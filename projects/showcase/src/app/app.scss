@@ -87,7 +87,9 @@
   font-weight: 500;
   color: var(--neu-text-muted);
   text-decoration: none;
-  transition: color var(--neu-transition), background-color var(--neu-transition);
+  transition:
+    color var(--neu-transition),
+    background-color var(--neu-transition);
 
   &:hover {
     color: var(--neu-text);
@@ -124,7 +126,9 @@
   font-weight: 500;
   color: var(--neu-text-muted);
   text-decoration: none;
-  transition: color var(--neu-transition), background-color var(--neu-transition);
+  transition:
+    color var(--neu-transition),
+    background-color var(--neu-transition);
 
   &:hover {
     color: var(--neu-text);

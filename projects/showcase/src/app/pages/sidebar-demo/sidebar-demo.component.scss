@@ -127,8 +127,13 @@
 }
 
 @keyframes url-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .url-indicator__bar {
@@ -245,7 +250,9 @@
   font-size: var(--neu-text-sm);
   color: var(--neu-text-muted);
   cursor: pointer;
-  transition: color var(--neu-transition), background-color var(--neu-transition);
+  transition:
+    color var(--neu-transition),
+    background-color var(--neu-transition);
 
   &:hover {
     color: var(--neu-text);
@@ -294,7 +301,8 @@
   border-collapse: collapse;
   font-size: var(--neu-text-sm);
 
-  th, td {
+  th,
+  td {
     padding: var(--neu-space-3) var(--neu-space-4);
     text-align: left;
     border-bottom: 1px solid var(--neu-border);

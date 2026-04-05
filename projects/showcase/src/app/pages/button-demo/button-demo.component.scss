@@ -154,7 +154,8 @@
   border-collapse: collapse;
   font-size: var(--neu-text-sm);
 
-  th, td {
+  th,
+  td {
     padding: var(--neu-space-3) var(--neu-space-4);
     text-align: left;
     border-bottom: 1px solid var(--neu-border);

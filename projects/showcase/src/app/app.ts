@@ -1,6 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  ActivatedRoute,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { map } from 'rxjs/operators';
 import { NeuButtonComponent } from '@neural-ui/core';
 import { NeuSidebarComponent } from '@neural-ui/core';
@@ -34,9 +40,9 @@ export class App {
   readonly isSidebarOpen = computed(() => this.menuParam() === 'open');
 
   readonly navItems: NavItem[] = [
-    { label: 'Inicio',   route: '/',                    icon: '◇' },
-    { label: 'Button',   route: '/components/button',   icon: '□' },
-    { label: 'Sidebar',  route: '/components/sidebar',  icon: '▤' },
+    { label: 'Inicio', route: '/', icon: '◇' },
+    { label: 'Button', route: '/components/button', icon: '□' },
+    { label: 'Sidebar', route: '/components/sidebar', icon: '▤' },
   ];
 
   openSidebar(): void {

@@ -35,7 +35,10 @@
   <!-- ===== Tamaños ===== -->
   <section class="demo-section">
     <h2 class="demo-section__title">Tamaños</h2>
-    <p class="demo-section__subtitle">El input <code>size</code> acepta <code>sm</code>, <code>md</code> (default) y <code>lg</code>.</p>
+    <p class="demo-section__subtitle">
+      El input <code>size</code> acepta <code>sm</code>, <code>md</code> (default) y
+      <code>lg</code>.
+    </p>
     <div class="demo-row demo-row--align-center">
       <button neu-button variant="primary" size="sm">Small</button>
       <button neu-button variant="primary" size="md">Medium</button>
@@ -47,15 +50,11 @@
   <section class="demo-section">
     <h2 class="demo-section__title">Estados con Signals</h2>
     <p class="demo-section__subtitle">
-      El estado <code>loading</code> es un <code>signal()</code> reactivo. Pulsa para simular una petición async.
+      El estado <code>loading</code> es un <code>signal()</code> reactivo. Pulsa para simular una
+      petición async.
     </p>
     <div class="demo-row">
-      <button
-        neu-button
-        variant="primary"
-        [loading]="isLoading()"
-        (click)="simulateLoad()"
-      >
+      <button neu-button variant="primary" [loading]="isLoading()" (click)="simulateLoad()">
         {{ isLoading() ? 'Procesando...' : 'Simular carga (2.5s)' }}
       </button>
       <button neu-button variant="outline" [disabled]="true">Deshabilitado</button>
