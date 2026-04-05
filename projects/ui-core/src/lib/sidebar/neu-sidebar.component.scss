@@ -1,6 +1,6 @@
 // ============================================================
-// NeuralUI — Sidebar Component Styles
-// ViewEncapsulation.None — usa prefijo BEM .neu-sidebar
+// NeuralUI — Sidebar Component Styles  (light theme v2)
+// ViewEncapsulation.None — prefijo BEM .neu-sidebar
 // ============================================================
 @use '../styles/breakpoints' as *;
 
@@ -8,9 +8,9 @@
 .neu-sidebar__overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: var(--neu-z-overlay);
   opacity: 0;
   pointer-events: none;
@@ -22,29 +22,42 @@
   }
 }
 
-// ---- Panel ----
+// ---- Panel base (modo overlay) ----
 .neu-sidebar {
   position: fixed;
   top: 0;
   left: 0;
   height: 100dvh;
-  width: 100%; // full-width en pantallas < 400px
+  width: 100%;
   background: var(--neu-sidebar-bg, var(--neu-surface));
   border-right: 1px solid var(--neu-border);
   z-index: var(--neu-z-sidebar);
   display: flex;
   flex-direction: column;
   transform: translateX(-100%);
-  transition: transform var(--neu-transition-slow);
+  transition: transform var(--neu-transition-slow), box-shadow var(--neu-transition-slow);
   overflow: hidden;
 
-  // A partir del breakpoint principal (400px), ancho fijo
   @include neu-from-mobile {
     width: var(--neu-sidebar-width, 260px);
   }
 
-  &--open {
+  // Overlay abierto
+  &--open:not(.neu-sidebar--persistent) {
     transform: translateX(0);
+    box-shadow: var(--neu-shadow-lg);
+  }
+
+  // ---- Modo persistente (desktop) ----
+  &--persistent {
+    position: sticky;
+    top: var(--neu-header-height);
+    height: calc(100dvh - var(--neu-header-height));
+    transform: none;
+    box-shadow: none;
+    border-right: 1px solid var(--neu-border);
+    flex-shrink: 0;
+    z-index: var(--neu-z-base);
   }
 }
 
@@ -53,7 +66,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--neu-space-4) var(--neu-space-5);
+  padding: 0 var(--neu-space-5);
   min-height: var(--neu-header-height, 64px);
   border-bottom: 1px solid var(--neu-border);
   flex-shrink: 0;
@@ -61,23 +74,23 @@
 
 .neu-sidebar__title {
   font-family: var(--neu-font-sans);
-  font-size: var(--neu-text-base);
-  font-weight: 600;
-  color: var(--neu-text);
+  font-size: var(--neu-text-sm);
+  font-weight: 700;
   letter-spacing: -0.01em;
+  color: var(--neu-text);
 }
 
-// ---- Botón de cerrar ----
+// ---- Botón cerrar ----
 .neu-sidebar__close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--neu-radius-sm);
+  border-radius: var(--neu-radius);
   color: var(--neu-text-muted);
   cursor: pointer;
   flex-shrink: 0;
@@ -94,7 +107,7 @@
 
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.45);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.35);
   }
 }
 
@@ -104,8 +117,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--neu-space-3) 0;
-
-  // Scroll personalizado
   scrollbar-width: thin;
   scrollbar-color: var(--neu-surface-3) transparent;
 

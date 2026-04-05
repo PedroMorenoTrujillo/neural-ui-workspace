@@ -1,0 +1,221 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  computed,
+  forwardRef,
+  input,
+  signal,
+} from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
+/** Contador global para IDs estables — seguro en SSR, predecible en hidratación */
+let _neuInputIdSeq = 0;
+
+export type NeuInputType =
+  | 'text'
+  | 'email'
+  | 'password'
+  | 'number'
+  | 'tel'
+  | 'url'
+  | 'search'
+  | 'date'
+  | 'time';
+
+/**
+ * NeuralUI Input Component
+ *
+ * Input con floating label, iconos y soporte completo para Angular Forms.
+ * Compatible con ReactiveFormsModule y ngModel.
+ *
+ * Uso standalone:
+ *   <neu-input label="Correo" type="email" />
+ *
+ * Con Reactive Forms:
+ *   <neu-input label="Correo" [formControl]="emailCtrl" [errorMessage]="emailError()" />
+ */
+@Component({
+  selector: 'neu-input',
+  standalone: true,
+  imports: [],
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  // Los atributos del host (class, style, data-*) no deben llegar al <input> nativo
+  // — se gestionan de forma explícita con los inputs del componente.
+  host: { class: 'neu-input-host' },
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => NeuInputComponent),
+      multi: true,
+    },
+  ],
+  template: `
+    <div
+      class="neu-input__wrapper"
+      [class.neu-input__wrapper--focused]="_focused()"
+      [class.neu-input__wrapper--has-value]="hasValue()"
+      [class.neu-input__wrapper--error]="hasError()"
+      [class.neu-input__wrapper--disabled]="disabled()"
+      [class.neu-input__wrapper--has-start-icon]="!!startIcon()"
+      [class.neu-input__wrapper--has-end-icon]="!!endIcon()"
+    >
+      <!-- Icono izquierdo -->
+      @if (startIcon()) {
+        <span class="neu-input__icon neu-input__icon--start" aria-hidden="true">
+          <ng-content select="[neu-input-start]" />
+          @if (!hasStartContent()) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" [innerHTML]="startIconPath()"></svg>
+          }
+        </span>
+      }
+
+      <!-- Campo nativo -->
+      <input
+        class="neu-input__field"
+        [id]="inputId()"
+        [type]="type()"
+        [disabled]="disabled()"
+        [attr.name]="name() || null"
+        [attr.required]="required() ? '' : null"
+        [attr.readonly]="readonly() ? '' : null"
+        [attr.maxlength]="maxlength() ?? null"
+        [attr.minlength]="minlength() ?? null"
+        [attr.min]="min() ?? null"
+        [attr.max]="max() ?? null"
+        [attr.pattern]="pattern() ?? null"
+        [attr.autocomplete]="autocomplete()"
+        [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-describedby]="hasError() ? inputId() + '-error' : null"
+        [value]="_value()"
+        placeholder=" "
+        (input)="onInput($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+      />
+
+      <!-- Floating Label -->
+      @if (label()) {
+        <label class="neu-input__label" [for]="inputId()">{{ label() }}</label>
+      }
+
+      <!-- Icono derecho -->
+      @if (endIcon()) {
+        <span class="neu-input__icon neu-input__icon--end" aria-hidden="true">
+          <ng-content select="[neu-input-end]" />
+        </span>
+      }
+    </div>
+
+    <!-- Mensajes de ayuda / error -->
+    @if (hasError()) {
+      <p class="neu-input__error" [id]="inputId() + '-error'" role="alert">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="13" height="13">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+        {{ errorMessage() }}
+      </p>
+    } @else if (hint()) {
+      <p class="neu-input__hint">{{ hint() }}</p>
+    }
+  `,
+  styleUrl: './neu-input.component.scss',
+})
+export class NeuInputComponent implements ControlValueAccessor {
+  /** Tipo de input HTML */
+  type = input<NeuInputType>('text');
+
+  /** Texto del floating label */
+  label = input<string>('');
+
+  /** Hint de ayuda (visible cuando no hay error) */
+  hint = input<string>('');
+
+  /** Mensaje de error (activa el estado de error) */
+  errorMessage = input<string>('');
+
+  /** Deshabilita el campo */
+  disabled = input<boolean>(false);
+
+  /** Atributo autocomplete HTML */
+  autocomplete = input<string>('off');
+
+  /** Muestra zona para icono al inicio */
+  startIcon = input<boolean>(false);
+
+  /** Muestra zona para icono al final */
+  endIcon = input<boolean>(false);
+
+  /** ID accesible para el input — generado con contador estable (seguro en SSR) */
+  inputId = input<string>(`neu-input-${++_neuInputIdSeq}`);
+
+  /** Nombre del campo para formularios nativos */
+  name = input<string>('');
+
+  /** Marca el campo como requerido */
+  required = input<boolean>(false);
+
+  /** Hace el campo de solo lectura */
+  readonly = input<boolean>(false);
+
+  /** Longitud máxima de caracteres */
+  maxlength = input<number | null>(null);
+
+  /** Longitud mínima de caracteres */
+  minlength = input<number | null>(null);
+
+  /** Valor mínimo (para type=number/date) */
+  min = input<string | null>(null);
+
+  /** Valor máximo (para type=number/date) */
+  max = input<string | null>(null);
+
+  /** Patrón de validación HTML5 */
+  pattern = input<string | null>(null);
+
+  // --- Estado interno reactivo ---
+  protected readonly _value = signal('');
+  protected readonly _focused = signal(false);
+
+  readonly hasValue = computed(() => this._value().length > 0);
+  readonly hasError = computed(() => !!this.errorMessage());
+  readonly startIconPath = computed(() => '');
+  readonly hasStartContent = computed(() => false);
+
+  // --- ControlValueAccessor ---
+  private _onChange: (v: string) => void = () => {};
+  private _onTouched: () => void = () => {};
+
+  writeValue(val: unknown): void {
+    this._value.set(val == null ? '' : String(val));
+  }
+
+  registerOnChange(fn: (v: string) => void): void {
+    this._onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this._onTouched = fn;
+  }
+
+  setDisabledState(): void {
+    // El estado disabled se gestiona via input signal
+  }
+
+  onInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this._value.set(value);
+    this._onChange(value);
+  }
+
+  onFocus(): void {
+    this._focused.set(true);
+  }
+
+  onBlur(): void {
+    this._focused.set(false);
+    this._onTouched();
+  }
+}

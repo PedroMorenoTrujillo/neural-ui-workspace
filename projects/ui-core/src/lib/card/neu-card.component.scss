@@ -1,0 +1,82 @@
+// ============================================================
+// NeuralUI — Card Component Styles (light theme)
+// ViewEncapsulation.None — prefijo BEM .neu-card
+// ============================================================
+
+.neu-card {
+  background: var(--neu-surface);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-lg);
+  box-shadow: var(--neu-shadow-sm);
+  overflow: hidden;
+  transition:
+    box-shadow var(--neu-transition),
+    transform var(--neu-transition),
+    border-color var(--neu-transition);
+
+  // ---- Hoverable ----
+  &--hoverable {
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: var(--neu-shadow);
+      transform: translateY(-2px);
+      border-color: var(--neu-border-hover);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  // ---- Bordered — acento primary ----
+  &--bordered {
+    border-color: var(--neu-primary);
+  }
+
+  // ---- Flat — sin sombras ----
+  &--flat {
+    box-shadow: none;
+    border-color: var(--neu-border);
+
+    &:hover {
+      box-shadow: none;
+      transform: none;
+    }
+  }
+}
+
+// ---- Header ----
+.neu-card__header {
+  padding: var(--neu-space-4) var(--neu-space-5);
+  border-bottom: 1px solid var(--neu-border);
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  color: var(--neu-text);
+
+  &:empty {
+    display: none;
+  }
+}
+
+// ---- Body ----
+.neu-card__body {
+  &--none  { padding: 0; }
+  &--sm    { padding: var(--neu-space-3) var(--neu-space-4); }
+  &--md    { padding: var(--neu-space-5); }
+  &--lg    { padding: var(--neu-space-6) var(--neu-space-8); }
+}
+
+// ---- Footer ----
+.neu-card__footer {
+  padding: var(--neu-space-4) var(--neu-space-5);
+  border-top: 1px solid var(--neu-border);
+  background: var(--neu-surface-2);
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-3);
+
+  &:empty {
+    display: none;
+  }
+}

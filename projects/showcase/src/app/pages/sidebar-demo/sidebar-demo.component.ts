@@ -1,54 +1,63 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NeuButtonComponent } from '@neural-ui/core';
-import { NeuSidebarComponent } from '@neural-ui/core';
+import { ChangeDetectionStrategy, Component, inject, ViewEncapsulation } from '@angular/core';
+import {
+  NeuBadgeComponent,
+  NeuButtonComponent,
+  NeuCodeBlockComponent,
+  NeuTab,
+  NeuTabPanelComponent,
+  NeuTabsComponent,
+  NeuUrlStateService,
+} from '@neural-ui/core';
 
-/**
- * SidebarDemoComponent
- *
- * Demuestra el patrón "URL-driven State":
- * - El input() 'menu' recibe el valor de ?menu= gracias a withComponentInputBinding()
- * - computed() deriva si el sidebar está abierto
- * - El Router actualiza la URL al abrir/cerrar — el estado es compartible y navegable
- */
 @Component({
   selector: 'app-sidebar-demo',
   standalone: true,
-  imports: [NeuButtonComponent, NeuSidebarComponent],
+  imports: [NeuButtonComponent, NeuBadgeComponent, NeuTabsComponent, NeuTabPanelComponent, NeuCodeBlockComponent],
   templateUrl: './sidebar-demo.component.html',
   styleUrl: './sidebar-demo.component.scss',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarDemoComponent {
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly urlState = inject(NeuUrlStateService);
 
-  // ----------------------------------------------------------------
-  // URL State via withComponentInputBinding()
-  // Angular inyecta automáticamente el valor de ?menu= en este input()
-  // ----------------------------------------------------------------
-  menu = input<string>(); // ← hydratado desde ?menu=open por el Router
+  readonly demoTabs: NeuTab[] = [
+    { id: 'preview', label: 'Preview' },
+    { id: 'api', label: 'API' },
+  ];
 
-  readonly isSidebarOpen = computed(() => this.menu() === 'open');
+  readonly isDemoOpen = this.urlState.getParam('sidebar-demo');
 
-  readonly currentUrl = computed(() => {
-    const base = '/components/sidebar';
-    return this.isSidebarOpen() ? `${base}?menu=open` : base;
-  });
-
-  openSidebar(): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { menu: 'open' },
-      queryParamsHandling: 'merge',
-    });
+  openDemo(): void {
+    this.urlState.setParam('sidebar-demo', 'open', false);
   }
 
-  closeSidebar(): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { menu: null },
-      queryParamsHandling: 'merge',
-    });
+  closeDemo(): void {
+    this.urlState.setParam('sidebar-demo', null, false);
   }
+
+  readonly usageCode = `import { NeuSidebarComponent, NeuUrlStateService } from '@neural-ui/core';
+
+@Component({
+  imports: [NeuSidebarComponent, NeuButtonComponent],
+  template: \`
+    <!-- El sidebar gestiona su propio estado desde ?menu=open -->
+    <neu-sidebar urlParam="menu" [persistent]="isDesktop()">
+      <span neu-sidebar-header>Mi App</span>
+      <nav><!-- links de navegación --></nav>
+      <div neu-sidebar-footer>v1.0</div>
+    </neu-sidebar>
+
+    <!-- Abrir desde cualquier botón -->
+    <button neu-button (click)="open()">Abrir menú</button>
+  \`
+})
+export class AppComponent {
+  private readonly urlState = inject(NeuUrlStateService);
+  isDesktop = computed(() => window.innerWidth >= 400);
+
+  open() {
+    this.urlState.setParam('menu', 'open', false);
+  }
+}\``;
 }

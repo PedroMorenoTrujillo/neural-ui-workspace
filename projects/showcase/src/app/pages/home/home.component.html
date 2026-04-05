@@ -1,79 +1,92 @@
-<section class="home-hero">
-  <div class="home-hero__content">
-    <div class="home-hero__badge">v0.1.0 — Angular 21 · Signals</div>
+<div class="home">
 
-    <h1 class="home-hero__title">
-      Construye interfaces
-      <span class="home-hero__title--gradient">extraordinarias</span>
-      con NeuralUI
+  <!-- Hero -->
+  <section class="home__hero">
+    <div class="home__hero-badge">
+      <neu-badge variant="info">Angular 21 · Signals · URL State</neu-badge>
+    </div>
+    <h1 class="home__title">
+      NeuralUI
+      <span class="home__title-gradient">Design System</span>
     </h1>
-
-    <p class="home-hero__description">
-      Suite de componentes Angular de alto rendimiento. Impulsada por Signals, optimizada para
-      móviles (<strong>400px</strong>), con estado sincronizado en la URL y CSS Tokens totalmente
-      personalizables.
+    <p class="home__subtitle">
+      Librería de componentes Angular moderna, construida con Signals,
+      OnPush y estado en la URL. Sin dependencias externas.
     </p>
-
-    <div class="home-hero__actions">
+    <div class="home__hero-actions">
+      <a routerLink="/components/table">
+        <button neu-button variant="primary" size="lg">Ver componente estrella →</button>
+      </a>
       <a routerLink="/components/button">
-        <button neu-button variant="primary" size="lg">Explorar Componentes</button>
-      </a>
-      <a routerLink="/components/sidebar">
-        <button neu-button variant="outline" size="lg">Ver Sidebar Demo</button>
+        <button neu-button size="lg">Explorar componentes</button>
       </a>
     </div>
-  </div>
 
-  <div class="home-hero__visual" aria-hidden="true">
-    <div class="home-hero__glow"></div>
-    <div class="home-feature-grid">
-      <div class="home-feature-card">
-        <span class="home-feature-card__icon">⚡</span>
-        <strong>Signals</strong>
-        <p>input(), output(), computed(), effect()</p>
+    <!-- Stats -->
+    <div class="home__stats">
+      <div class="home__stat">
+        <span class="home__stat-value">7</span>
+        <span class="home__stat-label">Componentes</span>
       </div>
-      <div class="home-feature-card">
-        <span class="home-feature-card__icon">🔗</span>
-        <strong>URL State</strong>
-        <p>Estado sincronizado con QueryParams</p>
+      <div class="home__stat">
+        <span class="home__stat-value">0</span>
+        <span class="home__stat-label">Dependencias</span>
       </div>
-      <div class="home-feature-card">
-        <span class="home-feature-card__icon">📱</span>
-        <strong>400px First</strong>
-        <p>Diseñado para dispositivos modernos</p>
+      <div class="home__stat">
+        <span class="home__stat-value">Angular 21</span>
+        <span class="home__stat-label">Standalone · Signals</span>
       </div>
-      <div class="home-feature-card">
-        <span class="home-feature-card__icon">🎨</span>
-        <strong>CSS Tokens</strong>
-        <p>--neu-primary, --neu-bg y más</p>
+      <div class="home__stat">
+        <span class="home__stat-value">URL State</span>
+        <span class="home__stat-label">Sincronizado</span>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="home-components">
-  <div class="home-components__header">
-    <h2>Componentes disponibles</h2>
-    <p>Producción-listo. Sin dependencias externas.</p>
-  </div>
+  <!-- Grid de componentes -->
+  <section class="home__grid-section">
+    <h2 class="home__grid-title">Componentes disponibles</h2>
+    <div class="home__grid">
+      @for (comp of components; track comp.route) {
+        <a [routerLink]="comp.route" class="home__card">
+          <neu-card [hoverable]="true">
+            <div class="home__card-content">
+              <div class="home__card-header">
+                <strong>{{ comp.name }}</strong>
+                @if (comp.tag !== 'componente') {
+                  <neu-badge variant="warning" size="sm">{{ comp.tag }}</neu-badge>
+                }
+              </div>
+              <p class="home__card-desc">{{ comp.desc }}</p>
+            </div>
+          </neu-card>
+        </a>
+      }
+    </div>
+  </section>
 
-  <div class="home-components__grid">
-    <a routerLink="/components/button" class="home-component-card">
-      <div class="home-component-card__icon">□</div>
-      <div class="home-component-card__info">
-        <strong>Button</strong>
-        <span>5 variantes · 3 tamaños · loading state</span>
-      </div>
-      <span class="home-component-card__arrow">→</span>
-    </a>
+  <!-- Features -->
+  <section class="home__features">
+    <div class="home__feature">
+      <span class="home__feature-icon">⚡</span>
+      <strong>Reactivo por diseño</strong>
+      <p>Signals de Angular 17+. Sin Zone.js overhead.</p>
+    </div>
+    <div class="home__feature">
+      <span class="home__feature-icon">🔗</span>
+      <strong>Estado en la URL</strong>
+      <p>Búsqueda, paginación y ordenación en la barra del navegador.</p>
+    </div>
+    <div class="home__feature">
+      <span class="home__feature-icon">♿</span>
+      <strong>Accesible</strong>
+      <p>ARIA roles, keyboard navigation y focus management.</p>
+    </div>
+    <div class="home__feature">
+      <span class="home__feature-icon">🎨</span>
+      <strong>Design Tokens CSS</strong>
+      <p>Variables CSS para colores, espaciado, sombras y tipografía.</p>
+    </div>
+  </section>
 
-    <a routerLink="/components/sidebar" class="home-component-card">
-      <div class="home-component-card__icon">▤</div>
-      <div class="home-component-card__info">
-        <strong>Sidebar</strong>
-        <span>URL State · Overlay · Accesible</span>
-      </div>
-      <span class="home-component-card__arrow">→</span>
-    </a>
-  </div>
-</section>
+</div>

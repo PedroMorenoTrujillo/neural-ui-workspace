@@ -1,63 +1,85 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import {
-  ActivatedRoute,
-  Router,
-  RouterLink,
-  RouterLinkActive,
-  RouterOutlet,
-} from '@angular/router';
-import { map } from 'rxjs/operators';
-import { NeuButtonComponent } from '@neural-ui/core';
-import { NeuSidebarComponent } from '@neural-ui/core';
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { distinctUntilChanged, fromEvent, map, startWith } from 'rxjs';
+import {
+  NeuBadgeComponent,
+  NeuSidebarComponent,
+  NeuUrlStateService,
+} from '@neural-ui/core';
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
 
 interface NavItem {
   label: string;
   route: string;
-  icon: string;
+  badge?: string;
 }
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NeuSidebarComponent, NeuButtonComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    NeuSidebarComponent,
+    NeuBadgeComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  readonly urlState = inject(NeuUrlStateService);
 
-  // ----------------------------------------------------------------
-  // URL State — el sidebar lee ?menu=open del queryParam
-  // Usamos toSignal() para convertir el Observable de la ruta en Signal
-  // ----------------------------------------------------------------
-  private readonly menuParam = toSignal(
-    this.route.queryParamMap.pipe(map((params) => params.get('menu'))),
-    { initialValue: null },
+  // ------------------------------------------------
+  // Detectar si estamos en ≥400px → sidebar persistente
+  // Por debajo de 400px → hamburguesa overlay
+  // ------------------------------------------------
+  readonly isDesktop = toSignal(
+    fromEvent(window, 'resize').pipe(
+      startWith(null),
+      map(() => window.innerWidth >= 400),
+      distinctUntilChanged(),
+    ),
+    { initialValue: window.innerWidth >= 400 },
   );
 
-  readonly isSidebarOpen = computed(() => this.menuParam() === 'open');
-
-  readonly navItems: NavItem[] = [
-    { label: 'Inicio', route: '/', icon: '◇' },
-    { label: 'Button', route: '/components/button', icon: '□' },
-    { label: 'Sidebar', route: '/components/sidebar', icon: '▤' },
+  // ------------------------------------------------
+  // Navegación del showcase
+  // ------------------------------------------------
+  readonly navGroups: NavGroup[] = [
+    {
+      label: 'Primeros pasos',
+      items: [{ label: 'Inicio', route: '/' }],
+    },
+    {
+      label: 'Componentes',
+      items: [
+        { label: 'Badge',   route: '/components/badge' },
+        { label: 'Button',  route: '/components/button' },
+        { label: 'Card',    route: '/components/card' },
+        { label: 'Input',   route: '/components/input' },
+        { label: 'Select',  route: '/components/select' },
+        { label: 'Sidebar', route: '/components/sidebar' },
+        { label: 'Table',   route: '/components/table', badge: 'Star' },
+      ],
+    },
   ];
 
-  openSidebar(): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { menu: 'open' },
-      queryParamsHandling: 'merge',
-    });
-  }
-
-  closeSidebar(): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { menu: null },
-      queryParamsHandling: 'merge',
-    });
+  openMenu(): void {
+    // false = pushState, el usuario puede volver con el botón Atrás
+    this.urlState.setParam('menu', 'open', false);
   }
 }

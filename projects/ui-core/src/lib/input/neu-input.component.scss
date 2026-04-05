@@ -1,0 +1,155 @@
+// ============================================================
+// NeuralUI — Input Component Styles (light theme)
+// ViewEncapsulation.None — prefijo BEM .neu-input
+// ============================================================
+@use '../styles/breakpoints' as *;
+
+$input-height:        48px;
+$input-height-sm:     40px;
+$label-scale-y:       10px;    // posición Y del label flotado
+$label-font-floating: 11px;
+
+// ---- Wrapper ----
+.neu-input__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  height: $input-height;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition),
+    background-color var(--neu-transition);
+
+  &:hover:not(.neu-input__wrapper--disabled) {
+    border-color: var(--neu-border-hover);
+  }
+
+  &--focused {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+  }
+
+  &--error {
+    border-color: var(--neu-error);
+
+    &.neu-input__wrapper--focused {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
+  }
+
+  &--disabled {
+    background: var(--neu-surface-2);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  // Padding extra para iconos
+  &--has-start-icon .neu-input__field { padding-left: 38px; }
+  &--has-end-icon   .neu-input__field { padding-right: 38px; }
+}
+
+// ---- Campo nativo ----
+.neu-input__field {
+  width: 100%;
+  height: 100%;
+  padding: 18px var(--neu-space-3) 6px;   // top padding deja espacio al label
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text);
+  caret-color: var(--neu-primary);
+
+  &:disabled {
+    cursor: not-allowed;
+    color: var(--neu-text-disabled);
+  }
+
+  // El placeholder real se ocultará; usamos " " para el truco de :placeholder-shown
+  &::placeholder {
+    color: transparent;
+  }
+}
+
+// ---- Floating Label ----
+.neu-input__label {
+  position: absolute;
+  left: var(--neu-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text-muted);
+  pointer-events: none;
+  transform-origin: left top;
+  transition:
+    top var(--neu-transition),
+    font-size var(--neu-transition),
+    color var(--neu-transition),
+    transform var(--neu-transition);
+
+  // Cuando el input tiene valor o está enfocado → sube
+  .neu-input__wrapper--focused &,
+  .neu-input__wrapper--has-value & {
+    top: $label-scale-y;
+    font-size: $label-font-floating;
+    transform: translateY(0);
+    font-weight: 500;
+  }
+
+  .neu-input__wrapper--focused & {
+    color: var(--neu-primary);
+  }
+
+  .neu-input__wrapper--error & {
+    color: var(--neu-error);
+  }
+}
+
+// Ajuste cuando hay start icon
+.neu-input__wrapper--has-start-icon .neu-input__label {
+  left: 38px;
+}
+
+// ---- Iconos ----
+.neu-input__icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--neu-text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &--start { left: 0; }
+  &--end   { right: 0; }
+}
+
+// ---- Error / Hint ----
+.neu-input__error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-error-text);
+  font-family: var(--neu-font-sans);
+  line-height: 1.4;
+}
+
+.neu-input__hint {
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+  font-family: var(--neu-font-sans);
+}

@@ -1,0 +1,120 @@
+<div class="demo-page">
+
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <h1 class="demo-hero__title">Select</h1>
+    <p class="demo-hero__desc">
+      Dropdown personalizado con floating label, teclado y soporte completo para
+      Angular Forms. Cierre automático al hacer clic fuera.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-preview__canvas demo-preview__canvas--flex" style="gap:24px;flex-wrap:wrap">
+            <neu-select
+              label="Framework favorito"
+              [options]="frameworks"
+              [(ngModel)]="selectedFramework"
+              style="min-width:220px"
+            />
+            <neu-select
+              label="País"
+              placeholder="Elige un país..."
+              [options]="countries"
+              [(ngModel)]="selectedCountry"
+              style="min-width:220px"
+            />
+            <neu-select
+              label="Con error"
+              [options]="frameworks"
+              errorMessage="Este campo es requerido"
+              style="min-width:220px"
+            />
+            <neu-select
+              label="Deshabilitado"
+              [options]="frameworks"
+              [disabled]="true"
+              style="min-width:220px"
+            />
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview">
+              <neu-select
+                [label]="cfg.label"
+                [placeholder]="cfg.placeholder"
+                [options]="frameworks"
+                [disabled]="cfg.disabled"
+                [errorMessage]="cfg.error"
+                [(ngModel)]="cfgValue"
+                style="min-width:240px"
+              />
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label>Label</label>
+                <input class="demo-select" type="text" [value]="cfg.label"
+                       (input)="cfg.label = $any($event.target).value" style="width:110px" />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Placeholder</label>
+                <input class="demo-select" type="text" [value]="cfg.placeholder"
+                       (input)="cfg.placeholder = $any($event.target).value" style="width:110px" />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Error</label>
+                <input class="demo-select" type="text" [value]="cfg.error"
+                       (input)="cfg.error = $any($event.target).value" style="width:110px" />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="sel-disabled">disabled</label>
+                <label class="demo-toggle">
+                  <input id="sel-disabled" type="checkbox" [checked]="cfg.disabled"
+                         (change)="cfg.disabled = $any($event.target).checked" />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead><tr><th>Input</th><th>Tipo</th><th>Default</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>options</code></td><td><code>NeuSelectOption[]</code></td><td><code>[]</code></td><td>Lista de opciones</td></tr>
+                <tr><td><code>label</code></td><td><code>string</code></td><td><code>''</code></td><td>Floating label</td></tr>
+                <tr><td><code>placeholder</code></td><td><code>string</code></td><td><code>'Seleccionar...'</code></td><td>Texto cuando no hay selección</td></tr>
+                <tr><td><code>errorMessage</code></td><td><code>string</code></td><td><code>''</code></td><td>Activa estado de error con mensaje</td></tr>
+                <tr><td><code>disabled</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Deshabilita el select</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+
+    </neu-tabs>
+  </section>
+
+</div>

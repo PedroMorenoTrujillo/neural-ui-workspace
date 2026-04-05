@@ -1,0 +1,106 @@
+// ============================================================
+// NeuralUI — Badge Component Styles (light theme)
+// ViewEncapsulation.None — prefijo BEM .neu-badge
+// ============================================================
+
+.neu-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--neu-font-sans);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+
+  // ---- Tamaños ----
+  &--sm {
+    padding: 2px 8px;
+    font-size: 11px;
+    border-radius: var(--neu-radius-sm);
+  }
+
+  &--md {
+    padding: 4px 10px;
+    font-size: var(--neu-text-xs);
+    border-radius: var(--neu-radius);
+  }
+
+  &--pill {
+    &.neu-badge--sm { border-radius: var(--neu-radius-full); }
+    &.neu-badge--md { border-radius: var(--neu-radius-full); }
+  }
+
+  // ---- Variantes ----
+  &--default {
+    background: var(--neu-surface-2);
+    color: var(--neu-text-muted);
+    border: 1px solid var(--neu-border);
+
+    .neu-badge__dot { background: var(--neu-text-disabled); }
+  }
+
+  &--success {
+    background: var(--neu-success-bg);
+    color: var(--neu-success-text);
+    border: 1px solid transparent;
+
+    .neu-badge__dot { background: var(--neu-success); }
+  }
+
+  &--info {
+    background: var(--neu-info-bg);
+    color: var(--neu-info-text);
+    border: 1px solid transparent;
+
+    .neu-badge__dot { background: var(--neu-info); }
+  }
+
+  &--warning {
+    background: var(--neu-warning-bg);
+    color: var(--neu-warning-text);
+    border: 1px solid transparent;
+
+    .neu-badge__dot { background: var(--neu-warning); }
+  }
+
+  &--danger {
+    background: var(--neu-error-bg);
+    color: var(--neu-error-text);
+    border: 1px solid transparent;
+
+    .neu-badge__dot { background: var(--neu-error); }
+  }
+
+  // ---- Outline variant ----
+  &--outline {
+    background: transparent;
+
+    &.neu-badge--success {
+      border-color: var(--neu-success);
+      background: transparent;
+    }
+
+    &.neu-badge--info {
+      border-color: var(--neu-info);
+      background: transparent;
+    }
+
+    &.neu-badge--warning {
+      border-color: var(--neu-warning);
+      background: transparent;
+    }
+
+    &.neu-badge--danger {
+      border-color: var(--neu-error);
+      background: transparent;
+    }
+  }
+}
+
+// ---- Punto de estado ----
+.neu-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--neu-radius-full);
+  flex-shrink: 0;
+}

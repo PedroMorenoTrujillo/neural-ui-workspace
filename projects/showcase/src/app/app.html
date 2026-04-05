@@ -1,70 +1,83 @@
-<div class="app-shell" [class.app-shell--sidebar-open]="isSidebarOpen()">
+<!-- ========================================================
+  NeuralUI Showcase — Layout principal
+  Desktop (≥768px): sidebar persistente a la izquierda
+  Mobile  (<768px): sidebar overlay controlado por URL ?menu=open
+======================================================== -->
+<div class="app-layout">
 
-  <!-- ===== Header ===== -->
+  <!-- ===== HEADER ===== -->
   <header class="app-header">
-    <button
-      neu-button
-      variant="ghost"
-      size="sm"
-      class="app-header__menu-btn"
-      (click)="openSidebar()"
-      aria-label="Abrir menú de navegación"
-      type="button"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="3" y1="6"  x2="21" y2="6"  />
-        <line x1="3" y1="12" x2="21" y2="12" />
-        <line x1="3" y1="18" x2="21" y2="18" />
-      </svg>
-    </button>
+    <!-- Hamburger — solo visible en mobile -->
+    @if (!isDesktop()) {
+      <button
+        class="app-header__menu-btn"
+        type="button"
+        aria-label="Abrir menú"
+        (click)="openMenu()"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6"  x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    }
 
-    <a routerLink="/" class="app-header__brand" aria-label="NeuralUI — Inicio">
-      <span class="app-header__logo" aria-hidden="true">N</span>
-      <span class="app-header__brand-name">NeuralUI</span>
+    <!-- Logo -->
+    <a class="app-header__brand" routerLink="/" aria-label="NeuralUI Home">
+      <span class="app-header__logo-icon" aria-hidden="true">&#9650;</span>
+      <span class="app-header__logo-text">NeuralUI</span>
+      <span class="app-header__logo-badge">v1.0</span>
     </a>
 
-    <nav class="app-header__nav" aria-label="Navegación principal">
-      @for (item of navItems; track item.route) {
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: item.route === '/' }"
-          class="app-header__nav-link"
-        >{{ item.label }}</a>
-      }
-    </nav>
+    <!-- Acciones -->
+    <div class="app-header__actions">
+      <a
+        class="app-header__gh-link"
+        href="https://github.com/PedroMorenoTrujillo/neural-ui-workspace"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Ver en GitHub"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        GitHub
+      </a>
+    </div>
   </header>
 
-  <!-- ===== Sidebar — estado ?menu=open en la URL ===== -->
+  <!-- ===== SIDEBAR ===== -->
   <neu-sidebar
-    [isOpen]="isSidebarOpen()"
-    (closeRequested)="closeSidebar()"
+    class="app-sidebar"
+    urlParam="menu"
+    [persistent]="isDesktop()"
   >
-    <span neu-sidebar-header>NeuralUI</span>
-
-    <nav class="sidebar-nav" aria-label="Componentes">
-      @for (item of navItems; track item.route) {
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="sidebar-nav__link--active"
-          [routerLinkActiveOptions]="{ exact: item.route === '/' }"
-          class="sidebar-nav__link"
-          (click)="closeSidebar()"
-        >
-          <span class="sidebar-nav__icon" aria-hidden="true">{{ item.icon }}</span>
-          {{ item.label }}
-        </a>
+    <nav class="app-nav" aria-label="Componentes NeuralUI">
+      @for (group of navGroups; track group.label) {
+        <div class="app-nav__group">
+          <span class="app-nav__group-label">{{ group.label }}</span>
+          @for (item of group.items; track item.route) {
+            <a
+              class="app-nav__link"
+              [routerLink]="item.route"
+              routerLinkActive="app-nav__link--active"
+              [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+            >
+              {{ item.label }}
+              @if (item.badge) {
+                <neu-badge variant="info" size="sm">{{ item.badge }}</neu-badge>
+              }
+            </a>
+          }
+        </div>
       }
     </nav>
-
-    <span neu-sidebar-footer>
-      <small class="sidebar-footer-text">v0.1.0 &middot; MIT License</small>
-    </span>
   </neu-sidebar>
 
-  <!-- ===== Contenido principal ===== -->
-  <main class="app-main" id="main-content">
+  <!-- ===== CONTENIDO PRINCIPAL ===== -->
+  <main class="app-content" id="main-content" tabindex="-1">
     <router-outlet />
   </main>
 

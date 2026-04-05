@@ -1,0 +1,153 @@
+<div class="demo-page">
+
+  <!-- Hero -->
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">Componente Estrella</neu-badge>
+    <h1 class="demo-hero__title">Table</h1>
+    <p class="demo-hero__desc">
+      Tabla de datos avanzada con búsqueda, ordenación y paginación sincronizadas
+      a la URL mediante <code>NeuUrlStateService</code>. Selección múltiple de filas,
+      skeleton de carga y scroll horizontal optimizado para mobile.
+    </p>
+  </div>
+
+  <!-- Tabs -->
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+
+      <!-- =========== PREVIEW =========== -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-preview__canvas" style="padding: 0">
+            <neu-table
+              title="Usuarios del sistema"
+              [columns]="columns"
+              [data]="data"
+              [pageSize]="10"
+              [sortable]="true"
+              [searchable]="true"
+              [selectable]="true"
+              (rowSelectionChange)="selectedRows.set($any($event))"
+            />
+          </div>
+        </div>
+
+        @if (selectedRows().length > 0) {
+          <div style="padding: 12px 0; font-size: 0.875rem; color: var(--neu-text-muted)">
+            Seleccionadas: {{ selectedRows().length }} filas
+          </div>
+        }
+      </neu-tab-panel>
+
+      <!-- =========== CONFIGURADOR =========== -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator" style="grid-template-columns: 1fr 260px">
+            <div class="demo-configurator__preview" style="padding: 0; align-items: stretch">
+              <neu-table
+                [columns]="columns"
+                [data]="data"
+                [pageSize]="cfg.pageSize"
+                [sortable]="cfg.sortable"
+                [searchable]="cfg.searchable"
+                [selectable]="cfg.selectable"
+                pageParam="cfgPage"
+                searchParam="cfgQ"
+                sortParam="cfgSort"
+                sortDirParam="cfgDir"
+              />
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label>searchable</label>
+                <label class="demo-toggle">
+                  <input type="checkbox" [checked]="cfg.searchable"
+                         (change)="cfg.searchable = $any($event.target).checked" />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>sortable</label>
+                <label class="demo-toggle">
+                  <input type="checkbox" [checked]="cfg.sortable"
+                         (change)="cfg.sortable = $any($event.target).checked" />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>selectable</label>
+                <label class="demo-toggle">
+                  <input type="checkbox" [checked]="cfg.selectable"
+                         (change)="cfg.selectable = $any($event.target).checked" />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>pageSize</label>
+                <select class="demo-select" [value]="cfg.pageSize"
+                        (change)="cfg.pageSize = +$any($event.target).value">
+                  <option [value]="5">5</option>
+                  <option [value]="10">10</option>
+                  <option [value]="15">15</option>
+                  <option [value]="25">25</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- =========== API =========== -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr><th>Input</th><th>Tipo</th><th>Default</th><th>Descripción</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>columns</code></td><td><code>NeuTableColumn[]</code></td><td><code>[]</code></td><td>Definición de columnas</td></tr>
+                <tr><td><code>data</code></td><td><code>object[]</code></td><td><code>[]</code></td><td>Array de datos a mostrar</td></tr>
+                <tr><td><code>pageSize</code></td><td><code>number</code></td><td><code>10</code></td><td>Filas por página</td></tr>
+                <tr><td><code>loading</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Muestra skeleton animado</td></tr>
+                <tr><td><code>searchable</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Activa el buscador</td></tr>
+                <tr><td><code>sortable</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Permite ordenar por columnas</td></tr>
+                <tr><td><code>selectable</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Activa selección múltiple de filas</td></tr>
+                <tr><td><code>rowKey</code></td><td><code>string</code></td><td><code>'id'</code></td><td>Clave única por fila</td></tr>
+                <tr><td><code>title</code></td><td><code>string</code></td><td><code>''</code></td><td>Título de la tabla</td></tr>
+                <tr><td><code>pageParam</code></td><td><code>string</code></td><td><code>'page'</code></td><td>URL param para la página</td></tr>
+                <tr><td><code>searchParam</code></td><td><code>string</code></td><td><code>'q'</code></td><td>URL param para búsqueda</td></tr>
+                <tr><td><code>sortParam</code></td><td><code>string</code></td><td><code>'sort'</code></td><td>URL param para columna de orden</td></tr>
+                <tr><td><code>sortDirParam</code></td><td><code>string</code></td><td><code>'sortDir'</code></td><td>URL param para dirección de orden</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <h3 class="demo-section__subtitle">NeuTableColumn</h3>
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead><tr><th>Propiedad</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>key</code></td><td><code>string</code></td><td>Clave del campo en el objeto de datos</td></tr>
+                <tr><td><code>header</code></td><td><code>string</code></td><td>Título de la columna</td></tr>
+                <tr><td><code>width</code></td><td><code>string?</code></td><td>Ancho CSS (ej: '120px', '20%')</td></tr>
+                <tr><td><code>align</code></td><td><code>'left'|'center'|'right'</code></td><td>Alineación del texto</td></tr>
+                <tr><td><code>sortable</code></td><td><code>boolean?</code></td><td>false = no se puede ordenar esta columna</td></tr>
+                <tr><td><code>cell</code></td><td><code>(row) => string</code></td><td>Función de renderizado personalizado</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+
+    </neu-tabs>
+  </section>
+
+</div>
