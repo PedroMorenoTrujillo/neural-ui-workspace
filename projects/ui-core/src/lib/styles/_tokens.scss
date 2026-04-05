@@ -7,94 +7,94 @@
   // ------------------------------------------------
   // Brand — Neural-Blue (inspirado en Apple HIG)
   // ------------------------------------------------
-  --neu-primary:        #007aff;
-  --neu-primary-dark:   #005fcc;
-  --neu-primary-light:  #339dff;
-  --neu-primary-50:     #eff6ff;
-  --neu-primary-100:    #dbeafe;
-  --neu-primary-fg:     #ffffff;
+  --neu-primary: #007aff;
+  --neu-primary-dark: #005fcc;
+  --neu-primary-light: #339dff;
+  --neu-primary-50: #eff6ff;
+  --neu-primary-100: #dbeafe;
+  --neu-primary-fg: #ffffff;
 
-  --neu-secondary:      #5856d6;
+  --neu-secondary: #5856d6;
   --neu-secondary-dark: #4340b8;
-  --neu-secondary-fg:   #ffffff;
+  --neu-secondary-fg: #ffffff;
 
-  --neu-accent:         #5ac8fa;
+  --neu-accent: #5ac8fa;
 
   // ------------------------------------------------
   // Fondos (ultra-clean, Slate scale)
   // ------------------------------------------------
-  --neu-bg:        #f8fafc; // Slate-50 — fondo base
-  --neu-surface:   #ffffff; // Blanco puro — tarjetas
+  --neu-bg: #f8fafc; // Slate-50 — fondo base
+  --neu-surface: #ffffff; // Blanco puro — tarjetas
   --neu-surface-2: #f1f5f9; // Slate-100 — fondos secundarios
   --neu-surface-3: #e2e8f0; // Slate-200 — hover, separadores
 
   // ------------------------------------------------
   // Bordes
   // ------------------------------------------------
-  --neu-border:       rgba(15, 23, 42, 0.08);
+  --neu-border: rgba(15, 23, 42, 0.08);
   --neu-border-hover: rgba(15, 23, 42, 0.16);
   --neu-border-focus: var(--neu-primary);
 
   // ------------------------------------------------
   // Tipografía (Slate scale)
   // ------------------------------------------------
-  --neu-text:          #0f172a; // Slate-900
-  --neu-text-muted:    #64748b; // Slate-500
+  --neu-text: #0f172a; // Slate-900
+  --neu-text-muted: #64748b; // Slate-500
   --neu-text-disabled: #94a3b8; // Slate-400
-  --neu-text-inverse:  #ffffff;
+  --neu-text-inverse: #ffffff;
 
   --neu-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --neu-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
 
-  --neu-text-xs:   0.75rem;
-  --neu-text-sm:   0.875rem;
+  --neu-text-xs: 0.75rem;
+  --neu-text-sm: 0.875rem;
   --neu-text-base: 1rem;
-  --neu-text-lg:   1.125rem;
-  --neu-text-xl:   1.25rem;
-  --neu-text-2xl:  1.5rem;
-  --neu-text-3xl:  1.875rem;
-  --neu-text-4xl:  2.25rem;
+  --neu-text-lg: 1.125rem;
+  --neu-text-xl: 1.25rem;
+  --neu-text-2xl: 1.5rem;
+  --neu-text-3xl: 1.875rem;
+  --neu-text-4xl: 2.25rem;
 
   // ------------------------------------------------
   // Estados semánticos
   // ------------------------------------------------
-  --neu-success:      #10b981;
-  --neu-success-bg:   #d1fae5;
+  --neu-success: #10b981;
+  --neu-success-bg: #d1fae5;
   --neu-success-text: #065f46;
 
-  --neu-warning:      #f59e0b;
-  --neu-warning-bg:   #fef3c7;
+  --neu-warning: #f59e0b;
+  --neu-warning-bg: #fef3c7;
   --neu-warning-text: #92400e;
 
-  --neu-error:        #ef4444;
-  --neu-error-bg:     #fee2e2;
-  --neu-error-text:   #991b1b;
+  --neu-error: #ef4444;
+  --neu-error-bg: #fee2e2;
+  --neu-error-text: #991b1b;
 
-  --neu-info:         #007aff;
-  --neu-info-bg:      #eff6ff;
-  --neu-info-text:    #1d4ed8;
+  --neu-info: #007aff;
+  --neu-info-bg: #eff6ff;
+  --neu-info-text: #1d4ed8;
 
   // ------------------------------------------------
   // Radio de borde
   // ------------------------------------------------
-  --neu-radius-xs:   2px;
-  --neu-radius-sm:   6px;
-  --neu-radius:      8px;
-  --neu-radius-lg:   12px;
-  --neu-radius-xl:   16px;
-  --neu-radius-2xl:  24px;
+  --neu-radius-xs: 2px;
+  --neu-radius-sm: 6px;
+  --neu-radius: 8px;
+  --neu-radius-lg: 12px;
+  --neu-radius-xl: 16px;
+  --neu-radius-2xl: 24px;
   --neu-radius-full: 9999px;
 
   // ------------------------------------------------
   // Espaciado
   // ------------------------------------------------
-  --neu-space-1:  0.25rem;
-  --neu-space-2:  0.5rem;
-  --neu-space-3:  0.75rem;
-  --neu-space-4:  1rem;
-  --neu-space-5:  1.25rem;
-  --neu-space-6:  1.5rem;
-  --neu-space-8:  2rem;
+  --neu-space-1: 0.25rem;
+  --neu-space-2: 0.5rem;
+  --neu-space-3: 0.75rem;
+  --neu-space-4: 1rem;
+  --neu-space-5: 1.25rem;
+  --neu-space-6: 1.5rem;
+  --neu-space-8: 2rem;
   --neu-space-10: 2.5rem;
   --neu-space-12: 3rem;
   --neu-space-16: 4rem;
@@ -102,8 +102,8 @@
   // ------------------------------------------------
   // Transiciones y animación
   // ------------------------------------------------
-  --neu-transition:        200ms ease;
-  --neu-transition-slow:   350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --neu-transition: 200ms ease;
+  --neu-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
   --neu-transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   // ------------------------------------------------
@@ -111,32 +111,32 @@
   // ------------------------------------------------
   --neu-header-height: 64px;
   --neu-sidebar-width: 260px;
-  --neu-sidebar-bg:    var(--neu-surface);
+  --neu-sidebar-bg: var(--neu-surface);
 
   // ------------------------------------------------
   // Z-index
   // ------------------------------------------------
-  --neu-z-base:     1;
+  --neu-z-base: 1;
   --neu-z-dropdown: 50;
-  --neu-z-sticky:   80;
-  --neu-z-overlay:  99;
-  --neu-z-sidebar:  100;
-  --neu-z-modal:    200;
-  --neu-z-toast:    300;
+  --neu-z-sticky: 80;
+  --neu-z-overlay: 99;
+  --neu-z-sidebar: 100;
+  --neu-z-modal: 200;
+  --neu-z-toast: 300;
 
   // ------------------------------------------------
   // Sombras (sutiles – tema claro)
   // ------------------------------------------------
   --neu-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
   --neu-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --neu-shadow:    0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --neu-shadow: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
   --neu-shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.04);
   --neu-shadow-glow: 0 0 20px rgba(0, 122, 255, 0.2);
 
   // ------------------------------------------------
   // Iconos (Lucide via @ng-icons)
   // ------------------------------------------------
-  --neu-icon-size:    1.25rem;   // 20px — tamaño por defecto
-  --neu-icon-size-sm: 1rem;      // 16px
-  --neu-icon-size-lg: 1.5rem;    // 24px
+  --neu-icon-size: 1.25rem; // 20px — tamaño por defecto
+  --neu-icon-size-sm: 1rem; // 16px
+  --neu-icon-size-lg: 1.5rem; // 24px
 }

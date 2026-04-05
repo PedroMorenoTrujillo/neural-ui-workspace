@@ -1,0 +1,43 @@
+.neu-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--neu-space-10, 2.5rem) var(--neu-space-6, 1.5rem);
+  text-align: center;
+  width: 100%;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--neu-space-3, 0.75rem);
+    max-width: 380px;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: var(--neu-radius-lg, 16px);
+    background: var(--neu-surface-2, #f8fafc);
+    color: var(--neu-text-muted, #94a3b8);
+    margin-bottom: var(--neu-space-2, 0.5rem);
+    border: 1px solid var(--neu-border, #e2e8f0);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--neu-text-base, 1rem);
+    font-weight: 600;
+    color: var(--neu-text, #0f172a);
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: var(--neu-text-sm, 0.875rem);
+    color: var(--neu-text-muted, #64748b);
+    line-height: 1.5;
+  }
+}

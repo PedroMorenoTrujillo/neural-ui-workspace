@@ -1,0 +1,276 @@
+// ============================================================
+// Templates Page — Vitrina de productos NeuralUI
+// ============================================================
+
+.templates-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--neu-space-8, 2rem) var(--neu-space-6, 1.5rem) var(--neu-space-16, 4rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--neu-space-10, 2.5rem);
+}
+
+// ---- Hero ----
+.templates-hero {
+  text-align: center;
+  padding: var(--neu-space-10, 2.5rem) 0 var(--neu-space-6, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--neu-space-4, 1rem);
+
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--neu-text-sm, 0.875rem);
+    font-weight: 600;
+    color: var(--neu-primary);
+    background: var(--neu-primary-50, #eff6ff);
+    border: 1px solid var(--neu-primary-100, #dbeafe);
+    padding: 5px 12px;
+    border-radius: var(--neu-radius-full, 999px);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: var(--neu-text);
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: var(--neu-text-base, 1rem);
+    color: var(--neu-text-muted);
+    max-width: 520px;
+    line-height: 1.6;
+  }
+
+  &__stats {
+    display: flex;
+    align-items: center;
+    gap: var(--neu-space-6, 1.5rem);
+    margin-top: var(--neu-space-2, 0.5rem);
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__stat-value {
+    font-size: var(--neu-text-xl, 1.25rem);
+    font-weight: 700;
+    color: var(--neu-text);
+    letter-spacing: -0.02em;
+  }
+
+  &__stat-label {
+    font-size: var(--neu-text-xs, 0.75rem);
+    color: var(--neu-text-muted);
+  }
+
+  &__stat-sep {
+    width: 1px;
+    height: 32px;
+    background: var(--neu-border);
+  }
+}
+
+// ---- Grid de productos ----
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: var(--neu-space-5, 1.25rem);
+}
+
+// ---- Product Card ----
+.template-card {
+  background: var(--neu-surface);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-lg, 16px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--neu-transition), transform var(--neu-transition);
+
+  &:hover {
+    box-shadow: var(--neu-shadow);
+    transform: translateY(-2px);
+  }
+
+  // Imagen
+  &__img-wrap {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--neu-surface-2);
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+
+    .template-card:hover & {
+      transform: scale(1.03);
+    }
+  }
+
+  &__category {
+    position: absolute;
+    top: var(--neu-space-3, 0.75rem);
+    left: var(--neu-space-3, 0.75rem);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    background: rgba(15, 23, 42, 0.6);
+    color: #fff;
+    border-radius: var(--neu-radius-full, 999px);
+    backdrop-filter: blur(4px);
+  }
+
+  // Body
+  &__body {
+    padding: var(--neu-space-4, 1rem) var(--neu-space-4, 1rem) var(--neu-space-2, 0.5rem);
+    flex: 1;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--neu-space-2, 0.5rem);
+    margin-bottom: var(--neu-space-2, 0.5rem);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--neu-text-base, 1rem);
+    font-weight: 700;
+    color: var(--neu-text);
+    line-height: 1.3;
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: var(--neu-text-sm, 0.875rem);
+    color: var(--neu-text-muted);
+    line-height: 1.55;
+  }
+
+  // Footer
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--neu-space-3, 0.75rem) var(--neu-space-4, 1rem);
+    border-top: 1px solid var(--neu-border);
+    gap: var(--neu-space-3, 0.75rem);
+  }
+
+  &__price {
+    font-size: var(--neu-text-lg, 1.125rem);
+    font-weight: 700;
+    color: var(--neu-text);
+    letter-spacing: -0.02em;
+
+    &--free {
+      color: #15803d;
+      font-size: var(--neu-text-sm, 0.875rem);
+      font-weight: 600;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--neu-space-2, 0.5rem);
+  }
+
+  &__preview-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: 1px solid var(--neu-border);
+    border-radius: var(--neu-radius, 8px);
+    background: transparent;
+    font-size: var(--neu-text-xs, 0.75rem);
+    font-weight: 500;
+    color: var(--neu-text-muted);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--neu-transition);
+    font-family: var(--neu-font-sans);
+
+    &:hover:not([disabled]) {
+      background: var(--neu-surface-2);
+      color: var(--neu-text);
+      border-color: var(--neu-border-hover);
+    }
+
+    &[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ---- CTA ----
+.templates-cta {
+  background: linear-gradient(135deg, var(--neu-primary-50, #eff6ff) 0%, #f5f3ff 100%);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-lg, 16px);
+  padding: var(--neu-space-10, 2.5rem) var(--neu-space-8, 2rem);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--neu-space-4, 1rem);
+
+  &__title {
+    margin: 0;
+    font-size: var(--neu-text-2xl, 1.5rem);
+    font-weight: 700;
+    color: var(--neu-text);
+    letter-spacing: -0.03em;
+  }
+
+  &__desc {
+    margin: 0;
+    color: var(--neu-text-muted);
+    font-size: var(--neu-text-sm, 0.875rem);
+    max-width: 480px;
+    line-height: 1.6;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--neu-space-2, 0.5rem);
+    padding: 10px var(--neu-space-5, 1.25rem);
+    background: var(--neu-text);
+    color: var(--neu-surface);
+    border-radius: var(--neu-radius, 8px);
+    font-size: var(--neu-text-sm, 0.875rem);
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity var(--neu-transition);
+    font-family: var(--neu-font-sans);
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+}

@@ -100,9 +100,38 @@ $layout-bp: 400px;
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: var(--neu-space-3);
+  gap: var(--neu-space-2);
 }
 
+// Botón selector de idioma
+.app-header__lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  background: transparent;
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  transition: all var(--neu-transition);
+  font-family: var(--neu-font-sans);
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+    border-color: var(--neu-border-hover);
+  }
+}
+
+.app-header__lang-text {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+// GitHub link
 .app-header__gh-link {
   display: inline-flex;
   align-items: center;
@@ -116,17 +145,42 @@ $layout-bp: 400px;
   text-decoration: none;
   transition: all var(--neu-transition);
 
-  svg {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-  }
-
   &:hover {
     border-color: var(--neu-text);
     color: var(--neu-text);
     background: var(--neu-surface-2);
   }
+}
+
+// Ocultar texto GitHub en xs
+.app-header__gh-text {
+  @media (max-width: 520px) { display: none; }
+}
+
+// Botón Premium Templates
+.app-header__premium-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px var(--neu-space-4);
+  background: var(--neu-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--neu-radius);
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--neu-transition), box-shadow var(--neu-transition);
+  white-space: nowrap;
+  font-family: var(--neu-font-sans);
+
+  &:hover {
+    background: var(--neu-primary-dark);
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
+  }
+
+  @media (max-width: 480px) { display: none; }
 }
 
 // ---- Sidebar ----
@@ -150,10 +204,19 @@ $layout-bp: 400px;
 
 .app-nav__group {
   margin-bottom: var(--neu-space-5);
+
+  &--templates {
+    margin-top: auto;
+    border-top: 1px solid var(--neu-border);
+    padding-top: var(--neu-space-3);
+    margin-bottom: 0;
+  }
 }
 
 .app-nav__group-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
   padding: 0 var(--neu-space-5);
   margin-bottom: var(--neu-space-2);
   font-size: 10px;
@@ -175,6 +238,7 @@ $layout-bp: 400px;
   border-radius: 0;
   transition: all var(--neu-transition);
   position: relative;
+  gap: var(--neu-space-2);
 
   &:hover {
     color: var(--neu-text);
@@ -197,6 +261,35 @@ $layout-bp: 400px;
       border-radius: 0 var(--neu-radius-full) var(--neu-radius-full) 0;
     }
   }
+
+  &--templates {
+    color: var(--neu-primary);
+    font-weight: 600;
+    gap: var(--neu-space-2);
+  }
+}
+
+.app-nav__badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.app-nav__icon-badge {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.app-nav__new-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  background: var(--neu-primary-100, #dbeafe);
+  color: var(--neu-primary);
+  border-radius: var(--neu-radius-full);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 // ---- Contenido principal ----

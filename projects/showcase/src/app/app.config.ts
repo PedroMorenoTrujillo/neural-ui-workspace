@@ -3,6 +3,7 @@ import { provideRouter, withComponentInputBinding, withRouterConfig } from '@ang
 import { provideIcons } from '@ng-icons/core';
 import { provideNgIconsConfig } from '@ng-icons/core';
 import {
+  // Originales
   lucideAlertCircle,
   lucideCheck,
   lucideChevronDown,
@@ -15,6 +16,23 @@ import {
   lucideSearch,
   lucideUser,
   lucideX,
+  // Sidebar nav categories
+  lucideHome,
+  lucideFormInput,
+  lucideDatabase,
+  lucideLayoutTemplate,
+  lucideBarChart2,
+  lucideLayers,
+  lucideGlobe,
+  lucideZap,
+  // Stats Card trend icons
+  lucideTrendingUp,
+  lucideTrendingDown,
+  lucideMinus,
+  // Templates page
+  lucideShoppingCart,
+  lucideGithub,
+  lucideInbox,
 } from '@ng-icons/lucide';
 
 import { routes } from './app.routes';
@@ -31,6 +49,7 @@ export const appConfig: ApplicationConfig = {
       withRouterConfig({ paramsInheritanceStrategy: 'always' }),
     ),
     provideIcons({
+      // Originales
       lucideAlertCircle,
       lucideCheck,
       lucideChevronDown,
@@ -43,6 +62,23 @@ export const appConfig: ApplicationConfig = {
       lucideSearch,
       lucideUser,
       lucideX,
+      // Sidebar nav categories
+      lucideHome,
+      lucideFormInput,
+      lucideDatabase,
+      lucideLayoutTemplate,
+      lucideBarChart2,
+      lucideLayers,
+      lucideGlobe,
+      lucideZap,
+      // Stats Card trend icons
+      lucideTrendingUp,
+      lucideTrendingDown,
+      lucideMinus,
+      // Templates page
+      lucideShoppingCart,
+      lucideGithub,
+      lucideInbox,
     }),
     provideNgIconsConfig({ size: '1.25rem', strokeWidth: '2' }),
   ],
