@@ -1,0 +1,64 @@
+// ============================================================
+// NeuralUI — Breakpoints Mobile-First
+// Punto de quiebre base: 400px (optimizado para plegables y móviles modernos)
+// ============================================================
+
+// Variables SCSS
+$neu-bp-xs:       320px;   // Teléfonos muy pequeños
+$neu-bp-mobile:   400px;   // Punto de quiebre principal (plegables, iPhone SE, etc.)
+$neu-bp-tablet:   768px;   // Tabletas
+$neu-bp-desktop: 1024px;   // Escritorio
+$neu-bp-wide:    1440px;   // Pantallas anchas
+
+// ------------------------------------------------
+// Mixins de media queries
+// ------------------------------------------------
+
+/// Pantallas menores a 400px (muy pequeñas)
+@mixin neu-xs-only {
+  @media (max-width: #{$neu-bp-mobile - 1px}) {
+    @content;
+  }
+}
+
+/// Pantallas de 400px en adelante — el breakpoint principal de NeuralUI
+@mixin neu-from-mobile {
+  @media (min-width: #{$neu-bp-mobile}) {
+    @content;
+  }
+}
+
+/// Tabletas y superior
+@mixin neu-tablet {
+  @media (min-width: #{$neu-bp-tablet}) {
+    @content;
+  }
+}
+
+/// Escritorio y superior
+@mixin neu-desktop {
+  @media (min-width: #{$neu-bp-desktop}) {
+    @content;
+  }
+}
+
+/// Pantallas anchas
+@mixin neu-wide {
+  @media (min-width: #{$neu-bp-wide}) {
+    @content;
+  }
+}
+
+/// Dispositivos plegables (entre 280px y 399px)
+@mixin neu-foldable {
+  @media (min-width: 280px) and (max-width: #{$neu-bp-mobile - 1px}) {
+    @content;
+  }
+}
+
+/// Modo landscape en móvil
+@mixin neu-landscape {
+  @media (orientation: landscape) and (max-height: 500px) {
+    @content;
+  }
+}

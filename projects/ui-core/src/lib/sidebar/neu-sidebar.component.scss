@@ -1,0 +1,135 @@
+// ============================================================
+// NeuralUI — Sidebar Component Styles
+// ViewEncapsulation.None — usa prefijo BEM .neu-sidebar
+// ============================================================
+@use '../styles/breakpoints' as *;
+
+// ---- Overlay ----
+.neu-sidebar__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: var(--neu-z-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--neu-transition-slow);
+
+  &--visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+
+// ---- Panel ----
+.neu-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100dvh;
+  width: 100%;            // full-width en pantallas < 400px
+  background: var(--neu-sidebar-bg, var(--neu-surface));
+  border-right: 1px solid var(--neu-border);
+  z-index: var(--neu-z-sidebar);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform var(--neu-transition-slow);
+  overflow: hidden;
+
+  // A partir del breakpoint principal (400px), ancho fijo
+  @include neu-from-mobile {
+    width: var(--neu-sidebar-width, 260px);
+  }
+
+  &--open {
+    transform: translateX(0);
+  }
+}
+
+// ---- Cabecera ----
+.neu-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--neu-space-4) var(--neu-space-5);
+  min-height: var(--neu-header-height, 64px);
+  border-bottom: 1px solid var(--neu-border);
+  flex-shrink: 0;
+}
+
+.neu-sidebar__title {
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-base);
+  font-weight: 600;
+  color: var(--neu-text);
+  letter-spacing: -0.01em;
+}
+
+// ---- Botón de cerrar ----
+.neu-sidebar__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--neu-radius-sm);
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color var(--neu-transition),
+    color var(--neu-transition),
+    border-color var(--neu-transition);
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+    border-color: var(--neu-border);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.45);
+  }
+}
+
+// ---- Contenido ----
+.neu-sidebar__content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--neu-space-3) 0;
+
+  // Scroll personalizado
+  scrollbar-width: thin;
+  scrollbar-color: var(--neu-surface-3) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--neu-surface-3);
+    border-radius: var(--neu-radius-full);
+  }
+}
+
+// ---- Footer ----
+.neu-sidebar__footer {
+  padding: var(--neu-space-4) var(--neu-space-5);
+  border-top: 1px solid var(--neu-border);
+  flex-shrink: 0;
+
+  &:empty {
+    display: none;
+  }
+}

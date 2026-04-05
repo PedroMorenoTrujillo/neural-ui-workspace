@@ -1,0 +1,71 @@
+<div class="app-shell" [class.app-shell--sidebar-open]="isSidebarOpen()">
+
+  <!-- ===== Header ===== -->
+  <header class="app-header">
+    <button
+      neu-button
+      variant="ghost"
+      size="sm"
+      class="app-header__menu-btn"
+      (click)="openSidebar()"
+      aria-label="Abrir menú de navegación"
+      type="button"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="3" y1="6"  x2="21" y2="6"  />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    </button>
+
+    <a routerLink="/" class="app-header__brand" aria-label="NeuralUI — Inicio">
+      <span class="app-header__logo" aria-hidden="true">N</span>
+      <span class="app-header__brand-name">NeuralUI</span>
+    </a>
+
+    <nav class="app-header__nav" aria-label="Navegación principal">
+      @for (item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+          class="app-header__nav-link"
+        >{{ item.label }}</a>
+      }
+    </nav>
+  </header>
+
+  <!-- ===== Sidebar — estado ?menu=open en la URL ===== -->
+  <neu-sidebar
+    [isOpen]="isSidebarOpen()"
+    (closeRequested)="closeSidebar()"
+  >
+    <span neu-sidebar-header>NeuralUI</span>
+
+    <nav class="sidebar-nav" aria-label="Componentes">
+      @for (item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="sidebar-nav__link--active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+          class="sidebar-nav__link"
+          (click)="closeSidebar()"
+        >
+          <span class="sidebar-nav__icon" aria-hidden="true">{{ item.icon }}</span>
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <span neu-sidebar-footer>
+      <small class="sidebar-footer-text">v0.1.0 &middot; MIT License</small>
+    </span>
+  </neu-sidebar>
+
+  <!-- ===== Contenido principal ===== -->
+  <main class="app-main" id="main-content">
+    <router-outlet />
+  </main>
+
+</div>

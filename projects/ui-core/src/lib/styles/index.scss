@@ -1,0 +1,5 @@
+// NeuralUI — Punto de entrada de estilos globales
+// Uso: @use '@neural-ui/core/styles' en tu styles.scss principal
+
+@forward 'tokens';
+@forward 'breakpoints';

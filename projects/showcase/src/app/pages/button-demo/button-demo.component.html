@@ -1,0 +1,134 @@
+<div class="demo-page">
+  <header class="demo-page__header">
+    <div class="demo-page__badge">Componente</div>
+    <h1 class="demo-page__title">Button</h1>
+    <p class="demo-page__description">
+      Botón semántico aplicado con el selector
+      <code>button[neu-button]</code>. Usa Angular Signals (<code>input()</code>,
+      <code>computed()</code>) para gestionar el estado de forma reactiva.
+    </p>
+    <div class="demo-page__meta">
+      <span class="demo-tag">ViewEncapsulation.None</span>
+      <span class="demo-tag">ChangeDetection.OnPush</span>
+      <span class="demo-tag">Signals</span>
+    </div>
+  </header>
+
+  <!-- ===== Variantes ===== -->
+  <section class="demo-section">
+    <h2 class="demo-section__title">Variantes</h2>
+    <p class="demo-section__subtitle">El input <code>variant</code> controla el estilo visual.</p>
+    <div class="demo-row">
+      <button neu-button variant="primary">Primary</button>
+      <button neu-button variant="secondary">Secondary</button>
+      <button neu-button variant="outline">Outline</button>
+      <button neu-button variant="ghost">Ghost</button>
+      <button neu-button variant="danger">Danger</button>
+    </div>
+    <pre class="demo-code"><code>&lt;button neu-button variant="primary"&gt;Primary&lt;/button&gt;
+&lt;button neu-button variant="secondary"&gt;Secondary&lt;/button&gt;
+&lt;button neu-button variant="outline"&gt;Outline&lt;/button&gt;
+&lt;button neu-button variant="ghost"&gt;Ghost&lt;/button&gt;
+&lt;button neu-button variant="danger"&gt;Danger&lt;/button&gt;</code></pre>
+  </section>
+
+  <!-- ===== Tamaños ===== -->
+  <section class="demo-section">
+    <h2 class="demo-section__title">Tamaños</h2>
+    <p class="demo-section__subtitle">El input <code>size</code> acepta <code>sm</code>, <code>md</code> (default) y <code>lg</code>.</p>
+    <div class="demo-row demo-row--align-center">
+      <button neu-button variant="primary" size="sm">Small</button>
+      <button neu-button variant="primary" size="md">Medium</button>
+      <button neu-button variant="primary" size="lg">Large</button>
+    </div>
+  </section>
+
+  <!-- ===== Estados ===== -->
+  <section class="demo-section">
+    <h2 class="demo-section__title">Estados con Signals</h2>
+    <p class="demo-section__subtitle">
+      El estado <code>loading</code> es un <code>signal()</code> reactivo. Pulsa para simular una petición async.
+    </p>
+    <div class="demo-row">
+      <button
+        neu-button
+        variant="primary"
+        [loading]="isLoading()"
+        (click)="simulateLoad()"
+      >
+        {{ isLoading() ? 'Procesando...' : 'Simular carga (2.5s)' }}
+      </button>
+      <button neu-button variant="outline" [disabled]="true">Deshabilitado</button>
+    </div>
+    <pre class="demo-code"><code>// TypeScript — Signal reactivo
+readonly isLoading = signal(false);
+
+simulateLoad(): void &#123;
+  this.isLoading.set(true);
+  setTimeout(() =&gt; this.isLoading.set(false), 2500);
+&#125;
+
+// Template
+&lt;button neu-button [loading]="isLoading()" (click)="simulateLoad()"&gt;
+  &#123;&#123; isLoading() ? 'Procesando...' : 'Enviar' &#125;&#125;
+&lt;/button&gt;</code></pre>
+  </section>
+
+  <!-- ===== Ancho completo ===== -->
+  <section class="demo-section">
+    <h2 class="demo-section__title">Ancho completo</h2>
+    <div class="demo-col">
+      <button neu-button variant="primary" [fullWidth]="true">Botón de ancho completo</button>
+      <button neu-button variant="outline" [fullWidth]="true">Outline ancho completo</button>
+    </div>
+  </section>
+
+  <!-- ===== API Reference ===== -->
+  <section class="demo-section">
+    <h2 class="demo-section__title">API</h2>
+    <div class="demo-table-wrapper">
+      <table class="demo-table">
+        <thead>
+          <tr>
+            <th>Input</th>
+            <th>Tipo</th>
+            <th>Default</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>variant</code></td>
+            <td><code>NeuButtonVariant</code></td>
+            <td><code>'primary'</code></td>
+            <td>Estilo visual del botón</td>
+          </tr>
+          <tr>
+            <td><code>size</code></td>
+            <td><code>NeuButtonSize</code></td>
+            <td><code>'md'</code></td>
+            <td>Tamaño del botón</td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Deshabilita el botón</td>
+          </tr>
+          <tr>
+            <td><code>loading</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Muestra spinner, deshabilita interacción</td>
+          </tr>
+          <tr>
+            <td><code>fullWidth</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Ocupa el 100% del contenedor</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

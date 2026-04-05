@@ -1,0 +1,81 @@
+// ============================================================
+// NeuralUI Showcase — Estilos Globales
+// ============================================================
+
+// Importar CSS Tokens de NeuralUI (@neural-ui/core)
+@use '../../ui-core/src/lib/styles/tokens' as *;
+
+// Importar estilos de componentes de la librería
+// (ViewEncapsulation.None — los estilos se aplican globalmente)
+@use '../../ui-core/src/lib/button/neu-button.component.scss';
+@use '../../ui-core/src/lib/sidebar/neu-sidebar.component.scss';
+
+// ---- Reset y base ----
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--neu-font-sans);
+  background-color: var(--neu-bg);
+  color: var(--neu-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ---- Tipografía base ----
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+a {
+  color: var(--neu-primary-light);
+  text-decoration: none;
+}
+
+code, kbd, pre, samp {
+  font-family: var(--neu-font-mono);
+}
+
+// ---- Focus visible global ----
+:focus-visible {
+  outline: 2px solid var(--neu-primary);
+  outline-offset: 2px;
+  border-radius: var(--neu-radius-xs);
+}
+
+// ---- Scrollbar personalizado (webkit) ----
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neu-surface-3);
+  border-radius: var(--neu-radius-full);
+
+  &:hover {
+    background: var(--neu-text-disabled);
+  }
+}
+
+// ---- Selección de texto ----
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: var(--neu-text);
+}

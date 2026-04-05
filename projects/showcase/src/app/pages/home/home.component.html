@@ -1,0 +1,83 @@
+<section class="home-hero">
+  <div class="home-hero__content">
+    <div class="home-hero__badge">v0.1.0 — Angular 21 · Signals</div>
+
+    <h1 class="home-hero__title">
+      Construye interfaces
+      <span class="home-hero__title--gradient">extraordinarias</span>
+      con NeuralUI
+    </h1>
+
+    <p class="home-hero__description">
+      Suite de componentes Angular de alto rendimiento.
+      Impulsada por Signals, optimizada para móviles (<strong>400px</strong>),
+      con estado sincronizado en la URL y CSS Tokens totalmente personalizables.
+    </p>
+
+    <div class="home-hero__actions">
+      <a routerLink="/components/button">
+        <button neu-button variant="primary" size="lg">
+          Explorar Componentes
+        </button>
+      </a>
+      <a routerLink="/components/sidebar">
+        <button neu-button variant="outline" size="lg">
+          Ver Sidebar Demo
+        </button>
+      </a>
+    </div>
+  </div>
+
+  <div class="home-hero__visual" aria-hidden="true">
+    <div class="home-hero__glow"></div>
+    <div class="home-feature-grid">
+      <div class="home-feature-card">
+        <span class="home-feature-card__icon">⚡</span>
+        <strong>Signals</strong>
+        <p>input(), output(), computed(), effect()</p>
+      </div>
+      <div class="home-feature-card">
+        <span class="home-feature-card__icon">🔗</span>
+        <strong>URL State</strong>
+        <p>Estado sincronizado con QueryParams</p>
+      </div>
+      <div class="home-feature-card">
+        <span class="home-feature-card__icon">📱</span>
+        <strong>400px First</strong>
+        <p>Diseñado para dispositivos modernos</p>
+      </div>
+      <div class="home-feature-card">
+        <span class="home-feature-card__icon">🎨</span>
+        <strong>CSS Tokens</strong>
+        <p>--neu-primary, --neu-bg y más</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="home-components">
+  <div class="home-components__header">
+    <h2>Componentes disponibles</h2>
+    <p>Producción-listo. Sin dependencias externas.</p>
+  </div>
+
+  <div class="home-components__grid">
+    <a routerLink="/components/button" class="home-component-card">
+      <div class="home-component-card__icon">□</div>
+      <div class="home-component-card__info">
+        <strong>Button</strong>
+        <span>5 variantes · 3 tamaños · loading state</span>
+      </div>
+      <span class="home-component-card__arrow">→</span>
+    </a>
+
+    <a routerLink="/components/sidebar" class="home-component-card">
+      <div class="home-component-card__icon">▤</div>
+      <div class="home-component-card__info">
+        <strong>Sidebar</strong>
+        <span>URL State · Overlay · Accesible</span>
+      </div>
+      <span class="home-component-card__arrow">→</span>
+    </a>
+  </div>
+</section>

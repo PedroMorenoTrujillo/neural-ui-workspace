@@ -1,0 +1,150 @@
+// ============================================================
+// NeuralUI Showcase — App Shell Styles
+// ============================================================
+
+// ---- Layout base ----
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--neu-bg);
+  color: var(--neu-text);
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Header ----
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--neu-z-sticky, 80);
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-3);
+  height: var(--neu-header-height, 64px);
+  padding: 0 var(--neu-space-4);
+  background: rgba(15, 15, 23, 0.85);
+  border-bottom: 1px solid var(--neu-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.app-header__menu-btn {
+  flex-shrink: 0;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  text-decoration: none;
+  color: var(--neu-text);
+  font-weight: 700;
+  font-size: var(--neu-text-lg);
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+
+  &:hover .app-header__logo {
+    box-shadow: var(--neu-shadow-glow);
+  }
+}
+
+.app-header__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--neu-primary);
+  color: #fff;
+  border-radius: var(--neu-radius-sm);
+  font-size: var(--neu-text-base);
+  font-weight: 800;
+  transition: box-shadow var(--neu-transition);
+}
+
+.app-header__brand-name {
+  background: linear-gradient(135deg, var(--neu-primary-light), var(--neu-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.app-header__nav {
+  display: none;
+  align-items: center;
+  gap: var(--neu-space-1);
+  margin-left: auto;
+
+  @media (min-width: 640px) {
+    display: flex;
+  }
+}
+
+.app-header__nav-link {
+  padding: var(--neu-space-1) var(--neu-space-3);
+  border-radius: var(--neu-radius);
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  text-decoration: none;
+  transition: color var(--neu-transition), background-color var(--neu-transition);
+
+  &:hover {
+    color: var(--neu-text);
+    background: var(--neu-surface-2);
+  }
+
+  &.active {
+    color: var(--neu-primary-light);
+    background: rgba(99, 102, 241, 0.1);
+  }
+}
+
+// ---- Main content ----
+.app-main {
+  flex: 1;
+  overflow-x: hidden;
+}
+
+// ---- Sidebar nav (estilos para el contenido dentro del sidebar) ----
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: var(--neu-space-2) var(--neu-space-3);
+  gap: var(--neu-space-1);
+}
+
+.sidebar-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-3);
+  padding: var(--neu-space-2) var(--neu-space-3);
+  border-radius: var(--neu-radius);
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  text-decoration: none;
+  transition: color var(--neu-transition), background-color var(--neu-transition);
+
+  &:hover {
+    color: var(--neu-text);
+    background: var(--neu-surface-2);
+  }
+
+  &--active {
+    color: var(--neu-primary-light);
+    background: rgba(99, 102, 241, 0.12);
+  }
+}
+
+.sidebar-nav__icon {
+  font-size: var(--neu-text-base);
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebar-footer-text {
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-disabled);
+}

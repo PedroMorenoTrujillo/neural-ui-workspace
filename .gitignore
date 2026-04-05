@@ -10,6 +10,11 @@
 /node_modules
 npm-debug.log
 yarn-error.log
+.npm/
+
+# Package manager lockfile — solo conservar package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # IDEs and editors
 .idea/
@@ -39,6 +44,24 @@ testem.log
 /typings
 __screenshots__/
 
+# Testing
+/reports
+/test-results
+*.spec.js.map
+
+# Secrets y variables de entorno
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
 # System files
 .DS_Store
 Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Build outputs
+*.js.map
+*.d.ts.map

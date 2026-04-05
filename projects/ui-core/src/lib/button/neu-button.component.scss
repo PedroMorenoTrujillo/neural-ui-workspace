@@ -1,0 +1,154 @@
+// ============================================================
+// NeuralUI — Button Component Styles
+// ViewEncapsulation.None — usa prefijo BEM .neu-button
+// ============================================================
+@use '../styles/breakpoints' as *;
+
+// ---- Base ----
+.neu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--neu-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--neu-radius);
+  font-family: var(--neu-font-sans);
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background-color var(--neu-transition),
+    border-color var(--neu-transition),
+    color var(--neu-transition),
+    box-shadow var(--neu-transition),
+    opacity var(--neu-transition);
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.45);
+  }
+
+  // ---- Tamaños ----
+  &--sm {
+    padding: var(--neu-space-2) var(--neu-space-3);
+    font-size: var(--neu-text-sm);
+    border-radius: var(--neu-radius-sm);
+  }
+
+  &--md {
+    padding: var(--neu-space-2) var(--neu-space-5);
+    font-size: var(--neu-text-base);
+
+    @include neu-from-mobile {
+      padding: 0.625rem var(--neu-space-6);
+    }
+  }
+
+  &--lg {
+    padding: var(--neu-space-3) var(--neu-space-8);
+    font-size: var(--neu-text-lg);
+  }
+
+  // ---- Ancho completo ----
+  &--full-width {
+    width: 100%;
+  }
+
+  // ---- Variantes ----
+  &--primary {
+    background: var(--neu-primary);
+    color: var(--neu-primary-fg);
+    border-color: var(--neu-primary);
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--neu-primary-dark);
+      border-color: var(--neu-primary-dark);
+      box-shadow: var(--neu-shadow-glow);
+    }
+
+    &:active:not(:disabled) {
+      background: var(--neu-primary-dark);
+      transform: translateY(1px);
+    }
+  }
+
+  &--secondary {
+    background: var(--neu-secondary);
+    color: var(--neu-secondary-fg);
+    border-color: var(--neu-secondary);
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--neu-secondary-dark);
+      border-color: var(--neu-secondary-dark);
+    }
+  }
+
+  &--outline {
+    background: transparent;
+    color: var(--neu-primary-light);
+    border-color: var(--neu-primary);
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--neu-primary-light);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--neu-text-muted);
+    border-color: transparent;
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--neu-surface-2);
+      color: var(--neu-text);
+    }
+  }
+
+  &--danger {
+    background: var(--neu-error);
+    color: #fff;
+    border-color: var(--neu-error);
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+  }
+
+  // ---- Estado deshabilitado ----
+  &--disabled,
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // ---- Estado cargando ----
+  &--loading {
+    cursor: wait;
+    pointer-events: none;
+  }
+}
+
+// ---- Spinner ----
+.neu-button__spinner {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    animation: neu-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes neu-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
