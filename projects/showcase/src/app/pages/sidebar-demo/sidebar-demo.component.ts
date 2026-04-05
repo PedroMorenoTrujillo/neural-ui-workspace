@@ -11,7 +11,6 @@ import {
 
 @Component({
   selector: 'app-sidebar-demo',
-  standalone: true,
   imports: [NeuButtonComponent, NeuBadgeComponent, NeuTabsComponent, NeuTabPanelComponent, NeuCodeBlockComponent],
   templateUrl: './sidebar-demo.component.html',
   styleUrl: './sidebar-demo.component.scss',

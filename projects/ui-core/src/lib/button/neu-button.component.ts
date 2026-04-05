@@ -20,7 +20,6 @@ export type NeuButtonSize = 'sm' | 'md' | 'lg';
  */
 @Component({
   selector: 'button[neu-button]',
-  standalone: true,
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

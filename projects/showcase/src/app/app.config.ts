@@ -1,5 +1,21 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withRouterConfig } from '@angular/router';
+import { provideIcons } from '@ng-icons/core';
+import { provideNgIconsConfig } from '@ng-icons/core';
+import {
+  lucideAlertCircle,
+  lucideCheck,
+  lucideChevronDown,
+  lucideChevronLeft,
+  lucideChevronRight,
+  lucideEye,
+  lucideEyeOff,
+  lucideMail,
+  lucideMenu,
+  lucideSearch,
+  lucideUser,
+  lucideX,
+} from '@ng-icons/lucide';
 
 import { routes } from './app.routes';
 
@@ -14,5 +30,20 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withRouterConfig({ paramsInheritanceStrategy: 'always' }),
     ),
+    provideIcons({
+      lucideAlertCircle,
+      lucideCheck,
+      lucideChevronDown,
+      lucideChevronLeft,
+      lucideChevronRight,
+      lucideEye,
+      lucideEyeOff,
+      lucideMail,
+      lucideMenu,
+      lucideSearch,
+      lucideUser,
+      lucideX,
+    }),
+    provideNgIconsConfig({ size: '1.25rem', strokeWidth: '2' }),
   ],
 };

@@ -1,25 +1,22 @@
 <div class="demo-page">
-
   <!-- Hero -->
   <div class="demo-hero">
     <neu-badge variant="info" size="sm">Componente</neu-badge>
     <h1 class="demo-hero__title">Input</h1>
     <p class="demo-hero__desc">
-      Campo de texto con floating label, iconos y soporte total para Angular Forms
-      (ngModel y Reactive Forms). IDs estables para SSR y a11y.
+      Campo de texto con floating label, iconos y soporte total para Angular Forms (ngModel y
+      Reactive Forms). IDs estables para SSR y a11y.
     </p>
   </div>
 
   <!-- Tabs: Preview / Configurador / API -->
   <section class="demo-section">
     <neu-tabs [tabs]="demoTabs" tabParam="tab">
-
       <!-- =========== PREVIEW =========== -->
       <neu-tab-panel tabId="preview">
         <div class="demo-preview demo-preview--tabs">
           <div class="demo-preview__canvas">
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:600px">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 600px">
               <neu-input label="Nombre" [(ngModel)]="nameVal" />
               <neu-input label="Apellidos" [(ngModel)]="surnameVal" />
               <neu-input label="Correo electrónico" type="email" [(ngModel)]="emailVal" />
@@ -31,16 +28,15 @@
               type="password"
               hint="Mínimo 8 caracteres con letras y números"
               [maxlength]="64"
-              style="max-width:300px"
+              style="max-width: 300px"
             />
 
             <neu-input
               label="URL del repositorio"
               type="url"
               errorMessage="La URL no es válida"
-              style="max-width:400px"
+              style="max-width: 400px"
             />
-
           </div>
         </div>
       </neu-tab-panel>
@@ -58,7 +54,7 @@
                 [disabled]="cfg.disabled"
                 [required]="cfg.required"
                 [readonly]="cfg.readonly"
-                style="max-width:280px;width:100%"
+                style="max-width: 280px; width: 100%"
               />
             </div>
             <div class="demo-configurator__controls">
@@ -66,15 +62,22 @@
 
               <div class="demo-configurator__control-row">
                 <label>Label</label>
-                <input class="demo-select" type="text" [value]="cfg.label"
-                       (input)="cfg.label = $any($event.target).value"
-                       style="width:120px" />
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.label"
+                  (input)="cfg.label = $any($event.target).value"
+                  style="width: 120px"
+                />
               </div>
 
               <div class="demo-configurator__control-row">
                 <label>Tipo</label>
-                <select class="demo-select" [value]="cfg.type"
-                        (change)="cfg.type = $any($event.target).value">
+                <select
+                  class="demo-select"
+                  [value]="cfg.type"
+                  (change)="cfg.type = $any($event.target).value"
+                >
                   <option>text</option>
                   <option>email</option>
                   <option>password</option>
@@ -85,23 +88,37 @@
 
               <div class="demo-configurator__control-row">
                 <label for="cfg-hint">Hint</label>
-                <input id="cfg-hint" class="demo-select" type="text" [value]="cfg.hint"
-                       (input)="cfg.hint = $any($event.target).value"
-                       style="width:120px" />
+                <input
+                  id="cfg-hint"
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.hint"
+                  (input)="cfg.hint = $any($event.target).value"
+                  style="width: 120px"
+                />
               </div>
 
               <div class="demo-configurator__control-row">
                 <label for="cfg-error">Error</label>
-                <input id="cfg-error" class="demo-select" type="text" [value]="cfg.error"
-                       (input)="cfg.error = $any($event.target).value"
-                       style="width:120px" />
+                <input
+                  id="cfg-error"
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.error"
+                  (input)="cfg.error = $any($event.target).value"
+                  style="width: 120px"
+                />
               </div>
 
               <div class="demo-configurator__control-row">
                 <label for="cfg-disabled">disabled</label>
                 <label class="demo-toggle">
-                  <input id="cfg-disabled" type="checkbox" [checked]="cfg.disabled"
-                         (change)="cfg.disabled = $any($event.target).checked" />
+                  <input
+                    id="cfg-disabled"
+                    type="checkbox"
+                    [checked]="cfg.disabled"
+                    (change)="cfg.disabled = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -109,8 +126,12 @@
               <div class="demo-configurator__control-row">
                 <label for="cfg-required">required</label>
                 <label class="demo-toggle">
-                  <input id="cfg-required" type="checkbox" [checked]="cfg.required"
-                         (change)="cfg.required = $any($event.target).checked" />
+                  <input
+                    id="cfg-required"
+                    type="checkbox"
+                    [checked]="cfg.required"
+                    (change)="cfg.required = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -118,8 +139,12 @@
               <div class="demo-configurator__control-row">
                 <label for="cfg-readonly">readonly</label>
                 <label class="demo-toggle">
-                  <input id="cfg-readonly" type="checkbox" [checked]="cfg.readonly"
-                         (change)="cfg.readonly = $any($event.target).checked" />
+                  <input
+                    id="cfg-readonly"
+                    type="checkbox"
+                    [checked]="cfg.readonly"
+                    (change)="cfg.readonly = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -134,22 +159,92 @@
           <div class="demo-api-table-wrapper">
             <table class="demo-api-table">
               <thead>
-                <tr><th>Input</th><th>Tipo</th><th>Default</th><th>Descripción</th></tr>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
               </thead>
               <tbody>
-                <tr><td><code>label</code></td><td><code>string</code></td><td><code>''</code></td><td>Floating label del campo</td></tr>
-                <tr><td><code>type</code></td><td><code>NeuInputType</code></td><td><code>'text'</code></td><td>Tipo de input HTML5</td></tr>
-                <tr><td><code>hint</code></td><td><code>string</code></td><td><code>''</code></td><td>Texto de ayuda (cuando no hay error)</td></tr>
-                <tr><td><code>errorMessage</code></td><td><code>string</code></td><td><code>''</code></td><td>Activa el estado de error con mensaje</td></tr>
-                <tr><td><code>disabled</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Deshabilita el campo</td></tr>
-                <tr><td><code>required</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Atributo HTML required</td></tr>
-                <tr><td><code>readonly</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Atributo HTML readonly</td></tr>
-                <tr><td><code>name</code></td><td><code>string</code></td><td><code>''</code></td><td>Atributo name para formularios nativos</td></tr>
-                <tr><td><code>maxlength</code></td><td><code>number</code></td><td><code>null</code></td><td>Longitud máxima</td></tr>
-                <tr><td><code>autocomplete</code></td><td><code>string</code></td><td><code>'off'</code></td><td>Atributo autocomplete HTML</td></tr>
-                <tr><td><code>inputId</code></td><td><code>string</code></td><td><em>auto</em></td><td>ID accesible (contador estable, seguro SSR)</td></tr>
-                <tr><td><code>startIcon</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Activa zona de icono inicial</td></tr>
-                <tr><td><code>endIcon</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Activa zona de icono final</td></tr>
+                <tr>
+                  <td><code>label</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Floating label del campo</td>
+                </tr>
+                <tr>
+                  <td><code>type</code></td>
+                  <td><code>NeuInputType</code></td>
+                  <td><code>'text'</code></td>
+                  <td>Tipo de input HTML5</td>
+                </tr>
+                <tr>
+                  <td><code>hint</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Texto de ayuda (cuando no hay error)</td>
+                </tr>
+                <tr>
+                  <td><code>errorMessage</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Activa el estado de error con mensaje</td>
+                </tr>
+                <tr>
+                  <td><code>disabled</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Deshabilita el campo</td>
+                </tr>
+                <tr>
+                  <td><code>required</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Atributo HTML required</td>
+                </tr>
+                <tr>
+                  <td><code>readonly</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Atributo HTML readonly</td>
+                </tr>
+                <tr>
+                  <td><code>name</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Atributo name para formularios nativos</td>
+                </tr>
+                <tr>
+                  <td><code>maxlength</code></td>
+                  <td><code>number</code></td>
+                  <td><code>null</code></td>
+                  <td>Longitud máxima</td>
+                </tr>
+                <tr>
+                  <td><code>autocomplete</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'off'</code></td>
+                  <td>Atributo autocomplete HTML</td>
+                </tr>
+                <tr>
+                  <td><code>inputId</code></td>
+                  <td><code>string</code></td>
+                  <td><em>auto</em></td>
+                  <td>ID accesible (contador estable, seguro SSR)</td>
+                </tr>
+                <tr>
+                  <td><code>startIcon</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Activa zona de icono inicial</td>
+                </tr>
+                <tr>
+                  <td><code>endIcon</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Activa zona de icono final</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -157,8 +252,6 @@
           <app-code-block [code]="apiCode" lang="TypeScript" />
         </div>
       </neu-tab-panel>
-
     </neu-tabs>
   </section>
-
 </div>

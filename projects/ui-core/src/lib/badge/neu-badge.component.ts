@@ -19,7 +19,6 @@ export type NeuBadgeSize = 'sm' | 'md';
  */
 @Component({
   selector: 'neu-badge',
-  standalone: true,
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

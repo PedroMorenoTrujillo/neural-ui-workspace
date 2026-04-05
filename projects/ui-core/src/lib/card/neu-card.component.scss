@@ -61,10 +61,18 @@
 
 // ---- Body ----
 .neu-card__body {
-  &--none  { padding: 0; }
-  &--sm    { padding: var(--neu-space-3) var(--neu-space-4); }
-  &--md    { padding: var(--neu-space-5); }
-  &--lg    { padding: var(--neu-space-6) var(--neu-space-8); }
+  &--none {
+    padding: 0;
+  }
+  &--sm {
+    padding: var(--neu-space-3) var(--neu-space-4);
+  }
+  &--md {
+    padding: var(--neu-space-5);
+  }
+  &--lg {
+    padding: var(--neu-space-6) var(--neu-space-8);
+  }
 }
 
 // ---- Footer ----

@@ -4,7 +4,6 @@ import { NeuBadgeComponent, NeuButtonComponent, NeuCardComponent } from '@neural
 
 @Component({
   selector: 'app-home',
-  standalone: true,
   imports: [RouterLink, NeuButtonComponent, NeuBadgeComponent, NeuCardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

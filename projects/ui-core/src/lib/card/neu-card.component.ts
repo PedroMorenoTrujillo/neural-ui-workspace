@@ -23,7 +23,6 @@ export type NeuCardPadding = 'none' | 'sm' | 'md' | 'lg';
  */
 @Component({
   selector: 'neu-card',
-  standalone: true,
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

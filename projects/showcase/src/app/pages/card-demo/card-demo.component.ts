@@ -9,7 +9,6 @@ import {
 
 @Component({
   selector: 'app-card-demo',
-  standalone: true,
   imports: [NeuCardComponent, NeuBadgeComponent, NeuTabsComponent, NeuTabPanelComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

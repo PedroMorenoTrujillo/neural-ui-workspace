@@ -4,9 +4,9 @@
 // ============================================================
 @use '../styles/breakpoints' as *;
 
-$input-height:        48px;
-$input-height-sm:     40px;
-$label-scale-y:       10px;    // posición Y del label flotado
+$input-height: 48px;
+$input-height-sm: 40px;
+$label-scale-y: 10px; // posición Y del label flotado
 $label-font-floating: 11px;
 
 // ---- Wrapper ----
@@ -47,15 +47,19 @@ $label-font-floating: 11px;
   }
 
   // Padding extra para iconos
-  &--has-start-icon .neu-input__field { padding-left: 38px; }
-  &--has-end-icon   .neu-input__field { padding-right: 38px; }
+  &--has-start-icon .neu-input__field {
+    padding-left: 38px;
+  }
+  &--has-end-icon .neu-input__field {
+    padding-right: 38px;
+  }
 }
 
 // ---- Campo nativo ----
 .neu-input__field {
   width: 100%;
   height: 100%;
-  padding: 18px var(--neu-space-3) 6px;   // top padding deja espacio al label
+  padding: 18px var(--neu-space-3) 6px; // top padding deja espacio al label
   border: none;
   background: transparent;
   outline: none;
@@ -131,8 +135,12 @@ $label-font-floating: 11px;
     height: 18px;
   }
 
-  &--start { left: 0; }
-  &--end   { right: 0; }
+  &--start {
+    left: 0;
+  }
+  &--end {
+    right: 0;
+  }
 }
 
 // ---- Error / Hint ----

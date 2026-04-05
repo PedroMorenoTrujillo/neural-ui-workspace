@@ -4,12 +4,12 @@
 // ViewEncapsulation.None — prefijo BEM .neu-code-block
 // ============================================================
 
-$cb-bg:      #1a1b26;
-$cb-bg-bar:  #16161e;
-$cb-border:  rgba(255, 255, 255, 0.06);
-$cb-text:    #cdd6f4;
-$cb-accent:  #7aa2f7;
-$cb-muted:   #565f89;
+$cb-bg: #1a1b26;
+$cb-bg-bar: #16161e;
+$cb-border: rgba(255, 255, 255, 0.06);
+$cb-text: #cdd6f4;
+$cb-accent: #7aa2f7;
+$cb-muted: #565f89;
 
 .neu-code-block {
   border-radius: var(--neu-radius-lg);
@@ -40,9 +40,15 @@ $cb-muted:   #565f89;
     height: 12px;
     border-radius: 50%;
 
-    &:nth-child(1) { background: #ff5f57; }
-    &:nth-child(2) { background: #febc2e; }
-    &:nth-child(3) { background: #28c840; }
+    &:nth-child(1) {
+      background: #ff5f57;
+    }
+    &:nth-child(2) {
+      background: #febc2e;
+    }
+    &:nth-child(3) {
+      background: #28c840;
+    }
   }
 }
 
@@ -74,7 +80,11 @@ $cb-muted:   #565f89;
   transition: all var(--neu-transition);
   flex-shrink: 0;
 
-  svg { width: 12px; height: 12px; flex-shrink: 0; }
+  svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -92,9 +102,16 @@ $cb-muted:   #565f89;
   scrollbar-width: thin;
   scrollbar-color: $cb-muted transparent;
 
-  &::-webkit-scrollbar        { height: 4px; }
-  &::-webkit-scrollbar-track  { background: transparent; }
-  &::-webkit-scrollbar-thumb  { background: $cb-muted; border-radius: 99px; }
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $cb-muted;
+    border-radius: 99px;
+  }
 }
 
 .neu-code-block__code {

@@ -65,9 +65,13 @@
   font-size: var(--neu-text-sm);
   color: var(--neu-text);
   outline: none;
-  transition: border-color var(--neu-transition), box-shadow var(--neu-transition);
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
 
-  &::placeholder { color: var(--neu-text-muted); }
+  &::placeholder {
+    color: var(--neu-text-muted);
+  }
 
   &:focus {
     border-color: var(--neu-primary);
@@ -76,7 +80,9 @@
   }
 
   // Ocultar el botón nativo de clear en WebKit
-  &::-webkit-search-cancel-button { display: none; }
+  &::-webkit-search-cancel-button {
+    display: none;
+  }
 }
 
 .neu-table__search-clear {
@@ -93,11 +99,19 @@
   color: var(--neu-text-muted);
   cursor: pointer;
   border-radius: var(--neu-radius-sm);
-  transition: color var(--neu-transition), background-color var(--neu-transition);
+  transition:
+    color var(--neu-transition),
+    background-color var(--neu-transition);
 
-  svg { width: 13px; height: 13px; }
+  svg {
+    width: 13px;
+    height: 13px;
+  }
 
-  &:hover { color: var(--neu-error); background: var(--neu-error-bg); }
+  &:hover {
+    color: var(--neu-error);
+    background: var(--neu-error-bg);
+  }
 }
 
 // ---- Scroll container — clave para mobile ----
@@ -108,9 +122,16 @@
   scrollbar-width: thin;
   scrollbar-color: var(--neu-surface-3) transparent;
 
-  &::-webkit-scrollbar       { height: 4px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: var(--neu-surface-3); border-radius: 99px; }
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--neu-surface-3);
+    border-radius: 99px;
+  }
 
   // Indicador de scroll en mobile
   @include neu-xs-only {
@@ -120,10 +141,18 @@
       linear-gradient(to right, var(--neu-surface), var(--neu-surface)),
       linear-gradient(to right, rgba(15, 23, 42, 0.08), transparent),
       linear-gradient(to left, rgba(15, 23, 42, 0.08), transparent);
-    background-position: left center, right center, left center, right center;
+    background-position:
+      left center,
+      right center,
+      left center,
+      right center;
     background-repeat: no-repeat;
     background-color: var(--neu-surface);
-    background-size: 20px 100%, 20px 100%, 10px 100%, 10px 100%;
+    background-size:
+      20px 100%,
+      20px 100%,
+      10px 100%,
+      10px 100%;
     background-attachment: local, local, scroll, scroll;
   }
 }
@@ -133,7 +162,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: var(--neu-text-sm);
-  min-width: 400px;   // fuerza scroll en pantallas menores a 400px
+  min-width: 400px; // fuerza scroll en pantallas menores a 400px
 }
 
 // ---- Encabezado ----
@@ -162,7 +191,9 @@
     cursor: pointer;
     transition: color var(--neu-transition);
 
-    &:hover { color: var(--neu-text); }
+    &:hover {
+      color: var(--neu-text);
+    }
   }
 
   &--sorted-asc,
@@ -178,7 +209,9 @@
   opacity: 0.5;
 
   .neu-table__th--sorted-asc &,
-  .neu-table__th--sorted-desc & { opacity: 1; }
+  .neu-table__th--sorted-desc & {
+    opacity: 1;
+  }
 }
 
 // ---- Selección ----
@@ -219,7 +252,9 @@
 .neu-table__row {
   transition: background-color var(--neu-transition);
 
-  &:hover { background: var(--neu-surface-2); }
+  &:hover {
+    background: var(--neu-surface-2);
+  }
 
   &:not(:last-child) .neu-table__td {
     border-bottom: 1px solid var(--neu-border);
@@ -228,10 +263,14 @@
   &--selected {
     background: var(--neu-primary-50) !important;
 
-    .neu-table__td { color: var(--neu-primary); }
+    .neu-table__td {
+      color: var(--neu-primary);
+    }
   }
 
-  &--clickable { cursor: pointer; }
+  &--clickable {
+    cursor: pointer;
+  }
 }
 
 .neu-table__td {
@@ -240,8 +279,12 @@
   line-height: 1.5;
   vertical-align: middle;
 
-  &--center { text-align: center; }
-  &--empty  { padding: var(--neu-space-8) 0; }
+  &--center {
+    text-align: center;
+  }
+  &--empty {
+    padding: var(--neu-space-8) 0;
+  }
 }
 
 // ---- Loading skeleton ----
@@ -272,14 +315,24 @@
   background-size: 200% 100%;
   animation: neu-skeleton 1.4s ease infinite;
 
-  &:first-child { max-width: 60px; }
-  &:nth-child(2) { max-width: 160px; }
-  &:last-child { max-width: 80px; }
+  &:first-child {
+    max-width: 60px;
+  }
+  &:nth-child(2) {
+    max-width: 160px;
+  }
+  &:last-child {
+    max-width: 80px;
+  }
 }
 
 @keyframes neu-skeleton {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 // ---- Empty state ----
@@ -314,7 +367,9 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 
-  &:hover { color: var(--neu-primary-dark); }
+  &:hover {
+    color: var(--neu-primary-dark);
+  }
 }
 
 // ---- Footer: info + paginación ----
@@ -357,7 +412,10 @@
   cursor: pointer;
   transition: all var(--neu-transition);
 
-  svg { width: 14px; height: 14px; }
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 
   &:hover:not(:disabled) {
     background: var(--neu-surface-3);
@@ -375,6 +433,9 @@
     color: #fff;
     border-color: var(--neu-primary);
 
-    &:hover { background: var(--neu-primary-dark); border-color: var(--neu-primary-dark); }
+    &:hover {
+      background: var(--neu-primary-dark);
+      border-color: var(--neu-primary-dark);
+    }
   }
 }

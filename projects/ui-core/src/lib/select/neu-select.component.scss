@@ -24,7 +24,7 @@ $select-height: 48px;
   width: 100%;
   height: $select-height;
   padding: 0 var(--neu-space-3);
-  padding-right: 36px;        // espacio para el chevron
+  padding-right: 36px; // espacio para el chevron
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius);
@@ -99,7 +99,7 @@ $select-height: 48px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-top: 14px;    // Espacio para el label flotado
+  padding-top: 14px; // Espacio para el label flotado
 
   .neu-select:not(.neu-select--has-value):not(.neu-select--open) & {
     padding-top: 0;
@@ -148,13 +148,24 @@ $select-height: 48px;
 
   animation: neu-select-open 150ms ease forwards;
 
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: var(--neu-surface-3); border-radius: 99px; }
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--neu-surface-3);
+    border-radius: 99px;
+  }
 }
 
 @keyframes neu-select-open {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // ---- Opciones ----

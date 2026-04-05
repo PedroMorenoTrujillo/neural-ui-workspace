@@ -28,7 +28,6 @@ export type { NeuSelectOption } from './neu-select.types';
  */
 @Component({
   selector: 'neu-select',
-  standalone: true,
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -104,8 +103,16 @@ export type { NeuSelectOption } from './neu-select.types';
             >
               <!-- Checkmark en la seleccionada -->
               @if (option.value === _value()) {
-                <svg class="neu-select__check" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg
+                  class="neu-select__check"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               }

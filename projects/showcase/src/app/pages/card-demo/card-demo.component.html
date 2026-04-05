@@ -3,48 +3,50 @@
     <neu-badge variant="info" size="sm">Componente</neu-badge>
     <h1 class="demo-hero__title">Card</h1>
     <p class="demo-hero__desc">
-      Contenedor de superficie con proyección de contenido estructurado:
-      header, body y footer. 4 modos de padding, variantes hoverable, flat y bordered.
+      Contenedor de superficie con proyección de contenido estructurado: header, body y footer. 4
+      modos de padding, variantes hoverable, flat y bordered.
     </p>
   </div>
 
   <section class="demo-section">
     <neu-tabs [tabs]="demoTabs" tabParam="tab">
-
       <!-- PREVIEW -->
       <neu-tab-panel tabId="preview">
         <div class="demo-preview demo-preview--tabs">
-          <div class="demo-preview__canvas demo-preview__canvas--grid" style="--demo-cols:3; gap:16px">
+          <div
+            class="demo-preview__canvas demo-preview__canvas--grid"
+            style="--demo-cols: 3; gap: 16px"
+          >
             <neu-card>
               <div neu-card-header><strong>Básica</strong></div>
-              <p style="margin:0">Tarjeta con header y cuerpo.</p>
+              <p style="margin: 0">Tarjeta con header y cuerpo.</p>
             </neu-card>
 
             <neu-card [hoverable]="true">
               <div neu-card-header><strong>Hoverable</strong></div>
-              <p style="margin:0">Eleva sombra en hover.</p>
+              <p style="margin: 0">Eleva sombra en hover.</p>
             </neu-card>
 
             <neu-card [bordered]="true">
               <div neu-card-header><strong>Bordered</strong></div>
-              <p style="margin:0">Borde de acento primario.</p>
+              <p style="margin: 0">Borde de acento primario.</p>
             </neu-card>
 
             <neu-card [flat]="true">
               <div neu-card-header><strong>Flat</strong></div>
-              <p style="margin:0">Sin sombra ni borde.</p>
+              <p style="margin: 0">Sin sombra ni borde.</p>
             </neu-card>
 
             <neu-card padding="sm">
               <div neu-card-header><strong>Padding sm</strong></div>
-              <p style="margin:0">Relleno compacto.</p>
+              <p style="margin: 0">Relleno compacto.</p>
             </neu-card>
 
             <neu-card>
               <div neu-card-header><strong>Con footer</strong></div>
-              <p style="margin:0">Footer con acciones.</p>
-              <div neu-card-footer style="justify-content:flex-end">
-                <span style="font-size:0.8rem;color:var(--neu-text-muted)">Ver más →</span>
+              <p style="margin: 0">Footer con acciones.</p>
+              <div neu-card-footer style="justify-content: flex-end">
+                <span style="font-size: 0.8rem; color: var(--neu-text-muted)">Ver más →</span>
               </div>
             </neu-card>
           </div>
@@ -56,15 +58,19 @@
         <div class="demo-preview demo-preview--tabs">
           <div class="demo-configurator">
             <div class="demo-configurator__preview">
-              <neu-card [hoverable]="cfg.hoverable" [flat]="cfg.flat"
-                        [bordered]="cfg.bordered" [padding]="cfg.padding"
-                        style="width:260px">
+              <neu-card
+                [hoverable]="cfg.hoverable"
+                [flat]="cfg.flat"
+                [bordered]="cfg.bordered"
+                [padding]="cfg.padding"
+                style="width: 260px"
+              >
                 <div neu-card-header><strong>Tarjeta demo</strong></div>
-                <p style="margin:0;line-height:1.5">
+                <p style="margin: 0; line-height: 1.5">
                   Contenido de ejemplo para visualizar las variantes del componente.
                 </p>
                 <div neu-card-footer>
-                  <span style="font-size:0.8rem;color:var(--neu-text-muted)">Footer</span>
+                  <span style="font-size: 0.8rem; color: var(--neu-text-muted)">Footer</span>
                 </div>
               </neu-card>
             </div>
@@ -74,8 +80,12 @@
               <div class="demo-configurator__control-row">
                 <label for="c-hov">hoverable</label>
                 <label class="demo-toggle">
-                  <input id="c-hov" type="checkbox" [checked]="cfg.hoverable"
-                         (change)="cfg.hoverable = $any($event.target).checked" />
+                  <input
+                    id="c-hov"
+                    type="checkbox"
+                    [checked]="cfg.hoverable"
+                    (change)="cfg.hoverable = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -83,8 +93,12 @@
               <div class="demo-configurator__control-row">
                 <label for="c-flat">flat</label>
                 <label class="demo-toggle">
-                  <input id="c-flat" type="checkbox" [checked]="cfg.flat"
-                         (change)="cfg.flat = $any($event.target).checked" />
+                  <input
+                    id="c-flat"
+                    type="checkbox"
+                    [checked]="cfg.flat"
+                    (change)="cfg.flat = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -92,16 +106,23 @@
               <div class="demo-configurator__control-row">
                 <label for="c-bord">bordered</label>
                 <label class="demo-toggle">
-                  <input id="c-bord" type="checkbox" [checked]="cfg.bordered"
-                         (change)="cfg.bordered = $any($event.target).checked" />
+                  <input
+                    id="c-bord"
+                    type="checkbox"
+                    [checked]="cfg.bordered"
+                    (change)="cfg.bordered = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
 
               <div class="demo-configurator__control-row">
                 <label>padding</label>
-                <select class="demo-select" [value]="cfg.padding"
-                        (change)="cfg.padding = $any($event.target).value">
+                <select
+                  class="demo-select"
+                  [value]="cfg.padding"
+                  (change)="cfg.padding = $any($event.target).value"
+                >
                   <option>none</option>
                   <option>sm</option>
                   <option value="md">md (default)</option>
@@ -118,12 +139,39 @@
         <div style="padding: 24px 0">
           <div class="demo-api-table-wrapper">
             <table class="demo-api-table">
-              <thead><tr><th>Input</th><th>Tipo</th><th>Default</th><th>Descripción</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>hoverable</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Eleva la sombra en hover</td></tr>
-                <tr><td><code>flat</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Sin sombra ni borde</td></tr>
-                <tr><td><code>bordered</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Borde de acento primario</td></tr>
-                <tr><td><code>padding</code></td><td><code>'none'|'sm'|'md'|'lg'</code></td><td><code>'md'</code></td><td>Tamaño del padding interno</td></tr>
+                <tr>
+                  <td><code>hoverable</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Eleva la sombra en hover</td>
+                </tr>
+                <tr>
+                  <td><code>flat</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Sin sombra ni borde</td>
+                </tr>
+                <tr>
+                  <td><code>bordered</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Borde de acento primario</td>
+                </tr>
+                <tr>
+                  <td><code>padding</code></td>
+                  <td><code>'none'|'sm'|'md'|'lg'</code></td>
+                  <td><code>'md'</code></td>
+                  <td>Tamaño del padding interno</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -131,16 +179,26 @@
           <h3 class="demo-section__subtitle">Slots de contenido (atributos de directiva)</h3>
           <div class="demo-api-table-wrapper">
             <table class="demo-api-table">
-              <thead><tr><th>Atributo</th><th>Descripción</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Atributo</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>neu-card-header</code></td><td>Zona superior con borde separador</td></tr>
-                <tr><td><code>neu-card-footer</code></td><td>Zona inferior con borde separador</td></tr>
+                <tr>
+                  <td><code>neu-card-header</code></td>
+                  <td>Zona superior con borde separador</td>
+                </tr>
+                <tr>
+                  <td><code>neu-card-footer</code></td>
+                  <td>Zona inferior con borde separador</td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
       </neu-tab-panel>
-
     </neu-tabs>
   </section>
 </div>

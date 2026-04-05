@@ -9,7 +9,6 @@ import {
 
 @Component({
   selector: 'app-badge-demo',
-  standalone: true,
   imports: [NeuBadgeComponent, NeuCodeBlockComponent, NeuTabsComponent, NeuTabPanelComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

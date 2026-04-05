@@ -10,11 +10,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { distinctUntilChanged, fromEvent, map, startWith } from 'rxjs';
-import {
-  NeuBadgeComponent,
-  NeuSidebarComponent,
-  NeuUrlStateService,
-} from '@neural-ui/core';
+import { NeuBadgeComponent, NeuSidebarComponent, NeuUrlStateService } from '@neural-ui/core';
 
 interface NavGroup {
   label: string;
@@ -29,13 +25,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-root',
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    NeuSidebarComponent,
-    NeuBadgeComponent,
-  ],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NeuSidebarComponent, NeuBadgeComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -67,13 +57,13 @@ export class App {
     {
       label: 'Componentes',
       items: [
-        { label: 'Badge',   route: '/components/badge' },
-        { label: 'Button',  route: '/components/button' },
-        { label: 'Card',    route: '/components/card' },
-        { label: 'Input',   route: '/components/input' },
-        { label: 'Select',  route: '/components/select' },
+        { label: 'Badge', route: '/components/badge' },
+        { label: 'Button', route: '/components/button' },
+        { label: 'Card', route: '/components/card' },
+        { label: 'Input', route: '/components/input' },
+        { label: 'Select', route: '/components/select' },
         { label: 'Sidebar', route: '/components/sidebar' },
-        { label: 'Table',   route: '/components/table', badge: 'Star' },
+        { label: 'Table', route: '/components/table', badge: 'Star' },
       ],
     },
   ];

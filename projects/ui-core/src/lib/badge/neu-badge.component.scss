@@ -26,8 +26,12 @@
   }
 
   &--pill {
-    &.neu-badge--sm { border-radius: var(--neu-radius-full); }
-    &.neu-badge--md { border-radius: var(--neu-radius-full); }
+    &.neu-badge--sm {
+      border-radius: var(--neu-radius-full);
+    }
+    &.neu-badge--md {
+      border-radius: var(--neu-radius-full);
+    }
   }
 
   // ---- Variantes ----
@@ -36,7 +40,9 @@
     color: var(--neu-text-muted);
     border: 1px solid var(--neu-border);
 
-    .neu-badge__dot { background: var(--neu-text-disabled); }
+    .neu-badge__dot {
+      background: var(--neu-text-disabled);
+    }
   }
 
   &--success {
@@ -44,7 +50,9 @@
     color: var(--neu-success-text);
     border: 1px solid transparent;
 
-    .neu-badge__dot { background: var(--neu-success); }
+    .neu-badge__dot {
+      background: var(--neu-success);
+    }
   }
 
   &--info {
@@ -52,7 +60,9 @@
     color: var(--neu-info-text);
     border: 1px solid transparent;
 
-    .neu-badge__dot { background: var(--neu-info); }
+    .neu-badge__dot {
+      background: var(--neu-info);
+    }
   }
 
   &--warning {
@@ -60,7 +70,9 @@
     color: var(--neu-warning-text);
     border: 1px solid transparent;
 
-    .neu-badge__dot { background: var(--neu-warning); }
+    .neu-badge__dot {
+      background: var(--neu-warning);
+    }
   }
 
   &--danger {
@@ -68,7 +80,9 @@
     color: var(--neu-error-text);
     border: 1px solid transparent;
 
-    .neu-badge__dot { background: var(--neu-error); }
+    .neu-badge__dot {
+      background: var(--neu-error);
+    }
   }
 
   // ---- Outline variant ----

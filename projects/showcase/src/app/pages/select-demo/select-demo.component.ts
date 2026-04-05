@@ -12,7 +12,6 @@ import {
 
 @Component({
   selector: 'app-select-demo',
-  standalone: true,
   imports: [
     NeuSelectComponent,
     NeuBadgeComponent,

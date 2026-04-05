@@ -15,7 +15,9 @@
   border-bottom: 1.5px solid var(--neu-border);
   overflow-x: auto;
   scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 // ---- Botón de pestaña ----
@@ -100,6 +102,12 @@
 }
 
 @keyframes neu-tab-fade {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -3,21 +3,34 @@
     <neu-badge variant="info" size="sm">Componente</neu-badge>
     <h1 class="demo-hero__title">Button</h1>
     <p class="demo-hero__desc">
-      Botón semántico con 4 variantes, 3 tamaños, estado de carga animado
-      y soporte completo de accesibilidad (aria-disabled, role="button").
+      Botón semántico con 4 variantes, 3 tamaños, estado de carga animado y soporte completo de
+      accesibilidad (aria-disabled, role="button").
     </p>
   </div>
 
   <section class="demo-section">
     <neu-tabs [tabs]="demoTabs" tabParam="tab">
-
       <!-- PREVIEW -->
       <neu-tab-panel tabId="preview">
         <div class="demo-preview demo-preview--tabs">
           <div class="demo-preview__canvas">
             <div>
-              <p style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--neu-text-muted);margin-bottom:12px">Variantes</p>
-              <div class="demo-preview__canvas--flex" style="padding:0;gap:10px;flex-wrap:wrap">
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Variantes
+              </p>
+              <div
+                class="demo-preview__canvas--flex"
+                style="padding: 0; gap: 10px; flex-wrap: wrap"
+              >
                 <button neu-button variant="outline">Outline</button>
                 <button neu-button variant="primary">Primary</button>
                 <button neu-button variant="secondary">Secondary</button>
@@ -26,20 +39,49 @@
               </div>
             </div>
             <div>
-              <p style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--neu-text-muted);margin-bottom:12px">Tamaños</p>
-              <div class="demo-preview__canvas--flex" style="padding:0;gap:10px;align-items:center">
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Tamaños
+              </p>
+              <div
+                class="demo-preview__canvas--flex"
+                style="padding: 0; gap: 10px; align-items: center"
+              >
                 <button neu-button size="sm">Small</button>
                 <button neu-button>Medium</button>
                 <button neu-button size="lg">Large</button>
               </div>
             </div>
             <div>
-              <p style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--neu-text-muted);margin-bottom:12px">Estados</p>
-              <div class="demo-preview__canvas--flex" style="padding:0;gap:10px">
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Estados
+              </p>
+              <div class="demo-preview__canvas--flex" style="padding: 0; gap: 10px">
                 <button neu-button [disabled]="true">Disabled</button>
-                <button neu-button variant="primary" [loading]="isLoading()"
-                        (click)="simulateLoad()">
-                  {{isLoading() ? 'Guardando...' : 'Guardar' }}
+                <button
+                  neu-button
+                  variant="primary"
+                  [loading]="isLoading()"
+                  (click)="simulateLoad()"
+                >
+                  {{ isLoading() ? 'Guardando...' : 'Guardar' }}
                 </button>
               </div>
             </div>
@@ -52,8 +94,12 @@
         <div class="demo-preview demo-preview--tabs">
           <div class="demo-configurator">
             <div class="demo-configurator__preview">
-              <button neu-button [variant]="cfg.variant" [size]="cfg.size"
-                      [disabled]="cfg.disabled">
+              <button
+                neu-button
+                [variant]="cfg.variant"
+                [size]="cfg.size"
+                [disabled]="cfg.disabled"
+              >
                 {{ cfg.label }}
               </button>
             </div>
@@ -62,14 +108,22 @@
 
               <div class="demo-configurator__control-row">
                 <label>Label</label>
-                <input class="demo-select" type="text" [value]="cfg.label"
-                       (input)="cfg.label = $any($event.target).value" style="width:100px" />
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.label"
+                  (input)="cfg.label = $any($event.target).value"
+                  style="width: 100px"
+                />
               </div>
 
               <div class="demo-configurator__control-row">
                 <label>variant</label>
-                <select class="demo-select" [value]="cfg.variant"
-                        (change)="cfg.variant = $any($event.target).value">
+                <select
+                  class="demo-select"
+                  [value]="cfg.variant"
+                  (change)="cfg.variant = $any($event.target).value"
+                >
                   <option>outline</option>
                   <option>primary</option>
                   <option>secondary</option>
@@ -80,8 +134,11 @@
 
               <div class="demo-configurator__control-row">
                 <label>size</label>
-                <select class="demo-select" [value]="cfg.size"
-                        (change)="cfg.size = $any($event.target).value">
+                <select
+                  class="demo-select"
+                  [value]="cfg.size"
+                  (change)="cfg.size = $any($event.target).value"
+                >
                   <option>sm</option>
                   <option value="md">md (default)</option>
                   <option>lg</option>
@@ -91,8 +148,12 @@
               <div class="demo-configurator__control-row">
                 <label for="btn-dis">disabled</label>
                 <label class="demo-toggle">
-                  <input id="btn-dis" type="checkbox" [checked]="cfg.disabled"
-                         (change)="cfg.disabled = $any($event.target).checked" />
+                  <input
+                    id="btn-dis"
+                    type="checkbox"
+                    [checked]="cfg.disabled"
+                    (change)="cfg.disabled = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -106,14 +167,51 @@
         <div style="padding: 24px 0">
           <div class="demo-api-table-wrapper">
             <table class="demo-api-table">
-              <thead><tr><th>Input</th><th>Tipo</th><th>Default</th><th>Descripción</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>variant</code></td><td><code>'default'|'primary'|'secondary'|'ghost'|'danger'</code></td><td><code>'default'</code></td><td>Variante visual</td></tr>
-                <tr><td><code>size</code></td><td><code>'sm'|'md'|'lg'</code></td><td><code>'md'</code></td><td>Tamaño del botón</td></tr>
-                <tr><td><code>disabled</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Deshabilita el botón</td></tr>
-                <tr><td><code>loading</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Muestra spinner de carga</td></tr>
-                <tr><td><code>type</code></td><td><code>'button'|'submit'|'reset'</code></td><td><code>'button'</code></td><td>Tipo del botón HTML</td></tr>
-                <tr><td><code>fullWidth</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Ocupa el 100% del ancho</td></tr>
+                <tr>
+                  <td><code>variant</code></td>
+                  <td><code>'default'|'primary'|'secondary'|'ghost'|'danger'</code></td>
+                  <td><code>'default'</code></td>
+                  <td>Variante visual</td>
+                </tr>
+                <tr>
+                  <td><code>size</code></td>
+                  <td><code>'sm'|'md'|'lg'</code></td>
+                  <td><code>'md'</code></td>
+                  <td>Tamaño del botón</td>
+                </tr>
+                <tr>
+                  <td><code>disabled</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Deshabilita el botón</td>
+                </tr>
+                <tr>
+                  <td><code>loading</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Muestra spinner de carga</td>
+                </tr>
+                <tr>
+                  <td><code>type</code></td>
+                  <td><code>'button'|'submit'|'reset'</code></td>
+                  <td><code>'button'</code></td>
+                  <td>Tipo del botón HTML</td>
+                </tr>
+                <tr>
+                  <td><code>fullWidth</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Ocupa el 100% del ancho</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -121,7 +219,6 @@
           <neu-code-block [code]="usageCode" lang="TypeScript" />
         </div>
       </neu-tab-panel>
-
     </neu-tabs>
   </section>
 </div>

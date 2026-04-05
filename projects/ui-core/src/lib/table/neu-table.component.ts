@@ -40,13 +40,11 @@ function asRows(data: object[]): Row[] {
  */
 @Component({
   selector: 'neu-table',
-  standalone: true,
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="neu-table-container">
-
       <!-- ---- Toolbar ---- -->
       @if (searchable() || title()) {
         <div class="neu-table__toolbar">
@@ -55,9 +53,16 @@ function asRows(data: object[]): Row[] {
           }
           @if (searchable()) {
             <div class="neu-table__search-wrapper">
-              <svg class="neu-table__search-icon" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                   stroke-linejoin="round" aria-hidden="true">
+              <svg
+                class="neu-table__search-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -70,10 +75,20 @@ function asRows(data: object[]): Row[] {
                 aria-label="Buscar en la tabla"
               />
               @if (searchQuery()) {
-                <button class="neu-table__search-clear" type="button"
-                        aria-label="Limpiar búsqueda" (click)="clearSearch()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <button
+                  class="neu-table__search-clear"
+                  type="button"
+                  aria-label="Limpiar búsqueda"
+                  (click)="clearSearch()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
@@ -87,7 +102,11 @@ function asRows(data: object[]): Row[] {
       <!-- Barra de selección (aparece al seleccionar) -->
       @if (selectable() && selectedCount() > 0) {
         <div class="neu-table__selection-bar">
-          <span>{{ selectedCount() }} fila{{ selectedCount() !== 1 ? 's' : '' }} seleccionada{{ selectedCount() !== 1 ? 's' : '' }}</span>
+          <span
+            >{{ selectedCount() }} fila{{ selectedCount() !== 1 ? 's' : '' }} seleccionada{{
+              selectedCount() !== 1 ? 's' : ''
+            }}</span
+          >
           <button class="neu-table__selection-clear" type="button" (click)="clearSelection()">
             Deseleccionar todo
           </button>
@@ -95,7 +114,11 @@ function asRows(data: object[]): Row[] {
       }
 
       <!-- ---- Scroll container ---- -->
-      <div class="neu-table__scroll-container" role="region" [attr.aria-label]="title() || 'Tabla de datos'">
+      <div
+        class="neu-table__scroll-container"
+        role="region"
+        [attr.aria-label]="title() || 'Tabla de datos'"
+      >
         <table class="neu-table" [attr.aria-rowcount]="filteredData().length">
           <thead class="neu-table__head">
             <tr>
@@ -128,8 +151,14 @@ function asRows(data: object[]): Row[] {
                   @if (sortable() && col.sortable !== false) {
                     <span class="neu-table__sort-icon" aria-hidden="true">
                       @if (sortKey() === col.key) {
-                        @if (sortDir() === 'asc') { ↑ } @else { ↓ }
-                      } @else { ↕ }
+                        @if (sortDir() === 'asc') {
+                          ↑
+                        } @else {
+                          ↓
+                        }
+                      } @else {
+                        ↕
+                      }
                     </span>
                   }
                 </th>
@@ -140,8 +169,10 @@ function asRows(data: object[]): Row[] {
           <tbody class="neu-table__body">
             @if (loading()) {
               <tr class="neu-table__row--loading">
-                <td [attr.colspan]="columns().length + (selectable() ? 1 : 0)"
-                    class="neu-table__td neu-table__td--center">
+                <td
+                  [attr.colspan]="columns().length + (selectable() ? 1 : 0)"
+                  class="neu-table__td neu-table__td--center"
+                >
                   <div class="neu-table__skeleton-rows">
                     @for (_ of skeletonRows(); track $index) {
                       <div class="neu-table__skeleton-row">
@@ -155,11 +186,19 @@ function asRows(data: object[]): Row[] {
               </tr>
             } @else if (paginatedData().length === 0) {
               <tr>
-                <td [attr.colspan]="columns().length + (selectable() ? 1 : 0)"
-                    class="neu-table__td neu-table__td--empty">
+                <td
+                  [attr.colspan]="columns().length + (selectable() ? 1 : 0)"
+                  class="neu-table__td neu-table__td--empty"
+                >
                   <div class="neu-table__empty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
                       <circle cx="11" cy="11" r="8" />
                       <line x1="21" y1="21" x2="16.65" y2="16.65" />
                     </svg>
@@ -181,7 +220,10 @@ function asRows(data: object[]): Row[] {
                   (click)="selectable() ? toggleRow(row) : null"
                 >
                   @if (selectable()) {
-                    <td class="neu-table__td neu-table__th--check" (click)="$event.stopPropagation()">
+                    <td
+                      class="neu-table__td neu-table__th--check"
+                      (click)="$event.stopPropagation()"
+                    >
                       <input
                         type="checkbox"
                         class="neu-table__checkbox"
@@ -215,10 +257,21 @@ function asRows(data: object[]): Row[] {
           </span>
           @if (totalPages() > 1) {
             <nav class="neu-table__pagination" aria-label="Paginación">
-              <button class="neu-table__page-btn" [disabled]="currentPage() === 1"
-                      (click)="goToPage(currentPage() - 1)" aria-label="Anterior" type="button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                class="neu-table__page-btn"
+                [disabled]="currentPage() === 1"
+                (click)="goToPage(currentPage() - 1)"
+                aria-label="Anterior"
+                type="button"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
@@ -229,12 +282,25 @@ function asRows(data: object[]): Row[] {
                   (click)="goToPage(page)"
                   [attr.aria-current]="page === currentPage() ? 'page' : null"
                   type="button"
-                >{{ page }}</button>
+                >
+                  {{ page }}
+                </button>
               }
-              <button class="neu-table__page-btn" [disabled]="currentPage() === totalPages()"
-                      (click)="goToPage(currentPage() + 1)" aria-label="Siguiente" type="button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                class="neu-table__page-btn"
+                [disabled]="currentPage() === totalPages()"
+                (click)="goToPage(currentPage() + 1)"
+                aria-label="Siguiente"
+                type="button"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>
@@ -242,7 +308,6 @@ function asRows(data: object[]): Row[] {
           }
         </div>
       }
-
     </div>
   `,
   styleUrl: './neu-table.component.scss',
@@ -251,26 +316,26 @@ export class NeuTableComponent {
   private readonly urlState = inject(NeuUrlStateService);
 
   // ---- Inputs de datos ----
-  columns    = input<NeuTableColumn[]>([]);
-  data       = input<object[]>([]);
-  pageSize   = input<number>(10);
-  loading    = input<boolean>(false);
-  title      = input<string>('');
+  columns = input<NeuTableColumn[]>([]);
+  data = input<object[]>([]);
+  pageSize = input<number>(10);
+  loading = input<boolean>(false);
+  title = input<string>('');
   emptyMessage = input<string>('No se encontraron resultados');
   skeletonRows = input<number[]>([1, 2, 3, 4, 5]);
 
   // ---- Inputs de funcionalidad ----
-  searchable        = input<boolean>(true);
+  searchable = input<boolean>(true);
   searchPlaceholder = input<string>('Buscar...');
-  sortable          = input<boolean>(false);
-  selectable        = input<boolean>(false);
+  sortable = input<boolean>(false);
+  selectable = input<boolean>(false);
   /** Clave del campo que identifica de forma única cada fila */
-  rowKey            = input<string>('id');
+  rowKey = input<string>('id');
 
   // ---- URL params (personalizables para múltiples tablas) ----
-  pageParam    = input<string>('page');
-  searchParam  = input<string>('q');
-  sortParam    = input<string>('sort');
+  pageParam = input<string>('page');
+  searchParam = input<string>('q');
+  sortParam = input<string>('sort');
   sortDirParam = input<string>('sortDir');
 
   // ---- Outputs ----
@@ -284,8 +349,8 @@ export class NeuTableComponent {
   });
 
   readonly searchQuery = computed(() => this.urlState.getParam(this.searchParam())() ?? '');
-  readonly sortKey     = computed(() => this.urlState.getParam(this.sortParam())() ?? '');
-  readonly sortDir     = computed<'asc' | 'desc'>(() => {
+  readonly sortKey = computed(() => this.urlState.getParam(this.sortParam())() ?? '');
+  readonly sortDir = computed<'asc' | 'desc'>(() => {
     const d = this.urlState.getParam(this.sortDirParam())();
     return d === 'desc' ? 'desc' : 'asc';
   });
@@ -350,11 +415,14 @@ export class NeuTableComponent {
 
   readonly selectedCount = computed(() => this._selectedKeys().size);
   readonly isAllSelected = computed(
-    () => this.paginatedData().length > 0 &&
+    () =>
+      this.paginatedData().length > 0 &&
       this.paginatedData().every((r) => this._selectedKeys().has(r[this.rowKey()])),
   );
   readonly isSomeSelected = computed(
-    () => !this.isAllSelected() && this.paginatedData().some((r) => this._selectedKeys().has(r[this.rowKey()])),
+    () =>
+      !this.isAllSelected() &&
+      this.paginatedData().some((r) => this._selectedKeys().has(r[this.rowKey()])),
   );
 
   isRowSelected(row: Row): boolean {
@@ -364,7 +432,8 @@ export class NeuTableComponent {
   toggleRow(row: Row): void {
     const key = row[this.rowKey()];
     const set = new Set(this._selectedKeys());
-    if (set.has(key)) set.delete(key); else set.add(key);
+    if (set.has(key)) set.delete(key);
+    else set.add(key);
     this._selectedKeys.set(set);
     this._emitSelection(set);
   }
@@ -392,7 +461,10 @@ export class NeuTableComponent {
 
   // ---- Acciones de URL ----
   goToPage(page: number): void {
-    this.urlState.setParam(this.pageParam(), String(Math.max(1, Math.min(page, this.totalPages()))));
+    this.urlState.setParam(
+      this.pageParam(),
+      String(Math.max(1, Math.min(page, this.totalPages()))),
+    );
   }
 
   sortBy(key: string): void {

@@ -11,6 +11,7 @@ export * from './lib/button/neu-button.component';
 export * from './lib/card/neu-card.component';
 export * from './lib/code-block/neu-code-block.component';
 export * from './lib/divider/neu-divider.component';
+export * from './lib/icon/neu-icon.component';
 export * from './lib/input/neu-input.component';
 export * from './lib/select/neu-select.component';
 export * from './lib/select/neu-select.types';

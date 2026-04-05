@@ -10,8 +10,13 @@ import {
 
 @Component({
   selector: 'app-button-demo',
-  standalone: true,
-  imports: [NeuButtonComponent, NeuBadgeComponent, NeuTabsComponent, NeuTabPanelComponent, NeuCodeBlockComponent],
+  imports: [
+    NeuButtonComponent,
+    NeuBadgeComponent,
+    NeuTabsComponent,
+    NeuTabPanelComponent,
+    NeuCodeBlockComponent,
+  ],
   templateUrl: './button-demo.component.html',
   styleUrl: './button-demo.component.scss',
   encapsulation: ViewEncapsulation.None,

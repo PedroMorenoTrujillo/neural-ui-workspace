@@ -49,7 +49,10 @@ $layout-bp: 400px;
   flex-shrink: 0;
   transition: all var(--neu-transition);
 
-  svg { width: 18px; height: 18px; }
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 
   &:hover {
     background: var(--neu-surface-2);
@@ -85,7 +88,7 @@ $layout-bp: 400px;
   font-size: 10px;
   font-weight: 600;
   padding: 2px 6px;
-  background: var(--neu-primary-100, #DBEAFE);
+  background: var(--neu-primary-100, #dbeafe);
   color: var(--neu-primary);
   border-radius: var(--neu-radius-full);
   letter-spacing: 0;
@@ -113,7 +116,11 @@ $layout-bp: 400px;
   text-decoration: none;
   transition: all var(--neu-transition);
 
-  svg { width: 16px; height: 16px; flex-shrink: 0; }
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
 
   &:hover {
     border-color: var(--neu-text);
@@ -176,7 +183,7 @@ $layout-bp: 400px;
 
   &--active {
     color: var(--neu-primary);
-    background: var(--neu-primary-50, #EFF6FF);
+    background: var(--neu-primary-50, #eff6ff);
     font-weight: 600;
 
     &::before {

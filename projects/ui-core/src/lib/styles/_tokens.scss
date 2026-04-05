@@ -132,4 +132,11 @@
   --neu-shadow:    0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
   --neu-shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.04);
   --neu-shadow-glow: 0 0 20px rgba(0, 122, 255, 0.2);
+
+  // ------------------------------------------------
+  // Iconos (Lucide via @ng-icons)
+  // ------------------------------------------------
+  --neu-icon-size:    1.25rem;   // 20px — tamaño por defecto
+  --neu-icon-size-sm: 1rem;      // 16px
+  --neu-icon-size-lg: 1.5rem;    // 24px
 }

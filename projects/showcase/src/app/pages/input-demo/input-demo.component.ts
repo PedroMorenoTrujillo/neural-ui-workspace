@@ -11,7 +11,6 @@ import { CodeBlockComponent } from '../../shared/code-block/code-block.component
 
 @Component({
   selector: 'app-input-demo',
-  standalone: true,
   imports: [
     NeuInputComponent,
     NeuBadgeComponent,

@@ -8,6 +8,7 @@ import {
   output,
 } from '@angular/core';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
+import { NeuIconComponent } from '../icon/neu-icon.component';
 
 /**
  * NeuralUI Sidebar Component
@@ -31,8 +32,7 @@ import { NeuUrlStateService } from '../url-state/neu-url-state.service';
  */
 @Component({
   selector: 'neu-sidebar',
-  standalone: true,
-  imports: [],
+  imports: [NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -68,21 +68,7 @@ import { NeuUrlStateService } from '../url-state/neu-url-state.service';
             [attr.aria-label]="closeLabel()"
             type="button"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <neu-icon name="lucideX" size="18px" aria-hidden="true" />
           </button>
         }
       </div>

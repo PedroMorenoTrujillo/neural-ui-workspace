@@ -20,7 +20,6 @@ interface User {
 
 @Component({
   selector: 'app-table-demo',
-  standalone: true,
   imports: [
     NeuTableComponent,
     NeuBadgeComponent,
@@ -41,19 +40,28 @@ export class TableDemoComponent {
   ];
 
   readonly columns: NeuTableColumn[] = [
-    { key: 'id',     header: 'ID',     width: '60px',  align: 'center', sortable: true },
-    { key: 'name',   header: 'Nombre', sortable: true },
-    { key: 'email',  header: 'Email',  sortable: true },
-    { key: 'role',   header: 'Rol',    sortable: true },
+    { key: 'id', header: 'ID', width: '60px', align: 'center', sortable: true },
+    { key: 'name', header: 'Nombre', sortable: true },
+    { key: 'email', header: 'Email', sortable: true },
+    { key: 'role', header: 'Rol', sortable: true },
     { key: 'status', header: 'Estado', sortable: true },
-    { key: 'joined', header: 'Alta',   sortable: true },
+    { key: 'joined', header: 'Alta', sortable: true },
   ];
 
   readonly data: User[] = Array.from({ length: 47 }, (_, i) => ({
     id: i + 1,
-    name: ['Ana García', 'Luis Martínez', 'Sofía López', 'Carlos Ruiz',
-           'Elena Torres', 'David Sánchez', 'Marta Díaz', 'Pablo Fernández',
-           'Laura Gómez', 'Javier Moreno'][i % 10],
+    name: [
+      'Ana García',
+      'Luis Martínez',
+      'Sofía López',
+      'Carlos Ruiz',
+      'Elena Torres',
+      'David Sánchez',
+      'Marta Díaz',
+      'Pablo Fernández',
+      'Laura Gómez',
+      'Javier Moreno',
+    ][i % 10],
     email: `user${i + 1}@neural.io`,
     role: ['Admin', 'Editor', 'Viewer', 'Developer', 'Manager'][i % 5],
     status: (['active', 'inactive', 'pending'] as const)[i % 3],

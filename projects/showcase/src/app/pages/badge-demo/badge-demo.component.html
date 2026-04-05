@@ -3,21 +3,30 @@
     <neu-badge variant="info" size="sm">Componente</neu-badge>
     <h1 class="demo-hero__title">Badge</h1>
     <p class="demo-hero__desc">
-      Etiquetas de estado compactas con 5 variantes semánticas, dot indicator
-      y soporte outline.
+      Etiquetas de estado compactas con 5 variantes semánticas, dot indicator y soporte outline.
     </p>
   </div>
 
   <section class="demo-section">
     <neu-tabs [tabs]="demoTabs" tabParam="tab">
-
       <!-- PREVIEW -->
       <neu-tab-panel tabId="preview">
         <div class="demo-preview demo-preview--tabs">
           <div class="demo-preview__canvas">
             <div>
-              <p style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--neu-text-muted);margin-bottom:12px">Variantes</p>
-              <div class="demo-preview__canvas--flex" style="padding:0;gap:8px">
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Variantes
+              </p>
+              <div class="demo-preview__canvas--flex" style="padding: 0; gap: 8px">
                 <neu-badge>Default</neu-badge>
                 <neu-badge variant="success">Éxito</neu-badge>
                 <neu-badge variant="info">Info</neu-badge>
@@ -26,8 +35,19 @@
               </div>
             </div>
             <div>
-              <p style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--neu-text-muted);margin-bottom:12px">Outline</p>
-              <div class="demo-preview__canvas--flex" style="padding:0;gap:8px">
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Outline
+              </p>
+              <div class="demo-preview__canvas--flex" style="padding: 0; gap: 8px">
                 <neu-badge [outline]="true">Default</neu-badge>
                 <neu-badge variant="success" [outline]="true">Éxito</neu-badge>
                 <neu-badge variant="info" [outline]="true">Info</neu-badge>
@@ -36,8 +56,19 @@
               </div>
             </div>
             <div>
-              <p style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--neu-text-muted);margin-bottom:12px">Con punto de estado</p>
-              <div class="demo-preview__canvas--flex" style="padding:0;gap:8px">
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Con punto de estado
+              </p>
+              <div class="demo-preview__canvas--flex" style="padding: 0; gap: 8px">
                 <neu-badge [dot]="true">Inactivo</neu-badge>
                 <neu-badge variant="success" [dot]="true">Online</neu-badge>
                 <neu-badge variant="warning" [dot]="true">Ausente</neu-badge>
@@ -59,21 +90,30 @@
                 [outline]="cfg.outline"
                 [dot]="cfg.dot"
                 [pill]="cfg.pill"
-              >{{ cfg.label }}</neu-badge>
+                >{{ cfg.label }}</neu-badge
+              >
             </div>
             <div class="demo-configurator__controls">
               <span class="demo-configurator__controls-title">Configurar</span>
 
               <div class="demo-configurator__control-row">
                 <label>Label</label>
-                <input class="demo-select" type="text" [value]="cfg.label"
-                       (input)="cfg.label = $any($event.target).value" style="width:100px" />
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.label"
+                  (input)="cfg.label = $any($event.target).value"
+                  style="width: 100px"
+                />
               </div>
 
               <div class="demo-configurator__control-row">
                 <label>variant</label>
-                <select class="demo-select" [value]="cfg.variant"
-                        (change)="cfg.variant = $any($event.target).value">
+                <select
+                  class="demo-select"
+                  [value]="cfg.variant"
+                  (change)="cfg.variant = $any($event.target).value"
+                >
                   <option>default</option>
                   <option>success</option>
                   <option>info</option>
@@ -84,8 +124,11 @@
 
               <div class="demo-configurator__control-row">
                 <label>size</label>
-                <select class="demo-select" [value]="cfg.size"
-                        (change)="cfg.size = $any($event.target).value">
+                <select
+                  class="demo-select"
+                  [value]="cfg.size"
+                  (change)="cfg.size = $any($event.target).value"
+                >
                   <option>sm</option>
                   <option>md</option>
                 </select>
@@ -94,8 +137,12 @@
               <div class="demo-configurator__control-row">
                 <label for="b-outline">outline</label>
                 <label class="demo-toggle">
-                  <input id="b-outline" type="checkbox" [checked]="cfg.outline"
-                         (change)="cfg.outline = $any($event.target).checked" />
+                  <input
+                    id="b-outline"
+                    type="checkbox"
+                    [checked]="cfg.outline"
+                    (change)="cfg.outline = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -103,8 +150,12 @@
               <div class="demo-configurator__control-row">
                 <label for="b-dot">dot</label>
                 <label class="demo-toggle">
-                  <input id="b-dot" type="checkbox" [checked]="cfg.dot"
-                         (change)="cfg.dot = $any($event.target).checked" />
+                  <input
+                    id="b-dot"
+                    type="checkbox"
+                    [checked]="cfg.dot"
+                    (change)="cfg.dot = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -112,8 +163,12 @@
               <div class="demo-configurator__control-row">
                 <label for="b-pill">pill</label>
                 <label class="demo-toggle">
-                  <input id="b-pill" type="checkbox" [checked]="cfg.pill"
-                         (change)="cfg.pill = $any($event.target).checked" />
+                  <input
+                    id="b-pill"
+                    type="checkbox"
+                    [checked]="cfg.pill"
+                    (change)="cfg.pill = $any($event.target).checked"
+                  />
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
@@ -127,13 +182,45 @@
         <div style="padding: 24px 0">
           <div class="demo-api-table-wrapper">
             <table class="demo-api-table">
-              <thead><tr><th>Input</th><th>Tipo</th><th>Default</th><th>Descripción</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>variant</code></td><td><code>'default'|'success'|'info'|'warning'|'danger'</code></td><td><code>'default'</code></td><td>Variante semántica</td></tr>
-                <tr><td><code>size</code></td><td><code>'sm'|'md'</code></td><td><code>'md'</code></td><td>Tamaño del badge</td></tr>
-                <tr><td><code>outline</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Estilo contorno</td></tr>
-                <tr><td><code>dot</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Punto de estado</td></tr>
-                <tr><td><code>pill</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Bordes redondeados</td></tr>
+                <tr>
+                  <td><code>variant</code></td>
+                  <td><code>'default'|'success'|'info'|'warning'|'danger'</code></td>
+                  <td><code>'default'</code></td>
+                  <td>Variante semántica</td>
+                </tr>
+                <tr>
+                  <td><code>size</code></td>
+                  <td><code>'sm'|'md'</code></td>
+                  <td><code>'md'</code></td>
+                  <td>Tamaño del badge</td>
+                </tr>
+                <tr>
+                  <td><code>outline</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Estilo contorno</td>
+                </tr>
+                <tr>
+                  <td><code>dot</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Punto de estado</td>
+                </tr>
+                <tr>
+                  <td><code>pill</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>true</code></td>
+                  <td>Bordes redondeados</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -141,7 +228,6 @@
           <neu-code-block [code]="usageCode" lang="TypeScript" />
         </div>
       </neu-tab-panel>
-
     </neu-tabs>
   </section>
 </div>

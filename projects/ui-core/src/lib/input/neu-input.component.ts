@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIconComponent } from '../icon/neu-icon.component';
 
 /** Contador global para IDs estables — seguro en SSR, predecible en hidratación */
 let _neuInputIdSeq = 0;
@@ -37,8 +38,7 @@ export type NeuInputType =
  */
 @Component({
   selector: 'neu-input',
-  standalone: true,
-  imports: [],
+  imports: [NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Los atributos del host (class, style, data-*) no deben llegar al <input> nativo
@@ -66,8 +66,15 @@ export type NeuInputType =
         <span class="neu-input__icon neu-input__icon--start" aria-hidden="true">
           <ng-content select="[neu-input-start]" />
           @if (!hasStartContent()) {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                 stroke-linecap="round" stroke-linejoin="round" [innerHTML]="startIconPath()"></svg>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              [innerHTML]="startIconPath()"
+            ></svg>
           }
         </span>
       }
@@ -112,9 +119,7 @@ export type NeuInputType =
     <!-- Mensajes de ayuda / error -->
     @if (hasError()) {
       <p class="neu-input__error" [id]="inputId() + '-error'" role="alert">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="13" height="13">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-        </svg>
+        <neu-icon name="lucideAlertCircle" size="13px" aria-hidden="true" />
         {{ errorMessage() }}
       </p>
     } @else if (hint()) {

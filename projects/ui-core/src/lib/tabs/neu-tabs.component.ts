@@ -14,9 +14,7 @@ import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 // Token de contexto — permite a NeuTabPanelComponent inyectar
 // la instancia padre sin pasar signals manualmente.
 // ----------------------------------------------------------------
-export const NEU_TABS_CONTEXT = new InjectionToken<NeuTabsComponent>(
-  'NeuTabsContext',
-);
+export const NEU_TABS_CONTEXT = new InjectionToken<NeuTabsComponent>('NeuTabsContext');
 
 export interface NeuTab {
   /** ID único de la pestaña — se usa como valor en la URL */
@@ -43,7 +41,6 @@ export interface NeuTab {
  */
 @Component({
   selector: 'neu-tabs',
-  standalone: true,
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -141,7 +138,6 @@ export class NeuTabsComponent {
  */
 @Component({
   selector: 'neu-tab-panel',
-  standalone: true,
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
