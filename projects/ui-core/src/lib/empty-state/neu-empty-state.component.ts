@@ -41,12 +41,7 @@ import { NeuButtonComponent } from '../button/neu-button.component';
       }
 
       @if (actionLabel()) {
-        <button
-          neu-button
-          variant="primary"
-          size="md"
-          (click)="action.emit()"
-        >
+        <button neu-button variant="primary" size="md" (click)="action.emit()">
           {{ actionLabel() }}
         </button>
       }

@@ -15,7 +15,10 @@ import { NeuButtonComponent } from '@neural-ui/core';
 
     <neu-modal [open]="showSm()" (closed)="showSm.set(false)" title="Confirmación" size="sm">
       <p>¿Estás seguro de que quieres continuar?</p>
-      <div neu-modal-footer style="display:flex;gap:.5rem;justify-content:flex-end;padding:1rem 1.25rem">
+      <div
+        neu-modal-footer
+        style="display:flex;gap:.5rem;justify-content:flex-end;padding:1rem 1.25rem"
+      >
         <button neu-button variant="ghost" (click)="showSm.set(false)">Cancelar</button>
         <button neu-button (click)="showSm.set(false)">Confirmar</button>
       </div>

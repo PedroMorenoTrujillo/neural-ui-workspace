@@ -98,7 +98,9 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: box-shadow var(--neu-transition), transform var(--neu-transition);
+  transition:
+    box-shadow var(--neu-transition),
+    transform var(--neu-transition);
 
   &:hover {
     box-shadow: var(--neu-shadow);

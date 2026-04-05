@@ -1,10 +1,10 @@
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-} from '@angular/core';
-import { NeuBadgeComponent, NeuButtonComponent, NeuIconComponent, NeuLangService } from '@neural-ui/core';
+  NeuBadgeComponent,
+  NeuButtonComponent,
+  NeuIconComponent,
+  NeuLangService,
+} from '@neural-ui/core';
 
 interface TemplateProduct {
   id: string;
@@ -102,15 +102,13 @@ export class TemplatesComponent {
   ];
 
   readonly title = computed(() =>
-    this.i18n.lang() === 'es'
-      ? 'Premium Templates'
-      : 'Premium Templates'
+    this.i18n.lang() === 'es' ? 'Premium Templates' : 'Premium Templates',
   );
 
   readonly subtitle = computed(() =>
     this.i18n.lang() === 'es'
       ? 'Dashboards y landing pages construidos con NeuralUI. Listos para producción.'
-      : 'Dashboards and landing pages built with NeuralUI. Production-ready.'
+      : 'Dashboards and landing pages built with NeuralUI. Production-ready.',
   );
 
   getTagVariant(tag: TemplateProduct['tag']): 'success' | 'info' | 'warning' {

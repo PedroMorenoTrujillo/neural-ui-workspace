@@ -154,7 +154,9 @@ $layout-bp: 400px;
 
 // Ocultar texto GitHub en xs
 .app-header__gh-text {
-  @media (max-width: 520px) { display: none; }
+  @media (max-width: 520px) {
+    display: none;
+  }
 }
 
 // Botón Premium Templates
@@ -171,7 +173,9 @@ $layout-bp: 400px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: background var(--neu-transition), box-shadow var(--neu-transition);
+  transition:
+    background var(--neu-transition),
+    box-shadow var(--neu-transition);
   white-space: nowrap;
   font-family: var(--neu-font-sans);
 
@@ -180,7 +184,9 @@ $layout-bp: 400px;
     box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
   }
 
-  @media (max-width: 480px) { display: none; }
+  @media (max-width: 480px) {
+    display: none;
+  }
 }
 
 // ---- Sidebar ----

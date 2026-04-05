@@ -1,5 +1,4 @@
 <section class="templates-page">
-
   <!-- Hero -->
   <div class="templates-hero">
     <div class="templates-hero__eyebrow">
@@ -12,17 +11,23 @@
     <div class="templates-hero__stats">
       <div class="templates-hero__stat">
         <span class="templates-hero__stat-value">6+</span>
-        <span class="templates-hero__stat-label">{{ i18n.lang() === 'es' ? 'Templates' : 'Templates' }}</span>
+        <span class="templates-hero__stat-label">{{
+          i18n.lang() === 'es' ? 'Templates' : 'Templates'
+        }}</span>
       </div>
       <div class="templates-hero__stat-sep"></div>
       <div class="templates-hero__stat">
         <span class="templates-hero__stat-value">MIT</span>
-        <span class="templates-hero__stat-label">{{ i18n.lang() === 'es' ? 'Licencia librería' : 'Library license' }}</span>
+        <span class="templates-hero__stat-label">{{
+          i18n.lang() === 'es' ? 'Licencia librería' : 'Library license'
+        }}</span>
       </div>
       <div class="templates-hero__stat-sep"></div>
       <div class="templates-hero__stat">
         <span class="templates-hero__stat-value">Angular 21</span>
-        <span class="templates-hero__stat-label">{{ i18n.lang() === 'es' ? 'Framework' : 'Framework' }}</span>
+        <span class="templates-hero__stat-label">{{
+          i18n.lang() === 'es' ? 'Framework' : 'Framework'
+        }}</span>
       </div>
     </div>
   </div>
@@ -82,11 +87,7 @@
               </button>
             }
 
-            <button
-              neu-button
-              [variant]="product.tag === 'free' ? 'outline' : 'primary'"
-              size="sm"
-            >
+            <button neu-button [variant]="product.tag === 'free' ? 'outline' : 'primary'" size="sm">
               @if (product.tag !== 'free') {
                 <neu-icon name="lucideShoppingCart" size="0.875rem" />
               }
@@ -104,9 +105,11 @@
       {{ i18n.lang() === 'es' ? '¿Necesitas algo personalizado?' : 'Need something custom?' }}
     </h2>
     <p class="templates-cta__desc">
-      {{ i18n.lang() === 'es'
-        ? 'La librería NeuralUI es MIT. Construye tus propios templates y véndelos.'
-        : 'NeuralUI library is MIT licensed. Build your own templates and sell them.' }}
+      {{
+        i18n.lang() === 'es'
+          ? 'La librería NeuralUI es MIT. Construye tus propios templates y véndelos.'
+          : 'NeuralUI library is MIT licensed. Build your own templates and sell them.'
+      }}
     </p>
     <a
       class="templates-cta__btn"
@@ -118,5 +121,4 @@
       {{ i18n.lang() === 'es' ? 'Ver en GitHub' : 'View on GitHub' }}
     </a>
   </div>
-
 </section>

@@ -40,7 +40,8 @@ const TRANSLATIONS: Record<NeuLang, NeuTranslationMap> = {
     'comp.chart': 'Chart',
     // Páginas
     'page.home.title': 'NeuralUI — Sistema de Diseño Angular',
-    'page.home.subtitle': 'Componentes de alta calidad con Signals y OnPush, listos para producción.',
+    'page.home.subtitle':
+      'Componentes de alta calidad con Signals y OnPush, listos para producción.',
     'page.templates.title': 'Premium Templates',
     'page.templates.subtitle': 'Dashboards y landing pages construidos con NeuralUI.',
     'templates.preview': 'Vista previa',

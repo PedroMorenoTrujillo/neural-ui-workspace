@@ -13,8 +13,12 @@
 }
 
 @keyframes neu-backdrop-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 // Panel CDK programático
@@ -30,16 +34,32 @@
   overflow: hidden;
   animation: neu-modal-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
-  &--sm   { width: min(100% - 2rem, 400px); }
-  &--md   { width: min(100% - 2rem, 560px); }
-  &--lg   { width: min(100% - 2rem, 720px); }
-  &--xl   { width: min(100% - 2rem, 900px); }
-  &--full { width: min(100% - 2rem, 1120px); }
+  &--sm {
+    width: min(100% - 2rem, 400px);
+  }
+  &--md {
+    width: min(100% - 2rem, 560px);
+  }
+  &--lg {
+    width: min(100% - 2rem, 720px);
+  }
+  &--xl {
+    width: min(100% - 2rem, 900px);
+  }
+  &--full {
+    width: min(100% - 2rem, 1120px);
+  }
 }
 
 @keyframes neu-modal-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 // ---- Uso declarativo (neu-modal como componente propio) ----
@@ -72,11 +92,21 @@
   animation: neu-modal-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
   height: fit-content;
 
-  &--sm   { width: min(100% - 2rem, 400px); }
-  &--md   { width: min(100% - 2rem, 560px); }
-  &--lg   { width: min(100% - 2rem, 720px); }
-  &--xl   { width: min(100% - 2rem, 900px); }
-  &--full { width: min(100% - 2rem, 1120px); }
+  &--sm {
+    width: min(100% - 2rem, 400px);
+  }
+  &--md {
+    width: min(100% - 2rem, 560px);
+  }
+  &--lg {
+    width: min(100% - 2rem, 720px);
+  }
+  &--xl {
+    width: min(100% - 2rem, 900px);
+  }
+  &--full {
+    width: min(100% - 2rem, 1120px);
+  }
 }
 
 .neu-modal__header {
