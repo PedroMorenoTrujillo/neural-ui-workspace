@@ -100,11 +100,26 @@ function asRows(data: object[]): Row[] {
             </div>
           }
           @if (exportable() && !loading()) {
-            <button class="neu-table__export-btn" type="button" (click)="exportCsv()" title="Exportar CSV">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="15" height="15">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
+            <button
+              class="neu-table__export-btn"
+              type="button"
+              (click)="exportCsv()"
+              title="Exportar CSV"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                width="15"
+                height="15"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
               CSV
             </button>
@@ -236,7 +251,10 @@ function asRows(data: object[]): Row[] {
                   (click)="selectable() ? toggleRow(row) : null"
                 >
                   @if (expandable()) {
-                    <td class="neu-table__td neu-table__td--expand-col" (click)="$event.stopPropagation()">
+                    <td
+                      class="neu-table__td neu-table__td--expand-col"
+                      (click)="$event.stopPropagation()"
+                    >
                       <button
                         class="neu-table__expand-btn"
                         type="button"
@@ -245,7 +263,14 @@ function asRows(data: object[]): Row[] {
                         [attr.aria-expanded]="isRowExpanded(row)"
                         aria-label="Expandir fila"
                       >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
                           <polyline points="9 18 15 12 9 6" />
                         </svg>
                       </button>
@@ -274,7 +299,11 @@ function asRows(data: object[]): Row[] {
                       @if (col.type === 'badge') {
                         @let badgeVal = getCellValue(row, col);
                         @let badgeCfg = col.badgeMap?.[badgeVal];
-                        <span class="neu-table__cell-badge neu-table__cell-badge--{{ badgeCfg?.variant ?? 'default' }}">
+                        <span
+                          class="neu-table__cell-badge neu-table__cell-badge--{{
+                            badgeCfg?.variant ?? 'default'
+                          }}"
+                        >
                           {{ badgeCfg?.label ?? badgeVal }}
                         </span>
                       } @else {
@@ -311,7 +340,9 @@ function asRows(data: object[]): Row[] {
               <label class="neu-table__page-size-label">Filas:</label>
               <select class="neu-table__page-size-select" (change)="onPageSizeChange($event)">
                 @for (size of pageSizeOptions(); track size) {
-                  <option [value]="size" [selected]="effectivePageSize() === size">{{ size }}</option>
+                  <option [value]="size" [selected]="effectivePageSize() === size">
+                    {{ size }}
+                  </option>
                 }
               </select>
             </div>

@@ -33,7 +33,9 @@ $layout-bp: 400px;
   gap: var(--neu-space-3);
   height: var(--neu-header-height);
   padding: 0 var(--neu-space-5);
-  background: var(--neu-surface);
+  background: color-mix(in srgb, var(--neu-surface) 85%, transparent);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
   border-bottom: 1px solid var(--neu-border);
   position: sticky;
   top: 0;
@@ -348,12 +350,26 @@ $layout-bp: 400px;
     font-weight: 600;
     gap: var(--neu-space-2);
   }
+
+  &--external {
+    color: var(--neu-text-muted);
+    &:hover {
+      color: var(--neu-text);
+    }
+  }
 }
 
 .app-nav__link-icon {
   flex-shrink: 0;
   color: var(--neu-text-disabled);
   transition: color var(--neu-transition);
+}
+
+.app-nav__link-external-icon {
+  flex-shrink: 0;
+  color: var(--neu-text-disabled);
+  opacity: 0.6;
+  margin-left: auto;
 }
 
 .app-nav__link-label {

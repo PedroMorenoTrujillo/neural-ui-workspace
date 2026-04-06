@@ -564,12 +564,30 @@
   letter-spacing: 0.02em;
   white-space: nowrap;
 
-  &--primary   { background: var(--neu-primary-100); color: var(--neu-primary-dark); }
-  &--success   { background: rgba(16,185,129,.12);  color: #059669; }
-  &--warning   { background: rgba(245,158,11,.12);  color: #d97706; }
-  &--danger    { background: rgba(239,68,68,.12);   color: #dc2626; }
-  &--info      { background: var(--neu-primary-50); color: var(--neu-primary); }
-  &--default   { background: var(--neu-surface-3);  color: var(--neu-text-muted); }
+  &--primary {
+    background: var(--neu-primary-100);
+    color: var(--neu-primary-dark);
+  }
+  &--success {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+  &--warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+  &--danger {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+  }
+  &--info {
+    background: var(--neu-primary-50);
+    color: var(--neu-primary);
+  }
+  &--default {
+    background: var(--neu-surface-3);
+    color: var(--neu-text-muted);
+  }
 }
 
 // ---- Sticky header ----
@@ -587,4 +605,3 @@
     box-shadow: 0 1px 0 var(--neu-border);
   }
 }
-

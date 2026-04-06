@@ -12,7 +12,9 @@
     "overlays": "Overlays",
     "ui": "UI",
     "advanced": "Advanced",
-    "templates": "Templates"
+    "templates": "Templates",
+    "resources": "Resources",
+    "icons": "Icons (Lucide)"
   },
   "header": {
     "github": "GitHub",

@@ -41,8 +41,30 @@ interface Order {
   items: { product: string; qty: number; price: number }[];
 }
 
-const NAMES = ['Ana García', 'Luis Martínez', 'Sofía López', 'Carlos Ruiz', 'Elena Torres', 'David Sánchez', 'Marta Díaz', 'Pablo Fernández', 'Laura Gómez', 'Javier Moreno'];
-const PRODUCTS_LIST = ['Laptop Pro 16"', 'Monitor 4K 27"', 'Teclado Mecánico', 'Ratón Inalámbrico', 'Auriculares BT', 'Webcam HD', 'Hub USB-C', 'SSD 1TB', 'RAM 32GB', 'Mousepad XL'];
+const NAMES = [
+  'Ana García',
+  'Luis Martínez',
+  'Sofía López',
+  'Carlos Ruiz',
+  'Elena Torres',
+  'David Sánchez',
+  'Marta Díaz',
+  'Pablo Fernández',
+  'Laura Gómez',
+  'Javier Moreno',
+];
+const PRODUCTS_LIST = [
+  'Laptop Pro 16"',
+  'Monitor 4K 27"',
+  'Teclado Mecánico',
+  'Ratón Inalámbrico',
+  'Auriculares BT',
+  'Webcam HD',
+  'Hub USB-C',
+  'SSD 1TB',
+  'RAM 32GB',
+  'Mousepad XL',
+];
 const CATEGORIES = ['Portátiles', 'Monitores', 'Periféricos', 'Almacenamiento', 'Audio'];
 
 @Component({
@@ -82,9 +104,9 @@ export class TableDemoComponent {
       sortable: true,
       type: 'badge',
       badgeMap: {
-        active:   { label: 'Activo',    variant: 'success' },
-        inactive: { label: 'Inactivo',  variant: 'default' },
-        pending:  { label: 'Pendiente', variant: 'warning' },
+        active: { label: 'Activo', variant: 'success' },
+        inactive: { label: 'Inactivo', variant: 'default' },
+        pending: { label: 'Pendiente', variant: 'warning' },
       } satisfies Record<string, NeuTableBadgeConfig>,
     },
     { key: 'joined', header: 'Alta', sortable: true },
@@ -103,21 +125,26 @@ export class TableDemoComponent {
 
   // ══════════════ DEMO 2: Productos (badges + CSV export) ══════════════
   readonly productColumns: NeuTableColumn[] = [
-    { key: 'id',       header: 'SKU',       width: '70px', align: 'center', sortable: true },
-    { key: 'name',     header: 'Producto',  sortable: true },
+    { key: 'id', header: 'SKU', width: '70px', align: 'center', sortable: true },
+    { key: 'name', header: 'Producto', sortable: true },
     { key: 'category', header: 'Categoría', sortable: true },
-    { key: 'price',    header: 'Precio',    align: 'right', sortable: true,
-      cell: (r) => `${(r as unknown as Product).price.toFixed(2)} €` },
-    { key: 'stock',    header: 'Stock',     align: 'center', sortable: true },
+    {
+      key: 'price',
+      header: 'Precio',
+      align: 'right',
+      sortable: true,
+      cell: (r) => `${(r as unknown as Product).price.toFixed(2)} €`,
+    },
+    { key: 'stock', header: 'Stock', align: 'center', sortable: true },
     {
       key: 'status',
       header: 'Disponibilidad',
       sortable: true,
       type: 'badge',
       badgeMap: {
-        in_stock:     { label: 'En stock',  variant: 'success' },
-        low_stock:    { label: 'Bajo',      variant: 'warning' },
-        out_of_stock: { label: 'Agotado',   variant: 'danger'  },
+        in_stock: { label: 'En stock', variant: 'success' },
+        low_stock: { label: 'Bajo', variant: 'warning' },
+        out_of_stock: { label: 'Agotado', variant: 'danger' },
       } satisfies Record<string, NeuTableBadgeConfig>,
     },
   ];
@@ -133,20 +160,25 @@ export class TableDemoComponent {
 
   // ══════════════ DEMO 3: Pedidos (row expansion) ══════════════
   readonly orderColumns: NeuTableColumn[] = [
-    { key: 'id',       header: 'Pedido',   width: '100px', sortable: true },
-    { key: 'customer', header: 'Cliente',  sortable: true },
-    { key: 'date',     header: 'Fecha',    sortable: true },
-    { key: 'total',    header: 'Total',    align: 'right', sortable: true,
-      cell: (r) => `${(r as unknown as Order).total.toFixed(2)} €` },
+    { key: 'id', header: 'Pedido', width: '100px', sortable: true },
+    { key: 'customer', header: 'Cliente', sortable: true },
+    { key: 'date', header: 'Fecha', sortable: true },
+    {
+      key: 'total',
+      header: 'Total',
+      align: 'right',
+      sortable: true,
+      cell: (r) => `${(r as unknown as Order).total.toFixed(2)} €`,
+    },
     {
       key: 'status',
       header: 'Estado',
       type: 'badge',
       badgeMap: {
-        delivered:  { label: 'Entregado',   variant: 'success' },
-        processing: { label: 'En proceso',  variant: 'info'    },
-        cancelled:  { label: 'Cancelado',   variant: 'danger'  },
-        pending:    { label: 'Pendiente',   variant: 'warning' },
+        delivered: { label: 'Entregado', variant: 'success' },
+        processing: { label: 'En proceso', variant: 'info' },
+        cancelled: { label: 'Cancelado', variant: 'danger' },
+        pending: { label: 'Pendiente', variant: 'warning' },
       } satisfies Record<string, NeuTableBadgeConfig>,
     },
   ];
@@ -158,16 +190,24 @@ export class TableDemoComponent {
     total: +(Math.random() * 800 + 20).toFixed(2),
     status: (['delivered', 'processing', 'cancelled', 'pending'] as const)[i % 4],
     items: [
-      { product: PRODUCTS_LIST[i % 10],          qty: (i % 3) + 1, price: +(Math.random() * 200 + 10).toFixed(2) },
-      { product: PRODUCTS_LIST[(i + 3) % 10],    qty: 1,           price: +(Math.random() * 100 + 5).toFixed(2)  },
+      {
+        product: PRODUCTS_LIST[i % 10],
+        qty: (i % 3) + 1,
+        price: +(Math.random() * 200 + 10).toFixed(2),
+      },
+      {
+        product: PRODUCTS_LIST[(i + 3) % 10],
+        qty: 1,
+        price: +(Math.random() * 100 + 5).toFixed(2),
+      },
     ],
   }));
 
   // ══════════════ DEMO 4: Sticky header ══════════════
   readonly simpleColumns: NeuTableColumn[] = [
-    { key: 'id',   header: '#',       width: '50px', align: 'center' },
-    { key: 'name', header: 'Nombre',  sortable: true },
-    { key: 'dept', header: 'Depto.',  sortable: true },
+    { key: 'id', header: '#', width: '50px', align: 'center' },
+    { key: 'name', header: 'Nombre', sortable: true },
+    { key: 'dept', header: 'Depto.', sortable: true },
     { key: 'city', header: 'Ciudad' },
   ];
 
@@ -269,4 +309,3 @@ export class UsersComponent {
   ...
 />`;
 }
-

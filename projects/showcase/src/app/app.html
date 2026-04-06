@@ -103,31 +103,52 @@
             @if (!isGroupCollapsed(group.labelKey)) {
               <div [id]="'nav-group-' + group.labelKey" role="list">
                 @for (item of group.items; track item.route) {
-                  <a
-                    class="app-nav__link"
-                    [routerLink]="item.route"
-                    routerLinkActive="app-nav__link--active"
-                    [routerLinkActiveOptions]="{ exact: item.route === '/' }"
-                    role="listitem"
-                  >
-                    @if (item.icon) {
-                      <neu-icon
-                        [name]="item.icon"
-                        size="0.875rem"
-                        class="app-nav__link-icon"
-                        aria-hidden="true"
-                      />
-                    }
-                    <span class="app-nav__link-label">{{ item.labelKey | transloco }}</span>
-                    <span class="app-nav__badges">
-                      @if (item.badge) {
-                        <span class="app-nav__icon-badge">{{ item.badge }}</span>
+                  @if (item.externalUrl) {
+                    <a
+                      class="app-nav__link app-nav__link--external"
+                      [href]="item.externalUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      role="listitem"
+                    >
+                      @if (item.icon) {
+                        <neu-icon
+                          [name]="item.icon"
+                          size="0.875rem"
+                          class="app-nav__link-icon"
+                          aria-hidden="true"
+                        />
                       }
-                      @if (item.isNew) {
-                        <span class="app-nav__new-badge">New</span>
+                      <span class="app-nav__link-label">{{ item.labelKey | transloco }}</span>
+                      <neu-icon name="lucideExternalLink" size="0.7rem" class="app-nav__link-external-icon" aria-hidden="true" />
+                    </a>
+                  } @else {
+                    <a
+                      class="app-nav__link"
+                      [routerLink]="item.route"
+                      routerLinkActive="app-nav__link--active"
+                      [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+                      role="listitem"
+                    >
+                      @if (item.icon) {
+                        <neu-icon
+                          [name]="item.icon"
+                          size="0.875rem"
+                          class="app-nav__link-icon"
+                          aria-hidden="true"
+                        />
                       }
-                    </span>
-                  </a>
+                      <span class="app-nav__link-label">{{ item.labelKey | transloco }}</span>
+                      <span class="app-nav__badges">
+                        @if (item.badge) {
+                          <span class="app-nav__icon-badge">{{ item.badge }}</span>
+                        }
+                        @if (item.isNew) {
+                          <span class="app-nav__new-badge">New</span>
+                        }
+                      </span>
+                    </a>
+                  }
                 }
               </div>
             }

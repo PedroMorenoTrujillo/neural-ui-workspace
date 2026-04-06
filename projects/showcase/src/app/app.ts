@@ -17,6 +17,7 @@ interface NavItem {
   icon?: string;
   badge?: string;
   isNew?: boolean;
+  externalUrl?: string;
 }
 
 interface NavGroup {
@@ -283,6 +284,18 @@ export class App {
           route: '/components/stepper',
           icon: 'lucideListChecks',
           isNew: true,
+        },
+      ],
+    },
+    {
+      labelKey: 'nav.resources',
+      icon: 'lucideBookOpen',
+      items: [
+        {
+          labelKey: 'nav.icons',
+          route: '',
+          icon: 'lucideSmile',
+          externalUrl: 'https://lucide.dev/icons',
         },
       ],
     },

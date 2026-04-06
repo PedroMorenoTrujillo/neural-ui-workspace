@@ -2,7 +2,9 @@
 .table-demo__example {
   margin-bottom: 2.5rem;
 
-  &:last-child { margin-bottom: 0; }
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .table-demo__example-header {
@@ -68,7 +70,9 @@
     border-bottom: 1px solid var(--neu-border);
   }
 
-  tr:last-child td { border-bottom: none; }
+  tr:last-child td {
+    border-bottom: none;
+  }
 }
 
 // ---- Selection info ----
@@ -77,4 +81,3 @@
   color: var(--neu-text-muted);
   margin: 0.75rem 0 0;
 }
-

@@ -131,12 +131,35 @@ $demo-max-width: 960px;
   padding-bottom: var(--neu-space-8);
   border-bottom: 1px solid var(--neu-border);
 
+  // ── Override neu-badge cuando actúa como eyebrow label ──
+  .neu-badge.neu-badge--info {
+    background: transparent;
+    border: 1.5px solid var(--neu-primary);
+    color: var(--neu-primary);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: var(--neu-radius-full);
+    box-shadow: none;
+    align-self: flex-start;
+  }
+
   &__title {
     font-size: var(--neu-text-4xl);
     font-weight: 800;
     letter-spacing: -0.04em;
-    color: var(--neu-text);
     line-height: 1.1;
+    // Sutil gradiente: texto oscuro en modo claro, toque de primary
+    background: linear-gradient(
+      135deg,
+      var(--neu-text) 30%,
+      color-mix(in srgb, var(--neu-text) 70%, var(--neu-primary) 30%) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   &__desc {

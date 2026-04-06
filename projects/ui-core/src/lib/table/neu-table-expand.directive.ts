@@ -17,7 +17,5 @@ import { Directive, TemplateRef } from '@angular/core';
   standalone: true,
 })
 export class NeuTableExpandDirective {
-  constructor(
-    public readonly templateRef: TemplateRef<{ $implicit: Record<string, unknown> }>,
-  ) {}
+  constructor(public readonly templateRef: TemplateRef<{ $implicit: Record<string, unknown> }>) {}
 }

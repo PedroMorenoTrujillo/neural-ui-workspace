@@ -47,4 +47,3 @@ export interface NeuTableColumn<T = Record<string, unknown>> {
    */
   badgeMap?: Record<string, NeuTableBadgeConfig>;
 }
-
