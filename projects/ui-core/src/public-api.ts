@@ -35,6 +35,7 @@ export * from './lib/nav/neu-nav.component';
 export * from './lib/stats-card/neu-stats-card.component';
 export * from './lib/table/neu-table.component';
 export * from './lib/table/neu-table.types';
+export * from './lib/table/neu-table-expand.directive';
 export * from './lib/tabs/neu-tabs.component';
 
 // Skeleton

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ContentChild,
   ViewEncapsulation,
   computed,
   inject,
@@ -8,6 +9,8 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 import { NeuTableColumn } from './neu-table.types';
 
@@ -40,13 +43,13 @@ function asRows(data: object[]): Row[] {
  */
 @Component({
   selector: 'neu-table',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="neu-table-container">
+    <div class="neu-table-container" [class.neu-table--sticky-header]="stickyHeader()">
       <!-- ---- Toolbar ---- -->
-      @if (searchable() || title()) {
+      @if (searchable() || title() || exportable()) {
         <div class="neu-table__toolbar">
           @if (title()) {
             <h3 class="neu-table__title">{{ title() }}</h3>
@@ -96,6 +99,16 @@ function asRows(data: object[]): Row[] {
               }
             </div>
           }
+          @if (exportable() && !loading()) {
+            <button class="neu-table__export-btn" type="button" (click)="exportCsv()" title="Exportar CSV">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="15" height="15">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              CSV
+            </button>
+          }
         </div>
       }
 
@@ -123,6 +136,9 @@ function asRows(data: object[]): Row[] {
           <thead class="neu-table__head">
             <tr>
               <!-- Checkbox de selección global -->
+              @if (expandable()) {
+                <th class="neu-table__th neu-table__th--expand-col" scope="col"></th>
+              }
               @if (selectable()) {
                 <th class="neu-table__th neu-table__th--check" scope="col">
                   <input
@@ -219,6 +235,22 @@ function asRows(data: object[]): Row[] {
                   [class.neu-table__row--clickable]="selectable()"
                   (click)="selectable() ? toggleRow(row) : null"
                 >
+                  @if (expandable()) {
+                    <td class="neu-table__td neu-table__td--expand-col" (click)="$event.stopPropagation()">
+                      <button
+                        class="neu-table__expand-btn"
+                        type="button"
+                        (click)="toggleExpand(row)"
+                        [class.neu-table__expand-btn--open]="isRowExpanded(row)"
+                        [attr.aria-expanded]="isRowExpanded(row)"
+                        aria-label="Expandir fila"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </button>
+                    </td>
+                  }
                   @if (selectable()) {
                     <td
                       class="neu-table__td neu-table__th--check"
@@ -239,10 +271,32 @@ function asRows(data: object[]): Row[] {
                       [class]="col.cellClass ?? ''"
                       [style.text-align]="col.align ?? 'left'"
                     >
-                      {{ getCellValue(row, col) }}
+                      @if (col.type === 'badge') {
+                        @let badgeVal = getCellValue(row, col);
+                        @let badgeCfg = col.badgeMap?.[badgeVal];
+                        <span class="neu-table__cell-badge neu-table__cell-badge--{{ badgeCfg?.variant ?? 'default' }}">
+                          {{ badgeCfg?.label ?? badgeVal }}
+                        </span>
+                      } @else {
+                        {{ getCellValue(row, col) }}
+                      }
                     </td>
                   }
                 </tr>
+                @if (expandable() && isRowExpanded(row)) {
+                  <tr class="neu-table__row-expand-detail">
+                    <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
+                      <div class="neu-table__expand-content">
+                        @if (expandTemplate) {
+                          <ng-container
+                            [ngTemplateOutlet]="expandTemplate.templateRef"
+                            [ngTemplateOutletContext]="{ $implicit: row }"
+                          />
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
               }
             }
           </tbody>
@@ -252,6 +306,16 @@ function asRows(data: object[]): Row[] {
       <!-- ---- Footer ---- -->
       @if (!loading() && filteredData().length > 0) {
         <div class="neu-table__footer">
+          @if (pageSizeOptions().length > 0) {
+            <div class="neu-table__page-size">
+              <label class="neu-table__page-size-label">Filas:</label>
+              <select class="neu-table__page-size-select" (change)="onPageSizeChange($event)">
+                @for (size of pageSizeOptions(); track size) {
+                  <option [value]="size" [selected]="effectivePageSize() === size">{{ size }}</option>
+                }
+              </select>
+            </div>
+          }
           <span class="neu-table__info">
             {{ paginationInfo() }}
           </span>
@@ -315,6 +379,8 @@ function asRows(data: object[]): Row[] {
 export class NeuTableComponent {
   private readonly urlState = inject(NeuUrlStateService);
 
+  @ContentChild(NeuTableExpandDirective) expandTemplate?: NeuTableExpandDirective;
+
   // ---- Inputs de datos ----
   columns = input<NeuTableColumn[]>([]);
   data = input<object[]>([]);
@@ -329,6 +395,11 @@ export class NeuTableComponent {
   searchPlaceholder = input<string>('Buscar...');
   sortable = input<boolean>(false);
   selectable = input<boolean>(false);
+  expandable = input<boolean>(false);
+  exportable = input<boolean>(false);
+  exportFileName = input<string>('export');
+  pageSizeOptions = input<number[]>([]);
+  stickyHeader = input<boolean>(false);
   /** Clave del campo que identifica de forma única cada fila */
   rowKey = input<string>('id');
 
@@ -382,13 +453,17 @@ export class NeuTableComponent {
     });
   });
 
+  // Tamaño de página dinámico (selector de footer sobreescribe el input)
+  private readonly _dynamicPageSize = signal<number | null>(null);
+  readonly effectivePageSize = computed(() => this._dynamicPageSize() ?? this.pageSize());
+
   readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.sortedData().length / this.pageSize())),
+    Math.max(1, Math.ceil(this.sortedData().length / this.effectivePageSize())),
   );
 
   readonly paginatedData = computed(() => {
     const page = Math.min(this.currentPage(), this.totalPages());
-    const size = this.pageSize();
+    const size = this.effectivePageSize();
     return this.sortedData().slice((page - 1) * size, page * size);
   });
 
@@ -404,11 +479,33 @@ export class NeuTableComponent {
   readonly paginationInfo = computed(() => {
     const total = this.sortedData().length;
     const page = Math.min(this.currentPage(), this.totalPages());
-    const size = this.pageSize();
+    const size = this.effectivePageSize();
     const from = Math.min((page - 1) * size + 1, total);
     const to = Math.min(page * size, total);
-    return `${from}–${to} de ${total} resultado${total !== 1 ? 's' : ''}`;
+    return `${from}\u2013${to} de ${total} resultado${total !== 1 ? 's' : ''}`;
   });
+
+  readonly totalColspan = computed(() => {
+    let cols = this.columns().length;
+    if (this.selectable()) cols++;
+    if (this.expandable()) cols++;
+    return cols;
+  });
+
+  // ---- Expansión de filas ----
+  private readonly _expandedKeys = signal<Set<unknown>>(new Set());
+
+  isRowExpanded(row: Row): boolean {
+    return this._expandedKeys().has(row[this.rowKey()]);
+  }
+
+  toggleExpand(row: Row): void {
+    const key = row[this.rowKey()];
+    const set = new Set(this._expandedKeys());
+    if (set.has(key)) set.delete(key);
+    else set.add(key);
+    this._expandedKeys.set(set);
+  }
 
   // ---- Selección de filas ----
   private readonly _selectedKeys = signal<Set<unknown>>(new Set());
@@ -483,6 +580,32 @@ export class NeuTableComponent {
 
   clearSearch(): void {
     this.urlState.patchParams({ [this.searchParam()]: null, [this.pageParam()]: '1' });
+  }
+
+  onPageSizeChange(event: Event): void {
+    const size = +(event.target as HTMLSelectElement).value;
+    this._dynamicPageSize.set(size);
+    this.urlState.patchParams({ [this.pageParam()]: '1' });
+  }
+
+  exportCsv(): void {
+    const headers = this.columns().map((c) => `"${c.header.replace(/"/g, '""')}"`);
+    const rows = this.filteredData().map((row) =>
+      this.columns().map((col) => {
+        const val = this.getCellValue(row as Row, col);
+        return `"${val.replace(/"/g, '""')}"`;
+      }),
+    );
+    const csv = [headers, ...rows].map((r) => r.join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${this.exportFileName()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   getRowKey(row: Row): unknown {

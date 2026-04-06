@@ -1,3 +1,17 @@
+export type NeuTableBadgeVariant =
+  | 'primary'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'info'
+  | 'default';
+
+export interface NeuTableBadgeConfig {
+  /** Etiqueta a mostrar (si omit, usa el valor bruto) */
+  label?: string;
+  variant: NeuTableBadgeVariant;
+}
+
 export interface NeuTableColumn<T = Record<string, unknown>> {
   /** Clave del campo en el objeto de datos */
   key: string;
@@ -19,4 +33,18 @@ export interface NeuTableColumn<T = Record<string, unknown>> {
 
   /** Esta columna es ordenable (requiere [sortable]=true en la tabla) */
   sortable?: boolean;
+
+  /**
+   * Tipo de renderizado de la celda.
+   * - `'text'` (default): texto plano
+   * - `'badge'`: chip de color usando `badgeMap`
+   */
+  type?: 'text' | 'badge';
+
+  /**
+   * Mapa valor → configuración de badge. Requiere `type: 'badge'`.
+   * Ejemplo: `{ active: { label: 'Activo', variant: 'success' } }`
+   */
+  badgeMap?: Record<string, NeuTableBadgeConfig>;
 }
+

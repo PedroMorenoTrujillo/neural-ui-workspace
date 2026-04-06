@@ -1,1 +1,80 @@
-// table-demo styles - ninguno adicional
+// ---- Ejemplo blocks ----
+.table-demo__example {
+  margin-bottom: 2.5rem;
+
+  &:last-child { margin-bottom: 0; }
+}
+
+.table-demo__example-header {
+  margin-bottom: 1rem;
+}
+
+.table-demo__example-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--neu-text);
+  margin: 0 0 0.375rem;
+}
+
+.table-demo__example-desc {
+  font-size: 0.875rem;
+  color: var(--neu-text-muted);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+
+  code {
+    font-family: var(--neu-font-mono);
+    font-size: 0.8125rem;
+    background: var(--neu-surface-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--neu-primary);
+  }
+}
+
+// ---- Expand panel content ----
+.table-demo__expand-body {
+  font-size: 0.875rem;
+  color: var(--neu-text);
+}
+
+.table-demo__expand-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--neu-text-muted);
+  margin: 0 0 0.5rem;
+}
+
+.table-demo__expand-items {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+
+  th {
+    font-weight: 600;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--neu-text-muted);
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--neu-border);
+  }
+
+  td {
+    padding: 5px 8px;
+    color: var(--neu-text);
+    border-bottom: 1px solid var(--neu-border);
+  }
+
+  tr:last-child td { border-bottom: none; }
+}
+
+// ---- Selection info ----
+.table-demo__selection-info {
+  font-size: 0.875rem;
+  color: var(--neu-text-muted);
+  margin: 0.75rem 0 0;
+}
+
