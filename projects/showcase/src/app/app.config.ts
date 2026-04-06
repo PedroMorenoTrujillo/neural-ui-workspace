@@ -1,7 +1,10 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withRouterConfig } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideTransloco } from '@jsverse/transloco';
 import { provideIcons } from '@ng-icons/core';
 import { provideNgIconsConfig } from '@ng-icons/core';
+import { TranslocoHttpLoader } from './transloco-loader';
 import {
   // Originales
   lucideAlertCircle,
@@ -40,6 +43,16 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideHttpClient(),
+    provideTransloco({
+      config: {
+        availableLangs: ['es', 'en'],
+        defaultLang: 'es',
+        reRenderOnLangChange: true,
+        prodMode: false,
+      },
+      loader: TranslocoHttpLoader,
+    }),
     provideRouter(
       routes,
       // Habilita que los inputs() de los componentes de ruta reciban

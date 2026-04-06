@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "gettingStarted": "Primeros pasos",
+    "home": "Inicio",
+    "components": "Componentes",
+    "form": "Formularios",
+    "data": "Datos",
+    "navigation": "Navegación",
+    "charts": "Gráficas",
+    "overlays": "Overlays",
+    "templates": "Templates"
+  },
+  "header": {
+    "github": "GitHub",
+    "templates": "Premium Templates",
+    "openMenu": "Abrir menú"
+  },
+  "comp": {
+    "badge": "Badge",
+    "button": "Button",
+    "card": "Card",
+    "input": "Input",
+    "select": "Select",
+    "sidebar": "Sidebar",
+    "table": "Table",
+    "avatar": "Avatar",
+    "emptyState": "Empty State",
+    "modal": "Modal",
+    "statsCard": "Stats Card",
+    "chart": "Chart"
+  },
+  "page": {
+    "home": {
+      "title": "NeuralUI — Sistema de Diseño Angular",
+      "subtitle": "Componentes de alta calidad con Signals y OnPush, listos para producción."
+    },
+    "templates": {
+      "title": "Premium Templates",
+      "subtitle": "Dashboards y landing pages construidos con NeuralUI."
+    }
+  },
+  "templates": {
+    "preview": "Vista previa",
+    "buy": "Comprar",
+    "free": "Gratis",
+    "heroStats": {
+      "templates": "plantillas",
+      "license": "Licencia MIT",
+      "angular": "Angular 21"
+    },
+    "cta": {
+      "title": "¿Tienes ideas? Contribuye.",
+      "desc": "NeuralUI es open source. Abre un PR o consulta el repositorio en GitHub.",
+      "btn": "Ver en GitHub"
+    }
+  }
+}

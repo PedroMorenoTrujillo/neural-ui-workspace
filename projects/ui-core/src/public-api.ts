@@ -4,7 +4,6 @@
 
 // Servicios
 export * from './lib/url-state/neu-url-state.service';
-export * from './lib/i18n/neu-lang.service';
 
 // Componentes
 export * from './lib/avatar/neu-avatar.component';

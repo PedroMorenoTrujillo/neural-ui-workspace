@@ -1,10 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import {
-  NeuBadgeComponent,
-  NeuButtonComponent,
-  NeuIconComponent,
-  NeuLangService,
-} from '@neural-ui/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
+import { NeuBadgeComponent, NeuButtonComponent, NeuIconComponent } from '@neural-ui/core';
 
 interface TemplateProduct {
   id: string;
@@ -19,13 +15,13 @@ interface TemplateProduct {
 
 @Component({
   selector: 'app-templates',
-  imports: [NeuBadgeComponent, NeuButtonComponent, NeuIconComponent],
+  imports: [NeuBadgeComponent, NeuButtonComponent, NeuIconComponent, TranslocoPipe],
   templateUrl: './templates.component.html',
   styleUrl: './templates.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TemplatesComponent {
-  readonly i18n = inject(NeuLangService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly products: TemplateProduct[] = [
     {
@@ -101,28 +97,19 @@ export class TemplatesComponent {
     },
   ];
 
-  readonly title = computed(() =>
-    this.i18n.lang() === 'es' ? 'Premium Templates' : 'Premium Templates',
-  );
-
-  readonly subtitle = computed(() =>
-    this.i18n.lang() === 'es'
-      ? 'Dashboards y landing pages construidos con NeuralUI. Listos para producción.'
-      : 'Dashboards and landing pages built with NeuralUI. Production-ready.',
-  );
-
   getTagVariant(tag: TemplateProduct['tag']): 'success' | 'info' | 'warning' {
     const map = { free: 'success' as const, new: 'info' as const, premium: 'warning' as const };
     return map[tag];
   }
 
   getTagLabel(tag: TemplateProduct['tag']): string {
-    if (tag === 'free') return this.i18n.t('templates.free');
-    if (tag === 'new') return 'New';
+    if (tag === 'free')    return this.transloco.translate('templates.free');
+    if (tag === 'new')     return 'New';
     return 'Premium';
   }
 
   getLocalText(obj: { es: string; en: string }): string {
-    return obj[this.i18n.lang()];
+    const lang = this.transloco.getActiveLang() as 'es' | 'en';
+    return obj[lang] ?? obj['es'];
   }
 }

@@ -54,9 +54,16 @@
               {
                 "glob": "**/*",
                 "input": "projects/showcase/public"
+              },
+              {
+                "glob": "**/*",
+                "input": "projects/showcase/src/assets/i18n",
+                "output": "assets/i18n"
               }
             ],
-            "styles": ["projects/showcase/src/styles.scss"]
+            "styles": [
+              "projects/showcase/src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {
@@ -122,7 +129,9 @@
                 "input": "projects/templates/public"
               }
             ],
-            "styles": ["projects/templates/src/styles.scss"]
+            "styles": [
+              "projects/templates/src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {

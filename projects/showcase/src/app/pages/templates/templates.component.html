@@ -5,29 +5,23 @@
       <neu-icon name="lucideZap" size="1rem" />
       NeuralUI Templates
     </div>
-    <h1 class="templates-hero__title">{{ title() }}</h1>
-    <p class="templates-hero__subtitle">{{ subtitle() }}</p>
+    <h1 class="templates-hero__title">{{ 'page.templates.title' | transloco }}</h1>
+    <p class="templates-hero__subtitle">{{ 'page.templates.subtitle' | transloco }}</p>
 
     <div class="templates-hero__stats">
       <div class="templates-hero__stat">
         <span class="templates-hero__stat-value">6+</span>
-        <span class="templates-hero__stat-label">{{
-          i18n.lang() === 'es' ? 'Templates' : 'Templates'
-        }}</span>
+        <span class="templates-hero__stat-label">{{ 'templates.heroStats.templates' | transloco }}</span>
       </div>
       <div class="templates-hero__stat-sep"></div>
       <div class="templates-hero__stat">
         <span class="templates-hero__stat-value">MIT</span>
-        <span class="templates-hero__stat-label">{{
-          i18n.lang() === 'es' ? 'Licencia librería' : 'Library license'
-        }}</span>
+        <span class="templates-hero__stat-label">{{ 'templates.heroStats.license' | transloco }}</span>
       </div>
       <div class="templates-hero__stat-sep"></div>
       <div class="templates-hero__stat">
         <span class="templates-hero__stat-value">Angular 21</span>
-        <span class="templates-hero__stat-label">{{
-          i18n.lang() === 'es' ? 'Framework' : 'Framework'
-        }}</span>
+        <span class="templates-hero__stat-label">{{ 'templates.heroStats.angular' | transloco }}</span>
       </div>
     </div>
   </div>
@@ -55,7 +49,6 @@
               {{ getTagLabel(product.tag) }}
             </neu-badge>
           </div>
-
           <p class="template-card__desc">{{ getLocalText(product.description) }}</p>
         </div>
 
@@ -65,7 +58,7 @@
             <span class="template-card__price">{{ product.price }}</span>
           } @else {
             <span class="template-card__price template-card__price--free">
-              {{ i18n.t('templates.free') }}
+              {{ 'templates.free' | transloco }}
             </span>
           }
 
@@ -78,20 +71,24 @@
                 rel="noopener noreferrer"
               >
                 <neu-icon name="lucideEye" size="0.875rem" />
-                {{ i18n.t('templates.preview') }}
+                {{ 'templates.preview' | transloco }}
               </a>
             } @else {
               <button class="template-card__preview-btn" type="button" disabled>
                 <neu-icon name="lucideEye" size="0.875rem" />
-                {{ i18n.t('templates.preview') }}
+                {{ 'templates.preview' | transloco }}
               </button>
             }
 
-            <button neu-button [variant]="product.tag === 'free' ? 'outline' : 'primary'" size="sm">
+            <button
+              neu-button
+              [variant]="product.tag === 'free' ? 'outline' : 'primary'"
+              size="sm"
+            >
               @if (product.tag !== 'free') {
                 <neu-icon name="lucideShoppingCart" size="0.875rem" />
               }
-              {{ product.tag === 'free' ? i18n.t('templates.preview') : i18n.t('templates.buy') }}
+              {{ product.tag === 'free' ? ('templates.preview' | transloco) : ('templates.buy' | transloco) }}
             </button>
           </div>
         </div>
@@ -101,16 +98,8 @@
 
   <!-- CTA inferior -->
   <div class="templates-cta">
-    <h2 class="templates-cta__title">
-      {{ i18n.lang() === 'es' ? '¿Necesitas algo personalizado?' : 'Need something custom?' }}
-    </h2>
-    <p class="templates-cta__desc">
-      {{
-        i18n.lang() === 'es'
-          ? 'La librería NeuralUI es MIT. Construye tus propios templates y véndelos.'
-          : 'NeuralUI library is MIT licensed. Build your own templates and sell them.'
-      }}
-    </p>
+    <h2 class="templates-cta__title">{{ 'templates.cta.title' | transloco }}</h2>
+    <p class="templates-cta__desc">{{ 'templates.cta.desc' | transloco }}</p>
     <a
       class="templates-cta__btn"
       href="https://github.com/PedroMorenoTrujillo/neural-ui-workspace"
@@ -118,7 +107,7 @@
       rel="noopener noreferrer"
     >
       <neu-icon name="lucideGithub" size="1rem" />
-      {{ i18n.lang() === 'es' ? 'Ver en GitHub' : 'View on GitHub' }}
+      {{ 'templates.cta.btn' | transloco }}
     </a>
   </div>
 </section>
