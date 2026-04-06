@@ -347,5 +347,9 @@
       "system": "Usar configuración del sistema",
       "selected": "Seleccionado"
     }
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados.",
+    "note": "El código fuente del showcase es de uso educativo. La librería @neural-ui/core es software propietario."
   }
 }

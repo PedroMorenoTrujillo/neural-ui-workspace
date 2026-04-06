@@ -179,6 +179,14 @@
   <!-- ===== CONTENIDO PRINCIPAL ===== -->
   <main class="app-content" id="main-content" tabindex="-1">
     <router-outlet />
+
+    <footer class="app-footer">
+      <p class="app-footer__copy">
+        &copy; {{ currentYear }} Pedro Moreno Trujillo.
+        {{ 'footer.rights' | transloco }}
+      </p>
+      <p class="app-footer__note">{{ 'footer.note' | transloco }}</p>
+    </footer>
   </main>
 </div>
 

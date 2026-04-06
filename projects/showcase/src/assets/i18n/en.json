@@ -347,5 +347,9 @@
       "system": "Use system settings",
       "selected": "Selected"
     }
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "note": "The showcase source code is for educational use. The @neural-ui/core library is proprietary software."
   }
 }

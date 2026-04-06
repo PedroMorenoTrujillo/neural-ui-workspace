@@ -46,6 +46,8 @@ export class App {
   readonly i18n = inject(NeuTranslationService);
   private readonly router = inject(Router);
 
+  readonly currentYear = new Date().getFullYear();
+
   // ---- Dark Mode ----
   readonly isDark = signal(this._initDark());
 
