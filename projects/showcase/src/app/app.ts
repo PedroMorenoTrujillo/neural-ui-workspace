@@ -107,6 +107,7 @@ export class App {
       icon: 'lucideHome',
       items: [
         { labelKey: 'nav.home', route: '/' },
+        { labelKey: 'nav.installation', route: '/components/installation', icon: 'lucidePackage' },
         { labelKey: 'comp.theming', route: '/components/theming', icon: 'lucidePalette' },
       ],
     },

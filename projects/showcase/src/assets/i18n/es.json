@@ -14,7 +14,8 @@
     "advanced": "Avanzado",
     "templates": "Templates",
     "resources": "Recursos",
-    "icons": "Iconos (Lucide)"
+    "icons": "Iconos (Lucide)",
+    "installation": "Instalación"
   },
   "header": {
     "github": "GitHub",
@@ -145,6 +146,33 @@
     "feedback": {
       "title": "Feedback Pro",
       "subtitle": "Tooltip y Toast para dashboards de alto nivel."
+    },
+    "install": {
+      "title": "Instalación",
+      "desc": "Añade NeuralUI a tu proyecto Angular en 4 pasos. Sin dependencias externas pesadas.",
+      "step1": {
+        "title": "Instalar el paquete",
+        "desc": "Un solo comando. Los iconos de Lucide se incluyen automáticamente.",
+        "note": "@angular/cdk es un peer dependency; instálalo si aún no lo tienes en tu proyecto."
+      },
+      "step2": {
+        "title": "Configurar proveedores",
+        "desc": "Registra los iconos y configura los providers en app.config.ts."
+      },
+      "step3": {
+        "title": "Importar estilos",
+        "desc": "Importa los design tokens (obligatorio) y los estilos de cada componente que uses."
+      },
+      "step4": {
+        "title": "Usar tu primer componente",
+        "desc": "Importa el componente en tu módulo standalone y úsalo en la plantilla."
+      },
+      "next": {
+        "title": "Siguientes pasos",
+        "theming": "Personalizar el tema",
+        "components": "Explorar componentes",
+        "table": "Ver componente estrella"
+      }
     }
   },
   "templates": {

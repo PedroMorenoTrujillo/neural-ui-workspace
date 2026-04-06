@@ -260,6 +260,12 @@ export const routes: Routes = [
 
   // Getting Started
   {
+    path: 'components/installation',
+    loadComponent: () =>
+      import('./pages/installation/installation.component').then((m) => m.InstallationComponent),
+    title: 'Instalación — NeuralUI',
+  },
+  {
     path: 'components/theming',
     loadComponent: () =>
       import('./pages/theming/theming.component').then((m) => m.ThemingComponent),

@@ -6,10 +6,11 @@
     "@angular/common": "^21.2.0",
     "@angular/core": "^21.2.0",
     "@angular/forms": "^21.2.0",
-    "@angular/router": "^21.2.0",
-    "@ng-icons/core": "^33.0.0"
+    "@angular/router": "^21.2.0"
   },
   "dependencies": {
+    "@ng-icons/core": "^33.0.0",
+    "@ng-icons/lucide": "^33.0.0",
     "tslib": "^2.3.0"
   },
   "sideEffects": false

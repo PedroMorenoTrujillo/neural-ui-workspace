@@ -1,0 +1,85 @@
+<div class="demo-page">
+  <!-- Hero -->
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
+    <h1 class="demo-hero__title">{{ 'page.install.title' | transloco }}</h1>
+    <p class="demo-hero__desc">{{ 'page.install.desc' | transloco }}</p>
+  </div>
+
+  <!-- Paso 1 — Instalar -->
+  <section class="install-step">
+    <div class="install-step__header">
+      <div class="install-step__num">1</div>
+      <div>
+        <h2 class="install-step__title">{{ 'page.install.step1.title' | transloco }}</h2>
+        <p class="install-step__desc">{{ 'page.install.step1.desc' | transloco }}</p>
+      </div>
+    </div>
+    <neu-code-block language="bash" [code]="installCmd" />
+
+    <div class="install-note">
+      <neu-icon name="lucideInfo" size="0.875rem" />
+      <span>{{ 'page.install.step1.note' | transloco }}</span>
+    </div>
+    <neu-code-block language="bash" [code]="peerDepsCmd" />
+  </section>
+
+  <!-- Paso 2 — Configurar app.config -->
+  <section class="install-step">
+    <div class="install-step__header">
+      <div class="install-step__num">2</div>
+      <div>
+        <h2 class="install-step__title">{{ 'page.install.step2.title' | transloco }}</h2>
+        <p class="install-step__desc">{{ 'page.install.step2.desc' | transloco }}</p>
+      </div>
+    </div>
+    <neu-code-block language="typescript" [code]="appConfigCode" />
+  </section>
+
+  <!-- Paso 3 — Importar estilos -->
+  <section class="install-step">
+    <div class="install-step__header">
+      <div class="install-step__num">3</div>
+      <div>
+        <h2 class="install-step__title">{{ 'page.install.step3.title' | transloco }}</h2>
+        <p class="install-step__desc">{{ 'page.install.step3.desc' | transloco }}</p>
+      </div>
+    </div>
+    <neu-code-block language="scss" [code]="stylesCode" />
+  </section>
+
+  <!-- Paso 4 — Primer componente -->
+  <section class="install-step">
+    <div class="install-step__header">
+      <div class="install-step__num">4</div>
+      <div>
+        <h2 class="install-step__title">{{ 'page.install.step4.title' | transloco }}</h2>
+        <p class="install-step__desc">{{ 'page.install.step4.desc' | transloco }}</p>
+      </div>
+    </div>
+    <neu-code-block language="typescript" [code]="firstUseTsCode" />
+    <neu-code-block language="html" [code]="firstUseCode" />
+  </section>
+
+  <!-- Siguiente paso -->
+  <section class="install-next">
+    <h2 class="install-next__title">{{ 'page.install.next.title' | transloco }}</h2>
+    <div class="install-next__cards">
+      <a class="install-next__card" routerLink="/components/theming">
+        <neu-icon name="lucidePalette" size="1.25rem" />
+        <span>{{ 'page.install.next.theming' | transloco }}</span>
+        <neu-icon name="lucideArrowRight" size="0.875rem" class="install-next__arrow" />
+      </a>
+      <a class="install-next__card" routerLink="/components/button">
+        <neu-icon name="lucidePlaySquare" size="1.25rem" />
+        <span>{{ 'page.install.next.components' | transloco }}</span>
+        <neu-icon name="lucideArrowRight" size="0.875rem" class="install-next__arrow" />
+      </a>
+      <a class="install-next__card" routerLink="/components/table">
+        <neu-icon name="lucideTable2" size="1.25rem" />
+        <span>{{ 'page.install.next.table' | transloco }}</span>
+        <neu-icon name="lucideArrowRight" size="0.875rem" class="install-next__arrow" />
+      </a>
+    </div>
+  </section>
+</div>

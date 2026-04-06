@@ -2,42 +2,8 @@
 // NeuralUI Showcase — Estilos Globales
 // ============================================================
 
-// ---- Design Tokens ----
-@use '../../ui-core/src/lib/styles/tokens' as *;
-
-// ---- Componentes de la librería (ViewEncapsulation.None) ----
-@use '../../ui-core/src/lib/badge/neu-badge.component.scss';
-@use '../../ui-core/src/lib/button/neu-button.component.scss';
-@use '../../ui-core/src/lib/card/neu-card.component.scss';
-@use '../../ui-core/src/lib/code-block/neu-code-block.component.scss';
-@use '../../ui-core/src/lib/input/neu-input.component.scss';
-@use '../../ui-core/src/lib/modal/neu-modal.component.scss';
-@use '../../ui-core/src/lib/select/neu-select.component.scss';
-@use '../../ui-core/src/lib/sidebar/neu-sidebar.component.scss';
-@use '../../ui-core/src/lib/table/neu-table.component.scss';
-@use '../../ui-core/src/lib/tabs/neu-tabs.component.scss';
-@use '../../ui-core/src/lib/toast/neu-toast.component.scss';
-@use '../../ui-core/src/lib/tooltip/neu-tooltip.component.scss';
-@use '../../ui-core/src/lib/avatar/neu-avatar.component.scss';
-@use '../../ui-core/src/lib/textarea/neu-textarea.component.scss';
-@use '../../ui-core/src/lib/switch/neu-switch.component.scss';
-@use '../../ui-core/src/lib/checkbox/neu-checkbox.component.scss';
-@use '../../ui-core/src/lib/radio/neu-radio.component.scss';
-@use '../../ui-core/src/lib/empty-state/neu-empty-state.component.scss';
-@use '../../ui-core/src/lib/skeleton/neu-skeleton.component.scss';
-@use '../../ui-core/src/lib/stats-card/neu-stats-card.component.scss';
-@use '../../ui-core/src/lib/chart/neu-chart.component.scss';
-
-// ---- Nuevos componentes ----
-@use '../../ui-core/src/lib/chip/neu-chip.component.scss';
-@use '../../ui-core/src/lib/breadcrumb/neu-breadcrumb.component.scss';
-@use '../../ui-core/src/lib/progress-bar/neu-progress-bar.component.scss';
-@use '../../ui-core/src/lib/accordion/neu-accordion.component.scss';
-@use '../../ui-core/src/lib/pagination/neu-pagination.component.scss';
-@use '../../ui-core/src/lib/rating/neu-rating.component.scss';
-@use '../../ui-core/src/lib/slider/neu-slider.component.scss';
-@use '../../ui-core/src/lib/timeline/neu-timeline.component.scss';
-@use '../../ui-core/src/lib/stepper/neu-stepper.component.scss';
+// ---- NeuralUI: tokens, breakpoints y todos los componentes ----
+@use '../../ui-core/src/lib/styles' as *;
 
 // ---- Reset y base ----
 *,

@@ -97,6 +97,8 @@ import {
   lucideStar,
   lucideSlidersHorizontal,
   lucideSparkles,
+  // Installation page
+  lucidePackage,
 } from '@ng-icons/lucide';
 
 import { routes } from './app.routes';
@@ -214,6 +216,7 @@ export const appConfig: ApplicationConfig = {
       lucideStar,
       lucideSlidersHorizontal,
       lucideSparkles,
+      lucidePackage,
     }),
     provideNgIconsConfig({ size: '1.25rem', strokeWidth: '2' }),
   ],
