@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ViewEncapsulation,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, inject } from '@angular/core';
 import { NeuToastService } from './neu-toast.service';
 import { NeuToastType } from './neu-toast.types';
 import { NeuIconComponent } from '../icon/neu-icon.component';
@@ -38,11 +33,7 @@ const TOAST_ICONS: Record<NeuToastType, string> = {
   host: { class: 'neu-toast-container', 'aria-live': 'polite', 'aria-atomic': 'true' },
   template: `
     @for (toast of toastService.toasts(); track toast.id) {
-      <div
-        class="neu-toast"
-        [class]="'neu-toast neu-toast--' + toast.type"
-        role="alert"
-      >
+      <div class="neu-toast" [class]="'neu-toast neu-toast--' + toast.type" role="alert">
         <span class="neu-toast__icon-wrap" aria-hidden="true">
           <neu-icon [name]="getIcon(toast.type)" size="sm" />
         </span>

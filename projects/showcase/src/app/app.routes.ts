@@ -4,8 +4,7 @@ export const routes: Routes = [
   // Inicio
   {
     path: '',
-    loadComponent: () =>
-      import('./pages/home/home.component').then((m) => m.HomeComponent),
+    loadComponent: () => import('./pages/home/home.component').then((m) => m.HomeComponent),
     title: 'NeuralUI — Sistema de Diseño Angular',
   },
 

@@ -1,0 +1,76 @@
+<div class="dashboard">
+  <h1 class="dashboard__title">{{ 'dashboard.title' | transloco }}</h1>
+
+  @if (loading()) {
+    <!-- ===== SKELETON STATE ===== -->
+    <div class="dashboard__stats">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="dashboard__skeleton-card">
+          <neu-skeleton height="12px" width="40%" />
+          <neu-skeleton height="28px" width="60%" />
+          <neu-skeleton height="10px" width="50%" />
+        </div>
+      }
+    </div>
+
+    <div class="dashboard__skeleton-chart">
+      <neu-skeleton height="300px" />
+    </div>
+
+    <div class="dashboard__skeleton-table">
+      <neu-skeleton height="18px" width="30%" />
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <neu-skeleton height="48px" />
+      }
+    </div>
+  } @else {
+    <!-- ===== STATS CARDS ===== -->
+    <div class="dashboard__stats">
+      <neu-stats-card
+        [title]="'dashboard.stats.sales' | transloco"
+        value="€24,580"
+        change="+12.4%"
+        trend="up"
+        icon="lucideShoppingBag"
+        [sparkData]="[18, 22, 19, 26, 24, 28]"
+      />
+      <neu-stats-card
+        [title]="'dashboard.stats.users' | transloco"
+        value="1,240"
+        change="+8.1%"
+        trend="up"
+        icon="lucideUsers"
+        [sparkData]="[900, 980, 1050, 1100, 1190, 1240]"
+      />
+      <neu-stats-card
+        [title]="'dashboard.stats.conversion' | transloco"
+        value="3.2%"
+        change="-1.4%"
+        trend="down"
+        icon="lucideUser"
+        [sparkData]="[4.1, 3.8, 3.9, 3.5, 3.3, 3.2]"
+      />
+    </div>
+
+    <!-- ===== CHART ===== -->
+    <neu-card class="dashboard__chart-card">
+      <h2 class="dashboard__section-title">{{ 'dashboard.revenue' | transloco }}</h2>
+      <neu-chart
+        type="area"
+        [series]="chartSeries()"
+        [categories]="chartCategories"
+        [height]="280"
+      />
+    </neu-card>
+
+    <!-- ===== TABLE ===== -->
+    <neu-table
+      [columns]="orderColumns"
+      [data]="orders()"
+      [title]="'dashboard.recentOrders' | transloco"
+      [searchable]="false"
+      pageParam="orderPage"
+      [pageSize]="5"
+    />
+  }
+</div>

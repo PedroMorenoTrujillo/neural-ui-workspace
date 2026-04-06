@@ -32,6 +32,9 @@ export * from './lib/table/neu-table.component';
 export * from './lib/table/neu-table.types';
 export * from './lib/tabs/neu-tabs.component';
 
+// Skeleton
+export * from './lib/skeleton/neu-skeleton.component';
+
 // Feedback / Overlays
 export * from './lib/tooltip/neu-tooltip.directive';
 export * from './lib/tooltip/neu-tooltip.component';

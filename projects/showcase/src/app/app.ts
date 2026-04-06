@@ -3,7 +3,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { distinctUntilChanged, fromEvent, map, startWith } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { NeuIconComponent, NeuSidebarComponent, NeuToastContainerComponent, NeuUrlStateService } from '@neural-ui/core';
+import {
+  NeuIconComponent,
+  NeuSidebarComponent,
+  NeuToastContainerComponent,
+  NeuUrlStateService,
+} from '@neural-ui/core';
 import { NeuTranslationService } from './services/neu-translation.service';
 
 interface NavItem {

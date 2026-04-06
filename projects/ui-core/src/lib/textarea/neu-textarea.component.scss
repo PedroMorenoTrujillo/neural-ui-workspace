@@ -25,7 +25,9 @@
   border-radius: var(--neu-radius);
   outline: none;
   resize: vertical;
-  transition: border-color var(--neu-transition), box-shadow var(--neu-transition);
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
   line-height: 1.5;
   box-sizing: border-box;
 
@@ -62,7 +64,10 @@
   color: var(--neu-text-muted);
   pointer-events: none;
   transform-origin: left top;
-  transition: transform var(--neu-transition), color var(--neu-transition), font-size var(--neu-transition);
+  transition:
+    transform var(--neu-transition),
+    color var(--neu-transition),
+    font-size var(--neu-transition);
 
   .neu-textarea__wrapper--focused &,
   .neu-textarea__wrapper--has-value & {

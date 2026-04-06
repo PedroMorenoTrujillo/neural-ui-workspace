@@ -1,0 +1,223 @@
+// =====================================================================
+// Neural Admin Pro — App Shell Styles
+// =====================================================================
+
+// ------------ Layout grid ------------
+.admin-layout {
+  display: flex;
+  min-height: 100dvh;
+  background: var(--neu-surface-1);
+  color: var(--neu-text-primary);
+}
+
+// ------------ Sidebar brand ------------
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  font-size: 1.125rem;
+
+  &__icon {
+    color: var(--neu-primary);
+    font-size: 1.25rem;
+  }
+
+  &__name {
+    font-weight: 400;
+    letter-spacing: -0.01em;
+
+    strong {
+      font-weight: 700;
+      color: var(--neu-primary);
+    }
+  }
+}
+
+// ------------ Sidebar footer ------------
+.admin-sidebar-footer {
+  padding-top: var(--neu-space-4);
+  border-top: 1px solid var(--neu-border);
+}
+
+// ------------ Nav links ------------
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neu-space-1);
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: var(--neu-space-3);
+    padding: var(--neu-space-3) var(--neu-space-4);
+    border-radius: var(--neu-radius);
+    color: var(--neu-text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition:
+      background var(--neu-duration-fast),
+      color var(--neu-duration-fast);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+
+    &:hover {
+      background: var(--neu-surface-2);
+      color: var(--neu-text-primary);
+    }
+
+    &--active {
+      background: color-mix(in srgb, var(--neu-primary) 12%, transparent);
+      color: var(--neu-primary);
+    }
+
+    &--logout {
+      color: var(--neu-error, #ef4444);
+
+      &:hover {
+        background: color-mix(in srgb, var(--neu-error, #ef4444) 10%, transparent);
+      }
+    }
+  }
+}
+
+// ------------ Main area ------------
+.admin-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// ------------ Header ------------
+.admin-header {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-3);
+  padding: 0 var(--neu-space-5);
+  height: 4rem;
+  background: var(--neu-surface-1);
+  border-bottom: 1px solid var(--neu-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  &__menu-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--neu-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--neu-space-2);
+    border-radius: var(--neu-radius);
+
+    &:hover {
+      background: var(--neu-surface-2);
+      color: var(--neu-text-primary);
+    }
+  }
+
+  &__search {
+    flex: 1;
+    position: relative;
+    max-width: 28rem;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: var(--neu-space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--neu-text-tertiary);
+    pointer-events: none;
+  }
+
+  &__search-input {
+    width: 100%;
+    padding: var(--neu-space-2) var(--neu-space-3) var(--neu-space-2) 2.25rem;
+    background: var(--neu-surface-2);
+    border: 1px solid var(--neu-border);
+    border-radius: var(--neu-radius);
+    color: var(--neu-text-primary);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color var(--neu-duration-fast);
+
+    &::placeholder {
+      color: var(--neu-text-tertiary);
+    }
+
+    &:focus {
+      border-color: var(--neu-primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 15%, transparent);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--neu-space-2);
+    margin-left: auto;
+  }
+
+  &__action-btn {
+    background: transparent;
+    border: 1px solid var(--neu-border);
+    border-radius: var(--neu-radius);
+    color: var(--neu-text-secondary);
+    cursor: pointer;
+    padding: var(--neu-space-2) var(--neu-space-3);
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition:
+      background var(--neu-duration-fast),
+      color var(--neu-duration-fast);
+
+    &:hover {
+      background: var(--neu-surface-2);
+      color: var(--neu-text-primary);
+    }
+
+    &--icon {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--neu-space-2);
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: var(--neu-primary);
+    color: #fff;
+    border-radius: var(--neu-radius-full);
+    font-size: 0.625rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// ------------ Page content area ------------
+.admin-content {
+  flex: 1;
+  padding: var(--neu-space-6);
+  overflow-y: auto;
+
+  @media (max-width: 640px) {
+    padding: var(--neu-space-4);
+  }
+}

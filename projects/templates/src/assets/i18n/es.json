@@ -1,0 +1,68 @@
+{
+    "nav": {
+        "dashboard": "Dashboard",
+        "users": "Usuarios",
+        "settings": "Ajustes",
+        "logout": "Cerrar sesión"
+    },
+    "header": {
+        "openMenu": "Abrir menú",
+        "search": "Buscar...",
+        "notifications": "Notificaciones"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "revenue": "Ingresos mensuales",
+        "recentOrders": "Pedidos Recientes",
+        "stats": {
+            "sales": "Ventas totales",
+            "users": "Usuarios activos",
+            "conversion": "Tasa de conversión"
+        }
+    },
+    "users": {
+        "title": "Gestión de Usuarios",
+        "search": "Buscar por nombre o email...",
+        "total": "usuarios en total",
+        "empty": "No se encontraron usuarios.",
+        "cols": {
+            "name": "Nombre",
+            "role": "Rol",
+            "status": "Estado",
+            "joined": "Alta",
+            "actions": "Acciones"
+        },
+        "status": {
+            "active": "Activo",
+            "banned": "Bloqueado",
+            "pending": "Pendiente"
+        },
+        "actions": {
+            "view": "Ver usuario",
+            "edit": "Editar usuario",
+            "delete": "Eliminar usuario"
+        }
+    },
+    "settings": {
+        "title": "Ajustes",
+        "save": "Guardar cambios",
+        "saving": "Guardando",
+        "profile": {
+            "title": "Perfil",
+            "desc": "Actualiza tu información personal.",
+            "name": "Nombre completo",
+            "email": "Correo electrónico",
+            "bio": "Biografía"
+        },
+        "prefs": {
+            "title": "Preferencias",
+            "desc": "Personaliza la experiencia de la plataforma.",
+            "notifications": "Notificaciones",
+            "notificationsHint": "Recibir alertas del sistema en tiempo real",
+            "newsletter": "Boletín informativo",
+            "newsletterHint": "Recibir novedades y actualizaciones por email",
+            "darkMode": "Modo oscuro",
+            "darkModeHint": "Activar el tema oscuro en la interfaz"
+        }
+    }
+}

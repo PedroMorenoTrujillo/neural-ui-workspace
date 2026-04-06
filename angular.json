@@ -127,6 +127,11 @@
               {
                 "glob": "**/*",
                 "input": "projects/templates/public"
+              },
+              {
+                "glob": "**/*",
+                "input": "projects/templates/src/assets/i18n",
+                "output": "assets/i18n"
               }
             ],
             "styles": [

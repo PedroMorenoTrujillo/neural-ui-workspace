@@ -3,15 +3,11 @@ import {
   Component,
   InjectionToken,
   ViewEncapsulation,
-  contentChildren,
   forwardRef,
-  inject,
   input,
-  model,
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuRadioComponent } from './neu-radio.component';
 
 /** Token para que neu-radio encuentre a su grupo padre */
 export const NEU_RADIO_GROUP = new InjectionToken<NeuRadioGroupComponent>('NEU_RADIO_GROUP');

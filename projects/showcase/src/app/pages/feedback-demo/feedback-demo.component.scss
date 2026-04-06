@@ -75,7 +75,10 @@
   border-radius: var(--neu-radius);
   cursor: pointer;
   border: 1.5px solid transparent;
-  transition: background-color var(--neu-transition), border-color var(--neu-transition), opacity var(--neu-transition);
+  transition:
+    background-color var(--neu-transition),
+    border-color var(--neu-transition),
+    opacity var(--neu-transition);
 
   &:focus-visible {
     outline: 2px solid var(--neu-primary);
@@ -85,41 +88,53 @@
   &--primary {
     background: var(--neu-primary);
     color: white;
-    &:hover { background: var(--neu-primary-dark); }
+    &:hover {
+      background: var(--neu-primary-dark);
+    }
   }
 
   &--outline {
     background: transparent;
     border-color: var(--neu-border-hover);
     color: var(--neu-text);
-    &:hover { background: var(--neu-surface-2); }
+    &:hover {
+      background: var(--neu-surface-2);
+    }
   }
 
   &--success {
     background: var(--neu-success-bg);
     color: var(--neu-success-text);
     border-color: var(--neu-success);
-    &:hover { opacity: 0.85; }
+    &:hover {
+      opacity: 0.85;
+    }
   }
 
   &--error {
     background: var(--neu-error-bg);
     color: var(--neu-error-text);
     border-color: var(--neu-error);
-    &:hover { opacity: 0.85; }
+    &:hover {
+      opacity: 0.85;
+    }
   }
 
   &--warning {
     background: var(--neu-warning-bg);
     color: var(--neu-warning-text);
     border-color: var(--neu-warning);
-    &:hover { opacity: 0.85; }
+    &:hover {
+      opacity: 0.85;
+    }
   }
 
   &--info {
     background: var(--neu-info-bg);
     color: var(--neu-info-text);
     border-color: var(--neu-info);
-    &:hover { opacity: 0.85; }
+    &:hover {
+      opacity: 0.85;
+    }
   }
 }

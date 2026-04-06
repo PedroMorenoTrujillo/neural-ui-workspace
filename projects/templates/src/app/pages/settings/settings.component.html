@@ -1,0 +1,104 @@
+<div class="settings-page">
+  <h1 class="settings-page__title">{{ 'settings.title' | transloco }}</h1>
+
+  <div class="settings-page__sections">
+    <!-- ===== PROFILE SECTION ===== -->
+    <neu-card class="settings-card">
+      <h2 class="settings-card__heading">{{ 'settings.profile.title' | transloco }}</h2>
+      <p class="settings-card__desc">{{ 'settings.profile.desc' | transloco }}</p>
+      <neu-divider />
+
+      <div class="settings-card__body">
+        <div class="settings-card__row">
+          <neu-input
+            [label]="'settings.profile.name' | transloco"
+            type="text"
+            [(ngModel)]="profile().name"
+            (ngModelChange)="updateProfile('name', $event)"
+          />
+        </div>
+        <div class="settings-card__row">
+          <neu-input
+            [label]="'settings.profile.email' | transloco"
+            type="email"
+            [(ngModel)]="profile().email"
+            (ngModelChange)="updateProfile('email', $event)"
+          />
+        </div>
+        <div class="settings-card__row">
+          <neu-textarea
+            [label]="'settings.profile.bio' | transloco"
+            [rows]="3"
+            [(ngModel)]="profile().bio"
+            (ngModelChange)="updateProfile('bio', $event)"
+          />
+        </div>
+      </div>
+    </neu-card>
+
+    <!-- ===== PREFERENCES SECTION ===== -->
+    <neu-card class="settings-card">
+      <h2 class="settings-card__heading">{{ 'settings.prefs.title' | transloco }}</h2>
+      <p class="settings-card__desc">{{ 'settings.prefs.desc' | transloco }}</p>
+      <neu-divider />
+
+      <div class="settings-card__body">
+        <div class="settings-pref-row">
+          <div class="settings-pref-row__info">
+            <span class="settings-pref-row__label">{{
+              'settings.prefs.notifications' | transloco
+            }}</span>
+            <span class="settings-pref-row__hint">{{
+              'settings.prefs.notificationsHint' | transloco
+            }}</span>
+          </div>
+          <neu-switch
+            [(ngModel)]="prefs().notifications"
+            (ngModelChange)="updatePref('notifications', $event)"
+          />
+        </div>
+
+        <div class="settings-pref-row">
+          <div class="settings-pref-row__info">
+            <span class="settings-pref-row__label">{{
+              'settings.prefs.newsletter' | transloco
+            }}</span>
+            <span class="settings-pref-row__hint">{{
+              'settings.prefs.newsletterHint' | transloco
+            }}</span>
+          </div>
+          <neu-switch
+            [(ngModel)]="prefs().newsletter"
+            (ngModelChange)="updatePref('newsletter', $event)"
+          />
+        </div>
+
+        <div class="settings-pref-row">
+          <div class="settings-pref-row__info">
+            <span class="settings-pref-row__label">{{
+              'settings.prefs.darkMode' | transloco
+            }}</span>
+            <span class="settings-pref-row__hint">{{
+              'settings.prefs.darkModeHint' | transloco
+            }}</span>
+          </div>
+          <neu-switch
+            [(ngModel)]="prefs().darkMode"
+            (ngModelChange)="updatePref('darkMode', $event)"
+          />
+        </div>
+      </div>
+    </neu-card>
+  </div>
+
+  <!-- Save button -->
+  <div class="settings-page__footer">
+    <button class="settings-save-btn" type="button" [disabled]="saving()" (click)="save()">
+      @if (saving()) {
+        {{ 'settings.saving' | transloco }}…
+      } @else {
+        {{ 'settings.save' | transloco }}
+      }
+    </button>
+  </div>
+</div>

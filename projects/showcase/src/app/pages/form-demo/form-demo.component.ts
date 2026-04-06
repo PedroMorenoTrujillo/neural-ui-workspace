@@ -1,7 +1,13 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { NeuTextareaComponent, NeuSwitchComponent, NeuCheckboxComponent, NeuRadioGroupComponent, NeuRadioComponent } from '@neural-ui/core';
+import {
+  NeuTextareaComponent,
+  NeuSwitchComponent,
+  NeuCheckboxComponent,
+  NeuRadioGroupComponent,
+  NeuRadioComponent,
+} from '@neural-ui/core';
 
 @Component({
   selector: 'app-form-demo',
