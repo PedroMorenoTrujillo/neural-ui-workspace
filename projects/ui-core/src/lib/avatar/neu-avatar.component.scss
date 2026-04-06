@@ -70,7 +70,7 @@ $colors: (
     &--#{$name} {
       width: $size;
       height: $size;
-      font-size: map-get($font-sizes, $name);
+      font-size: map.get($font-sizes, $name);
     }
   }
 
