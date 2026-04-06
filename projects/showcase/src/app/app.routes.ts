@@ -102,6 +102,18 @@ export const routes: Routes = [
       ),
     title: 'Empty State — NeuralUI',
   },
+  {
+    path: 'components/feedback',
+    loadComponent: () =>
+      import('./pages/feedback-demo/feedback-demo.component').then((m) => m.FeedbackDemoComponent),
+    title: 'Tooltip & Toast — NeuralUI',
+  },
+  {
+    path: 'components/form',
+    loadComponent: () =>
+      import('./pages/form-demo/form-demo.component').then((m) => m.FormDemoComponent),
+    title: 'Form Controls — NeuralUI',
+  },
 
   // Fallback
   {

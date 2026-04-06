@@ -139,4 +139,19 @@
   --neu-icon-size: 1.25rem; // 20px — tamaño por defecto
   --neu-icon-size-sm: 1rem; // 16px
   --neu-icon-size-lg: 1.5rem; // 24px
+
+  // ------------------------------------------------
+  // Tooltip
+  // ------------------------------------------------
+  --neu-tooltip-bg: #0f172a; // Ink-Black
+  --neu-tooltip-fg: #ffffff;
+  --neu-tooltip-radius: 6px;
+  --neu-tooltip-shadow: 0 4px 12px rgba(15, 23, 42, 0.24);
+
+  // ------------------------------------------------
+  // Toast
+  // ------------------------------------------------
+  --neu-toast-bg: var(--neu-surface);
+  --neu-toast-radius: 10px;
+  --neu-toast-shadow: 0 8px 24px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.06);
 }

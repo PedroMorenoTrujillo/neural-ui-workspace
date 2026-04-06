@@ -27,7 +27,9 @@
     "emptyState": "Empty State",
     "modal": "Modal",
     "statsCard": "Stats Card",
-    "chart": "Chart"
+    "chart": "Chart",
+    "textarea": "Textarea & Form",
+    "tooltip": "Tooltip & Toast"
   },
   "page": {
     "home": {
@@ -37,6 +39,14 @@
     "templates": {
       "title": "Premium Templates",
       "subtitle": "Dashboards y landing pages construidos con NeuralUI."
+    },
+    "form": {
+      "title": "Controles de Formulario",
+      "subtitle": "Textarea, Switch, Checkbox y Radio con ControlValueAccessor."
+    },
+    "feedback": {
+      "title": "Feedback Pro",
+      "subtitle": "Tooltip y Toast para dashboards de alto nivel."
     }
   },
   "templates": {
@@ -52,6 +62,49 @@
       "title": "¿Tienes ideas? Contribuye.",
       "desc": "NeuralUI es open source. Abre un PR o consulta el repositorio en GitHub.",
       "btn": "Ver en GitHub"
+    }
+  },
+  "demo": {
+    "textarea": {
+      "desc": "Textarea con floating label y soporte para auto-resize.",
+      "label": "Descripción",
+      "autoResize": "Auto-resize (prueba a escribir)",
+      "error": "Campo con error",
+      "errorMsg": "Este campo es requerido"
+    },
+    "switch": {
+      "desc": "Toggle animado con Electric-Blue. Compatible con Reactive Forms.",
+      "notifications": "Notificaciones push",
+      "newsletter": "Suscripción newsletter",
+      "disabled": "Opción deshabilitada"
+    },
+    "checkbox": {
+      "desc": "Checkbox personalizado y accesible.",
+      "terms": "Acepto los términos y condiciones",
+      "privacy": "Acepto la política de privacidad",
+      "disabled": "Opción deshabilitada"
+    },
+    "radio": {
+      "desc": "Grupo de selección única. El grupo implementa ControlValueAccessor.",
+      "light": "Tema claro",
+      "dark": "Tema oscuro",
+      "system": "Usar configuración del sistema",
+      "selected": "Seleccionado"
+    },
+    "tooltip": {
+      "desc": "Directiva [neuTooltip] que usa CDK Overlay. Responde a hover y focus.",
+      "top": "Tooltip arriba — muy útil para iconos de acción",
+      "bottom": "Tooltip abajo",
+      "left": "Tooltip a la izquierda",
+      "right": "Tooltip a la derecha"
+    },
+    "toast": {
+      "desc": "Notificaciones flotantes. Mobile: centro inferior. Desktop: esquina superior derecha.",
+      "success": "Toast de éxito",
+      "error": "Toast de error",
+      "warning": "Toast de advertencia",
+      "info": "Toast informativo",
+      "persistent": "Toast persistente (sin auto-hide)"
     }
   }
 }

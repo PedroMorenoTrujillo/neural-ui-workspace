@@ -36,6 +36,11 @@ import {
   lucideShoppingCart,
   lucideGithub,
   lucideInbox,
+  // Feedback (toast icons)
+  lucideCheckCircle,
+  lucideXCircle,
+  lucideAlertTriangle,
+  lucideInfo,
 } from '@ng-icons/lucide';
 
 import { routes } from './app.routes';
@@ -92,6 +97,11 @@ export const appConfig: ApplicationConfig = {
       lucideShoppingCart,
       lucideGithub,
       lucideInbox,
+      // Feedback (toast icons)
+      lucideCheckCircle,
+      lucideXCircle,
+      lucideAlertTriangle,
+      lucideInfo,
     }),
     provideNgIconsConfig({ size: '1.25rem', strokeWidth: '2' }),
   ],

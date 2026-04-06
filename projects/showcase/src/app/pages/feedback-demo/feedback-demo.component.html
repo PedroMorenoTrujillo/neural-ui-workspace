@@ -1,0 +1,73 @@
+<section class="demo-page">
+  <header class="demo-page__header">
+    <h1 class="demo-page__title">{{ 'page.feedback.title' | transloco }}</h1>
+    <p class="demo-page__subtitle">{{ 'page.feedback.subtitle' | transloco }}</p>
+  </header>
+
+  <!-- Tooltip -->
+  <div class="demo-section">
+    <h2 class="demo-section__title">neu-tooltip</h2>
+    <p class="demo-section__desc">{{ 'demo.tooltip.desc' | transloco }}</p>
+
+    <div class="demo-card">
+      <div class="demo-row demo-row--flex">
+        <button
+          class="demo-btn demo-btn--primary"
+          [neuTooltip]="'demo.tooltip.top' | transloco"
+          neuTooltipPosition="top"
+        >
+          Top
+        </button>
+        <button
+          class="demo-btn demo-btn--outline"
+          [neuTooltip]="'demo.tooltip.bottom' | transloco"
+          neuTooltipPosition="bottom"
+        >
+          Bottom
+        </button>
+        <button
+          class="demo-btn demo-btn--outline"
+          [neuTooltip]="'demo.tooltip.left' | transloco"
+          neuTooltipPosition="left"
+        >
+          Left
+        </button>
+        <button
+          class="demo-btn demo-btn--outline"
+          [neuTooltip]="'demo.tooltip.right' | transloco"
+          neuTooltipPosition="right"
+        >
+          Right
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="demo-section">
+    <h2 class="demo-section__title">neu-toast</h2>
+    <p class="demo-section__desc">{{ 'demo.toast.desc' | transloco }}</p>
+
+    <div class="demo-card">
+      <div class="demo-row demo-row--flex">
+        <button class="demo-btn demo-btn--success" (click)="showSuccess()">
+          {{ 'demo.toast.success' | transloco }}
+        </button>
+        <button class="demo-btn demo-btn--error" (click)="showError()">
+          {{ 'demo.toast.error' | transloco }}
+        </button>
+        <button class="demo-btn demo-btn--warning" (click)="showWarning()">
+          {{ 'demo.toast.warning' | transloco }}
+        </button>
+        <button class="demo-btn demo-btn--info" (click)="showInfo()">
+          {{ 'demo.toast.info' | transloco }}
+        </button>
+      </div>
+      <div class="demo-row demo-row--flex">
+        <button class="demo-btn demo-btn--outline" (click)="showPersistent()">
+          {{ 'demo.toast.persistent' | transloco }}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

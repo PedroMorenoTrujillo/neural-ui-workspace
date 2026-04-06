@@ -27,7 +27,9 @@
     "emptyState": "Empty State",
     "modal": "Modal",
     "statsCard": "Stats Card",
-    "chart": "Chart"
+    "chart": "Chart",
+    "textarea": "Textarea & Form",
+    "tooltip": "Tooltip & Toast"
   },
   "page": {
     "home": {
@@ -37,6 +39,14 @@
     "templates": {
       "title": "Premium Templates",
       "subtitle": "Dashboards and landing pages built with NeuralUI."
+    },
+    "form": {
+      "title": "Form Controls",
+      "subtitle": "Textarea, Switch, Checkbox and Radio with ControlValueAccessor."
+    },
+    "feedback": {
+      "title": "Feedback Pro",
+      "subtitle": "Tooltip and Toast for high-end dashboards."
     }
   },
   "templates": {
@@ -52,6 +62,49 @@
       "title": "Have ideas? Contribute.",
       "desc": "NeuralUI is open source. Open a PR or check the repository on GitHub.",
       "btn": "View on GitHub"
+    }
+  },
+  "demo": {
+    "textarea": {
+      "desc": "Textarea with floating label and optional auto-resize support.",
+      "label": "Description",
+      "autoResize": "Auto-resize (try typing)",
+      "error": "Field with error",
+      "errorMsg": "This field is required"
+    },
+    "switch": {
+      "desc": "Animated toggle with Electric-Blue. Compatible with Reactive Forms.",
+      "notifications": "Push notifications",
+      "newsletter": "Newsletter subscription",
+      "disabled": "Disabled option"
+    },
+    "checkbox": {
+      "desc": "Custom and accessible checkbox.",
+      "terms": "I accept the terms and conditions",
+      "privacy": "I accept the privacy policy",
+      "disabled": "Disabled option"
+    },
+    "radio": {
+      "desc": "Single-selection group. The group implements ControlValueAccessor.",
+      "light": "Light theme",
+      "dark": "Dark theme",
+      "system": "Use system settings",
+      "selected": "Selected"
+    },
+    "tooltip": {
+      "desc": "[neuTooltip] directive using CDK Overlay. Responds to hover and focus.",
+      "top": "Tooltip on top — great for action icons",
+      "bottom": "Tooltip on bottom",
+      "left": "Tooltip on the left",
+      "right": "Tooltip on the right"
+    },
+    "toast": {
+      "desc": "Floating notifications. Mobile: bottom center. Desktop: top right corner.",
+      "success": "Success toast",
+      "error": "Error toast",
+      "warning": "Warning toast",
+      "info": "Info toast",
+      "persistent": "Persistent toast (no auto-hide)"
     }
   }
 }
