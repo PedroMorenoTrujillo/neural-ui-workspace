@@ -51,6 +51,7 @@ import { NeuIconComponent } from '../icon/neu-icon.component';
       class="neu-sidebar"
       [class.neu-sidebar--open]="isOpen()"
       [class.neu-sidebar--persistent]="persistent()"
+      [class.neu-sidebar--right]="side() === 'right'"
       role="navigation"
       [attr.aria-label]="ariaLabel()"
       [attr.aria-hidden]="!isOpen() && !persistent()"
@@ -88,6 +89,9 @@ import { NeuIconComponent } from '../icon/neu-icon.component';
 })
 export class NeuSidebarComponent {
   private readonly urlState = inject(NeuUrlStateService);
+
+  /** Posición del sidebar: izquierda o derecha de la pantalla */
+  side = input<'left' | 'right'>('left');
 
   /** QueryParam que controla el estado. Default: 'menu' (?menu=open) */
   urlParam = input<string>('menu');

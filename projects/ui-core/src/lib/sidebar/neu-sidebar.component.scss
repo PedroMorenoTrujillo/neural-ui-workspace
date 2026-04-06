@@ -35,17 +35,33 @@
   display: flex;
   flex-direction: column;
   transform: translateX(-100%);
-  transition: transform var(--neu-transition-slow), box-shadow var(--neu-transition-slow);
+  transition:
+    transform var(--neu-transition-slow),
+    box-shadow var(--neu-transition-slow);
   overflow: hidden;
 
   @include neu-from-mobile {
     width: var(--neu-sidebar-width, 260px);
   }
 
-  // Overlay abierto
-  &--open:not(.neu-sidebar--persistent) {
+  // Overlay abierto (izquierda)
+  &--open:not(.neu-sidebar--persistent):not(.neu-sidebar--right) {
     transform: translateX(0);
     box-shadow: var(--neu-shadow-lg);
+  }
+
+  // ---- Variante derecha ----
+  &--right {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid var(--neu-border);
+    transform: translateX(100%);
+
+    &.neu-sidebar--open:not(.neu-sidebar--persistent) {
+      transform: translateX(0);
+      box-shadow: var(--neu-shadow-lg);
+    }
   }
 
   // ---- Modo persistente (desktop) ----

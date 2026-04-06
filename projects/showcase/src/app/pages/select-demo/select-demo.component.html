@@ -57,6 +57,9 @@
                 [options]="frameworks"
                 [disabled]="cfg.disabled"
                 [errorMessage]="cfg.error"
+                [floatingLabel]="cfg.floatingLabel"
+                [searchable]="cfg.searchable"
+                [searchPlaceholder]="cfg.searchPlaceholder"
                 [(ngModel)]="cfgValue"
                 style="min-width: 240px"
               />
@@ -109,8 +112,50 @@
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="sel-floating">floatingLabel</label>
+                <label class="demo-toggle">
+                  <input
+                    id="sel-floating"
+                    type="checkbox"
+                    [checked]="cfg.floatingLabel"
+                    (change)="cfg.floatingLabel = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="sel-searchable">searchable</label>
+                <label class="demo-toggle">
+                  <input
+                    id="sel-searchable"
+                    type="checkbox"
+                    [checked]="cfg.searchable"
+                    (change)="cfg.searchable = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              @if (cfg.searchable) {
+                <div class="demo-configurator__control-row">
+                  <label>searchPlaceholder</label>
+                  <input
+                    class="demo-select"
+                    type="text"
+                    [value]="cfg.searchPlaceholder"
+                    (input)="cfg.searchPlaceholder = $any($event.target).value"
+                    style="width: 110px"
+                  />
+                </div>
+              }
             </div>
           </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
         </div>
       </neu-tab-panel>
 

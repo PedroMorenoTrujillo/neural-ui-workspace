@@ -43,7 +43,7 @@ let _neuTextareaIdSeq = 0;
       [class.neu-textarea__wrapper--focused]="_focused()"
       [class.neu-textarea__wrapper--has-value]="hasValue()"
       [class.neu-textarea__wrapper--error]="hasError()"
-      [class.neu-textarea__wrapper--disabled]="_isDisabled()"
+      [class.neu-textarea__wrapper--disabled]="_isDisabledState()"
     >
       <textarea
         #textareaRef
@@ -51,18 +51,28 @@ let _neuTextareaIdSeq = 0;
         [id]="_id"
         [rows]="rows()"
         [placeholder]="' '"
-        [attr.disabled]="_isDisabled() ? true : null"
+        [attr.disabled]="_isDisabledState() ? true : null"
+        [attr.readonly]="readonly() ? true : null"
         [attr.required]="required() ? true : null"
         [attr.maxlength]="maxlength() ?? null"
         [attr.name]="name() || null"
+        [attr.aria-label]="label() || null"
+        [attr.aria-describedby]="hasError() ? _id + '-error' : hint() ? _id + '-hint' : null"
+        [attr.aria-invalid]="hasError() ? 'true' : null"
+        [style.resize]="_resizeStyle()"
         [value]="_value()"
         (input)="onInput($event)"
         (focus)="onFocus()"
         (blur)="onBlur()"
       ></textarea>
       <label class="neu-textarea__label" [for]="_id">{{ label() }}</label>
+      @if (hint() && !hasError()) {
+        <span class="neu-textarea__hint" [id]="_id + '-hint'">{{ hint() }}</span>
+      }
       @if (hasError()) {
-        <span class="neu-textarea__error" role="alert">{{ errorMessage() }}</span>
+        <span class="neu-textarea__error" role="alert" [id]="_id + '-error'">{{
+          errorMessage()
+        }}</span>
       }
     </div>
   `,
@@ -72,7 +82,12 @@ export class NeuTextareaComponent implements ControlValueAccessor {
   readonly label = input('');
   readonly rows = input<number>(3);
   readonly autoResize = input<boolean>(false);
+  /** Permite al usuario redimensionar el campo manualmente (por defecto: true) */
+  readonly resizable = input<boolean>(true);
   readonly errorMessage = input<string>('');
+  readonly hint = input<string>('');
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
   readonly required = input<boolean>(false);
   readonly name = input<string>('');
   readonly maxlength = input<number | null>(null);
@@ -83,8 +98,13 @@ export class NeuTextareaComponent implements ControlValueAccessor {
   protected readonly _focused = signal(false);
   protected readonly _isDisabled = signal(false);
 
+  readonly _isDisabledState = computed(() => this.disabled() || this._isDisabled());
   readonly hasValue = computed(() => this._value().length > 0);
   readonly hasError = computed(() => !!this.errorMessage());
+  readonly _resizeStyle = computed(() => {
+    if (this.autoResize()) return 'none';
+    return this.resizable() ? 'vertical' : 'none';
+  });
 
   private readonly _textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textareaRef');
 

@@ -4,6 +4,7 @@
     "home": "Home",
     "components": "Components",
     "form": "Form",
+    "actions": "Actions",
     "data": "Data",
     "navigation": "Navigation",
     "charts": "Charts",
@@ -18,23 +19,73 @@
   "comp": {
     "badge": "Badge",
     "button": "Button",
+    "splitButton": "Split Button",
+    "toggleButton": "Toggle Button",
     "card": "Card",
     "input": "Input",
     "select": "Select",
+    "multiselect": "Multiselect",
+    "dateInput": "Date Input",
+    "textarea": "Textarea",
+    "switch": "Switch",
+    "checkbox": "Checkbox",
+    "radio": "Radio",
     "sidebar": "Sidebar",
+    "nav": "Nav",
     "table": "Table",
     "avatar": "Avatar",
     "emptyState": "Empty State",
     "modal": "Modal",
     "statsCard": "Stats Card",
     "chart": "Chart",
-    "textarea": "Textarea & Form",
     "tooltip": "Tooltip & Toast"
   },
   "page": {
     "home": {
       "title": "NeuralUI — Angular Design System",
-      "subtitle": "High-quality components with Signals and OnPush, production-ready."
+      "subtitle": "High-quality components with Signals and OnPush, production-ready.",
+      "hero": {
+        "subtitle": "Modern Angular component library, built with Signals, OnPush and URL state. No external dependencies.",
+        "cta1": "View star component →",
+        "cta2": "Explore components"
+      },
+      "stats": {
+        "components": "Components",
+        "dependencies": "Dependencies",
+        "standalone": "Standalone · Signals",
+        "urlState": "Synchronized"
+      },
+      "grid": {
+        "title": "Available components",
+        "starBadge": "⭐ star"
+      },
+      "components": {
+        "badge": "Semantic status labels with 5 variants",
+        "button": "Button with 4 variants, 3 sizes and loading state",
+        "card": "Content surface with header, body and footer",
+        "input": "Text field with floating label and validation",
+        "select": "Custom dropdown with keyboard and Forms support",
+        "sidebar": "Side panel with URL-synced state",
+        "table": "Table with URL-driven search, sort and pagination"
+      },
+      "features": {
+        "reactive": {
+          "label": "Reactive by design",
+          "desc": "Angular 17+ Signals. No Zone.js overhead."
+        },
+        "urlState": {
+          "label": "URL State",
+          "desc": "Search, pagination and sorting stored in the browser bar."
+        },
+        "accessible": {
+          "label": "Accessible",
+          "desc": "ARIA roles, keyboard navigation and focus management."
+        },
+        "tokens": {
+          "label": "CSS Design Tokens",
+          "desc": "CSS variables for colors, spacing, shadows and typography."
+        }
+      }
     },
     "templates": {
       "title": "Premium Templates",

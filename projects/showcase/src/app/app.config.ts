@@ -28,6 +28,10 @@ import {
   lucideLayers,
   lucideGlobe,
   lucideZap,
+  lucideMousePointerClick,
+  // Tema dark/light
+  lucideSun,
+  lucideMoon,
   // Stats Card trend icons
   lucideTrendingUp,
   lucideTrendingDown,
@@ -41,6 +45,49 @@ import {
   lucideXCircle,
   lucideAlertTriangle,
   lucideInfo,
+  // Home — hero tech tabs
+  lucideShieldCheck,
+  lucideLink,
+  // Home — component cards
+  lucideTag,
+  lucidePlaySquare,
+  lucideLayout,
+  lucideType,
+  lucidePanelLeft,
+  lucideTable2,
+  lucideList,
+  // Home — features
+  lucideLink2,
+  lucideAccessibility,
+  lucidePalette,
+  // Toggle Button demo
+  lucideAlignLeft,
+  lucideAlignCenter,
+  lucideAlignRight,
+  lucideLayoutGrid,
+  // Button demo — iconos
+  lucidePlus,
+  lucideDownload,
+  lucideArrowRight,
+  lucideTrash2,
+  lucideSend,
+  // Nav item icons — componentes
+  lucideCalendar,
+  lucideListChecks,
+  lucideToggleLeft,
+  lucideSquareCheck,
+  lucideCircleDot,
+  lucideMaximize2,
+  lucideMessageSquare,
+  lucideFileText,
+  // Nav demo icons
+  lucideLayoutDashboard,
+  lucideActivity,
+  lucideUsers,
+  lucideImage,
+  lucideSettings,
+  lucideHelpCircle,
+  lucideExternalLink,
 } from '@ng-icons/lucide';
 
 import { routes } from './app.routes';
@@ -89,6 +136,10 @@ export const appConfig: ApplicationConfig = {
       lucideLayers,
       lucideGlobe,
       lucideZap,
+      lucideMousePointerClick,
+      // Tema dark/light
+      lucideSun,
+      lucideMoon,
       // Stats Card trend icons
       lucideTrendingUp,
       lucideTrendingDown,
@@ -102,6 +153,49 @@ export const appConfig: ApplicationConfig = {
       lucideXCircle,
       lucideAlertTriangle,
       lucideInfo,
+      // Home — hero tech tabs
+      lucideShieldCheck,
+      lucideLink,
+      // Home — component cards
+      lucideTag,
+      lucidePlaySquare,
+      lucideLayout,
+      lucideType,
+      lucidePanelLeft,
+      lucideTable2,
+      lucideList,
+      // Home — features
+      lucideLink2,
+      lucideAccessibility,
+      lucidePalette,
+      // Toggle Button demo
+      lucideAlignLeft,
+      lucideAlignCenter,
+      lucideAlignRight,
+      lucideLayoutGrid,
+      // Button demo — iconos
+      lucidePlus,
+      lucideDownload,
+      lucideArrowRight,
+      lucideTrash2,
+      lucideSend,
+      // Nav item icons — componentes
+      lucideCalendar,
+      lucideListChecks,
+      lucideToggleLeft,
+      lucideSquareCheck,
+      lucideCircleDot,
+      lucideMaximize2,
+      lucideMessageSquare,
+      lucideFileText,
+      // Nav demo icons
+      lucideLayoutDashboard,
+      lucideActivity,
+      lucideUsers,
+      lucideImage,
+      lucideSettings,
+      lucideHelpCircle,
+      lucideExternalLink,
     }),
     provideNgIconsConfig({ size: '1.25rem', strokeWidth: '2' }),
   ],

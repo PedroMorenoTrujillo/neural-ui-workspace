@@ -132,6 +132,25 @@
     cursor: wait;
     pointer-events: none;
   }
+
+  // ---- Solo icono (cuadrado) ----
+  &--icon-only {
+    &.neu-button--sm {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+    }
+    &.neu-button--md {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+    }
+    &.neu-button--lg {
+      width: 46px;
+      height: 46px;
+      padding: 0;
+    }
+  }
 }
 
 // ---- Spinner ----

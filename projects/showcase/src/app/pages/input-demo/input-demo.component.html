@@ -34,7 +34,7 @@
             <neu-input
               label="URL del repositorio"
               type="url"
-              errorMessage="La URL no es válida"
+              hint="Incluye https://"
               style="max-width: 400px"
             />
           </div>
@@ -54,6 +54,8 @@
                 [disabled]="cfg.disabled"
                 [required]="cfg.required"
                 [readonly]="cfg.readonly"
+                [floatingLabel]="cfg.floatingLabel"
+                [placeholder]="cfg.placeholder"
                 style="max-width: 280px; width: 100%"
               />
             </div>
@@ -148,8 +150,39 @@
                   <span class="demo-toggle__track"></span>
                 </label>
               </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="cfg-float">floatingLabel</label>
+                <label class="demo-toggle">
+                  <input
+                    id="cfg-float"
+                    type="checkbox"
+                    [checked]="cfg.floatingLabel"
+                    (change)="cfg.floatingLabel = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              @if (!cfg.floatingLabel) {
+                <div class="demo-configurator__control-row">
+                  <label for="cfg-placeholder">placeholder</label>
+                  <input
+                    id="cfg-placeholder"
+                    class="demo-select"
+                    type="text"
+                    [value]="cfg.placeholder"
+                    (input)="cfg.placeholder = $any($event.target).value"
+                    style="width: 120px"
+                  />
+                </div>
+              }
             </div>
           </div>
+        </div>
+        <!-- Código generado en tiempo real -->
+        <div class="demo-configurator__snippet">
+          <app-code-block [code]="configCode" lang="HTML" />
         </div>
       </neu-tab-panel>
 

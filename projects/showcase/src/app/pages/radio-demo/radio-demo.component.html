@@ -1,0 +1,161 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <h1 class="demo-hero__title">Radio</h1>
+    <p class="demo-hero__desc">
+      Grupo de opciones de selección única con soporte completo para Angular Forms.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div
+            class="demo-preview__canvas"
+            style="display: flex; flex-direction: column; gap: 24px"
+          >
+            <div>
+              <p
+                style="
+                  font-size: var(--neu-text-xs);
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Tema
+              </p>
+              <neu-radio-group [(ngModel)]="theme">
+                <neu-radio value="light" label="Claro" />
+                <neu-radio value="dark" label="Oscuro" />
+                <neu-radio value="system" label="Sistema" />
+              </neu-radio-group>
+            </div>
+            <div>
+              <p
+                style="
+                  font-size: var(--neu-text-xs);
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Tamaño
+              </p>
+              <neu-radio-group [(ngModel)]="size">
+                <neu-radio value="sm" label="Pequeño" />
+                <neu-radio value="md" label="Mediano" />
+                <neu-radio value="lg" label="Grande" />
+              </neu-radio-group>
+            </div>
+            <div>
+              <p
+                style="
+                  font-size: var(--neu-text-xs);
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Deshabilitado
+              </p>
+              <neu-radio-group [ngModel]="'b'">
+                <neu-radio value="a" label="Opción A" [disabled]="true" />
+                <neu-radio value="b" label="Opción B (marcada)" [disabled]="true" />
+                <neu-radio value="c" label="Opción C" [disabled]="true" />
+              </neu-radio-group>
+            </div>
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview">
+              <neu-radio-group [(ngModel)]="cfgTheme">
+                <neu-radio value="light" label="Claro" [disabled]="cfg.disabled" />
+                <neu-radio value="dark" label="Oscuro" [disabled]="cfg.disabled" />
+                <neu-radio value="system" label="Sistema" [disabled]="cfg.disabled" />
+              </neu-radio-group>
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label for="rb-disabled">disabled</label>
+                <label class="demo-toggle">
+                  <input
+                    id="rb-disabled"
+                    type="checkbox"
+                    [checked]="cfg.disabled"
+                    (change)="cfg.disabled = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Componente / Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>neu-radio-group</code></td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>Contenedor, gestiona el valor seleccionado (CVA)</td>
+                </tr>
+                <tr>
+                  <td><code>neu-radio[value]</code></td>
+                  <td><code>string</code></td>
+                  <td>—</td>
+                  <td>Valor de esta opción</td>
+                </tr>
+                <tr>
+                  <td><code>neu-radio[label]</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Texto de la opción</td>
+                </tr>
+                <tr>
+                  <td><code>neu-radio[disabled]</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Deshabilita esta opción</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

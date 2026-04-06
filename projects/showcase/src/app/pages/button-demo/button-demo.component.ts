@@ -36,11 +36,17 @@ export class ButtonDemoComponent {
     size: 'sm' | 'md' | 'lg';
     disabled: boolean;
     label: string;
+    icon: string;
+    iconPosition: 'left' | 'right';
+    iconOnly: boolean;
   } = {
     variant: 'primary',
     size: 'md',
     disabled: false,
     label: 'Confirmar',
+    icon: '',
+    iconPosition: 'left',
+    iconOnly: false,
   };
 
   simulateLoad(): void {
@@ -48,17 +54,40 @@ export class ButtonDemoComponent {
     setTimeout(() => this.isLoading.set(false), 2500);
   }
 
+  get configCode(): string {
+    const attrs: string[] = [];
+    if (this.cfg.variant !== 'primary') attrs.push(` variant="${this.cfg.variant}"`);
+    if (this.cfg.size !== 'md') attrs.push(` size="${this.cfg.size}"`);
+    if (this.cfg.disabled) attrs.push(` [disabled]="true"`);
+    if (this.cfg.icon) attrs.push(` icon="${this.cfg.icon}"`);
+    if (this.cfg.icon && this.cfg.iconPosition !== 'left')
+      attrs.push(` iconPosition="${this.cfg.iconPosition}"`);
+    if (this.cfg.iconOnly) attrs.push(` [iconOnly]="true"`);
+    const attrsStr = attrs.join('');
+    const content = this.cfg.iconOnly ? '' : this.cfg.label;
+    return `<button neu-button${attrsStr}>${content}</button>`;
+  }
+
   readonly usageCode = `import { NeuButtonComponent } from '@neural-ui/core';
 
 @Component({
   imports: [NeuButtonComponent],
   template: \`
+    <!-- Solo texto -->
     <button neu-button>Default</button>
     <button neu-button variant="primary">Primary</button>
-    <button neu-button variant="ghost" size="sm">Ghost sm</button>
-    <button neu-button [loading]="isLoading()" (click)="save()">
-      Guardar
-    </button>
+
+    <!-- Icono a la izquierda (por defecto) -->
+    <button neu-button icon="lucidePlus">Nuevo</button>
+
+    <!-- Icono a la derecha -->
+    <button neu-button icon="lucideArrowRight" iconPosition="right">Siguiente</button>
+
+    <!-- Solo icono (cuadrado) -->
+    <button neu-button variant="ghost" icon="lucideTrash2" [iconOnly]="true" />
+
+    <!-- Loading -->
+    <button neu-button [loading]="isLoading()" (click)="save()">Guardar</button>
   \`
 })
 export class MyComponent {

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
 import {
   NeuBadgeComponent,
   NeuCardComponent,
+  NeuCodeBlockComponent,
   NeuTab,
   NeuTabPanelComponent,
   NeuTabsComponent,
@@ -9,7 +10,13 @@ import {
 
 @Component({
   selector: 'app-card-demo',
-  imports: [NeuCardComponent, NeuBadgeComponent, NeuTabsComponent, NeuTabPanelComponent],
+  imports: [
+    NeuCardComponent,
+    NeuBadgeComponent,
+    NeuCodeBlockComponent,
+    NeuTabsComponent,
+    NeuTabPanelComponent,
+  ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './card-demo.component.html',
@@ -28,6 +35,16 @@ export class CardDemoComponent {
     bordered: false,
     padding: 'md' as 'none' | 'sm' | 'md' | 'lg',
   };
+
+  get configCode(): string {
+    const attrs: string[] = [];
+    if (this.cfg.hoverable) attrs.push(`[hoverable]="true"`);
+    if (this.cfg.flat) attrs.push(`[flat]="true"`);
+    if (this.cfg.bordered) attrs.push(`[bordered]="true"`);
+    if (this.cfg.padding !== 'md') attrs.push(`padding="${this.cfg.padding}"`);
+    const attrsStr = attrs.length ? '\n  ' + attrs.join('\n  ') + '\n' : '';
+    return `<neu-card${attrsStr}>\n  <p>Contenido</p>\n</neu-card>`;
+  }
 
   readonly basicCode = `<neu-card>
   <div neu-card-header>

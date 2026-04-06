@@ -1,0 +1,204 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <h1 class="demo-hero__title">Multiselect</h1>
+    <p class="demo-hero__desc">
+      Dropdown de selección múltiple con chips, búsqueda integrada y soporte completo para Angular
+      Forms. Resumen en footer y limpieza con un clic.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div
+            class="demo-preview__canvas"
+            style="display: flex; flex-direction: column; gap: 24px; max-width: 360px"
+          >
+            <neu-multiselect
+              label="Tecnologías"
+              [options]="technologies"
+              [(ngModel)]="previewTechs"
+            />
+            <neu-multiselect
+              label="Países"
+              placeholder="Elige países..."
+              [options]="countries"
+              [(ngModel)]="previewCountries"
+            />
+            <neu-multiselect
+              label="Con error"
+              [options]="technologies"
+              errorMessage="Debes seleccionar al menos una opción"
+            />
+            <neu-multiselect label="Deshabilitado" [options]="technologies" [disabled]="true" />
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview">
+              <neu-multiselect
+                [label]="cfg.label"
+                [placeholder]="cfg.placeholder"
+                [searchable]="cfg.searchable"
+                [searchPlaceholder]="cfg.searchPlaceholder"
+                [options]="technologies"
+                [disabled]="cfg.disabled"
+                [errorMessage]="cfg.error"
+                [(ngModel)]="cfgValue"
+                style="min-width: 260px"
+              />
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label>Label</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.label"
+                  (input)="cfg.label = $any($event.target).value"
+                  style="width: 110px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Placeholder</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.placeholder"
+                  (input)="cfg.placeholder = $any($event.target).value"
+                  style="width: 110px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="ms-searchable">searchable</label>
+                <label class="demo-toggle">
+                  <input
+                    id="ms-searchable"
+                    type="checkbox"
+                    [checked]="cfg.searchable"
+                    (change)="cfg.searchable = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>searchPlaceholder</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.searchPlaceholder"
+                  [disabled]="!cfg.searchable"
+                  (input)="cfg.searchPlaceholder = $any($event.target).value"
+                  style="width: 110px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Error</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.error"
+                  (input)="cfg.error = $any($event.target).value"
+                  style="width: 110px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="ms-disabled">disabled</label>
+                <label class="demo-toggle">
+                  <input
+                    id="ms-disabled"
+                    type="checkbox"
+                    [checked]="cfg.disabled"
+                    (change)="cfg.disabled = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>options</code></td>
+                  <td><code>NeuSelectOption[]</code></td>
+                  <td><code>[]</code></td>
+                  <td>Lista de opciones disponibles</td>
+                </tr>
+                <tr>
+                  <td><code>label</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Etiqueta visible encima del componente</td>
+                </tr>
+                <tr>
+                  <td><code>placeholder</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Seleccionar...'</code></td>
+                  <td>Texto cuando no hay selección</td>
+                </tr>
+                <tr>
+                  <td><code>searchPlaceholder</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Buscar...'</code></td>
+                  <td>Placeholder del input de búsqueda</td>
+                </tr>
+                <tr>
+                  <td><code>errorMessage</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Activa estado de error con mensaje</td>
+                </tr>
+                <tr>
+                  <td><code>disabled</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Deshabilita el componente</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <p
+            style="font-size: var(--neu-text-sm); color: var(--neu-text-muted); margin-bottom: 12px"
+          >
+            El valor del componente es <code>string[]</code> — compatible con <code>ngModel</code> y
+            <code>FormControl&lt;string[]&gt;</code>.
+          </p>
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

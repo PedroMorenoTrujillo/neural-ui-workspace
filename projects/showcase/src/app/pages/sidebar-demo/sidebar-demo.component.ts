@@ -3,6 +3,7 @@ import {
   NeuBadgeComponent,
   NeuButtonComponent,
   NeuCodeBlockComponent,
+  NeuSidebarComponent,
   NeuTab,
   NeuTabPanelComponent,
   NeuTabsComponent,
@@ -11,7 +12,14 @@ import {
 
 @Component({
   selector: 'app-sidebar-demo',
-  imports: [NeuButtonComponent, NeuBadgeComponent, NeuTabsComponent, NeuTabPanelComponent, NeuCodeBlockComponent],
+  imports: [
+    NeuButtonComponent,
+    NeuBadgeComponent,
+    NeuTabsComponent,
+    NeuTabPanelComponent,
+    NeuCodeBlockComponent,
+    NeuSidebarComponent,
+  ],
   templateUrl: './sidebar-demo.component.html',
   styleUrl: './sidebar-demo.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -26,6 +34,7 @@ export class SidebarDemoComponent {
   ];
 
   readonly isDemoOpen = this.urlState.getParam('sidebar-demo');
+  readonly isDemoRightOpen = this.urlState.getParam('sidebar-demo-right');
 
   openDemo(): void {
     this.urlState.setParam('sidebar-demo', 'open', false);
@@ -33,6 +42,10 @@ export class SidebarDemoComponent {
 
   closeDemo(): void {
     this.urlState.setParam('sidebar-demo', null, false);
+  }
+
+  openDemoRight(): void {
+    this.urlState.setParam('sidebar-demo-right', 'open', false);
   }
 
   readonly usageCode = `import { NeuSidebarComponent, NeuUrlStateService } from '@neural-ui/core';

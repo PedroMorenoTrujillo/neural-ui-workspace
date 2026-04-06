@@ -161,3 +161,23 @@ $label-font-floating: 11px;
   color: var(--neu-text-muted);
   font-family: var(--neu-font-sans);
 }
+
+// ---- Static label (floatingLabel=false) ----
+.neu-input__static-label {
+  display: block;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  margin-bottom: var(--neu-space-2);
+}
+
+// ---- No float mode ----
+.neu-input__wrapper--no-float {
+  .neu-input__field {
+    padding: 0 var(--neu-space-3);
+
+    &::placeholder {
+      color: var(--neu-text-disabled);
+    }
+  }
+}

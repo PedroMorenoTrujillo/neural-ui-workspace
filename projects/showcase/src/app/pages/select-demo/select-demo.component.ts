@@ -60,8 +60,27 @@ export class SelectDemoComponent {
     placeholder: 'Seleccionar...',
     error: '',
     disabled: false,
+    floatingLabel: false,
+    searchable: false,
+    searchPlaceholder: 'Buscar...',
   };
   cfgValue = '';
+
+  get configCode(): string {
+    const lines: string[] = [`<neu-select`];
+    if (this.cfg.label) lines.push(`  label="${this.cfg.label}"`);
+    if (this.cfg.placeholder !== 'Seleccionar...')
+      lines.push(`  placeholder="${this.cfg.placeholder}"`);
+    lines.push(`  [options]="options"`);
+    if (this.cfg.floatingLabel) lines.push(`  [floatingLabel]="true"`);
+    if (this.cfg.searchable) lines.push(`  [searchable]="true"`);
+    if (this.cfg.searchable && this.cfg.searchPlaceholder !== 'Buscar...')
+      lines.push(`  searchPlaceholder="${this.cfg.searchPlaceholder}"`);
+    if (this.cfg.error) lines.push(`  errorMessage="${this.cfg.error}"`);
+    if (this.cfg.disabled) lines.push(`  [disabled]="true"`);
+    lines.push(`/>`);
+    return lines.join('\n');
+  }
 
   readonly usageCode = `import { NeuSelectComponent } from '@neural-ui/core';
 import { FormsModule } from '@angular/forms';

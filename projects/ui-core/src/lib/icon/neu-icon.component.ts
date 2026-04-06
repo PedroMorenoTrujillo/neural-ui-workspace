@@ -30,12 +30,18 @@ import { NgIcon } from '@ng-icons/core';
     '[style.line-height]': '"1"',
     '[style.color]': '"inherit"',
   },
-  template: `<ng-icon [name]="name()" [size]="resolvedSize()" />`,
+  template: `<ng-icon [name]="name()" [size]="resolvedSize()" [strokeWidth]="strokeWidth()" />`,
   styleUrl: './neu-icon.component.scss',
 })
 export class NeuIconComponent {
   /** Nombre del icono registrado con provideIcons() */
   name = input.required<string>();
+
+  /**
+   * Grosor del trazo. Default '2' para estética fina y técnica.
+   * Puede sobrescribirse por instancia.
+   */
+  strokeWidth = input<string>('2');
 
   /**
    * Tamaño del icono. Acepta cualquier unidad CSS válida.

@@ -14,8 +14,8 @@
   --neu-primary-100: #dbeafe;
   --neu-primary-fg: #ffffff;
 
-  --neu-secondary: #5856d6;
-  --neu-secondary-dark: #4340b8;
+  --neu-secondary: #10b981;
+  --neu-secondary-dark: #059669;
   --neu-secondary-fg: #ffffff;
 
   --neu-accent: #5ac8fa;
@@ -154,4 +154,57 @@
   --neu-toast-bg: var(--neu-surface);
   --neu-toast-radius: 10px;
   --neu-toast-shadow: 0 8px 24px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+// ============================================================
+// NeuralUI — Dark Theme Tokens
+// Activado con: document.documentElement.setAttribute('data-theme', 'dark')
+// ============================================================
+[data-theme='dark'] {
+  // ---- Brand (mantienen el mismo azul, se adaptan los fondos) ----
+  --neu-primary-50: rgba(0, 122, 255, 0.12);
+  --neu-primary-100: rgba(0, 122, 255, 0.2);
+
+  // ---- Fondos ----
+  --neu-bg: #0d1117; // GitHub-dark inspired — fondo base
+  --neu-surface: #161b22; // Tarjetas, paneles
+  --neu-surface-2: #21262d; // Hover, fondos secundarios
+  --neu-surface-3: #30363d; // Separadores, track de switch
+
+  // ---- Bordes ----
+  --neu-border: rgba(255, 255, 255, 0.08);
+  --neu-border-hover: rgba(255, 255, 255, 0.16);
+
+  // ---- Texto ----
+  --neu-text: #e6edf3; // Casi blanco — texto principal
+  --neu-text-muted: #8b949e; // Slate-400 equivalent — subtítulos
+  --neu-text-disabled: #484f58; // Elementos deshabilitados
+
+  // ---- Semánticos — fondos ajustados a dark ----
+  --neu-success-bg: rgba(16, 185, 129, 0.15);
+  --neu-success-text: #6ee7b7;
+
+  --neu-warning-bg: rgba(245, 158, 11, 0.15);
+  --neu-warning-text: #fcd34d;
+
+  --neu-error-bg: rgba(239, 68, 68, 0.15);
+  --neu-error-text: #fca5a5;
+
+  --neu-info-bg: rgba(0, 122, 255, 0.15);
+  --neu-info-text: #93c5fd;
+
+  // ---- Sombras (desaparecen en dark, se usan bordes) ----
+  --neu-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --neu-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --neu-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --neu-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+  --neu-shadow-glow: 0 0 20px rgba(0, 122, 255, 0.35);
+
+  // ---- Tooltip: fondo claro sobre dark para contraste ----
+  --neu-tooltip-bg: #e6edf3;
+  --neu-tooltip-fg: #0d1117;
+  --neu-tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  // ---- Toast ----
+  --neu-toast-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
 }

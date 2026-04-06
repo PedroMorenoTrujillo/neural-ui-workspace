@@ -1,0 +1,262 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <h1 class="demo-hero__title">Date Input</h1>
+    <p class="demo-hero__desc">
+      Campo de fecha, hora y fecha+hora con icono, estilo consistente con el sistema y soporte
+      completo para Angular Forms.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div
+            class="demo-preview__canvas"
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+              gap: 24px;
+            "
+          >
+            <neu-date-input label="Fecha de nacimiento" type="date" [(ngModel)]="previewDate" />
+            <neu-date-input label="Hora de inicio" type="time" [(ngModel)]="previewTime" />
+            <neu-date-input
+              label="Fecha y hora del evento"
+              type="datetime-local"
+              [(ngModel)]="previewDatetime"
+            />
+            <neu-date-input
+              label="Fecha límite"
+              type="date"
+              hint="No puede ser anterior a hoy"
+              min="2026-04-06"
+            />
+            <neu-date-input label="Con error" type="date" errorMessage="La fecha es obligatoria" />
+            <neu-date-input label="Deshabilitado" type="date" [disabled]="true" />
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview">
+              <neu-date-input
+                [label]="cfg.label"
+                [type]="cfg.type"
+                [hint]="cfg.hint"
+                [errorMessage]="cfg.error"
+                [disabled]="cfg.disabled"
+                [required]="cfg.required"
+                [min]="cfg.min || null"
+                [max]="cfg.max || null"
+                [(ngModel)]="cfgValue"
+                style="max-width: 280px; width: 100%"
+              />
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label>Label</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.label"
+                  (input)="cfg.label = $any($event.target).value"
+                  style="width: 120px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Tipo</label>
+                <select
+                  class="demo-select"
+                  [value]="cfg.type"
+                  (change)="cfg.type = $any($event.target).value"
+                >
+                  <option value="date">date</option>
+                  <option value="time">time</option>
+                  <option value="datetime-local">datetime-local</option>
+                </select>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Min</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.min"
+                  (input)="cfg.min = $any($event.target).value"
+                  style="width: 120px"
+                  placeholder="YYYY-MM-DD"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Max</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.max"
+                  (input)="cfg.max = $any($event.target).value"
+                  style="width: 120px"
+                  placeholder="YYYY-MM-DD"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Hint</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.hint"
+                  (input)="cfg.hint = $any($event.target).value"
+                  style="width: 120px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>Error</label>
+                <input
+                  class="demo-select"
+                  type="text"
+                  [value]="cfg.error"
+                  (input)="cfg.error = $any($event.target).value"
+                  style="width: 120px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="di-disabled">disabled</label>
+                <label class="demo-toggle">
+                  <input
+                    id="di-disabled"
+                    type="checkbox"
+                    [checked]="cfg.disabled"
+                    (change)="cfg.disabled = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="di-required">required</label>
+                <label class="demo-toggle">
+                  <input
+                    id="di-required"
+                    type="checkbox"
+                    [checked]="cfg.required"
+                    (change)="cfg.required = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>type</code></td>
+                  <td><code>'date' | 'time' | 'datetime-local'</code></td>
+                  <td><code>'date'</code></td>
+                  <td>Tipo de picker</td>
+                </tr>
+                <tr>
+                  <td><code>label</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Etiqueta visible encima del campo</td>
+                </tr>
+                <tr>
+                  <td><code>hint</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Texto de ayuda</td>
+                </tr>
+                <tr>
+                  <td><code>errorMessage</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Activa el estado de error con mensaje</td>
+                </tr>
+                <tr>
+                  <td><code>min</code></td>
+                  <td><code>string | null</code></td>
+                  <td><code>null</code></td>
+                  <td>Valor mínimo (ISO: YYYY-MM-DD o HH:mm)</td>
+                </tr>
+                <tr>
+                  <td><code>max</code></td>
+                  <td><code>string | null</code></td>
+                  <td><code>null</code></td>
+                  <td>Valor máximo (ISO)</td>
+                </tr>
+                <tr>
+                  <td><code>step</code></td>
+                  <td><code>number | null</code></td>
+                  <td><code>null</code></td>
+                  <td>Paso de incremento</td>
+                </tr>
+                <tr>
+                  <td><code>disabled</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Deshabilita el campo</td>
+                </tr>
+                <tr>
+                  <td><code>required</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Atributo HTML required</td>
+                </tr>
+                <tr>
+                  <td><code>readonly</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Atributo HTML readonly</td>
+                </tr>
+                <tr>
+                  <td><code>name</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Atributo name para formularios nativos</td>
+                </tr>
+                <tr>
+                  <td><code>inputId</code></td>
+                  <td><code>string</code></td>
+                  <td><em>auto</em></td>
+                  <td>ID accesible (generado automáticamente)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

@@ -4,6 +4,7 @@
     "home": "Inicio",
     "components": "Componentes",
     "form": "Formularios",
+    "actions": "Acciones",
     "data": "Datos",
     "navigation": "Navegación",
     "charts": "Gráficas",
@@ -18,23 +19,73 @@
   "comp": {
     "badge": "Badge",
     "button": "Button",
+    "splitButton": "Split Button",
+    "toggleButton": "Toggle Button",
     "card": "Card",
     "input": "Input",
     "select": "Select",
+    "multiselect": "Multiselect",
+    "dateInput": "Date Input",
+    "textarea": "Textarea",
+    "switch": "Switch",
+    "checkbox": "Checkbox",
+    "radio": "Radio",
     "sidebar": "Sidebar",
+    "nav": "Nav",
     "table": "Table",
     "avatar": "Avatar",
     "emptyState": "Empty State",
     "modal": "Modal",
     "statsCard": "Stats Card",
     "chart": "Chart",
-    "textarea": "Textarea & Form",
     "tooltip": "Tooltip & Toast"
   },
   "page": {
     "home": {
       "title": "NeuralUI — Sistema de Diseño Angular",
-      "subtitle": "Componentes de alta calidad con Signals y OnPush, listos para producción."
+      "subtitle": "Componentes de alta calidad con Signals y OnPush, listos para producción.",
+      "hero": {
+        "subtitle": "Librería de componentes Angular moderna, construida con Signals, OnPush y estado en la URL. Sin dependencias externas.",
+        "cta1": "Ver componente estrella →",
+        "cta2": "Explorar componentes"
+      },
+      "stats": {
+        "components": "Componentes",
+        "dependencies": "Dependencias",
+        "standalone": "Standalone · Signals",
+        "urlState": "Sincronizado"
+      },
+      "grid": {
+        "title": "Componentes disponibles",
+        "starBadge": "⭐ estrella"
+      },
+      "components": {
+        "badge": "Etiquetas de estado semánticas con 5 variantes",
+        "button": "Botón con 4 variantes, 3 tamaños y estado loading",
+        "card": "Superficie de contenido con header, body y footer",
+        "input": "Campo de texto con floating label y validación",
+        "select": "Dropdown personalizado con teclado y Forms",
+        "sidebar": "Panel lateral con estado sincronizado a la URL",
+        "table": "Tabla con búsqueda, orden y paginación URL-driven"
+      },
+      "features": {
+        "reactive": {
+          "label": "Reactivo por diseño",
+          "desc": "Signals de Angular 17+. Sin Zone.js overhead."
+        },
+        "urlState": {
+          "label": "Estado en la URL",
+          "desc": "Búsqueda, paginación y ordenación en la barra del navegador."
+        },
+        "accessible": {
+          "label": "Accesible",
+          "desc": "ARIA roles, keyboard navigation y focus management."
+        },
+        "tokens": {
+          "label": "Design Tokens CSS",
+          "desc": "Variables CSS para colores, espaciado, sombras y tipografía."
+        }
+      }
     },
     "templates": {
       "title": "Premium Templates",

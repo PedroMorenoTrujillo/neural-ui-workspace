@@ -37,6 +37,6 @@
     },
     {
       "path": "./projects/showcase/tsconfig.spec.json"
-    },
+    }
   ]
 }

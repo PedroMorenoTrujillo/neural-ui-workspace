@@ -27,7 +27,7 @@ let _neuRadioIdSeq = 0;
     <label
       class="neu-radio"
       [class.neu-radio--checked]="isChecked()"
-      [class.neu-radio--disabled]="group._isDisabled()"
+      [class.neu-radio--disabled]="isDisabled()"
       [for]="_id"
     >
       <input
@@ -37,7 +37,7 @@ let _neuRadioIdSeq = 0;
         [name]="_groupName"
         [value]="value()"
         [checked]="isChecked()"
-        [disabled]="group._isDisabled()"
+        [disabled]="isDisabled()"
         (change)="onSelect()"
         (blur)="onBlur()"
       />
@@ -53,6 +53,7 @@ let _neuRadioIdSeq = 0;
 export class NeuRadioComponent {
   readonly value = input.required<unknown>();
   readonly label = input<string>('');
+  readonly disabled = input<boolean>(false);
 
   readonly group = inject(NEU_RADIO_GROUP);
 
@@ -60,6 +61,7 @@ export class NeuRadioComponent {
   readonly _groupName = `neu-radio-group-${Math.random().toString(36).slice(2, 7)}`;
 
   readonly isChecked = computed(() => this.group._value() === this.value());
+  readonly isDisabled = computed(() => this.disabled() || this.group._isDisabled());
 
   onSelect(): void {
     this.group.select(this.value());

@@ -35,7 +35,7 @@ const TOAST_ICONS: Record<NeuToastType, string> = {
     @for (toast of toastService.toasts(); track toast.id) {
       <div class="neu-toast" [class]="'neu-toast neu-toast--' + toast.type" role="alert">
         <span class="neu-toast__icon-wrap" aria-hidden="true">
-          <neu-icon [name]="getIcon(toast.type)" size="sm" />
+          <neu-icon [name]="getIcon(toast.type)" size="1rem" />
         </span>
         <div class="neu-toast__body">
           @if (toast.title) {
@@ -49,7 +49,7 @@ const TOAST_ICONS: Record<NeuToastType, string> = {
           [attr.aria-label]="'Cerrar'"
           (click)="toastService.dismiss(toast.id)"
         >
-          <neu-icon name="lucideX" size="sm" />
+          <neu-icon name="lucideX" size="1rem" />
         </button>
       </div>
     }

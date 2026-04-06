@@ -81,7 +81,8 @@ $select-height: 48px;
     transform var(--neu-transition);
 
   .neu-select--open &,
-  .neu-select--has-value & {
+  .neu-select--has-value &,
+  .neu-select--has-placeholder & {
     top: 10px;
     font-size: 11px;
     font-weight: 500;
@@ -101,7 +102,12 @@ $select-height: 48px;
   white-space: nowrap;
   padding-top: 14px; // Espacio para el label flotado
 
-  .neu-select:not(.neu-select--has-value):not(.neu-select--open) & {
+  .neu-select:not(.neu-select--has-value):not(.neu-select--open):not(.neu-select--has-placeholder)
+    & {
+    padding-top: 0;
+  }
+
+  .neu-select--no-float & {
     padding-top: 0;
   }
 }
@@ -207,5 +213,58 @@ $select-height: 48px;
   margin-top: var(--neu-space-1);
   font-size: var(--neu-text-xs);
   color: var(--neu-error-text);
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Static label (floatingLabel=false) ----
+.neu-select__static-label {
+  display: block;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  margin-bottom: var(--neu-space-2);
+}
+
+// ---- Search input en el panel ----
+.neu-select__search {
+  padding: var(--neu-space-2);
+  border-bottom: 1px solid var(--neu-border);
+  position: sticky;
+  top: 0;
+  background: var(--neu-surface);
+  z-index: 1;
+}
+
+.neu-select__search-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 var(--neu-space-3);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-bg);
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+  outline: none;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &:focus {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.12);
+  }
+
+  &::placeholder {
+    color: var(--neu-text-disabled);
+  }
+}
+
+// ---- Empty state ----
+.neu-select__empty {
+  padding: var(--neu-space-4);
+  text-align: center;
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-disabled);
   font-family: var(--neu-font-sans);
 }

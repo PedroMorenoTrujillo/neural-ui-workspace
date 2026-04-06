@@ -11,10 +11,22 @@
 @use '../../ui-core/src/lib/card/neu-card.component.scss';
 @use '../../ui-core/src/lib/code-block/neu-code-block.component.scss';
 @use '../../ui-core/src/lib/input/neu-input.component.scss';
+@use '../../ui-core/src/lib/modal/neu-modal.component.scss';
 @use '../../ui-core/src/lib/select/neu-select.component.scss';
 @use '../../ui-core/src/lib/sidebar/neu-sidebar.component.scss';
 @use '../../ui-core/src/lib/table/neu-table.component.scss';
 @use '../../ui-core/src/lib/tabs/neu-tabs.component.scss';
+@use '../../ui-core/src/lib/toast/neu-toast.component.scss';
+@use '../../ui-core/src/lib/tooltip/neu-tooltip.component.scss';
+@use '../../ui-core/src/lib/avatar/neu-avatar.component.scss';
+@use '../../ui-core/src/lib/textarea/neu-textarea.component.scss';
+@use '../../ui-core/src/lib/switch/neu-switch.component.scss';
+@use '../../ui-core/src/lib/checkbox/neu-checkbox.component.scss';
+@use '../../ui-core/src/lib/radio/neu-radio.component.scss';
+@use '../../ui-core/src/lib/empty-state/neu-empty-state.component.scss';
+@use '../../ui-core/src/lib/skeleton/neu-skeleton.component.scss';
+@use '../../ui-core/src/lib/stats-card/neu-stats-card.component.scss';
+@use '../../ui-core/src/lib/chart/neu-chart.component.scss';
 
 // ---- Reset y base ----
 *,
@@ -39,13 +51,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   line-height: 1.2;
   font-weight: 700;
 }
 
-a { color: var(--neu-primary); text-decoration: none; }
-code, kbd, pre, samp { font-family: var(--neu-font-mono); }
+a {
+  color: var(--neu-primary);
+  text-decoration: none;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--neu-font-mono);
+}
 
 :focus-visible {
   outline: 2px solid var(--neu-primary);
@@ -53,12 +78,19 @@ code, kbd, pre, samp { font-family: var(--neu-font-mono); }
   border-radius: var(--neu-radius-xs);
 }
 
-::-webkit-scrollbar       { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 ::-webkit-scrollbar-thumb {
   background: var(--neu-surface-3);
   border-radius: var(--neu-radius-full);
-  &:hover { background: var(--neu-text-disabled); }
+  &:hover {
+    background: var(--neu-text-disabled);
+  }
 }
 
 ::selection {
@@ -136,7 +168,7 @@ $demo-max-width: 960px;
 .demo-preview {
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius-lg);
-  overflow: hidden;
+  overflow: visible;
 
   // Pestaña visual (integra con NeuTabs)
   &--tabs {
@@ -150,12 +182,14 @@ $demo-max-width: 960px;
     background: var(--neu-bg);
     display: flex;
     flex-direction: column;
-    gap: var(--neu-space-4);
+    gap: var(--neu-space-6);
 
     &--flex {
+      display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-start;
+      gap: var(--neu-space-3);
     }
 
     &--grid {
@@ -176,10 +210,7 @@ $demo-max-width: 960px;
 .demo-configurator {
   display: grid;
   grid-template-columns: 1fr 280px;
-  gap: var(--neu-space-6);
-  border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-lg);
-  overflow: hidden;
+  gap: 0;
 
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
@@ -214,6 +245,16 @@ $demo-max-width: 960px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--neu-text-disabled);
+  }
+
+  &__snippet {
+    margin-top: var(--neu-space-4);
+    border-radius: var(--neu-radius-lg);
+    overflow: hidden;
+
+    .neu-code-block {
+      border-radius: var(--neu-radius-lg);
+    }
   }
 
   &__control-row {
@@ -271,7 +312,9 @@ $demo-max-width: 960px;
 
   input:checked ~ .demo-toggle__track {
     background: var(--neu-primary);
-    &::after { transform: translateX(16px); }
+    &::after {
+      transform: translateX(16px);
+    }
   }
 
   input:focus-visible ~ .demo-toggle__track {
@@ -293,7 +336,9 @@ $demo-max-width: 960px;
   cursor: pointer;
   outline: none;
 
-  &:focus { border-color: var(--neu-primary); }
+  &:focus {
+    border-color: var(--neu-primary);
+  }
 }
 
 // ---- Tabla de API ----
@@ -308,7 +353,8 @@ $demo-max-width: 960px;
   border-collapse: collapse;
   font-size: var(--neu-text-sm);
 
-  th, td {
+  th,
+  td {
     padding: var(--neu-space-3) var(--neu-space-4);
     text-align: left;
     border-bottom: 1px solid var(--neu-border);
@@ -323,8 +369,12 @@ $demo-max-width: 960px;
     color: var(--neu-text-muted);
   }
 
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--neu-surface-2); }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  tr:hover td {
+    background: var(--neu-surface-2);
+  }
 
   code {
     padding: 2px 6px;

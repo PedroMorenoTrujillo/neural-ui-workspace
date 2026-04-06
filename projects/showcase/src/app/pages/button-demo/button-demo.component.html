@@ -29,7 +29,7 @@
               </p>
               <div
                 class="demo-preview__canvas--flex"
-                style="padding: 0; gap: 10px; flex-wrap: wrap"
+                style="padding: 0; gap: 16px; flex-wrap: wrap"
               >
                 <button neu-button variant="outline">Outline</button>
                 <button neu-button variant="primary">Primary</button>
@@ -53,7 +53,7 @@
               </p>
               <div
                 class="demo-preview__canvas--flex"
-                style="padding: 0; gap: 10px; align-items: center"
+                style="padding: 0; gap: 16px; align-items: center"
               >
                 <button neu-button size="sm">Small</button>
                 <button neu-button>Medium</button>
@@ -73,7 +73,7 @@
               >
                 Estados
               </p>
-              <div class="demo-preview__canvas--flex" style="padding: 0; gap: 10px">
+              <div class="demo-preview__canvas--flex" style="padding: 0; gap: 16px">
                 <button neu-button [disabled]="true">Disabled</button>
                 <button
                   neu-button
@@ -83,6 +83,41 @@
                 >
                   {{ isLoading() ? 'Guardando...' : 'Guardar' }}
                 </button>
+              </div>
+            </div>
+
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Iconos
+              </p>
+              <div
+                class="demo-preview__canvas--flex"
+                style="padding: 0; gap: 12px; align-items: center; flex-wrap: wrap"
+              >
+                <button neu-button icon="lucidePlus">Nuevo</button>
+                <button neu-button variant="secondary" icon="lucideDownload">Descargar</button>
+                <button neu-button variant="outline" icon="lucideArrowRight" iconPosition="right">
+                  Siguiente
+                </button>
+                <button neu-button variant="ghost" icon="lucideSend">Enviar</button>
+                <button neu-button variant="danger" icon="lucideTrash2" [iconOnly]="true"></button>
+                <button neu-button variant="ghost" icon="lucidePlus" [iconOnly]="true"></button>
+                <button
+                  neu-button
+                  variant="outline"
+                  icon="lucideDownload"
+                  size="sm"
+                  [iconOnly]="true"
+                ></button>
               </div>
             </div>
           </div>
@@ -99,8 +134,11 @@
                 [variant]="cfg.variant"
                 [size]="cfg.size"
                 [disabled]="cfg.disabled"
+                [icon]="cfg.icon"
+                [iconPosition]="cfg.iconPosition"
+                [iconOnly]="cfg.iconOnly"
               >
-                {{ cfg.label }}
+                {{ cfg.iconOnly ? '' : cfg.label }}
               </button>
             </div>
             <div class="demo-configurator__controls">
@@ -146,6 +184,48 @@
               </div>
 
               <div class="demo-configurator__control-row">
+                <label>icon</label>
+                <select
+                  class="demo-select"
+                  [value]="cfg.icon"
+                  (change)="cfg.icon = $any($event.target).value"
+                >
+                  <option value="">— ninguno —</option>
+                  <option value="lucidePlus">lucidePlus</option>
+                  <option value="lucideDownload">lucideDownload</option>
+                  <option value="lucideArrowRight">lucideArrowRight</option>
+                  <option value="lucideTrash2">lucideTrash2</option>
+                  <option value="lucideSend">lucideSend</option>
+                  <option value="lucideCheck">lucideCheck</option>
+                </select>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>iconPosition</label>
+                <select
+                  class="demo-select"
+                  [value]="cfg.iconPosition"
+                  (change)="cfg.iconPosition = $any($event.target).value"
+                >
+                  <option value="left">left</option>
+                  <option value="right">right</option>
+                </select>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="btn-icon-only">iconOnly</label>
+                <label class="demo-toggle">
+                  <input
+                    id="btn-icon-only"
+                    type="checkbox"
+                    [checked]="cfg.iconOnly"
+                    (change)="cfg.iconOnly = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
                 <label for="btn-dis">disabled</label>
                 <label class="demo-toggle">
                   <input
@@ -160,9 +240,11 @@
             </div>
           </div>
         </div>
+        <!-- Código generado en tiempo real -->
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
+        </div>
       </neu-tab-panel>
-
-      <!-- API -->
       <neu-tab-panel tabId="api">
         <div style="padding: 24px 0">
           <div class="demo-api-table-wrapper">
@@ -211,6 +293,27 @@
                   <td><code>boolean</code></td>
                   <td><code>false</code></td>
                   <td>Ocupa el 100% del ancho</td>
+                </tr>
+                <tr>
+                  <td><code>icon</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>
+                    Nombre de icono Lucide (ej: <code>'lucidePlus'</code>). Requiere registrar el
+                    icono en <code>provideIcons()</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>iconPosition</code></td>
+                  <td><code>'left' | 'right'</code></td>
+                  <td><code>'left'</code></td>
+                  <td>Posición del icono respecto al texto</td>
+                </tr>
+                <tr>
+                  <td><code>iconOnly</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Aplica padding cuadrado para botones solo de icono (sin texto)</td>
                 </tr>
               </tbody>
             </table>

@@ -30,10 +30,66 @@ export const routes: Routes = [
     title: 'Select — NeuralUI',
   },
   {
+    path: 'components/multiselect',
+    loadComponent: () =>
+      import('./pages/multiselect-demo/multiselect-demo.component').then(
+        (m) => m.MultiselectDemoComponent,
+      ),
+    title: 'Multiselect — NeuralUI',
+  },
+  {
+    path: 'components/date-input',
+    loadComponent: () =>
+      import('./pages/date-input-demo/date-input-demo.component').then(
+        (m) => m.DateInputDemoComponent,
+      ),
+    title: 'Date Input — NeuralUI',
+  },
+  {
+    path: 'components/textarea',
+    loadComponent: () =>
+      import('./pages/textarea-demo/textarea-demo.component').then((m) => m.TextareaDemoComponent),
+    title: 'Textarea — NeuralUI',
+  },
+  {
     path: 'components/button',
     loadComponent: () =>
       import('./pages/button-demo/button-demo.component').then((m) => m.ButtonDemoComponent),
     title: 'Button — NeuralUI',
+  },
+  {
+    path: 'components/split-button',
+    loadComponent: () =>
+      import('./pages/split-button-demo/split-button-demo.component').then(
+        (m) => m.SplitButtonDemoComponent,
+      ),
+    title: 'Split Button — NeuralUI',
+  },
+  {
+    path: 'components/toggle-button',
+    loadComponent: () =>
+      import('./pages/toggle-button-demo/toggle-button-demo.component').then(
+        (m) => m.ToggleButtonDemoComponent,
+      ),
+    title: 'Toggle Button — NeuralUI',
+  },
+  {
+    path: 'components/switch',
+    loadComponent: () =>
+      import('./pages/switch-demo/switch-demo.component').then((m) => m.SwitchDemoComponent),
+    title: 'Switch — NeuralUI',
+  },
+  {
+    path: 'components/checkbox',
+    loadComponent: () =>
+      import('./pages/checkbox-demo/checkbox-demo.component').then((m) => m.CheckboxDemoComponent),
+    title: 'Checkbox — NeuralUI',
+  },
+  {
+    path: 'components/radio',
+    loadComponent: () =>
+      import('./pages/radio-demo/radio-demo.component').then((m) => m.RadioDemoComponent),
+    title: 'Radio — NeuralUI',
   },
 
   // Componentes — Data
@@ -57,6 +113,12 @@ export const routes: Routes = [
   },
 
   // Componentes — Navigation
+  {
+    path: 'components/nav',
+    loadComponent: () =>
+      import('./pages/nav-demo/nav-demo.component').then((m) => m.NavDemoComponent),
+    title: 'Nav — NeuralUI',
+  },
   {
     path: 'components/sidebar',
     loadComponent: () =>

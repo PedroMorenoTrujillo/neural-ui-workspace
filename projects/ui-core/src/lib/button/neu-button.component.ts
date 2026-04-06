@@ -6,21 +6,25 @@ import {
   input,
   output,
 } from '@angular/core';
+import { NeuIconComponent } from '../icon/neu-icon.component';
 
 export type NeuButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
 export type NeuButtonSize = 'sm' | 'md' | 'lg';
+export type NeuButtonIconPosition = 'left' | 'right';
 
 /**
  * NeuralUI Button Component
  *
  * Uso: <button neu-button variant="primary" size="md">Texto</button>
+ * Con icono: <button neu-button icon="lucideSave">Guardar</button>
+ * Solo icono: <button neu-button icon="lucideTrash2" [iconOnly]="true" />
  *
- * Signals: variant, size, disabled, loading, fullWidth son inputs reactivos.
- * El estado se computa automáticamente con computed().
+ * Signals: variant, size, disabled, loading, fullWidth, icon, iconPosition, iconOnly
+ * son inputs reactivos. El estado se computa automáticamente con computed().
  */
 @Component({
   selector: 'button[neu-button]',
-  imports: [],
+  imports: [NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -46,7 +50,13 @@ export type NeuButtonSize = 'sm' | 'md' | 'lg';
         </svg>
       </span>
     }
+    @if (hasIcon() && iconPosition() === 'left') {
+      <neu-icon [name]="icon()" [size]="iconSize()" strokeWidth="2" aria-hidden="true" />
+    }
     <ng-content />
+    @if (hasIcon() && iconPosition() === 'right') {
+      <neu-icon [name]="icon()" [size]="iconSize()" strokeWidth="2" aria-hidden="true" />
+    }
   `,
   styleUrl: './neu-button.component.scss',
 })
@@ -66,10 +76,25 @@ export class NeuButtonComponent {
   /** Ocupa el 100% del ancho de su contenedor */
   fullWidth = input<boolean>(false);
 
+  /** Nombre del icono Lucide (ej: 'lucideSave', 'lucidePlus') */
+  icon = input<string>('');
+
+  /** Posición del icono respecto al texto */
+  iconPosition = input<NeuButtonIconPosition>('left');
+
+  /** Modo solo-icono: aplica padding cuadrado y oculta el ng-content */
+  iconOnly = input<boolean>(false);
+
   /** Emite el evento de click cuando el botón está activo */
   neuClick = output<MouseEvent>();
 
   readonly isDisabled = computed(() => this.disabled() || this.loading());
+  readonly hasIcon = computed(() => !!this.icon());
+
+  readonly iconSize = computed(() => {
+    const map: Record<NeuButtonSize, string> = { sm: '14px', md: '16px', lg: '18px' };
+    return map[this.size()];
+  });
 
   readonly hostClasses = computed(() => ({
     'neu-button': true,
@@ -78,5 +103,6 @@ export class NeuButtonComponent {
     'neu-button--loading': this.loading(),
     'neu-button--disabled': this.isDisabled(),
     'neu-button--full-width': this.fullWidth(),
+    'neu-button--icon-only': this.iconOnly(),
   }));
 }

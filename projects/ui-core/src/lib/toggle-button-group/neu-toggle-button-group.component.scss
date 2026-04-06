@@ -1,0 +1,103 @@
+// ============================================================
+// NeuralUI — ToggleButtonGroup Component Styles
+// ViewEncapsulation.None — usa prefijo BEM .neu-toggle-group
+// ============================================================
+
+// ---- Host ----
+.neu-toggle-group-host {
+  display: inline-block;
+}
+
+// ---- Grupo ----
+.neu-toggle-group {
+  display: inline-flex;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  overflow: hidden;
+  background: var(--neu-surface);
+
+  // ---- Botón base ----
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--neu-space-2);
+    border: none;
+    border-right: 1px solid var(--neu-border);
+    background: transparent;
+    color: var(--neu-text-muted);
+    font-family: var(--neu-font-sans);
+    font-size: var(--neu-text-sm);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    padding: 0.5rem var(--neu-space-4);
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+    outline: none;
+    user-select: none;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &:hover:not(:disabled):not(.neu-toggle-group__btn--disabled) {
+      background: var(--neu-surface-2);
+      color: var(--neu-text);
+    }
+
+    &:focus-visible {
+      position: relative;
+      z-index: 1;
+      box-shadow: inset 0 0 0 2px var(--neu-primary);
+    }
+
+    // ---- Activo ----
+    &--active {
+      background: var(--neu-primary);
+      color: var(--neu-primary-fg);
+      border-right-color: var(--neu-primary-dark);
+
+      &:hover:not(:disabled):not(.neu-toggle-group__btn--disabled) {
+        background: var(--neu-primary-dark);
+        color: var(--neu-primary-fg);
+      }
+
+      // El siguiente botón al activo ajusta su borde izquierdo
+      & + .neu-toggle-group__btn {
+        border-left-color: var(--neu-primary-dark);
+      }
+    }
+
+    // ---- Deshabilitado ----
+    &--disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  // ---- Grupo deshabilitado ----
+  &--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  // ---- Tamaños ----
+  &--sm &__btn {
+    font-size: var(--neu-text-xs);
+    padding: 0.375rem var(--neu-space-3);
+  }
+
+  &--md &__btn {
+    font-size: var(--neu-text-sm);
+    padding: 0.5rem var(--neu-space-4);
+  }
+
+  &--lg &__btn {
+    font-size: var(--neu-text-base);
+    padding: 0.625rem var(--neu-space-5);
+  }
+}

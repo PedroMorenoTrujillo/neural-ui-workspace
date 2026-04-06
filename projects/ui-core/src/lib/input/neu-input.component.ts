@@ -13,16 +13,7 @@ import { NeuIconComponent } from '../icon/neu-icon.component';
 /** Contador global para IDs estables — seguro en SSR, predecible en hidratación */
 let _neuInputIdSeq = 0;
 
-export type NeuInputType =
-  | 'text'
-  | 'email'
-  | 'password'
-  | 'number'
-  | 'tel'
-  | 'url'
-  | 'search'
-  | 'date'
-  | 'time';
+export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
 
 /**
  * NeuralUI Input Component
@@ -52,6 +43,9 @@ export type NeuInputType =
     },
   ],
   template: `
+    @if (!floatingLabel() && label()) {
+      <label class="neu-input__static-label" [for]="inputId()">{{ label() }}</label>
+    }
     <div
       class="neu-input__wrapper"
       [class.neu-input__wrapper--focused]="_focused()"
@@ -60,6 +54,7 @@ export type NeuInputType =
       [class.neu-input__wrapper--disabled]="disabled()"
       [class.neu-input__wrapper--has-start-icon]="!!startIcon()"
       [class.neu-input__wrapper--has-end-icon]="!!endIcon()"
+      [class.neu-input__wrapper--no-float]="!floatingLabel()"
     >
       <!-- Icono izquierdo -->
       @if (startIcon()) {
@@ -97,14 +92,14 @@ export type NeuInputType =
         [attr.aria-invalid]="hasError() ? 'true' : null"
         [attr.aria-describedby]="hasError() ? inputId() + '-error' : null"
         [value]="_value()"
-        placeholder=" "
+        [attr.placeholder]="floatingLabel() ? ' ' : placeholder() || null"
         (input)="onInput($event)"
         (focus)="onFocus()"
         (blur)="onBlur()"
       />
 
       <!-- Floating Label -->
-      @if (label()) {
+      @if (floatingLabel() && label()) {
         <label class="neu-input__label" [for]="inputId()">{{ label() }}</label>
       }
 
@@ -134,6 +129,12 @@ export class NeuInputComponent implements ControlValueAccessor {
 
   /** Texto del floating label */
   label = input<string>('');
+
+  /** Placeholder visible cuando floatingLabel=false */
+  placeholder = input<string>('');
+
+  /** Muestra el label como flotante (true) o estático encima del campo (false) */
+  floatingLabel = input<boolean>(true);
 
   /** Hint de ayuda (visible cuando no hay error) */
   hint = input<string>('');

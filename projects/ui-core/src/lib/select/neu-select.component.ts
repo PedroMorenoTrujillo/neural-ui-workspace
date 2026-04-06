@@ -43,12 +43,17 @@ export type { NeuSelectOption } from './neu-select.types';
     '(keydown.escape)': 'close()',
   },
   template: `
+    @if (!floatingLabel() && label()) {
+      <label class="neu-select__static-label">{{ label() }}</label>
+    }
     <div
       class="neu-select"
       [class.neu-select--open]="isOpen()"
       [class.neu-select--disabled]="disabled()"
       [class.neu-select--error]="hasError()"
       [class.neu-select--has-value]="!!_value()"
+      [class.neu-select--has-placeholder]="!!placeholder() && !_value()"
+      [class.neu-select--no-float]="!floatingLabel()"
     >
       <!-- Trigger ------>
       <button
@@ -61,7 +66,7 @@ export type { NeuSelectOption } from './neu-select.types';
         (click)="toggle()"
       >
         <!-- Floating label -->
-        @if (label()) {
+        @if (floatingLabel() && label()) {
           <span class="neu-select__label">{{ label() }}</span>
         }
 
@@ -91,7 +96,19 @@ export type { NeuSelectOption } from './neu-select.types';
       <!-- Panel ------>
       @if (isOpen()) {
         <div class="neu-select__panel" role="listbox" [attr.aria-label]="label()">
-          @for (option of options(); track option.value) {
+          @if (searchable()) {
+            <div class="neu-select__search">
+              <input
+                class="neu-select__search-input"
+                type="text"
+                [placeholder]="searchPlaceholder()"
+                [value]="searchQuery()"
+                (input)="searchQuery.set($any($event.target).value)"
+                (click)="$event.stopPropagation()"
+              />
+            </div>
+          }
+          @for (option of filteredOptions(); track option.value) {
             <div
               class="neu-select__option"
               [class.neu-select__option--selected]="option.value === _value()"
@@ -118,6 +135,9 @@ export type { NeuSelectOption } from './neu-select.types';
               }
               {{ option.label }}
             </div>
+          }
+          @if (filteredOptions().length === 0) {
+            <div class="neu-select__empty">Sin resultados</div>
           }
         </div>
       }
@@ -148,11 +168,27 @@ export class NeuSelectComponent implements ControlValueAccessor {
   /** Deshabilita el select */
   disabled = input<boolean>(false);
 
+  /** Muestra el label como flotante (true) o como label estático encima (false, por defecto) */
+  floatingLabel = input<boolean>(false);
+
+  /** Activa input de búsqueda/filtro en el panel */
+  searchable = input<boolean>(false);
+
+  /** Placeholder del input de búsqueda */
+  searchPlaceholder = input<string>('Buscar...');
+
   // Estado interno
   protected readonly _value = signal<string | null>(null);
   readonly isOpen = signal(false);
+  readonly searchQuery = signal('');
 
   readonly hasError = computed(() => !!this.errorMessage());
+
+  readonly filteredOptions = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return this.options();
+    return this.options().filter((o) => o.label.toLowerCase().includes(q));
+  });
 
   readonly selectedLabel = computed(
     () => this.options().find((o) => o.value === this._value())?.label ?? null,
@@ -180,6 +216,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   close(): void {
     this.isOpen.set(false);
+    this.searchQuery.set('');
     this._onTouched();
   }
 

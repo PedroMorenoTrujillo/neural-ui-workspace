@@ -38,6 +38,17 @@ export class BadgeDemoComponent {
     label: 'Estado',
   };
 
+  get configCode(): string {
+    const attrs: string[] = [];
+    if (this.cfg.variant !== 'default') attrs.push(`variant="${this.cfg.variant}"`);
+    if (this.cfg.size !== 'md') attrs.push(`size="${this.cfg.size}"`);
+    if (this.cfg.dot) attrs.push(`[dot]="true"`);
+    if (this.cfg.outline) attrs.push(`[outline]="true"`);
+    if (!this.cfg.pill) attrs.push(`[pill]="false"`);
+    const attrsStr = attrs.length ? ' ' + attrs.join(' ') : '';
+    return `<neu-badge${attrsStr}>${this.cfg.label}</neu-badge>`;
+  }
+
   readonly usageCode = `import { NeuBadgeComponent } from '@neural-ui/core';
 
 @Component({

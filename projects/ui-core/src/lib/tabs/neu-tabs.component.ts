@@ -1,12 +1,16 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   InjectionToken,
+  OnDestroy,
   ViewEncapsulation,
   computed,
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 
@@ -48,7 +52,7 @@ export interface NeuTab {
   template: `
     <!-- Barra de pestañas -->
     <div class="neu-tabs" [class.neu-tabs--flush]="flush()">
-      <div class="neu-tabs__nav" role="tablist" [attr.aria-label]="ariaLabel()">
+      <div class="neu-tabs__nav" role="tablist" [attr.aria-label]="ariaLabel()" #navRef>
         @for (tab of tabs(); track tab.id) {
           <button
             class="neu-tabs__tab"
@@ -80,8 +84,10 @@ export interface NeuTab {
   `,
   styleUrl: './neu-tabs.component.scss',
 })
-export class NeuTabsComponent {
+export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   private readonly urlState = inject(NeuUrlStateService);
+  private readonly elRef = inject(ElementRef);
+  private resizeObserver?: ResizeObserver;
 
   /** Definición de pestañas */
   tabs = input<NeuTab[]>([]);
@@ -107,19 +113,46 @@ export class NeuTabsComponent {
     return this.tabs().find((t) => !t.disabled)?.id ?? '';
   });
 
-  /** Estilo CSS del indicador deslizante (calcula posición por índice) */
-  readonly indicatorStyle = computed(() => {
+  /** Posición del indicador calculada mediante medición DOM */
+  private readonly _indicatorLeft = signal('0px');
+  private readonly _indicatorWidth = signal('0px');
+
+  readonly indicatorStyle = computed(
+    () => `left: ${this._indicatorLeft()}; width: ${this._indicatorWidth()}`,
+  );
+
+  ngAfterViewInit(): void {
+    this._updateIndicator();
+    // Actualizar cuando cambie el tamaño del nav (p.ej. resize de ventana)
+    const nav = this.elRef.nativeElement.querySelector('.neu-tabs__nav');
+    if (nav && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this._updateIndicator());
+      this.resizeObserver.observe(nav);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+  }
+
+  private _updateIndicator(): void {
+    const nav: HTMLElement | null = this.elRef.nativeElement.querySelector('.neu-tabs__nav');
+    if (!nav) return;
+    const tabEls = nav.querySelectorAll<HTMLElement>('.neu-tabs__tab');
     const idx = this.tabs().findIndex((t) => t.id === this.activeTabId());
-    if (idx < 0) return '';
-    const pct = (100 / this.tabs().length) * idx;
-    const w = 100 / this.tabs().length;
-    return `left: ${pct}%; width: ${w}%`;
-  });
+    const tabEl = tabEls[idx];
+    if (tabEl) {
+      this._indicatorLeft.set(tabEl.offsetLeft + 'px');
+      this._indicatorWidth.set(tabEl.offsetWidth + 'px');
+    }
+  }
 
   selectTab(tab: NeuTab): void {
     if (tab.disabled) return;
     this.urlState.setParam(this.tabParam(), tab.id);
     this.tabChange.emit(tab.id);
+    // Actualizar indicador tras el cambio de tab
+    requestAnimationFrame(() => this._updateIndicator());
   }
 }
 

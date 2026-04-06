@@ -24,7 +24,7 @@
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius);
   outline: none;
-  resize: vertical;
+  resize: var(--_neu-textarea-resize, vertical);
   transition:
     border-color var(--neu-transition),
     box-shadow var(--neu-transition);
@@ -79,6 +79,13 @@
   .neu-textarea__wrapper--error & {
     color: var(--neu-error);
   }
+}
+
+.neu-textarea__hint {
+  display: block;
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
 }
 
 .neu-textarea__error {

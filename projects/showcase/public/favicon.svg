@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="fav_grad_blue" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0EA5E9" />
+      <stop offset="100%" style="stop-color:#0284C7" />
+    </linearGradient>
+    <linearGradient id="fav_grad_cyan" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22D3EE" />
+      <stop offset="100%" style="stop-color:#06B6D4" />
+    </linearGradient>
+  </defs>
+
+  <g fill="#CBD5E1">
+    <rect x="25" y="5" width="50" height="18" rx="3"/>
+    <rect x="25" y="77" width="50" height="18" rx="3"/>
+  </g>
+
+  <g stroke-linecap="round" stroke-width="2.5" opacity="0.9">
+    <path d="M38 18 C38 35, 62 45, 62 60 C62 70, 38 75, 38 82" stroke="url(#fav_grad_cyan)">
+      <animate attributeName="stroke-dasharray" values="0,200; 200,0" dur="2.5s" repeatCount="indefinite" />
+    </path>
+    <path d="M50 18 C55 30, 35 40, 50 50 C65 60, 45 70, 62 82" stroke="#64748B">
+      <animate attributeName="stroke-dasharray" values="0,200; 200,0" dur="2s" repeatCount="indefinite" begin="0.4s" />
+    </path>
+    <path d="M62 18 C62 35, 38 45, 38 60 C38 70, 55 75, 50 82" stroke="url(#fav_grad_blue)">
+      <animate attributeName="stroke-dasharray" values="0,200; 200,0" dur="2.5s" repeatCount="indefinite" begin="0.8s" />
+    </path>
+  </g>
+
+  <g fill="#FFFFFF" stroke-width="1.5">
+    <circle cx="38" cy="14" r="3" stroke="#22D3EE" />
+    <circle cx="50" cy="14" r="3" stroke="#64748B" />
+    <circle cx="62" cy="14" r="3" stroke="#0EA5E9" />
+  </g>
+
+  <g fill="#FFFFFF" stroke-width="1.5">
+    <circle cx="38" cy="86" r="3" stroke="#22D3EE">
+      <animate attributeName="opacity" values="1;0.2;1" dur="1.2s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="50" cy="86" r="3" stroke="#0EA5E9">
+      <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="62" cy="86" r="3" stroke="#64748B">
+      <animate attributeName="opacity" values="1;0.2;1" dur="1.5s" repeatCount="indefinite" begin="0.5s" />
+    </circle>
+  </g>
+</svg>

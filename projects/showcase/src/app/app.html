@@ -2,11 +2,11 @@
   NeuralUI Showcase — Layout principal
   Desktop (≥400px): sidebar persistente | Mobile: overlay
 ======================================================== -->
-<div class="app-layout">
+<div class="app-layout" [class.app-layout--no-sidebar]="!showSidebar()">
   <!-- ===== HEADER ===== -->
   <header class="app-header">
-    <!-- Hamburger (solo mobile) -->
-    @if (!isDesktop()) {
+    <!-- Hamburger (solo mobile, solo cuando hay sidebar) -->
+    @if (!isDesktop() && showSidebar()) {
       <button
         class="app-header__menu-btn"
         type="button"
@@ -19,7 +19,7 @@
 
     <!-- Logo -->
     <a class="app-header__brand" routerLink="/" aria-label="NeuralUI Home">
-      <span class="app-header__logo-icon" aria-hidden="true">&#9650;</span>
+      <img class="app-header__logo-icon" src="logo2.svg" alt="" aria-hidden="true" />
       <span class="app-header__logo-text">NeuralUI</span>
       <span class="app-header__logo-badge">v1.0</span>
     </a>
@@ -36,6 +36,21 @@
       >
         <neu-icon name="lucideGlobe" size="1rem" />
         <span class="app-header__lang-text">{{ i18n.lang() === 'es' ? 'ES' : 'EN' }}</span>
+      </button>
+
+      <!-- Toggle dark / light mode -->
+      <button
+        class="app-header__theme-btn"
+        type="button"
+        [attr.aria-label]="isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+        [title]="isDark() ? 'Modo claro' : 'Modo oscuro'"
+        (click)="toggleTheme()"
+      >
+        @if (isDark()) {
+          <neu-icon name="lucideSun" size="1rem" />
+        } @else {
+          <neu-icon name="lucideMoon" size="1rem" />
+        }
       </button>
 
       <!-- GitHub -->
@@ -62,49 +77,78 @@
     </div>
   </header>
 
-  <!-- ===== SIDEBAR ===== -->
-  <neu-sidebar class="app-sidebar" urlParam="menu" [persistent]="isDesktop()">
-    <nav class="app-nav" aria-label="Componentes NeuralUI">
-      @for (group of navGroups; track group.labelKey) {
-        <div class="app-nav__group">
-          <span class="app-nav__group-label">
-            <neu-icon [name]="group.icon" size="0.75rem" />
-            {{ group.labelKey | transloco }}
-          </span>
-          @for (item of group.items; track item.route) {
-            <a
-              class="app-nav__link"
-              [routerLink]="item.route"
-              routerLinkActive="app-nav__link--active"
-              [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+  <!-- ===== SIDEBAR (solo en rutas /components/**) ===== -->
+  @if (showSidebar()) {
+    <neu-sidebar class="app-sidebar" urlParam="menu" [persistent]="isDesktop()">
+      <nav class="app-nav" aria-label="Componentes NeuralUI">
+        @for (group of navGroups; track group.labelKey) {
+          <div class="app-nav__group">
+            <button
+              class="app-nav__group-label"
+              type="button"
+              [attr.aria-expanded]="!isGroupCollapsed(group.labelKey)"
+              [attr.aria-controls]="'nav-group-' + group.labelKey"
+              (click)="toggleGroup(group.labelKey)"
             >
-              {{ item.labelKey | transloco }}
-              <span class="app-nav__badges">
-                @if (item.badge) {
-                  <span class="app-nav__icon-badge">{{ item.badge }}</span>
+              <neu-icon [name]="group.icon" size="0.75rem" aria-hidden="true" />
+              {{ group.labelKey | transloco }}
+              <neu-icon
+                name="lucideChevronRight"
+                size="0.7rem"
+                class="app-nav__group-chevron"
+                [class.app-nav__group-chevron--open]="!isGroupCollapsed(group.labelKey)"
+                aria-hidden="true"
+              />
+            </button>
+            @if (!isGroupCollapsed(group.labelKey)) {
+              <div [id]="'nav-group-' + group.labelKey" role="list">
+                @for (item of group.items; track item.route) {
+                  <a
+                    class="app-nav__link"
+                    [routerLink]="item.route"
+                    routerLinkActive="app-nav__link--active"
+                    [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+                    role="listitem"
+                  >
+                    @if (item.icon) {
+                      <neu-icon
+                        [name]="item.icon"
+                        size="0.875rem"
+                        class="app-nav__link-icon"
+                        aria-hidden="true"
+                      />
+                    }
+                    <span class="app-nav__link-label">{{ item.labelKey | transloco }}</span>
+                    <span class="app-nav__badges">
+                      @if (item.badge) {
+                        <span class="app-nav__icon-badge">{{ item.badge }}</span>
+                      }
+                      @if (item.isNew) {
+                        <span class="app-nav__new-badge">New</span>
+                      }
+                    </span>
+                  </a>
                 }
-                @if (item.isNew) {
-                  <span class="app-nav__new-badge">New</span>
-                }
-              </span>
-            </a>
-          }
-        </div>
-      }
+              </div>
+            }
+          </div>
+        }
 
-      <!-- Templates link en sidebar -->
-      <div class="app-nav__group app-nav__group--templates">
-        <a
-          class="app-nav__link app-nav__link--templates"
-          routerLink="/templates"
-          routerLinkActive="app-nav__link--active"
-        >
-          <neu-icon name="lucideZap" size="0.875rem" />
-          {{ 'nav.templates' | transloco }}
-        </a>
-      </div>
-    </nav>
-  </neu-sidebar>
+        <!-- Templates link en sidebar -->
+        <div class="app-nav__group app-nav__group--templates">
+          <a
+            class="app-nav__link app-nav__link--templates"
+            routerLink="/templates"
+            routerLinkActive="app-nav__link--active"
+          >
+            <neu-icon name="lucideZap" size="0.875rem" />
+            {{ 'nav.templates' | transloco }}
+          </a>
+        </div>
+      </nav>
+    </neu-sidebar>
+  }
+  <!-- /showSidebar -->
 
   <!-- ===== CONTENIDO PRINCIPAL ===== -->
   <main class="app-content" id="main-content" tabindex="-1">

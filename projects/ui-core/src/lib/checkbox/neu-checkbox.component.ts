@@ -44,23 +44,22 @@ let _neuCheckboxIdSeq = 0;
         (blur)="onBlur()"
       />
       <span class="neu-checkbox__box" [class.neu-checkbox__box--checked]="_checked()">
-        @if (_checked()) {
-          <svg
-            class="neu-checkbox__check"
-            viewBox="0 0 12 10"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M1 5L4.5 8.5L11 1"
-              stroke="white"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        }
+        <svg
+          class="neu-checkbox__check"
+          viewBox="0 0 12 10"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          [class.neu-checkbox__check--visible]="_checked()"
+        >
+          <path
+            d="M1 5L4.5 8.5L11 1"
+            stroke="white"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
       </span>
       @if (label()) {
         <span class="neu-checkbox__label">{{ label() }}</span>

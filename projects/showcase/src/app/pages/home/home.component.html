@@ -1,24 +1,34 @@
 <div class="home">
-
   <!-- Hero -->
   <section class="home__hero">
-    <div class="home__hero-badge">
-      <neu-badge variant="info">Angular 21 · Signals · URL State</neu-badge>
+    <!-- Tech tabs con iconos -->
+    <div class="home__tech-tabs" role="list">
+      @for (t of techTabs; track t.label) {
+        <div class="home__tech-tab" role="listitem">
+          <neu-icon [name]="t.icon" size="15px" />
+          {{ t.label }}
+        </div>
+      }
     </div>
+
     <h1 class="home__title">
-      NeuralUI
+      <span class="home__title-line1">
+        <img src="logo2.svg" alt="" aria-hidden="true" class="home__title-logo" />
+        NeuralUI
+      </span>
       <span class="home__title-gradient">Design System</span>
     </h1>
     <p class="home__subtitle">
-      Librería de componentes Angular moderna, construida con Signals,
-      OnPush y estado en la URL. Sin dependencias externas.
+      {{ 'page.home.hero.subtitle' | transloco }}
     </p>
     <div class="home__hero-actions">
       <a routerLink="/components/table">
-        <button neu-button variant="primary" size="lg">Ver componente estrella →</button>
+        <button neu-button variant="primary" size="lg">
+          {{ 'page.home.hero.cta1' | transloco }}
+        </button>
       </a>
       <a routerLink="/components/button">
-        <button neu-button size="lg">Explorar componentes</button>
+        <button neu-button size="lg">{{ 'page.home.hero.cta2' | transloco }}</button>
       </a>
     </div>
 
@@ -26,38 +36,43 @@
     <div class="home__stats">
       <div class="home__stat">
         <span class="home__stat-value">7</span>
-        <span class="home__stat-label">Componentes</span>
+        <span class="home__stat-label">{{ 'page.home.stats.components' | transloco }}</span>
       </div>
       <div class="home__stat">
         <span class="home__stat-value">0</span>
-        <span class="home__stat-label">Dependencias</span>
+        <span class="home__stat-label">{{ 'page.home.stats.dependencies' | transloco }}</span>
       </div>
       <div class="home__stat">
         <span class="home__stat-value">Angular 21</span>
-        <span class="home__stat-label">Standalone · Signals</span>
+        <span class="home__stat-label">{{ 'page.home.stats.standalone' | transloco }}</span>
       </div>
       <div class="home__stat">
         <span class="home__stat-value">URL State</span>
-        <span class="home__stat-label">Sincronizado</span>
+        <span class="home__stat-label">{{ 'page.home.stats.urlState' | transloco }}</span>
       </div>
     </div>
   </section>
 
   <!-- Grid de componentes -->
   <section class="home__grid-section">
-    <h2 class="home__grid-title">Componentes disponibles</h2>
+    <h2 class="home__grid-title">{{ 'page.home.grid.title' | transloco }}</h2>
     <div class="home__grid">
       @for (comp of components; track comp.route) {
         <a [routerLink]="comp.route" class="home__card">
           <neu-card [hoverable]="true">
             <div class="home__card-content">
               <div class="home__card-header">
+                <div class="home__card-icon" aria-hidden="true">
+                  <neu-icon [name]="comp.icon" size="18px" />
+                </div>
                 <strong>{{ comp.name }}</strong>
-                @if (comp.tag !== 'componente') {
-                  <neu-badge variant="warning" size="sm">{{ comp.tag }}</neu-badge>
+                @if (comp.star) {
+                  <neu-badge variant="warning" size="sm">{{
+                    'page.home.grid.starBadge' | transloco
+                  }}</neu-badge>
                 }
               </div>
-              <p class="home__card-desc">{{ comp.desc }}</p>
+              <p class="home__card-desc">{{ comp.descKey | transloco }}</p>
             </div>
           </neu-card>
         </a>
@@ -67,26 +82,18 @@
 
   <!-- Features -->
   <section class="home__features">
-    <div class="home__feature">
-      <span class="home__feature-icon">⚡</span>
-      <strong>Reactivo por diseño</strong>
-      <p>Signals de Angular 17+. Sin Zone.js overhead.</p>
-    </div>
-    <div class="home__feature">
-      <span class="home__feature-icon">🔗</span>
-      <strong>Estado en la URL</strong>
-      <p>Búsqueda, paginación y ordenación en la barra del navegador.</p>
-    </div>
-    <div class="home__feature">
-      <span class="home__feature-icon">♿</span>
-      <strong>Accesible</strong>
-      <p>ARIA roles, keyboard navigation y focus management.</p>
-    </div>
-    <div class="home__feature">
-      <span class="home__feature-icon">🎨</span>
-      <strong>Design Tokens CSS</strong>
-      <p>Variables CSS para colores, espaciado, sombras y tipografía.</p>
-    </div>
+    @for (f of features; track f.labelKey) {
+      <div class="home__feature">
+        <div
+          class="home__feature-icon"
+          [class.home__feature-icon--accent]="f.accent"
+          aria-hidden="true"
+        >
+          <neu-icon [name]="f.icon" size="22px" />
+        </div>
+        <strong>{{ f.labelKey | transloco }}</strong>
+        <p>{{ f.descKey | transloco }}</p>
+      </div>
+    }
   </section>
-
 </div>

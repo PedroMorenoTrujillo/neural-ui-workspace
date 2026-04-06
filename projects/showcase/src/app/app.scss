@@ -16,6 +16,13 @@ $layout-bp: 400px;
   @media (min-width: $layout-bp) {
     grid-template-columns: var(--neu-sidebar-width) 1fr;
   }
+
+  // Landing / templates — sin sidebar, una sola columna
+  &--no-sidebar {
+    @media (min-width: $layout-bp) {
+      grid-template-columns: 1fr;
+    }
+  }
 }
 
 // ---- Header ----
@@ -64,7 +71,7 @@ $layout-bp: 400px;
 .app-header__brand {
   display: flex;
   align-items: center;
-  gap: var(--neu-space-2);
+  gap: 6px;
   text-decoration: none;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -72,10 +79,10 @@ $layout-bp: 400px;
 }
 
 .app-header__logo-icon {
-  font-size: 1rem;
-  color: var(--neu-primary);
-  line-height: 1;
-  transform: rotate(0deg);
+  height: 24px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
 }
 
 .app-header__logo-text {
@@ -189,6 +196,29 @@ $layout-bp: 400px;
   }
 }
 
+// ---- Botón dark/light mode ----
+.app-header__theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  background: transparent;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  transition: all var(--neu-transition);
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+    border-color: var(--neu-border-hover);
+  }
+}
+
 // ---- Sidebar ----
 .app-sidebar {
   // En mobile: el componente NeuSidebar gestiona su overlay
@@ -224,12 +254,44 @@ $layout-bp: 400px;
   align-items: center;
   gap: var(--neu-space-2);
   padding: 0 var(--neu-space-5);
-  margin-bottom: var(--neu-space-2);
+  padding-right: var(--neu-space-4);
+  margin-bottom: var(--neu-space-1);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--neu-text-disabled);
+  // Clickable
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 0;
+  font-family: inherit;
+  text-align: left;
+  transition: color var(--neu-transition);
+  min-height: 28px;
+
+  &:hover {
+    color: var(--neu-text-muted);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+}
+
+.app-nav__group-chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: transform var(--neu-transition);
+  transform: rotate(0deg);
+
+  &--open {
+    transform: rotate(90deg);
+  }
 }
 
 .app-nav__link {
@@ -246,9 +308,18 @@ $layout-bp: 400px;
   position: relative;
   gap: var(--neu-space-2);
 
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+
   &:hover {
     color: var(--neu-text);
     background: var(--neu-surface-2);
+
+    .app-nav__link-icon {
+      color: var(--neu-text-muted);
+    }
   }
 
   &--active {
@@ -266,6 +337,10 @@ $layout-bp: 400px;
       background: var(--neu-primary);
       border-radius: 0 var(--neu-radius-full) var(--neu-radius-full) 0;
     }
+
+    .app-nav__link-icon {
+      color: var(--neu-primary);
+    }
   }
 
   &--templates {
@@ -275,6 +350,19 @@ $layout-bp: 400px;
   }
 }
 
+.app-nav__link-icon {
+  flex-shrink: 0;
+  color: var(--neu-text-disabled);
+  transition: color var(--neu-transition);
+}
+
+.app-nav__link-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .app-nav__badges {
   display: inline-flex;
   align-items: center;
@@ -307,5 +395,14 @@ $layout-bp: 400px;
 
   @media (min-width: $layout-bp) {
     grid-column: 2;
+    padding-left: var(--neu-space-4);
+  }
+
+  // En modo sin sidebar, el contenido ocupa siempre la columna 1
+  .app-layout--no-sidebar & {
+    @media (min-width: $layout-bp) {
+      grid-column: 1;
+      padding-left: 0;
+    }
   }
 }

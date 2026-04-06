@@ -14,17 +14,56 @@
   gap: 20px;
 }
 
-.home__hero-badge {
+// ── Tech tabs (hero) ──────────────────────────────────────────────────────
+.home__tech-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
   margin-bottom: -4px;
 }
 
+.home__tech-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--neu-surface);
+  border: 1px solid var(--neu-border);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--neu-text-secondary, var(--neu-text-muted));
+  letter-spacing: 0.01em;
+
+  neu-icon {
+    color: var(--neu-primary);
+  }
+}
+
 .home__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   font-size: clamp(2.2rem, 6vw, 3.5rem);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
   color: var(--neu-text);
   margin: 0;
+}
+
+.home__title-line1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.home__title-logo {
+  height: clamp(40px, 5vw, 52px);
+  width: auto;
+  flex-shrink: 0;
 }
 
 .home__title-gradient {
@@ -49,31 +88,32 @@
   flex-wrap: wrap;
   justify-content: center;
 
-  a { text-decoration: none; }
+  a {
+    text-decoration: none;
+  }
 }
 
 // ── Stats ──────────────────────────────────────────────────────────────────
 .home__stats {
   display: flex;
-  gap: 0;
-  background: var(--neu-bg-subtle);
-  border: 1px solid var(--neu-border);
-  border-radius: 12px;
-  overflow: hidden;
+  gap: var(--neu-space-2);
+  flex-wrap: wrap;
+  justify-content: center;
   width: 100%;
   max-width: 600px;
 }
 
 .home__stat {
   flex: 1;
-  padding: 16px;
+  min-width: 120px;
+  padding: 16px 20px;
   text-align: center;
-  border-right: 1px solid var(--neu-border);
+  background: var(--neu-surface);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-lg);
   display: flex;
   flex-direction: column;
   gap: 4px;
-
-  &:last-child { border-right: none; }
 }
 
 .home__stat-value {
@@ -112,7 +152,9 @@
   color: inherit;
   display: block;
 
-  neu-card { height: 100%; }
+  neu-card {
+    height: 100%;
+  }
 }
 
 .home__card-content {
@@ -124,9 +166,20 @@
 .home__card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   font-size: 1rem;
+}
+
+.home__card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--neu-radius-sm);
+  background: color-mix(in srgb, var(--neu-primary) 10%, transparent);
+  color: var(--neu-primary);
+  flex-shrink: 0;
 }
 
 .home__card-desc {
@@ -164,6 +217,18 @@
 }
 
 .home__feature-icon {
-  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--neu-radius);
+  background: var(--neu-surface-2);
+  color: var(--neu-text-secondary, var(--neu-text-muted));
   margin-bottom: 4px;
+
+  &--accent {
+    background: color-mix(in srgb, var(--neu-primary) 12%, transparent);
+    color: var(--neu-primary);
+  }
 }

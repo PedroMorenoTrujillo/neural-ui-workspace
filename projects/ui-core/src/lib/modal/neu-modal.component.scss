@@ -63,6 +63,10 @@
 }
 
 // ---- Uso declarativo (neu-modal como componente propio) ----
+neu-modal {
+  display: contents; // El host es transparente; el panel está posicionado como fixed
+}
+
 .neu-modal--open {
   // El host es transparente; el panel está posicionado como fixed
 }

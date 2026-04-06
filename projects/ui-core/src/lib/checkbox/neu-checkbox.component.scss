@@ -57,15 +57,13 @@
 .neu-checkbox__check {
   width: 12px;
   height: 10px;
-  animation: neu-check-in 150ms ease forwards;
-}
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
 
-@keyframes neu-check-in {
-  from {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  to {
+  &--visible {
     opacity: 1;
     transform: scale(1);
   }
