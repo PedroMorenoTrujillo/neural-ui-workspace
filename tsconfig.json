@@ -38,11 +38,5 @@
     {
       "path": "./projects/showcase/tsconfig.spec.json"
     },
-    {
-      "path": "./projects/templates/tsconfig.app.json"
-    },
-    {
-      "path": "./projects/templates/tsconfig.spec.json"
-    }
   ]
 }
