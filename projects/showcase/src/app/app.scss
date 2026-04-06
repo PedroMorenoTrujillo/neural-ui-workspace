@@ -403,24 +403,12 @@ $layout-bp: 400px;
 }
 
 // ---- Contenido principal ----
-.app-footer {
-  margin-top: var(--neu-space-16);
-  padding: var(--neu-space-6) 0 var(--neu-space-8);
-  border-top: 1px solid var(--neu-border);
-  display: flex;
-  flex-direction: column;
-  gap: var(--neu-space-1);
-
-  &__copy,
-  &__note {
-    font-size: 0.75rem;
-    color: var(--neu-text-muted);
-    line-height: 1.5;
-  }
-
-  &__copy {
-    font-weight: 500;
-  }
+.app-nav__copyright {
+  padding: var(--neu-space-4) var(--neu-space-3) var(--neu-space-3);
+  font-size: 0.65rem;
+  color: var(--neu-text-muted);
+  opacity: 0.5;
+  line-height: 1.4;
 }
 
 .app-content {
