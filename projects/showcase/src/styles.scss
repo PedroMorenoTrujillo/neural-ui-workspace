@@ -28,6 +28,17 @@
 @use '../../ui-core/src/lib/stats-card/neu-stats-card.component.scss';
 @use '../../ui-core/src/lib/chart/neu-chart.component.scss';
 
+// ---- Nuevos componentes ----
+@use '../../ui-core/src/lib/chip/neu-chip.component.scss';
+@use '../../ui-core/src/lib/breadcrumb/neu-breadcrumb.component.scss';
+@use '../../ui-core/src/lib/progress-bar/neu-progress-bar.component.scss';
+@use '../../ui-core/src/lib/accordion/neu-accordion.component.scss';
+@use '../../ui-core/src/lib/pagination/neu-pagination.component.scss';
+@use '../../ui-core/src/lib/rating/neu-rating.component.scss';
+@use '../../ui-core/src/lib/slider/neu-slider.component.scss';
+@use '../../ui-core/src/lib/timeline/neu-timeline.component.scss';
+@use '../../ui-core/src/lib/stepper/neu-stepper.component.scss';
+
 // ---- Reset y base ----
 *,
 *::before,

@@ -1,0 +1,213 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <h1 class="demo-hero__title">Accordion</h1>
+    <p class="demo-hero__desc">
+      Paneles expandibles con animación suave. Soporta modo múltiple, paneles desactivados y
+      accesibilidad ARIA completa.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-preview__canvas">
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Exclusivo (un panel a la vez)
+              </p>
+              <neu-accordion [items]="faqItems" [multiple]="false" [bordered]="true" />
+            </div>
+
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Múltiple (varios paneles abiertos)
+              </p>
+              <neu-accordion [items]="faqItems" [multiple]="true" [bordered]="true" />
+            </div>
+
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Sin borde exterior
+              </p>
+              <neu-accordion [items]="faqItems" [bordered]="false" />
+            </div>
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview">
+              <div style="width: 100%; max-width: 500px">
+                <neu-accordion
+                  [items]="faqItems"
+                  [multiple]="cfg.multiple"
+                  [bordered]="cfg.bordered"
+                />
+              </div>
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label for="acc-mult">multiple</label>
+                <label class="demo-toggle">
+                  <input
+                    id="acc-mult"
+                    type="checkbox"
+                    [checked]="cfg.multiple"
+                    (change)="cfg.multiple = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="acc-brd">bordered</label>
+                <label class="demo-toggle">
+                  <input
+                    id="acc-brd"
+                    type="checkbox"
+                    [checked]="cfg.bordered"
+                    (change)="cfg.bordered = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>items</code></td>
+                  <td><code>NeuAccordionItem[]</code></td>
+                  <td><code>[]</code></td>
+                  <td>Lista de paneles</td>
+                </tr>
+                <tr>
+                  <td><code>multiple</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Permite varios paneles abiertos</td>
+                </tr>
+                <tr>
+                  <td><code>bordered</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>true</code></td>
+                  <td>Borde exterior alrededor del accordion</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr>
+                  <th>Output</th>
+                  <th>Tipo</th>
+                  <th>—</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>panelToggle</code></td>
+                  <td><code>&#123; id: string; expanded: boolean &#125;</code></td>
+                  <td>—</td>
+                  <td>Emite al abrir/cerrar un panel</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>NeuAccordionItem</th>
+                  <th>Tipo</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td><code>string</code></td>
+                  <td>Identificador único</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td><code>string</code></td>
+                  <td>Texto del encabezado</td>
+                </tr>
+                <tr>
+                  <td><code>content</code></td>
+                  <td><code>string</code></td>
+                  <td>HTML del cuerpo</td>
+                </tr>
+                <tr>
+                  <td><code>expanded</code></td>
+                  <td><code>boolean</code></td>
+                  <td>Abierto al iniciar</td>
+                </tr>
+                <tr>
+                  <td><code>disabled</code></td>
+                  <td><code>boolean</code></td>
+                  <td>Desactiva el panel</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

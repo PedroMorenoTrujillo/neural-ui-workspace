@@ -1,0 +1,76 @@
+// ============================================================
+// NeuralUI — Pagination Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-pagination
+// ============================================================
+
+.neu-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--neu-font-sans);
+}
+
+.neu-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  background: var(--neu-surface);
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  transition:
+    background var(--neu-transition),
+    border-color var(--neu-transition),
+    color var(--neu-transition);
+  outline: none;
+
+  &:hover:not(:disabled) {
+    background: var(--neu-surface-2);
+    border-color: var(--neu-border-hover);
+    color: var(--neu-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    background: var(--neu-primary);
+    border-color: var(--neu-primary);
+    color: var(--neu-primary-fg);
+    font-weight: 600;
+
+    &:hover {
+      background: var(--neu-primary-dark);
+      border-color: var(--neu-primary-dark);
+    }
+  }
+
+  &--nav {
+    color: var(--neu-text-muted);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.neu-pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-disabled);
+  user-select: none;
+}

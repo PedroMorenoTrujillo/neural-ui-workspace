@@ -175,6 +175,88 @@ export const routes: Routes = [
       import('./pages/form-demo/form-demo.component').then((m) => m.FormDemoComponent),
     title: 'Form Controls — NeuralUI',
   },
+  {
+    path: 'components/tabs',
+    loadComponent: () =>
+      import('./pages/tabs-demo/tabs-demo.component').then((m) => m.TabsDemoComponent),
+    title: 'Tabs — NeuralUI',
+  },
+  {
+    path: 'components/skeleton',
+    loadComponent: () =>
+      import('./pages/skeleton-demo/skeleton-demo.component').then((m) => m.SkeletonDemoComponent),
+    title: 'Skeleton — NeuralUI',
+  },
+  {
+    path: 'components/divider',
+    loadComponent: () =>
+      import('./pages/divider-demo/divider-demo.component').then((m) => m.DividerDemoComponent),
+    title: 'Divider — NeuralUI',
+  },
+
+  // Componentes — Nuevos
+  {
+    path: 'components/chip',
+    loadComponent: () =>
+      import('./pages/chip-demo/chip-demo.component').then((m) => m.ChipDemoComponent),
+    title: 'Chip — NeuralUI',
+  },
+  {
+    path: 'components/breadcrumb',
+    loadComponent: () =>
+      import('./pages/breadcrumb-demo/breadcrumb-demo.component').then(
+        (m) => m.BreadcrumbDemoComponent,
+      ),
+    title: 'Breadcrumb — NeuralUI',
+  },
+  {
+    path: 'components/progress-bar',
+    loadComponent: () =>
+      import('./pages/progress-bar-demo/progress-bar-demo.component').then(
+        (m) => m.ProgressBarDemoComponent,
+      ),
+    title: 'Progress Bar — NeuralUI',
+  },
+  {
+    path: 'components/accordion',
+    loadComponent: () =>
+      import('./pages/accordion-demo/accordion-demo.component').then(
+        (m) => m.AccordionDemoComponent,
+      ),
+    title: 'Accordion — NeuralUI',
+  },
+  {
+    path: 'components/pagination',
+    loadComponent: () =>
+      import('./pages/pagination-demo/pagination-demo.component').then(
+        (m) => m.PaginationDemoComponent,
+      ),
+    title: 'Pagination — NeuralUI',
+  },
+  {
+    path: 'components/rating',
+    loadComponent: () =>
+      import('./pages/rating-demo/rating-demo.component').then((m) => m.RatingDemoComponent),
+    title: 'Rating — NeuralUI',
+  },
+  {
+    path: 'components/slider',
+    loadComponent: () =>
+      import('./pages/slider-demo/slider-demo.component').then((m) => m.SliderDemoComponent),
+    title: 'Slider — NeuralUI',
+  },
+  {
+    path: 'components/timeline',
+    loadComponent: () =>
+      import('./pages/timeline-demo/timeline-demo.component').then((m) => m.TimelineDemoComponent),
+    title: 'Timeline — NeuralUI',
+  },
+  {
+    path: 'components/stepper',
+    loadComponent: () =>
+      import('./pages/stepper-demo/stepper-demo.component').then((m) => m.StepperDemoComponent),
+    title: 'Stepper — NeuralUI',
+  },
 
   // Fallback
   {

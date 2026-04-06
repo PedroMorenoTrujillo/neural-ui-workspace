@@ -9,6 +9,8 @@
     "navigation": "Navigation",
     "charts": "Charts",
     "overlays": "Overlays",
+    "ui": "UI",
+    "advanced": "Advanced",
     "templates": "Templates"
   },
   "header": {
@@ -38,7 +40,19 @@
     "modal": "Modal",
     "statsCard": "Stats Card",
     "chart": "Chart",
-    "tooltip": "Tooltip & Toast"
+    "tooltip": "Tooltip & Toast",
+    "tabs": "Tabs",
+    "skeleton": "Skeleton",
+    "divider": "Divider",
+    "chip": "Chip",
+    "breadcrumb": "Breadcrumb",
+    "progressBar": "Progress Bar",
+    "accordion": "Accordion",
+    "pagination": "Pagination",
+    "rating": "Rating",
+    "slider": "Slider",
+    "timeline": "Timeline",
+    "stepper": "Stepper"
   },
   "page": {
     "home": {

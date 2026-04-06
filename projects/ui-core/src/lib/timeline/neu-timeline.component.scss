@@ -1,0 +1,109 @@
+// ============================================================
+// NeuralUI — Timeline Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-timeline
+// ============================================================
+
+.neu-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Item ----
+.neu-timeline__item {
+  display: flex;
+  gap: var(--neu-space-4);
+  min-height: 56px;
+}
+
+// ---- Eje (dot + línea) ----
+.neu-timeline__axis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.neu-timeline__dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2.5px solid;
+  background: var(--neu-surface);
+
+  &--default {
+    border-color: var(--neu-border);
+    color: var(--neu-text-disabled);
+    background: var(--neu-surface-2);
+  }
+  &--success {
+    border-color: var(--neu-success);
+    color: var(--neu-success);
+  }
+  &--warning {
+    border-color: var(--neu-warning);
+    color: var(--neu-warning);
+  }
+  &--danger {
+    border-color: var(--neu-error);
+    color: var(--neu-error);
+  }
+  &--info {
+    border-color: var(--neu-primary);
+    color: var(--neu-primary);
+  }
+}
+
+.neu-timeline__dot-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.neu-timeline__line {
+  width: 2px;
+  flex: 1;
+  background: var(--neu-border);
+  margin: 4px 0;
+  min-height: 16px;
+}
+
+// ---- Contenido ----
+.neu-timeline__content {
+  flex: 1;
+  padding-bottom: var(--neu-space-5);
+  padding-top: 2px;
+}
+
+.neu-timeline__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--neu-space-3);
+  margin-bottom: 4px;
+}
+
+.neu-timeline__title {
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  color: var(--neu-text);
+}
+
+.neu-timeline__time {
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-disabled);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.neu-timeline__desc {
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}

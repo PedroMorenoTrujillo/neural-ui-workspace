@@ -1,0 +1,61 @@
+// Estilos específicos de divider-demo.
+// Los estilos compartidos de .demo-* viven en styles.scss
+
+.divider-demo__text {
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-muted);
+  margin: 0;
+}
+
+.divider-demo__content-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--neu-border);
+  border-radius: 12px;
+}
+
+.divider-demo__social-row {
+  display: flex;
+  gap: 12px;
+}
+
+.divider-demo__social-btn {
+  flex: 1;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--neu-border);
+  border-radius: 8px;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  background: var(--neu-surface);
+}
+
+.divider-demo__vertical-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--neu-border);
+  border-radius: 12px;
+}
+
+.divider-demo__cfg-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0;
+
+  &--vertical {
+    flex-direction: row;
+    align-items: center;
+    height: 60px;
+    gap: 16px;
+  }
+}

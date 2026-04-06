@@ -46,3 +46,14 @@ export * from './lib/tooltip/neu-tooltip.component';
 export * from './lib/toast/neu-toast.service';
 export * from './lib/toast/neu-toast.component';
 export * from './lib/toast/neu-toast.types';
+
+// Componentes — Nuevos
+export * from './lib/chip/neu-chip.component';
+export * from './lib/breadcrumb/neu-breadcrumb.component';
+export * from './lib/progress-bar/neu-progress-bar.component';
+export * from './lib/accordion/neu-accordion.component';
+export * from './lib/pagination/neu-pagination.component';
+export * from './lib/rating/neu-rating.component';
+export * from './lib/slider/neu-slider.component';
+export * from './lib/timeline/neu-timeline.component';
+export * from './lib/stepper/neu-stepper.component';

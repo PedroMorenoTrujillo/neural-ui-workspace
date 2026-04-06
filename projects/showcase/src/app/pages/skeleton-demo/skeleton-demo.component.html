@@ -1,0 +1,151 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <h1 class="demo-hero__title">Skeleton</h1>
+    <p class="demo-hero__desc">
+      Placeholders animados para simular la carga de contenido. Tres variantes: texto, círculo y
+      rectángulo.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div
+            class="demo-preview__canvas"
+            style="flex-direction: column; gap: 40px; align-items: stretch"
+          >
+            <!-- Card simulada -->
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Card de carga
+              </p>
+              <div class="skeleton-demo__card">
+                <neu-skeleton variant="rect" width="100%" height="160px" border-radius="8px" />
+                <div class="skeleton-demo__card-body">
+                  <neu-skeleton variant="text" width="65%" height="18px" />
+                  <neu-skeleton variant="text" width="100%" />
+                  <neu-skeleton variant="text" width="85%" />
+                  <div class="skeleton-demo__card-footer">
+                    <neu-skeleton variant="circle" width="32px" height="32px" />
+                    <neu-skeleton variant="text" width="120px" height="12px" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lista de usuarios simulada -->
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Lista de usuarios
+              </p>
+              <div class="skeleton-demo__list">
+                @for (i of [1, 2, 3]; track i) {
+                  <div class="skeleton-demo__list-item">
+                    <neu-skeleton variant="circle" width="40px" height="40px" />
+                    <div class="skeleton-demo__list-text">
+                      <neu-skeleton variant="text" width="140px" height="14px" />
+                      <neu-skeleton variant="text" width="90px" height="11px" />
+                    </div>
+                    <neu-skeleton width="60px" height="24px" [borderRadius]="'12px'" />
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Estadísticas simuladas -->
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Stats cards
+              </p>
+              <div class="skeleton-demo__stats">
+                @for (i of [1, 2, 3, 4]; track i) {
+                  <div class="skeleton-demo__stat-card">
+                    <neu-skeleton variant="text" width="60%" height="12px" />
+                    <neu-skeleton variant="text" width="40%" height="28px" />
+                    <neu-skeleton variant="text" width="80%" height="10px" />
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>variant</code></td>
+                  <td><code>'text' | 'circle' | 'rect'</code></td>
+                  <td><code>'rect'</code></td>
+                  <td>Forma del skeleton.</td>
+                </tr>
+                <tr>
+                  <td><code>width</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'100%'</code></td>
+                  <td>Anchura (cualquier valor CSS).</td>
+                </tr>
+                <tr>
+                  <td><code>height</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'16px'</code></td>
+                  <td>Altura (cualquier valor CSS).</td>
+                </tr>
+                <tr>
+                  <td><code>borderRadius</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Radio de borde personalizado.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

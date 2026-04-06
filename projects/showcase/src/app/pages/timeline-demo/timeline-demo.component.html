@@ -1,0 +1,141 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <h1 class="demo-hero__title">Timeline</h1>
+    <p class="demo-hero__desc">
+      Lista cronológica de eventos con 5 variantes semánticas, timestamps y línea conectora animada.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-preview__canvas">
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Actividad reciente
+              </p>
+              <neu-timeline [items]="activityItems" />
+            </div>
+
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Historial de versiones
+              </p>
+              <neu-timeline [items]="releaseItems" />
+            </div>
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview">
+              <div style="max-width: 480px; width: 100%">
+                <neu-timeline [items]="activityItems" />
+              </div>
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+              <p style="font-size: 0.8rem; color: var(--neu-text-muted)">
+                Personaliza los ítems via la interfaz <code>NeuTimelineItem</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>Tipo</th>
+                  <th>Default</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>items</code></td>
+                  <td><code>NeuTimelineItem[]</code></td>
+                  <td><code>[]</code></td>
+                  <td>Lista de eventos</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>NeuTimelineItem</th>
+                  <th>Tipo</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>title</code></td>
+                  <td><code>string</code></td>
+                  <td>Título del evento (obligatorio)</td>
+                </tr>
+                <tr>
+                  <td><code>description</code></td>
+                  <td><code>string</code></td>
+                  <td>Descripción opcional</td>
+                </tr>
+                <tr>
+                  <td><code>time</code></td>
+                  <td><code>string</code></td>
+                  <td>Etiqueta temporal (ej. "Hace 2h")</td>
+                </tr>
+                <tr>
+                  <td><code>variant</code></td>
+                  <td><code>'default'|'success'|'warning'|'danger'|'info'</code></td>
+                  <td>Color del punto</td>
+                </tr>
+                <tr>
+                  <td><code>icon</code></td>
+                  <td><code>string</code></td>
+                  <td>SVG path para icono dentro del punto</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br />
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

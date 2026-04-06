@@ -1,0 +1,31 @@
+// ── Avatar demo — estilos específicos ──────────────────────
+
+.demo-avatar-group {
+  display: flex;
+
+  .neu-avatar-host {
+    margin-left: -10px;
+    border: 2px solid var(--neu-surface-1);
+    border-radius: 50%;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+.demo-avatar-extra {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--neu-surface-3);
+  border: 2px solid var(--neu-surface-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--neu-text-muted);
+  margin-left: -10px;
+  flex-shrink: 0;
+}

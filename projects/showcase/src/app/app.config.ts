@@ -36,6 +36,9 @@ import {
   lucideTrendingUp,
   lucideTrendingDown,
   lucideMinus,
+  // UI component icons
+  lucideLayoutList,
+  lucideLoader,
   // Templates page
   lucideShoppingCart,
   lucideGithub,
@@ -88,6 +91,12 @@ import {
   lucideSettings,
   lucideHelpCircle,
   lucideExternalLink,
+  // Nuevos componentes
+  lucideChevronsRight,
+  lucideMoreHorizontal,
+  lucideStar,
+  lucideSlidersHorizontal,
+  lucideSparkles,
 } from '@ng-icons/lucide';
 
 import { routes } from './app.routes';
@@ -196,6 +205,15 @@ export const appConfig: ApplicationConfig = {
       lucideSettings,
       lucideHelpCircle,
       lucideExternalLink,
+      // UI group icons
+      lucideLayoutList,
+      lucideLoader,
+      // Nuevos componentes
+      lucideChevronsRight,
+      lucideMoreHorizontal,
+      lucideStar,
+      lucideSlidersHorizontal,
+      lucideSparkles,
     }),
     provideNgIconsConfig({ size: '1.25rem', strokeWidth: '2' }),
   ],

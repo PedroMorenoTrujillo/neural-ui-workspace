@@ -1,0 +1,129 @@
+// ============================================================
+// NeuralUI — Stepper Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-stepper
+// ============================================================
+
+.neu-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neu-space-6);
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Cabecera ----
+.neu-stepper__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.neu-stepper__step {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+
+  &:last-child {
+    flex: 0 0 auto;
+  }
+}
+
+.neu-stepper__step-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-3);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  outline: none;
+
+  &:focus-visible .neu-stepper__indicator {
+    box-shadow: 0 0 0 3px var(--neu-primary-100);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+// ---- Indicador (número / check) ----
+.neu-stepper__indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: var(--neu-surface-2);
+  border: 2px solid var(--neu-border);
+  color: var(--neu-text-disabled);
+  transition:
+    background var(--neu-transition),
+    border-color var(--neu-transition),
+    color var(--neu-transition);
+}
+
+.neu-stepper__step--active .neu-stepper__indicator {
+  background: var(--neu-primary);
+  border-color: var(--neu-primary);
+  color: var(--neu-primary-fg);
+}
+
+.neu-stepper__step--completed .neu-stepper__indicator {
+  background: var(--neu-success);
+  border-color: var(--neu-success);
+  color: #fff;
+}
+
+// ---- Info del paso ----
+.neu-stepper__step-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.neu-stepper__step-label {
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  color: var(--neu-text-muted);
+  transition: color var(--neu-transition);
+}
+
+.neu-stepper__step--active .neu-stepper__step-label {
+  color: var(--neu-text);
+}
+
+.neu-stepper__step--completed .neu-stepper__step-label {
+  color: var(--neu-text-muted);
+}
+
+.neu-stepper__step-desc {
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-disabled);
+  margin-top: 1px;
+}
+
+// ---- Conector entre pasos ----
+.neu-stepper__connector {
+  flex: 1;
+  height: 2px;
+  min-width: 24px;
+  background: var(--neu-border);
+  margin: 0 var(--neu-space-2);
+  transition: background var(--neu-transition);
+
+  &--done {
+    background: var(--neu-success);
+  }
+}
+
+// ---- Contenido ----
+.neu-stepper__content {
+  min-height: 80px;
+}

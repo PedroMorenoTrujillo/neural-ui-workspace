@@ -214,6 +214,75 @@ export class App {
         },
       ],
     },
+    {
+      labelKey: 'nav.ui',
+      icon: 'lucideLayout',
+      items: [
+        { labelKey: 'comp.tabs', route: '/components/tabs', icon: 'lucideLayoutList', isNew: true },
+        {
+          labelKey: 'comp.skeleton',
+          route: '/components/skeleton',
+          icon: 'lucideLoader',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.divider',
+          route: '/components/divider',
+          icon: 'lucideMinus',
+          isNew: true,
+        },
+      ],
+    },
+    {
+      labelKey: 'nav.advanced',
+      icon: 'lucideSparkles',
+      items: [
+        { labelKey: 'comp.chip', route: '/components/chip', icon: 'lucideTag', isNew: true },
+        {
+          labelKey: 'comp.breadcrumb',
+          route: '/components/breadcrumb',
+          icon: 'lucideChevronsRight',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.progressBar',
+          route: '/components/progress-bar',
+          icon: 'lucideBarChart2',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.accordion',
+          route: '/components/accordion',
+          icon: 'lucideList',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.pagination',
+          route: '/components/pagination',
+          icon: 'lucideMoreHorizontal',
+          isNew: true,
+        },
+        { labelKey: 'comp.rating', route: '/components/rating', icon: 'lucideStar', isNew: true },
+        {
+          labelKey: 'comp.slider',
+          route: '/components/slider',
+          icon: 'lucideSlidersHorizontal',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.timeline',
+          route: '/components/timeline',
+          icon: 'lucideActivity',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.stepper',
+          route: '/components/stepper',
+          icon: 'lucideListChecks',
+          isNew: true,
+        },
+      ],
+    },
   ];
 
   openMenu(): void {
