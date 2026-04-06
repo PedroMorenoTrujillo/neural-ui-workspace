@@ -7,7 +7,6 @@
 
   <section class="demo-section">
     <neu-tabs [tabs]="demoTabs" tabParam="tab">
-
       <!-- ══════════════ OVERVIEW ══════════════ -->
       <neu-tab-panel tabId="overview">
         <div class="theming-intro">
@@ -45,7 +44,6 @@
 
       <!-- ══════════════ TOKENS ══════════════ -->
       <neu-tab-panel tabId="tokens">
-
         <!-- Brand -->
         <h3 class="demo-api__title">{{ 'page.theming.sections.brand' | transloco }}</h3>
         <table class="demo-api-table theming-table">
@@ -59,9 +57,15 @@
           <tbody>
             @for (t of brandTokens; track t.token) {
               <tr>
-                <td><code>{{ t.token }}</code></td>
                 <td>
-                  @if (t.token.includes('color') || t.value.startsWith('#') || t.value.startsWith('rgba')) {
+                  <code>{{ t.token }}</code>
+                </td>
+                <td>
+                  @if (
+                    t.token.includes('color') ||
+                    t.value.startsWith('#') ||
+                    t.value.startsWith('rgba')
+                  ) {
                     <span class="theming-swatch" [style.background]="t.value"></span>
                   }
                   <code>{{ t.value }}</code>
@@ -73,7 +77,9 @@
         </table>
 
         <!-- Backgrounds -->
-        <h3 class="demo-api__title" style="margin-top:2rem">{{ 'page.theming.sections.backgrounds' | transloco }}</h3>
+        <h3 class="demo-api__title" style="margin-top: 2rem">
+          {{ 'page.theming.sections.backgrounds' | transloco }}
+        </h3>
         <table class="demo-api-table theming-table">
           <thead>
             <tr>
@@ -85,7 +91,9 @@
           <tbody>
             @for (t of bgTokens; track t.token) {
               <tr>
-                <td><code>{{ t.token }}</code></td>
+                <td>
+                  <code>{{ t.token }}</code>
+                </td>
                 <td>
                   @if (t.value.startsWith('#') || t.value.startsWith('rgba')) {
                     <span class="theming-swatch" [style.background]="t.value"></span>
@@ -99,7 +107,9 @@
         </table>
 
         <!-- Typography -->
-        <h3 class="demo-api__title" style="margin-top:2rem">{{ 'page.theming.sections.text' | transloco }}</h3>
+        <h3 class="demo-api__title" style="margin-top: 2rem">
+          {{ 'page.theming.sections.text' | transloco }}
+        </h3>
         <table class="demo-api-table theming-table">
           <thead>
             <tr>
@@ -111,7 +121,9 @@
           <tbody>
             @for (t of textTokens; track t.token) {
               <tr>
-                <td><code>{{ t.token }}</code></td>
+                <td>
+                  <code>{{ t.token }}</code>
+                </td>
                 <td>
                   @if (t.value.startsWith('#')) {
                     <span class="theming-swatch" [style.background]="t.value"></span>
@@ -125,7 +137,9 @@
         </table>
 
         <!-- Border radius -->
-        <h3 class="demo-api__title" style="margin-top:2rem">{{ 'page.theming.sections.radius' | transloco }}</h3>
+        <h3 class="demo-api__title" style="margin-top: 2rem">
+          {{ 'page.theming.sections.radius' | transloco }}
+        </h3>
         <table class="demo-api-table theming-table">
           <thead>
             <tr>
@@ -137,8 +151,12 @@
           <tbody>
             @for (t of radiusTokens; track t.token) {
               <tr>
-                <td><code>{{ t.token }}</code></td>
-                <td><code>{{ t.value }}</code></td>
+                <td>
+                  <code>{{ t.token }}</code>
+                </td>
+                <td>
+                  <code>{{ t.value }}</code>
+                </td>
                 <td>{{ t.desc_es }}</td>
               </tr>
             }
@@ -146,7 +164,9 @@
         </table>
 
         <!-- Shadows -->
-        <h3 class="demo-api__title" style="margin-top:2rem">{{ 'page.theming.sections.shadow' | transloco }}</h3>
+        <h3 class="demo-api__title" style="margin-top: 2rem">
+          {{ 'page.theming.sections.shadow' | transloco }}
+        </h3>
         <table class="demo-api-table theming-table">
           <thead>
             <tr>
@@ -157,13 +177,14 @@
           <tbody>
             @for (t of shadowTokens; track t.token) {
               <tr>
-                <td><code>{{ t.token }}</code></td>
+                <td>
+                  <code>{{ t.token }}</code>
+                </td>
                 <td>{{ t.desc_es }}</td>
               </tr>
             }
           </tbody>
         </table>
-
       </neu-tab-panel>
 
       <!-- ══════════════ DARK MODE ══════════════ -->
@@ -201,7 +222,6 @@
           <neu-code-block language="scss" [code]="customThemeCode" />
         </div>
       </neu-tab-panel>
-
     </neu-tabs>
   </section>
 </div>
