@@ -1,11 +1,8 @@
 <div class="demo-page">
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Toggle Button Group</h1>
-    <p class="demo-hero__desc">
-      Grupo de botones de selección única o múltiple con soporte completo para Angular Forms.
-      Equivalente superior al <code>SelectButton</code> de PrimeNG.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.toggleButton.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -112,9 +109,9 @@
               <thead>
                 <tr>
                   <th>Input / Output</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

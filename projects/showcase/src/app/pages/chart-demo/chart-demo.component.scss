@@ -1,0 +1,28 @@
+.demo-chart-block {
+  margin-bottom: 2.5rem;
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--neu-text-muted);
+    margin-bottom: 12px;
+  }
+}
+
+.demo-chart-block--half {
+  display: inline-block;
+  width: calc(50% - 1rem);
+  vertical-align: top;
+
+  &:nth-child(odd) {
+    margin-right: 2rem;
+  }
+
+  @media (max-width: 640px) {
+    width: 100%;
+    display: block;
+    margin-right: 0;
+  }
+}

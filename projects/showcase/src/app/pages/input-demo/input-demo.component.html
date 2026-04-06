@@ -1,12 +1,9 @@
 <div class="demo-page">
   <!-- Hero -->
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Input</h1>
-    <p class="demo-hero__desc">
-      Campo de texto con floating label, iconos y soporte total para Angular Forms (ngModel y
-      Reactive Forms). IDs estables para SSR y a11y.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.input.desc' | transloco"></p>
   </div>
 
   <!-- Tabs: Preview / Configurador / API -->
@@ -194,9 +191,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

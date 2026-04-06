@@ -1,11 +1,8 @@
 <div class="demo-page">
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Slider</h1>
-    <p class="demo-hero__desc">
-      Control deslizante accesible sobre <code>input[type=range]</code> nativo con estilos
-      personalizados, soporte de unidades y señales.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.slider.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -213,9 +210,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -277,9 +274,9 @@
               <thead>
                 <tr>
                   <th>Output</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>—</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

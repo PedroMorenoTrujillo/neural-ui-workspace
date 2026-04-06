@@ -1,11 +1,8 @@
 <div class="demo-page">
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Split Button</h1>
-    <p class="demo-hero__desc">
-      Botón principal con menú desplegable de acciones secundarias. ARIA completo, navegación por
-      teclado, spinner de carga y 5 variantes visuales.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.splitButton.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -249,9 +246,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -300,8 +297,8 @@
               <thead>
                 <tr>
                   <th>Output</th>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -324,8 +321,8 @@
               <thead>
                 <tr>
                   <th>NeuSplitButtonAction</th>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

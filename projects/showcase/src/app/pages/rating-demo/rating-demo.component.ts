@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, signal } from '@angular/core';
 import {
   NeuBadgeComponent,
@@ -11,6 +12,7 @@ import {
 @Component({
   selector: 'app-rating-demo',
   imports: [
+    TranslocoPipe,
     NeuBadgeComponent,
     NeuRatingComponent,
     NeuCodeBlockComponent,

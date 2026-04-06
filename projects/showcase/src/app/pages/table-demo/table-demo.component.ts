@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, signal, ViewEncapsulation } from '@angular/core';
 import {
   NeuBadgeComponent,
@@ -21,6 +22,7 @@ interface User {
 @Component({
   selector: 'app-table-demo',
   imports: [
+    TranslocoPipe,
     NeuTableComponent,
     NeuBadgeComponent,
     NeuTabsComponent,

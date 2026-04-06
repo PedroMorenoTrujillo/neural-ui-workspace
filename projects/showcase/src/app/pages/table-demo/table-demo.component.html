@@ -1,13 +1,9 @@
 <div class="demo-page">
   <!-- Hero -->
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente Estrella</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Table</h1>
-    <p class="demo-hero__desc">
-      Tabla de datos avanzada con búsqueda, ordenación y paginación sincronizadas a la URL mediante
-      <code>NeuUrlStateService</code>. Selección múltiple de filas, skeleton de carga y scroll
-      horizontal optimizado para mobile.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.table.desc' | transloco"></p>
   </div>
 
   <!-- Tabs -->
@@ -120,9 +116,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -214,8 +210,8 @@
               <thead>
                 <tr>
                   <th>Propiedad</th>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

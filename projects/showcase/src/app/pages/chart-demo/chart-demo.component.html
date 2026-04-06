@@ -1,0 +1,172 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
+    <h1 class="demo-hero__title">Charts</h1>
+    <p class="demo-hero__desc" [innerHTML]="'demo.chart.desc' | transloco"></p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs" tabParam="tab">
+      <!-- ═══════════════════════════════ PREVIEW ═══════════════════════════ -->
+      <neu-tab-panel tabId="preview">
+        <!-- Barras verticales agrupadas -->
+        <div class="demo-chart-block">
+          <p class="demo-chart-block__label">Barras verticales agrupadas</p>
+          <neu-chart type="bar" [series]="barSeries" [categories]="months" [height]="280" />
+        </div>
+
+        <!-- Barras apiladas (vertical) -->
+        <div class="demo-chart-block">
+          <p class="demo-chart-block__label">Barras apiladas (vertical)</p>
+          <neu-chart
+            type="bar-stacked"
+            [series]="stackedBarSeries"
+            [categories]="quarters"
+            [height]="260"
+          />
+        </div>
+
+        <!-- Barras horizontales agrupadas -->
+        <div class="demo-chart-block">
+          <p class="demo-chart-block__label">Barras horizontales agrupadas</p>
+          <neu-chart
+            type="bar-horizontal"
+            [series]="hBarSeries"
+            [categories]="hBarCategories"
+            [height]="300"
+          />
+        </div>
+
+        <!-- Barras horizontales apiladas -->
+        <div class="demo-chart-block">
+          <p class="demo-chart-block__label">Barras horizontales apiladas</p>
+          <neu-chart
+            type="bar-horizontal-stacked"
+            [series]="hStackedSeries"
+            [categories]="hStackedCategories"
+            [height]="280"
+          />
+        </div>
+
+        <!-- Área (multi-series) -->
+        <div class="demo-chart-block">
+          <p class="demo-chart-block__label">Área con gradiente (multi-serie)</p>
+          <neu-chart type="area" [series]="areaSeries" [categories]="months" [height]="280" />
+        </div>
+
+        <!-- Line -->
+        <div class="demo-chart-block">
+          <p class="demo-chart-block__label">Línea suave</p>
+          <neu-chart type="line" [series]="areaSeries" [categories]="months" [height]="260" />
+        </div>
+
+        <!-- Pie -->
+        <div class="demo-chart-block demo-chart-block--half">
+          <p class="demo-chart-block__label">Pie — Fuentes de tráfico</p>
+          <neu-chart type="pie" [pieSeries]="pieSeries" [labels]="pieLabels" [height]="280" />
+        </div>
+
+        <!-- Donut -->
+        <div class="demo-chart-block demo-chart-block--half">
+          <p class="demo-chart-block__label">Donut — Fuentes de tráfico</p>
+          <neu-chart type="donut" [pieSeries]="pieSeries" [labels]="pieLabels" [height]="280" />
+        </div>
+
+        <!-- Pareto -->
+        <div class="demo-chart-block">
+          <p class="demo-chart-block__label">
+            Pareto — causas de defectos (línea acumulada generada automáticamente)
+          </p>
+          <neu-chart
+            type="pareto"
+            [series]="paretoSeries"
+            [categories]="paretoCategories"
+            [height]="300"
+          />
+        </div>
+      </neu-tab-panel>
+
+      <!-- ═══════════════════════════════ API ══════════════════════════════ -->
+      <neu-tab-panel tabId="api">
+        <div class="demo-api">
+          <h3 class="demo-api__title">Inputs</h3>
+          <table class="demo-api-table">
+            <thead>
+              <tr>
+                <th>Prop</th>
+                <th>{{ 'demo.common.api.type' | transloco }}</th>
+                <th>Default</th>
+                <th>{{ 'demo.common.api.desc' | transloco }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>type</code></td>
+                <td><code>NeuChartType</code></td>
+                <td><code>'line'</code></td>
+                <td>
+                  Tipo de gráfica:
+                  <code>line</code> · <code>area</code> · <code>bar</code> ·
+                  <code>bar-stacked</code> · <code>bar-horizontal</code> ·
+                  <code>bar-horizontal-stacked</code> · <code>pareto</code> · <code>pie</code> ·
+                  <code>donut</code> · <code>radialBar</code>
+                </td>
+              </tr>
+              <tr>
+                <td><code>series</code></td>
+                <td><code>NeuChartSeries[]</code></td>
+                <td><code>[]</code></td>
+                <td>Series para gráficas con ejes (line, area, bar…, pareto).</td>
+              </tr>
+              <tr>
+                <td><code>pieSeries</code></td>
+                <td><code>number[]</code></td>
+                <td><code>[]</code></td>
+                <td>Valores para <code>pie</code> y <code>donut</code>.</td>
+              </tr>
+              <tr>
+                <td><code>categories</code></td>
+                <td><code>string[]</code></td>
+                <td><code>[]</code></td>
+                <td>Etiquetas del eje X.</td>
+              </tr>
+              <tr>
+                <td><code>labels</code></td>
+                <td><code>string[]</code></td>
+                <td><code>[]</code></td>
+                <td>Etiquetas de segmentos para pie/donut.</td>
+              </tr>
+              <tr>
+                <td><code>height</code></td>
+                <td><code>number</code></td>
+                <td><code>280</code></td>
+                <td>Altura en píxeles.</td>
+              </tr>
+              <tr>
+                <td><code>colors</code></td>
+                <td><code>string[]</code></td>
+                <td><em>paleta Neural</em></td>
+                <td>Colores custom para series. Si está vacío usa la paleta por defecto.</td>
+              </tr>
+              <tr>
+                <td><code>showDataLabels</code></td>
+                <td><code>boolean</code></td>
+                <td><code>false</code></td>
+                <td>Muestra etiquetas de valor sobre cada punto/barra.</td>
+              </tr>
+              <tr>
+                <td><code>title</code></td>
+                <td><code>string</code></td>
+                <td><code>''</code></td>
+                <td>Título mostrado encima de la gráfica.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 class="demo-api__title" style="margin-top: 2rem">Tipos exportados</h3>
+          <neu-code-block language="typescript" [code]="usageCode" />
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

@@ -1,11 +1,8 @@
 <div class="demo-page">
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Skeleton</h1>
-    <p class="demo-hero__desc">
-      Placeholders animados para simular la carga de contenido. Tres variantes: texto, círculo y
-      rectángulo.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.skeleton.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -109,9 +106,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

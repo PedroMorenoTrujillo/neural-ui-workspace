@@ -1,11 +1,8 @@
 <div class="demo-page">
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Breadcrumb</h1>
-    <p class="demo-hero__desc">
-      Navegación jerárquica accesible con soporte para RouterLink, separadores personalizables e
-      indicador <code>aria-current="page"</code> en el último ítem.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.breadcrumb.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -133,9 +130,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,8 +157,8 @@
               <thead>
                 <tr>
                   <th>NeuBreadcrumbItem</th>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

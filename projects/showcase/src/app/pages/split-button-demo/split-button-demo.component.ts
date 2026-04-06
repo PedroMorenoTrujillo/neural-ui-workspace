@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, signal, ViewEncapsulation } from '@angular/core';
 import {
   NeuBadgeComponent,
@@ -12,6 +13,7 @@ import {
 @Component({
   selector: 'app-split-button-demo',
   imports: [
+    TranslocoPipe,
     NeuSplitButtonComponent,
     NeuBadgeComponent,
     NeuTabsComponent,

@@ -75,13 +75,9 @@
     </div>
   </neu-sidebar>
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Sidebar</h1>
-    <p class="demo-hero__desc">
-      Panel lateral cuyo estado abierto/cerrado vive en la URL (<code>?menu=open</code>). Modo
-      <strong>overlay</strong> en mobile, <strong>persistent</strong> en desktop ≥400px. El estado
-      es compartible, navegable y sincronizado vía <code>NeuUrlStateService</code>.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.sidebar.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -142,9 +138,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -188,8 +184,8 @@
               <thead>
                 <tr>
                   <th>Output</th>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -208,7 +204,7 @@
               <thead>
                 <tr>
                   <th>Atributo</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

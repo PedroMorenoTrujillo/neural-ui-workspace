@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import {
   NeuBadgeComponent,
@@ -12,6 +13,7 @@ import {
 @Component({
   selector: 'app-timeline-demo',
   imports: [
+    TranslocoPipe,
     NeuBadgeComponent,
     NeuTimelineComponent,
     NeuCodeBlockComponent,

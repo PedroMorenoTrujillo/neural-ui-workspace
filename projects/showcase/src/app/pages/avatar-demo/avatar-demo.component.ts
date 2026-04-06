@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import {
   NeuAvatarColor,
@@ -15,6 +16,7 @@ import {
 @Component({
   selector: 'app-avatar-demo',
   imports: [
+    TranslocoPipe,
     NeuAvatarComponent,
     NeuBadgeComponent,
     NeuCodeBlockComponent,

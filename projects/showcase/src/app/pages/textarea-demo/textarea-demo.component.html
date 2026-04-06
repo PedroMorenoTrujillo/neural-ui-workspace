@@ -1,10 +1,8 @@
 <div class="demo-page">
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Textarea</h1>
-    <p class="demo-hero__desc">
-      Área de texto con floating label, auto-resize opcional y soporte completo para Angular Forms.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.textarea.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -163,9 +161,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,11 +1,8 @@
 <div class="demo-page">
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Date Input</h1>
-    <p class="demo-hero__desc">
-      Campo de fecha, hora y fecha+hora con icono, estilo consistente con el sistema y soporte
-      completo para Angular Forms.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.dateInput.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -172,9 +169,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

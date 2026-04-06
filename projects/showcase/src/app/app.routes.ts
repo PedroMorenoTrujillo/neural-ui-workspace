@@ -258,6 +258,14 @@ export const routes: Routes = [
     title: 'Stepper — NeuralUI',
   },
 
+  // Getting Started
+  {
+    path: 'components/theming',
+    loadComponent: () =>
+      import('./pages/theming/theming.component').then((m) => m.ThemingComponent),
+    title: 'Theming — NeuralUI',
+  },
+
   // Fallback
   {
     path: '**',

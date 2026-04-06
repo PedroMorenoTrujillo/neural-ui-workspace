@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -12,6 +13,7 @@ import { CodeBlockComponent } from '../../shared/code-block/code-block.component
 @Component({
   selector: 'app-input-demo',
   imports: [
+    TranslocoPipe,
     NeuInputComponent,
     NeuBadgeComponent,
     NeuTabsComponent,

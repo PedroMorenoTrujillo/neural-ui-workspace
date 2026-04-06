@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -13,6 +14,7 @@ import {
 @Component({
   selector: 'app-multiselect-demo',
   imports: [
+    TranslocoPipe,
     NeuMultiselectComponent,
     NeuBadgeComponent,
     NeuCodeBlockComponent,

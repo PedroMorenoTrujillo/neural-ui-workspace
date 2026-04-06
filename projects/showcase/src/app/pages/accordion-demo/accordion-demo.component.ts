@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import {
   NeuAccordionComponent,
@@ -12,6 +13,7 @@ import {
 @Component({
   selector: 'app-accordion-demo',
   imports: [
+    TranslocoPipe,
     NeuBadgeComponent,
     NeuAccordionComponent,
     NeuCodeBlockComponent,

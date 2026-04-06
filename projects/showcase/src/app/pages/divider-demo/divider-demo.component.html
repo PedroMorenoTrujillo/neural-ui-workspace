@@ -1,11 +1,8 @@
 <div class="demo-page">
   <div class="demo-hero">
-    <neu-badge variant="info" size="sm">Componente</neu-badge>
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
     <h1 class="demo-hero__title">Divider</h1>
-    <p class="demo-hero__desc">
-      Separador visual para secciones de contenido. Soporta orientación horizontal y vertical, y
-      etiqueta central.
-    </p>
+    <p class="demo-hero__desc" [innerHTML]="'demo.divider.desc' | transloco"></p>
   </div>
 
   <section class="demo-section">
@@ -150,9 +147,9 @@
               <thead>
                 <tr>
                   <th>Input</th>
-                  <th>Tipo</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
                   <th>Default</th>
-                  <th>Descripción</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
                 </tr>
               </thead>
               <tbody>

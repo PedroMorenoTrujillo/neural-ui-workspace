@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ChangeDetectionStrategy, Component, inject, ViewEncapsulation } from '@angular/core';
 import {
   NeuBadgeComponent,
@@ -13,6 +14,7 @@ import {
 @Component({
   selector: 'app-sidebar-demo',
   imports: [
+    TranslocoPipe,
     NeuButtonComponent,
     NeuBadgeComponent,
     NeuTabsComponent,

@@ -1,3 +1,4 @@
+import { TranslocoPipe } from '@jsverse/transloco';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -18,6 +19,7 @@ import {
 @Component({
   selector: 'app-stepper-demo',
   imports: [
+    TranslocoPipe,
     NeuBadgeComponent,
     NeuStepperComponent,
     NeuCodeBlockComponent,

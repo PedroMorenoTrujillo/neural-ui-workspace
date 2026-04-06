@@ -104,7 +104,10 @@ export class App {
     {
       labelKey: 'nav.gettingStarted',
       icon: 'lucideHome',
-      items: [{ labelKey: 'nav.home', route: '/' }],
+      items: [
+        { labelKey: 'nav.home', route: '/' },
+        { labelKey: 'comp.theming', route: '/components/theming', icon: 'lucidePalette' },
+      ],
     },
     {
       labelKey: 'nav.form',

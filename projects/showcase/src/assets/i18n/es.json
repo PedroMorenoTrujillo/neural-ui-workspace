@@ -2,7 +2,323 @@
   "nav": {
     "gettingStarted": "Primeros pasos",
     "home": "Inicio",
+    "theming": "Tematización",
     "components": "Componentes",
+    "form": "Formularios",
+    "actions": "Acciones",
+    "data": "Datos",
+    "navigation": "Navegación",
+    "charts": "Gráficas",
+    "overlays": "Overlays",
+    "ui": "UI",
+    "advanced": "Avanzado",
+    "templates": "Templates"
+  },
+  "header": {
+    "github": "GitHub",
+    "templates": "Premium Templates",
+    "openMenu": "Abrir menú"
+  },
+  "comp": {
+    "theming": "Tematización",
+    "badge": "Badge",
+    "button": "Button",
+    "splitButton": "Split Button",
+    "toggleButton": "Toggle Button",
+    "card": "Card",
+    "input": "Input",
+    "select": "Select",
+    "multiselect": "Multiselect",
+    "dateInput": "Date Input",
+    "textarea": "Textarea",
+    "switch": "Switch",
+    "checkbox": "Checkbox",
+    "radio": "Radio",
+    "sidebar": "Sidebar",
+    "nav": "Nav",
+    "table": "Table",
+    "avatar": "Avatar",
+    "emptyState": "Empty State",
+    "modal": "Modal",
+    "statsCard": "Stats Card",
+    "chart": "Chart",
+    "tooltip": "Tooltip & Toast",
+    "tabs": "Tabs",
+    "skeleton": "Skeleton",
+    "divider": "Divider",
+    "chip": "Chip",
+    "breadcrumb": "Breadcrumb",
+    "progressBar": "Progress Bar",
+    "accordion": "Accordion",
+    "pagination": "Pagination",
+    "rating": "Rating",
+    "slider": "Slider",
+    "timeline": "Timeline",
+    "stepper": "Stepper"
+  },
+  "page": {
+    "home": {
+      "title": "NeuralUI — Sistema de Diseño Angular",
+      "subtitle": "Componentes de alta calidad con Signals y OnPush, listos para producción.",
+      "hero": {
+        "subtitle": "Librería de componentes Angular moderna, construida con Signals, OnPush y estado en la URL. Sin dependencias externas.",
+        "cta1": "Ver componente estrella →",
+        "cta2": "Explorar componentes"
+      },
+      "stats": {
+        "components": "Componentes",
+        "dependencies": "Dependencias",
+        "standalone": "Standalone · Signals",
+        "urlState": "Sincronizado"
+      },
+      "grid": {
+        "title": "Componentes disponibles",
+        "starBadge": "⭐ estrella"
+      },
+      "components": {
+        "badge": "Etiquetas de estado semánticas con 5 variantes",
+        "button": "Botón con 4 variantes, 3 tamaños y estado loading",
+        "card": "Superficie de contenido con header, body y footer",
+        "input": "Campo de texto con floating label y validación",
+        "select": "Dropdown personalizado con teclado y Forms",
+        "sidebar": "Panel lateral con estado sincronizado a la URL",
+        "table": "Tabla con búsqueda, orden y paginación URL-driven"
+      },
+      "features": {
+        "reactive": {
+          "label": "Reactivo por diseño",
+          "desc": "Signals de Angular 17+. Sin Zone.js overhead."
+        },
+        "urlState": {
+          "label": "Estado en la URL",
+          "desc": "Búsqueda, paginación y ordenación en la barra del navegador."
+        },
+        "accessible": {
+          "label": "Accesible",
+          "desc": "ARIA roles, keyboard navigation y focus management."
+        },
+        "tokens": {
+          "label": "Design Tokens CSS",
+          "desc": "Variables CSS para colores, espaciado, sombras y tipografía."
+        }
+      }
+    },
+    "theming": {
+      "title": "Tematización",
+      "subtitle": "Personaliza NeuralUI sobreescribiendo variables CSS. Sin configuración de build.",
+      "intro": "NeuralUI está construido sobre un sistema de <strong>Design Tokens</strong> implementados como variables CSS nativas. Para personalizar cualquier aspecto visual basta con sobreescribir las variables en tu hoja de estilos global.",
+      "howto": {
+        "title": "Cómo aplicar un tema",
+        "desc": "Añade estas variables en tu <code>styles.scss</code> o en cualquier selector CSS. Los cambios se aplican de forma instantánea sin recompilar la librería."
+      },
+      "sections": {
+        "brand": "Color de marca",
+        "backgrounds": "Fondos y superficies",
+        "text": "Tipografía",
+        "semantic": "Estados semánticos",
+        "radius": "Radio de borde",
+        "shadow": "Sombras",
+        "spacing": "Espaciado"
+      },
+      "dark": {
+        "title": "Modo oscuro",
+        "desc": "El tema oscuro se activa añadiendo el atributo <code>data-theme=\"dark\"</code> al elemento raíz. NeuralUI lo aplica automáticamente cuando usas el toggle integrado."
+      },
+      "custom": {
+        "title": "Tema personalizado",
+        "desc": "Puedes crear un tema completamente diferente sobreescribiendo las variables en <code>:root</code>. Por ejemplo, un tema verde corporativo:"
+      },
+      "token": "Token",
+      "value": "Valor por defecto",
+      "description": "Descripción"
+    },
+    "templates": {
+      "title": "Premium Templates",
+      "subtitle": "Dashboards y landing pages construidos con NeuralUI."
+    },
+    "form": {
+      "title": "Controles de Formulario",
+      "subtitle": "Textarea, Switch, Checkbox y Radio con ControlValueAccessor."
+    },
+    "feedback": {
+      "title": "Feedback Pro",
+      "subtitle": "Tooltip y Toast para dashboards de alto nivel."
+    }
+  },
+  "templates": {
+    "preview": "Vista previa",
+    "buy": "Comprar",
+    "free": "Gratis",
+    "heroStats": {
+      "templates": "plantillas",
+      "license": "Licencia MIT",
+      "angular": "Angular 21"
+    },
+    "cta": {
+      "title": "¿Tienes ideas? Contribuye.",
+      "desc": "NeuralUI es open source. Abre un PR o consulta el repositorio en GitHub.",
+      "btn": "Ver en GitHub"
+    }
+  },
+  "demo": {
+    "common": {
+      "componentBadge": "Componente",
+      "tabs": {
+        "preview": "Preview",
+        "config": "Configurador",
+        "api": "API"
+      },
+      "api": {
+        "inputs": "Inputs",
+        "outputs": "Outputs",
+        "prop": "Prop",
+        "type": "Tipo",
+        "default": "Default",
+        "desc": "Descripción"
+      }
+    },
+    "accordion": {
+      "desc": "Paneles expandibles con animación suave. Soporta modo múltiple, paneles desactivados y accesibilidad ARIA completa."
+    },
+    "avatar": {
+      "desc": "Componente circular o cuadrado para fotos de perfil o iniciales. Soporta 5 tamaños, 6 colores, indicador de presencia y fallback automático si la imagen falla."
+    },
+    "badge": {
+      "desc": "Etiquetas de estado compactas con 5 variantes semánticas, dot indicator y soporte outline."
+    },
+    "breadcrumb": {
+      "desc": "Navegación jerárquica accesible con soporte para RouterLink, separadores personalizables e indicador <code>aria-current=\"page\"</code> en el último ítem."
+    },
+    "button": {
+      "desc": "Botón semántico con 4 variantes, 3 tamaños, estado de carga animado y soporte completo de accesibilidad (aria-disabled, role=\"button\")."
+    },
+    "card": {
+      "desc": "Contenedor de superficie con proyección de contenido estructurado: header, body y footer. 4 modos de padding, variantes hoverable, flat y bordered."
+    },
+    "chart": {
+      "desc": "Gráficas reactivas basadas en ApexCharts con estética Neural-Blue. Barras agrupadas, apiladas, horizontales, área, pie, donut y diagrama de Pareto, todos con colores, tooltip y leyenda integrados."
+    },
+    "checkbox": {
+      "desc": "Casilla de verificación animada con soporte completo para Angular Forms."
+    },
+    "chip": {
+      "desc": "Etiquetas compactas seleccionables y eliminables. Perfectas para filtros, tags y selección múltiple visual con soporte de señales."
+    },
+    "dateInput": {
+      "desc": "Campo de fecha, hora y fecha+hora con icono, estilo consistente con el sistema y soporte completo para Angular Forms."
+    },
+    "divider": {
+      "desc": "Separador visual para secciones de contenido. Soporta orientación horizontal y vertical, y etiqueta central."
+    },
+    "input": {
+      "desc": "Campo de texto con floating label, iconos y soporte total para Angular Forms (ngModel y Reactive Forms). IDs estables para SSR y a11y."
+    },
+    "modal": {
+      "desc": "Diálogo accesible con CDK Overlay, trampa de foco, cierre con Escape y soporte para tamaños sm, md, lg y fullscreen."
+    },
+    "multiselect": {
+      "desc": "Dropdown de selección múltiple con chips, búsqueda integrada y soporte completo para Angular Forms. Resumen en footer y limpieza con un clic."
+    },
+    "nav": {
+      "desc": "Sidebar de navegación persistente con soporte para submenús, badges, modo colapsado (64 px ↔ 280 px) y tooltips accesibles en iconos."
+    },
+    "pagination": {
+      "desc": "Paginación accesible con ellipsis automático, navegación por teclado y estado gestionado con señales."
+    },
+    "progressBar": {
+      "desc": "Barra de progreso accesible con 4 variantes semánticas, 3 tamaños, modo indeterminado y etiqueta de valor en tiempo real."
+    },
+    "radio": {
+      "desc": "Grupo de opciones de selección única con soporte completo para Angular Forms."
+    },
+    "rating": {
+      "desc": "Selector de valoración con estrellas. Soporta valores medios, modo solo lectura y navegación por teclado."
+    },
+    "select": {
+      "desc": "Dropdown personalizado con floating label, teclado y soporte completo para Angular Forms. Cierre automático al hacer clic fuera."
+    },
+    "sidebar": {
+      "desc": "Panel lateral cuyo estado abierto/cerrado vive en la URL (<code>?menu=open</code>). Modo <strong>overlay</strong> en mobile, <strong>persistent</strong> en desktop ≥400px. Estado compartible y sincronizado vía <code>NeuUrlStateService</code>."
+    },
+    "skeleton": {
+      "desc": "Placeholders animados para simular la carga de contenido. Tres variantes: texto, círculo y rectángulo."
+    },
+    "slider": {
+      "desc": "Control deslizante accesible sobre <code>input[type=range]</code> nativo con estilos personalizados, soporte de unidades y señales."
+    },
+    "splitButton": {
+      "desc": "Botón principal con menú desplegable de acciones secundarias. ARIA completo, navegación por teclado, spinner de carga y 5 variantes visuales."
+    },
+    "statsCard": {
+      "desc": "Tarjeta de métrica con valor principal, tendencia animada y subtítulo. Ideal para dashboards analíticos."
+    },
+    "stepper": {
+      "desc": "Wizard paso a paso con navegación libre o lineal, estado de completado y métodos imperativos <code>next()</code> / <code>prev()</code>."
+    },
+    "switch": {
+      "desc": "Toggle animado compatible con Angular Forms. Ideal para activar/desactivar opciones."
+    },
+    "table": {
+      "desc": "Tabla de datos avanzada con búsqueda, ordenación y paginación sincronizadas a la URL mediante <code>NeuUrlStateService</code>. Selección múltiple de filas, skeleton de carga y scroll horizontal optimizado para mobile."
+    },
+    "tabs": {
+      "desc": "Sistema de pestañas con estado sincronizado a la URL. Indicador animado, badges, pestañas deshabilitadas y modo flush."
+    },
+    "textarea": {
+      "desc": "Área de texto con floating label, auto-resize opcional y soporte completo para Angular Forms."
+    },
+    "timeline": {
+      "desc": "Lista cronológica de eventos con 5 variantes semánticas, timestamps y línea conectora animada."
+    },
+    "toggleButton": {
+      "desc": "Grupo de botones de selección única o múltiple con soporte completo para Angular Forms. Equivalente superior al <code>SelectButton</code> de PrimeNG."
+    },
+    "tooltip": {
+      "desc": "Directiva [neuTooltip] que usa CDK Overlay. Responde a hover y focus.",
+      "top": "Tooltip arriba — muy útil para iconos de acción",
+      "bottom": "Tooltip abajo",
+      "left": "Tooltip a la izquierda",
+      "right": "Tooltip a la derecha"
+    },
+    "toast": {
+      "desc": "Notificaciones flotantes. Mobile: centro inferior. Desktop: esquina superior derecha.",
+      "success": "Toast de éxito",
+      "error": "Toast de error",
+      "warning": "Toast de advertencia",
+      "info": "Toast informativo",
+      "persistent": "Toast persistente (sin auto-hide)"
+    },
+    "emptyState": {
+      "desc": "Estado vacío configurable con ilustración SVG, título, descripción y CTA opcionales."
+    },
+    "textarea_form": {
+      "desc": "Área de texto con floating label y soporte para auto-resize.",
+      "label": "Descripción",
+      "autoResize": "Auto-resize (prueba a escribir)",
+      "error": "Campo con error",
+      "errorMsg": "Este campo es requerido"
+    },
+    "switch_form": {
+      "desc": "Toggle animado con Electric-Blue. Compatible con Reactive Forms.",
+      "notifications": "Notificaciones push",
+      "newsletter": "Suscripción newsletter",
+      "disabled": "Opción deshabilitada"
+    },
+    "checkbox_form": {
+      "desc": "Checkbox personalizado y accesible.",
+      "terms": "Acepto los términos y condiciones",
+      "privacy": "Acepto la política de privacidad",
+      "disabled": "Opción deshabilitada"
+    },
+    "radio_form": {
+      "desc": "Grupo de selección única. El grupo implementa ControlValueAccessor.",
+      "light": "Tema claro",
+      "dark": "Tema oscuro",
+      "system": "Usar configuración del sistema",
+      "selected": "Seleccionado"
+    }
+  }
+}
     "form": "Formularios",
     "actions": "Acciones",
     "data": "Datos",
