@@ -232,6 +232,11 @@ $demo-max-width: 960px;
     padding: var(--neu-space-8);
     background: var(--neu-bg);
     min-height: 180px;
+
+    @media (max-width: 600px) {
+      min-height: 140px;
+      padding: var(--neu-space-5);
+    }
   }
 
   &__controls {
@@ -245,6 +250,11 @@ $demo-max-width: 960px;
     @media (max-width: 600px) {
       border-left: none;
       border-top: 1px solid var(--neu-border);
+      // Rejilla 2 columnas para que quepan más controles sin tanto scroll
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--neu-space-3) var(--neu-space-4);
+      padding: var(--neu-space-4);
     }
   }
 
@@ -254,6 +264,10 @@ $demo-max-width: 960px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--neu-text-disabled);
+
+    @media (max-width: 600px) {
+      grid-column: 1 / -1;
+    }
   }
 
   &__snippet {
@@ -278,6 +292,19 @@ $demo-max-width: 960px;
       color: var(--neu-text-muted);
       cursor: pointer;
     }
+
+    // En móvil: label encima, control debajo — ocupan todo el ancho
+    @media (max-width: 600px) {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 6px;
+
+      label {
+        font-size: var(--neu-text-xs);
+        font-weight: 600;
+      }
+    }
   }
 }
 
@@ -289,6 +316,13 @@ $demo-max-width: 960px;
   height: 20px;
   cursor: pointer;
   flex-shrink: 0;
+
+  // Ampliar área táctil mínima a 44×44px sin afectar el visual
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -12px -12px;
+  }
 
   input {
     opacity: 0;
@@ -347,6 +381,15 @@ $demo-max-width: 960px;
 
   &:focus {
     border-color: var(--neu-primary);
+  }
+
+  // En móvil: ancho completo y altura táctil mínima de 40px
+  // !important necesario para sobreescribir inline styles (style="width: Xpx")
+  @media (max-width: 600px) {
+    width: 100% !important;
+    min-height: 40px;
+    font-size: var(--neu-text-sm);
+    padding: 6px 10px;
   }
 }
 
