@@ -1,0 +1,96 @@
+// ── NeuralUI tokens + all component styles ──────────────────────────────────
+@use '../../ui-core/src/lib/styles' as *;
+
+// ── Reset ────────────────────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--neu-font-sans);
+  background-color: var(--neu-bg);
+  color: var(--neu-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+// ── Sandbox layout ───────────────────────────────────────────────────────────
+.sb-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.sb-header {
+  border-bottom: 2px solid var(--neu-primary);
+  padding-bottom: 16px;
+  margin-bottom: 48px;
+}
+
+.sb-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--neu-primary);
+}
+
+.sb-header p {
+  color: var(--neu-text-muted);
+  font-size: 0.875rem;
+}
+
+.sb-section {
+  margin-bottom: 64px;
+}
+
+.sb-section__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--neu-text);
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--neu-border);
+}
+
+.sb-section__sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--neu-text-muted);
+  margin: 20px 0 10px;
+}
+
+.sb-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.sb-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.sb-nav-host {
+  width: 240px;
+  min-height: 320px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-lg);
+  overflow: hidden;
+}
