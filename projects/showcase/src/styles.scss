@@ -393,6 +393,30 @@ $demo-max-width: 960px;
   }
 }
 
+// ---- Input nativo del configurador ----
+.demo-input {
+  padding: 4px 8px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface);
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: var(--neu-primary);
+  }
+
+  @media (max-width: 600px) {
+    min-height: 40px;
+    font-size: var(--neu-text-sm);
+    padding: 6px 10px;
+  }
+}
+
 // ---- Tabla de API ----
 .demo-api-table-wrapper {
   overflow-x: auto;

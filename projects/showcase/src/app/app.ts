@@ -202,8 +202,8 @@ export class App {
       icon: 'lucideLayers',
       items: [
         {
-          labelKey: 'comp.modal',
-          route: '/components/modal',
+          labelKey: 'comp.dialog',
+          route: '/components/dialog',
           icon: 'lucideMaximize2',
           isNew: true,
         },

@@ -43,6 +43,7 @@
     "avatar": "Avatar",
     "emptyState": "Empty State",
     "modal": "Modal",
+    "dialog": "Dialog",
     "statsCard": "Stats Card",
     "chart": "Chart",
     "tooltip": "Tooltip & Toast",
@@ -244,6 +245,9 @@
       "desc": "Campo de texto con floating label, iconos y soporte total para Angular Forms (ngModel y Reactive Forms). IDs estables para SSR y a11y."
     },
     "modal": {
+      "desc": "Diálogo accesible con CDK Overlay, trampa de foco, cierre con Escape y soporte para tamaños sm, md, lg y fullscreen."
+    },
+    "dialog": {
       "desc": "Diálogo accesible con CDK Overlay, trampa de foco, cierre con Escape y soporte para tamaños sm, md, lg y fullscreen."
     },
     "multiselect": {

@@ -151,9 +151,13 @@ export const routes: Routes = [
   // Componentes — Overlays
   {
     path: 'components/modal',
+    redirectTo: 'components/dialog',
+  },
+  {
+    path: 'components/dialog',
     loadComponent: () =>
-      import('./pages/modal-demo/modal-demo.component').then((m) => m.ModalDemoComponent),
-    title: 'Modal — NeuralUI',
+      import('./pages/dialog-demo/dialog-demo.component').then((m) => m.DialogDemoComponent),
+    title: 'Dialog — NeuralUI',
   },
   {
     path: 'components/empty-state',

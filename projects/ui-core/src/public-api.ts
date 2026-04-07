@@ -33,7 +33,7 @@ export * from './lib/tabs/neu-tabs.component';
 export * from './lib/accordion/neu-accordion.component';
 export * from './lib/card/neu-card.component';
 export * from './lib/divider/neu-divider.component';
-export * from './lib/modal/neu-modal.component';
+export * from './lib/modal/neu-modal.component'; // exports NeuDialogComponent + NeuDialogService (NeuModalComponent/NeuModalService are deprecated aliases)
 export * from './lib/table/neu-table.component';
 export * from './lib/table/neu-table.types';
 export * from './lib/table/neu-table-expand.directive';
