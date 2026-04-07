@@ -1,44 +1,67 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { NeuStatsCardComponent } from '@neural-ui/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  computed,
+  inject,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import {
+  NeuBadgeComponent,
+  NeuCodeBlockComponent,
+  NeuStatsCardComponent,
+  NeuTab,
+  NeuTabPanelComponent,
+  NeuTabsComponent,
+} from '@neural-ui/core';
 
 @Component({
   selector: 'app-stats-card-demo',
-  template: `
-    <h1>Stats Card</h1>
-    <p>Tarjetas de métricas con sparkline integrado.</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.5rem;padding:2rem 0">
-      <neu-stats-card
-        title="Ingresos"
-        value="$48,295"
-        change="+12.5%"
-        trend="up"
-        label="vs mes anterior"
-        icon="lucideTrendingUp"
-        [sparkData]="revenueData"
-      />
-      <neu-stats-card
-        title="Usuarios activos"
-        value="3,241"
-        change="-4.2%"
-        trend="down"
-        label="vs semana pasada"
-        icon="lucideUser"
-        [sparkData]="usersData"
-      />
-      <neu-stats-card
-        title="Peticiones API"
-        value="1.2M"
-        change="0%"
-        trend="neutral"
-        label="sin cambios"
-        icon="lucideDatabase"
-      />
-    </div>
-  `,
+  templateUrl: './stats-card-demo.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NeuStatsCardComponent],
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    TranslocoPipe,
+    NeuBadgeComponent,
+    NeuStatsCardComponent,
+    NeuCodeBlockComponent,
+    NeuTabsComponent,
+    NeuTabPanelComponent,
+  ],
 })
 export class StatsCardDemoComponent {
+  private readonly _t = inject(TranslocoService);
+  private readonly _translations = toSignal(this._t.selectTranslation());
+
+  readonly demoTabs = computed<NeuTab[]>(() => {
+    this._translations();
+    return [
+      { id: 'preview', label: this._t.translate('demo.common.tabs.preview') },
+      { id: 'api', label: this._t.translate('demo.common.tabs.api') },
+    ];
+  });
+
   revenueData = [30, 55, 40, 80, 65, 90, 75, 110, 95, 120];
-  usersData   = [80, 70, 85, 60, 55, 65, 50, 45, 55, 40];
+  usersData = [80, 70, 85, 60, 55, 65, 50, 45, 55, 40];
+
+  readonly usageCode = `import { NeuStatsCardComponent } from '@neural-ui/core';
+
+@Component({
+  imports: [NeuStatsCardComponent],
+  template: \`
+    <neu-stats-card
+      title="Ingresos"
+      value="$48,295"
+      change="+12.5%"
+      trend="up"
+      label="vs mes anterior"
+      icon="lucideTrendingUp"
+      [sparkData]="data"
+    />
+  \`
+})
+export class MyComponent {
+  data = [30, 55, 40, 80, 65, 90, 75, 110, 95, 120];
+}`;
 }

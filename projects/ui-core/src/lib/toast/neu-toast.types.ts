@@ -1,5 +1,7 @@
 export type NeuToastType = 'success' | 'error' | 'info' | 'warning';
 
+export type NeuToastPosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+
 export interface NeuToastOptions {
   /** Mensaje del toast */
   message: string;

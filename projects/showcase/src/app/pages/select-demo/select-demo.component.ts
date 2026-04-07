@@ -1,11 +1,19 @@
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   NeuBadgeComponent,
   NeuCodeBlockComponent,
   NeuSelectComponent,
+  NeuSelectItemDirective,
   NeuSelectOption,
   NeuTab,
   NeuTabPanelComponent,
@@ -17,6 +25,7 @@ import {
   imports: [
     TranslocoPipe,
     NeuSelectComponent,
+    NeuSelectItemDirective,
     NeuBadgeComponent,
     NeuTabsComponent,
     NeuTabPanelComponent,
@@ -62,6 +71,13 @@ export class SelectDemoComponent {
   selectedFramework = signal('angular');
   selectedCountry = signal('');
 
+  readonly serverStatuses: NeuSelectOption[] = [
+    { value: 'online', label: 'En línea' },
+    { value: 'busy', label: 'Ocupado' },
+    { value: 'offline', label: 'Desconectado' },
+  ];
+  selectedStatus = signal('online');
+
   // Configurador
   cfg = {
     label: 'Framework',
@@ -71,6 +87,7 @@ export class SelectDemoComponent {
     floatingLabel: false,
     searchable: false,
     searchPlaceholder: 'Buscar...',
+    clearable: false,
   };
   cfgValue = '';
 
@@ -84,13 +101,14 @@ export class SelectDemoComponent {
     if (this.cfg.searchable) lines.push(`  [searchable]="true"`);
     if (this.cfg.searchable && this.cfg.searchPlaceholder !== 'Buscar...')
       lines.push(`  searchPlaceholder="${this.cfg.searchPlaceholder}"`);
+    if (this.cfg.clearable) lines.push(`  [clearable]="true"`);
     if (this.cfg.error) lines.push(`  errorMessage="${this.cfg.error}"`);
     if (this.cfg.disabled) lines.push(`  [disabled]="true"`);
     lines.push(`/>`);
     return lines.join('\n');
   }
 
-  readonly usageCode = `import { NeuSelectComponent } from '@neural-ui/core';
+  readonly usageCode = `import { NeuSelectComponent, NeuSelectItemDirective, NeuSelectSelectedDirective } from '@neural-ui/core';
 import { FormsModule } from '@angular/forms';
 
 const options: NeuSelectOption[] = [
@@ -100,26 +118,33 @@ const options: NeuSelectOption[] = [
 ];
 
 @Component({
-  imports: [NeuSelectComponent, FormsModule],
+  imports: [NeuSelectComponent, NeuSelectItemDirective, NeuSelectSelectedDirective, FormsModule],
   template: \`
-    <!-- Con ngModel -->
-    <neu-select
-      label="País"
-      [options]="options"
-      [(ngModel)]="country"
-    />
+    <!-- Básico con ngModel -->
+    <neu-select label="País" [options]="options" [(ngModel)]="country" />
 
-    <!-- Con Reactive Forms -->
-    <neu-select
-      label="Idioma"
-      [options]="languages"
-      [formControl]="langCtrl"
-      [errorMessage]="langCtrl.invalid ? 'Requerido' : ''"
-    />
+    <!-- Template personalizado para ítems del panel -->
+    <neu-select label="Estado" [options]="statuses" [(ngModel)]="status">
+      <ng-template neuSelectItem let-item>
+        <span style="display: inline-flex; align-items: center; gap: 8px">
+          <span [style.background]="item.value === 'online' ? 'green' : 'red'"
+                style="width: 8px; height: 8px; border-radius: 50%"></span>
+          {{ item.label }}
+        </span>
+      </ng-template>
+    </neu-select>
+
+    <!-- Template personalizado para el trigger (valor seleccionado) -->
+    <neu-select label="Rol" [options]="roles" [(ngModel)]="role">
+      <ng-template neuSelectSelected let-item>
+        <strong>{{ item?.label }}</strong>
+      </ng-template>
+    </neu-select>
   \`
 })
 export class MyComponent {
   country = '';
-  langCtrl = new FormControl('', Validators.required);
+  status = 'online';
+  role = '';
 }`;
 }

@@ -1,11 +1,18 @@
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  computed,
+  inject,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   NeuBadgeComponent,
   NeuCodeBlockComponent,
   NeuMultiselectComponent,
+  NeuMultiselectItemDirective,
   NeuSelectOption,
   NeuTab,
   NeuTabPanelComponent,
@@ -17,6 +24,7 @@ import {
   imports: [
     TranslocoPipe,
     NeuMultiselectComponent,
+    NeuMultiselectItemDirective,
     NeuBadgeComponent,
     NeuCodeBlockComponent,
     NeuTabsComponent,
@@ -73,6 +81,7 @@ export class MultiselectDemoComponent {
     placeholder: 'Seleccionar...',
     searchable: false,
     searchPlaceholder: 'Buscar...',
+    clearable: false,
     error: '',
     disabled: false,
   };
@@ -86,6 +95,7 @@ export class MultiselectDemoComponent {
     if (this.cfg.searchable) lines.push(`  [searchable]="true"`);
     if (this.cfg.searchable && this.cfg.searchPlaceholder !== 'Buscar...')
       lines.push(`  searchPlaceholder="${this.cfg.searchPlaceholder}"`);
+    if (this.cfg.clearable) lines.push(`  [clearable]="true"`);
     if (this.cfg.error) lines.push(`  errorMessage="${this.cfg.error}"`);
     if (this.cfg.disabled) lines.push(`  [disabled]="true"`);
     lines.push(`  [options]="options"`);
@@ -94,7 +104,7 @@ export class MultiselectDemoComponent {
     return lines.join('\n');
   }
 
-  readonly usageCode = `import { NeuMultiselectComponent } from '@neural-ui/core';
+  readonly usageCode = `import { NeuMultiselectComponent, NeuMultiselectItemDirective } from '@neural-ui/core';
 import { FormsModule } from '@angular/forms';
 
 const options: NeuSelectOption[] = [
@@ -104,14 +114,20 @@ const options: NeuSelectOption[] = [
 ];
 
 @Component({
-  imports: [NeuMultiselectComponent, FormsModule],
+  imports: [NeuMultiselectComponent, NeuMultiselectItemDirective, FormsModule],
   template: \`
-    <!-- Con ngModel -->
-    <neu-multiselect
-      label="Tecnologías"
-      [options]="options"
-      [(ngModel)]="selected"
-    />
+    <!-- Básico con ngModel -->
+    <neu-multiselect label="Tecnologías" [options]="options" [(ngModel)]="selected" />
+
+    <!-- Template personalizado para ítems del panel -->
+    <neu-multiselect label="Tecnologías" [options]="options" [(ngModel)]="selected">
+      <ng-template neuMultiselectItem let-item>
+        <span style="display: inline-flex; align-items: center; gap: 8px">
+          <span style="font-size: 16px">{{ item.value === 'angular' ? '🅰️' : '📦' }}</span>
+          {{ item.label }}
+        </span>
+      </ng-template>
+    </neu-multiselect>
 
     <!-- Con Reactive Forms -->
     <neu-multiselect

@@ -42,6 +42,9 @@
             </div>
           </div>
         </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
+        </div>
       </neu-tab-panel>
 
       <!-- CONFIGURADOR -->
@@ -220,6 +223,18 @@
                   <td><code>string</code></td>
                   <td><code>'Navegación principal'</code></td>
                   <td>Etiqueta accesible del elemento <code>&lt;nav&gt;</code></td>
+                </tr>
+                <tr>
+                  <td><code>expandLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Expandir menú'</code></td>
+                  <td>Aria-label del botón toggle cuando el nav está colapsado</td>
+                </tr>
+                <tr>
+                  <td><code>collapseLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Colapsar menú'</code></td>
+                  <td>Aria-label del botón toggle cuando el nav está expandido</td>
                 </tr>
               </tbody>
             </table>

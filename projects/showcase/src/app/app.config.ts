@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withRouterConfig } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling, withRouterConfig } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTransloco } from '@jsverse/transloco';
 import { provideIcons } from '@ng-icons/core';
@@ -99,6 +99,11 @@ import {
   lucideSparkles,
   // Installation page
   lucidePackage,
+  lucideCode2,
+  lucideSmile,
+  lucideWifi,
+  lucideBell,
+  lucideLock,
 } from '@ng-icons/lucide';
 
 import { routes } from './app.routes';
@@ -123,6 +128,7 @@ export const appConfig: ApplicationConfig = {
       // Ejemplo: input() 'menu' en un componente ← ?menu=open en la URL
       withComponentInputBinding(),
       withRouterConfig({ paramsInheritanceStrategy: 'always' }),
+      withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
     ),
     provideIcons({
       // Originales
@@ -210,6 +216,7 @@ export const appConfig: ApplicationConfig = {
       // UI group icons
       lucideLayoutList,
       lucideLoader,
+      lucideLock,
       // Nuevos componentes
       lucideChevronsRight,
       lucideMoreHorizontal,
@@ -217,6 +224,11 @@ export const appConfig: ApplicationConfig = {
       lucideSlidersHorizontal,
       lucideSparkles,
       lucidePackage,
+      // Nuevas páginas
+      lucideCode2,
+      lucideSmile,
+      lucideWifi,
+      lucideBell,
     }),
     provideNgIconsConfig({ size: '1.25rem', strokeWidth: '2' }),
   ],

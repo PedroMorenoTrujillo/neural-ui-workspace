@@ -89,7 +89,7 @@ export interface NeuSplitButtonAction {
         [disabled]="isDisabled() || null"
         [attr.aria-haspopup]="'menu'"
         [attr.aria-expanded]="isOpen()"
-        [attr.aria-label]="'Más opciones'"
+        [attr.aria-label]="moreActionsAriaLabel()"
         (click)="toggleDropdown($event)"
       >
         <svg
@@ -110,7 +110,7 @@ export interface NeuSplitButtonAction {
         <div
           class="neu-split-button__dropdown"
           role="menu"
-          [attr.aria-label]="'Acciones'"
+          [attr.aria-label]="actionsAriaLabel()"
           (click)="$event.stopPropagation()"
         >
           @for (action of actions(); track action.id) {
@@ -155,6 +155,12 @@ export class NeuSplitButtonComponent {
 
   /** Acciones del dropdown */
   actions = input<NeuSplitButtonAction[]>([]);
+
+  /** Aria-label del botón de desplegable */
+  moreActionsAriaLabel = input<string>('Más opciones');
+
+  /** Aria-label del menú desplegable */
+  actionsAriaLabel = input<string>('Acciones');
 
   /** Emite al hacer click en el botón principal */
   primaryClick = output<MouseEvent>();

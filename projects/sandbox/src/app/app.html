@@ -6,7 +6,10 @@
   <p style="padding: 16px; font-size: 0.875rem; color: var(--neu-text-muted)">
     Sidebar content proyectado aquí.
   </p>
-  <div neu-sidebar-footer style="padding: 12px 16px; font-size: 0.75rem; color: var(--neu-text-muted)">
+  <div
+    neu-sidebar-footer
+    style="padding: 12px 16px; font-size: 0.75rem; color: var(--neu-text-muted)"
+  >
     Footer del sidebar
   </div>
 </neu-sidebar>
@@ -30,591 +33,650 @@
   </button>
 </neu-dialog>
 
-<div class="sb-page">
-
-  <!-- ══════════════════════════════════════ HEADER ══════════════════════════════ -->
-  <header class="sb-header">
-    <h1>NeuralUI Sandbox</h1>
-    <p>Todos los componentes de @neural-ui/core — outputs bindeados a console.log</p>
-  </header>
-
-  <!-- ══════════════════════════════════════ FEEDBACK ═══════════════════════════ -->
-  <section class="sb-section">
-    <h2 class="sb-section__title">Feedback & Overlays</h2>
-
-    <p class="sb-section__sub">Toast</p>
-    <div class="sb-row">
-      <button neu-button variant="primary" (neuClick)="showToast('success')">Toast Success</button>
-      <button neu-button variant="outline" (neuClick)="showToast('info')">Toast Info</button>
-      <button neu-button variant="outline" (neuClick)="showToast('warning')">Toast Warning</button>
-      <button neu-button variant="danger" (neuClick)="showToast('error')">Toast Error</button>
-    </div>
-
-    <p class="sb-section__sub">Modal / Dialog</p>
-    <div class="sb-row">
-      <button
-        neu-button
-        [neuTooltip]="'Abre el modal declarativo'"
-        (neuClick)="modalOpen.set(true); log('dialog.open')"
-      >
-        Abrir Modal
-      </button>
-    </div>
-
-    <p class="sb-section__sub">Sidebar</p>
-    <div class="sb-row">
-      <button neu-button variant="outline" icon="lucideMenu" (neuClick)="openSidebar()">
-        Abrir Sidebar
-      </button>
-    </div>
-
-    <p class="sb-section__sub">Tooltip (hover sobre botones)</p>
-    <div class="sb-row">
-      <button neu-button [neuTooltip]="'Tooltip arriba (default)'" variant="ghost">
-        Hover top
-      </button>
-      <button neu-button [neuTooltip]="'Tooltip abajo'" neuTooltipPosition="bottom" variant="ghost">
-        Hover bottom
-      </button>
-      <button neu-button [neuTooltip]="'Tooltip derecha'" neuTooltipPosition="right" variant="ghost">
-        Hover right
-      </button>
-      <button neu-button [neuTooltip]="'Deshabilitado'" [neuTooltipDisabled]="true" variant="ghost">
-        Disabled tooltip
-      </button>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════ BUTTONS ════════════════════════════ -->
-  <section class="sb-section">
-    <h2 class="sb-section__title">Button</h2>
-
-    <p class="sb-section__sub">Variants</p>
-    <div class="sb-row">
-      <button neu-button variant="primary" (neuClick)="log('button.neuClick.primary', $event)">Primary</button>
-      <button neu-button variant="secondary" (neuClick)="log('button.neuClick.secondary', $event)">Secondary</button>
-      <button neu-button variant="outline" (neuClick)="log('button.neuClick.outline', $event)">Outline</button>
-      <button neu-button variant="ghost" (neuClick)="log('button.neuClick.ghost', $event)">Ghost</button>
-      <button neu-button variant="danger" (neuClick)="log('button.neuClick.danger', $event)">Danger</button>
-      <button neu-button variant="ghost" (neuClick)="log('button.neuClick.ghost2', $event)">Ghost 2</button>
-    </div>
-
-    <p class="sb-section__sub">Sizes</p>
-    <div class="sb-row">
-      <button neu-button size="sm" (neuClick)="log('button.neuClick.sm', $event)">Small</button>
-      <button neu-button size="md" (neuClick)="log('button.neuClick.md', $event)">Medium</button>
-      <button neu-button size="lg" (neuClick)="log('button.neuClick.lg', $event)">Large</button>
-    </div>
-
-    <p class="sb-section__sub">States & icons</p>
-    <div class="sb-row">
-      <button neu-button [disabled]="true" (neuClick)="log('button.neuClick.disabled', $event)">Disabled</button>
-      <button neu-button [loading]="true" (neuClick)="log('button.neuClick.loading', $event)">Loading</button>
-      <button neu-button icon="lucidePlus" iconPosition="left" (neuClick)="log('button.neuClick.iconLeft', $event)">Icon Left</button>
-      <button neu-button icon="lucideArrowRight" iconPosition="right" (neuClick)="log('button.neuClick.iconRight', $event)">Icon Right</button>
-      <button neu-button icon="lucideDownload" [iconOnly]="true" ariaLabel="Descargar" (neuClick)="log('button.neuClick.iconOnly', $event)"></button>
-    </div>
-
-    <p class="sb-section__sub">SplitButton</p>
-    <div class="sb-row">
-      <neu-split-button
-        label="Guardar"
-        variant="primary"
-        [actions]="splitActions"
-        (primaryClick)="log('splitButton.primaryClick', $event)"
-        (actionClick)="log('splitButton.actionClick', $event)"
-      />
-      <neu-split-button
-        label="Disabled"
-        [disabled]="true"
-        [actions]="splitActions"
-        (primaryClick)="log('splitButton.disabled.primaryClick', $event)"
-        (actionClick)="log('splitButton.disabled.actionClick', $event)"
-      />
-    </div>
-
-    <p class="sb-section__sub">ToggleButtonGroup</p>
-    <div class="sb-row">
-      <neu-toggle-button-group
-        [options]="toggleOptions"
-        [formControl]="toggleCtrl"
-        (neuChange)="log('toggleGroup.neuChange', $event)"
-      />
-      <neu-toggle-button-group
-        [options]="toggleOptions"
-        [multiple]="true"
-        [disabled]="false"
-        (neuChange)="log('toggleGroup.multi.neuChange', $event)"
-      />
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════ FORMS ══════════════════════════════ -->
-  <section class="sb-section">
-    <h2 class="sb-section__title">Form Inputs</h2>
-
-    <p class="sb-section__sub">Input</p>
-    <div class="sb-row">
-      <neu-input
-        label="Email"
-        type="email"
-        placeholder="usuario@ejemplo.com"
-        [formControl]="inputCtrl"
-        [startIcon]="true"
-        [endIcon]="false"
-        hint="Introduce tu email"
-        style="width: 260px"
-      >
-        <neu-icon neu-input-start name="lucideMail" size="16px" />
-      </neu-input>
-      <neu-input
-        label="Búsqueda"
-        type="search"
-        placeholder="Buscar..."
-        [floatingLabel]="false"
-        [endIcon]="true"
-        errorMessage="Campo inválido"
-        style="width: 200px"
-      >
-        <neu-icon neu-input-end name="lucideSearch" size="16px" />
-      </neu-input>
-      <neu-input label="Readonly" [readonly]="true" [formControl]="inputCtrl" style="width: 180px" />
-      <neu-input label="Disabled" [disabled]="true" style="width: 160px" />
-    </div>
-
-    <p class="sb-section__sub">Textarea</p>
-    <div class="sb-row">
-      <neu-textarea
-        label="Comentarios"
-        placeholder="Escribe aquí..."
-        [rows]="3"
-        [autoResize]="false"
-        hint="Máximo 500 caracteres"
-        [formControl]="textareaCtrl"
-        style="width: 320px"
-      />
-      <neu-textarea
-        label="Auto-resize"
-        [autoResize]="true"
-        [rows]="2"
-        style="width: 240px"
-      />
-      <neu-textarea
-        label="Con error"
-        errorMessage="Este campo es obligatorio"
-        style="width: 220px"
-      />
-    </div>
-
-    <p class="sb-section__sub">Checkbox</p>
-    <div class="sb-row">
-      <neu-checkbox label="Acepto los términos" [formControl]="checkboxCtrl" name="terms" />
-      <neu-checkbox label="Disabled marcado" [disabled]="true" name="dis-checked" />
-      <neu-checkbox label="Sin label" name="nolabel" />
-    </div>
-
-    <p class="sb-section__sub">Switch</p>
-    <div class="sb-row">
-      <neu-switch label="Notificaciones push" [formControl]="switchCtrl" name="notif" />
-      <neu-switch label="Modo oscuro" name="dark" />
-      <neu-switch label="Disabled" [disabled]="true" name="sw-dis" />
-    </div>
-
-    <p class="sb-section__sub">Radio Group</p>
-    <div class="sb-row">
-      <neu-radio-group [formControl]="radioCtrl" ariaLabel="Plan de suscripción">
-        <neu-radio value="free" label="Free" />
-        <neu-radio value="b" label="Pro" />
-        <neu-radio value="enterprise" label="Enterprise" />
-        <neu-radio value="disabled-opt" label="Deshabilitado" [disabled]="true" />
-      </neu-radio-group>
-      <neu-radio-group [formControl]="radioCtrl" direction="row" ariaLabel="Plan horizontal">
-        <neu-radio value="free" label="Free" />
-        <neu-radio value="b" label="Pro" />
-        <neu-radio value="enterprise" label="Enterprise" />
-      </neu-radio-group>
-    </div>
-
-    <p class="sb-section__sub">Select</p>
-    <div class="sb-row">
-      <neu-select
-        label="País"
-        [options]="selectOptions"
-        [formControl]="selectCtrl"
-        placeholder="Selecciona un país"
-        style="width: 220px"
-      />
-      <neu-select
-        label="Buscable"
-        [options]="selectOptions"
-        [searchable]="true"
-        searchPlaceholder="Filtrar..."
-        style="width: 220px"
-      />
-      <neu-select
-        label="Con error"
-        [options]="selectOptions"
-        errorMessage="Selecciona una opción"
-        style="width: 200px"
-      />
-      <neu-select
-        label="Disabled"
-        [options]="selectOptions"
-        [disabled]="true"
-        style="width: 180px"
-      />
-    </div>
-
-    <p class="sb-section__sub">Multiselect</p>
-    <div class="sb-row">
-      <neu-multiselect
-        label="Frameworks"
-        [options]="selectOptions"
-        [formControl]="multiselectCtrl"
-        placeholder="Selecciona varios..."
-        style="width: 260px"
-      />
-      <neu-multiselect
-        label="Buscable"
-        [options]="selectOptions"
-        [searchable]="true"
-        style="width: 260px"
-      />
-    </div>
-
-    <p class="sb-section__sub">Slider</p>
-    <div class="sb-row">
-      <neu-slider
-        label="Volumen"
-        [min]="0"
-        [max]="100"
-        [step]="1"
-        unit="%"
-        [showValue]="true"
-        [showTicks]="false"
-        [formControl]="sliderCtrl"
-        (valueChange)="log('slider.valueChange', $event)"
-        style="width: 260px"
-      />
-      <neu-slider
-        label="Con ticks"
-        [min]="0"
-        [max]="10"
-        [step]="1"
-        [showTicks]="true"
-        style="width: 220px"
-      />
-      <neu-slider label="Disabled" [disabled]="true" style="width: 200px" />
-    </div>
-
-    <p class="sb-section__sub">Date Input</p>
-    <div class="sb-row">
-      <neu-date-input
-        label="Fecha nacimiento"
-        type="date"
-        [formControl]="dateCtrl"
-        style="width: 220px"
-      />
-      <neu-date-input
-        label="Hora"
-        type="time"
-        style="width: 180px"
-      />
-      <neu-date-input
-        label="Fecha y hora"
-        type="datetime-local"
-        style="width: 240px"
-      />
-    </div>
-
-    <p class="sb-section__sub">Rating</p>
-    <div class="sb-row">
-      <neu-rating
-        [value]="ratingValue()"
-        [stars]="5"
-        [readonly]="false"
-        (valueChange)="ratingValue.set($event); log('rating.valueChange', $event)"
-      />
-      <neu-rating [value]="4" [readonly]="true" />
-      <neu-rating [value]="3" [stars]="10" (valueChange)="log('rating.10stars.valueChange', $event)" />
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════ DISPLAY ════════════════════════════ -->
-  <section class="sb-section">
-    <h2 class="sb-section__title">Display</h2>
-
-    <p class="sb-section__sub">Badge</p>
-    <div class="sb-row">
-      <neu-badge variant="default">Default</neu-badge>
-      <neu-badge variant="success">Success</neu-badge>
-      <neu-badge variant="info">Info</neu-badge>
-      <neu-badge variant="warning">Warning</neu-badge>
-      <neu-badge variant="danger">Danger</neu-badge>
-      <neu-badge variant="success" size="sm">Small</neu-badge>
-      <neu-badge variant="info" [dot]="true">Dot</neu-badge>
-      <neu-badge variant="danger" [outline]="true">Outline</neu-badge>
-      <neu-badge variant="warning" [pill]="false">No pill</neu-badge>
-    </div>
-
-    <p class="sb-section__sub">Avatar</p>
-    <div class="sb-row">
-      <neu-avatar src="https://i.pravatar.cc/150?img=1" alt="Alice" size="sm" />
-      <neu-avatar src="https://i.pravatar.cc/150?img=2" alt="Bob" size="md" />
-      <neu-avatar src="https://i.pravatar.cc/150?img=3" alt="Carol" size="lg" />
-      <neu-avatar name="David Brown" size="md" color="blue" />
-      <neu-avatar name="Eve Wilson" size="md" color="violet" shape="square" />
-      <neu-avatar size="md" status="online" src="https://i.pravatar.cc/150?img=5" alt="Status" />
-      <neu-avatar size="md" status="busy" name="Busy User" />
-    </div>
-
-    <p class="sb-section__sub">Chip</p>
-    <div class="sb-row">
-      <neu-chip variant="default">Default</neu-chip>
-      <neu-chip variant="primary">Primary</neu-chip>
-      <neu-chip variant="success">Success</neu-chip>
-      <neu-chip variant="warning">Warning</neu-chip>
-      <neu-chip variant="danger">Danger</neu-chip>
-      <neu-chip
-        variant="primary"
-        [selected]="chipSelected()"
-        [removable]="true"
-        (selectedChange)="chipSelected.set($event); log('chip.selectedChange', $event)"
-        (removed)="log('chip.removed')"
-      >
-        Seleccionable + removible
-      </neu-chip>
-      <neu-chip variant="default" [disabled]="true">Disabled</neu-chip>
-    </div>
-
-    <p class="sb-section__sub">Icon</p>
-    <div class="sb-row">
-      <neu-icon name="lucideHome" />
-      <neu-icon name="lucideUsers" size="24px" />
-      <neu-icon name="lucideStar" size="32px" />
-      <neu-icon name="lucideSettings" size="20px" strokeWidth="1.5" />
-    </div>
-
-    <p class="sb-section__sub">ProgressBar</p>
-    <div class="sb-col" style="max-width: 400px">
-      <neu-progress-bar [value]="progressValue()" variant="primary" label="Progreso" [showValue]="true" size="md" />
-      <neu-progress-bar [value]="75" variant="success" size="sm" />
-      <neu-progress-bar [value]="40" variant="warning" size="lg" [showValue]="true" />
-      <neu-progress-bar [indeterminate]="true" variant="primary" label="Cargando..." />
-    </div>
-
-    <p class="sb-section__sub">StatsCard</p>
-    <div class="sb-grid">
-      <neu-stats-card
-        title="Usuarios activos"
-        value="12.430"
-        change="+8.2%"
-        trend="up"
-        label="vs. mes anterior"
-        icon="lucideUsers"
-        [sparkData]="[30, 40, 35, 50, 49, 60, 70, 91]"
-      />
-      <neu-stats-card
-        title="Ingresos"
-        value="€ 48.300"
-        change="-2.1%"
-        trend="down"
-        label="vs. mes anterior"
-        icon="lucideArrowRight"
-        [sparkData]="[80, 70, 65, 60, 55, 50, 45, 40]"
-      />
-      <neu-stats-card
-        title="Churn rate"
-        value="3.4%"
-        change="0%"
-        trend="neutral"
-        label="Sin cambios"
-        icon="lucideMinus"
-        [sparkData]="[3, 3, 4, 3, 4, 3, 3, 3]"
-      />
-    </div>
-
-    <p class="sb-section__sub">Timeline</p>
-    <neu-timeline [items]="timelineItems" />
-
-    <p class="sb-section__sub">Chart — line</p>
-    <neu-chart
-      type="line"
-      [series]="chartSeries"
-      [categories]="chartCategories"
-      title="Ventas vs Gastos"
-      [height]="260"
-      [showDataLabels]="false"
+<div class="sb-app">
+  <div class="sb-nav">
+    <neu-nav
+      [items]="navItems"
+      [collapsed]="navCollapsed()"
+      [collapsible]="true"
+      ariaLabel="Nav sandbox"
+      (collapsedChange)="navCollapsed.set($event); log('nav.collapsedChange', $event)"
     />
+  </div>
 
-    <p class="sb-section__sub">Chart — bar</p>
-    <neu-chart
-      type="bar"
-      [series]="chartSeries"
-      [categories]="chartCategories"
-      title="Barras agrupadas"
-      [height]="220"
-    />
+  <div class="sb-page">
+    <!-- ══════════════════════════════════════ HEADER ══════════════════════════════ -->
+    <header class="sb-header">
+      <h1>NeuralUI Sandbox</h1>
+      <p>Todos los componentes de @neural-ui/core — outputs bindeados a console.log</p>
+    </header>
 
-    <p class="sb-section__sub">Chart — donut</p>
-    <neu-chart
-      type="donut"
-      [pieSeries]="[44, 55, 41, 17]"
-      [labels]="['Q1', 'Q2', 'Q3', 'Q4']"
-      title="Distribución trimestral"
-      [height]="260"
-    />
+    <!-- ══════════════════════════════════════ FEEDBACK ═══════════════════════════ -->
+    <section class="sb-section">
+      <h2 class="sb-section__title">Feedback & Overlays</h2>
 
-    <p class="sb-section__sub">CodeBlock</p>
-    <neu-code-block [code]="sampleCode" lang="TypeScript" />
-
-    <p class="sb-section__sub">Skeleton</p>
-    <div class="sb-col" style="max-width: 360px; gap: 8px">
-      <neu-skeleton variant="text" width="80%" height="16px" />
-      <neu-skeleton variant="text" width="60%" height="16px" />
-      <neu-skeleton variant="rect" width="100%" height="120px" borderRadius="8px" />
-      <neu-skeleton variant="circle" width="48px" height="48px" />
-    </div>
-
-    <p class="sb-section__sub">EmptyState</p>
-    <neu-empty-state
-      icon="lucideInbox"
-      title="No hay resultados"
-      description="Prueba a cambiar los filtros de búsqueda."
-      actionLabel="Limpiar filtros"
-      (action)="log('emptyState.action')"
-    />
-  </section>
-
-  <!-- ══════════════════════════════════════ LAYOUT ═════════════════════════════ -->
-  <section class="sb-section">
-    <h2 class="sb-section__title">Layout</h2>
-
-    <p class="sb-section__sub">Accordion — exclusivo</p>
-    <neu-accordion
-      [items]="accordionItems"
-      [multiple]="false"
-      [bordered]="true"
-      (panelToggle)="log('accordion.panelToggle', $event)"
-    />
-
-    <p class="sb-section__sub">Accordion — múltiple, sin borde</p>
-    <neu-accordion
-      [items]="accordionItems"
-      [multiple]="true"
-      [bordered]="false"
-      (panelToggle)="log('accordion.multi.panelToggle', $event)"
-    />
-
-    <p class="sb-section__sub">Card</p>
-    <div class="sb-grid">
-      <neu-card padding="md" [hoverable]="false" [bordered]="false" [flat]="false">
-        <p>Card default (shadow)</p>
-      </neu-card>
-      <neu-card padding="md" [hoverable]="true" [bordered]="true">
-        <p>Card hoverable + bordered</p>
-      </neu-card>
-      <neu-card padding="lg" [flat]="true">
-        <p>Card flat, padding lg</p>
-      </neu-card>
-    </div>
-
-    <p class="sb-section__sub">Divider</p>
-    <div class="sb-col">
-      <p>Contenido arriba</p>
-      <neu-divider />
-      <p>Contenido abajo</p>
-      <neu-divider label="o continuar con" />
-    </div>
-
-    <p class="sb-section__sub">Tabs</p>
-    <neu-tabs
-      [tabs]="demoTabs"
-      tabParam="demo-tab"
-      [flush]="false"
-      ariaLabel="Pestañas de demostración"
-      (tabChange)="log('tabs.tabChange', $event)"
-    >
-      <neu-tab-panel tabId="tab1">
-        <div style="padding: 16px">Contenido de la Pestaña A</div>
-      </neu-tab-panel>
-      <neu-tab-panel tabId="tab2">
-        <div style="padding: 16px">Contenido de la Pestaña B</div>
-      </neu-tab-panel>
-      <neu-tab-panel tabId="tab3">
-        <div style="padding: 16px">Esta pestaña está deshabilitada</div>
-      </neu-tab-panel>
-    </neu-tabs>
-  </section>
-
-  <!-- ══════════════════════════════════════ TABLE ══════════════════════════════ -->
-  <section class="sb-section">
-    <h2 class="sb-section__title">Table</h2>
-    <neu-table
-      [columns]="tableColumns"
-      [data]="tableData"
-      title="Usuarios"
-      [searchable]="true"
-      [sortable]="true"
-      [selectable]="true"
-      [exportable]="true"
-      exportFileName="sandbox-users"
-      [pageSize]="5"
-      [loading]="false"
-      (rowSelectionChange)="log('table.rowSelectionChange', $event)"
-    />
-  </section>
-
-  <!-- ══════════════════════════════════════ NAVIGATION ═════════════════════════ -->
-  <section class="sb-section">
-    <h2 class="sb-section__title">Navigation</h2>
-
-    <p class="sb-section__sub">Breadcrumb</p>
-    <neu-breadcrumb [items]="breadcrumbs" separator="/" />
-
-    <p class="sb-section__sub">Pagination</p>
-    <div class="sb-col">
-      <neu-pagination
-        [page]="page()"
-        [total]="120"
-        [pageSize]="10"
-        [maxVisible]="7"
-        (pageChange)="page.set($event); log('pagination.pageChange', $event)"
-      />
-      <span style="font-size: 0.8rem; color: var(--neu-text-muted)">Página actual: {{ page() }}</span>
-    </div>
-
-    <p class="sb-section__sub">Stepper</p>
-    <div class="sb-col">
-      <neu-stepper
-        [steps]="stepperSteps"
-        [activeStep]="step()"
-        [linear]="false"
-        (stepChange)="step.set($event); log('stepper.stepChange', $event)"
-      />
-      <div class="sb-row" style="margin-top: 12px">
-        <button neu-button variant="outline" size="sm" (neuClick)="prevStep()">← Anterior</button>
-        <button neu-button variant="primary" size="sm" (neuClick)="nextStep()">Siguiente →</button>
+      <p class="sb-section__sub">Toast</p>
+      <div class="sb-row">
+        <button neu-button variant="primary" (neuClick)="showToast('success')">
+          Toast Success
+        </button>
+        <button neu-button variant="outline" (neuClick)="showToast('info')">Toast Info</button>
+        <button neu-button variant="outline" (neuClick)="showToast('warning')">
+          Toast Warning
+        </button>
+        <button neu-button variant="danger" (neuClick)="showToast('error')">Toast Error</button>
       </div>
-    </div>
 
-    <p class="sb-section__sub">Nav (sidebar-style)</p>
-    <div class="sb-nav-host">
-      <neu-nav
-        [items]="navItems"
-        [collapsed]="navCollapsed()"
-        [collapsible]="true"
-        ariaLabel="Nav sandbox"
-        (collapsedChange)="navCollapsed.set($event); log('nav.collapsedChange', $event)"
+      <p class="sb-section__sub">Modal / Dialog</p>
+      <div class="sb-row">
+        <button
+          neu-button
+          [neuTooltip]="'Abre el modal declarativo'"
+          (neuClick)="modalOpen.set(true); log('dialog.open')"
+        >
+          Abrir Modal
+        </button>
+      </div>
+
+      <p class="sb-section__sub">Sidebar</p>
+      <div class="sb-row">
+        <button neu-button variant="outline" icon="lucideMenu" (neuClick)="openSidebar()">
+          Abrir Sidebar
+        </button>
+      </div>
+
+      <p class="sb-section__sub">Tooltip (hover sobre botones)</p>
+      <div class="sb-row">
+        <button neu-button [neuTooltip]="'Tooltip arriba (default)'" variant="ghost">
+          Hover top
+        </button>
+        <button
+          neu-button
+          [neuTooltip]="'Tooltip abajo'"
+          neuTooltipPosition="bottom"
+          variant="ghost"
+        >
+          Hover bottom
+        </button>
+        <button
+          neu-button
+          [neuTooltip]="'Tooltip derecha'"
+          neuTooltipPosition="right"
+          variant="ghost"
+        >
+          Hover right
+        </button>
+        <button
+          neu-button
+          [neuTooltip]="'Deshabilitado'"
+          [neuTooltipDisabled]="true"
+          variant="ghost"
+        >
+          Disabled tooltip
+        </button>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ BUTTONS ════════════════════════════ -->
+    <section class="sb-section">
+      <h2 class="sb-section__title">Button</h2>
+
+      <p class="sb-section__sub">Variants</p>
+      <div class="sb-row">
+        <button neu-button variant="primary" (neuClick)="log('button.neuClick.primary', $event)">
+          Primary
+        </button>
+        <button
+          neu-button
+          variant="secondary"
+          (neuClick)="log('button.neuClick.secondary', $event)"
+        >
+          Secondary
+        </button>
+        <button neu-button variant="outline" (neuClick)="log('button.neuClick.outline', $event)">
+          Outline
+        </button>
+        <button neu-button variant="ghost" (neuClick)="log('button.neuClick.ghost', $event)">
+          Ghost
+        </button>
+        <button neu-button variant="danger" (neuClick)="log('button.neuClick.danger', $event)">
+          Danger
+        </button>
+        <button neu-button variant="ghost" (neuClick)="log('button.neuClick.ghost2', $event)">
+          Ghost 2
+        </button>
+      </div>
+
+      <p class="sb-section__sub">Sizes</p>
+      <div class="sb-row">
+        <button neu-button size="sm" (neuClick)="log('button.neuClick.sm', $event)">Small</button>
+        <button neu-button size="md" (neuClick)="log('button.neuClick.md', $event)">Medium</button>
+        <button neu-button size="lg" (neuClick)="log('button.neuClick.lg', $event)">Large</button>
+      </div>
+
+      <p class="sb-section__sub">States & icons</p>
+      <div class="sb-row">
+        <button neu-button [disabled]="true" (neuClick)="log('button.neuClick.disabled', $event)">
+          Disabled
+        </button>
+        <button neu-button [loading]="true" (neuClick)="log('button.neuClick.loading', $event)">
+          Loading
+        </button>
+        <button
+          neu-button
+          icon="lucidePlus"
+          iconPosition="left"
+          (neuClick)="log('button.neuClick.iconLeft', $event)"
+        >
+          Icon Left
+        </button>
+        <button
+          neu-button
+          icon="lucideArrowRight"
+          iconPosition="right"
+          (neuClick)="log('button.neuClick.iconRight', $event)"
+        >
+          Icon Right
+        </button>
+        <button
+          neu-button
+          icon="lucideDownload"
+          [iconOnly]="true"
+          ariaLabel="Descargar"
+          (neuClick)="log('button.neuClick.iconOnly', $event)"
+        ></button>
+      </div>
+
+      <p class="sb-section__sub">SplitButton</p>
+      <div class="sb-row">
+        <neu-split-button
+          label="Guardar"
+          variant="primary"
+          [actions]="splitActions"
+          (primaryClick)="log('splitButton.primaryClick', $event)"
+          (actionClick)="log('splitButton.actionClick', $event)"
+        />
+        <neu-split-button
+          label="Disabled"
+          [disabled]="true"
+          [actions]="splitActions"
+          (primaryClick)="log('splitButton.disabled.primaryClick', $event)"
+          (actionClick)="log('splitButton.disabled.actionClick', $event)"
+        />
+      </div>
+
+      <p class="sb-section__sub">ToggleButtonGroup</p>
+      <div class="sb-row">
+        <neu-toggle-button-group
+          [options]="toggleOptions"
+          [formControl]="toggleCtrl"
+          (neuChange)="log('toggleGroup.neuChange', $event)"
+        />
+        <neu-toggle-button-group
+          [options]="toggleOptions"
+          [multiple]="true"
+          [disabled]="false"
+          (neuChange)="log('toggleGroup.multi.neuChange', $event)"
+        />
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ FORMS ══════════════════════════════ -->
+    <section class="sb-section">
+      <h2 class="sb-section__title">Form Inputs</h2>
+
+      <p class="sb-section__sub">Input</p>
+      <div class="sb-row">
+        <neu-input
+          label="Email"
+          type="email"
+          placeholder="usuario@ejemplo.com"
+          [formControl]="inputCtrl"
+          hint="Introduce tu email"
+          style="width: 260px"
+        />
+        <neu-input
+          label="Búsqueda"
+          type="search"
+          placeholder="Buscar..."
+          [floatingLabel]="false"
+          [endIcon]="true"
+          errorMessage="Campo inválido"
+          style="width: 200px"
+        >
+          <neu-icon neu-input-end name="lucideSearch" size="16px" />
+        </neu-input>
+        <neu-input
+          label="Readonly"
+          [readonly]="true"
+          [formControl]="inputCtrl"
+          style="width: 180px"
+        />
+        <neu-input label="Disabled" [disabled]="true" style="width: 160px" />
+      </div>
+
+      <p class="sb-section__sub">Textarea</p>
+      <div class="sb-row">
+        <neu-textarea
+          label="Comentarios"
+          placeholder="Escribe aquí..."
+          [rows]="3"
+          [autoResize]="false"
+          hint="Máximo 500 caracteres"
+          [formControl]="textareaCtrl"
+          style="width: 320px"
+        />
+        <neu-textarea label="Auto-resize" [autoResize]="true" [rows]="2" style="width: 240px" />
+        <neu-textarea
+          label="Con error"
+          errorMessage="Este campo es obligatorio"
+          style="width: 220px"
+        />
+      </div>
+
+      <p class="sb-section__sub">Checkbox</p>
+      <div class="sb-row">
+        <neu-checkbox label="Acepto los términos" [formControl]="checkboxCtrl" name="terms" />
+        <neu-checkbox label="Disabled marcado" [disabled]="true" name="dis-checked" />
+        <neu-checkbox label="Sin label" name="nolabel" />
+      </div>
+
+      <p class="sb-section__sub">Switch</p>
+      <div class="sb-row">
+        <neu-switch label="Notificaciones push" [formControl]="switchCtrl" name="notif" />
+        <neu-switch label="Modo oscuro" name="dark" />
+        <neu-switch label="Disabled" [disabled]="true" name="sw-dis" />
+      </div>
+
+      <p class="sb-section__sub">Radio Group</p>
+      <div class="sb-row">
+        <neu-radio-group [formControl]="radioCtrl" ariaLabel="Plan de suscripción">
+          <neu-radio value="free" label="Free" />
+          <neu-radio value="b" label="Pro" />
+          <neu-radio value="enterprise" label="Enterprise" />
+          <neu-radio value="disabled-opt" label="Deshabilitado" [disabled]="true" />
+        </neu-radio-group>
+        <neu-radio-group [formControl]="radioCtrl" direction="row" ariaLabel="Plan horizontal">
+          <neu-radio value="free" label="Free" />
+          <neu-radio value="b" label="Pro" />
+          <neu-radio value="enterprise" label="Enterprise" />
+        </neu-radio-group>
+      </div>
+
+      <p class="sb-section__sub">Select</p>
+      <div class="sb-row">
+        <neu-select
+          label="País"
+          [options]="selectOptions"
+          [formControl]="selectCtrl"
+          [clearable]="true"
+          placeholder="Selecciona un país"
+          style="width: 220px"
+        />
+        <neu-select
+          label="Buscable"
+          [options]="selectOptions"
+          [searchable]="true"
+          searchPlaceholder="Filtrar..."
+          style="width: 220px"
+        />
+        <neu-select
+          label="Con error"
+          [options]="selectOptions"
+          errorMessage="Selecciona una opción"
+          style="width: 200px"
+        />
+        <neu-select
+          label="Disabled"
+          [options]="selectOptions"
+          [disabled]="true"
+          style="width: 180px"
+        />
+      </div>
+
+      <p class="sb-section__sub">Multiselect</p>
+      <div class="sb-row">
+        <neu-multiselect
+          label="Frameworks"
+          [options]="selectOptions"
+          [formControl]="multiselectCtrl"
+          placeholder="Selecciona varios..."
+          style="width: 260px"
+        />
+        <neu-multiselect
+          label="Buscable"
+          [options]="selectOptions"
+          [searchable]="true"
+          style="width: 260px"
+        />
+      </div>
+
+      <p class="sb-section__sub">Slider</p>
+      <div class="sb-row">
+        <neu-slider
+          label="Volumen"
+          [min]="0"
+          [max]="100"
+          [step]="1"
+          unit="%"
+          [showValue]="true"
+          [showTicks]="false"
+          [value]="sliderCtrl.value!"
+          (valueChange)="sliderCtrl.setValue($event); log('slider.valueChange', $event)"
+          style="width: 260px"
+        />
+        <neu-slider
+          label="Con ticks"
+          [min]="0"
+          [max]="10"
+          [step]="1"
+          [showTicks]="true"
+          [showValue]="true"
+          (valueChange)="log('slider.ticks.valueChange', $event)"
+          style="width: 220px"
+        />
+        <neu-slider label="Disabled" [disabled]="true" style="width: 200px" />
+      </div>
+
+      <p class="sb-section__sub">Date Input</p>
+      <div class="sb-row">
+        <neu-date-input
+          label="Fecha nacimiento"
+          type="date"
+          [formControl]="dateCtrl"
+          style="width: 220px"
+        />
+        <neu-date-input label="Hora" type="time" style="width: 180px" />
+        <neu-date-input label="Fecha y hora" type="datetime-local" style="width: 240px" />
+      </div>
+
+      <p class="sb-section__sub">Rating</p>
+      <div class="sb-row">
+        <neu-rating
+          [value]="ratingValue()"
+          [stars]="5"
+          [readonly]="false"
+          (valueChange)="ratingValue.set($event); log('rating.valueChange', $event)"
+        />
+        <neu-rating [value]="4" [readonly]="true" />
+        <neu-rating
+          [value]="3"
+          [stars]="10"
+          (valueChange)="log('rating.10stars.valueChange', $event)"
+        />
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ DISPLAY ════════════════════════════ -->
+    <section class="sb-section">
+      <h2 class="sb-section__title">Display</h2>
+
+      <p class="sb-section__sub">Badge</p>
+      <div class="sb-row">
+        <neu-badge variant="default">Default</neu-badge>
+        <neu-badge variant="success">Success</neu-badge>
+        <neu-badge variant="info">Info</neu-badge>
+        <neu-badge variant="warning">Warning</neu-badge>
+        <neu-badge variant="danger">Danger</neu-badge>
+        <neu-badge variant="success" size="sm">Small</neu-badge>
+        <neu-badge variant="info" [dot]="true">Dot</neu-badge>
+        <neu-badge variant="danger" [outline]="true">Outline</neu-badge>
+        <neu-badge variant="warning" [pill]="false">No pill</neu-badge>
+      </div>
+
+      <p class="sb-section__sub">Avatar</p>
+      <div class="sb-row">
+        <neu-avatar src="https://i.pravatar.cc/150?img=1" alt="Alice" size="sm" />
+        <neu-avatar src="https://i.pravatar.cc/150?img=2" alt="Bob" size="md" />
+        <neu-avatar src="https://i.pravatar.cc/150?img=3" alt="Carol" size="lg" />
+        <neu-avatar name="David Brown" size="md" color="blue" />
+        <neu-avatar name="Eve Wilson" size="md" color="violet" shape="square" />
+        <neu-avatar size="md" status="online" src="https://i.pravatar.cc/150?img=5" alt="Status" />
+        <neu-avatar size="md" status="busy" name="Busy User" />
+      </div>
+
+      <p class="sb-section__sub">Chip</p>
+      <div class="sb-row">
+        <neu-chip variant="default">Default</neu-chip>
+        <neu-chip variant="primary">Primary</neu-chip>
+        <neu-chip variant="success">Success</neu-chip>
+        <neu-chip variant="warning">Warning</neu-chip>
+        <neu-chip variant="danger">Danger</neu-chip>
+        <neu-chip
+          variant="primary"
+          [selected]="chipSelected()"
+          [removable]="true"
+          (selectedChange)="chipSelected.set($event); log('chip.selectedChange', $event)"
+          (removed)="log('chip.removed')"
+        >
+          Seleccionable + removible
+        </neu-chip>
+        <neu-chip variant="default" [disabled]="true">Disabled</neu-chip>
+      </div>
+
+      <p class="sb-section__sub">Icon</p>
+      <div class="sb-row">
+        <neu-icon name="lucideHome" />
+        <neu-icon name="lucideUsers" size="24px" />
+        <neu-icon name="lucideStar" size="32px" />
+        <neu-icon name="lucideSettings" size="20px" strokeWidth="1.5" />
+      </div>
+
+      <p class="sb-section__sub">ProgressBar</p>
+      <div class="sb-col" style="max-width: 400px">
+        <neu-progress-bar
+          [value]="progressValue()"
+          variant="primary"
+          label="Progreso"
+          [showValue]="true"
+          size="md"
+        />
+        <neu-progress-bar [value]="75" variant="success" size="sm" />
+        <neu-progress-bar [value]="40" variant="warning" size="lg" [showValue]="true" />
+        <neu-progress-bar [indeterminate]="true" variant="primary" label="Cargando..." />
+      </div>
+
+      <p class="sb-section__sub">StatsCard</p>
+      <div class="sb-grid">
+        <neu-stats-card
+          title="Usuarios activos"
+          value="12.430"
+          change="+8.2%"
+          trend="up"
+          label="vs. mes anterior"
+          icon="lucideUsers"
+          [sparkData]="[30, 40, 35, 50, 49, 60, 70, 91]"
+        />
+        <neu-stats-card
+          title="Ingresos"
+          value="€ 48.300"
+          change="-2.1%"
+          trend="down"
+          label="vs. mes anterior"
+          icon="lucideArrowRight"
+          [sparkData]="[80, 70, 65, 60, 55, 50, 45, 40]"
+        />
+        <neu-stats-card
+          title="Churn rate"
+          value="3.4%"
+          change="0%"
+          trend="neutral"
+          label="Sin cambios"
+          icon="lucideMinus"
+          [sparkData]="[3, 3, 4, 3, 4, 3, 3, 3]"
+        />
+      </div>
+
+      <p class="sb-section__sub">Timeline</p>
+      <neu-timeline [items]="timelineItems" />
+
+      <p class="sb-section__sub">Chart — line</p>
+      <neu-chart
+        type="line"
+        [series]="chartSeries"
+        [categories]="chartCategories"
+        title="Ventas vs Gastos"
+        [height]="260"
+        [showDataLabels]="false"
       />
-    </div>
-    <div class="sb-row" style="margin-top: 8px">
-      <button neu-button variant="ghost" size="sm" (neuClick)="navCollapsed.set(!navCollapsed())">
-        Toggle nav collapsed (actual: {{ navCollapsed() }})
-      </button>
-    </div>
-  </section>
 
+      <p class="sb-section__sub">Chart — bar</p>
+      <neu-chart
+        type="bar"
+        [series]="chartSeries"
+        [categories]="chartCategories"
+        title="Barras agrupadas"
+        [height]="220"
+      />
+
+      <p class="sb-section__sub">Chart — donut</p>
+      <neu-chart
+        type="donut"
+        [pieSeries]="[44, 55, 41, 17]"
+        [labels]="['Q1', 'Q2', 'Q3', 'Q4']"
+        title="Distribución trimestral"
+        [height]="260"
+      />
+
+      <p class="sb-section__sub">CodeBlock</p>
+      <neu-code-block [code]="sampleCode" lang="TypeScript" />
+
+      <p class="sb-section__sub">Skeleton</p>
+      <div class="sb-col" style="max-width: 360px; gap: 8px">
+        <neu-skeleton variant="text" width="80%" height="16px" />
+        <neu-skeleton variant="text" width="60%" height="16px" />
+        <neu-skeleton variant="rect" width="100%" height="120px" borderRadius="8px" />
+        <neu-skeleton variant="circle" width="48px" height="48px" />
+      </div>
+
+      <p class="sb-section__sub">EmptyState</p>
+      <neu-empty-state
+        icon="lucideInbox"
+        title="No hay resultados"
+        description="Prueba a cambiar los filtros de búsqueda."
+        actionLabel="Limpiar filtros"
+        (action)="log('emptyState.action')"
+      />
+    </section>
+
+    <!-- ══════════════════════════════════════ LAYOUT ═════════════════════════════ -->
+    <section class="sb-section">
+      <h2 class="sb-section__title">Layout</h2>
+
+      <p class="sb-section__sub">Accordion — exclusivo</p>
+      <neu-accordion
+        [items]="accordionItems"
+        [multiple]="false"
+        [bordered]="true"
+        (panelToggle)="log('accordion.panelToggle', $event)"
+      />
+
+      <p class="sb-section__sub">Accordion — múltiple, sin borde</p>
+      <neu-accordion
+        [items]="accordionItems"
+        [multiple]="true"
+        [bordered]="false"
+        (panelToggle)="log('accordion.multi.panelToggle', $event)"
+      />
+
+      <p class="sb-section__sub">Card</p>
+      <div class="sb-grid">
+        <neu-card padding="md" [hoverable]="false" [bordered]="false" [flat]="false">
+          <p>Card default (shadow)</p>
+        </neu-card>
+        <neu-card padding="md" [hoverable]="true" [bordered]="true">
+          <p>Card hoverable + bordered</p>
+        </neu-card>
+        <neu-card padding="lg" [flat]="true">
+          <p>Card flat, padding lg</p>
+        </neu-card>
+      </div>
+
+      <p class="sb-section__sub">Divider</p>
+      <div class="sb-col">
+        <p>Contenido arriba</p>
+        <neu-divider />
+        <p>Contenido abajo</p>
+        <neu-divider label="o continuar con" />
+      </div>
+
+      <p class="sb-section__sub">Tabs</p>
+      <neu-tabs
+        [tabs]="demoTabs"
+        tabParam="demo-tab"
+        [flush]="false"
+        ariaLabel="Pestañas de demostración"
+        (tabChange)="log('tabs.tabChange', $event)"
+      >
+        <neu-tab-panel tabId="tab1">
+          <div style="padding: 16px">Contenido de la Pestaña A</div>
+        </neu-tab-panel>
+        <neu-tab-panel tabId="tab2">
+          <div style="padding: 16px">Contenido de la Pestaña B</div>
+        </neu-tab-panel>
+        <neu-tab-panel tabId="tab3">
+          <div style="padding: 16px">Esta pestaña está deshabilitada</div>
+        </neu-tab-panel>
+      </neu-tabs>
+    </section>
+
+    <!-- ══════════════════════════════════════ TABLE ══════════════════════════════ -->
+    <section class="sb-section">
+      <h2 class="sb-section__title">Table</h2>
+      <neu-table
+        [columns]="tableColumns"
+        [data]="tableData"
+        title="Usuarios"
+        [searchable]="true"
+        [exactMatchable]="true"
+        [sortable]="true"
+        [selectable]="true"
+        [exportable]="true"
+        exportFileName="sandbox-users"
+        [pageSize]="5"
+        [loading]="false"
+        (rowSelectionChange)="log('table.rowSelectionChange', $event)"
+      />
+    </section>
+
+    <!-- ══════════════════════════════════════ NAVIGATION ═════════════════════════ -->
+    <section class="sb-section">
+      <h2 class="sb-section__title">Navigation</h2>
+
+      <p class="sb-section__sub">Breadcrumb</p>
+      <neu-breadcrumb [items]="breadcrumbs" separator="/" />
+
+      <p class="sb-section__sub">Pagination</p>
+      <div class="sb-col">
+        <neu-pagination
+          [page]="page()"
+          [total]="120"
+          [pageSize]="10"
+          [maxVisible]="7"
+          (pageChange)="page.set($event); log('pagination.pageChange', $event)"
+        />
+        <span style="font-size: 0.8rem; color: var(--neu-text-muted)"
+          >Página actual: {{ page() }}</span
+        >
+      </div>
+
+      <p class="sb-section__sub">Stepper</p>
+      <div class="sb-col">
+        <neu-stepper
+          [steps]="stepperSteps"
+          [activeStep]="step()"
+          [linear]="false"
+          (stepChange)="step.set($event); log('stepper.stepChange', $event)"
+        />
+        <div class="sb-row" style="margin-top: 12px">
+          <button neu-button variant="outline" size="sm" (neuClick)="prevStep()">← Anterior</button>
+          <button neu-button variant="primary" size="sm" (neuClick)="nextStep()">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <router-outlet />

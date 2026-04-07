@@ -52,11 +52,11 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'u
       [class.neu-input__wrapper--has-value]="hasValue()"
       [class.neu-input__wrapper--error]="hasError()"
       [class.neu-input__wrapper--disabled]="isDisabledFinal()"
-      [class.neu-input__wrapper--has-start-icon]="!!startIcon()"
-      [class.neu-input__wrapper--has-end-icon]="!!endIcon()"
+      [class.neu-input__wrapper--has-start-icon]="!!startIcon() || _hasIconLeft()"
+      [class.neu-input__wrapper--has-end-icon]="!!endIcon() || _hasIconRight()"
       [class.neu-input__wrapper--no-float]="!floatingLabel()"
     >
-      <!-- Icono izquierdo -->
+      <!-- Icono izquierdo (proyección) -->
       @if (startIcon()) {
         <span class="neu-input__icon neu-input__icon--start" aria-hidden="true">
           <ng-content select="[neu-input-start]" />
@@ -71,6 +71,13 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'u
               [innerHTML]="startIconPath()"
             ></svg>
           }
+        </span>
+      }
+
+      <!-- Icono izquierdo (por nombre) -->
+      @if (_hasIconLeft()) {
+        <span class="neu-input__icon neu-input__icon--start" aria-hidden="true">
+          <neu-icon [name]="icon()" size="16px" />
         </span>
       }
 
@@ -105,10 +112,17 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'u
         <label class="neu-input__label" [for]="inputId()">{{ label() }}</label>
       }
 
-      <!-- Icono derecho -->
+      <!-- Icono derecho (proyección) -->
       @if (endIcon()) {
         <span class="neu-input__icon neu-input__icon--end" aria-hidden="true">
           <ng-content select="[neu-input-end]" />
+        </span>
+      }
+
+      <!-- Icono derecho (por nombre) -->
+      @if (_hasIconRight()) {
+        <span class="neu-input__icon neu-input__icon--end" aria-hidden="true">
+          <neu-icon [name]="icon()" size="16px" />
         </span>
       }
     </div>
@@ -156,6 +170,12 @@ export class NeuInputComponent implements ControlValueAccessor {
   /** Muestra zona para icono al final */
   endIcon = input<boolean>(false);
 
+  /** Nombre del icono lucide a renderizar dentro del campo */
+  icon = input<string>('');
+
+  /** Posición del icono cuando se usa `icon` */
+  iconPosition = input<'left' | 'right'>('left');
+
   /** ID accesible para el input — generado con contador estable (seguro en SSR) */
   inputId = input<string>(`neu-input-${++_neuInputIdSeq}`);
 
@@ -191,6 +211,8 @@ export class NeuInputComponent implements ControlValueAccessor {
   readonly hasError = computed(() => !!this.errorMessage());
   readonly startIconPath = computed(() => '');
   readonly hasStartContent = computed(() => false);
+  readonly _hasIconLeft = computed(() => !!this.icon() && this.iconPosition() === 'left');
+  readonly _hasIconRight = computed(() => !!this.icon() && this.iconPosition() === 'right');
 
   // --- ControlValueAccessor ---
   private _onChange: (v: string) => void = () => {};

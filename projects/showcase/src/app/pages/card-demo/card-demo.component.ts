@@ -1,5 +1,11 @@
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  computed,
+  inject,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   NeuBadgeComponent,
@@ -95,4 +101,40 @@ export class CardDemoComponent {
 <neu-card padding="lg">
   <p>Tarjeta con relleno grande</p>
 </neu-card>`;
+
+  readonly usageCode = `import { NeuCardComponent } from '@neural-ui/core';
+
+@Component({
+  imports: [NeuCardComponent],
+  template: \`
+    <!-- Básica -->
+    <neu-card>
+      <p>Contenido de la tarjeta</p>
+    </neu-card>
+
+    <!-- Con header y footer -->
+    <neu-card>
+      <div neu-card-header><h3>Título</h3></div>
+      <p>Cuerpo de la tarjeta</p>
+      <div neu-card-footer>
+        <button neu-button variant="ghost" size="sm">Cancelar</button>
+        <button neu-button size="sm">Confirmar</button>
+      </div>
+    </neu-card>
+
+    <!-- Hoverable -->
+    <neu-card [hoverable]="true"><p>Eleva la sombra en hover</p></neu-card>
+
+    <!-- Flat (sin sombra) -->
+    <neu-card [flat]="true"><p>Tarjeta flat</p></neu-card>
+
+    <!-- Bordered -->
+    <neu-card [bordered]="true"><p>Borde de acento</p></neu-card>
+
+    <!-- Padding personalizado -->
+    <neu-card padding="sm"><p>Relleno pequeño</p></neu-card>
+    <neu-card padding="lg"><p>Relleno grande</p></neu-card>
+  \`
+})
+export class MyComponent {}`;
 }

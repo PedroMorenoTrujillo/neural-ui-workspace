@@ -1,0 +1,160 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
+    <h1 class="demo-hero__title">Icon</h1>
+    <p class="demo-hero__desc">
+      Wrapper delgado sobre <strong>@ng-icons/core</strong>. Hereda el color del padre y es
+      compatible con todas las librerías de iconos registradas con <code>provideIcons()</code>.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs()" tabParam="tab">
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-preview__canvas">
+            <div class="icon-demo__group">
+              <p class="icon-demo__label">Tamaños</p>
+              <div class="icon-demo__row">
+                <neu-icon name="lucideSearch" size="1rem" />
+                <neu-icon name="lucideSearch" size="1.25rem" />
+                <neu-icon name="lucideSearch" size="1.5rem" />
+                <neu-icon name="lucideSearch" size="2rem" />
+                <neu-icon name="lucideSearch" size="2.5rem" />
+              </div>
+            </div>
+
+            <div class="icon-demo__group">
+              <p class="icon-demo__label">Grosor de trazo</p>
+              <div class="icon-demo__row">
+                <neu-icon name="lucideCircle" strokeWidth="1" />
+                <neu-icon name="lucideCircle" strokeWidth="1.5" />
+                <neu-icon name="lucideCircle" strokeWidth="2" />
+                <neu-icon name="lucideCircle" strokeWidth="2.5" />
+                <neu-icon name="lucideCircle" strokeWidth="3" />
+              </div>
+            </div>
+
+            <div class="icon-demo__group">
+              <p class="icon-demo__label">Color heredado del contexto</p>
+              <div class="icon-demo__row">
+                <span style="color: var(--neu-color-primary)"><neu-icon name="lucideStar" /></span>
+                <span style="color: var(--neu-color-success)"><neu-icon name="lucideCheck" /></span>
+                <span style="color: var(--neu-color-warning)"
+                  ><neu-icon name="lucideAlertTriangle"
+                /></span>
+                <span style="color: var(--neu-color-danger)"><neu-icon name="lucideX" /></span>
+                <span style="color: var(--neu-text-muted)"><neu-icon name="lucideInfo" /></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="demo-section__subtitle">Uso básico</h3>
+        <neu-code-block [code]="usageCode" lang="typescript" />
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview">
+              <neu-icon [name]="cfg.name" [size]="cfg.size" [strokeWidth]="cfg.strokeWidth" />
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label>name</label>
+                <select
+                  class="demo-select"
+                  [value]="cfg.name"
+                  (change)="cfg.name = $any($event.target).value"
+                >
+                  @for (icon of iconOptions; track icon) {
+                    <option [value]="icon">{{ icon }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>size</label>
+                <select
+                  class="demo-select"
+                  [value]="cfg.size"
+                  (change)="cfg.size = $any($event.target).value"
+                >
+                  <option value="1rem">1rem</option>
+                  <option value="1.25rem">1.25rem</option>
+                  <option value="1.5rem">1.5rem</option>
+                  <option value="2rem">2rem (default)</option>
+                  <option value="2.5rem">2.5rem</option>
+                  <option value="3rem">3rem</option>
+                  <option value="4rem">4rem</option>
+                </select>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>strokeWidth</label>
+                <select
+                  class="demo-select"
+                  [value]="cfg.strokeWidth"
+                  (change)="cfg.strokeWidth = $any($event.target).value"
+                >
+                  <option value="1">1</option>
+                  <option value="1.5">1.5</option>
+                  <option value="2">2 (default)</option>
+                  <option value="2.5">2.5</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div class="demo-api-table-wrapper">
+          <table class="demo-api-table">
+            <thead>
+              <tr>
+                <th>{{ 'demo.common.api.input' | transloco }}</th>
+                <th>{{ 'demo.common.api.type' | transloco }}</th>
+                <th>{{ 'demo.common.api.default' | transloco }}</th>
+                <th>{{ 'demo.common.api.desc' | transloco }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>name</code> <span class="demo-api-table__required">*</span></td>
+                <td><code>string</code></td>
+                <td>—</td>
+                <td>Nombre del icono registrado con <code>provideIcons()</code>. Obligatorio.</td>
+              </tr>
+              <tr>
+                <td><code>size</code></td>
+                <td><code>string</code></td>
+                <td><code>''</code></td>
+                <td>
+                  Tamaño CSS del icono (p.ej. <code>'1.5rem'</code>, <code>'24px'</code>). Si está
+                  vacío usa <code>--neu-icon-size</code> (por defecto 1.25rem).
+                </td>
+              </tr>
+              <tr>
+                <td><code>strokeWidth</code></td>
+                <td><code>string</code></td>
+                <td><code>'2'</code></td>
+                <td>Grosor del trazo SVG. Acepta cualquier valor numérico como string.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

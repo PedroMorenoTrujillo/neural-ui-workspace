@@ -46,7 +46,7 @@
     "dialog": "Dialog",
     "statsCard": "Stats Card",
     "chart": "Chart",
-    "tooltip": "Tooltip & Toast",
+    "tooltip": "Tooltip",
     "tabs": "Tabs",
     "skeleton": "Skeleton",
     "divider": "Divider",
@@ -58,7 +58,11 @@
     "rating": "Rating",
     "slider": "Slider",
     "timeline": "Timeline",
-    "stepper": "Stepper"
+    "stepper": "Stepper",
+    "codeBlock": "Code Block",
+    "icon": "Icon",
+    "toast": "Toast",
+    "spinner": "Spinner"
   },
   "page": {
     "home": {
@@ -73,7 +77,9 @@
         "components": "Components",
         "dependencies": "Dependencies",
         "standalone": "Standalone · Signals",
-        "urlState": "Synchronized"
+        "urlState": "Synchronized",
+        "zonelessValue": "Zoneless",
+        "zoneless": "No NgZone · Angular 19+"
       },
       "grid": {
         "title": "Available components",
@@ -91,7 +97,7 @@
       "features": {
         "reactive": {
           "label": "Reactive by design",
-          "desc": "Angular 17+ Signals. No Zone.js overhead."
+          "desc": "Angular 19+ Signals. No Zone.js overhead."
         },
         "urlState": {
           "label": "URL State",
@@ -104,6 +110,10 @@
         "tokens": {
           "label": "CSS Design Tokens",
           "desc": "CSS variables for colors, spacing, shadows and typography."
+        },
+        "zoneless": {
+          "label": "Zoneless ready",
+          "desc": "No NgZone dependency. Fully compatible with Angular 19+ zoneless mode."
         }
       }
     },
@@ -150,7 +160,7 @@
     },
     "install": {
       "title": "Installation",
-      "desc": "Add NeuralUI to your Angular 17+ project in 4 steps. No heavy external dependencies.",
+      "desc": "Add NeuralUI to your Angular 19+ project in 4 steps. No heavy external dependencies.",
       "step1": {
         "title": "Install the package",
         "desc": "One command. Lucide icons are bundled automatically.",
@@ -170,16 +180,16 @@
       },
       "compat": {
         "title": "Angular version compatibility",
-        "desc": "NeuralUI code is fully compatible with Angular 17+. Versions marked as \"Partial\" mean that NeuralUI itself works, but third-party peer dependencies (@angular/cdk, @ng-icons, ng-apexcharts) may not officially support that Angular version — always verify their compatibility matrix before upgrading.",
+        "desc": "NeuralUI requires Angular 19 or higher. Earlier versions are not supported due to the use of linkedSignal(), the full signals API, and zoneless compatibility.",
         "colStatus": "Status",
         "colNotes": "Notes",
         "supported": "Supported",
         "partial": "Partial",
         "notSupported": "Not supported",
         "note21": "Developed and tested on this version.",
-        "note18": "Install @angular/cdk@18. @ng-icons/core@33 and ng-apexcharts@2 both support Angular 17+.",
-        "note17": "Install @angular/cdk@17. @ng-icons/core@33 and ng-apexcharts@2 both support Angular 17+.",
-        "noteSub17": "Signals API and new control flow not available.",
+        "note20": "Fully compatible.",
+        "note19": "Compatible. Minimum supported version.",
+        "noteSub19": "Not supported. Requires the full signals API and zoneless compatibility.",
         "browserTitle": "Browser compatibility",
         "browserDesc": "NeuralUI relies only on standard web APIs and runs on all modern evergreen browsers.",
         "browserChrome": "Chrome / Chromium",

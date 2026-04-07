@@ -80,7 +80,12 @@
 
   <!-- ===== SIDEBAR (solo en rutas /components/**) ===== -->
   @if (showSidebar()) {
-    <neu-sidebar class="app-sidebar" urlParam="menu" [persistent]="isDesktop()">
+    <neu-sidebar
+      class="app-sidebar"
+      urlParam="menu"
+      [persistent]="isDesktop()"
+      [hideHeader]="isDesktop()"
+    >
       <nav class="app-nav" aria-label="Componentes NeuralUI">
         @for (group of navGroups; track group.labelKey) {
           <div class="app-nav__group">

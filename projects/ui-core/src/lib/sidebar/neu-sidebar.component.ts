@@ -58,21 +58,23 @@ import { NeuIconComponent } from '../icon/neu-icon.component';
       [attr.inert]="!isOpen() && !persistent() ? '' : null"
     >
       <!-- Cabecera -->
-      <div class="neu-sidebar__header">
-        <div class="neu-sidebar__title">
-          <ng-content select="[neu-sidebar-header]" />
+      @if (!hideHeader()) {
+        <div class="neu-sidebar__header">
+          <div class="neu-sidebar__title">
+            <ng-content select="[neu-sidebar-header]" />
+          </div>
+          @if (!persistent()) {
+            <button
+              class="neu-sidebar__close"
+              (click)="close()"
+              [attr.aria-label]="closeLabel()"
+              type="button"
+            >
+              <neu-icon name="lucideX" size="18px" aria-hidden="true" />
+            </button>
+          }
         </div>
-        @if (!persistent()) {
-          <button
-            class="neu-sidebar__close"
-            (click)="close()"
-            [attr.aria-label]="closeLabel()"
-            type="button"
-          >
-            <neu-icon name="lucideX" size="18px" aria-hidden="true" />
-          </button>
-        }
-      </div>
+      }
 
       <!-- Contenido -->
       <div class="neu-sidebar__content">
@@ -101,6 +103,12 @@ export class NeuSidebarComponent {
    * Usar en desktop (≥768px). El overlay y el toggle por URL no aplican.
    */
   persistent = input<boolean>(false);
+
+  /**
+   * Ocultar la cabecera del sidebar. Útil cuando el header ya está en el layout
+   * principal y el sidebar persistente no necesita su propio header.
+   */
+  hideHeader = input<boolean>(false);
 
   /** Etiqueta accesible para el <aside> */
   ariaLabel = input<string>('Menú de navegación');

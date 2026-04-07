@@ -4,13 +4,16 @@ import {
   ElementRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   forwardRef,
   inject,
   input,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from './neu-select.types';
+import { NeuSelectItemDirective, NeuSelectSelectedDirective } from './neu-select.directives';
 
 export type { NeuSelectOption } from './neu-select.types';
 
@@ -30,7 +33,7 @@ let _neuSelectIdSeq = 0;
  */
 @Component({
   selector: 'neu-select',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -79,11 +82,41 @@ let _neuSelectIdSeq = 0;
 
         <span class="neu-select__value">
           @if (selectedLabel()) {
-            {{ selectedLabel() }}
+            @if (selectedItemTpl()) {
+              <ng-container
+                [ngTemplateOutlet]="selectedItemTpl()!.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: _selectedOption() }"
+              />
+            } @else {
+              {{ selectedLabel() }}
+            }
           } @else {
             <span class="neu-select__placeholder">{{ placeholder() }}</span>
           }
         </span>
+
+        <!-- Clear button -->
+        @if (clearable() && !!_value() && !isDisabledFinal()) {
+          <button
+            class="neu-select__clear"
+            type="button"
+            aria-label="Limpiar selección"
+            [attr.aria-label]="clearAriaLabel()"
+            (click)="clearValue($event)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        }
 
         <!-- Chevron -->
         <svg
@@ -132,26 +165,32 @@ let _neuSelectIdSeq = 0;
               (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
               (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
             >
-              <!-- Checkmark en la seleccionada -->
-              @if (option.value === _value()) {
-                <svg
-                  class="neu-select__check"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+              <!-- Checkmark en la seleccionada (siempre reserva el espacio) -->
+              <svg
+                class="neu-select__check"
+                [style.visibility]="option.value === _value() ? 'visible' : 'hidden'"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              @if (itemTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{ $implicit: option }"
+                />
+              } @else {
+                {{ option.label }}
               }
-              {{ option.label }}
             </div>
           }
           @if (filteredOptions().length === 0) {
-            <div class="neu-select__empty">Sin resultados</div>
+            <div class="neu-select__empty">{{ noResultsMessage() }}</div>
           }
         </div>
       }
@@ -169,7 +208,11 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   /** @internal — ID \u00fanico para asociar label con trigger */
   readonly _triggerId = `neu-select-trigger-${_neuSelectIdSeq++}`;
+  /** Template personalizado para cada opción del dropdown */
+  readonly itemTpl = contentChild(NeuSelectItemDirective);
 
+  /** Template personalizado para el valor seleccionado en el trigger */
+  readonly selectedItemTpl = contentChild(NeuSelectSelectedDirective);
   /** Opciones del dropdown */
   options = input<NeuSelectOption[]>([]);
 
@@ -194,6 +237,15 @@ export class NeuSelectComponent implements ControlValueAccessor {
   /** Placeholder del input de búsqueda */
   searchPlaceholder = input<string>('Buscar...');
 
+  /** Muestra un botón para limpiar la selección */
+  clearable = input<boolean>(false);
+
+  /** Texto cuando no hay opciones tras filtrar */
+  noResultsMessage = input<string>('Sin resultados');
+
+  /** Aria-label del botón de limpiar */
+  clearAriaLabel = input<string>('Limpiar selección');
+
   // Estado interno
   protected readonly _value = signal<string | null>(null);
   readonly isOpen = signal(false);
@@ -209,6 +261,10 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   readonly selectedLabel = computed(
     () => this.options().find((o) => o.value === this._value())?.label ?? null,
+  );
+
+  readonly _selectedOption = computed(
+    () => this.options().find((o) => o.value === this._value()) ?? null,
   );
 
   // CVA
@@ -279,6 +335,14 @@ export class NeuSelectComponent implements ControlValueAccessor {
       );
       el?.focus();
     }
+  }
+
+  clearValue(event: MouseEvent): void {
+    event.stopPropagation();
+    this._value.set(null);
+    this._onChange(null);
+    this._onTouched();
+    this.close();
   }
 
   selectOption(option: NeuSelectOption): void {

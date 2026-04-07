@@ -7,21 +7,17 @@ import {
   input,
   output,
 } from '@angular/core';
-import { Dialog, DialogConfig, DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
+import { Dialog, DialogConfig, DialogRef } from '@angular/cdk/dialog';
 import { A11yModule } from '@angular/cdk/a11y';
 import { NeuIconComponent } from '../icon/neu-icon.component';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
-/** @deprecated Use NeuDialogSize */
-export type NeuModalSize = NeuDialogSize;
 
 /** Datos que se inyectan en el componente del diálogo */
 export interface NeuDialogData<T = unknown> {
   title?: string;
   data?: T;
 }
-/** @deprecated Use NeuDialogData */
-export type NeuModalData<T = unknown> = NeuDialogData<T>;
 
 /**
  * NeuDialogService — Servicio para abrir diálogos programáticamente.
@@ -54,9 +50,6 @@ export class NeuDialogService {
     } satisfies DialogConfig);
   }
 }
-
-/** @deprecated Use NeuDialogService */
-export { NeuDialogService as NeuModalService };
 
 /**
  * NeuDialogComponent — Diálogo accesible con header, body y footer.
@@ -144,6 +137,3 @@ export class NeuDialogComponent {
   /** @internal — ID único para aria-labelledby */
   readonly _uid = Math.random().toString(36).slice(2, 7);
 }
-
-/** @deprecated Use NeuDialogComponent */
-export { NeuDialogComponent as NeuModalComponent };

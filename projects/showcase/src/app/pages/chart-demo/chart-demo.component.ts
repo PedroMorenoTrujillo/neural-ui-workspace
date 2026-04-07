@@ -117,6 +117,113 @@ export class ChartDemoComponent {
   ];
 
   // ── Código de uso ─────────────────────────────────────────────────────────
+  readonly barCode = `<neu-chart
+  type="bar"
+  [series]="barSeries"
+  [categories]="months"
+  [height]="280"
+/>
+
+// series: NeuChartSeries[]
+barSeries = [
+  { name: 'Ingresos', data: [420, 580, 510, 740, 870, 760, 920, 960, 840, 1120, 1050, 1230] },
+  { name: 'Gastos',   data: [310, 390, 350, 490, 560, 510, 610, 640, 550,  720,  680,  790] },
+];`;
+
+  readonly stackedBarCode = `<neu-chart
+  type="bar-stacked"
+  [series]="stackedBarSeries"
+  [categories]="quarters"
+  [height]="260"
+/>
+
+stackedBarSeries = [
+  { name: 'Producto A', data: [120, 145, 132, 178] },
+  { name: 'Producto B', data: [98,  112, 125, 143] },
+  { name: 'Producto C', data: [64,   80,  72,  95] },
+];`;
+
+  readonly hBarCode = `<neu-chart
+  type="bar-horizontal"
+  [series]="hBarSeries"
+  [categories]="hBarCategories"
+  [height]="300"
+/>
+
+hBarSeries = [
+  { name: '2024', data: [44, 72, 61, 55, 83, 48, 90] },
+  { name: '2025', data: [53, 80, 70, 63, 91, 57, 98] },
+];
+hBarCategories = ['Ventas', 'Marketing', 'Soporte', 'I+D', 'Ops', 'RRHH', 'Finanzas'];`;
+
+  readonly hStackedCode = `<neu-chart
+  type="bar-horizontal-stacked"
+  [series]="hStackedSeries"
+  [categories]="hStackedCategories"
+  [height]="280"
+/>
+
+hStackedSeries = [
+  { name: 'Completado', data: [65, 80, 45, 70, 55] },
+  { name: 'En curso',   data: [20, 10, 30, 15, 25] },
+  { name: 'Pendiente',  data: [15, 10, 25, 15, 20] },
+];`;
+
+  readonly areaCode = `<neu-chart
+  type="area"
+  [series]="areaSeries"
+  [categories]="months"
+  [height]="280"
+/>
+
+areaSeries = [
+  { name: 'Usuarios activos',  data: [310, 520, 480, 760, 830, 720, 900, 940, 830, 1100, 1000, 1200] },
+  { name: 'Nuevos registros',  data: [120, 210, 180, 290, 310, 270, 350, 380, 310,  440,  410,  490] },
+];`;
+
+  readonly lineCode = `<neu-chart
+  type="line"
+  [series]="lineSeries"
+  [categories]="months"
+  [height]="260"
+/>
+
+lineSeries = [
+  { name: 'Usuarios activos',  data: [310, 520, 480, 760, 830, 720, 900, 940, 830, 1100, 1000, 1200] },
+  { name: 'Nuevos registros',  data: [120, 210, 180, 290, 310, 270, 350, 380, 310,  440,  410,  490] },
+];`;
+
+  readonly pieCode = `<neu-chart
+  type="pie"
+  [pieSeries]="pieSeries"
+  [labels]="pieLabels"
+  [height]="280"
+/>
+
+pieSeries = [42, 28, 18, 12];
+pieLabels = ['Orgánico', 'Paid', 'Referral', 'Directo'];`;
+
+  readonly donutCode = `<neu-chart
+  type="donut"
+  [pieSeries]="pieSeries"
+  [labels]="pieLabels"
+  [height]="280"
+/>
+
+pieSeries = [42, 28, 18, 12];
+pieLabels = ['Orgánico', 'Paid', 'Referral', 'Directo'];`;
+
+  readonly paretoCode = `<neu-chart
+  type="pareto"
+  [series]="paretoSeries"
+  [categories]="paretoCategories"
+  [height]="300"
+/>
+
+// La línea acumulada (%) se genera automáticamente.
+paretoSeries = [{ name: 'Defectos', data: [180, 120, 85, 60, 42, 30, 18, 12] }];
+paretoCategories = ['Error UI', 'Timeout', 'Auth fail', 'Missing data', '404', 'Crash', 'Lento', 'Otro'];`;
+
   readonly usageCode = `import { NeuChartComponent, NeuChartSeries } from '@neural-ui/core';
 
 @Component({

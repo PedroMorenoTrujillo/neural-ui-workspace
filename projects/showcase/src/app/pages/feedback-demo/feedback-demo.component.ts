@@ -1,40 +1,62 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, inject } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
-import { NeuTooltipDirective, NeuToastService } from '@neural-ui/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject } from '@angular/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  NeuBadgeComponent,
+  NeuButtonComponent,
+  NeuCodeBlockComponent,
+  NeuTab,
+  NeuTabPanelComponent,
+  NeuTabsComponent,
+  NeuTooltipDirective,
+} from '@neural-ui/core';
 
 @Component({
   selector: 'app-feedback-demo',
-  imports: [TranslocoPipe, NeuTooltipDirective],
+  imports: [
+    TranslocoPipe,
+    NeuBadgeComponent,
+    NeuButtonComponent,
+    NeuCodeBlockComponent,
+    NeuTabsComponent,
+    NeuTabPanelComponent,
+    NeuTooltipDirective,
+  ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './feedback-demo.component.html',
   styleUrl: './feedback-demo.component.scss',
 })
 export class FeedbackDemoComponent {
-  private toast = inject(NeuToastService);
+  private readonly _t = inject(TranslocoService);
+  private readonly _translations = toSignal(this._t.selectTranslation());
 
-  showSuccess(): void {
-    this.toast.success('Cambios guardados correctamente.', { title: 'Éxito' });
-  }
+  readonly demoTabs = computed<NeuTab[]>(() => {
+    this._translations();
+    return [
+      { id: 'preview', label: this._t.translate('demo.common.tabs.preview') },
+      { id: 'api', label: this._t.translate('demo.common.tabs.api') },
+    ];
+  });
 
-  showError(): void {
-    this.toast.error('No se pudo completar la operación.', { title: 'Error' });
-  }
+  readonly usageCode = `import { NeuTooltipDirective } from '@neural-ui/core';
 
-  showWarning(): void {
-    this.toast.warning('Tu sesión está a punto de expirar.', { title: 'Advertencia' });
-  }
+@Component({
+  imports: [NeuTooltipDirective],
+  template: \`
+    <button
+      neu-button
+      [neuTooltip]="'Texto del tooltip'"
+      neuTooltipPosition="top"
+    >
+      Hover me
+    </button>
 
-  showInfo(): void {
-    this.toast.info('Hay una nueva versión disponible.');
-  }
-
-  showPersistent(): void {
-    this.toast.show({
-      type: 'info',
-      title: 'Toast Persistente',
-      message: 'Este toast no se cierra automáticamente.',
-      duration: 0,
-    });
-  }
+    <!-- Posiciones disponibles: top | bottom | left | right -->
+    <span [neuTooltip]="'Tooltip deshabilitado'" [neuTooltipDisabled]="true">
+      Sin tooltip
+    </span>
+  \`
+})
+export class MyComponent {}`;
 }

@@ -20,6 +20,9 @@
             <neu-switch label="Opción deshabilitada (off)" [disabled]="true" [ngModel]="false" />
           </div>
         </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
+        </div>
       </neu-tab-panel>
 
       <!-- CONFIGURADOR -->
@@ -88,6 +91,12 @@
                   <td><code>boolean</code></td>
                   <td><code>false</code></td>
                   <td>Deshabilita el toggle</td>
+                </tr>
+                <tr>
+                  <td><code>name</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Atributo <code>name</code> del input nativo (formularios HTML)</td>
                 </tr>
               </tbody>
             </table>

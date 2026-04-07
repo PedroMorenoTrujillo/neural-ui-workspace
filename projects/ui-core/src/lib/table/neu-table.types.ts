@@ -1,3 +1,5 @@
+import { TemplateRef } from '@angular/core';
+
 export type NeuTableBadgeVariant =
   | 'primary'
   | 'success'
@@ -46,4 +48,19 @@ export interface NeuTableColumn<T = Record<string, unknown>> {
    * Ejemplo: `{ active: { label: 'Activo', variant: 'success' } }`
    */
   badgeMap?: Record<string, NeuTableBadgeConfig>;
+
+  /**
+   * Template personalizado para la cabecera de esta columna.
+   * Contexto de la plantilla: `{ $implicit: col }`.
+   *
+   * Ejemplo:
+   * ```html
+   * <ng-template #myHeader let-col>
+   *   <span class="custom-header">{{ col.header }}</span>
+   * </ng-template>
+   * <neu-table [columns]="[{ key: 'name', header: 'Nombre', headerTemplate: myHeader }]" ... />
+   * ```
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  headerTemplate?: TemplateRef<any>;
 }

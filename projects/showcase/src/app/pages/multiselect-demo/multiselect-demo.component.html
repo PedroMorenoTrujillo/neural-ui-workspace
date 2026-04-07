@@ -12,26 +12,78 @@
         <div class="demo-preview demo-preview--tabs">
           <div
             class="demo-preview__canvas"
-            style="display: flex; flex-direction: column; gap: 24px; max-width: 360px"
+            style="display: flex; flex-direction: column; gap: 24px; align-items: flex-start"
           >
             <neu-multiselect
               label="Tecnologías"
               [options]="technologies"
               [(ngModel)]="previewTechs"
+              style="width: 100%; max-width: 360px"
             />
             <neu-multiselect
               label="Países"
               placeholder="Elige países..."
               [options]="countries"
               [(ngModel)]="previewCountries"
+              style="width: 100%; max-width: 360px"
             />
             <neu-multiselect
               label="Con error"
               [options]="technologies"
               errorMessage="Debes seleccionar al menos una opción"
+              style="width: 100%; max-width: 360px"
             />
-            <neu-multiselect label="Deshabilitado" [options]="technologies" [disabled]="true" />
+            <neu-multiselect
+              label="Deshabilitado"
+              [options]="technologies"
+              [disabled]="true"
+              style="width: 100%; max-width: 360px"
+            />
+
+            <!-- Template personalizado de ítem -->
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <p
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin: 0 0 4px;
+                "
+              >
+                Template personalizado
+              </p>
+              <neu-multiselect
+                label="Tecnologías (con iconos)"
+                [options]="technologies"
+                [(ngModel)]="previewTechs"
+                style="width: 100%; max-width: 360px"
+              >
+                <ng-template neuMultiselectItem let-item>
+                  <span
+                    style="display: inline-flex; align-items: center; gap: 8px; font-weight: 500"
+                  >
+                    <span style="font-size: 16px">{{
+                      item.value === 'angular'
+                        ? '🅰️'
+                        : item.value === 'react'
+                          ? '⚛️'
+                          : item.value === 'vue'
+                            ? '💚'
+                            : item.value === 'svelte'
+                              ? '🔥'
+                              : '📦'
+                    }}</span>
+                    {{ item.label }}
+                  </span>
+                </ng-template>
+              </neu-multiselect>
+            </div>
           </div>
+        </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
         </div>
       </neu-tab-panel>
 
@@ -45,6 +97,7 @@
                 [placeholder]="cfg.placeholder"
                 [searchable]="cfg.searchable"
                 [searchPlaceholder]="cfg.searchPlaceholder"
+                [clearable]="cfg.clearable"
                 [options]="technologies"
                 [disabled]="cfg.disabled"
                 [errorMessage]="cfg.error"
@@ -85,6 +138,19 @@
                     type="checkbox"
                     [checked]="cfg.searchable"
                     (change)="cfg.searchable = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="ms-clearable">clearable</label>
+                <label class="demo-toggle">
+                  <input
+                    id="ms-clearable"
+                    type="checkbox"
+                    [checked]="cfg.clearable"
+                    (change)="cfg.clearable = $any($event.target).checked"
                   />
                   <span class="demo-toggle__track"></span>
                 </label>
@@ -182,6 +248,62 @@
                   <td><code>boolean</code></td>
                   <td><code>false</code></td>
                   <td>Deshabilita el componente</td>
+                </tr>
+                <tr>
+                  <td><code>clearable</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Muestra un botón × en el trigger para limpiar la selección completa</td>
+                </tr>
+                <tr>
+                  <td><code>clearAriaLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Limpiar selección'</code></td>
+                  <td>Aria-label del botón clear del trigger (accesibilidad)</td>
+                </tr>
+                <tr>
+                  <td><code>noResultsMessage</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Sin resultados'</code></td>
+                  <td>Texto cuando la búsqueda no tiene coincidencias</td>
+                </tr>
+                <tr>
+                  <td><code>clearAllLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Limpiar todo'</code></td>
+                  <td>Etiqueta del botón que deselecciona todas las opciones</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="demo-section__subtitle" style="margin-top: 1.5rem">Directivas de contenido</h3>
+          <p
+            style="font-size: var(--neu-text-sm); color: var(--neu-text-muted); margin-bottom: 12px"
+          >
+            Proyecta un <code>ng-template</code> dentro de <code>&lt;neu-multiselect&gt;</code> para
+            personalizar el renderizado de cada ítem en el panel desplegable.
+          </p>
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Directiva</th>
+                  <th>Selector</th>
+                  <th>Contexto implícito</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>NeuMultiselectItemDirective</code></td>
+                  <td><code>[neuMultiselectItem]</code></td>
+                  <td><code>NeuSelectOption</code></td>
+                  <td>
+                    Template para cada opción en el panel. Usa <code>let-item</code> para acceder a
+                    <code>item.label</code> e <code>item.value</code>. Los demás comportamientos
+                    (check, disabled, hover) se mantienen automáticamente.
+                  </td>
                 </tr>
               </tbody>
             </table>

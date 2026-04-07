@@ -39,7 +39,49 @@
               [disabled]="true"
               style="min-width: 220px"
             />
+
+            <!-- Template personalizado de ítem -->
+            <div style="display: flex; flex-direction: column; gap: 8px; min-width: 220px">
+              <p
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin: 0 0 4px;
+                "
+              >
+                Template personalizado
+              </p>
+              <neu-select
+                label="Estado del servidor"
+                [options]="serverStatuses"
+                [(ngModel)]="selectedStatus"
+                style="min-width: 220px"
+              >
+                <ng-template neuSelectItem let-item>
+                  <span style="display: inline-flex; align-items: center; gap: 8px">
+                    <span
+                      style="width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0"
+                      [style.background]="
+                        item.value === 'online'
+                          ? 'var(--neu-success)'
+                          : item.value === 'busy'
+                            ? 'var(--neu-warning)'
+                            : 'var(--neu-danger)'
+                      "
+                    >
+                    </span>
+                    {{ item.label }}
+                  </span>
+                </ng-template>
+              </neu-select>
+            </div>
           </div>
+        </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
         </div>
       </neu-tab-panel>
 
@@ -57,6 +99,7 @@
                 [floatingLabel]="cfg.floatingLabel"
                 [searchable]="cfg.searchable"
                 [searchPlaceholder]="cfg.searchPlaceholder"
+                [clearable]="cfg.clearable"
                 [(ngModel)]="cfgValue"
                 style="min-width: 240px"
               />
@@ -148,6 +191,19 @@
                   />
                 </div>
               }
+
+              <div class="demo-configurator__control-row">
+                <label for="sel-clearable">clearable</label>
+                <label class="demo-toggle">
+                  <input
+                    id="sel-clearable"
+                    type="checkbox"
+                    [checked]="cfg.clearable"
+                    (change)="cfg.clearable = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -200,9 +256,87 @@
                   <td><code>false</code></td>
                   <td>Deshabilita el select</td>
                 </tr>
+                <tr>
+                  <td><code>floatingLabel</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Muestra el label como flotante dentro del trigger</td>
+                </tr>
+                <tr>
+                  <td><code>searchable</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Activa el input de búsqueda/filtro en el panel</td>
+                </tr>
+                <tr>
+                  <td><code>searchPlaceholder</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Buscar...'</code></td>
+                  <td>Placeholder del input de búsqueda</td>
+                </tr>
+                <tr>
+                  <td><code>clearable</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Muestra un botón para limpiar la selección actual</td>
+                </tr>
+                <tr>
+                  <td><code>noResultsMessage</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Sin resultados'</code></td>
+                  <td>Texto cuando la búsqueda no tiene coincidencias</td>
+                </tr>
+                <tr>
+                  <td><code>clearAriaLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Limpiar selección'</code></td>
+                  <td>Aria-label del botón de limpiar (accesibilidad)</td>
+                </tr>
               </tbody>
             </table>
           </div>
+
+          <h3 class="demo-section__subtitle" style="margin-top: 1.5rem">Directivas de contenido</h3>
+          <p
+            style="font-size: var(--neu-text-sm); color: var(--neu-text-muted); margin-bottom: 12px"
+          >
+            Proyecta <code>ng-template</code> dentro de <code>&lt;neu-select&gt;</code> para
+            personalizar el renderizado de cada ítem de la lista o del trigger.
+          </p>
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Directiva</th>
+                  <th>Selector</th>
+                  <th>Contexto implícito</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>NeuSelectItemDirective</code></td>
+                  <td><code>[neuSelectItem]</code></td>
+                  <td><code>NeuSelectOption</code></td>
+                  <td>
+                    Template para cada opción en el panel desplegable. Usa
+                    <code>let-item</code> para acceder a <code>item.label</code> e
+                    <code>item.value</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>NeuSelectSelectedDirective</code></td>
+                  <td><code>[neuSelectSelected]</code></td>
+                  <td><code>NeuSelectOption | null</code></td>
+                  <td>
+                    Template para el trigger cuando hay una opción seleccionada. Si no se provee,
+                    muestra el <code>label</code> de la opción.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <h3 class="demo-section__subtitle">Uso básico</h3>
 
           <neu-code-block [code]="usageCode" lang="TypeScript" />

@@ -1,5 +1,14 @@
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  TemplateRef,
+  ViewEncapsulation,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import {
@@ -224,6 +233,46 @@ export class TableDemoComponent {
     city: ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Bilbao'][i % 5],
   }));
 
+  readonly stickyCode = `
+const columns: NeuTableColumn[] = [
+  { key: 'id', header: '#', width: '50px', align: 'center' },
+  { key: 'name', header: 'Nombre', sortable: true },
+  { key: 'dept', header: 'Depto.', sortable: true },
+  { key: 'city', header: 'Ciudad' },
+];
+
+const data = Array.from({ length: 40 }, (_, i) => ({
+  id: i + 1,
+  name: names[i % 10],
+  dept: ['Ingeniería', 'Producto', 'Marketing', 'Ventas', 'Soporte'][i % 5],
+  city: ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Bilbao'][i % 5],
+}));
+`.trim();
+
+  // ══════════════ DEMO 5: Custom header templates ══════════════
+  readonly _customStatusHeaderTpl = viewChild<TemplateRef<unknown>>('customStatusHeader');
+
+  readonly customHeaderColumns = computed<NeuTableColumn[]>(() => {
+    const tpl = this._customStatusHeaderTpl();
+    return [
+      { key: 'id', header: '#', width: '50px', align: 'center' },
+      { key: 'name', header: 'Nombre', sortable: true },
+      { key: 'email', header: 'Email' },
+      {
+        key: 'status',
+        header: 'Estado',
+        headerTemplate: tpl,
+        sortable: true,
+        type: 'badge',
+        badgeMap: {
+          active: { label: 'Activo', variant: 'success' },
+          inactive: { label: 'Inactivo', variant: 'danger' },
+          pending: { label: 'Pendiente', variant: 'warning' },
+        },
+      },
+    ];
+  });
+
   // ══════════════ Configurador ══════════════
   cfg = {
     searchable: true,
@@ -233,6 +282,8 @@ export class TableDemoComponent {
     exportable: false,
     stickyHeader: false,
     pageSize: 10,
+    exactMatchable: false,
+    searchPlaceholder: 'Search...',
   };
 
   get configCode(): string {
@@ -244,6 +295,9 @@ export class TableDemoComponent {
     if (this.cfg.exportable) attrs.push(`[exportable]="true"\n  exportFileName="mi-export"`);
     if (this.cfg.stickyHeader) attrs.push(`[stickyHeader]="true"`);
     attrs.push(`[pageSize]="${this.cfg.pageSize}"`);
+    if (this.cfg.exactMatchable) attrs.push(`[exactMatchable]="true"`);
+    if (this.cfg.searchPlaceholder !== 'Search...')
+      attrs.push(`searchPlaceholder="${this.cfg.searchPlaceholder}"`);
     return `<neu-table\n  ${attrs.join('\n  ')}\n/>`;
   }
 
@@ -326,4 +380,52 @@ export class UsersComponent {
   [pageSizeOptions]="[10, 25, 50, 100]"
   ...
 />`;
+
+  readonly headerTemplateCode = `import { NeuTableComponent, NeuTableColumn } from '@neural-ui/core';
+import { TemplateRef, viewChild } from '@angular/core';
+
+@Component({
+  imports: [NeuTableComponent],
+  template: \`
+    <neu-table
+      title="Cabeceras personalizadas"
+      [columns]="customColumns()"
+      [data]="data"
+      [sortable]="true"
+    />
+
+    <!-- Plantilla personalizada para la cabecera de Estado -->
+    <ng-template #statusHeaderTpl let-col>
+      <span style="display: flex; align-items: center; gap: 6px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        Estado
+      </span>
+    </ng-template>
+  \`,
+})
+export class MyComponent {
+  private statusHeaderTpl = viewChild<TemplateRef<unknown>>('statusHeaderTpl');
+
+  readonly customColumns = computed<NeuTableColumn[]>(() => [
+    { key: 'id',     header: '#',      width: '50px' },
+    { key: 'name',   header: 'Nombre', sortable: true },
+    { key: 'email',  header: 'Email' },
+    {
+      key: 'status',
+      header: 'Estado',
+      headerTemplate: this.statusHeaderTpl(),
+      sortable: true,
+      type: 'badge',
+      badgeMap: {
+        active:  { label: 'Activo',    variant: 'success' },
+        inactive:{ label: 'Inactivo',  variant: 'danger'  },
+        pending: { label: 'Pendiente', variant: 'warning' },
+      },
+    },
+  ]);
+}`;
 }

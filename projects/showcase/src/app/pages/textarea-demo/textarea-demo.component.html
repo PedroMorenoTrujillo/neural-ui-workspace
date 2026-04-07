@@ -12,7 +12,7 @@
         <div class="demo-preview demo-preview--tabs">
           <div
             class="demo-preview__canvas"
-            style="display: flex; flex-direction: column; gap: 20px; max-width: 440px"
+            style="display: flex; flex-direction: column; gap: 20px; width: 100%"
           >
             <neu-textarea label="Descripción" [rows]="4" [(ngModel)]="previewVal" />
             <neu-textarea
@@ -24,6 +24,9 @@
             <neu-textarea label="Con error" errorMessage="Este campo es requerido" />
             <neu-textarea label="Deshabilitado" [disabled]="true" />
           </div>
+        </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
         </div>
       </neu-tab-panel>
 
@@ -220,6 +223,18 @@
                   <td><code>number | null</code></td>
                   <td><code>null</code></td>
                   <td>Longitud máxima</td>
+                </tr>
+                <tr>
+                  <td><code>resizable</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>true</code></td>
+                  <td>Permite al usuario redimensionar el textarea manualmente</td>
+                </tr>
+                <tr>
+                  <td><code>name</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Atributo <code>name</code> del textarea nativo (formularios HTML)</td>
                 </tr>
               </tbody>
             </table>

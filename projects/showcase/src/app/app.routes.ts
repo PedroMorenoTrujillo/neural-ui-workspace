@@ -171,7 +171,13 @@ export const routes: Routes = [
     path: 'components/feedback',
     loadComponent: () =>
       import('./pages/feedback-demo/feedback-demo.component').then((m) => m.FeedbackDemoComponent),
-    title: 'Tooltip & Toast — NeuralUI',
+    title: 'Tooltip — NeuralUI',
+  },
+  {
+    path: 'components/toast',
+    loadComponent: () =>
+      import('./pages/toast-demo/toast-demo.component').then((m) => m.ToastDemoComponent),
+    title: 'Toast — NeuralUI',
   },
   {
     path: 'components/form',
@@ -260,6 +266,26 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/stepper-demo/stepper-demo.component').then((m) => m.StepperDemoComponent),
     title: 'Stepper — NeuralUI',
+  },
+  {
+    path: 'components/code-block',
+    loadComponent: () =>
+      import('./pages/code-block-demo/code-block-demo.component').then(
+        (m) => m.CodeBlockDemoComponent,
+      ),
+    title: 'Code Block — NeuralUI',
+  },
+  {
+    path: 'components/icon',
+    loadComponent: () =>
+      import('./pages/icon-demo/icon-demo.component').then((m) => m.IconDemoComponent),
+    title: 'Icon — NeuralUI',
+  },
+  {
+    path: 'components/spinner',
+    loadComponent: () =>
+      import('./pages/spinner-demo/spinner-demo.component').then((m) => m.SpinnerDemoComponent),
+    title: 'Spinner — NeuralUI',
   },
 
   // Getting Started

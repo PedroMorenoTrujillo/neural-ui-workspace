@@ -44,15 +44,15 @@ export type NeuAvatarStatus = 'online' | 'offline' | 'busy' | 'away' | '';
       } @else {
         <span class="neu-avatar__initials" aria-hidden="true">{{ initials() }}</span>
       }
-
-      @if (status()) {
-        <span
-          class="neu-avatar__status"
-          [ngClass]="'neu-avatar__status--' + status()"
-          aria-hidden="true"
-        ></span>
-      }
     </span>
+
+    @if (status()) {
+      <span
+        class="neu-avatar__status"
+        [ngClass]="'neu-avatar__status--' + status()"
+        aria-hidden="true"
+      ></span>
+    }
   `,
   styleUrl: './neu-avatar.component.scss',
 })

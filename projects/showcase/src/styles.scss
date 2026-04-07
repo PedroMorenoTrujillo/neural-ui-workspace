@@ -184,7 +184,7 @@ $demo-max-width: 960px;
 
   &__canvas {
     padding: var(--neu-space-8) var(--neu-space-6);
-    background: var(--neu-bg);
+    background: var(--neu-surface);
     display: flex;
     flex-direction: column;
     gap: var(--neu-space-6);
@@ -213,6 +213,16 @@ $demo-max-width: 960px;
       min-height: 200px;
     }
   }
+
+  &__code {
+    margin-top: var(--neu-space-4);
+    border-radius: var(--neu-radius-lg);
+    overflow: hidden;
+
+    .neu-code-block {
+      border-radius: var(--neu-radius-lg);
+    }
+  }
 }
 
 // ---- Configurador (Storybook-lite) ----
@@ -231,7 +241,7 @@ $demo-max-width: 960px;
     align-items: center;
     justify-content: center;
     padding: var(--neu-space-8);
-    background: var(--neu-bg);
+    background: var(--neu-surface);
     min-height: 180px;
 
     @media (max-width: 600px) {

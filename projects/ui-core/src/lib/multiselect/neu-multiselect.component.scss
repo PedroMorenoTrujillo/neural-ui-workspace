@@ -117,6 +117,36 @@ $panel-z: 200;
   }
 }
 
+// ---- Clear button ----
+.neu-multiselect__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  border-radius: var(--neu-radius-sm);
+  flex-shrink: 0;
+  transition:
+    color var(--neu-transition),
+    background var(--neu-transition);
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: var(--neu-text);
+    background: var(--neu-surface-3);
+  }
+}
+
 // ---- Chevron ----
 .neu-multiselect__chevron {
   position: absolute;

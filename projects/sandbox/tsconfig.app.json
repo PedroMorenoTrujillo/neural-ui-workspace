@@ -3,7 +3,10 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
     "rootDir": "../..",
-    "types": []
+    "types": [],
+    "paths": {
+      "@neural-ui/core": ["../../projects/ui-core/src/public-api.ts"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts"]

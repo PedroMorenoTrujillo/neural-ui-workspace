@@ -12,7 +12,7 @@
         <div class="demo-preview demo-preview--tabs">
           <div
             class="demo-preview__canvas"
-            style="flex-direction: column; gap: 40px; align-items: stretch; max-width: 480px"
+            style="flex-direction: column; gap: 40px; align-items: stretch; width: 100%"
           >
             <!-- Simple -->
             <div>
@@ -82,6 +82,9 @@
               </div>
             </div>
           </div>
+        </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
         </div>
       </neu-tab-panel>
 

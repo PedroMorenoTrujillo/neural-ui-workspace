@@ -4,10 +4,14 @@
 // ============================================================
 @use '../styles/breakpoints' as *;
 
-$input-height: 48px;
-$input-height-sm: 40px;
-$label-scale-y: 10px; // posición Y del label flotado
-$label-font-floating: 11px;
+$input-height: 52px;
+$input-height-sm: 42px;
+$label-font-floating: 12px;
+
+// ---- Host ----
+.neu-input-host {
+  display: block;
+}
 
 // ---- Wrapper ----
 .neu-input__wrapper {
@@ -48,10 +52,10 @@ $label-font-floating: 11px;
 
   // Padding extra para iconos
   &--has-start-icon .neu-input__field {
-    padding-left: 38px;
+    padding-left: 40px;
   }
   &--has-end-icon .neu-input__field {
-    padding-right: 38px;
+    padding-right: 40px;
   }
 }
 
@@ -59,7 +63,7 @@ $label-font-floating: 11px;
 .neu-input__field {
   width: 100%;
   height: 100%;
-  padding: 18px var(--neu-space-3) 6px; // top padding deja espacio al label
+  padding: 0 var(--neu-space-3);
   border: none;
   background: transparent;
   outline: none;
@@ -73,13 +77,19 @@ $label-font-floating: 11px;
     color: var(--neu-text-disabled);
   }
 
-  // El placeholder real se ocultará; usamos " " para el truco de :placeholder-shown
+  // Placeholder oculto en modo floating — visible sólo al enfocar
   &::placeholder {
     color: transparent;
+    transition: color var(--neu-transition);
   }
 }
 
-// ---- Floating Label ----
+// Placeholder visible cuando el wrapper está enfocado (label ya flotó)
+.neu-input__wrapper--focused .neu-input__field::placeholder {
+  color: var(--neu-text-disabled);
+}
+
+// ---- Floating Label — estilo "outlined" (sube al borde superior) ----
 .neu-input__label {
   position: absolute;
   left: var(--neu-space-3);
@@ -88,20 +98,29 @@ $label-font-floating: 11px;
   font-size: var(--neu-text-base);
   color: var(--neu-text-muted);
   pointer-events: none;
-  transform-origin: left top;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - var(--neu-space-6));
   transition:
     top var(--neu-transition),
     font-size var(--neu-transition),
     color var(--neu-transition),
-    transform var(--neu-transition);
+    transform var(--neu-transition),
+    padding var(--neu-transition),
+    background var(--neu-transition);
 
-  // Cuando el input tiene valor o está enfocado → sube
+  // Cuando el input tiene valor o está enfocado → sube al borde
   .neu-input__wrapper--focused &,
   .neu-input__wrapper--has-value & {
-    top: $label-scale-y;
+    top: 0;
+    transform: translateY(-50%);
     font-size: $label-font-floating;
-    transform: translateY(0);
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: var(--neu-surface);
+    padding: 0 4px;
+    left: calc(var(--neu-space-3) - 4px);
   }
 
   .neu-input__wrapper--focused & {
@@ -111,11 +130,22 @@ $label-font-floating: 11px;
   .neu-input__wrapper--error & {
     color: var(--neu-error);
   }
+
+  // En wrapper deshabilitado, usar color de fondo correcto
+  .neu-input__wrapper--disabled & {
+    background: var(--neu-surface-2);
+  }
 }
 
 // Ajuste cuando hay start icon
 .neu-input__wrapper--has-start-icon .neu-input__label {
-  left: 38px;
+  left: 40px;
+
+  &.neu-input__wrapper--focused,
+  .neu-input__wrapper--focused &,
+  .neu-input__wrapper--has-value & {
+    left: calc(var(--neu-space-3) - 4px); // vuelve a la izquierda al flotar
+  }
 }
 
 // ---- Iconos ----

@@ -71,44 +71,10 @@
                 </neu-tab-panel>
               </neu-tabs>
             </div>
-
-            <!-- Flush -->
-            <div>
-              <p
-                style="
-                  font-size: 0.75rem;
-                  font-weight: 600;
-                  text-transform: uppercase;
-                  letter-spacing: 0.06em;
-                  color: var(--neu-text-muted);
-                  margin-bottom: 12px;
-                "
-              >
-                Modo flush (sin padding interno)
-              </p>
-              <neu-tabs [tabs]="flushTabs" tabParam="flush" [flush]="true" ariaLabel="Tabs flush">
-                <neu-tab-panel tabId="ft1">
-                  <div class="tabs-demo__panel-flush">
-                    <div class="tabs-demo__flush-row tabs-demo__flush-row--header"></div>
-                    <div class="tabs-demo__flush-row"></div>
-                    <div class="tabs-demo__flush-row tabs-demo__flush-row--short"></div>
-                    <div class="tabs-demo__flush-row"></div>
-                  </div>
-                </neu-tab-panel>
-                <neu-tab-panel tabId="ft2">
-                  <div class="tabs-demo__panel-flush">
-                    <div class="tabs-demo__flush-row tabs-demo__flush-row--header"></div>
-                    <div class="tabs-demo__flush-row tabs-demo__flush-row--short"></div>
-                  </div>
-                </neu-tab-panel>
-                <neu-tab-panel tabId="ft3">
-                  <div class="tabs-demo__panel-flush">
-                    <div class="tabs-demo__flush-row"></div>
-                  </div>
-                </neu-tab-panel>
-              </neu-tabs>
-            </div>
           </div>
+        </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
         </div>
       </neu-tab-panel>
 
@@ -117,12 +83,7 @@
         <div class="demo-preview demo-preview--tabs">
           <div class="demo-configurator">
             <div class="demo-configurator__preview">
-              <neu-tabs
-                [tabs]="cfgTabs"
-                tabParam="cfg"
-                [flush]="cfg.flush"
-                ariaLabel="Tabs configurables"
-              >
+              <neu-tabs [tabs]="cfgTabs" tabParam="cfg" ariaLabel="Tabs configurables">
                 <neu-tab-panel tabId="c1">
                   <div class="tabs-demo__panel-content">Contenido de General</div>
                 </neu-tab-panel>
@@ -146,19 +107,6 @@
                   (input)="cfg.badge = $any($event.target).value"
                   style="width: 100px"
                 />
-              </div>
-
-              <div class="demo-configurator__control-row">
-                <label for="t-flush">Flush (sin padding)</label>
-                <label class="demo-toggle">
-                  <input
-                    id="t-flush"
-                    type="checkbox"
-                    [checked]="cfg.flush"
-                    (change)="cfg.flush = $any($event.target).checked"
-                  />
-                  <span class="demo-toggle__track"></span>
-                </label>
               </div>
 
               <div class="demo-configurator__control-row">

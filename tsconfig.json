@@ -37,6 +37,12 @@
     },
     {
       "path": "./projects/showcase/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/sandbox/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/sandbox/tsconfig.spec.json"
     }
   ]
 }

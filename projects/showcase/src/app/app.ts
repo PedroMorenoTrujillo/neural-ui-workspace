@@ -219,6 +219,12 @@ export class App {
           icon: 'lucideMessageSquare',
           isNew: true,
         },
+        {
+          labelKey: 'comp.toast',
+          route: '/components/toast',
+          icon: 'lucideBell',
+          isNew: true,
+        },
       ],
     },
     {
@@ -286,6 +292,24 @@ export class App {
           labelKey: 'comp.stepper',
           route: '/components/stepper',
           icon: 'lucideListChecks',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.codeBlock',
+          route: '/components/code-block',
+          icon: 'lucideCode2',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.icon',
+          route: '/components/icon',
+          icon: 'lucideSmile',
+          isNew: true,
+        },
+        {
+          labelKey: 'comp.spinner',
+          route: '/components/spinner',
+          icon: 'lucideLoader',
           isNew: true,
         },
       ],

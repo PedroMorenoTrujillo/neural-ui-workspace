@@ -34,7 +34,31 @@
               hint="Incluye https://"
               style="max-width: 400px"
             />
+
+            <!-- Iconos internos -->
+            <div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--neu-text-muted);
+                  margin-bottom: 12px;
+                "
+              >
+                Icono interno
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 12px; max-width: 360px">
+                <neu-input label="Buscar" icon="lucideSearch" iconPosition="left" />
+                <neu-input label="Usuario" icon="lucideUser" iconPosition="right" />
+                <neu-input label="Contraseña" icon="lucideLock" iconPosition="left" />
+              </div>
+            </div>
           </div>
+        </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
         </div>
       </neu-tab-panel>
 
@@ -252,6 +276,30 @@
                   <td>Longitud máxima</td>
                 </tr>
                 <tr>
+                  <td><code>minlength</code></td>
+                  <td><code>number</code></td>
+                  <td><code>null</code></td>
+                  <td>Longitud mínima</td>
+                </tr>
+                <tr>
+                  <td><code>min</code></td>
+                  <td><code>string | null</code></td>
+                  <td><code>null</code></td>
+                  <td>Valor mínimo para inputs de tipo <code>number</code> o <code>date</code></td>
+                </tr>
+                <tr>
+                  <td><code>max</code></td>
+                  <td><code>string | null</code></td>
+                  <td><code>null</code></td>
+                  <td>Valor máximo para inputs de tipo <code>number</code> o <code>date</code></td>
+                </tr>
+                <tr>
+                  <td><code>pattern</code></td>
+                  <td><code>string | null</code></td>
+                  <td><code>null</code></td>
+                  <td>Patrón de validación regex HTML nativo</td>
+                </tr>
+                <tr>
                   <td><code>autocomplete</code></td>
                   <td><code>string</code></td>
                   <td><code>'off'</code></td>
@@ -274,6 +322,18 @@
                   <td><code>boolean</code></td>
                   <td><code>false</code></td>
                   <td>Activa zona de icono final</td>
+                </tr>
+                <tr>
+                  <td><code>icon</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Nombre del icono lucide a renderizar dentro del campo</td>
+                </tr>
+                <tr>
+                  <td><code>iconPosition</code></td>
+                  <td><code>'left' | 'right'</code></td>
+                  <td><code>'left'</code></td>
+                  <td>Posición del icono cuando se usa <code>icon</code></td>
                 </tr>
               </tbody>
             </table>

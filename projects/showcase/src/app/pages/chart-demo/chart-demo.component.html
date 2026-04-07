@@ -11,78 +11,132 @@
       <neu-tab-panel tabId="preview">
         <!-- Barras verticales agrupadas -->
         <div class="demo-chart-block">
-          <p class="demo-chart-block__label">Barras verticales agrupadas</p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">Barras verticales agrupadas</p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/bar-chart/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart type="bar" [series]="barSeries" [categories]="months" [height]="280" />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="barCode" language="html" />
+          </div>
         </div>
 
         <!-- Barras apiladas (vertical) -->
         <div class="demo-chart-block">
-          <p class="demo-chart-block__label">Barras apiladas (vertical)</p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">Barras apiladas (vertical)</p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/bar-chart/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart
             type="bar-stacked"
             [series]="stackedBarSeries"
             [categories]="quarters"
             [height]="260"
           />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="stackedBarCode" language="html" />
+          </div>
         </div>
 
         <!-- Barras horizontales agrupadas -->
         <div class="demo-chart-block">
-          <p class="demo-chart-block__label">Barras horizontales agrupadas</p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">Barras horizontales agrupadas</p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/bar-chart/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart
             type="bar-horizontal"
             [series]="hBarSeries"
             [categories]="hBarCategories"
             [height]="300"
           />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="hBarCode" language="html" />
+          </div>
         </div>
 
         <!-- Barras horizontales apiladas -->
         <div class="demo-chart-block">
-          <p class="demo-chart-block__label">Barras horizontales apiladas</p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">Barras horizontales apiladas</p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/bar-chart/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart
             type="bar-horizontal-stacked"
             [series]="hStackedSeries"
             [categories]="hStackedCategories"
             [height]="280"
           />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="hStackedCode" language="html" />
+          </div>
         </div>
 
         <!-- Área (multi-series) -->
         <div class="demo-chart-block">
-          <p class="demo-chart-block__label">Área con gradiente (multi-serie)</p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">Área con gradiente (multi-serie)</p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/area-chart/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart type="area" [series]="areaSeries" [categories]="months" [height]="280" />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="areaCode" language="html" />
+          </div>
         </div>
 
         <!-- Line -->
         <div class="demo-chart-block">
-          <p class="demo-chart-block__label">Línea suave</p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">Línea suave</p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/line-chart/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart type="line" [series]="areaSeries" [categories]="months" [height]="260" />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="lineCode" language="html" />
+          </div>
         </div>
 
         <!-- Pie -->
         <div class="demo-chart-block demo-chart-block--half">
-          <p class="demo-chart-block__label">Pie — Fuentes de tráfico</p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">Pie — Fuentes de tráfico</p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/pie-donut/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart type="pie" [pieSeries]="pieSeries" [labels]="pieLabels" [height]="280" />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="pieCode" language="html" />
+          </div>
         </div>
 
         <!-- Donut -->
         <div class="demo-chart-block demo-chart-block--half">
-          <p class="demo-chart-block__label">Donut — Fuentes de tráfico</p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">Donut — Fuentes de tráfico</p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/pie-donut/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart type="donut" [pieSeries]="pieSeries" [labels]="pieLabels" [height]="280" />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="donutCode" language="html" />
+          </div>
         </div>
 
         <!-- Pareto -->
         <div class="demo-chart-block">
-          <p class="demo-chart-block__label">
-            Pareto — causas de defectos (línea acumulada generada automáticamente)
-          </p>
+          <div class="demo-chart-block__header">
+            <p class="demo-chart-block__label">
+              Pareto — causas de defectos (línea acumulada generada automáticamente)
+            </p>
+            <a class="demo-chart-block__docs" href="https://apexcharts.com/docs/chart-types/mixed-charts/" target="_blank" rel="noopener">ApexCharts docs ↗</a>
+          </div>
           <neu-chart
             type="pareto"
             [series]="paretoSeries"
             [categories]="paretoCategories"
             [height]="300"
           />
+          <div class="demo-preview__code">
+            <neu-code-block [code]="paretoCode" language="html" />
+          </div>
         </div>
       </neu-tab-panel>
 

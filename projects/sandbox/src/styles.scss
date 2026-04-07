@@ -1,6 +1,11 @@
 // ── NeuralUI tokens + all component styles ──────────────────────────────────
 @use '../../ui-core/src/lib/styles' as *;
 
+// ── Host display fixes (no definidos en los SCSS del componente) ─────────────
+.neu-input-host {
+  display: block;
+}
+
 // ── Reset ────────────────────────────────────────────────────────────────────
 *,
 *::before,
@@ -23,9 +28,25 @@ body {
 }
 
 // ── Sandbox layout ───────────────────────────────────────────────────────────
+.sb-app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sb-nav {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  border-right: 1px solid var(--neu-border);
+  background: var(--neu-surface);
+  display: flex;
+}
+
 .sb-page {
+  flex: 1;
+  min-width: 0;
   max-width: 1100px;
-  margin: 0 auto;
   padding: 40px 24px 80px;
 }
 
@@ -85,12 +106,4 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
-}
-
-.sb-nav-host {
-  width: 240px;
-  min-height: 320px;
-  border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-lg);
-  overflow: hidden;
 }

@@ -1,5 +1,11 @@
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  computed,
+  inject,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   NeuBadgeComponent,
@@ -45,18 +51,10 @@ export class TabsDemoComponent {
     { id: 'tab5', label: 'Avanzado', disabled: true },
   ];
 
-  readonly flushTabs: NeuTab[] = [
-    { id: 'ft1', label: 'Vista general' },
-    { id: 'ft2', label: 'Actividad' },
-    { id: 'ft3', label: 'Equipo' },
-  ];
-
   cfg: {
-    flush: boolean;
     badge: string;
     disabled: boolean;
   } = {
-    flush: false,
     badge: '',
     disabled: false,
   };
@@ -71,7 +69,6 @@ export class TabsDemoComponent {
 
   get configCode(): string {
     const attrs: string[] = ['[tabs]="tabs"', 'tabParam="tab"'];
-    if (this.cfg.flush) attrs.push('[flush]="true"');
     return `<neu-tabs ${attrs.join(' ')}>
   <neu-tab-panel tabId="tab1">Contenido de General</neu-tab-panel>
   <neu-tab-panel tabId="tab2">Contenido de Seguridad</neu-tab-panel>

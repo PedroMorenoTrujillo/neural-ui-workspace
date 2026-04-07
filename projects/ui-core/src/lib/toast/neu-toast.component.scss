@@ -16,15 +16,42 @@
   max-width: 400px;
   align-items: stretch;
 
-  // Desktop (≥ 400px): esquina superior derecha
+  // Desktop (≥ 400px): posición según clase modificadora
   @media (min-width: 400px) {
     bottom: auto;
-    top: calc(var(--neu-header-height, 64px) + var(--neu-space-4));
-    right: var(--neu-space-6);
     left: auto;
     transform: none;
     width: 360px;
     align-items: flex-end;
+  }
+}
+
+// Posiciones desktop
+@media (min-width: 400px) {
+  .neu-toast-container--top-right {
+    top: calc(var(--neu-header-height, 64px) + var(--neu-space-4));
+    right: var(--neu-space-6);
+    align-items: flex-end;
+  }
+
+  .neu-toast-container--top-left {
+    top: calc(var(--neu-header-height, 64px) + var(--neu-space-4));
+    left: var(--neu-space-6);
+    align-items: flex-start;
+  }
+
+  .neu-toast-container--bottom-right {
+    top: auto;
+    bottom: var(--neu-space-6);
+    right: var(--neu-space-6);
+    align-items: flex-end;
+  }
+
+  .neu-toast-container--bottom-left {
+    top: auto;
+    bottom: var(--neu-space-6);
+    left: var(--neu-space-6);
+    align-items: flex-start;
   }
 }
 

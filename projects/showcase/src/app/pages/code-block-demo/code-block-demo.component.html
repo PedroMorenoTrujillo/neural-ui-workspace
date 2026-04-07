@@ -1,0 +1,154 @@
+<div class="demo-page">
+  <div class="demo-hero">
+    <neu-badge variant="info" size="sm">{{ 'demo.common.componentBadge' | transloco }}</neu-badge>
+    <h1 class="demo-hero__title">Code Block</h1>
+    <p class="demo-hero__desc">
+      Bloque de código con resaltado de sintaxis, indicador de lenguaje y botón de copia al
+      portapapeles. Todos los textos son configurables para internacionalización.
+    </p>
+  </div>
+
+  <section class="demo-section">
+    <neu-tabs [tabs]="demoTabs()" tabParam="tab">
+      <!-- PREVIEW -->
+      <neu-tab-panel tabId="preview">
+        <div class="demo-preview demo-preview--tabs">
+          <div
+            class="demo-preview__canvas"
+            style="flex-direction: column; align-items: stretch; gap: 1.5rem"
+          >
+            <div>
+              <p class="demo-preview__label">TypeScript</p>
+              <neu-code-block [code]="tsCode" lang="TypeScript" />
+            </div>
+            <div>
+              <p class="demo-preview__label">HTML</p>
+              <neu-code-block [code]="htmlCode" lang="HTML" />
+            </div>
+            <div>
+              <p class="demo-preview__label">SCSS</p>
+              <neu-code-block [code]="scssCode" lang="SCSS" />
+            </div>
+          </div>
+        </div>
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview" style="padding: 0; align-items: stretch">
+              <neu-code-block
+                [code]="cfgCode"
+                [lang]="cfg.lang"
+                [copyLabel]="cfg.copyLabel"
+                [copiedLabel]="cfg.copiedLabel"
+              />
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label>lang</label>
+                <select
+                  class="demo-select"
+                  [value]="cfg.lang"
+                  (change)="cfg.lang = $any($event.target).value"
+                >
+                  <option>TypeScript</option>
+                  <option>HTML</option>
+                  <option>SCSS</option>
+                  <option>JSON</option>
+                  <option>Bash</option>
+                </select>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>copyLabel</label>
+                <input
+                  type="text"
+                  class="demo-select"
+                  [value]="cfg.copyLabel"
+                  (input)="cfg.copyLabel = $any($event.target).value"
+                  style="width: 100px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>copiedLabel</label>
+                <input
+                  type="text"
+                  class="demo-select"
+                  [value]="cfg.copiedLabel"
+                  (input)="cfg.copiedLabel = $any($event.target).value"
+                  style="width: 100px"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
+        </div>
+      </neu-tab-panel>
+
+      <!-- API -->
+      <neu-tab-panel tabId="api">
+        <div style="padding: 24px 0">
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
+              <thead>
+                <tr>
+                  <th>Input</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
+                  <th>Default</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>code</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Código fuente a mostrar</td>
+                </tr>
+                <tr>
+                  <td><code>lang</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'TypeScript'</code></td>
+                  <td>Etiqueta de lenguaje mostrada en la cabecera del bloque</td>
+                </tr>
+                <tr>
+                  <td><code>copyLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Copiar'</code></td>
+                  <td>Texto del botón de copia antes de copiar</td>
+                </tr>
+                <tr>
+                  <td><code>copiedLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Copiado'</code></td>
+                  <td>Texto del botón de copia tras copiar exitosamente</td>
+                </tr>
+                <tr>
+                  <td><code>copyAriaLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Copiar código'</code></td>
+                  <td>Aria-label del botón antes de copiar (accesibilidad)</td>
+                </tr>
+                <tr>
+                  <td><code>copiedAriaLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Código copiado'</code></td>
+                  <td>Aria-label del botón tras copiar (accesibilidad)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h3 class="demo-section__subtitle">Uso básico</h3>
+          <neu-code-block [code]="usageCode" lang="TypeScript" />
+        </div>
+      </neu-tab-panel>
+    </neu-tabs>
+  </section>
+</div>

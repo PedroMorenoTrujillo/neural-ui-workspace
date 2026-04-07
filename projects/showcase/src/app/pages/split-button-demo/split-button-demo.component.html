@@ -156,6 +156,9 @@
             }
           </div>
         </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
+        </div>
       </neu-tab-panel>
 
       <!-- CONFIGURADOR -->
@@ -287,6 +290,18 @@
                   <td><code>NeuSplitButtonAction[]</code></td>
                   <td><code>[]</code></td>
                   <td>Lista de acciones del dropdown</td>
+                </tr>
+                <tr>
+                  <td><code>moreActionsAriaLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Más opciones'</code></td>
+                  <td>Aria-label del botón que abre el dropdown (accesibilidad)</td>
+                </tr>
+                <tr>
+                  <td><code>actionsAriaLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>'Acciones'</code></td>
+                  <td>Aria-label del menú desplegable (accesibilidad)</td>
                 </tr>
               </tbody>
             </table>

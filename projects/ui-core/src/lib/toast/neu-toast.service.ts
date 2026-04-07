@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { NeuToastItem, NeuToastOptions } from './neu-toast.types';
+import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.types';
 
 /**
  * NeuralUI Toast Service
@@ -16,6 +16,13 @@ import { NeuToastItem, NeuToastOptions } from './neu-toast.types';
 export class NeuToastService {
   /** Lista reactiva de toasts activos */
   readonly toasts = signal<NeuToastItem[]>([]);
+
+  /** Posición del contenedor de toasts */
+  readonly position = signal<NeuToastPosition>('top-right');
+
+  setPosition(position: NeuToastPosition): void {
+    this.position.set(position);
+  }
 
   show(options: NeuToastOptions): string {
     const id = `neu-toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;

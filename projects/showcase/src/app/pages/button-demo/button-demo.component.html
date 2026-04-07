@@ -119,24 +119,49 @@
             </div>
           </div>
         </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
+        </div>
       </neu-tab-panel>
 
       <!-- CONFIGURADOR -->
       <neu-tab-panel tabId="config">
         <div class="demo-preview demo-preview--tabs">
           <div class="demo-configurator">
-            <div class="demo-configurator__preview">
-              <button
-                neu-button
-                [variant]="cfg.variant"
-                [size]="cfg.size"
-                [disabled]="cfg.disabled"
-                [icon]="cfg.icon"
-                [iconPosition]="cfg.iconPosition"
-                [iconOnly]="cfg.iconOnly"
-              >
-                {{ cfg.iconOnly ? '' : cfg.label }}
-              </button>
+            <div
+              class="demo-configurator__preview"
+              style="flex-direction: column; gap: 12px; align-items: stretch"
+            >
+              <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center">
+                @for (v of ['outline', 'primary', 'secondary', 'ghost', 'danger']; track v) {
+                  <button
+                    neu-button
+                    [variant]="$any(v)"
+                    [size]="cfg.size"
+                    [disabled]="cfg.disabled"
+                    [icon]="cfg.iconOnly ? cfg.icon : ''"
+                    [iconOnly]="cfg.iconOnly"
+                  >
+                    {{ cfg.iconOnly ? '' : v }}
+                  </button>
+                }
+              </div>
+              @if (cfg.icon && !cfg.iconOnly) {
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center">
+                  @for (v of ['outline', 'primary', 'secondary', 'ghost', 'danger']; track v) {
+                    <button
+                      neu-button
+                      [variant]="$any(v)"
+                      [size]="cfg.size"
+                      [disabled]="cfg.disabled"
+                      [icon]="cfg.icon"
+                      [iconPosition]="cfg.iconPosition"
+                    >
+                      {{ cfg.label }}
+                    </button>
+                  }
+                </div>
+              }
             </div>
             <div class="demo-configurator__controls">
               <span class="demo-configurator__controls-title">Configurar</span>
@@ -311,6 +336,28 @@
                   <td><code>boolean</code></td>
                   <td><code>false</code></td>
                   <td>Aplica padding cuadrado para botones solo de icono (sin texto)</td>
+                </tr>
+                <tr>
+                  <td><code>ariaLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>''</code></td>
+                  <td>Aria-label accesible para botones solo de icono sin texto visible</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr>
+                  <th>Output</th>
+                  <th>{{ 'demo.common.api.type' | transloco }}</th>
+                  <th>—</th>
+                  <th>{{ 'demo.common.api.desc' | transloco }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>neuClick</code></td>
+                  <td><code>MouseEvent</code></td>
+                  <td>—</td>
+                  <td>Emite el evento click del botón</td>
                 </tr>
               </tbody>
             </table>

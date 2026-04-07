@@ -4,13 +4,16 @@ import {
   ElementRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   forwardRef,
   inject,
   input,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from '../select/neu-select.types';
+import { NeuMultiselectItemDirective } from './neu-multiselect.directives';
 
 export type { NeuSelectOption } from '../select/neu-select.types';
 
@@ -27,7 +30,7 @@ let _neuMultiselectIdSeq = 0;
  */
 @Component({
   selector: 'neu-multiselect',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -103,6 +106,28 @@ let _neuMultiselectIdSeq = 0;
           }
         </span>
 
+        <!-- Clear button -->
+        @if (clearable() && _values().length > 0 && !isDisabledFinal()) {
+          <button
+            class="neu-multiselect__clear"
+            type="button"
+            [attr.aria-label]="clearAriaLabel()"
+            (click)="clearAll($event)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        }
+
         <!-- Chevron -->
         <svg
           class="neu-multiselect__chevron"
@@ -177,12 +202,19 @@ let _neuMultiselectIdSeq = 0;
                     <polyline points="1 5 4.5 9 11 1" />
                   </svg>
                 </span>
-                {{ option.label }}
+                @if (itemTpl()) {
+                  <ng-container
+                    [ngTemplateOutlet]="itemTpl()!.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: option }"
+                  />
+                } @else {
+                  {{ option.label }}
+                }
               </div>
             }
 
             @if (filteredOptions().length === 0) {
-              <div class="neu-multiselect__empty">Sin resultados</div>
+              <div class="neu-multiselect__empty">{{ noResultsMessage() }}</div>
             }
           </div>
 
@@ -206,7 +238,7 @@ let _neuMultiselectIdSeq = 0;
                   type="button"
                   (click)="clearAll($event)"
                 >
-                  Limpiar todo
+                  {{ clearAllLabel() }}
                 </button>
               </div>
             </div>
@@ -226,6 +258,9 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   /** @internal */
   readonly _triggerId = `neu-multiselect-trigger-${_neuMultiselectIdSeq++}`;
+
+  /** Template personalizado para cada opción del dropdown */
+  readonly itemTpl = contentChild(NeuMultiselectItemDirective);
 
   /** Opciones del dropdown */
   options = input<NeuSelectOption[]>([]);
@@ -248,11 +283,23 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   /** Placeholder del input de búsqueda */
   searchPlaceholder = input<string>('Buscar...');
 
+  /** Texto cuando no hay opciones tras filtrar */
+  noResultsMessage = input<string>('Sin resultados');
+
+  /** Texto del botón de limpiar todas las selecciones */
+  clearAllLabel = input<string>('Limpiar todo');
+
+  /** Muestra un botón × en el trigger para limpiar la selección de una vez */
+  clearable = input<boolean>(false);
+
+  /** Aria-label del botón clear que aparece en el trigger */
+  clearAriaLabel = input<string>('Limpiar selección');
+
   // --- Estado interno ---
   protected readonly _values = signal<string[]>([]);
   readonly isOpen = signal(false);
   readonly searchQuery = signal('');
-  readonly _chipMode = signal<'chips' | 'count'>('chips');
+  readonly _chipMode = signal<'chips' | 'count'>('count');
 
   readonly _visibleChips = computed(() => this._values().slice(0, 3));
 

@@ -13,7 +13,7 @@
 // ---- Cabecera ----
 .neu-stepper__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0;
   overflow-x: auto;
 }
@@ -24,8 +24,16 @@
   flex: 1;
   min-width: 0;
 
+  &:first-child {
+    flex: 0 0 auto;
+  }
+
   &:last-child {
     flex: 0 0 auto;
+  }
+
+  &:not(:first-child) {
+    padding-left: var(--neu-space-3);
   }
 }
 
@@ -39,6 +47,7 @@
   cursor: pointer;
   white-space: nowrap;
   outline: none;
+  flex-shrink: 0;
 
   &:focus-visible .neu-stepper__indicator {
     box-shadow: 0 0 0 3px var(--neu-primary-100);
@@ -115,7 +124,7 @@
   height: 2px;
   min-width: 24px;
   background: var(--neu-border);
-  margin: 0 var(--neu-space-2);
+  margin: 0 var(--neu-space-3);
   transition: background var(--neu-transition);
 
   &--done {

@@ -55,47 +55,62 @@ function asRows(data: object[]): Row[] {
             <h3 class="neu-table__title">{{ title() }}</h3>
           }
           @if (searchable()) {
-            <div class="neu-table__search-wrapper">
-              <svg
-                class="neu-table__search-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                class="neu-table__search"
-                type="search"
-                [placeholder]="searchPlaceholder()"
-                [value]="searchQuery()"
-                (input)="onSearch($event)"
-                aria-label="Buscar en la tabla"
-              />
-              @if (searchQuery()) {
-                <button
-                  class="neu-table__search-clear"
-                  type="button"
-                  aria-label="Limpiar búsqueda"
-                  (click)="clearSearch()"
+            <div class="neu-table__search-group">
+              <div class="neu-table__search-wrapper">
+                <svg
+                  class="neu-table__search-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  class="neu-table__search"
+                  type="search"
+                  [placeholder]="searchPlaceholder()"
+                  [value]="searchQuery()"
+                  (input)="onSearch($event)"
+                  aria-label="Buscar en la tabla"
+                  [attr.aria-label]="searchAriaLabel()"
+                />
+                @if (searchQuery()) {
+                  <button
+                    class="neu-table__search-clear"
+                    type="button"
+                    aria-label="Limpiar búsqueda"
+                    [attr.aria-label]="clearSearchAriaLabel()"
+                    (click)="clearSearch()"
                   >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                }
+              </div>
+              @if (exactMatchable()) {
+                <label class="neu-table__exact-label">
+                  <input
+                    class="neu-table__exact-checkbox"
+                    type="checkbox"
+                    [checked]="exactMatch()"
+                    (change)="exactMatch.set($any($event.target).checked)"
+                  />
+                  {{ exactMatchLabel() }}
+                </label>
               }
             </div>
           }
@@ -178,7 +193,14 @@ function asRows(data: object[]): Row[] {
                   scope="col"
                   (click)="sortable() && col.sortable !== false ? sortBy(col.key) : null"
                 >
-                  {{ col.header }}
+                  @if (col.headerTemplate) {
+                    <ng-container
+                      [ngTemplateOutlet]="col.headerTemplate"
+                      [ngTemplateOutletContext]="{ $implicit: col }"
+                    />
+                  } @else {
+                    {{ col.header }}
+                  }
                   @if (sortable() && col.sortable !== false) {
                     <span class="neu-table__sort-icon" aria-hidden="true">
                       @if (sortKey() === col.key) {
@@ -236,7 +258,7 @@ function asRows(data: object[]): Row[] {
                     <p>{{ emptyMessage() }}</p>
                     @if (searchQuery()) {
                       <button class="neu-table__clear-filter" type="button" (click)="clearSearch()">
-                        Eliminar filtro
+                        {{ clearFilterLabel() }}
                       </button>
                     }
                   </div>
@@ -356,7 +378,7 @@ function asRows(data: object[]): Row[] {
                 class="neu-table__page-btn"
                 [disabled]="currentPage() === 1"
                 (click)="goToPage(currentPage() - 1)"
-                aria-label="Anterior"
+                [attr.aria-label]="previousPageAriaLabel()"
                 type="button"
               >
                 <svg
@@ -385,7 +407,7 @@ function asRows(data: object[]): Row[] {
                 class="neu-table__page-btn"
                 [disabled]="currentPage() === totalPages()"
                 (click)="goToPage(currentPage() + 1)"
-                aria-label="Siguiente"
+                [attr.aria-label]="nextPageAriaLabel()"
                 type="button"
               >
                 <svg
@@ -424,6 +446,23 @@ export class NeuTableComponent {
   // ---- Inputs de funcionalidad ----
   searchable = input<boolean>(true);
   searchPlaceholder = input<string>('Buscar...');
+  exactMatchable = input<boolean>(false);
+  exactMatchLabel = input<string>('Búsqueda exacta');
+
+  /** Aria-label del input de búsqueda */
+  searchAriaLabel = input<string>('Buscar en la tabla');
+
+  /** Aria-label del botón de limpiar búsqueda */
+  clearSearchAriaLabel = input<string>('Limpiar búsqueda');
+
+  /** Texto del botón que elimina el filtro activo */
+  clearFilterLabel = input<string>('Eliminar filtro');
+
+  /** Aria-label del botón de página anterior */
+  previousPageAriaLabel = input<string>('Anterior');
+
+  /** Aria-label del botón de página siguiente */
+  nextPageAriaLabel = input<string>('Siguiente');
   sortable = input<boolean>(false);
   selectable = input<boolean>(false);
   expandable = input<boolean>(false);
@@ -460,13 +499,23 @@ export class NeuTableComponent {
   // ---- Pipeline de datos ----
   private readonly rows = computed(() => asRows(this.data()));
 
+  readonly exactMatch = signal(false);
+
   readonly filteredData = computed(() => {
     const q = this.searchQuery().trim().toLowerCase();
     if (!q) return this.rows();
+    const exact = this.exactMatch();
+    const matches = (text: string) =>
+      exact ? text.toLowerCase() === q : text.toLowerCase().includes(q);
     return this.rows().filter((row) =>
       this.columns().some((col) => {
-        const val = col.cell ? col.cell(row) : String(row[col.key] ?? '');
-        return val.toLowerCase().includes(q);
+        const rawVal = String(row[col.key] ?? '');
+        const displayVal = col.cell
+          ? col.cell(row)
+          : col.type === 'badge' && col.badgeMap?.[rawVal]?.label
+            ? col.badgeMap[rawVal].label
+            : rawVal;
+        return matches(displayVal) || matches(rawVal);
       }),
     );
   });

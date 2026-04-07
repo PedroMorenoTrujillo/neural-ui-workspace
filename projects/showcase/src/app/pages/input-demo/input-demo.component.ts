@@ -1,9 +1,16 @@
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  computed,
+  inject,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   NeuBadgeComponent,
+  NeuCodeBlockComponent,
   NeuInputComponent,
   NeuTab,
   NeuTabPanelComponent,
@@ -17,6 +24,7 @@ import { CodeBlockComponent } from '../../shared/code-block/code-block.component
     TranslocoPipe,
     NeuInputComponent,
     NeuBadgeComponent,
+    NeuCodeBlockComponent,
     NeuTabsComponent,
     NeuTabPanelComponent,
     CodeBlockComponent,
@@ -84,6 +92,15 @@ import { FormsModule } from '@angular/forms';
     <!-- Con atributos nativos -->
     <neu-input label="URL" type="url" [required]="true" [maxlength]="200"
                hint="Incluye https://" />
+
+    <!-- Icono interno (izquierda por defecto) -->
+    <neu-input label="Buscar" icon="lucideSearch" />
+
+    <!-- Icono a la derecha -->
+    <neu-input label="Usuario" icon="lucideUser" iconPosition="right" />
+
+    <!-- Icono combinado con tipo password -->
+    <neu-input label="Contraseña" type="password" icon="lucideLock" iconPosition="left" />
   \`
 })
 export class MyFormComponent {
@@ -91,10 +108,11 @@ export class MyFormComponent {
   passwordCtrl = new FormControl('', Validators.required);
 }`;
 
+  readonly usageCode = this.apiCode;
+
   get configCode(): string {
     const lines: string[] = [`<neu-input`];
     lines.push(`  label="${this.cfg.label}"`);
-    if (this.cfg.type !== 'text') lines.push(`  type="${this.cfg.type}"`);
     if (!this.cfg.floatingLabel) lines.push(`  [floatingLabel]="false"`);
     if (!this.cfg.floatingLabel && this.cfg.placeholder)
       lines.push(`  placeholder="${this.cfg.placeholder}"`);

@@ -96,6 +96,78 @@
             </div>
           </div>
         </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
+        </div>
+      </neu-tab-panel>
+
+      <!-- CONFIGURADOR -->
+      <neu-tab-panel tabId="config">
+        <div class="demo-preview demo-preview--tabs">
+          <div class="demo-configurator">
+            <div class="demo-configurator__preview">
+              <neu-skeleton
+                [variant]="cfg.variant"
+                [width]="cfg.width"
+                [height]="cfg.height"
+                [borderRadius]="cfg.borderRadius"
+              />
+            </div>
+            <div class="demo-configurator__controls">
+              <span class="demo-configurator__controls-title">Configurar</span>
+
+              <div class="demo-configurator__control-row">
+                <label>variant</label>
+                <select
+                  class="demo-select"
+                  [value]="cfg.variant"
+                  (change)="cfg.variant = $any($event.target).value"
+                >
+                  <option>rect</option>
+                  <option>text</option>
+                  <option>circle</option>
+                </select>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>width</label>
+                <input
+                  type="text"
+                  class="demo-select"
+                  [value]="cfg.width"
+                  (input)="cfg.width = $any($event.target).value"
+                  style="width: 100px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>height</label>
+                <input
+                  type="text"
+                  class="demo-select"
+                  [value]="cfg.height"
+                  (input)="cfg.height = $any($event.target).value"
+                  style="width: 100px"
+                />
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>borderRadius</label>
+                <input
+                  type="text"
+                  class="demo-select"
+                  [value]="cfg.borderRadius"
+                  (input)="cfg.borderRadius = $any($event.target).value"
+                  placeholder="p.ej. 8px"
+                  style="width: 100px"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-configurator__snippet">
+          <neu-code-block [code]="configCode" lang="HTML" />
+        </div>
       </neu-tab-panel>
 
       <!-- API -->

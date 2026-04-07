@@ -20,15 +20,13 @@ npm install @angular/cdk`;
   readonly appConfigCode = `// app.config.ts
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
-import { lucideCheck, lucideX, lucideChevronDown } from '@ng-icons/lucide';
+import { provideNeuralUI } from '@neural-ui/core';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideNgIconsConfig({ size: '1em' }),
-    provideIcons({ lucideCheck, lucideX, lucideChevronDown }),
+    provideNeuralUI(),
   ],
 };`;
 

@@ -21,12 +21,16 @@
               [pageSizeOptions]="[5, 10, 25, 50]"
               [sortable]="true"
               [searchable]="true"
+              [exactMatchable]="true"
               [selectable]="true"
               [exportable]="true"
               exportFileName="usuarios"
               (rowSelectionChange)="selectedUsers.set($any($event))"
             />
           </div>
+        </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
         </div>
         @if (selectedUsers().length > 0) {
           <p class="table-demo__selection-info">
@@ -161,6 +165,34 @@
               />
             </div>
           </div>
+          <neu-code-block language="typescript" [code]="stickyCode" />
+        </div>
+
+        <!-- ---- Ejemplo 5: Cabeceras personalizadas ---- -->
+        <div class="table-demo__example">
+          <div class="table-demo__example-header">
+            <h3 class="table-demo__example-title">Cabeceras personalizadas</h3>
+            <p class="table-demo__example-desc">
+              Usa <code>headerTemplate</code> en <code>NeuTableColumn</code> para renderizar
+              cabeceras con contenido personalizado: iconos, tooltips o cualquier elemento HTML.
+            </p>
+          </div>
+          <div class="demo-preview demo-preview--tabs">
+            <div class="demo-preview__canvas" style="padding: 0">
+              <neu-table
+                title="Cabeceras personalizadas"
+                [columns]="customHeaderColumns()"
+                [data]="userData"
+                [pageSize]="5"
+                [sortable]="true"
+                searchParam="chq"
+                pageParam="chpage"
+              />
+            </div>
+          </div>
+          <div class="demo-preview__code">
+            <neu-code-block [code]="headerTemplateCode" language="typescript" />
+          </div>
         </div>
       </neu-tab-panel>
 
@@ -179,6 +211,8 @@
                 [expandable]="cfg.expandable"
                 [exportable]="cfg.exportable"
                 [stickyHeader]="cfg.stickyHeader"
+                [exactMatchable]="cfg.exactMatchable"
+                [searchPlaceholder]="cfg.searchPlaceholder"
                 [pageSizeOptions]="[5, 10, 25]"
                 exportFileName="usuarios-export"
                 pageParam="cfgPage"
@@ -236,6 +270,30 @@
                   <option [value]="25">25</option>
                 </select>
               </div>
+
+              <div class="demo-configurator__control-row">
+                <label for="t-exact">exactMatchable</label>
+                <label class="demo-toggle">
+                  <input
+                    id="t-exact"
+                    type="checkbox"
+                    [checked]="cfg.exactMatchable"
+                    (change)="cfg.exactMatchable = $any($event.target).checked"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
+              </div>
+
+              <div class="demo-configurator__control-row">
+                <label>searchPlaceholder</label>
+                <input
+                  type="text"
+                  class="demo-select"
+                  [value]="cfg.searchPlaceholder"
+                  (input)="cfg.searchPlaceholder = $any($event.target).value"
+                  style="width: 130px"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -290,10 +348,34 @@
                 <td>Muestra skeleton animado</td>
               </tr>
               <tr>
+                <td><code>skeletonRows</code></td>
+                <td><code>number[]</code></td>
+                <td><code>[1,2,3,4,5]</code></td>
+                <td>Número de filas skeleton mostradas durante la carga</td>
+              </tr>
+              <tr>
                 <td><code>searchable</code></td>
                 <td><code>boolean</code></td>
                 <td><code>true</code></td>
                 <td>Activa el buscador</td>
+              </tr>
+              <tr>
+                <td><code>searchPlaceholder</code></td>
+                <td><code>string</code></td>
+                <td><code>'Buscar...'</code></td>
+                <td>Placeholder del input de búsqueda</td>
+              </tr>
+              <tr>
+                <td><code>exactMatchable</code></td>
+                <td><code>boolean</code></td>
+                <td><code>false</code></td>
+                <td>Muestra un checkbox de búsqueda exacta junto al buscador</td>
+              </tr>
+              <tr>
+                <td><code>exactMatchLabel</code></td>
+                <td><code>string</code></td>
+                <td><code>'Búsqueda exacta'</code></td>
+                <td>Etiqueta del checkbox de búsqueda exacta</td>
               </tr>
               <tr>
                 <td><code>sortable</code></td>
@@ -350,6 +432,36 @@
                 <td><code>string</code></td>
                 <td><code>—</code></td>
                 <td>Texto del estado vacío</td>
+              </tr>
+              <tr>
+                <td><code>clearFilterLabel</code></td>
+                <td><code>string</code></td>
+                <td><code>'Eliminar filtro'</code></td>
+                <td>Texto del botón que limpia el filtro de columna activo</td>
+              </tr>
+              <tr>
+                <td><code>searchAriaLabel</code></td>
+                <td><code>string</code></td>
+                <td><code>'Buscar en la tabla'</code></td>
+                <td>Aria-label del input de búsqueda</td>
+              </tr>
+              <tr>
+                <td><code>clearSearchAriaLabel</code></td>
+                <td><code>string</code></td>
+                <td><code>'Limpiar búsqueda'</code></td>
+                <td>Aria-label del botón limpiar búsqueda</td>
+              </tr>
+              <tr>
+                <td><code>previousPageAriaLabel</code></td>
+                <td><code>string</code></td>
+                <td><code>'Anterior'</code></td>
+                <td>Aria-label del botón de página anterior</td>
+              </tr>
+              <tr>
+                <td><code>nextPageAriaLabel</code></td>
+                <td><code>string</code></td>
+                <td><code>'Siguiente'</code></td>
+                <td>Aria-label del botón de página siguiente</td>
               </tr>
               <tr>
                 <td><code>pageParam</code></td>
@@ -457,6 +569,15 @@
                 <td><code>string?</code></td>
                 <td>Clases CSS adicionales en la celda</td>
               </tr>
+              <tr>
+                <td><code>headerTemplate</code></td>
+                <td><code>TemplateRef&lt;any&gt;</code></td>
+                <td>
+                  Template personalizado para la cabecera de la columna. El contexto implícito
+                  expone la definición de la columna: <code>let-col</code>. Compatible con iconos,
+                  traducciones o cualquier contenido HTML.
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -486,10 +607,31 @@
           </table>
         </div>
 
-          <h3 class="demo-section__subtitle">Uso básico</h3>
+        <h3 class="demo-section__subtitle">Uso básico</h3>
 
-          <neu-code-block [code]="usageCode" language="typescript" />
+        <neu-code-block [code]="usageCode" language="typescript" />
       </neu-tab-panel>
     </neu-tabs>
   </section>
 </div>
+
+<!-- Templates reutilizables (fuera del flujo visual) -->
+<ng-template #customStatusHeader let-col>
+  <span style="display: inline-flex; align-items: center; gap: 5px">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      width="13"
+      height="13"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <polyline points="12 7 12 12 15 15" />
+    </svg>
+    {{ col.header }}
+  </span>
+</ng-template>

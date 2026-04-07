@@ -1,64 +1,82 @@
-# UiCore
+# @neural-ui/core
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
+A modern Angular UI component library built with signals, OnPush change detection, and zero zone dependence. Designed for Angular 21+.
 
-## Code scaffolding
+## Features
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- **40+ components** — forms, navigation, layout, feedback, and data display
+- **Signals-first API** — all inputs/outputs use Angular signals (`input()`, `output()`, `model()`)
+- **Standalone** — every component is standalone, import only what you need
+- **Accessible** — ARIA attributes, keyboard navigation, and focus management out of the box
+- **Themeable** — CSS custom properties for full design token control
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the library, run:
+## Installation
 
 ```bash
-ng build ui-core
+npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
 ```
 
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
+## Setup
 
-### Publishing the Library
+Add `provideNeuralUI()` to your `app.config.ts`:
 
-Once the project is built, you can publish your library by following these steps:
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideNeuralUI } from '@neural-ui/core';
 
-1. Navigate to the `dist` directory:
-
-   ```bash
-   cd dist/ui-core
-   ```
-
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+export const appConfig: ApplicationConfig = {
+  providers: [provideRouter(routes), provideNeuralUI()],
+};
 ```
 
-## Running end-to-end tests
+This registers all icons used internally by the library. If you need custom icon sizing:
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+```typescript
+provideNeuralUI({ iconSize: '1rem', iconStrokeWidth: '1.5' });
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Import the global stylesheet in your `styles.scss`:
 
-## Additional Resources
+```scss
+@use '@neural-ui/core/styles' as *;
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Usage
+
+Import components directly into your standalone component or NgModule:
+
+```typescript
+import { NeuButtonComponent } from '@neural-ui/core';
+
+@Component({
+  imports: [NeuButtonComponent],
+  template: `<neu-button variant="primary">Click me</neu-button>`,
+})
+export class AppComponent {}
+```
+
+## Components
+
+| Category        | Components                                                                                                                                                                                                           |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Forms**       | `NeuCheckbox`, `NeuDateInput`, `NeuInput`, `NeuMultiselect`, `NeuRadio`, `NeuRadioGroup`, `NeuSelect`, `NeuSlider`, `NeuSwitch`, `NeuTextarea`, `NeuToggleButtonGroup`                                               |
+| **Navigation**  | `NeuBreadcrumb`, `NeuNav`, `NeuPagination`, `NeuSidebar`, `NeuStepper`, `NeuTabs`                                                                                                                                    |
+| **Layout**      | `NeuAccordion`, `NeuCard`, `NeuDivider`, `NeuDialog` / `NeuDialogService`, `NeuTable`                                                                                                                                |
+| **UI Elements** | `NeuAvatar`, `NeuBadge`, `NeuButton`, `NeuChart`, `NeuChip`, `NeuCodeBlock`, `NeuEmptyState`, `NeuIcon`, `NeuProgressBar`, `NeuRating`, `NeuSkeleton`, `NeuSpinner`, `NeuSplitButton`, `NeuStatsCard`, `NeuTimeline` |
+| **Feedback**    | `NeuToast` / `NeuToastService`, `NeuTooltip`                                                                                                                                                                         |
+
+## Peer Dependencies
+
+| Package            | Version            |
+| ------------------ | ------------------ |
+| `@angular/core`    | `>=19.0.0 <23.0.0` |
+| `@angular/cdk`     | `>=19.0.0 <23.0.0` |
+| `@ng-icons/core`   | `>=33.0.0`         |
+| `@ng-icons/lucide` | `>=33.0.0`         |
+| `apexcharts`       | `>=5.0.0`          |
+| `ng-apexcharts`    | `>=2.0.0`          |
+
+## License
+
+MIT

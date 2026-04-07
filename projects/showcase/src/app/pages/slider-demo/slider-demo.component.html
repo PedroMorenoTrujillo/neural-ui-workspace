@@ -95,6 +95,9 @@
             </div>
           </div>
         </div>
+        <div class="demo-preview__code">
+          <neu-code-block [code]="usageCode" language="typescript" />
+        </div>
       </neu-tab-panel>
 
       <!-- CONFIGURADOR -->
@@ -205,6 +208,7 @@
       <!-- API -->
       <neu-tab-panel tabId="api">
         <div style="padding: 24px 0">
+          <h3 class="demo-section__subtitle">Inputs</h3>
           <div class="demo-api-table-wrapper">
             <table class="demo-api-table">
               <thead>
@@ -271,6 +275,12 @@
                   <td>Deshabilitado</td>
                 </tr>
               </tbody>
+            </table>
+          </div>
+
+          <h3 class="demo-section__subtitle" style="margin-top: 1.5rem">Outputs</h3>
+          <div class="demo-api-table-wrapper">
+            <table class="demo-api-table">
               <thead>
                 <tr>
                   <th>Output</th>
@@ -289,8 +299,8 @@
               </tbody>
             </table>
           </div>
-          <h3 class="demo-section__subtitle">Uso básico</h3>
 
+          <h3 class="demo-section__subtitle" style="margin-top: 1.5rem">Uso básico</h3>
           <neu-code-block [code]="usageCode" lang="TypeScript" />
         </div>
       </neu-tab-panel>

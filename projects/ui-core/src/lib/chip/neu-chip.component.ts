@@ -42,7 +42,7 @@ export type NeuChipSize = 'sm' | 'md';
         type="button"
         [disabled]="disabled()"
         (click)="$event.stopPropagation(); onRemove()"
-        aria-label="Eliminar"
+        [attr.aria-label]="removeAriaLabel()"
       >
         <svg
           width="10"
@@ -77,6 +77,9 @@ export class NeuChipComponent {
 
   /** Deshabilitado */
   disabled = input<boolean>(false);
+
+  /** Aria-label del botón de eliminar */
+  removeAriaLabel = input<string>('Eliminar');
 
   /** Emite al hacer clic o pulsar espacio/enter */
   selectedChange = output<boolean>();

@@ -50,6 +50,7 @@ $colors: (
   display: inline-block;
   vertical-align: middle;
   flex-shrink: 0;
+  position: relative; // necesario para el status dot absoluto
 }
 
 .neu-avatar {
@@ -74,7 +75,7 @@ $colors: (
     }
   }
 
-  // Formas
+  // Formas — border-radius en el wrapper (la imagen hereda con border-radius: inherit)
   &--circle {
     border-radius: 50%;
   }
@@ -103,11 +104,11 @@ $colors: (
     letter-spacing: -0.01em;
   }
 
-  // Indicador de estado
+  // Indicador de estado — posicionado relativo al host, no al avatar (evita overflow:hidden)
   &__status {
     position: absolute;
-    bottom: 5%;
-    right: 5%;
+    bottom: 3%;
+    right: 3%;
     width: 25%;
     height: 25%;
     min-width: 8px;
@@ -115,6 +116,7 @@ $colors: (
     border-radius: 50%;
     border: 2px solid var(--neu-surface);
     box-sizing: border-box;
+    z-index: 1;
 
     &--online {
       background: #22c55e;

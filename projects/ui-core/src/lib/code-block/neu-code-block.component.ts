@@ -38,7 +38,7 @@ import { DOCUMENT } from '@angular/common';
         <button
           class="neu-code-block__copy"
           type="button"
-          [attr.aria-label]="copied() ? 'Código copiado' : 'Copiar código'"
+          [attr.aria-label]="copied() ? copiedAriaLabel() : copyAriaLabel()"
           (click)="copy()"
         >
           @if (copied()) {
@@ -52,7 +52,7 @@ import { DOCUMENT } from '@angular/common';
             >
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            Copiado
+            {{ copiedLabel() }}
           } @else {
             <svg
               viewBox="0 0 24 24"
@@ -65,7 +65,7 @@ import { DOCUMENT } from '@angular/common';
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
             </svg>
-            Copiar
+            {{ copyLabel() }}
           }
         </button>
       </div>
@@ -84,6 +84,18 @@ export class NeuCodeBlockComponent {
 
   /** Nombre del lenguaje (decorativo) */
   lang = input<string>('TypeScript');
+
+  /** Texto del botón cuando no se ha copiado */
+  copyLabel = input<string>('Copiar');
+
+  /** Texto del botón tras copiar */
+  copiedLabel = input<string>('Copiado');
+
+  /** Aria-label del botón copiar */
+  copyAriaLabel = input<string>('Copiar código');
+
+  /** Aria-label del botón tras copiar */
+  copiedAriaLabel = input<string>('Código copiado');
 
   protected readonly copied = signal(false);
   private _copyTimer?: ReturnType<typeof setTimeout>;

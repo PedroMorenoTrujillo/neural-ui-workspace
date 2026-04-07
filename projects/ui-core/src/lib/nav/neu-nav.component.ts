@@ -442,7 +442,7 @@ export interface NeuNavItem {
         <button
           class="neu-nav__toggle-tab"
           type="button"
-          [attr.aria-label]="isCollapsed() ? 'Expandir menú' : 'Colapsar menú'"
+          [attr.aria-label]="isCollapsed() ? expandLabel() : collapseLabel()"
           [attr.aria-expanded]="!isCollapsed()"
           (click)="toggleCollapse()"
         >
@@ -479,6 +479,12 @@ export class NeuNavComponent {
 
   /** Etiqueta accesible del <nav> */
   ariaLabel = input<string>('Navegación principal');
+
+  /** Aria-label del botón cuando el nav está colapsado */
+  expandLabel = input<string>('Expandir menú');
+
+  /** Aria-label del botón cuando el nav está expandido */
+  collapseLabel = input<string>('Colapsar menú');
 
   /** Emite cuando cambia el estado colapsado */
   collapsedChange = output<boolean>();

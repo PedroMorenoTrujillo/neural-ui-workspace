@@ -4,7 +4,6 @@ import {
   ElementRef,
   HostListener,
   Injector,
-  NgZone,
   OnDestroy,
   inject,
   input,
@@ -42,7 +41,6 @@ export class NeuTooltipDirective implements OnDestroy {
   private readonly _overlay = inject(Overlay);
   private readonly _elementRef = inject(ElementRef<HTMLElement>);
   private readonly _injector = inject(Injector);
-  private readonly _zone = inject(NgZone);
 
   readonly _tooltipId = `neu-tooltip-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -65,13 +63,11 @@ export class NeuTooltipDirective implements OnDestroy {
     }
     if (this._overlayRef?.hasAttached()) return;
 
-    this._zone.run(() => {
-      this._createOverlay();
-      const portal = new ComponentPortal(NeuTooltipOverlayComponent, null, this._injector);
-      this._tooltipRef = this._overlayRef!.attach(portal);
-      this._tooltipRef!.setInput('text', this.neuTooltip());
-      this._tooltipRef!.setInput('tooltipId', this._tooltipId);
-    });
+    this._createOverlay();
+    const portal = new ComponentPortal(NeuTooltipOverlayComponent, null, this._injector);
+    this._tooltipRef = this._overlayRef!.attach(portal);
+    this._tooltipRef!.setInput('text', this.neuTooltip());
+    this._tooltipRef!.setInput('tooltipId', this._tooltipId);
   }
 
   @HostListener('mouseleave')

@@ -81,7 +81,7 @@ export interface NeuStepperStep {
             @if (!last) {
               <div
                 class="neu-stepper__connector"
-                [class.neu-stepper__connector--done]="isCompleted(i)"
+                [class.neu-stepper__connector--done]="isCompleted(i) || i < activeStep()"
               ></div>
             }
           </div>
@@ -113,7 +113,7 @@ export class NeuStepperComponent {
   private readonly _completed = signal<Set<number>>(new Set());
 
   readonly isCompleted = (i: number) =>
-    this._completed().has(i) || (this.steps()[i]?.completed ?? false);
+    this._completed().has(i) || (this.steps()[i]?.completed ?? false) || i < this.activeStep();
 
   goTo(i: number): void {
     const step = this.steps()[i];
