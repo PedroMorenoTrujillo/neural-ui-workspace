@@ -2,10 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
+  effect,
   inject,
   input,
-  linkedSignal,
   output,
+  signal,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -101,16 +102,25 @@ export class NeuAccordionComponent {
 
   /**
    * Set de IDs actualmente expandidos.
-   * Se inicializa desde los ítems con `expanded: true`.
-   * Usa linkedSignal para inicializar el estado y mantenerlo mutable.
+   * Se inicializa desde los ítems con `expanded: true` en el primer render.
+   * Después se vuelve un signal mutable independiente (no se resetea al cambiar items).
    */
-  private readonly _expanded = linkedSignal<NeuAccordionItem[], Set<string>>({
-    source: this.items,
-    computation: (items, previous) =>
-      previous === undefined
-        ? new Set(items.filter((i) => i.expanded).map((i) => i.id))
-        : previous.value,
-  });
+  private _expandedInit = false;
+  private readonly _expanded = signal<Set<string>>(new Set());
+
+  constructor() {
+    // Inicialización única desde items.expanded (equivalente a linkedSignal source+computation)
+    effect(
+      () => {
+        const items = this.items();
+        if (!this._expandedInit) {
+          this._expanded.set(new Set(items.filter((i) => i.expanded).map((i) => i.id)));
+          this._expandedInit = true;
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   readonly isExpanded = (id: string) => this._expanded().has(id);
 

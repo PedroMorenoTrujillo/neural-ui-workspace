@@ -168,6 +168,19 @@
         "title": "Usar tu primer componente",
         "desc": "Importa el componente en tu módulo standalone y úsalo en la plantilla."
       },
+      "compat": {
+        "title": "Compatibilidad con versiones de Angular",
+        "desc": "El código de NeuralUI es completamente compatible con Angular 17+. Las versiones marcadas como \"Parcial\" indican que NeuralUI en sí funciona, pero las dependencias de terceros (@angular/cdk, @ng-icons, ng-apexcharts) pueden no soportar oficialmente esa versión de Angular — consulta siempre su matriz de compatibilidad antes de migrar.",
+        "colStatus": "Estado",
+        "colNotes": "Notas",
+        "supported": "Compatible",
+        "partial": "Parcial",
+        "notSupported": "No compatible",
+        "note21": "Desarrollado y probado en esta versión.",
+        "note18": "Instala @angular/cdk@18. @ng-icons/core@33 y ng-apexcharts@2 son compatibles con Angular 17+.",
+        "note17": "Instala @angular/cdk@17. @ng-icons/core@33 y ng-apexcharts@2 son compatibles con Angular 17+.",
+        "noteSub17": "La API de Signals y el nuevo control flow no están disponibles."
+      },
       "next": {
         "title": "Siguientes pasos",
         "theming": "Personalizar el tema",

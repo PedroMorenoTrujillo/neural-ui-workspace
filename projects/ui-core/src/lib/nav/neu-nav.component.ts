@@ -4,9 +4,9 @@ import {
   DestroyRef,
   ViewEncapsulation,
   afterNextRender,
+  effect,
   inject,
   input,
-  linkedSignal,
   output,
   signal,
 } from '@angular/core';
@@ -485,9 +485,9 @@ export class NeuNavComponent {
 
   // ---- Estado interno ----
 
-  // linkedSignal: sigue el input `collapsed` del padre (permite el configurador)
+  // Sigue el input `collapsed` del padre (permite el configurador)
   // pero puede ser sobreescrito localmente con toggleCollapse()
-  readonly isCollapsed = linkedSignal(() => this.collapsed());
+  readonly isCollapsed = signal(this.collapsed());
   private readonly openGroups = signal<Set<string>>(new Set());
 
   // ---- Flyout para modo colapsado ----
@@ -495,6 +495,8 @@ export class NeuNavComponent {
   private _flyoutTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    // Sincroniza isCollapsed cuando el input cambia desde el padre
+    effect(() => this.isCollapsed.set(this.collapsed()), { allowSignalWrites: true });
     // Abrimos el grupo activo DESPUÉS de que el padre haya pasado los inputs
     afterNextRender(() => this._openActiveGroup());
     // Limpiamos el timer del flyout al destruir el componente

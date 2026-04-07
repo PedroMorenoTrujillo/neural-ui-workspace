@@ -150,7 +150,7 @@
     },
     "install": {
       "title": "Installation",
-      "desc": "Add NeuralUI to your Angular project in 4 steps. No heavy external dependencies.",
+      "desc": "Add NeuralUI to your Angular 17+ project in 4 steps. No heavy external dependencies.",
       "step1": {
         "title": "Install the package",
         "desc": "One command. Lucide icons are bundled automatically.",
@@ -167,6 +167,19 @@
       "step4": {
         "title": "Use your first component",
         "desc": "Import the component in your standalone module and use it in the template."
+      },
+      "compat": {
+        "title": "Angular version compatibility",
+        "desc": "NeuralUI code is fully compatible with Angular 17+. Versions marked as \"Partial\" mean that NeuralUI itself works, but third-party peer dependencies (@angular/cdk, @ng-icons, ng-apexcharts) may not officially support that Angular version — always verify their compatibility matrix before upgrading.",
+        "colStatus": "Status",
+        "colNotes": "Notes",
+        "supported": "Supported",
+        "partial": "Partial",
+        "notSupported": "Not supported",
+        "note21": "Developed and tested on this version.",
+        "note18": "Install @angular/cdk@18. @ng-icons/core@33 and ng-apexcharts@2 both support Angular 17+.",
+        "note17": "Install @angular/cdk@17. @ng-icons/core@33 and ng-apexcharts@2 both support Angular 17+.",
+        "noteSub17": "Signals API and new control flow not available."
       },
       "next": {
         "title": "Next steps",

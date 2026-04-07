@@ -95,6 +95,14 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   private readonly elRef = inject(ElementRef);
   private resizeObserver?: ResizeObserver;
 
+  constructor() {
+    // Actualizar indicador cuando activeTabId cambie — debe estar en el constructor (injection context)
+    effect(() => {
+      this.activeTabId(); // dependencia reactiva
+      requestAnimationFrame(() => this._updateIndicator());
+    });
+  }
+
   /** Definición de pestañas */
   tabs = input<NeuTab[]>([]);
 
@@ -129,11 +137,6 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this._updateIndicator();
-    // Actualizar cuando activeTabId cambie (incluyendo navegación de URL externa)
-    effect(() => {
-      this.activeTabId(); // dependencia reactiva
-      requestAnimationFrame(() => this._updateIndicator());
-    });
     // Actualizar cuando cambie el tamaño del nav (p.ej. resize de ventana)
     const nav = this.elRef.nativeElement.querySelector('.neu-tabs__nav');
     if (nav && typeof ResizeObserver !== 'undefined') {

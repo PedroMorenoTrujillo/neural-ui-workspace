@@ -62,6 +62,88 @@
   </section>
 
   <!-- Siguiente paso -->
+  <section class="install-step">
+    <div class="install-step__header">
+      <div class="install-step__num">
+        <neu-icon name="lucidePackageCheck" size="1rem" />
+      </div>
+      <div>
+        <h2 class="install-step__title">{{ 'page.install.compat.title' | transloco }}</h2>
+        <p class="install-step__desc">{{ 'page.install.compat.desc' | transloco }}</p>
+      </div>
+    </div>
+    <div class="install-compat">
+      <div class="install-compat__table-wrap">
+        <table class="demo-api-table">
+          <thead>
+            <tr>
+              <th>Angular</th>
+              <th>{{ 'page.install.compat.colStatus' | transloco }}</th>
+              <th>{{ 'page.install.compat.colNotes' | transloco }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>21.x</code></td>
+              <td>
+                <neu-badge variant="success" size="sm">{{
+                  'page.install.compat.supported' | transloco
+                }}</neu-badge>
+              </td>
+              <td>{{ 'page.install.compat.note21' | transloco }}</td>
+            </tr>
+            <tr>
+              <td><code>20.x</code></td>
+              <td>
+                <neu-badge variant="success" size="sm">{{
+                  'page.install.compat.supported' | transloco
+                }}</neu-badge>
+              </td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><code>19.x</code></td>
+              <td>
+                <neu-badge variant="success" size="sm">{{
+                  'page.install.compat.supported' | transloco
+                }}</neu-badge>
+              </td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><code>18.x</code></td>
+              <td>
+                <neu-badge variant="warning" size="sm">{{
+                  'page.install.compat.partial' | transloco
+                }}</neu-badge>
+              </td>
+              <td>{{ 'page.install.compat.note18' | transloco }}</td>
+            </tr>
+            <tr>
+              <td><code>17.x</code></td>
+              <td>
+                <neu-badge variant="warning" size="sm">{{
+                  'page.install.compat.partial' | transloco
+                }}</neu-badge>
+              </td>
+              <td>{{ 'page.install.compat.note17' | transloco }}</td>
+            </tr>
+            <tr>
+              <td><code>&lt; 17</code></td>
+              <td>
+                <neu-badge variant="danger" size="sm">{{
+                  'page.install.compat.notSupported' | transloco
+                }}</neu-badge>
+              </td>
+              <td>{{ 'page.install.compat.noteSub17' | transloco }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Siguiente paso -->
   <section class="install-next">
     <h2 class="install-next__title">{{ 'page.install.next.title' | transloco }}</h2>
     <div class="install-next__cards">
