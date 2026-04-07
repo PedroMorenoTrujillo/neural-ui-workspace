@@ -90,7 +90,9 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'u
         [attr.pattern]="pattern() ?? null"
         [attr.autocomplete]="autocomplete()"
         [attr.aria-invalid]="hasError() ? 'true' : null"
-        [attr.aria-describedby]="hasError() ? inputId() + '-error' : null"
+        [attr.aria-describedby]="
+          hasError() ? inputId() + '-error' : hint() ? inputId() + '-hint' : null
+        "
         [value]="_value()"
         [attr.placeholder]="floatingLabel() ? ' ' : placeholder() || null"
         (input)="onInput($event)"
@@ -118,7 +120,7 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'u
         {{ errorMessage() }}
       </p>
     } @else if (hint()) {
-      <p class="neu-input__hint">{{ hint() }}</p>
+      <p class="neu-input__hint" [id]="inputId() + '-hint'">{{ hint() }}</p>
     }
   `,
   styleUrl: './neu-input.component.scss',

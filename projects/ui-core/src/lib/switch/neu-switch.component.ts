@@ -36,6 +36,7 @@ let _neuSwitchIdSeq = 0;
     <label class="neu-switch" [class.neu-switch--disabled]="_isDisabled()" [for]="_id">
       <input
         type="checkbox"
+        role="switch"
         class="neu-switch__input"
         [id]="_id"
         [attr.name]="name() || null"

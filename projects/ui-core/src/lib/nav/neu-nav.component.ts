@@ -380,6 +380,7 @@ export interface NeuNavItem {
                   @if (grand.href) {
                     <a
                       class="neu-nav__flyout-item"
+                      role="menuitem"
                       [href]="grand.href"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -396,6 +397,7 @@ export interface NeuNavItem {
                   } @else {
                     <a
                       class="neu-nav__flyout-item"
+                      role="menuitem"
                       [routerLink]="grand.route"
                       routerLinkActive="neu-nav__flyout-item--active"
                       (click)="flyoutState.set(null)"
@@ -409,6 +411,7 @@ export interface NeuNavItem {
             } @else if (child.href) {
               <a
                 class="neu-nav__flyout-item"
+                role="menuitem"
                 [href]="child.href"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -421,6 +424,7 @@ export interface NeuNavItem {
             } @else {
               <a
                 class="neu-nav__flyout-item"
+                role="menuitem"
                 [routerLink]="child.route"
                 routerLinkActive="neu-nav__flyout-item--active"
                 (click)="flyoutState.set(null)"

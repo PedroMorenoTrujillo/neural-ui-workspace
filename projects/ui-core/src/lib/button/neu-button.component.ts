@@ -32,6 +32,7 @@ export type NeuButtonIconPosition = 'left' | 'right';
     '[attr.disabled]': 'isDisabled() ? "" : null',
     '[attr.aria-disabled]': 'isDisabled()',
     '[attr.aria-busy]': 'loading()',
+    '[attr.aria-label]': 'ariaLabel() || null',
     '(click)': '_onHostClick($event)',
   },
   template: `
@@ -85,6 +86,9 @@ export class NeuButtonComponent {
 
   /** Modo solo-icono: aplica padding cuadrado y oculta el ng-content */
   iconOnly = input<boolean>(false);
+
+  /** Etiqueta accesible obligatoria cuando se usa iconOnly (WCAG 4.1.2) */
+  ariaLabel = input<string>('');
 
   /** Emite el evento de click cuando el botón está activo */
   neuClick = output<MouseEvent>();

@@ -14,6 +14,8 @@ import { NeuSelectOption } from './neu-select.types';
 
 export type { NeuSelectOption } from './neu-select.types';
 
+let _neuSelectIdSeq = 0;
+
 /**
  * NeuralUI Select Component
  *
@@ -44,7 +46,7 @@ export type { NeuSelectOption } from './neu-select.types';
   },
   template: `
     @if (!floatingLabel() && label()) {
-      <label class="neu-select__static-label">{{ label() }}</label>
+      <label class="neu-select__static-label" [for]="_triggerId">{{ label() }}</label>
     }
     <div
       class="neu-select"
@@ -59,11 +61,16 @@ export type { NeuSelectOption } from './neu-select.types';
       <button
         class="neu-select__trigger"
         type="button"
+        [id]="_triggerId"
         [disabled]="isDisabledFinal()"
+        [attr.role]="'combobox'"
         [attr.aria-haspopup]="'listbox'"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-activedescendant]="isOpen() && _value() ? 'neu-select-opt-' + _value() : null"
         (click)="toggle()"
+        (keydown.arrowDown)="onTriggerKey($any($event))"
+        (keydown.arrowUp)="onTriggerKey($any($event))"
       >
         <!-- Floating label -->
         @if (floatingLabel() && label()) {
@@ -101,6 +108,7 @@ export type { NeuSelectOption } from './neu-select.types';
               <input
                 class="neu-select__search-input"
                 type="text"
+                [attr.aria-label]="'Search ' + label()"
                 [placeholder]="searchPlaceholder()"
                 [value]="searchQuery()"
                 (input)="searchQuery.set($any($event.target).value)"
@@ -114,9 +122,15 @@ export type { NeuSelectOption } from './neu-select.types';
               [class.neu-select__option--selected]="option.value === _value()"
               [class.neu-select__option--disabled]="option.disabled"
               role="option"
+              [id]="'neu-select-opt-' + option.value"
               [attr.aria-selected]="option.value === _value()"
               [attr.aria-disabled]="option.disabled"
+              [attr.tabindex]="option.disabled ? null : '-1'"
               (click)="selectOption(option)"
+              (keydown.enter)="selectOption(option)"
+              (keydown.space)="selectOption(option)"
+              (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
+              (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
             >
               <!-- Checkmark en la seleccionada -->
               @if (option.value === _value()) {
@@ -152,6 +166,9 @@ export type { NeuSelectOption } from './neu-select.types';
 })
 export class NeuSelectComponent implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  /** @internal — ID \u00fanico para asociar label con trigger */
+  readonly _triggerId = `neu-select-trigger-${_neuSelectIdSeq++}`;
 
   /** Opciones del dropdown */
   options = input<NeuSelectOption[]>([]);
@@ -219,12 +236,49 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   toggle(): void {
     if (!this.isDisabledFinal()) this.isOpen.update((v) => !v);
+    if (this.isOpen()) {
+      // Foco al primer item cuando abre con teclado
+      requestAnimationFrame(() => {
+        const first = this.elementRef.nativeElement.querySelector<HTMLElement>(
+          '.neu-select__option:not([aria-disabled="true"])',
+        );
+        first?.focus();
+      });
+    }
   }
 
   close(): void {
     this.isOpen.set(false);
     this.searchQuery.set('');
     this._onTouched();
+  }
+
+  /** Abre el panel y navega con flechas desde el trigger */
+  onTriggerKey(event: Event): void {
+    event.preventDefault();
+    if (!this.isOpen()) {
+      this.isOpen.set(true);
+      requestAnimationFrame(() => {
+        const first = this.elementRef.nativeElement.querySelector<HTMLElement>(
+          '.neu-select__option:not([aria-disabled="true"])',
+        );
+        first?.focus();
+      });
+    }
+  }
+
+  /** Navega entre opciones con flechas */
+  focusOptionByIndex(event: Event, current: NeuSelectOption, dir: 1 | -1): void {
+    event.preventDefault();
+    const opts = this.filteredOptions().filter((o) => !o.disabled);
+    const idx = opts.findIndex((o) => o.value === current.value);
+    const next = opts[(idx + dir + opts.length) % opts.length];
+    if (next) {
+      const el = this.elementRef.nativeElement.querySelector<HTMLElement>(
+        `#neu-select-opt-${next.value}`,
+      );
+      el?.focus();
+    }
   }
 
   selectOption(option: NeuSelectOption): void {

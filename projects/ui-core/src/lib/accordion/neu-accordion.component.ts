@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
+  inject,
   input,
   linkedSignal,
   output,
 } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface NeuAccordionItem {
   /** ID único del panel */
@@ -74,7 +76,7 @@ export interface NeuAccordionItem {
             role="region"
             [attr.aria-labelledby]="'neu-acc-btn-' + item.id"
           >
-            <div class="neu-accordion__body" [innerHTML]="item.content"></div>
+            <div class="neu-accordion__body" [innerHTML]="sanitize(item.content)"></div>
           </div>
         </div>
       }
@@ -83,6 +85,8 @@ export interface NeuAccordionItem {
   styleUrl: './neu-accordion.component.scss',
 })
 export class NeuAccordionComponent {
+  private readonly _sanitizer = inject(DomSanitizer);
+
   /** Lista de paneles */
   items = input<NeuAccordionItem[]>([]);
 
@@ -109,6 +113,10 @@ export class NeuAccordionComponent {
   });
 
   readonly isExpanded = (id: string) => this._expanded().has(id);
+
+  sanitize(html: string): SafeHtml {
+    return this._sanitizer.sanitize(1 /* HTML */, html) ?? '';
+  }
 
   toggle(id: string): void {
     const current = new Set(this._expanded());

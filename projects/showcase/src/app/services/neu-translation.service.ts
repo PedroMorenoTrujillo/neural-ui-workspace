@@ -80,7 +80,7 @@ export class NeuTranslationService {
     const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
     if (this.#isValid(stored)) return stored as NeuLang;
     // 3. Fallback
-    return 'es';
+    return 'en';
   }
 
   #isValid(lang: string | null): lang is NeuLang {

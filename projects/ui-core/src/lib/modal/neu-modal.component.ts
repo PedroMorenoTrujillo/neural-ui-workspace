@@ -8,6 +8,7 @@ import {
   output,
 } from '@angular/core';
 import { Dialog, DialogConfig, DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
+import { A11yModule } from '@angular/cdk/a11y';
 import { NeuIconComponent } from '../icon/neu-icon.component';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -73,7 +74,7 @@ export { NeuDialogService as NeuModalService };
  */
 @Component({
   selector: 'neu-dialog',
-  imports: [NeuIconComponent],
+  imports: [NeuIconComponent, A11yModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -91,19 +92,23 @@ export { NeuDialogService as NeuModalService };
 
       <!-- Panel -->
       <div
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
         class="neu-dialog__panel neu-dialog__panel--{{ size() }}"
         role="dialog"
-        [attr.aria-label]="title()"
+        [id]="'neu-dialog-' + _uid"
+        [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
         [attr.aria-modal]="true"
+        (keydown.escape)="!disableClose() && closed.emit()"
       >
         <!-- Header -->
         <div class="neu-dialog__header">
-          <h2 class="neu-dialog__title">{{ title() }}</h2>
+          <h2 class="neu-dialog__title" [id]="'neu-dialog-title-' + _uid">{{ title() }}</h2>
           @if (!disableClose()) {
             <button
               class="neu-dialog__close"
               type="button"
-              aria-label="Cerrar diálogo"
+              aria-label="Close dialog"
               (click)="closed.emit()"
             >
               <neu-icon name="lucideX" size="1.125rem" />
@@ -135,6 +140,9 @@ export class NeuDialogComponent {
 
   /** Emite cuando el usuario cierra el diálogo. */
   closed = output<void>();
+
+  /** @internal — ID único para aria-labelledby */
+  readonly _uid = Math.random().toString(36).slice(2, 7);
 }
 
 /** @deprecated Use NeuDialogComponent */

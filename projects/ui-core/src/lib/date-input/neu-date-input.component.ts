@@ -106,6 +106,7 @@ interface DrumSlot {
           class="neu-date-input__panel"
           [class.neu-date-input__panel--time-only]="type() === 'time'"
           role="dialog"
+          [attr.aria-label]="'Choose date' + (monthLabel() ? ': ' + monthLabel() : '')"
           (click)="$event.stopPropagation()"
         >
           <!-- ── Calendar (date / datetime-local) ── -->
@@ -163,6 +164,8 @@ interface DrumSlot {
                     [class.neu-date-input__cal-day--other]="!day.inMonth"
                     [class.neu-date-input__cal-day--today]="day.isToday"
                     [class.neu-date-input__cal-day--selected]="day.isSelected"
+                    [attr.aria-label]="formatDayLabel(day.date)"
+                    [attr.aria-pressed]="day.isSelected"
                     (click)="selectDay(day)"
                   >
                     {{ day.date.getDate() }}
@@ -490,6 +493,15 @@ export class NeuDateInputComponent implements ControlValueAccessor {
     this._selDay.set(day.date.getDate());
     this._emitValue();
     if (this.type() === 'date') this.close();
+  }
+
+  formatDayLabel(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   }
 
   today(): void {

@@ -56,7 +56,6 @@ let _neuTextareaIdSeq = 0;
         [attr.required]="required() ? true : null"
         [attr.maxlength]="maxlength() ?? null"
         [attr.name]="name() || null"
-        [attr.aria-label]="label() || null"
         [attr.aria-describedby]="hasError() ? _id + '-error' : hint() ? _id + '-hint' : null"
         [attr.aria-invalid]="hasError() ? 'true' : null"
         [style.resize]="_resizeStyle()"

@@ -30,7 +30,8 @@ export type NeuTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
   selector: '[neuTooltip]',
   host: {
     '[attr.aria-describedby]': '_tooltipId',
-    '[attr.tabindex]': '"0"',
+    // Sólo añadimos tabindex en elementos que no son nativamente focusables
+    '[attr.tabindex]': '_needsTabindex() ? "0" : null',
   },
 })
 export class NeuTooltipDirective implements OnDestroy {
@@ -44,6 +45,11 @@ export class NeuTooltipDirective implements OnDestroy {
   private readonly _zone = inject(NgZone);
 
   readonly _tooltipId = `neu-tooltip-${Math.random().toString(36).slice(2, 7)}`;
+
+  /** Elementos HTML nativamente focusables que no necesitan tabindex extra */
+  private readonly _NATIVE_FOCUSABLE = /^(a|button|input|select|textarea|details|summary)$/i;
+  protected readonly _needsTabindex = () =>
+    !this._NATIVE_FOCUSABLE.test(this._elementRef.nativeElement.tagName);
 
   private _overlayRef: OverlayRef | null = null;
   private _tooltipRef: ComponentRef<NeuTooltipOverlayComponent> | null = null;
@@ -64,6 +70,7 @@ export class NeuTooltipDirective implements OnDestroy {
       const portal = new ComponentPortal(NeuTooltipOverlayComponent, null, this._injector);
       this._tooltipRef = this._overlayRef!.attach(portal);
       this._tooltipRef!.setInput('text', this.neuTooltip());
+      this._tooltipRef!.setInput('tooltipId', this._tooltipId);
     });
   }
 

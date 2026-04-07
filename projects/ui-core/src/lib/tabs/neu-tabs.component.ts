@@ -63,9 +63,14 @@ export interface NeuTab {
             [id]="'neu-tab-' + tab.id"
             [attr.aria-selected]="activeTabId() === tab.id"
             [attr.aria-controls]="'neu-tabpanel-' + tab.id"
+            [attr.tabindex]="activeTabId() === tab.id ? '0' : '-1'"
             [disabled]="tab.disabled"
             type="button"
             (click)="selectTab(tab)"
+            (keydown.arrowRight)="focusTab($any($event), 1)"
+            (keydown.arrowLeft)="focusTab($any($event), -1)"
+            (keydown.home)="focusTab($any($event), 'first')"
+            (keydown.end)="focusTab($any($event), 'last')"
           >
             {{ tab.label }}
             @if (tab.badge) {
@@ -157,8 +162,28 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     if (tab.disabled) return;
     this.urlState.setParam(this.tabParam(), tab.id);
     this.tabChange.emit(tab.id);
-    // Actualizar indicador tras el cambio de tab
     requestAnimationFrame(() => this._updateIndicator());
+  }
+
+  /** Mueve el foco entre tabs con flechas (roving tabindex — WAI-ARIA Tabs Pattern) */
+  focusTab(event: Event, dir: 1 | -1 | 'first' | 'last'): void {
+    event.preventDefault();
+    const enabledTabs = this.tabs().filter((t) => !t.disabled);
+    const currentIdx = enabledTabs.findIndex((t) => t.id === this.activeTabId());
+    let nextIdx: number;
+    if (dir === 'first') {
+      nextIdx = 0;
+    } else if (dir === 'last') {
+      nextIdx = enabledTabs.length - 1;
+    } else {
+      nextIdx = (currentIdx + dir + enabledTabs.length) % enabledTabs.length;
+    }
+    const next = enabledTabs[nextIdx];
+    this.selectTab(next);
+    const btn = (this.elRef.nativeElement as HTMLElement).querySelector(
+      `#neu-tab-${next.id}`,
+    ) as HTMLElement | null;
+    btn?.focus();
   }
 }
 

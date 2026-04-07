@@ -14,6 +14,8 @@ import { NeuSelectOption } from '../select/neu-select.types';
 
 export type { NeuSelectOption } from '../select/neu-select.types';
 
+let _neuMultiselectIdSeq = 0;
+
 /**
  * NeuralUI Multiselect Component
  *
@@ -41,7 +43,7 @@ export type { NeuSelectOption } from '../select/neu-select.types';
   },
   template: `
     @if (label()) {
-      <label class="neu-multiselect__static-label">{{ label() }}</label>
+      <label class="neu-multiselect__static-label" [for]="_triggerId">{{ label() }}</label>
     }
     <div
       class="neu-multiselect"
@@ -53,12 +55,16 @@ export type { NeuSelectOption } from '../select/neu-select.types';
       <button
         class="neu-multiselect__trigger"
         type="button"
+        [id]="_triggerId"
         [disabled]="isDisabledFinal()"
+        [attr.role]="'combobox'"
         [attr.aria-haspopup]="'listbox'"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-invalid]="hasError() ? 'true' : null"
-        [attr.aria-label]="label()"
+        [attr.aria-label]="label() || null"
         (click)="toggle()"
+        (keydown.arrowDown)="onTriggerKey($any($event))"
+        (keydown.arrowUp)="onTriggerKey($any($event))"
       >
         <span class="neu-multiselect__chips">
           @if (_values().length === 0) {
@@ -114,13 +120,19 @@ export type { NeuSelectOption } from '../select/neu-select.types';
 
       <!-- Panel -->
       @if (isOpen()) {
-        <div class="neu-multiselect__panel" role="listbox" [attr.aria-multiselectable]="true">
+        <div
+          class="neu-multiselect__panel"
+          role="listbox"
+          [attr.aria-multiselectable]="true"
+          [attr.aria-label]="label() || null"
+        >
           <!-- Search -->
           @if (searchable()) {
             <div class="neu-multiselect__search">
               <input
                 class="neu-multiselect__search-input"
                 type="text"
+                [attr.aria-label]="'Search ' + label()"
                 [placeholder]="searchPlaceholder()"
                 [value]="searchQuery()"
                 (input)="searchQuery.set($any($event.target).value)"
@@ -137,9 +149,15 @@ export type { NeuSelectOption } from '../select/neu-select.types';
                 [class.neu-multiselect__option--selected]="isSelected(option.value)"
                 [class.neu-multiselect__option--disabled]="option.disabled"
                 role="option"
+                [id]="'neu-ms-opt-' + option.value"
                 [attr.aria-selected]="isSelected(option.value)"
                 [attr.aria-disabled]="option.disabled"
+                [attr.tabindex]="option.disabled ? null : '-1'"
                 (click)="toggleOption(option)"
+                (keydown.enter)="toggleOption(option)"
+                (keydown.space)="toggleOption(option)"
+                (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
+                (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
               >
                 <!-- Checkbox visual -->
                 <span
@@ -205,6 +223,9 @@ export type { NeuSelectOption } from '../select/neu-select.types';
 })
 export class NeuMultiselectComponent implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  /** @internal */
+  readonly _triggerId = `neu-multiselect-trigger-${_neuMultiselectIdSeq++}`;
 
   /** Opciones del dropdown */
   options = input<NeuSelectOption[]>([]);
@@ -280,6 +301,41 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     if (!this.isOpen()) {
       this.searchQuery.set('');
       this._onTouched();
+    } else {
+      requestAnimationFrame(() => {
+        const first = this.elementRef.nativeElement.querySelector<HTMLElement>(
+          '.neu-multiselect__option:not([aria-disabled="true"])',
+        );
+        first?.focus();
+      });
+    }
+  }
+
+  /** Abre el panel y mueve el foco al primer item */
+  onTriggerKey(event: Event): void {
+    event.preventDefault();
+    if (!this.isOpen()) {
+      this.isOpen.set(true);
+      requestAnimationFrame(() => {
+        const first = this.elementRef.nativeElement.querySelector<HTMLElement>(
+          '.neu-multiselect__option:not([aria-disabled="true"])',
+        );
+        first?.focus();
+      });
+    }
+  }
+
+  /** Navega entre opciones con flechas */
+  focusOptionByIndex(event: Event, current: NeuSelectOption, dir: 1 | -1): void {
+    event.preventDefault();
+    const opts = this.filteredOptions().filter((o) => !o.disabled);
+    const idx = opts.findIndex((o) => o.value === current.value);
+    const next = opts[(idx + dir + opts.length) % opts.length];
+    if (next) {
+      const el = this.elementRef.nativeElement.querySelector<HTMLElement>(
+        `#neu-ms-opt-${next.value}`,
+      );
+      el?.focus();
     }
   }
 

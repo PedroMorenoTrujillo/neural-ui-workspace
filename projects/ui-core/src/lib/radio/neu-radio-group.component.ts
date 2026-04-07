@@ -33,6 +33,7 @@ let _neuRadioGroupIdSeq = 0;
     class: 'neu-radio-group',
     role: 'radiogroup',
     '[attr.aria-disabled]': '_isDisabled()',
+    '[attr.aria-label]': 'ariaLabel() || null',
   },
   providers: [
     {
@@ -50,6 +51,8 @@ let _neuRadioGroupIdSeq = 0;
 })
 export class NeuRadioGroupComponent implements ControlValueAccessor {
   readonly direction = input<'row' | 'column'>('column');
+  /** Etiqueta accesible del grupo (WCAG 4.1.2). Usar cuando no hay <legend> visible. */
+  readonly ariaLabel = input<string>('');
 
   /** Nombre HTML compartido por todos los neu-radio hijos — garantiza la exclusión mutua nativa */
   readonly _name = `neu-radio-group-${++_neuRadioGroupIdSeq}`;

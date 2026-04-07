@@ -30,10 +30,17 @@ const TOAST_ICONS: Record<NeuToastType, string> = {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NeuIconComponent],
-  host: { class: 'neu-toast-container', 'aria-live': 'polite', 'aria-atomic': 'true' },
+  host: { class: 'neu-toast-container', 'aria-live': 'polite', 'aria-atomic': 'false' },
   template: `
     @for (toast of toastService.toasts(); track toast.id) {
-      <div class="neu-toast" [class]="'neu-toast neu-toast--' + toast.type" role="alert">
+      <div
+        class="neu-toast"
+        [class]="'neu-toast neu-toast--' + toast.type"
+        [attr.role]="toast.type === 'error' || toast.type === 'warning' ? 'alert' : 'status'"
+        [attr.aria-live]="
+          toast.type === 'error' || toast.type === 'warning' ? 'assertive' : 'polite'
+        "
+      >
         <span class="neu-toast__icon-wrap" aria-hidden="true">
           <neu-icon [name]="getIcon(toast.type)" size="1rem" />
         </span>
