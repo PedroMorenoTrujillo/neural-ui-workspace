@@ -95,7 +95,9 @@
 
               <!-- Disable close -->
               <div class="demo-configurator__control-row">
-                <label class="demo-configurator__label" for="cfg-disable-close">Bloquear cierre</label>
+                <label class="demo-configurator__label" for="cfg-disable-close"
+                  >Bloquear cierre</label
+                >
                 <label class="demo-toggle">
                   <input
                     id="cfg-disable-close"
@@ -154,8 +156,11 @@
               </tr>
             </tbody>
           </table>
+        </div>
 
-          <table class="demo-api-table" style="margin-top: 1.5rem">
+        <h3 class="demo-section__subtitle">Outputs</h3>
+        <div class="demo-api-table-wrapper">
+          <table class="demo-api-table">
             <thead>
               <tr>
                 <th>Output</th>
@@ -171,34 +176,40 @@
               </tr>
             </tbody>
           </table>
+        </div>
 
-          <table class="demo-api-table" style="margin-top: 1.5rem">
+        <h3 class="demo-section__subtitle">Slots (ng-content)</h3>
+        <div class="demo-api-table-wrapper">
+          <table class="demo-api-table">
             <thead>
               <tr>
-                <th>Content slot</th>
+                <th>Selector</th>
                 <th>Descripción</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><code>neu-dialog-footer</code></td>
+                <td><code>[neu-dialog-footer]</code></td>
                 <td>Atributo en un elemento hijo para proyectarlo en el footer del diálogo.</td>
               </tr>
             </tbody>
           </table>
+        </div>
 
-          <table class="demo-api-table" style="margin-top: 1.5rem">
+        <h3 class="demo-section__subtitle">Servicio — NeuDialogService</h3>
+        <div class="demo-api-table-wrapper">
+          <table class="demo-api-table">
             <thead>
               <tr>
-                <th>Servicio</th>
                 <th>Método</th>
+                <th>Firma</th>
                 <th>Descripción</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><code>NeuDialogService</code></td>
-                <td><code>open(component, config?)</code></td>
+                <td><code>open()</code></td>
+                <td><code>open(component, config?): DialogRef</code></td>
                 <td>
                   Abre un componente dinámico en el diálogo usando Angular CDK. Retorna un
                   <code>DialogRef</code>.

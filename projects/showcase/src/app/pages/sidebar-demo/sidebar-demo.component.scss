@@ -160,21 +160,6 @@
   margin: 0 0 var(--neu-space-2);
 }
 
-.demo-section__subtitle {
-  font-size: var(--neu-text-sm);
-  color: var(--neu-text-muted);
-  margin: 0 0 var(--neu-space-5);
-  line-height: 1.6;
-
-  code {
-    background: var(--neu-surface-2);
-    padding: 2px 6px;
-    border-radius: var(--neu-radius-xs);
-    font-family: var(--neu-font-mono);
-    color: var(--neu-accent);
-  }
-}
-
 // ---- Interactive Demo ----
 .demo-interactive {
   background: var(--neu-surface);

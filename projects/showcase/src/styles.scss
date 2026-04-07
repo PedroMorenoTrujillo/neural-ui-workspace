@@ -418,6 +418,33 @@ $demo-max-width: 960px;
   }
 }
 
+// ---- Títulos de sección en pestañas API ----
+// Unifica .demo-section__subtitle y .demo-api-section-title en una sola regla global.
+// Las definiciones locales en componentes (ViewEncapsulation.None) han sido eliminadas
+// para evitar sobreescrituras por orden de inyección del bundle.
+.demo-section__subtitle,
+.demo-api-section-title {
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  color: var(--neu-text-muted);
+  // margin-top empuja el heading lejos de la tabla anterior
+  margin: 2rem 0 0.75rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  code {
+    background: var(--neu-surface-2);
+    padding: 2px 6px;
+    border-radius: var(--neu-radius-xs);
+    font-family: var(--neu-font-mono);
+    color: var(--neu-primary);
+  }
+}
+
 // ---- Tabla de API ----
 .demo-api-table-wrapper {
   overflow-x: auto;
