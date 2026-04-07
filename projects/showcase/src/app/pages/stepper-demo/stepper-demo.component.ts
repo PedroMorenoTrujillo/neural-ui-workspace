@@ -28,9 +28,9 @@ import {
 })
 export class StepperDemoComponent {
   private readonly _t = inject(TranslocoService);
-  private readonly _activeLang = toSignal(this._t.langChanges$, { initialValue: this._t.getActiveLang() });
+  private readonly _translations = toSignal(this._t.selectTranslation());
   readonly demoTabs = computed<NeuTab[]>(() => {
-    this._activeLang();
+    this._translations();
     return [
       { id: 'preview', label: this._t.translate('demo.common.tabs.preview') },
       { id: 'config', label: this._t.translate('demo.common.tabs.config') },
