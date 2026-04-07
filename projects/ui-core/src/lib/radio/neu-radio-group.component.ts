@@ -23,6 +23,8 @@ export const NEU_RADIO_GROUP = new InjectionToken<NeuRadioGroupComponent>('NEU_R
  *     <neu-radio value="b" label="Opción B" />
  *   </neu-radio-group>
  */
+let _neuRadioGroupIdSeq = 0;
+
 @Component({
   selector: 'neu-radio-group',
   encapsulation: ViewEncapsulation.None,
@@ -50,7 +52,7 @@ export class NeuRadioGroupComponent implements ControlValueAccessor {
   readonly direction = input<'row' | 'column'>('column');
 
   /** Nombre HTML compartido por todos los neu-radio hijos — garantiza la exclusión mutua nativa */
-  readonly _name = `neu-radio-group-${Math.random().toString(36).slice(2, 9)}`;
+  readonly _name = `neu-radio-group-${++_neuRadioGroupIdSeq}`;
 
   readonly _value = signal<unknown>(null);
   readonly _isDisabled = signal(false);

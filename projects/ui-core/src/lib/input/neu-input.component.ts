@@ -51,7 +51,7 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'u
       [class.neu-input__wrapper--focused]="_focused()"
       [class.neu-input__wrapper--has-value]="hasValue()"
       [class.neu-input__wrapper--error]="hasError()"
-      [class.neu-input__wrapper--disabled]="disabled()"
+      [class.neu-input__wrapper--disabled]="isDisabledFinal()"
       [class.neu-input__wrapper--has-start-icon]="!!startIcon()"
       [class.neu-input__wrapper--has-end-icon]="!!endIcon()"
       [class.neu-input__wrapper--no-float]="!floatingLabel()"
@@ -79,7 +79,7 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'u
         class="neu-input__field"
         [id]="inputId()"
         [type]="type()"
-        [disabled]="disabled()"
+        [disabled]="isDisabledFinal()"
         [attr.name]="name() || null"
         [attr.required]="required() ? '' : null"
         [attr.readonly]="readonly() ? '' : null"
@@ -206,9 +206,12 @@ export class NeuInputComponent implements ControlValueAccessor {
     this._onTouched = fn;
   }
 
-  setDisabledState(): void {
-    // El estado disabled se gestiona via input signal
+  private readonly _cvaDisabled = signal(false);
+  setDisabledState(isDisabled: boolean): void {
+    this._cvaDisabled.set(isDisabled);
   }
+
+  readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
 
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;

@@ -46,14 +46,14 @@ export type { NeuSelectOption } from '../select/neu-select.types';
     <div
       class="neu-multiselect"
       [class.neu-multiselect--open]="isOpen()"
-      [class.neu-multiselect--disabled]="disabled()"
+      [class.neu-multiselect--disabled]="isDisabledFinal()"
       [class.neu-multiselect--error]="hasError()"
     >
       <!-- Trigger -->
       <button
         class="neu-multiselect__trigger"
         type="button"
-        [disabled]="disabled()"
+        [disabled]="isDisabledFinal()"
         [attr.aria-haspopup]="'listbox'"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-invalid]="hasError() ? 'true' : null"
@@ -259,7 +259,11 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this._onTouched = fn;
   }
 
-  setDisabledState(): void {}
+  private readonly _cvaDisabled = signal(false);
+  setDisabledState(isDisabled: boolean): void {
+    this._cvaDisabled.set(isDisabled);
+  }
+  readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
 
   // --- Helpers ---
   protected labelFor(value: string): string {
@@ -271,7 +275,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   }
 
   protected toggle(): void {
-    if (this.disabled()) return;
+    if (this.isDisabledFinal()) return;
     this.isOpen.update((v) => !v);
     if (!this.isOpen()) {
       this.searchQuery.set('');

@@ -50,7 +50,7 @@ interface DrumSlot {
     <div
       class="neu-date-input"
       [class.neu-date-input--open]="isOpen()"
-      [class.neu-date-input--disabled]="disabled()"
+      [class.neu-date-input--disabled]="isDisabledFinal()"
       [class.neu-date-input--error]="hasError()"
     >
       <!-- Trigger -->
@@ -58,7 +58,7 @@ interface DrumSlot {
         class="neu-date-input__trigger"
         type="button"
         [id]="_id"
-        [disabled]="disabled() || readonly()"
+        [disabled]="isDisabledFinal() || readonly()"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-haspopup]="'dialog'"
         (click)="toggle()"
@@ -457,7 +457,7 @@ export class NeuDateInputComponent implements ControlValueAccessor {
 
   // ── Actions ──────────────────────────────────────────────
   toggle(): void {
-    if (this.disabled() || this.readonly()) return;
+    if (this.isDisabledFinal() || this.readonly()) return;
     this.isOpen.update((v) => !v);
   }
 
@@ -595,5 +595,9 @@ export class NeuDateInputComponent implements ControlValueAccessor {
   registerOnTouched(fn: () => void): void {
     this._onTouched = fn;
   }
-  setDisabledState(): void {}
+  private readonly _cvaDisabled = signal(false);
+  setDisabledState(isDisabled: boolean): void {
+    this._cvaDisabled.set(isDisabled);
+  }
+  readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
 }

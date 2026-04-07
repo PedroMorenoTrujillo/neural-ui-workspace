@@ -1,9 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ComponentRef,
-  EnvironmentInjector,
-  Injector,
   Type,
   ViewEncapsulation,
   inject,

@@ -7,6 +7,7 @@ import {
   OnDestroy,
   ViewEncapsulation,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -123,6 +124,11 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this._updateIndicator();
+    // Actualizar cuando activeTabId cambie (incluyendo navegación de URL externa)
+    effect(() => {
+      this.activeTabId(); // dependencia reactiva
+      requestAnimationFrame(() => this._updateIndicator());
+    });
     // Actualizar cuando cambie el tamaño del nav (p.ej. resize de ventana)
     const nav = this.elRef.nativeElement.querySelector('.neu-tabs__nav');
     if (nav && typeof ResizeObserver !== 'undefined') {

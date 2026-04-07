@@ -32,6 +32,7 @@ export type NeuButtonIconPosition = 'left' | 'right';
     '[attr.disabled]': 'isDisabled() ? "" : null',
     '[attr.aria-disabled]': 'isDisabled()',
     '[attr.aria-busy]': 'loading()',
+    '(click)': '_onHostClick($event)',
   },
   template: `
     @if (loading()) {
@@ -87,6 +88,13 @@ export class NeuButtonComponent {
 
   /** Emite el evento de click cuando el botón está activo */
   neuClick = output<MouseEvent>();
+
+  /** @internal — reenvía el click nativo al output Angular */
+  _onHostClick(event: MouseEvent): void {
+    if (!this.isDisabled()) {
+      this.neuClick.emit(event);
+    }
+  }
 
   readonly isDisabled = computed(() => this.disabled() || this.loading());
   readonly hasIcon = computed(() => !!this.icon());

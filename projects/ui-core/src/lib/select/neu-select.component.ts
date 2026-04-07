@@ -49,7 +49,7 @@ export type { NeuSelectOption } from './neu-select.types';
     <div
       class="neu-select"
       [class.neu-select--open]="isOpen()"
-      [class.neu-select--disabled]="disabled()"
+      [class.neu-select--disabled]="isDisabledFinal()"
       [class.neu-select--error]="hasError()"
       [class.neu-select--has-value]="!!_value()"
       [class.neu-select--has-placeholder]="!!placeholder() && !_value()"
@@ -59,7 +59,7 @@ export type { NeuSelectOption } from './neu-select.types';
       <button
         class="neu-select__trigger"
         type="button"
-        [disabled]="disabled()"
+        [disabled]="isDisabledFinal()"
         [attr.aria-haspopup]="'listbox'"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-invalid]="hasError() ? 'true' : null"
@@ -210,8 +210,15 @@ export class NeuSelectComponent implements ControlValueAccessor {
     this._onTouched = fn;
   }
 
+  private readonly _cvaDisabled = signal(false);
+  setDisabledState(isDisabled: boolean): void {
+    this._cvaDisabled.set(isDisabled);
+  }
+
+  readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
+
   toggle(): void {
-    if (!this.disabled()) this.isOpen.update((v) => !v);
+    if (!this.isDisabledFinal()) this.isOpen.update((v) => !v);
   }
 
   close(): void {

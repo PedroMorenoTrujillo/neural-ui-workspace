@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ViewEncapsulation,
+  afterNextRender,
   inject,
   input,
   linkedSignal,
@@ -489,7 +491,12 @@ export class NeuNavComponent {
   private _flyoutTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
-    this._openActiveGroup();
+    // Abrimos el grupo activo DESPUÉS de que el padre haya pasado los inputs
+    afterNextRender(() => this._openActiveGroup());
+    // Limpiamos el timer del flyout al destruir el componente
+    inject(DestroyRef).onDestroy(() => {
+      if (this._flyoutTimer) clearTimeout(this._flyoutTimer);
+    });
   }
 
   // ---- Helpers de estado ----
