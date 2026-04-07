@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   ViewEncapsulation,
   input,
+  linkedSignal,
   output,
-  signal,
 } from '@angular/core';
 
 export interface NeuAccordionItem {
@@ -83,7 +82,7 @@ export interface NeuAccordionItem {
   `,
   styleUrl: './neu-accordion.component.scss',
 })
-export class NeuAccordionComponent implements OnInit {
+export class NeuAccordionComponent {
   /** Lista de paneles */
   items = input<NeuAccordionItem[]>([]);
 
@@ -96,19 +95,18 @@ export class NeuAccordionComponent implements OnInit {
   /** Emite el id del panel al abrirse/cerrarse */
   panelToggle = output<{ id: string; expanded: boolean }>();
 
-  /** Set de IDs actualmente expandidos */
-  private readonly _expanded = signal<Set<string>>(new Set<string>());
-
-  constructor() {}
-
-  ngOnInit(): void {
-    const initial = new Set(
-      this.items()
-        .filter((i) => i.expanded)
-        .map((i) => i.id),
-    );
-    this._expanded.set(initial);
-  }
+  /**
+   * Set de IDs actualmente expandidos.
+   * Se inicializa desde los ítems con `expanded: true`.
+   * Usa linkedSignal para inicializar el estado y mantenerlo mutable.
+   */
+  private readonly _expanded = linkedSignal<NeuAccordionItem[], Set<string>>({
+    source: this.items,
+    computation: (items, previous) =>
+      previous === undefined
+        ? new Set(items.filter((i) => i.expanded).map((i) => i.id))
+        : previous.value,
+  });
 
   readonly isExpanded = (id: string) => this._expanded().has(id);
 

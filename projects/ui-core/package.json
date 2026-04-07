@@ -11,6 +11,8 @@
   "dependencies": {
     "@ng-icons/core": "^33.0.0",
     "@ng-icons/lucide": "^33.0.0",
+    "apexcharts": "^5.10.4",
+    "ng-apexcharts": "^2.3.0",
     "tslib": "^2.3.0"
   },
   "sideEffects": false

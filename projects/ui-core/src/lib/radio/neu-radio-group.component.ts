@@ -49,6 +49,9 @@ export const NEU_RADIO_GROUP = new InjectionToken<NeuRadioGroupComponent>('NEU_R
 export class NeuRadioGroupComponent implements ControlValueAccessor {
   readonly direction = input<'row' | 'column'>('column');
 
+  /** Nombre HTML compartido por todos los neu-radio hijos — garantiza la exclusión mutua nativa */
+  readonly _name = `neu-radio-group-${Math.random().toString(36).slice(2, 9)}`;
+
   readonly _value = signal<unknown>(null);
   readonly _isDisabled = signal(false);
 

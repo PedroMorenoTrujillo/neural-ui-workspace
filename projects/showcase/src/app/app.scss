@@ -3,8 +3,8 @@
 // CSS Grid: sidebar fijo en desktop + overlay en mobile
 // ============================================================
 
-// ---- Breakpoint de layout — 400px ----
-$layout-bp: 400px;
+// ---- Breakpoint de layout — 768px (tablet) ----
+$layout-bp: 768px;
 
 .app-layout {
   display: grid;

@@ -1,12 +1,16 @@
 .home {
   max-width: 960px;
   margin: 0 auto;
-  padding: 0 0 80px;
+  padding: 0 var(--neu-space-5) 80px;
+
+  @media (max-width: 480px) {
+    padding: 0 var(--neu-space-4) 48px;
+  }
 }
 
 // ── Hero ───────────────────────────────────────────────────────────────────
 .home__hero {
-  padding: 64px 0 48px;
+  padding: clamp(32px, 8vw, 64px) 0 clamp(24px, 6vw, 48px);
   text-align: center;
   display: flex;
   flex-direction: column;

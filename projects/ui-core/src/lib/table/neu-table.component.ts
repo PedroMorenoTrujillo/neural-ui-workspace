@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ContentChild,
   ViewEncapsulation,
   computed,
+  contentChild,
   inject,
   input,
   output,
@@ -316,9 +316,9 @@ function asRows(data: object[]): Row[] {
                   <tr class="neu-table__row-expand-detail">
                     <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
                       <div class="neu-table__expand-content">
-                        @if (expandTemplate) {
+                        @if (expandTemplate(); as tpl) {
                           <ng-container
-                            [ngTemplateOutlet]="expandTemplate.templateRef"
+                            [ngTemplateOutlet]="tpl.templateRef"
                             [ngTemplateOutletContext]="{ $implicit: row }"
                           />
                         }
@@ -410,7 +410,7 @@ function asRows(data: object[]): Row[] {
 export class NeuTableComponent {
   private readonly urlState = inject(NeuUrlStateService);
 
-  @ContentChild(NeuTableExpandDirective) expandTemplate?: NeuTableExpandDirective;
+  readonly expandTemplate = contentChild(NeuTableExpandDirective);
 
   // ---- Inputs de datos ----
   columns = input<NeuTableColumn[]>([]);

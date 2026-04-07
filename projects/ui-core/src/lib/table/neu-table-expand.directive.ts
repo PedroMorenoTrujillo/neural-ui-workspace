@@ -1,4 +1,4 @@
-import { Directive, TemplateRef } from '@angular/core';
+import { Directive, TemplateRef, inject } from '@angular/core';
 
 /**
  * Directiva para definir el template de expansión de fila en NeuTable.
@@ -17,5 +17,5 @@ import { Directive, TemplateRef } from '@angular/core';
   standalone: true,
 })
 export class NeuTableExpandDirective {
-  constructor(public readonly templateRef: TemplateRef<{ $implicit: Record<string, unknown> }>) {}
+  readonly templateRef = inject(TemplateRef) as TemplateRef<{ $implicit: Record<string, unknown> }>;
 }

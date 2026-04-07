@@ -87,6 +87,11 @@ $demo-max-width: 960px;
   display: flex;
   flex-direction: column;
   gap: var(--neu-space-10);
+
+  @media (max-width: 480px) {
+    padding: var(--neu-space-5) var(--neu-space-4);
+    gap: var(--neu-space-8);
+  }
 }
 
 // ---- Hero ----
@@ -113,7 +118,7 @@ $demo-max-width: 960px;
   }
 
   &__title {
-    font-size: var(--neu-text-4xl);
+    font-size: clamp(var(--neu-text-2xl), 5vw, var(--neu-text-4xl));
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1.1;
@@ -183,6 +188,10 @@ $demo-max-width: 960px;
     display: flex;
     flex-direction: column;
     gap: var(--neu-space-6);
+
+    @media (max-width: 480px) {
+      padding: var(--neu-space-5) var(--neu-space-4);
+    }
 
     &--flex {
       display: flex;

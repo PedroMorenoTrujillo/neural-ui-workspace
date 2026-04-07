@@ -89,10 +89,31 @@ export class NeuCodeBlockComponent {
   private _copyTimer?: ReturnType<typeof setTimeout>;
 
   copy(): void {
-    void this.doc.defaultView?.navigator.clipboard.writeText(this.code()).then(() => {
-      this.copied.set(true);
-      clearTimeout(this._copyTimer);
-      this._copyTimer = setTimeout(() => this.copied.set(false), 2000);
-    });
+    const text = this.code();
+    const win = this.doc.defaultView;
+
+    if (win?.navigator?.clipboard) {
+      void win.navigator.clipboard.writeText(text).then(() => this._markCopied());
+    } else {
+      // Fallback para HTTP o navegadores sin Clipboard API
+      const ta = this.doc.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+      this.doc.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        this.doc.execCommand('copy');
+        this._markCopied();
+      } finally {
+        this.doc.body.removeChild(ta);
+      }
+    }
+  }
+
+  private _markCopied(): void {
+    this.copied.set(true);
+    clearTimeout(this._copyTimer);
+    this._copyTimer = setTimeout(() => this.copied.set(false), 2000);
   }
 }

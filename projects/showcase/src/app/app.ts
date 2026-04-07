@@ -88,10 +88,10 @@ export class App {
   readonly isDesktop = toSignal(
     fromEvent(window, 'resize').pipe(
       startWith(null),
-      map(() => window.innerWidth >= 400),
+      map(() => window.innerWidth >= 768),
       distinctUntilChanged(),
     ),
-    { initialValue: window.innerWidth >= 400 },
+    { initialValue: window.innerWidth >= 768 },
   );
 
   /** True cuando la ruta activa es una página de componente (con sidebar) */

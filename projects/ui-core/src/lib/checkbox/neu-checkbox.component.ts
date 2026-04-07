@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
-  effect,
+  computed,
   forwardRef,
   input,
   signal,
@@ -76,13 +76,9 @@ export class NeuCheckboxComponent implements ControlValueAccessor {
   readonly _id = `neu-checkbox-${_neuCheckboxIdSeq++}`;
 
   protected readonly _checked = signal(false);
-  protected readonly _isDisabled = signal(false);
-
-  constructor() {
-    effect(() => {
-      if (this.disabled()) this._isDisabled.set(true);
-    });
-  }
+  /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState */
+  private readonly _cvaDisabled = signal(false);
+  protected readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
 
   private _onChange: (v: boolean) => void = () => {};
   private _onTouched: () => void = () => {};
@@ -110,6 +106,6 @@ export class NeuCheckboxComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this._isDisabled.set(isDisabled);
+    this._cvaDisabled.set(isDisabled);
   }
 }

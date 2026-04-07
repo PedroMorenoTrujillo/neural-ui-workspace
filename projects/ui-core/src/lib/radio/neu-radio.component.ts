@@ -58,7 +58,8 @@ export class NeuRadioComponent {
   readonly group = inject(NEU_RADIO_GROUP);
 
   readonly _id = `neu-radio-${_neuRadioIdSeq++}`;
-  readonly _groupName = `neu-radio-group-${Math.random().toString(36).slice(2, 7)}`;
+  /** Toma el nombre del grupo padre — así todos los radios del grupo comparten el mismo `name` nativo */
+  readonly _groupName = this.group._name;
 
   readonly isChecked = computed(() => this.group._value() === this.value());
   readonly isDisabled = computed(() => this.disabled() || this.group._isDisabled());
