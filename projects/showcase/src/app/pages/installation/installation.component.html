@@ -141,6 +141,71 @@
         </table>
       </div>
     </div>
+
+    <h3 class="demo-section__subtitle" style="margin-top: 24px">
+      {{ 'page.install.compat.browserTitle' | transloco }}
+    </h3>
+    <p class="install-step__desc" style="margin-bottom: 12px">
+      {{ 'page.install.compat.browserDesc' | transloco }}
+    </p>
+    <div class="install-compat__table-wrap">
+      <table class="demo-api-table">
+        <thead>
+          <tr>
+            <th>{{ 'page.install.compat.browserTitle' | transloco }}</th>
+            <th>{{ 'page.install.compat.colStatus' | transloco }}</th>
+            <th>{{ 'page.install.compat.colNotes' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ 'page.install.compat.browserChrome' | transloco }}</td>
+            <td>
+              <neu-badge variant="success" size="sm">{{
+                'page.install.compat.supported' | transloco
+              }}</neu-badge>
+            </td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>{{ 'page.install.compat.browserFirefox' | transloco }}</td>
+            <td>
+              <neu-badge variant="success" size="sm">{{
+                'page.install.compat.supported' | transloco
+              }}</neu-badge>
+            </td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>{{ 'page.install.compat.browserEdge' | transloco }}</td>
+            <td>
+              <neu-badge variant="success" size="sm">{{
+                'page.install.compat.supported' | transloco
+              }}</neu-badge>
+            </td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>{{ 'page.install.compat.browserSafari' | transloco }}</td>
+            <td>
+              <neu-badge variant="success" size="sm">{{
+                'page.install.compat.supported' | transloco
+              }}</neu-badge>
+            </td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>{{ 'page.install.compat.browserIE' | transloco }}</td>
+            <td>
+              <neu-badge variant="danger" size="sm">{{
+                'page.install.compat.notSupported' | transloco
+              }}</neu-badge>
+            </td>
+            <td>{{ 'page.install.compat.browserIENote' | transloco }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- Siguiente paso -->

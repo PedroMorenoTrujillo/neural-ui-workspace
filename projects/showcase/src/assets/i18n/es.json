@@ -179,7 +179,15 @@
         "note21": "Desarrollado y probado en esta versión.",
         "note18": "Instala @angular/cdk@18. @ng-icons/core@33 y ng-apexcharts@2 son compatibles con Angular 17+.",
         "note17": "Instala @angular/cdk@17. @ng-icons/core@33 y ng-apexcharts@2 son compatibles con Angular 17+.",
-        "noteSub17": "La API de Signals y el nuevo control flow no están disponibles."
+        "noteSub17": "La API de Signals y el nuevo control flow no están disponibles.",
+        "browserTitle": "Compatibilidad con navegadores",
+        "browserDesc": "NeuralUI usa solo APIs web estándar y funciona en todos los navegadores modernos evergreen.",
+        "browserChrome": "Chrome / Chromium",
+        "browserFirefox": "Firefox",
+        "browserEdge": "Edge",
+        "browserSafari": "Safari 15+",
+        "browserIE": "Internet Explorer",
+        "browserIENote": "No compatible. Angular eliminó el soporte de IE en la v13."
       },
       "next": {
         "title": "Siguientes pasos",
