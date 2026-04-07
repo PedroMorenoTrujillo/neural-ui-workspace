@@ -1,5 +1,6 @@
-import { TranslocoPipe } from '@jsverse/transloco';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   NeuBadgeComponent,
   NeuChartComponent,
@@ -25,10 +26,15 @@ import {
   styleUrl: './chart-demo.component.scss',
 })
 export class ChartDemoComponent {
-  readonly demoTabs: NeuTab[] = [
-    { id: 'preview', label: 'Preview' },
-    { id: 'api', label: 'API' },
-  ];
+  private readonly _t = inject(TranslocoService);
+  private readonly _activeLang = toSignal(this._t.langChanges$, { initialValue: this._t.getActiveLang() });
+  readonly demoTabs = computed<NeuTab[]>(() => {
+    this._activeLang();
+    return [
+      { id: 'preview', label: this._t.translate('demo.common.tabs.preview') },
+      { id: 'api', label: this._t.translate('demo.common.tabs.api') },
+    ];
+  });
 
   // ── Datos comunes ──────────────────────────────────────────────────────────
   readonly months = [

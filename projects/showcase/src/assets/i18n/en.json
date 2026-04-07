@@ -197,6 +197,7 @@
       "tabs": {
         "preview": "Preview",
         "config": "Configurator",
+        "examples": "Examples",
         "api": "API"
       },
       "api": {

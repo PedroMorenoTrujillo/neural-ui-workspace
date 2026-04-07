@@ -1,5 +1,6 @@
-import { TranslocoPipe } from '@jsverse/transloco';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   NeuBadgeComponent,
   NeuCodeBlockComponent,
@@ -18,11 +19,16 @@ import {
   styleUrl: './badge-demo.component.scss',
 })
 export class BadgeDemoComponent {
-  readonly demoTabs: NeuTab[] = [
-    { id: 'preview', label: 'Preview' },
-    { id: 'config', label: 'Configurador' },
-    { id: 'api', label: 'API' },
-  ];
+  private readonly _t = inject(TranslocoService);
+  private readonly _activeLang = toSignal(this._t.langChanges$, { initialValue: this._t.getActiveLang() });
+  readonly demoTabs = computed<NeuTab[]>(() => {
+    this._activeLang();
+    return [
+      { id: 'preview', label: this._t.translate('demo.common.tabs.preview') },
+      { id: 'config', label: this._t.translate('demo.common.tabs.config') },
+      { id: 'api', label: this._t.translate('demo.common.tabs.api') },
+    ];
+  });
 
   cfg: {
     variant: 'default' | 'success' | 'info' | 'warning' | 'danger';
