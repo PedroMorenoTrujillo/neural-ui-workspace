@@ -229,6 +229,18 @@ export class TableDemoComponent {
     pageSize: 10,
   };
 
+  get configCode(): string {
+    const attrs: string[] = [`[columns]="columns"`, `[data]="data"`];
+    if (this.cfg.searchable) attrs.push(`[searchable]="true"`);
+    if (this.cfg.sortable) attrs.push(`[sortable]="true"`);
+    if (this.cfg.selectable) attrs.push(`[selectable]="true"`);
+    if (this.cfg.expandable) attrs.push(`[expandable]="true"`);
+    if (this.cfg.exportable) attrs.push(`[exportable]="true"\n  exportFileName="mi-export"`);
+    if (this.cfg.stickyHeader) attrs.push(`[stickyHeader]="true"`);
+    attrs.push(`[pageSize]="${this.cfg.pageSize}"`);
+    return `<neu-table\n  ${attrs.join('\n  ')}\n/>`;
+  }
+
   readonly cfgSelectedRows = signal<User[]>([]);
 
   // ══════════════ Usage code snippets ══════════════
