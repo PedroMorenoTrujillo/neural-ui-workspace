@@ -222,7 +222,8 @@ $demo-max-width: 960px;
   gap: 0;
 
   @media (max-width: 600px) {
-    grid-template-columns: 1fr;
+    // !important necesario para vencer inline styles (e.g. table-demo usa style="grid-template-columns: 1fr 260px")
+    grid-template-columns: 1fr !important;
   }
 
   &__preview {

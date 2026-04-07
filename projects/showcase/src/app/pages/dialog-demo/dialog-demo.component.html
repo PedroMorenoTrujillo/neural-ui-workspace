@@ -7,11 +7,13 @@
 
   <section class="demo-section">
     <neu-tabs [tabs]="demoTabs" tabParam="tab">
-
       <!-- PREVIEW -->
       <neu-tab-panel tabId="preview">
         <div class="demo-preview demo-preview--tabs">
-          <div class="demo-preview__canvas" style="gap: 1rem; flex-wrap: wrap; justify-content: center">
+          <div
+            class="demo-preview__canvas"
+            style="gap: 1rem; flex-wrap: wrap; justify-content: center"
+          >
             <button neu-button variant="outline" size="sm" (click)="showPreview.set(true)">
               Abrir diálogo
             </button>
@@ -43,9 +45,7 @@
           <div class="demo-configurator">
             <!-- Vista previa -->
             <div class="demo-configurator__preview">
-              <button neu-button (click)="cfgOpen.set(true)">
-                Abrir diálogo de prueba
-              </button>
+              <button neu-button (click)="cfgOpen.set(true)">Abrir diálogo de prueba</button>
 
               <neu-dialog
                 [open]="cfgOpen()"
@@ -57,7 +57,9 @@
                 <p>Este es el contenido del diálogo configurado.</p>
                 <div neu-dialog-footer>
                   @if (!cfgDisableClose()) {
-                    <button neu-button variant="ghost" (click)="cfgOpen.set(false)">Cancelar</button>
+                    <button neu-button variant="ghost" (click)="cfgOpen.set(false)">
+                      Cancelar
+                    </button>
                   }
                   <button neu-button (click)="cfgOpen.set(false)">Aceptar</button>
                 </div>
@@ -93,17 +95,16 @@
 
               <!-- Disable close -->
               <div class="demo-configurator__control-row">
-                <label class="demo-configurator__label">Bloquear cierre</label>
-                <button
-                  class="demo-toggle"
-                  [class.demo-toggle--active]="cfgDisableClose()"
-                  (click)="cfgDisableClose.set(!cfgDisableClose())"
-                  type="button"
-                  role="switch"
-                  [attr.aria-checked]="cfgDisableClose()"
-                >
-                  <span class="demo-toggle__thumb"></span>
-                </button>
+                <label class="demo-configurator__label" for="cfg-disable-close">Bloquear cierre</label>
+                <label class="demo-toggle">
+                  <input
+                    id="cfg-disable-close"
+                    type="checkbox"
+                    [checked]="cfgDisableClose()"
+                    (change)="cfgDisableClose.set($any($event.target).checked)"
+                  />
+                  <span class="demo-toggle__track"></span>
+                </label>
               </div>
             </div>
           </div>
@@ -198,13 +199,15 @@
               <tr>
                 <td><code>NeuDialogService</code></td>
                 <td><code>open(component, config?)</code></td>
-                <td>Abre un componente dinámico en el diálogo usando Angular CDK. Retorna un <code>DialogRef</code>.</td>
+                <td>
+                  Abre un componente dinámico en el diálogo usando Angular CDK. Retorna un
+                  <code>DialogRef</code>.
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </neu-tab-panel>
-
     </neu-tabs>
   </section>
 </div>

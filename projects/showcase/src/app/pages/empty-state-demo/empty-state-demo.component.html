@@ -7,12 +7,13 @@
 
   <section class="demo-section">
     <neu-tabs [tabs]="demoTabs" tabParam="tab">
-
       <!-- PREVIEW -->
       <neu-tab-panel tabId="preview">
         <div class="demo-preview demo-preview--tabs">
-          <div class="demo-preview__canvas" style="flex-direction: column; gap: 3rem; align-items: stretch">
-
+          <div
+            class="demo-preview__canvas"
+            style="flex-direction: column; gap: 3rem; align-items: stretch"
+          >
             <!-- Sin notificaciones -->
             <div>
               <p class="demo-preview__label">Con CTA</p>
@@ -50,7 +51,6 @@
                 />
               </div>
             </div>
-
           </div>
         </div>
 
@@ -77,7 +77,6 @@
 
             <!-- Controles -->
             <div class="demo-configurator__controls">
-
               <!-- Icono -->
               <div class="demo-configurator__control-row">
                 <label class="demo-configurator__label">Icono</label>
@@ -125,7 +124,6 @@
                   (input)="cfgActionLabel.set($any($event.target).value)"
                 />
               </div>
-
             </div>
           </div>
         </div>
@@ -199,7 +197,6 @@
           </table>
         </div>
       </neu-tab-panel>
-
     </neu-tabs>
   </section>
 </div>

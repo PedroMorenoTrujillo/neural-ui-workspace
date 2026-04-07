@@ -80,4 +80,3 @@ export class EmptyStateDemoComponent {
 })
 export class MyComponent {}`;
 }
-
