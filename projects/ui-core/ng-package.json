@@ -3,5 +3,12 @@
   "dest": "../../dist/neural-ui/core",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "assets": [
+    {
+      "input": "./src/lib/styles",
+      "glob": "**",
+      "output": "./styles"
+    }
+  ]
 }
