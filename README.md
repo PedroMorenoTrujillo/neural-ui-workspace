@@ -93,29 +93,29 @@ export class LoginComponent {
 
 ## Components
 
-| Category | Components |
-|---|---|
-| **Forms** | `NeuCheckbox` · `NeuDateInput` · `NeuInput` · `NeuMultiselect` · `NeuRadio` · `NeuRadioGroup` · `NeuSelect` · `NeuSlider` · `NeuSwitch` · `NeuTextarea` · `NeuToggleButtonGroup` |
-| **Navigation** | `NeuBreadcrumb` · `NeuNav` · `NeuPagination` · `NeuSidebar` · `NeuStepper` · `NeuTabs` |
-| **Layout** | `NeuAccordion` · `NeuCard` · `NeuDivider` · `NeuModal` · `NeuTable` |
+| Category        | Components                                                                                                                                                                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Forms**       | `NeuCheckbox` · `NeuDateInput` · `NeuInput` · `NeuMultiselect` · `NeuRadio` · `NeuRadioGroup` · `NeuSelect` · `NeuSlider` · `NeuSwitch` · `NeuTextarea` · `NeuToggleButtonGroup`                                                   |
+| **Navigation**  | `NeuBreadcrumb` · `NeuNav` · `NeuPagination` · `NeuSidebar` · `NeuStepper` · `NeuTabs`                                                                                                                                             |
+| **Layout**      | `NeuAccordion` · `NeuCard` · `NeuDivider` · `NeuModal` · `NeuTable`                                                                                                                                                                |
 | **UI Elements** | `NeuAvatar` · `NeuBadge` · `NeuButton` · `NeuChart` · `NeuChip` · `NeuCodeBlock` · `NeuEmptyState` · `NeuIcon` · `NeuProgressBar` · `NeuRating` · `NeuSkeleton` · `NeuSpinner` · `NeuSplitButton` · `NeuStatsCard` · `NeuTimeline` |
-| **Feedback** | `NeuToast` · `NeuToastService` · `NeuTooltip` |
+| **Feedback**    | `NeuToast` · `NeuToastService` · `NeuTooltip`                                                                                                                                                                                      |
 
 ---
 
 ## Peer dependencies
 
-| Package | Required version |
-|---|---|
-| `@angular/core` | `>=19.0.0 <23.0.0` |
-| `@angular/cdk` | `>=19.0.0 <23.0.0` |
-| `@angular/common` | `>=19.0.0 <23.0.0` |
-| `@angular/forms` | `>=19.0.0 <23.0.0` |
-| `@angular/router` | `>=19.0.0 <23.0.0` |
-| `@ng-icons/core` | `>=33.0.0` |
-| `@ng-icons/lucide` | `>=33.0.0` |
-| `apexcharts` | `>=5.0.0` |
-| `ng-apexcharts` | `>=2.0.0` |
+| Package            | Required version   |
+| ------------------ | ------------------ |
+| `@angular/core`    | `>=19.0.0 <23.0.0` |
+| `@angular/cdk`     | `>=19.0.0 <23.0.0` |
+| `@angular/common`  | `>=19.0.0 <23.0.0` |
+| `@angular/forms`   | `>=19.0.0 <23.0.0` |
+| `@angular/router`  | `>=19.0.0 <23.0.0` |
+| `@ng-icons/core`   | `>=33.0.0`         |
+| `@ng-icons/lucide` | `>=33.0.0`         |
+| `apexcharts`       | `>=5.0.0`          |
+| `ng-apexcharts`    | `>=2.0.0`          |
 
 ---
 

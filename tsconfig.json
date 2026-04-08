@@ -14,9 +14,7 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve",
-    "paths": {
-      "@neural-ui/core": ["./projects/ui-core/src/public-api.ts"]
-    }
+    "paths": {}
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -31,18 +29,6 @@
     },
     {
       "path": "./projects/ui-core/tsconfig.spec.json"
-    },
-    {
-      "path": "./projects/showcase/tsconfig.app.json"
-    },
-    {
-      "path": "./projects/showcase/tsconfig.spec.json"
-    },
-    {
-      "path": "./projects/sandbox/tsconfig.app.json"
-    },
-    {
-      "path": "./projects/sandbox/tsconfig.spec.json"
     }
   ]
 }

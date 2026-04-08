@@ -16,6 +16,7 @@ Initial stable release of `@neural-ui/core`.
 #### Components (40+)
 
 **Forms**
+
 - `NeuCheckbox` — checkbox with indeterminate state and CVA support
 - `NeuDateInput` — date/time/datetime-local picker with drum scroll UI
 - `NeuInput` — text input with floating label, icons, hint, and error
@@ -28,6 +29,7 @@ Initial stable release of `@neural-ui/core`.
 - `NeuToggleButtonGroup` — single/multi selection button group with CVA support
 
 **Navigation**
+
 - `NeuBreadcrumb` — breadcrumb trail with custom separators
 - `NeuNav` — sidebar navigation with flyout menus and accordion groups
 - `NeuPagination` — page navigation with configurable page size
@@ -36,6 +38,7 @@ Initial stable release of `@neural-ui/core`.
 - `NeuTabs` — tab group with URL state sync and badge support
 
 **Layout**
+
 - `NeuAccordion` — collapsible content panels
 - `NeuCard` — card container with header, content, and footer slots
 - `NeuDivider` — horizontal or vertical visual separator
@@ -43,6 +46,7 @@ Initial stable release of `@neural-ui/core`.
 - `NeuTable` — data table with sorting, pagination, expandable rows, and CSV export
 
 **UI Elements**
+
 - `NeuAvatar` — user avatar with image, initials, and size variants
 - `NeuBadge` — status badge with color variants
 - `NeuButton` — button with variants, sizes, loading state, and icon support
@@ -60,10 +64,12 @@ Initial stable release of `@neural-ui/core`.
 - `NeuTimeline` — vertical timeline with custom icons and connectors
 
 **Feedback**
+
 - `NeuToast` / `NeuToastService` — toast notification system with queue management
 - `NeuTooltip` / `NeuTooltipDirective` — tooltip overlay with position variants
 
 #### Infrastructure
+
 - `provideNeuralUI()` — single setup function for `app.config.ts`
 - `NeuUrlStateService` — URL query param state synchronization utility
 - CSS custom properties theming system (colors, spacing, radius, typography)

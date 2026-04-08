@@ -52,7 +52,7 @@ export const appConfig: ApplicationConfig = {
 Optionally customize global icon defaults:
 
 ```typescript
-provideNeuralUI({ iconSize: '1rem', iconStrokeWidth: '1.5' })
+provideNeuralUI({ iconSize: '1rem', iconStrokeWidth: '1.5' });
 ```
 
 Import the global stylesheet in your `styles.scss`:
@@ -87,13 +87,13 @@ export class LoginComponent {
 
 ## Components
 
-| Category | Components |
-|---|---|
-| **Forms** | `NeuCheckbox` · `NeuDateInput` · `NeuInput` · `NeuMultiselect` · `NeuRadio` · `NeuRadioGroup` · `NeuSelect` · `NeuSlider` · `NeuSwitch` · `NeuTextarea` · `NeuToggleButtonGroup` |
-| **Navigation** | `NeuBreadcrumb` · `NeuNav` · `NeuPagination` · `NeuSidebar` · `NeuStepper` · `NeuTabs` |
-| **Layout** | `NeuAccordion` · `NeuCard` · `NeuDivider` · `NeuModal` · `NeuTable` |
+| Category        | Components                                                                                                                                                                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Forms**       | `NeuCheckbox` · `NeuDateInput` · `NeuInput` · `NeuMultiselect` · `NeuRadio` · `NeuRadioGroup` · `NeuSelect` · `NeuSlider` · `NeuSwitch` · `NeuTextarea` · `NeuToggleButtonGroup`                                                   |
+| **Navigation**  | `NeuBreadcrumb` · `NeuNav` · `NeuPagination` · `NeuSidebar` · `NeuStepper` · `NeuTabs`                                                                                                                                             |
+| **Layout**      | `NeuAccordion` · `NeuCard` · `NeuDivider` · `NeuModal` · `NeuTable`                                                                                                                                                                |
 | **UI Elements** | `NeuAvatar` · `NeuBadge` · `NeuButton` · `NeuChart` · `NeuChip` · `NeuCodeBlock` · `NeuEmptyState` · `NeuIcon` · `NeuProgressBar` · `NeuRating` · `NeuSkeleton` · `NeuSpinner` · `NeuSplitButton` · `NeuStatsCard` · `NeuTimeline` |
-| **Feedback** | `NeuToast` · `NeuToastService` · `NeuTooltip` |
+| **Feedback**    | `NeuToast` · `NeuToastService` · `NeuTooltip`                                                                                                                                                                                      |
 
 ---
 
@@ -104,26 +104,26 @@ All visual properties are controlled via CSS custom properties. Override them in
 ```scss
 :root {
   // Brand colors
-  --neu-color-primary:       #6366f1;
+  --neu-color-primary: #6366f1;
   --neu-color-primary-hover: #4f46e5;
 
   // Neutral scale
-  --neu-color-surface:       #ffffff;
-  --neu-color-surface-alt:   #f8fafc;
-  --neu-color-border:        #e2e8f0;
-  --neu-color-text:          #0f172a;
-  --neu-color-text-muted:    #64748b;
+  --neu-color-surface: #ffffff;
+  --neu-color-surface-alt: #f8fafc;
+  --neu-color-border: #e2e8f0;
+  --neu-color-text: #0f172a;
+  --neu-color-text-muted: #64748b;
 
   // Feedback
-  --neu-color-error:         #ef4444;
-  --neu-color-success:       #22c55e;
-  --neu-color-warning:       #f59e0b;
+  --neu-color-error: #ef4444;
+  --neu-color-success: #22c55e;
+  --neu-color-warning: #f59e0b;
 
   // Shape & spacing
-  --neu-radius-sm:  0.25rem;
-  --neu-radius-md:  0.5rem;
-  --neu-radius-lg:  0.75rem;
-  --neu-radius-xl:  1rem;
+  --neu-radius-sm: 0.25rem;
+  --neu-radius-md: 0.5rem;
+  --neu-radius-lg: 0.75rem;
+  --neu-radius-xl: 1rem;
   --neu-spacing-xs: 0.25rem;
   --neu-spacing-sm: 0.5rem;
   --neu-spacing-md: 1rem;
@@ -131,9 +131,9 @@ All visual properties are controlled via CSS custom properties. Override them in
 
   // Typography
   --neu-font-family: 'Inter', system-ui, sans-serif;
-  --neu-font-size-sm:   0.875rem;
+  --neu-font-size-sm: 0.875rem;
   --neu-font-size-base: 1rem;
-  --neu-font-size-lg:   1.125rem;
+  --neu-font-size-lg: 1.125rem;
 }
 ```
 
@@ -141,17 +141,17 @@ All visual properties are controlled via CSS custom properties. Override them in
 
 ## Peer dependencies
 
-| Package | Required version |
-|---|---|
-| `@angular/core` | `>=19.0.0 <23.0.0` |
-| `@angular/cdk` | `>=19.0.0 <23.0.0` |
-| `@angular/common` | `>=19.0.0 <23.0.0` |
-| `@angular/forms` | `>=19.0.0 <23.0.0` |
-| `@angular/router` | `>=19.0.0 <23.0.0` |
-| `@ng-icons/core` | `>=33.0.0` |
-| `@ng-icons/lucide` | `>=33.0.0` |
-| `apexcharts` | `>=5.0.0` |
-| `ng-apexcharts` | `>=2.0.0` |
+| Package            | Required version   |
+| ------------------ | ------------------ |
+| `@angular/core`    | `>=19.0.0 <23.0.0` |
+| `@angular/cdk`     | `>=19.0.0 <23.0.0` |
+| `@angular/common`  | `>=19.0.0 <23.0.0` |
+| `@angular/forms`   | `>=19.0.0 <23.0.0` |
+| `@angular/router`  | `>=19.0.0 <23.0.0` |
+| `@ng-icons/core`   | `>=33.0.0`         |
+| `@ng-icons/lucide` | `>=33.0.0`         |
+| `apexcharts`       | `>=5.0.0`          |
+| `ng-apexcharts`    | `>=2.0.0`          |
 
 ---
 
