@@ -16,6 +16,52 @@ $panel-z: 200;
   margin-bottom: var(--neu-space-2);
 }
 
+// ---- Floating Label ----
+.neu-multiselect__label {
+  position: absolute;
+  left: var(--neu-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text-muted);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - var(--neu-space-8));
+  transition:
+    top var(--neu-transition),
+    font-size var(--neu-transition),
+    color var(--neu-transition),
+    transform var(--neu-transition),
+    padding var(--neu-transition),
+    background var(--neu-transition);
+
+  .neu-multiselect--open &,
+  .neu-multiselect--has-value & {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: var(--neu-surface);
+    padding: 0 4px;
+    left: calc(var(--neu-space-3) - 4px);
+  }
+
+  .neu-multiselect--open & {
+    color: var(--neu-primary);
+  }
+
+  .neu-multiselect--error & {
+    color: var(--neu-error);
+  }
+
+  .neu-multiselect--disabled & {
+    background: var(--neu-surface-2);
+  }
+}
+
 // ---- Contenedor raíz ----
 .neu-multiselect {
   position: relative;
@@ -72,6 +118,10 @@ $panel-z: 200;
   color: var(--neu-text-disabled);
   font-size: var(--neu-text-base);
   line-height: 1.5;
+  // En modo floating label se oculta hasta que el multiselect está abierto
+  .neu-multiselect:not(.neu-multiselect--no-float):not(.neu-multiselect--open) & {
+    visibility: hidden;
+  }
 }
 
 // ---- Chip individual ----

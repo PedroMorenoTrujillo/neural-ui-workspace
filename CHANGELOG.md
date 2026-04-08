@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-04-08
+
+### Added
+
+- `NeuMultiselect` — nueva propiedad `floatingLabel` (boolean, default `false`). Cuando está activa, el label se muestra dentro del campo como etiqueta flotante animada, consistente con `NeuInput`, `NeuSelect` y `NeuTextarea`.
+
+### Fixed
+
+- `NeuSelect` — el label ya no quedaba pegado al borde superior cuando el componente tenía un `placeholder` definido pero sin valor seleccionado. El placeholder ahora se oculta hasta que el desplegable está abierto, igual que `NeuInput`.
+- `NeuTextarea` — el label flotante ahora usa el mismo patrón outlined que `NeuInput` (posicionado sobre el borde, con fondo de superficie y padding lateral).
+
+---
+
 ## [1.0.0] - 2026-04-08
 
 Initial stable release of `@neural-ui/core`.

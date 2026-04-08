@@ -45,7 +45,7 @@ let _neuMultiselectIdSeq = 0;
     '(keydown.escape)': 'close()',
   },
   template: `
-    @if (label()) {
+    @if (!floatingLabel() && label()) {
       <label class="neu-multiselect__static-label" [for]="_triggerId">{{ label() }}</label>
     }
     <div
@@ -53,6 +53,8 @@ let _neuMultiselectIdSeq = 0;
       [class.neu-multiselect--open]="isOpen()"
       [class.neu-multiselect--disabled]="isDisabledFinal()"
       [class.neu-multiselect--error]="hasError()"
+      [class.neu-multiselect--has-value]="_values().length > 0"
+      [class.neu-multiselect--no-float]="!floatingLabel()"
     >
       <!-- Trigger -->
       <button
@@ -69,6 +71,10 @@ let _neuMultiselectIdSeq = 0;
         (keydown.arrowDown)="onTriggerKey($any($event))"
         (keydown.arrowUp)="onTriggerKey($any($event))"
       >
+        <!-- Floating label -->
+        @if (floatingLabel() && label()) {
+          <span class="neu-multiselect__label">{{ label() }}</span>
+        }
         <span class="neu-multiselect__chips">
           @if (_values().length === 0) {
             <span class="neu-multiselect__placeholder">{{ placeholder() }}</span>
@@ -267,6 +273,9 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   /** Etiqueta del componente */
   label = input<string>('');
+
+  /** Muestra el label como flotante dentro del campo (true) o estático encima (false) */
+  floatingLabel = input<boolean>(false);
 
   /** Placeholder cuando no hay selección */
   placeholder = input<string>('Seleccionar...');

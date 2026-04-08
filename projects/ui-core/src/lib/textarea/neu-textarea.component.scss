@@ -60,24 +60,41 @@
   position: absolute;
   top: 0.9rem;
   left: var(--neu-space-4);
-  font-size: var(--neu-text-sm);
+  font-size: var(--neu-text-base);
   color: var(--neu-text-muted);
   pointer-events: none;
-  transform-origin: left top;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - var(--neu-space-8));
   transition:
+    top var(--neu-transition),
     transform var(--neu-transition),
     color var(--neu-transition),
-    font-size var(--neu-transition);
+    font-size var(--neu-transition),
+    padding var(--neu-transition),
+    background var(--neu-transition);
 
   .neu-textarea__wrapper--focused &,
   .neu-textarea__wrapper--has-value & {
-    transform: translateY(-0.55rem) scale(0.78);
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: var(--neu-surface);
+    padding: 0 4px;
+    left: calc(var(--neu-space-4) - 4px);
     color: var(--neu-primary);
-    font-weight: 500;
   }
 
+  .neu-textarea__wrapper--focused.neu-textarea__wrapper--error &,
   .neu-textarea__wrapper--error & {
     color: var(--neu-error);
+  }
+
+  .neu-textarea__wrapper--disabled & {
+    background: var(--neu-surface-2);
   }
 }
 
