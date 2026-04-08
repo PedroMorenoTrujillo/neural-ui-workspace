@@ -1,0 +1,44 @@
+name: Bug report
+description: Something is not working as expected
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: "@neural-ui/core version"
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: angular
+    attributes:
+      label: Angular version
+      placeholder: "21.2.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Import NeuXxx
+        2. Use selector <neu-xxx>
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Error messages, screenshots, minimal reproduction link
