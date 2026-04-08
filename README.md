@@ -11,7 +11,7 @@
 
 Modern Angular UI component library — **signals-first**, fully **standalone**, zero Zone.js dependency.
 
-> Live documentation and examples → [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app)
+> Live documentation and examples → [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app)
 
 ---
 
