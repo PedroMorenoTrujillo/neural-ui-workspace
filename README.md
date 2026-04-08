@@ -13,6 +13,10 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 > Live documentation and examples → [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app)
 
+<p align="center">
+  <img src=".github/assets/lighthouse.png" alt="Lighthouse scores: Performance 98, Accessibility 96, Best Practices 100, SEO 91" width="480" />
+</p>
+
 ---
 
 ## Features
