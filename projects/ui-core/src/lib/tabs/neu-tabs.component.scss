@@ -1,0 +1,114 @@
+// ============================================================
+// NeuralUI — Tabs Component Styles (light theme)
+// ViewEncapsulation.None — prefijo BEM .neu-tabs
+// ============================================================
+
+.neu-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+// ---- Barra de pestañas ----
+.neu-tabs__nav {
+  position: relative;
+  display: flex;
+  border-bottom: 1.5px solid var(--neu-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// ---- Botón de pestaña ----
+.neu-tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  padding: var(--neu-space-3) var(--neu-space-5);
+  background: transparent;
+  border: none;
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition:
+    color var(--neu-transition),
+    background-color var(--neu-transition);
+  outline: none;
+
+  &:hover:not(:disabled) {
+    color: var(--neu-text);
+    background: var(--neu-surface-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+    border-radius: var(--neu-radius-sm) var(--neu-radius-sm) 0 0;
+  }
+
+  &--active {
+    color: var(--neu-primary);
+    font-weight: 600;
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// ---- Badge en la pestaña ----
+.neu-tabs__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--neu-radius-full);
+  background: var(--neu-primary-100);
+  color: var(--neu-primary);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+// ---- Indicador deslizante (animated underline) ----
+.neu-tabs__indicator {
+  position: absolute;
+  bottom: -1.5px;
+  height: 2.5px;
+  background: var(--neu-primary);
+  border-radius: var(--neu-radius-full) var(--neu-radius-full) 0 0;
+  transition:
+    left var(--neu-transition-slow),
+    width var(--neu-transition-slow);
+  pointer-events: none;
+}
+
+// ---- Paneles ----
+.neu-tabs__panels {
+  flex: 1;
+}
+
+.neu-tab-panel {
+  padding-top: 1.5rem;
+  animation: neu-tab-fade 180ms ease;
+}
+
+@keyframes neu-tab-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

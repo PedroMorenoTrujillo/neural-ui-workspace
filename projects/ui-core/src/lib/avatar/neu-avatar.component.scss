@@ -1,0 +1,134 @@
+// ============================================================
+// NeuAvatar — Avatar circular o cuadrado
+// ============================================================
+@use 'sass:map';
+
+$sizes: (
+  'xs': 24px,
+  'sm': 32px,
+  'md': 40px,
+  'lg': 48px,
+  'xl': 64px,
+);
+
+$font-sizes: (
+  'xs': 10px,
+  'sm': 12px,
+  'md': 14px,
+  'lg': 16px,
+  'xl': 22px,
+);
+
+$colors: (
+  'blue': (
+    bg: #dbeafe,
+    fg: #1d4ed8,
+  ),
+  'violet': (
+    bg: #ede9fe,
+    fg: #5b21b6,
+  ),
+  'green': (
+    bg: #dcfce7,
+    fg: #15803d,
+  ),
+  'amber': (
+    bg: #fef3c7,
+    fg: #b45309,
+  ),
+  'red': (
+    bg: #fee2e2,
+    fg: #b91c1c,
+  ),
+  'slate': (
+    bg: #f1f5f9,
+    fg: #475569,
+  ),
+);
+
+.neu-avatar-host {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  position: relative; // necesario para el status dot absoluto
+}
+
+.neu-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--neu-surface-2);
+  color: var(--neu-text-muted);
+  font-weight: 600;
+  font-family: var(--neu-font-sans);
+  user-select: none;
+  flex-shrink: 0;
+
+  // Tamaños
+  @each $name, $size in $sizes {
+    &--#{$name} {
+      width: $size;
+      height: $size;
+      font-size: map.get($font-sizes, $name);
+    }
+  }
+
+  // Formas — border-radius en el wrapper (la imagen hereda con border-radius: inherit)
+  &--circle {
+    border-radius: 50%;
+  }
+  &--square {
+    border-radius: var(--neu-radius);
+  }
+
+  // Colores de iniciales
+  @each $name, $vals in $colors {
+    &--#{$name} {
+      background: map.get($vals, bg);
+      color: map.get($vals, fg);
+    }
+  }
+
+  // Imagen
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__initials {
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  // Indicador de estado — posicionado relativo al host, no al avatar (evita overflow:hidden)
+  &__status {
+    position: absolute;
+    bottom: 3%;
+    right: 3%;
+    width: 25%;
+    height: 25%;
+    min-width: 8px;
+    min-height: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--neu-surface);
+    box-sizing: border-box;
+    z-index: 1;
+
+    &--online {
+      background: #22c55e;
+    }
+    &--offline {
+      background: #94a3b8;
+    }
+    &--busy {
+      background: #ef4444;
+    }
+    &--away {
+      background: #f59e0b;
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm",
+    "analytics": false
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "ui-core": {
+      "projectType": "library",
+      "root": "projects/ui-core",
+      "sourceRoot": "projects/ui-core/src",
+      "prefix": "neu",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ui-core/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ui-core/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ui-core/tsconfig.spec.json"
+          }
+        }
+      }
+    }
+  }
+}

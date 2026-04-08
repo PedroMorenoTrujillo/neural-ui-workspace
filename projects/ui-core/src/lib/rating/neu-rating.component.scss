@@ -1,0 +1,55 @@
+// ============================================================
+// NeuralUI — Rating Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-rating
+// ============================================================
+
+.neu-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--neu-font-sans);
+
+  &--readonly {
+    pointer-events: none;
+  }
+}
+
+.neu-rating__star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: var(--neu-radius-sm);
+  cursor: pointer;
+  color: var(--neu-surface-3);
+  padding: 2px;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
+  outline: none;
+
+  &--filled {
+    color: #f59e0b;
+  }
+
+  &:hover:not(:disabled) {
+    transform: scale(1.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.neu-rating__icon {
+  width: 22px;
+  height: 22px;
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@neural-ui/core",
+  "version": "1.1.1",
+  "description": "Modern Angular UI component library built with signals, standalone components, and OnPush change detection.",
+  "author": "PedroMorenoTrujillo",
+  "keywords": [
+    "angular",
+    "ui",
+    "components",
+    "signals",
+    "design-system",
+    "standalone",
+    "zoneless"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/cdk": ">=19.0.0 <23.0.0",
+    "@angular/common": ">=19.0.0 <23.0.0",
+    "@angular/core": ">=19.0.0 <23.0.0",
+    "@angular/forms": ">=19.0.0 <23.0.0",
+    "@angular/router": ">=19.0.0 <23.0.0",
+    "@ng-icons/core": ">=33.0.0",
+    "@ng-icons/lucide": ">=33.0.0",
+    "apexcharts": ">=5.0.0",
+    "ng-apexcharts": ">=2.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PedroMorenoTrujillo/neural-ui-workspace.git",
+    "directory": "projects/ui-core"
+  },
+  "homepage": "https://neural-ui-three.vercel.app",
+  "bugs": {
+    "url": "https://github.com/PedroMorenoTrujillo/neural-ui-workspace/issues"
+  }
+}

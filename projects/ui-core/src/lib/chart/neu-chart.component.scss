@@ -1,0 +1,49 @@
+.neu-chart {
+  display: block;
+  width: 100%;
+
+  // Resetear estilos de ApexCharts para integrarlos con el sistema NeuralUI
+  .apexcharts-canvas {
+    background: transparent !important;
+  }
+
+  .apexcharts-tooltip {
+    border: 1px solid var(--neu-border) !important;
+    box-shadow: var(--neu-shadow-sm) !important;
+    border-radius: var(--neu-radius) !important;
+    font-family: inherit !important;
+    font-size: 12px !important;
+    background: var(--neu-surface) !important;
+    color: var(--neu-text) !important;
+  }
+
+  .apexcharts-tooltip-title {
+    background: var(--neu-surface-2) !important;
+    border-bottom: 1px solid var(--neu-border) !important;
+    font-weight: 600 !important;
+    color: var(--neu-text) !important;
+    padding: 6px 10px !important;
+  }
+
+  .apexcharts-xaxistooltip,
+  .apexcharts-yaxistooltip {
+    background: var(--neu-surface) !important;
+    border-color: var(--neu-border) !important;
+    color: var(--neu-text-muted) !important;
+  }
+
+  .apexcharts-legend-text {
+    color: var(--neu-text-muted) !important;
+    font-family: inherit !important;
+  }
+
+  .apexcharts-yaxis-label,
+  .apexcharts-xaxis-label {
+    fill: var(--neu-text-muted) !important;
+    font-family: inherit !important;
+  }
+
+  .apexcharts-gridline {
+    stroke: var(--neu-border) !important;
+  }
+}

@@ -1,0 +1,131 @@
+// ============================================================
+// NeuralUI — Slider Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-slider
+// ============================================================
+
+$thumb-size: 18px;
+$track-height: 4px;
+
+.neu-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  font-family: var(--neu-font-sans);
+
+  &--disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+.neu-slider__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.neu-slider__label {
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+}
+
+.neu-slider__value {
+  font-size: var(--neu-text-xs);
+  font-weight: 600;
+  color: var(--neu-primary);
+  min-width: 32px;
+  text-align: right;
+}
+
+// ---- Track wrapper (posicionamiento relativo input + fill) ----
+.neu-slider__track-wrap {
+  position: relative;
+  height: $thumb-size;
+  display: flex;
+  align-items: center;
+}
+
+.neu-slider__track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: $track-height;
+  background: var(--neu-surface-3);
+  border-radius: var(--neu-radius-full);
+  pointer-events: none;
+}
+
+.neu-slider__fill {
+  height: 100%;
+  background: var(--neu-primary);
+  border-radius: var(--neu-radius-full);
+  transition: width 0.05s linear;
+}
+
+// ---- Input range (resets necesarios) ----
+.neu-slider__input {
+  position: relative;
+  width: 100%;
+  height: $thumb-size;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  z-index: 1;
+
+  // Track invisible (el visual lo hace .neu-slider__track)
+  &::-webkit-slider-runnable-track {
+    background: transparent;
+    height: $track-height;
+  }
+  &::-moz-range-track {
+    background: transparent;
+    height: $track-height;
+  }
+
+  // Thumb
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: $thumb-size;
+    height: $thumb-size;
+    border-radius: 50%;
+    background: var(--neu-surface);
+    border: 2.5px solid var(--neu-primary);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.15s;
+    cursor: pointer;
+    margin-top: calc(($track-height - $thumb-size) / 2);
+  }
+
+  &::-moz-range-thumb {
+    width: $thumb-size;
+    height: $thumb-size;
+    border-radius: 50%;
+    background: var(--neu-surface);
+    border: 2.5px solid var(--neu-primary);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+  }
+
+  &:hover::-webkit-slider-thumb,
+  &:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px var(--neu-primary-100);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+// ---- Ticks ----
+.neu-slider__ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-disabled);
+}

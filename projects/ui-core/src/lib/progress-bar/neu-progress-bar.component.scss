@@ -1,0 +1,91 @@
+// ============================================================
+// NeuralUI — ProgressBar Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-progress
+// ============================================================
+
+@keyframes neu-progress-indeterminate {
+  0% {
+    transform: translateX(-100%) scaleX(0.5);
+  }
+  50% {
+    transform: translateX(0%) scaleX(0.7);
+  }
+  100% {
+    transform: translateX(200%) scaleX(0.5);
+  }
+}
+
+.neu-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  font-family: var(--neu-font-sans);
+}
+
+.neu-progress__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.neu-progress__label {
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+}
+
+.neu-progress__value {
+  font-size: var(--neu-text-xs);
+  font-weight: 600;
+  color: var(--neu-text-muted);
+  min-width: 32px;
+  text-align: right;
+}
+
+// ---- Track ----
+.neu-progress__track {
+  width: 100%;
+  background: var(--neu-surface-3);
+  border-radius: var(--neu-radius-full);
+  overflow: hidden;
+}
+
+// ---- Tamaños ----
+.neu-progress--sm .neu-progress__track {
+  height: 4px;
+}
+.neu-progress--md .neu-progress__track {
+  height: 8px;
+}
+.neu-progress--lg .neu-progress__track {
+  height: 12px;
+}
+
+// ---- Fill ----
+.neu-progress__fill {
+  height: 100%;
+  border-radius: var(--neu-radius-full);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+
+  &--indeterminate {
+    width: 50% !important;
+    animation: neu-progress-indeterminate 1.4s ease-in-out infinite;
+  }
+}
+
+// ---- Variantes ----
+.neu-progress--primary .neu-progress__fill {
+  background: var(--neu-primary);
+}
+.neu-progress--success .neu-progress__fill {
+  background: var(--neu-success);
+}
+.neu-progress--warning .neu-progress__fill {
+  background: var(--neu-warning);
+}
+.neu-progress--danger .neu-progress__fill {
+  background: var(--neu-error);
+}

@@ -1,0 +1,125 @@
+// ============================================================
+// NeuralUI — Code Block Styles
+// Tema: Tokyo Night Dark (inspirado en el popular VS Code theme)
+// ViewEncapsulation.None — prefijo BEM .neu-code-block
+// ============================================================
+
+$cb-bg: #1a1b26;
+$cb-bg-bar: #16161e;
+$cb-border: rgba(255, 255, 255, 0.06);
+$cb-text: #cdd6f4;
+$cb-accent: #7aa2f7;
+$cb-muted: #565f89;
+
+.neu-code-block {
+  border-radius: var(--neu-radius-lg);
+  overflow: hidden;
+  border: 1px solid $cb-border;
+  font-family: var(--neu-font-mono);
+}
+
+// ---- Header ----
+.neu-code-block__header {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-3);
+  padding: 10px 16px;
+  background: $cb-bg-bar;
+  border-bottom: 1px solid $cb-border;
+}
+
+// ---- Traffic lights decorativos ----
+.neu-code-block__dots {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+
+  span {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+
+    &:nth-child(1) {
+      background: #ff5f57;
+    }
+    &:nth-child(2) {
+      background: #febc2e;
+    }
+    &:nth-child(3) {
+      background: #28c840;
+    }
+  }
+}
+
+// ---- Badge del lenguaje ----
+.neu-code-block__lang {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $cb-accent;
+  font-family: var(--neu-font-mono);
+}
+
+// ---- Botón copiar ----
+.neu-code-block__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #a9b1d6;
+  cursor: pointer;
+  font-family: var(--neu-font-sans);
+  transition: all var(--neu-transition);
+  flex-shrink: 0;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #c0caf5;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// ---- Bloque <pre><code> ----
+.neu-code-block__pre {
+  margin: 0;
+  padding: 20px 24px;
+  background: $cb-bg;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: $cb-muted transparent;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $cb-muted;
+    border-radius: 99px;
+  }
+}
+
+.neu-code-block__code {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: $cb-text;
+  font-family: inherit;
+  white-space: pre;
+  tab-size: 2;
+}

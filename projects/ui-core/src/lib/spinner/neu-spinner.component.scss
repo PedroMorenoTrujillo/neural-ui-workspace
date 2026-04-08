@@ -1,0 +1,75 @@
+// ============================================================
+// NeuralUI — Spinner Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-spinner
+// ============================================================
+
+.neu-spinner-host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-spinner {
+  animation: neu-spinner-rotate linear infinite;
+  animation-duration: inherit;
+
+  // Track (anillo de fondo)
+  &__track {
+    stroke: var(--neu-border);
+    opacity: 0.3;
+  }
+
+  // Arco animado
+  &__arc {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -10;
+    animation: neu-spinner-dash 1.5s ease-in-out infinite;
+    stroke-linecap: round;
+  }
+
+  // Severities — stroke del arco
+  &--primary &__arc {
+    stroke: var(--neu-primary);
+  }
+
+  &--success &__arc {
+    stroke: var(--neu-success);
+  }
+
+  &--warning &__arc {
+    stroke: var(--neu-warning);
+  }
+
+  &--danger &__arc {
+    stroke: var(--neu-danger);
+  }
+
+  &--info &__arc {
+    stroke: var(--neu-info);
+  }
+}
+
+// Rotación global del SVG
+@keyframes neu-spinner-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Animación del trazo (dash)
+@keyframes neu-spinner-dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124px;
+  }
+}

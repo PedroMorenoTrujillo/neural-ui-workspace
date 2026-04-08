@@ -1,0 +1,38 @@
+.neu-skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--neu-surface-2) 25%,
+    var(--neu-surface-3) 50%,
+    var(--neu-surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: neu-skeleton-shimmer 1.5s ease-in-out infinite;
+
+  &--rect {
+    border-radius: var(--neu-radius);
+  }
+
+  &--text {
+    border-radius: var(--neu-radius-sm);
+    height: 14px;
+    width: 100%;
+
+    &:not(:last-child) {
+      margin-bottom: var(--neu-space-2);
+    }
+  }
+
+  &--circle {
+    border-radius: var(--neu-radius-full);
+  }
+}
+
+@keyframes neu-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

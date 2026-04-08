@@ -1,0 +1,6 @@
+// NeuralUI — Punto de entrada de estilos globales
+// Uso: @use '@neural-ui/core/styles' as * en tu styles.scss principal
+// Los estilos de cada componente están encapsulados en su propio bundle JS.
+
+@forward 'tokens';
+@forward 'breakpoints';

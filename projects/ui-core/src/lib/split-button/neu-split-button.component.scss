@@ -1,0 +1,117 @@
+// ============================================================
+// NeuralUI — SplitButton Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-split-button
+// ============================================================
+
+.neu-split-button-host {
+  display: inline-block;
+}
+
+// ---- Contenedor ----
+.neu-split-button {
+  display: inline-flex;
+  align-items: stretch;
+
+  &--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  // Main button pierde el border-radius derecho
+  .neu-split-button__main {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: none !important;
+    flex: 1;
+  }
+
+  // Chevron pierde el border-radius izquierdo
+  .neu-split-button__chevron {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    padding-inline: 10px !important;
+    min-width: auto;
+
+    svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+    }
+  }
+}
+
+// ---- Separador vertical entre botones ----
+.neu-split-button__divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.25);
+  align-self: stretch;
+  flex-shrink: 0;
+
+  .neu-button--secondary &,
+  .neu-button--ghost &,
+  .neu-button--outline & {
+    background: var(--neu-border);
+  }
+}
+
+// ---- Dropdown ----
+.neu-split-button__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 200;
+  min-width: 180px;
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-lg);
+  padding: var(--neu-space-1) 0;
+  animation: neu-split-btn-in 0.1s ease;
+}
+
+@keyframes neu-split-btn-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Hace relativo al contenedor para que el dropdown salga bien
+.neu-split-button {
+  position: relative;
+}
+
+.neu-split-button__dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 9px var(--neu-space-4);
+  border: none;
+  background: none;
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--neu-transition);
+
+  &:hover:not(:disabled):not(.neu-split-button__dropdown-item--disabled) {
+    background: var(--neu-surface-2);
+  }
+
+  &--disabled,
+  &:disabled {
+    color: var(--neu-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.neu-split-button__dropdown-sep {
+  height: 1px;
+  background: var(--neu-border);
+  margin: var(--neu-space-1) 0;
+}

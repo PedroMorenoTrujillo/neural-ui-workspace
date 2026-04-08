@@ -1,0 +1,438 @@
+// ============================================================
+// NeuralUI — Multiselect Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-multiselect
+// ============================================================
+
+$trigger-min-height: 48px;
+$panel-max-height: 280px;
+$panel-z: 200;
+
+// ---- Label estático ----
+.neu-multiselect__static-label {
+  display: block;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  margin-bottom: var(--neu-space-2);
+}
+
+// ---- Floating Label ----
+.neu-multiselect__label {
+  position: absolute;
+  left: var(--neu-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text-muted);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - var(--neu-space-8));
+  transition:
+    top var(--neu-transition),
+    font-size var(--neu-transition),
+    color var(--neu-transition),
+    transform var(--neu-transition),
+    padding var(--neu-transition),
+    background var(--neu-transition);
+
+  .neu-multiselect--open &,
+  .neu-multiselect--has-value & {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: var(--neu-surface);
+    padding: 0 4px;
+    left: calc(var(--neu-space-3) - 4px);
+  }
+
+  .neu-multiselect--open & {
+    color: var(--neu-primary);
+  }
+
+  .neu-multiselect--error & {
+    color: var(--neu-error);
+  }
+
+  .neu-multiselect--disabled & {
+    background: var(--neu-surface-2);
+  }
+}
+
+// ---- Contenedor raíz ----
+.neu-multiselect {
+  position: relative;
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Trigger ----
+.neu-multiselect__trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: $trigger-min-height;
+  padding: var(--neu-space-2) var(--neu-space-3);
+  padding-right: 36px; // hueco para chevron
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &:hover:not(:disabled) {
+    border-color: var(--neu-border-hover);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--neu-surface-2);
+  }
+
+  .neu-multiselect--open & {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+  }
+
+  .neu-multiselect--error & {
+    border-color: var(--neu-error);
+  }
+}
+
+// ---- Chips área ----
+.neu-multiselect__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--neu-space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.neu-multiselect__placeholder {
+  color: var(--neu-text-disabled);
+  font-size: var(--neu-text-base);
+  line-height: 1.5;
+  // En modo floating label se oculta hasta que el multiselect está abierto
+  .neu-multiselect:not(.neu-multiselect--no-float):not(.neu-multiselect--open) & {
+    visibility: hidden;
+  }
+}
+
+// ---- Chip individual ----
+.neu-multiselect__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 8px;
+  background: var(--neu-primary-soft, rgba(0, 122, 255, 0.1));
+  color: var(--neu-primary);
+  border-radius: var(--neu-radius-sm);
+  font-size: var(--neu-text-xs);
+  font-weight: 500;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neu-multiselect__chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  border-radius: 2px;
+  transition: opacity var(--neu-transition);
+  flex-shrink: 0;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+// ---- Clear button ----
+.neu-multiselect__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  border-radius: var(--neu-radius-sm);
+  flex-shrink: 0;
+  transition:
+    color var(--neu-transition),
+    background var(--neu-transition);
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: var(--neu-text);
+    background: var(--neu-surface-3);
+  }
+}
+
+// ---- Chevron ----
+.neu-multiselect__chevron {
+  position: absolute;
+  right: var(--neu-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--neu-text-muted);
+  pointer-events: none;
+  transition: transform var(--neu-transition);
+  flex-shrink: 0;
+
+  .neu-multiselect--open & {
+    transform: translateY(-50%) rotate(180deg);
+  }
+}
+
+// ---- Panel dropdown ----
+.neu-multiselect__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: $panel-z;
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-lg);
+  overflow: hidden;
+  max-height: $panel-max-height;
+  display: flex;
+  flex-direction: column;
+  animation: neu-multiselect-fade-in 0.12s ease;
+}
+
+@keyframes neu-multiselect-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ---- Search dentro del panel ----
+.neu-multiselect__search {
+  padding: var(--neu-space-2);
+  border-bottom: 1px solid var(--neu-border);
+  flex-shrink: 0;
+}
+
+.neu-multiselect__search-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 var(--neu-space-3);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-bg);
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+  outline: none;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &:focus {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.12);
+  }
+
+  &::placeholder {
+    color: var(--neu-text-disabled);
+  }
+}
+
+// ---- Lista de opciones scrollable ----
+.neu-multiselect__options {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+// ---- Opción individual ----
+.neu-multiselect__option {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  padding: 10px var(--neu-space-3);
+  cursor: pointer;
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+  transition: background var(--neu-transition);
+
+  &:hover:not(.neu-multiselect__option--disabled) {
+    background: var(--neu-surface-2);
+  }
+
+  &--selected {
+    background: var(--neu-primary-soft, rgba(0, 122, 255, 0.06));
+    color: var(--neu-primary);
+    font-weight: 500;
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// ---- Checkbox visual ----
+.neu-multiselect__checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid var(--neu-border);
+  background: var(--neu-bg);
+  flex-shrink: 0;
+  transition:
+    border-color var(--neu-transition),
+    background var(--neu-transition);
+
+  &--checked {
+    background: var(--neu-primary);
+    border-color: var(--neu-primary);
+    color: #fff;
+  }
+}
+
+.neu-multiselect__checkbox-check {
+  width: 10px;
+  height: 8px;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+
+  .neu-multiselect__checkbox--checked & {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ---- Empty state ----
+.neu-multiselect__empty {
+  padding: var(--neu-space-4);
+  text-align: center;
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-disabled);
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Footer ----
+.neu-multiselect__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--neu-space-2) var(--neu-space-3);
+  border-top: 1px solid var(--neu-border);
+  background: var(--neu-surface);
+  flex-shrink: 0;
+}
+
+.neu-multiselect__footer-count {
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+}
+
+.neu-multiselect__footer-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+}
+
+.neu-multiselect__footer-mode {
+  background: none;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  padding: 2px 6px;
+  font-size: var(--neu-text-xs);
+  font-family: var(--neu-font-sans);
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  line-height: 1.4;
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+  }
+}
+
+.neu-multiselect__footer-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--neu-text-xs);
+  font-family: var(--neu-font-sans);
+  color: var(--neu-primary);
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.neu-multiselect__count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  background: var(--neu-primary-100, rgba(14, 165, 233, 0.12));
+  color: var(--neu-primary);
+  border-radius: var(--neu-radius-full);
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+}
+
+.neu-multiselect__chip--overflow {
+  background: var(--neu-surface-2);
+  color: var(--neu-text-muted);
+  border: 1px dashed var(--neu-border);
+  cursor: default;
+  pointer-events: none;
+}
+
+// ---- Error ----
+.neu-multiselect__error {
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-error-text, var(--neu-error));
+  font-family: var(--neu-font-sans);
+}

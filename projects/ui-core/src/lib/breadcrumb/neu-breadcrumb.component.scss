@@ -1,0 +1,55 @@
+// ============================================================
+// NeuralUI — Breadcrumb Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-breadcrumb
+// ============================================================
+
+.neu-breadcrumb {
+  display: inline-flex;
+}
+
+.neu-breadcrumb__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+}
+
+.neu-breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.neu-breadcrumb__link {
+  color: var(--neu-text-muted);
+  text-decoration: none;
+  transition: color var(--neu-transition);
+  border-radius: var(--neu-radius-xs);
+  outline: none;
+
+  &:hover {
+    color: var(--neu-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
+}
+
+.neu-breadcrumb__separator {
+  color: var(--neu-text-disabled);
+  font-size: var(--neu-text-xs);
+  user-select: none;
+  margin: 0 2px;
+}
+
+.neu-breadcrumb__current {
+  color: var(--neu-text);
+  font-weight: 500;
+}

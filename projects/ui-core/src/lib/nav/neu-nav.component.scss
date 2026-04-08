@@ -1,0 +1,502 @@
+// ============================================================
+// NeuralUI — Nav Component Styles
+// Sidebar de navegación persistente y colapsable
+// ViewEncapsulation.None — prefijo BEM .neu-nav
+// ============================================================
+
+// ---- Dimensiones ----
+$nav-width-expanded: 268px;
+$nav-width-collapsed: 64px;
+$nav-transition:
+  width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+  opacity 0.2s ease;
+$item-height: 40px;
+$item-radius: 8px;
+
+// ---- Contenedor principal ----
+.neu-nav {
+  display: flex;
+  flex-direction: column;
+  width: $nav-width-expanded;
+  height: 100%;
+  background: var(--neu-surface);
+  border-right: 1px solid var(--neu-border);
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  flex-shrink: 0;
+  user-select: none;
+
+  // Estado colapsado
+  &--collapsed {
+    width: $nav-width-collapsed;
+
+    // Brand: solo el icono centrado
+    .neu-nav__brand {
+      justify-content: center;
+      padding: 0;
+      gap: 0;
+    }
+
+    .neu-nav__brand-content {
+      flex: 0 0 0;
+      width: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    // Ítems: solo icono centrado
+    .neu-nav__items {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .neu-nav__item {
+      justify-content: center;
+      width: $nav-width-collapsed;
+      padding: 0;
+      gap: 0;
+    }
+
+    // Anular el margin-left:auto del chevron en grupos (mayor especificidad)
+    .neu-nav__item--parent .neu-nav__group-chevron {
+      margin-left: 0;
+    }
+
+    .neu-nav__item-label,
+    .neu-nav__item-badge,
+    .neu-nav__group-chevron,
+    .neu-nav__external-icon {
+      flex: 0 0 0;
+      width: 0;
+      margin: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    // Footer oculto
+    .neu-nav__footer {
+      height: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+  }
+}
+
+// ---- Área de brand / logo ----
+.neu-nav__brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  padding: 0 var(--neu-space-4);
+  border-bottom: 1px solid var(--neu-border);
+  flex-shrink: 0;
+  gap: var(--neu-space-3);
+}
+
+.neu-nav__brand-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition:
+    opacity 0.2s ease,
+    width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+// Slot de icono: oculto en modo expandido, visible en colapsado como botón que expande
+.neu-nav__brand-icon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: $nav-width-collapsed;
+  height: 64px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+
+  .neu-nav--collapsed & {
+    display: flex;
+  }
+}
+
+// ---- Wrapper — necesario para el botón pestaña fuera del overflow:hidden del nav ----
+.neu-nav-wrapper {
+  position: relative;
+  height: 100%;
+  flex-shrink: 0;
+  display: flex;
+}
+
+// ---- Pestaña collapse/expand — posicionada absolutamente en el borde derecho ----
+.neu-nav__toggle-tab {
+  position: absolute;
+  right: -13px;
+  top: 16px;
+  transform: none;
+  width: 13px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neu-surface);
+  border: 1px solid var(--neu-border);
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+  transition:
+    background var(--neu-transition),
+    color var(--neu-transition);
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
+}
+
+// ---- Lista de ítems ----
+.neu-nav__items {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--neu-space-3) var(--neu-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  // Scrollbar discreta
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--neu-border);
+    border-radius: 4px;
+  }
+}
+
+// ---- Ítem base ----
+.neu-nav__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: $item-height;
+  padding: 0 var(--neu-space-3);
+  border-radius: $item-radius;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+  transition:
+    background var(--neu-transition),
+    color var(--neu-transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+
+  &:hover:not(.neu-nav__item--disabled) {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+
+    .neu-nav__item-icon {
+      color: var(--neu-text);
+    }
+  }
+
+  // Estado activo
+  &--active {
+    background: var(--neu-primary-50);
+    color: var(--neu-primary);
+    font-weight: 600;
+
+    .neu-nav__item-icon {
+      color: var(--neu-primary);
+    }
+
+    // Línea de acento izquierda
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      background: var(--neu-primary);
+      border-radius: 0 var(--neu-radius-full) var(--neu-radius-full) 0;
+    }
+  }
+
+  // Deshabilitado
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // Ítem hijo (submenú) — sangría visual
+  &--child {
+    height: 36px;
+    padding-left: calc(var(--neu-space-3) + 6px);
+    font-size: 0.8125rem;
+  }
+
+  // Ítem padre (con submenú)
+  &--parent {
+    .neu-nav__group-chevron {
+      margin-left: auto;
+      flex-shrink: 0;
+      transition: transform var(--neu-transition);
+      color: var(--neu-text-disabled);
+    }
+  }
+}
+
+// ---- Icono del ítem ----
+.neu-nav__item-icon {
+  flex-shrink: 0;
+  color: var(--neu-text-disabled);
+  transition: color var(--neu-transition);
+}
+
+// ---- Label del ítem ----
+.neu-nav__item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    opacity 0.2s ease,
+    width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ---- Badge del ítem ----
+.neu-nav__item-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: var(--neu-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: opacity 0.2s ease;
+
+  &--default {
+    background: var(--neu-surface-3);
+    color: var(--neu-text-muted);
+  }
+  &--success {
+    background: var(--neu-success-bg);
+    color: var(--neu-success-text);
+  }
+  &--warning {
+    background: var(--neu-warning-bg);
+    color: var(--neu-warning-text);
+  }
+  &--danger {
+    background: var(--neu-error-bg);
+    color: var(--neu-error-text);
+  }
+  &--info {
+    background: var(--neu-info-bg);
+    color: var(--neu-info-text);
+  }
+}
+
+// ---- Grupo con submenú ----
+.neu-nav__group {
+  display: flex;
+  flex-direction: column;
+
+  // Chevron rotado cuando el grupo está abierto
+  &--open {
+    .neu-nav__group-chevron {
+      transform: rotate(90deg);
+    }
+
+    > .neu-nav__item--parent {
+      color: var(--neu-text);
+      background: var(--neu-surface-2);
+
+      .neu-nav__item-icon {
+        color: var(--neu-text-muted);
+      }
+    }
+  }
+}
+
+// ---- Submenú ----
+.neu-nav__submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 0 4px var(--neu-space-3);
+  margin-top: 2px;
+  border-left: 2px solid var(--neu-border);
+  margin-left: calc(var(--neu-space-3) + 9px);
+
+  // Nivel 3 — submenú anidado dentro de un subgrupo (nivel 2)
+  &--nested {
+    padding-left: var(--neu-space-2);
+    margin-left: calc(var(--neu-space-2) + 7px);
+    border-color: var(--neu-border);
+    border-left-style: dashed;
+  }
+}
+
+// ---- Ítem nieto (nivel 3) ----
+.neu-nav__item--grandchild {
+  height: 32px;
+  padding-left: calc(var(--neu-space-2) + 4px);
+  font-size: 0.75rem;
+}
+
+// ---- Icono de enlace externo ----
+.neu-nav__external-icon {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--neu-text-disabled);
+  opacity: 0.7;
+  transition:
+    opacity var(--neu-transition),
+    color var(--neu-transition);
+
+  .neu-nav__item:hover & {
+    opacity: 1;
+    color: var(--neu-text-muted);
+  }
+}
+
+// ---- Footer ----
+.neu-nav__footer {
+  border-top: 1px solid var(--neu-border);
+  padding: var(--neu-space-3) var(--neu-space-4);
+  flex-shrink: 0;
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+  transition:
+    opacity 0.2s ease,
+    height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ---- Indicador de submenú en modo colapsado ----
+.neu-nav--collapsed .neu-nav__item--parent {
+  &::after {
+    content: '›';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    line-height: 1;
+    color: var(--neu-text-disabled);
+    pointer-events: none;
+  }
+}
+
+// ---- Flyout panel (modo colapsado) ----
+.neu-nav__flyout {
+  position: fixed;
+  z-index: 1000;
+  min-width: 200px;
+  max-width: 240px;
+  background: var(--neu-surface);
+  border: 1px solid var(--neu-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  margin-left: 6px;
+}
+
+.neu-nav__flyout-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--neu-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 8px 6px;
+}
+
+.neu-nav__flyout-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: var(--neu-text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--neu-transition),
+    color var(--neu-transition);
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+  }
+
+  &--active {
+    background: var(--neu-primary-50);
+    color: var(--neu-primary);
+    font-weight: 600;
+  }
+
+  .neu-nav__external-icon {
+    margin-left: auto;
+    opacity: 0.6;
+  }
+}
+
+.neu-nav__flyout-group {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--neu-border);
+}
+
+.neu-nav__flyout-group-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--neu-text-disabled);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px 4px;
+}

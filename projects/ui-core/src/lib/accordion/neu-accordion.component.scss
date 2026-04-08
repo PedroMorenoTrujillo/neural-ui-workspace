@@ -1,0 +1,98 @@
+// ============================================================
+// NeuralUI — Accordion Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-accordion
+// ============================================================
+
+.neu-accordion {
+  width: 100%;
+  font-family: var(--neu-font-sans);
+
+  &--bordered {
+    border: 1.5px solid var(--neu-border);
+    border-radius: var(--neu-radius-lg);
+    overflow: hidden;
+  }
+}
+
+// ---- Item ----
+.neu-accordion__item {
+  border-bottom: 1.5px solid var(--neu-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+// ---- Header / Button ----
+.neu-accordion__header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neu-space-4);
+  padding: var(--neu-space-4) var(--neu-space-5);
+  background: var(--neu-surface);
+  border: none;
+  cursor: pointer;
+  font-family: var(--neu-font-sans);
+  text-align: left;
+  transition: background var(--neu-transition);
+  outline: none;
+
+  &:hover {
+    background: var(--neu-surface-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+}
+
+.neu-accordion__title {
+  font-size: var(--neu-text-base);
+  font-weight: 600;
+  color: var(--neu-text);
+}
+
+// ---- Chevron animado ----
+.neu-accordion__chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--neu-text-muted);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .neu-accordion__item--expanded & {
+    transform: rotate(180deg);
+  }
+}
+
+// ---- Panel con animación CSS ----
+.neu-accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .neu-accordion__item--expanded & {
+    grid-template-rows: 1fr;
+  }
+}
+
+.neu-accordion__body {
+  overflow: hidden;
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-muted);
+  line-height: 1.7;
+  padding: 0;
+  transition: padding 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .neu-accordion__item--expanded & {
+    padding: var(--neu-space-4) var(--neu-space-5);
+    padding-top: 0;
+  }
+}
