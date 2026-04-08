@@ -1,6 +1,6 @@
 {
   "name": "@neural-ui/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Modern Angular UI component library built with signals, standalone components, and OnPush change detection.",
   "author": "PedroMorenoTrujillo",
   "keywords": [

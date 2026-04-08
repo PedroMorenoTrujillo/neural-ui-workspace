@@ -1,43 +1,6 @@
 // NeuralUI — Punto de entrada de estilos globales
 // Uso: @use '@neural-ui/core/styles' as * en tu styles.scss principal
+// Los estilos de cada componente están encapsulados en su propio bundle JS.
 
 @forward 'tokens';
 @forward 'breakpoints';
-
-// Componentes — @use carga el CSS sin re-exportar variables internas
-@use '../accordion/neu-accordion.component';
-@use '../avatar/neu-avatar.component';
-@use '../badge/neu-badge.component';
-@use '../breadcrumb/neu-breadcrumb.component';
-@use '../button/neu-button.component';
-@use '../card/neu-card.component';
-@use '../chart/neu-chart.component';
-@use '../checkbox/neu-checkbox.component';
-@use '../chip/neu-chip.component';
-@use '../code-block/neu-code-block.component';
-@use '../date-input/neu-date-input.component';
-@use '../empty-state/neu-empty-state.component';
-@use '../icon/neu-icon.component';
-@use '../input/neu-input.component';
-@use '../modal/neu-modal.component';
-@use '../multiselect/neu-multiselect.component';
-@use '../nav/neu-nav.component';
-@use '../pagination/neu-pagination.component';
-@use '../progress-bar/neu-progress-bar.component';
-@use '../radio/neu-radio.component';
-@use '../rating/neu-rating.component';
-@use '../select/neu-select.component';
-@use '../sidebar/neu-sidebar.component';
-@use '../skeleton/neu-skeleton.component';
-@use '../slider/neu-slider.component';
-@use '../split-button/neu-split-button.component';
-@use '../stats-card/neu-stats-card.component';
-@use '../stepper/neu-stepper.component';
-@use '../switch/neu-switch.component';
-@use '../table/neu-table.component';
-@use '../tabs/neu-tabs.component';
-@use '../textarea/neu-textarea.component';
-@use '../timeline/neu-timeline.component';
-@use '../toast/neu-toast.component';
-@use '../toggle-button-group/neu-toggle-button-group.component';
-@use '../tooltip/neu-tooltip.component';
