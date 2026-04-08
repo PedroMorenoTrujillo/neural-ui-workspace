@@ -12,7 +12,7 @@
 Modern Angular UI component library — **signals-first**, fully **standalone**, zero Zone.js dependency.  
 Built for Angular 19–22 with OnPush change detection and no Zone.js requirement.
 
-> Live documentation and examples → [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app)
+> Live documentation and examples → [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app)
 
 ---
 

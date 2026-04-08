@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.1] - 2026-04-08
+
+### Fixed
+
+- Corregida la URL del showcase en `README.md` y `package.json` (`homepage`) — ahora apunta a [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app).
+
+---
+
 ## [1.1.0] - 2026-04-08
 
 ### Added
