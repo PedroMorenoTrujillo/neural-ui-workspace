@@ -4,7 +4,8 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build ui-core --configuration production",
-    "test": "ng test ui-core --watch=false"
+    "test": "ng test ui-core --watch=false",
+    "sandbox": "ng serve sandbox --open"
   },
   "private": true,
   "packageManager": "npm@10.9.7",

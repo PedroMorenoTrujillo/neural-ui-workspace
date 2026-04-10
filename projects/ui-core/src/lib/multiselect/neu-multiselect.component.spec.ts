@@ -397,6 +397,61 @@ describe('NeuMultiselectComponent', () => {
 
   // ── NeuMultiselectItemDirective ───────────────────────────────────────────
 
+  // ── selectionChange output ────────────────────────────────────────────────────────────
+
+  it('selectionChange should emit full options array on toggleOption', () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
+    const emitted: NeuSelectOption[][] = [];
+    ms.selectionChange.subscribe((v: NeuSelectOption[]) => emitted.push(v));
+    ms.toggleOption(OPTIONS[0]);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0][0]).toEqual(OPTIONS[0]);
+  });
+
+  it('selectionChange should emit updated array after removeValue', () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    f.componentInstance.ctrl.setValue(['angular', 'react']);
+    f.detectChanges();
+    const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
+    const emitted: NeuSelectOption[][] = [];
+    ms.selectionChange.subscribe((v: NeuSelectOption[]) => emitted.push(v));
+    ms.removeValue('angular', { stopPropagation: () => {} } as MouseEvent);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0].length).toBe(1);
+    expect(emitted[0][0].value).toBe('react');
+  });
+
+  it('selectionChange should emit empty array on clearAll', () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    f.componentInstance.ctrl.setValue(['angular', 'vue']);
+    f.detectChanges();
+    const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
+    const emitted: NeuSelectOption[][] = [];
+    ms.selectionChange.subscribe((v: NeuSelectOption[]) => emitted.push(v));
+    ms.clearAll({ stopPropagation: () => {} } as MouseEvent);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]).toEqual([]);
+  });
+
+  it('selectionChange should emit option with data field', () => {
+    const optsWithData: NeuSelectOption[] = [
+      { value: 'angular', label: 'Angular', data: { id: 1, tier: 'A' } },
+      { value: 'react', label: 'React', data: { id: 2, tier: 'A' } },
+    ];
+    const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.options = optsWithData;
+    f.detectChanges();
+    const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
+    const emitted: NeuSelectOption[][] = [];
+    ms.selectionChange.subscribe((v: NeuSelectOption[]) => emitted.push(v));
+    ms.toggleOption(optsWithData[0]);
+    expect(emitted[0][0].data).toEqual({ id: 1, tier: 'A' });
+  });
+
   it('NeuMultiselectItemDirective should inject templateRef', () => {
     @Component({
       template: `<neu-multiselect [options]="opts">

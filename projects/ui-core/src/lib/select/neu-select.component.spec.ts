@@ -267,6 +267,47 @@ describe('NeuSelectComponent', () => {
 
   // ── With ReactiveFormsModule (FormControl integration) ────────────────────
 
+  // ── selectionChange output ────────────────────────────────────────────────────────────
+
+  it('selectionChange should emit full option on select', async () => {
+    const { comp } = await setup();
+    const emitted: (NeuSelectOption | null)[] = [];
+    comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
+    comp.selectOption(OPTIONS[0]);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]).toEqual(OPTIONS[0]);
+  });
+
+  it('selectionChange should emit null on clearValue', async () => {
+    const { comp } = await setup({ clearable: true });
+    comp.writeValue('es');
+    const emitted: (NeuSelectOption | null)[] = [];
+    comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
+    comp.clearValue({ stopPropagation: () => {} } as unknown as MouseEvent);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]).toBeNull();
+  });
+
+  it('selectionChange should not emit for disabled option', async () => {
+    const { comp } = await setup();
+    const emitted: (NeuSelectOption | null)[] = [];
+    comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
+    comp.selectOption(OPTIONS[2]); // disabled
+    expect(emitted).toHaveLength(0);
+  });
+
+  it('selectionChange should emit option with data field', async () => {
+    const optsWithData: NeuSelectOption[] = [
+      { value: 'es', label: 'España', data: { id: 1, iso: 'ES' } },
+      { value: 'mx', label: 'México', data: { id: 2, iso: 'MX' } },
+    ];
+    const { comp } = await setup({ options: optsWithData });
+    const emitted: (NeuSelectOption | null)[] = [];
+    comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
+    comp.selectOption(optsWithData[0]);
+    expect(emitted[0]?.data).toEqual({ id: 1, iso: 'ES' });
+  });
+
   it('should integrate with FormControl via ReactiveFormsModule', async () => {
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],

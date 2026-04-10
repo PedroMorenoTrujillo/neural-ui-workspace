@@ -5,11 +5,15 @@ import {
   ViewEncapsulation,
   computed,
   contentChild,
+  effect,
   forwardRef,
   inject,
   input,
+  output,
   signal,
+  untracked,
 } from '@angular/core';
+import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from './neu-select.types';
@@ -205,7 +209,19 @@ let _neuSelectIdSeq = 0;
 })
 export class NeuSelectComponent implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly _urlState = inject(NeuUrlStateService);
 
+  constructor() {
+    effect(() => {
+      const param = this.urlParam();
+      if (!param) return;
+      const urlVal = this._urlState.getParam(param)();
+      if (urlVal !== untracked(() => this._value())) {
+        this._value.set(urlVal);
+        this._onChange(urlVal);
+      }
+    });
+  }
   /** @internal — ID \u00fanico para asociar label con trigger */
   readonly _triggerId = `neu-select-trigger-${_neuSelectIdSeq++}`;
   /** Template personalizado para cada opción del dropdown */
@@ -245,6 +261,20 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   /** Aria-label del botón de limpiar */
   clearAriaLabel = input<string>('Limpiar selección');
+
+  /**
+   * Sincroniza el valor seleccionado con este query param de la URL.
+   * Al seleccionar una opción se añade `?{urlParam}=value` a la URL.
+   * Pasar `null` (default) deshabilita la sincronización.
+   */
+  urlParam = input<string | null>(null);
+
+  /**
+   * Emite el objeto NeuSelectOption completo (incluyendo data) al seleccionar una opción.
+   * Emite null al limpiar la selección.
+   * El valor de ngModel / formControl sigue siendo string.
+   */
+  readonly selectionChange = output<NeuSelectOption | null>();
 
   // Estado interno
   protected readonly _value = signal<string | null>(null);
@@ -341,7 +371,10 @@ export class NeuSelectComponent implements ControlValueAccessor {
     event.stopPropagation();
     this._value.set(null);
     this._onChange(null);
+    const param = this.urlParam();
+    if (param) this._urlState.setParam(param, null);
     this._onTouched();
+    this.selectionChange.emit(null);
     this.close();
   }
 
@@ -349,6 +382,9 @@ export class NeuSelectComponent implements ControlValueAccessor {
     if (option.disabled) return;
     this._value.set(option.value);
     this._onChange(option.value);
+    const param = this.urlParam();
+    if (param) this._urlState.setParam(param, option.value);
+    this.selectionChange.emit(option);
     this.close();
   }
 

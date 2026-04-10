@@ -1,0 +1,87 @@
+<!-- NeuralUI Sandbox — Layout principal -->
+<div class="sb-layout">
+  <!-- ===== HEADER ===== -->
+  <header class="sb-header">
+    <!-- Hamburger (solo mobile) -->
+    @if (!isDesktop()) {
+      <button
+        class="sb-header__menu-btn"
+        type="button"
+        aria-label="Abrir menú"
+        (click)="sidebar.open()"
+      >
+        <neu-icon name="lucideMenu" size="1.125rem" />
+      </button>
+    }
+
+    <!-- Brand -->
+    <a class="sb-header__brand" routerLink="/" aria-label="NeuralUI Sandbox">
+      NeuralUI
+      <span class="sb-header__badge">Sandbox</span>
+    </a>
+
+    <!-- Acciones -->
+    <div class="sb-header__actions">
+      <button
+        class="sb-header__theme-btn"
+        type="button"
+        [attr.aria-label]="isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+        (click)="toggleTheme()"
+      >
+        @if (isDark()) {
+          <neu-icon name="lucideSun" size="1rem" />
+        } @else {
+          <neu-icon name="lucideMoon" size="1rem" />
+        }
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== SIDEBAR ===== -->
+  <neu-sidebar #sidebar class="sb-sidebar" [persistent]="isDesktop()" [hideHeader]="isDesktop()">
+    <nav class="sb-nav" aria-label="Componentes NeuralUI">
+      @for (group of navGroups; track group.key) {
+        <div class="sb-nav__group">
+          <button
+            class="sb-nav__group-label"
+            type="button"
+            [attr.aria-expanded]="!isGroupCollapsed(group.key)"
+            (click)="toggleGroup(group.key)"
+          >
+            <neu-icon [name]="group.icon" size="0.75rem" aria-hidden="true" />
+            {{ group.label }}
+            <neu-icon
+              name="lucideChevronRight"
+              size="0.9rem"
+              class="sb-nav__group-chevron"
+              [class.sb-nav__group-chevron--open]="!isGroupCollapsed(group.key)"
+              aria-hidden="true"
+            />
+          </button>
+          @if (!isGroupCollapsed(group.key)) {
+            <div role="list">
+              @for (item of group.items; track item.route) {
+                <a
+                  class="sb-nav__link"
+                  [routerLink]="item.route"
+                  routerLinkActive="active"
+                  role="listitem"
+                >
+                  {{ item.label }}
+                </a>
+              }
+            </div>
+          }
+        </div>
+      }
+    </nav>
+  </neu-sidebar>
+
+  <!-- ===== MAIN ===== -->
+  <main class="sb-main">
+    <router-outlet />
+  </main>
+
+  <!-- Toast container (necesario para la página Toast) -->
+  <neu-toast-container />
+</div>

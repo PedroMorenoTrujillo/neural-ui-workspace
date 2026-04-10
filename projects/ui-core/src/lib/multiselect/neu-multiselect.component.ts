@@ -5,11 +5,15 @@ import {
   ViewEncapsulation,
   computed,
   contentChild,
+  effect,
   forwardRef,
   inject,
   input,
+  output,
   signal,
+  untracked,
 } from '@angular/core';
+import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from '../select/neu-select.types';
@@ -261,6 +265,21 @@ let _neuMultiselectIdSeq = 0;
 })
 export class NeuMultiselectComponent implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly _urlState = inject(NeuUrlStateService);
+
+  constructor() {
+    effect(() => {
+      const param = this.urlParam();
+      if (!param) return;
+      const urlRaw = this._urlState.getParam(param)();
+      const urlVals = urlRaw ? urlRaw.split(',').filter(Boolean) : [];
+      const current = untracked(() => this._values());
+      if (JSON.stringify(urlVals) !== JSON.stringify(current)) {
+        this._values.set(urlVals);
+        this._onChange(urlVals);
+      }
+    });
+  }
 
   /** @internal */
   readonly _triggerId = `neu-multiselect-trigger-${_neuMultiselectIdSeq++}`;
@@ -303,6 +322,20 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   /** Aria-label del botón clear que aparece en el trigger */
   clearAriaLabel = input<string>('Limpiar selección');
+
+  /**
+   * Sincroniza los valores seleccionados con este query param de la URL.
+   * Los valores se codifican como lista separada por comas: `?{urlParam}=a,b,c`.
+   * Pasar `null` (default) deshabilita la sincronización.
+   */
+  urlParam = input<string | null>(null);
+
+  /**
+   * Emite el array de NeuSelectOption completo (incluyendo data) al cambiar la selección.
+   * Emite [] al limpiar toda la selección.
+   * Los valores de ngModel / formControl siguen siendo string[].
+   */
+  readonly selectionChange = output<NeuSelectOption[]>();
 
   // --- Estado interno ---
   protected readonly _values = signal<string[]>([]);
@@ -409,6 +442,9 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
       : [...current, option.value];
     this._values.set(next);
     this._onChange(next);
+    this.selectionChange.emit(this.options().filter((o) => next.includes(o.value)));
+    const param = this.urlParam();
+    if (param) this._urlState.setParam(param, next.length ? next.join(',') : null);
   }
 
   protected removeValue(value: string, event: MouseEvent): void {
@@ -417,6 +453,9 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this._values.set(next);
     this._onChange(next);
     this._onTouched();
+    this.selectionChange.emit(this.options().filter((o) => next.includes(o.value)));
+    const param = this.urlParam();
+    if (param) this._urlState.setParam(param, next.length ? next.join(',') : null);
   }
 
   protected clearAll(event: MouseEvent): void {
@@ -424,6 +463,9 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this._values.set([]);
     this._onChange([]);
     this._onTouched();
+    this.selectionChange.emit([]);
+    const param = this.urlParam();
+    if (param) this._urlState.setParam(param, null);
   }
 
   protected toggleChipMode(event: MouseEvent): void {
