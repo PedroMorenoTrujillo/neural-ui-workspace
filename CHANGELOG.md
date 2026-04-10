@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.2] - 2026-04-10
+
+### Fixed
+
+- `NeuSplitButton` — los estilos de los botones (`.neu-button`, variantes y tamaños) ahora se incluyen correctamente en el bundle del componente. El template usa `<button>` nativo con clases BEM, por lo que los estilos de `NeuButtonComponent` se incorporan via `@use` en el SCSS del split-button para garantizar que se inyectan en el DOM independientemente de si `NeuButtonComponent` se usa en la misma página.
+
+---
+
 ## [1.1.1] - 2026-04-08
 
 ### Fixed

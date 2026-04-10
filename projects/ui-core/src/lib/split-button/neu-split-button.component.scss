@@ -2,6 +2,9 @@
 // NeuralUI — SplitButton Component Styles
 // ViewEncapsulation.None — prefijo BEM .neu-split-button
 // ============================================================
+// Incluimos los estilos del botón porque el template usa clases BEM
+// de NeuButtonComponent con <button> nativo (no <neu-button>)
+@use '../button/neu-button.component' as *;
 
 .neu-split-button-host {
   display: inline-block;
