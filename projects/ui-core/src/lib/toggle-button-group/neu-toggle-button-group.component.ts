@@ -13,21 +13,21 @@ import { NeuButtonSize } from '../button/neu-button.component';
 import { NeuIconComponent } from '../icon/neu-icon.component';
 
 export interface NeuToggleOption<T = unknown> {
-  /** Texto visible del botón */
+  /** Texto visible del botón / Visible button text */
   label: string;
-  /** Valor asociado a esta opción */
+  /** Valor asociado a esta opción / Value associated with this option */
   value: T;
-  /** Nombre de icono Lucide (opcional) */
+  /** Nombre de icono Lucide (opcional) / Lucide icon name (optional) */
   icon?: string;
-  /** Deshabilita solo esta opción */
+  /** Deshabilita solo esta opción / Disables this option only */
   disabled?: boolean;
 }
 
 /**
  * NeuralUI ToggleButtonGroup Component
  *
- * Grupo de botones de selección (single o múltiple).
- * Equivalente técnicamente superior al SelectButton de PrimeNG.
+ * Grupo de botones de selección (single o múltiple). / Selection button group (single or multiple).
+ * Equivalente técnicamente superior al SelectButton de PrimeNG. / Technically superior equivalent to PrimeNG's SelectButton.
  *
  * Uso (single):
  *   <neu-toggle-button-group [options]="opts" [(ngModel)]="value" />
@@ -77,7 +77,7 @@ export interface NeuToggleOption<T = unknown> {
   styleUrl: './neu-toggle-button-group.component.scss',
 })
 export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueAccessor {
-  /** Lista de opciones del grupo */
+  /** Lista de opciones del grupo / Group option list */
   options = input<NeuToggleOption<T>[]>([]);
 
   /**
@@ -87,13 +87,13 @@ export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueA
    */
   multiple = input<boolean>(false);
 
-  /** Tamaño visual */
+  /** Tamaño visual / Visual size */
   size = input<NeuButtonSize>('md');
 
-  /** Deshabilita todo el grupo */
+  /** Deshabilita todo el grupo / Disables the entire group */
   disabled = input<boolean>(false);
 
-  /** Emite el nuevo valor al cambiar (útil sin formControl) */
+  /** Emite el nuevo valor al cambiar (útil sin formControl) / Emits the new value on change (useful without formControl) */
   neuChange = output<T | T[] | null>();
 
   readonly _value = signal<T | T[] | null>(null);

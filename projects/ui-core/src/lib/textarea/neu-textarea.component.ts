@@ -81,7 +81,7 @@ export class NeuTextareaComponent implements ControlValueAccessor {
   readonly label = input('');
   readonly rows = input<number>(3);
   readonly autoResize = input<boolean>(false);
-  /** Permite al usuario redimensionar el campo manualmente (por defecto: true) */
+  /** Permite al usuario redimensionar el campo manualmente (por defecto: true) / Allows the user to manually resize the field (default: true) */
   readonly resizable = input<boolean>(true);
   readonly errorMessage = input<string>('');
   readonly hint = input<string>('');

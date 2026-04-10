@@ -14,10 +14,10 @@ import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.typ
  */
 @Injectable({ providedIn: 'root' })
 export class NeuToastService {
-  /** Lista reactiva de toasts activos */
+  /** Lista reactiva de toasts activos / Reactive list of active toasts */
   readonly toasts = signal<NeuToastItem[]>([]);
 
-  /** Posición del contenedor de toasts */
+  /** Posición del contenedor de toasts / Toast container position */
   readonly position = signal<NeuToastPosition>('top-right');
 
   setPosition(position: NeuToastPosition): void {

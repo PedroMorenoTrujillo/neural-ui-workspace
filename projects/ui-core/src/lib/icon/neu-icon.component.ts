@@ -34,7 +34,7 @@ import { NgIcon } from '@ng-icons/core';
   styleUrl: './neu-icon.component.scss',
 })
 export class NeuIconComponent {
-  /** Nombre del icono registrado con provideIcons() */
+  /** Nombre del icono registrado con provideIcons() / Icon name registered with provideIcons() */
   name = input.required<string>();
 
   /**
@@ -49,6 +49,6 @@ export class NeuIconComponent {
    */
   size = input<string>('');
 
-  /** Tamaño resuelto: usa el input `size` o cae al token CSS. */
+  /** Tamaño resuelto: usa el input `size` o cae al token CSS. / Resolved size: uses the `size` input or falls back to the CSS token. */
   readonly resolvedSize = computed(() => this.size() || 'var(--neu-icon-size, 1.25rem)');
 }

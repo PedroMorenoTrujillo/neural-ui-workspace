@@ -30,12 +30,12 @@
     }
   }
 
-  // ---- Bordered — acento primary ----
+  // ---- Bordered — acento primary / primary accent ----
   &--bordered {
     border-color: var(--neu-primary);
   }
 
-  // ---- Flat — sin sombras ----
+  // ---- Flat — sin sombras / no shadows ----
   &--flat {
     box-shadow: none;
     border-color: var(--neu-border);

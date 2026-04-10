@@ -72,34 +72,34 @@ export class NeuSliderComponent {
   private static _idCounter = 0;
   protected readonly sliderId = `neu-slider-${++NeuSliderComponent._idCounter}`;
 
-  /** Valor actual */
+  /** Valor actual / Current value */
   value = input<number>(0);
 
-  /** Valor mínimo */
+  /** Valor mínimo / Minimum value */
   min = input<number>(0);
 
-  /** Valor máximo */
+  /** Valor máximo / Maximum value */
   max = input<number>(100);
 
-  /** Paso */
+  /** Paso / Step */
   step = input<number>(1);
 
-  /** Etiqueta */
+  /** Etiqueta / Label */
   label = input<string>('');
 
-  /** Muestra el valor numerico */
+  /** Muestra el valor numerico / Shows the numeric value */
   showValue = input<boolean>(true);
 
-  /** Muestra min/mid/max bajo la barra */
+  /** Muestra min/mid/max bajo la barra / Shows min/mid/max below the bar */
   showTicks = input<boolean>(false);
 
-  /** Unidad a mostrar junto al valor */
+  /** Unidad a mostrar junto al valor / Unit to display next to the value */
   unit = input<string>('');
 
-  /** Deshabilitado */
+  /** Deshabilitado / Disabled */
   disabled = input<boolean>(false);
 
-  /** Emite al mover el slider */
+  /** Emite al mover el slider / Emits when the slider moves */
   valueChange = output<number>();
 
   readonly fillPercent = computed(() => {

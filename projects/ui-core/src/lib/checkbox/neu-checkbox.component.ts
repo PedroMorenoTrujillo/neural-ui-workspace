@@ -76,7 +76,7 @@ export class NeuCheckboxComponent implements ControlValueAccessor {
   readonly _id = `neu-checkbox-${_neuCheckboxIdSeq++}`;
 
   protected readonly _checked = signal(false);
-  /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState */
+  /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState / Internal disabled state — combines the `disabled` input with CVA setDisabledState */
   private readonly _cvaDisabled = signal(false);
   protected readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
 

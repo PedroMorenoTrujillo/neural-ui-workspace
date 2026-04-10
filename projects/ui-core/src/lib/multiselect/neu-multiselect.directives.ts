@@ -2,7 +2,7 @@ import { Directive, TemplateRef, inject } from '@angular/core';
 import { NeuSelectOption } from '../select/neu-select.types';
 
 /**
- * Directiva para personalizar el template de cada ítem del dropdown de Multiselect.
+ * Directiva para personalizar el template de cada ítem del dropdown de Multiselect. / Directive to customize the template of each Multiselect dropdown item.
  *
  * Uso:
  * ```html

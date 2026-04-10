@@ -58,7 +58,7 @@ export class NeuRadioComponent {
   readonly group = inject(NEU_RADIO_GROUP);
 
   readonly _id = `neu-radio-${_neuRadioIdSeq++}`;
-  /** Toma el nombre del grupo padre — así todos los radios del grupo comparten el mismo `name` nativo */
+  /** Toma el nombre del grupo padre — así todos los radios del grupo comparten el mismo `name` nativo / Takes the parent group name — so all radios in the group share the same native `name` */
   readonly _groupName = this.group._name;
 
   readonly isChecked = computed(() => this.group._value() === this.value());

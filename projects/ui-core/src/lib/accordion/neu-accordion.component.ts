@@ -11,15 +11,15 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface NeuAccordionItem {
-  /** ID único del panel */
+  /** ID único del panel / Unique panel ID */
   id: string;
-  /** Título del encabezado */
+  /** Título del encabezado / Header title */
   title: string;
-  /** Contenido del cuerpo (HTML o texto plano) */
+  /** Contenido del cuerpo (HTML o texto plano) / Body content (HTML or plain text) */
   content: string;
-  /** Inicia expandido */
+  /** Inicia expandido / Starts expanded */
   expanded?: boolean;
-  /** Deshabilita este panel */
+  /** Deshabilita este panel / Disables this panel */
   disabled?: boolean;
 }
 
@@ -27,7 +27,7 @@ export interface NeuAccordionItem {
  * NeuralUI Accordion Component
  *
  * Paneles expandibles / colapsables con animación suave.
- * Soporta modo múltiple (varios abiertos a la vez) o exclusivo.
+ * Soporta modo múltiple (varios abiertos a la vez) o exclusivo. / Supports multiple (several open at once) or exclusive mode.
  *
  * Uso:
  *   <neu-accordion [items]="items" />
@@ -88,16 +88,16 @@ export interface NeuAccordionItem {
 export class NeuAccordionComponent {
   private readonly _sanitizer = inject(DomSanitizer);
 
-  /** Lista de paneles */
+  /** Lista de paneles / Panel list */
   items = input<NeuAccordionItem[]>([]);
 
-  /** Permite varios paneles abiertos a la vez */
+  /** Permite varios paneles abiertos a la vez / Allows multiple panels open at once */
   multiple = input<boolean>(false);
 
-  /** Borde exterior alrededor del accordion */
+  /** Borde exterior alrededor del accordion / Outer border around the accordion */
   bordered = input<boolean>(true);
 
-  /** Emite el id del panel al abrirse/cerrarse */
+  /** Emite el id del panel al abrirse/cerrarse / Emits the panel id on open/close */
   panelToggle = output<{ id: string; expanded: boolean }>();
 
   /**

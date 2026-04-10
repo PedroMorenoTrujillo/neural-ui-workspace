@@ -3,7 +3,7 @@ import { NeuToastService } from './neu-toast.service';
 import { NeuToastType } from './neu-toast.types';
 import { NeuIconComponent } from '../icon/neu-icon.component';
 
-/** Mapa de iconos Lucide por tipo de toast */
+/** Mapa de iconos Lucide por tipo de toast / Map of Lucide icons by toast type */
 const TOAST_ICONS: Record<NeuToastType, string> = {
   success: 'lucideCheckCircle',
   error: 'lucideXCircle',

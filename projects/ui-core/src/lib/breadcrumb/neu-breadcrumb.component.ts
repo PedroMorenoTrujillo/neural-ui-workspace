@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@a
 import { RouterLink } from '@angular/router';
 
 export interface NeuBreadcrumbItem {
-  /** Etiqueta visible */
+  /** Etiqueta visible / Visible label */
   label: string;
-  /** Ruta interna (RouterLink) */
+  /** Ruta interna (RouterLink) / Internal route (RouterLink) */
   route?: string | string[];
-  /** URL externa */
+  /** URL externa / External URL */
   url?: string;
-  /** Icono Lucide opcional */
+  /** Icono Lucide opcional / Optional Lucide icon */
   icon?: string;
 }
 
@@ -59,9 +59,9 @@ export interface NeuBreadcrumbItem {
   styleUrl: './neu-breadcrumb.component.scss',
 })
 export class NeuBreadcrumbComponent {
-  /** Lista de ítems de navegación */
+  /** Lista de ítems de navegación / Navigation item list */
   items = input<NeuBreadcrumbItem[]>([]);
 
-  /** Separador personalizable */
+  /** Separador personalizable / Customizable separator */
   separator = input<string>('/');
 }

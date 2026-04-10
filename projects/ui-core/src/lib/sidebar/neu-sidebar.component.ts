@@ -13,12 +13,12 @@ import { NeuIconComponent } from '../icon/neu-icon.component';
 /**
  * NeuralUI Sidebar Component
  *
- * El estado abierto/cerrado se gestiona automáticamente desde la URL
- * via NeuUrlStateService (?menu=open por defecto).
+ * El estado abierto/cerrado se gestiona automáticamente desde la URL / The open/closed state is automatically managed from the URL
+ * via NeuUrlStateService (?menu=open por defecto). / via NeuUrlStateService (?menu=open by default).
  *
  * Modos:
- *   - overlay (default): panel flotante sobre el contenido con backdrop
- *   - persistent: sidebar fijo integrado en el layout (desktop)
+ *   - overlay (default): panel flotante sobre el contenido con backdrop / floating panel above content with backdrop
+ *   - persistent: sidebar fijo integrado en el layout (desktop) / fixed sidebar integrated in the layout (desktop)
  *
  * Uso:
  *   <neu-sidebar urlParam="menu" [persistent]="isDesktop()">
@@ -27,7 +27,7 @@ import { NeuIconComponent } from '../icon/neu-icon.component';
  *     <div neu-sidebar-footer>...</div>
  *   </neu-sidebar>
  *
- * Abrir desde cualquier parte:
+ * Abrir desde cualquier parte: / Open from anywhere:
  *   inject(NeuUrlStateService).setParam('menu', 'open', false);
  */
 @Component({
@@ -92,10 +92,10 @@ import { NeuIconComponent } from '../icon/neu-icon.component';
 export class NeuSidebarComponent {
   private readonly urlState = inject(NeuUrlStateService);
 
-  /** Posición del sidebar: izquierda o derecha de la pantalla */
+  /** Posición del sidebar: izquierda o derecha de la pantalla / Sidebar position: left or right of the screen */
   side = input<'left' | 'right'>('left');
 
-  /** QueryParam que controla el estado. Default: 'menu' (?menu=open) */
+  /** QueryParam que controla el estado. Default: 'menu' (?menu=open) / QueryParam that controls the state. Default: 'menu' (?menu=open) */
   urlParam = input<string>('menu');
 
   /**
@@ -110,27 +110,27 @@ export class NeuSidebarComponent {
    */
   hideHeader = input<boolean>(false);
 
-  /** Etiqueta accesible para el <aside> */
+  /** Etiqueta accesible para el <aside> / Accessible label for the <aside> */
   ariaLabel = input<string>('Menú de navegación');
 
-  /** Etiqueta accesible para el botón cerrar */
+  /** Etiqueta accesible para el botón cerrar / Accessible label for the close button */
   closeLabel = input<string>('Cerrar menú de navegación');
 
-  /** Emite cuando el usuario cierra el sidebar (overlay click o botón) */
+  /** Emite cuando el usuario cierra el sidebar (overlay click o botón) / Emits when the user closes the sidebar (overlay click or button) */
   closeRequested = output<void>();
 
-  /** Signal reactivo: true si el sidebar debe mostrarse */
+  /** Signal reactivo: true si el sidebar debe mostrarse / Reactive signal: true if the sidebar should be shown */
   readonly isOpen = computed(() => {
     if (this.persistent()) return true;
     return this.urlState.getParam(this.urlParam())() === 'open';
   });
 
-  /** Abre el sidebar — añade ?{urlParam}=open a la URL */
+  /** Abre el sidebar — añade ?{urlParam}=open a la URL / Opens the sidebar — adds ?{urlParam}=open to the URL */
   open(replaceUrl = false): void {
     this.urlState.setParam(this.urlParam(), 'open', replaceUrl);
   }
 
-  /** Cierra el sidebar — elimina el parámetro de la URL */
+  /** Cierra el sidebar — elimina el parámetro de la URL / Closes the sidebar — removes the URL parameter */
   close(): void {
     this.urlState.setParam(this.urlParam(), null, true);
     this.closeRequested.emit();

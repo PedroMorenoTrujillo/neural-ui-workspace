@@ -44,7 +44,7 @@ export class NeuTooltipDirective implements OnDestroy {
 
   readonly _tooltipId = `neu-tooltip-${Math.random().toString(36).slice(2, 7)}`;
 
-  /** Elementos HTML nativamente focusables que no necesitan tabindex extra */
+  /** Elementos HTML nativamente focusables que no necesitan tabindex extra / Natively focusable HTML elements that don't need extra tabindex */
   private readonly _NATIVE_FOCUSABLE = /^(a|button|input|select|textarea|details|summary)$/i;
   protected readonly _needsTabindex = () =>
     !this._NATIVE_FOCUSABLE.test(this._elementRef.nativeElement.tagName);

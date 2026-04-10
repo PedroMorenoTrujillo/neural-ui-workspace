@@ -13,14 +13,14 @@ import { NeuIconComponent } from '../icon/neu-icon.component';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
-/** Datos que se inyectan en el componente del diálogo */
+/** Datos que se inyectan en el componente del diálogo / Data injected into the dialog component */
 export interface NeuDialogData<T = unknown> {
   title?: string;
   data?: T;
 }
 
 /**
- * NeuDialogService — Servicio para abrir diálogos programáticamente.
+ * NeuDialogService — Servicio para abrir diálogos programáticamente. / Service to open dialogs programmatically.
  *
  * Uso:
  *   const dialog = inject(NeuDialogService);
@@ -52,8 +52,8 @@ export class NeuDialogService {
 }
 
 /**
- * NeuDialogComponent — Diálogo accesible con header, body y footer.
- * Úsalo directamente como componente declarativo pasando `open` como signal.
+ * NeuDialogComponent — Diálogo accesible con header, body y footer. / Accessible dialog with header, body and footer.
+ * Úsalo directamente como componente declarativo pasando `open` como signal. / Use it directly as a declarative component passing `open` as a signal.
  *
  * Para uso programático, utiliza NeuDialogService.open().
  *
@@ -122,18 +122,18 @@ export class NeuDialogService {
   styleUrl: './neu-modal.component.scss',
 })
 export class NeuDialogComponent {
-  /** Controla la visibilidad del diálogo. */
+  /** Controla la visibilidad del diálogo. / Controls dialog visibility. */
   open = input<boolean>(false);
-  /** Título que aparece en el header. */
+  /** Título que aparece en el header. / Title shown in the header. */
   title = input<string>('');
-  /** Tamaño del panel: sm | md | lg | xl | full. */
+  /** Tamaño del panel: sm | md | lg | xl | full. / Panel size: sm | md | lg | xl | full. */
   size = input<NeuDialogSize>('md');
-  /** Si es true, el backdrop y el botón cerrar no funcionan. */
+  /** Si es true, el backdrop y el botón cerrar no funcionan. / If true, the backdrop and close button do not work. */
   disableClose = input<boolean>(false);
 
-  /** Emite cuando el usuario cierra el diálogo. */
+  /** Emite cuando el usuario cierra el diálogo. / Emits when the user closes the dialog. */
   closed = output<void>();
 
-  /** @internal — ID único para aria-labelledby */
+  /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
   readonly _uid = Math.random().toString(36).slice(2, 7);
 }

@@ -26,8 +26,8 @@ let _neuMultiselectIdSeq = 0;
 /**
  * NeuralUI Multiselect Component
  *
- * Dropdown de selección múltiple con chips, búsqueda integrada y soporte
- * completo para Angular Forms (ngModel y Reactive Forms).
+ * Dropdown de selección múltiple con chips, búsqueda integrada y soporte / Multiple selection dropdown with chips, integrated search and support
+ * completo para Angular Forms (ngModel y Reactive Forms). / for Angular Forms (ngModel and Reactive Forms).
  *
  * Uso:
  *   <neu-multiselect label="Tecnologías" [options]="opts" [(ngModel)]="selected" />
@@ -284,43 +284,43 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   /** @internal */
   readonly _triggerId = `neu-multiselect-trigger-${_neuMultiselectIdSeq++}`;
 
-  /** Template personalizado para cada opción del dropdown */
+  /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
   readonly itemTpl = contentChild(NeuMultiselectItemDirective);
 
-  /** Opciones del dropdown */
+  /** Opciones del dropdown / Dropdown options */
   options = input<NeuSelectOption[]>([]);
 
-  /** Etiqueta del componente */
+  /** Etiqueta del componente / Component label */
   label = input<string>('');
 
-  /** Muestra el label como flotante dentro del campo (true) o estático encima (false) */
+  /** Muestra el label como flotante dentro del campo (true) o estático encima (false) / Shows the label as floating inside the field (true) or static above (false) */
   floatingLabel = input<boolean>(false);
 
-  /** Placeholder cuando no hay selección */
+  /** Placeholder cuando no hay selección / Placeholder when there is no selection */
   placeholder = input<string>('Seleccionar...');
 
-  /** Mensaje de error */
+  /** Mensaje de error / Error message */
   errorMessage = input<string>('');
 
-  /** Deshabilita el componente */
+  /** Deshabilita el componente / Disables the component */
   disabled = input<boolean>(false);
 
-  /** Activa input de búsqueda/filtro en el panel */
+  /** Activa input de búsqueda/filtro en el panel / Activates the search/filter input in the panel */
   searchable = input<boolean>(false);
 
-  /** Placeholder del input de búsqueda */
+  /** Placeholder del input de búsqueda / Search input placeholder */
   searchPlaceholder = input<string>('Buscar...');
 
-  /** Texto cuando no hay opciones tras filtrar */
+  /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
   noResultsMessage = input<string>('Sin resultados');
 
-  /** Texto del botón de limpiar todas las selecciones */
+  /** Texto del botón de limpiar todas las selecciones / Button text to clear all selections */
   clearAllLabel = input<string>('Limpiar todo');
 
-  /** Muestra un botón × en el trigger para limpiar la selección de una vez */
+  /** Muestra un botón × en el trigger para limpiar la selección de una vez / Shows a × button in the trigger to clear the selection at once */
   clearable = input<boolean>(false);
 
-  /** Aria-label del botón clear que aparece en el trigger */
+  /** Aria-label del botón clear que aparece en el trigger / Aria-label for the clear button shown in the trigger */
   clearAriaLabel = input<string>('Limpiar selección');
 
   /**
@@ -400,7 +400,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     }
   }
 
-  /** Abre el panel y mueve el foco al primer item */
+  /** Abre el panel y mueve el foco al primer item / Opens the panel and moves focus to the first item */
   onTriggerKey(event: Event): void {
     event.preventDefault();
     if (!this.isOpen()) {
@@ -414,7 +414,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     }
   }
 
-  /** Navega entre opciones con flechas */
+  /** Navega entre opciones con flechas / Navigates between options with arrows */
   focusOptionByIndex(event: Event, current: NeuSelectOption, dir: 1 | -1): void {
     event.preventDefault();
     const opts = this.filteredOptions().filter((o) => !o.disabled);

@@ -434,7 +434,7 @@ export class NeuTableComponent {
 
   readonly expandTemplate = contentChild(NeuTableExpandDirective);
 
-  // ---- Inputs de datos ----
+  // ---- Inputs de datos / Data inputs ----
   columns = input<NeuTableColumn[]>([]);
   data = input<object[]>([]);
   pageSize = input<number>(10);
@@ -443,25 +443,25 @@ export class NeuTableComponent {
   emptyMessage = input<string>('No se encontraron resultados');
   skeletonRows = input<number[]>([1, 2, 3, 4, 5]);
 
-  // ---- Inputs de funcionalidad ----
+  // ---- Inputs de funcionalidad / Functionality inputs ----
   searchable = input<boolean>(true);
   searchPlaceholder = input<string>('Buscar...');
   exactMatchable = input<boolean>(false);
   exactMatchLabel = input<string>('Búsqueda exacta');
 
-  /** Aria-label del input de búsqueda */
+  /** Aria-label del input de búsqueda / Aria-label for the search input */
   searchAriaLabel = input<string>('Buscar en la tabla');
 
-  /** Aria-label del botón de limpiar búsqueda */
+  /** Aria-label del botón de limpiar búsqueda / Aria-label for the search clear button */
   clearSearchAriaLabel = input<string>('Limpiar búsqueda');
 
-  /** Texto del botón que elimina el filtro activo */
+  /** Texto del botón que elimina el filtro activo / Button text that removes the active filter */
   clearFilterLabel = input<string>('Eliminar filtro');
 
-  /** Aria-label del botón de página anterior */
+  /** Aria-label del botón de página anterior / Aria-label for the previous page button */
   previousPageAriaLabel = input<string>('Anterior');
 
-  /** Aria-label del botón de página siguiente */
+  /** Aria-label del botón de página siguiente / Aria-label for the next page button */
   nextPageAriaLabel = input<string>('Siguiente');
   sortable = input<boolean>(false);
   selectable = input<boolean>(false);
@@ -470,10 +470,10 @@ export class NeuTableComponent {
   exportFileName = input<string>('export');
   pageSizeOptions = input<number[]>([]);
   stickyHeader = input<boolean>(false);
-  /** Clave del campo que identifica de forma única cada fila */
+  /** Clave del campo que identifica de forma única cada fila / Field key that uniquely identifies each row */
   rowKey = input<string>('id');
 
-  // ---- URL params (personalizables para múltiples tablas) ----
+  // ---- URL params (personalizables / customizable for multiple tables) ----
   pageParam = input<string>('page');
   searchParam = input<string>('q');
   sortParam = input<string>('sort');
@@ -496,7 +496,7 @@ export class NeuTableComponent {
     return d === 'desc' ? 'desc' : 'asc';
   });
 
-  // ---- Pipeline de datos ----
+  // ---- Pipeline de datos / Data pipeline ----
   private readonly rows = computed(() => asRows(this.data()));
 
   readonly exactMatch = signal(false);
@@ -572,7 +572,7 @@ export class NeuTableComponent {
     return cols;
   });
 
-  // ---- Expansión de filas ----
+  // ---- Expansión de filas / Row expansion ----
   private readonly _expandedKeys = signal<Set<unknown>>(new Set());
 
   isRowExpanded(row: Row): boolean {
@@ -587,7 +587,7 @@ export class NeuTableComponent {
     this._expandedKeys.set(set);
   }
 
-  // ---- Selección de filas ----
+  // ---- Selección de filas / Row selection ----
   private readonly _selectedKeys = signal<Set<unknown>>(new Set());
 
   readonly selectedCount = computed(() => this._selectedKeys().size);
@@ -636,7 +636,7 @@ export class NeuTableComponent {
     this.rowSelectionChange.emit(selected);
   }
 
-  // ---- Acciones de URL ----
+  // ---- Acciones de URL / URL actions ----
   goToPage(page: number): void {
     this.urlState.setParam(
       this.pageParam(),

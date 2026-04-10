@@ -59,22 +59,22 @@ export type NeuProgressVariant = 'primary' | 'success' | 'warning' | 'danger';
   styleUrl: './neu-progress-bar.component.scss',
 })
 export class NeuProgressBarComponent {
-  /** Valor de 0 a 100 */
+  /** Valor de 0 a 100 / Value from 0 to 100 */
   value = input<number>(0);
 
-  /** Variante de color */
+  /** Variante de color / Color variant */
   variant = input<NeuProgressVariant>('primary');
 
-  /** Etiqueta descriptiva sobre la barra */
+  /** Etiqueta descriptiva sobre la barra / Descriptive label above the bar */
   label = input<string>('');
 
-  /** Muestra el % a la derecha */
+  /** Muestra el % a la derecha / Shows the % on the right */
   showValue = input<boolean>(false);
 
-  /** Modo indeterminado (animación continua) */
+  /** Modo indeterminado (animación continua) / Indeterminate mode (continuous animation) */
   indeterminate = input<boolean>(false);
 
-  /** Altura de la barra */
+  /** Altura de la barra / Bar height */
   size = input<'sm' | 'md' | 'lg'>('md');
 
   readonly clampedValue = computed(() => Math.min(100, Math.max(0, this.value())));

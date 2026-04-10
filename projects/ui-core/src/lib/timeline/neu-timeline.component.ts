@@ -3,22 +3,22 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@a
 export type NeuTimelineItemVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface NeuTimelineItem {
-  /** Etiqueta de tiempo (ej. "Hace 2h", "12 Mar") */
+  /** Etiqueta de tiempo (ej. "Hace 2h", "12 Mar") / Time label (e.g. "2h ago", "Mar 12") */
   time?: string;
-  /** Título del evento */
+  /** Título del evento / Event title */
   title: string;
-  /** Descripción opcional */
+  /** Descripción opcional / Optional description */
   description?: string;
-  /** Variante de color del punto */
+  /** Variante de color del punto / Dot color variant */
   variant?: NeuTimelineItemVariant;
-  /** Icono SVG path opcional */
+  /** Icono SVG path opcional / Optional SVG path icon */
   icon?: string;
 }
 
 /**
  * NeuralUI Timeline Component
  *
- * Lista vertical de eventos cronológicos con línea conectora.
+ * Lista vertical de eventos cronológicos con línea conectora. / Vertical list of chronological events with a connector line.
  *
  * Uso:
  *   <neu-timeline [items]="events" />
@@ -77,6 +77,6 @@ export interface NeuTimelineItem {
   styleUrl: './neu-timeline.component.scss',
 })
 export class NeuTimelineComponent {
-  /** Eventos a mostrar */
+  /** Eventos a mostrar / Events to display */
   items = input<NeuTimelineItem[]>([]);
 }

@@ -314,40 +314,40 @@ interface DrumSlot {
 export class NeuDateInputComponent implements ControlValueAccessor {
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  /** Tipo: date | time | datetime-local */
+  /** Tipo: date | time | datetime-local / Type: date | time | datetime-local */
   type = input<'date' | 'time' | 'datetime-local'>('date');
 
-  /** Etiqueta del campo */
+  /** Etiqueta del campo / Field label */
   label = input<string>('');
 
-  /** Texto de ayuda */
+  /** Texto de ayuda / Help text */
   hint = input<string>('');
 
-  /** Mensaje de error */
+  /** Mensaje de error / Error message */
   errorMessage = input<string>('');
 
-  /** Deshabilita el campo */
+  /** Deshabilita el campo / Disables the field */
   disabled = input<boolean>(false);
 
-  /** Solo lectura */
+  /** Solo lectura / Read only */
   readonly = input<boolean>(false);
 
-  /** Nombre del campo (formularios nativos) */
+  /** Nombre del campo (formularios nativos) / Field name (native forms) */
   name = input<string>('');
 
-  /** ID accesible */
+  /** ID accesible / Accessible ID */
   inputId = input<string>('');
 
-  /** Requerido */
+  /** Requerido / Required */
   required = input<boolean>(false);
 
-  /** Mínimo (no implementado visualmente en v1) */
+  /** Mínimo (no implementado visualmente en v1) / Minimum (not visually implemented in v1) */
   min = input<string | null>(null);
 
-  /** Máximo (no implementado visualmente en v1) */
+  /** Máximo (no implementado visualmente en v1) / Maximum (not visually implemented in v1) */
   max = input<string | null>(null);
 
-  /** Paso */
+  /** Paso / Step */
   step = input<number | null>(null);
 
   // ── Estado ──────────────────────────────────────────────

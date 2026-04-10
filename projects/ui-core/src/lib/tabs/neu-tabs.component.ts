@@ -22,21 +22,21 @@ import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 export const NEU_TABS_CONTEXT = new InjectionToken<NeuTabsComponent>('NeuTabsContext');
 
 export interface NeuTab {
-  /** ID único de la pestaña — se usa como valor en la URL */
+  /** ID único de la pestaña — se usa como valor en la URL / Unique tab ID — used as the URL value */
   id: string;
-  /** Etiqueta visible */
+  /** Etiqueta visible / Visible label */
   label: string;
-  /** Badge opcional junto al label */
+  /** Badge opcional junto al label / Optional badge next to the label */
   badge?: string;
-  /** Deshabilita la pestaña sin ocultarla */
+  /** Deshabilita la pestaña sin ocultarla / Disables the tab without hiding it */
   disabled?: boolean;
 }
 
 /**
  * NeuralUI Tabs Component
  *
- * Sistema de pestañas con estado sincronizado a la URL via NeuUrlStateService.
- * El panel activo se determina por ?{tabParam}={tabId}.
+ * Sistema de pestañas con estado sincronizado a la URL via NeuUrlStateService. / Tab system with state synchronized to the URL via NeuUrlStateService.
+ * El panel activo se determina por ?{tabParam}={tabId}. / The active panel is determined by ?{tabParam}={tabId}.
  *
  * Uso:
  *   <neu-tabs [tabs]="tabs" tabParam="tab">
@@ -103,22 +103,22 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  /** Definición de pestañas */
+  /** Definición de pestañas / Tab definitions */
   tabs = input<NeuTab[]>([]);
 
-  /** QueryParam que almacena la pestaña activa */
+  /** QueryParam que almacena la pestaña activa / QueryParam that stores the active tab */
   tabParam = input<string>('tab');
 
-  /** Si true, elimina el padding interno de los paneles */
+  /** Si true, elimina el padding interno de los paneles / If true, removes the internal padding from panels */
   flush = input<boolean>(false);
 
-  /** Etiqueta accesible del rol tablist */
+  /** Etiqueta accesible del rol tablist / Accessible label for the tablist role */
   ariaLabel = input<string>('Pestañas de contenido');
 
-  /** Emite al cambiar de pestaña */
+  /** Emite al cambiar de pestaña / Emits when the tab changes */
   tabChange = output<string>();
 
-  /** ID de la pestaña activa (de la URL o la primera disponible) */
+  /** ID de la pestaña activa (de la URL o la primera disponible) / Active tab ID (from the URL or the first available) */
   readonly activeTabId = computed(() => {
     const fromUrl = this.urlState.getParam(this.tabParam())();
     const available = this.tabs().find((t) => t.id === fromUrl && !t.disabled);
@@ -127,7 +127,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     return this.tabs().find((t) => !t.disabled)?.id ?? '';
   });
 
-  /** Posición del indicador calculada mediante medición DOM */
+  /** Posición del indicador calculada mediante medición DOM / Indicator position calculated via DOM measurement */
   private readonly _indicatorLeft = signal('0px');
   private readonly _indicatorWidth = signal('0px');
 
@@ -168,7 +168,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     requestAnimationFrame(() => this._updateIndicator());
   }
 
-  /** Mueve el foco entre tabs con flechas (roving tabindex — WAI-ARIA Tabs Pattern) */
+  /** Mueve el foco entre tabs con flechas (roving tabindex — WAI-ARIA Tabs Pattern) / Moves focus between tabs with arrows (roving tabindex — WAI-ARIA Tabs Pattern) */
   focusTab(event: Event, dir: 1 | -1 | 'first' | 'last'): void {
     event.preventDefault();
     const enabledTabs = this.tabs().filter((t) => !t.disabled);
@@ -197,8 +197,8 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
 /**
  * NeuralUI Tab Panel
  *
- * Panel de contenido asociado a una pestaña de NeuTabsComponent.
- * Solo se renderiza (no oculta con CSS) cuando la pestaña está activa.
+ * Panel de contenido asociado a una pestaña de NeuTabsComponent. / Content panel associated with a NeuTabsComponent tab.
+ * Solo se renderiza (no oculta con CSS) cuando la pestaña está activa. / Only rendered (not hidden with CSS) when the tab is active.
  *
  * Uso: hijo directo de <neu-tabs>
  *   <neu-tab-panel tabId="api">...</neu-tab-panel>
@@ -224,7 +224,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
 export class NeuTabPanelComponent {
   private readonly tabs = inject(NEU_TABS_CONTEXT, { optional: true });
 
-  /** ID que debe coincidir con NeuTab.id del padre */
+  /** ID que debe coincidir con NeuTab.id del padre / ID that must match the parent NeuTab.id */
   tabId = input.required<string>();
 
   readonly isActive = computed(() => this.tabs?.activeTabId() === this.tabId());

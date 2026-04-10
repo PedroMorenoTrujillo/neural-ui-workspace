@@ -5,7 +5,7 @@
 // ============================================================
 @use '../styles/breakpoints' as *;
 
-// ---- Contenedor principal ----
+// ---- Contenedor principal / Main container ----
 .neu-table-container {
   background: var(--neu-surface);
   border: 1px solid var(--neu-border);
@@ -34,7 +34,7 @@
   letter-spacing: -0.01em;
 }
 
-// ---- Buscador ----
+// ---- Buscador / Search ----
 .neu-table__search-group {
   display: flex;
   align-items: center;
@@ -145,7 +145,7 @@
   cursor: pointer;
 }
 
-// ---- Scroll container — clave para mobile ----
+// ---- Scroll container — clave para mobile / key for mobile ----
 .neu-table__scroll-container {
   width: 100%;
   overflow-x: auto;
@@ -188,7 +188,7 @@
   }
 }
 
-// ---- Tabla ----
+// ---- Tabla / Table ----
 .neu-table {
   width: 100%;
   border-collapse: collapse;
@@ -196,7 +196,7 @@
   min-width: 400px; // fuerza scroll en pantallas menores a 400px
 }
 
-// ---- Encabezado ----
+// ---- Encabezado / Heading ----
 .neu-table__head {
   background: var(--neu-surface-2);
 }
@@ -245,7 +245,7 @@
   }
 }
 
-// ---- Selección ----
+// ---- Selección / Selection ----
 .neu-table__checkbox {
   width: 16px;
   height: 16px;
@@ -279,7 +279,7 @@
   font-family: var(--neu-font-sans);
 }
 
-// ---- Filas ----
+// ---- Filas / Rows ----
 .neu-table__row {
   transition: background-color var(--neu-transition);
 

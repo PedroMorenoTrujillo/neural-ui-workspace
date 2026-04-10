@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2026-04-11
+
+### Fixed
+
+- `NeuMultiselectComponent` — añadido `:focus-visible` en `.neu-multiselect__trigger` para mostrar el anillo de foco en navegación por teclado (paridad con `NeuSelectComponent`).
+
+### Improved
+
+- Todos los comentarios JSDoc y de sección en los ficheros `.ts` y `.scss` de la librería ahora son bilingües (español / inglés) para mejorar la DX de consumidores en ambos idiomas.
+
+---
+
 ## [1.2.0] - 2026-04-10
 
 ### Added
 
-- `NeuSelectComponent` — nuevo output `(selectionChange)`  que emite el objeto `NeuSelectOption` completo (incluyendo el campo `data`) al seleccionar una opción, o `null` al limpiar. El valor de `ngModel` / `formControl` sigue siendo `string`.
+- `NeuSelectComponent` — nuevo output `(selectionChange)` que emite el objeto `NeuSelectOption` completo (incluyendo el campo `data`) al seleccionar una opción, o `null` al limpiar. El valor de `ngModel` / `formControl` sigue siendo `string`.
 - `NeuMultiselectComponent` — nuevo output `(selectionChange)` que emite el array `NeuSelectOption[]` completo al cambiar la selección, o `[]` al limpiar. Los valores de `ngModel` / `formControl` siguen siendo `string[]`.
 - `NeuSelectOption` — nuevo campo opcional `data?: unknown` para adjuntar el objeto de origen (p.ej. entidad de la API) sin transformación, accesible vía `(selectionChange)`.
 - `NeuSelectComponent` / `NeuMultiselectComponent` — nuevo input `urlParam` (desde v1.1.x) que sincroniza el valor seleccionado con el query param indicado de la URL, con soporte a recarga de página.

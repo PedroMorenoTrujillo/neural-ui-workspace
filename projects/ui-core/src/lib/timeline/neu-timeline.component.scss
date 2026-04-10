@@ -17,7 +17,7 @@
   min-height: 56px;
 }
 
-// ---- Eje (dot + línea) ----
+// ---- Eje (dot + línea) / Axis (dot + line) ----
 .neu-timeline__axis {
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
   min-height: 16px;
 }
 
-// ---- Contenido ----
+// ---- Contenido / Content ----
 .neu-timeline__content {
   flex: 1;
   padding-bottom: var(--neu-space-5);

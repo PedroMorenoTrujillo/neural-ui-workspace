@@ -73,16 +73,16 @@ import {
 export class NeuRatingComponent {
   protected readonly Math = Math;
 
-  /** Valor actual (1 a stars) */
+  /** Valor actual (1 a stars) / Current value (1 to stars) */
   value = input<number>(0);
 
-  /** Número de estrellas */
+  /** Número de estrellas / Number of stars */
   stars = input<number>(5);
 
-  /** Modo solo lectura */
+  /** Modo solo lectura / Read-only mode */
   readonly = input<boolean>(false);
 
-  /** Emite el nuevo valor al seleccionar */
+  /** Emite el nuevo valor al seleccionar / Emits the new value on selection */
   valueChange = output<number>();
 
   protected readonly hovered = signal<number | null>(null);

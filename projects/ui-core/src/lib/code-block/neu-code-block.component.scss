@@ -28,7 +28,7 @@ $cb-muted: #565f89;
   border-bottom: 1px solid $cb-border;
 }
 
-// ---- Traffic lights decorativos ----
+// ---- Traffic lights decorativos / Decorative traffic lights ----
 .neu-code-block__dots {
   display: flex;
   gap: 6px;
@@ -52,7 +52,7 @@ $cb-muted: #565f89;
   }
 }
 
-// ---- Badge del lenguaje ----
+// ---- Badge del lenguaje / Language badge ----
 .neu-code-block__lang {
   flex: 1;
   font-size: 11px;
@@ -63,7 +63,7 @@ $cb-muted: #565f89;
   font-family: var(--neu-font-mono);
 }
 
-// ---- Botón copiar ----
+// ---- Botón copiar / Copy button ----
 .neu-code-block__copy {
   display: inline-flex;
   align-items: center;
@@ -93,7 +93,7 @@ $cb-muted: #565f89;
   }
 }
 
-// ---- Bloque <pre><code> ----
+// ---- Bloque <pre><code> / Code block ----
 .neu-code-block__pre {
   margin: 0;
   padding: 20px 24px;

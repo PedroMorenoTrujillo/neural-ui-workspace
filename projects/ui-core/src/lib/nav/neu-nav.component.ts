@@ -16,7 +16,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NeuIconComponent } from '../icon/neu-icon.component';
 import { NeuTooltipDirective } from '../tooltip/neu-tooltip.directive';
 
-// ---- Tipos públicos ----
+// ---- Tipos públicos / Public types ----
 
 /**
  * Ítem de navegación con soporte para 3 niveles de profundidad.
@@ -33,11 +33,11 @@ export interface NeuNavItem {
   id: string;
   label: string;
   icon: string;
-  /** Ruta Angular interna (RouterLink). Excluye `href`. */
+  /** Ruta Angular interna (RouterLink). Excluye `href`. / Internal Angular route (RouterLink). Excludes `href`. */
   route?: string;
-  /** URL externa. Se abre en nueva pestaña. Excluye `route`. */
+  /** URL externa. Se abre en nueva pestaña. Excluye `route`. / External URL. Opens in a new tab. Excludes `route`. */
   href?: string;
-  /** Ítems hijo (nivel 2). Cada hijo puede tener sus propios `children` (nivel 3). */
+  /** Ítems hijo (nivel 2). Cada hijo puede tener sus propios `children` (nivel 3). / Child items (level 2). Each child can have its own `children` (level 3). */
   children?: NeuNavItem[];
   badge?: string;
   badgeVariant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
@@ -460,7 +460,7 @@ export interface NeuNavItem {
 export class NeuNavComponent {
   private readonly router = inject(Router);
 
-  // ---- Señal reactiva de ruta activa ----
+  // ---- Señal reactiva de ruta activa / Reactive active route signal ----
   private readonly currentUrl = toSignal(
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)),
     { initialValue: null },
@@ -468,35 +468,35 @@ export class NeuNavComponent {
 
   // ---- Inputs ----
 
-  /** Lista de ítems de navegación */
+  /** Lista de ítems de navegación / Navigation item list */
   items = input<NeuNavItem[]>([]);
 
-  /** Estado inicial colapsado */
+  /** Estado inicial colapsado / Initial collapsed state */
   collapsed = input<boolean>(false);
 
-  /** Muestra el botón de colapsar/expandir */
+  /** Muestra el botón de colapsar/expandir / Shows the collapse/expand button */
   collapsible = input<boolean>(true);
 
-  /** Etiqueta accesible del <nav> */
+  /** Etiqueta accesible del <nav> / Accessible label for the <nav> */
   ariaLabel = input<string>('Navegación principal');
 
-  /** Aria-label del botón cuando el nav está colapsado */
+  /** Aria-label del botón cuando el nav está colapsado / Aria-label for the button when the nav is collapsed */
   expandLabel = input<string>('Expandir menú');
 
-  /** Aria-label del botón cuando el nav está expandido */
+  /** Aria-label del botón cuando el nav está expandido / Aria-label for the button when the nav is expanded */
   collapseLabel = input<string>('Colapsar menú');
 
-  /** Emite cuando cambia el estado colapsado */
+  /** Emite cuando cambia el estado colapsado / Emits when the collapsed state changes */
   collapsedChange = output<boolean>();
 
-  // ---- Estado interno ----
+  // ---- Estado interno / Internal state ----
 
   // Sigue el input `collapsed` del padre (permite el configurador)
   // pero puede ser sobreescrito localmente con toggleCollapse()
   readonly isCollapsed = signal(this.collapsed());
   private readonly openGroups = signal<Set<string>>(new Set());
 
-  // ---- Flyout para modo colapsado ----
+  // ---- Flyout para modo colapsado / Flyout for collapsed mode ----
   readonly flyoutState = signal<{ item: NeuNavItem; top: number; left: number } | null>(null);
   private _flyoutTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -511,7 +511,7 @@ export class NeuNavComponent {
     });
   }
 
-  // ---- Helpers de estado ----
+  // ---- Helpers de estado / State helpers ----
 
   toggleCollapse(): void {
     this.isCollapsed.update((v) => {

@@ -91,19 +91,19 @@ import {
   styleUrl: './neu-pagination.component.scss',
 })
 export class NeuPaginationComponent {
-  /** Página actual (1-indexed) */
+  /** Página actual (1-indexed) / Current page (1-indexed) */
   page = input<number>(1);
 
-  /** Total de ítems */
+  /** Total de ítems / Total items */
   total = input<number>(0);
 
-  /** Ítems por página */
+  /** Ítems por página / Items per page */
   pageSize = input<number>(10);
 
-  /** Número máximo de botones de página visibles (sin contar anterior/siguiente) */
+  /** Número máximo de botones de página visibles (sin contar anterior/siguiente) / Maximum number of visible page buttons (not counting prev/next) */
   maxVisible = input<number>(7);
 
-  /** Emite la nueva página al hacer click */
+  /** Emite la nueva página al hacer click / Emits the new page on click */
   pageChange = output<number>();
 
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));

@@ -84,22 +84,22 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
   styleUrl: './neu-stats-card.component.scss',
 })
 export class NeuStatsCardComponent {
-  /** Título o etiqueta de la métrica. */
+  /** Título o etiqueta de la métrica. / Metric title or label. */
   title = input<string>('');
-  /** Valor principal formateado (p.ej. "$12,450" o "98.2%"). */
+  /** Valor principal formateado (p.ej. "$12,450" o "98.2%"). / Main formatted value (e.g. "$12,450" or "98.2%"). */
   value = input<string>('');
-  /** Cambio porcentual o absoluto (p.ej. "+12.5%" o "-3"). */
+  /** Cambio porcentual o absoluto (p.ej. "+12.5%" o "-3"). / Percentage or absolute change (e.g. "+12.5%" or "-3"). */
   change = input<string>('');
-  /** Dirección del cambio. Afecta el color del change. */
+  /** Dirección del cambio. Afecta el color del change. / Change direction. Affects the change color. */
   trend = input<NeuStatsTrend>('neutral');
-  /** Texto auxiliar bajo el cambio (p.ej. "vs. mes anterior"). */
+  /** Texto auxiliar bajo el cambio (p.ej. "vs. mes anterior"). / Auxiliary text below the change (e.g. "vs. previous month"). */
   label = input<string>('');
-  /** Nombre del icono Lucide para el encabezado. */
+  /** Nombre del icono Lucide para el encabezado. / Lucide icon name for the header. */
   icon = input<string>('');
-  /** Array de valores numéricos para la sparkline. Mín. 2 puntos. */
+  /** Array de valores numéricos para la sparkline. Mín. 2 puntos. / Array of numeric values for the sparkline. Min. 2 points. */
   sparkData = input<number[]>([]);
 
-  /** @internal Genera los puntos SVG de la sparkline */
+  /** @internal Genera los puntos SVG de la sparkline / Generates the SVG sparkline points */
   protected readonly sparkPoints = computed(() => {
     const data = this.sparkData();
     if (data.length < 2) return '';

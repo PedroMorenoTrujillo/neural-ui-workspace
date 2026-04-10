@@ -8,7 +8,7 @@
   flex-direction: column;
 }
 
-// ---- Barra de pestañas ----
+// ---- Barra de pestañas / Tab bar ----
 .neu-tabs__nav {
   position: relative;
   display: flex;
@@ -20,7 +20,7 @@
   }
 }
 
-// ---- Botón de pestaña ----
+// ---- Botón de pestaña / Tab button ----
 .neu-tabs__tab {
   position: relative;
   display: inline-flex;
@@ -63,7 +63,7 @@
   }
 }
 
-// ---- Badge en la pestaña ----
+// ---- Badge en la pestaña / Tab badge ----
 .neu-tabs__tab-badge {
   display: inline-flex;
   align-items: center;
@@ -79,7 +79,7 @@
   line-height: 1;
 }
 
-// ---- Indicador deslizante (animated underline) ----
+// ---- Indicador deslizante / Sliding indicator (animated underline) ----
 .neu-tabs__indicator {
   position: absolute;
   bottom: -1.5px;
@@ -92,7 +92,7 @@
   pointer-events: none;
 }
 
-// ---- Paneles ----
+// ---- Paneles / Panels ----
 .neu-tabs__panels {
   flex: 1;
 }

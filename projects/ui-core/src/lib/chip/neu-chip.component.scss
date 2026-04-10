@@ -25,7 +25,7 @@
     outline-offset: 2px;
   }
 
-  // ---- Tamaños ----
+  // ---- Tamaños / Sizes ----
   &--sm {
     padding: 3px 10px;
     font-size: var(--neu-text-xs);
@@ -38,7 +38,7 @@
     border-radius: var(--neu-radius-full);
   }
 
-  // ---- Variantes ----
+  // ---- Variantes / Variants ----
   &--default {
     background: var(--neu-surface-2);
     color: var(--neu-text-muted);
@@ -105,7 +105,7 @@
     }
   }
 
-  // ---- Deshabilitado ----
+  // ---- Deshabilitado / Disabled ----
   &--disabled {
     opacity: 0.45;
     cursor: not-allowed;
@@ -113,7 +113,7 @@
   }
 }
 
-// ---- Botón de cierre ----
+// ---- Botón de cierre / Close button ----
 .neu-chip__remove {
   display: inline-flex;
   align-items: center;

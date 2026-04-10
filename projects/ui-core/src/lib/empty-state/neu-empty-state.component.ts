@@ -50,17 +50,17 @@ import { NeuButtonComponent } from '../button/neu-button.component';
   styleUrl: './neu-empty-state.component.scss',
 })
 export class NeuEmptyStateComponent {
-  /** Nombre del icono Lucide registrado con provideIcons(). */
+  /** Nombre del icono Lucide registrado con provideIcons(). / Lucide icon name registered with provideIcons(). */
   icon = input<string>('lucideInbox');
-  /** Tamaño del icono. Por defecto 3rem. */
+  /** Tamaño del icono. Por defecto 3rem. / Icon size. Default 3rem. */
   iconSize = input<string>('3rem');
-  /** Título principal del estado vacío. */
+  /** Título principal del estado vacío. / Main title of the empty state. */
   title = input<string>('No hay nada aquí');
-  /** Descripción secundaria opcional. */
+  /** Descripción secundaria opcional. / Optional secondary description. */
   description = input<string>('');
-  /** Texto del botón de acción. Si está vacío, no se muestra el botón. */
+  /** Texto del botón de acción. Si está vacío, no se muestra el botón. / Action button text. If empty, the button is not shown. */
   actionLabel = input<string>('');
 
-  /** Emite cuando el usuario hace clic en el botón de acción. */
+  /** Emite cuando el usuario hace clic en el botón de acción. / Emits when the user clicks the action button. */
   action = output<void>();
 }

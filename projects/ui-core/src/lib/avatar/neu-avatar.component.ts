@@ -57,22 +57,22 @@ export type NeuAvatarStatus = 'online' | 'offline' | 'busy' | 'away' | '';
   styleUrl: './neu-avatar.component.scss',
 })
 export class NeuAvatarComponent {
-  /** URL de la imagen. Si falla la carga, muestra las iniciales. */
+  /** URL de la imagen. Si falla la carga, muestra las iniciales. / Image URL. If loading fails, shows the initials. */
   src = input<string>('');
-  /** Texto alternativo de la imagen. */
+  /** Texto alternativo de la imagen. / Image alternative text. */
   alt = input<string>('');
-  /** Nombre completo — se usan las iniciales como fallback. */
+  /** Nombre completo — se usan las iniciales como fallback. / Full name — initials are used as fallback. */
   name = input<string>('');
-  /** Tamaño: xs (24) | sm (32) | md (40) | lg (48) | xl (64). Por defecto 'md'. */
+  /** Tamaño: xs (24) | sm (32) | md (40) | lg (48) | xl (64). Por defecto 'md'. / Size: xs (24) | sm (32) | md (40) | lg (48) | xl (64). Default 'md'. */
   size = input<NeuAvatarSize>('md');
-  /** Forma: 'circle' (default) o 'square'. */
+  /** Forma: 'circle' (default) o 'square'. / Shape: 'circle' (default) or 'square'. */
   shape = input<NeuAvatarShape>('circle');
-  /** Color de fondo para iniciales. */
+  /** Color de fondo para iniciales. / Background color for initials. */
   color = input<NeuAvatarColor>('blue');
-  /** Indicador de presencia. */
+  /** Indicador de presencia. / Presence indicator. */
   status = input<NeuAvatarStatus>('');
 
-  /** @internal Imagen fallida */
+  /** @internal Imagen fallida / Failed image */
   protected readonly imgError = signal(false);
 
   protected readonly initials = computed(() => {

@@ -63,37 +63,37 @@ export type NeuButtonIconPosition = 'left' | 'right';
   styleUrl: './neu-button.component.scss',
 })
 export class NeuButtonComponent {
-  /** Variante visual del botón */
+  /** Variante visual del botón / Visual button variant */
   variant = input<NeuButtonVariant>('primary');
 
-  /** Tamaño del botón */
+  /** Tamaño del botón / Button size */
   size = input<NeuButtonSize>('md');
 
-  /** Deshabilita el botón y bloquea la interacción */
+  /** Deshabilita el botón y bloquea la interacción / Disables the button and blocks interaction */
   disabled = input<boolean>(false);
 
-  /** Muestra un spinner y deshabilita mientras se procesa */
+  /** Muestra un spinner y deshabilita mientras se procesa / Shows a spinner and disables while processing */
   loading = input<boolean>(false);
 
-  /** Ocupa el 100% del ancho de su contenedor */
+  /** Ocupa el 100% del ancho de su contenedor / Takes up 100% of its container width */
   fullWidth = input<boolean>(false);
 
-  /** Nombre del icono Lucide (ej: 'lucideSave', 'lucidePlus') */
+  /** Nombre del icono Lucide (ej: 'lucideSave', 'lucidePlus') / Lucide icon name (e.g. 'lucideSave', 'lucidePlus') */
   icon = input<string>('');
 
   /** Posición del icono respecto al texto */
   iconPosition = input<NeuButtonIconPosition>('left');
 
-  /** Modo solo-icono: aplica padding cuadrado y oculta el ng-content */
+  /** Modo solo-icono: aplica padding cuadrado y oculta el ng-content / Icon-only mode: applies square padding and hides ng-content */
   iconOnly = input<boolean>(false);
 
-  /** Etiqueta accesible obligatoria cuando se usa iconOnly (WCAG 4.1.2) */
+  /** Etiqueta accesible obligatoria cuando se usa iconOnly (WCAG 4.1.2) / Required accessible label when using iconOnly (WCAG 4.1.2) */
   ariaLabel = input<string>('');
 
-  /** Emite el evento de click cuando el botón está activo */
+  /** Emite el evento de click cuando el botón está activo / Emits the click event when the button is active */
   neuClick = output<MouseEvent>();
 
-  /** @internal — reenvía el click nativo al output Angular */
+  /** @internal — reenvía el click nativo al output Angular / forwards the native click to the Angular output */
   _onHostClick(event: MouseEvent): void {
     if (!this.isDisabled()) {
       this.neuClick.emit(event);

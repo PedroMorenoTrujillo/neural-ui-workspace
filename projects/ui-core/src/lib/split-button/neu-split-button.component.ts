@@ -12,22 +12,22 @@ import {
 import { NeuButtonVariant, NeuButtonSize } from '../button/neu-button.component';
 
 export interface NeuSplitButtonAction {
-  /** Identificador único de la acción */
+  /** Identificador único de la acción / Unique action identifier */
   id: string;
-  /** Texto visible */
+  /** Texto visible / Visible text */
   label: string;
-  /** Icono opcional (SVG string o nombre) */
+  /** Icono opcional (SVG string o nombre) / Optional icon (SVG string or name) */
   icon?: string;
-  /** Deshabilita esta acción individualmente */
+  /** Deshabilita esta acción individualmente / Disables this action individually */
   disabled?: boolean;
-  /** Separador visual encima de este item */
+  /** Separador visual encima de este item / Visual separator above this item */
   divider?: boolean;
 }
 
 /**
  * NeuralUI SplitButton Component
  *
- * Botón principal con un dropdown de acciones adicionales.
+ * Botón principal con un dropdown de acciones adicionales. / Primary button with a dropdown of additional actions.
  *
  * Uso:
  *   <neu-split-button
@@ -138,34 +138,34 @@ export interface NeuSplitButtonAction {
 export class NeuSplitButtonComponent {
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  /** Texto del botón principal */
+  /** Texto del botón principal / Primary button text */
   label = input<string>('');
 
-  /** Variante visual */
+  /** Variante visual / Visual variant */
   variant = input<NeuButtonVariant>('primary');
 
-  /** Tamaño */
+  /** Tamaño / Size */
   size = input<NeuButtonSize>('md');
 
-  /** Deshabilita todo el componente */
+  /** Deshabilita todo el componente / Disables the entire component */
   disabled = input<boolean>(false);
 
-  /** Muestra spinner en el botón principal */
+  /** Muestra spinner en el botón principal / Shows spinner on the primary button */
   loading = input<boolean>(false);
 
-  /** Acciones del dropdown */
+  /** Acciones del dropdown / Dropdown actions */
   actions = input<NeuSplitButtonAction[]>([]);
 
-  /** Aria-label del botón de desplegable */
+  /** Aria-label del botón de desplegable / Aria-label for the dropdown button */
   moreActionsAriaLabel = input<string>('Más opciones');
 
-  /** Aria-label del menú desplegable */
+  /** Aria-label del menú desplegable / Aria-label for the dropdown menu */
   actionsAriaLabel = input<string>('Acciones');
 
-  /** Emite al hacer click en el botón principal */
+  /** Emite al hacer click en el botón principal / Emits on primary button click */
   primaryClick = output<MouseEvent>();
 
-  /** Emite al seleccionar una acción del dropdown */
+  /** Emite al seleccionar una acción del dropdown / Emits when a dropdown action is selected */
   actionClick = output<NeuSplitButtonAction>();
 
   readonly isOpen = signal(false);

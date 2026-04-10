@@ -6,7 +6,7 @@
 
 $select-height: 48px;
 
-// ---- Contenedor ----
+// ---- Contenedor / Container ----
 .neu-select {
   position: relative;
   display: block;
@@ -110,7 +110,7 @@ $select-height: 48px;
   }
 }
 
-// ---- Valor seleccionado ----
+// ---- Valor seleccionado / Selected value ----
 .neu-select__value {
   flex: 1;
   overflow: hidden;
@@ -218,7 +218,7 @@ $select-height: 48px;
   }
 }
 
-// ---- Opciones ----
+// ---- Opciones / Options ----
 .neu-select__option {
   display: flex;
   align-items: center;
@@ -269,7 +269,7 @@ $select-height: 48px;
   margin-bottom: var(--neu-space-2);
 }
 
-// ---- Search input en el panel ----
+// ---- Search input en el panel / Search input inside panel ----
 .neu-select__search {
   padding: var(--neu-space-2);
   border-bottom: 1px solid var(--neu-border);

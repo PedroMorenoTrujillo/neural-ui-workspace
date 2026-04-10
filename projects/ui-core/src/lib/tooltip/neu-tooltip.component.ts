@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@angular/core';
 
-/** @internal — componente flotante del tooltip, renderizado vía CDK Portal */
+/** @internal — componente flotante del tooltip, renderizado vía CDK Portal / floating tooltip component, rendered via CDK Portal */
 @Component({
   selector: 'neu-tooltip-overlay',
   encapsulation: ViewEncapsulation.None,

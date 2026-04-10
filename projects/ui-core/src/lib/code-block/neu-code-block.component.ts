@@ -79,22 +79,22 @@ import { DOCUMENT } from '@angular/common';
 export class NeuCodeBlockComponent {
   private readonly doc = inject(DOCUMENT);
 
-  /** Código fuente a mostrar */
+  /** Código fuente a mostrar / Source code to display */
   code = input<string>('');
 
-  /** Nombre del lenguaje (decorativo) */
+  /** Nombre del lenguaje (decorativo) / Language name (decorative) */
   lang = input<string>('TypeScript');
 
-  /** Texto del botón cuando no se ha copiado */
+  /** Texto del botón cuando no se ha copiado / Button text when not yet copied */
   copyLabel = input<string>('Copiar');
 
-  /** Texto del botón tras copiar */
+  /** Texto del botón tras copiar / Button text after copying */
   copiedLabel = input<string>('Copiado');
 
-  /** Aria-label del botón copiar */
+  /** Aria-label del botón copiar / Aria-label for the copy button */
   copyAriaLabel = input<string>('Copiar código');
 
-  /** Aria-label del botón tras copiar */
+  /** Aria-label del botón tras copiar / Aria-label for the button after copying */
   copiedAriaLabel = input<string>('Código copiado');
 
   protected readonly copied = signal(false);

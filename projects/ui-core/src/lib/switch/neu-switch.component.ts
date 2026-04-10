@@ -63,7 +63,7 @@ export class NeuSwitchComponent implements ControlValueAccessor {
   readonly _id = `neu-switch-${_neuSwitchIdSeq++}`;
 
   protected readonly _checked = signal(false);
-  /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState */
+  /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState / Internal disabled state — combines the `disabled` input with CVA setDisabledState */
   private readonly _cvaDisabled = signal(false);
   protected readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
 

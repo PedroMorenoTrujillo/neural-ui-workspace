@@ -10,7 +10,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuIconComponent } from '../icon/neu-icon.component';
 
-/** Contador global para IDs estables — seguro en SSR, predecible en hidratación */
+/** Contador global para IDs estables — seguro en SSR, predecible en hidratación / Global counter for stable IDs — SSR-safe, predictable on hydration */
 let _neuInputIdSeq = 0;
 
 export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
@@ -140,67 +140,67 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'u
   styleUrl: './neu-input.component.scss',
 })
 export class NeuInputComponent implements ControlValueAccessor {
-  /** Tipo de input HTML */
+  /** Tipo de input HTML / HTML input type */
   type = input<NeuInputType>('text');
 
-  /** Texto del floating label */
+  /** Texto del floating label / Floating label text */
   label = input<string>('');
 
-  /** Placeholder visible cuando floatingLabel=false */
+  /** Placeholder visible cuando floatingLabel=false / Visible placeholder when floatingLabel=false */
   placeholder = input<string>('');
 
-  /** Muestra el label como flotante (true) o estático encima del campo (false) */
+  /** Muestra el label como flotante (true) o estático encima del campo (false) / Shows the label as floating (true) or static above the field (false) */
   floatingLabel = input<boolean>(true);
 
-  /** Hint de ayuda (visible cuando no hay error) */
+  /** Hint de ayuda (visible cuando no hay error) / Help hint (visible when there is no error) */
   hint = input<string>('');
 
-  /** Mensaje de error (activa el estado de error) */
+  /** Mensaje de error (activa el estado de error) / Error message (activates the error state) */
   errorMessage = input<string>('');
 
-  /** Deshabilita el campo */
+  /** Deshabilita el campo / Disables the field */
   disabled = input<boolean>(false);
 
-  /** Atributo autocomplete HTML */
+  /** Atributo autocomplete HTML / HTML autocomplete attribute */
   autocomplete = input<string>('off');
 
-  /** Muestra zona para icono al inicio */
+  /** Muestra zona para icono al inicio / Shows icon slot at the start */
   startIcon = input<boolean>(false);
 
-  /** Muestra zona para icono al final */
+  /** Muestra zona para icono al final / Shows icon slot at the end */
   endIcon = input<boolean>(false);
 
-  /** Nombre del icono lucide a renderizar dentro del campo */
+  /** Nombre del icono lucide a renderizar dentro del campo / Lucide icon name to render inside the field */
   icon = input<string>('');
 
-  /** Posición del icono cuando se usa `icon` */
+  /** Posición del icono cuando se usa `icon` / Icon position when using `icon` */
   iconPosition = input<'left' | 'right'>('left');
 
-  /** ID accesible para el input — generado con contador estable (seguro en SSR) */
+  /** ID accesible para el input — generado con contador estable (seguro en SSR) / Accessible ID for the input — generated with stable counter (SSR-safe) */
   inputId = input<string>(`neu-input-${++_neuInputIdSeq}`);
 
-  /** Nombre del campo para formularios nativos */
+  /** Nombre del campo para formularios nativos / Field name for native forms */
   name = input<string>('');
 
-  /** Marca el campo como requerido */
+  /** Marca el campo como requerido / Marks the field as required */
   required = input<boolean>(false);
 
-  /** Hace el campo de solo lectura */
+  /** Hace el campo de solo lectura / Makes the field read-only */
   readonly = input<boolean>(false);
 
-  /** Longitud máxima de caracteres */
+  /** Longitud máxima de caracteres / Maximum character length */
   maxlength = input<number | null>(null);
 
-  /** Longitud mínima de caracteres */
+  /** Longitud mínima de caracteres / Minimum character length */
   minlength = input<number | null>(null);
 
-  /** Valor mínimo (para type=number/date) */
+  /** Valor mínimo (para type=number/date) / Minimum value (for type=number/date) */
   min = input<string | null>(null);
 
-  /** Valor máximo (para type=number/date) */
+  /** Valor máximo (para type=number/date) / Maximum value (for type=number/date) */
   max = input<string | null>(null);
 
-  /** Patrón de validación HTML5 */
+  /** Patrón de validación HTML5 / HTML5 validation pattern */
   pattern = input<string | null>(null);
 
   // --- Estado interno reactivo ---

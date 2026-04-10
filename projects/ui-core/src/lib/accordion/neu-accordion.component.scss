@@ -60,7 +60,7 @@
   color: var(--neu-text);
 }
 
-// ---- Chevron animado ----
+// ---- Chevron animado / Animated chevron ----
 .neu-accordion__chevron {
   display: inline-flex;
   flex-shrink: 0;
@@ -72,7 +72,7 @@
   }
 }
 
-// ---- Panel con animación CSS ----
+// ---- Panel con animación CSS / Panel with CSS animation ----
 .neu-accordion__panel {
   display: grid;
   grid-template-rows: 0fr;

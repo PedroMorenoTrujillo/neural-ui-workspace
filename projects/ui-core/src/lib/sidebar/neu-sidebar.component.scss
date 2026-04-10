@@ -22,7 +22,7 @@
   }
 }
 
-// ---- Panel base (modo overlay) ----
+// ---- Panel base (modo overlay) / Base panel (overlay mode) ----
 .neu-sidebar {
   position: fixed;
   top: 0;
@@ -50,7 +50,7 @@
     box-shadow: var(--neu-shadow-lg);
   }
 
-  // ---- Variante derecha ----
+  // ---- Variante derecha / Right variant ----
   &--right {
     left: auto;
     right: 0;
@@ -64,7 +64,7 @@
     }
   }
 
-  // ---- Modo persistente (desktop) ----
+  // ---- Modo persistente (desktop) / Persistent mode ----
   &--persistent {
     position: sticky;
     top: var(--neu-header-height);
@@ -77,7 +77,7 @@
   }
 }
 
-// ---- Cabecera ----
+// ---- Cabecera / Header ----
 .neu-sidebar__header {
   display: flex;
   align-items: center;
@@ -96,7 +96,7 @@
   color: var(--neu-text);
 }
 
-// ---- Botón cerrar ----
+// ---- Botón cerrar / Close button ----
 .neu-sidebar__close {
   display: inline-flex;
   align-items: center;
@@ -127,7 +127,7 @@
   }
 }
 
-// ---- Contenido ----
+// ---- Contenido / Content ----
 .neu-sidebar__content {
   flex: 1;
   overflow-y: auto;

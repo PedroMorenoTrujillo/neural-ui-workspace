@@ -7,7 +7,7 @@ $trigger-min-height: 48px;
 $panel-max-height: 280px;
 $panel-z: 200;
 
-// ---- Label estático ----
+// ---- Label estático / Static label ----
 .neu-multiselect__static-label {
   display: block;
   font-size: var(--neu-text-sm);
@@ -62,7 +62,7 @@ $panel-z: 200;
   }
 }
 
-// ---- Contenedor raíz ----
+// ---- Contenedor raíz / Root container ----
 .neu-multiselect {
   position: relative;
   font-family: var(--neu-font-sans);
@@ -89,6 +89,12 @@ $panel-z: 200;
     border-color: var(--neu-border-hover);
   }
 
+  &:focus-visible {
+    outline: none;
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+  }
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -102,10 +108,14 @@ $panel-z: 200;
 
   .neu-multiselect--error & {
     border-color: var(--neu-error);
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
   }
 }
 
-// ---- Chips área ----
+// ---- Chips área / Chips area ----
 .neu-multiselect__chips {
   display: flex;
   flex-wrap: wrap;
@@ -124,7 +134,7 @@ $panel-z: 200;
   }
 }
 
-// ---- Chip individual ----
+// ---- Chip individual / Individual chip ----
 .neu-multiselect__chip {
   display: inline-flex;
   align-items: center;
@@ -244,7 +254,7 @@ $panel-z: 200;
   }
 }
 
-// ---- Search dentro del panel ----
+// ---- Search dentro del panel / Search inside panel ----
 .neu-multiselect__search {
   padding: var(--neu-space-2);
   border-bottom: 1px solid var(--neu-border);
@@ -276,14 +286,14 @@ $panel-z: 200;
   }
 }
 
-// ---- Lista de opciones scrollable ----
+// ---- Lista de opciones scrollable / Scrollable options list ----
 .neu-multiselect__options {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
 }
 
-// ---- Opción individual ----
+// ---- Opción individual / Individual option ----
 .neu-multiselect__option {
   display: flex;
   align-items: center;

@@ -12,7 +12,7 @@
   line-height: 1;
   white-space: nowrap;
 
-  // ---- Tamaños ----
+  // ---- Tamaños / Sizes ----
   &--sm {
     padding: 2px 8px;
     font-size: 11px;
@@ -34,7 +34,7 @@
     }
   }
 
-  // ---- Variantes ----
+  // ---- Variantes / Variants ----
   &--default {
     background: var(--neu-surface-2);
     color: var(--neu-text-muted);
@@ -111,7 +111,7 @@
   }
 }
 
-// ---- Punto de estado ----
+// ---- Punto de estado / Status dot ----
 .neu-badge__dot {
   width: 6px;
   height: 6px;

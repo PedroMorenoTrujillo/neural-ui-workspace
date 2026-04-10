@@ -4,7 +4,7 @@
 // ViewEncapsulation.None — prefijo BEM .neu-nav
 // ============================================================
 
-// ---- Dimensiones ----
+// ---- Dimensiones / Dimensions ----
 $nav-width-expanded: 268px;
 $nav-width-collapsed: 64px;
 $nav-transition:
@@ -13,7 +13,7 @@ $nav-transition:
 $item-height: 40px;
 $item-radius: 8px;
 
-// ---- Contenedor principal ----
+// ---- Contenedor principal / Main container ----
 .neu-nav {
   display: flex;
   flex-direction: column;
@@ -134,7 +134,7 @@ $item-radius: 8px;
   }
 }
 
-// ---- Wrapper — necesario para el botón pestaña fuera del overflow:hidden del nav ----
+// ---- Wrapper — necesario para el botón pestaña / needed for tab button outside nav overflow:hidden ----
 .neu-nav-wrapper {
   position: relative;
   height: 100%;
@@ -142,7 +142,7 @@ $item-radius: 8px;
   display: flex;
 }
 
-// ---- Pestaña collapse/expand — posicionada absolutamente en el borde derecho ----
+// ---- Pestaña collapse/expand — posicionada absolutamente en el borde derecho / absolutely positioned on right edge ----
 .neu-nav__toggle-tab {
   position: absolute;
   right: -13px;
@@ -176,7 +176,7 @@ $item-radius: 8px;
   }
 }
 
-// ---- Lista de ítems ----
+// ---- Lista de ítems / Items list ----
 .neu-nav__items {
   flex: 1;
   overflow-y: auto;
@@ -199,7 +199,7 @@ $item-radius: 8px;
   }
 }
 
-// ---- Ítem base ----
+// ---- Ítem base / Base item ----
 .neu-nav__item {
   position: relative;
   display: flex;
@@ -286,7 +286,7 @@ $item-radius: 8px;
   }
 }
 
-// ---- Icono del ítem ----
+// ---- Icono del ítem / Item icon ----
 .neu-nav__item-icon {
   flex-shrink: 0;
   color: var(--neu-text-disabled);
@@ -304,7 +304,7 @@ $item-radius: 8px;
     width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-// ---- Badge del ítem ----
+// ---- Badge del ítem / Item badge ----
 .neu-nav__item-badge {
   flex-shrink: 0;
   font-size: 10px;
@@ -338,7 +338,7 @@ $item-radius: 8px;
   }
 }
 
-// ---- Grupo con submenú ----
+// ---- Grupo con submenú / Group with submenu ----
 .neu-nav__group {
   display: flex;
   flex-direction: column;
@@ -360,7 +360,7 @@ $item-radius: 8px;
   }
 }
 
-// ---- Submenú ----
+// ---- Submenú / Submenu ----
 .neu-nav__submenu {
   display: flex;
   flex-direction: column;
@@ -379,14 +379,14 @@ $item-radius: 8px;
   }
 }
 
-// ---- Ítem nieto (nivel 3) ----
+// ---- Ítem nieto (nivel 3) / Grandchild item (level 3) ----
 .neu-nav__item--grandchild {
   height: 32px;
   padding-left: calc(var(--neu-space-2) + 4px);
   font-size: 0.75rem;
 }
 
-// ---- Icono de enlace externo ----
+// ---- Icono de enlace externo / External link icon ----
 .neu-nav__external-icon {
   flex-shrink: 0;
   margin-left: auto;
@@ -414,7 +414,7 @@ $item-radius: 8px;
     height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-// ---- Indicador de submenú en modo colapsado ----
+// ---- Indicador de submenú en modo colapsado / Submenu indicator (collapsed mode) ----
 .neu-nav--collapsed .neu-nav__item--parent {
   &::after {
     content: '›';
@@ -429,7 +429,7 @@ $item-radius: 8px;
   }
 }
 
-// ---- Flyout panel (modo colapsado) ----
+// ---- Flyout panel (modo colapsado) / Flyout panel (collapsed mode) ----
 .neu-nav__flyout {
   position: fixed;
   z-index: 1000;

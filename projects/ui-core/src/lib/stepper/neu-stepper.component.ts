@@ -9,13 +9,13 @@ import {
 } from '@angular/core';
 
 export interface NeuStepperStep {
-  /** Etiqueta del paso */
+  /** Etiqueta del paso / Step label */
   label: string;
-  /** Descripción corta opcional */
+  /** Descripción corta opcional / Optional short description */
   description?: string;
-  /** Marca el paso como completado externamente */
+  /** Marca el paso como completado externamente / Marks the step as completed externally */
   completed?: boolean;
-  /** Desactiva el paso */
+  /** Desactiva el paso / Disables the step */
   disabled?: boolean;
 }
 
@@ -97,19 +97,19 @@ export interface NeuStepperStep {
   styleUrl: './neu-stepper.component.scss',
 })
 export class NeuStepperComponent {
-  /** Pasos del wizard */
+  /** Pasos del wizard / Wizard steps */
   steps = input<NeuStepperStep[]>([]);
 
-  /** Índice del paso activo (0-based) */
+  /** Índice del paso activo (0-based) / Active step index (0-based) */
   activeStep = input<number>(0);
 
-  /** Si true, solo permite ir hacia adelante secuencialmente */
+  /** Si true, solo permite ir hacia adelante secuencialmente / If true, only allows moving forward sequentially */
   linear = input<boolean>(false);
 
-  /** Emite el nuevo índice al cambiar */
+  /** Emite el nuevo índice al cambiar / Emits the new index on change */
   stepChange = output<number>();
 
-  /** Set de pasos completados */
+  /** Set de pasos completados / Set of completed steps */
   private readonly _completed = signal<Set<number>>(new Set());
 
   readonly isCompleted = (i: number) =>
@@ -122,7 +122,7 @@ export class NeuStepperComponent {
     this.stepChange.emit(i);
   }
 
-  /** Marca el paso actual como completado y avanza al siguiente */
+  /** Marca el paso actual como completado y avanza al siguiente / Marks the current step as completed and advances to the next */
   next(): void {
     const current = this.activeStep();
     const updated = new Set(this._completed());

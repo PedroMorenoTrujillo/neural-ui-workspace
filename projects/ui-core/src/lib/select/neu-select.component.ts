@@ -224,42 +224,42 @@ export class NeuSelectComponent implements ControlValueAccessor {
   }
   /** @internal — ID \u00fanico para asociar label con trigger */
   readonly _triggerId = `neu-select-trigger-${_neuSelectIdSeq++}`;
-  /** Template personalizado para cada opción del dropdown */
+  /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
   readonly itemTpl = contentChild(NeuSelectItemDirective);
 
-  /** Template personalizado para el valor seleccionado en el trigger */
+  /** Template personalizado para el valor seleccionado en el trigger / Custom template for the selected value in the trigger */
   readonly selectedItemTpl = contentChild(NeuSelectSelectedDirective);
-  /** Opciones del dropdown */
+  /** Opciones del dropdown / Dropdown options */
   options = input<NeuSelectOption[]>([]);
 
-  /** Texto del floating label */
+  /** Texto del floating label / Floating label text */
   label = input<string>('');
 
-  /** Placeholder cuando no hay selección */
+  /** Placeholder cuando no hay selección / Placeholder when there is no selection */
   placeholder = input<string>('Seleccionar...');
 
-  /** Mensaje de error */
+  /** Mensaje de error / Error message */
   errorMessage = input<string>('');
 
-  /** Deshabilita el select */
+  /** Deshabilita el select / Disables the select */
   disabled = input<boolean>(false);
 
-  /** Muestra el label como flotante (true) o como label estático encima (false, por defecto) */
+  /** Muestra el label como flotante (true) o como label estático encima (false, por defecto) / Shows the label as floating (true) or static above (false, default) */
   floatingLabel = input<boolean>(false);
 
-  /** Activa input de búsqueda/filtro en el panel */
+  /** Activa input de búsqueda/filtro en el panel / Activates the search/filter input in the panel */
   searchable = input<boolean>(false);
 
-  /** Placeholder del input de búsqueda */
+  /** Placeholder del input de búsqueda / Search input placeholder */
   searchPlaceholder = input<string>('Buscar...');
 
-  /** Muestra un botón para limpiar la selección */
+  /** Muestra un botón para limpiar la selección / Shows a button to clear the selection */
   clearable = input<boolean>(false);
 
-  /** Texto cuando no hay opciones tras filtrar */
+  /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
   noResultsMessage = input<string>('Sin resultados');
 
-  /** Aria-label del botón de limpiar */
+  /** Aria-label del botón de limpiar / Aria-label for the clear button */
   clearAriaLabel = input<string>('Limpiar selección');
 
   /**
@@ -339,7 +339,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
     this._onTouched();
   }
 
-  /** Abre el panel y navega con flechas desde el trigger */
+  /** Abre el panel y navega con flechas desde el trigger / Opens the panel and navigates with arrows from the trigger */
   onTriggerKey(event: Event): void {
     event.preventDefault();
     if (!this.isOpen()) {
@@ -353,7 +353,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
     }
   }
 
-  /** Navega entre opciones con flechas */
+  /** Navega entre opciones con flechas / Navigates between options with arrows */
   focusOptionByIndex(event: Event, current: NeuSelectOption, dir: 1 | -1): void {
     event.preventDefault();
     const opts = this.filteredOptions().filter((o) => !o.disabled);

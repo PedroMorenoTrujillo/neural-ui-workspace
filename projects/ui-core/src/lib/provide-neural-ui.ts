@@ -17,9 +17,9 @@ import {
 } from '@ng-icons/lucide';
 
 export interface NeuralUIConfig {
-  /** Tamaño por defecto de los iconos. Por defecto: '1.25rem' */
+  /** Tamaño por defecto de los iconos. Por defecto: '1.25rem' / Default icon size. Default: '1.25rem' */
   iconSize?: string;
-  /** Grosor de trazo de los iconos. Por defecto: '2' */
+  /** Grosor de trazo de los iconos. Por defecto: '2' / Icon stroke width. Default: '2' */
   iconStrokeWidth?: string;
 }
 

@@ -59,7 +59,7 @@ $label-font-floating: 12px;
   }
 }
 
-// ---- Campo nativo ----
+// ---- Campo nativo / Native input ----
 .neu-input__field {
   width: 100%;
   height: 100%;
@@ -89,7 +89,7 @@ $label-font-floating: 12px;
   color: var(--neu-text-disabled);
 }
 
-// ---- Floating Label — estilo "outlined" (sube al borde superior) ----
+// ---- Floating Label — estilo "outlined" / "outlined" style (floats to top border) ----
 .neu-input__label {
   position: absolute;
   left: var(--neu-space-3);
@@ -148,7 +148,7 @@ $label-font-floating: 12px;
   }
 }
 
-// ---- Iconos ----
+// ---- Iconos / Icons ----
 .neu-input__icon {
   position: absolute;
   display: flex;

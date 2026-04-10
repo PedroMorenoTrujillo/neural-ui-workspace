@@ -10,7 +10,7 @@
   font-family: var(--neu-font-sans);
 }
 
-// ---- Cabecera ----
+// ---- Cabecera / Header ----
 .neu-stepper__header {
   display: flex;
   align-items: center;
@@ -90,7 +90,7 @@
   color: #fff;
 }
 
-// ---- Info del paso ----
+// ---- Info del paso / Step info ----
 .neu-stepper__step-info {
   display: flex;
   flex-direction: column;
@@ -118,7 +118,7 @@
   margin-top: 1px;
 }
 
-// ---- Conector entre pasos ----
+// ---- Conector entre pasos / Step connector ----
 .neu-stepper__connector {
   flex: 1;
   height: 2px;
@@ -132,7 +132,7 @@
   }
 }
 
-// ---- Contenido ----
+// ---- Contenido / Content ----
 .neu-stepper__content {
   min-height: 80px;
 }

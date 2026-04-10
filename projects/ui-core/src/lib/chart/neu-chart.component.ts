@@ -24,10 +24,10 @@ export interface NeuChartSeries {
   data: number[];
 }
 
-/** Paleta por defecto Neural-Blue */
+/** Paleta por defecto Neural-Blue / Default Neural-Blue palette */
 const DEFAULT_COLORS = ['#007aff', '#5856d6', '#34c759', '#ff9f0a', '#ff3b30', '#64748b'];
 
-/** Calcula la línea acumulada porcentual para un diagrama de Pareto. */
+/** Calcula la línea acumulada porcentual para un diagrama de Pareto. / Calculates the cumulative percentage line for a Pareto chart. */
 function computeParetoCumulative(data: number[]): number[] {
   const total = data.reduce((s, v) => s + Math.abs(v), 0);
   if (total === 0) return data.map(() => 0);
@@ -78,23 +78,23 @@ function computeParetoCumulative(data: number[]): number[] {
   styleUrl: './neu-chart.component.scss',
 })
 export class NeuChartComponent {
-  /** Tipo de gráfica. */
+  /** Tipo de gráfica. / Chart type. */
   type = input<NeuChartType>('line');
-  /** Series para gráficas de ejes (line, area, bar, pareto…). */
+  /** Series para gráficas de ejes (line, area, bar, pareto…). / Series for axis-based charts (line, area, bar, pareto…). */
   series = input<NeuChartSeries[]>([]);
-  /** Series para gráficas sin ejes (donut, pie). */
+  /** Series para gráficas sin ejes (donut, pie). / Series for non-axis charts (donut, pie). */
   pieSeries = input<number[]>([]);
-  /** Etiquetas del eje X. */
+  /** Etiquetas del eje X. / X-axis labels. */
   categories = input<string[]>([]);
-  /** Etiquetas para donut/pie. */
+  /** Etiquetas para donut/pie. / Labels for donut/pie. */
   labels = input<string[]>([]);
-  /** Altura en px. */
+  /** Altura en px. / Height in px. */
   height = input<number>(280);
-  /** Colores custom. Si no se proveen, usa la paleta Neural-Blue. */
+  /** Colores custom. Si no se proveen, usa la paleta Neural-Blue. / Custom colors. If not provided, uses the Neural-Blue palette. */
   colors = input<string[]>([]);
-  /** Muestra/oculta las etiquetas de datos. */
+  /** Muestra/oculta las etiquetas de datos. / Shows/hides data labels. */
   showDataLabels = input<boolean>(false);
-  /** Título de la gráfica. */
+  /** Título de la gráfica. / Chart title. */
   title = input<string>('');
 
   // --------------------------------------------------

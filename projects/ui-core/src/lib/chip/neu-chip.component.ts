@@ -63,28 +63,28 @@ export type NeuChipSize = 'sm' | 'md';
   styleUrl: './neu-chip.component.scss',
 })
 export class NeuChipComponent {
-  /** Variante de color */
+  /** Variante de color / Color variant */
   variant = input<NeuChipVariant>('default');
 
-  /** Tamaño */
+  /** Tamaño / Size */
   size = input<NeuChipSize>('md');
 
-  /** Estado seleccionado */
+  /** Estado seleccionado / Selected state */
   selected = input<boolean>(false);
 
-  /** Muestra botón de cierre */
+  /** Muestra botón de cierre / Shows close button */
   removable = input<boolean>(false);
 
-  /** Deshabilitado */
+  /** Deshabilitado / Disabled */
   disabled = input<boolean>(false);
 
-  /** Aria-label del botón de eliminar */
+  /** Aria-label del botón de eliminar / Aria-label for the delete button */
   removeAriaLabel = input<string>('Eliminar');
 
-  /** Emite al hacer clic o pulsar espacio/enter */
+  /** Emite al hacer clic o pulsar espacio/enter / Emits on click or space/enter press */
   selectedChange = output<boolean>();
 
-  /** Emite al pulsar el botón de cierre */
+  /** Emite al pulsar el botón de cierre / Emits when the close button is pressed */
   removed = output<void>();
 
   readonly hostClasses = computed(() => ({

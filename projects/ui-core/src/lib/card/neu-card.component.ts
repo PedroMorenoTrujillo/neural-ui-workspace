@@ -43,16 +43,16 @@ export type NeuCardPadding = 'none' | 'sm' | 'md' | 'lg';
   styleUrl: './neu-card.component.scss',
 })
 export class NeuCardComponent {
-  /** Espaciado interior del cuerpo */
+  /** Espaciado interior del cuerpo / Inner body padding */
   padding = input<NeuCardPadding>('md');
 
-  /** Efecto hover con elevación de sombra */
+  /** Efecto hover con elevación de sombra / Hover effect with shadow elevation */
   hoverable = input<boolean>(false);
 
-  /** Borde con acento de color primario */
+  /** Borde con acento de color primario / Border with primary color accent */
   bordered = input<boolean>(false);
 
-  /** Card compacta sin bordes ni sombras */
+  /** Card compacta sin bordes ni sombras / Compact card without borders or shadows */
   flat = input<boolean>(false);
 
   readonly hostClasses = computed(() => ({
