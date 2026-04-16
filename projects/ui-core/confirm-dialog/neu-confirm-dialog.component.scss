@@ -1,0 +1,107 @@
+.neu-confirm-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--neu-surface-1, #ffffff);
+  border: 1px solid var(--neu-border-color, #e5e7eb);
+  border-radius: var(--neu-radius-xl, 16px);
+  box-shadow: 0 20px 40px -8px rgb(0 0 0 / 0.18);
+  padding: 24px;
+  width: clamp(280px, 90vw, 420px);
+  animation: neu-confirm-in 140ms ease;
+}
+
+@keyframes neu-confirm-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Title ─────────────────────────────────────────────────────── */
+.neu-confirm-dialog__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--neu-text-primary, #111);
+}
+
+/* ── Message ────────────────────────────────────────────────────── */
+.neu-confirm-dialog__message {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--neu-text-secondary, #4b5563);
+  line-height: 1.55;
+}
+
+/* ── Actions ────────────────────────────────────────────────────── */
+.neu-confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.neu-confirm-dialog__btn {
+  all: unset;
+  box-sizing: border-box;
+  padding: 8px 18px;
+  border-radius: var(--neu-radius-md, 8px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    color 120ms;
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
+    outline-offset: 2px;
+  }
+
+  &--reject {
+    color: var(--neu-text-secondary, #4b5563);
+    background: var(--neu-surface-2, #f3f4f6);
+
+    &:hover {
+      background: var(--neu-surface-3, #e5e7eb);
+    }
+
+    &.neu-confirm-dialog__btn--danger {
+      background: var(--neu-color-danger, #ef4444);
+      color: var(--neu-primary-fg);
+
+      &:hover {
+        filter: brightness(1.08);
+      }
+    }
+  }
+
+  &--primary {
+    background: var(--neu-color-primary, #0ea5e9);
+    color: var(--neu-primary-fg);
+
+    &:hover {
+      filter: brightness(1.08);
+    }
+  }
+
+  &--danger {
+    background: var(--neu-color-danger, #ef4444);
+    color: var(--neu-primary-fg);
+
+    &:hover {
+      filter: brightness(1.08);
+    }
+  }
+}
+
+/* ── Backdrop ────────────────────────────────────────────────── */
+.neu-confirm-dialog-backdrop {
+  background: var(--neu-overlay-bg);
+  backdrop-filter: blur(2px);
+}

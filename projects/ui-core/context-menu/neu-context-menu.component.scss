@@ -1,0 +1,80 @@
+.neu-context-menu {
+  background: var(--neu-context-menu-bg, var(--neu-surface-1, #ffffff));
+  border: 1px solid var(--neu-context-menu-border, var(--neu-border-color, #e5e7eb));
+  border-radius: var(--neu-radius-lg, 12px);
+  box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.14);
+  padding: 6px;
+  min-width: 180px;
+  max-width: 260px;
+  z-index: 2000;
+  outline: none;
+  animation: neu-ctx-in 80ms ease;
+}
+
+@keyframes neu-ctx-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Item ─────────────────────────────────────────────────────── */
+.neu-context-menu__item {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: var(--neu-radius-md, 8px);
+  font-size: 0.875rem;
+  color: var(--neu-context-menu-color, var(--neu-text, var(--neu-text-primary, #111827)));
+  cursor: pointer;
+  transition: background 100ms;
+
+  &:hover:not(.neu-context-menu__item--disabled) {
+    background: var(--neu-context-menu-hover, var(--neu-surface-2, #f3f4f6));
+  }
+
+  &:focus-visible {
+    background: var(--neu-context-menu-hover, var(--neu-surface-2, #f3f4f6));
+    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
+    outline-offset: -2px;
+  }
+
+  &.neu-context-menu__item--danger {
+    color: var(--neu-color-danger, #ef4444);
+  }
+
+  &.neu-context-menu__item--disabled {
+    color: var(--neu-context-menu-disabled-color, var(--neu-text-muted, #6b7280));
+    opacity: 0.56;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.neu-context-menu__icon {
+  flex-shrink: 0;
+  font-style: normal;
+  font-size: 1em;
+}
+
+/* ── Separator ────────────────────────────────────────────────── */
+.neu-context-menu__separator {
+  all: unset;
+  display: block;
+  height: 1px;
+  background: var(--neu-context-menu-border, var(--neu-border-color, #e5e7eb));
+  margin: 4px 0;
+}
+
+/* Invisible backdrop */
+.neu-context-menu-backdrop {
+  background: transparent;
+}

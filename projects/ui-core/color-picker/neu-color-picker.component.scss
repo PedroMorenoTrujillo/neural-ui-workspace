@@ -1,0 +1,251 @@
+.neu-cp {
+  position: relative;
+  display: inline-block;
+
+  &--disabled {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+}
+
+/* ── Trigger ──────────────────────────────────────────────────── */
+.neu-cp__trigger {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border: 1px solid var(--neu-border-color, #d1d5db);
+  border-radius: var(--neu-radius-md, 8px);
+  background: var(--neu-surface-1, #ffffff);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 120ms;
+
+  &:hover:not([disabled]) {
+    border-color: var(--neu-color-primary, #0ea5e9);
+  }
+
+  &[disabled] {
+    background: var(--neu-surface-2, #f3f4f6);
+  }
+}
+
+/* ── Swatch ───────────────────────────────────────────────────── */
+.neu-cp__swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--neu-radius-sm, 4px);
+  border: 1px solid rgb(0 0 0 / 0.1);
+  display: inline-block;
+}
+
+.neu-cp__swatch-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--neu-radius-md, 8px);
+  border: 1px solid rgb(0 0 0 / 0.1);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.neu-cp__hex-label {
+  font-size: 0.8125rem;
+  color: var(--neu-text-primary, #111);
+  font-family: monospace;
+}
+
+/* ── Panel ────────────────────────────────────────────────────── */
+.neu-cp__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 272px;
+  background: var(--neu-surface-1, #ffffff);
+  border: 1px solid var(--neu-border-color, #e5e7eb);
+  border-radius: var(--neu-radius-xl, 16px);
+  box-shadow: 0 10px 24px -4px rgb(0 0 0 / 0.14);
+  padding: 16px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: neu-cp-in 80ms ease;
+}
+
+@keyframes neu-cp-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── HSV Canvas ──────────────────────────────────────────────── */
+.neu-cp__canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-radius: var(--neu-radius-md, 8px);
+  overflow: hidden;
+  cursor: crosshair;
+  user-select: none;
+  touch-action: none;
+
+  // White gradient: left → transparent right
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, #fff, transparent);
+  }
+
+  // Black gradient: bottom → transparent top
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #000, transparent);
+  }
+}
+
+.neu-cp__canvas-cursor {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Hue Slider ──────────────────────────────────────────────── */
+.neu-cp__hue-slider {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(
+    to right,
+    hsl(0, 100%, 50%),
+    hsl(30, 100%, 50%),
+    hsl(60, 100%, 50%),
+    hsl(90, 100%, 50%),
+    hsl(120, 100%, 50%),
+    hsl(150, 100%, 50%),
+    hsl(180, 100%, 50%),
+    hsl(210, 100%, 50%),
+    hsl(240, 100%, 50%),
+    hsl(270, 100%, 50%),
+    hsl(300, 100%, 50%),
+    hsl(330, 100%, 50%),
+    hsl(360, 100%, 50%)
+  );
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid rgb(0 0 0 / 0.25);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid rgb(0 0 0 / 0.25);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+    cursor: pointer;
+  }
+}
+
+/* ── Swatches ─────────────────────────────────────────────────── */
+.neu-cp__swatches {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.neu-cp__sw {
+  all: unset;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1.5px solid rgb(0 0 0 / 0.1);
+  transition: transform 80ms;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-color-primary, #0ea5e9);
+    outline-offset: 1px;
+  }
+}
+
+/* ── Mode tabs ────────────────────────────────────────────────── */
+.neu-cp__mode-tabs {
+  display: flex;
+  background: var(--neu-surface-2, #f3f4f6);
+  border-radius: var(--neu-radius-md, 8px);
+  padding: 3px;
+  gap: 2px;
+}
+
+.neu-cp__mode-btn {
+  all: unset;
+  flex: 1;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 4px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 80ms,
+    color 80ms;
+
+  &--active {
+    background: var(--neu-surface-1, #ffffff);
+    color: var(--neu-color-primary, #0ea5e9);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.08);
+  }
+}
+
+/* ── Text input ───────────────────────────────────────────────── */
+.neu-cp__input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.neu-cp__text-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--neu-border-color, #d1d5db);
+  border-radius: var(--neu-radius-md, 8px);
+  font-size: 0.8125rem;
+  font-family: monospace;
+  background: var(--neu-surface-1, #fff);
+  color: var(--neu-text-primary, #111);
+  outline: none;
+
+  &:focus {
+    border-color: var(--neu-color-primary, #0ea5e9);
+  }
+}

@@ -4,6 +4,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -16,7 +17,8 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@neural-ui/core": ["projects/ui-core/src/public-api.ts"]
+      "@neural-ui/core": ["projects/ui-core/public-api.ts"],
+      "@neural-ui/core/*": ["projects/ui-core/*/public_api.ts"]
     }
   },
   "angularCompilerOptions": {
@@ -32,12 +34,6 @@
     },
     {
       "path": "./projects/ui-core/tsconfig.spec.json"
-    },
-    {
-      "path": "./projects/sandbox/tsconfig.app.json"
-    },
-    {
-      "path": "./projects/sandbox/tsconfig.spec.json"
     }
   ]
 }

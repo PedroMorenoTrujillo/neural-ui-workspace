@@ -1,0 +1,204 @@
+.neu-nc {
+  position: relative;
+  display: inline-block;
+}
+
+/* ── Bell button ──────────────────────────────────────────────── */
+.neu-nc__bell {
+  all: unset;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--neu-radius-lg, 12px);
+  cursor: pointer;
+  transition: background 120ms;
+
+  &:hover {
+    background: var(--neu-surface-2, #f3f4f6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
+    outline-offset: 2px;
+  }
+}
+
+.neu-nc__bell-icon {
+  font-size: 1.2rem;
+}
+
+/* ── Badge ────────────────────────────────────────────────────── */
+.neu-nc__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--neu-error);
+  color: var(--neu-text-inverse);
+  font-size: 0.625rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ── Panel ────────────────────────────────────────────────────── */
+.neu-nc__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-height: 420px;
+  display: flex;
+  flex-direction: column;
+  background: var(--neu-surface-1, #ffffff);
+  border: 1px solid var(--neu-border-color, #e5e7eb);
+  border-radius: var(--neu-radius-xl, 16px);
+  box-shadow: 0 12px 28px -6px rgb(0 0 0 / 0.14);
+  z-index: 1001;
+  overflow: hidden;
+  animation: neu-nc-in 100ms ease;
+}
+
+@keyframes neu-nc-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Panel header ─────────────────────────────────────────────── */
+.neu-nc__panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--neu-border-color, #e5e7eb);
+  flex-shrink: 0;
+}
+
+.neu-nc__panel-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--neu-text-primary, #111);
+}
+
+.neu-nc__panel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.neu-nc__action-btn {
+  all: unset;
+  font-size: 0.75rem;
+  color: var(--neu-color-primary, #0ea5e9);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--neu-radius-sm, 4px);
+
+  &:hover {
+    background: var(--neu-color-primary-alpha, rgb(14 165 233 / 0.1));
+  }
+}
+
+/* ── List ─────────────────────────────────────────────────────── */
+.neu-nc__list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 6px;
+}
+
+.neu-nc__empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--neu-text-secondary, #6b7280);
+}
+
+/* ── Item ─────────────────────────────────────────────────────── */
+.neu-nc__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 10px 10px 12px;
+  border-radius: var(--neu-radius-lg, 12px);
+  position: relative;
+  transition: background 100ms;
+
+  &:hover {
+    background: var(--neu-surface-2, #f3f4f6);
+  }
+
+  &--unread::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--neu-color-primary, #0ea5e9);
+  }
+}
+
+.neu-nc__item-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.neu-nc__item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.neu-nc__item-title {
+  margin: 0 0 2px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--neu-text-primary, #111);
+}
+
+.neu-nc__item-msg {
+  margin: 0 0 4px;
+  font-size: 0.8125rem;
+  color: var(--neu-text-secondary, #4b5563);
+  line-height: 1.4;
+}
+
+.neu-nc__item-time {
+  font-size: 0.6875rem;
+  color: var(--neu-text-secondary, #9ca3af);
+}
+
+.neu-nc__item-close {
+  all: unset;
+  opacity: 0;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: var(--neu-text-secondary, #9ca3af);
+  flex-shrink: 0;
+  transition: opacity 100ms;
+
+  .neu-nc__item:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    color: var(--neu-text-primary, #111);
+  }
+}

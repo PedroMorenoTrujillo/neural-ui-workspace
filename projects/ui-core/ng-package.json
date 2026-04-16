@@ -1,14 +1,15 @@
 {
-  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
-  "dest": "../../dist/neural-ui/core",
-  "lib": {
-    "entryFile": "src/public-api.ts"
-  },
-  "assets": [
-    {
-      "input": "./src/lib/styles",
-      "glob": "**",
-      "output": "./styles"
-    }
-  ]
+    "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+    "dest": "../../dist/neural-ui/core",
+    "deleteDestPath": true,
+    "lib": {
+        "entryFile": "public-api.ts"
+    },
+    "assets": [
+        {
+            "input": "./styles",
+            "glob": "**",
+            "output": "./styles"
+        }
+    ]
 }

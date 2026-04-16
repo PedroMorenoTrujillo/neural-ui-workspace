@@ -1,0 +1,204 @@
+/* ── Host: flex-column para acomodar label + control ──────────── */
+.neu-number-input {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.neu-number-input--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── Label visible / Visible label ─ */
+.neu-number-input__label {
+  font-size: var(--neu-text-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--neu-text);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/* ── Wrapper interno para botones + input ────────────────────── */
+.neu-number-input__control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  /* Layout vertical: columna — el contenedor pone el borde, los hijos no / Vertical layout — container owns the border, children don't */
+  .neu-number-input--vertical & {
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
+    border: 1px solid var(--neu-border);
+    border-radius: var(--neu-radius-md, 8px);
+    overflow: hidden;
+    width: var(--neu-number-input-width, 80px);
+  }
+
+  /* Layout apilado: items estiran para compartir altura */
+  .neu-number-input--stacked & {
+    align-items: stretch;
+    gap: 0;
+  }
+}
+
+/* ── Field ────────────────────────────────────────────────────── */
+.neu-number-input__field {
+  width: var(--neu-number-input-width, 80px);
+  height: var(--neu-number-input-height, 48px);
+  padding: 0 8px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-md, 8px);
+  background: var(--neu-surface);
+  color: var(--neu-text);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline: none;
+  transition: border-color 150ms;
+  /* Remove native number arrows / Quita las flechas nativas */
+  -moz-appearance: textfield;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    display: none;
+  }
+
+  &:focus {
+    border-color: var(--neu-primary);
+    box-shadow: var(--neu-focus-ring);
+  }
+
+  /* Stacked: el input comparte el borde con los botones apilados */
+  .neu-number-input--stacked & {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: var(--neu-number-input-stacked-min-width, 120px);
+    border-radius: var(--neu-radius-md, 8px) 0 0 var(--neu-radius-md, 8px);
+    border-right: none;
+    text-align: left;
+    padding: 0 10px;
+  }
+
+  /* Vertical: el contenedor ya tiene el borde — el input solo separa con divisores / Container owns border — input only needs dividers */
+  .neu-number-input--vertical & {
+    width: 100%;
+    border: none;
+    border-top: 1px solid var(--neu-border);
+    border-bottom: 1px solid var(--neu-border);
+    border-radius: 0;
+  }
+}
+
+/* ── Stack (botones apilados ▲▼ a la derecha) ────────────────── */
+.neu-number-input__stack {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--neu-border);
+  border-radius: 0 var(--neu-radius-md, 8px) var(--neu-radius-md, 8px) 0;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  .neu-number-input__btn {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    width: var(--neu-number-input-btn-size, 26px);
+    border: none;
+    border-radius: 0;
+    background: var(--neu-surface);
+    color: var(--neu-text-muted);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    transition:
+      background 100ms,
+      color 100ms;
+
+    &:not(:disabled):hover {
+      background: var(--neu-surface-2);
+      color: var(--neu-text);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--neu-primary);
+      outline-offset: -1px;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &--inc {
+      border-bottom: 1px solid var(--neu-border);
+    }
+  }
+}
+
+/* ── Botones independientes (layout horizontal y vertical) ───── */
+.neu-number-input__control > .neu-number-input__btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--neu-number-input-btn-size, 48px);
+  height: var(--neu-number-input-btn-size, 48px);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-md, 8px);
+  background: var(--neu-surface);
+  color: var(--neu-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1;
+  transition:
+    background 120ms,
+    color 120ms,
+    border-color 120ms;
+
+  &:not(:disabled):hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+    border-color: var(--neu-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* Vertical: botones sin borde propio — el contenedor es la caja / No individual borders in vertical — container is the box */
+.neu-number-input--vertical .neu-number-input__control > .neu-number-input__btn {
+  width: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+/* ---- Sizes / Tamaños ----------------------------------------
+   sm: 36px | md: 48px (default) | lg: 56px                     */
+.neu-number-input--sm {
+  --neu-number-input-height: 36px;
+  --neu-number-input-btn-size: 36px;
+
+  .neu-number-input__field {
+    font-size: var(--neu-text-sm);
+  }
+}
+
+.neu-number-input--lg {
+  --neu-number-input-height: 56px;
+  --neu-number-input-btn-size: 56px;
+}

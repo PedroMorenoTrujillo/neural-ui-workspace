@@ -1,0 +1,226 @@
+// ============================================================
+// NeuralUI — Input Component Styles (light theme)
+// ViewEncapsulation.None — prefijo BEM .neu-input
+// ============================================================
+@use '../styles/breakpoints' as *;
+
+$input-height: 48px; // md — default
+$input-height-sm: 36px; // sm
+$input-height-lg: 56px; // lg
+$label-font-floating: 12px;
+
+// ---- Host ----
+.neu-input-host {
+  display: block;
+}
+
+// ---- Wrapper ----
+.neu-input__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  height: $input-height;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition),
+    background-color var(--neu-transition);
+
+  &:hover:not(.neu-input__wrapper--disabled) {
+    border-color: var(--neu-border-hover);
+  }
+
+  &--focused {
+    border-color: var(--neu-primary);
+    box-shadow: var(--neu-focus-ring);
+  }
+
+  &--error {
+    border-color: var(--neu-error);
+
+    &.neu-input__wrapper--focused {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
+  }
+
+  &--disabled {
+    background: var(--neu-surface-2);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  // Padding extra para iconos
+  &--has-start-icon .neu-input__field {
+    padding-left: 40px;
+  }
+  &--has-end-icon .neu-input__field {
+    padding-right: 40px;
+  }
+}
+
+// ---- Campo nativo / Native input ----
+.neu-input__field {
+  width: 100%;
+  height: 100%;
+  padding: 0 var(--neu-space-3);
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text);
+  caret-color: var(--neu-primary);
+
+  &:disabled {
+    cursor: not-allowed;
+    color: var(--neu-text-disabled);
+  }
+
+  // Placeholder oculto en modo floating — visible sólo al enfocar
+  &::placeholder {
+    color: transparent;
+    transition: color var(--neu-transition);
+  }
+}
+
+// Placeholder visible cuando el wrapper está enfocado (label ya flotó)
+.neu-input__wrapper--focused .neu-input__field::placeholder {
+  color: var(--neu-text-disabled);
+}
+
+// ---- Floating Label — estilo "outlined" / "outlined" style (floats to top border) ----
+.neu-input__label {
+  position: absolute;
+  left: var(--neu-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text-muted);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - var(--neu-space-6));
+  transition:
+    top var(--neu-transition),
+    font-size var(--neu-transition),
+    color var(--neu-transition),
+    transform var(--neu-transition),
+    padding var(--neu-transition),
+    background var(--neu-transition);
+
+  // Cuando el input tiene valor o está enfocado → sube al borde
+  .neu-input__wrapper--focused &,
+  .neu-input__wrapper--has-value & {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: $label-font-floating;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: var(--neu-surface);
+    padding: 0 4px;
+    left: calc(var(--neu-space-3) - 4px);
+  }
+
+  .neu-input__wrapper--focused & {
+    color: var(--neu-primary);
+  }
+
+  .neu-input__wrapper--error & {
+    color: var(--neu-error);
+  }
+
+  // En wrapper deshabilitado, usar color de fondo correcto
+  .neu-input__wrapper--disabled & {
+    background: var(--neu-surface-2);
+  }
+}
+
+// Ajuste cuando hay start icon
+.neu-input__wrapper--has-start-icon .neu-input__label {
+  left: 40px;
+
+  &.neu-input__wrapper--focused,
+  .neu-input__wrapper--focused &,
+  .neu-input__wrapper--has-value & {
+    left: calc(var(--neu-space-3) - 4px); // vuelve a la izquierda al flotar
+  }
+}
+
+// ---- Iconos / Icons ----
+.neu-input__icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--neu-text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &--start {
+    left: 0;
+  }
+  &--end {
+    right: 0;
+  }
+}
+
+// ---- Error / Hint ----
+.neu-input__error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-error-text);
+  font-family: var(--neu-font-sans);
+  line-height: 1.4;
+}
+
+.neu-input__hint {
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Static label (floatingLabel=false) ----
+.neu-input__static-label {
+  display: block;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  margin-bottom: var(--neu-space-2);
+}
+
+// ---- No float mode ----
+.neu-input__wrapper--no-float {
+  .neu-input__field {
+    padding: 0 var(--neu-space-3);
+
+    &::placeholder {
+      color: var(--neu-text-disabled);
+    }
+  }
+}
+
+// ---- Sizes / Tamaños ----------------------------------------
+// sm: 36px | md: 48px (default) | lg: 56px
+.neu-input-host--sm .neu-input__wrapper {
+  height: $input-height-sm;
+}
+.neu-input-host--sm .neu-input__field {
+  font-size: var(--neu-text-sm);
+}
+.neu-input-host--lg .neu-input__wrapper {
+  height: $input-height-lg;
+}

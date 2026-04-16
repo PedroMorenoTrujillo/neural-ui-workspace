@@ -1,0 +1,412 @@
+// ============================================================
+// NeuralUI — Sistema de Design Tokens v2
+// Estética High-End · Neural-Blue · Light Theme
+// ============================================================
+
+:root {
+  // ------------------------------------------------
+  // Brand — Neural-Blue (inspirado en Apple HIG)
+  // ------------------------------------------------
+  --neu-primary: #007aff;
+  --neu-primary-dark: #005fcc;
+  --neu-primary-light: #339dff;
+  --neu-primary-50: #eff6ff;
+  --neu-primary-100: #dbeafe;
+  --neu-primary-fg: #ffffff;
+
+  --neu-secondary: #10b981;
+  --neu-secondary-dark: #059669;
+  --neu-secondary-fg: #ffffff;
+
+  --neu-accent: #5ac8fa;
+
+  // ------------------------------------------------
+  // Fondos (ultra-clean, Slate scale)
+  // ------------------------------------------------
+  --neu-bg: #f8fafc; // Slate-50 — fondo base
+  --neu-surface: #ffffff; // Blanco puro — tarjetas
+  --neu-surface-2: #f1f5f9; // Slate-100 — fondos secundarios
+  --neu-surface-3: #e2e8f0; // Slate-200 — hover, separadores
+
+  // ------------------------------------------------
+  // Bordes
+  // ------------------------------------------------
+  --neu-border: rgba(15, 23, 42, 0.08);
+  --neu-border-hover: rgba(15, 23, 42, 0.16);
+  --neu-border-focus: var(--neu-primary);
+
+  // ------------------------------------------------
+  // Tipografía (Slate scale)
+  // ------------------------------------------------
+  --neu-text: #0f172a; // Slate-900
+  --neu-text-muted: #64748b; // Slate-500
+  --neu-text-disabled: #94a3b8; // Slate-400
+  --neu-text-inverse: #ffffff;
+  --neu-knob-display-color: var(--neu-text);
+  --neu-knob-label-color: var(--neu-text-muted);
+
+  --neu-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --neu-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  --neu-text-xs: 0.75rem;
+  --neu-text-sm: 0.875rem;
+  --neu-text-base: 1rem;
+  --neu-text-lg: 1.125rem;
+  --neu-text-xl: 1.25rem;
+  --neu-text-2xl: 1.5rem;
+  --neu-text-3xl: 1.875rem;
+  --neu-text-4xl: 2.25rem;
+
+  // ------------------------------------------------
+  // Estados semánticos
+  // ------------------------------------------------
+  --neu-success: #10b981;
+  --neu-success-bg: #d1fae5;
+  --neu-success-text: #065f46;
+
+  --neu-warning: #f59e0b;
+  --neu-warning-bg: #fef3c7;
+  --neu-warning-text: #92400e;
+
+  --neu-error: #ef4444;
+  --neu-error-bg: #fee2e2;
+  --neu-error-text: #991b1b;
+
+  --neu-info: #007aff;
+  --neu-info-bg: #eff6ff;
+  --neu-info-text: #1d4ed8;
+
+  // ------------------------------------------------
+  // Radio de borde
+  // ------------------------------------------------
+  --neu-radius-xs: 2px;
+  --neu-radius-sm: 6px;
+  --neu-radius: 8px;
+  --neu-radius-lg: 12px;
+  --neu-radius-xl: 16px;
+  --neu-radius-2xl: 24px;
+  --neu-radius-full: 9999px;
+
+  // ------------------------------------------------
+  // Espaciado
+  // ------------------------------------------------
+  --neu-space-1: 0.25rem;
+  --neu-space-2: 0.5rem;
+  --neu-space-3: 0.75rem;
+  --neu-space-4: 1rem;
+  --neu-space-5: 1.25rem;
+  --neu-space-6: 1.5rem;
+  --neu-space-8: 2rem;
+  --neu-space-10: 2.5rem;
+  --neu-space-12: 3rem;
+  --neu-space-16: 4rem;
+
+  // ------------------------------------------------
+  // Transiciones y animación
+  // ------------------------------------------------
+  --neu-transition: 200ms ease;
+  --neu-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --neu-transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // ------------------------------------------------
+  // Layout estructural
+  // ------------------------------------------------
+  --neu-header-height: 64px;
+  --neu-sidebar-width: 260px;
+  --neu-sidebar-bg: var(--neu-surface);
+
+  // ------------------------------------------------
+  // Z-index
+  // ------------------------------------------------
+  --neu-z-base: 1;
+  --neu-z-dropdown: 50;
+  --neu-z-sticky: 80;
+  --neu-z-overlay: 99;
+  --neu-z-sidebar: 100;
+  --neu-z-modal: 200;
+  --neu-z-toast: 300;
+
+  // ------------------------------------------------
+  // Sombras (sutiles – tema claro)
+  // ------------------------------------------------
+  --neu-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --neu-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --neu-shadow: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --neu-shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.04);
+  --neu-shadow-glow: 0 0 20px rgba(0, 122, 255, 0.2);
+
+  // ------------------------------------------------
+  // Focus ring — anillo de enfoque accesible
+  // Modern browsers (color-mix) auto-adapt on theme change.
+  // ------------------------------------------------
+  --neu-focus-ring: 0 0 0 3px rgba(0, 122, 255, 0.15);
+  --neu-focus-ring-strong: 0 0 0 3px rgba(0, 122, 255, 0.35);
+  @supports (color: color-mix(in srgb, red, blue)) {
+    --neu-focus-ring: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 25%, transparent);
+    --neu-focus-ring-strong: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 50%, transparent);
+  }
+
+  // ------------------------------------------------
+  // Iconos (Lucide via @ng-icons)
+  // ------------------------------------------------
+  --neu-icon-size: 1.25rem; // 20px — tamaño por defecto
+  --neu-icon-size-sm: 1rem; // 16px
+  --neu-icon-size-lg: 1.5rem; // 24px
+
+  // ------------------------------------------------
+  // Tooltip
+  // ------------------------------------------------
+  --neu-tooltip-bg: #0f172a; // Ink-Black
+  --neu-tooltip-fg: #ffffff;
+  --neu-tooltip-radius: 6px;
+  --neu-tooltip-shadow: 0 4px 12px rgba(15, 23, 42, 0.24);
+
+  // ------------------------------------------------
+  // Toast
+  // ------------------------------------------------
+  --neu-toast-bg: var(--neu-surface);
+  --neu-toast-radius: 10px;
+  --neu-toast-shadow: 0 8px 24px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.06);
+
+  // ------------------------------------------------
+  // Tabla — density padding (v1.3.0)
+  // ------------------------------------------------
+  --neu-table-density-compact-padding: 0.375rem 0.625rem;
+  --neu-table-density-relaxed-padding: 1.125rem 1.25rem;
+
+  // ------------------------------------------------
+  // Alert (v1.3.0)
+  // ------------------------------------------------
+  --neu-alert-info-bg: var(--neu-info-bg);
+  --neu-alert-info-text: var(--neu-info-text);
+  --neu-alert-info-border: rgba(0, 122, 255, 0.2);
+
+  --neu-alert-success-bg: var(--neu-success-bg);
+  --neu-alert-success-text: var(--neu-success-text);
+  --neu-alert-success-border: rgba(16, 185, 129, 0.2);
+
+  --neu-alert-warning-bg: var(--neu-warning-bg);
+  --neu-alert-warning-text: var(--neu-warning-text);
+  --neu-alert-warning-border: rgba(245, 158, 11, 0.2);
+
+  --neu-alert-danger-bg: var(--neu-error-bg);
+  --neu-alert-danger-text: var(--neu-error-text);
+  --neu-alert-danger-border: rgba(239, 68, 68, 0.2);
+
+  // ------------------------------------------------
+  // Popover (v1.3.0)
+  // ------------------------------------------------
+  --neu-popover-bg: var(--neu-surface);
+  --neu-popover-border: var(--neu-border);
+  --neu-popover-shadow: var(--neu-shadow-lg);
+  --neu-popover-radius: var(--neu-radius-lg);
+
+  // ------------------------------------------------
+  // Context Menu (v1.3.0)
+  // ------------------------------------------------
+  --neu-context-menu-bg: var(--neu-surface);
+  --neu-context-menu-shadow: var(--neu-shadow-lg);
+  --neu-context-menu-hover: var(--neu-surface-2);
+  --neu-context-menu-radius: var(--neu-radius);
+
+  // ------------------------------------------------
+  // Meter Group (v1.3.0)
+  // ------------------------------------------------
+  --neu-meter-track-bg: var(--neu-surface-3);
+  --neu-meter-radius: var(--neu-radius-full);
+
+  // ------------------------------------------------
+  // Splitter (v1.3.0)
+  // ------------------------------------------------
+  --neu-splitter-handle-bg: var(--neu-surface-3);
+
+  // ------------------------------------------------
+  // Knob (v1.3.0)
+  // ------------------------------------------------
+  --neu-knob-track: var(--neu-surface-3);
+
+  // ------------------------------------------------
+  // Color Picker (v1.3.0)
+  // ------------------------------------------------
+  --neu-color-picker-bg: var(--neu-surface);
+  --neu-color-picker-shadow: var(--neu-shadow-lg);
+
+  // ------------------------------------------------
+  // Command Palette (v1.3.0)
+  // ------------------------------------------------
+  --neu-cmd-bg: var(--neu-surface);
+  --neu-cmd-highlight: var(--neu-primary-50);
+  --neu-cmd-shadow: var(--neu-shadow-lg);
+  --neu-cmd-radius: var(--neu-radius-xl);
+
+  // ------------------------------------------------
+  // Input OTP (v1.3.0)
+  // ------------------------------------------------
+  --neu-otp-cell-size: 2.75rem;
+  --neu-otp-cell-radius: var(--neu-radius);
+  --neu-otp-cell-border: var(--neu-border);
+  --neu-otp-cell-focus-border: var(--neu-primary);
+
+  // ------------------------------------------------
+  // Number Input (v1.3.0)
+  // ------------------------------------------------
+  --neu-number-input-btn-size: 2rem;
+
+  // ------------------------------------------------
+  // Block UI (v1.3.0)
+  // ------------------------------------------------
+  --neu-block-ui-bg: rgba(255, 255, 255, 0.6);
+  --neu-block-ui-radius: var(--neu-radius-lg);
+
+  // ------------------------------------------------
+  // Notification Center (v1.3.0)
+  // ------------------------------------------------
+  --neu-notification-unread-bg: rgba(0, 122, 255, 0.08);
+
+  // ------------------------------------------------
+  // Overlay / Backdrop — fondos semitransparentes de capas / semi-transparent layer backgrounds
+  // ------------------------------------------------
+  --neu-overlay-bg: rgba(15, 23, 42, 0.45);
+  --neu-overlay-bg-soft: rgba(15, 23, 42, 0.35);
+
+  // ------------------------------------------------
+  // Table — badge cell semantic colors / colores semánticos de celda badge
+  // ------------------------------------------------
+  --neu-table-badge-success-bg: rgba(16, 185, 129, 0.12);
+  --neu-table-badge-success-text: #059669;
+  --neu-table-badge-warning-bg: rgba(245, 158, 11, 0.12);
+  --neu-table-badge-warning-text: #d97706;
+  --neu-table-badge-danger-bg: rgba(239, 68, 68, 0.12);
+  --neu-table-badge-danger-text: #dc2626;
+
+  // ------------------------------------------------
+  // Alert — dismiss button hover / hover del botón de cierre
+  // ------------------------------------------------
+  --neu-alert-dismiss-hover-bg: rgb(0 0 0 / 8%);
+
+  // ------------------------------------------------
+  // Split Button — divider on primary variant / separador en variante primary
+  // ------------------------------------------------
+  --neu-split-button-primary-divider: rgba(255, 255, 255, 0.25);
+
+  // ------------------------------------------------
+  // Image Viewer — dark lightbox overlay (always dark) / overlay lightbox oscuro (siempre oscuro)
+  // ------------------------------------------------
+  --neu-image-viewer-bg: rgb(0 0 0 / 0.9);
+  --neu-image-viewer-muted: rgb(255 255 255 / 0.7);
+  --neu-image-viewer-btn-hover: rgb(255 255 255 / 0.15);
+  --neu-image-viewer-caption: rgb(255 255 255 / 0.65);
+  --neu-image-viewer-arrow-bg: rgb(255 255 255 / 0.12);
+  --neu-image-viewer-arrow-hover: rgb(255 255 255 / 0.25);
+
+  // ------------------------------------------------
+  // Code Block — Tokyo Night theme (always dark) / tema Tokyo Night (siempre oscuro)
+  // ------------------------------------------------
+  --neu-code-block-bg: #1a1b26;
+  --neu-code-block-bar-bg: #16161e;
+  --neu-code-block-border: rgba(255, 255, 255, 0.06);
+  --neu-code-block-text: #cdd6f4;
+  --neu-code-block-accent: #7aa2f7;
+  --neu-code-block-muted: #565f89;
+  --neu-code-block-copy-text: #a9b1d6;
+  --neu-code-block-copy-hover-text: #c0caf5;
+  --neu-code-block-copy-border: rgba(255, 255, 255, 0.1);
+  --neu-code-block-copy-hover-bg: rgba(255, 255, 255, 0.1);
+  --neu-code-block-copy-hover-border: rgba(255, 255, 255, 0.2);
+}
+
+// ============================================================
+// NeuralUI — Dark Theme Tokens
+// Activado con: document.documentElement.setAttribute('data-theme', 'dark')
+// ============================================================
+[data-theme='dark'] {
+  // ---- Brand (mismo azul / same blue, fondos adaptados / adapted backgrounds) ----
+  --neu-primary-50: rgba(0, 122, 255, 0.12);
+  --neu-primary-100: rgba(0, 122, 255, 0.2);
+
+  // ---- Fondos / Backgrounds ----
+  --neu-bg: #0d1117; // GitHub-dark inspired — fondo base
+  --neu-surface: #161b22; // Tarjetas, paneles
+  --neu-surface-2: #21262d; // Hover, fondos secundarios
+  --neu-surface-3: #30363d; // Separadores, track de switch
+
+  // ---- Bordes / Borders ----
+  --neu-border: rgba(255, 255, 255, 0.08);
+  --neu-border-hover: rgba(255, 255, 255, 0.16);
+
+  // ---- Texto / Text ----
+  --neu-text: #e6edf3; // Casi blanco — texto principal
+  --neu-text-muted: #8b949e; // Slate-400 equivalent — subtítulos
+  --neu-text-disabled: #484f58; // Elementos deshabilitados
+  --neu-knob-display-color: #f8fafc;
+  --neu-knob-label-color: #8b949e;
+
+  // ---- Semánticos — fondos ajustados a dark / Semantic — backgrounds adjusted for dark mode ----
+  --neu-success-bg: rgba(16, 185, 129, 0.15);
+  --neu-success-text: #6ee7b7;
+
+  --neu-warning-bg: rgba(245, 158, 11, 0.15);
+  --neu-warning-text: #fcd34d;
+
+  --neu-error-bg: rgba(239, 68, 68, 0.15);
+  --neu-error-text: #fca5a5;
+
+  --neu-info-bg: rgba(0, 122, 255, 0.15);
+  --neu-info-text: #93c5fd;
+
+  // ---- Sombras / Shadows (hidden in dark mode, borders used instead) ----
+  --neu-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --neu-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --neu-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --neu-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+  --neu-shadow-glow: 0 0 20px rgba(0, 122, 255, 0.35);
+
+  // ---- Tooltip: fondo claro sobre dark / light bg on dark for contrast ----
+  --neu-tooltip-bg: #e6edf3;
+  --neu-tooltip-fg: #0d1117;
+  --neu-tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  // ---- Toast ----
+  --neu-toast-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+
+  // ---- Alert dark overrides (v1.3.0) ----
+  --neu-alert-info-bg: rgba(0, 122, 255, 0.15);
+  --neu-alert-info-text: #93c5fd;
+  --neu-alert-info-border: rgba(0, 122, 255, 0.3);
+
+  --neu-alert-success-bg: rgba(16, 185, 129, 0.15);
+  --neu-alert-success-text: #6ee7b7;
+  --neu-alert-success-border: rgba(16, 185, 129, 0.3);
+
+  --neu-alert-warning-bg: rgba(245, 158, 11, 0.15);
+  --neu-alert-warning-text: #fcd34d;
+  --neu-alert-warning-border: rgba(245, 158, 11, 0.3);
+
+  --neu-alert-danger-bg: rgba(239, 68, 68, 0.15);
+  --neu-alert-danger-text: #fca5a5;
+  --neu-alert-danger-border: rgba(239, 68, 68, 0.3);
+
+  // ---- Block UI dark override (v1.3.0) ----
+  --neu-block-ui-bg: rgba(13, 17, 23, 0.7);
+
+  // ---- Notification dark override (v1.3.0) ----
+  --neu-notification-unread-bg: rgba(0, 122, 255, 0.18);
+
+  // ---- Command Palette dark override (v1.3.0) ----
+  --neu-cmd-highlight: rgba(0, 122, 255, 0.15);
+
+  // ---- Overlay dark overrides / Overrides de overlay para modo oscuro ----
+  --neu-overlay-bg: rgba(0, 0, 0, 0.65);
+  --neu-overlay-bg-soft: rgba(0, 0, 0, 0.5);
+
+  // ---- Table badge dark overrides / Overrides de badge de tabla para modo oscuro ----
+  --neu-table-badge-success-bg: rgba(16, 185, 129, 0.18);
+  --neu-table-badge-success-text: #6ee7b7;
+  --neu-table-badge-warning-bg: rgba(245, 158, 11, 0.18);
+  --neu-table-badge-warning-text: #fcd34d;
+  --neu-table-badge-danger-bg: rgba(239, 68, 68, 0.18);
+  --neu-table-badge-danger-text: #fca5a5;
+
+  // ---- Alert dismiss dark override / Override de botón de cierre de alert en oscuro ----
+  --neu-alert-dismiss-hover-bg: rgb(255 255 255 / 12%);
+}

@@ -1,0 +1,27 @@
+.neu-virtual-list {
+  display: block;
+  overflow: hidden;
+}
+
+.neu-virtual-list__viewport {
+  width: 100%;
+  overflow-y: auto;
+}
+
+.neu-virtual-list__item-default {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--neu-border-color, #e5e7eb);
+  font-size: 0.875rem;
+  color: var(--neu-text-primary, #111);
+}
+
+.neu-virtual-list__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--neu-text-secondary, #6b7280);
+  font-size: 0.875rem;
+}

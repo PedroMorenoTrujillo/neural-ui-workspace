@@ -1,0 +1,697 @@
+// ============================================================
+// NeuralUI — DateInput (custom datepicker) Styles
+// ViewEncapsulation.None — prefijo BEM .neu-date-input
+// ============================================================
+
+$trigger-height: 48px;
+$panel-z: 200;
+$drum-item-h: 36px;
+
+// ---- Host ----
+.neu-date-input-host {
+  display: block;
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Label ----
+.neu-date-input__label {
+  display: block;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  margin-bottom: var(--neu-space-2);
+}
+
+// ---- Root ----
+.neu-date-input {
+  position: relative;
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Trigger ----
+.neu-date-input__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  width: 100%;
+  min-height: $trigger-height;
+  padding: 0 var(--neu-space-3);
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text);
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &:hover:not(:disabled) {
+    border-color: var(--neu-border-hover, var(--neu-border));
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--neu-surface-2);
+  }
+
+  .neu-date-input--open & {
+    border-color: var(--neu-primary);
+    box-shadow: var(--neu-focus-ring);
+  }
+
+  .neu-date-input--error & {
+    border-color: var(--neu-error);
+  }
+}
+
+.neu-date-input__icon {
+  display: flex;
+  align-items: center;
+  color: var(--neu-text-muted);
+  flex-shrink: 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.neu-date-input__display {
+  flex: 1;
+  color: var(--neu-text);
+  white-space: nowrap;
+
+  &--placeholder {
+    color: var(--neu-text-disabled);
+  }
+}
+
+// ---- Panel ----
+.neu-date-input__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: $panel-z;
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-lg);
+  display: flex;
+  flex-direction: column; // tiempo siempre debajo
+  overflow: hidden;
+  animation: neu-datepicker-in 0.12s ease;
+
+  // Para type="time" puro, orientación horizontal (solo el drum)
+  &--time-only {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 600px) {
+  .neu-date-input__panel {
+    left: auto;
+    right: 0;
+    width: min(280px, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+@keyframes neu-datepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ---- Calendar ----
+.neu-date-input__calendar {
+  padding: var(--neu-space-3);
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.neu-date-input__cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--neu-space-2);
+}
+
+.neu-date-input__cal-title {
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  color: var(--neu-text);
+  text-transform: capitalize;
+}
+
+.neu-date-input__cal-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--neu-radius-sm);
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  transition:
+    background var(--neu-transition),
+    color var(--neu-transition);
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+  }
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.neu-date-input__cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 4px;
+
+  span {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--neu-text-muted);
+    padding: 4px 0;
+    text-transform: uppercase;
+  }
+}
+
+.neu-date-input__cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.neu-date-input__cal-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--neu-radius-sm);
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+  cursor: pointer;
+  transition:
+    background var(--neu-transition),
+    color var(--neu-transition);
+
+  &:hover:not(.neu-date-input__cal-day--other):not(.neu-date-input__cal-day--selected) {
+    background: var(--neu-surface-2);
+  }
+
+  &--other {
+    color: var(--neu-text-disabled);
+    pointer-events: none;
+    cursor: default;
+  }
+
+  &--today {
+    color: var(--neu-primary);
+    font-weight: 700;
+  }
+
+  &--selected {
+    background: var(--neu-primary) !important;
+    color: var(--neu-primary-fg) !important;
+    font-weight: 600;
+  }
+}
+
+.neu-date-input__cal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--neu-space-2);
+  padding-top: var(--neu-space-2);
+  border-top: 1px solid var(--neu-border);
+}
+
+.neu-date-input__cal-footer-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  border-radius: var(--neu-radius-sm);
+  transition:
+    background var(--neu-transition),
+    color var(--neu-transition);
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+  }
+
+  &--today {
+    color: var(--neu-primary);
+    font-weight: 500;
+
+    &:hover {
+      color: var(--neu-primary);
+    }
+  }
+}
+
+// ---- Separator ----
+.neu-date-input__sep {
+  height: 1px;
+  width: 100%;
+  background: var(--neu-border);
+  flex-shrink: 0;
+}
+
+// ---- Time section ----
+.neu-date-input__time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--neu-space-1);
+  padding: var(--neu-space-3) var(--neu-space-4);
+  flex-shrink: 0;
+}
+
+.neu-date-input__time-colon {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--neu-text);
+  line-height: 1;
+  margin-bottom: 4px;
+  user-select: none;
+}
+
+// ---- Drum ----
+.neu-date-input__drum {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.neu-date-input__drum-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--neu-radius-sm);
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  transition:
+    background var(--neu-transition),
+    color var(--neu-transition);
+
+  &:hover {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.neu-date-input__drum-track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  // Highlight the center (selected) slot
+  &::before {
+    content: '';
+    position: absolute;
+    top: $drum-item-h; // skip first adjacent item
+    left: -6px;
+    right: -6px;
+    height: $drum-item-h;
+    background: var(--neu-primary-soft, rgba(0, 122, 255, 0.1));
+    border-radius: var(--neu-radius-sm);
+    pointer-events: none;
+  }
+}
+
+.neu-date-input__drum-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: $drum-item-h;
+  font-family: var(--neu-font-sans);
+  font-weight: 500;
+  user-select: none;
+  border-radius: var(--neu-radius-sm);
+  transition: opacity var(--neu-transition);
+
+  &--adjacent {
+    font-size: 13px;
+    color: var(--neu-text-muted);
+    opacity: 0.45;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+
+  &--selected {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--neu-primary);
+    cursor: default;
+  }
+}
+
+// ---- Error / Hint ----
+.neu-date-input__error {
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-error-text, var(--neu-error));
+  font-family: var(--neu-font-sans);
+}
+
+.neu-date-input__hint {
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+  font-family: var(--neu-font-sans);
+}
+
+// ============================================================
+// Range mode styles (type="range") — fusionado desde neu-date-range-picker
+// Range mode styles — merged from neu-date-range-picker
+// ============================================================
+
+.neu-drp {
+  position: relative;
+  display: block;
+  font-family: var(--neu-font-sans);
+
+  &--disabled {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+}
+
+.neu-drp__label {
+  display: block;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  margin-bottom: var(--neu-space-2);
+}
+
+.neu-drp__trigger {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--neu-space-3);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  background: var(--neu-surface);
+  color: var(--neu-text);
+  font-size: var(--neu-text-base);
+  font-family: var(--neu-font-sans);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &:hover:not([disabled]) {
+    border-color: var(--neu-border-hover, var(--neu-border));
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--neu-primary);
+    box-shadow: var(--neu-focus-ring);
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--neu-surface-2);
+  }
+
+  .neu-drp--open & {
+    border-color: var(--neu-primary);
+    box-shadow: var(--neu-focus-ring);
+  }
+}
+
+.neu-drp__icon {
+  display: flex;
+  align-items: center;
+  color: var(--neu-text-muted);
+  flex-shrink: 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.neu-drp__value {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &--placeholder {
+    color: var(--neu-text-disabled);
+  }
+}
+
+.neu-drp__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius-lg);
+  box-shadow: var(--neu-shadow-lg);
+  padding: var(--neu-space-4);
+  z-index: 1000;
+  animation: neu-drp-in 100ms ease;
+  min-width: 560px;
+}
+
+@keyframes neu-drp-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.neu-drp__calendars {
+  display: flex;
+  gap: var(--neu-space-6);
+}
+
+.neu-drp__cal {
+  flex: 1;
+}
+
+.neu-drp__cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--neu-space-3);
+
+  button {
+    all: unset;
+    padding: 4px 8px;
+    border-radius: var(--neu-radius);
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--neu-text-muted);
+
+    &:hover {
+      background: var(--neu-surface-2);
+    }
+  }
+}
+
+.neu-drp__cal-title {
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--neu-text);
+}
+
+.neu-drp__cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.neu-drp__day-label {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--neu-text-muted);
+  padding: 4px 0;
+}
+
+.neu-drp__cell {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: var(--neu-text-sm);
+  cursor: pointer;
+  transition: background var(--neu-transition);
+  box-sizing: border-box;
+  margin: 1px auto;
+
+  &:hover {
+    background: var(--neu-surface-2);
+  }
+
+  &--other-month {
+    opacity: 0.35;
+  }
+
+  &--today {
+    font-weight: 700;
+    border: 1.5px solid var(--neu-primary);
+  }
+
+  &--selected,
+  &--range-start,
+  &--range-end {
+    background: var(--neu-primary);
+    color: var(--neu-primary-fg);
+    border-radius: 50%;
+  }
+
+  &--in-range {
+    background: var(--neu-primary-soft, rgba(14, 165, 233, 0.15));
+    border-radius: 0;
+  }
+}
+
+.neu-drp__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--neu-space-2);
+  padding-top: var(--neu-space-3);
+  border-top: 1px solid var(--neu-border);
+  margin-top: var(--neu-space-3);
+}
+
+.neu-drp__clear {
+  all: unset;
+  padding: 7px 14px;
+  border-radius: var(--neu-radius);
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  background: var(--neu-surface-2);
+
+  &:hover {
+    background: var(--neu-surface-3, var(--neu-surface-2));
+    color: var(--neu-text);
+  }
+}
+
+.neu-drp__apply {
+  all: unset;
+  padding: 7px 18px;
+  border-radius: var(--neu-radius);
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  background: var(--neu-primary);
+  color: var(--neu-primary-fg);
+  cursor: pointer;
+
+  &:hover:not([disabled]) {
+    filter: brightness(1.08);
+  }
+
+  &[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 600px) {
+  .neu-drp__panel {
+    left: 0;
+    right: auto;
+    min-width: 0;
+    width: min(100%, 360px, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+    padding: var(--neu-space-2);
+  }
+
+  .neu-drp__calendars {
+    flex-direction: column;
+    gap: var(--neu-space-4);
+  }
+
+  .neu-drp__cal {
+    width: 100%;
+    max-width: 320px;
+    margin-inline: auto;
+  }
+
+  .neu-drp__footer {
+    flex-wrap: wrap;
+  }
+}
+
+// ---- Sizes / Tamaños ----------------------------------------
+// sm: 36px | md: 48px (default) | lg: 56px
+.neu-date-input-host--sm .neu-date-input__trigger {
+  min-height: 36px;
+  font-size: var(--neu-text-sm);
+}
+.neu-date-input-host--lg .neu-date-input__trigger {
+  min-height: 56px;
+}

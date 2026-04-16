@@ -1,0 +1,64 @@
+.neu-knob {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.neu-knob--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── Dial ─────────────────────────────────────────────────────── */
+.neu-knob__dial {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  border-radius: 50%;
+  touch-action: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
+    outline-offset: 3px;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* ── SVG arcs ────────────────────────────────────────────────── */
+.neu-knob__track {
+  stroke: var(--neu-knob-track, var(--neu-border-color, #e5e7eb));
+}
+
+.neu-knob__value-arc {
+  stroke: var(--neu-color-primary, #0ea5e9);
+  transition: stroke-dashoffset 40ms linear;
+}
+
+.neu-knob__indicator {
+  fill: var(--neu-color-primary, #0ea5e9);
+}
+
+/* ── Value display ────────────────────────────────────────────── */
+.neu-knob__display {
+  position: absolute;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--neu-knob-display-color, var(--neu-text, #0f172a));
+  -webkit-text-fill-color: var(--neu-knob-display-color, var(--neu-text, #0f172a));
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Label ────────────────────────────────────────────────────── */
+.neu-knob__label {
+  font-size: 0.8125rem;
+  color: var(--neu-knob-label-color, var(--neu-text-muted, #64748b));
+  cursor: pointer;
+}

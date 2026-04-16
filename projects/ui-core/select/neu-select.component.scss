@@ -1,0 +1,333 @@
+// ============================================================
+// NeuralUI — Select Component Styles (light theme)
+// ViewEncapsulation.None — prefijo BEM .neu-select
+// ============================================================
+@use '../styles/breakpoints' as *;
+
+$select-height: 48px;
+
+// ---- Contenedor / Container ----
+.neu-select {
+  position: relative;
+  display: block;
+
+  &--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+// ---- Trigger ----
+.neu-select__trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: $select-height;
+  padding: 0 var(--neu-space-3);
+  padding-right: 36px; // espacio para el chevron
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius);
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text);
+  cursor: pointer;
+  text-align: left;
+  outline: none;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+  position: relative;
+
+  &:hover:not(:disabled) {
+    border-color: var(--neu-border-hover);
+  }
+
+  &:focus-visible {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+  }
+
+  .neu-select--open & {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .neu-select--error & {
+    border-color: var(--neu-error);
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
+  }
+}
+
+// ---- Floating Label ----
+.neu-select__label {
+  position: absolute;
+  left: var(--neu-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--neu-text-base);
+  color: var(--neu-text-muted);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - var(--neu-space-6));
+  transition:
+    top var(--neu-transition),
+    font-size var(--neu-transition),
+    color var(--neu-transition),
+    transform var(--neu-transition),
+    padding var(--neu-transition),
+    background var(--neu-transition);
+
+  .neu-select--open &,
+  .neu-select--has-value & {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: var(--neu-surface);
+    padding: 0 4px;
+    left: calc(var(--neu-space-3) - 4px);
+  }
+
+  .neu-select--open & {
+    color: var(--neu-primary);
+  }
+
+  .neu-select--error & {
+    color: var(--neu-error);
+  }
+
+  .neu-select--disabled & {
+    background: var(--neu-surface-2);
+  }
+}
+
+// ---- Valor seleccionado / Selected value ----
+.neu-select__value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .neu-select--no-float & {
+    padding-top: 0;
+  }
+}
+
+.neu-select__placeholder {
+  color: var(--neu-text-disabled);
+  // En modo floating label, el placeholder se oculta hasta que el select está abierto
+  .neu-select:not(.neu-select--no-float):not(.neu-select--open) & {
+    visibility: hidden;
+  }
+}
+
+// ---- Chevron ----
+.neu-select__chevron {
+  position: absolute;
+  right: var(--neu-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--neu-text-muted);
+  flex-shrink: 0;
+  transition: transform var(--neu-transition);
+
+  .neu-select--open & {
+    transform: translateY(-50%) rotate(180deg);
+    color: var(--neu-primary);
+  }
+}
+
+// ---- Clear button ----
+.neu-select__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  border-radius: var(--neu-radius-sm);
+  flex-shrink: 0;
+  transition:
+    color var(--neu-transition),
+    background var(--neu-transition);
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: var(--neu-text);
+    background: var(--neu-surface-3);
+  }
+}
+
+// ---- Panel ----
+.neu-select__panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--neu-z-dropdown);
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-primary);
+  border-top: none;
+  border-bottom-left-radius: var(--neu-radius);
+  border-bottom-right-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-lg);
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--neu-surface-3) transparent;
+
+  animation: neu-select-open 150ms ease forwards;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--neu-surface-3);
+    border-radius: 99px;
+  }
+}
+
+@media (max-width: 600px) {
+  .neu-select__panel {
+    left: auto;
+    right: 0;
+    width: min(max(100%, 220px), calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+@keyframes neu-select-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ---- Opciones / Options ----
+.neu-select__option {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  padding: var(--neu-space-3) var(--neu-space-4);
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+  cursor: pointer;
+  transition: background-color var(--neu-transition);
+
+  &:hover:not(.neu-select__option--disabled) {
+    background: var(--neu-primary-50);
+    color: var(--neu-primary);
+  }
+
+  &--selected {
+    color: var(--neu-primary);
+    font-weight: 600;
+    background: var(--neu-primary-50);
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.neu-select__check {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+// ---- Error ----
+.neu-select__error {
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-error-text);
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Static label (floatingLabel=false) ----
+.neu-select__static-label {
+  display: block;
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  margin-bottom: var(--neu-space-2);
+}
+
+// ---- Search input en el panel / Search input inside panel ----
+.neu-select__search {
+  padding: var(--neu-space-2);
+  border-bottom: 1px solid var(--neu-border);
+  position: sticky;
+  top: 0;
+  background: var(--neu-surface);
+  z-index: 1;
+}
+
+.neu-select__search-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 var(--neu-space-3);
+  border: 1.5px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-bg);
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+  outline: none;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &:focus {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.12);
+  }
+
+  &::placeholder {
+    color: var(--neu-text-disabled);
+  }
+}
+
+// ---- Empty state ----
+.neu-select__empty {
+  padding: var(--neu-space-4);
+  text-align: center;
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-disabled);
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Sizes / Tamaños ----------------------------------------
+// sm: 36px | md: 48px (default) | lg: 56px
+.neu-select--sm .neu-select__trigger {
+  height: 36px;
+  font-size: var(--neu-text-sm);
+}
+.neu-select--lg .neu-select__trigger {
+  height: 56px;
+}

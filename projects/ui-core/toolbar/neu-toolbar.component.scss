@@ -1,0 +1,63 @@
+.neu-toolbar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  background: var(--neu-toolbar-bg, var(--neu-surface-1, #ffffff));
+  color: var(--neu-toolbar-color, var(--neu-text-primary, #111));
+}
+
+/* ── Sizes ───────────────────────────────────────────────────── */
+.neu-toolbar--sm {
+  padding: 6px 12px;
+  min-height: 40px;
+}
+.neu-toolbar--md {
+  padding: 8px 16px;
+  min-height: 52px;
+}
+.neu-toolbar--lg {
+  padding: 12px 20px;
+  min-height: 64px;
+}
+
+/* ── Surface variants ────────────────────────────────────────── */
+.neu-toolbar--primary {
+  background: var(--neu-toolbar-primary-bg, var(--neu-color-primary, #0ea5e9));
+  color: var(--neu-toolbar-primary-color, #fff);
+}
+
+.neu-toolbar--none {
+  background: transparent;
+}
+
+/* ── Modifiers ──────────────────────────────────────────────── */
+.neu-toolbar--shadow {
+  box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.1);
+}
+
+.neu-toolbar--bordered {
+  border-bottom: 1px solid var(--neu-border-color, #e5e7eb);
+}
+
+/* ── Sections ───────────────────────────────────────────────── */
+.neu-toolbar__section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.neu-toolbar__section--start {
+  flex: 0 0 auto;
+  margin-right: auto;
+}
+
+.neu-toolbar__section--center {
+  flex: 0 1 auto;
+  justify-content: center;
+}
+
+.neu-toolbar__section--end {
+  flex: 0 0 auto;
+  margin-left: auto;
+}

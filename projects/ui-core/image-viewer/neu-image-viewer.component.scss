@@ -1,0 +1,133 @@
+/* ── Fullscreen overlay ───────────────────────────────────────── */
+.neu-iv {
+  position: fixed;
+  inset: 0;
+  background: var(--neu-image-viewer-bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 1300;
+  outline: none;
+}
+
+.neu-iv__overlay {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────── */
+.neu-iv__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+.neu-iv__counter {
+  font-size: 0.875rem;
+  color: var(--neu-image-viewer-muted);
+}
+
+.neu-iv__toolbar-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.neu-iv__btn {
+  all: unset;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 100ms;
+
+  &:hover {
+    background: var(--neu-image-viewer-btn-hover);
+  }
+
+  &--close {
+    font-size: 0.875rem;
+  }
+}
+
+/* ── Stage (image container) ──────────────────────────────────── */
+.neu-iv__stage {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.neu-iv__img {
+  max-width: 90%;
+  max-height: 80vh;
+  object-fit: contain;
+  transform-origin: center;
+  transition: transform 60ms linear;
+  pointer-events: none;
+  border-radius: var(--neu-radius-lg, 12px);
+}
+
+/* ── Caption ────────────────────────────────────────────────── */
+.neu-iv__caption {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--neu-image-viewer-caption);
+}
+
+/* ── Navigation arrows ────────────────────────────────────────── */
+.neu-iv__arrow {
+  all: unset;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--neu-image-viewer-arrow-bg);
+  color: #fff;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: background 120ms;
+
+  &:hover:not(:disabled) {
+    background: var(--neu-image-viewer-arrow-hover);
+  }
+
+  &:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+
+  &--prev {
+    left: 16px;
+  }
+  &--next {
+    right: 16px;
+  }
+}
+
+/* ── Trigger ──────────────────────────────────────────────────── */
+.neu-iv-trigger {
+  display: inline-block;
+}

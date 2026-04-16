@@ -1,0 +1,72 @@
+.neu-block-ui {
+  /* Component itself is positioned absolute inside the container */
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  display: contents; /* lets overlay be the only visible child */
+}
+
+/* ── Overlay ─────────────────────────────────────────────────── */
+.neu-block-ui__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neu-block-ui-bg, rgba(255, 255, 255, 0.7));
+  border-radius: var(--neu-block-ui-radius, inherit);
+  pointer-events: all;
+  backdrop-filter: blur(1px);
+  z-index: 100;
+}
+
+.neu-block-ui--dark .neu-block-ui__overlay {
+  background: var(--neu-block-ui-bg, rgba(0, 0, 0, 0.5));
+}
+
+.neu-block-ui--light .neu-block-ui__overlay {
+  background: var(--neu-block-ui-bg, rgba(255, 255, 255, 0.9));
+}
+
+/* ── Content ─────────────────────────────────────────────────── */
+.neu-block-ui__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Spinner ─────────────────────────────────────────────────── */
+.neu-block-ui__spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--neu-spinner-track, #e5e7eb);
+  border-top-color: var(--neu-color-primary, #0ea5e9);
+  border-radius: 50%;
+  animation: neu-block-ui-spin 0.75s linear infinite;
+}
+
+@keyframes neu-block-ui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Message ─────────────────────────────────────────────────── */
+.neu-block-ui__message {
+  font-size: 0.875rem;
+  color: var(--neu-text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+/* ── Directive host ──────────────────────────────────────────── */
+.neu-block-ui__host {
+  position: relative;
+}
+
+.neu-block-ui__host--blocked {
+  overflow: hidden;
+  pointer-events: none;
+}

@@ -1,0 +1,47 @@
+.neu-input-otp {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 100%;
+  gap: var(--neu-otp-gap, 8px);
+}
+
+.neu-input-otp--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── Cell ─────────────────────────────────────────────────────── */
+.neu-input-otp__cell {
+  flex: 0 0 auto;
+  width: var(--neu-otp-cell-size, 44px);
+  height: var(--neu-otp-cell-size, 44px);
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border: 2px solid var(--neu-otp-cell-border, var(--neu-border-color, #d1d5db));
+  border-radius: var(--neu-otp-cell-radius, var(--neu-radius-md, 8px));
+  background: var(--neu-otp-cell-bg, var(--neu-surface-1, #fff));
+  color: var(--neu-text-primary, #111);
+  caret-color: var(--neu-color-primary, #0ea5e9);
+  outline: none;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+
+  &:focus {
+    border-color: var(--neu-color-primary, #0ea5e9);
+    box-shadow: 0 0 0 3px var(--neu-focus-ring-alpha, rgb(14 165 233 / 0.25));
+  }
+
+  &.neu-input-otp__cell--filled {
+    border-color: var(--neu-color-primary, #0ea5e9);
+  }
+
+  /* Remove number input arrows in Firefox and Chrome */
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    display: none;
+  }
+  -moz-appearance: textfield;
+}

@@ -1,0 +1,71 @@
+.neu-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Chips ───────────────────────────────────────────────────── */
+.neu-filter-bar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.neu-filter-bar__chip {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--neu-radius-full, 9999px);
+  border: 1px solid var(--neu-border-color, #d1d5db);
+  background: var(--neu-surface-1, #ffffff);
+  color: var(--neu-text-secondary, #6b7280);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  transition:
+    background 120ms,
+    border-color 120ms,
+    color 120ms;
+  user-select: none;
+
+  &:hover {
+    border-color: var(--neu-color-primary, #0ea5e9);
+    color: var(--neu-color-primary, #0ea5e9);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
+    outline-offset: 2px;
+  }
+
+  &.neu-filter-bar__chip--active {
+    background: var(--neu-color-primary, #0ea5e9);
+    border-color: var(--neu-color-primary, #0ea5e9);
+    color: #fff;
+  }
+}
+
+/* ── Clear button ────────────────────────────────────────────── */
+.neu-filter-bar__clear {
+  all: unset;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--neu-text-secondary, #6b7280);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 120ms;
+
+  &:hover {
+    color: var(--neu-text-primary, #111);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}

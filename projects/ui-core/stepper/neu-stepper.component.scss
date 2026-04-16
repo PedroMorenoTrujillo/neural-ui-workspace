@@ -1,0 +1,176 @@
+// ============================================================
+// NeuralUI — Stepper Component Styles
+// ViewEncapsulation.None — prefijo BEM .neu-stepper
+// ============================================================
+
+.neu-stepper {
+  --neu-stepper-indicator-size: 32px;
+  --neu-stepper-indicator-radius: calc(var(--neu-stepper-indicator-size) / 2);
+  --neu-stepper-connector-gap: 8px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--neu-space-6);
+  font-family: var(--neu-font-sans);
+}
+
+// ---- Cabecera / Header ----
+.neu-stepper__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: var(--neu-space-2);
+}
+
+.neu-stepper__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 0 8.5rem;
+  min-width: 8.5rem;
+}
+
+.neu-stepper__step-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: var(--neu-space-3);
+  background: none;
+  border: none;
+  padding: 0 var(--neu-space-2);
+  cursor: pointer;
+  min-width: 0;
+  outline: none;
+  position: relative;
+  z-index: 1;
+
+  &:focus-visible .neu-stepper__indicator {
+    box-shadow: 0 0 0 3px var(--neu-primary-100);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+// ---- Indicador (número / check) ----
+.neu-stepper__indicator {
+  width: var(--neu-stepper-indicator-size);
+  height: var(--neu-stepper-indicator-size);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: var(--neu-surface-2);
+  border: 2px solid var(--neu-border);
+  color: var(--neu-text-disabled);
+  transition:
+    background var(--neu-transition),
+    border-color var(--neu-transition),
+    color var(--neu-transition);
+}
+
+.neu-stepper__step--active .neu-stepper__indicator {
+  background: var(--neu-primary);
+  border-color: var(--neu-primary);
+  color: var(--neu-primary-fg);
+}
+
+.neu-stepper__step--completed .neu-stepper__indicator {
+  background: var(--neu-success);
+  border-color: var(--neu-success);
+  color: var(--neu-primary-fg);
+}
+
+// ---- Info del paso / Step info ----
+.neu-stepper__step-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+  width: 100%;
+  gap: 2px;
+}
+
+.neu-stepper__step-label {
+  display: block;
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+  color: var(--neu-text-muted);
+  transition: color var(--neu-transition);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.neu-stepper__step--active .neu-stepper__step-label {
+  color: var(--neu-text);
+}
+
+.neu-stepper__step--completed .neu-stepper__step-label {
+  color: var(--neu-text-muted);
+}
+
+.neu-stepper__step-desc {
+  display: block;
+  max-width: 100%;
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-disabled);
+  margin-top: 1px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+// ---- Conector entre pasos / Step connector ----
+.neu-stepper__connector {
+  position: absolute;
+  top: calc(var(--neu-stepper-indicator-radius) - 1px);
+  left: calc(50% + var(--neu-stepper-indicator-radius) + var(--neu-stepper-connector-gap));
+  width: calc(100% - var(--neu-stepper-indicator-size) - (var(--neu-stepper-connector-gap) * 2));
+  height: 2px;
+  background: var(--neu-border);
+  transition: background var(--neu-transition);
+  z-index: 0;
+
+  &--done {
+    background: var(--neu-success);
+  }
+}
+
+// ---- Contenido / Content ----
+.neu-stepper__content {
+  min-height: 80px;
+}
+
+@media (max-width: 767px) {
+  .neu-stepper__header {
+    align-items: flex-start;
+    gap: var(--neu-space-2);
+    scroll-snap-type: x proximity;
+  }
+
+  .neu-stepper__step {
+    flex: 0 0 auto;
+    min-width: 3.5rem;
+  }
+
+  .neu-stepper__step-btn {
+    padding-inline: 0;
+  }
+
+  .neu-stepper__connector {
+    left: calc(50% + var(--neu-stepper-indicator-radius) + var(--neu-stepper-connector-gap));
+    width: calc(100% - var(--neu-stepper-indicator-size) - (var(--neu-stepper-connector-gap) * 2));
+  }
+
+  .neu-stepper__step-info {
+    display: none;
+  }
+}

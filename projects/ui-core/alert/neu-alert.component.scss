@@ -1,0 +1,93 @@
+.neu-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--neu-radius-md, 8px);
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  position: relative;
+}
+
+.neu-alert--dismissed {
+  display: none;
+}
+
+/* ── Types ─────────────────────────────────────────────────────── */
+.neu-alert--info {
+  background: var(--neu-alert-info-bg, #eff6ff);
+  border-color: var(--neu-alert-info-border, #bfdbfe);
+  color: var(--neu-alert-info-text, #1d4ed8);
+}
+
+.neu-alert--success {
+  background: var(--neu-alert-success-bg, #f0fdf4);
+  border-color: var(--neu-alert-success-border, #bbf7d0);
+  color: var(--neu-alert-success-text, #15803d);
+}
+
+.neu-alert--warning {
+  background: var(--neu-alert-warning-bg, #fffbeb);
+  border-color: var(--neu-alert-warning-border, #fde68a);
+  color: var(--neu-alert-warning-text, #b45309);
+}
+
+.neu-alert--error {
+  background: var(--neu-alert-error-bg, #fef2f2);
+  border-color: var(--neu-alert-error-border, #fecaca);
+  color: var(--neu-alert-error-text, #b91c1c);
+}
+
+/* ── Outline variant ────────────────────────────────────────────── */
+.neu-alert--outline {
+  background: transparent;
+}
+
+/* ── Icon ──────────────────────────────────────────────────────── */
+.neu-alert__icon {
+  flex-shrink: 0;
+  font-size: 1.1em;
+  line-height: 1.5;
+  font-style: normal;
+}
+
+/* ── Body ──────────────────────────────────────────────────────── */
+.neu-alert__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.neu-alert__title {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.neu-alert__content {
+  opacity: 0.9;
+}
+
+/* ── Close button ───────────────────────────────────────────────── */
+.neu-alert__close {
+  all: unset;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 150ms;
+  padding: 2px 4px;
+  border-radius: var(--neu-radius-sm, 4px);
+
+  &:hover {
+    opacity: 1;
+    background: var(--neu-alert-dismiss-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
+    outline-offset: 1px;
+    opacity: 1;
+  }
+}

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-04-16
+
+### Fixed
+
+- Publishing workflow now verifies that the pushed git tag matches the built package version before running `npm publish`.
+
+### Improved
+
+- Quality documentation refreshed across the workspace: README metrics now reflect the current validation snapshot with 1440 passing tests and 96.33% statements coverage.
+- Added a formal quality and accessibility status document for `@neural-ui/core`, summarizing architecture alignment, testing thresholds, zoneless readiness and current accessibility confidence.
+- Expanded automated test coverage in several complex components, pushing the library-wide baseline above 96% statements, 95% branches and 91% functions.
+- README documentation was aligned with the published package structure: dedicated subpath imports, real theme token names, and current release guidance for `@neural-ui/core` 1.3.0.
+
+---
+
+## [Unreleased]
+
+<!-- next release -->
+
 ## [1.2.1] - 2026-04-11
 
 ### Fixed
@@ -23,8 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `NeuSelectComponent` — nuevo output `(selectionChange)` que emite el objeto `NeuSelectOption` completo (incluyendo el campo `data`) al seleccionar una opción, o `null` al limpiar. El valor de `ngModel` / `formControl` sigue siendo `string`.
-- `NeuMultiselectComponent` — nuevo output `(selectionChange)` que emite el array `NeuSelectOption[]` completo al cambiar la selección, o `[]` al limpiar. Los valores de `ngModel` / `formControl` siguen siendo `string[]`.
+- `NeuSelectComponent` — nuevo output `(selectionChange)` que emite el objeto `NeuSelectOption` completo (incluyendo el campo `data`) al seleccionar una opción, o `null` al limpiar. El valor del `FormControl` sigue siendo `string`.
+- `NeuMultiselectComponent` — nuevo output `(selectionChange)` que emite el array `NeuSelectOption[]` completo al cambiar la selección, o `[]` al limpiar. Los valores del `FormControl` siguen siendo `string[]`.
 - `NeuSelectOption` — nuevo campo opcional `data?: unknown` para adjuntar el objeto de origen (p.ej. entidad de la API) sin transformación, accesible vía `(selectionChange)`.
 - `NeuSelectComponent` / `NeuMultiselectComponent` — nuevo input `urlParam` (desde v1.1.x) que sincroniza el valor seleccionado con el query param indicado de la URL, con soporte a recarga de página.
 

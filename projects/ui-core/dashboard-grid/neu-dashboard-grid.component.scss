@@ -1,0 +1,98 @@
+.neu-dg {
+  display: block;
+  width: 100%;
+}
+
+.neu-dg__projection-source {
+  display: none;
+}
+
+/* ── Grid ─────────────────────────────────────────────────────── */
+.neu-dg__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--neu-dg-cols, 3), 1fr);
+  gap: var(--neu-dg-gap, 16px);
+}
+
+/* ── Tile ─────────────────────────────────────────────────────── */
+.neu-dg__tile {
+  grid-column: span var(--tile-cols, 1);
+  grid-row: span var(--tile-rows, 1);
+  background: var(--neu-surface-1, #ffffff);
+  border: 1px solid var(--neu-border-color, #e5e7eb);
+  border-radius: var(--neu-radius-xl, 16px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 120ms;
+
+  &:hover {
+    box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+  }
+}
+
+/* ── Tile header / drag handle ────────────────────────────────── */
+.neu-dg__tile-handle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--neu-border-color, #f3f4f6);
+  cursor: grab;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.neu-dg__tile-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--neu-text-primary, #111);
+}
+
+.neu-dg__handle-icon {
+  font-size: 1rem;
+  color: var(--neu-text-secondary, #9ca3af);
+  letter-spacing: 2px;
+}
+
+/* ── Tile content ─────────────────────────────────────────────── */
+.neu-dg__tile-content {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 12px 16px;
+}
+
+.neu-dg__tile-slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neu-dg-content-gap, 12px);
+  min-height: 100%;
+}
+
+/* ── Drag states ──────────────────────────────────────────────── */
+.neu-dg__placeholder {
+  background: var(--neu-color-primary-alpha, rgb(14 165 233 / 0.1));
+  border: 2px dashed var(--neu-color-primary, #0ea5e9);
+  border-radius: var(--neu-radius-xl, 16px);
+}
+
+.neu-dg__preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  background: var(--neu-surface-1, #fff);
+  border: 1px solid var(--neu-border-color, #e5e7eb);
+  border-radius: var(--neu-radius-xl, 16px);
+  box-shadow: 0 8px 20px -4px rgb(0 0 0 / 0.14);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* CDK drag active state */
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}

@@ -1,0 +1,86 @@
+.neu-splitter {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+
+  &--horizontal {
+    flex-direction: row;
+  }
+
+  &--vertical {
+    flex-direction: column;
+  }
+}
+
+/* ── Pane ─────────────────────────────────────────────────────── */
+.neu-splitter__pane {
+  overflow: auto;
+  flex-shrink: 0;
+}
+
+/* ── Handle ───────────────────────────────────────────────────── */
+.neu-splitter__handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neu-border-color, #e5e7eb);
+  transition: background 150ms;
+  cursor: col-resize;
+  position: relative;
+  z-index: 1;
+  outline: none;
+
+  .neu-splitter--horizontal & {
+    width: var(--neu-splitter-handle-size, 4px);
+    cursor: col-resize;
+    min-height: 0;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--neu-color-primary, #0ea5e9);
+      width: 4px;
+    }
+  }
+
+  .neu-splitter--vertical & {
+    height: var(--neu-splitter-handle-size, 4px);
+    cursor: row-resize;
+    width: 100%;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--neu-color-primary, #0ea5e9);
+      height: 4px;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
+    outline-offset: 1px;
+  }
+}
+
+.neu-splitter__handle-dots {
+  display: block;
+  width: 4px;
+  height: 24px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--neu-text-secondary, #9ca3af) 0 3px,
+    transparent 3px 6px
+  );
+  border-radius: 2px;
+  opacity: 0.6;
+
+  .neu-splitter--vertical & {
+    width: 24px;
+    height: 4px;
+    background: repeating-linear-gradient(
+      to right,
+      var(--neu-text-secondary, #9ca3af) 0 3px,
+      transparent 3px 6px
+    );
+  }
+}
