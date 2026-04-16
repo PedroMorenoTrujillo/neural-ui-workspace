@@ -94,6 +94,33 @@ describe('NeuTabsComponent', () => {
     expect(disabledTab).toBeTruthy();
   });
 
+  it('should keep tab clicks working when pointer interaction starts on a tab button', async () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
+      ?.componentInstance as NeuTabsComponent;
+    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    const tabs = f.nativeElement.querySelectorAll('[role="tab"]') as NodeListOf<HTMLButtonElement>;
+
+    tabsComp.startNavDrag({
+      pointerId: 1,
+      pointerType: 'mouse',
+      button: 0,
+      clientX: 24,
+      target: tabs[1],
+      currentTarget: nav,
+    } as unknown as PointerEvent);
+
+    tabs[1].click();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.componentInstance.lastTab).toBe('code');
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+  });
+
   // ── selectTab directly ────────────────────────────────────────────────────
 
   it('selectTab should not emit for disabled tab', () => {

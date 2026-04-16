@@ -219,6 +219,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     const target = event.target as HTMLElement | null;
     if (!target?.closest('.neu-tabs__nav')) return;
+    if (target.closest('.neu-tabs__tab')) return;
 
     const nav = event.currentTarget as HTMLElement;
     this._dragPointerId = event.pointerId;

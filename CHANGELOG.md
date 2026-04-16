@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.2] - 2026-04-17
+
+### Fixed
+
+- `NeuTabsComponent` ya no inicia la captura de puntero cuando la interacción comienza sobre un botón de pestaña, corrigiendo un fallo real en navegador que impedía cambiar de tab en la showcase publicada.
+- Se añadió una prueba de regresión para asegurar que los clicks en tabs siguen funcionando aunque exista lógica de drag en la barra.
+
+---
+
 ## [1.3.1] - 2026-04-17
 
 ### Fixed
