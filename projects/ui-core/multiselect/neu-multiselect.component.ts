@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Signal,
   ViewEncapsulation,
   computed,
   contentChild,
@@ -22,6 +23,10 @@ import { NeuMultiselectItemDirective } from './neu-multiselect.directives';
 export type { NeuSelectOption } from '@neural-ui/core/select';
 
 let _neuMultiselectIdSeq = 0;
+
+function arraysEqual(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
 
 /**
  * NeuralUI Multiselect Component
@@ -53,7 +58,9 @@ let _neuMultiselectIdSeq = 0;
   },
   template: `
     @if (!floatingLabel() && label()) {
-      <label class="neu-multiselect__static-label" [for]="_triggerId">{{ label() }}</label>
+      <label class="neu-multiselect__static-label" [for]="_triggerId" (click)="focusTrigger()">{{
+        label()
+      }}</label>
     }
     <div
       class="neu-multiselect"
@@ -66,19 +73,23 @@ let _neuMultiselectIdSeq = 0;
       [class.neu-multiselect--lg]="size() === 'lg'"
     >
       <!-- Trigger -->
-      <button
+      <div
         class="neu-multiselect__trigger"
-        type="button"
         [id]="_triggerId"
-        [disabled]="isDisabledFinal()"
+        [attr.tabindex]="isDisabledFinal() ? '-1' : '0'"
         [attr.role]="'combobox'"
         [attr.aria-haspopup]="'listbox'"
-        [attr.aria-expanded]="isOpen()"
+        [attr.aria-expanded]="isOpen() ? 'true' : 'false'"
+        [attr.aria-controls]="_panelId"
+        [attr.aria-disabled]="isDisabledFinal() ? 'true' : null"
         [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-describedby]="describedBy()"
         [attr.aria-label]="label() || null"
         (click)="toggle()"
         (keydown.arrowDown)="onTriggerKey($any($event))"
         (keydown.arrowUp)="onTriggerKey($any($event))"
+        (keydown.enter)="onTriggerActionKey($any($event))"
+        (keydown.space)="onTriggerActionKey($any($event))"
       >
         <!-- Floating label -->
         @if (floatingLabel() && label()) {
@@ -156,13 +167,14 @@ let _neuMultiselectIdSeq = 0;
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
-      </button>
+      </div>
 
       <!-- Panel -->
       @if (isOpen()) {
         <div
           class="neu-multiselect__panel"
           role="listbox"
+          [id]="_panelId"
           [attr.aria-multiselectable]="true"
           [attr.aria-label]="label() || null"
           [style.position]="panelPosition().position"
@@ -265,10 +277,18 @@ let _neuMultiselectIdSeq = 0;
           }
         </div>
       }
+
+      <div class="neu-multiselect__sr-status" aria-live="polite" aria-atomic="true">
+        {{ resultsAnnouncement() }}
+      </div>
     </div>
 
     @if (hasError()) {
-      <p class="neu-multiselect__error" role="alert">{{ errorMessage() }}</p>
+      <p class="neu-multiselect__error" [id]="_triggerId + '-error'" role="alert">
+        {{ errorMessage() }}
+      </p>
+    } @else if (hint()) {
+      <p class="neu-multiselect__hint" [id]="_triggerId + '-hint'">{{ hint() }}</p>
     }
   `,
   styleUrl: './neu-multiselect.component.scss',
@@ -278,15 +298,25 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _mobileViewportMax = 768;
   private readonly _viewportMargin = 16;
+  private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
+
+  private _getUrlParamSignal(key: string): Signal<string | null> {
+    let paramSignal = this._urlParamSignals.get(key);
+    if (!paramSignal) {
+      paramSignal = this._urlState.getParam(key);
+      this._urlParamSignals.set(key, paramSignal);
+    }
+    return paramSignal;
+  }
 
   constructor() {
     effect(() => {
       const param = this.urlParam();
       if (!param) return;
-      const urlRaw = this._urlState.getParam(param)();
+      const urlRaw = this._getUrlParamSignal(param)();
       const urlVals = urlRaw ? urlRaw.split(',').filter(Boolean) : [];
       const current = untracked(() => this._values());
-      if (JSON.stringify(urlVals) !== JSON.stringify(current)) {
+      if (!arraysEqual(urlVals, current)) {
         this._values.set(urlVals);
         this._onChange(urlVals);
       }
@@ -295,6 +325,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   /** @internal */
   readonly _triggerId = `neu-multiselect-trigger-${_neuMultiselectIdSeq++}`;
+  readonly _panelId = `${this._triggerId}-panel`;
 
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
   readonly itemTpl = contentChild(NeuMultiselectItemDirective);
@@ -316,6 +347,9 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   /** Mensaje de error / Error message */
   errorMessage = input<string>('');
+
+  /** Texto de ayuda bajo el campo / Helper text below the field */
+  hint = input<string>('');
 
   /** Deshabilita el componente / Disables the component */
   disabled = input<boolean>(false);
@@ -375,10 +409,33 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   readonly hasError = computed(() => !!this.errorMessage());
 
+  readonly describedBy = computed(() => {
+    if (this.hasError()) {
+      return `${this._triggerId}-error`;
+    }
+    if (this.hint()) {
+      return `${this._triggerId}-hint`;
+    }
+    return null;
+  });
+
   readonly filteredOptions = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.options();
     return this.options().filter((o) => o.label.toLowerCase().includes(q));
+  });
+
+  readonly resultsAnnouncement = computed(() => {
+    if (!this.isOpen()) {
+      return '';
+    }
+
+    const total = this.filteredOptions().length;
+    if (!total) {
+      return this.noResultsMessage();
+    }
+
+    return total === 1 ? '1 opción disponible' : `${total} opciones disponibles`;
   });
 
   // --- CVA ---
@@ -432,6 +489,9 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   /** Abre el panel y mueve el foco al primer item / Opens the panel and moves focus to the first item */
   onTriggerKey(event: Event): void {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
     event.preventDefault();
     if (!this.isOpen()) {
       this.isOpen.set(true);
@@ -443,6 +503,18 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
         first?.focus();
       });
     }
+  }
+
+  onTriggerActionKey(event: KeyboardEvent): void {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+    event.preventDefault();
+    this.toggle();
+  }
+
+  focusTrigger(): void {
+    this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-multiselect__trigger')?.focus();
   }
 
   /** Navega entre opciones con flechas / Navigates between options with arrows */

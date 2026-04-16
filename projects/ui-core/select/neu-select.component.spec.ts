@@ -32,7 +32,7 @@ describe('NeuSelectComponent', () => {
     expect(f.nativeElement.textContent).toContain('País');
   });
 
-  it('should show trigger button', async () => {
+  it('should show trigger control', async () => {
     const { f } = await setup();
     const trigger = f.nativeElement.querySelector('.neu-select__trigger');
     expect(trigger).toBeTruthy();
@@ -42,7 +42,7 @@ describe('NeuSelectComponent', () => {
 
   it('should open panel when trigger is clicked', async () => {
     const { f } = await setup();
-    const trigger: HTMLButtonElement = f.nativeElement.querySelector('.neu-select__trigger');
+    const trigger: HTMLElement = f.nativeElement.querySelector('.neu-select__trigger');
     trigger.click();
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-select__panel')).toBeTruthy();
@@ -50,7 +50,7 @@ describe('NeuSelectComponent', () => {
 
   it('should close panel on second click', async () => {
     const { f } = await setup();
-    const trigger: HTMLButtonElement = f.nativeElement.querySelector('.neu-select__trigger');
+    const trigger: HTMLElement = f.nativeElement.querySelector('.neu-select__trigger');
     trigger.click();
     f.detectChanges();
     trigger.click();
@@ -186,6 +186,34 @@ describe('NeuSelectComponent', () => {
     expect(f.nativeElement.textContent).toContain('Requerido');
   });
 
+  it('should expose hint through aria-describedby when there is no error', async () => {
+    const { f } = await setup({ hint: 'Selecciona un país' });
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const hint = f.nativeElement.querySelector('.neu-select__hint') as HTMLParagraphElement;
+
+    expect(hint.id).toBeTruthy();
+    expect(trigger.getAttribute('aria-describedby')).toBe(hint.id);
+  });
+
+  it('should expose error through aria-invalid and aria-describedby', async () => {
+    const { f } = await setup({ hint: 'Selecciona un país', errorMessage: 'Requerido' });
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const error = f.nativeElement.querySelector('.neu-select__error') as HTMLParagraphElement;
+
+    expect(trigger.getAttribute('aria-invalid')).toBe('true');
+    expect(trigger.getAttribute('aria-describedby')).toBe(error.id);
+  });
+
+  it('should announce filtered result counts in the live region', async () => {
+    const { f, comp } = await setup({ searchable: true });
+    comp.isOpen.set(true);
+    comp.searchQuery.set('xico');
+    f.detectChanges();
+
+    const liveRegion = f.nativeElement.querySelector('.neu-select__sr-status');
+    expect(liveRegion.textContent.trim()).toBe('1 opción disponible');
+  });
+
   // ── Clearable ──────────────────────────────────────────────────────────────
 
   it('should show clear button when clearable=true and value is set', async () => {
@@ -193,6 +221,16 @@ describe('NeuSelectComponent', () => {
     comp.writeValue('es');
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-select__clear')).toBeTruthy();
+  });
+
+  it('should keep the trigger as a non-button container', async () => {
+    const { f, comp } = await setup({ clearable: true });
+    comp.writeValue('es');
+    f.detectChanges();
+
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    expect(trigger.tagName).toBe('DIV');
+    expect(f.nativeElement.querySelector('button.neu-select__trigger')).toBeNull();
   });
 
   it('clearValue should reset value and call onChange', async () => {
@@ -313,7 +351,7 @@ describe('NeuSelectComponent', () => {
     const originalInnerWidth = window.innerWidth;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLButtonElement;
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
       return 1;
@@ -354,7 +392,7 @@ describe('NeuSelectComponent', () => {
     const originalInnerHeight = window.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLButtonElement;
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
     Object.defineProperty(trigger, 'getBoundingClientRect', {
       configurable: true,
       value: () => ({ left: 24, bottom: 100, width: 220 }),

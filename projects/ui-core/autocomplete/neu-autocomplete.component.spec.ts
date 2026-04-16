@@ -400,4 +400,48 @@ describe('NeuAutocompleteComponent', () => {
       expect(f.componentInstance._query()).toBe('');
     }
   });
+
+  it('should expose hint through aria-describedby when there is no error', async () => {
+    const f = setup();
+    f.componentRef.setInput('hint', 'Escribe para buscar');
+    f.detectChanges();
+    await f.whenStable();
+
+    const inputEl: HTMLInputElement = f.nativeElement.querySelector('.neu-autocomplete__input');
+    const hintEl = f.nativeElement.querySelector('.neu-autocomplete__hint');
+    expect(hintEl?.id).toBeTruthy();
+    expect(inputEl.getAttribute('aria-describedby')).toBe(hintEl.id);
+  });
+
+  it('should expose errors semantically with aria-invalid and aria-describedby', async () => {
+    const f = setup();
+    f.componentRef.setInput('hint', 'Texto auxiliar');
+    f.componentRef.setInput('errorMessage', 'Campo obligatorio');
+    f.detectChanges();
+    await f.whenStable();
+
+    const inputEl: HTMLInputElement = f.nativeElement.querySelector('.neu-autocomplete__input');
+    const errorEl = f.nativeElement.querySelector('.neu-autocomplete__error');
+    expect(inputEl.getAttribute('aria-invalid')).toBe('true');
+    expect(inputEl.getAttribute('aria-describedby')).toBe(errorEl.id);
+  });
+
+  it('should announce result counts through the live region', async () => {
+    const f = setup();
+    f.componentInstance.onQueryChange('a');
+    f.detectChanges();
+    await f.whenStable();
+
+    const liveRegion = f.nativeElement.querySelector('.neu-autocomplete__sr-status');
+    expect(liveRegion.textContent.trim()).toBe('2 resultados disponibles');
+  });
+
+  it('ArrowDown should avoid landing on a disabled option', () => {
+    const f = setup();
+    f.componentInstance.onQueryChange('l');
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(f.componentInstance._activeIndex()).toBe(0);
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(f.componentInstance._activeIndex()).toBe(0);
+  });
 });

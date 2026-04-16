@@ -49,6 +49,12 @@ describe('NeuTabsComponent', () => {
     expect(f.nativeElement.querySelector('[role="tablist"]')).toBeTruthy();
   });
 
+  it('should render a single tablist container', () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    expect(f.nativeElement.querySelectorAll('[role="tablist"]').length).toBe(1);
+  });
+
   it('should render tab buttons', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();

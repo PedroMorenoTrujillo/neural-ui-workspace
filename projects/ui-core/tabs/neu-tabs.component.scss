@@ -14,9 +14,16 @@
   display: flex;
   border-bottom: 1.5px solid var(--neu-border);
   overflow-x: auto;
+  cursor: grab;
+  touch-action: pan-x;
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+
+  &--dragging {
+    cursor: grabbing;
+    user-select: none;
   }
 }
 

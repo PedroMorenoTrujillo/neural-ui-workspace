@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Signal,
   ViewEncapsulation,
   computed,
   contentChild,
@@ -58,7 +59,9 @@ let _neuSelectIdSeq = 0;
   },
   template: `
     @if (!floatingLabel() && label()) {
-      <label class="neu-select__static-label" [for]="_triggerId">{{ label() }}</label>
+      <label class="neu-select__static-label" [for]="_triggerId" (click)="focusTrigger()">{{
+        label()
+      }}</label>
     }
     <div
       class="neu-select"
@@ -72,20 +75,24 @@ let _neuSelectIdSeq = 0;
       [class.neu-select--lg]="size() === 'lg'"
     >
       <!-- Trigger ------>
-      <button
+      <div
         class="neu-select__trigger"
-        type="button"
         [id]="_triggerId"
-        [disabled]="isDisabledFinal()"
+        [attr.tabindex]="isDisabledFinal() ? '-1' : '0'"
         [attr.role]="'combobox'"
         [attr.aria-haspopup]="'listbox'"
-        [attr.aria-expanded]="isOpen()"
+        [attr.aria-expanded]="isOpen() ? 'true' : 'false'"
+        [attr.aria-controls]="_panelId"
+        [attr.aria-disabled]="isDisabledFinal() ? 'true' : null"
         [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-describedby]="describedBy()"
         [attr.aria-activedescendant]="isOpen() && _value() ? 'neu-select-opt-' + _value() : null"
         [attr.aria-label]="label() || placeholder() || null"
         (click)="toggle()"
         (keydown.arrowDown)="onTriggerKey($any($event))"
         (keydown.arrowUp)="onTriggerKey($any($event))"
+        (keydown.enter)="onTriggerActionKey($any($event))"
+        (keydown.space)="onTriggerActionKey($any($event))"
       >
         <!-- Floating label -->
         @if (floatingLabel() && label()) {
@@ -143,13 +150,14 @@ let _neuSelectIdSeq = 0;
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
-      </button>
+      </div>
 
       <!-- Panel ------>
       @if (isOpen()) {
         <div
           class="neu-select__panel"
           role="listbox"
+          [id]="_panelId"
           [attr.aria-label]="label()"
           [style.position]="panelPosition().position"
           [style.top]="panelPosition().top"
@@ -215,11 +223,18 @@ let _neuSelectIdSeq = 0;
           }
         </div>
       }
+      <div class="neu-select__sr-status" aria-live="polite" aria-atomic="true">
+        {{ resultsAnnouncement() }}
+      </div>
     </div>
 
     <!-- Error / hint -->
     @if (hasError()) {
-      <p class="neu-select__error" role="alert">{{ errorMessage() }}</p>
+      <p class="neu-select__error" [id]="_triggerId + '-error'" role="alert">
+        {{ errorMessage() }}
+      </p>
+    } @else if (hint()) {
+      <p class="neu-select__hint" [id]="_triggerId + '-hint'">{{ hint() }}</p>
     }
   `,
   styleUrl: './neu-select.component.scss',
@@ -229,12 +244,22 @@ export class NeuSelectComponent implements ControlValueAccessor {
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _mobileViewportMax = 768;
   private readonly _viewportMargin = 16;
+  private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
+
+  private _getUrlParamSignal(key: string): Signal<string | null> {
+    let paramSignal = this._urlParamSignals.get(key);
+    if (!paramSignal) {
+      paramSignal = this._urlState.getParam(key);
+      this._urlParamSignals.set(key, paramSignal);
+    }
+    return paramSignal;
+  }
 
   constructor() {
     effect(() => {
       const param = this.urlParam();
       if (!param) return;
-      const urlVal = this._urlState.getParam(param)();
+      const urlVal = this._getUrlParamSignal(param)();
       if (urlVal !== untracked(() => this._value())) {
         this._value.set(urlVal);
         this._onChange(urlVal);
@@ -243,6 +268,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
   }
   /** @internal — ID \u00fanico para asociar label con trigger */
   readonly _triggerId = `neu-select-trigger-${_neuSelectIdSeq++}`;
+  readonly _panelId = `${this._triggerId}-panel`;
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
   readonly itemTpl = contentChild(NeuSelectItemDirective);
 
@@ -259,6 +285,9 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   /** Mensaje de error / Error message */
   errorMessage = input<string>('');
+
+  /** Texto de ayuda bajo el campo / Helper text below the field */
+  hint = input<string>('');
 
   /** Deshabilita el select / Disables the select */
   disabled = input<boolean>(false);
@@ -316,6 +345,16 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   readonly hasError = computed(() => !!this.errorMessage());
 
+  readonly describedBy = computed(() => {
+    if (this.hasError()) {
+      return `${this._triggerId}-error`;
+    }
+    if (this.hint()) {
+      return `${this._triggerId}-hint`;
+    }
+    return null;
+  });
+
   readonly filteredOptions = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.options();
@@ -329,6 +368,19 @@ export class NeuSelectComponent implements ControlValueAccessor {
   readonly _selectedOption = computed(
     () => this.options().find((o) => o.value === this._value()) ?? null,
   );
+
+  readonly resultsAnnouncement = computed(() => {
+    if (!this.isOpen()) {
+      return '';
+    }
+
+    const total = this.filteredOptions().length;
+    if (!total) {
+      return this.noResultsMessage();
+    }
+
+    return total === 1 ? '1 opción disponible' : `${total} opciones disponibles`;
+  });
 
   // CVA
   private _onChange: (v: string | null) => void = () => {};
@@ -378,6 +430,9 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   /** Abre el panel y navega con flechas desde el trigger / Opens the panel and navigates with arrows from the trigger */
   onTriggerKey(event: Event): void {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
     event.preventDefault();
     if (!this.isOpen()) {
       this.isOpen.set(true);
@@ -389,6 +444,18 @@ export class NeuSelectComponent implements ControlValueAccessor {
         first?.focus();
       });
     }
+  }
+
+  onTriggerActionKey(event: KeyboardEvent): void {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+    event.preventDefault();
+    this.toggle();
+  }
+
+  focusTrigger(): void {
+    this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select__trigger')?.focus();
   }
 
   /** Navega entre opciones con flechas / Navigates between options with arrows */

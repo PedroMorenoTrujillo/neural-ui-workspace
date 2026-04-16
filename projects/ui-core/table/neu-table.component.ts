@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   PLATFORM_ID,
+  Signal,
   TemplateRef,
   ViewEncapsulation,
   computed,
@@ -760,23 +761,41 @@ export class NeuTableComponent {
   private readonly _internalMultiSort = signal('');
 
   // ── URL State ─────────────────────────────────────────────────────────
+  private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
+
+  private _getUrlParamSignal(key: string): Signal<string | null> {
+    let paramSignal = this._urlParamSignals.get(key);
+    if (!paramSignal) {
+      paramSignal = this._urlState.getParam(key);
+      this._urlParamSignals.set(key, paramSignal);
+    }
+    return paramSignal;
+  }
+
+  private _readUrlParam(key: string): string | null {
+    return this._getUrlParamSignal(key)();
+  }
+
   readonly currentPage = computed(() => {
     if (!this.useUrlState()) return this._internalPage();
-    const raw = this._urlState.getParam(this.pageParam())();
+    const raw = this._readUrlParam(this.pageParam());
     const n = Number(raw);
     return !raw || isNaN(n) || n < 1 ? 1 : n;
   });
+
   readonly searchQuery = computed(() => {
     if (!this.useUrlState()) return this._internalSearch();
-    return this._urlState.getParam(this.searchParam())() ?? '';
+    return this._readUrlParam(this.searchParam()) ?? '';
   });
+
   readonly sortKey = computed(() => {
     if (!this.useUrlState()) return this._internalSortKey();
-    return this._urlState.getParam(this.sortParam())() ?? '';
+    return this._readUrlParam(this.sortParam()) ?? '';
   });
+
   readonly sortDir = computed<'asc' | 'desc'>(() => {
     if (!this.useUrlState()) return this._internalSortDir();
-    const d = this._urlState.getParam(this.sortDirParam())();
+    const d = this._readUrlParam(this.sortDirParam());
     return d === 'desc' ? 'desc' : 'asc';
   });
 
@@ -794,7 +813,7 @@ export class NeuTableComponent {
   readonly _sortEntries = computed<NeuTableSortEntry[]>(() => {
     if (!this.multiSort()) return [];
     const param = this.useUrlState()
-      ? this._urlState.getParam(this.multiSortParam())()
+      ? this._readUrlParam(this.multiSortParam())
       : this._internalMultiSort();
     if (!param) return [];
     return param.split(',').flatMap((chunk) => {

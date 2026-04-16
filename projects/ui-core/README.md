@@ -4,7 +4,7 @@
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
   <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
-  <img src="https://img.shields.io/badge/tests-1440%20passing-22c55e" alt="1440 tests passing" />
+  <img src="https://img.shields.io/badge/tests-1519%20passing-22c55e" alt="1519 tests passing" />
   <img src="https://img.shields.io/badge/coverage-96.33%25-22c55e" alt="96.33% coverage" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
 </p>
@@ -23,7 +23,7 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
 - **Accessible by design** — ARIA attributes, keyboard navigation and focus management across the main interactive components
-- **Well-tested** — 1440 passing tests with 96.33% statements coverage and 95.59% branch coverage
+- **Well-tested** — 1519 passing tests with 96.33% statements coverage and 95.59% branch coverage
 - **Themeable** — full design token system via CSS custom properties
 
 ---
@@ -110,7 +110,7 @@ export class LoginComponent {
 
 ## Components
 
-Representative entry points in 1.3.0:
+Representative entry points in 1.3.1:
 
 - **Forms**: `@neural-ui/core/input`, `@neural-ui/core/select`, `@neural-ui/core/multiselect`, `@neural-ui/core/date-input`, `@neural-ui/core/number-input`, `@neural-ui/core/input-otp`
 - **Navigation and layout**: `@neural-ui/core/tabs`, `@neural-ui/core/nav`, `@neural-ui/core/sidebar`, `@neural-ui/core/accordion`, `@neural-ui/core/toolbar`, `@neural-ui/core/dashboard-grid`

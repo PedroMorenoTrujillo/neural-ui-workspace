@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+<!-- next release -->
+
+---
+
+## [1.3.1] - 2026-04-17
+
+### Fixed
+
+- `NeuSelectComponent` y `NeuMultiselectComponent` ahora usan una estructura de trigger válida para el patrón combobox, evitando botones anidados y mejorando la compatibilidad con lectores de pantalla y navegación por teclado.
+- `NeuAutocompleteComponent` mejora la navegación por teclado evitando opciones deshabilitadas y expone estados de ayuda y error mediante `aria-describedby` y `aria-invalid`.
+- `NeuTabsComponent` corrige la estructura ARIA para renderizar un único `tablist` y mejora la usabilidad de barras de pestañas largas con arrastre horizontal y auto-scroll al tab activo.
+
+### Improved
+
+- Se redujo el trabajo reactivo innecesario en `NeuTableComponent`, `NeuSelectComponent`, `NeuMultiselectComponent` y `NeuTabsComponent` memoizando señales de query params y evitando recreaciones repetidas.
+- La accesibilidad base de componentes interactivos se reforzó con live regions, texto auxiliar semántico, estados de error consistentes y mejoras de foco visible.
+- La showcase fue alineada con los cambios de rendimiento y accesibilidad: navegación inicial corregida a `/home`, sincronización de título optimizada, demos con configuradores más granulares y documentación validada con build, unit tests y Playwright.
+
+---
+
 ## [1.3.0] - 2026-04-16
 
 ### Fixed
@@ -19,12 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a formal quality and accessibility status document for `@neural-ui/core`, summarizing architecture alignment, testing thresholds, zoneless readiness and current accessibility confidence.
 - Expanded automated test coverage in several complex components, pushing the library-wide baseline above 96% statements, 95% branches and 91% functions.
 - README documentation was aligned with the published package structure: dedicated subpath imports, real theme token names, and current release guidance for `@neural-ui/core` 1.3.0.
-
----
-
-## [Unreleased]
-
-<!-- next release -->
 
 ## [1.2.1] - 2026-04-11
 

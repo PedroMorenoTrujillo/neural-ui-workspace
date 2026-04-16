@@ -85,7 +85,7 @@ $panel-z: 200;
     border-color var(--neu-transition),
     box-shadow var(--neu-transition);
 
-  &:hover:not(:disabled) {
+  &:hover:not([aria-disabled='true']) {
     border-color: var(--neu-border-hover);
   }
 
@@ -95,7 +95,7 @@ $panel-z: 200;
     box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
   }
 
-  &:disabled {
+  &[aria-disabled='true'] {
     opacity: 0.6;
     cursor: not-allowed;
     background: var(--neu-surface-2);
@@ -171,6 +171,11 @@ $panel-z: 200;
     opacity: 1;
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
+
   svg {
     width: 10px;
     height: 10px;
@@ -204,6 +209,11 @@ $panel-z: 200;
   &:hover {
     color: var(--neu-text);
     background: var(--neu-surface-3);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
   }
 }
 
@@ -412,6 +422,11 @@ $panel-z: 200;
     background: var(--neu-surface-2);
     color: var(--neu-text);
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
 }
 
 .neu-multiselect__footer-clear {
@@ -426,6 +441,12 @@ $panel-z: 200;
 
   &:hover {
     text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+    border-radius: var(--neu-radius-sm);
   }
 }
 
@@ -454,6 +475,25 @@ $panel-z: 200;
   font-size: var(--neu-text-xs);
   color: var(--neu-error-text, var(--neu-error));
   font-family: var(--neu-font-sans);
+}
+
+.neu-multiselect__hint {
+  margin-top: var(--neu-space-1);
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+  font-family: var(--neu-font-sans);
+}
+
+.neu-multiselect__sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 // ---- Sizes / Tamaños ----------------------------------------

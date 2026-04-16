@@ -86,16 +86,16 @@ describe('NeuMultiselectComponent', () => {
     expect(f.nativeElement.textContent).toContain('Tecnologías');
   });
 
-  it('should show trigger button', () => {
+  it('should show trigger control', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
-    expect(f.nativeElement.querySelector('button.neu-multiselect__trigger')).toBeTruthy();
+    expect(f.nativeElement.querySelector('.neu-multiselect__trigger')).toBeTruthy();
   });
 
   it('should open dropdown and show options when clicked', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
-    f.nativeElement.querySelector('button.neu-multiselect__trigger').click();
+    f.nativeElement.querySelector('.neu-multiselect__trigger').click();
     f.detectChanges();
     const text = f.nativeElement.textContent;
     expect(text).toContain('Angular');
@@ -113,6 +113,49 @@ describe('NeuMultiselectComponent', () => {
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-multiselect--error')).toBeTruthy();
     expect(f.nativeElement.textContent).toContain('Campo requerido');
+  });
+
+  it('should expose hint through aria-describedby when there is no error', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('label', 'Tecnologías');
+    f.componentRef.setInput('hint', 'Selecciona varias tecnologías');
+    f.detectChanges();
+    await f.whenStable();
+
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    const hint = f.nativeElement.querySelector('.neu-multiselect__hint') as HTMLParagraphElement;
+    expect(trigger.getAttribute('aria-describedby')).toBe(hint.id);
+  });
+
+  it('should expose error through aria-invalid and aria-describedby', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('label', 'Tecnologías');
+    f.componentRef.setInput('hint', 'Selecciona varias tecnologías');
+    f.componentRef.setInput('errorMessage', 'Campo requerido');
+    f.detectChanges();
+    await f.whenStable();
+
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    const error = f.nativeElement.querySelector('.neu-multiselect__error') as HTMLParagraphElement;
+    expect(trigger.getAttribute('aria-invalid')).toBe('true');
+    expect(trigger.getAttribute('aria-describedby')).toBe(error.id);
+  });
+
+  it('should announce filtered result counts in the live region', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('searchable', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.isOpen.set(true);
+    comp.searchQuery.set('ang');
+    f.detectChanges();
+    await f.whenStable();
+
+    const liveRegion = f.nativeElement.querySelector('.neu-multiselect__sr-status');
+    expect(liveRegion.textContent.trim()).toBe('1 opción disponible');
   });
 
   // ── Selección ────────────────────────────────────────────────────────────
@@ -341,7 +384,9 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('button.neu-multiselect__trigger').disabled).toBe(true);
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+    expect(trigger.getAttribute('tabindex')).toBe('-1');
   });
 
   it('should be disabled when formControl is disabled', () => {
@@ -349,7 +394,24 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     f.componentInstance.ctrl.disable();
     f.detectChanges();
-    expect(f.nativeElement.querySelector('button.neu-multiselect__trigger').disabled).toBe(true);
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+    expect(trigger.getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('should keep the trigger as a non-button container', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('clearable', true);
+    f.detectChanges();
+    (f.componentInstance as any)._values.set(['angular']);
+    (f.componentInstance as any)._chipMode.set('chips');
+    f.detectChanges();
+    await f.whenStable();
+
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    expect(trigger.tagName).toBe('DIV');
+    expect(f.nativeElement.querySelector('button.neu-multiselect__trigger')).toBeNull();
   });
 
   it('should render floating label inside the trigger when floatingLabel=true', async () => {
@@ -426,7 +488,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLButtonElement;
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
     trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     f.detectChanges();
 
@@ -528,7 +590,9 @@ describe('NeuMultiselectComponent', () => {
     comp.setDisabledState(true);
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('button.neu-multiselect__trigger').disabled).toBe(true);
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+    expect(trigger.getAttribute('tabindex')).toBe('-1');
   });
 
   // ── NeuMultiselectItemDirective ───────────────────────────────────────────
@@ -1062,7 +1126,7 @@ describe('NeuMultiselectComponent', () => {
     const originalInnerWidth = window.innerWidth;
     const originalInnerHeight = window.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
-    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLButtonElement;
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
 
     Object.defineProperty(trigger, 'getBoundingClientRect', {
       configurable: true,

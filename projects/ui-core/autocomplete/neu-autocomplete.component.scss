@@ -45,7 +45,8 @@
     border-color: var(--neu-border-hover, var(--neu-border, #d1d5db));
   }
 
-  &:focus {
+  &:focus,
+  &:focus-visible {
     border-color: var(--neu-primary, #0ea5e9);
     box-shadow: var(--neu-focus-ring, 0 0 0 3px rgb(14 165 233 / 0.2));
   }
@@ -133,6 +134,11 @@
     color: var(--neu-text, #111);
     background: var(--neu-surface-3, #e5e7eb);
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary, #0ea5e9);
+    outline-offset: 2px;
+  }
 }
 
 /* ── Dropdown list ────────────────────────────────────────────── */
@@ -204,6 +210,33 @@
   font-size: 0.875rem;
   color: var(--neu-text-muted, #6b7280);
   text-align: center;
+}
+
+.neu-autocomplete__hint,
+.neu-autocomplete__error {
+  margin: 6px 0 0;
+  font-size: var(--neu-text-sm, 0.875rem);
+  line-height: 1.4;
+}
+
+.neu-autocomplete__hint {
+  color: var(--neu-text-muted, #6b7280);
+}
+
+.neu-autocomplete__error {
+  color: var(--neu-danger, #dc2626);
+}
+
+.neu-autocomplete__sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ---- Sizes / Tamaños ----------------------------------------

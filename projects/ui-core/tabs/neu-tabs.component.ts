@@ -5,6 +5,7 @@ import {
   ElementRef,
   InjectionToken,
   OnDestroy,
+  Signal,
   ViewEncapsulation,
   computed,
   effect,
@@ -53,7 +54,17 @@ export interface NeuTab {
   template: `
     <!-- Barra de pestañas -->
     <div class="neu-tabs" [class.neu-tabs--flush]="flush()">
-      <div class="neu-tabs__nav" role="tablist" [attr.aria-label]="ariaLabel()" #navRef>
+      <div
+        class="neu-tabs__nav"
+        role="tablist"
+        [attr.aria-label]="ariaLabel()"
+        [class.neu-tabs__nav--dragging]="isDraggingNav()"
+        #navRef
+        (pointerdown)="startNavDrag($event)"
+        (pointermove)="moveNavDrag($event)"
+        (pointerup)="endNavDrag($event)"
+        (pointercancel)="endNavDrag($event)"
+      >
         @for (tab of tabs(); track tab.id) {
           <button
             class="neu-tabs__tab"
@@ -66,7 +77,7 @@ export interface NeuTab {
             [attr.tabindex]="activeTabId() === tab.id ? '0' : '-1'"
             [disabled]="tab.disabled"
             type="button"
-            (click)="selectTab(tab)"
+            (click)="handleTabClick($event, tab)"
             (keydown.arrowRight)="focusTab($any($event), 1)"
             (keydown.arrowLeft)="focusTab($any($event), -1)"
             (keydown.home)="focusTab($any($event), 'first')"
@@ -94,6 +105,25 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   private readonly urlState = inject(NeuUrlStateService);
   private readonly elRef = inject(ElementRef);
   private resizeObserver?: ResizeObserver;
+  private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
+  private _dragPointerId: number | null = null;
+  private _dragStartX = 0;
+  private _dragStartScrollLeft = 0;
+  private _suppressNextClick = false;
+  readonly isDraggingNav = signal(false);
+
+  private _getUrlParamSignal(key: string): Signal<string | null> {
+    let paramSignal = this._urlParamSignals.get(key);
+    if (!paramSignal) {
+      paramSignal = this.urlState.getParam(key);
+      this._urlParamSignals.set(key, paramSignal);
+    }
+    return paramSignal;
+  }
+
+  private _readUrlParam(key: string): string | null {
+    return this._getUrlParamSignal(key)();
+  }
 
   constructor() {
     // Actualizar indicador cuando activeTabId cambie — debe estar en el constructor (injection context)
@@ -120,7 +150,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
 
   /** ID de la pestaña activa (de la URL o la primera disponible) / Active tab ID (from the URL or the first available) */
   readonly activeTabId = computed(() => {
-    const fromUrl = this.urlState.getParam(this.tabParam())();
+    const fromUrl = this._readUrlParam(this.tabParam());
     const available = this.tabs().find((t) => t.id === fromUrl && !t.disabled);
     if (available) return available.id;
     // Fallback: primera pestaña no deshabilitada
@@ -158,7 +188,24 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     if (tabEl) {
       this._indicatorLeft.set(tabEl.offsetLeft + 'px');
       this._indicatorWidth.set(tabEl.offsetWidth + 'px');
+      if (typeof tabEl.scrollIntoView === 'function') {
+        tabEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'nearest',
+        });
+      }
     }
+  }
+
+  handleTabClick(event: Event, tab: NeuTab): void {
+    if (this._suppressNextClick) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._suppressNextClick = false;
+      return;
+    }
+    this.selectTab(tab);
   }
 
   selectTab(tab: NeuTab): void {
@@ -166,6 +213,47 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     this.urlState.setParam(this.tabParam(), tab.id);
     this.tabChange.emit(tab.id);
     requestAnimationFrame(() => this._updateIndicator());
+  }
+
+  startNavDrag(event: PointerEvent): void {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest('.neu-tabs__nav')) return;
+
+    const nav = event.currentTarget as HTMLElement;
+    this._dragPointerId = event.pointerId;
+    this._dragStartX = event.clientX;
+    this._dragStartScrollLeft = nav.scrollLeft;
+    this.isDraggingNav.set(false);
+    nav.setPointerCapture(event.pointerId);
+  }
+
+  moveNavDrag(event: PointerEvent): void {
+    if (this._dragPointerId !== event.pointerId) return;
+
+    const nav = event.currentTarget as HTMLElement;
+    const deltaX = event.clientX - this._dragStartX;
+    if (!this.isDraggingNav() && Math.abs(deltaX) > 6) {
+      this.isDraggingNav.set(true);
+      this._suppressNextClick = true;
+    }
+    if (!this.isDraggingNav()) return;
+
+    nav.scrollLeft = this._dragStartScrollLeft - deltaX;
+    event.preventDefault();
+  }
+
+  endNavDrag(event: PointerEvent): void {
+    if (this._dragPointerId !== event.pointerId) return;
+
+    const nav = event.currentTarget as HTMLElement;
+    if (nav.hasPointerCapture(event.pointerId)) {
+      nav.releasePointerCapture(event.pointerId);
+    }
+    this._dragPointerId = null;
+    if (this.isDraggingNav()) {
+      requestAnimationFrame(() => this.isDraggingNav.set(false));
+    }
   }
 
   /** Mueve el foco entre tabs con flechas (roving tabindex — WAI-ARIA Tabs Pattern) / Moves focus between tabs with arrows (roving tabindex — WAI-ARIA Tabs Pattern) */

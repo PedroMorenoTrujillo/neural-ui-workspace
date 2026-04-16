@@ -78,9 +78,13 @@ let _seq = 0;
         [id]="_id"
         [attr.placeholder]="floatingLabel() ? ' ' : placeholder() || null"
         [attr.aria-label]="label() || placeholder()"
-        [attr.aria-expanded]="_isOpen()"
+        [attr.aria-autocomplete]="'list'"
+        [attr.aria-haspopup]="'listbox'"
+        [attr.aria-expanded]="_isOpen() ? 'true' : 'false'"
         [attr.aria-controls]="_listId"
         [attr.aria-activedescendant]="_activeId()"
+        [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-describedby]="describedBy()"
         [disabled]="_cvaDisabled()"
         [value]="_query()"
         (input)="onQueryChange($any($event.target).value)"
@@ -102,6 +106,9 @@ let _seq = 0;
           ×
         </button>
       }
+    </div>
+    <div class="neu-autocomplete__sr-status" aria-live="polite" aria-atomic="true">
+      {{ resultsAnnouncement() }}
     </div>
     @if (_isOpen() && _filtered().length) {
       <ul
@@ -129,6 +136,13 @@ let _seq = 0;
     @if (_isOpen() && !_filtered().length) {
       <div class="neu-autocomplete__empty" role="status">{{ emptyLabel() }}</div>
     }
+    @if (hasError()) {
+      <p class="neu-autocomplete__error" [id]="_id + '-error'" role="alert">
+        {{ errorMessage() }}
+      </p>
+    } @else if (hint()) {
+      <p class="neu-autocomplete__hint" [id]="_id + '-hint'">{{ hint() }}</p>
+    }
   `,
   styleUrl: './neu-autocomplete.component.scss',
 })
@@ -137,6 +151,8 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   readonly options = input<NeuAutocompleteOption[]>([]);
   readonly placeholder = input<string>('');
   readonly label = input<string>('');
+  readonly hint = input<string>('');
+  readonly errorMessage = input<string>('');
   readonly emptyLabel = input<string>('Sin resultados');
   readonly minLength = input<number>(0);
   /** Muestra el label como flotante (true) o estático encima del campo (false) / Shows the label as floating (true) or static above the field (false) */
@@ -176,6 +192,32 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   readonly _activeId = computed(() => {
     const i = this._activeIndex();
     return i >= 0 ? this._optionId(i) : null;
+  });
+
+  readonly hasError = computed(() => !!this.errorMessage());
+
+  readonly describedBy = computed(() => {
+    if (this.hasError()) {
+      return `${this._id}-error`;
+    }
+    if (this.hint()) {
+      return `${this._id}-hint`;
+    }
+    return null;
+  });
+
+  readonly resultsAnnouncement = computed(() => {
+    const query = this._query().trim();
+    if (!query || !this._isOpen()) {
+      return '';
+    }
+
+    const total = this._filtered().length;
+    if (!total) {
+      return this.emptyLabel();
+    }
+
+    return total === 1 ? '1 resultado disponible' : `${total} resultados disponibles`;
   });
 
   _optionId(i: number): string {
@@ -228,12 +270,12 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        this._activeIndex.update((i) => Math.min(i + 1, total - 1));
+        this._moveActiveIndex(1);
         this._isOpen.set(true);
         break;
       case 'ArrowUp':
         e.preventDefault();
-        this._activeIndex.update((i) => Math.max(i - 1, 0));
+        this._moveActiveIndex(-1);
         break;
       case 'Enter': {
         const idx = this._activeIndex();
@@ -245,6 +287,35 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
         this._isOpen.set(false);
         this._activeIndex.set(-1);
         break;
+    }
+  }
+
+  private _moveActiveIndex(step: 1 | -1): void {
+    const filtered = this._filtered();
+    if (!filtered.length) {
+      this._activeIndex.set(-1);
+      return;
+    }
+
+    const currentIndex = this._activeIndex();
+    let nextIndex = currentIndex;
+
+    for (let count = 0; count < filtered.length; count += 1) {
+      nextIndex =
+        step === 1 ? Math.min(nextIndex + 1, filtered.length - 1) : Math.max(nextIndex - 1, 0);
+
+      if (!filtered[nextIndex]?.disabled) {
+        this._activeIndex.set(nextIndex);
+        return;
+      }
+
+      if ((step === 1 && nextIndex === filtered.length - 1) || (step === -1 && nextIndex === 0)) {
+        break;
+      }
+    }
+
+    if (currentIndex === -1) {
+      this._activeIndex.set(filtered.findIndex((option) => !option.disabled));
     }
   }
 
