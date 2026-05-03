@@ -263,9 +263,14 @@ $item-radius: 8px;
 
   // Deshabilitado
   &--disabled {
-    opacity: 0.4;
+    opacity: 1;
+    color: var(--neu-text-disabled);
     cursor: not-allowed;
     pointer-events: none;
+
+    .neu-nav__item-icon {
+      color: var(--neu-text-disabled);
+    }
   }
 
   // Ítem hijo (submenú) — sangría visual

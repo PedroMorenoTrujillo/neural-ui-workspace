@@ -13,9 +13,11 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NgTemplateOutlet } from '@angular/common';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from './neu-select.types';
 import { NeuSelectItemDirective, NeuSelectSelectedDirective } from './neu-select.directives';
@@ -41,7 +43,7 @@ let _neuSelectIdSeq = 0;
  */
 @Component({
   selector: 'neu-select',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -73,6 +75,7 @@ let _neuSelectIdSeq = 0;
       [class.neu-select--no-float]="!floatingLabel()"
       [class.neu-select--sm]="size() === 'sm'"
       [class.neu-select--lg]="size() === 'lg'"
+      [style.--neu-select-option-height]="virtualScrollItemSize() + 'px'"
     >
       <!-- Trigger ------>
       <div
@@ -156,6 +159,7 @@ let _neuSelectIdSeq = 0;
       @if (isOpen()) {
         <div
           class="neu-select__panel"
+          [class.neu-select__panel--virtual]="virtualScroll()"
           role="listbox"
           [id]="_panelId"
           [attr.aria-label]="label()"
@@ -178,45 +182,93 @@ let _neuSelectIdSeq = 0;
               />
             </div>
           }
-          @for (option of filteredOptions(); track option.value) {
-            <div
-              class="neu-select__option"
-              [class.neu-select__option--selected]="option.value === _value()"
-              [class.neu-select__option--disabled]="option.disabled"
-              role="option"
-              [id]="'neu-select-opt-' + option.value"
-              [attr.aria-selected]="option.value === _value()"
-              [attr.aria-disabled]="option.disabled"
-              [attr.tabindex]="option.disabled ? null : '-1'"
-              (click)="selectOption(option)"
-              (keydown.enter)="selectOption(option)"
-              (keydown.space)="selectOption(option)"
-              (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
-              (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
+          @if (virtualScroll()) {
+            <cdk-virtual-scroll-viewport
+              class="neu-select__viewport"
+              [itemSize]="virtualScrollItemSize()"
+              [style.height]="virtualViewportHeight()"
             >
-              <!-- Checkmark en la seleccionada (siempre reserva el espacio) -->
-              <svg
-                class="neu-select__check"
-                [style.visibility]="option.value === _value() ? 'visible' : 'hidden'"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
+              <div
+                *cdkVirtualFor="let option of filteredOptions(); trackBy: trackByOptionValue"
+                class="neu-select__option"
+                [class.neu-select__option--selected]="option.value === _value()"
+                [class.neu-select__option--disabled]="option.disabled"
+                role="option"
+                [id]="'neu-select-opt-' + option.value"
+                [attr.aria-selected]="option.value === _value()"
+                [attr.aria-disabled]="option.disabled"
+                [attr.tabindex]="option.disabled ? null : '-1'"
+                (click)="selectOption(option)"
+                (keydown.enter)="selectOption(option)"
+                (keydown.space)="selectOption(option)"
+                (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
+                (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
               >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              @if (itemTpl()) {
-                <ng-container
-                  [ngTemplateOutlet]="itemTpl()!.templateRef"
-                  [ngTemplateOutletContext]="{ $implicit: option }"
-                />
-              } @else {
-                {{ option.label }}
-              }
-            </div>
+                <!-- Checkmark en la seleccionada (siempre reserva el espacio) -->
+                <svg
+                  class="neu-select__check"
+                  [style.visibility]="option.value === _value() ? 'visible' : 'hidden'"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                @if (itemTpl()) {
+                  <ng-container
+                    [ngTemplateOutlet]="itemTpl()!.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: option }"
+                  />
+                } @else {
+                  {{ option.label }}
+                }
+              </div>
+            </cdk-virtual-scroll-viewport>
+          } @else {
+            @for (option of filteredOptions(); track option.value) {
+              <div
+                class="neu-select__option"
+                [class.neu-select__option--selected]="option.value === _value()"
+                [class.neu-select__option--disabled]="option.disabled"
+                role="option"
+                [id]="'neu-select-opt-' + option.value"
+                [attr.aria-selected]="option.value === _value()"
+                [attr.aria-disabled]="option.disabled"
+                [attr.tabindex]="option.disabled ? null : '-1'"
+                (click)="selectOption(option)"
+                (keydown.enter)="selectOption(option)"
+                (keydown.space)="selectOption(option)"
+                (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
+                (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
+              >
+                <!-- Checkmark en la seleccionada (siempre reserva el espacio) -->
+                <svg
+                  class="neu-select__check"
+                  [style.visibility]="option.value === _value() ? 'visible' : 'hidden'"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                @if (itemTpl()) {
+                  <ng-container
+                    [ngTemplateOutlet]="itemTpl()!.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: option }"
+                  />
+                } @else {
+                  {{ option.label }}
+                }
+              </div>
+            }
           }
           @if (filteredOptions().length === 0) {
             <div class="neu-select__empty">{{ noResultsMessage() }}</div>
@@ -244,7 +296,9 @@ export class NeuSelectComponent implements ControlValueAccessor {
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _mobileViewportMax = 768;
   private readonly _viewportMargin = 16;
+  private readonly _panelMaxHeight = 240;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
+  private readonly _viewport = viewChild(CdkVirtualScrollViewport);
 
   private _getUrlParamSignal(key: string): Signal<string | null> {
     let paramSignal = this._urlParamSignals.get(key);
@@ -261,8 +315,10 @@ export class NeuSelectComponent implements ControlValueAccessor {
       if (!param) return;
       const urlVal = this._getUrlParamSignal(param)();
       if (urlVal !== untracked(() => this._value())) {
-        this._value.set(urlVal);
-        this._onChange(urlVal);
+        untracked(() => {
+          this._value.set(urlVal);
+          this._onChange(urlVal);
+        });
       }
     });
   }
@@ -304,6 +360,12 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   /** Muestra un botón para limpiar la selección / Shows a button to clear the selection */
   clearable = input<boolean>(false);
+
+  /** Habilita scroll virtual para listas largas / Enables virtual scrolling for large option lists */
+  virtualScroll = input<boolean>(false);
+
+  /** Número de opciones visibles en el viewport virtual / Number of visible options in the virtual viewport */
+  virtualScrollVisibleItems = input<number>(8);
 
   /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
   noResultsMessage = input<string>('Sin resultados');
@@ -382,6 +444,39 @@ export class NeuSelectComponent implements ControlValueAccessor {
     return total === 1 ? '1 opción disponible' : `${total} opciones disponibles`;
   });
 
+  readonly virtualScrollItemSize = computed(() => {
+    switch (this.size()) {
+      case 'sm':
+        return 36;
+      case 'lg':
+        return 52;
+      default:
+        return 44;
+    }
+  });
+
+  readonly virtualViewportHeight = computed(() => {
+    const desiredHeight = this.virtualScrollVisibleItems() * this.virtualScrollItemSize();
+    const panelMaxHeight = this.panelPosition().maxHeight;
+    const searchOffset = this.searchable() ? 52 : 0;
+
+    const parsedMaxHeight = panelMaxHeight
+      ? Number.parseFloat(panelMaxHeight)
+      : this._panelMaxHeight;
+    if (Number.isNaN(parsedMaxHeight)) {
+      return `${Math.min(desiredHeight, this._panelMaxHeight - searchOffset)}px`;
+    }
+
+    const effectivePanelMaxHeight = Math.min(this._panelMaxHeight, parsedMaxHeight);
+    const availableHeight = Math.max(
+      this.virtualScrollItemSize(),
+      effectivePanelMaxHeight - searchOffset,
+    );
+    return `${Math.min(desiredHeight, availableHeight)}px`;
+  });
+
+  readonly trackByOptionValue = (_index: number, option: NeuSelectOption) => option.value;
+
   // CVA
   private _onChange: (v: string | null) => void = () => {};
   private _onTouched: () => void = () => {};
@@ -409,13 +504,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
     if (!this.isDisabledFinal()) this.isOpen.update((v) => !v);
     if (this.isOpen()) {
       this.syncPanelPosition();
-      // Foco al primer item cuando abre con teclado
-      requestAnimationFrame(() => {
-        const first = this.elementRef.nativeElement.querySelector<HTMLElement>(
-          '.neu-select__option:not([aria-disabled="true"])',
-        );
-        first?.focus();
-      });
+      this.focusFirstOption();
     } else {
       this.resetPanelPosition();
     }
@@ -437,12 +526,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
     if (!this.isOpen()) {
       this.isOpen.set(true);
       this.syncPanelPosition();
-      requestAnimationFrame(() => {
-        const first = this.elementRef.nativeElement.querySelector<HTMLElement>(
-          '.neu-select__option:not([aria-disabled="true"])',
-        );
-        first?.focus();
-      });
+      this.focusFirstOption();
     }
   }
 
@@ -465,10 +549,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
     const idx = opts.findIndex((o) => o.value === current.value);
     const next = opts[(idx + dir + opts.length) % opts.length];
     if (next) {
-      const el = this.elementRef.nativeElement.querySelector<HTMLElement>(
-        `#neu-select-opt-${next.value}`,
-      );
-      el?.focus();
+      this.focusOption(next.value);
     }
   }
 
@@ -539,7 +620,42 @@ export class NeuSelectComponent implements ControlValueAccessor {
         width: `${width}px`,
         maxHeight: `${maxHeight}px`,
       });
+
+      if (this.virtualScroll()) {
+        this._viewport()?.checkViewportSize();
+      }
     });
+  }
+
+  private focusFirstOption(): void {
+    const firstEnabled = this.filteredOptions().find((option) => !option.disabled);
+    if (!firstEnabled) {
+      return;
+    }
+
+    this.focusOption(firstEnabled.value);
+  }
+
+  private focusOption(value: string): void {
+    if (this.virtualScroll()) {
+      const optionIndex = this.filteredOptions().findIndex((option) => option.value === value);
+      if (optionIndex >= 0) {
+        this._viewport()?.scrollToIndex(optionIndex, 'auto');
+        this._viewport()?.checkViewportSize();
+      }
+      requestAnimationFrame(() => {
+        const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
+          `#neu-select-opt-${value}`,
+        );
+        optionElement?.focus();
+      });
+      return;
+    }
+
+    const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
+      `#neu-select-opt-${value}`,
+    );
+    optionElement?.focus();
   }
 
   private resetPanelPosition(): void {

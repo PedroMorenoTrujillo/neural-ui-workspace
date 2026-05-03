@@ -10,7 +10,9 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface NeuAutocompleteOption {
@@ -40,7 +42,7 @@ let _seq = 0;
  */
 @Component({
   selector: 'neu-autocomplete',
-  imports: [],
+  imports: [ScrollingModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -59,6 +61,7 @@ let _seq = 0;
     '[class.neu-autocomplete--has-value]': '!!_query()',
     '[class.neu-autocomplete--sm]': 'size() === "sm"',
     '[class.neu-autocomplete--lg]': 'size() === "lg"',
+    '[style.--neu-autocomplete-option-height]': 'virtualScrollItemSize() + "px"',
   },
   template: `
     @if (!floatingLabel() && label()) {
@@ -111,14 +114,17 @@ let _seq = 0;
       {{ resultsAnnouncement() }}
     </div>
     @if (_isOpen() && _filtered().length) {
-      <ul
-        class="neu-autocomplete__list"
-        role="listbox"
-        [id]="_listId"
-        [attr.aria-label]="label() || placeholder()"
-      >
-        @for (opt of _filtered(); track opt.label; let i = $index) {
-          <li
+      @if (virtualScroll()) {
+        <cdk-virtual-scroll-viewport
+          class="neu-autocomplete__list neu-autocomplete__list--virtual"
+          role="listbox"
+          [id]="_listId"
+          [attr.aria-label]="label() || placeholder()"
+          [itemSize]="virtualScrollItemSize()"
+          [style.height]="virtualViewportHeight()"
+        >
+          <div
+            *cdkVirtualFor="let opt of _filtered(); trackBy: trackByOption; let i = index"
             class="neu-autocomplete__option"
             role="option"
             [id]="_optionId(i)"
@@ -129,9 +135,31 @@ let _seq = 0;
             (mousedown)="selectOption(opt)"
           >
             {{ opt.label }}
-          </li>
-        }
-      </ul>
+          </div>
+        </cdk-virtual-scroll-viewport>
+      } @else {
+        <ul
+          class="neu-autocomplete__list"
+          role="listbox"
+          [id]="_listId"
+          [attr.aria-label]="label() || placeholder()"
+        >
+          @for (opt of _filtered(); track opt.label; let i = $index) {
+            <li
+              class="neu-autocomplete__option"
+              role="option"
+              [id]="_optionId(i)"
+              [class.neu-autocomplete__option--active]="_activeIndex() === i"
+              [class.neu-autocomplete__option--disabled]="opt.disabled"
+              [attr.aria-selected]="_activeIndex() === i"
+              [attr.aria-disabled]="opt.disabled ?? false"
+              (mousedown)="selectOption(opt)"
+            >
+              {{ opt.label }}
+            </li>
+          }
+        </ul>
+      }
     }
     @if (_isOpen() && !_filtered().length) {
       <div class="neu-autocomplete__empty" role="status">{{ emptyLabel() }}</div>
@@ -160,6 +188,12 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   /** Tamaño del campo: 'sm' = 36px | 'md' = 48px | 'lg' = 56px / Field size */
   readonly size = input<'sm' | 'md' | 'lg'>('md');
 
+  /** Habilita scroll virtual para listas largas / Enables virtual scrolling for large result lists */
+  readonly virtualScroll = input<boolean>(false);
+
+  /** Número de resultados visibles en el viewport virtual / Number of visible results in the virtual viewport */
+  readonly virtualScrollVisibleItems = input<number>(8);
+
   /** Emitido al seleccionar una opción / Emitted when an option is selected */
   readonly optionSelected = output<NeuAutocompleteOption>();
 
@@ -175,6 +209,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   readonly _activeIndex = signal(-1);
   readonly _cvaDisabled = signal(false);
   readonly _focused = signal(false);
+  private readonly _viewport = viewChild(CdkVirtualScrollViewport);
 
   private _onChange: (v: unknown) => void = () => {};
   private _onTouched: () => void = () => {};
@@ -219,6 +254,24 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
 
     return total === 1 ? '1 resultado disponible' : `${total} resultados disponibles`;
   });
+
+  readonly virtualScrollItemSize = computed(() => {
+    switch (this.size()) {
+      case 'sm':
+        return 36;
+      case 'lg':
+        return 52;
+      default:
+        return 40;
+    }
+  });
+
+  readonly virtualViewportHeight = computed(
+    () => `${this.virtualScrollVisibleItems() * this.virtualScrollItemSize()}px`,
+  );
+
+  readonly trackByOption = (index: number, option: NeuAutocompleteOption) =>
+    option.value ?? option.label ?? index;
 
   _optionId(i: number): string {
     return `${this._listId}-opt-${i}`;
@@ -272,10 +325,12 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
         e.preventDefault();
         this._moveActiveIndex(1);
         this._isOpen.set(true);
+        this._scrollActiveOptionIntoView();
         break;
       case 'ArrowUp':
         e.preventDefault();
         this._moveActiveIndex(-1);
+        this._scrollActiveOptionIntoView();
         break;
       case 'Enter': {
         const idx = this._activeIndex();
@@ -332,7 +387,32 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     this._query.set('');
     this._onChange(null);
     this._isOpen.set(false);
+    this._activeIndex.set(-1);
     this.queryChange.emit('');
+  }
+
+  private _scrollActiveOptionIntoView(): void {
+    const activeIndex = this._activeIndex();
+    if (activeIndex < 0) {
+      return;
+    }
+
+    if (this.virtualScroll()) {
+      requestAnimationFrame(() => {
+        this._viewport()?.scrollToIndex(activeIndex, 'auto');
+        this._viewport()?.checkViewportSize();
+      });
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const activeOption = this._el.nativeElement.querySelector(
+        `#${this._optionId(activeIndex)}`,
+      ) as HTMLElement | null;
+      if (typeof activeOption?.scrollIntoView === 'function') {
+        activeOption.scrollIntoView({ block: 'nearest' });
+      }
+    });
   }
 
   // ── CVA ──────────────────────────────────────────────────────────

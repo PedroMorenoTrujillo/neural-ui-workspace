@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { NeuNavComponent, NeuNavItem } from './neu-nav.component';
 import { provideIcons } from '@ng-icons/core';
@@ -94,7 +95,7 @@ const FLYOUT_MIXED: NeuNavItem[] = [
 
 function mkProviders() {
   return [
-    provideRouter([]),
+    provideRouter([{ path: '**', component: DummyRouteComponent }]),
     provideIcons({ lucideChevronRight, lucideExternalLink, lucideChevronLeft }),
   ];
 }
@@ -749,10 +750,10 @@ describe('NeuNavComponent', () => {
     const flyoutItems = Array.from(
       f.nativeElement.querySelectorAll('.neu-nav__flyout-item'),
     ) as HTMLAnchorElement[];
-    const link = flyoutItems.find((item) =>
-      item.textContent?.includes('Grand External'),
-    ) as HTMLAnchorElement;
-    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }));
+    const linkIndex = flyoutItems.findIndex((item) => item.textContent?.includes('Grand External'));
+    f.debugElement
+      .queryAll(By.css('.neu-nav__flyout-item'))
+      [linkIndex].triggerEventHandler('click', new MouseEvent('click'));
     f.detectChanges();
 
     expect(f.componentInstance.flyoutState()).toBeNull();
@@ -804,6 +805,7 @@ describe('NeuNavComponent', () => {
       new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }),
     );
     f.detectChanges();
+    await f.whenStable();
 
     expect(f.componentInstance.flyoutState()).toBeNull();
   });
@@ -831,8 +833,9 @@ describe('NeuNavComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const link = f.nativeElement.querySelector('.neu-nav__flyout-item') as HTMLAnchorElement;
-    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }));
+    f.debugElement
+      .query(By.css('.neu-nav__flyout-item'))
+      .triggerEventHandler('click', new MouseEvent('click'));
     f.detectChanges();
 
     expect(f.componentInstance.flyoutState()).toBeNull();
@@ -876,11 +879,12 @@ describe('NeuNavComponent', () => {
     const flyoutItems = Array.from(
       f.nativeElement.querySelectorAll('.neu-nav__flyout-item'),
     ) as HTMLAnchorElement[];
-    const link = flyoutItems.find((item) =>
-      item.textContent?.includes('Grand Route'),
-    ) as HTMLAnchorElement;
-    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }));
+    const linkIndex = flyoutItems.findIndex((item) => item.textContent?.includes('Grand Route'));
+    f.debugElement
+      .queryAll(By.css('.neu-nav__flyout-item'))
+      [linkIndex].triggerEventHandler('click', new MouseEvent('click'));
     f.detectChanges();
+    await f.whenStable();
 
     expect(f.componentInstance.flyoutState()).toBeNull();
   });

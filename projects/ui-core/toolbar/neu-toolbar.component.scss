@@ -23,8 +23,17 @@
 
 /* ── Surface variants ────────────────────────────────────────── */
 .neu-toolbar--primary {
-  background: var(--neu-toolbar-primary-bg, var(--neu-color-primary, #0ea5e9));
+  background: var(--neu-toolbar-primary-bg, var(--neu-primary-dark, var(--neu-primary)));
   color: var(--neu-toolbar-primary-color, #fff);
+}
+
+.neu-toolbar--primary .neu-button--ghost {
+  color: rgb(255 255 255 / 0.92);
+
+  &:hover:not(:disabled):not(.neu-button--disabled) {
+    background: rgb(255 255 255 / 0.12);
+    color: #fff;
+  }
 }
 
 .neu-toolbar--none {

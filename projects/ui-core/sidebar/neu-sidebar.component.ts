@@ -122,6 +122,7 @@ function unlockDocumentScroll(document: Document): void {
 export class NeuSidebarComponent {
   private readonly document = inject(DOCUMENT);
   private readonly urlState = inject(NeuUrlStateService);
+  private readonly openParam = computed(() => this.urlState.getParam(this.urlParam()));
 
   /** Posición del sidebar: izquierda o derecha de la pantalla / Sidebar position: left or right of the screen */
   side = input<'left' | 'right'>('left');
@@ -153,7 +154,7 @@ export class NeuSidebarComponent {
   /** Signal reactivo: true si el sidebar debe mostrarse / Reactive signal: true if the sidebar should be shown */
   readonly isOpen = computed(() => {
     if (this.persistent()) return true;
-    return this.urlState.getParam(this.urlParam())() === 'open';
+    return this.openParam()() === 'open';
   });
 
   constructor() {

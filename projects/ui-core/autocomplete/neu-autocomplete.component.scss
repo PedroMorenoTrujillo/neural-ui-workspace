@@ -160,6 +160,11 @@
   animation: neu-ac-in 80ms ease;
 }
 
+.neu-autocomplete__list--virtual {
+  padding: 0;
+  overflow: hidden;
+}
+
 @keyframes neu-ac-in {
   from {
     opacity: 0;
@@ -176,6 +181,8 @@
   display: flex;
   align-items: center;
   padding: 7px 10px;
+  min-height: var(--neu-autocomplete-option-height, 40px);
+  box-sizing: border-box;
   border-radius: var(--neu-radius-md, 8px);
   font-size: 0.875rem;
   color: var(--neu-text, #111);

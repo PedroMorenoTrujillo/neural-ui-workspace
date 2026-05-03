@@ -39,7 +39,7 @@
   font-family: var(--neu-font-sans);
   font-size: var(--neu-text-sm);
   font-weight: 500;
-  color: var(--neu-text-muted);
+  color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -60,7 +60,7 @@
   }
 
   &--active {
-    color: var(--neu-primary);
+    color: var(--neu-primary-dark, var(--neu-primary));
     font-weight: 600;
   }
 
@@ -80,7 +80,7 @@
   padding: 0 5px;
   border-radius: var(--neu-radius-full);
   background: var(--neu-primary-100);
-  color: var(--neu-primary);
+  color: var(--neu-primary-dark, var(--neu-primary));
   font-size: 10px;
   font-weight: 700;
   line-height: 1;

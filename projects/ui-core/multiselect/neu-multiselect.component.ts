@@ -13,9 +13,11 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NgTemplateOutlet } from '@angular/common';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from '@neural-ui/core/select';
 import { NeuMultiselectItemDirective } from './neu-multiselect.directives';
@@ -40,7 +42,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
  */
 @Component({
   selector: 'neu-multiselect',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -71,6 +73,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
       [class.neu-multiselect--no-float]="!floatingLabel()"
       [class.neu-multiselect--sm]="size() === 'sm'"
       [class.neu-multiselect--lg]="size() === 'lg'"
+      [style.--neu-multiselect-option-height]="virtualScrollItemSize() + 'px'"
     >
       <!-- Trigger -->
       <div
@@ -173,6 +176,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
       @if (isOpen()) {
         <div
           class="neu-multiselect__panel"
+          [class.neu-multiselect__panel--virtual]="virtualScroll()"
           role="listbox"
           [id]="_panelId"
           [attr.aria-multiselectable]="true"
@@ -200,49 +204,99 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
 
           <!-- Opciones -->
           <div class="neu-multiselect__options">
-            @for (option of filteredOptions(); track option.value) {
-              <div
-                class="neu-multiselect__option"
-                [class.neu-multiselect__option--selected]="isSelected(option.value)"
-                [class.neu-multiselect__option--disabled]="option.disabled"
-                role="option"
-                [id]="'neu-ms-opt-' + option.value"
-                [attr.aria-selected]="isSelected(option.value)"
-                [attr.aria-disabled]="option.disabled"
-                [attr.tabindex]="option.disabled ? null : '-1'"
-                (click)="toggleOption(option)"
-                (keydown.enter)="toggleOption(option)"
-                (keydown.space)="toggleOption(option)"
-                (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
-                (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
+            @if (virtualScroll()) {
+              <cdk-virtual-scroll-viewport
+                class="neu-multiselect__viewport"
+                [itemSize]="virtualScrollItemSize()"
+                [style.height]="virtualViewportHeight()"
               >
-                <!-- Checkbox visual -->
-                <span
-                  class="neu-multiselect__checkbox"
-                  [class.neu-multiselect__checkbox--checked]="isSelected(option.value)"
+                <div
+                  *cdkVirtualFor="let option of filteredOptions(); trackBy: trackByOptionValue"
+                  class="neu-multiselect__option"
+                  [class.neu-multiselect__option--selected]="isSelected(option.value)"
+                  [class.neu-multiselect__option--disabled]="option.disabled"
+                  role="option"
+                  [id]="'neu-ms-opt-' + option.value"
+                  [attr.aria-selected]="isSelected(option.value)"
+                  [attr.aria-disabled]="option.disabled"
+                  [attr.tabindex]="option.disabled ? null : '-1'"
+                  (click)="toggleOption(option)"
+                  (keydown.enter)="toggleOption(option)"
+                  (keydown.space)="toggleOption(option)"
+                  (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
+                  (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
                 >
-                  <svg
-                    class="neu-multiselect__checkbox-check"
-                    viewBox="0 0 12 10"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
+                  <span
+                    class="neu-multiselect__checkbox"
+                    [class.neu-multiselect__checkbox--checked]="isSelected(option.value)"
                   >
-                    <polyline points="1 5 4.5 9 11 1" />
-                  </svg>
-                </span>
-                @if (itemTpl()) {
-                  <ng-container
-                    [ngTemplateOutlet]="itemTpl()!.templateRef"
-                    [ngTemplateOutletContext]="{ $implicit: option }"
-                  />
-                } @else {
-                  {{ option.label }}
-                }
-              </div>
+                    <svg
+                      class="neu-multiselect__checkbox-check"
+                      viewBox="0 0 12 10"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="1 5 4.5 9 11 1" />
+                    </svg>
+                  </span>
+                  @if (itemTpl()) {
+                    <ng-container
+                      [ngTemplateOutlet]="itemTpl()!.templateRef"
+                      [ngTemplateOutletContext]="{ $implicit: option }"
+                    />
+                  } @else {
+                    {{ option.label }}
+                  }
+                </div>
+              </cdk-virtual-scroll-viewport>
+            } @else {
+              @for (option of filteredOptions(); track option.value) {
+                <div
+                  class="neu-multiselect__option"
+                  [class.neu-multiselect__option--selected]="isSelected(option.value)"
+                  [class.neu-multiselect__option--disabled]="option.disabled"
+                  role="option"
+                  [id]="'neu-ms-opt-' + option.value"
+                  [attr.aria-selected]="isSelected(option.value)"
+                  [attr.aria-disabled]="option.disabled"
+                  [attr.tabindex]="option.disabled ? null : '-1'"
+                  (click)="toggleOption(option)"
+                  (keydown.enter)="toggleOption(option)"
+                  (keydown.space)="toggleOption(option)"
+                  (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
+                  (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
+                >
+                  <span
+                    class="neu-multiselect__checkbox"
+                    [class.neu-multiselect__checkbox--checked]="isSelected(option.value)"
+                  >
+                    <svg
+                      class="neu-multiselect__checkbox-check"
+                      viewBox="0 0 12 10"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="1 5 4.5 9 11 1" />
+                    </svg>
+                  </span>
+                  @if (itemTpl()) {
+                    <ng-container
+                      [ngTemplateOutlet]="itemTpl()!.templateRef"
+                      [ngTemplateOutletContext]="{ $implicit: option }"
+                    />
+                  } @else {
+                    {{ option.label }}
+                  }
+                </div>
+              }
             }
 
             @if (filteredOptions().length === 0) {
@@ -298,7 +352,9 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _mobileViewportMax = 768;
   private readonly _viewportMargin = 16;
+  private readonly _panelMaxHeight = 280;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
+  private readonly _viewport = viewChild(CdkVirtualScrollViewport);
 
   private _getUrlParamSignal(key: string): Signal<string | null> {
     let paramSignal = this._urlParamSignals.get(key);
@@ -317,8 +373,10 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
       const urlVals = urlRaw ? urlRaw.split(',').filter(Boolean) : [];
       const current = untracked(() => this._values());
       if (!arraysEqual(urlVals, current)) {
-        this._values.set(urlVals);
-        this._onChange(urlVals);
+        untracked(() => {
+          this._values.set(urlVals);
+          this._onChange(urlVals);
+        });
       }
     });
   }
@@ -368,6 +426,12 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   /** Muestra un botón × en el trigger para limpiar la selección de una vez / Shows a × button in the trigger to clear the selection at once */
   clearable = input<boolean>(false);
+
+  /** Habilita scroll virtual para listas largas / Enables virtual scrolling for large option lists */
+  virtualScroll = input<boolean>(false);
+
+  /** Número de opciones visibles en el viewport virtual / Number of visible options in the virtual viewport */
+  virtualScrollVisibleItems = input<number>(8);
 
   /** Aria-label del botón clear que aparece en el trigger / Aria-label for the clear button shown in the trigger */
   clearAriaLabel = input<string>('Limpiar selección');
@@ -438,6 +502,40 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     return total === 1 ? '1 opción disponible' : `${total} opciones disponibles`;
   });
 
+  readonly virtualScrollItemSize = computed(() => {
+    switch (this.size()) {
+      case 'sm':
+        return 36;
+      case 'lg':
+        return 52;
+      default:
+        return 44;
+    }
+  });
+
+  readonly virtualViewportHeight = computed(() => {
+    const desiredHeight = this.virtualScrollVisibleItems() * this.virtualScrollItemSize();
+    const panelMaxHeight = this.panelPosition().maxHeight;
+    const searchOffset = this.searchable() ? 52 : 0;
+    const footerOffset = this._values().length > 0 ? 52 : 0;
+
+    const parsedMaxHeight = panelMaxHeight
+      ? Number.parseFloat(panelMaxHeight)
+      : this._panelMaxHeight;
+    if (Number.isNaN(parsedMaxHeight)) {
+      return `${Math.min(desiredHeight, this._panelMaxHeight - searchOffset - footerOffset)}px`;
+    }
+
+    const effectivePanelMaxHeight = Math.min(this._panelMaxHeight, parsedMaxHeight);
+    const availableHeight = Math.max(
+      this.virtualScrollItemSize(),
+      effectivePanelMaxHeight - searchOffset - footerOffset,
+    );
+    return `${Math.min(desiredHeight, availableHeight)}px`;
+  });
+
+  readonly trackByOptionValue = (_index: number, option: NeuSelectOption) => option.value;
+
   // --- CVA ---
   private _onChange: (v: string[]) => void = () => {};
   private _onTouched: () => void = () => {};
@@ -478,12 +576,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
       this._onTouched();
     } else {
       this.syncPanelPosition();
-      requestAnimationFrame(() => {
-        const first = this.elementRef.nativeElement.querySelector<HTMLElement>(
-          '.neu-multiselect__option:not([aria-disabled="true"])',
-        );
-        first?.focus();
-      });
+      this.focusFirstOption();
     }
   }
 
@@ -496,12 +589,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     if (!this.isOpen()) {
       this.isOpen.set(true);
       this.syncPanelPosition();
-      requestAnimationFrame(() => {
-        const first = this.elementRef.nativeElement.querySelector<HTMLElement>(
-          '.neu-multiselect__option:not([aria-disabled="true"])',
-        );
-        first?.focus();
-      });
+      this.focusFirstOption();
     }
   }
 
@@ -524,10 +612,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     const idx = opts.findIndex((o) => o.value === current.value);
     const next = opts[(idx + dir + opts.length) % opts.length];
     if (next) {
-      const el = this.elementRef.nativeElement.querySelector<HTMLElement>(
-        `#neu-ms-opt-${next.value}`,
-      );
-      el?.focus();
+      this.focusOption(next.value);
     }
   }
 
@@ -624,7 +709,42 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
         width: `${width}px`,
         maxHeight: `${maxHeight}px`,
       });
+
+      if (this.virtualScroll()) {
+        this._viewport()?.checkViewportSize();
+      }
     });
+  }
+
+  private focusFirstOption(): void {
+    const firstEnabled = this.filteredOptions().find((option) => !option.disabled);
+    if (!firstEnabled) {
+      return;
+    }
+
+    this.focusOption(firstEnabled.value);
+  }
+
+  private focusOption(value: string): void {
+    if (this.virtualScroll()) {
+      const optionIndex = this.filteredOptions().findIndex((option) => option.value === value);
+      if (optionIndex >= 0) {
+        this._viewport()?.scrollToIndex(optionIndex, 'auto');
+        this._viewport()?.checkViewportSize();
+      }
+      requestAnimationFrame(() => {
+        const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
+          `#neu-ms-opt-${value}`,
+        );
+        optionElement?.focus();
+      });
+      return;
+    }
+
+    const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
+      `#neu-ms-opt-${value}`,
+    );
+    optionElement?.focus();
   }
 
   private resetPanelPosition(): void {

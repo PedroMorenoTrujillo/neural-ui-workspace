@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 import { NeuUrlStateService } from './neu-url-state.service';
 
 describe('NeuUrlStateService', () => {
@@ -25,16 +26,28 @@ describe('NeuUrlStateService', () => {
   });
 
   it('should set and get a param', async () => {
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
     service.setParam('tab', 'preview');
-    await TestBed.inject(Router).navigateByUrl('/?tab=preview');
+
     expect(service.getParam('tab')()).toBe('preview');
+
+    await Promise.resolve();
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should remove a param when set to null', async () => {
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
     await router.navigateByUrl('/?menu=open');
     service.setParam('menu', null);
-    await router.navigateByUrl('/');
+
     expect(service.getParam('menu')()).toBeNull();
+
+    await Promise.resolve();
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should patch multiple params at once', async () => {
@@ -62,5 +75,66 @@ describe('NeuUrlStateService', () => {
     await router.navigateByUrl('/');
     expect(service.getParam('a')()).toBeNull();
     expect(service.getParam('b')()).toBeNull();
+  });
+
+  it('should batch consecutive setParam calls into one navigation', async () => {
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    service.setParam('page', '2');
+    service.setParam('sort', 'name');
+
+    expect(navigateSpy).not.toHaveBeenCalled();
+
+    await Promise.resolve();
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+    expect(navigateSpy).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({
+        queryParams: { page: '2', sort: 'name' },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      }),
+    );
+  });
+
+  it('should flush pending setParam calls when patchParams runs', async () => {
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    service.setParam('page', '2');
+    service.patchParams({ sort: 'name', sortDir: 'asc' });
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+    expect(navigateSpy).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({
+        queryParams: { page: '2', sort: 'name', sortDir: 'asc' },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      }),
+    );
+
+    await Promise.resolve();
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should keep replaceUrl=false if any pending update requires history entry', async () => {
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    service.setParam('page', '2');
+    service.setParam('tab', 'details', false);
+
+    await Promise.resolve();
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+    expect(navigateSpy).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({
+        queryParams: { page: '2', tab: 'details' },
+        queryParamsHandling: 'merge',
+        replaceUrl: false,
+      }),
+    );
   });
 });

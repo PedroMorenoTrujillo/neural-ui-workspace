@@ -1,4 +1,4 @@
-import { Component, Signal, signal } from '@angular/core';
+import { Component, Signal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NeuSidebarComponent } from './neu-sidebar.component';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
@@ -10,13 +10,15 @@ import { lucideX } from '@ng-icons/lucide';
 
 let _menuParam: ReturnType<typeof signal<string | null>>;
 let _mockSetParam: ReturnType<typeof vi.fn>;
+let _mockGetParam: ReturnType<typeof vi.fn>;
 
 function createMockUrlState() {
   _menuParam = signal<string | null>(null);
   _mockSetParam = vi.fn();
+  _mockGetParam = vi.fn((_key: string): Signal<string | null> => _menuParam);
   return {
     params: signal<Record<string, string>>({}),
-    getParam: (_key: string): Signal<string | null> => _menuParam,
+    getParam: _mockGetParam,
     setParam: _mockSetParam,
     patchParams: vi.fn(),
     clearParams: vi.fn(),
@@ -65,6 +67,7 @@ describe('NeuSidebarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
+        provideZonelessChangeDetection(),
         { provide: NeuUrlStateService, useValue: mockUrlState },
         provideIcons({ lucideX }),
       ],
@@ -331,5 +334,19 @@ describe('NeuSidebarComponent', () => {
     f.componentRef.setInput('persistent', false);
     f.detectChanges();
     expect(f.componentInstance.isOpen()).toBe(true);
+  });
+
+  it('should memoize getParam lookups across reactive URL updates', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('persistent', false);
+    f.detectChanges();
+
+    expect(_mockGetParam).toHaveBeenCalledTimes(1);
+
+    _menuParam.set('open');
+    f.detectChanges();
+
+    expect(f.componentInstance.isOpen()).toBe(true);
+    expect(_mockGetParam).toHaveBeenCalledTimes(1);
   });
 });

@@ -14,8 +14,17 @@ $track-height: 4px;
   font-family: var(--neu-font-sans);
 
   &--disabled {
-    opacity: 0.45;
     pointer-events: none;
+
+    .neu-slider__label,
+    .neu-slider__value,
+    .neu-slider__ticks {
+      color: var(--neu-text-disabled);
+    }
+
+    .neu-slider__track-wrap {
+      opacity: 0.45;
+    }
   }
 }
 

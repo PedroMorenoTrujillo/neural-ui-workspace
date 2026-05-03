@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuInputComponent } from './neu-input.component';
 import { provideIcons } from '@ng-icons/core';
-import { lucideAlertCircle, lucideSearch } from '@ng-icons/lucide';
+import { lucideAlertCircle, lucideSearch, lucideUser } from '@ng-icons/lucide';
 
 function mk(inputs: Record<string, unknown> = {}) {
   const f = TestBed.createComponent(NeuInputComponent);
@@ -17,7 +17,7 @@ function mk(inputs: Record<string, unknown> = {}) {
 describe('NeuInputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideIcons({ lucideAlertCircle, lucideSearch })],
+      providers: [provideIcons({ lucideAlertCircle, lucideSearch, lucideUser })],
     }).compileComponents();
   });
 
@@ -247,7 +247,7 @@ describe('NeuInputComponent', () => {
 
   it('icon with iconPosition=left renders .neu-input__icon--start', async () => {
     const f = TestBed.createComponent(NeuInputComponent);
-    f.componentRef.setInput('icon', 'user');
+    f.componentRef.setInput('icon', 'lucideUser');
     f.componentRef.setInput('iconPosition', 'left');
     f.detectChanges();
     await f.whenStable();
@@ -256,7 +256,7 @@ describe('NeuInputComponent', () => {
 
   it('icon with iconPosition=right renders .neu-input__icon--end', async () => {
     const f = TestBed.createComponent(NeuInputComponent);
-    f.componentRef.setInput('icon', 'user');
+    f.componentRef.setInput('icon', 'lucideUser');
     f.componentRef.setInput('iconPosition', 'right');
     f.detectChanges();
     await f.whenStable();

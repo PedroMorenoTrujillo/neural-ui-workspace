@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { NeuAutocompleteComponent, NeuAutocompleteOption } from './neu-autocomplete.component';
 
 const OPTIONS: NeuAutocompleteOption[] = [
@@ -443,5 +443,107 @@ describe('NeuAutocompleteComponent', () => {
     expect(f.componentInstance._activeIndex()).toBe(0);
     f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     expect(f.componentInstance._activeIndex()).toBe(0);
+  });
+
+  it('virtualScrollItemSize should map sm and lg sizes correctly', () => {
+    const f = setup();
+    f.componentRef.setInput('size', 'sm');
+    expect(f.componentInstance.virtualScrollItemSize()).toBe(36);
+    f.componentRef.setInput('size', 'lg');
+    expect(f.componentInstance.virtualScrollItemSize()).toBe(52);
+  });
+
+  it('virtualViewportHeight should use visible items and item size', () => {
+    const f = setup();
+    f.componentRef.setInput('size', 'sm');
+    f.componentRef.setInput('virtualScrollVisibleItems', 6);
+    expect(f.componentInstance.virtualViewportHeight()).toBe('216px');
+  });
+
+  it('trackByOption should prefer value, then label, then index', () => {
+    const f = setup();
+    expect(f.componentInstance.trackByOption(0, { value: 'id-1', label: 'Angular' })).toBe('id-1');
+    expect(f.componentInstance.trackByOption(1, { value: null, label: 'React' } as any)).toBe(
+      'React',
+    );
+    expect(f.componentInstance.trackByOption(2, { value: null, label: null } as any)).toBe(2);
+  });
+
+  it('onKeyDown should ignore non-Escape keys when there are no filtered results', () => {
+    const f = setup();
+    const preventDefault = vi.fn();
+
+    f.componentInstance.onKeyDown({ key: 'ArrowDown', preventDefault } as unknown as KeyboardEvent);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(f.componentInstance._activeIndex()).toBe(-1);
+  });
+
+  it('Enter should not select a disabled active option', () => {
+    const f = setup();
+    const onChange = vi.fn();
+    f.componentInstance.registerOnChange(onChange);
+    f.componentInstance.onQueryChange('solid');
+    f.componentInstance._activeIndex.set(0);
+
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('ArrowUp from no active option should pick the first enabled result', () => {
+    const f = setup();
+    f.componentInstance.onQueryChange('a');
+    f.componentInstance._activeIndex.set(-1);
+
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+
+    expect(f.componentInstance._activeIndex()).toBe(0);
+  });
+
+  it('_scrollActiveOptionIntoView should use the virtual viewport when virtualScroll=true', () => {
+    const f = setup();
+    f.componentRef.setInput('virtualScroll', true);
+    const scrollToIndex = vi.fn();
+    const checkViewportSize = vi.fn();
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+
+    (f.componentInstance as any)._viewport = () => ({ scrollToIndex, checkViewportSize });
+    f.componentInstance._activeIndex.set(1);
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      (f.componentInstance as any)._scrollActiveOptionIntoView();
+      expect(scrollToIndex).toHaveBeenCalledWith(1, 'auto');
+      expect(checkViewportSize).toHaveBeenCalled();
+    } finally {
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('_scrollActiveOptionIntoView should tolerate missing scrollIntoView in non-virtual mode', () => {
+    const f = setup();
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const activeOption = {};
+    const querySpy = vi
+      .spyOn(f.nativeElement, 'querySelector')
+      .mockReturnValue(activeOption as any);
+
+    f.componentInstance.onQueryChange('ang');
+    f.componentInstance._activeIndex.set(0);
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      expect(() => (f.componentInstance as any)._scrollActiveOptionIntoView()).not.toThrow();
+    } finally {
+      querySpy.mockRestore();
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
   });
 });

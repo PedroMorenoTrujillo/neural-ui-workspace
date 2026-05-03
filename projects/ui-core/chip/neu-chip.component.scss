@@ -107,7 +107,9 @@
 
   // ---- Deshabilitado / Disabled ----
   &--disabled {
-    opacity: 0.45;
+    background: var(--neu-surface-2);
+    color: var(--neu-text-muted);
+    border-color: var(--neu-border);
     cursor: not-allowed;
     pointer-events: none;
   }

@@ -14,6 +14,31 @@ import {
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { NgTemplateOutlet } from '@angular/common';
 
+@Component({
+  selector: 'neu-virtual-list-row',
+  standalone: true,
+  imports: [NgTemplateOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (template(); as projectedTemplate) {
+      <ng-container [ngTemplateOutlet]="projectedTemplate" [ngTemplateOutletContext]="context()" />
+    } @else {
+      <div class="neu-virtual-list__item-default" [style.height.px]="itemSize()">
+        {{ label() }}
+      </div>
+    }
+  `,
+})
+export class NeuVirtualListRowComponent {
+  readonly item = input.required<unknown>();
+  readonly index = input.required<number>();
+  readonly itemSize = input.required<number>();
+  readonly label = input.required<string>();
+  readonly template = input<TemplateRef<{ $implicit: unknown; index: number }> | null>(null);
+
+  readonly context = computed(() => ({ $implicit: this.item(), index: this.index() }));
+}
+
 /**
  * NeuralUI VirtualList
  *
@@ -29,7 +54,7 @@ import { NgTemplateOutlet } from '@angular/common';
  */
 @Component({
   selector: 'neu-virtual-list',
-  imports: [ScrollingModule, NgTemplateOutlet],
+  imports: [ScrollingModule, NeuVirtualListRowComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -37,12 +62,6 @@ import { NgTemplateOutlet } from '@angular/common';
     '[style.height]': '_containerHeight()',
   },
   template: `
-    <ng-template #defaultItem let-item>
-      <div class="neu-virtual-list__item-default" [style.height.px]="itemSize()">
-        {{ _defaultItemLabel(item) }}
-      </div>
-    </ng-template>
-
     <cdk-virtual-scroll-viewport
       class="neu-virtual-list__viewport"
       [itemSize]="itemSize()"
@@ -50,9 +69,12 @@ import { NgTemplateOutlet } from '@angular/common';
       tabindex="0"
     >
       <ng-container *cdkVirtualFor="let item of items(); let index = index; trackBy: _trackBy">
-        <ng-container
-          [ngTemplateOutlet]="_itemTemplateOrDefault(defaultItem)"
-          [ngTemplateOutletContext]="_itemContext(item, index)"
+        <neu-virtual-list-row
+          [item]="item"
+          [index]="index"
+          [itemSize]="itemSize()"
+          [label]="_defaultItemLabel(item)"
+          [template]="itemTemplate"
         />
       </ng-container>
     </cdk-virtual-scroll-viewport>

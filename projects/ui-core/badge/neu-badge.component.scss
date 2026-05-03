@@ -37,7 +37,7 @@
   // ---- Variantes / Variants ----
   &--default {
     background: var(--neu-surface-2);
-    color: var(--neu-text-muted);
+    color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
     border: 1px solid var(--neu-border);
 
     .neu-badge__dot {
@@ -47,7 +47,7 @@
 
   &--success {
     background: var(--neu-success-bg);
-    color: var(--neu-success-text);
+    color: color-mix(in srgb, var(--neu-text) 78%, var(--neu-success) 22%);
     border: 1px solid transparent;
 
     .neu-badge__dot {
@@ -57,7 +57,7 @@
 
   &--info {
     background: var(--neu-info-bg);
-    color: var(--neu-info-text);
+    color: color-mix(in srgb, var(--neu-text) 76%, var(--neu-info) 24%);
     border: 1px solid transparent;
 
     .neu-badge__dot {
@@ -67,7 +67,7 @@
 
   &--warning {
     background: var(--neu-warning-bg);
-    color: var(--neu-warning-text);
+    color: color-mix(in srgb, var(--neu-text) 78%, var(--neu-warning) 22%);
     border: 1px solid transparent;
 
     .neu-badge__dot {
@@ -77,7 +77,7 @@
 
   &--danger {
     background: var(--neu-error-bg);
-    color: var(--neu-error-text);
+    color: color-mix(in srgb, var(--neu-text) 74%, var(--neu-error) 26%);
     border: 1px solid transparent;
 
     .neu-badge__dot {

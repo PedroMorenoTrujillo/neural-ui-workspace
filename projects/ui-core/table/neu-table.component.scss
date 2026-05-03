@@ -8,10 +8,16 @@
 // ---- Contenedor principal / Main container ----
 .neu-table-container {
   background: var(--neu-surface);
-  border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-lg);
   overflow: hidden;
   box-shadow: var(--neu-shadow-sm);
+}
+
+.neu-table-container--bordered {
+  border: 1px solid var(--neu-border);
+}
+
+.neu-table-container--rounded {
+  border-radius: var(--neu-radius-lg);
 }
 
 // ---- Toolbar ----
@@ -190,6 +196,10 @@
   }
 }
 
+.neu-table__scroll-container--virtual {
+  overflow-y: auto;
+}
+
 // ---- Tabla / Table ----
 .neu-table {
   width: 100%;
@@ -239,7 +249,7 @@
   padding: var(--neu-space-3) var(--neu-space-4);
   font-size: var(--neu-text-xs);
   font-weight: 600;
-  color: var(--neu-text-muted);
+  color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   border-bottom: 1px solid var(--neu-border);
@@ -264,7 +274,7 @@
 
   &--sorted-asc,
   &--sorted-desc {
-    color: var(--neu-primary);
+    color: var(--neu-primary-dark, var(--neu-primary));
   }
 }
 
@@ -339,6 +349,10 @@
   }
 }
 
+.neu-table-container--striped .neu-table__row:not(.neu-table__row--selected):nth-child(even) {
+  background: color-mix(in srgb, var(--neu-surface-2) 70%, transparent);
+}
+
 .neu-table__td {
   padding: var(--neu-space-3) var(--neu-space-4);
   color: var(--neu-text);
@@ -352,6 +366,16 @@
   &--empty {
     padding: var(--neu-space-8) 0;
   }
+}
+
+.neu-table__spacer-row {
+  pointer-events: none;
+}
+
+.neu-table__spacer-cell {
+  padding: 0 !important;
+  border: 0 !important;
+  line-height: 0;
 }
 
 // ---- Loading skeleton ----
@@ -453,7 +477,7 @@
 
 .neu-table__info {
   font-size: var(--neu-text-xs);
-  color: var(--neu-text-muted);
+  color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
 }
 
 .neu-table__pagination {
@@ -547,7 +571,7 @@
 
 .neu-table__page-size-label {
   font-size: var(--neu-text-xs);
-  color: var(--neu-text-muted);
+  color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
 }
 
 .neu-table__page-size-select {
@@ -556,6 +580,17 @@
 
   .neu-select__trigger {
     min-width: 78px;
+  }
+}
+
+@supports selector(:has(*)) {
+  .neu-table-container:has(.neu-table__page-size .neu-select--open) {
+    overflow: visible;
+  }
+
+  .neu-table__footer:has(.neu-table__page-size .neu-select--open) {
+    position: relative;
+    z-index: 4;
   }
 }
 
@@ -629,23 +664,23 @@
   }
   &--success {
     background: var(--neu-table-badge-success-bg);
-    color: var(--neu-table-badge-success-text);
+    color: color-mix(in srgb, var(--neu-text) 78%, var(--neu-success) 22%);
   }
   &--warning {
     background: var(--neu-table-badge-warning-bg);
-    color: var(--neu-table-badge-warning-text);
+    color: color-mix(in srgb, var(--neu-text) 78%, var(--neu-warning) 22%);
   }
   &--danger {
     background: var(--neu-table-badge-danger-bg);
-    color: var(--neu-table-badge-danger-text);
+    color: color-mix(in srgb, var(--neu-text) 74%, var(--neu-error) 26%);
   }
   &--info {
     background: var(--neu-primary-50);
-    color: var(--neu-primary);
+    color: var(--neu-primary-dark, var(--neu-primary));
   }
   &--default {
     background: var(--neu-surface-3);
-    color: var(--neu-text-muted);
+    color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
   }
 }
 
@@ -693,6 +728,7 @@
   position: sticky;
   z-index: 3; // Por encima de las celdas del cuerpo / Above body cells
   background: var(--neu-surface-2);
+  background-clip: border-box;
 }
 
 .neu-table__th--frozen-left {
@@ -706,13 +742,13 @@
 .neu-table__th--frozen-left-boundary {
   box-shadow:
     inset -1px 0 0 var(--neu-border),
-    6px 0 8px -8px rgba(15, 23, 42, 0.32);
+    6px 0 8px -8px rgba(15, 23, 42, 0.16);
 }
 
 .neu-table__th--frozen-right-boundary {
   box-shadow:
     inset 1px 0 0 var(--neu-border),
-    -6px 0 8px -8px rgba(15, 23, 42, 0.32);
+    -6px 0 8px -8px rgba(15, 23, 42, 0.16);
 }
 
 .neu-table__td--frozen-left,
@@ -720,6 +756,7 @@
   position: sticky;
   z-index: 2;
   background: var(--neu-surface);
+  background-clip: border-box;
 }
 
 .neu-table__td--frozen-left {
@@ -733,13 +770,13 @@
 .neu-table__td--frozen-left-boundary {
   box-shadow:
     inset -1px 0 0 var(--neu-border),
-    6px 0 8px -8px rgba(15, 23, 42, 0.32);
+    6px 0 8px -8px rgba(15, 23, 42, 0.16);
 }
 
 .neu-table__td--frozen-right-boundary {
   box-shadow:
     inset 1px 0 0 var(--neu-border),
-    -6px 0 8px -8px rgba(15, 23, 42, 0.32);
+    -6px 0 8px -8px rgba(15, 23, 42, 0.16);
 }
 
 // ── Footer row de tabla (tfoot) ────────────────────────────────────────

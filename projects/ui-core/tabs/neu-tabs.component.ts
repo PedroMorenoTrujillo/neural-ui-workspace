@@ -110,6 +110,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   private _dragStartX = 0;
   private _dragStartScrollLeft = 0;
   private _suppressNextClick = false;
+  private readonly _optimisticActiveTabId = signal<string | null>(null);
   readonly isDraggingNav = signal(false);
 
   private _getUrlParamSignal(key: string): Signal<string | null> {
@@ -150,11 +151,17 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
 
   /** ID de la pestaña activa (de la URL o la primera disponible) / Active tab ID (from the URL or the first available) */
   readonly activeTabId = computed(() => {
+    const tabList = this.tabs();
     const fromUrl = this._readUrlParam(this.tabParam());
-    const available = this.tabs().find((t) => t.id === fromUrl && !t.disabled);
+    const available = tabList.find((t) => t.id === fromUrl && !t.disabled);
     if (available) return available.id;
+
+    const optimistic = this._optimisticActiveTabId();
+    const optimisticAvailable = tabList.find((t) => t.id === optimistic && !t.disabled);
+    if (optimisticAvailable) return optimisticAvailable.id;
+
     // Fallback: primera pestaña no deshabilitada
-    return this.tabs().find((t) => !t.disabled)?.id ?? '';
+    return tabList.find((t) => !t.disabled)?.id ?? '';
   });
 
   /** Posición del indicador calculada mediante medición DOM / Indicator position calculated via DOM measurement */
@@ -210,6 +217,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
 
   selectTab(tab: NeuTab): void {
     if (tab.disabled) return;
+    this._optimisticActiveTabId.set(tab.id);
     this.urlState.setParam(this.tabParam(), tab.id);
     this.tabChange.emit(tab.id);
     requestAnimationFrame(() => this._updateIndicator());

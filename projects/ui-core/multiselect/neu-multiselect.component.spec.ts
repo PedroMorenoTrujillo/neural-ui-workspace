@@ -1,5 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-import { Component, TemplateRef, signal } from '@angular/core';
+import {
+  Component,
+  Directive,
+  Input,
+  TemplateRef,
+  ViewContainerRef,
+  provideZonelessChangeDetection,
+  signal,
+} from '@angular/core';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NeuMultiselectComponent } from './neu-multiselect.component';
@@ -15,10 +24,41 @@ const OPTIONS: NeuSelectOption[] = [
 ];
 
 @Component({
+  selector: 'cdk-virtual-scroll-viewport',
+  template: '<ng-content />',
+  standalone: true,
+})
+class FakeMultiselectVirtualScrollViewportComponent {
+  @Input() itemSize = 0;
+
+  checkViewportSize(): void {}
+}
+
+@Directive({
+  selector: '[cdkVirtualFor][cdkVirtualForOf]',
+  standalone: true,
+})
+class FakeMultiselectCdkVirtualForDirective<T> {
+  @Input() cdkVirtualForTrackBy?: (index: number, item: T) => unknown;
+
+  constructor(
+    private readonly templateRef: TemplateRef<{ $implicit: T; index: number }>,
+    private readonly viewContainerRef: ViewContainerRef,
+  ) {}
+
+  @Input()
+  set cdkVirtualForOf(items: readonly T[]) {
+    this.viewContainerRef.clear();
+    items.forEach((item, index) => {
+      this.viewContainerRef.createEmbeddedView(this.templateRef, { $implicit: item, index });
+    });
+  }
+}
+
+@Component({
   template: `<neu-multiselect
     [label]="label"
     [options]="options"
-    [disabled]="disabled"
     [errorMessage]="errorMessage"
     [clearable]="clearable"
     [searchable]="searchable"
@@ -29,7 +69,6 @@ const OPTIONS: NeuSelectOption[] = [
 class HostComponent {
   label = 'Tecnologías';
   options = OPTIONS;
-  disabled = false;
   errorMessage = '';
   clearable = false;
   searchable = false;
@@ -75,6 +114,7 @@ describe('NeuMultiselectComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent, ChipHostComponent, UrlSyncHostComponent, TemplateHostComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
   });
 
@@ -482,6 +522,104 @@ describe('NeuMultiselectComponent', () => {
     expect(comp.isOpen()).toBe(true);
   });
 
+  it('onTriggerKey should ignore events coming from child elements', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const preventDefault = vi.fn();
+
+    comp.onTriggerKey({
+      preventDefault,
+      target: {},
+      currentTarget: document.createElement('div'),
+    } as unknown as Event);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(comp.isOpen()).toBe(false);
+  });
+
+  it('onTriggerActionKey should toggle only for direct trigger events', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    comp.onTriggerActionKey({
+      preventDefault: vi.fn(),
+      target: {},
+      currentTarget: document.createElement('div'),
+    } as unknown as KeyboardEvent);
+    expect(comp.isOpen()).toBe(false);
+
+    comp.onTriggerActionKey({
+      preventDefault: vi.fn(),
+      target: document.body,
+      currentTarget: document.body,
+    } as unknown as KeyboardEvent);
+    expect(comp.isOpen()).toBe(true);
+  });
+
+  it('focusTrigger should focus the trigger element', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    trigger.focus = vi.fn();
+
+    comp.focusTrigger();
+
+    expect(trigger.focus).toHaveBeenCalled();
+  });
+
+  it('syncPanelPosition should return early when the trigger is missing', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
+
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      comp.panelPosition.set({
+        position: 'fixed',
+        top: '1px',
+        left: '2px',
+        width: '3px',
+        maxHeight: '4px',
+      });
+      comp.syncPanelPosition();
+      expect(comp.panelPosition()).toEqual({
+        position: 'fixed',
+        top: '1px',
+        left: '2px',
+        width: '3px',
+        maxHeight: '4px',
+      });
+    } finally {
+      querySpy.mockRestore();
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('focusFirstOption should do nothing when all options are disabled', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', [{ value: 'x', label: 'Disabled', disabled: true }]);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const focusOptionSpy = vi.spyOn(comp, 'focusOption');
+
+    comp.focusFirstOption();
+
+    expect(focusOptionSpy).not.toHaveBeenCalled();
+  });
+
   it('keydown ArrowDown on the trigger should open the panel from the template', async () => {
     const f = TestBed.createComponent(NeuMultiselectComponent);
     f.componentRef.setInput('options', OPTIONS);
@@ -519,6 +657,81 @@ describe('NeuMultiselectComponent', () => {
     comp.close();
     expect(comp.isOpen()).toBe(false);
     expect(onTouched).toHaveBeenCalled();
+  });
+
+  it('syncPanelPosition should notify the virtual viewport when virtualScroll=true', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    Object.defineProperty(trigger, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 24, bottom: 100, width: 220 }),
+    });
+
+    const checkViewportSize = vi.fn();
+    comp._viewport = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
+
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 });
+
+    try {
+      comp.syncPanelPosition();
+      expect(checkViewportSize).toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: originalInnerWidth,
+      });
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('focusOption should scroll and focus through the virtual viewport when virtualScroll=true', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const focus = vi.fn();
+    const scrollToIndex = vi.fn();
+    const checkViewportSize = vi.fn();
+    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+
+    const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue({ focus } as any);
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      comp.focusOption('react');
+      expect(scrollToIndex).toHaveBeenCalledWith(1, 'auto');
+      expect(checkViewportSize).toHaveBeenCalled();
+      expect(focus).toHaveBeenCalled();
+    } finally {
+      querySpy.mockRestore();
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
   });
 
   // ── focusOptionByIndex (keyboard nav entre opciones) ─────────────────────
@@ -764,6 +977,33 @@ describe('NeuMultiselectComponent', () => {
     expect(mockSetParam).toHaveBeenCalledWith('techs', null);
   });
 
+  it('toggleOption with urlParam should clear the param when the last value is deselected', () => {
+    const mockSetParam = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: NeuUrlStateService,
+          useValue: {
+            params: signal<Record<string, string>>({}),
+            getParam: (_k: string) => signal<string | null>(null),
+            setParam: mockSetParam,
+            patchParams: vi.fn(),
+            clearParams: vi.fn(),
+          },
+        },
+      ],
+    });
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('urlParam', 'techs');
+    f.detectChanges();
+    (f.componentInstance as any)._values.set(['angular']);
+
+    (f.componentInstance as any).toggleOption(OPTIONS[0]);
+
+    expect(mockSetParam).toHaveBeenCalledWith('techs', null);
+  });
+
   it('constructor should sync values from urlParam and notify onChange', async () => {
     const urlSignal = signal<string | null>('angular,vue');
     const mockGetParam = vi.fn(() => urlSignal);
@@ -802,6 +1042,38 @@ describe('NeuMultiselectComponent', () => {
     const onChange = vi.fn();
     comp.registerOnChange(onChange);
     comp.writeValue(['angular']);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('urlParam sync should skip updates when URL values are already equal', async () => {
+    const urlSignal = signal<string | null>(null);
+    const mockGetParam = vi.fn(() => urlSignal);
+    const mockUrlState = {
+      params: signal<Record<string, string>>({ techs: 'angular,react' }),
+      getParam: mockGetParam,
+      setParam: vi.fn(),
+      patchParams: vi.fn(),
+      clearParams: vi.fn(),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [{ provide: NeuUrlStateService, useValue: mockUrlState }],
+    });
+
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('urlParam', 'techs');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp._values.set(['angular', 'react']);
+    const onChange = vi.fn();
+    comp.registerOnChange(onChange);
+
+    urlSignal.set('angular,react');
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(mockGetParam).toHaveBeenCalledWith('techs');
     expect(onChange).not.toHaveBeenCalled();
   });
 
@@ -1005,6 +1277,79 @@ describe('NeuMultiselectComponent', () => {
     expect(f.nativeElement).toBeTruthy();
   });
 
+  it('DOM click on option should call toggleOption through the template listener', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const optionEls = f.nativeElement.querySelectorAll('.neu-multiselect__option');
+    optionEls[1].click();
+    f.detectChanges();
+
+    expect(comp._values()).toContain('react');
+  });
+
+  it('template handlers should cover trigger key bindings and search input updates via DebugElement', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('searchable', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const triggerDe = f.debugElement.query(By.css('.neu-multiselect__trigger'));
+
+    triggerDe.triggerEventHandler('keydown.arrowUp', {
+      target: triggerDe.nativeElement,
+      currentTarget: triggerDe.nativeElement,
+      preventDefault: vi.fn(),
+    });
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(true);
+
+    triggerDe.triggerEventHandler('keydown.space', {
+      target: triggerDe.nativeElement,
+      currentTarget: triggerDe.nativeElement,
+      preventDefault: vi.fn(),
+    });
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
+
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const inputDe = f.debugElement.query(By.css('.neu-multiselect__search-input'));
+    inputDe.triggerEventHandler('input', { target: { value: 'vue' } });
+    f.detectChanges();
+
+    expect(comp.searchQuery()).toBe('vue');
+  });
+
+  it('option template handlers should cover click and key bindings via DebugElement', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const optionDe = f.debugElement.queryAll(By.css('.neu-multiselect__option'))[0];
+    const eventBase = { preventDefault: vi.fn() };
+
+    optionDe.triggerEventHandler('click', eventBase);
+    optionDe.triggerEventHandler('keydown.enter', eventBase);
+    optionDe.triggerEventHandler('keydown.space', eventBase);
+    optionDe.triggerEventHandler('keydown.arrowDown', eventBase);
+    optionDe.triggerEventHandler('keydown.arrowUp', eventBase);
+    f.detectChanges();
+
+    expect(comp._values()).toContain('angular');
+  });
+
   it('toggle open path calls requestAnimationFrame for first option focus', async () => {
     // El path de abrir el panel llama a requestAnimationFrame para enfocar la primera opción
     // Opening path calls requestAnimationFrame to focus the first option
@@ -1036,6 +1381,149 @@ describe('NeuMultiselectComponent', () => {
 
     expect(comp.searchQuery()).toBe('rea');
     expect(comp.filteredOptions()).toHaveLength(1);
+  });
+
+  it('clicking the static label should focus the trigger through the template binding', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('label', 'Tecnologías');
+    f.detectChanges();
+    await f.whenStable();
+
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    trigger.focus = vi.fn();
+
+    const label = f.nativeElement.querySelector('.neu-multiselect__static-label') as HTMLElement;
+    label.click();
+    f.detectChanges();
+
+    expect(trigger.focus).toHaveBeenCalled();
+  });
+
+  it('virtualScroll should render the virtual panel branch and its bindings', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.componentRef.setInput('searchable', true);
+    f.componentRef.setInput('size', 'lg');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.writeValue(['angular']);
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const panel = f.nativeElement.querySelector('.neu-multiselect__panel--virtual');
+    const viewport = f.nativeElement.querySelector('.neu-multiselect__viewport');
+    expect(panel).toBeTruthy();
+    expect(viewport).toBeTruthy();
+    expect(viewport.style.height).toBe(comp.virtualViewportHeight());
+    expect(comp.virtualScrollItemSize()).toBe(52);
+    expect(comp.filteredOptions()).toHaveLength(4);
+    expect(comp.trackByOptionValue(0, { value: 'angular', label: 'Angular' })).toBe('angular');
+  });
+
+  it('virtualViewportHeight should use parsed maxHeight without search or footer offsets', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    comp.panelPosition.set({
+      position: 'fixed',
+      top: '0px',
+      left: '0px',
+      width: '240px',
+      maxHeight: '120px',
+    });
+
+    expect(comp.virtualViewportHeight()).toBe('120px');
+  });
+
+  it('virtualViewportHeight should fall back when maxHeight is not parseable', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    comp.panelPosition.set({
+      position: 'fixed',
+      top: '0px',
+      left: '0px',
+      width: '240px',
+      maxHeight: 'calc(100vh)',
+    });
+
+    expect(comp.virtualViewportHeight()).toBe(`${comp._panelMaxHeight}px`);
+  });
+
+  it('virtualScroll should expose the viewport viewChild when the panel is open', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(comp._viewport()).toBeTruthy();
+  });
+
+  it('virtual option handlers should execute when virtual rows are rendered with a fake viewport', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    })
+      .overrideComponent(NeuMultiselectComponent, {
+        remove: { imports: [ScrollingModule] },
+        add: {
+          imports: [
+            FakeMultiselectVirtualScrollViewportComponent,
+            FakeMultiselectCdkVirtualForDirective,
+          ],
+        },
+      })
+      .compileComponents();
+
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const optionEls = f.nativeElement.querySelectorAll('.neu-multiselect__option');
+    expect(optionEls.length).toBeGreaterThan(0);
+
+    optionEls[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    f.detectChanges();
+
+    expect(comp._values()).toContain('angular');
+  });
+
+  it('trigger DOM key bindings should open and toggle the panel', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(true);
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
   });
 
   it('focusOptionByIndex should focus the next enabled option when it exists', async () => {

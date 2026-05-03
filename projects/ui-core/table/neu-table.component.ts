@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   PLATFORM_ID,
   Signal,
   TemplateRef,
@@ -13,6 +14,7 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -86,7 +88,13 @@ function asRows(data: object[]): Row[] {
     '[class.neu-table__host--relaxed]': 'density() === "relaxed"',
   },
   template: `
-    <div class="neu-table-container" [class.neu-table--sticky-header]="stickyHeader()">
+    <div
+      class="neu-table-container"
+      [class.neu-table--sticky-header]="stickyHeader()"
+      [class.neu-table-container--bordered]="bordered()"
+      [class.neu-table-container--rounded]="roundedBorders()"
+      [class.neu-table-container--striped]="stripedRows()"
+    >
       <!-- ---- Toolbar ---- -->
       @if (searchable() || title() || exportable()) {
         <div class="neu-table__toolbar">
@@ -220,9 +228,13 @@ function asRows(data: object[]): Row[] {
 
       <!-- ---- Scroll container ---- -->
       <div
+        #scrollContainer
         class="neu-table__scroll-container"
+        [class.neu-table__scroll-container--virtual]="_virtualScrollActive()"
         role="region"
         [attr.aria-label]="title() || tableAriaLabel()"
+        [style.max-height]="_virtualScrollActive() ? virtualContainerMaxHeight() : null"
+        (scroll)="onTableScroll($event)"
       >
         <table class="neu-table" [attr.aria-rowcount]="filteredData().length">
           <thead class="neu-table__head">
@@ -393,7 +405,16 @@ function asRows(data: object[]): Row[] {
                 </td>
               </tr>
             } @else {
-              @for (row of paginatedData(); track getRowKey(row); let rowIdx = $index) {
+              @if (_virtualScrollActive() && _virtualTopSpacerHeight() > 0) {
+                <tr class="neu-table__spacer-row" aria-hidden="true">
+                  <td
+                    [attr.colspan]="totalColspan()"
+                    class="neu-table__spacer-cell"
+                    [style.height.px]="_virtualTopSpacerHeight()"
+                  ></td>
+                </tr>
+              }
+              @for (row of visiblePageRows(); track getRowKey(row); let rowIdx = $index) {
                 <tr
                   class="neu-table__row"
                   [class]="getRowClass(row)"
@@ -444,7 +465,7 @@ function asRows(data: object[]): Row[] {
                   }
                   @if (showRowNumbers()) {
                     <td class="neu-table__td neu-table__td--rn">
-                      {{ (currentPage() - 1) * effectivePageSize() + rowIdx + 1 }}
+                      {{ visibleRowNumber(rowIdx) }}
                     </td>
                   }
                   @for (col of columns(); track col.key) {
@@ -558,6 +579,15 @@ function asRows(data: object[]): Row[] {
                   </tr>
                 }
               }
+              @if (_virtualScrollActive() && _virtualBottomSpacerHeight() > 0) {
+                <tr class="neu-table__spacer-row" aria-hidden="true">
+                  <td
+                    [attr.colspan]="totalColspan()"
+                    class="neu-table__spacer-cell"
+                    [style.height.px]="_virtualBottomSpacerHeight()"
+                  ></td>
+                </tr>
+              }
             }
           </tbody>
           @if (footerRow()) {
@@ -589,7 +619,7 @@ function asRows(data: object[]): Row[] {
       <!-- ---- Footer ---- -->
       @if (!loading() && filteredData().length > 0) {
         <div class="neu-table__footer">
-          @if (pageSizeOptions().length > 0) {
+          @if (pagination() && pageSizeOptions().length > 0) {
             <div class="neu-table__page-size">
               <label class="neu-table__page-size-label">{{ pageSizeLabel() }}</label>
               <neu-select
@@ -666,6 +696,8 @@ export class NeuTableComponent {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
+  private readonly _virtualOverscan = 3;
 
   readonly expandTemplate = contentChild(NeuTableExpandDirective);
 
@@ -673,6 +705,8 @@ export class NeuTableComponent {
   readonly columns = input<NeuTableColumn[]>([]);
   readonly data = input<object[]>([]);
   readonly pageSize = input<number>(10);
+  /** Controla si la paginación está activa. Si es false, se muestran todos los datos y se ocultan los controles de paginación y pageSize. */
+  readonly pagination = input<boolean>(true);
   readonly loading = input<boolean>(false);
   readonly title = input<string>('');
   readonly emptyMessage = input<string>('No results found');
@@ -712,7 +746,12 @@ export class NeuTableComponent {
   readonly exportFileName = input<string>('export');
   readonly pageSizeOptions = input<number[]>([]);
   readonly stickyHeader = input<boolean>(false);
+  readonly virtualScroll = input<boolean>(false);
+  readonly virtualScrollVisibleItems = input<number>(8);
   readonly rowKey = input<string>('id');
+  readonly bordered = input<boolean>(true);
+  readonly roundedBorders = input<boolean>(true);
+  readonly stripedRows = input<boolean>(false);
 
   // ── Inputs nuevos v1.3.0 ──────────────────────────────────────────────
   readonly density = input<'compact' | 'normal' | 'relaxed'>('normal');
@@ -841,6 +880,8 @@ export class NeuTableComponent {
     this.pageSizeOptions().map((size) => ({ label: String(size), value: String(size) })),
   );
 
+  private readonly _virtualScrollTop = signal(0);
+
   constructor() {
     this._pageSizeControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
@@ -863,6 +904,22 @@ export class NeuTableComponent {
           control.setValue(nextValue, { emitEvent: false });
         }
       }
+    });
+
+    effect(() => {
+      if (!this.virtualScroll()) {
+        return;
+      }
+
+      this.currentPage();
+      this.searchQuery();
+      this.sortKey();
+      this.sortDir();
+      this._sortEntries();
+      this._columnFilters();
+      this.effectivePageSize();
+      this.paginatedData().length;
+      this.resetVirtualScrollPosition();
     });
   }
 
@@ -935,9 +992,13 @@ export class NeuTableComponent {
   });
 
   private readonly _dynamicPageSize = signal<number | null>(null);
-  readonly effectivePageSize = computed(() => this._dynamicPageSize() ?? this.pageSize());
+  readonly effectivePageSize = computed(() => {
+    if (!this.pagination()) return this.filteredData().length || 1;
+    return this._dynamicPageSize() ?? this.pageSize();
+  });
 
   readonly totalPages = computed(() => {
+    if (!this.pagination()) return 1;
     const total =
       this.serverSide() && this.totalItems() != null
         ? this.totalItems()!
@@ -946,10 +1007,82 @@ export class NeuTableComponent {
   });
 
   readonly paginatedData = computed(() => {
+    if (!this.pagination()) return this.sortedData();
     if (this.serverSide()) return this._rows();
     const page = Math.min(this.currentPage(), this.totalPages());
     const size = this.effectivePageSize();
     return this.sortedData().slice((page - 1) * size, page * size);
+  });
+
+  readonly _virtualRowHeight = computed(() => {
+    switch (this.density()) {
+      case 'compact':
+        return 34;
+      case 'relaxed':
+        return 64;
+      default:
+        return 48;
+    }
+  });
+
+  readonly _virtualHeaderHeight = computed(() => 44 + (this._hasFilterableCol() ? 52 : 0));
+
+  readonly _virtualScrollActive = computed(
+    () => this.virtualScroll() && this.paginatedData().length > this.virtualScrollVisibleItems(),
+  );
+
+  readonly virtualContainerMaxHeight = computed(
+    () =>
+      `${this._virtualHeaderHeight() + this.virtualScrollVisibleItems() * this._virtualRowHeight()}px`,
+  );
+
+  readonly _virtualStartIndex = computed(() => {
+    if (!this._virtualScrollActive()) {
+      return 0;
+    }
+
+    const bodyScrollTop = Math.max(0, this._virtualScrollTop() - this._virtualHeaderHeight());
+    const startIndex = Math.floor(bodyScrollTop / this._virtualRowHeight());
+    return Math.max(0, startIndex - this._virtualOverscan);
+  });
+
+  readonly _virtualEndIndex = computed(() => {
+    if (!this._virtualScrollActive()) {
+      return this.paginatedData().length;
+    }
+
+    return Math.min(
+      this.paginatedData().length,
+      this._virtualStartIndex() + this.virtualScrollVisibleItems() + this._virtualOverscan * 2,
+    );
+  });
+
+  readonly visiblePageRows = computed(() => {
+    const rows = this.paginatedData();
+    if (!this._virtualScrollActive()) {
+      return rows;
+    }
+
+    return rows.slice(this._virtualStartIndex(), this._virtualEndIndex());
+  });
+
+  readonly _virtualTopSpacerHeight = computed(() => {
+    if (!this._virtualScrollActive()) {
+      return 0;
+    }
+
+    return this._virtualStartIndex() * this._virtualRowHeight();
+  });
+
+  readonly _virtualBottomSpacerHeight = computed(() => {
+    if (!this._virtualScrollActive()) {
+      return 0;
+    }
+
+    return Math.max(
+      0,
+      (this.paginatedData().length - this._virtualEndIndex()) * this._virtualRowHeight(),
+    );
   });
 
   readonly pageNumbers = computed<number[]>(() => {
@@ -968,9 +1101,9 @@ export class NeuTableComponent {
         : this.filteredData().length;
     const page = Math.min(this.currentPage(), this.totalPages());
     const size = this.effectivePageSize();
-    const from = Math.min((page - 1) * size + 1, total);
-    const to = Math.min(page * size, total);
-    return `${from}\u2013${to} ${this.ofLabel()} ${total} ${
+    const from = total === 0 ? 0 : Math.min((page - 1) * size + 1, total);
+    const to = total === 0 ? 0 : Math.min(page * size, total);
+    return `${from}-${to} ${this.ofLabel()} ${total} ${
       total === 1 ? this.resultLabelSingular() : this.resultLabelPlural()
     }`;
   });
@@ -983,8 +1116,6 @@ export class NeuTableComponent {
     return cols;
   });
 
-  /** Calcula el offset izquierdo acumulado para columnas frozen-left múltiples.
-   *  Calculates cumulative left offset for multiple frozen-left columns. */
   readonly _frozenLeftOffsets = computed(() => {
     const offsets = new Map<string, number>();
     let leftPx = 0;
@@ -992,8 +1123,8 @@ export class NeuTableComponent {
       if (col.frozen === 'left') {
         offsets.set(col.key, leftPx);
         if (col.width && col.width !== 'auto') {
-          const px = parseFloat(col.width);
-          if (!isNaN(px)) leftPx += px;
+          const px = Number.parseFloat(col.width);
+          if (!Number.isNaN(px)) leftPx += px;
         }
       }
     }
@@ -1287,8 +1418,29 @@ export class NeuTableComponent {
   }
 
   // ── Utilidades ────────────────────────────────────────────────────────
+  onTableScroll(event: Event): void {
+    if (!this._virtualScrollActive()) {
+      return;
+    }
+
+    this._virtualScrollTop.set((event.target as HTMLElement).scrollTop);
+  }
+
   getRowKey(row: Row): unknown {
     return row[this.rowKey()] ?? JSON.stringify(row);
+  }
+
+  visibleRowNumber(rowIdx: number): number {
+    return (
+      (this.currentPage() - 1) * this.effectivePageSize() + this._virtualStartIndex() + rowIdx + 1
+    );
+  }
+
+  private resetVirtualScrollPosition(): void {
+    this._virtualScrollTop.set(0);
+    requestAnimationFrame(() => {
+      this._scrollContainer()?.nativeElement.scrollTo({ top: 0 });
+    });
   }
 
   getRowClass(row: Row): string {

@@ -218,6 +218,35 @@ describe('NeuColorPickerComponent', () => {
     expect(f.componentInstance._hue()).toBe(0);
   });
 
+  it('writeValue with grayscale and black colors should cover achromatic conversion branches', () => {
+    const f = setup();
+
+    f.componentInstance.writeValue('#808080');
+    expect(f.componentInstance._sv().s).toBe(0);
+
+    f.componentInstance.writeValue('#000000');
+    expect(f.componentInstance._sv().v).toBe(0);
+  });
+
+  it('_onTextChange should ignore invalid rgb and hsl strings without throwing', () => {
+    const f = setup();
+    const previousHex = f.componentInstance._hexValue();
+
+    expect(() => f.componentInstance._onTextChange('rgb(invalid)')).not.toThrow();
+    expect(() => f.componentInstance._onTextChange('hsl(invalid)')).not.toThrow();
+    expect(f.componentInstance._hexValue()).toBe(previousHex);
+  });
+
+  it('_textValue should fall back to raw hex when hexToRgb cannot parse it', () => {
+    const f = setup();
+    const originalHexValue = f.componentInstance._hexValue;
+
+    (f.componentInstance as any)._hexValue = () => 'invalid-hex';
+    expect(f.componentInstance._textValue()).toBe('invalid-hex');
+
+    (f.componentInstance as any)._hexValue = originalHexValue;
+  });
+
   it('typing in the text input should parse the value from the template', async () => {
     const f = setup();
     f.componentInstance._isOpen.set(true);

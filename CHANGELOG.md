@@ -13,6 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-05-04
+
+### Added
+
+- `NeuAutocompleteComponent` añade `virtualScroll` y `virtualScrollVisibleItems` para datasets largos, renderizando resultados con `cdk-virtual-scroll-viewport` y manteniendo la navegación por teclado sincronizada con el viewport.
+- `@neural-ui/core/modal` exporta ahora `NeuDialogService`, permitiendo abrir diálogos programáticamente sobre la misma base visual y de tamaños que `NeuDialogComponent`.
+
+### Fixed
+
+- Se reforzó el comportamiento interactivo de `NeuSelectComponent`, `NeuMultiselectComponent`, `NeuTableComponent`, `NeuTabsComponent` y `NeuUrlStateService` para reducir trabajo reactivo innecesario y estabilizar escenarios de interacción complejos en navegación, filtros y query params.
+- `NeuModalComponent` y `NeuSidebarComponent` endurecen su gestión de foco, scroll y sincronización de estado, reduciendo regresiones en flujos overlay y navegación responsive.
+
+### Improved
+
+- La cobertura automatizada sube a 1615 tests con una instantánea validada de 96.75% statements, 95.67% branches, 94.98% functions y 98.02% lines.
+- README, documentación de calidad y ejemplos públicos se alinean con el estado actual de la librería: signals-first, standalone, OnPush, zoneless-oriented y con una base de accesibilidad de alta confianza.
+
+---
+
 ## [1.3.2] - 2026-04-17
 
 ### Fixed

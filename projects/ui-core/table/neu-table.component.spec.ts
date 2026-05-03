@@ -5,6 +5,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { lucidePencil } from '@ng-icons/lucide';
 import { NeuTableComponent } from './neu-table.component';
+import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableColumn } from './neu-table.types';
 
 interface Person {
@@ -54,6 +55,9 @@ function mkProviders() {
 
 describe('NeuTableComponent', () => {
   beforeEach(async () => {
+    if (!HTMLElement.prototype.scrollTo) {
+      HTMLElement.prototype.scrollTo = vi.fn();
+    }
     await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
   });
 
@@ -2179,6 +2183,27 @@ describe('NeuTableComponent', () => {
     expect((f.componentInstance as any).effectivePageSize()).toBe(5);
   });
 
+  it('page-size sync effect should update the control without re-emitting valueChanges', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', MANY_ROWS);
+    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('pageSizeOptions', [5, 10]);
+    f.componentRef.setInput('pageSize', 10);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const onPageSizeChangeSpy = vi.spyOn(comp, 'onPageSizeChange');
+
+    f.componentRef.setInput('pageSize', 5);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(comp._pageSizeControl.value).toBe('5');
+    expect(onPageSizeChangeSpy).not.toHaveBeenCalled();
+  });
+
   // ── MultiSort priority display in column headers ─────────────────────
 
   it('multiSort active entries render sort priority indicators in headers', async () => {
@@ -2386,5 +2411,248 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect((f.componentInstance as any)._confirmPending()).toBeNull();
+  });
+
+  it('virtual scroll computeds should update after scrolling a long table', async () => {
+    const originalScrollTo = HTMLElement.prototype.scrollTo;
+    HTMLElement.prototype.scrollTo = vi.fn();
+
+    try {
+      const filterableColumns: NeuTableColumn[] = [
+        { key: 'name', header: 'Nombre', filterable: true },
+        { key: 'age', header: 'Edad' },
+        { key: 'city', header: 'Ciudad' },
+      ];
+      const f = TestBed.createComponent(NeuTableComponent);
+      f.componentRef.setInput('columns', filterableColumns);
+      f.componentRef.setInput('data', MANY_ROWS);
+      f.componentRef.setInput('virtualScroll', true);
+      f.componentRef.setInput('virtualScrollVisibleItems', 5);
+      f.componentRef.setInput('useUrlState', false);
+      f.componentRef.setInput('pagination', false);
+      f.detectChanges();
+      await f.whenStable();
+      const comp = f.componentInstance as any;
+
+      expect(comp.rows()).toHaveLength(MANY_ROWS.length);
+      expect(comp._scrollContainer()).toBeTruthy();
+      expect(comp._virtualRowHeight()).toBe(48);
+      expect(comp._virtualHeaderHeight()).toBe(96);
+      expect(comp._virtualScrollActive()).toBe(true);
+      expect(comp.virtualContainerMaxHeight()).toBe('336px');
+      expect(comp.visiblePageRows().length).toBeGreaterThan(0);
+
+      comp.onTableScroll({ target: { scrollTop: 520 } } as unknown as Event);
+
+      expect(comp._virtualStartIndex()).toBeGreaterThan(0);
+      expect(comp._virtualEndIndex()).toBeGreaterThan(comp._virtualStartIndex());
+      expect(comp._virtualTopSpacerHeight()).toBeGreaterThan(0);
+      expect(comp._virtualBottomSpacerHeight()).toBeGreaterThanOrEqual(0);
+    } finally {
+      HTMLElement.prototype.scrollTo = originalScrollTo;
+    }
+  });
+
+  it('toolbar export buttons should call exportCsv and exportJson via DOM', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('exportFormats', ['csv', 'json']);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    vi.spyOn(comp, 'exportCsv');
+    vi.spyOn(comp, 'exportJson');
+
+    const buttons = Array.from(
+      f.nativeElement.querySelectorAll('.neu-table__export-btn'),
+    ) as HTMLButtonElement[];
+    buttons[0].click();
+    buttons[1].click();
+    f.detectChanges();
+
+    expect(comp.exportCsv).toHaveBeenCalled();
+    expect(comp.exportJson).toHaveBeenCalled();
+  });
+
+  it('selection clear button via DOM should clear the selected rows', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    comp.toggleRow(DATA[0]);
+    f.detectChanges();
+
+    const clearBtn = f.nativeElement.querySelector(
+      '.neu-table__selection-clear',
+    ) as HTMLButtonElement;
+    clearBtn.click();
+    f.detectChanges();
+
+    expect(comp.selectedCount()).toBe(0);
+  });
+
+  it('clicking a table row via DOM should call onRowClick and toggle selection', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+    const clickedRows: unknown[] = [];
+    f.componentInstance.rowClick.subscribe((row) => clickedRows.push(row));
+
+    const row = f.nativeElement.querySelector('.neu-table__row') as HTMLTableRowElement;
+    row.click();
+    f.detectChanges();
+
+    expect((f.componentInstance as any).selectedCount()).toBe(1);
+    expect(clickedRows).toHaveLength(1);
+  });
+
+  it('clicking Sí in a confirm action via DOM should emit the confirmed action', async () => {
+    const actionColumns: NeuTableColumn[] = [
+      {
+        key: 'actions',
+        header: '',
+        type: 'actions',
+        actions: [{ key: 'delete', label: 'Borrar', icon: '🗑️', confirm: '¿Borrar?' }],
+      },
+    ];
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', actionColumns);
+    f.componentRef.setInput('data', DATA);
+    f.detectChanges();
+    await f.whenStable();
+    const events: any[] = [];
+    f.componentInstance.actionClick.subscribe((e: any) => events.push(e));
+
+    const actionBtn = f.nativeElement.querySelector('.neu-table__action-btn') as HTMLButtonElement;
+    actionBtn.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    const confirmBtn = f.nativeElement.querySelector(
+      '.neu-table__action-confirm .neu-table__action-btn--danger',
+    ) as HTMLButtonElement;
+    confirmBtn.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(events).toHaveLength(1);
+    expect(events[0].action.key).toBe('delete');
+  });
+
+  it('link cells should stop propagation and not toggle row selection', async () => {
+    const linkColumns: NeuTableColumn[] = [
+      {
+        key: 'name',
+        header: 'Nombre',
+        type: 'link',
+        linkHref: (row) => `/users/${(row as unknown as Person).id}`,
+      },
+    ];
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', linkColumns);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const link = f.nativeElement.querySelector('.neu-table__cell-link') as HTMLAnchorElement;
+    link.click();
+    f.detectChanges();
+
+    expect((f.componentInstance as any).selectedCount()).toBe(0);
+  });
+
+  it('headerTemplate and expandTemplate branches should render custom templates', async () => {
+    const originalScrollTo = HTMLElement.prototype.scrollTo;
+    HTMLElement.prototype.scrollTo = vi.fn();
+
+    try {
+      @Component({
+        template: `
+          <ng-template #header let-col>
+            <span class="custom-header">header-{{ col.header }}</span>
+          </ng-template>
+          <neu-table
+            [columns]="[{ key: 'name', header: 'Nombre', headerTemplate: header }]"
+            [data]="data"
+            [expandable]="true"
+          >
+            <ng-template neuTableExpand let-row>
+              <div class="custom-expand">expand-{{ row.name }}</div>
+            </ng-template>
+          </neu-table>
+        `,
+        imports: [NeuTableComponent, NeuTableExpandDirective],
+      })
+      class TemplateHostComponent {
+        data: Person[] = [DATA[0]];
+      }
+
+      const f = TestBed.createComponent(TemplateHostComponent);
+      f.detectChanges();
+      await f.whenStable();
+
+      const hostComp = f.componentInstance as any;
+      expect(f.nativeElement.querySelector('.custom-header')?.textContent).toContain(
+        'header-Nombre',
+      );
+
+      const expandBtn = f.nativeElement.querySelector(
+        '.neu-table__expand-btn',
+      ) as HTMLButtonElement;
+      expandBtn.click();
+      f.detectChanges();
+      await f.whenStable();
+      expect(f.nativeElement.querySelector('.custom-expand')?.textContent).toContain(
+        'expand-Ana García',
+      );
+    } finally {
+      HTMLElement.prototype.scrollTo = originalScrollTo;
+    }
+  });
+
+  it('emptyStateTemplate branch should render a custom empty template', async () => {
+    @Component({
+      template: `
+        <ng-template #empty>
+          <div class="custom-empty">vacío</div>
+        </ng-template>
+        <neu-table [columns]="columns" [data]="data" [emptyStateTemplate]="empty" />
+      `,
+      imports: [NeuTableComponent],
+    })
+    class EmptyTemplateHostComponent {
+      columns = COLUMNS;
+      data: Person[] = [];
+    }
+
+    const f = TestBed.createComponent(EmptyTemplateHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.custom-empty')?.textContent).toContain('vacío');
+  });
+
+  it('footerRow should render empty strings for undefined footer cells', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('footerRow', { name: 'Total' });
+    f.detectChanges();
+    await f.whenStable();
+
+    const footerCells = Array.from(
+      f.nativeElement.querySelectorAll('.neu-table__td--footer'),
+    ) as HTMLTableCellElement[];
+    expect(footerCells[0].textContent?.trim()).toBe('Total');
+    expect(footerCells[1].textContent?.trim()).toBe('');
+    expect(footerCells[2].textContent?.trim()).toBe('');
   });
 });

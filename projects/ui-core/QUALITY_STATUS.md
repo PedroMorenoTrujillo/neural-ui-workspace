@@ -1,6 +1,6 @@
 # Neural UI Core Quality Status
 
-Last reviewed: 2026-04-15
+Last reviewed: 2026-05-04
 
 ## Executive Summary
 
@@ -8,10 +8,10 @@ Neural UI Core is currently aligned with the project's main engineering standard
 
 Validated coverage snapshot:
 
-- Statements: 96.33%
-- Branches: 95.59%
-- Functions: 91.64%
-- Lines: 98.70%
+- Statements: 96.75%
+- Branches: 95.67%
+- Functions: 94.98%
+- Lines: 98.02%
 
 The library presents a strong accessibility baseline across interactive components, but accessibility should be described as high-confidence rather than formally certified 100% component-by-component.
 

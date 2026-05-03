@@ -76,7 +76,7 @@ $select-height: 48px;
   top: 50%;
   transform: translateY(-50%);
   font-size: var(--neu-text-base);
-  color: var(--neu-text-muted);
+  color: color-mix(in srgb, var(--neu-text) 68%, var(--neu-surface) 32%);
   pointer-events: none;
   white-space: nowrap;
   overflow: hidden;
@@ -128,7 +128,7 @@ $select-height: 48px;
 }
 
 .neu-select__placeholder {
-  color: var(--neu-text-disabled);
+  color: color-mix(in srgb, var(--neu-text) 62%, var(--neu-surface) 38%);
   // En modo floating label, el placeholder se oculta hasta que el select está abierto
   .neu-select:not(.neu-select--no-float):not(.neu-select--open) & {
     visibility: hidden;
@@ -217,6 +217,14 @@ $select-height: 48px;
   }
 }
 
+.neu-select__panel--virtual {
+  overflow: visible;
+}
+
+.neu-select__viewport {
+  width: 100%;
+}
+
 @media (max-width: 600px) {
   .neu-select__panel {
     left: auto;
@@ -243,6 +251,8 @@ $select-height: 48px;
   align-items: center;
   gap: var(--neu-space-2);
   padding: var(--neu-space-3) var(--neu-space-4);
+  min-height: var(--neu-select-option-height, 44px);
+  box-sizing: border-box;
   font-size: var(--neu-text-sm);
   color: var(--neu-text);
   cursor: pointer;

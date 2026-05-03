@@ -7,9 +7,9 @@
   // ------------------------------------------------
   // Brand — Neural-Blue (inspirado en Apple HIG)
   // ------------------------------------------------
-  --neu-primary: #007aff;
-  --neu-primary-dark: #005fcc;
-  --neu-primary-light: #339dff;
+  --neu-primary: #005fcc;
+  --neu-primary-dark: #004799;
+  --neu-primary-light: #2d7fff;
   --neu-primary-50: #eff6ff;
   --neu-primary-100: #dbeafe;
   --neu-primary-fg: #ffffff;
@@ -39,8 +39,8 @@
   // Tipografía (Slate scale)
   // ------------------------------------------------
   --neu-text: #0f172a; // Slate-900
-  --neu-text-muted: #64748b; // Slate-500
-  --neu-text-disabled: #94a3b8; // Slate-400
+  --neu-text-muted: #475569; // Slate-600
+  --neu-text-disabled: #64748b; // Slate-500
   --neu-text-inverse: #ffffff;
   --neu-knob-display-color: var(--neu-text);
   --neu-knob-label-color: var(--neu-text-muted);
@@ -60,7 +60,7 @@
   // ------------------------------------------------
   // Estados semánticos
   // ------------------------------------------------
-  --neu-success: #10b981;
+  --neu-success: #15803d;
   --neu-success-bg: #d1fae5;
   --neu-success-text: #065f46;
 
@@ -68,11 +68,11 @@
   --neu-warning-bg: #fef3c7;
   --neu-warning-text: #92400e;
 
-  --neu-error: #ef4444;
+  --neu-error: #dc2626;
   --neu-error-bg: #fee2e2;
   --neu-error-text: #991b1b;
 
-  --neu-info: #007aff;
+  --neu-info: #005fcc;
   --neu-info-bg: #eff6ff;
   --neu-info-text: #1d4ed8;
 
