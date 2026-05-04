@@ -32,6 +32,21 @@ export interface NeuTableActionEvent<T = Record<string, unknown>> {
   row: T;
 }
 
+export interface NeuTableSelectionAction<T = Record<string, unknown>> {
+  key: string;
+  label: string;
+  icon: string;
+  variant?: 'ghost' | 'primary' | 'danger';
+  show?: (rows: T[]) => boolean;
+  disabled?: (rows: T[]) => boolean;
+  confirm?: string;
+}
+
+export interface NeuTableSelectionActionEvent<T = Record<string, unknown>> {
+  action: NeuTableSelectionAction<T>;
+  rows: T[];
+}
+
 // ── Sort ──────────────────────────────────────────────────────────────────
 export interface NeuTableSortEntry {
   key: string;

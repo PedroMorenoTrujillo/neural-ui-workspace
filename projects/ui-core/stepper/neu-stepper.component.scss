@@ -78,9 +78,9 @@
 }
 
 .neu-stepper__step--active .neu-stepper__indicator {
-  background: var(--neu-primary);
-  border-color: var(--neu-primary);
-  color: var(--neu-primary-fg);
+  background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+  border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+  color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
 }
 
 .neu-stepper__step--completed .neu-stepper__indicator {

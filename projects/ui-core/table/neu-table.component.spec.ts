@@ -35,6 +35,22 @@ const BADGE_COLUMNS: NeuTableColumn[] = [
   },
 ];
 
+const SELECTION_ACTIONS = [
+  {
+    key: 'archive',
+    label: 'Archivar',
+    icon: 'lucideArchive',
+    variant: 'primary' as const,
+  },
+  {
+    key: 'delete',
+    label: 'Eliminar',
+    icon: 'lucideTrash2',
+    variant: 'danger' as const,
+    confirm: 'Confirmar borrado',
+  },
+];
+
 const DATA: Person[] = [
   { id: 1, name: 'Ana García', age: 28, city: 'Madrid', status: 'active' },
   { id: 2, name: 'Luis Pérez', age: 34, city: 'Barcelona', status: 'inactive' },
@@ -299,6 +315,51 @@ describe('NeuTableComponent', () => {
     expect(emitted.length).toBe(1);
   });
 
+  it('should emit selectionActionClick with the selected rows', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('selectionActions', SELECTION_ACTIONS);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const emitted: Array<{ action: { key: string }; rows: Person[] }> = [];
+    comp.selectionActionClick.subscribe((event: { action: { key: string }; rows: Person[] }) =>
+      emitted.push(event),
+    );
+
+    comp.toggleRow(DATA[0]);
+    comp.handleSelectionAction(SELECTION_ACTIONS[0]);
+
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]?.action.key).toBe('archive');
+    expect(emitted[0]?.rows.map((row) => row.id)).toEqual([1]);
+  });
+
+  it('selection action with confirm should require a second click', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('selectionActions', SELECTION_ACTIONS);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const emitSpy = vi.spyOn(comp.selectionActionClick, 'emit');
+
+    comp.toggleRow(DATA[1]);
+    comp.handleSelectionAction(SELECTION_ACTIONS[1]);
+    expect(comp.isSelectionConfirmPending(SELECTION_ACTIONS[1])).toBe(true);
+    expect(emitSpy).not.toHaveBeenCalled();
+
+    comp.handleSelectionAction(SELECTION_ACTIONS[1]);
+    expect(comp.isSelectionConfirmPending(SELECTION_ACTIONS[1])).toBe(false);
+    expect(emitSpy).toHaveBeenCalledWith({ action: SELECTION_ACTIONS[1], rows: [DATA[1]] });
+  });
+
   // ── Paginación ───────────────────────────────────────────────────────────
 
   it('should paginate data when rows exceed pageSize', async () => {
@@ -424,6 +485,40 @@ describe('NeuTableComponent', () => {
     comp.toggleExpand(DATA[0]);
     expect(comp.isRowExpanded(DATA[0])).toBe(true);
     comp.toggleExpand(DATA[0]);
+    expect(comp.isRowExpanded(DATA[0])).toBe(false);
+  });
+
+  it('expandMode=single should keep only one expanded row at a time', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', 'single');
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.expandRow(DATA[0]);
+    expect(comp.isRowExpanded(DATA[0])).toBe(true);
+
+    comp.expandRow(DATA[1]);
+    expect(comp.isRowExpanded(DATA[0])).toBe(false);
+    expect(comp.isRowExpanded(DATA[1])).toBe(true);
+  });
+
+  it('collapseRow should deterministically close an expanded row', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('expandable', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.expandRow(DATA[0]);
+    expect(comp.isRowExpanded(DATA[0])).toBe(true);
+
+    comp.collapseRow(DATA[0]);
     expect(comp.isRowExpanded(DATA[0])).toBe(false);
   });
 
@@ -1233,6 +1328,51 @@ describe('NeuTableComponent', () => {
     const text = await blob.text();
     expect(text).toContain('Nombre');
     expect(text).not.toContain('Edad');
+  });
+
+  it('exportCsv should prefer selected rows when exportScope=auto and selection exists', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.toggleRow(DATA[1]);
+
+    const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
+    comp.exportCsv();
+
+    const [blob] = downloadSpy.mock.calls[0] as [Blob, string];
+    const text = await blob.text();
+    expect(text).toContain('Luis Pérez');
+    expect(text).not.toContain('Ana García');
+    expect(text).not.toContain('María López');
+  });
+
+  it('exportJson should export selected rows only when exportScope=selected', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('exportScope', 'selected');
+    f.componentRef.setInput('exportFormats', ['json']);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.toggleRow(DATA[2]);
+
+    const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
+    comp.exportJson();
+
+    const [blob] = downloadSpy.mock.calls[0] as [Blob, string];
+    const payload = JSON.parse(await blob.text()) as Array<Record<string, string>>;
+    expect(payload).toHaveLength(1);
+    expect(payload[0]?.['name']).toBe('María López');
   });
 
   // ── filteredData: badge label matching ───────────────────────────────

@@ -703,6 +703,33 @@ describe('NeuMultiselectComponent', () => {
     }
   });
 
+  it('toggleOption should refresh the virtual viewport when the open panel gains the footer', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const checkViewportSize = vi.fn();
+    comp.isOpen.set(true);
+    comp._viewport = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
+
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      comp.toggleOption(OPTIONS[0]);
+      expect(comp._values()).toEqual(['angular']);
+      expect(checkViewportSize).toHaveBeenCalled();
+    } finally {
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
   it('focusOption should scroll and focus through the virtual viewport when virtualScroll=true', async () => {
     const f = TestBed.createComponent(NeuMultiselectComponent);
     f.componentRef.setInput('options', OPTIONS);

@@ -1,0 +1,528 @@
+.neu-calendar {
+  display: grid;
+  gap: var(--neu-space-4);
+  padding: var(--neu-space-4);
+  overflow: hidden;
+  border-radius: calc(var(--neu-radius-lg) + 4px);
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--neu-primary) 6%, transparent 94%),
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neu-surface-2) 82%, var(--neu-surface) 18%),
+      var(--neu-surface)
+    );
+  border: 1px solid color-mix(in srgb, var(--neu-border) 92%, transparent 8%);
+  box-shadow: var(--neu-shadow-sm);
+}
+
+.neu-calendar__viewport {
+  display: grid;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  scrollbar-gutter: stable;
+}
+
+.neu-calendar__viewport {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--neu-border) 88%, transparent 12%) transparent;
+}
+
+.neu-calendar__viewport::-webkit-scrollbar {
+  height: 8px;
+}
+
+.neu-calendar__viewport::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--neu-border) 88%, transparent 12%);
+  border-radius: 999px;
+}
+
+.neu-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neu-space-4);
+  flex-wrap: wrap;
+}
+
+.neu-calendar__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+}
+
+.neu-calendar__title {
+  margin: 0;
+  font-size: clamp(1.05rem, 1vw + 0.9rem, 1.35rem);
+  font-weight: 700;
+  color: var(--neu-text);
+  text-transform: capitalize;
+}
+
+.neu-calendar__nav-btn {
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid color-mix(in srgb, var(--neu-border) 88%, transparent 12%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--neu-surface) 88%, var(--neu-surface-2) 12%);
+  color: var(--neu-text);
+  cursor: pointer;
+  transition:
+    transform var(--neu-transition),
+    border-color var(--neu-transition),
+    background var(--neu-transition);
+}
+
+.neu-calendar__nav-btn:hover,
+.neu-calendar__today:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--neu-primary) 45%, var(--neu-border) 55%);
+}
+
+.neu-calendar__today {
+  height: 36px;
+  padding: 0 var(--neu-space-3);
+  border: 1px solid color-mix(in srgb, var(--neu-border) 88%, transparent 12%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--neu-surface-2) 92%, var(--neu-surface) 8%);
+  color: var(--neu-text);
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    transform var(--neu-transition),
+    border-color var(--neu-transition),
+    background var(--neu-transition);
+}
+
+.neu-calendar__weekdays,
+.neu-calendar__month-grid,
+.neu-calendar__week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.neu-calendar__weekday {
+  padding: 0 8px 6px;
+  text-align: center;
+  background: transparent;
+  color: var(--neu-text-muted);
+  font-size: var(--neu-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.neu-calendar--month .neu-calendar__weekdays,
+.neu-calendar--month .neu-calendar__month-grid {
+  min-width: 800px;
+}
+
+.neu-calendar--month .neu-calendar__month-grid {
+  grid-auto-rows: 172px;
+}
+
+.neu-calendar--week .neu-calendar__weekdays,
+.neu-calendar--week .neu-calendar__week-grid {
+  min-width: 0;
+}
+
+.neu-calendar__day {
+  min-height: 110px;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--neu-border) 94%, transparent 6%);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neu-surface) 96%, var(--neu-surface-2) 4%),
+    color-mix(in srgb, var(--neu-surface) 88%, black 12%)
+  );
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: start;
+  gap: var(--neu-space-2);
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+  box-shadow:
+    0 12px 24px -24px color-mix(in srgb, black 32%, transparent 68%),
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent 92%);
+  transition:
+    background var(--neu-transition),
+    box-shadow var(--neu-transition),
+    border-color var(--neu-transition),
+    transform var(--neu-transition);
+}
+
+.neu-calendar--month .neu-calendar__day {
+  min-height: 0;
+  height: 100%;
+}
+
+.neu-calendar--month .neu-calendar__event-list {
+  max-height: 100%;
+}
+
+.neu-calendar__day--outside {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neu-surface-2) 90%, black 10%),
+    color-mix(in srgb, var(--neu-surface-2) 82%, black 18%)
+  );
+  box-shadow: none;
+  opacity: 0.72;
+}
+
+.neu-calendar__day--today {
+  border-color: color-mix(in srgb, var(--neu-primary) 36%, var(--neu-border) 64%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neu-primary) 10%, var(--neu-surface) 90%),
+    color-mix(in srgb, var(--neu-primary) 6%, var(--neu-surface) 94%)
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--neu-primary) 22%, transparent 78%),
+    0 12px 26px -24px color-mix(in srgb, var(--neu-primary) 18%, transparent 82%);
+}
+
+.neu-calendar__day--selected {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neu-primary) 14%, var(--neu-surface) 86%),
+    color-mix(in srgb, var(--neu-primary) 8%, var(--neu-surface) 92%)
+  );
+  border-color: color-mix(in srgb, var(--neu-primary) 38%, var(--neu-border) 62%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--neu-primary) 22%, transparent 78%),
+    0 12px 24px -24px color-mix(in srgb, var(--neu-primary) 18%, transparent 82%);
+}
+
+.neu-calendar__day:hover,
+.neu-calendar__week-day:hover {
+  background: color-mix(in srgb, var(--neu-primary) 4%, var(--neu-surface) 96%);
+  border-color: color-mix(in srgb, var(--neu-primary) 22%, var(--neu-border) 78%);
+  transform: translateY(-1px);
+}
+
+.neu-calendar__day:focus-visible,
+.neu-calendar__week-day:focus-visible,
+.neu-calendar__event:focus-visible,
+.neu-calendar__nav-btn:focus-visible,
+.neu-calendar__today:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--neu-primary) 75%, white 25%);
+  outline-offset: -2px;
+}
+
+.neu-calendar__day-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neu-space-2);
+  min-width: 0;
+}
+
+.neu-calendar__day-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--neu-surface-2) 72%, black 28%);
+  color: color-mix(in srgb, var(--neu-text-muted) 72%, var(--neu-text) 28%);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.neu-calendar__day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+}
+
+.neu-calendar__day--selected .neu-calendar__day-number {
+  background: var(--neu-primary);
+  color: white;
+}
+
+.neu-calendar__event-list {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  padding-right: 2px;
+  scrollbar-gutter: stable;
+}
+
+.neu-calendar__event-list {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--neu-border) 88%, transparent 12%) transparent;
+}
+
+.neu-calendar__event-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.neu-calendar__event-list::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--neu-border) 88%, transparent 12%);
+  border-radius: 999px;
+}
+
+.neu-calendar__event {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  justify-self: stretch;
+  align-self: start;
+  padding: 8px 8px;
+  border: 1px solid color-mix(in srgb, var(--neu-border) 94%, transparent 6%);
+  border-left: 2px solid var(--neu-primary);
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neu-surface-2) 46%, var(--neu-surface) 54%),
+    color-mix(in srgb, var(--neu-surface) 74%, black 26%)
+  );
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 6%, transparent 94%),
+    0 10px 18px -20px color-mix(in srgb, black 34%, transparent 66%);
+  min-width: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.neu-calendar__event--compact {
+  gap: 1px;
+  padding: 5px 6px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.neu-calendar__event--compact .neu-calendar__event-title,
+.neu-calendar__event--compact .neu-calendar__event-meta {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neu-calendar__event--compact .neu-calendar__event-title {
+  font-size: 11px;
+}
+
+.neu-calendar__event--compact .neu-calendar__event-meta {
+  font-size: 10px;
+}
+
+.neu-calendar__event--default {
+  border-left-color: var(--neu-primary);
+}
+
+.neu-calendar__event--success {
+  border-left-color: var(--neu-success);
+}
+
+.neu-calendar__event--warning {
+  border-left-color: var(--neu-warning);
+}
+
+.neu-calendar__event--danger {
+  border-left-color: var(--neu-danger);
+}
+
+.neu-calendar__event--info {
+  border-left-color: #0ea5e9;
+}
+
+.neu-calendar__event-title {
+  font-size: var(--neu-text-xs);
+  font-weight: 700;
+  color: var(--neu-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neu-calendar__event-meta {
+  font-size: 11px;
+  color: var(--neu-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neu-calendar__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  width: 100%;
+  padding: 0 8px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--neu-border) 92%, transparent 8%);
+  background: color-mix(in srgb, var(--neu-surface-2) 72%, var(--neu-surface) 28%);
+  font-size: 11px;
+  color: var(--neu-text-muted);
+  box-sizing: border-box;
+}
+
+.neu-calendar__more--summary {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.neu-calendar__agenda {
+  display: grid;
+  gap: var(--neu-space-3);
+  padding: 14px;
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--neu-border) 94%, transparent 6%);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neu-surface) 94%, var(--neu-surface-2) 6%),
+    color-mix(in srgb, var(--neu-surface) 86%, black 14%)
+  );
+  box-shadow:
+    0 12px 24px -24px color-mix(in srgb, black 28%, transparent 72%),
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent 92%);
+}
+
+.neu-calendar__agenda-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neu-space-3);
+  flex-wrap: wrap;
+}
+
+.neu-calendar__agenda-title {
+  margin: 0;
+  font-size: var(--neu-text-base);
+  font-weight: 700;
+  color: var(--neu-text);
+  text-transform: capitalize;
+}
+
+.neu-calendar__agenda-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--neu-surface-2) 72%, black 28%);
+  color: var(--neu-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.neu-calendar__agenda-list {
+  display: grid;
+  gap: 8px;
+}
+
+.neu-calendar__agenda-event {
+  min-height: 48px;
+}
+
+.neu-calendar__agenda-empty {
+  margin: 0;
+  color: var(--neu-text-muted);
+  font-size: var(--neu-text-sm);
+}
+
+.neu-calendar__week-day {
+  min-height: 220px;
+  border: 1px solid color-mix(in srgb, var(--neu-border) 94%, transparent 6%);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neu-surface) 94%, var(--neu-surface-2) 6%),
+    color-mix(in srgb, var(--neu-surface) 84%, black 16%)
+  );
+  display: grid;
+  grid-template-rows: auto 1fr;
+  text-align: left;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+  box-shadow:
+    0 12px 24px -24px color-mix(in srgb, black 32%, transparent 68%),
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent 92%);
+}
+
+.neu-calendar__week-head {
+  display: grid;
+  gap: 4px;
+  padding: 14px 12px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--neu-border) 90%, transparent 10%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neu-surface-2) 78%, transparent 22%),
+    transparent
+  );
+  border-radius: 18px 18px 0 0;
+}
+
+.neu-calendar__week-date {
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+}
+
+.neu-calendar__week-events {
+  scrollbar-width: none;
+}
+
+.neu-calendar__week-events::-webkit-scrollbar {
+  display: none;
+}
+
+.neu-calendar__week-events {
+  padding: 12px;
+  display: grid;
+  align-content: start;
+  gap: var(--neu-space-2);
+  overflow: hidden;
+  min-height: 0;
+  min-width: 0;
+}
+
+.neu-calendar__empty {
+  margin: 0;
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text-muted);
+  line-height: 1.35;
+}
+
+@media (max-width: 860px) {
+  .neu-calendar {
+    padding: var(--neu-space-3);
+  }
+
+  .neu-calendar--month .neu-calendar__weekdays,
+  .neu-calendar--month .neu-calendar__month-grid {
+    min-width: 760px;
+  }
+}

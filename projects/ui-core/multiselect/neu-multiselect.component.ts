@@ -634,6 +634,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this.selectionChange.emit(this.options().filter((o) => next.includes(o.value)));
     const param = this.urlParam();
     if (param) this._urlState.setParam(param, next.length ? next.join(',') : null);
+    this.refreshVirtualViewport();
   }
 
   protected removeValue(value: string, event: MouseEvent): void {
@@ -645,6 +646,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this.selectionChange.emit(this.options().filter((o) => next.includes(o.value)));
     const param = this.urlParam();
     if (param) this._urlState.setParam(param, next.length ? next.join(',') : null);
+    this.refreshVirtualViewport();
   }
 
   protected clearAll(event: MouseEvent): void {
@@ -655,6 +657,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this.selectionChange.emit([]);
     const param = this.urlParam();
     if (param) this._urlState.setParam(param, null);
+    this.refreshVirtualViewport();
   }
 
   protected toggleChipMode(event: MouseEvent): void {
@@ -754,6 +757,16 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
       left: null,
       width: null,
       maxHeight: null,
+    });
+  }
+
+  private refreshVirtualViewport(): void {
+    if (!this.isOpen() || !this.virtualScroll()) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      this._viewport()?.checkViewportSize();
     });
   }
 }

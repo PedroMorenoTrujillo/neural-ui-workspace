@@ -7,12 +7,15 @@
   // ------------------------------------------------
   // Brand — Neural-Blue (inspirado en Apple HIG)
   // ------------------------------------------------
-  --neu-primary: #005fcc;
-  --neu-primary-dark: #004799;
-  --neu-primary-light: #2d7fff;
+  --neu-primary: #007aff;
+  --neu-primary-dark: #005fcc;
+  --neu-primary-light: #339dff;
   --neu-primary-50: #eff6ff;
   --neu-primary-100: #dbeafe;
   --neu-primary-fg: #ffffff;
+  --neu-primary-solid: #006ee6;
+  --neu-primary-solid-hover: #005fcc;
+  --neu-primary-solid-fg: #ffffff;
 
   --neu-secondary: #10b981;
   --neu-secondary-dark: #059669;
@@ -72,7 +75,7 @@
   --neu-error-bg: #fee2e2;
   --neu-error-text: #991b1b;
 
-  --neu-info: #005fcc;
+  --neu-info: #007aff;
   --neu-info-bg: #eff6ff;
   --neu-info-text: #1d4ed8;
 
@@ -321,8 +324,13 @@
 // ============================================================
 [data-theme='dark'] {
   // ---- Brand (mismo azul / same blue, fondos adaptados / adapted backgrounds) ----
+  --neu-primary: #007aff;
+  --neu-primary-dark: #005fcc;
+  --neu-primary-light: #339dff;
   --neu-primary-50: rgba(0, 122, 255, 0.12);
   --neu-primary-100: rgba(0, 122, 255, 0.2);
+  --neu-primary-solid: #007aff;
+  --neu-primary-solid-hover: #005fcc;
 
   // ---- Fondos / Backgrounds ----
   --neu-bg: #0d1117; // GitHub-dark inspired — fondo base
@@ -351,6 +359,7 @@
   --neu-error-bg: rgba(239, 68, 68, 0.15);
   --neu-error-text: #fca5a5;
 
+  --neu-info: #007aff;
   --neu-info-bg: rgba(0, 122, 255, 0.15);
   --neu-info-text: #93c5fd;
 

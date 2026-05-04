@@ -302,6 +302,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--neu-space-3);
+  flex-wrap: wrap;
   padding: var(--neu-space-2) var(--neu-space-5);
   background: var(--neu-primary-50);
   border-bottom: 1px solid var(--neu-primary-100);
@@ -309,6 +311,20 @@
   color: var(--neu-primary);
   font-weight: 500;
   animation: neu-tab-fade 150ms ease;
+}
+
+.neu-table__selection-main {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-3);
+  flex-wrap: wrap;
+}
+
+.neu-table__selection-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  flex-wrap: wrap;
 }
 
 .neu-table__selection-clear {
@@ -520,13 +536,13 @@
   }
 
   &--active {
-    background: var(--neu-primary);
-    color: var(--neu-primary-fg);
-    border-color: var(--neu-primary);
+    background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+    border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
 
     &:hover {
-      background: var(--neu-primary-dark);
-      border-color: var(--neu-primary-dark);
+      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+      border-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
     }
   }
 }
@@ -535,6 +551,7 @@
 .neu-table__export-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   height: 36px;
   padding: 0 var(--neu-space-3);
@@ -558,6 +575,34 @@
     color: var(--neu-primary);
     border-color: var(--neu-primary);
     background: var(--neu-primary-50);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.neu-table__export-btn--selection {
+  height: 30px;
+  font-size: var(--neu-text-xs);
+  padding: 0 var(--neu-space-2);
+}
+
+.neu-table__export-btn--primary {
+  color: var(--neu-primary);
+  border-color: var(--neu-primary-200);
+  background: var(--neu-surface);
+}
+
+.neu-table__export-btn--danger {
+  color: var(--neu-error);
+  border-color: color-mix(in srgb, var(--neu-error) 24%, var(--neu-border) 76%);
+
+  &:hover:not(:disabled) {
+    background: var(--neu-error-bg);
+    border-color: color-mix(in srgb, var(--neu-error) 40%, var(--neu-border) 60%);
+    color: var(--neu-error);
   }
 }
 
@@ -800,8 +845,8 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--neu-primary);
-  color: var(--neu-primary-fg);
+  background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+  color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
   font-size: 9px;
   font-weight: 700;
   margin-right: 2px;
@@ -856,8 +901,8 @@
     color: var(--neu-primary);
 
     &:hover:not(:disabled) {
-      background: var(--neu-primary);
-      color: var(--neu-primary-fg);
+      background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+      color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
     }
   }
 

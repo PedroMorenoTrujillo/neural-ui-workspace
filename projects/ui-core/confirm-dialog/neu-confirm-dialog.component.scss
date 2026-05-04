@@ -83,7 +83,7 @@
 
   &--primary {
     background: var(--neu-color-primary, #0ea5e9);
-    color: var(--neu-primary-fg);
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
 
     &:hover {
       filter: brightness(1.08);

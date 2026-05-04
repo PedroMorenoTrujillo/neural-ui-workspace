@@ -66,9 +66,9 @@
     }
 
     &.neu-chip--selected {
-      background: var(--neu-primary);
-      color: var(--neu-primary-fg);
-      border-color: var(--neu-primary);
+      background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+      color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+      border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
     }
   }
 

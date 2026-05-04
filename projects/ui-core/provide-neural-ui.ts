@@ -12,6 +12,7 @@ import {
   lucideMinus,
   lucideTrendingDown,
   lucideTrendingUp,
+  lucideUpload,
   lucideX,
   lucideXCircle,
 } from '@ng-icons/lucide';
@@ -66,6 +67,8 @@ export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProvide
       lucideTrendingUp,
       lucideTrendingDown,
       lucideMinus,
+      // Uploader picker-only trigger
+      lucideUpload,
     }),
     provideNgIconsConfig({ size: iconSize, strokeWidth: iconStrokeWidth }),
   ]);

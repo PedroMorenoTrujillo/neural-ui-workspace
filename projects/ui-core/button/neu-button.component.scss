@@ -59,18 +59,18 @@
 
   // ---- Variantes / Variants ----
   &--primary {
-    background: var(--neu-primary);
-    color: var(--neu-primary-fg);
-    border-color: var(--neu-primary);
+    background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+    border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-primary-dark);
-      border-color: var(--neu-primary-dark);
+      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+      border-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
       box-shadow: var(--neu-shadow-glow);
     }
 
     &:active:not(:disabled) {
-      background: var(--neu-primary-dark);
+      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
       transform: translateY(1px);
     }
   }

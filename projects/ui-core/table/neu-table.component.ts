@@ -30,6 +30,8 @@ import type {
   NeuTableAction,
   NeuTableActionEvent,
   NeuTableColumn,
+  NeuTableSelectionAction,
+  NeuTableSelectionActionEvent,
   NeuTableServerState,
   NeuTableSortEntry,
 } from './neu-table.types';
@@ -41,6 +43,8 @@ export type {
   NeuTableBadgeVariant,
   NeuTableCellType,
   NeuTableColumn,
+  NeuTableSelectionAction,
+  NeuTableSelectionActionEvent,
   NeuTableServerState,
   NeuTableSortEntry,
 } from './neu-table.types';
@@ -219,7 +223,53 @@ function asRows(data: object[]): Row[] {
       <!-- Barra de selección (aparece al seleccionar) -->
       @if (selectable() && selectedCount() > 0) {
         <div class="neu-table__selection-bar">
-          <span>{{ selectedRowsInfo() }}</span>
+          <div class="neu-table__selection-main">
+            <span>{{ selectedRowsInfo() }}</span>
+            @if (selectionActions().length > 0) {
+              <div class="neu-table__selection-actions">
+                @for (action of selectionActions(); track action.key) {
+                  @if (action.show === undefined || action.show(selectedRows())) {
+                    @if (isSelectionConfirmPending(action)) {
+                      <span class="neu-table__action-confirm">
+                        <span>{{ action.confirm }}</span>
+                        <button
+                          class="neu-table__action-btn neu-table__action-btn--danger"
+                          type="button"
+                          (click)="handleSelectionAction(action)"
+                        >
+                          Sí
+                        </button>
+                        <button
+                          class="neu-table__action-btn"
+                          type="button"
+                          (click)="cancelSelectionConfirm()"
+                        >
+                          No
+                        </button>
+                      </span>
+                    } @else {
+                      <button
+                        class="neu-table__export-btn neu-table__export-btn--selection neu-table__export-btn--{{
+                          action.variant ?? 'ghost'
+                        }}"
+                        type="button"
+                        [disabled]="action.disabled ? action.disabled(selectedRows()) : false"
+                        [title]="action.label"
+                        (click)="handleSelectionAction(action)"
+                      >
+                        @if (action.icon.startsWith('lucide')) {
+                          <neu-icon [name]="action.icon" size="0.95rem" aria-hidden="true" />
+                        } @else {
+                          <span aria-hidden="true">{{ action.icon }}</span>
+                        }
+                        <span>{{ action.label }}</span>
+                      </button>
+                    }
+                  }
+                }
+              </div>
+            }
+          </div>
           <button class="neu-table__selection-clear" type="button" (click)="clearSelection()">
             {{ clearSelectionLabel() }}
           </button>
@@ -742,6 +792,7 @@ export class NeuTableComponent {
   readonly sortable = input<boolean>(false);
   readonly selectable = input<boolean>(false);
   readonly expandable = input<boolean>(false);
+  readonly expandMode = input<'multiple' | 'single'>('multiple');
   readonly exportable = input<boolean>(false);
   readonly exportFileName = input<string>('export');
   readonly pageSizeOptions = input<number[]>([]);
@@ -764,6 +815,8 @@ export class NeuTableComponent {
   readonly multiSort = input<boolean>(false);
   readonly exportFormats = input<('csv' | 'json')[]>(['csv']);
   readonly exportColumns = input<string[]>([]);
+  readonly exportScope = input<'filtered' | 'selected' | 'auto'>('auto');
+  readonly selectionActions = input<NeuTableSelectionAction<Row>[]>([]);
 
   // ── URL params ────────────────────────────────────────────────────────
   readonly pageParam = input<string>('page');
@@ -788,6 +841,7 @@ export class NeuTableComponent {
   readonly rowClick = output<Row>();
   readonly rowDblClick = output<Row>();
   readonly actionClick = output<NeuTableActionEvent<Row>>();
+  readonly selectionActionClick = output<NeuTableSelectionActionEvent<Row>>();
   readonly serverStateChange = output<NeuTableServerState>();
   readonly searchChange = output<string>();
 
@@ -1156,18 +1210,36 @@ export class NeuTableComponent {
     return this._expandedKeys().has(this.getRowKey(row));
   }
 
-  toggleExpand(row: Row): void {
+  expandRow(row: Row): void {
+    const key = this.getRowKey(row);
+    const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
+    set.add(key);
+    this._expandedKeys.set(set);
+  }
+
+  collapseRow(row: Row): void {
     const key = this.getRowKey(row);
     const set = new Set(this._expandedKeys());
-    if (set.has(key)) set.delete(key);
+    set.delete(key);
+    this._expandedKeys.set(set);
+  }
+
+  toggleExpand(row: Row): void {
+    const key = this.getRowKey(row);
+    const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
+    if (this._expandedKeys().has(key)) set.delete(key);
     else set.add(key);
     this._expandedKeys.set(set);
   }
 
   // ── Selección ─────────────────────────────────────────────────────────
   private readonly _selectedKeys = signal<Set<unknown>>(new Set());
+  private readonly _selectionConfirmPending = signal<string | null>(null);
 
   readonly selectedCount = computed(() => this._selectedKeys().size);
+  readonly selectedRows = computed(() =>
+    this._rows().filter((row) => this._selectedKeys().has(this.getRowKey(row))),
+  );
   readonly selectedRowsInfo = computed(
     () => `${this.selectedCount()} ${this.selectionSummaryLabel()}`,
   );
@@ -1216,6 +1288,7 @@ export class NeuTableComponent {
 
   clearSelection(): void {
     this._selectedKeys.set(new Set());
+    this._selectionConfirmPending.set(null);
     this.selectionChange.emit([]);
   }
 
@@ -1371,12 +1444,36 @@ export class NeuTableComponent {
     this._confirmPending.set(null);
   }
 
+  isSelectionConfirmPending(action: NeuTableSelectionAction<Row>): boolean {
+    return this._selectionConfirmPending() === action.key;
+  }
+
+  handleSelectionAction(action: NeuTableSelectionAction<Row>): void {
+    const rows = this.selectedRows();
+
+    if (action.confirm) {
+      if (this._selectionConfirmPending() === action.key) {
+        this._selectionConfirmPending.set(null);
+        this.selectionActionClick.emit({ action, rows });
+      } else {
+        this._selectionConfirmPending.set(action.key);
+      }
+      return;
+    }
+
+    this.selectionActionClick.emit({ action, rows });
+  }
+
+  cancelSelectionConfirm(): void {
+    this._selectionConfirmPending.set(null);
+  }
+
   // ── Export ────────────────────────────────────────────────────────────
   exportCsv(): void {
     if (!isPlatformBrowser(this._platformId)) return;
     const cols = this._getExportColumns();
     const headers = cols.map((c) => `"${c.header.replace(/"/g, '""')}"`);
-    const rows = this.filteredData().map((row) =>
+    const rows = this._getExportRows().map((row) =>
       cols.map((col) => `"${this.getCellValue(row, col).replace(/"/g, '""')}"`),
     );
     const csv = [headers, ...rows].map((r) => r.join(',')).join('\r\n');
@@ -1389,7 +1486,7 @@ export class NeuTableComponent {
   exportJson(): void {
     if (!isPlatformBrowser(this._platformId)) return;
     const cols = this._getExportColumns();
-    const data = this.filteredData().map((row) => {
+    const data = this._getExportRows().map((row) => {
       const obj: Record<string, string> = {};
       cols.forEach((col) => (obj[col.key] = this.getCellValue(row, col)));
       return obj;
@@ -1404,6 +1501,24 @@ export class NeuTableComponent {
     const keys = this.exportColumns();
     const all = this.columns().filter((c) => c.type !== 'actions');
     return keys.length ? all.filter((c) => keys.includes(c.key)) : all;
+  }
+
+  private _getExportRows(): Row[] {
+    const scope = this.exportScope();
+
+    if (scope === 'filtered') {
+      return this.filteredData();
+    }
+
+    const selectedRows = this._rows().filter((row) =>
+      this._selectedKeys().has(this.getRowKey(row)),
+    );
+
+    if (scope === 'selected') {
+      return selectedRows;
+    }
+
+    return selectedRows.length > 0 ? selectedRows : this.filteredData();
   }
 
   private _downloadBlob(blob: Blob, filename: string): void {

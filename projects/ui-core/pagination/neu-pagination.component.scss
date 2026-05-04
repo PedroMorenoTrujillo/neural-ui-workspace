@@ -43,14 +43,14 @@
   }
 
   &--active {
-    background: var(--neu-primary);
-    border-color: var(--neu-primary);
-    color: var(--neu-primary-fg);
+    background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+    border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
     font-weight: 600;
 
     &:hover {
-      background: var(--neu-primary-dark);
-      border-color: var(--neu-primary-dark);
+      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+      border-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
     }
   }
 
