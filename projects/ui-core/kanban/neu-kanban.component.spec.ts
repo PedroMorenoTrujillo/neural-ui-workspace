@@ -1,6 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { By } from '@angular/platform-browser';
 import { NeuKanbanComponent, type NeuKanbanColumn } from './neu-kanban.component';
 
 const COLUMNS: NeuKanbanColumn[] = [
@@ -82,6 +83,29 @@ describe('NeuKanbanComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('AM');
   });
 
+  it('should render the assignee avatar image when provided', async () => {
+    const fixture = setup([
+      {
+        id: 'todo',
+        title: 'To do',
+        cards: [
+          {
+            id: 'card-a',
+            title: 'Qualify inbound lead',
+            assignee: { name: 'Alice Martin', avatar: '/avatar.png' },
+          },
+        ],
+      },
+    ]);
+    await fixture.whenStable();
+
+    const avatar = fixture.nativeElement.querySelector(
+      '.neu-kanban__avatar img',
+    ) as HTMLImageElement;
+    expect(avatar.getAttribute('src')).toBe('/avatar.png');
+    expect(avatar.getAttribute('alt')).toBe('Alice Martin');
+  });
+
   it('should apply the configured column width as CSS variable', async () => {
     const fixture = setup();
     fixture.componentRef.setInput('columnWidth', '360px');
@@ -147,6 +171,23 @@ describe('NeuKanbanComponent', () => {
     expect(fixture.componentInstance._columns()[0].cards).toHaveLength(1);
     expect(fixture.componentInstance._columns()[1].cards[1].id).toBe('card-a');
     expect(events).toEqual([{ fromColumnId: 'todo', toColumnId: 'doing', cardId: 'card-a' }]);
+  });
+
+  it('should wire cdkDropListDropped from the DOM container', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+
+    const dropSpy = vi.spyOn(fixture.componentInstance, 'onCardDrop');
+    const list = fixture.debugElement.query(By.css('.neu-kanban__list'));
+    list.triggerEventHandler('cdkDropListDropped', {
+      previousContainer: { id: 'todo' },
+      container: { id: 'todo' },
+      previousIndex: 0,
+      currentIndex: 1,
+    });
+    fixture.detectChanges();
+
+    expect(dropSpy).toHaveBeenCalled();
   });
 
   it('should ignore drops when source or target columns are unknown', async () => {

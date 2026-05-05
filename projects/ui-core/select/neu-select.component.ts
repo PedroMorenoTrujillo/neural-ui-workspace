@@ -68,6 +68,7 @@ let _neuSelectIdSeq = 0;
     <div
       class="neu-select"
       [class.neu-select--open]="isOpen()"
+      [class.neu-select--open-above]="isPanelAbove()"
       [class.neu-select--disabled]="isDisabledFinal()"
       [class.neu-select--error]="hasError()"
       [class.neu-select--has-value]="!!_value()"
@@ -159,12 +160,14 @@ let _neuSelectIdSeq = 0;
       @if (isOpen()) {
         <div
           class="neu-select__panel"
+          [class.neu-select__panel--above]="isPanelAbove()"
           [class.neu-select__panel--virtual]="virtualScroll()"
           role="listbox"
           [id]="_panelId"
           [attr.aria-label]="label()"
           [style.position]="panelPosition().position"
           [style.top]="panelPosition().top"
+          [style.bottom]="panelPosition().bottom"
           [style.left]="panelPosition().left"
           [style.width]="panelPosition().width"
           [style.max-height]="panelPosition().maxHeight"
@@ -394,16 +397,19 @@ export class NeuSelectComponent implements ControlValueAccessor {
   readonly panelPosition = signal<{
     position: string | null;
     top: string | null;
+    bottom: string | null;
     left: string | null;
     width: string | null;
     maxHeight: string | null;
   }>({
     position: null,
     top: null,
+    bottom: null,
     left: null,
     width: null,
     maxHeight: null,
   });
+  readonly isPanelAbove = signal(false);
 
   readonly hasError = computed(() => !!this.errorMessage());
 
@@ -597,29 +603,42 @@ export class NeuSelectComponent implements ControlValueAccessor {
       const trigger =
         this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select__trigger');
       if (!trigger) return;
-      if (window.innerWidth > this._mobileViewportMax) {
-        this.resetPanelPosition();
-        return;
-      }
 
       const triggerRect = trigger.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
+      const gap = 6;
+      const configuratorControls = trigger.closest<HTMLElement>('.demo-configurator__controls');
+      const controlsDisplay = configuratorControls
+        ? window.getComputedStyle(configuratorControls).display
+        : null;
+      const boundaryRect =
+        controlsDisplay === 'grid' ? null : configuratorControls?.getBoundingClientRect();
+      const boundaryTop = boundaryRect
+        ? Math.max(boundaryRect.top, this._viewportMargin)
+        : this._viewportMargin;
+      const boundaryBottom = boundaryRect
+        ? Math.min(boundaryRect.bottom, viewportHeight - this._viewportMargin)
+        : viewportHeight - this._viewportMargin;
       const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
       const left = Math.min(
         Math.max(triggerRect.left, this._viewportMargin),
         viewportWidth - this._viewportMargin - width,
       );
-      const top = triggerRect.bottom + 6;
-      const maxHeight = Math.max(140, viewportHeight - top - this._viewportMargin);
+      const availableBelow = Math.max(0, boundaryBottom - triggerRect.bottom - gap);
+      const availableAbove = Math.max(0, triggerRect.top - boundaryTop - gap);
+      const openAbove = availableAbove > availableBelow && availableAbove >= 140;
+      const maxHeight = Math.max(140, openAbove ? availableAbove : availableBelow);
 
       this.panelPosition.set({
         position: 'fixed',
-        top: `${top}px`,
+        top: openAbove ? 'auto' : `${triggerRect.bottom + gap}px`,
+        bottom: openAbove ? `${viewportHeight - triggerRect.top + gap}px` : 'auto',
         left: `${left}px`,
         width: `${width}px`,
         maxHeight: `${maxHeight}px`,
       });
+      this.isPanelAbove.set(openAbove);
 
       if (this.virtualScroll()) {
         this._viewport()?.checkViewportSize();
@@ -662,9 +681,11 @@ export class NeuSelectComponent implements ControlValueAccessor {
     this.panelPosition.set({
       position: null,
       top: null,
+      bottom: null,
       left: null,
       width: null,
       maxHeight: null,
     });
+    this.isPanelAbove.set(false);
   }
 }

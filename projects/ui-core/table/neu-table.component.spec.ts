@@ -22,6 +22,12 @@ const COLUMNS: NeuTableColumn[] = [
   { key: 'city', header: 'Ciudad' },
 ];
 
+const RESIZABLE_COLUMNS: NeuTableColumn[] = [
+  { key: 'name', header: 'Nombre', width: '120px', frozen: 'left' },
+  { key: 'age', header: 'Edad', width: '140px', frozen: 'left' },
+  { key: 'city', header: 'Ciudad', width: '180px' },
+];
+
 const BADGE_COLUMNS: NeuTableColumn[] = [
   { key: 'name', header: 'Nombre' },
   {
@@ -1039,6 +1045,56 @@ describe('NeuTableComponent', () => {
     expect(emitted[0]).toEqual(DATA[0]);
   });
 
+  it('should render resize handles when resizableColumns=true', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelectorAll('.neu-table__resize-handle').length).toBe(3);
+  });
+
+  it('startColumnResize should update the effective column width', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const handle = f.nativeElement.querySelector('.neu-table__resize-handle') as HTMLButtonElement;
+
+    handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100 }));
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 145 }));
+    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 145 }));
+
+    expect(comp.columnWidth(RESIZABLE_COLUMNS[0])).toBe('165px');
+  });
+
+  it('resized frozen columns should update the next frozen offset', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.startColumnResize(RESIZABLE_COLUMNS[0], {
+      clientX: 100,
+      preventDefault: () => {},
+      stopPropagation: () => {},
+      currentTarget: null,
+    } as MouseEvent);
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140 }));
+    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 140 }));
+
+    expect(comp._frozenLeftOffsets().get('age')).toBe(160);
+  });
+
   // ── Server-side: onSearch ─────────────────────────────────────────────
 
   it('onSearch with serverSide=true should emit serverStateChange with search and page=1', async () => {
@@ -1373,6 +1429,29 @@ describe('NeuTableComponent', () => {
     const payload = JSON.parse(await blob.text()) as Array<Record<string, string>>;
     expect(payload).toHaveLength(1);
     expect(payload[0]?.['name']).toBe('María López');
+  });
+
+  it('exportCsv should export filtered rows only when exportScope=filtered', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('exportScope', 'filtered');
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.onSearch({ target: { value: 'Ana' } } as unknown as Event);
+    f.detectChanges();
+    await f.whenStable();
+
+    const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
+    comp.exportCsv();
+
+    const [blob] = downloadSpy.mock.calls[0] as [Blob, string];
+    const text = await blob.text();
+    expect(text).toContain('Ana García');
+    expect(text).not.toContain('Luis Pérez');
   });
 
   // ── filteredData: badge label matching ───────────────────────────────
@@ -2591,6 +2670,39 @@ describe('NeuTableComponent', () => {
     } finally {
       HTMLElement.prototype.scrollTo = originalScrollTo;
     }
+  });
+
+  it('onTableScroll should no-op when virtual scroll is inactive', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('virtualScroll', false);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.onTableScroll({ target: { scrollTop: 300 } } as unknown as Event);
+
+    expect(comp._virtualScrollTop()).toBe(0);
+  });
+
+  it('columnFilterControl should update the filter state when the control changes', async () => {
+    const filterableColumns: NeuTableColumn[] = [
+      { key: 'name', header: 'Nombre', filterable: true },
+      { key: 'age', header: 'Edad' },
+    ];
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', filterableColumns);
+    f.componentRef.setInput('data', DATA);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const control = comp.columnFilterControl('name');
+    control.setValue('Ana');
+    f.detectChanges();
+
+    expect(comp.getColumnFilterValue('name')).toBe('Ana');
   });
 
   it('toolbar export buttons should call exportCsv and exportJson via DOM', async () => {

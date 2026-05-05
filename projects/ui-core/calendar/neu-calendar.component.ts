@@ -164,8 +164,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                 [class.neu-calendar__day--today]="day.isToday"
                 [class.neu-calendar__day--selected]="day.isSelected"
                 (click)="selectDate(day.date)"
-                (keydown.enter)="selectDate(day.date)"
-                (keydown.space)="onDaySpace($event, day.date)"
+                (keydown)="onDayKeydown($event, day.date)"
               >
                 <div class="neu-calendar__day-top">
                   <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
@@ -205,8 +204,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                 [class.neu-calendar__day--today]="day.isToday"
                 [class.neu-calendar__day--selected]="day.isSelected"
                 (click)="selectDate(day.date)"
-                (keydown.enter)="selectDate(day.date)"
-                (keydown.space)="onDaySpace($event, day.date)"
+                (keydown)="onDayKeydown($event, day.date)"
               >
                 <div class="neu-calendar__week-head">
                   <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
@@ -432,6 +430,18 @@ export class NeuCalendarComponent {
   onDaySpace(event: Event, date: Date): void {
     event.preventDefault();
     this.selectDate(date);
+  }
+
+  onDayKeydown(event: KeyboardEvent, date: Date): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.selectDate(date);
+      return;
+    }
+
+    if (event.key === ' ' || event.key === 'Spacebar') {
+      this.onDaySpace(event, date);
+    }
   }
 
   onEventClick(event: MouseEvent, calendarEvent: NormalizedCalendarEvent): void {

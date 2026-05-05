@@ -1,7 +1,7 @@
 {
     "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
     "dest": "../../dist/neural-ui/core",
-    "deleteDestPath": true,
+    "deleteDestPath": false,
     "lib": {
         "entryFile": "public-api.ts"
     },

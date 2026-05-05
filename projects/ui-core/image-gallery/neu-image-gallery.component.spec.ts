@@ -50,6 +50,21 @@ describe('NeuImageGalleryComponent', () => {
     expect(emitted).toEqual([1]);
   });
 
+  it('next button click should advance to the next image', async () => {
+    const f = TestBed.createComponent(NeuImageGalleryComponent);
+    f.componentRef.setInput('items', ITEMS);
+    f.detectChanges();
+    await f.whenStable();
+
+    const next = f.nativeElement.querySelector(
+      '.neu-image-gallery__nav--next',
+    ) as HTMLButtonElement;
+    next.click();
+    f.detectChanges();
+
+    expect(f.componentInstance.activeIndex()).toBe(1);
+  });
+
   it('goPrev should not go below zero', async () => {
     const f = TestBed.createComponent(NeuImageGalleryComponent);
     f.componentRef.setInput('items', ITEMS);
@@ -57,6 +72,22 @@ describe('NeuImageGalleryComponent', () => {
     await f.whenStable();
 
     f.componentInstance.goPrev();
+    expect(f.componentInstance.activeIndex()).toBe(0);
+  });
+
+  it('previous button click should go back to the prior image', async () => {
+    const f = TestBed.createComponent(NeuImageGalleryComponent);
+    f.componentRef.setInput('items', ITEMS);
+    f.componentRef.setInput('initialIndex', 1);
+    f.detectChanges();
+    await f.whenStable();
+
+    const prev = f.nativeElement.querySelector(
+      '.neu-image-gallery__nav--prev',
+    ) as HTMLButtonElement;
+    prev.click();
+    f.detectChanges();
+
     expect(f.componentInstance.activeIndex()).toBe(0);
   });
 
@@ -112,6 +143,47 @@ describe('NeuImageGalleryComponent', () => {
 
     expect(f.nativeElement.querySelector('.neu-image-gallery__viewer-trigger')).toBeFalsy();
     expect(f.nativeElement.querySelector('.neu-image-gallery__image')).toBeTruthy();
+  });
+
+  it('should apply the contain object-fit modifier for the active image', async () => {
+    const f = TestBed.createComponent(NeuImageGalleryComponent);
+    f.componentRef.setInput('items', ITEMS);
+    f.componentRef.setInput('viewerEnabled', false);
+    f.componentRef.setInput('objectFit', 'contain');
+    f.detectChanges();
+    await f.whenStable();
+
+    const image = f.nativeElement.querySelector('.neu-image-gallery__image') as HTMLImageElement;
+    expect(image.classList.contains('neu-image-gallery__image--contain')).toBe(true);
+    expect(image.classList.contains('neu-image-gallery__image--cover')).toBe(false);
+  });
+
+  it('should render nothing when there are no items', async () => {
+    const f = TestBed.createComponent(NeuImageGalleryComponent);
+    f.componentRef.setInput('items', []);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.textContent.trim()).toBe('');
+  });
+
+  it('should hide navigation and caption and use fallback labels for a single image without metadata', async () => {
+    const f = TestBed.createComponent(NeuImageGalleryComponent);
+    f.componentRef.setInput('items', [{ src: 'https://picsum.photos/seed/gallery-z/800/600' }]);
+    f.detectChanges();
+    await f.whenStable();
+
+    const thumb = f.nativeElement.querySelector('.neu-image-gallery__thumb') as HTMLButtonElement;
+    const trigger = f.nativeElement.querySelector(
+      '.neu-image-gallery__viewer-trigger',
+    ) as HTMLButtonElement;
+    const image = f.nativeElement.querySelector('.neu-image-gallery__image') as HTMLImageElement;
+
+    expect(f.nativeElement.querySelector('.neu-image-gallery__nav')).toBeFalsy();
+    expect(f.nativeElement.querySelector('.neu-image-gallery__caption')).toBeFalsy();
+    expect(thumb.getAttribute('aria-label')).toBe('Image 1');
+    expect(trigger.getAttribute('aria-label')).toBe('Open image viewer');
+    expect(image.getAttribute('alt')).toBe('');
   });
 
   it('next button should be disabled on the last item', async () => {

@@ -528,17 +528,23 @@ describe('NeuSelectComponent', () => {
     expect(syncSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('syncPanelPosition should reset inline position on desktop viewport', async () => {
+  it('syncPanelPosition should compute fixed panel geometry on desktop viewport', async () => {
     const { f, comp } = await setup();
     const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
 
     const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    Object.defineProperty(trigger, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ top: 18, left: 20, bottom: 50, width: 180 }),
+    });
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
       return 1;
     }) as typeof window.requestAnimationFrame;
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 900 });
 
     try {
       comp.panelPosition.set({
@@ -553,16 +559,21 @@ describe('NeuSelectComponent', () => {
 
       expect(trigger).toBeTruthy();
       expect(comp.panelPosition()).toEqual({
-        position: null,
-        top: null,
-        left: null,
-        width: null,
-        maxHeight: null,
+        position: 'fixed',
+        top: '56px',
+        bottom: 'auto',
+        left: '20px',
+        width: '180px',
+        maxHeight: '828px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
         configurable: true,
         value: originalInnerWidth,
+      });
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: originalInnerHeight,
       });
       window.requestAnimationFrame = originalRequestAnimationFrame;
     }
@@ -593,6 +604,7 @@ describe('NeuSelectComponent', () => {
       expect(comp.panelPosition()).toEqual({
         position: 'fixed',
         top: '106px',
+        bottom: 'auto',
         left: '24px',
         width: '220px',
         maxHeight: '722px',

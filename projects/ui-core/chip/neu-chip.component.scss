@@ -58,11 +58,12 @@
 
   &--primary {
     background: var(--neu-primary-50);
-    color: var(--neu-primary);
-    border-color: var(--neu-primary-100);
+    color: var(--neu-primary-dark, var(--neu-primary));
+    border-color: color-mix(in srgb, var(--neu-primary-dark, var(--neu-primary)) 28%, transparent);
 
     &:hover:not(.neu-chip--disabled) {
       background: var(--neu-primary-100);
+      color: var(--neu-primary-dark, var(--neu-primary));
     }
 
     &.neu-chip--selected {

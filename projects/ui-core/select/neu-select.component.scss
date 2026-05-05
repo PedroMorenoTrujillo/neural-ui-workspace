@@ -60,6 +60,13 @@ $select-height: 48px;
     border-bottom-right-radius: 0;
   }
 
+  .neu-select--open-above & {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: var(--neu-radius);
+    border-bottom-right-radius: var(--neu-radius);
+  }
+
   .neu-select--error & {
     border-color: var(--neu-error);
 
@@ -215,6 +222,15 @@ $select-height: 48px;
     background: var(--neu-surface-3);
     border-radius: 99px;
   }
+}
+
+.neu-select__panel--above {
+  border-top: 1.5px solid var(--neu-primary);
+  border-bottom: none;
+  border-top-left-radius: var(--neu-radius);
+  border-top-right-radius: var(--neu-radius);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .neu-select__panel--virtual {

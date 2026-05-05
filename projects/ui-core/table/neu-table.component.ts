@@ -326,7 +326,9 @@ function asRows(data: object[]): Row[] {
                   [style.left]="
                     col.frozen === 'left' ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px' : null
                   "
-                  [style.width]="col.width ?? 'auto'"
+                  [style.width]="columnWidth(col)"
+                  [style.min-width]="columnWidth(col)"
+                  [style.max-width]="columnWidth(col)"
                   [style.text-align]="col.align ?? 'left'"
                   scope="col"
                   (click)="sortable() && col.sortable !== false ? sortBy(col.key, $event) : null"
@@ -358,6 +360,15 @@ function asRows(data: object[]): Row[] {
                       }
                     </span>
                   }
+                  @if (isColumnResizable(col)) {
+                    <button
+                      class="neu-table__resize-handle"
+                      type="button"
+                      [attr.aria-label]="'Resize ' + col.header"
+                      (dblclick)="resetColumnWidth(col.key, $event)"
+                      (mousedown)="startColumnResize(col, $event)"
+                    ></button>
+                  }
                 </th>
               }
             </tr>
@@ -377,7 +388,9 @@ function asRows(data: object[]): Row[] {
                   <th
                     class="neu-table__th neu-table__th--filter"
                     scope="col"
-                    [style.width]="col.width ?? 'auto'"
+                    [style.width]="columnWidth(col)"
+                    [style.min-width]="columnWidth(col)"
+                    [style.max-width]="columnWidth(col)"
                   >
                     @if (col.filterable) {
                       @if (col.filterType === 'select') {
@@ -533,6 +546,9 @@ function asRows(data: object[]): Row[] {
                           ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
                           : null
                       "
+                      [style.width]="columnWidth(col)"
+                      [style.min-width]="columnWidth(col)"
+                      [style.max-width]="columnWidth(col)"
                       [style.text-align]="col.align ?? 'left'"
                     >
                       @if (col.cellTemplate) {
@@ -655,6 +671,9 @@ function asRows(data: object[]): Row[] {
                 @for (col of columns(); track col.key) {
                   <td
                     class="neu-table__td neu-table__td--footer"
+                    [style.width]="columnWidth(col)"
+                    [style.min-width]="columnWidth(col)"
+                    [style.max-width]="columnWidth(col)"
                     [style.text-align]="col.align ?? 'left'"
                   >
                     {{ footerRow()![col.key] !== undefined ? footerRow()![col.key] : '' }}
@@ -799,6 +818,7 @@ export class NeuTableComponent {
   readonly stickyHeader = input<boolean>(false);
   readonly virtualScroll = input<boolean>(false);
   readonly virtualScrollVisibleItems = input<number>(8);
+  readonly resizableColumns = input<boolean>(false);
   readonly rowKey = input<string>('id');
   readonly bordered = input<boolean>(true);
   readonly roundedBorders = input<boolean>(true);
@@ -844,6 +864,7 @@ export class NeuTableComponent {
   readonly selectionActionClick = output<NeuTableSelectionActionEvent<Row>>();
   readonly serverStateChange = output<NeuTableServerState>();
   readonly searchChange = output<string>();
+  readonly columnResize = output<{ key: string; width: number }>();
 
   // ── Estado interno (usado cuando useUrlState = false) ─────────────────
   // Internal state signals (used when useUrlState = false)
@@ -852,6 +873,8 @@ export class NeuTableComponent {
   private readonly _internalSortKey = signal('');
   private readonly _internalSortDir = signal<'asc' | 'desc'>('asc');
   private readonly _internalMultiSort = signal('');
+  private readonly _columnWidths = signal<Record<string, number>>({});
+  private _resizeCleanup: (() => void) | null = null;
 
   // ── URL State ─────────────────────────────────────────────────────────
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
@@ -937,6 +960,8 @@ export class NeuTableComponent {
   private readonly _virtualScrollTop = signal(0);
 
   constructor() {
+    this._destroyRef.onDestroy(() => this._stopColumnResize());
+
     this._pageSizeControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => this.onPageSizeChange(value));
@@ -1171,15 +1196,13 @@ export class NeuTableComponent {
   });
 
   readonly _frozenLeftOffsets = computed(() => {
+    this._columnWidths();
     const offsets = new Map<string, number>();
     let leftPx = 0;
     for (const col of this.columns()) {
       if (col.frozen === 'left') {
         offsets.set(col.key, leftPx);
-        if (col.width && col.width !== 'auto') {
-          const px = Number.parseFloat(col.width);
-          if (!Number.isNaN(px)) leftPx += px;
-        }
+        leftPx += this._columnWidthPx(col) ?? 0;
       }
     }
     return offsets;
@@ -1201,6 +1224,78 @@ export class NeuTableComponent {
 
   isFirstFrozenRightColumn(key: string): boolean {
     return this._firstFrozenRightKey() === key;
+  }
+
+  isColumnResizable(col: NeuTableColumn): boolean {
+    return this.resizableColumns() && col.resizable !== false;
+  }
+
+  columnWidth(col: NeuTableColumn): string | null {
+    const resized = this._columnWidths()[col.key];
+    if (resized != null) {
+      return `${resized}px`;
+    }
+
+    return col.width ?? null;
+  }
+
+  startColumnResize(col: NeuTableColumn, event: MouseEvent): void {
+    if (!this.isColumnResizable(col) || !isPlatformBrowser(this._platformId)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const headerCell = (event.currentTarget as HTMLElement | null)?.closest('th');
+    const startWidth =
+      (headerCell instanceof HTMLElement ? headerCell.getBoundingClientRect().width : 0) ||
+      this._columnWidthPx(col) ||
+      160;
+    const startX = event.clientX;
+    const minWidth = col.minWidth ?? 96;
+    const maxWidth = col.maxWidth ?? Number.POSITIVE_INFINITY;
+
+    this._stopColumnResize();
+
+    const onMove = (moveEvent: MouseEvent) => {
+      const nextWidth = Math.min(
+        maxWidth,
+        Math.max(minWidth, Math.round(startWidth + (moveEvent.clientX - startX))),
+      );
+      this._setColumnWidth(col.key, nextWidth);
+    };
+
+    const onUp = () => {
+      const width = this._columnWidths()[col.key];
+      if (width != null) {
+        this.columnResize.emit({ key: col.key, width });
+      }
+      this._stopColumnResize();
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    this._resizeCleanup = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      this._resizeCleanup = null;
+    };
+  }
+
+  resetColumnWidth(key: string, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    this._columnWidths.update((current) => {
+      if (!(key in current)) {
+        return current;
+      }
+
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
   }
 
   // ── Expansión de filas ────────────────────────────────────────────────
@@ -1560,6 +1655,28 @@ export class NeuTableComponent {
 
   getRowClass(row: Row): string {
     return this.rowClass()?.(row) ?? '';
+  }
+
+  private _columnWidthPx(col: NeuTableColumn): number | null {
+    const resized = this._columnWidths()[col.key];
+    if (resized != null) {
+      return resized;
+    }
+
+    if (!col.width || col.width === 'auto') {
+      return null;
+    }
+
+    const px = Number.parseFloat(col.width);
+    return Number.isNaN(px) ? null : px;
+  }
+
+  private _setColumnWidth(key: string, width: number): void {
+    this._columnWidths.update((current) => ({ ...current, [key]: width }));
+  }
+
+  private _stopColumnResize(): void {
+    this._resizeCleanup?.();
   }
 
   getCellValue(row: Row, col: NeuTableColumn): string {

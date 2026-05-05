@@ -30,6 +30,10 @@ const stylesWildcardExport = {
 
 const stylesEntryContent = "@forward './styles/index';\n";
 
+if (!isWatchMode && existsSync(distPackageRoot)) {
+  rmSync(distPackageRoot, { recursive: true, force: true });
+}
+
 function patchDistPackageJson() {
   if (!existsSync(distPackageJsonPath)) {
     return;
@@ -71,7 +75,10 @@ function patchDistPackageJson() {
     writeFileSync(distPackageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
   }
 
-  if (!existsSync(distStylesEntryPath) || readFileSync(distStylesEntryPath, 'utf8') !== stylesEntryContent) {
+  if (
+    !existsSync(distStylesEntryPath) ||
+    readFileSync(distStylesEntryPath, 'utf8') !== stylesEntryContent
+  ) {
     writeFileSync(distStylesEntryPath, stylesEntryContent);
   }
 

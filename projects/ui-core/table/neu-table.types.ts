@@ -79,11 +79,14 @@ export interface NeuTableColumn<T = Record<string, unknown>> {
   key: string;
   header: string;
   width?: string;
+  minWidth?: number;
+  maxWidth?: number;
   align?: 'left' | 'center' | 'right';
   cell?: (row: T) => string;
   cellTemplate?: TemplateRef<{ $implicit: T; row: T; column: NeuTableColumn<T> }>;
   cellClass?: string;
   sortable?: boolean;
+  resizable?: boolean;
   type?: NeuTableCellType;
   // Badge
   badgeMap?: Record<string, NeuTableBadgeConfig>;

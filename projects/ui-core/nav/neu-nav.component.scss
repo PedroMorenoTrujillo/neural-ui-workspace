@@ -241,11 +241,11 @@ $item-radius: 8px;
   // Estado activo
   &--active {
     background: var(--neu-primary-50);
-    color: var(--neu-primary);
+    color: var(--neu-primary-dark, var(--neu-primary));
     font-weight: 600;
 
     .neu-nav__item-icon {
-      color: var(--neu-primary);
+      color: var(--neu-primary-dark, var(--neu-primary));
     }
 
     // Línea de acento izquierda
@@ -256,7 +256,7 @@ $item-radius: 8px;
       top: 6px;
       bottom: 6px;
       width: 3px;
-      background: var(--neu-primary);
+      background: var(--neu-primary-dark, var(--neu-primary));
       border-radius: 0 var(--neu-radius-full) var(--neu-radius-full) 0;
     }
   }

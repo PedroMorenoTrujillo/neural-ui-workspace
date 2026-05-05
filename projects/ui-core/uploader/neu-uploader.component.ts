@@ -65,13 +65,8 @@ let _neuUploaderIdSeq = 0;
       @if (dropzone()) {
         <div
           class="neu-uploader__dropzone"
-          role="button"
-          [attr.tabindex]="isDisabledFinal() ? '-1' : '0'"
-          [attr.aria-disabled]="isDisabledFinal() ? 'true' : null"
           [attr.aria-describedby]="describedBy()"
           (click)="openFilePicker()"
-          (keydown.enter)="onDropzoneKey($any($event))"
-          (keydown.space)="onDropzoneKey($any($event))"
           (dragover)="onDragOver($event)"
           (dragleave)="onDragLeave($event)"
           (drop)="onDrop($event)"
