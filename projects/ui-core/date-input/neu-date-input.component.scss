@@ -11,6 +11,19 @@ $drum-item-h: 36px;
 .neu-date-input-host {
   display: block;
   font-family: var(--neu-font-sans);
+
+  &--sm {
+    .neu-date-input__trigger {
+      min-height: 36px;
+      font-size: var(--neu-text-sm);
+    }
+  }
+
+  &--lg {
+    .neu-date-input__trigger {
+      min-height: 56px;
+    }
+  }
 }
 
 // ---- Label ----
@@ -688,10 +701,3 @@ $drum-item-h: 36px;
 
 // ---- Sizes / Tamaños ----------------------------------------
 // sm: 36px | md: 48px (default) | lg: 56px
-.neu-date-input-host--sm .neu-date-input__trigger {
-  min-height: 36px;
-  font-size: var(--neu-text-sm);
-}
-.neu-date-input-host--lg .neu-date-input__trigger {
-  min-height: 56px;
-}

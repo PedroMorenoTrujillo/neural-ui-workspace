@@ -6,6 +6,30 @@
     opacity: 0.55;
     pointer-events: none;
   }
+
+  &--sm {
+    .neu-autocomplete__input {
+      height: 36px;
+      font-size: var(--neu-text-sm, 0.875rem);
+    }
+  }
+
+  &--lg {
+    .neu-autocomplete__input {
+      height: 56px;
+    }
+  }
+
+  &--floating#{&}--focused {
+    .neu-autocomplete__input::placeholder {
+      color: var(--neu-text-disabled, #9ca3af);
+    }
+
+    .neu-autocomplete__input {
+      border-color: var(--neu-primary, #0ea5e9);
+      box-shadow: var(--neu-focus-ring, 0 0 0 3px rgb(14 165 233 / 0.2));
+    }
+  }
 }
 
 /* ── Label ───────────────────────────────────────────────────── */
@@ -65,11 +89,6 @@
   }
 }
 
-// Placeholder visible cuando el input está enfocado (label ya flotó)
-.neu-autocomplete--floating.neu-autocomplete--focused .neu-autocomplete__input::placeholder {
-  color: var(--neu-text-disabled, #9ca3af);
-}
-
 /* ── Floating Label ───────────────────────────────────────────── */
 .neu-autocomplete__floating-label {
   position: absolute;
@@ -107,12 +126,6 @@
   .neu-autocomplete--focused & {
     color: var(--neu-primary, #0ea5e9);
   }
-}
-
-// En modo floating con foco: borde primario en el input-wrap
-.neu-autocomplete--floating.neu-autocomplete--focused .neu-autocomplete__input {
-  border-color: var(--neu-primary, #0ea5e9);
-  box-shadow: var(--neu-focus-ring, 0 0 0 3px rgb(14 165 233 / 0.2));
 }
 
 /* ── Clear button ─────────────────────────────────────────────── */
@@ -244,14 +257,4 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* ---- Sizes / Tamaños ----------------------------------------
-   sm: 36px | md: 48px (default) | lg: 56px                     */
-.neu-autocomplete--sm .neu-autocomplete__input {
-  height: 36px;
-  font-size: var(--neu-text-sm, 0.875rem);
-}
-.neu-autocomplete--lg .neu-autocomplete__input {
-  height: 56px;
 }

@@ -13,6 +13,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-05-05
+
+### Added
+
+- `NeuTreeComponent` (`@neural-ui/core/tree`) — árbol jerárquico interactivo con soporte de expansión, selección simple/múltiple, lazy loading y teclado completo (flechas, Enter, Space).
+- `NeuTreeTableComponent` (`@neural-ui/core/tree-table`) — tabla con filas expandibles en árbol, columnas configurables, selección y accesibilidad aria-treegrid.
+- `NeuTimelineGridComponent` (`@neural-ui/core/timeline-grid`) — vista de timeline horizontal tipo Gantt con posicionamiento por rango de fechas y scroll libre.
+- `NeuKanbanComponent` (`@neural-ui/core/kanban`) — tablero kanban con columnas, tarjetas drag-and-drop (CDK) y callbacks de cambio de estado.
+- `NeuImageGalleryComponent` (`@neural-ui/core/image-gallery`) — galería de imágenes con grid, lightbox integrado y navegación por teclado.
+- `NeuUploaderComponent` (`@neural-ui/core/uploader`) — componente de subida de archivos con drag-and-drop, validación de tipo/tamaño/duplicados, progreso y mensajes i18n totalmente configurables.
+
+### Fixed
+
+- `NeuUploaderComponent` — los fondos del dropzone y el estado de error ya no usan colores hardcoded (`rgba` fijo), sino `color-mix()` sobre tokens CSS (`--neu-primary`, `--neu-surface`, `--neu-error`); el componente ahora es totalmente compatible con temas oscuros y personalizados.
+- `NeuCalendarComponent` — mejoras en la navegación de meses, selección de rango y layout responsivo.
+- `NeuSelectComponent` / `NeuMultiselectComponent` — correcciones en sincronización de estado al usar `formControl` en combinación con cambios externos al valor.
+- `NeuTableComponent` — se endurece el guard de resize para evitar excepciones en columnas sin ancho definido.
+- `NeuSliderComponent` / `NeuStepperComponent` / `NeuPaginationComponent` — ajustes visuales de SCSS para compatibilidad con el sistema de tokens actualizado.
+
+### Improved
+
+- Design tokens (`styles/_tokens.scss`) — se añaden nuevas variables de espacio, radio y sombra para dar soporte a los nuevos componentes sin romper compatibilidad existente.
+- La cobertura automatizada se mantiene por encima del 96% statements con 1615+ tests pasando.
+
+---
+
 ## [1.4.0] - 2026-05-04
 
 ### Added

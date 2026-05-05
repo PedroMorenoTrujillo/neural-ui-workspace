@@ -6,6 +6,7 @@
         "entryFile": "public-api.ts"
     },
     "assets": [
+        "./styles.scss",
         {
             "input": "./styles",
             "glob": "**",

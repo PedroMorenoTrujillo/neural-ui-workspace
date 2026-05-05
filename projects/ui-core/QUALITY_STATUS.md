@@ -1,6 +1,6 @@
 # Neural UI Core Quality Status
 
-Last reviewed: 2026-05-04
+Last reviewed: 2026-05-05
 
 ## Executive Summary
 
@@ -8,10 +8,11 @@ Neural UI Core is currently aligned with the project's main engineering standard
 
 Validated coverage snapshot:
 
-- Statements: 96.75%
-- Branches: 95.67%
-- Functions: 94.98%
-- Lines: 98.02%
+- Statements: 96.43%
+- Branches: 95.05%
+- Functions: 95.05%
+- Lines: 97.79%
+- Unit tests: 1763 passing tests in ui-core
 
 The library presents a strong accessibility baseline across interactive components, but accessibility should be described as high-confidence rather than formally certified 100% component-by-component.
 
@@ -22,6 +23,7 @@ The library presents a strong accessibility baseline across interactive componen
 - Signals-first: yes
 - Standalone components: yes
 - OnPush by default: yes
+- BEM styling convention required for component styles: yes
 - Classic `@Input()` / `@Output()` decorators in `ui-core`: not found in review
 - `ChangeDetectionStrategy.Default` in `ui-core`: not found in review
 
@@ -48,10 +50,17 @@ The library presents a strong accessibility baseline across interactive componen
 - Showcase accessibility validation completed previously: yes
 - Formal 100% accessibility certification across all library components: no
 
+### Integration Validation Through Showcase
+
+- Playwright showcase report: 86 passed, 0 failed
+- Accessibility audit summary (`showcase-a11y-summary-final.json`): 67 passed, 0 failed
+- Validation model: showcase runs against the compiled `@neural-ui/core` package, so these checks act as integration validation of the library in real consumer flows
+
 ### Documentation / DX
 
 - README quality statement updated to current metrics: yes
 - Release-note style quality summary added to changelog: yes
+- BEM requirement documented as part of engineering standards: yes
 - Bilingual comments requirement fully re-audited line by line: not fully re-verified in this pass
 
 ## Accessibility Audit Snapshot
@@ -93,4 +102,6 @@ This is a rapid engineering audit, not a full WCAG certification.
 
 Use this wording in documentation or internal reporting:
 
-"Neural UI Core is aligned with a signals-first, standalone, OnPush and zoneless-oriented Angular architecture, exceeds 90% global coverage, and maintains a strong accessibility baseline with ARIA, keyboard navigation and focus management across its main interactive components. Accessibility quality is high-confidence, although not formally certified as 100% component-by-component."
+"Neural UI Core is aligned with a signals-first, standalone, OnPush and zoneless-oriented Angular architecture, uses BEM as its required styling convention, exceeds 90% coverage in every main metric and in every covered ui-core source file, and maintains a strong accessibility baseline with ARIA, keyboard navigation and focus management across its main interactive components. Accessibility quality is high-confidence, although not formally certified as 100% component-by-component."
+
+For styling standards, component and demo styles are expected to follow BEM naming and BEM-oriented SCSS grouping rather than flat ad hoc selector organization.

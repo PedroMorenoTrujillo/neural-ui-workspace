@@ -5,48 +5,47 @@
   gap: 8px;
   background: var(--neu-toolbar-bg, var(--neu-surface-1, #ffffff));
   color: var(--neu-toolbar-color, var(--neu-text-primary, #111));
-}
 
-/* ── Sizes ───────────────────────────────────────────────────── */
-.neu-toolbar--sm {
-  padding: 6px 12px;
-  min-height: 40px;
-}
-.neu-toolbar--md {
-  padding: 8px 16px;
-  min-height: 52px;
-}
-.neu-toolbar--lg {
-  padding: 12px 20px;
-  min-height: 64px;
-}
-
-/* ── Surface variants ────────────────────────────────────────── */
-.neu-toolbar--primary {
-  background: var(--neu-toolbar-primary-bg, var(--neu-primary-dark, var(--neu-primary)));
-  color: var(--neu-toolbar-primary-color, #fff);
-}
-
-.neu-toolbar--primary .neu-button--ghost {
-  color: rgb(255 255 255 / 0.92);
-
-  &:hover:not(:disabled):not(.neu-button--disabled) {
-    background: rgb(255 255 255 / 0.12);
-    color: #fff;
+  &--sm {
+    padding: 6px 12px;
+    min-height: 40px;
   }
-}
 
-.neu-toolbar--none {
-  background: transparent;
-}
+  &--md {
+    padding: 8px 16px;
+    min-height: 52px;
+  }
 
-/* ── Modifiers ──────────────────────────────────────────────── */
-.neu-toolbar--shadow {
-  box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.1);
-}
+  &--lg {
+    padding: 12px 20px;
+    min-height: 64px;
+  }
 
-.neu-toolbar--bordered {
-  border-bottom: 1px solid var(--neu-border-color, #e5e7eb);
+  &--primary {
+    background: var(--neu-toolbar-primary-bg, var(--neu-primary-dark, var(--neu-primary)));
+    color: var(--neu-toolbar-primary-color, #fff);
+
+    .neu-button--ghost {
+      color: rgb(255 255 255 / 0.92);
+
+      &:hover:not(:disabled):not(.neu-button--disabled) {
+        background: rgb(255 255 255 / 0.12);
+        color: #fff;
+      }
+    }
+  }
+
+  &--none {
+    background: transparent;
+  }
+
+  &--shadow {
+    box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.1);
+  }
+
+  &--bordered {
+    border-bottom: 1px solid var(--neu-border-color, #e5e7eb);
+  }
 }
 
 /* ── Sections ───────────────────────────────────────────────── */

@@ -21,6 +21,48 @@
   gap: 6px;
   width: 100%;
   font-family: var(--neu-font-sans);
+
+  &--sm {
+    .neu-progress__track {
+      height: 4px;
+    }
+  }
+
+  &--md {
+    .neu-progress__track {
+      height: 8px;
+    }
+  }
+
+  &--lg {
+    .neu-progress__track {
+      height: 12px;
+    }
+  }
+
+  &--primary {
+    .neu-progress__fill {
+      background: var(--neu-primary);
+    }
+  }
+
+  &--success {
+    .neu-progress__fill {
+      background: var(--neu-success);
+    }
+  }
+
+  &--warning {
+    .neu-progress__fill {
+      background: var(--neu-warning);
+    }
+  }
+
+  &--danger {
+    .neu-progress__fill {
+      background: var(--neu-error);
+    }
+  }
 }
 
 .neu-progress__header {
@@ -52,17 +94,6 @@
   overflow: hidden;
 }
 
-// ---- Tamaños / Sizes ----
-.neu-progress--sm .neu-progress__track {
-  height: 4px;
-}
-.neu-progress--md .neu-progress__track {
-  height: 8px;
-}
-.neu-progress--lg .neu-progress__track {
-  height: 12px;
-}
-
 // ---- Fill ----
 .neu-progress__fill {
   height: 100%;
@@ -74,18 +105,4 @@
     width: 50% !important;
     animation: neu-progress-indeterminate 1.4s ease-in-out infinite;
   }
-}
-
-// ---- Variantes / Variants ----
-.neu-progress--primary .neu-progress__fill {
-  background: var(--neu-primary);
-}
-.neu-progress--success .neu-progress__fill {
-  background: var(--neu-success);
-}
-.neu-progress--warning .neu-progress__fill {
-  background: var(--neu-warning);
-}
-.neu-progress--danger .neu-progress__fill {
-  background: var(--neu-error);
 }

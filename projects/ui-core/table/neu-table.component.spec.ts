@@ -1144,7 +1144,7 @@ describe('NeuTableComponent', () => {
       preventDefault,
       stopPropagation,
       currentTarget: null,
-    } as MouseEvent);
+    } as unknown as MouseEvent);
 
     expect(preventDefault).not.toHaveBeenCalled();
     expect(stopPropagation).not.toHaveBeenCalled();

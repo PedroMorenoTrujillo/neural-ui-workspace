@@ -5,6 +5,18 @@
   z-index: 100;
   pointer-events: none;
   display: contents; /* lets overlay be the only visible child */
+
+  &--dark {
+    .neu-block-ui__overlay {
+      background: var(--neu-block-ui-bg, rgba(0, 0, 0, 0.5));
+    }
+  }
+
+  &--light {
+    .neu-block-ui__overlay {
+      background: var(--neu-block-ui-bg, rgba(255, 255, 255, 0.9));
+    }
+  }
 }
 
 /* ── Overlay ─────────────────────────────────────────────────── */
@@ -19,14 +31,6 @@
   pointer-events: all;
   backdrop-filter: blur(1px);
   z-index: 100;
-}
-
-.neu-block-ui--dark .neu-block-ui__overlay {
-  background: var(--neu-block-ui-bg, rgba(0, 0, 0, 0.5));
-}
-
-.neu-block-ui--light .neu-block-ui__overlay {
-  background: var(--neu-block-ui-bg, rgba(255, 255, 255, 0.9));
 }
 
 /* ── Content ─────────────────────────────────────────────────── */

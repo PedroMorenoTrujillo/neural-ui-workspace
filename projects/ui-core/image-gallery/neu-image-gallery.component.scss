@@ -1,11 +1,11 @@
 .neu-image-gallery {
   display: grid;
   gap: var(--neu-space-3);
-}
 
-.neu-image-gallery--left {
-  grid-template-columns: 88px minmax(0, 1fr);
-  align-items: start;
+  &--left {
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: start;
+  }
 }
 
 .neu-image-gallery__stage {
@@ -131,8 +131,10 @@
 }
 
 @media (max-width: 720px) {
-  .neu-image-gallery--left {
-    grid-template-columns: 1fr;
+  .neu-image-gallery {
+    &--left {
+      grid-template-columns: 1fr;
+    }
   }
 
   .neu-image-gallery__thumbs--left {

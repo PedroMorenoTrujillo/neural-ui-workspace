@@ -10,14 +10,20 @@
   background: var(--neu-surface);
   overflow: hidden;
   box-shadow: var(--neu-shadow-sm);
-}
 
-.neu-table-container--bordered {
-  border: 1px solid var(--neu-border);
-}
+  &--bordered {
+    border: 1px solid var(--neu-border);
+  }
 
-.neu-table-container--rounded {
-  border-radius: var(--neu-radius-lg);
+  &--rounded {
+    border-radius: var(--neu-radius-lg);
+  }
+
+  &--striped {
+    .neu-table__row:not(.neu-table__row--selected):nth-child(even) {
+      background: color-mix(in srgb, var(--neu-surface-2) 70%, transparent);
+    }
+  }
 }
 
 // ---- Toolbar ----
@@ -207,36 +213,43 @@
   border-spacing: 0;
   font-size: var(--neu-text-sm);
   min-width: 400px; // fuerza scroll en pantallas menores a 400px
-}
 
-// ---- Cabecera fija / Sticky header ----
-// Activado con [stickyHeader]="true". Usa --neu-table-max-height para controlar la altura.
-// Enabled via [stickyHeader]="true". Use --neu-table-max-height to control container height.
-.neu-table--sticky-header {
-  .neu-table__scroll-container {
-    overflow-y: auto;
-    max-height: var(--neu-table-max-height, 480px);
+  &--sticky-header {
+    .neu-table__scroll-container {
+      overflow-y: auto;
+      max-height: var(--neu-table-max-height, 480px);
+    }
+
+    .neu-table__head tr:first-child .neu-table__th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--neu-surface-2);
+      box-shadow: inset 0 -1px 0 var(--neu-border);
+    }
+
+    .neu-table__th--filter,
+    .neu-table__th--filter-placeholder {
+      position: sticky;
+      top: var(--neu-table-header-height, 44px);
+      z-index: 1;
+      background: var(--neu-surface-2);
+    }
   }
 
-  // Primera fila del encabezado — se pega al top del contenedor scrollable
-  // First header row — sticks to the top of the scrollable container
-  .neu-table__head tr:first-child .neu-table__th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--neu-surface-2);
-    // Mantiene la línea separadora visible al hacer scroll / Keep separator visible on scroll
-    box-shadow: inset 0 -1px 0 var(--neu-border);
-  }
+  &--scrollable {
+    .neu-table__scroll-container {
+      max-height: 480px;
+      overflow-y: auto;
+    }
 
-  // Fila de filtros de columna (segunda fila del thead, opcional)
-  // Column filter row (optional second thead row)
-  .neu-table__th--filter,
-  .neu-table__th--filter-placeholder {
-    position: sticky;
-    top: var(--neu-table-header-height, 44px);
-    z-index: 1;
-    background: var(--neu-surface-2);
+    .neu-table__head .neu-table__th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--neu-surface-2);
+      box-shadow: 0 1px 0 var(--neu-border);
+    }
   }
 }
 
@@ -402,10 +415,6 @@
   &--clickable {
     cursor: pointer;
   }
-}
-
-.neu-table-container--striped .neu-table__row:not(.neu-table__row--selected):nth-child(even) {
-  background: color-mix(in srgb, var(--neu-surface-2) 70%, transparent);
 }
 
 .neu-table__td {
@@ -1042,20 +1051,4 @@
 
 .neu-table__col-filter-select {
   cursor: pointer;
-}
-
-// ── Scrollable table ───────────────────────────────────────────────────
-.neu-table--scrollable {
-  .neu-table__scroll-container {
-    max-height: 480px;
-    overflow-y: auto;
-  }
-
-  .neu-table__head .neu-table__th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--neu-surface-2);
-    box-shadow: 0 1px 0 var(--neu-border);
-  }
 }

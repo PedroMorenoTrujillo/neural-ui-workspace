@@ -15,6 +15,19 @@ $select-height: 48px;
     opacity: 0.6;
     pointer-events: none;
   }
+
+  &--sm {
+    .neu-select__trigger {
+      height: 36px;
+      font-size: var(--neu-text-sm);
+    }
+  }
+
+  &--lg {
+    .neu-select__trigger {
+      height: 56px;
+    }
+  }
 }
 
 // ---- Trigger ----
@@ -375,14 +388,4 @@ $select-height: 48px;
   font-size: var(--neu-text-sm);
   color: var(--neu-text-disabled);
   font-family: var(--neu-font-sans);
-}
-
-// ---- Sizes / Tamaños ----------------------------------------
-// sm: 36px | md: 48px (default) | lg: 56px
-.neu-select--sm .neu-select__trigger {
-  height: 36px;
-  font-size: var(--neu-text-sm);
-}
-.neu-select--lg .neu-select__trigger {
-  height: 56px;
 }

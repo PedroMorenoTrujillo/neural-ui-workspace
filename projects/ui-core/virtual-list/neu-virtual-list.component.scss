@@ -12,9 +12,9 @@
   display: flex;
   align-items: center;
   padding: 0 12px;
-  border-bottom: 1px solid var(--neu-border-color, #e5e7eb);
+  border-bottom: 1px solid var(--neu-border);
   font-size: 0.875rem;
-  color: var(--neu-text-primary, #111);
+  color: var(--neu-text);
 }
 
 .neu-virtual-list__empty {
@@ -22,6 +22,6 @@
   align-items: center;
   justify-content: center;
   padding: 32px;
-  color: var(--neu-text-secondary, #6b7280);
+  color: var(--neu-text-muted);
   font-size: 0.875rem;
 }

@@ -8,40 +8,38 @@
   font-size: 0.875rem;
   line-height: 1.5;
   position: relative;
-}
 
-.neu-alert--dismissed {
-  display: none;
-}
+  &--dismissed {
+    display: none;
+  }
 
-/* ── Types ─────────────────────────────────────────────────────── */
-.neu-alert--info {
-  background: var(--neu-alert-info-bg, #eff6ff);
-  border-color: var(--neu-alert-info-border, #bfdbfe);
-  color: var(--neu-alert-info-text, #1d4ed8);
-}
+  &--info {
+    background: var(--neu-alert-info-bg, #eff6ff);
+    border-color: var(--neu-alert-info-border, #bfdbfe);
+    color: var(--neu-alert-info-text, #1d4ed8);
+  }
 
-.neu-alert--success {
-  background: var(--neu-alert-success-bg, #f0fdf4);
-  border-color: var(--neu-alert-success-border, #bbf7d0);
-  color: var(--neu-alert-success-text, #15803d);
-}
+  &--success {
+    background: var(--neu-alert-success-bg, #f0fdf4);
+    border-color: var(--neu-alert-success-border, #bbf7d0);
+    color: var(--neu-alert-success-text, #15803d);
+  }
 
-.neu-alert--warning {
-  background: var(--neu-alert-warning-bg, #fffbeb);
-  border-color: var(--neu-alert-warning-border, #fde68a);
-  color: var(--neu-alert-warning-text, #b45309);
-}
+  &--warning {
+    background: var(--neu-alert-warning-bg, #fffbeb);
+    border-color: var(--neu-alert-warning-border, #fde68a);
+    color: var(--neu-alert-warning-text, #b45309);
+  }
 
-.neu-alert--error {
-  background: var(--neu-alert-error-bg, #fef2f2);
-  border-color: var(--neu-alert-error-border, #fecaca);
-  color: var(--neu-alert-error-text, #b91c1c);
-}
+  &--error {
+    background: var(--neu-alert-error-bg, #fef2f2);
+    border-color: var(--neu-alert-error-border, #fecaca);
+    color: var(--neu-alert-error-text, #b91c1c);
+  }
 
-/* ── Outline variant ────────────────────────────────────────────── */
-.neu-alert--outline {
-  background: transparent;
+  &--outline {
+    background: transparent;
+  }
 }
 
 /* ── Icon ──────────────────────────────────────────────────────── */

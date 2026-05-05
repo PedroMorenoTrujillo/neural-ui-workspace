@@ -18,8 +18,8 @@
 .neu-dg__tile {
   grid-column: span var(--tile-cols, 1);
   grid-row: span var(--tile-rows, 1);
-  background: var(--neu-surface-1, #ffffff);
-  border: 1px solid var(--neu-border-color, #e5e7eb);
+  background: var(--neu-surface);
+  border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius-xl, 16px);
   overflow: hidden;
   display: flex;
@@ -37,7 +37,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--neu-border-color, #f3f4f6);
+  border-bottom: 1px solid var(--neu-border);
   cursor: grab;
   user-select: none;
 
@@ -49,12 +49,12 @@
 .neu-dg__tile-title {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--neu-text-primary, #111);
+  color: var(--neu-text);
 }
 
 .neu-dg__handle-icon {
   font-size: 1rem;
-  color: var(--neu-text-secondary, #9ca3af);
+  color: var(--neu-text-muted);
   letter-spacing: 2px;
 }
 
@@ -74,8 +74,8 @@
 
 /* ── Drag states ──────────────────────────────────────────────── */
 .neu-dg__placeholder {
-  background: var(--neu-color-primary-alpha, rgb(14 165 233 / 0.1));
-  border: 2px dashed var(--neu-color-primary, #0ea5e9);
+  background: color-mix(in srgb, var(--neu-primary) 10%, transparent);
+  border: 2px dashed var(--neu-primary);
   border-radius: var(--neu-radius-xl, 16px);
 }
 
@@ -84,8 +84,8 @@
   align-items: center;
   justify-content: center;
   padding: 12px 20px;
-  background: var(--neu-surface-1, #fff);
-  border: 1px solid var(--neu-border-color, #e5e7eb);
+  background: var(--neu-surface);
+  border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius-xl, 16px);
   box-shadow: 0 8px 20px -4px rgb(0 0 0 / 0.14);
   font-size: 0.875rem;

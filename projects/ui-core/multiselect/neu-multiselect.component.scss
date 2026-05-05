@@ -66,6 +66,21 @@ $panel-z: 200;
 .neu-multiselect {
   position: relative;
   font-family: var(--neu-font-sans);
+
+  &--sm {
+    .neu-multiselect__trigger {
+      min-height: 36px;
+      font-size: var(--neu-text-sm);
+      padding: var(--neu-space-1) var(--neu-space-2);
+      padding-right: 36px;
+    }
+  }
+
+  &--lg {
+    .neu-multiselect__trigger {
+      min-height: 56px;
+    }
+  }
 }
 
 // ---- Trigger ----
@@ -508,16 +523,4 @@ $panel-z: 200;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-// ---- Sizes / Tamaños ----------------------------------------
-// sm: 36px | md: 48px (default) | lg: 56px
-.neu-multiselect--sm .neu-multiselect__trigger {
-  min-height: 36px;
-  font-size: var(--neu-text-sm);
-  padding: var(--neu-space-1) var(--neu-space-2);
-  padding-right: 36px;
-}
-.neu-multiselect--lg .neu-multiselect__trigger {
-  min-height: 56px;
 }

@@ -3,6 +3,12 @@
   flex-direction: column;
   gap: 10px;
   width: 100%;
+
+  &--rounded {
+    .neu-meter-group__bar {
+      border-radius: var(--neu-radius-full, 9999px);
+    }
+  }
 }
 
 /* ── Bar ─────────────────────────────────────────────────────── */
@@ -13,10 +19,6 @@
   background: var(--neu-meter-track, #e5e7eb);
   overflow: hidden;
   border-radius: 0;
-}
-
-.neu-meter-group--rounded .neu-meter-group__bar {
-  border-radius: var(--neu-radius-full, 9999px);
 }
 
 /* ── Segments (color via data-index as fallback palette) ─────── */
