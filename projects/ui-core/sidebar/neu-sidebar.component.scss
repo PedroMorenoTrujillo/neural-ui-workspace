@@ -160,3 +160,52 @@
     display: none;
   }
 }
+
+// ---- Collapsed mode (icon-only) / Modo colapsado (solo iconos) ----
+.neu-sidebar--collapsed {
+  width: var(--neu-sidebar-collapsed-width, 60px) !important;
+
+  .neu-sidebar__header {
+    flex-direction: column;
+    justify-content: center;
+    padding: 0;
+    min-height: var(--neu-header-height, 64px);
+
+    .neu-sidebar__title {
+      display: none;
+    }
+  }
+
+  .neu-sidebar__content {
+    padding: var(--neu-space-2) 0;
+  }
+
+  // Hide text labels in nav items via CSS (assumes items have class like .nav-item or similar)
+  // Applications can further style nav items inside collapsed sidebar
+  a,
+  button {
+    span:not([neu-sidebar-header]) {
+      max-width: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition:
+        max-width var(--neu-transition),
+        opacity var(--neu-transition);
+    }
+  }
+
+  .neu-sidebar__footer {
+    padding: var(--neu-space-2) var(--neu-space-3);
+    min-height: auto;
+
+    span {
+      display: none;
+    }
+  }
+
+  // Close button in collapsed mode (if not persistent)
+  .neu-sidebar__close {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -250,6 +250,7 @@ describe('NeuSidebarComponent', () => {
 
   it('aside should have role="navigation"', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('persistent', true);
     f.detectChanges();
     expect(f.nativeElement.querySelector('[role="navigation"]')).toBeTruthy();
   });
@@ -348,5 +349,54 @@ describe('NeuSidebarComponent', () => {
 
     expect(f.componentInstance.isOpen()).toBe(true);
     expect(_mockGetParam).toHaveBeenCalledTimes(1);
+  });
+
+  // ── Collapsed mode ────────────────────────────────────────────────────────
+
+  it('should apply neu-sidebar--collapsed class when collapsed=true', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-sidebar--collapsed')).toBeTruthy();
+  });
+
+  it('should NOT apply neu-sidebar--collapsed class when collapsed=false', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-sidebar--collapsed')).toBeFalsy();
+  });
+
+  // ── Drawer mode a11y (role="dialog" + aria-modal) ────────────────────────
+
+  it('should have role="dialog" and aria-modal="true" in drawer mode (non-persistent)', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('persistent', false);
+    f.detectChanges();
+    const aside = f.nativeElement.querySelector('aside.neu-sidebar');
+    expect(aside?.getAttribute('role')).toBe('dialog');
+    expect(aside?.getAttribute('aria-modal')).toBe('true');
+  });
+
+  it('should have role="navigation" in persistent mode', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('persistent', true);
+    f.detectChanges();
+    const aside = f.nativeElement.querySelector('aside.neu-sidebar');
+    expect(aside?.getAttribute('role')).toBe('navigation');
+    expect(aside?.getAttribute('aria-modal')).toBe('false');
+  });
+
+  // ── Focus management ──────────────────────────────────────────────────────
+
+  it('collapsedChange should emit when collapsed input changes', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.detectChanges();
+    let emittedValue: boolean | null = null;
+    f.componentInstance.collapsedChange.subscribe((value) => {
+      emittedValue = value;
+    });
+    f.componentInstance.toggleCollapsed();
+    expect(emittedValue).toBe(true);
   });
 });

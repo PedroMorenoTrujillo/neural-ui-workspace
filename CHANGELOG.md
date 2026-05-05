@@ -13,6 +13,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.1] - 2026-05-05
+
+### Added
+
+- `NeuSidebarComponent` — new `collapsed` input for icon-only mode in persistent sidebars (desktop layouts).
+- `NeuSidebarComponent` — new `collapsedChange` output for two-way binding `[(collapsed)]`.
+
+### Improved
+
+- `NeuSidebarComponent` — enhanced a11y in drawer mode:
+  - Dynamic `role="dialog"` + `aria-modal="true"` when sidebar is in drawer (non-persistent) mode.
+  - Focus management: automatically moves focus to first focusable element when opening in drawer mode.
+  - Focus trap: Tab/Shift+Tab navigation cycles within the drawer while open.
+  - Focus restoration: returns focus to the previously active element when closing the drawer.
+  - Updated tests: 7 new test cases for collapsed mode, role/aria-modal, and focus management.
+
+---
+
 ## [1.5.0] - 2026-05-05
 
 ### Added

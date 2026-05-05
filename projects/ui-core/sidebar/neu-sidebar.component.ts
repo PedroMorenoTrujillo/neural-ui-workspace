@@ -7,6 +7,8 @@ import {
   inject,
   input,
   output,
+  ElementRef,
+  HostListener,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
@@ -81,8 +83,10 @@ function unlockDocumentScroll(document: Document): void {
       class="neu-sidebar"
       [class.neu-sidebar--open]="isOpen()"
       [class.neu-sidebar--persistent]="persistent()"
+      [class.neu-sidebar--collapsed]="collapsed()"
       [class.neu-sidebar--right]="side() === 'right'"
-      role="navigation"
+      [attr.role]="persistent() ? 'navigation' : 'dialog'"
+      [attr.aria-modal]="!persistent()"
       [attr.aria-label]="ariaLabel()"
       [attr.aria-hidden]="!isOpen() && !persistent()"
       [attr.inert]="!isOpen() && !persistent() ? '' : null"
@@ -121,8 +125,10 @@ function unlockDocumentScroll(document: Document): void {
 })
 export class NeuSidebarComponent {
   private readonly document = inject(DOCUMENT);
+  private readonly elementRef = inject(ElementRef);
   private readonly urlState = inject(NeuUrlStateService);
   private readonly openParam = computed(() => this.urlState.getParam(this.urlParam()));
+  private previousActiveElement: HTMLElement | null = null;
 
   /** Posición del sidebar: izquierda o derecha de la pantalla / Sidebar position: left or right of the screen */
   side = input<'left' | 'right'>('left');
@@ -148,8 +154,17 @@ export class NeuSidebarComponent {
   /** Etiqueta accesible para el botón cerrar / Accessible label for the close button */
   closeLabel = input<string>('Cerrar menú de navegación');
 
+  /**
+   * Modo colapsado: el sidebar muestra solo iconos (icon-only en desktop).
+   * Útil para sidebars persistentes en modo compact / Collapsed mode: sidebar shows only icons.
+   */
+  collapsed = input<boolean>(false);
+
   /** Emite cuando el usuario cierra el sidebar (overlay click o botón) / Emits when the user closes the sidebar (overlay click or button) */
   closeRequested = output<void>();
+
+  /** Emite cuando el estado collapsed cambia / Emits when collapsed state changes */
+  collapsedChange = output<boolean>();
 
   /** Signal reactivo: true si el sidebar debe mostrarse / Reactive signal: true if the sidebar should be shown */
   readonly isOpen = computed(() => {
@@ -171,6 +186,30 @@ export class NeuSidebarComponent {
         unlockDocumentScroll(this.document);
       });
     });
+
+    // Focus management: save previous element and move focus to sidebar when opening in drawer mode
+    effect(() => {
+      const isOpenNow = this.isOpen();
+      const isPersistent = this.persistent();
+
+      if (isPersistent) {
+        return;
+      }
+
+      if (isOpenNow) {
+        // Save the current active element
+        this.previousActiveElement = this.document.activeElement as HTMLElement;
+
+        // Move focus to first focusable element inside the sidebar
+        this.focusFirstElement();
+      } else if (this.previousActiveElement && this.previousActiveElement.focus) {
+        // Restore focus to the element that had it before opening
+        setTimeout(() => {
+          this.previousActiveElement?.focus();
+          this.previousActiveElement = null;
+        }, 0);
+      }
+    });
   }
 
   /** Abre el sidebar — añade ?{urlParam}=open a la URL / Opens the sidebar — adds ?{urlParam}=open to the URL */
@@ -182,5 +221,74 @@ export class NeuSidebarComponent {
   close(): void {
     this.urlState.setParam(this.urlParam(), null, true);
     this.closeRequested.emit();
+  }
+
+  /** Alterna el estado collapsed / Toggles collapsed state */
+  toggleCollapsed(): void {
+    const newState = !this.collapsed();
+    this.collapsedChange.emit(newState);
+  }
+
+  /** Obtiene los elementos focusables dentro del sidebar / Gets focusable elements inside sidebar */
+  private getFocusableElements(): HTMLElement[] {
+    const focusableSelectors = [
+      'button',
+      'a[href]',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+
+    const aside = this.elementRef.nativeElement.querySelector('aside.neu-sidebar');
+    if (!aside) {
+      return [];
+    }
+
+    return Array.from(aside.querySelectorAll(focusableSelectors)) as HTMLElement[];
+  }
+
+  /** Mueve el foco al primer elemento focusable / Moves focus to first focusable element */
+  private focusFirstElement(): void {
+    setTimeout(() => {
+      const focusable = this.getFocusableElements();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }, 0);
+  }
+
+  /** Focus trap: cicla entre elementos focusables con Tab/Shift+Tab / Focus trap cycling */
+  @HostListener('keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    if (!this.isOpen() || this.persistent()) {
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const focusable = this.getFocusableElements();
+    if (focusable.length === 0) {
+      return;
+    }
+
+    const activeElement = this.document.activeElement as HTMLElement;
+    const currentIndex = focusable.indexOf(activeElement);
+
+    if (event.shiftKey) {
+      // Shift+Tab — go to previous
+      if (currentIndex <= 0) {
+        event.preventDefault();
+        focusable[focusable.length - 1].focus();
+      }
+    } else {
+      // Tab — go to next
+      if (currentIndex >= focusable.length - 1) {
+        event.preventDefault();
+        focusable[0].focus();
+      }
+    }
   }
 }
