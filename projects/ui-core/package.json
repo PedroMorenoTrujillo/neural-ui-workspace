@@ -1,6 +1,6 @@
 {
   "name": "@neural-ui/core",
-  "version": "1.3.0",
+  "version": "1.5.0",
   "description": "Modern Angular UI component library built with signals, standalone components, and OnPush change detection.",
   "author": "PedroMorenoTrujillo",
   "keywords": [
@@ -28,7 +28,8 @@
     "tslib": "^2.3.0"
   },
   "sideEffects": [
-    "./styles/*.scss"
+    "./styles/*.scss",
+    "./styles.scss"
   ],
   "repository": {
     "type": "git",
@@ -41,9 +42,9 @@
   },
   "exports": {
     "./styles": {
-      "sass": "./styles/index.scss",
-      "style": "./styles/index.scss",
-      "default": "./styles/index.scss"
+      "sass": "./styles.scss",
+      "style": "./styles.scss",
+      "default": "./styles.scss"
     },
     "./styles/*": {
       "sass": "./styles/*",
@@ -51,6 +52,6 @@
       "default": "./styles/*"
     }
   },
-  "sass": "./styles/index.scss",
-  "style": "./styles/index.scss"
+  "sass": "./styles.scss",
+  "style": "./styles.scss"
 }

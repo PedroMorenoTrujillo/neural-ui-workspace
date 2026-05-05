@@ -10,7 +10,6 @@ import { NeuDateInputComponent } from './neu-date-input.component';
     [label]="label"
     [hint]="hint"
     [errorMessage]="errorMessage"
-    [disabled]="disabled"
     [readonly]="readonly"
     [type]="type"
     [formControl]="ctrl"
@@ -21,7 +20,6 @@ class HostComponent {
   label = 'Fecha';
   hint = '';
   errorMessage = '';
-  disabled = false;
   readonly = false;
   type: 'date' | 'time' | 'datetime-local' = 'date';
   ctrl = new FormControl<string | null>(null);
@@ -882,5 +880,83 @@ describe('NeuDateInputComponent', () => {
       adjacentItems[0].click();
       f.detectChanges();
     }
+  });
+
+  it('displayValue should return an empty string when there is no value', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.detectChanges();
+
+    expect((f.componentInstance as any).displayValue()).toBe('');
+  });
+
+  it('displayValue should return the raw time string for type=time', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'time');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.writeValue('13:45');
+
+    expect(comp.displayValue()).toBe('13:45');
+  });
+
+  it('_rangeDisplayValue should fall back to placeholder when start date is empty', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.componentRef.setInput('placeholder', 'Selecciona un rango');
+    f.detectChanges();
+
+    expect((f.componentInstance as any)._rangeDisplayValue()).toBe('Selecciona un rango');
+  });
+
+  it('displayValue should return the raw value when type=date receives an invalid date string', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'date');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    comp.writeValue('fecha-invalida');
+
+    expect(comp.displayValue()).toBe('fecha-invalida');
+  });
+
+  it('displayValue for datetime-local should fall back to datePart and empty time when parsing fails', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'datetime-local');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    comp.writeValue('fecha-invalida');
+
+    expect(comp.displayValue()).toBe('fecha-invalida, ');
+  });
+
+  it('_fmtDate should use the short format fallback when dateFormat is unknown', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.componentRef.setInput('dateFormat', 'desconocido' as any);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const date = new Date(2025, 3, 5);
+
+    expect(comp._fmtDate(date)).toBe(
+      date.toLocaleDateString(comp._resolvedLocale(), {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }),
+    );
+  });
+
+  it('_rangeCell should mark dates in range when the hover date is before the selected start', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    comp._pickStart.set(new Date(2025, 3, 15));
+    comp._pickEnd.set(null);
+    comp._hoverDate.set(new Date(2025, 3, 5));
+
+    expect(comp._rangeCell(new Date(2025, 3, 10), true).inRange).toBe(true);
   });
 });

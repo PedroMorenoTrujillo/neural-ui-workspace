@@ -1,55 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Type,
+  ElementRef,
   ViewEncapsulation,
-  inject,
+  effect,
   input,
   output,
+  viewChild,
 } from '@angular/core';
-import { Dialog, DialogConfig, DialogRef } from '@angular/cdk/dialog';
-import { A11yModule } from '@angular/cdk/a11y';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
-
-/** Datos que se inyectan en el componente del diálogo / Data injected into the dialog component */
-export interface NeuDialogData<T = unknown> {
-  title?: string;
-  data?: T;
-}
-
-/**
- * NeuDialogService — Servicio para abrir diálogos programáticamente. / Service to open dialogs programmatically.
- *
- * Uso:
- *   const dialog = inject(NeuDialogService);
- *   const ref = dialog.open(MyContentComponent, { title: 'Editar', data: item });
- *   ref.closed.subscribe(result => console.log(result));
- */
-import { Injectable } from '@angular/core';
-
-@Injectable({ providedIn: 'root' })
-export class NeuDialogService {
-  private readonly dialog = inject(Dialog);
-
-  open<T = unknown, R = unknown>(
-    component: Type<unknown>,
-    config?: {
-      title?: string;
-      data?: T;
-      size?: NeuDialogSize;
-      disableClose?: boolean;
-    },
-  ): DialogRef<R> {
-    return this.dialog.open<R>(component, {
-      data: { title: config?.title, data: config?.data } satisfies NeuDialogData<T>,
-      panelClass: ['neu-dialog-panel', `neu-dialog-panel--${config?.size ?? 'md'}`],
-      backdropClass: 'neu-dialog-backdrop',
-      disableClose: config?.disableClose ?? false,
-    } satisfies DialogConfig);
-  }
-}
 
 /**
  * NeuDialogComponent — Diálogo accesible con header, body y footer. / Accessible dialog with header, body and footer.
@@ -67,7 +28,7 @@ export class NeuDialogService {
  */
 @Component({
   selector: 'neu-dialog',
-  imports: [NeuIconComponent, A11yModule],
+  imports: [NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -85,14 +46,14 @@ export class NeuDialogService {
 
       <!-- Panel -->
       <div
-        cdkTrapFocus
-        [cdkTrapFocusAutoCapture]="true"
+        #panel
         class="neu-dialog__panel neu-dialog__panel--{{ size() }}"
         role="dialog"
+        tabindex="-1"
         [id]="'neu-dialog-' + _uid"
         [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
         [attr.aria-modal]="true"
-        (keydown.escape)="!disableClose() && closed.emit()"
+        (keydown)="onPanelKeydown($event)"
       >
         <!-- Header -->
         <div class="neu-dialog__header">
@@ -134,6 +95,70 @@ export class NeuDialogComponent {
   /** Emite cuando el usuario cierra el diálogo. / Emits when the user closes the dialog. */
   closed = output<void>();
 
+  private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
+
   /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
   readonly _uid = Math.random().toString(36).slice(2, 7);
+
+  constructor() {
+    effect(() => {
+      if (!this.open()) return;
+
+      queueMicrotask(() => this.focusInitialElement());
+    });
+  }
+
+  onPanelKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      if (!this.disableClose()) {
+        this.closed.emit();
+      }
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+
+    const panel = this.panelRef()?.nativeElement;
+    if (!panel) return;
+
+    const focusable = this.getFocusableElements(panel);
+    if (!focusable.length) {
+      event.preventDefault();
+      panel.focus();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const activeElement = document.activeElement as HTMLElement | null;
+
+    if (event.shiftKey) {
+      if (activeElement === first || activeElement === panel) {
+        event.preventDefault();
+        last.focus();
+      }
+      return;
+    }
+
+    if (activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  private focusInitialElement(): void {
+    const panel = this.panelRef()?.nativeElement;
+    if (!panel) return;
+
+    const [firstFocusable] = this.getFocusableElements(panel);
+    (firstFocusable ?? panel).focus();
+  }
+
+  private getFocusableElements(panel: HTMLElement): HTMLElement[] {
+    return Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => !element.hasAttribute('aria-hidden'));
+  }
 }

@@ -7,6 +7,7 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -110,16 +111,15 @@ export class NeuAccordionComponent {
 
   constructor() {
     // Inicialización única desde items.expanded (equivalente a linkedSignal source+computation)
-    effect(
-      () => {
-        const items = this.items();
+    effect(() => {
+      const items = this.items();
+      untracked(() => {
         if (!this._expandedInit) {
           this._expanded.set(new Set(items.filter((i) => i.expanded).map((i) => i.id)));
           this._expandedInit = true;
         }
-      },
-      { allowSignalWrites: true },
-    );
+      });
+    });
   }
 
   readonly isExpanded = (id: string) => this._expanded().has(id);

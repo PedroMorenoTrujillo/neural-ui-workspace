@@ -57,18 +57,18 @@
 
     // ---- Activo / Active ----
     &--active {
-      background: var(--neu-primary);
-      color: var(--neu-primary-fg);
-      border-right-color: var(--neu-primary-dark);
+      background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+      color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+      border-right-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
 
       &:hover:not(:disabled):not(.neu-toggle-group__btn--disabled) {
-        background: var(--neu-primary-dark);
-        color: var(--neu-primary-fg);
+        background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+        color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
       }
 
       // El siguiente botón al activo ajusta su borde izquierdo
       & + .neu-toggle-group__btn {
-        border-left-color: var(--neu-primary-dark);
+        border-left-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
       }
     }
 

@@ -1,0 +1,90 @@
+.neu-tree-table__cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.neu-tree-table__cell--disabled {
+  opacity: 0.56;
+}
+
+.neu-tree-table__toggle {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--neu-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+
+  svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 160ms ease;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--neu-primary) 10%, transparent);
+    color: var(--neu-primary);
+  }
+}
+
+.neu-tree-table__toggle--open svg {
+  transform: rotate(90deg);
+}
+
+.neu-tree-table__toggle--placeholder {
+  cursor: default;
+}
+
+.neu-tree-table__content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.neu-tree-table__main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.neu-tree-table__label {
+  color: var(--neu-text);
+  font-weight: 600;
+}
+
+.neu-tree-table__description {
+  color: var(--neu-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.neu-tree-table__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.45rem;
+  min-height: 1.2rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--neu-primary) 12%, transparent);
+  color: var(--neu-primary-dark, var(--neu-primary));
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

@@ -12,6 +12,22 @@ $label-font-floating: 12px;
 // ---- Host ----
 .neu-input-host {
   display: block;
+
+  &--sm {
+    .neu-input__wrapper {
+      height: $input-height-sm;
+    }
+
+    .neu-input__field {
+      font-size: var(--neu-text-sm);
+    }
+  }
+
+  &--lg {
+    .neu-input__wrapper {
+      height: $input-height-lg;
+    }
+  }
 }
 
 // ---- Wrapper ----
@@ -215,12 +231,3 @@ $label-font-floating: 12px;
 
 // ---- Sizes / Tamaños ----------------------------------------
 // sm: 36px | md: 48px (default) | lg: 56px
-.neu-input-host--sm .neu-input__wrapper {
-  height: $input-height-sm;
-}
-.neu-input-host--sm .neu-input__field {
-  font-size: var(--neu-text-sm);
-}
-.neu-input-host--lg .neu-input__wrapper {
-  height: $input-height-lg;
-}

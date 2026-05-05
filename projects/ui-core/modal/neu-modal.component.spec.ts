@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { DialogModule } from '@angular/cdk/dialog';
-import { NeuDialogComponent, NeuDialogService } from './neu-modal.component';
+import { NeuDialogComponent } from './neu-modal.component';
+import { NeuDialogService } from './neu-dialog.service';
 import { provideIcons } from '@ng-icons/core';
 import { lucideX } from '@ng-icons/lucide';
 
@@ -19,13 +20,37 @@ class OpenHostComponent {}
 @Component({ template: '<p>Servicio</p>' })
 class FakeContentComponent {}
 
+@Component({
+  template: `
+    <neu-dialog [open]="true" [disableClose]="true" title="Focusable test">
+      <button type="button" aria-hidden="true">Oculto</button>
+      <button type="button" class="visible-action">Visible</button>
+      <a href="#" class="visible-link">Link</a>
+    </neu-dialog>
+  `,
+  standalone: true,
+  imports: [NeuDialogComponent],
+})
+class FocusableHostComponent {}
+
+@Component({
+  template: `
+    <neu-dialog [open]="true" [disableClose]="true" title="No focusable test">
+      <p>Solo texto</p>
+    </neu-dialog>
+  `,
+  standalone: true,
+  imports: [NeuDialogComponent],
+})
+class NoFocusableHostComponent {}
+
 // ── Helper ────────────────────────────────────────────────────────────────────
 
 /** Crea y configura un NeuDialogComponent con open=true / Creates and configures NeuDialogComponent with open=true */
 async function mkDialog(inputs: Record<string, unknown> = {}) {
   await TestBed.configureTestingModule({
     imports: [OpenHostComponent, DialogModule, FakeContentComponent],
-    providers: [provideIcons({ lucideX })],
+    providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
   }).compileComponents();
   const f = TestBed.createComponent(NeuDialogComponent);
   f.componentRef.setInput('open', true);
@@ -208,6 +233,140 @@ describe('NeuDialogComponent', () => {
     const panel = f.nativeElement.querySelector('[role="dialog"]');
     expect(panel?.getAttribute('aria-modal')).toBe('true');
   });
+
+  it('should focus the first visible focusable element when opened', async () => {
+    await TestBed.configureTestingModule({
+      imports: [FocusableHostComponent, DialogModule],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    }).compileComponents();
+
+    const f = TestBed.createComponent(FocusableHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    await Promise.resolve();
+
+    const visibleButton = f.nativeElement.querySelector('.visible-action');
+    expect(document.activeElement).toBe(visibleButton);
+  });
+
+  it('should focus the panel when no visible focusable elements exist', async () => {
+    await TestBed.configureTestingModule({
+      imports: [NoFocusableHostComponent, DialogModule],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    }).compileComponents();
+
+    const f = TestBed.createComponent(NoFocusableHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    await Promise.resolve();
+
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel');
+    expect(document.activeElement).toBe(panel);
+  });
+
+  it('should ignore non-Tab keys after handling Escape', async () => {
+    const { comp } = await mkDialog({ title: 'Test' });
+    const event = new KeyboardEvent('keydown', { key: 'Enter' });
+    const emitSpy = vi.spyOn(comp.closed, 'emit');
+
+    comp.onPanelKeydown(event);
+
+    expect(emitSpy).not.toHaveBeenCalled();
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('should return early on Tab when panel is unavailable', async () => {
+    await TestBed.configureTestingModule({
+      imports: [DialogModule],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    }).compileComponents();
+
+    const f = TestBed.createComponent(NeuDialogComponent);
+    f.componentRef.setInput('open', false);
+    f.detectChanges();
+
+    const event = new KeyboardEvent('keydown', { key: 'Tab' });
+    expect(() => f.componentInstance.onPanelKeydown(event)).not.toThrow();
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('should keep focus trapped when tabbing forward from the last focusable element', async () => {
+    await TestBed.configureTestingModule({
+      imports: [FocusableHostComponent, DialogModule],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    }).compileComponents();
+
+    const f = TestBed.createComponent(FocusableHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    await Promise.resolve();
+
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel');
+    const visibleButton = f.nativeElement.querySelector('.visible-action') as HTMLButtonElement;
+    const visibleLink = f.nativeElement.querySelector('.visible-link') as HTMLAnchorElement;
+    const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+
+    visibleLink.focus();
+    panel.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(visibleButton);
+  });
+
+  it('should keep focus trapped when shift-tabbing from the first focusable element', async () => {
+    await TestBed.configureTestingModule({
+      imports: [FocusableHostComponent, DialogModule],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    }).compileComponents();
+
+    const f = TestBed.createComponent(FocusableHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    await Promise.resolve();
+
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel');
+    const visibleButton = f.nativeElement.querySelector('.visible-action') as HTMLButtonElement;
+    const visibleLink = f.nativeElement.querySelector('.visible-link') as HTMLAnchorElement;
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    visibleButton.focus();
+    panel.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(visibleLink);
+  });
+
+  it('should keep focus trapped when shift-tabbing from the panel itself', async () => {
+    await TestBed.configureTestingModule({
+      imports: [FocusableHostComponent, DialogModule],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    }).compileComponents();
+
+    const f = TestBed.createComponent(FocusableHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    await Promise.resolve();
+
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLDivElement;
+    const visibleLink = f.nativeElement.querySelector('.visible-link') as HTMLAnchorElement;
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    panel.focus();
+    panel.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(visibleLink);
+  });
 });
 
 // ── NeuDialogService ──────────────────────────────────────────────────────────
@@ -216,7 +375,7 @@ describe('NeuDialogService', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule, FakeContentComponent],
-      providers: [provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
     }).compileComponents();
   });
 

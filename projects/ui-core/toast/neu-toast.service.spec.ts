@@ -108,4 +108,21 @@ describe('NeuToastService', () => {
     service.show({ message: 'Msg', title: 'Title', type: 'info', duration: 0 });
     expect(service.toasts()[0].title).toBe('Title');
   });
+
+  it('show should apply default duration, title and type when omitted', () => {
+    service.show({ message: 'Defaulted' });
+
+    expect(service.toasts()[0].duration).toBe(4000);
+    expect(service.toasts()[0].title).toBe('');
+    expect(service.toasts()[0].type).toBe('info');
+  });
+
+  it('dismiss should keep the list unchanged when the id does not exist', () => {
+    service.show({ message: 'A', type: 'info', duration: 0 });
+
+    service.dismiss('missing-id');
+
+    expect(service.toasts()).toHaveLength(1);
+    expect(service.toasts()[0].message).toBe('A');
+  });
 });

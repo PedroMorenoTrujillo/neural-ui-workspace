@@ -4,12 +4,11 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuCheckboxComponent } from './neu-checkbox.component';
 
 @Component({
-  template: `<neu-checkbox [label]="label" [disabled]="disabled" [formControl]="ctrl" />`,
+  template: `<neu-checkbox [label]="label" [formControl]="ctrl" />`,
   imports: [NeuCheckboxComponent, ReactiveFormsModule],
 })
 class TestHostComponent {
   label = 'Acepto los términos';
-  disabled = false;
   ctrl = new FormControl(false);
 }
 

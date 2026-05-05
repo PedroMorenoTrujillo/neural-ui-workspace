@@ -4,12 +4,11 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuSwitchComponent } from './neu-switch.component';
 
 @Component({
-  template: `<neu-switch [label]="label" [disabled]="disabled" [formControl]="ctrl" />`,
+  template: `<neu-switch [label]="label" [formControl]="ctrl" />`,
   imports: [NeuSwitchComponent, ReactiveFormsModule],
 })
 class TestHostComponent {
   label = 'Notificaciones';
-  disabled = false;
   ctrl = new FormControl(false);
 }
 

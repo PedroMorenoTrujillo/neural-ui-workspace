@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   PLATFORM_ID,
+  Signal,
   TemplateRef,
   ViewEncapsulation,
   computed,
@@ -12,6 +14,7 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -27,6 +30,8 @@ import type {
   NeuTableAction,
   NeuTableActionEvent,
   NeuTableColumn,
+  NeuTableSelectionAction,
+  NeuTableSelectionActionEvent,
   NeuTableServerState,
   NeuTableSortEntry,
 } from './neu-table.types';
@@ -38,6 +43,8 @@ export type {
   NeuTableBadgeVariant,
   NeuTableCellType,
   NeuTableColumn,
+  NeuTableSelectionAction,
+  NeuTableSelectionActionEvent,
   NeuTableServerState,
   NeuTableSortEntry,
 } from './neu-table.types';
@@ -85,7 +92,13 @@ function asRows(data: object[]): Row[] {
     '[class.neu-table__host--relaxed]': 'density() === "relaxed"',
   },
   template: `
-    <div class="neu-table-container" [class.neu-table--sticky-header]="stickyHeader()">
+    <div
+      class="neu-table-container"
+      [class.neu-table--sticky-header]="stickyHeader()"
+      [class.neu-table-container--bordered]="bordered()"
+      [class.neu-table-container--rounded]="roundedBorders()"
+      [class.neu-table-container--striped]="stripedRows()"
+    >
       <!-- ---- Toolbar ---- -->
       @if (searchable() || title() || exportable()) {
         <div class="neu-table__toolbar">
@@ -210,7 +223,53 @@ function asRows(data: object[]): Row[] {
       <!-- Barra de selección (aparece al seleccionar) -->
       @if (selectable() && selectedCount() > 0) {
         <div class="neu-table__selection-bar">
-          <span>{{ selectedRowsInfo() }}</span>
+          <div class="neu-table__selection-main">
+            <span>{{ selectedRowsInfo() }}</span>
+            @if (selectionActions().length > 0) {
+              <div class="neu-table__selection-actions">
+                @for (action of selectionActions(); track action.key) {
+                  @if (action.show === undefined || action.show(selectedRows())) {
+                    @if (isSelectionConfirmPending(action)) {
+                      <span class="neu-table__action-confirm">
+                        <span>{{ action.confirm }}</span>
+                        <button
+                          class="neu-table__action-btn neu-table__action-btn--danger"
+                          type="button"
+                          (click)="handleSelectionAction(action)"
+                        >
+                          Sí
+                        </button>
+                        <button
+                          class="neu-table__action-btn"
+                          type="button"
+                          (click)="cancelSelectionConfirm()"
+                        >
+                          No
+                        </button>
+                      </span>
+                    } @else {
+                      <button
+                        class="neu-table__export-btn neu-table__export-btn--selection neu-table__export-btn--{{
+                          action.variant ?? 'ghost'
+                        }}"
+                        type="button"
+                        [disabled]="action.disabled ? action.disabled(selectedRows()) : false"
+                        [title]="action.label"
+                        (click)="handleSelectionAction(action)"
+                      >
+                        @if (action.icon.startsWith('lucide')) {
+                          <neu-icon [name]="action.icon" size="0.95rem" aria-hidden="true" />
+                        } @else {
+                          <span aria-hidden="true">{{ action.icon }}</span>
+                        }
+                        <span>{{ action.label }}</span>
+                      </button>
+                    }
+                  }
+                }
+              </div>
+            }
+          </div>
           <button class="neu-table__selection-clear" type="button" (click)="clearSelection()">
             {{ clearSelectionLabel() }}
           </button>
@@ -219,9 +278,13 @@ function asRows(data: object[]): Row[] {
 
       <!-- ---- Scroll container ---- -->
       <div
+        #scrollContainer
         class="neu-table__scroll-container"
+        [class.neu-table__scroll-container--virtual]="_virtualScrollActive()"
         role="region"
         [attr.aria-label]="title() || tableAriaLabel()"
+        [style.max-height]="_virtualScrollActive() ? virtualContainerMaxHeight() : null"
+        (scroll)="onTableScroll($event)"
       >
         <table class="neu-table" [attr.aria-rowcount]="filteredData().length">
           <thead class="neu-table__head">
@@ -263,7 +326,9 @@ function asRows(data: object[]): Row[] {
                   [style.left]="
                     col.frozen === 'left' ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px' : null
                   "
-                  [style.width]="col.width ?? 'auto'"
+                  [style.width]="columnWidth(col)"
+                  [style.min-width]="columnWidth(col)"
+                  [style.max-width]="columnWidth(col)"
                   [style.text-align]="col.align ?? 'left'"
                   scope="col"
                   (click)="sortable() && col.sortable !== false ? sortBy(col.key, $event) : null"
@@ -295,6 +360,15 @@ function asRows(data: object[]): Row[] {
                       }
                     </span>
                   }
+                  @if (isColumnResizable(col)) {
+                    <button
+                      class="neu-table__resize-handle"
+                      type="button"
+                      [attr.aria-label]="'Resize ' + col.header"
+                      (dblclick)="resetColumnWidth(col.key, $event)"
+                      (mousedown)="startColumnResize(col, $event)"
+                    ></button>
+                  }
                 </th>
               }
             </tr>
@@ -314,7 +388,9 @@ function asRows(data: object[]): Row[] {
                   <th
                     class="neu-table__th neu-table__th--filter"
                     scope="col"
-                    [style.width]="col.width ?? 'auto'"
+                    [style.width]="columnWidth(col)"
+                    [style.min-width]="columnWidth(col)"
+                    [style.max-width]="columnWidth(col)"
                   >
                     @if (col.filterable) {
                       @if (col.filterType === 'select') {
@@ -392,7 +468,16 @@ function asRows(data: object[]): Row[] {
                 </td>
               </tr>
             } @else {
-              @for (row of paginatedData(); track getRowKey(row); let rowIdx = $index) {
+              @if (_virtualScrollActive() && _virtualTopSpacerHeight() > 0) {
+                <tr class="neu-table__spacer-row" aria-hidden="true">
+                  <td
+                    [attr.colspan]="totalColspan()"
+                    class="neu-table__spacer-cell"
+                    [style.height.px]="_virtualTopSpacerHeight()"
+                  ></td>
+                </tr>
+              }
+              @for (row of visiblePageRows(); track getRowKey(row); let rowIdx = $index) {
                 <tr
                   class="neu-table__row"
                   [class]="getRowClass(row)"
@@ -443,7 +528,7 @@ function asRows(data: object[]): Row[] {
                   }
                   @if (showRowNumbers()) {
                     <td class="neu-table__td neu-table__td--rn">
-                      {{ (currentPage() - 1) * effectivePageSize() + rowIdx + 1 }}
+                      {{ visibleRowNumber(rowIdx) }}
                     </td>
                   }
                   @for (col of columns(); track col.key) {
@@ -461,6 +546,9 @@ function asRows(data: object[]): Row[] {
                           ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
                           : null
                       "
+                      [style.width]="columnWidth(col)"
+                      [style.min-width]="columnWidth(col)"
+                      [style.max-width]="columnWidth(col)"
                       [style.text-align]="col.align ?? 'left'"
                     >
                       @if (col.cellTemplate) {
@@ -557,6 +645,15 @@ function asRows(data: object[]): Row[] {
                   </tr>
                 }
               }
+              @if (_virtualScrollActive() && _virtualBottomSpacerHeight() > 0) {
+                <tr class="neu-table__spacer-row" aria-hidden="true">
+                  <td
+                    [attr.colspan]="totalColspan()"
+                    class="neu-table__spacer-cell"
+                    [style.height.px]="_virtualBottomSpacerHeight()"
+                  ></td>
+                </tr>
+              }
             }
           </tbody>
           @if (footerRow()) {
@@ -574,6 +671,9 @@ function asRows(data: object[]): Row[] {
                 @for (col of columns(); track col.key) {
                   <td
                     class="neu-table__td neu-table__td--footer"
+                    [style.width]="columnWidth(col)"
+                    [style.min-width]="columnWidth(col)"
+                    [style.max-width]="columnWidth(col)"
                     [style.text-align]="col.align ?? 'left'"
                   >
                     {{ footerRow()![col.key] !== undefined ? footerRow()![col.key] : '' }}
@@ -588,7 +688,7 @@ function asRows(data: object[]): Row[] {
       <!-- ---- Footer ---- -->
       @if (!loading() && filteredData().length > 0) {
         <div class="neu-table__footer">
-          @if (pageSizeOptions().length > 0) {
+          @if (pagination() && pageSizeOptions().length > 0) {
             <div class="neu-table__page-size">
               <label class="neu-table__page-size-label">{{ pageSizeLabel() }}</label>
               <neu-select
@@ -665,6 +765,8 @@ export class NeuTableComponent {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
+  private readonly _virtualOverscan = 3;
 
   readonly expandTemplate = contentChild(NeuTableExpandDirective);
 
@@ -672,6 +774,8 @@ export class NeuTableComponent {
   readonly columns = input<NeuTableColumn[]>([]);
   readonly data = input<object[]>([]);
   readonly pageSize = input<number>(10);
+  /** Controla si la paginación está activa. Si es false, se muestran todos los datos y se ocultan los controles de paginación y pageSize. */
+  readonly pagination = input<boolean>(true);
   readonly loading = input<boolean>(false);
   readonly title = input<string>('');
   readonly emptyMessage = input<string>('No results found');
@@ -707,11 +811,18 @@ export class NeuTableComponent {
   readonly sortable = input<boolean>(false);
   readonly selectable = input<boolean>(false);
   readonly expandable = input<boolean>(false);
+  readonly expandMode = input<'multiple' | 'single'>('multiple');
   readonly exportable = input<boolean>(false);
   readonly exportFileName = input<string>('export');
   readonly pageSizeOptions = input<number[]>([]);
   readonly stickyHeader = input<boolean>(false);
+  readonly virtualScroll = input<boolean>(false);
+  readonly virtualScrollVisibleItems = input<number>(8);
+  readonly resizableColumns = input<boolean>(false);
   readonly rowKey = input<string>('id');
+  readonly bordered = input<boolean>(true);
+  readonly roundedBorders = input<boolean>(true);
+  readonly stripedRows = input<boolean>(false);
 
   // ── Inputs nuevos v1.3.0 ──────────────────────────────────────────────
   readonly density = input<'compact' | 'normal' | 'relaxed'>('normal');
@@ -724,6 +835,8 @@ export class NeuTableComponent {
   readonly multiSort = input<boolean>(false);
   readonly exportFormats = input<('csv' | 'json')[]>(['csv']);
   readonly exportColumns = input<string[]>([]);
+  readonly exportScope = input<'filtered' | 'selected' | 'auto'>('auto');
+  readonly selectionActions = input<NeuTableSelectionAction<Row>[]>([]);
 
   // ── URL params ────────────────────────────────────────────────────────
   readonly pageParam = input<string>('page');
@@ -748,8 +861,10 @@ export class NeuTableComponent {
   readonly rowClick = output<Row>();
   readonly rowDblClick = output<Row>();
   readonly actionClick = output<NeuTableActionEvent<Row>>();
+  readonly selectionActionClick = output<NeuTableSelectionActionEvent<Row>>();
   readonly serverStateChange = output<NeuTableServerState>();
   readonly searchChange = output<string>();
+  readonly columnResize = output<{ key: string; width: number }>();
 
   // ── Estado interno (usado cuando useUrlState = false) ─────────────────
   // Internal state signals (used when useUrlState = false)
@@ -758,25 +873,45 @@ export class NeuTableComponent {
   private readonly _internalSortKey = signal('');
   private readonly _internalSortDir = signal<'asc' | 'desc'>('asc');
   private readonly _internalMultiSort = signal('');
+  private readonly _columnWidths = signal<Record<string, number>>({});
+  private _resizeCleanup: (() => void) | null = null;
 
   // ── URL State ─────────────────────────────────────────────────────────
+  private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
+
+  private _getUrlParamSignal(key: string): Signal<string | null> {
+    let paramSignal = this._urlParamSignals.get(key);
+    if (!paramSignal) {
+      paramSignal = this._urlState.getParam(key);
+      this._urlParamSignals.set(key, paramSignal);
+    }
+    return paramSignal;
+  }
+
+  private _readUrlParam(key: string): string | null {
+    return this._getUrlParamSignal(key)();
+  }
+
   readonly currentPage = computed(() => {
     if (!this.useUrlState()) return this._internalPage();
-    const raw = this._urlState.getParam(this.pageParam())();
+    const raw = this._readUrlParam(this.pageParam());
     const n = Number(raw);
     return !raw || isNaN(n) || n < 1 ? 1 : n;
   });
+
   readonly searchQuery = computed(() => {
     if (!this.useUrlState()) return this._internalSearch();
-    return this._urlState.getParam(this.searchParam())() ?? '';
+    return this._readUrlParam(this.searchParam()) ?? '';
   });
+
   readonly sortKey = computed(() => {
     if (!this.useUrlState()) return this._internalSortKey();
-    return this._urlState.getParam(this.sortParam())() ?? '';
+    return this._readUrlParam(this.sortParam()) ?? '';
   });
+
   readonly sortDir = computed<'asc' | 'desc'>(() => {
     if (!this.useUrlState()) return this._internalSortDir();
-    const d = this._urlState.getParam(this.sortDirParam())();
+    const d = this._readUrlParam(this.sortDirParam());
     return d === 'desc' ? 'desc' : 'asc';
   });
 
@@ -794,7 +929,7 @@ export class NeuTableComponent {
   readonly _sortEntries = computed<NeuTableSortEntry[]>(() => {
     if (!this.multiSort()) return [];
     const param = this.useUrlState()
-      ? this._urlState.getParam(this.multiSortParam())()
+      ? this._readUrlParam(this.multiSortParam())
       : this._internalMultiSort();
     if (!param) return [];
     return param.split(',').flatMap((chunk) => {
@@ -822,7 +957,11 @@ export class NeuTableComponent {
     this.pageSizeOptions().map((size) => ({ label: String(size), value: String(size) })),
   );
 
+  private readonly _virtualScrollTop = signal(0);
+
   constructor() {
+    this._destroyRef.onDestroy(() => this._stopColumnResize());
+
     this._pageSizeControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => this.onPageSizeChange(value));
@@ -844,6 +983,22 @@ export class NeuTableComponent {
           control.setValue(nextValue, { emitEvent: false });
         }
       }
+    });
+
+    effect(() => {
+      if (!this.virtualScroll()) {
+        return;
+      }
+
+      this.currentPage();
+      this.searchQuery();
+      this.sortKey();
+      this.sortDir();
+      this._sortEntries();
+      this._columnFilters();
+      this.effectivePageSize();
+      this.paginatedData().length;
+      this.resetVirtualScrollPosition();
     });
   }
 
@@ -916,9 +1071,13 @@ export class NeuTableComponent {
   });
 
   private readonly _dynamicPageSize = signal<number | null>(null);
-  readonly effectivePageSize = computed(() => this._dynamicPageSize() ?? this.pageSize());
+  readonly effectivePageSize = computed(() => {
+    if (!this.pagination()) return this.filteredData().length || 1;
+    return this._dynamicPageSize() ?? this.pageSize();
+  });
 
   readonly totalPages = computed(() => {
+    if (!this.pagination()) return 1;
     const total =
       this.serverSide() && this.totalItems() != null
         ? this.totalItems()!
@@ -927,10 +1086,82 @@ export class NeuTableComponent {
   });
 
   readonly paginatedData = computed(() => {
+    if (!this.pagination()) return this.sortedData();
     if (this.serverSide()) return this._rows();
     const page = Math.min(this.currentPage(), this.totalPages());
     const size = this.effectivePageSize();
     return this.sortedData().slice((page - 1) * size, page * size);
+  });
+
+  readonly _virtualRowHeight = computed(() => {
+    switch (this.density()) {
+      case 'compact':
+        return 34;
+      case 'relaxed':
+        return 64;
+      default:
+        return 48;
+    }
+  });
+
+  readonly _virtualHeaderHeight = computed(() => 44 + (this._hasFilterableCol() ? 52 : 0));
+
+  readonly _virtualScrollActive = computed(
+    () => this.virtualScroll() && this.paginatedData().length > this.virtualScrollVisibleItems(),
+  );
+
+  readonly virtualContainerMaxHeight = computed(
+    () =>
+      `${this._virtualHeaderHeight() + this.virtualScrollVisibleItems() * this._virtualRowHeight()}px`,
+  );
+
+  readonly _virtualStartIndex = computed(() => {
+    if (!this._virtualScrollActive()) {
+      return 0;
+    }
+
+    const bodyScrollTop = Math.max(0, this._virtualScrollTop() - this._virtualHeaderHeight());
+    const startIndex = Math.floor(bodyScrollTop / this._virtualRowHeight());
+    return Math.max(0, startIndex - this._virtualOverscan);
+  });
+
+  readonly _virtualEndIndex = computed(() => {
+    if (!this._virtualScrollActive()) {
+      return this.paginatedData().length;
+    }
+
+    return Math.min(
+      this.paginatedData().length,
+      this._virtualStartIndex() + this.virtualScrollVisibleItems() + this._virtualOverscan * 2,
+    );
+  });
+
+  readonly visiblePageRows = computed(() => {
+    const rows = this.paginatedData();
+    if (!this._virtualScrollActive()) {
+      return rows;
+    }
+
+    return rows.slice(this._virtualStartIndex(), this._virtualEndIndex());
+  });
+
+  readonly _virtualTopSpacerHeight = computed(() => {
+    if (!this._virtualScrollActive()) {
+      return 0;
+    }
+
+    return this._virtualStartIndex() * this._virtualRowHeight();
+  });
+
+  readonly _virtualBottomSpacerHeight = computed(() => {
+    if (!this._virtualScrollActive()) {
+      return 0;
+    }
+
+    return Math.max(
+      0,
+      (this.paginatedData().length - this._virtualEndIndex()) * this._virtualRowHeight(),
+    );
   });
 
   readonly pageNumbers = computed<number[]>(() => {
@@ -949,9 +1180,9 @@ export class NeuTableComponent {
         : this.filteredData().length;
     const page = Math.min(this.currentPage(), this.totalPages());
     const size = this.effectivePageSize();
-    const from = Math.min((page - 1) * size + 1, total);
-    const to = Math.min(page * size, total);
-    return `${from}\u2013${to} ${this.ofLabel()} ${total} ${
+    const from = total === 0 ? 0 : Math.min((page - 1) * size + 1, total);
+    const to = total === 0 ? 0 : Math.min(page * size, total);
+    return `${from}-${to} ${this.ofLabel()} ${total} ${
       total === 1 ? this.resultLabelSingular() : this.resultLabelPlural()
     }`;
   });
@@ -964,18 +1195,14 @@ export class NeuTableComponent {
     return cols;
   });
 
-  /** Calcula el offset izquierdo acumulado para columnas frozen-left múltiples.
-   *  Calculates cumulative left offset for multiple frozen-left columns. */
   readonly _frozenLeftOffsets = computed(() => {
+    this._columnWidths();
     const offsets = new Map<string, number>();
     let leftPx = 0;
     for (const col of this.columns()) {
       if (col.frozen === 'left') {
         offsets.set(col.key, leftPx);
-        if (col.width && col.width !== 'auto') {
-          const px = parseFloat(col.width);
-          if (!isNaN(px)) leftPx += px;
-        }
+        leftPx += this._columnWidthPx(col) ?? 0;
       }
     }
     return offsets;
@@ -999,6 +1226,78 @@ export class NeuTableComponent {
     return this._firstFrozenRightKey() === key;
   }
 
+  isColumnResizable(col: NeuTableColumn): boolean {
+    return this.resizableColumns() && col.resizable !== false;
+  }
+
+  columnWidth(col: NeuTableColumn): string | null {
+    const resized = this._columnWidths()[col.key];
+    if (resized != null) {
+      return `${resized}px`;
+    }
+
+    return col.width ?? null;
+  }
+
+  startColumnResize(col: NeuTableColumn, event: MouseEvent): void {
+    if (!this.isColumnResizable(col) || !isPlatformBrowser(this._platformId)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const headerCell = (event.currentTarget as HTMLElement | null)?.closest('th');
+    const startWidth =
+      (headerCell instanceof HTMLElement ? headerCell.getBoundingClientRect().width : 0) ||
+      this._columnWidthPx(col) ||
+      160;
+    const startX = event.clientX;
+    const minWidth = col.minWidth ?? 96;
+    const maxWidth = col.maxWidth ?? Number.POSITIVE_INFINITY;
+
+    this._stopColumnResize();
+
+    const onMove = (moveEvent: MouseEvent) => {
+      const nextWidth = Math.min(
+        maxWidth,
+        Math.max(minWidth, Math.round(startWidth + (moveEvent.clientX - startX))),
+      );
+      this._setColumnWidth(col.key, nextWidth);
+    };
+
+    const onUp = () => {
+      const width = this._columnWidths()[col.key];
+      if (width != null) {
+        this.columnResize.emit({ key: col.key, width });
+      }
+      this._stopColumnResize();
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    this._resizeCleanup = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      this._resizeCleanup = null;
+    };
+  }
+
+  resetColumnWidth(key: string, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    this._columnWidths.update((current) => {
+      if (!(key in current)) {
+        return current;
+      }
+
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  }
+
   // ── Expansión de filas ────────────────────────────────────────────────
   private readonly _expandedKeys = signal<Set<unknown>>(new Set());
 
@@ -1006,18 +1305,36 @@ export class NeuTableComponent {
     return this._expandedKeys().has(this.getRowKey(row));
   }
 
-  toggleExpand(row: Row): void {
+  expandRow(row: Row): void {
+    const key = this.getRowKey(row);
+    const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
+    set.add(key);
+    this._expandedKeys.set(set);
+  }
+
+  collapseRow(row: Row): void {
     const key = this.getRowKey(row);
     const set = new Set(this._expandedKeys());
-    if (set.has(key)) set.delete(key);
+    set.delete(key);
+    this._expandedKeys.set(set);
+  }
+
+  toggleExpand(row: Row): void {
+    const key = this.getRowKey(row);
+    const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
+    if (this._expandedKeys().has(key)) set.delete(key);
     else set.add(key);
     this._expandedKeys.set(set);
   }
 
   // ── Selección ─────────────────────────────────────────────────────────
   private readonly _selectedKeys = signal<Set<unknown>>(new Set());
+  private readonly _selectionConfirmPending = signal<string | null>(null);
 
   readonly selectedCount = computed(() => this._selectedKeys().size);
+  readonly selectedRows = computed(() =>
+    this._rows().filter((row) => this._selectedKeys().has(this.getRowKey(row))),
+  );
   readonly selectedRowsInfo = computed(
     () => `${this.selectedCount()} ${this.selectionSummaryLabel()}`,
   );
@@ -1066,6 +1383,7 @@ export class NeuTableComponent {
 
   clearSelection(): void {
     this._selectedKeys.set(new Set());
+    this._selectionConfirmPending.set(null);
     this.selectionChange.emit([]);
   }
 
@@ -1221,12 +1539,36 @@ export class NeuTableComponent {
     this._confirmPending.set(null);
   }
 
+  isSelectionConfirmPending(action: NeuTableSelectionAction<Row>): boolean {
+    return this._selectionConfirmPending() === action.key;
+  }
+
+  handleSelectionAction(action: NeuTableSelectionAction<Row>): void {
+    const rows = this.selectedRows();
+
+    if (action.confirm) {
+      if (this._selectionConfirmPending() === action.key) {
+        this._selectionConfirmPending.set(null);
+        this.selectionActionClick.emit({ action, rows });
+      } else {
+        this._selectionConfirmPending.set(action.key);
+      }
+      return;
+    }
+
+    this.selectionActionClick.emit({ action, rows });
+  }
+
+  cancelSelectionConfirm(): void {
+    this._selectionConfirmPending.set(null);
+  }
+
   // ── Export ────────────────────────────────────────────────────────────
   exportCsv(): void {
     if (!isPlatformBrowser(this._platformId)) return;
     const cols = this._getExportColumns();
     const headers = cols.map((c) => `"${c.header.replace(/"/g, '""')}"`);
-    const rows = this.filteredData().map((row) =>
+    const rows = this._getExportRows().map((row) =>
       cols.map((col) => `"${this.getCellValue(row, col).replace(/"/g, '""')}"`),
     );
     const csv = [headers, ...rows].map((r) => r.join(',')).join('\r\n');
@@ -1239,7 +1581,7 @@ export class NeuTableComponent {
   exportJson(): void {
     if (!isPlatformBrowser(this._platformId)) return;
     const cols = this._getExportColumns();
-    const data = this.filteredData().map((row) => {
+    const data = this._getExportRows().map((row) => {
       const obj: Record<string, string> = {};
       cols.forEach((col) => (obj[col.key] = this.getCellValue(row, col)));
       return obj;
@@ -1256,6 +1598,24 @@ export class NeuTableComponent {
     return keys.length ? all.filter((c) => keys.includes(c.key)) : all;
   }
 
+  private _getExportRows(): Row[] {
+    const scope = this.exportScope();
+
+    if (scope === 'filtered') {
+      return this.filteredData();
+    }
+
+    const selectedRows = this._rows().filter((row) =>
+      this._selectedKeys().has(this.getRowKey(row)),
+    );
+
+    if (scope === 'selected') {
+      return selectedRows;
+    }
+
+    return selectedRows.length > 0 ? selectedRows : this.filteredData();
+  }
+
   private _downloadBlob(blob: Blob, filename: string): void {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1268,12 +1628,55 @@ export class NeuTableComponent {
   }
 
   // ── Utilidades ────────────────────────────────────────────────────────
+  onTableScroll(event: Event): void {
+    if (!this._virtualScrollActive()) {
+      return;
+    }
+
+    this._virtualScrollTop.set((event.target as HTMLElement).scrollTop);
+  }
+
   getRowKey(row: Row): unknown {
     return row[this.rowKey()] ?? JSON.stringify(row);
   }
 
+  visibleRowNumber(rowIdx: number): number {
+    return (
+      (this.currentPage() - 1) * this.effectivePageSize() + this._virtualStartIndex() + rowIdx + 1
+    );
+  }
+
+  private resetVirtualScrollPosition(): void {
+    this._virtualScrollTop.set(0);
+    requestAnimationFrame(() => {
+      this._scrollContainer()?.nativeElement.scrollTo({ top: 0 });
+    });
+  }
+
   getRowClass(row: Row): string {
     return this.rowClass()?.(row) ?? '';
+  }
+
+  private _columnWidthPx(col: NeuTableColumn): number | null {
+    const resized = this._columnWidths()[col.key];
+    if (resized != null) {
+      return resized;
+    }
+
+    if (!col.width || col.width === 'auto') {
+      return null;
+    }
+
+    const px = Number.parseFloat(col.width);
+    return Number.isNaN(px) ? null : px;
+  }
+
+  private _setColumnWidth(key: string, width: number): void {
+    this._columnWidths.update((current) => ({ ...current, [key]: width }));
+  }
+
+  private _stopColumnResize(): void {
+    this._resizeCleanup?.();
   }
 
   getCellValue(row: Row, col: NeuTableColumn): string {

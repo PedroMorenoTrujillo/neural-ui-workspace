@@ -198,6 +198,7 @@ describe('NeuImageViewerOverlayComponent', () => {
 });
 
 @Component({
+  selector: 'neu-iv-host-string',
   template: `<img src="x.jpg" [neuImageViewer]="src" />`,
   imports: [NeuImageViewerDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -207,6 +208,7 @@ class HostForDirective {
 }
 
 @Component({
+  selector: 'neu-iv-host-item',
   template: `<img src="x.jpg" [neuImageViewer]="item" />`,
   imports: [NeuImageViewerDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -216,6 +218,7 @@ class HostWithItemDirective {
 }
 
 @Component({
+  selector: 'neu-iv-host-array',
   template: `<img src="x.jpg" [neuImageViewer]="items" [neuIvIndex]="1" />`,
   imports: [NeuImageViewerDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,

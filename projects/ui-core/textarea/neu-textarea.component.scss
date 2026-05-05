@@ -1,6 +1,29 @@
 .neu-textarea-host {
   display: block;
   width: 100%;
+
+  &--sm {
+    .neu-textarea__field {
+      min-height: 60px;
+      padding: 0.7rem var(--neu-space-3) var(--neu-space-2);
+    }
+
+    .neu-textarea__label {
+      top: 0.6rem;
+    }
+  }
+
+  &--lg {
+    .neu-textarea__field {
+      min-height: 100px;
+      font-size: var(--neu-text-base);
+      padding: 1.5rem var(--neu-space-5) var(--neu-space-4);
+    }
+
+    .neu-textarea__label {
+      top: 1.2rem;
+    }
+  }
 }
 
 .neu-textarea__wrapper {
@@ -114,19 +137,3 @@
 
 // ---- Sizes / Tamaños ----------------------------------------
 // sm: compacto | md: estándar (default) | lg: grande
-.neu-textarea-host--sm .neu-textarea__field {
-  min-height: 60px;
-  padding: 0.7rem var(--neu-space-3) var(--neu-space-2);
-}
-.neu-textarea-host--sm .neu-textarea__label {
-  top: 0.6rem;
-}
-
-.neu-textarea-host--lg .neu-textarea__field {
-  min-height: 100px;
-  font-size: var(--neu-text-base);
-  padding: 1.5rem var(--neu-space-5) var(--neu-space-4);
-}
-.neu-textarea-host--lg .neu-textarea__label {
-  top: 1.2rem;
-}

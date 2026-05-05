@@ -15,4 +15,4 @@
 - [ ] I have run `ng test ui-core --watch=false` and all tests pass
 - [ ] I have added tests for my changes (if applicable)
 - [ ] I have updated the documentation (if applicable)
-- [ ] My changes follow the existing code style (signals API, OnPush, standalone)
+- [ ] My changes follow the existing code style and standards (signals API, OnPush, standalone, BEM for styles)

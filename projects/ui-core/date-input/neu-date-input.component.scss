@@ -11,6 +11,19 @@ $drum-item-h: 36px;
 .neu-date-input-host {
   display: block;
   font-family: var(--neu-font-sans);
+
+  &--sm {
+    .neu-date-input__trigger {
+      min-height: 36px;
+      font-size: var(--neu-text-sm);
+    }
+  }
+
+  &--lg {
+    .neu-date-input__trigger {
+      min-height: 56px;
+    }
+  }
 }
 
 // ---- Label ----
@@ -234,8 +247,8 @@ $drum-item-h: 36px;
   }
 
   &--selected {
-    background: var(--neu-primary) !important;
-    color: var(--neu-primary-fg) !important;
+    background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))) !important;
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg)) !important;
     font-weight: 600;
   }
 }
@@ -600,8 +613,8 @@ $drum-item-h: 36px;
   &--selected,
   &--range-start,
   &--range-end {
-    background: var(--neu-primary);
-    color: var(--neu-primary-fg);
+    background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
     border-radius: 50%;
   }
 
@@ -641,8 +654,8 @@ $drum-item-h: 36px;
   border-radius: var(--neu-radius);
   font-size: var(--neu-text-sm);
   font-weight: 500;
-  background: var(--neu-primary);
-  color: var(--neu-primary-fg);
+  background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+  color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
   cursor: pointer;
 
   &:hover:not([disabled]) {
@@ -688,10 +701,3 @@ $drum-item-h: 36px;
 
 // ---- Sizes / Tamaños ----------------------------------------
 // sm: 36px | md: 48px (default) | lg: 56px
-.neu-date-input-host--sm .neu-date-input__trigger {
-  min-height: 36px;
-  font-size: var(--neu-text-sm);
-}
-.neu-date-input-host--lg .neu-date-input__trigger {
-  min-height: 56px;
-}

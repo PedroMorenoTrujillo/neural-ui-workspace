@@ -8,10 +8,22 @@
 // ---- Contenedor principal / Main container ----
 .neu-table-container {
   background: var(--neu-surface);
-  border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-lg);
   overflow: hidden;
   box-shadow: var(--neu-shadow-sm);
+
+  &--bordered {
+    border: 1px solid var(--neu-border);
+  }
+
+  &--rounded {
+    border-radius: var(--neu-radius-lg);
+  }
+
+  &--striped {
+    .neu-table__row:not(.neu-table__row--selected):nth-child(even) {
+      background: color-mix(in srgb, var(--neu-surface-2) 70%, transparent);
+    }
+  }
 }
 
 // ---- Toolbar ----
@@ -190,6 +202,10 @@
   }
 }
 
+.neu-table__scroll-container--virtual {
+  overflow-y: auto;
+}
+
 // ---- Tabla / Table ----
 .neu-table {
   width: 100%;
@@ -197,36 +213,43 @@
   border-spacing: 0;
   font-size: var(--neu-text-sm);
   min-width: 400px; // fuerza scroll en pantallas menores a 400px
-}
 
-// ---- Cabecera fija / Sticky header ----
-// Activado con [stickyHeader]="true". Usa --neu-table-max-height para controlar la altura.
-// Enabled via [stickyHeader]="true". Use --neu-table-max-height to control container height.
-.neu-table--sticky-header {
-  .neu-table__scroll-container {
-    overflow-y: auto;
-    max-height: var(--neu-table-max-height, 480px);
+  &--sticky-header {
+    .neu-table__scroll-container {
+      overflow-y: auto;
+      max-height: var(--neu-table-max-height, 480px);
+    }
+
+    .neu-table__head tr:first-child .neu-table__th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--neu-surface-2);
+      box-shadow: inset 0 -1px 0 var(--neu-border);
+    }
+
+    .neu-table__th--filter,
+    .neu-table__th--filter-placeholder {
+      position: sticky;
+      top: var(--neu-table-header-height, 44px);
+      z-index: 1;
+      background: var(--neu-surface-2);
+    }
   }
 
-  // Primera fila del encabezado — se pega al top del contenedor scrollable
-  // First header row — sticks to the top of the scrollable container
-  .neu-table__head tr:first-child .neu-table__th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--neu-surface-2);
-    // Mantiene la línea separadora visible al hacer scroll / Keep separator visible on scroll
-    box-shadow: inset 0 -1px 0 var(--neu-border);
-  }
+  &--scrollable {
+    .neu-table__scroll-container {
+      max-height: 480px;
+      overflow-y: auto;
+    }
 
-  // Fila de filtros de columna (segunda fila del thead, opcional)
-  // Column filter row (optional second thead row)
-  .neu-table__th--filter,
-  .neu-table__th--filter-placeholder {
-    position: sticky;
-    top: var(--neu-table-header-height, 44px);
-    z-index: 1;
-    background: var(--neu-surface-2);
+    .neu-table__head .neu-table__th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--neu-surface-2);
+      box-shadow: 0 1px 0 var(--neu-border);
+    }
   }
 }
 
@@ -236,10 +259,11 @@
 }
 
 .neu-table__th {
+  position: relative;
   padding: var(--neu-space-3) var(--neu-space-4);
   font-size: var(--neu-text-xs);
   font-weight: 600;
-  color: var(--neu-text-muted);
+  color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   border-bottom: 1px solid var(--neu-border);
@@ -264,7 +288,45 @@
 
   &--sorted-asc,
   &--sorted-desc {
-    color: var(--neu-primary);
+    color: var(--neu-primary-dark, var(--neu-primary));
+  }
+}
+
+.neu-table__resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 12px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+  opacity: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 50%;
+    width: 2px;
+    border-radius: 999px;
+    transform: translateX(-50%);
+    background: color-mix(in srgb, var(--neu-primary) 26%, var(--neu-border) 74%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--neu-surface) 55%, transparent 45%);
+    opacity: 1;
+    transition: background var(--neu-transition);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible::after,
+  &:hover::after {
+    background: color-mix(in srgb, var(--neu-primary) 62%, var(--neu-border) 38%);
   }
 }
 
@@ -292,6 +354,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--neu-space-3);
+  flex-wrap: wrap;
   padding: var(--neu-space-2) var(--neu-space-5);
   background: var(--neu-primary-50);
   border-bottom: 1px solid var(--neu-primary-100);
@@ -299,6 +363,20 @@
   color: var(--neu-primary);
   font-weight: 500;
   animation: neu-tab-fade 150ms ease;
+}
+
+.neu-table__selection-main {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-3);
+  flex-wrap: wrap;
+}
+
+.neu-table__selection-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  flex-wrap: wrap;
 }
 
 .neu-table__selection-clear {
@@ -352,6 +430,16 @@
   &--empty {
     padding: var(--neu-space-8) 0;
   }
+}
+
+.neu-table__spacer-row {
+  pointer-events: none;
+}
+
+.neu-table__spacer-cell {
+  padding: 0 !important;
+  border: 0 !important;
+  line-height: 0;
 }
 
 // ---- Loading skeleton ----
@@ -453,7 +541,7 @@
 
 .neu-table__info {
   font-size: var(--neu-text-xs);
-  color: var(--neu-text-muted);
+  color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
 }
 
 .neu-table__pagination {
@@ -496,13 +584,13 @@
   }
 
   &--active {
-    background: var(--neu-primary);
-    color: var(--neu-primary-fg);
-    border-color: var(--neu-primary);
+    background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+    border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
 
     &:hover {
-      background: var(--neu-primary-dark);
-      border-color: var(--neu-primary-dark);
+      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+      border-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
     }
   }
 }
@@ -511,6 +599,7 @@
 .neu-table__export-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   height: 36px;
   padding: 0 var(--neu-space-3);
@@ -535,6 +624,34 @@
     border-color: var(--neu-primary);
     background: var(--neu-primary-50);
   }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.neu-table__export-btn--selection {
+  height: 30px;
+  font-size: var(--neu-text-xs);
+  padding: 0 var(--neu-space-2);
+}
+
+.neu-table__export-btn--primary {
+  color: var(--neu-primary);
+  border-color: var(--neu-primary-200);
+  background: var(--neu-surface);
+}
+
+.neu-table__export-btn--danger {
+  color: var(--neu-error);
+  border-color: color-mix(in srgb, var(--neu-error) 24%, var(--neu-border) 76%);
+
+  &:hover:not(:disabled) {
+    background: var(--neu-error-bg);
+    border-color: color-mix(in srgb, var(--neu-error) 40%, var(--neu-border) 60%);
+    color: var(--neu-error);
+  }
 }
 
 // ---- Page size selector ----
@@ -547,7 +664,7 @@
 
 .neu-table__page-size-label {
   font-size: var(--neu-text-xs);
-  color: var(--neu-text-muted);
+  color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
 }
 
 .neu-table__page-size-select {
@@ -556,6 +673,17 @@
 
   .neu-select__trigger {
     min-width: 78px;
+  }
+}
+
+@supports selector(:has(*)) {
+  .neu-table-container:has(.neu-table__page-size .neu-select--open) {
+    overflow: visible;
+  }
+
+  .neu-table__footer:has(.neu-table__page-size .neu-select--open) {
+    position: relative;
+    z-index: 4;
   }
 }
 
@@ -629,23 +757,23 @@
   }
   &--success {
     background: var(--neu-table-badge-success-bg);
-    color: var(--neu-table-badge-success-text);
+    color: color-mix(in srgb, var(--neu-text) 78%, var(--neu-success) 22%);
   }
   &--warning {
     background: var(--neu-table-badge-warning-bg);
-    color: var(--neu-table-badge-warning-text);
+    color: color-mix(in srgb, var(--neu-text) 78%, var(--neu-warning) 22%);
   }
   &--danger {
     background: var(--neu-table-badge-danger-bg);
-    color: var(--neu-table-badge-danger-text);
+    color: color-mix(in srgb, var(--neu-text) 74%, var(--neu-error) 26%);
   }
   &--info {
     background: var(--neu-primary-50);
-    color: var(--neu-primary);
+    color: var(--neu-primary-dark, var(--neu-primary));
   }
   &--default {
     background: var(--neu-surface-3);
-    color: var(--neu-text-muted);
+    color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
   }
 }
 
@@ -693,6 +821,7 @@
   position: sticky;
   z-index: 3; // Por encima de las celdas del cuerpo / Above body cells
   background: var(--neu-surface-2);
+  background-clip: border-box;
 }
 
 .neu-table__th--frozen-left {
@@ -706,13 +835,13 @@
 .neu-table__th--frozen-left-boundary {
   box-shadow:
     inset -1px 0 0 var(--neu-border),
-    6px 0 8px -8px rgba(15, 23, 42, 0.32);
+    6px 0 8px -8px rgba(15, 23, 42, 0.16);
 }
 
 .neu-table__th--frozen-right-boundary {
   box-shadow:
     inset 1px 0 0 var(--neu-border),
-    -6px 0 8px -8px rgba(15, 23, 42, 0.32);
+    -6px 0 8px -8px rgba(15, 23, 42, 0.16);
 }
 
 .neu-table__td--frozen-left,
@@ -720,6 +849,7 @@
   position: sticky;
   z-index: 2;
   background: var(--neu-surface);
+  background-clip: border-box;
 }
 
 .neu-table__td--frozen-left {
@@ -733,13 +863,13 @@
 .neu-table__td--frozen-left-boundary {
   box-shadow:
     inset -1px 0 0 var(--neu-border),
-    6px 0 8px -8px rgba(15, 23, 42, 0.32);
+    6px 0 8px -8px rgba(15, 23, 42, 0.16);
 }
 
 .neu-table__td--frozen-right-boundary {
   box-shadow:
     inset 1px 0 0 var(--neu-border),
-    -6px 0 8px -8px rgba(15, 23, 42, 0.32);
+    -6px 0 8px -8px rgba(15, 23, 42, 0.16);
 }
 
 // ── Footer row de tabla (tfoot) ────────────────────────────────────────
@@ -763,8 +893,8 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--neu-primary);
-  color: var(--neu-primary-fg);
+  background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+  color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
   font-size: 9px;
   font-weight: 700;
   margin-right: 2px;
@@ -819,8 +949,8 @@
     color: var(--neu-primary);
 
     &:hover:not(:disabled) {
-      background: var(--neu-primary);
-      color: var(--neu-primary-fg);
+      background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+      color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
     }
   }
 
@@ -921,20 +1051,4 @@
 
 .neu-table__col-filter-select {
   cursor: pointer;
-}
-
-// ── Scrollable table ───────────────────────────────────────────────────
-.neu-table--scrollable {
-  .neu-table__scroll-container {
-    max-height: 480px;
-    overflow-y: auto;
-  }
-
-  .neu-table__head .neu-table__th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--neu-surface-2);
-    box-shadow: 0 1px 0 var(--neu-border);
-  }
 }

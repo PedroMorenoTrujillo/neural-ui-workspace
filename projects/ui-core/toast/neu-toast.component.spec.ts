@@ -1,5 +1,13 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideIcons } from '@ng-icons/core';
+import {
+  lucideAlertTriangle,
+  lucideCheckCircle,
+  lucideInfo,
+  lucideX,
+  lucideXCircle,
+} from '@ng-icons/lucide';
 import { NeuToastContainerComponent } from './neu-toast.component';
 import { NeuToastService } from './neu-toast.service';
 import { NeuToastType } from './neu-toast.types';
@@ -7,7 +15,16 @@ import { NeuToastType } from './neu-toast.types';
 describe('NeuToastContainerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideIcons({
+          lucideCheckCircle,
+          lucideXCircle,
+          lucideAlertTriangle,
+          lucideInfo,
+          lucideX,
+        }),
+      ],
     }).compileComponents();
     // Limpia toasts entre tests / Clear toasts between tests
     TestBed.inject(NeuToastService).clear();

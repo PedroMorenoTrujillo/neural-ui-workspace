@@ -33,8 +33,8 @@
   user-select: none;
 
   &:hover {
-    border-color: var(--neu-color-primary, #0ea5e9);
-    color: var(--neu-color-primary, #0ea5e9);
+    border-color: var(--neu-primary-dark, var(--neu-primary, #005fcc));
+    color: var(--neu-primary-dark, var(--neu-primary, #005fcc));
   }
 
   &:focus-visible {
@@ -43,8 +43,8 @@
   }
 
   &.neu-filter-bar__chip--active {
-    background: var(--neu-color-primary, #0ea5e9);
-    border-color: var(--neu-color-primary, #0ea5e9);
+    background: var(--neu-primary-dark, var(--neu-primary, #005fcc));
+    border-color: var(--neu-primary-dark, var(--neu-primary, #005fcc));
     color: #fff;
   }
 }

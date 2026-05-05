@@ -4,6 +4,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { NeuTooltipDirective } from './neu-tooltip.directive';
 
 @Component({
+  selector: 'neu-tooltip-host',
   template: `<button [neuTooltip]="text()" [neuTooltipDisabled]="disabled()">Hover me</button>`,
   imports: [NeuTooltipDirective],
 })
@@ -13,6 +14,7 @@ class TestHostComponent {
 }
 
 @Component({
+  selector: 'neu-tooltip-disabled-host',
   template: `<button [neuTooltip]="'Tooltip deshabilitado'" [neuTooltipDisabled]="true">
     Hover me
   </button>`,

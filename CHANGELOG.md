@@ -7,6 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+<!-- next release -->
+
+---
+
+## [1.5.0] - 2026-05-05
+
+### Added
+
+- `NeuTreeComponent` (`@neural-ui/core/tree`) — árbol jerárquico interactivo con soporte de expansión, selección simple/múltiple, lazy loading y teclado completo (flechas, Enter, Space).
+- `NeuTreeTableComponent` (`@neural-ui/core/tree-table`) — tabla con filas expandibles en árbol, columnas configurables, selección y accesibilidad aria-treegrid.
+- `NeuTimelineGridComponent` (`@neural-ui/core/timeline-grid`) — vista de timeline horizontal tipo Gantt con posicionamiento por rango de fechas y scroll libre.
+- `NeuKanbanComponent` (`@neural-ui/core/kanban`) — tablero kanban con columnas, tarjetas drag-and-drop (CDK) y callbacks de cambio de estado.
+- `NeuImageGalleryComponent` (`@neural-ui/core/image-gallery`) — galería de imágenes con grid, lightbox integrado y navegación por teclado.
+- `NeuUploaderComponent` (`@neural-ui/core/uploader`) — componente de subida de archivos con drag-and-drop, validación de tipo/tamaño/duplicados, progreso y mensajes i18n totalmente configurables.
+
+### Fixed
+
+- `NeuUploaderComponent` — los fondos del dropzone y el estado de error ya no usan colores hardcoded (`rgba` fijo), sino `color-mix()` sobre tokens CSS (`--neu-primary`, `--neu-surface`, `--neu-error`); el componente ahora es totalmente compatible con temas oscuros y personalizados.
+- `NeuCalendarComponent` — mejoras en la navegación de meses, selección de rango y layout responsivo.
+- `NeuSelectComponent` / `NeuMultiselectComponent` — correcciones en sincronización de estado al usar `formControl` en combinación con cambios externos al valor.
+- `NeuTableComponent` — se endurece el guard de resize para evitar excepciones en columnas sin ancho definido.
+- `NeuSliderComponent` / `NeuStepperComponent` / `NeuPaginationComponent` — ajustes visuales de SCSS para compatibilidad con el sistema de tokens actualizado.
+
+### Improved
+
+- Design tokens (`styles/_tokens.scss`) — se añaden nuevas variables de espacio, radio y sombra para dar soporte a los nuevos componentes sin romper compatibilidad existente.
+- La cobertura automatizada se mantiene por encima del 96% statements con 1615+ tests pasando.
+
+---
+
+## [1.4.0] - 2026-05-04
+
+### Added
+
+- `NeuAutocompleteComponent` añade `virtualScroll` y `virtualScrollVisibleItems` para datasets largos, renderizando resultados con `cdk-virtual-scroll-viewport` y manteniendo la navegación por teclado sincronizada con el viewport.
+- `@neural-ui/core/modal` exporta ahora `NeuDialogService`, permitiendo abrir diálogos programáticamente sobre la misma base visual y de tamaños que `NeuDialogComponent`.
+
+### Fixed
+
+- Se reforzó el comportamiento interactivo de `NeuSelectComponent`, `NeuMultiselectComponent`, `NeuTableComponent`, `NeuTabsComponent` y `NeuUrlStateService` para reducir trabajo reactivo innecesario y estabilizar escenarios de interacción complejos en navegación, filtros y query params.
+- `NeuModalComponent` y `NeuSidebarComponent` endurecen su gestión de foco, scroll y sincronización de estado, reduciendo regresiones en flujos overlay y navegación responsive.
+
+### Improved
+
+- La cobertura automatizada sube a 1615 tests con una instantánea validada de 96.75% statements, 95.67% branches, 94.98% functions y 98.02% lines.
+- README, documentación de calidad y ejemplos públicos se alinean con el estado actual de la librería: signals-first, standalone, OnPush, zoneless-oriented y con una base de accesibilidad de alta confianza.
+
+---
+
+## [1.3.2] - 2026-04-17
+
+### Fixed
+
+- `NeuTabsComponent` ya no inicia la captura de puntero cuando la interacción comienza sobre un botón de pestaña, corrigiendo un fallo real en navegador que impedía cambiar de tab en la showcase publicada.
+- Se añadió una prueba de regresión para asegurar que los clicks en tabs siguen funcionando aunque exista lógica de drag en la barra.
+
+---
+
+## [1.3.1] - 2026-04-17
+
+### Fixed
+
+- `NeuSelectComponent` y `NeuMultiselectComponent` ahora usan una estructura de trigger válida para el patrón combobox, evitando botones anidados y mejorando la compatibilidad con lectores de pantalla y navegación por teclado.
+- `NeuAutocompleteComponent` mejora la navegación por teclado evitando opciones deshabilitadas y expone estados de ayuda y error mediante `aria-describedby` y `aria-invalid`.
+- `NeuTabsComponent` corrige la estructura ARIA para renderizar un único `tablist` y mejora la usabilidad de barras de pestañas largas con arrastre horizontal y auto-scroll al tab activo.
+
+### Improved
+
+- Se redujo el trabajo reactivo innecesario en `NeuTableComponent`, `NeuSelectComponent`, `NeuMultiselectComponent` y `NeuTabsComponent` memoizando señales de query params y evitando recreaciones repetidas.
+- La accesibilidad base de componentes interactivos se reforzó con live regions, texto auxiliar semántico, estados de error consistentes y mejoras de foco visible.
+- La showcase fue alineada con los cambios de rendimiento y accesibilidad: navegación inicial corregida a `/home`, sincronización de título optimizada, demos con configuradores más granulares y documentación validada con build, unit tests y Playwright.
+
+---
+
 ## [1.3.0] - 2026-04-16
 
 ### Fixed
@@ -19,12 +95,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a formal quality and accessibility status document for `@neural-ui/core`, summarizing architecture alignment, testing thresholds, zoneless readiness and current accessibility confidence.
 - Expanded automated test coverage in several complex components, pushing the library-wide baseline above 96% statements, 95% branches and 91% functions.
 - README documentation was aligned with the published package structure: dedicated subpath imports, real theme token names, and current release guidance for `@neural-ui/core` 1.3.0.
-
----
-
-## [Unreleased]
-
-<!-- next release -->
 
 ## [1.2.1] - 2026-04-11
 

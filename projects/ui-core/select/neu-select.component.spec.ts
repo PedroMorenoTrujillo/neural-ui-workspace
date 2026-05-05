@@ -1,6 +1,16 @@
 import { TestBed } from '@angular/core/testing';
-import { Component, signal } from '@angular/core';
+import {
+  Component,
+  Directive,
+  Input,
+  TemplateRef,
+  ViewContainerRef,
+  provideZonelessChangeDetection,
+  signal,
+} from '@angular/core';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 import { NeuSelectComponent, NeuSelectOption } from './neu-select.component';
 import { NeuSelectItemDirective, NeuSelectSelectedDirective } from './neu-select.directives';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
@@ -11,8 +21,42 @@ const OPTIONS: NeuSelectOption[] = [
   { value: 'ar', label: 'Argentina', disabled: true },
 ];
 
+@Component({
+  selector: 'cdk-virtual-scroll-viewport',
+  template: '<ng-content />',
+  standalone: true,
+})
+class FakeSelectVirtualScrollViewportComponent {
+  @Input() itemSize = 0;
+
+  checkViewportSize(): void {}
+}
+
+@Directive({
+  selector: '[cdkVirtualFor][cdkVirtualForOf]',
+  standalone: true,
+})
+class FakeSelectCdkVirtualForDirective<T> {
+  @Input() cdkVirtualForTrackBy?: (index: number, item: T) => unknown;
+
+  constructor(
+    private readonly templateRef: TemplateRef<{ $implicit: T; index: number }>,
+    private readonly viewContainerRef: ViewContainerRef,
+  ) {}
+
+  @Input()
+  set cdkVirtualForOf(items: readonly T[]) {
+    this.viewContainerRef.clear();
+    items.forEach((item, index) => {
+      this.viewContainerRef.createEmbeddedView(this.templateRef, { $implicit: item, index });
+    });
+  }
+}
+
 async function setup(extraInputs: Record<string, unknown> = {}) {
-  await TestBed.configureTestingModule({}).compileComponents();
+  await TestBed.configureTestingModule({
+    providers: [provideZonelessChangeDetection()],
+  }).compileComponents();
   const f = TestBed.createComponent(NeuSelectComponent);
   f.componentRef.setInput('options', OPTIONS);
   f.componentRef.setInput('label', 'País');
@@ -32,7 +76,7 @@ describe('NeuSelectComponent', () => {
     expect(f.nativeElement.textContent).toContain('País');
   });
 
-  it('should show trigger button', async () => {
+  it('should show trigger control', async () => {
     const { f } = await setup();
     const trigger = f.nativeElement.querySelector('.neu-select__trigger');
     expect(trigger).toBeTruthy();
@@ -42,7 +86,7 @@ describe('NeuSelectComponent', () => {
 
   it('should open panel when trigger is clicked', async () => {
     const { f } = await setup();
-    const trigger: HTMLButtonElement = f.nativeElement.querySelector('.neu-select__trigger');
+    const trigger: HTMLElement = f.nativeElement.querySelector('.neu-select__trigger');
     trigger.click();
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-select__panel')).toBeTruthy();
@@ -50,7 +94,7 @@ describe('NeuSelectComponent', () => {
 
   it('should close panel on second click', async () => {
     const { f } = await setup();
-    const trigger: HTMLButtonElement = f.nativeElement.querySelector('.neu-select__trigger');
+    const trigger: HTMLElement = f.nativeElement.querySelector('.neu-select__trigger');
     trigger.click();
     f.detectChanges();
     trigger.click();
@@ -186,6 +230,34 @@ describe('NeuSelectComponent', () => {
     expect(f.nativeElement.textContent).toContain('Requerido');
   });
 
+  it('should expose hint through aria-describedby when there is no error', async () => {
+    const { f } = await setup({ hint: 'Selecciona un país' });
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const hint = f.nativeElement.querySelector('.neu-select__hint') as HTMLParagraphElement;
+
+    expect(hint.id).toBeTruthy();
+    expect(trigger.getAttribute('aria-describedby')).toBe(hint.id);
+  });
+
+  it('should expose error through aria-invalid and aria-describedby', async () => {
+    const { f } = await setup({ hint: 'Selecciona un país', errorMessage: 'Requerido' });
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const error = f.nativeElement.querySelector('.neu-select__error') as HTMLParagraphElement;
+
+    expect(trigger.getAttribute('aria-invalid')).toBe('true');
+    expect(trigger.getAttribute('aria-describedby')).toBe(error.id);
+  });
+
+  it('should announce filtered result counts in the live region', async () => {
+    const { f, comp } = await setup({ searchable: true });
+    comp.isOpen.set(true);
+    comp.searchQuery.set('xico');
+    f.detectChanges();
+
+    const liveRegion = f.nativeElement.querySelector('.neu-select__sr-status');
+    expect(liveRegion.textContent.trim()).toBe('1 opción disponible');
+  });
+
   // ── Clearable ──────────────────────────────────────────────────────────────
 
   it('should show clear button when clearable=true and value is set', async () => {
@@ -193,6 +265,16 @@ describe('NeuSelectComponent', () => {
     comp.writeValue('es');
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-select__clear')).toBeTruthy();
+  });
+
+  it('should keep the trigger as a non-button container', async () => {
+    const { f, comp } = await setup({ clearable: true });
+    comp.writeValue('es');
+    f.detectChanges();
+
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    expect(trigger.tagName).toBe('DIV');
+    expect(f.nativeElement.querySelector('button.neu-select__trigger')).toBeNull();
   });
 
   it('clearValue should reset value and call onChange', async () => {
@@ -253,6 +335,56 @@ describe('NeuSelectComponent', () => {
     expect(comp.filteredOptions()).toHaveLength(1);
   });
 
+  it('clicking the static label should focus the trigger through the template binding', async () => {
+    const { f } = await setup({ floatingLabel: false });
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    trigger.focus = vi.fn();
+
+    const label = f.nativeElement.querySelector('.neu-select__static-label') as HTMLElement;
+    label.click();
+    f.detectChanges();
+
+    expect(trigger.focus).toHaveBeenCalled();
+  });
+
+  it('virtualScroll should render the virtual panel branch and its bindings', async () => {
+    const { f, comp } = await setup({
+      virtualScroll: true,
+      searchable: true,
+      size: 'lg',
+      options: [
+        { value: 'es', label: 'España' },
+        { value: 'mx', label: 'México' },
+      ],
+    });
+    comp.writeValue('es');
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const panel = f.nativeElement.querySelector('.neu-select__panel--virtual');
+    const viewport = f.nativeElement.querySelector('.neu-select__viewport');
+    expect(panel).toBeTruthy();
+    expect(viewport).toBeTruthy();
+    expect(viewport.style.height).toBe(comp.virtualViewportHeight());
+    expect(comp.virtualScrollItemSize()).toBe(52);
+    expect(comp.filteredOptions()).toHaveLength(2);
+    expect(comp.trackByOptionValue(0, { value: 'es', label: 'España' })).toBe('es');
+  });
+
+  it('trigger DOM key bindings should open and toggle the panel', async () => {
+    const { f, comp } = await setup();
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(true);
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
+  });
+
   // ── focusOptionByIndex no-throw ───────────────────────────────────────────
 
   it('focusOptionByIndex should not throw', async () => {
@@ -268,6 +400,94 @@ describe('NeuSelectComponent', () => {
     const { comp } = await setup();
     comp.onTriggerKey({ preventDefault: () => {} } as Event);
     expect(comp.isOpen()).toBe(true);
+  });
+
+  it('onTriggerKey should ignore events coming from child elements', async () => {
+    const { comp } = await setup();
+    const preventDefault = vi.fn();
+
+    comp.onTriggerKey({
+      preventDefault,
+      target: {},
+      currentTarget: document.createElement('div'),
+    } as unknown as Event);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(comp.isOpen()).toBe(false);
+  });
+
+  it('onTriggerActionKey should toggle only for direct trigger events', async () => {
+    const { comp } = await setup();
+
+    comp.onTriggerActionKey({
+      preventDefault: vi.fn(),
+      target: {},
+      currentTarget: document.createElement('div'),
+    } as unknown as KeyboardEvent);
+    expect(comp.isOpen()).toBe(false);
+
+    comp.onTriggerActionKey({
+      preventDefault: vi.fn(),
+      target: document.body,
+      currentTarget: document.body,
+    } as unknown as KeyboardEvent);
+    expect(comp.isOpen()).toBe(true);
+  });
+
+  it('focusTrigger should focus the trigger element', async () => {
+    const { f, comp } = await setup();
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    trigger.focus = vi.fn();
+
+    comp.focusTrigger();
+
+    expect(trigger.focus).toHaveBeenCalled();
+  });
+
+  it('syncPanelPosition should return early when the trigger is missing', async () => {
+    const { f, comp } = await setup();
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
+
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      comp.panelPosition.set({
+        position: 'fixed',
+        top: '1px',
+        left: '2px',
+        width: '3px',
+        maxHeight: '4px',
+      });
+      comp.syncPanelPosition();
+      expect(comp.panelPosition()).toEqual({
+        position: 'fixed',
+        top: '1px',
+        left: '2px',
+        width: '3px',
+        maxHeight: '4px',
+      });
+    } finally {
+      querySpy.mockRestore();
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('focusFirstOption should do nothing when all options are disabled', async () => {
+    const { comp } = await setup({
+      options: [{ value: 'x', label: 'Disabled', disabled: true }],
+    });
+    const focusOptionSpy = vi.spyOn(
+      comp as object as { focusOption: (value: string) => void },
+      'focusOption',
+    );
+
+    comp.focusFirstOption();
+
+    expect(focusOptionSpy).not.toHaveBeenCalled();
   });
 
   it('focusOptionByIndex should focus the next enabled option when it exists', async () => {
@@ -308,17 +528,23 @@ describe('NeuSelectComponent', () => {
     expect(syncSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('syncPanelPosition should reset inline position on desktop viewport', async () => {
+  it('syncPanelPosition should compute fixed panel geometry on desktop viewport', async () => {
     const { f, comp } = await setup();
     const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLButtonElement;
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    Object.defineProperty(trigger, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ top: 18, left: 20, bottom: 50, width: 180 }),
+    });
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
       return 1;
     }) as typeof window.requestAnimationFrame;
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 900 });
 
     try {
       comp.panelPosition.set({
@@ -333,16 +559,21 @@ describe('NeuSelectComponent', () => {
 
       expect(trigger).toBeTruthy();
       expect(comp.panelPosition()).toEqual({
-        position: null,
-        top: null,
-        left: null,
-        width: null,
-        maxHeight: null,
+        position: 'fixed',
+        top: '56px',
+        bottom: 'auto',
+        left: '20px',
+        width: '180px',
+        maxHeight: '828px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
         configurable: true,
         value: originalInnerWidth,
+      });
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: originalInnerHeight,
       });
       window.requestAnimationFrame = originalRequestAnimationFrame;
     }
@@ -354,7 +585,7 @@ describe('NeuSelectComponent', () => {
     const originalInnerHeight = window.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLButtonElement;
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
     Object.defineProperty(trigger, 'getBoundingClientRect', {
       configurable: true,
       value: () => ({ left: 24, bottom: 100, width: 220 }),
@@ -373,6 +604,7 @@ describe('NeuSelectComponent', () => {
       expect(comp.panelPosition()).toEqual({
         position: 'fixed',
         top: '106px',
+        bottom: 'auto',
         left: '24px',
         width: '220px',
         maxHeight: '722px',
@@ -386,6 +618,70 @@ describe('NeuSelectComponent', () => {
         configurable: true,
         value: originalInnerHeight,
       });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('syncPanelPosition should notify the virtual viewport when virtualScroll=true', async () => {
+    const { f, comp } = await setup({ virtualScroll: true });
+    const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    Object.defineProperty(trigger, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 24, bottom: 100, width: 220 }),
+    });
+
+    const checkViewportSize = vi.fn();
+    comp._viewport = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
+
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 });
+
+    try {
+      comp.syncPanelPosition();
+      expect(checkViewportSize).toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: originalInnerWidth,
+      });
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('focusOption should scroll and focus through the virtual viewport when virtualScroll=true', async () => {
+    const { f, comp } = await setup({ virtualScroll: true });
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+
+    const focus = vi.fn();
+    const scrollToIndex = vi.fn();
+    const checkViewportSize = vi.fn();
+    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+
+    const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue({ focus } as any);
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      comp.focusOption('mx');
+      expect(scrollToIndex).toHaveBeenCalledWith(1, 'auto');
+      expect(checkViewportSize).toHaveBeenCalled();
+      expect(focus).toHaveBeenCalled();
+    } finally {
+      querySpy.mockRestore();
       window.requestAnimationFrame = originalRequestAnimationFrame;
     }
   });
@@ -588,8 +884,7 @@ describe('NeuSelectComponent', () => {
     trigger?.click();
     f.detectChanges();
     await f.whenStable();
-    // The custom template may not show text until open — verify component renders
-    expect(f.nativeElement).toBeTruthy();
+    expect(f.nativeElement.textContent).toContain('ITEM:España');
   });
 
   it('size input adds size class to host', async () => {
@@ -609,7 +904,7 @@ describe('NeuSelectComponent', () => {
     ];
     const f = TestBed.createComponent(NeuSelectComponent);
     f.componentRef.setInput('options', disabledOptions);
-    f.componentRef.setInput('open', true);
+    (f.componentInstance as any).isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -670,6 +965,149 @@ describe('NeuSelectComponent', () => {
       f.detectChanges();
       expect(comp._value()).toBeNull();
     }
+  });
+
+  it('DOM click on option should call selectOption through the template listener', async () => {
+    const { f, comp } = await setup();
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const optionEls = f.nativeElement.querySelectorAll('.neu-select__option');
+    optionEls[1].click();
+    f.detectChanges();
+
+    expect(comp._value()).toBe('mx');
+  });
+
+  it('unselected option checkmarks should render with hidden visibility', async () => {
+    const { f, comp } = await setup();
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const checks = Array.from(
+      f.nativeElement.querySelectorAll('.neu-select__check'),
+    ) as SVGElement[];
+    expect(checks.some((check) => check.style.visibility === 'hidden')).toBe(true);
+  });
+
+  it('_selectedOption should return null when the current value does not match any option', async () => {
+    const { comp } = await setup();
+    comp.writeValue('desconocido');
+
+    expect(comp._selectedOption()).toBeNull();
+  });
+
+  it('virtualViewportHeight should use parsed maxHeight and the no-search offset branch', async () => {
+    const { comp } = await setup({ virtualScroll: true, searchable: false });
+    comp.panelPosition.set({
+      position: 'fixed',
+      top: '0px',
+      left: '0px',
+      width: '240px',
+      maxHeight: '120px',
+    });
+
+    expect(comp.virtualViewportHeight()).toBe('120px');
+  });
+
+  it('virtualViewportHeight should fall back when maxHeight cannot be parsed', async () => {
+    const { comp } = await setup({ virtualScroll: true, searchable: false });
+    comp.panelPosition.set({
+      position: 'fixed',
+      top: '0px',
+      left: '0px',
+      width: '240px',
+      maxHeight: 'calc(100vh)',
+    });
+
+    expect(comp.virtualViewportHeight()).toBe('240px');
+  });
+
+  it('virtualScroll should expose the viewport viewChild when the panel is open', async () => {
+    const { f, comp } = await setup({ virtualScroll: true });
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(comp._viewport()).toBeTruthy();
+  });
+
+  it('virtual option handlers should execute when virtual rows are rendered with a fake viewport', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    })
+      .overrideComponent(NeuSelectComponent, {
+        remove: { imports: [ScrollingModule] },
+        add: {
+          imports: [FakeSelectVirtualScrollViewportComponent, FakeSelectCdkVirtualForDirective],
+        },
+      })
+      .compileComponents();
+
+    const f = TestBed.createComponent(NeuSelectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const optionEls = f.nativeElement.querySelectorAll('.neu-select__option');
+    expect(optionEls.length).toBeGreaterThan(0);
+
+    optionEls[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    f.detectChanges();
+
+    expect(comp._value()).toBe('es');
+  });
+
+  it('trigger event handlers should cover ArrowUp and Space template bindings', async () => {
+    const { f, comp } = await setup();
+    const triggerDe = f.debugElement.query(By.css('.neu-select__trigger'));
+
+    triggerDe.triggerEventHandler('keydown.arrowUp', {
+      target: triggerDe.nativeElement,
+      currentTarget: triggerDe.nativeElement,
+      preventDefault: vi.fn(),
+    });
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(true);
+
+    triggerDe.triggerEventHandler('keydown.space', {
+      target: triggerDe.nativeElement,
+      currentTarget: triggerDe.nativeElement,
+      preventDefault: vi.fn(),
+    });
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
+  });
+
+  it('option template handlers should cover click and key bindings via DebugElement', async () => {
+    const { f, comp } = await setup();
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const optionDes = f.debugElement.queryAll(By.css('.neu-select__option'));
+    const optionDe = optionDes[0];
+    const option = OPTIONS[0];
+    const eventBase = { preventDefault: vi.fn() };
+
+    optionDe.triggerEventHandler('click', eventBase);
+    optionDe.triggerEventHandler('keydown.enter', eventBase);
+    optionDe.triggerEventHandler('keydown.space', eventBase);
+    optionDe.triggerEventHandler('keydown.arrowDown', eventBase);
+    optionDe.triggerEventHandler('keydown.arrowUp', eventBase);
+    f.detectChanges();
+
+    expect(comp._value()).toBe(option.value);
   });
 
   // ── Keyboard DOM dispatch on option elements ──────────────────────────────
@@ -779,5 +1217,35 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(comp._value()).toBe('es');
+  });
+
+  it('URL sync effect should skip redundant updates when the selected value already matches', async () => {
+    const mockParam = signal<string | null>(null);
+    const mockUrlState = {
+      params: signal<Record<string, string>>({}),
+      getParam: (_key: string) => mockParam,
+      setParam: vi.fn(),
+      patchParams: vi.fn(),
+      clearParams: vi.fn(),
+    };
+    await TestBed.configureTestingModule({
+      providers: [{ provide: NeuUrlStateService, useValue: mockUrlState }],
+    }).compileComponents();
+    const f = TestBed.createComponent(NeuSelectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('urlParam', 'country');
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    const onChange = vi.fn();
+    comp.registerOnChange(onChange);
+    comp.writeValue('es');
+
+    mockParam.set('es');
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(comp._value()).toBe('es');
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

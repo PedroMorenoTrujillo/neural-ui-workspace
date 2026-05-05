@@ -59,41 +59,41 @@
 
   // ---- Variantes / Variants ----
   &--primary {
-    background: var(--neu-primary);
-    color: var(--neu-primary-fg);
-    border-color: var(--neu-primary);
+    background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+    border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-primary-dark);
-      border-color: var(--neu-primary-dark);
+      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+      border-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
       box-shadow: var(--neu-shadow-glow);
     }
 
     &:active:not(:disabled) {
-      background: var(--neu-primary-dark);
+      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
       transform: translateY(1px);
     }
   }
 
   &--secondary {
-    background: var(--neu-secondary);
-    color: var(--neu-secondary-fg);
-    border-color: var(--neu-secondary);
+    background: #475569;
+    color: #ffffff;
+    border-color: #475569;
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-secondary-dark);
-      border-color: var(--neu-secondary-dark);
+      background: #334155;
+      border-color: #334155;
     }
   }
 
   &--outline {
     background: transparent;
-    color: var(--neu-primary-light);
+    color: var(--neu-primary-dark, var(--neu-primary));
     border-color: var(--neu-primary);
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
       background: var(--neu-primary-50);
-      border-color: var(--neu-primary-light);
+      border-color: var(--neu-primary-dark, var(--neu-primary));
     }
   }
 

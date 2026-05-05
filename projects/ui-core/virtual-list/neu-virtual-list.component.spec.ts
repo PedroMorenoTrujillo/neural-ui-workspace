@@ -272,4 +272,63 @@ describe('NeuVirtualListComponent', () => {
     expect(rows.length).toBeGreaterThan(0);
     expect(rows[0].textContent).toContain('Alpha');
   });
+
+  it('should apply itemSize to the simulated default rows', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    })
+      .overrideComponent(NeuVirtualListComponent, {
+        remove: { imports: [ScrollingModule] },
+        add: { imports: [FakeVirtualScrollViewportComponent, FakeCdkVirtualForDirective] },
+      })
+      .compileComponents();
+
+    const f = TestBed.createComponent(NeuVirtualListComponent);
+    f.componentRef.setInput('items', ['Alpha']);
+    f.componentRef.setInput('itemSize', 64);
+    f.detectChanges();
+    await f.whenStable();
+
+    const row = f.nativeElement.querySelector('.neu-virtual-list__item-default') as HTMLElement;
+    expect(row.style.height).toBe('64px');
+    expect(row.textContent).toContain('Alpha');
+  });
+
+  it('should render projected rows when the virtual viewport is simulated', async () => {
+    TestBed.resetTestingModule();
+
+    @Component({
+      template: `
+        <neu-virtual-list [items]="items">
+          <ng-template let-item let-index="index">
+            <span class="projected-row">{{ index }}-{{ item }}</span>
+          </ng-template>
+        </neu-virtual-list>
+      `,
+      imports: [NeuVirtualListComponent],
+    })
+    class SimulatedProjectedHostComponent {
+      readonly items = ['Alpha', 'Beta'];
+    }
+
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    })
+      .overrideComponent(NeuVirtualListComponent, {
+        remove: { imports: [ScrollingModule] },
+        add: { imports: [FakeVirtualScrollViewportComponent, FakeCdkVirtualForDirective] },
+      })
+      .compileComponents();
+
+    const f = TestBed.createComponent(SimulatedProjectedHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const rows = Array.from(f.nativeElement.querySelectorAll('.projected-row')) as HTMLElement[];
+
+    expect(rows.length).toBe(2);
+    expect(rows[0].textContent).toContain('0-Alpha');
+    expect(rows[1].textContent).toContain('1-Beta');
+  });
 });

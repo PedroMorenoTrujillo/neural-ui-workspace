@@ -58,17 +58,18 @@
 
   &--primary {
     background: var(--neu-primary-50);
-    color: var(--neu-primary);
-    border-color: var(--neu-primary-100);
+    color: var(--neu-primary-dark, var(--neu-primary));
+    border-color: color-mix(in srgb, var(--neu-primary-dark, var(--neu-primary)) 28%, transparent);
 
     &:hover:not(.neu-chip--disabled) {
       background: var(--neu-primary-100);
+      color: var(--neu-primary-dark, var(--neu-primary));
     }
 
     &.neu-chip--selected {
-      background: var(--neu-primary);
-      color: var(--neu-primary-fg);
-      border-color: var(--neu-primary);
+      background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+      color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+      border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
     }
   }
 
@@ -107,7 +108,9 @@
 
   // ---- Deshabilitado / Disabled ----
   &--disabled {
-    opacity: 0.45;
+    background: var(--neu-surface-2);
+    color: var(--neu-text-muted);
+    border-color: var(--neu-border);
     cursor: not-allowed;
     pointer-events: none;
   }

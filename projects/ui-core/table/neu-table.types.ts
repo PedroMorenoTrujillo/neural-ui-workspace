@@ -32,6 +32,21 @@ export interface NeuTableActionEvent<T = Record<string, unknown>> {
   row: T;
 }
 
+export interface NeuTableSelectionAction<T = Record<string, unknown>> {
+  key: string;
+  label: string;
+  icon: string;
+  variant?: 'ghost' | 'primary' | 'danger';
+  show?: (rows: T[]) => boolean;
+  disabled?: (rows: T[]) => boolean;
+  confirm?: string;
+}
+
+export interface NeuTableSelectionActionEvent<T = Record<string, unknown>> {
+  action: NeuTableSelectionAction<T>;
+  rows: T[];
+}
+
 // ── Sort ──────────────────────────────────────────────────────────────────
 export interface NeuTableSortEntry {
   key: string;
@@ -64,11 +79,14 @@ export interface NeuTableColumn<T = Record<string, unknown>> {
   key: string;
   header: string;
   width?: string;
+  minWidth?: number;
+  maxWidth?: number;
   align?: 'left' | 'center' | 'right';
   cell?: (row: T) => string;
   cellTemplate?: TemplateRef<{ $implicit: T; row: T; column: NeuTableColumn<T> }>;
   cellClass?: string;
   sortable?: boolean;
+  resizable?: boolean;
   type?: NeuTableCellType;
   // Badge
   badgeMap?: Record<string, NeuTableBadgeConfig>;

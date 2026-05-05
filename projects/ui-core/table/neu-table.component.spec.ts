@@ -5,6 +5,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { lucidePencil } from '@ng-icons/lucide';
 import { NeuTableComponent } from './neu-table.component';
+import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableColumn } from './neu-table.types';
 
 interface Person {
@@ -21,6 +22,12 @@ const COLUMNS: NeuTableColumn[] = [
   { key: 'city', header: 'Ciudad' },
 ];
 
+const RESIZABLE_COLUMNS: NeuTableColumn[] = [
+  { key: 'name', header: 'Nombre', width: '120px', frozen: 'left' },
+  { key: 'age', header: 'Edad', width: '140px', frozen: 'left' },
+  { key: 'city', header: 'Ciudad', width: '180px' },
+];
+
 const BADGE_COLUMNS: NeuTableColumn[] = [
   { key: 'name', header: 'Nombre' },
   {
@@ -31,6 +38,22 @@ const BADGE_COLUMNS: NeuTableColumn[] = [
       active: { label: 'Activo', variant: 'success' },
       inactive: { label: 'Inactivo', variant: 'danger' },
     },
+  },
+];
+
+const SELECTION_ACTIONS = [
+  {
+    key: 'archive',
+    label: 'Archivar',
+    icon: 'lucideArchive',
+    variant: 'primary' as const,
+  },
+  {
+    key: 'delete',
+    label: 'Eliminar',
+    icon: 'lucideTrash2',
+    variant: 'danger' as const,
+    confirm: 'Confirmar borrado',
   },
 ];
 
@@ -54,6 +77,9 @@ function mkProviders() {
 
 describe('NeuTableComponent', () => {
   beforeEach(async () => {
+    if (!HTMLElement.prototype.scrollTo) {
+      HTMLElement.prototype.scrollTo = vi.fn();
+    }
     await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
   });
 
@@ -295,6 +321,51 @@ describe('NeuTableComponent', () => {
     expect(emitted.length).toBe(1);
   });
 
+  it('should emit selectionActionClick with the selected rows', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('selectionActions', SELECTION_ACTIONS);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const emitted: Array<{ action: { key: string }; rows: Person[] }> = [];
+    comp.selectionActionClick.subscribe((event: { action: { key: string }; rows: Person[] }) =>
+      emitted.push(event),
+    );
+
+    comp.toggleRow(DATA[0]);
+    comp.handleSelectionAction(SELECTION_ACTIONS[0]);
+
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]?.action.key).toBe('archive');
+    expect(emitted[0]?.rows.map((row) => row.id)).toEqual([1]);
+  });
+
+  it('selection action with confirm should require a second click', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('selectionActions', SELECTION_ACTIONS);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const emitSpy = vi.spyOn(comp.selectionActionClick, 'emit');
+
+    comp.toggleRow(DATA[1]);
+    comp.handleSelectionAction(SELECTION_ACTIONS[1]);
+    expect(comp.isSelectionConfirmPending(SELECTION_ACTIONS[1])).toBe(true);
+    expect(emitSpy).not.toHaveBeenCalled();
+
+    comp.handleSelectionAction(SELECTION_ACTIONS[1]);
+    expect(comp.isSelectionConfirmPending(SELECTION_ACTIONS[1])).toBe(false);
+    expect(emitSpy).toHaveBeenCalledWith({ action: SELECTION_ACTIONS[1], rows: [DATA[1]] });
+  });
+
   // ── Paginación ───────────────────────────────────────────────────────────
 
   it('should paginate data when rows exceed pageSize', async () => {
@@ -420,6 +491,40 @@ describe('NeuTableComponent', () => {
     comp.toggleExpand(DATA[0]);
     expect(comp.isRowExpanded(DATA[0])).toBe(true);
     comp.toggleExpand(DATA[0]);
+    expect(comp.isRowExpanded(DATA[0])).toBe(false);
+  });
+
+  it('expandMode=single should keep only one expanded row at a time', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', 'single');
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.expandRow(DATA[0]);
+    expect(comp.isRowExpanded(DATA[0])).toBe(true);
+
+    comp.expandRow(DATA[1]);
+    expect(comp.isRowExpanded(DATA[0])).toBe(false);
+    expect(comp.isRowExpanded(DATA[1])).toBe(true);
+  });
+
+  it('collapseRow should deterministically close an expanded row', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('expandable', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.expandRow(DATA[0]);
+    expect(comp.isRowExpanded(DATA[0])).toBe(true);
+
+    comp.collapseRow(DATA[0]);
     expect(comp.isRowExpanded(DATA[0])).toBe(false);
   });
 
@@ -940,6 +1045,128 @@ describe('NeuTableComponent', () => {
     expect(emitted[0]).toEqual(DATA[0]);
   });
 
+  it('should render resize handles when resizableColumns=true', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelectorAll('.neu-table__resize-handle').length).toBe(3);
+  });
+
+  it('startColumnResize should update the effective column width', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const handle = f.nativeElement.querySelector('.neu-table__resize-handle') as HTMLButtonElement;
+
+    handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100 }));
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 145 }));
+    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 145 }));
+
+    expect(comp.columnWidth(RESIZABLE_COLUMNS[0])).toBe('165px');
+  });
+
+  it('resized frozen columns should update the next frozen offset', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.startColumnResize(RESIZABLE_COLUMNS[0], {
+      clientX: 100,
+      preventDefault: () => {},
+      stopPropagation: () => {},
+      currentTarget: null,
+    } as MouseEvent);
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140 }));
+    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 140 }));
+
+    expect(comp._frozenLeftOffsets().get('age')).toBe(160);
+  });
+
+  it('columnWidth should fall back to the configured width when the column has not been resized', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+
+    expect(comp.columnWidth(RESIZABLE_COLUMNS[2])).toBe('180px');
+  });
+
+  it('should not render a resize handle for columns explicitly marked as non-resizable', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', [
+      { key: 'name', header: 'Nombre', width: '120px' },
+      { key: 'age', header: 'Edad', width: '140px', resizable: false },
+      { key: 'city', header: 'Ciudad', width: '180px' },
+    ]);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelectorAll('.neu-table__resize-handle').length).toBe(2);
+  });
+
+  it('startColumnResize should no-op when the target column is not resizable', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const columns = [
+      { key: 'name', header: 'Nombre', width: '120px', resizable: false },
+      { key: 'age', header: 'Edad', width: '140px' },
+    ];
+    f.componentRef.setInput('columns', columns);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+
+    comp.startColumnResize(columns[0], {
+      clientX: 100,
+      preventDefault,
+      stopPropagation,
+      currentTarget: null,
+    } as unknown as MouseEvent);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(stopPropagation).not.toHaveBeenCalled();
+    expect(comp.columnWidth(columns[0])).toBe('120px');
+  });
+
+  it('resetColumnWidth should keep the width map unchanged when the column was not resized', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+
+    comp.resetColumnWidth('name');
+
+    expect(comp.columnWidth(RESIZABLE_COLUMNS[0])).toBe('120px');
+    expect(comp._columnWidths()).toEqual({});
+  });
+
   // ── Server-side: onSearch ─────────────────────────────────────────────
 
   it('onSearch with serverSide=true should emit serverStateChange with search and page=1', async () => {
@@ -1229,6 +1456,74 @@ describe('NeuTableComponent', () => {
     const text = await blob.text();
     expect(text).toContain('Nombre');
     expect(text).not.toContain('Edad');
+  });
+
+  it('exportCsv should prefer selected rows when exportScope=auto and selection exists', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.toggleRow(DATA[1]);
+
+    const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
+    comp.exportCsv();
+
+    const [blob] = downloadSpy.mock.calls[0] as [Blob, string];
+    const text = await blob.text();
+    expect(text).toContain('Luis Pérez');
+    expect(text).not.toContain('Ana García');
+    expect(text).not.toContain('María López');
+  });
+
+  it('exportJson should export selected rows only when exportScope=selected', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('exportScope', 'selected');
+    f.componentRef.setInput('exportFormats', ['json']);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.toggleRow(DATA[2]);
+
+    const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
+    comp.exportJson();
+
+    const [blob] = downloadSpy.mock.calls[0] as [Blob, string];
+    const payload = JSON.parse(await blob.text()) as Array<Record<string, string>>;
+    expect(payload).toHaveLength(1);
+    expect(payload[0]?.['name']).toBe('María López');
+  });
+
+  it('exportCsv should export filtered rows only when exportScope=filtered', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('exportScope', 'filtered');
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.onSearch({ target: { value: 'Ana' } } as unknown as Event);
+    f.detectChanges();
+    await f.whenStable();
+
+    const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
+    comp.exportCsv();
+
+    const [blob] = downloadSpy.mock.calls[0] as [Blob, string];
+    const text = await blob.text();
+    expect(text).toContain('Ana García');
+    expect(text).not.toContain('Luis Pérez');
   });
 
   // ── filteredData: badge label matching ───────────────────────────────
@@ -2179,6 +2474,27 @@ describe('NeuTableComponent', () => {
     expect((f.componentInstance as any).effectivePageSize()).toBe(5);
   });
 
+  it('page-size sync effect should update the control without re-emitting valueChanges', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', MANY_ROWS);
+    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('pageSizeOptions', [5, 10]);
+    f.componentRef.setInput('pageSize', 10);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const onPageSizeChangeSpy = vi.spyOn(comp, 'onPageSizeChange');
+
+    f.componentRef.setInput('pageSize', 5);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(comp._pageSizeControl.value).toBe('5');
+    expect(onPageSizeChangeSpy).not.toHaveBeenCalled();
+  });
+
   // ── MultiSort priority display in column headers ─────────────────────
 
   it('multiSort active entries render sort priority indicators in headers', async () => {
@@ -2386,5 +2702,281 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect((f.componentInstance as any)._confirmPending()).toBeNull();
+  });
+
+  it('virtual scroll computeds should update after scrolling a long table', async () => {
+    const originalScrollTo = HTMLElement.prototype.scrollTo;
+    HTMLElement.prototype.scrollTo = vi.fn();
+
+    try {
+      const filterableColumns: NeuTableColumn[] = [
+        { key: 'name', header: 'Nombre', filterable: true },
+        { key: 'age', header: 'Edad' },
+        { key: 'city', header: 'Ciudad' },
+      ];
+      const f = TestBed.createComponent(NeuTableComponent);
+      f.componentRef.setInput('columns', filterableColumns);
+      f.componentRef.setInput('data', MANY_ROWS);
+      f.componentRef.setInput('virtualScroll', true);
+      f.componentRef.setInput('virtualScrollVisibleItems', 5);
+      f.componentRef.setInput('useUrlState', false);
+      f.componentRef.setInput('pagination', false);
+      f.detectChanges();
+      await f.whenStable();
+      const comp = f.componentInstance as any;
+
+      expect(comp.rows()).toHaveLength(MANY_ROWS.length);
+      expect(comp._scrollContainer()).toBeTruthy();
+      expect(comp._virtualRowHeight()).toBe(48);
+      expect(comp._virtualHeaderHeight()).toBe(96);
+      expect(comp._virtualScrollActive()).toBe(true);
+      expect(comp.virtualContainerMaxHeight()).toBe('336px');
+      expect(comp.visiblePageRows().length).toBeGreaterThan(0);
+
+      comp.onTableScroll({ target: { scrollTop: 520 } } as unknown as Event);
+
+      expect(comp._virtualStartIndex()).toBeGreaterThan(0);
+      expect(comp._virtualEndIndex()).toBeGreaterThan(comp._virtualStartIndex());
+      expect(comp._virtualTopSpacerHeight()).toBeGreaterThan(0);
+      expect(comp._virtualBottomSpacerHeight()).toBeGreaterThanOrEqual(0);
+    } finally {
+      HTMLElement.prototype.scrollTo = originalScrollTo;
+    }
+  });
+
+  it('onTableScroll should no-op when virtual scroll is inactive', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('virtualScroll', false);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.onTableScroll({ target: { scrollTop: 300 } } as unknown as Event);
+
+    expect(comp._virtualScrollTop()).toBe(0);
+  });
+
+  it('columnFilterControl should update the filter state when the control changes', async () => {
+    const filterableColumns: NeuTableColumn[] = [
+      { key: 'name', header: 'Nombre', filterable: true },
+      { key: 'age', header: 'Edad' },
+    ];
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', filterableColumns);
+    f.componentRef.setInput('data', DATA);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const control = comp.columnFilterControl('name');
+    control.setValue('Ana');
+    f.detectChanges();
+
+    expect(comp.getColumnFilterValue('name')).toBe('Ana');
+  });
+
+  it('toolbar export buttons should call exportCsv and exportJson via DOM', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('exportFormats', ['csv', 'json']);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    vi.spyOn(comp, 'exportCsv');
+    vi.spyOn(comp, 'exportJson');
+
+    const buttons = Array.from(
+      f.nativeElement.querySelectorAll('.neu-table__export-btn'),
+    ) as HTMLButtonElement[];
+    buttons[0].click();
+    buttons[1].click();
+    f.detectChanges();
+
+    expect(comp.exportCsv).toHaveBeenCalled();
+    expect(comp.exportJson).toHaveBeenCalled();
+  });
+
+  it('selection clear button via DOM should clear the selected rows', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    comp.toggleRow(DATA[0]);
+    f.detectChanges();
+
+    const clearBtn = f.nativeElement.querySelector(
+      '.neu-table__selection-clear',
+    ) as HTMLButtonElement;
+    clearBtn.click();
+    f.detectChanges();
+
+    expect(comp.selectedCount()).toBe(0);
+  });
+
+  it('clicking a table row via DOM should call onRowClick and toggle selection', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+    const clickedRows: unknown[] = [];
+    f.componentInstance.rowClick.subscribe((row) => clickedRows.push(row));
+
+    const row = f.nativeElement.querySelector('.neu-table__row') as HTMLTableRowElement;
+    row.click();
+    f.detectChanges();
+
+    expect((f.componentInstance as any).selectedCount()).toBe(1);
+    expect(clickedRows).toHaveLength(1);
+  });
+
+  it('clicking Sí in a confirm action via DOM should emit the confirmed action', async () => {
+    const actionColumns: NeuTableColumn[] = [
+      {
+        key: 'actions',
+        header: '',
+        type: 'actions',
+        actions: [{ key: 'delete', label: 'Borrar', icon: '🗑️', confirm: '¿Borrar?' }],
+      },
+    ];
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', actionColumns);
+    f.componentRef.setInput('data', DATA);
+    f.detectChanges();
+    await f.whenStable();
+    const events: any[] = [];
+    f.componentInstance.actionClick.subscribe((e: any) => events.push(e));
+
+    const actionBtn = f.nativeElement.querySelector('.neu-table__action-btn') as HTMLButtonElement;
+    actionBtn.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    const confirmBtn = f.nativeElement.querySelector(
+      '.neu-table__action-confirm .neu-table__action-btn--danger',
+    ) as HTMLButtonElement;
+    confirmBtn.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(events).toHaveLength(1);
+    expect(events[0].action.key).toBe('delete');
+  });
+
+  it('link cells should stop propagation and not toggle row selection', async () => {
+    const linkColumns: NeuTableColumn[] = [
+      {
+        key: 'name',
+        header: 'Nombre',
+        type: 'link',
+        linkHref: (row) => `/users/${(row as unknown as Person).id}`,
+      },
+    ];
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', linkColumns);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const link = f.nativeElement.querySelector('.neu-table__cell-link') as HTMLAnchorElement;
+    link.click();
+    f.detectChanges();
+
+    expect((f.componentInstance as any).selectedCount()).toBe(0);
+  });
+
+  it('headerTemplate and expandTemplate branches should render custom templates', async () => {
+    const originalScrollTo = HTMLElement.prototype.scrollTo;
+    HTMLElement.prototype.scrollTo = vi.fn();
+
+    try {
+      @Component({
+        template: `
+          <ng-template #header let-col>
+            <span class="custom-header">header-{{ col.header }}</span>
+          </ng-template>
+          <neu-table
+            [columns]="[{ key: 'name', header: 'Nombre', headerTemplate: header }]"
+            [data]="data"
+            [expandable]="true"
+          >
+            <ng-template neuTableExpand let-row>
+              <div class="custom-expand">expand-{{ row.name }}</div>
+            </ng-template>
+          </neu-table>
+        `,
+        imports: [NeuTableComponent, NeuTableExpandDirective],
+      })
+      class TemplateHostComponent {
+        data: Person[] = [DATA[0]];
+      }
+
+      const f = TestBed.createComponent(TemplateHostComponent);
+      f.detectChanges();
+      await f.whenStable();
+
+      const hostComp = f.componentInstance as any;
+      expect(f.nativeElement.querySelector('.custom-header')?.textContent).toContain(
+        'header-Nombre',
+      );
+
+      const expandBtn = f.nativeElement.querySelector(
+        '.neu-table__expand-btn',
+      ) as HTMLButtonElement;
+      expandBtn.click();
+      f.detectChanges();
+      await f.whenStable();
+      expect(f.nativeElement.querySelector('.custom-expand')?.textContent).toContain(
+        'expand-Ana García',
+      );
+    } finally {
+      HTMLElement.prototype.scrollTo = originalScrollTo;
+    }
+  });
+
+  it('emptyStateTemplate branch should render a custom empty template', async () => {
+    @Component({
+      template: `
+        <ng-template #empty>
+          <div class="custom-empty">vacío</div>
+        </ng-template>
+        <neu-table [columns]="columns" [data]="data" [emptyStateTemplate]="empty" />
+      `,
+      imports: [NeuTableComponent],
+    })
+    class EmptyTemplateHostComponent {
+      columns = COLUMNS;
+      data: Person[] = [];
+    }
+
+    const f = TestBed.createComponent(EmptyTemplateHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.custom-empty')?.textContent).toContain('vacío');
+  });
+
+  it('footerRow should render empty strings for undefined footer cells', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('footerRow', { name: 'Total' });
+    f.detectChanges();
+    await f.whenStable();
+
+    const footerCells = Array.from(
+      f.nativeElement.querySelectorAll('.neu-table__td--footer'),
+    ) as HTMLTableCellElement[];
+    expect(footerCells[0].textContent?.trim()).toBe('Total');
+    expect(footerCells[1].textContent?.trim()).toBe('');
+    expect(footerCells[2].textContent?.trim()).toBe('');
   });
 });

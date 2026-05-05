@@ -5,10 +5,10 @@ import {
   HostListener,
   ViewEncapsulation,
   computed,
-  effect,
   forwardRef,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
 } from '@angular/core';
@@ -259,20 +259,13 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   readonly _cvaDisabled = signal(false);
   readonly _hue = signal(210);
   readonly _sv = signal({ s: 80, v: 90 });
-  readonly _activeMode = signal<NeuColorMode>('hex');
+  readonly _activeMode = linkedSignal<NeuColorMode>(() => this.mode());
 
   private _dragging = false;
   private _onChange: (v: string) => void = () => {};
   private _onTouched: () => void = () => {};
 
   private readonly _el = inject(ElementRef<HTMLElement>);
-
-  constructor() {
-    // Sync mode input → internal active mode
-    effect(() => {
-      this._activeMode.set(this.mode());
-    });
-  }
 
   // ── Close on outside click ─────────────────────────────────────
   @HostListener('document:mousedown', ['$event'])

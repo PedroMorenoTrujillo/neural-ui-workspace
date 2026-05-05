@@ -4,11 +4,11 @@
   align-items: center;
   gap: 6px;
   user-select: none;
-}
 
-.neu-knob--disabled {
-  opacity: 0.5;
-  pointer-events: none;
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 }
 
 /* ── Dial ─────────────────────────────────────────────────────── */

@@ -1,0 +1,71 @@
+.neu-scheduler-gantt {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+neu-scheduler-gantt {
+  min-width: 0;
+}
+
+.neu-scheduler-gantt .neu-timeline-grid__row-label {
+  min-inline-size: 14rem;
+}
+
+.neu-scheduler-gantt .neu-timeline-grid__column-label {
+  text-transform: capitalize;
+}
+
+.neu-scheduler-gantt .neu-timeline-grid__column-desc {
+  white-space: nowrap;
+}
+
+.neu-scheduler-gantt__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--neu-border);
+  border-radius: calc(var(--neu-radius, 1rem) * 0.9);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--neu-primary) 8%, transparent),
+      transparent 48%
+    ),
+    var(--neu-surface);
+  color: var(--neu-text);
+}
+
+.neu-scheduler-gantt__summary-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.neu-scheduler-gantt__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.neu-scheduler-gantt__range,
+.neu-scheduler-gantt__count {
+  color: var(--neu-text-muted, #64748b);
+  font-size: 0.875rem;
+}
+
+.neu-scheduler-gantt__count {
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .neu-scheduler-gantt .neu-timeline-grid__row-label {
+    min-inline-size: 10rem;
+  }
+
+  .neu-scheduler-gantt__summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

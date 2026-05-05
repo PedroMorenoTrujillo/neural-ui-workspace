@@ -13,6 +13,9 @@
   --neu-primary-50: #eff6ff;
   --neu-primary-100: #dbeafe;
   --neu-primary-fg: #ffffff;
+  --neu-primary-solid: #006ee6;
+  --neu-primary-solid-hover: #005fcc;
+  --neu-primary-solid-fg: #ffffff;
 
   --neu-secondary: #10b981;
   --neu-secondary-dark: #059669;
@@ -39,8 +42,8 @@
   // Tipografía (Slate scale)
   // ------------------------------------------------
   --neu-text: #0f172a; // Slate-900
-  --neu-text-muted: #64748b; // Slate-500
-  --neu-text-disabled: #94a3b8; // Slate-400
+  --neu-text-muted: #475569; // Slate-600
+  --neu-text-disabled: #64748b; // Slate-500
   --neu-text-inverse: #ffffff;
   --neu-knob-display-color: var(--neu-text);
   --neu-knob-label-color: var(--neu-text-muted);
@@ -60,7 +63,7 @@
   // ------------------------------------------------
   // Estados semánticos
   // ------------------------------------------------
-  --neu-success: #10b981;
+  --neu-success: #15803d;
   --neu-success-bg: #d1fae5;
   --neu-success-text: #065f46;
 
@@ -68,7 +71,7 @@
   --neu-warning-bg: #fef3c7;
   --neu-warning-text: #92400e;
 
-  --neu-error: #ef4444;
+  --neu-error: #dc2626;
   --neu-error-bg: #fee2e2;
   --neu-error-text: #991b1b;
 
@@ -321,8 +324,13 @@
 // ============================================================
 [data-theme='dark'] {
   // ---- Brand (mismo azul / same blue, fondos adaptados / adapted backgrounds) ----
+  --neu-primary: #007aff;
+  --neu-primary-dark: #005fcc;
+  --neu-primary-light: #339dff;
   --neu-primary-50: rgba(0, 122, 255, 0.12);
   --neu-primary-100: rgba(0, 122, 255, 0.2);
+  --neu-primary-solid: #007aff;
+  --neu-primary-solid-hover: #005fcc;
 
   // ---- Fondos / Backgrounds ----
   --neu-bg: #0d1117; // GitHub-dark inspired — fondo base
@@ -351,6 +359,7 @@
   --neu-error-bg: rgba(239, 68, 68, 0.15);
   --neu-error-text: #fca5a5;
 
+  --neu-info: #007aff;
   --neu-info-bg: rgba(0, 122, 255, 0.15);
   --neu-info-text: #93c5fd;
 
