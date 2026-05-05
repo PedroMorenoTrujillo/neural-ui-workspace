@@ -1095,6 +1095,78 @@ describe('NeuTableComponent', () => {
     expect(comp._frozenLeftOffsets().get('age')).toBe(160);
   });
 
+  it('columnWidth should fall back to the configured width when the column has not been resized', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+
+    expect(comp.columnWidth(RESIZABLE_COLUMNS[2])).toBe('180px');
+  });
+
+  it('should not render a resize handle for columns explicitly marked as non-resizable', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', [
+      { key: 'name', header: 'Nombre', width: '120px' },
+      { key: 'age', header: 'Edad', width: '140px', resizable: false },
+      { key: 'city', header: 'Ciudad', width: '180px' },
+    ]);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelectorAll('.neu-table__resize-handle').length).toBe(2);
+  });
+
+  it('startColumnResize should no-op when the target column is not resizable', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const columns = [
+      { key: 'name', header: 'Nombre', width: '120px', resizable: false },
+      { key: 'age', header: 'Edad', width: '140px' },
+    ];
+    f.componentRef.setInput('columns', columns);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+
+    comp.startColumnResize(columns[0], {
+      clientX: 100,
+      preventDefault,
+      stopPropagation,
+      currentTarget: null,
+    } as MouseEvent);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(stopPropagation).not.toHaveBeenCalled();
+    expect(comp.columnWidth(columns[0])).toBe('120px');
+  });
+
+  it('resetColumnWidth should keep the width map unchanged when the column was not resized', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+
+    comp.resetColumnWidth('name');
+
+    expect(comp.columnWidth(RESIZABLE_COLUMNS[0])).toBe('120px');
+    expect(comp._columnWidths()).toEqual({});
+  });
+
   // ── Server-side: onSearch ─────────────────────────────────────────────
 
   it('onSearch with serverSide=true should emit serverStateChange with search and page=1', async () => {
