@@ -38,6 +38,13 @@
   background: var(--neu-surface);
 }
 
+.neu-table__toolbar-extra {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  flex-wrap: wrap;
+}
+
 .neu-table__title {
   font-size: var(--neu-text-base);
   font-weight: 600;

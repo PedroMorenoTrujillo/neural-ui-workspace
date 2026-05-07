@@ -239,6 +239,7 @@ export class NeuChartComponent {
     const base = {
       theme: 'light' as const,
       style: { fontSize: '12px', fontFamily: 'inherit' },
+      x: { show: true },
     };
     if (this.type() === 'pareto') {
       return {

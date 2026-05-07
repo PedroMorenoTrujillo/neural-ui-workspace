@@ -100,10 +100,15 @@ function asRows(data: object[]): Row[] {
       [class.neu-table-container--striped]="stripedRows()"
     >
       <!-- ---- Toolbar ---- -->
-      @if (searchable() || title() || exportable()) {
+      @if (searchable() || title() || exportable() || toolbarExtraRef()) {
         <div class="neu-table__toolbar">
           @if (title()) {
             <h3 class="neu-table__title">{{ title() }}</h3>
+          }
+          @if (toolbarExtraRef()) {
+            <div class="neu-table__toolbar-extra">
+              <ng-container [ngTemplateOutlet]="toolbarExtraRef()!" />
+            </div>
           }
           @if (searchable()) {
             <div class="neu-table__search-group">
@@ -778,6 +783,7 @@ export class NeuTableComponent {
   readonly pagination = input<boolean>(true);
   readonly loading = input<boolean>(false);
   readonly title = input<string>('');
+  readonly toolbarExtraRef = input<TemplateRef<unknown> | null>(null);
   readonly emptyMessage = input<string>('No results found');
   readonly skeletonRows = input<number[]>([1, 2, 3, 4, 5]);
 
