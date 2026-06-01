@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.4] - 2026-06-01
+
+### Fixed
+
+- `NeuSelectComponent` — panel now opens instantly without position flash. `syncPanelPosition()` runs synchronously before setting `isOpen = true`, so the panel renders directly at the correct `position: fixed` coordinates instead of jumping from a `position: absolute` interim state caused by a `requestAnimationFrame` delay.
+- `NeuMultiselectComponent` — same fix applied: position is computed synchronously before the panel is rendered.
+
+---
+
 ## [1.5.1] - 2026-05-05
 
 ### Added

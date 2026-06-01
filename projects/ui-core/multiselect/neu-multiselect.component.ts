@@ -569,14 +569,15 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   protected toggle(): void {
     if (this.isDisabledFinal()) return;
-    this.isOpen.update((v) => !v);
     if (!this.isOpen()) {
+      this.syncPanelPosition();
+      this.isOpen.set(true);
+      this.focusFirstOption();
+    } else {
+      this.isOpen.set(false);
       this.searchQuery.set('');
       this.resetPanelPosition();
       this._onTouched();
-    } else {
-      this.syncPanelPosition();
-      this.focusFirstOption();
     }
   }
 
@@ -587,8 +588,8 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     }
     event.preventDefault();
     if (!this.isOpen()) {
-      this.isOpen.set(true);
       this.syncPanelPosition();
+      this.isOpen.set(true);
       this.focusFirstOption();
     }
   }
@@ -684,39 +685,37 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   }
 
   private syncPanelPosition(): void {
-    requestAnimationFrame(() => {
-      const trigger = this.elementRef.nativeElement.querySelector<HTMLElement>(
-        '.neu-multiselect__trigger',
-      );
-      if (!trigger) return;
-      if (window.innerWidth > this._mobileViewportMax) {
-        this.resetPanelPosition();
-        return;
-      }
+    const trigger = this.elementRef.nativeElement.querySelector<HTMLElement>(
+      '.neu-multiselect__trigger',
+    );
+    if (!trigger) return;
+    if (window.innerWidth > this._mobileViewportMax) {
+      this.resetPanelPosition();
+      return;
+    }
 
-      const triggerRect = trigger.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
-      const left = Math.min(
-        Math.max(triggerRect.left, this._viewportMargin),
-        viewportWidth - this._viewportMargin - width,
-      );
-      const top = triggerRect.bottom + 6;
-      const maxHeight = Math.max(180, viewportHeight - top - this._viewportMargin);
+    const triggerRect = trigger.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
+    const left = Math.min(
+      Math.max(triggerRect.left, this._viewportMargin),
+      viewportWidth - this._viewportMargin - width,
+    );
+    const top = triggerRect.bottom + 6;
+    const maxHeight = Math.max(180, viewportHeight - top - this._viewportMargin);
 
-      this.panelPosition.set({
-        position: 'fixed',
-        top: `${top}px`,
-        left: `${left}px`,
-        width: `${width}px`,
-        maxHeight: `${maxHeight}px`,
-      });
-
-      if (this.virtualScroll()) {
-        this._viewport()?.checkViewportSize();
-      }
+    this.panelPosition.set({
+      position: 'fixed',
+      top: `${top}px`,
+      left: `${left}px`,
+      width: `${width}px`,
+      maxHeight: `${maxHeight}px`,
     });
+
+    if (this.virtualScroll()) {
+      requestAnimationFrame(() => this._viewport()?.checkViewportSize());
+    }
   }
 
   private focusFirstOption(): void {

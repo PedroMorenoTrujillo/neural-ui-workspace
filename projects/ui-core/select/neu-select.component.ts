@@ -507,11 +507,13 @@ export class NeuSelectComponent implements ControlValueAccessor {
   readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
 
   toggle(): void {
-    if (!this.isDisabledFinal()) this.isOpen.update((v) => !v);
-    if (this.isOpen()) {
+    if (this.isDisabledFinal()) return;
+    if (!this.isOpen()) {
       this.syncPanelPosition();
+      this.isOpen.set(true);
       this.focusFirstOption();
     } else {
+      this.isOpen.set(false);
       this.resetPanelPosition();
     }
   }
@@ -530,8 +532,8 @@ export class NeuSelectComponent implements ControlValueAccessor {
     }
     event.preventDefault();
     if (!this.isOpen()) {
-      this.isOpen.set(true);
       this.syncPanelPosition();
+      this.isOpen.set(true);
       this.focusFirstOption();
     }
   }
@@ -599,51 +601,49 @@ export class NeuSelectComponent implements ControlValueAccessor {
   }
 
   private syncPanelPosition(): void {
-    requestAnimationFrame(() => {
-      const trigger =
-        this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select__trigger');
-      if (!trigger) return;
+    const trigger =
+      this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select__trigger');
+    if (!trigger) return;
 
-      const triggerRect = trigger.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const gap = 6;
-      const configuratorControls = trigger.closest<HTMLElement>('.demo-configurator__controls');
-      const controlsDisplay = configuratorControls
-        ? window.getComputedStyle(configuratorControls).display
-        : null;
-      const boundaryRect =
-        controlsDisplay === 'grid' ? null : configuratorControls?.getBoundingClientRect();
-      const boundaryTop = boundaryRect
-        ? Math.max(boundaryRect.top, this._viewportMargin)
-        : this._viewportMargin;
-      const boundaryBottom = boundaryRect
-        ? Math.min(boundaryRect.bottom, viewportHeight - this._viewportMargin)
-        : viewportHeight - this._viewportMargin;
-      const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
-      const left = Math.min(
-        Math.max(triggerRect.left, this._viewportMargin),
-        viewportWidth - this._viewportMargin - width,
-      );
-      const availableBelow = Math.max(0, boundaryBottom - triggerRect.bottom - gap);
-      const availableAbove = Math.max(0, triggerRect.top - boundaryTop - gap);
-      const openAbove = availableAbove > availableBelow && availableAbove >= 140;
-      const maxHeight = Math.max(140, openAbove ? availableAbove : availableBelow);
+    const triggerRect = trigger.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const gap = 6;
+    const configuratorControls = trigger.closest<HTMLElement>('.demo-configurator__controls');
+    const controlsDisplay = configuratorControls
+      ? window.getComputedStyle(configuratorControls).display
+      : null;
+    const boundaryRect =
+      controlsDisplay === 'grid' ? null : configuratorControls?.getBoundingClientRect();
+    const boundaryTop = boundaryRect
+      ? Math.max(boundaryRect.top, this._viewportMargin)
+      : this._viewportMargin;
+    const boundaryBottom = boundaryRect
+      ? Math.min(boundaryRect.bottom, viewportHeight - this._viewportMargin)
+      : viewportHeight - this._viewportMargin;
+    const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
+    const left = Math.min(
+      Math.max(triggerRect.left, this._viewportMargin),
+      viewportWidth - this._viewportMargin - width,
+    );
+    const availableBelow = Math.max(0, boundaryBottom - triggerRect.bottom - gap);
+    const availableAbove = Math.max(0, triggerRect.top - boundaryTop - gap);
+    const openAbove = availableAbove > availableBelow && availableAbove >= 140;
+    const maxHeight = Math.max(140, openAbove ? availableAbove : availableBelow);
 
-      this.panelPosition.set({
-        position: 'fixed',
-        top: openAbove ? 'auto' : `${triggerRect.bottom + gap}px`,
-        bottom: openAbove ? `${viewportHeight - triggerRect.top + gap}px` : 'auto',
-        left: `${left}px`,
-        width: `${width}px`,
-        maxHeight: `${maxHeight}px`,
-      });
-      this.isPanelAbove.set(openAbove);
-
-      if (this.virtualScroll()) {
-        this._viewport()?.checkViewportSize();
-      }
+    this.panelPosition.set({
+      position: 'fixed',
+      top: openAbove ? 'auto' : `${triggerRect.bottom + gap}px`,
+      bottom: openAbove ? `${viewportHeight - triggerRect.top + gap}px` : 'auto',
+      left: `${left}px`,
+      width: `${width}px`,
+      maxHeight: `${maxHeight}px`,
     });
+    this.isPanelAbove.set(openAbove);
+
+    if (this.virtualScroll()) {
+      requestAnimationFrame(() => this._viewport()?.checkViewportSize());
+    }
   }
 
   private focusFirstOption(): void {
