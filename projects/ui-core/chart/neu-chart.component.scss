@@ -5,6 +5,10 @@
   // Resetear estilos de ApexCharts para integrarlos con el sistema NeuralUI
   .apexcharts-canvas {
     background: transparent !important;
+
+    circle[fill='transparent'] {
+      pointer-events: none;
+    }
   }
 
   .apexcharts-tooltip {

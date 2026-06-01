@@ -26,13 +26,67 @@ $drum-item-h: 36px;
   }
 }
 
-// ---- Label ----
+// ---- Label (static) ----
 .neu-date-input__label {
   display: block;
   font-size: var(--neu-text-sm);
   font-weight: 500;
   color: var(--neu-text-muted);
   margin-bottom: var(--neu-space-2);
+}
+
+// ---- Floating label ----
+.neu-date-input--float {
+  position: relative;
+
+  .neu-date-input__float-label {
+    position: absolute;
+    pointer-events: none;
+    // Start after the icon (~24px svg + 8px gap + 12px padding-left)
+    left: calc(var(--neu-space-3) + 32px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--neu-text-base);
+    color: var(--neu-text-muted);
+    background: transparent;
+    padding: 0;
+    z-index: 1;
+    white-space: nowrap;
+    transition:
+      top var(--neu-transition),
+      font-size var(--neu-transition),
+      color var(--neu-transition),
+      transform var(--neu-transition),
+      padding var(--neu-transition),
+      background var(--neu-transition);
+  }
+
+  &.neu-date-input--open,
+  &.neu-date-input--has-value {
+    .neu-date-input__float-label {
+      top: 0;
+      transform: translateY(-50%);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neu-primary);
+      background: var(--neu-surface);
+      padding: 0 4px;
+      left: calc(var(--neu-space-3) - 4px);
+    }
+  }
+
+  &.neu-date-input--disabled .neu-date-input__float-label {
+    background: var(--neu-surface-2);
+  }
+
+  &.neu-date-input--error .neu-date-input__float-label {
+    color: var(--neu-error);
+
+    &.neu-date-input--open .neu-date-input__float-label,
+    &.neu-date-input--has-value .neu-date-input__float-label {
+      color: var(--neu-error);
+    }
+  }
 }
 
 // ---- Root ----

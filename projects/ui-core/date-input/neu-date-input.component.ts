@@ -225,7 +225,7 @@ function cloneDate(d: Date): Date {
         </div>
       }
     } @else {
-      @if (label()) {
+      @if (!floatingLabel() && label()) {
         <label class="neu-date-input__label" [for]="_id">{{ label() }}</label>
       }
       <div
@@ -233,6 +233,8 @@ function cloneDate(d: Date): Date {
         [class.neu-date-input--open]="isOpen()"
         [class.neu-date-input--disabled]="isDisabledFinal()"
         [class.neu-date-input--error]="hasError()"
+        [class.neu-date-input--has-value]="_value()"
+        [class.neu-date-input--float]="floatingLabel()"
       >
         <button
           class="neu-date-input__trigger"
@@ -276,9 +278,12 @@ function cloneDate(d: Date): Date {
             class="neu-date-input__display"
             [class.neu-date-input__display--placeholder]="!_value()"
           >
-            {{ displayValue() || placeholderText() }}
+            {{ displayValue() || (floatingLabel() ? '' : placeholderText()) }}
           </span>
         </button>
+        @if (floatingLabel() && label()) {
+          <label class="neu-date-input__float-label" [for]="_id">{{ label() }}</label>
+        }
         @if (isOpen()) {
           <div
             class="neu-date-input__panel"
@@ -516,6 +521,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   placeholder = input<string>('');
   /** Formato de fecha en modo rango / Date display format in range mode */
   dateFormat = input<'short' | 'medium' | 'long' | 'full' | 'numeric'>('short');
+  /** Etiqueta flotante / Floating label */
+  floatingLabel = input<boolean>(false);
 
   // ── Outputs ──────────────────────────────────────────────────────
   /** Emitido al confirmar el rango / Emitted when range is confirmed */
