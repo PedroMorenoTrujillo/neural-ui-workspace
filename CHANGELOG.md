@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.5] - 2026-06-01
+
+### Fixed
+
+- `NeuCardComponent` — removed `overflow: hidden` and `transform: translateY(-2px)` from hoverable card hover state. The `transform` property was creating a new CSS containing block, causing `position: fixed` panels (e.g. `neu-select`, `neu-multiselect` dropdowns) rendered inside a card to be clipped and invisible. Hover effect now uses an enhanced `box-shadow` instead.
+
+---
+
 ## [1.5.4] - 2026-06-01
 
 ### Fixed

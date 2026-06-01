@@ -9,10 +9,9 @@
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius-lg);
   box-shadow: var(--neu-shadow-sm);
-  overflow: hidden;
+  overflow: visible;
   transition:
     box-shadow var(--neu-transition),
-    transform var(--neu-transition),
     border-color var(--neu-transition);
 
   // ---- Hoverable ----
@@ -20,13 +19,8 @@
     cursor: pointer;
 
     &:hover {
-      box-shadow: var(--neu-shadow);
-      transform: translateY(-2px);
+      box-shadow: var(--neu-shadow-lg);
       border-color: var(--neu-border-hover);
-    }
-
-    &:active {
-      transform: translateY(0);
     }
   }
 
@@ -42,7 +36,6 @@
 
     &:hover {
       box-shadow: none;
-      transform: none;
     }
   }
 }
