@@ -37,10 +37,15 @@ let _seq = 0;
     },
   ],
   template: `
-    @if (label()) {
+    @if (!floatingLabel() && label()) {
       <label class="neu-number-input__label" [for]="_id">{{ label() }}</label>
     }
-    <div class="neu-number-input__control">
+    <div
+      class="neu-number-input__control"
+      [class.neu-number-input__control--focused]="_focused()"
+      [class.neu-number-input__control--has-value]="hasValue()"
+      [class.neu-number-input__control--no-float]="!floatingLabel()"
+    >
       @if (vertical()) {
         <!-- layout vertical: [▲] [input] [▼] -->
         <button
@@ -64,6 +69,7 @@ let _seq = 0;
           [disabled]="_cvaDisabled()"
           [value]="_value()"
           (change)="onInputChange($event)"
+          (focus)="onFocus()"
           (blur)="onBlur()"
         />
         <button
@@ -89,6 +95,7 @@ let _seq = 0;
           [disabled]="_cvaDisabled()"
           [value]="_value()"
           (change)="onInputChange($event)"
+          (focus)="onFocus()"
           (blur)="onBlur()"
         />
         <span class="neu-number-input__stack">
@@ -134,6 +141,7 @@ let _seq = 0;
           [disabled]="_cvaDisabled()"
           [value]="_value()"
           (change)="onInputChange($event)"
+          (focus)="onFocus()"
           (blur)="onBlur()"
         />
         <button
@@ -145,6 +153,10 @@ let _seq = 0;
         >
           +
         </button>
+      }
+
+      @if (floatingLabel() && label()) {
+        <label class="neu-number-input__floating-label" [for]="_id">{{ label() }}</label>
       }
     </div>
   `,
@@ -159,6 +171,8 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   readonly step = input<number>(1);
   /** Etiqueta para el input (accesibilidad) / Label for the input (accessibility) */
   readonly label = input<string>('');
+  /** Muestra el label como flotante dentro del campo / Shows the label as floating inside the field */
+  readonly floatingLabel = input<boolean>(false);
   /** Aria-label del botón de decremento */
   readonly decrementLabel = input<string>('Disminuir');
   /** Aria-label del botón de incremento */
@@ -175,11 +189,15 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   readonly _id = `neu-number-input-${++_seq}`;
   readonly _cvaDisabled = signal(false);
   readonly _value = signal(0);
+  readonly _focused = signal(false);
+
+  readonly hasValue = computed(() => Number.isFinite(this._value()));
 
   readonly hostClasses = computed(() => ({
     'neu-number-input': true,
     'neu-number-input--vertical': this.vertical(),
     'neu-number-input--stacked': this.stacked(),
+    'neu-number-input--horizontal': !this.vertical() && !this.stacked(),
     'neu-number-input--disabled': this._cvaDisabled(),
     'neu-number-input--sm': this.size() === 'sm',
     'neu-number-input--lg': this.size() === 'lg',
@@ -215,7 +233,12 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
     this._emit(this._clamp(isNaN(raw) ? 0 : raw));
   }
 
+  onFocus(): void {
+    this._focused.set(true);
+  }
+
   onBlur(): void {
+    this._focused.set(false);
     this._onTouched();
   }
 

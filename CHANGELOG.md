@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.6] - 2026-06-05
+
+### Added
+
+- `NeuNumberInputComponent` — added `floatingLabel` support so numeric fields can render an outlined floating label consistent with text, select and date inputs.
+
+---
+
 ## [1.5.5] - 2026-06-01
 
 ### Fixed

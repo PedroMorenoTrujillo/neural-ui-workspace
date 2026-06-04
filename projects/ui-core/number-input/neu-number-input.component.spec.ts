@@ -206,6 +206,53 @@ describe('NeuNumberInputComponent', () => {
     expect(lbl.textContent.trim()).toBe('Cantidad');
   });
 
+  it('renders static label by default when label is set', async () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    f.componentRef.setInput('label', 'Comensales');
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelector('.neu-number-input__label')).toBeTruthy();
+    expect(f.nativeElement.querySelector('.neu-number-input__floating-label')).toBeNull();
+  });
+
+  it('renders floating label inside control when floatingLabel=true', async () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    f.componentRef.setInput('label', 'Comensales');
+    f.componentRef.setInput('floatingLabel', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const staticLabel = f.nativeElement.querySelector('.neu-number-input__label');
+    const floatingLabel = f.nativeElement.querySelector('.neu-number-input__floating-label');
+    expect(staticLabel).toBeNull();
+    expect(floatingLabel).toBeTruthy();
+    expect(floatingLabel.textContent.trim()).toBe('Comensales');
+  });
+
+  it('adds focus class while the field is focused', async () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    f.componentRef.setInput('label', 'Comensales');
+    f.componentRef.setInput('floatingLabel', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
+    input.dispatchEvent(new Event('focus'));
+    f.detectChanges();
+
+    expect(f.nativeElement.querySelector('.neu-number-input__control').classList).toContain(
+      'neu-number-input__control--focused',
+    );
+
+    input.dispatchEvent(new Event('blur'));
+    f.detectChanges();
+
+    expect(f.nativeElement.querySelector('.neu-number-input__control').classList).not.toContain(
+      'neu-number-input__control--focused',
+    );
+  });
+
   it('label is not rendered when empty', async () => {
     const f = TestBed.createComponent(NeuNumberInputComponent);
     f.detectChanges();

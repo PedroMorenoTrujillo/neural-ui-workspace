@@ -34,6 +34,11 @@
       border: none;
       border-radius: 0;
     }
+
+    .neu-number-input__floating-label {
+      left: 10px;
+      max-width: calc(100% - 20px);
+    }
   }
 
   &--stacked {
@@ -50,6 +55,13 @@
       border-right: none;
       text-align: left;
       padding: 0 10px;
+    }
+  }
+
+  &--horizontal {
+    .neu-number-input__floating-label {
+      left: calc(var(--neu-number-input-btn-size, 48px) + 12px);
+      max-width: calc(100% - (var(--neu-number-input-btn-size, 48px) * 2) - 28px);
     }
   }
 
@@ -79,6 +91,7 @@
 
 /* ── Wrapper interno para botones + input ────────────────────── */
 .neu-number-input__control {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -110,6 +123,43 @@
     border-color: var(--neu-primary);
     box-shadow: var(--neu-focus-ring);
   }
+}
+
+.neu-number-input__floating-label {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  z-index: 1;
+  transform: translateY(-50%);
+  max-width: calc(100% - var(--neu-number-input-btn-size, 26px) - 18px);
+  padding: 0 4px;
+  overflow: hidden;
+  color: var(--neu-text-muted);
+  font-size: var(--neu-text-base, 1rem);
+  line-height: 1.2;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transition:
+    top var(--neu-transition),
+    color var(--neu-transition),
+    font-size var(--neu-transition),
+    transform var(--neu-transition),
+    background var(--neu-transition);
+  white-space: nowrap;
+}
+
+.neu-number-input__control--focused .neu-number-input__floating-label,
+.neu-number-input__control--has-value .neu-number-input__floating-label {
+  top: 0;
+  transform: translateY(-50%);
+  background: var(--neu-surface);
+  color: var(--neu-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.neu-number-input__control--focused .neu-number-input__floating-label {
+  color: var(--neu-primary);
 }
 
 /* ── Stack (botones apilados ▲▼ a la derecha) ────────────────── */
