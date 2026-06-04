@@ -39,7 +39,18 @@ function patchDistPackageJson() {
     return;
   }
 
-  const packageJson = JSON.parse(readFileSync(distPackageJsonPath, 'utf8'));
+  const packageJsonContent = readFileSync(distPackageJsonPath, 'utf8');
+  if (!packageJsonContent.trim()) {
+    return;
+  }
+
+  let packageJson;
+  try {
+    packageJson = JSON.parse(packageJsonContent);
+  } catch {
+    return;
+  }
+
   let changed = false;
 
   packageJson.exports ??= {};
