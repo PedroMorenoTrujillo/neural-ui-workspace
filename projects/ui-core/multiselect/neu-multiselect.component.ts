@@ -182,6 +182,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
         [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
         [cdkConnectedOverlayHasBackdrop]="true"
         [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+        [cdkConnectedOverlayWidth]="panelPosition().width ?? ''"
         [cdkConnectedOverlayPush]="true"
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
         (backdropClick)="close()"

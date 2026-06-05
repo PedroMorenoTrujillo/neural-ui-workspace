@@ -143,6 +143,29 @@ describe('NeuMultiselectComponent', () => {
     expect(text).toContain('Vue');
   });
 
+  it('should apply measured trigger width to the CDK overlay pane', async () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    const trigger: HTMLElement = f.nativeElement.querySelector('.neu-multiselect__trigger');
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      x: 32,
+      y: 72,
+      top: 72,
+      right: 312,
+      bottom: 120,
+      left: 32,
+      width: 280,
+      height: 48,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    trigger.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(document.querySelector<HTMLElement>('.cdk-overlay-pane')?.style.width).toBe('280px');
+  });
+
   // ── Error state ──────────────────────────────────────────────────────────
 
   it('should show error class and message when errorMessage is set', async () => {

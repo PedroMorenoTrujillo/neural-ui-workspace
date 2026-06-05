@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.10] - 2026-06-05
+
+### Fixed
+
+- `NeuSelectComponent` and `NeuMultiselectComponent` now pass the measured trigger width to the CDK overlay pane itself, improving dropdown alignment in dialogs and scrollable layouts.
+
+---
+
 ## [1.5.9] - 2026-06-05
 
 ### Fixed

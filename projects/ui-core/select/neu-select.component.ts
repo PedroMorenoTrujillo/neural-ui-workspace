@@ -171,6 +171,7 @@ let _neuSelectIdSeq = 0;
         [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
         [cdkConnectedOverlayHasBackdrop]="true"
         [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+        [cdkConnectedOverlayWidth]="panelPosition().width ?? ''"
         [cdkConnectedOverlayPush]="true"
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
         (backdropClick)="close()"

@@ -92,6 +92,28 @@ describe('NeuSelectComponent', () => {
     expect(document.querySelector('.neu-select__panel')).toBeTruthy();
   });
 
+  it('should apply measured trigger width to the CDK overlay pane', async () => {
+    const { f } = await setup();
+    const trigger: HTMLElement = f.nativeElement.querySelector('.neu-select__trigger');
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      x: 40,
+      y: 80,
+      top: 80,
+      right: 340,
+      bottom: 128,
+      left: 40,
+      width: 300,
+      height: 48,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    trigger.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(document.querySelector<HTMLElement>('.cdk-overlay-pane')?.style.width).toBe('300px');
+  });
+
   it('should close panel on second click', async () => {
     const { f } = await setup();
     const trigger: HTMLElement = f.nativeElement.querySelector('.neu-select__trigger');
