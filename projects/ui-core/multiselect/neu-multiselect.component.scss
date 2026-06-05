@@ -254,6 +254,8 @@ $panel-z: 200;
 .neu-multiselect__panel {
   position: relative;
   z-index: $panel-z;
+  box-sizing: border-box;
+  width: 100%;
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius);

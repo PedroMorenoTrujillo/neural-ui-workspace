@@ -112,6 +112,9 @@ describe('NeuSelectComponent', () => {
     await f.whenStable();
 
     expect(document.querySelector<HTMLElement>('.cdk-overlay-pane')?.style.width).toBe('300px');
+    expect(getComputedStyle(document.querySelector<HTMLElement>('.neu-select__panel')!).width).toBe(
+      '300px',
+    );
   });
 
   it('should close panel on second click', async () => {

@@ -212,6 +212,8 @@ $select-height: 48px;
 .neu-select__panel {
   position: relative;
   z-index: var(--neu-z-dropdown);
+  box-sizing: border-box;
+  width: 100%;
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-primary);
   border-top: none;

@@ -164,6 +164,9 @@ describe('NeuMultiselectComponent', () => {
     await f.whenStable();
 
     expect(document.querySelector<HTMLElement>('.cdk-overlay-pane')?.style.width).toBe('280px');
+    expect(
+      getComputedStyle(document.querySelector<HTMLElement>('.neu-multiselect__panel')!).width,
+    ).toBe('280px');
   });
 
   // ── Error state ──────────────────────────────────────────────────────────

@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.11] - 2026-06-05
+
+### Fixed
+
+- `NeuSelectComponent` and `NeuMultiselectComponent` panels now use `box-sizing: border-box` and fill their CDK overlay pane, preventing border/content expansion from making dropdowns wider than their trigger.
+
+---
+
 ## [1.5.10] - 2026-06-05
 
 ### Fixed
