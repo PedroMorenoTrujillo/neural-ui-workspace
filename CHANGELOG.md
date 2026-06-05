@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.9] - 2026-06-05
+
+### Fixed
+
+- Global Neural UI styles now include the required CDK overlay base classes, so floating panels are positioned correctly for consumers that only import `@neural-ui/core/styles`.
+
+---
+
 ## [1.5.8] - 2026-06-05
 
 ### Fixed
