@@ -128,7 +128,7 @@ describe('NeuDateInputComponent', () => {
     btn.click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-date-input__calendar')).toBeTruthy();
+    expect(document.querySelector('.neu-date-input__calendar')).toBeTruthy();
   });
 
   it('toggle should close if already open', async () => {
@@ -301,8 +301,8 @@ describe('NeuDateInputComponent', () => {
     comp.toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-date-input__time')).toBeTruthy();
-    expect(f.nativeElement.querySelector('.neu-date-input__calendar')).toBeNull();
+    expect(document.querySelector('.neu-date-input__time')).toBeTruthy();
+    expect(document.querySelector('.neu-date-input__calendar')).toBeNull();
   });
 
   it('writeValue for time: sets hour and minute signals', () => {
@@ -439,8 +439,8 @@ describe('NeuDateInputComponent', () => {
     comp.toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-date-input__calendar')).toBeTruthy();
-    expect(f.nativeElement.querySelector('.neu-date-input__time')).toBeTruthy();
+    expect(document.querySelector('.neu-date-input__calendar')).toBeTruthy();
+    expect(document.querySelector('.neu-date-input__time')).toBeTruthy();
   });
 
   it('writeValue for datetime-local: sets date and time signals', () => {
@@ -520,7 +520,7 @@ describe('NeuDateInputComponent', () => {
     f.componentInstance.toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-drp__cal')).toBeTruthy();
+    expect(document.querySelector('.neu-drp__cal')).toBeTruthy();
   });
 
   it('writeValue for range sets _pickStart and _pickEnd', () => {
@@ -680,9 +680,9 @@ describe('NeuDateInputComponent', () => {
     f.nativeElement.querySelector('.neu-drp__trigger').click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-drp__panel')).toBeTruthy();
-    expect(f.nativeElement.querySelector('.neu-drp__clear')).toBeTruthy();
-    expect(f.nativeElement.querySelector('.neu-drp__apply')).toBeTruthy();
+    expect(document.querySelector('.neu-drp__panel')).toBeTruthy();
+    expect(document.querySelector('.neu-drp__clear')).toBeTruthy();
+    expect(document.querySelector('.neu-drp__apply')).toBeTruthy();
   });
 
   it('clicking prev/next nav buttons in range panel covers their template listeners', async () => {
@@ -761,7 +761,7 @@ describe('NeuDateInputComponent', () => {
     comp._pickEnd.set(new Date(2025, 3, 30));
     f.detectChanges();
     // Click clear button via DOM
-    const clearBtn = f.nativeElement.querySelector('.neu-drp__clear');
+    const clearBtn = document.querySelector('.neu-drp__clear') as HTMLButtonElement | null;
     if (clearBtn) {
       clearBtn.click();
       f.detectChanges();
@@ -772,7 +772,7 @@ describe('NeuDateInputComponent', () => {
     comp._pickStart.set(new Date(2025, 3, 1));
     comp._pickEnd.set(new Date(2025, 3, 30));
     f.detectChanges();
-    const applyBtn = f.nativeElement.querySelector('.neu-drp__apply');
+    const applyBtn = document.querySelector('.neu-drp__apply') as HTMLButtonElement | null;
     if (applyBtn && !applyBtn.disabled) {
       applyBtn.click();
       f.detectChanges();
@@ -845,8 +845,8 @@ describe('NeuDateInputComponent', () => {
     f.componentInstance.toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-date-input__time')).toBeTruthy();
-    expect(f.nativeElement.querySelector('.neu-date-input__sep')).toBeTruthy();
+    expect(document.querySelector('.neu-date-input__time')).toBeTruthy();
+    expect(document.querySelector('.neu-date-input__sep')).toBeTruthy();
   });
 
   it('DOM click on hour drum arrows covers changeHour template listeners', async () => {

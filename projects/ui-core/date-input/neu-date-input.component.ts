@@ -1,8 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
-  HostListener,
   OnDestroy,
   ViewEncapsulation,
   computed,
@@ -13,6 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 // ── Exported types ───────────────────────────────────────────────────────────
@@ -79,7 +78,7 @@ function cloneDate(d: Date): Date {
  */
 @Component({
   selector: 'neu-date-input',
-  imports: [],
+  imports: [OverlayModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -104,6 +103,8 @@ function cloneDate(d: Date): Date {
         <label class="neu-drp__label" [for]="_id">{{ label() }}</label>
       }
       <button
+        cdkOverlayOrigin
+        #rangeOrigin="cdkOverlayOrigin"
         type="button"
         [id]="_id"
         class="neu-drp__trigger"
@@ -131,7 +132,19 @@ function cloneDate(d: Date): Date {
           {{ _hasRange() ? _rangeDisplayValue() : _rangePlaceholderText() }}
         </span>
       </button>
-      @if (isOpen()) {
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="rangeOrigin"
+        [cdkConnectedOverlayOpen]="isOpen()"
+        [cdkConnectedOverlayPositions]="rangeOverlayPositions"
+        [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayViewportMargin]="_viewportMargin"
+        (backdropClick)="close()"
+        (detach)="close()"
+      >
         <div
           class="neu-drp__panel"
           role="dialog"
@@ -223,7 +236,7 @@ function cloneDate(d: Date): Date {
             </button>
           </div>
         </div>
-      }
+      </ng-template>
     } @else {
       @if (!floatingLabel() && label()) {
         <label class="neu-date-input__label" [for]="_id">{{ label() }}</label>
@@ -237,6 +250,8 @@ function cloneDate(d: Date): Date {
         [class.neu-date-input--float]="floatingLabel()"
       >
         <button
+          cdkOverlayOrigin
+          #singleOrigin="cdkOverlayOrigin"
           class="neu-date-input__trigger"
           type="button"
           [id]="_id"
@@ -284,7 +299,19 @@ function cloneDate(d: Date): Date {
         @if (floatingLabel() && label()) {
           <label class="neu-date-input__float-label" [for]="_id">{{ label() }}</label>
         }
-        @if (isOpen()) {
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="singleOrigin"
+          [cdkConnectedOverlayOpen]="isOpen()"
+          [cdkConnectedOverlayPositions]="singleOverlayPositions"
+          [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+          [cdkConnectedOverlayHasBackdrop]="true"
+          [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+          [cdkConnectedOverlayPush]="true"
+          [cdkConnectedOverlayViewportMargin]="_viewportMargin"
+          (backdropClick)="close()"
+          (detach)="close()"
+        >
           <div
             class="neu-date-input__panel"
             [class.neu-date-input__panel--time-only]="type() === 'time'"
@@ -471,7 +498,7 @@ function cloneDate(d: Date): Date {
               </div>
             }
           </div>
-        }
+        </ng-template>
       </div>
       @if (hasError()) {
         <p class="neu-date-input__error" role="alert">{{ errorMessage() }}</p>
@@ -483,8 +510,8 @@ function cloneDate(d: Date): Date {
   styleUrl: './neu-date-input.component.scss',
 })
 export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
-  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly doc = inject(DOCUMENT);
+  private readonly overlay = inject(Overlay);
   private _langObserver?: MutationObserver;
 
   /** Tipo del campo / Field type */
@@ -531,6 +558,68 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   // ── Estado interno / Internal state ──────────────────────────────
   protected readonly _id = `neu-date-input-${++_neuDateInputIdSeq}`;
   readonly isOpen = signal(false);
+  readonly _viewportMargin = 16;
+  readonly singleOverlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+  ];
+  readonly rangeOverlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+  ];
+  readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
   readonly _isRange = computed(() => this.type() === 'range');
   private readonly _cvaDisabled = signal(false);
   readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
@@ -872,9 +961,12 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     this.isOpen.set(false);
   }
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.el.nativeElement.contains(event.target as Node)) this.close();
+    const target = event.target as Element | null;
+    const isInsidePanel = !!target?.closest('.neu-date-input__panel, .neu-drp__panel');
+    if (!isInsidePanel) {
+      this.close();
+    }
   }
 
   prevMonth(): void {

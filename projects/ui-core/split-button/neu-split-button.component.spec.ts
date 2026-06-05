@@ -35,7 +35,7 @@ describe('NeuSplitButtonComponent', () => {
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.neu-split-button__dropdown')).toBeFalsy();
+    expect(document.querySelector('.neu-split-button__dropdown')).toBeFalsy();
   });
 
   it('should show dropdown when chevron is clicked', () => {
@@ -48,7 +48,7 @@ describe('NeuSplitButtonComponent', () => {
     );
     chevron.click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.neu-split-button__dropdown')).toBeTruthy();
+    expect(document.querySelector('.neu-split-button__dropdown')).toBeTruthy();
   });
 
   it('should render all action labels in dropdown', () => {
@@ -58,7 +58,7 @@ describe('NeuSplitButtonComponent', () => {
     fixture.detectChanges();
     fixture.componentInstance.isOpen.set(true);
     fixture.detectChanges();
-    const text = fixture.nativeElement.textContent;
+    const text = document.body.textContent ?? '';
     expect(text).toContain('Guardar borrador');
     expect(text).toContain('Programar');
     expect(text).toContain('Eliminar');
@@ -264,7 +264,7 @@ describe('NeuSplitButtonComponent', () => {
     fixture.componentInstance.isOpen.set(true);
     fixture.detectChanges();
     await fixture.whenStable();
-    const sep = fixture.nativeElement.querySelector('.neu-split-button__dropdown-sep');
+    const sep = document.querySelector('.neu-split-button__dropdown-sep');
     expect(sep).toBeTruthy();
   });
 
@@ -307,7 +307,7 @@ describe('NeuSplitButtonComponent', () => {
     );
 
     const actionButtons = Array.from(
-      fixture.nativeElement.querySelectorAll('.neu-split-button__dropdown-item'),
+      document.querySelectorAll('.neu-split-button__dropdown-item'),
     ) as HTMLButtonElement[];
 
     actionButtons[0].click();
@@ -327,7 +327,7 @@ describe('NeuSplitButtonComponent', () => {
     fixture.componentInstance.isOpen.set(true);
     fixture.detectChanges();
 
-    const dropdown = fixture.nativeElement.querySelector(
+    const dropdown = document.querySelector(
       '.neu-split-button__dropdown',
     ) as HTMLDivElement;
     dropdown.dispatchEvent(new MouseEvent('click', { bubbles: true }));

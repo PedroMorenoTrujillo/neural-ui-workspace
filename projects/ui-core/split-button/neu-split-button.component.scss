@@ -59,9 +59,7 @@
 
 // ---- Dropdown ----
 .neu-split-button__dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
+  position: relative;
   z-index: 200;
   min-width: 180px;
   background: var(--neu-surface);

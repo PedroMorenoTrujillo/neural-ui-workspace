@@ -304,9 +304,9 @@ describe('NeuAutocompleteComponent', () => {
     f.componentInstance.onQueryChange('ang');
     f.detectChanges();
     await f.whenStable();
-    const list = f.nativeElement.querySelector('.neu-autocomplete__list');
+    const list = document.querySelector('.neu-autocomplete__list');
     expect(list).toBeTruthy();
-    const items = f.nativeElement.querySelectorAll('.neu-autocomplete__option');
+    const items = document.querySelectorAll('.neu-autocomplete__option');
     expect(items.length).toBeGreaterThan(0);
   });
 
@@ -378,7 +378,7 @@ describe('NeuAutocompleteComponent', () => {
     await f.whenStable();
     const values: unknown[] = [];
     f.componentInstance.registerOnChange((v) => values.push(v));
-    const firstOpt = f.nativeElement.querySelector('.neu-autocomplete__option');
+    const firstOpt = document.querySelector('.neu-autocomplete__option');
     if (firstOpt) {
       firstOpt.dispatchEvent(new Event('mousedown', { bubbles: true }));
       f.detectChanges();

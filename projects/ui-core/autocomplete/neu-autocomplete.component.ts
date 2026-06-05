@@ -12,6 +12,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -42,7 +44,7 @@ let _seq = 0;
  */
 @Component({
   selector: 'neu-autocomplete',
-  imports: [ScrollingModule],
+  imports: [OverlayModule, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -68,6 +70,8 @@ let _seq = 0;
       <label class="neu-autocomplete__label" [for]="_id">{{ label() }}</label>
     }
     <div
+      cdkOverlayOrigin
+      #autocompleteOrigin="cdkOverlayOrigin"
       class="neu-autocomplete__input-wrap"
       [class.neu-autocomplete__input-wrap--focused]="_focused()"
       [class.neu-autocomplete__input-wrap--has-value]="!!_query()"
@@ -113,39 +117,29 @@ let _seq = 0;
     <div class="neu-autocomplete__sr-status" aria-live="polite" aria-atomic="true">
       {{ resultsAnnouncement() }}
     </div>
-    @if (_isOpen() && _filtered().length) {
-      @if (virtualScroll()) {
-        <cdk-virtual-scroll-viewport
-          class="neu-autocomplete__list neu-autocomplete__list--virtual"
-          role="listbox"
-          [id]="_listId"
-          [attr.aria-label]="label() || placeholder()"
-          [itemSize]="virtualScrollItemSize()"
-          [style.height]="virtualViewportHeight()"
-        >
-          <div
-            *cdkVirtualFor="let opt of _filtered(); trackBy: trackByOption; let i = index"
-            class="neu-autocomplete__option"
-            role="option"
-            [id]="_optionId(i)"
-            [class.neu-autocomplete__option--active]="_activeIndex() === i"
-            [class.neu-autocomplete__option--disabled]="opt.disabled"
-            [attr.aria-selected]="_activeIndex() === i"
-            [attr.aria-disabled]="opt.disabled ?? false"
-            (mousedown)="selectOption(opt)"
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="autocompleteOrigin"
+      [cdkConnectedOverlayOpen]="_isOpen()"
+      [cdkConnectedOverlayPositions]="overlayPositions"
+      [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayViewportMargin]="_viewportMargin"
+      (detach)="_closePanel()"
+    >
+      @if (_filtered().length) {
+        @if (virtualScroll()) {
+          <cdk-virtual-scroll-viewport
+            class="neu-autocomplete__list neu-autocomplete__list--virtual"
+            role="listbox"
+            [id]="_listId"
+            [attr.aria-label]="label() || placeholder()"
+            [itemSize]="virtualScrollItemSize()"
+            [style.height]="virtualViewportHeight()"
+            [style.width.px]="overlayWidth()"
           >
-            {{ opt.label }}
-          </div>
-        </cdk-virtual-scroll-viewport>
-      } @else {
-        <ul
-          class="neu-autocomplete__list"
-          role="listbox"
-          [id]="_listId"
-          [attr.aria-label]="label() || placeholder()"
-        >
-          @for (opt of _filtered(); track opt.label; let i = $index) {
-            <li
+            <div
+              *cdkVirtualFor="let opt of _filtered(); trackBy: trackByOption; let i = index"
               class="neu-autocomplete__option"
               role="option"
               [id]="_optionId(i)"
@@ -156,14 +150,38 @@ let _seq = 0;
               (mousedown)="selectOption(opt)"
             >
               {{ opt.label }}
-            </li>
-          }
-        </ul>
+            </div>
+          </cdk-virtual-scroll-viewport>
+        } @else {
+          <ul
+            class="neu-autocomplete__list"
+            role="listbox"
+            [id]="_listId"
+            [attr.aria-label]="label() || placeholder()"
+            [style.width.px]="overlayWidth()"
+          >
+            @for (opt of _filtered(); track opt.label; let i = $index) {
+              <li
+                class="neu-autocomplete__option"
+                role="option"
+                [id]="_optionId(i)"
+                [class.neu-autocomplete__option--active]="_activeIndex() === i"
+                [class.neu-autocomplete__option--disabled]="opt.disabled"
+                [attr.aria-selected]="_activeIndex() === i"
+                [attr.aria-disabled]="opt.disabled ?? false"
+                (mousedown)="selectOption(opt)"
+              >
+                {{ opt.label }}
+              </li>
+            }
+          </ul>
+        }
+      } @else {
+        <div class="neu-autocomplete__empty" role="status" [style.width.px]="overlayWidth()">
+          {{ emptyLabel() }}
+        </div>
       }
-    }
-    @if (_isOpen() && !_filtered().length) {
-      <div class="neu-autocomplete__empty" role="status">{{ emptyLabel() }}</div>
-    }
+    </ng-template>
     @if (hasError()) {
       <p class="neu-autocomplete__error" [id]="_id + '-error'" role="alert">
         {{ errorMessage() }}
@@ -210,6 +228,41 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   readonly _cvaDisabled = signal(false);
   readonly _focused = signal(false);
   private readonly _viewport = viewChild(CdkVirtualScrollViewport);
+  readonly overlayWidth = signal<number | null>(null);
+  readonly _viewportMargin = 16;
+  readonly overlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 4,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -4,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 4,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -4,
+    },
+  ];
+  private readonly _document = inject(DOCUMENT);
+  private readonly _overlay = inject(Overlay);
+  readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
 
   private _onChange: (v: unknown) => void = () => {};
   private _onTouched: () => void = () => {};
@@ -282,8 +335,17 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
 
   @HostListener('document:mousedown', ['$event'])
   onDocClick(e: MouseEvent): void {
-    if (!this._el.nativeElement.contains(e.target as Node)) {
-      this._isOpen.set(false);
+    const target = e.target as Element | null;
+    const isInsideOverlay = !!target?.closest('.neu-autocomplete__list, .neu-autocomplete__empty');
+    if (!this._el.nativeElement.contains(e.target as Node) && !isInsideOverlay) {
+      this._closePanel();
+    }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this._isOpen()) {
+      this._syncOverlayWidth();
     }
   }
 
@@ -294,7 +356,11 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     // Sólo abrimos si hay texto suficiente; si no, cerramos.
     // Only open when there is enough text; otherwise close.
     const minLen = Math.max(1, this.minLength());
-    this._isOpen.set(q.trim().length >= minLen);
+    const shouldOpen = q.trim().length >= minLen;
+    if (shouldOpen) {
+      this._syncOverlayWidth();
+    }
+    this._isOpen.set(shouldOpen);
     this.queryChange.emit(q);
     // CVA — emit null when query is cleared
     if (!q) {
@@ -306,6 +372,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     this._focused.set(true);
     // Abre el dropdown solo si ya hay texto escrito / Only open when there is already a query.
     if (this._query().trim().length >= Math.max(1, this.minLength())) {
+      this._syncOverlayWidth();
       this._isOpen.set(true);
     }
   }
@@ -314,7 +381,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     this._focused.set(false);
     this._onTouched();
     // Small delay to allow mousedown on option to fire first
-    setTimeout(() => this._isOpen.set(false), 150);
+    setTimeout(() => this._closePanel(), 150);
   }
 
   onKeyDown(e: KeyboardEvent): void {
@@ -323,6 +390,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
+        this._syncOverlayWidth();
         this._moveActiveIndex(1);
         this._isOpen.set(true);
         this._scrollActiveOptionIntoView();
@@ -391,6 +459,11 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     this.queryChange.emit('');
   }
 
+  _closePanel(): void {
+    this._isOpen.set(false);
+    this._activeIndex.set(-1);
+  }
+
   private _scrollActiveOptionIntoView(): void {
     const activeIndex = this._activeIndex();
     if (activeIndex < 0) {
@@ -409,10 +482,29 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
       const activeOption = this._el.nativeElement.querySelector(
         `#${this._optionId(activeIndex)}`,
       ) as HTMLElement | null;
-      if (typeof activeOption?.scrollIntoView === 'function') {
-        activeOption.scrollIntoView({ block: 'nearest' });
+      const overlayOption =
+        activeOption ?? this._document.getElementById(this._optionId(activeIndex));
+      if (typeof overlayOption?.scrollIntoView === 'function') {
+        overlayOption.scrollIntoView({ block: 'nearest' });
       }
     });
+  }
+
+  private _syncOverlayWidth(): void {
+    const trigger = this._el.nativeElement.querySelector(
+      '.neu-autocomplete__input-wrap',
+    ) as HTMLElement | null;
+    if (!trigger) {
+      return;
+    }
+    const width =
+      typeof trigger.getBoundingClientRect === 'function'
+        ? trigger.getBoundingClientRect().width
+        : 0;
+    this.overlayWidth.set(Math.min(width, window.innerWidth - 32));
+    if (this.virtualScroll()) {
+      requestAnimationFrame(() => this._viewport()?.checkViewportSize());
+    }
   }
 
   // ── CVA ──────────────────────────────────────────────────────────

@@ -12,6 +12,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export type NeuColorMode = 'hex' | 'rgb' | 'hsl';
@@ -132,7 +133,7 @@ let _seq = 0;
  */
 @Component({
   selector: 'neu-color-picker',
-  imports: [],
+  imports: [OverlayModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -150,6 +151,8 @@ let _seq = 0;
   template: `
     <!-- Swatch trigger -->
     <button
+      cdkOverlayOrigin
+      #colorPickerOrigin="cdkOverlayOrigin"
       type="button"
       class="neu-cp__trigger"
       [attr.aria-expanded]="_isOpen()"
@@ -161,7 +164,19 @@ let _seq = 0;
       <span class="neu-cp__hex-label">{{ _hexValue() }}</span>
     </button>
 
-    @if (_isOpen()) {
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="colorPickerOrigin"
+      [cdkConnectedOverlayOpen]="_isOpen()"
+      [cdkConnectedOverlayPositions]="overlayPositions"
+      [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+      [cdkConnectedOverlayHasBackdrop]="true"
+      [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayViewportMargin]="_viewportMargin"
+      (backdropClick)="_isOpen.set(false)"
+      (detach)="_isOpen.set(false)"
+    >
       <div class="neu-cp__panel" role="dialog" aria-label="Selector de color">
         <!-- HSV Canvas -->
         <div
@@ -228,7 +243,7 @@ let _seq = 0;
           <span class="neu-cp__swatch-sm" [style.background]="_hexValue()"></span>
         </div>
       </div>
-    }
+    </ng-template>
   `,
   styleUrl: './neu-color-picker.component.scss',
 })
@@ -266,11 +281,39 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   private _onTouched: () => void = () => {};
 
   private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly _overlay = inject(Overlay);
+  readonly _viewportMargin = 16;
+  readonly overlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+  ];
+  readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
 
   // ── Close on outside click ─────────────────────────────────────
   @HostListener('document:mousedown', ['$event'])
   _outsideClick(e: MouseEvent): void {
-    if (!this._el.nativeElement.contains(e.target as Node)) {
+    const target = e.target as Element | null;
+    const isInsidePanel = !!target?.closest('.neu-cp__panel');
+    if (!this._el.nativeElement.contains(e.target as Node) && !isInsidePanel) {
       this._isOpen.set(false);
     }
   }

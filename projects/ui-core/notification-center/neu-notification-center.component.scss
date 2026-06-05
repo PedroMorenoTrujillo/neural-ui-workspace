@@ -51,9 +51,7 @@
 
 /* ── Panel ────────────────────────────────────────────────────── */
 .neu-nc__panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  position: relative;
   width: 320px;
   max-height: 420px;
   display: flex;

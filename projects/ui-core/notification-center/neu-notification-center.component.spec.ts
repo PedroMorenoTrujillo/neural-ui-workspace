@@ -141,7 +141,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(f.componentInstance._isOpen()).toBe(true);
-    expect(f.nativeElement.querySelector('.neu-nc__panel')).toBeTruthy();
+    expect(document.querySelector('.neu-nc__panel')).toBeTruthy();
   });
 
   it('_toggle again should close panel', async () => {
@@ -197,8 +197,8 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-nc__item')).toBeTruthy();
-    expect(f.nativeElement.textContent).toContain('Cuerpo');
+    expect(document.querySelector('.neu-nc__item')).toBeTruthy();
+    expect(document.body.textContent).toContain('Cuerpo');
   });
 
   it('should render item title when present', async () => {
@@ -208,7 +208,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('Mi título');
+    expect(document.body.textContent).toContain('Mi título');
   });
 
   it('should not render title element when notification has no title', async () => {
@@ -218,7 +218,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-nc__item-title')).toBeNull();
+    expect(document.querySelector('.neu-nc__item-title')).toBeNull();
   });
 
   it('should mark notification as unread with class', async () => {
@@ -228,7 +228,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-nc__item--unread')).toBeTruthy();
+    expect(document.querySelector('.neu-nc__item--unread')).toBeTruthy();
   });
 
   it('close button should remove the notification', async () => {
@@ -238,7 +238,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    const closeBtn = f.nativeElement.querySelector('.neu-nc__item-close');
+    const closeBtn = document.querySelector('.neu-nc__item-close') as HTMLButtonElement;
     closeBtn.click();
     f.detectChanges();
     await f.whenStable();
@@ -252,7 +252,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    const closeBtn = f.nativeElement.querySelector('.neu-nc__item-close') as HTMLButtonElement;
+    const closeBtn = document.querySelector('.neu-nc__item-close') as HTMLButtonElement;
     expect(closeBtn.getAttribute('aria-label')).toBe('Cerrar notificación');
   });
 
@@ -263,7 +263,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    const readAllBtn = Array.from(f.nativeElement.querySelectorAll('.neu-nc__action-btn')).find(
+    const readAllBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find(
       (b: any) => b.textContent.includes('Leer'),
     ) as HTMLButtonElement;
     expect(readAllBtn).toBeTruthy();
@@ -280,7 +280,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    const clearBtn = Array.from(f.nativeElement.querySelectorAll('.neu-nc__action-btn')).find(
+    const clearBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find(
       (b: any) => b.textContent.includes('Limpiar'),
     ) as HTMLButtonElement;
     expect(clearBtn).toBeTruthy();
@@ -304,7 +304,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-nc__empty')).toBeTruthy();
+    expect(document.querySelector('.neu-nc__empty')).toBeTruthy();
   });
 
   it('push with duration=0 should NOT auto-dismiss', async () => {

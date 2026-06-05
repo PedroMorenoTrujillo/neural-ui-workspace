@@ -16,7 +16,13 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
-import { NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
+import {
+  ConnectedOverlayPositionChange,
+  ConnectedPosition,
+  Overlay,
+  OverlayModule,
+} from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from './neu-select.types';
@@ -43,7 +49,7 @@ let _neuSelectIdSeq = 0;
  */
 @Component({
   selector: 'neu-select',
-  imports: [NgTemplateOutlet, ScrollingModule],
+  imports: [NgTemplateOutlet, OverlayModule, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -54,10 +60,8 @@ let _neuSelectIdSeq = 0;
     },
   ],
   host: {
-    '(document:click)': 'onDocumentClick($event)',
     '(keydown.escape)': 'close()',
     '(window:resize)': 'onWindowResize()',
-    '(window:scroll)': 'onWindowScroll()',
   },
   template: `
     @if (!floatingLabel() && label()) {
@@ -80,6 +84,8 @@ let _neuSelectIdSeq = 0;
     >
       <!-- Trigger ------>
       <div
+        cdkOverlayOrigin
+        #selectOrigin="cdkOverlayOrigin"
         class="neu-select__trigger"
         [id]="_triggerId"
         [attr.tabindex]="isDisabledFinal() ? '-1' : '0'"
@@ -157,7 +163,20 @@ let _neuSelectIdSeq = 0;
       </div>
 
       <!-- Panel ------>
-      @if (isOpen()) {
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="selectOrigin"
+        [cdkConnectedOverlayOpen]="isOpen()"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayViewportMargin]="_viewportMargin"
+        (backdropClick)="close()"
+        (detach)="close()"
+        (positionChange)="onOverlayPositionChange($event)"
+      >
         <div
           class="neu-select__panel"
           [class.neu-select__panel--above]="isPanelAbove()"
@@ -165,10 +184,6 @@ let _neuSelectIdSeq = 0;
           role="listbox"
           [id]="_panelId"
           [attr.aria-label]="label()"
-          [style.position]="panelPosition().position"
-          [style.top]="panelPosition().top"
-          [style.bottom]="panelPosition().bottom"
-          [style.left]="panelPosition().left"
           [style.width]="panelPosition().width"
           [style.max-height]="panelPosition().maxHeight"
         >
@@ -277,7 +292,7 @@ let _neuSelectIdSeq = 0;
             <div class="neu-select__empty">{{ noResultsMessage() }}</div>
           }
         </div>
-      }
+      </ng-template>
       <div class="neu-select__sr-status" aria-live="polite" aria-atomic="true">
         {{ resultsAnnouncement() }}
       </div>
@@ -296,9 +311,10 @@ let _neuSelectIdSeq = 0;
 })
 export class NeuSelectComponent implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly _document = inject(DOCUMENT);
+  private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
-  private readonly _mobileViewportMax = 768;
-  private readonly _viewportMargin = 16;
+  readonly _viewportMargin = 16;
   private readonly _panelMaxHeight = 240;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
   private readonly _viewport = viewChild(CdkVirtualScrollViewport);
@@ -394,6 +410,37 @@ export class NeuSelectComponent implements ControlValueAccessor {
   protected readonly _value = signal<string | null>(null);
   readonly isOpen = signal(false);
   readonly searchQuery = signal('');
+  readonly overlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+  ];
+  readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
   readonly panelPosition = signal<{
     position: string | null;
     top: string | null;
@@ -583,7 +630,10 @@ export class NeuSelectComponent implements ControlValueAccessor {
   }
 
   onDocumentClick(event: MouseEvent): void {
-    if (!this.elementRef.nativeElement.contains(event.target as Node)) {
+    const target = event.target as Element | null;
+    const isInsideHost = this.elementRef.nativeElement.contains(target);
+    const isInsidePanel = !!target?.closest('.neu-select__panel');
+    if (!isInsideHost && !isInsidePanel) {
       this.close();
     }
   }
@@ -609,25 +659,12 @@ export class NeuSelectComponent implements ControlValueAccessor {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const gap = 6;
-    const configuratorControls = trigger.closest<HTMLElement>('.demo-configurator__controls');
-    const controlsDisplay = configuratorControls
-      ? window.getComputedStyle(configuratorControls).display
-      : null;
-    const boundaryRect =
-      controlsDisplay === 'grid' ? null : configuratorControls?.getBoundingClientRect();
-    const boundaryTop = boundaryRect
-      ? Math.max(boundaryRect.top, this._viewportMargin)
-      : this._viewportMargin;
-    const boundaryBottom = boundaryRect
-      ? Math.min(boundaryRect.bottom, viewportHeight - this._viewportMargin)
-      : viewportHeight - this._viewportMargin;
     const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
-    const left = Math.min(
-      Math.max(triggerRect.left, this._viewportMargin),
-      viewportWidth - this._viewportMargin - width,
+    const availableBelow = Math.max(
+      0,
+      viewportHeight - this._viewportMargin - triggerRect.bottom - gap,
     );
-    const availableBelow = Math.max(0, boundaryBottom - triggerRect.bottom - gap);
-    const availableAbove = Math.max(0, triggerRect.top - boundaryTop - gap);
+    const availableAbove = Math.max(0, triggerRect.top - this._viewportMargin - gap);
     const openAbove = availableAbove > availableBelow && availableAbove >= 140;
     const maxHeight = Math.max(140, openAbove ? availableAbove : availableBelow);
 
@@ -635,7 +672,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
       position: 'fixed',
       top: openAbove ? 'auto' : `${triggerRect.bottom + gap}px`,
       bottom: openAbove ? `${viewportHeight - triggerRect.top + gap}px` : 'auto',
-      left: `${left}px`,
+      left: `${Math.min(Math.max(triggerRect.left, this._viewportMargin), viewportWidth - width - this._viewportMargin)}px`,
       width: `${width}px`,
       maxHeight: `${maxHeight}px`,
     });
@@ -644,6 +681,10 @@ export class NeuSelectComponent implements ControlValueAccessor {
     if (this.virtualScroll()) {
       requestAnimationFrame(() => this._viewport()?.checkViewportSize());
     }
+  }
+
+  onOverlayPositionChange(event: ConnectedOverlayPositionChange): void {
+    this.isPanelAbove.set(event.connectionPair.overlayY === 'bottom');
   }
 
   private focusFirstOption(): void {
@@ -665,15 +706,15 @@ export class NeuSelectComponent implements ControlValueAccessor {
       requestAnimationFrame(() => {
         const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
           `#neu-select-opt-${value}`,
-        );
+        ) ?? this._document.getElementById(`neu-select-opt-${value}`);
         optionElement?.focus();
       });
       return;
     }
 
-    const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
-      `#neu-select-opt-${value}`,
-    );
+    const optionElement =
+      this.elementRef.nativeElement.querySelector<HTMLElement>(`#neu-select-opt-${value}`) ??
+      this._document.getElementById(`neu-select-opt-${value}`);
     optionElement?.focus();
   }
 

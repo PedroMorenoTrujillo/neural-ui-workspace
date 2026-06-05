@@ -158,10 +158,7 @@
 .neu-autocomplete__list {
   all: unset;
   display: block;
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
+  position: relative;
   background: var(--neu-surface, #ffffff);
   border: 1.5px solid var(--neu-border, #e5e7eb);
   border-radius: var(--neu-radius-lg, 12px);
@@ -219,10 +216,7 @@
 
 /* ── Empty state –––––––––––––––––––––––––––––––––––––––––––––––– */
 .neu-autocomplete__empty {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
+  position: relative;
   background: var(--neu-surface, #ffffff);
   border: 1.5px solid var(--neu-border, #e5e7eb);
   border-radius: var(--neu-radius-lg, 12px);

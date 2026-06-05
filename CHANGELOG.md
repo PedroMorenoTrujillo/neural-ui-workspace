@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.8] - 2026-06-05
+
+### Fixed
+
+- Floating panels now use Angular CDK Overlay in `NeuSelectComponent`, `NeuMultiselectComponent`, `NeuAutocompleteComponent`, `NeuDateInputComponent`, `NeuSplitButtonComponent`, `NeuColorPickerComponent` and `NeuNotificationCenterComponent`.
+- Dropdowns, autocomplete suggestions, date pickers, color picker panels and notification panels are no longer clipped or mispositioned inside modals, transformed containers, cards or scrollable layouts.
+- Overlay panels now use viewport-aware positioning with fallbacks and scroll repositioning.
+
+---
+
 ## [1.5.7] - 2026-06-05
 
 ### Fixed

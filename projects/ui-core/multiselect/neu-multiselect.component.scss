@@ -252,10 +252,7 @@ $panel-z: 200;
 
 // ---- Panel dropdown ----
 .neu-multiselect__panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
+  position: relative;
   z-index: $panel-z;
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);

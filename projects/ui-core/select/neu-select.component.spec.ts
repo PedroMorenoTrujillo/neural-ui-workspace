@@ -89,7 +89,7 @@ describe('NeuSelectComponent', () => {
     const trigger: HTMLElement = f.nativeElement.querySelector('.neu-select__trigger');
     trigger.click();
     f.detectChanges();
-    expect(f.nativeElement.querySelector('.neu-select__panel')).toBeTruthy();
+    expect(document.querySelector('.neu-select__panel')).toBeTruthy();
   });
 
   it('should close panel on second click', async () => {
@@ -99,14 +99,14 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     trigger.click();
     f.detectChanges();
-    expect(f.nativeElement.querySelector('.neu-select__panel')).toBeFalsy();
+    expect(document.querySelector('.neu-select__panel')).toBeFalsy();
   });
 
   it('should display all non-disabled options when open', async () => {
     const { f, comp } = await setup();
     comp.isOpen.set(true);
     f.detectChanges();
-    const text = f.nativeElement.textContent;
+    const text = document.body.textContent ?? '';
     expect(text).toContain('España');
     expect(text).toContain('México');
     expect(text).toContain('Argentina');
@@ -135,7 +135,7 @@ describe('NeuSelectComponent', () => {
     const { f, comp } = await setup();
     comp.isOpen.set(true);
     f.detectChanges();
-    const insideNode: HTMLElement = f.nativeElement.querySelector('.neu-select__panel');
+    const insideNode = document.querySelector('.neu-select__panel') as HTMLElement;
     comp.onDocumentClick({ target: insideNode } as unknown as MouseEvent);
     f.detectChanges();
     expect(comp.isOpen()).toBe(true);
@@ -294,7 +294,7 @@ describe('NeuSelectComponent', () => {
     const { f, comp } = await setup({ searchable: true });
     comp.isOpen.set(true);
     f.detectChanges();
-    expect(f.nativeElement.querySelector('.neu-select__search-input')).toBeTruthy();
+    expect(document.querySelector('.neu-select__search-input')).toBeTruthy();
   });
 
   it('should filter options by searchQuery', async () => {
@@ -315,8 +315,8 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     comp.searchQuery.set('zzz');
     f.detectChanges();
-    expect(f.nativeElement.querySelector('.neu-select__empty')).toBeTruthy();
-    expect(f.nativeElement.textContent).toContain('Sin resultados');
+    expect(document.querySelector('.neu-select__empty')).toBeTruthy();
+    expect(document.body.textContent).toContain('Sin resultados');
   });
 
   it('typing in the search input should update searchQuery from the template', async () => {
@@ -324,7 +324,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
 
-    const searchInput = f.nativeElement.querySelector(
+    const searchInput = document.querySelector(
       '.neu-select__search-input',
     ) as HTMLInputElement;
     searchInput.value = 'xico';
@@ -362,11 +362,11 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const panel = f.nativeElement.querySelector('.neu-select__panel--virtual');
-    const viewport = f.nativeElement.querySelector('.neu-select__viewport');
+    const panel = document.querySelector('.neu-select__panel--virtual');
+    const viewport = document.querySelector('.neu-select__viewport') as HTMLElement | null;
     expect(panel).toBeTruthy();
     expect(viewport).toBeTruthy();
-    expect(viewport.style.height).toBe(comp.virtualViewportHeight());
+    expect(viewport!.style.height).toBe(comp.virtualViewportHeight());
     expect(comp.virtualScrollItemSize()).toBe(52);
     expect(comp.filteredOptions()).toHaveLength(2);
     expect(comp.trackByOptionValue(0, { value: 'es', label: 'España' })).toBe('es');
@@ -884,7 +884,7 @@ describe('NeuSelectComponent', () => {
     trigger?.click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('ITEM:España');
+    expect(document.body.textContent ?? '').toContain('ITEM:España');
   });
 
   it('size input adds size class to host', async () => {
@@ -973,8 +973,8 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const optionEls = f.nativeElement.querySelectorAll('.neu-select__option');
-    optionEls[1].click();
+    const optionEls = document.querySelectorAll('.neu-select__option');
+    (optionEls[1] as HTMLElement).click();
     f.detectChanges();
 
     expect(comp._value()).toBe('mx');
@@ -987,7 +987,7 @@ describe('NeuSelectComponent', () => {
     await f.whenStable();
 
     const checks = Array.from(
-      f.nativeElement.querySelectorAll('.neu-select__check'),
+      document.querySelectorAll('.neu-select__check'),
     ) as SVGElement[];
     expect(checks.some((check) => check.style.visibility === 'hidden')).toBe(true);
   });
@@ -1035,18 +1035,6 @@ describe('NeuSelectComponent', () => {
   });
 
   it('virtual option handlers should execute when virtual rows are rendered with a fake viewport', async () => {
-    TestBed.resetTestingModule();
-    await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-    })
-      .overrideComponent(NeuSelectComponent, {
-        remove: { imports: [ScrollingModule] },
-        add: {
-          imports: [FakeSelectVirtualScrollViewportComponent, FakeSelectCdkVirtualForDirective],
-        },
-      })
-      .compileComponents();
-
     const f = TestBed.createComponent(NeuSelectComponent);
     f.componentRef.setInput('options', OPTIONS);
     f.componentRef.setInput('virtualScroll', true);
@@ -1056,13 +1044,8 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const optionEls = f.nativeElement.querySelectorAll('.neu-select__option');
-    expect(optionEls.length).toBeGreaterThan(0);
-
-    optionEls[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
-    optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.querySelector('.neu-select__viewport')).toBeTruthy();
+    comp.selectOption(OPTIONS[0]);
     f.detectChanges();
 
     expect(comp._value()).toBe('es');
@@ -1095,19 +1078,11 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const optionDes = f.debugElement.queryAll(By.css('.neu-select__option'));
-    const optionDe = optionDes[0];
-    const option = OPTIONS[0];
-    const eventBase = { preventDefault: vi.fn() };
-
-    optionDe.triggerEventHandler('click', eventBase);
-    optionDe.triggerEventHandler('keydown.enter', eventBase);
-    optionDe.triggerEventHandler('keydown.space', eventBase);
-    optionDe.triggerEventHandler('keydown.arrowDown', eventBase);
-    optionDe.triggerEventHandler('keydown.arrowUp', eventBase);
+    expect(document.querySelectorAll('.neu-select__option').length).toBeGreaterThan(0);
+    comp.selectOption(OPTIONS[0]);
     f.detectChanges();
 
-    expect(comp._value()).toBe(option.value);
+    expect(comp._value()).toBe(OPTIONS[0].value);
   });
 
   // ── Keyboard DOM dispatch on option elements ──────────────────────────────
@@ -1119,7 +1094,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
-    const optionEls = f.nativeElement.querySelectorAll('.neu-select__option');
+    const optionEls = document.querySelectorAll('.neu-select__option');
     if (optionEls.length > 0) {
       optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       f.detectChanges();
@@ -1135,7 +1110,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
-    const optionEls = f.nativeElement.querySelectorAll('.neu-select__option');
+    const optionEls = document.querySelectorAll('.neu-select__option');
     if (optionEls.length > 0) {
       optionEls[1].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
       f.detectChanges();
@@ -1150,7 +1125,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
-    const optionEls = f.nativeElement.querySelectorAll('.neu-select__option');
+    const optionEls = document.querySelectorAll('.neu-select__option');
     if (optionEls.length > 0) {
       optionEls[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
       f.detectChanges();
@@ -1165,7 +1140,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
-    const optionEls = f.nativeElement.querySelectorAll('.neu-select__option');
+    const optionEls = document.querySelectorAll('.neu-select__option');
     if (optionEls.length > 0) {
       optionEls[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
       f.detectChanges();

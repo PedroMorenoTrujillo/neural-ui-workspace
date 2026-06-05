@@ -8,6 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 
 export type NeuNotificationType = 'info' | 'success' | 'warning' | 'error';
 
@@ -102,7 +103,7 @@ let _panelSeq = 0;
  */
 @Component({
   selector: 'neu-notification-center',
-  imports: [],
+  imports: [OverlayModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -112,6 +113,8 @@ let _panelSeq = 0;
   template: `
     <!-- Bell button -->
     <button
+      cdkOverlayOrigin
+      #notificationOrigin="cdkOverlayOrigin"
       type="button"
       class="neu-nc__bell"
       [attr.aria-expanded]="_isOpen()"
@@ -128,7 +131,19 @@ let _panelSeq = 0;
     </button>
 
     <!-- Panel -->
-    @if (_isOpen()) {
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="notificationOrigin"
+      [cdkConnectedOverlayOpen]="_isOpen()"
+      [cdkConnectedOverlayPositions]="overlayPositions"
+      [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+      [cdkConnectedOverlayHasBackdrop]="true"
+      [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayViewportMargin]="_viewportMargin"
+      (backdropClick)="_isOpen.set(false)"
+      (detach)="_isOpen.set(false)"
+    >
       <div
         class="neu-nc__panel"
         [id]="_panelId"
@@ -185,14 +200,40 @@ let _panelSeq = 0;
           }
         </div>
       </div>
-    }
+    </ng-template>
   `,
   styleUrl: './neu-notification-center.component.scss',
 })
 export class NeuNotificationCenterComponent {
   readonly _svc = inject(NeuNotificationService);
+  private readonly overlay = inject(Overlay);
   readonly _isOpen = signal(false);
   readonly _panelId = `neu-nc-panel-${++_panelSeq}`;
+  readonly _viewportMargin = 16;
+  readonly overlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+  ];
+  readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
   _toggle(): void {
     const opening = !this._isOpen();

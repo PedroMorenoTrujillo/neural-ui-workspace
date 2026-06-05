@@ -16,7 +16,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
-import { NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
+import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from '@neural-ui/core/select';
@@ -42,7 +43,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
  */
 @Component({
   selector: 'neu-multiselect',
-  imports: [NgTemplateOutlet, ScrollingModule],
+  imports: [NgTemplateOutlet, OverlayModule, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -53,10 +54,8 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
     },
   ],
   host: {
-    '(document:click)': 'onDocumentClick($event)',
     '(keydown.escape)': 'close()',
     '(window:resize)': 'onWindowResize()',
-    '(window:scroll)': 'onWindowScroll()',
   },
   template: `
     @if (!floatingLabel() && label()) {
@@ -77,6 +76,8 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
     >
       <!-- Trigger -->
       <div
+        cdkOverlayOrigin
+        #multiselectOrigin="cdkOverlayOrigin"
         class="neu-multiselect__trigger"
         [id]="_triggerId"
         [attr.tabindex]="isDisabledFinal() ? '-1' : '0'"
@@ -173,7 +174,19 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
       </div>
 
       <!-- Panel -->
-      @if (isOpen()) {
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="multiselectOrigin"
+        [cdkConnectedOverlayOpen]="isOpen()"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayViewportMargin]="_viewportMargin"
+        (backdropClick)="close()"
+        (detach)="close()"
+      >
         <div
           class="neu-multiselect__panel"
           [class.neu-multiselect__panel--virtual]="virtualScroll()"
@@ -181,9 +194,6 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
           [id]="_panelId"
           [attr.aria-multiselectable]="true"
           [attr.aria-label]="label() || null"
-          [style.position]="panelPosition().position"
-          [style.top]="panelPosition().top"
-          [style.left]="panelPosition().left"
           [style.width]="panelPosition().width"
           [style.max-height]="panelPosition().maxHeight"
         >
@@ -330,7 +340,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
             </div>
           }
         </div>
-      }
+      </ng-template>
 
       <div class="neu-multiselect__sr-status" aria-live="polite" aria-atomic="true">
         {{ resultsAnnouncement() }}
@@ -349,9 +359,10 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
 })
 export class NeuMultiselectComponent implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly _document = inject(DOCUMENT);
+  private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
-  private readonly _mobileViewportMax = 768;
-  private readonly _viewportMargin = 16;
+  readonly _viewportMargin = 16;
   private readonly _panelMaxHeight = 280;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
   private readonly _viewport = viewChild(CdkVirtualScrollViewport);
@@ -455,6 +466,37 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   readonly isOpen = signal(false);
   readonly searchQuery = signal('');
   readonly _chipMode = signal<'chips' | 'count'>('count');
+  readonly overlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+  ];
+  readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
   readonly panelPosition = signal<{
     position: string | null;
     top: string | null;
@@ -666,8 +708,11 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this._chipMode.set(this._chipMode() === 'chips' ? 'count' : 'chips');
   }
 
-  protected onDocumentClick(event: MouseEvent): void {
-    if (!this.elementRef.nativeElement.contains(event.target as Node)) {
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Element | null;
+    const isInsideHost = this.elementRef.nativeElement.contains(target);
+    const isInsidePanel = !!target?.closest('.neu-multiselect__panel');
+    if (!isInsideHost && !isInsidePanel) {
       this.close();
     }
   }
@@ -689,26 +734,23 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
       '.neu-multiselect__trigger',
     );
     if (!trigger) return;
-    if (window.innerWidth > this._mobileViewportMax) {
-      this.resetPanelPosition();
-      return;
-    }
 
     const triggerRect = trigger.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    const gap = 6;
     const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
-    const left = Math.min(
-      Math.max(triggerRect.left, this._viewportMargin),
-      viewportWidth - this._viewportMargin - width,
+    const availableBelow = Math.max(
+      0,
+      viewportHeight - this._viewportMargin - triggerRect.bottom - gap,
     );
-    const top = triggerRect.bottom + 6;
-    const maxHeight = Math.max(180, viewportHeight - top - this._viewportMargin);
+    const availableAbove = Math.max(0, triggerRect.top - this._viewportMargin - gap);
+    const maxHeight = Math.max(180, Math.max(availableBelow, availableAbove));
 
     this.panelPosition.set({
-      position: 'fixed',
-      top: `${top}px`,
-      left: `${left}px`,
+      position: null,
+      top: null,
+      left: null,
       width: `${width}px`,
       maxHeight: `${maxHeight}px`,
     });
@@ -737,15 +779,15 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
       requestAnimationFrame(() => {
         const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
           `#neu-ms-opt-${value}`,
-        );
+        ) ?? this._document.getElementById(`neu-ms-opt-${value}`);
         optionElement?.focus();
       });
       return;
     }
 
-    const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
-      `#neu-ms-opt-${value}`,
-    );
+    const optionElement =
+      this.elementRef.nativeElement.querySelector<HTMLElement>(`#neu-ms-opt-${value}`) ??
+      this._document.getElementById(`neu-ms-opt-${value}`);
     optionElement?.focus();
   }
 

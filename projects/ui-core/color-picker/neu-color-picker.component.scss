@@ -57,9 +57,7 @@
 
 /* ── Panel ────────────────────────────────────────────────────── */
 .neu-cp__panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: relative;
   width: 272px;
   background: var(--neu-surface-1, #ffffff);
   border: 1px solid var(--neu-border-color, #e5e7eb);

@@ -9,6 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonVariant, NeuButtonSize } from '@neural-ui/core/button';
 
 export interface NeuSplitButtonAction {
@@ -39,7 +40,7 @@ export interface NeuSplitButtonAction {
  */
 @Component({
   selector: 'neu-split-button',
-  imports: [],
+  imports: [OverlayModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -83,6 +84,8 @@ export interface NeuSplitButtonAction {
 
       <!-- Chevron trigger -->
       <button
+        cdkOverlayOrigin
+        #splitButtonOrigin="cdkOverlayOrigin"
         class="neu-split-button__chevron"
         [class]="chevronClasses()"
         type="button"
@@ -106,7 +109,19 @@ export interface NeuSplitButtonAction {
       </button>
 
       <!-- Dropdown de acciones -->
-      @if (isOpen()) {
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="splitButtonOrigin"
+        [cdkConnectedOverlayOpen]="isOpen()"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayViewportMargin]="_viewportMargin"
+        (backdropClick)="closeDropdown()"
+        (detach)="closeDropdown()"
+      >
         <div
           class="neu-split-button__dropdown"
           role="menu"
@@ -130,13 +145,39 @@ export interface NeuSplitButtonAction {
             </button>
           }
         </div>
-      }
+      </ng-template>
     </div>
   `,
   styleUrl: './neu-split-button.component.scss',
 })
 export class NeuSplitButtonComponent {
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly overlay = inject(Overlay);
+  readonly _viewportMargin = 16;
+  readonly overlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+  ];
+  readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
   /** Texto del botón principal / Primary button text */
   label = input<string>('');
@@ -191,7 +232,11 @@ export class NeuSplitButtonComponent {
   }
 
   onDocumentClick(event: MouseEvent): void {
-    if (!this.el.nativeElement.contains(event.target as Node)) this.closeDropdown();
+    const target = event.target as Element | null;
+    const isInsidePanel = !!target?.closest('.neu-split-button__dropdown');
+    if (!this.el.nativeElement.contains(event.target as Node) && !isInsidePanel) {
+      this.closeDropdown();
+    }
   }
 
   onPrimaryClick(event: MouseEvent): void {

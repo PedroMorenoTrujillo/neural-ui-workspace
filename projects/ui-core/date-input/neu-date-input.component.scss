@@ -159,9 +159,7 @@ $drum-item-h: 36px;
 
 // ---- Panel ----
 .neu-date-input__panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: relative;
   z-index: $panel-z;
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);
@@ -563,9 +561,7 @@ $drum-item-h: 36px;
 }
 
 .neu-drp__panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: relative;
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius-lg);

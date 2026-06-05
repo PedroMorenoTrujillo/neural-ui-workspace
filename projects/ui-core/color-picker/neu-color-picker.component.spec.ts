@@ -49,7 +49,7 @@ describe('NeuColorPickerComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-cp__panel')).toBeTruthy();
+    expect(document.querySelector('.neu-cp__panel')).toBeTruthy();
   });
 
   it('clicking the trigger button should toggle the panel from the template', async () => {
@@ -188,14 +188,14 @@ describe('NeuColorPickerComponent', () => {
     await f.whenStable();
 
     const buttons = Array.from(
-      f.nativeElement.querySelectorAll('.neu-cp__mode-btn'),
+      document.querySelectorAll('.neu-cp__mode-btn'),
     ) as HTMLButtonElement[];
     buttons.find((button) => button.textContent?.trim() === 'RGB')?.click();
     f.detectChanges();
     await f.whenStable();
 
     expect(f.componentInstance._activeMode()).toBe('rgb');
-    expect(f.nativeElement.querySelector('.neu-cp__text-input')?.getAttribute('aria-label')).toBe(
+    expect(document.querySelector('.neu-cp__text-input')?.getAttribute('aria-label')).toBe(
       'Valor rgb',
     );
   });
@@ -208,7 +208,7 @@ describe('NeuColorPickerComponent', () => {
     const previousHex = f.componentInstance._hexValue();
 
     const swatches = Array.from(
-      f.nativeElement.querySelectorAll('.neu-cp__sw'),
+      document.querySelectorAll('.neu-cp__sw'),
     ) as HTMLButtonElement[];
     swatches[0].click();
     f.detectChanges();
@@ -253,7 +253,7 @@ describe('NeuColorPickerComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const input = f.nativeElement.querySelector('.neu-cp__text-input') as HTMLInputElement;
+    const input = document.querySelector('.neu-cp__text-input') as HTMLInputElement;
     input.value = '#00ff00';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     f.detectChanges();
@@ -268,7 +268,7 @@ describe('NeuColorPickerComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const slider = f.nativeElement.querySelector('.neu-cp__hue-slider') as HTMLInputElement;
+    const slider = document.querySelector('.neu-cp__hue-slider') as HTMLInputElement;
     slider.value = '45';
     slider.dispatchEvent(new Event('input', { bubbles: true }));
     f.detectChanges();
@@ -283,7 +283,7 @@ describe('NeuColorPickerComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const canvas = f.nativeElement.querySelector('.neu-cp__canvas-wrap') as HTMLDivElement;
+    const canvas = document.querySelector('.neu-cp__canvas-wrap') as HTMLDivElement;
     canvas.setPointerCapture = vi.fn();
     canvas.releasePointerCapture = vi.fn();
     Object.defineProperty(canvas, 'getBoundingClientRect', {
