@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.7] - 2026-06-05
+
+### Fixed
+
+- `NeuNumberInputComponent` — `floatingLabel` is now disabled automatically when `vertical=true`, preventing an unsupported visual combination. Vertical number inputs keep the static label.
+
+---
+
 ## [1.5.6] - 2026-06-05
 
 ### Added

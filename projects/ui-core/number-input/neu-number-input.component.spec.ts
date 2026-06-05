@@ -230,6 +230,21 @@ describe('NeuNumberInputComponent', () => {
     expect(floatingLabel.textContent.trim()).toBe('Comensales');
   });
 
+  it('does not render floating label when vertical=true', async () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    f.componentRef.setInput('label', 'Comensales');
+    f.componentRef.setInput('floatingLabel', true);
+    f.componentRef.setInput('vertical', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const staticLabel = f.nativeElement.querySelector('.neu-number-input__label');
+    const floatingLabel = f.nativeElement.querySelector('.neu-number-input__floating-label');
+    expect(staticLabel).toBeTruthy();
+    expect(staticLabel.textContent.trim()).toBe('Comensales');
+    expect(floatingLabel).toBeNull();
+  });
+
   it('adds focus class while the field is focused', async () => {
     const f = TestBed.createComponent(NeuNumberInputComponent);
     f.componentRef.setInput('label', 'Comensales');
