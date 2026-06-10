@@ -132,7 +132,7 @@ export class NeuChartComponent {
       const cumulative = computeParetoCumulative(first.data);
       return [
         { name: first.name, type: 'bar', data: first.data },
-        { name: 'Acumulado %', type: 'line', data: cumulative },
+        { name: 'Cumulative %', type: 'line', data: cumulative },
       ];
     }
     return this.series();
@@ -280,7 +280,7 @@ export class NeuChartComponent {
             },
             total: {
               show: true,
-              label: 'Promedio',
+              label: 'Average',
               fontSize: '13px',
               fontFamily: 'inherit',
               color: 'var(--neu-text-secondary, #64748b)',

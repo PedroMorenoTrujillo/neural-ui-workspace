@@ -117,7 +117,7 @@ describe('NeuChartComponent', () => {
     expect(res.length).toBe(2);
     expect(res[0].type).toBe('bar');
     expect(res[1].type).toBe('line');
-    expect(res[1].name).toBe('Acumulado %');
+    expect(res[1].name).toBe('Cumulative %');
   });
 
   it('resolvedSeries pareto returns empty array when no series', () => {
