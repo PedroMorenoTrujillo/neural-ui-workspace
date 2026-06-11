@@ -13,6 +13,8 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 > Live documentation and examples → [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app)
 
+> Building a full admin product? Try [Neural Admin Pro](https://neural-ui-admin-pro.vercel.app/login), a premium Angular dashboard template built with Neural UI and ready to connect to your own backend.
+
 <p align="center">
   <img src=".github/assets/lighthouse.png" alt="Lighthouse scores: Performance 98, Accessibility 96, Best Practices 100, SEO 91" width="480" />
 </p>
@@ -118,6 +120,19 @@ Representative entry points in 1.5.0:
 - **Visualization and display**: `@neural-ui/core/chart`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
 
 For the complete catalog, examples, and API tables, use the live docs at [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app).
+
+---
+
+## Neural Admin Pro
+
+Build production-ready SaaS dashboards, CRM tools, internal business apps and client portals with Neural Admin Pro, a premium Angular dashboard template built with Neural UI.
+
+Neural Admin Pro is frontend-only and backend-ready, so you can connect it to your own API, Firebase, Supabase, Laravel, NestJS, Django, Rails or any custom backend.
+
+- [Live demo](https://neural-ui-admin-pro.vercel.app/login)
+- [Buy on Gumroad](https://trujillopete.gumroad.com/l/epbrur)
+- [Buy on Payhip](https://payhip.com/b/0apB6)
+- [Buy on Lemon Squeezy](https://pedromorenostordeve.lemonsqueezy.com/checkout/buy/52e743fd-bb93-4ce7-ae17-c8bf2718de3c)
 
 ### Highlights in 1.5.0
 
