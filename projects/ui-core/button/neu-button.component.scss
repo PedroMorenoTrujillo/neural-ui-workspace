@@ -135,6 +135,12 @@
 
   // ---- Solo icono (cuadrado) / Icon only (square) ----
   &--icon-only {
+    gap: 0;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    line-height: 1;
+
     &.neu-button--sm {
       width: 30px;
       height: 30px;
@@ -149,6 +155,23 @@
       width: 46px;
       height: 46px;
       padding: 0;
+    }
+
+    .neu-icon,
+    neu-icon,
+    ng-icon,
+    svg {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      margin: 0;
+      line-height: 1;
+    }
+
+    neu-icon > ng-icon {
+      width: 100%;
+      height: 100%;
     }
   }
 }

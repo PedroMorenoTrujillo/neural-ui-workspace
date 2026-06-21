@@ -80,6 +80,23 @@ describe('NeuButtonComponent', () => {
     expect(fixture.nativeElement.classList).toContain('neu-button--icon-only');
   });
 
+  it('should render only the icon content when iconOnly=true', async () => {
+    const fixture = TestBed.createComponent(NeuButtonComponent);
+    fixture.componentRef.setInput('icon', 'lucidePlus');
+    fixture.componentRef.setInput('iconOnly', true);
+    fixture.componentRef.setInput('ariaLabel', 'Crear');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const host: HTMLButtonElement = fixture.nativeElement;
+    const icon = host.querySelector('neu-icon');
+
+    expect(host.classList).toContain('neu-button--icon-only');
+    expect(host.getAttribute('aria-label')).toBe('Crear');
+    expect(icon).toBeTruthy();
+    expect(host.textContent?.trim()).toBe('');
+  });
+
   it('should emit neuClick when clicked and not disabled', () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
     fixture.detectChanges();

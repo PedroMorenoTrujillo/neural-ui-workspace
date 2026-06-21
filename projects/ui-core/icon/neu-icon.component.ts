@@ -27,6 +27,7 @@ import { NgIcon } from '@ng-icons/core';
     class: 'neu-icon',
     '[style.display]': '"inline-flex"',
     '[style.align-items]': '"center"',
+    '[style.justify-content]': '"center"',
     '[style.line-height]': '"1"',
     '[style.color]': '"inherit"',
   },
