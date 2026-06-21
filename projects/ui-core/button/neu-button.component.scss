@@ -158,9 +158,7 @@
     }
 
     .neu-icon,
-    neu-icon,
-    ng-icon,
-    svg {
+    neu-icon {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -169,7 +167,19 @@
       line-height: 1;
     }
 
-    neu-icon > ng-icon {
+    .neu-icon ng-icon,
+    neu-icon ng-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ng-icon__size, 1em);
+      height: var(--ng-icon__size, 1em);
+      line-height: 1;
+    }
+
+    .neu-icon svg,
+    neu-icon svg {
+      display: block;
       width: 100%;
       height: 100%;
     }

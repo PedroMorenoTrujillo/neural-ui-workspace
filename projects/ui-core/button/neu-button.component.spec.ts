@@ -97,6 +97,19 @@ describe('NeuButtonComponent', () => {
     expect(host.textContent?.trim()).toBe('');
   });
 
+  it('should pass the expected icon size to ng-icons in iconOnly mode', async () => {
+    const fixture = TestBed.createComponent(NeuButtonComponent);
+    fixture.componentRef.setInput('icon', 'lucidePlus');
+    fixture.componentRef.setInput('iconOnly', true);
+    fixture.componentRef.setInput('size', 'md');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const ngIcon = fixture.nativeElement.querySelector('ng-icon');
+
+    expect(ngIcon?.getAttribute('style')).toContain('--ng-icon__size: 16px');
+  });
+
   it('should emit neuClick when clicked and not disabled', () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
     fixture.detectChanges();
