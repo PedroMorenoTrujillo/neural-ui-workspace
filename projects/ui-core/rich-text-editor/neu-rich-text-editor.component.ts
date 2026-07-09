@@ -102,7 +102,9 @@ let _neuRichTextEditorIdSeq = 0;
   template: `
     <div class="neu-rich-text-editor" [class.neu-rich-text-editor--disabled]="isDisabledFinal()">
       @if (label()) {
-        <label class="neu-rich-text-editor__label" [for]="editorId()">{{ label() }}</label>
+        <label class="neu-rich-text-editor__label" [id]="editorId() + '-label'" [for]="editorId()">
+          {{ label() }}
+        </label>
       }
 
       <div
@@ -262,6 +264,8 @@ let _neuRichTextEditorIdSeq = 0;
           role="textbox"
           aria-multiline="true"
           [id]="editorId()"
+          [attr.aria-label]="label() ? null : mergedLabels().toolbar"
+          [attr.aria-labelledby]="label() ? editorId() + '-label' : null"
           [attr.contenteditable]="isDisabledFinal() ? 'false' : 'true'"
           [attr.data-placeholder]="placeholder()"
           [attr.aria-describedby]="ariaDescribedBy()"

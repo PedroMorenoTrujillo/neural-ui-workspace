@@ -164,6 +164,8 @@ export class NeuCodeBlockComponent {
     const root = this.doc.documentElement;
     const win = this.doc.defaultView;
 
+    this.destroyRef.onDestroy(() => clearTimeout(this._copyTimer));
+
     if (!root || !win?.MutationObserver) return;
 
     const observer = new win.MutationObserver(() => {

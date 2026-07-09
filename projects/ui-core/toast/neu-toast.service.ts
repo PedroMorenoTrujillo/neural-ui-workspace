@@ -20,6 +20,8 @@ export class NeuToastService {
   /** Posición del contenedor de toasts / Toast container position */
   readonly position = signal<NeuToastPosition>('top-right');
 
+  private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
+
   setPosition(position: NeuToastPosition): void {
     this.position.set(position);
   }
@@ -39,7 +41,8 @@ export class NeuToastService {
     this.toasts.update((list) => [...list, item]);
 
     if (duration > 0) {
-      setTimeout(() => this.dismiss(id), duration);
+      const timer = setTimeout(() => this.dismiss(id), duration);
+      this.timers.set(id, timer);
     }
 
     return id;
@@ -62,10 +65,22 @@ export class NeuToastService {
   }
 
   dismiss(id: string): void {
+    this.clearTimer(id);
     this.toasts.update((list) => list.filter((t) => t.id !== id));
   }
 
   clear(): void {
+    for (const timer of this.timers.values()) {
+      clearTimeout(timer);
+    }
+    this.timers.clear();
     this.toasts.set([]);
+  }
+
+  private clearTimer(id: string): void {
+    const timer = this.timers.get(id);
+    if (!timer) return;
+    clearTimeout(timer);
+    this.timers.delete(id);
   }
 }

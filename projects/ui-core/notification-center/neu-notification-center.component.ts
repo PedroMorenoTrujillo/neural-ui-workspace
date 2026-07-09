@@ -53,6 +53,8 @@ export class NeuNotificationService {
 
   readonly unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
 
+  private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
+
   /** Agrega una notificación / Adds a notification */
   push(opts: Partial<NeuNotificationOptions> & Pick<NeuNotificationOptions, 'message'>): string {
     const id = `neu-notif-${++_idSeq}`;
@@ -69,13 +71,15 @@ export class NeuNotificationService {
     this.notifications.update((list) => [n, ...list]);
 
     if (n.duration && n.duration > 0) {
-      setTimeout(() => this.remove(id), n.duration);
+      const timer = setTimeout(() => this.remove(id), n.duration);
+      this.timers.set(id, timer);
     }
     return id;
   }
 
   /** Elimina una notificación / Removes a notification */
   remove(id: string): void {
+    this.clearTimer(id);
     this.notifications.update((list) => list.filter((n) => n.id !== id));
   }
 
@@ -86,7 +90,18 @@ export class NeuNotificationService {
 
   /** Elimina todas / Clears all */
   clearAll(): void {
+    for (const timer of this.timers.values()) {
+      clearTimeout(timer);
+    }
+    this.timers.clear();
     this.notifications.set([]);
+  }
+
+  private clearTimer(id: string): void {
+    const timer = this.timers.get(id);
+    if (!timer) return;
+    clearTimeout(timer);
+    this.timers.delete(id);
   }
 }
 

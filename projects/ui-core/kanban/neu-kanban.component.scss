@@ -129,18 +129,18 @@
 
 .neu-kanban__priority--low {
   background: color-mix(in srgb, var(--neu-success) 12%, white 88%);
-  color: var(--neu-success);
+  color: #166534;
 }
 
 .neu-kanban__priority--medium {
   background: color-mix(in srgb, var(--neu-warning) 16%, white 84%);
-  color: #b45309;
+  color: #78350f;
 }
 
 .neu-kanban__priority--high,
 .neu-kanban__priority--urgent {
   background: color-mix(in srgb, var(--neu-danger) 12%, white 88%);
-  color: var(--neu-danger);
+  color: #991b1b;
 }
 
 .neu-kanban__title {
@@ -204,8 +204,8 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: color-mix(in srgb, var(--neu-primary) 15%, white 85%);
-  color: var(--neu-primary);
+  background: color-mix(in srgb, var(--neu-primary) 12%, white 88%);
+  color: #004b93;
   font-size: 11px;
   font-weight: 700;
 }

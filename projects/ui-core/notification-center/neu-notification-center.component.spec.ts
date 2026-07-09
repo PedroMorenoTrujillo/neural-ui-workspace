@@ -21,6 +21,10 @@ beforeEach(() =>
   }).compileComponents(),
 );
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe('NeuNotificationService', () => {
   it('push should add a notification', () => {
     const svc = mkSvc();
@@ -86,6 +90,17 @@ describe('NeuNotificationService', () => {
     svc.push({ message: 'A' });
     svc.push({ message: 'B' });
     svc.clearAll();
+    expect(svc.notifications().length).toBe(0);
+  });
+
+  it('clearAll should cancel pending auto-dismiss timers', () => {
+    vi.useFakeTimers();
+    const svc = mkSvc();
+    svc.push({ message: 'Timed', duration: 100 });
+
+    svc.clearAll();
+    vi.advanceTimersByTime(200);
+
     expect(svc.notifications().length).toBe(0);
   });
 

@@ -104,6 +104,26 @@ describe('NeuRichTextEditorComponent', () => {
     expect(boldButton.getAttribute('title')).toBe('Aplicar negrita');
   });
 
+  it('should provide an accessible name for the editable surface', () => {
+    const { fixture } = createComponent({ label: 'Contenido' });
+    const surface: HTMLDivElement = fixture.nativeElement.querySelector(
+      '.neu-rich-text-editor__surface',
+    );
+
+    expect(surface.getAttribute('aria-labelledby')).toBe(`${surface.id}-label`);
+    expect(surface.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should fall back to the toolbar label as editable surface name', () => {
+    const { fixture } = createComponent({ labels: { toolbar: 'Editor enriquecido' } });
+    const surface: HTMLDivElement = fixture.nativeElement.querySelector(
+      '.neu-rich-text-editor__surface',
+    );
+
+    expect(surface.getAttribute('aria-label')).toBe('Editor enriquecido');
+    expect(surface.getAttribute('aria-labelledby')).toBeNull();
+  });
+
   it('should disable contenteditable when disabled through CVA', () => {
     const { fixture, component } = createComponent();
     component.setDisabledState(true);
@@ -154,6 +174,14 @@ describe('rich text html utils', () => {
     expect(sanitizeRichTextHtml('<a href="{{link_dossier}}">Descargar</a>')).toBe(
       '<a href="{{link_dossier}}" target="_blank" rel="noopener noreferrer">Descargar</a>',
     );
+  });
+
+  it('sanitizeRichTextHtml should remove unsafe link and image sources', () => {
+    expect(
+      sanitizeRichTextHtml(
+        '<a href="javascript:alert(1)" target="_self">Bad</a><img src="data:image/svg+xml;base64,PHN2Zz4=" alt="bad">',
+      ),
+    ).toBe('<a>Bad</a><img alt="bad">');
   });
 
   it('normalizeRichTextHtml should convert plain text to paragraphs', () => {

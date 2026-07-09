@@ -1,6 +1,5 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { NeuCalendarComponent } from './neu-calendar.component';
 
 const EVENTS = [
@@ -53,7 +52,7 @@ describe('NeuCalendarComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.neu-calendar__week-day').length).toBe(7);
   });
 
-  it('should select a week day from the enter key handler in the DOM', async () => {
+  it('should select a week day from the rendered date button', async () => {
     const fixture = setup();
     fixture.componentRef.setInput('view', 'week');
     fixture.detectChanges();
@@ -64,31 +63,29 @@ describe('NeuCalendarComponent', () => {
       selectedChanges.push(localDayKey(date));
     });
 
-    const targetDay = Array.from(
-      fixture.nativeElement.querySelectorAll('.neu-calendar__week-day') as NodeListOf<HTMLElement>,
+    const targetButton = Array.from(
+      fixture.nativeElement.querySelectorAll(
+        '.neu-calendar__week-head',
+      ) as NodeListOf<HTMLButtonElement>,
     ).find((node) => node.getAttribute('aria-label')?.includes('May 16, 2026'));
-    targetDay?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    targetButton?.click();
     fixture.detectChanges();
 
     expect(selectedChanges).toContain('2026-05-16');
   });
 
-  it('should handle the week day keydown listener directly', async () => {
+  it('should avoid nested interactive day cells when events are clickable', async () => {
     const fixture = setup();
     fixture.componentRef.setInput('view', 'week');
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const selectedChanges: string[] = [];
-    fixture.componentInstance.selectedDateChange.subscribe((date) => {
-      selectedChanges.push(localDayKey(date));
-    });
-
-    const weekDays = fixture.debugElement.queryAll(By.css('.neu-calendar__week-day'));
-    weekDays[3].triggerEventHandler('keydown', new KeyboardEvent('keydown', { key: 'Enter' }));
-    fixture.detectChanges();
-
-    expect(selectedChanges.length).toBeGreaterThan(0);
+    const weekDay = fixture.nativeElement.querySelector('.neu-calendar__week-day');
+    expect(weekDay.getAttribute('role')).toBeNull();
+    expect(weekDay.getAttribute('tabindex')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.neu-calendar__week-head')).toBeInstanceOf(
+      HTMLButtonElement,
+    );
   });
 
   it('should select a date from the Spacebar keyboard branch', async () => {
@@ -350,7 +347,7 @@ describe('NeuCalendarComponent', () => {
     expect(fixture.componentInstance.monthVisibleEvents(day?.events ?? []).length).toBe(2);
   });
 
-  it('should select a date from the rendered day keyboard handler', async () => {
+  it('should select a date from the rendered month day button', async () => {
     const fixture = setup();
     await fixture.whenStable();
 
@@ -359,10 +356,12 @@ describe('NeuCalendarComponent', () => {
       selectedChanges.push(localDayKey(date));
     });
 
-    const targetDay = Array.from(
-      fixture.nativeElement.querySelectorAll('.neu-calendar__day') as NodeListOf<HTMLElement>,
+    const targetButton = Array.from(
+      fixture.nativeElement.querySelectorAll(
+        '.neu-calendar__day-select',
+      ) as NodeListOf<HTMLButtonElement>,
     ).find((node) => node.getAttribute('aria-label')?.includes('May 20, 2026'));
-    targetDay?.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+    targetButton?.click();
     fixture.detectChanges();
 
     expect(selectedChanges).toContain('2026-05-20');

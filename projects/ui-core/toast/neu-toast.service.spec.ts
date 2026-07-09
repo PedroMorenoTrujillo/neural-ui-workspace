@@ -11,6 +11,7 @@ describe('NeuToastService', () => {
 
   afterEach(() => {
     service.clear();
+    vi.useRealTimers();
   });
 
   it('should be created', () => {
@@ -100,6 +101,17 @@ describe('NeuToastService', () => {
     service.show({ message: 'Temp', type: 'info', duration: 100 });
     expect(service.toasts().length).toBe(1);
     vi.advanceTimersByTime(200);
+    expect(service.toasts().length).toBe(0);
+    vi.useRealTimers();
+  });
+
+  it('clear should cancel pending auto-dismiss timers', () => {
+    vi.useFakeTimers();
+    service.show({ message: 'Temp', type: 'info', duration: 100 });
+
+    service.clear();
+    vi.advanceTimersByTime(200);
+
     expect(service.toasts().length).toBe(0);
     vi.useRealTimers();
   });

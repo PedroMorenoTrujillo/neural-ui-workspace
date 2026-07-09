@@ -7,6 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = dirname(__dirname);
 const distPackageJsonPath = join(workspaceRoot, 'dist', 'neural-ui', 'core', 'package.json');
 const distPackageRoot = dirname(distPackageJsonPath);
+const distNpmIgnorePath = join(distPackageRoot, '.npmignore');
 const distStylesEntryPath = join(distPackageRoot, 'styles.scss');
 const isWatchMode = process.argv.includes('--watch');
 const ngBinary = join(
@@ -96,6 +97,10 @@ function patchDistPackageJson() {
   const legacyPartialEntryPath = join(distPackageRoot, '_styles.scss');
   if (existsSync(legacyPartialEntryPath)) {
     rmSync(legacyPartialEntryPath);
+  }
+
+  if (existsSync(distNpmIgnorePath)) {
+    rmSync(distNpmIgnorePath);
   }
 }
 

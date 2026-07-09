@@ -157,20 +157,23 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
             @for (day of monthDays(); track day.date.toISOString()) {
               <article
                 class="neu-calendar__day"
-                tabindex="0"
-                role="button"
                 [attr.aria-label]="formatDayAriaLabel(day)"
                 [class.neu-calendar__day--outside]="!day.inCurrentMonth"
                 [class.neu-calendar__day--today]="day.isToday"
                 [class.neu-calendar__day--selected]="day.isSelected"
-                (click)="selectDate(day.date)"
-                (keydown)="onDayKeydown($event, day.date)"
               >
                 <div class="neu-calendar__day-top">
-                  <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
-                  @if (day.events.length > 0) {
-                    <span class="neu-calendar__day-count">{{ day.events.length }}</span>
-                  }
+                  <button
+                    type="button"
+                    class="neu-calendar__day-select"
+                    [attr.aria-label]="formatDayAriaLabel(day)"
+                    (click)="selectDate(day.date)"
+                  >
+                    <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
+                    @if (day.events.length > 0) {
+                      <span class="neu-calendar__day-count">{{ day.events.length }}</span>
+                    }
+                  </button>
                 </div>
                 <div class="neu-calendar__event-list">
                   @for (event of monthVisibleEvents(day.events); track event.id) {
@@ -198,18 +201,19 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
             @for (day of weekDays(); track day.date.toISOString()) {
               <article
                 class="neu-calendar__week-day"
-                tabindex="0"
-                role="button"
                 [attr.aria-label]="formatDayAriaLabel(day)"
                 [class.neu-calendar__day--today]="day.isToday"
                 [class.neu-calendar__day--selected]="day.isSelected"
-                (click)="selectDate(day.date)"
-                (keydown)="onDayKeydown($event, day.date)"
               >
-                <div class="neu-calendar__week-head">
+                <button
+                  type="button"
+                  class="neu-calendar__week-head neu-calendar__day-select"
+                  [attr.aria-label]="formatDayAriaLabel(day)"
+                  (click)="selectDate(day.date)"
+                >
                   <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
                   <span class="neu-calendar__week-date">{{ formatWeekDate(day.date) }}</span>
-                </div>
+                </button>
 
                 <div class="neu-calendar__week-events">
                   @if (day.events.length === 0) {

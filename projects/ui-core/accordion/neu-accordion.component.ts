@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  SecurityContext,
   signal,
   untracked,
 } from '@angular/core';
@@ -125,7 +126,7 @@ export class NeuAccordionComponent {
   readonly isExpanded = (id: string) => this._expanded().has(id);
 
   sanitize(html: string): SafeHtml {
-    return this._sanitizer.sanitize(1 /* HTML */, html) ?? '';
+    return this._sanitizer.sanitize(SecurityContext.HTML, html) ?? '';
   }
 
   toggle(id: string): void {

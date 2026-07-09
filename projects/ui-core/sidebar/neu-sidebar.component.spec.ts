@@ -109,6 +109,16 @@ describe('NeuSidebarComponent', () => {
     expect(f.nativeElement.querySelector('.neu-sidebar--persistent')).toBeTruthy();
   });
 
+  it('should not render aria-modal in persistent navigation mode', () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.persistent = true;
+    f.detectChanges();
+
+    const aside = f.nativeElement.querySelector('aside.neu-sidebar');
+    expect(aside.getAttribute('role')).toBe('navigation');
+    expect(aside.hasAttribute('aria-modal')).toBe(false);
+  });
+
   it('should show projected content when persistent', () => {
     const f = TestBed.createComponent(HostComponent);
     f.componentInstance.persistent = true;
@@ -145,6 +155,17 @@ describe('NeuSidebarComponent', () => {
     f.componentInstance.persistent = false;
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-sidebar--open')).toBeTruthy();
+  });
+
+  it('should render aria-modal when opened as an overlay dialog', () => {
+    _menuParam.set('open');
+    const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.persistent = false;
+    f.detectChanges();
+
+    const aside = f.nativeElement.querySelector('aside.neu-sidebar');
+    expect(aside.getAttribute('role')).toBe('dialog');
+    expect(aside.getAttribute('aria-modal')).toBe('true');
   });
 
   it('should show overlay div in non-persistent mode', () => {
@@ -384,7 +405,7 @@ describe('NeuSidebarComponent', () => {
     f.detectChanges();
     const aside = f.nativeElement.querySelector('aside.neu-sidebar');
     expect(aside?.getAttribute('role')).toBe('navigation');
-    expect(aside?.getAttribute('aria-modal')).toBe('false');
+    expect(aside?.hasAttribute('aria-modal')).toBe(false);
   });
 
   // ── Focus management ──────────────────────────────────────────────────────

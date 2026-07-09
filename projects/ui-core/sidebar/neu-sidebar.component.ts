@@ -86,7 +86,7 @@ function unlockDocumentScroll(document: Document): void {
       [class.neu-sidebar--collapsed]="collapsed()"
       [class.neu-sidebar--right]="side() === 'right'"
       [attr.role]="persistent() ? 'navigation' : 'dialog'"
-      [attr.aria-modal]="!persistent()"
+      [attr.aria-modal]="persistent() ? null : 'true'"
       [attr.aria-label]="ariaLabel()"
       [attr.aria-hidden]="!isOpen() && !persistent()"
       [attr.inert]="!isOpen() && !persistent() ? '' : null"
