@@ -131,45 +131,76 @@ $item-radius: 8px;
     }
   }
 
-  // ---- Wrapper — necesario para el botón pestaña / needed for tab button outside nav overflow:hidden ----
+  // ---- Wrapper — necesario para el botón de borde / needed for edge button outside nav overflow:hidden ----
   &-wrapper {
     position: relative;
     height: 100%;
     flex-shrink: 0;
     display: flex;
+    --neu-nav-toggle-size: 28px;
+    --neu-nav-toggle-offset-top: 18px;
+    --neu-nav-toggle-bg: var(--neu-surface);
+    --neu-nav-toggle-bg-hover: var(--neu-surface-2);
+    --neu-nav-toggle-border: var(--neu-border);
+    --neu-nav-toggle-color: var(--neu-text-muted);
+    --neu-nav-toggle-color-hover: var(--neu-text);
+    --neu-nav-toggle-shadow:
+      0 6px 14px color-mix(in srgb, var(--neu-text) 10%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--neu-surface) 82%, white);
   }
 
-  // ---- Pestaña collapse/expand — posicionada absolutamente en el borde derecho / absolutely positioned on right edge ----
+  // ---- Botón collapse/expand — montado sobre el borde derecho / collapse/expand button mounted on right edge ----
   &__toggle-tab {
     position: absolute;
-    right: -13px;
-    top: 16px;
+    right: calc(var(--neu-nav-toggle-size) / -2);
+    top: var(--neu-nav-toggle-offset-top);
     transform: none;
-    width: 13px;
-    height: 40px;
+    width: var(--neu-nav-toggle-size);
+    height: var(--neu-nav-toggle-size);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--neu-surface);
-    border: 1px solid var(--neu-border);
-    border-left: none;
-    border-radius: 0 6px 6px 0;
-    color: var(--neu-text-muted);
+    background: var(--neu-nav-toggle-bg);
+    border: 1px solid var(--neu-nav-toggle-border);
+    border-radius: 8px;
+    color: var(--neu-nav-toggle-color);
     cursor: pointer;
     padding: 0;
     z-index: 10;
+    box-shadow: var(--neu-nav-toggle-shadow);
     transition:
       background var(--neu-transition),
-      color var(--neu-transition);
+      border-color var(--neu-transition),
+      box-shadow var(--neu-transition),
+      color var(--neu-transition),
+      transform 0.16s ease;
 
     &:hover {
-      background: var(--neu-surface-2);
-      color: var(--neu-text);
+      background: var(--neu-nav-toggle-bg-hover);
+      border-color: color-mix(in srgb, var(--neu-nav-toggle-border) 55%, var(--neu-text));
+      color: var(--neu-nav-toggle-color-hover);
+      transform: translateX(-1px);
+    }
+
+    &:active {
+      transform: translateX(-1px) scale(0.96);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--neu-primary);
-      outline-offset: 2px;
+      outline: none;
+      box-shadow:
+        var(--neu-focus-ring-strong),
+        var(--neu-nav-toggle-shadow);
+    }
+  }
+
+  &-wrapper--collapsed &__toggle-tab {
+    &:hover {
+      transform: translateX(1px);
+    }
+
+    &:active {
+      transform: translateX(1px) scale(0.96);
     }
   }
 

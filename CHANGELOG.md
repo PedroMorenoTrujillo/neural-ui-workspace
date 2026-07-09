@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.7.1] - 2026-07-09
+
+### Changed
+
+- Refined the `NeuNavComponent` collapse/expand control into a border-mounted handle while preserving the existing API and collapsed flyout behavior.
+
 ## [1.7.0] - 2026-07-09
 
 ### Added
