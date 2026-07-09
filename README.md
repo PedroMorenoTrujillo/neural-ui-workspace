@@ -154,10 +154,12 @@ Neural Admin Pro is frontend-only and backend-ready, so you can connect it to yo
 | `@angular/common`  | `>=19.0.0 <23.0.0` |
 | `@angular/forms`   | `>=19.0.0 <23.0.0` |
 | `@angular/router`  | `>=19.0.0 <23.0.0` |
-| `@ng-icons/core`   | `>=33.0.0`         |
-| `@ng-icons/lucide` | `>=33.0.0`         |
-| `apexcharts`       | `>=5.0.0`          |
-| `ng-apexcharts`    | `>=2.0.0`          |
+| `@ng-icons/core`   | `>=31.4.0 <34.0.0` |
+| `@ng-icons/lucide` | `>=31.4.0 <34.0.0` |
+| `apexcharts`       | `>=4.0.0 <6.0.0`   |
+| `ng-apexcharts`    | `>=1.15.0 <3.0.0`  |
+
+For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or newer. Angular 20+ projects can use the newer `ng-apexcharts@2.x` line.
 
 ---
 

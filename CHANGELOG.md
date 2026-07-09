@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.7.0] - 2026-07-09
+
+### Added
+
+- Added peer compatibility for Angular 22 by widening Angular and CDK peer ranges to `>=19.0.0 <23.0.0`.
+
+### Changed
+
+- Relaxed `@ng-icons/*`, `apexcharts` and `ng-apexcharts` peer ranges so Angular 19 projects can resolve compatible dependency lines.
+- `provideNeuralUI()` now registers internal Lucide aliases using icon names available across the supported `@ng-icons/lucide` range.
+
 ---
 
 ## [1.5.11] - 2026-06-05

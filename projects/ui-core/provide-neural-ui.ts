@@ -1,20 +1,20 @@
 import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
 import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
 import {
-  lucideAlertCircle,
-  lucideAlertTriangle,
-  lucideCheckCircle,
   lucideChevronLeft,
   lucideChevronRight,
+  lucideCircleAlert,
+  lucideCircleCheck,
+  lucideCircleX,
   lucideExternalLink,
   lucideInbox,
   lucideInfo,
   lucideMinus,
+  lucideTriangleAlert,
   lucideTrendingDown,
   lucideTrendingUp,
   lucideUpload,
   lucideX,
-  lucideXCircle,
 } from '@ng-icons/lucide';
 
 export interface NeuralUIConfig {
@@ -48,11 +48,11 @@ export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProvide
   return makeEnvironmentProviders([
     provideIcons({
       // Input validation
-      lucideAlertCircle,
+      lucideAlertCircle: lucideCircleAlert,
       // Toast severity icons
-      lucideCheckCircle,
-      lucideXCircle,
-      lucideAlertTriangle,
+      lucideCheckCircle: lucideCircleCheck,
+      lucideXCircle: lucideCircleX,
+      lucideAlertTriangle: lucideTriangleAlert,
       lucideInfo,
       // Close buttons (sidebar, modal, toast)
       lucideX,
