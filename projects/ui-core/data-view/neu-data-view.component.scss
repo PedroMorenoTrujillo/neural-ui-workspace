@@ -50,8 +50,8 @@ html[data-theme='dark'] {
   }
 
   .neu-data-view__mode--active {
-    background: #0b66d4;
-    color: #ffffff;
+    background: var(--neu-primary-solid);
+    color: var(--neu-primary-solid-fg);
   }
 }
 

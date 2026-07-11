@@ -339,7 +339,8 @@
   --neu-primary-light: #339dff;
   --neu-primary-50: rgba(0, 122, 255, 0.12);
   --neu-primary-100: rgba(0, 122, 255, 0.2);
-  --neu-primary-solid: #007aff;
+  // Opaque blue chosen to keep white text above WCAG AA in dark surfaces.
+  --neu-primary-solid: #006ee6;
   --neu-primary-solid-hover: #005fcc;
 
   // ---- Fondos / Backgrounds ----
@@ -356,8 +357,8 @@
 
   // ---- Texto / Text ----
   --neu-text: #e6edf3; // Casi blanco — texto principal
-  --neu-text-muted: #8b949e; // Slate-400 equivalent — subtítulos
-  --neu-text-disabled: #8b949e; // Elementos deshabilitados; conserva contraste sobre surface-2
+  --neu-text-muted: #a9b2bc; // AA-safe secondary text on dark surfaces
+  --neu-text-disabled: #a9b2bc; // Keeps disabled form labels legible on surface-2
   --neu-knob-display-color: #f8fafc;
   --neu-knob-label-color: #8b949e;
 

@@ -5,6 +5,7 @@ import {
   ElementRef,
   InjectionToken,
   OnDestroy,
+  PLATFORM_ID,
   Signal,
   ViewEncapsulation,
   computed,
@@ -14,6 +15,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 
 // ----------------------------------------------------------------
@@ -104,6 +106,7 @@ export interface NeuTab {
 export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   private readonly urlState = inject(NeuUrlStateService);
   private readonly elRef = inject(ElementRef);
+  private readonly platformId = inject(PLATFORM_ID);
   private resizeObserver?: ResizeObserver;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
   private _dragPointerId: number | null = null;
@@ -126,11 +129,17 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     return this._getUrlParamSignal(key)();
   }
 
+  private _requestFrame(callback: FrameRequestCallback): void {
+    if (isPlatformBrowser(this.platformId)) {
+      requestAnimationFrame(callback);
+    }
+  }
+
   constructor() {
     // Actualizar indicador cuando activeTabId cambie — debe estar en el constructor (injection context)
     effect(() => {
       this.activeTabId(); // dependencia reactiva
-      requestAnimationFrame(() => this._updateIndicator());
+      this._requestFrame(() => this._updateIndicator());
     });
   }
 
@@ -220,7 +229,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     this._optimisticActiveTabId.set(tab.id);
     this.urlState.setParam(this.tabParam(), tab.id);
     this.tabChange.emit(tab.id);
-    requestAnimationFrame(() => this._updateIndicator());
+    this._requestFrame(() => this._updateIndicator());
   }
 
   startNavDrag(event: PointerEvent): void {
@@ -261,7 +270,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     }
     this._dragPointerId = null;
     if (this.isDraggingNav()) {
-      requestAnimationFrame(() => this.isDraggingNav.set(false));
+      this._requestFrame(() => this.isDraggingNav.set(false));
     }
   }
 

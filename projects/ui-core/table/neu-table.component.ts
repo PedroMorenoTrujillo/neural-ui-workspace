@@ -1967,6 +1967,7 @@ export class NeuTableComponent {
 
   private resetVirtualScrollPosition(): void {
     this._virtualScrollTop.set(0);
+    if (!isPlatformBrowser(this._platformId)) return;
     requestAnimationFrame(() => {
       this._scrollContainer()?.nativeElement.scrollTo({ top: 0 });
     });

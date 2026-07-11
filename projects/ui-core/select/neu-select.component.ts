@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  PLATFORM_ID,
   Signal,
   ViewEncapsulation,
   computed,
@@ -16,7 +17,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
-import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   ConnectedOverlayPositionChange,
   ConnectedPosition,
@@ -289,6 +290,7 @@ let _neuSelectIdSeq = 0;
 export class NeuSelectComponent implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _document = inject(DOCUMENT);
+  private readonly _platformId = inject(PLATFORM_ID);
   private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
   readonly _viewportMargin = 16;
@@ -662,7 +664,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
     this.isPanelAbove.set(openAbove);
 
     if (this.virtualScroll()) {
-      requestAnimationFrame(() => this._viewport()?.checkViewportSize());
+      this._requestFrame(() => this._viewport()?.checkViewportSize());
     }
   }
 
@@ -686,7 +688,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
         this._viewport()?.scrollToIndex(optionIndex, 'auto');
         this._viewport()?.checkViewportSize();
       }
-      requestAnimationFrame(() => {
+      this._requestFrame(() => {
         const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
           `#neu-select-opt-${value}`,
         ) ?? this._document.getElementById(`neu-select-opt-${value}`);
@@ -711,5 +713,11 @@ export class NeuSelectComponent implements ControlValueAccessor {
       maxHeight: null,
     });
     this.isPanelAbove.set(false);
+  }
+
+  private _requestFrame(callback: FrameRequestCallback): void {
+    if (isPlatformBrowser(this._platformId)) {
+      requestAnimationFrame(callback);
+    }
   }
 }

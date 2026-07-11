@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  PLATFORM_ID,
   Signal,
   ViewEncapsulation,
   computed,
@@ -16,7 +17,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
-import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -339,6 +340,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
 export class NeuMultiselectComponent implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _document = inject(DOCUMENT);
+  private readonly _platformId = inject(PLATFORM_ID);
   private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
   readonly _viewportMargin = 16;
@@ -765,7 +767,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     });
 
     if (this.virtualScroll()) {
-      requestAnimationFrame(() => this._viewport()?.checkViewportSize());
+      this._requestFrame(() => this._viewport()?.checkViewportSize());
     }
   }
 
@@ -785,7 +787,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
         this._viewport()?.scrollToIndex(optionIndex, 'auto');
         this._viewport()?.checkViewportSize();
       }
-      requestAnimationFrame(() => {
+      this._requestFrame(() => {
         const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
           `#neu-ms-opt-${value}`,
         ) ?? this._document.getElementById(`neu-ms-opt-${value}`);
@@ -815,8 +817,14 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
       return;
     }
 
-    requestAnimationFrame(() => {
+    this._requestFrame(() => {
       this._viewport()?.checkViewportSize();
     });
+  }
+
+  private _requestFrame(callback: FrameRequestCallback): void {
+    if (isPlatformBrowser(this._platformId)) {
+      requestAnimationFrame(callback);
+    }
   }
 }

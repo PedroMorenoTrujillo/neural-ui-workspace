@@ -146,6 +146,11 @@ html[data-theme='dark'] {
     background: #7f1d1d;
     border-color: #f87171;
   }
+
+  .neu-chip--warning.neu-chip--selected {
+    background: #a16207;
+    color: #ffffff;
+  }
 }
 
 // ---- Botón de cierre / Close button ----

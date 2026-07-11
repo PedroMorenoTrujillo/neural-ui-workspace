@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  PLATFORM_ID,
   ViewEncapsulation,
   effect,
   inject,
@@ -11,6 +12,7 @@ import {
   untracked,
   viewChildren,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {
   CdkDrag,
   CdkDragDrop,
@@ -92,6 +94,7 @@ export interface NeuDashboardTileConfig {
 })
 export class NeuDashboardGridComponent {
   private readonly _host = inject(ElementRef) as ElementRef<HTMLElement>;
+  private readonly _platformId = inject(PLATFORM_ID);
 
   readonly tiles = input<NeuDashboardTileConfig[]>([]);
   readonly columns = input<number>(3);
@@ -111,7 +114,9 @@ export class NeuDashboardGridComponent {
     effect(() => {
       this._orderedTiles();
       this._tileSlots();
-      queueMicrotask(() => this._attachProjectedTiles());
+      if (isPlatformBrowser(this._platformId)) {
+        queueMicrotask(() => this._attachProjectedTiles());
+      }
     });
   }
 
@@ -123,8 +128,9 @@ export class NeuDashboardGridComponent {
   }
 
   private _attachProjectedTiles(): void {
+    if (!isPlatformBrowser(this._platformId)) return;
     const slots = new Map(
-      this._tileSlots().map((slotRef) => [
+      this._tileSlots().filter(Boolean).map((slotRef) => [
         slotRef.nativeElement.dataset['slotId'],
         slotRef.nativeElement,
       ]),

@@ -4,6 +4,7 @@ import {
   Directive,
   ElementRef,
   HostListener,
+  PLATFORM_ID,
   TemplateRef,
   ViewEncapsulation,
   computed,
@@ -15,7 +16,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -298,6 +299,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     },
   ];
   private readonly _document = inject(DOCUMENT);
+  private readonly _platformId = inject(PLATFORM_ID);
   private readonly _overlay = inject(Overlay);
   readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
 
@@ -518,14 +520,14 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     }
 
     if (this.virtualScroll()) {
-      requestAnimationFrame(() => {
+      this._requestFrame(() => {
         this._viewport()?.scrollToIndex(activeIndex, 'auto');
         this._viewport()?.checkViewportSize();
       });
       return;
     }
 
-    requestAnimationFrame(() => {
+    this._requestFrame(() => {
       const activeOption = this._el.nativeElement.querySelector(
         `#${this._optionId(activeIndex)}`,
       ) as HTMLElement | null;
@@ -538,6 +540,9 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   }
 
   private _syncOverlayWidth(): void {
+    if (!isPlatformBrowser(this._platformId)) {
+      return;
+    }
     const trigger = this._el.nativeElement.querySelector(
       '.neu-autocomplete__input-wrap',
     ) as HTMLElement | null;
@@ -550,7 +555,13 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
         : 0;
     this.overlayWidth.set(Math.min(width, window.innerWidth - 32));
     if (this.virtualScroll()) {
-      requestAnimationFrame(() => this._viewport()?.checkViewportSize());
+      this._requestFrame(() => this._viewport()?.checkViewportSize());
+    }
+  }
+
+  private _requestFrame(callback: FrameRequestCallback): void {
+    if (isPlatformBrowser(this._platformId)) {
+      requestAnimationFrame(callback);
     }
   }
 
