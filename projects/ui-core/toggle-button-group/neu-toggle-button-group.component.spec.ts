@@ -177,6 +177,14 @@ describe('NeuToggleButtonGroupComponent', () => {
     expect(onTouched).toHaveBeenCalled();
   });
 
+  it('forwards blur from an option button to the CVA touched callback', () => {
+    const { f, comp } = mk();
+    const touched = vi.fn();
+    comp.registerOnTouched(touched);
+    (f.nativeElement.querySelector('button') as HTMLButtonElement).dispatchEvent(new Event('blur'));
+    expect(touched).toHaveBeenCalled();
+  });
+
   it('should integrate with FormControl', async () => {
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],

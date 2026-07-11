@@ -68,6 +68,14 @@ describe('NeuInputComponent', () => {
     expect(f.nativeElement.querySelector('.neu-input__hint')).toBeTruthy();
   });
 
+  it('should describe the input with the hint id when there is a hint and no error', () => {
+    const { f } = mk({ hint: 'Mínimo 8 caracteres', label: 'Test' });
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    const hint = f.nativeElement.querySelector('.neu-input__hint') as HTMLElement;
+
+    expect(input.getAttribute('aria-describedby')).toBe(hint.id);
+  });
+
   it('should NOT show hint when error is present', () => {
     const { f } = mk({ errorMessage: 'Error', hint: 'Hint', label: 'Test' });
     expect(f.nativeElement.querySelector('.neu-input__hint')).toBeFalsy();
@@ -300,5 +308,62 @@ describe('NeuInputComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue('hello');
     expect(f.componentInstance['_value']()).toBe('hello');
+  });
+
+  it('renders projected start and end icon slots and full native attributes', async () => {
+    @Component({
+      template: `
+        <neu-input
+          inputId="account-field"
+          name="account"
+          label="Account"
+          placeholder="Account id"
+          autocomplete="username"
+          [floatingLabel]="false"
+          [startIcon]="true"
+          [endIcon]="true"
+          [minlength]="2"
+          [maxlength]="8"
+          min="1"
+          max="9"
+          pattern="[a-z]+"
+        >
+          <span neu-input-start class="start-slot">S</span>
+          <span neu-input-end class="end-slot">E</span>
+        </neu-input>
+      `,
+      imports: [NeuInputComponent],
+    })
+    class InputSlotHostComponent {}
+
+    await TestBed.configureTestingModule({ imports: [InputSlotHostComponent] }).compileComponents();
+    const f = TestBed.createComponent(InputSlotHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    expect(f.nativeElement.querySelector('.start-slot')?.textContent).toBe('S');
+    expect(f.nativeElement.querySelector('.end-slot')?.textContent).toBe('E');
+    expect(input.id).toBe('account-field');
+    expect(input.name).toBe('account');
+    expect(input.autocomplete).toBe('username');
+    expect(input.minLength).toBe(2);
+    expect(input.maxLength).toBe(8);
+    expect(input.getAttribute('min')).toBe('1');
+    expect(input.getAttribute('max')).toBe('9');
+    expect(input.getAttribute('pattern')).toBe('[a-z]+');
+  });
+
+  it('input and blur before CVA registration use the default callbacks safely', async () => {
+    const f = TestBed.createComponent(NeuInputComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'unregistered';
+
+    expect(() => input.dispatchEvent(new Event('input', { bubbles: true }))).not.toThrow();
+    expect(() => input.dispatchEvent(new Event('blur'))).not.toThrow();
+    expect((f.componentInstance as any)._value()).toBe('unregistered');
   });
 });

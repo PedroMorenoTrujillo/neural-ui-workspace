@@ -67,6 +67,26 @@ describe('NeuKanbanComponent', () => {
     expect(fixture.nativeElement.querySelector('.neu-kanban__count')?.textContent).toContain('2');
   });
 
+  it('should hide counts and mark exceeded WIP limits when configured', async () => {
+    const fixture = setup([
+      {
+        id: 'todo',
+        title: 'To do',
+        wipLimit: 1,
+        cards: [
+          { id: 'card-a', title: 'A' },
+          { id: 'card-b', title: 'B' },
+        ],
+      },
+    ]);
+    fixture.componentRef.setInput('showCounts', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.neu-kanban__count')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('.neu-kanban__wip--alert')).toBeTruthy();
+  });
+
   it('should hide wip metadata when showWipLimit=false', async () => {
     const fixture = setup();
     fixture.componentRef.setInput('showWipLimit', false);
@@ -81,6 +101,8 @@ describe('NeuKanbanComponent', () => {
     await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain('AM');
+    expect(fixture.componentInstance.assigneeInitials({ name: 'Ignored', initials: 'IM' })).toBe('IM');
+    expect(fixture.componentInstance.assigneeInitials({ name: '  one   two three  ' })).toBe('OT');
   });
 
   it('should render the assignee avatar image when provided', async () => {
@@ -206,6 +228,37 @@ describe('NeuKanbanComponent', () => {
     );
 
     expect(fixture.componentInstance._columns()).toEqual(snapshot);
+
+    fixture.componentInstance.onCardDrop(
+      {
+        previousContainer: { id: 'todo' },
+        container: { id: 'missing' },
+        previousIndex: 0,
+        currentIndex: 0,
+      } as any,
+      'missing',
+    );
+
+    expect(fixture.componentInstance._columns()).toEqual(snapshot);
+  });
+
+  it('does not emit a card drop event when no moved card is resolved', async () => {
+    const fixture = setup([{ id: 'todo', title: 'To do', cards: [] }]);
+    await fixture.whenStable();
+    const drops: unknown[] = [];
+    fixture.componentInstance.cardDrop.subscribe((event) => drops.push(event));
+
+    fixture.componentInstance.onCardDrop(
+      {
+        previousContainer: { id: 'todo' },
+        container: { id: 'todo' },
+        previousIndex: 0,
+        currentIndex: 0,
+      } as any,
+      'todo',
+    );
+
+    expect(drops).toEqual([]);
   });
 
   it('should keep connected drop lists in sync with column ids', async () => {

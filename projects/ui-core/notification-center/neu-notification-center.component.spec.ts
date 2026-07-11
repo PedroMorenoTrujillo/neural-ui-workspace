@@ -159,6 +159,18 @@ describe('NeuNotificationCenterComponent', () => {
     expect(document.querySelector('.neu-nc__panel')).toBeTruthy();
   });
 
+  it('opens from the rendered bell and closes from the CDK backdrop', async () => {
+    const f = setup();
+    (f.nativeElement.querySelector('.neu-nc__bell') as HTMLButtonElement).click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.componentInstance._isOpen()).toBe(true);
+    (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.componentInstance._isOpen()).toBe(false);
+  });
+
   it('_toggle again should close panel', async () => {
     const f = setup();
     f.componentInstance._toggle();

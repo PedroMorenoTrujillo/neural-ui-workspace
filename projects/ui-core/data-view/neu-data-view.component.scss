@@ -1,0 +1,108 @@
+.neu-data-view {
+  display: block;
+  color: var(--neu-text, #111827);
+}
+
+.neu-data-view__toolbar,
+.neu-data-view__pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.neu-data-view__search input {
+  min-height: 2.25rem;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.5rem;
+  background: var(--neu-surface, #fff);
+  color: inherit;
+  padding: 0 0.75rem;
+}
+
+.neu-data-view__sort {
+  min-width: 12rem;
+}
+
+.neu-data-view__modes {
+  display: inline-flex;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.neu-data-view__mode {
+  border: 0 !important;
+  border-radius: 0 !important;
+  text-transform: capitalize;
+  color: var(--neu-text, #111827);
+}
+
+.neu-data-view__mode--active {
+  background: var(--neu-primary-solid, var(--neu-primary, #2563eb));
+  color: var(--neu-primary-solid-fg, var(--neu-primary-fg, #fff));
+}
+
+html[data-theme='dark'] {
+  .neu-data-view__mode {
+    color: #f2f7fb;
+  }
+
+  .neu-data-view__mode--active {
+    background: #0b66d4;
+    color: #ffffff;
+  }
+}
+
+.neu-data-view__items {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.neu-data-view--grid .neu-data-view__items {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.neu-data-view--table .neu-data-view__items {
+  gap: 0;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.neu-data-view__item {
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.5rem;
+  background: var(--neu-surface, #fff);
+  padding: 0.875rem;
+}
+
+.neu-data-view--table .neu-data-view__item {
+  border: 0;
+  border-bottom: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0;
+}
+
+.neu-data-view__empty,
+.neu-data-view__loading {
+  border: 1px dashed var(--neu-border, #d1d5db);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--neu-text-muted, #6b7280);
+}
+
+.neu-data-view__pagination {
+  justify-content: flex-end;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+.neu-data-view__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}

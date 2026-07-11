@@ -47,7 +47,8 @@
     border-color var(--neu-transition),
     box-shadow var(--neu-transition);
 
-  &--checked {
+  &--checked,
+  &--mixed {
     background: var(--neu-primary);
     border-color: var(--neu-primary);
     box-shadow: var(--neu-focus-ring-strong);
@@ -57,6 +58,9 @@
 .neu-checkbox__check {
   width: 12px;
   height: 10px;
+}
+
+.neu-checkbox__check-mark {
   opacity: 0;
   transform: scale(0.6);
   transition:

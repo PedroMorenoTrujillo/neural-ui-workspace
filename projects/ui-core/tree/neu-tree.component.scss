@@ -129,10 +129,16 @@
 
 .neu-tree__checkbox {
   flex: 0 0 auto;
-  width: 1rem;
-  height: 1rem;
   margin: 0.8rem 0 0;
-  accent-color: var(--neu-primary);
+
+  .neu-checkbox {
+    gap: 0;
+  }
+
+  .neu-checkbox__box {
+    width: 1rem;
+    height: 1rem;
+  }
 }
 
 .neu-tree__content {

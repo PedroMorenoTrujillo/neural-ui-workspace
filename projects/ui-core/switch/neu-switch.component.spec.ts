@@ -189,4 +189,13 @@ describe('NeuSwitchComponent', () => {
     // No registerOnTouched called — default () => {} is invoked
     expect(() => df.componentInstance.onBlur()).not.toThrow();
   });
+
+  it('fires touched through the native blur binding', () => {
+    const df = TestBed.createComponent(NeuSwitchComponent);
+    const touched = vi.fn();
+    df.componentInstance.registerOnTouched(touched);
+    df.detectChanges();
+    (df.nativeElement.querySelector('input') as HTMLInputElement).dispatchEvent(new Event('blur'));
+    expect(touched).toHaveBeenCalled();
+  });
 });

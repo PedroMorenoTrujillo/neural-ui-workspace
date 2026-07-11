@@ -294,6 +294,29 @@ $uploader-height-lg: 208px;
   }
 }
 
+.neu-uploader__item--uploading {
+  border-color: var(--neu-primary);
+}
+
+.neu-uploader__item--success {
+  border-color: var(--neu-success, #16a34a);
+}
+
+.neu-uploader__item--error {
+  border-color: var(--neu-danger, #dc2626);
+}
+
+.neu-uploader__retry {
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface);
+  color: var(--neu-text);
+  padding: var(--neu-space-1) var(--neu-space-2);
+  font: inherit;
+  font-size: var(--neu-text-xs);
+  cursor: pointer;
+}
+
 .neu-uploader__error,
 .neu-uploader__hint {
   margin-top: var(--neu-space-1);

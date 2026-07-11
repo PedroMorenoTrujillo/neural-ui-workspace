@@ -101,3 +101,15 @@
     padding: 0.625rem var(--neu-space-5);
   }
 }
+
+html[data-theme='dark'] {
+  .neu-toggle-group__btn {
+    color: #f2f7fb;
+  }
+
+  .neu-toggle-group__btn--active {
+    background: #0b66d4;
+    color: #ffffff;
+    border-right-color: #0b66d4;
+  }
+}

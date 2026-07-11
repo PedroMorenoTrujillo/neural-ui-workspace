@@ -9,6 +9,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 
 export interface NeuTreeNode<T = unknown> {
   id: string;
@@ -27,7 +28,7 @@ export type NeuTreeSelectionMode = 'single' | 'multiple';
 @Component({
   selector: 'neu-tree',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, NeuCheckboxComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -112,14 +113,13 @@ export type NeuTreeSelectionMode = 'single' | 'multiple';
             }
 
             @if (canSelect(node) && selectionMode() === 'multiple') {
-              <input
+              <neu-checkbox
                 class="neu-tree__checkbox"
-                type="checkbox"
-                [attr.aria-label]="'Select ' + node.label"
                 [checked]="isSelected(node.id)"
                 [disabled]="node.disabled"
+                [ariaLabel]="'Select ' + node.label"
                 (click)="$event.stopPropagation()"
-                (change)="onCheckboxChange(node, $event)"
+                (checkedChange)="onCheckboxChange(node, $event)"
               />
             }
 
@@ -260,9 +260,12 @@ export class NeuTreeComponent {
     this.updateSelection(node, true);
   }
 
-  onCheckboxChange(node: NeuTreeNode, event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.updateSelection(node, target.checked);
+  onCheckboxChange(node: NeuTreeNode, checkedOrEvent: boolean | Event): void {
+    const checked =
+      typeof checkedOrEvent === 'boolean'
+        ? checkedOrEvent
+        : (checkedOrEvent.target as HTMLInputElement).checked;
+    this.updateSelection(node, checked);
   }
 
   private updateSelection(node: NeuTreeNode, checked: boolean): void {

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { NeuVirtualListComponent } from './neu-virtual-list.component';
+import { NeuVirtualListComponent, NeuVirtualListRowComponent } from './neu-virtual-list.component';
 
 @Component({
   template: `
@@ -291,8 +291,12 @@ describe('NeuVirtualListComponent', () => {
     await f.whenStable();
 
     const row = f.nativeElement.querySelector('.neu-virtual-list__item-default') as HTMLElement;
+    const rowComponent = f.debugElement.query(
+      (de) => de.componentInstance instanceof NeuVirtualListRowComponent,
+    ).componentInstance as NeuVirtualListRowComponent;
     expect(row.style.height).toBe('64px');
     expect(row.textContent).toContain('Alpha');
+    expect(rowComponent.context()).toEqual({ $implicit: 'Alpha', index: 0 });
   });
 
   it('should render projected rows when the virtual viewport is simulated', async () => {

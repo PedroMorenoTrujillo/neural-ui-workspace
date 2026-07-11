@@ -1,5 +1,6 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuInputOTPComponent } from './neu-input-otp.component';
 
 function mk() {
@@ -434,5 +435,87 @@ describe('NeuInputOTPComponent', () => {
 
     expect(comp._digits()[0]).toBe('B');
     expect(fakeInput.value).toBe('B');
+  });
+
+  it('DOM keydown events exercise keyboard navigation through the template listener', async () => {
+    const f = TestBed.createComponent(NeuInputOTPComponent);
+    f.componentRef.setInput('length', 4);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const keySpy = vi.spyOn(comp, 'onKeyDown');
+    const cells = f.nativeElement.querySelectorAll('.neu-input-otp__cell') as NodeListOf<HTMLInputElement>;
+    const focusSpy = vi.spyOn(cells[0], 'focus');
+
+    cells[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
+    cells[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    f.detectChanges();
+
+    expect(keySpy).toHaveBeenCalled();
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
+  it('paste without clipboard data clears cells and still focuses the first cell', async () => {
+    const f = TestBed.createComponent(NeuInputOTPComponent);
+    f.componentRef.setInput('length', 4);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const first = f.nativeElement.querySelector('.neu-input-otp__cell') as HTMLInputElement;
+    const focusSpy = vi.spyOn(first, 'focus');
+    const event = new Event('paste', { bubbles: true });
+    Object.defineProperty(event, 'clipboardData', { configurable: true, value: undefined });
+
+    first.dispatchEvent(event);
+    f.detectChanges();
+
+    expect(comp._digits().join('')).toBe('');
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
+  it('empty input sanitizes to an empty string and keeps the rendered input blank', () => {
+    const f = TestBed.createComponent(NeuInputOTPComponent);
+    f.componentRef.setInput('length', 4);
+    f.detectChanges();
+
+    const comp = f.componentInstance as any;
+    const input = document.createElement('input');
+    input.value = '';
+
+    comp.onCellInput({ target: input } as unknown as Event, 0);
+
+    expect(comp._digits()[0]).toBe('');
+    expect(input.value).toBe('');
+  });
+
+  it('resolves the CVA provider through Reactive Forms', async () => {
+    @Component({
+      imports: [NeuInputOTPComponent, ReactiveFormsModule],
+      template: `<neu-input-otp [length]="4" [formControl]="control" />`,
+    })
+    class HostComponent {
+      readonly control = new FormControl('12', { nonNullable: true });
+    }
+
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [HostComponent],
+        providers: [provideZonelessChangeDetection()],
+      })
+      .compileComponents();
+    const host = TestBed.createComponent(HostComponent);
+    host.detectChanges();
+    await host.whenStable();
+
+    const cells = host.nativeElement.querySelectorAll(
+      '.neu-input-otp__cell',
+    ) as NodeListOf<HTMLInputElement>;
+    cells[2].value = '3';
+    cells[2].dispatchEvent(new Event('input', { bubbles: true }));
+    host.detectChanges();
+
+    expect(host.componentInstance.control.value).toBe('123');
   });
 });

@@ -63,29 +63,22 @@
 }
 
 .neu-alert__content {
-  opacity: 0.9;
+  color: inherit;
 }
 
 /* ── Close button ───────────────────────────────────────────────── */
 .neu-alert__close {
-  all: unset;
-  cursor: pointer;
   flex-shrink: 0;
-  font-size: 1.1rem;
-  line-height: 1;
-  opacity: 0.6;
-  transition: opacity 150ms;
-  padding: 2px 4px;
-  border-radius: var(--neu-radius-sm, 4px);
+  align-self: flex-start;
+  color: inherit;
+  opacity: 0.78;
+  --neu-button-ghost-hover-bg: var(--neu-alert-dismiss-hover-bg, rgba(0, 0, 0, 0.08));
 
   &:hover {
     opacity: 1;
-    background: var(--neu-alert-dismiss-hover-bg);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--neu-focus-ring, #0ea5e9);
-    outline-offset: 1px;
     opacity: 1;
   }
 }

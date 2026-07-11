@@ -335,4 +335,23 @@ describe('NeuSplitButtonComponent', () => {
 
     expect(fixture.componentInstance.isOpen()).toBe(true);
   });
+
+  it('should close the overlay when the connected backdrop is clicked', async () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.detectChanges();
+
+    const chevron = fixture.nativeElement.querySelector(
+      '.neu-split-button__chevron',
+    ) as HTMLButtonElement;
+    chevron.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+  });
 });

@@ -106,6 +106,13 @@ describe('NeuStatsCardComponent', () => {
     expect(f.nativeElement.querySelector('.neu-stats-card__sparkline')).toBeFalsy();
   });
 
+  it('sparkPoints computed should return empty string for fewer than two points', () => {
+    const f = mk({ title: 'T', value: 'V', sparkData: [10] });
+    const comp = f.componentInstance as any;
+
+    expect(comp.sparkPoints()).toBe('');
+  });
+
   it('sparkPoints computed should return valid SVG polyline points', () => {
     const f = mk({ title: 'T', value: 'V', sparkData: [10, 30, 20] });
     const comp = f.componentInstance as any;

@@ -26,7 +26,7 @@
 }
 
 .neu-breadcrumb__link {
-  color: var(--neu-text-muted);
+  color: var(--neu-text);
   text-decoration: none;
   transition: color var(--neu-transition);
   border-radius: var(--neu-radius-xs);
@@ -39,6 +39,16 @@
   &:focus-visible {
     outline: 2px solid var(--neu-primary);
     outline-offset: 2px;
+  }
+}
+
+html[data-theme='dark'] {
+  .neu-breadcrumb__link {
+    color: #f2f7fb;
+  }
+
+  .neu-breadcrumb__separator {
+    color: #c9d1d9;
   }
 }
 

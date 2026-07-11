@@ -1,0 +1,61 @@
+.neu-panel__surface,
+.neu-fieldset,
+.neu-scroll-area__viewport {
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.75rem;
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+}
+
+.neu-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--neu-border, #e5e7eb);
+}
+
+.neu-panel__header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.neu-panel__header button {
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.5rem;
+  background: var(--neu-surface-2, #f3f4f6);
+  color: var(--neu-text, #111827);
+  padding: 0.375rem 0.625rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.neu-panel__header button:hover {
+  background: var(--neu-surface-3, #e5e7eb);
+}
+
+.neu-panel__body,
+.neu-fieldset {
+  padding: 1rem;
+}
+
+.neu-fieldset legend {
+  padding: 0 0.375rem;
+  font-weight: 600;
+  color: var(--neu-text, #111827);
+}
+
+.neu-scroll-area__viewport {
+  overflow: auto;
+  padding: 1rem;
+  background:
+    linear-gradient(var(--neu-surface, #fff) 30%, transparent),
+    linear-gradient(transparent, var(--neu-surface, #fff) 70%) bottom,
+    radial-gradient(farthest-side at 50% 0, rgb(0 0 0 / 12%), transparent),
+    radial-gradient(farthest-side at 50% 100%, rgb(0 0 0 / 12%), transparent) bottom;
+  background-repeat: no-repeat;
+  background-size: 100% 24px, 100% 24px, 100% 8px, 100% 8px;
+  background-attachment: local, local, scroll, scroll;
+}

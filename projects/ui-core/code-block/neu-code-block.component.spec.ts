@@ -256,4 +256,17 @@ describe('NeuCodeBlockComponent', () => {
     const btn = f.nativeElement.querySelector('.neu-code-block__copy');
     expect(btn.getAttribute('aria-label')).toBe('Copy the code');
   });
+
+  it('clicking the rendered copy button invokes the copy handler', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.componentRef.setInput('code', 'button copy');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const copySpy = vi.spyOn(comp, 'copy');
+
+    (f.nativeElement.querySelector('.neu-code-block__copy') as HTMLButtonElement).click();
+    f.detectChanges();
+
+    expect(copySpy).toHaveBeenCalled();
+  });
 });

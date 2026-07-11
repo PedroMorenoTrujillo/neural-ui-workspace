@@ -252,3 +252,16 @@
   white-space: nowrap;
   border: 0;
 }
+
+.neu-autocomplete__dropdown {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: var(--neu-radius-md, 8px);
+  background: transparent;
+  color: var(--neu-text-muted, #6b7280);
+  cursor: pointer;
+  padding: 4px 6px;
+}

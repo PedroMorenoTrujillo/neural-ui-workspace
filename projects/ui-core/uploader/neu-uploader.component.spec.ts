@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
@@ -441,6 +441,159 @@ describe('NeuUploaderComponent', () => {
     comp.writeValue(null);
     expect(comp.fileItems()).toEqual([]);
   });
+
+  it('wires dropzone action, drop and retry buttons through the template', () => {
+    const { f, comp } = mk();
+    const input = f.nativeElement.querySelector('input[type="file"]') as HTMLInputElement;
+    const pickerClick = vi.spyOn(input, 'click');
+    const action = f.nativeElement.querySelector('.neu-uploader__actions button') as HTMLButtonElement;
+    action.click();
+    expect(pickerClick).toHaveBeenCalled();
+
+    const file = createFile('dom-drop.png');
+    const drop = new Event('drop', { bubbles: true, cancelable: true }) as DragEvent;
+    Object.defineProperty(drop, 'dataTransfer', { value: { files: toFileList(file) } });
+    (f.nativeElement.querySelector('.neu-uploader__dropzone') as HTMLElement).dispatchEvent(drop);
+    f.detectChanges();
+    expect(comp.fileItems()[0].name).toBe('dom-drop.png');
+
+    const id = comp.fileItems()[0].id;
+    comp.setFileState(id, { status: 'error', error: 'Network' });
+    f.detectChanges();
+    (f.nativeElement.querySelector('.neu-uploader__retry') as HTMLButtonElement).click();
+    expect(comp.fileItems()[0].status).toBe('uploading');
+  });
+
+  it('keeps drag state stable for picker-only and disabled drops, and ignores missing items', () => {
+    const { comp } = mk({ dropzone: false });
+    const leave = vi.fn();
+    comp.onDragLeave({ preventDefault: leave } as unknown as DragEvent);
+    expect(leave).not.toHaveBeenCalled();
+    comp.onDrop({ preventDefault: vi.fn(), dataTransfer: { files: null } } as unknown as DragEvent);
+    expect(comp.fileItems()).toEqual([]);
+    expect(() => comp.removeFile('missing')).not.toThrow();
+    expect(() => comp.retryFile('missing')).not.toThrow();
+  });
+
+  it('handles a drop without a dataTransfer payload as an empty selection', () => {
+    const { comp } = mk();
+    const rejected = vi.fn();
+    comp.filesRejected.subscribe(rejected);
+
+    comp.onDrop({ preventDefault: vi.fn() } as unknown as DragEvent);
+
+    expect(rejected).toHaveBeenCalled();
+    expect(comp.displayErrorMessage()).toBe('No file was selected.');
+  });
+
+  it('creates uploading items when global progress is active', () => {
+    const { comp } = mk({ progress: 25 });
+    const file = createFile('uploading.png');
+
+    comp['consumeFiles'](toFileList(file));
+
+    expect(comp.fileItems()[0]).toEqual(
+      expect.objectContaining({ progress: 25, status: 'uploading' }),
+    );
+  });
+
+  it('applies external state only to matching file ids', () => {
+    const first = createFile('state-a.png');
+    const second = createFile('state-b.png');
+    const id = `${first.name}__${first.size}__${first.lastModified}`;
+    const { f, comp } = mk({ multiple: true });
+    comp.writeValue([first, second]);
+
+    f.componentRef.setInput('fileStates', { [id]: { status: 'success', progress: 100 } });
+    f.detectChanges();
+
+    expect(comp.fileItems()[0].status).toBe('success');
+    expect(comp.fileItems()[1].status).toBe('idle');
+  });
+
+  it('retries one file without changing sibling items', () => {
+    const { comp } = mk();
+    const first = createFile('retry-a.png');
+    const second = createFile('retry-b.png');
+    comp.writeValue([first, second]);
+    const firstId = comp.fileItems()[0].id;
+    const secondId = comp.fileItems()[1].id;
+    comp.setFileState(firstId, { status: 'error', error: 'Network' });
+    comp.setFileState(secondId, { status: 'success' });
+
+    comp.retryFile(firstId, { stopPropagation: vi.fn() } as unknown as Event);
+
+    expect(comp.fileItems()[0].status).toBe('uploading');
+    expect(comp.fileItems()[1].status).toBe('success');
+  });
+
+  it('builds picker-only descriptions without optional accept or size text', () => {
+    const { comp } = mk({ dropzone: false, pickerDescription: 'Browse only' });
+
+    expect(comp.descriptionText()).toBe('Browse only');
+  });
+});
+
+describe('NeuUploaderComponent file states', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideIcons({ lucideUpload })],
+    }).compileComponents();
+  });
+
+  it('should apply external per-file state', () => {
+    const file = createFile('state.png');
+    const id = `${file.name}__${file.size}__${file.lastModified}`;
+    const { comp } = mk({
+      fileStates: { [id]: { status: 'success', progress: 100 } },
+    });
+
+    comp.writeValue([file]);
+
+    expect(comp.fileItems()[0].status).toBe('success');
+    expect(comp.fileItems()[0].progress).toBe(100);
+  });
+
+  it('should emit retry and set a failed item back to uploading', () => {
+    const { comp } = mk();
+    const retrySpy = vi.fn();
+    const file = createFile('retry.png');
+    comp.fileRetry.subscribe(retrySpy);
+    comp.writeValue([file]);
+    const id = comp.fileItems()[0].id;
+    comp.setFileState(id, { status: 'error', error: 'Network' });
+
+    comp.retryFile(id);
+
+    expect(comp.fileItems()[0].status).toBe('uploading');
+    expect(retrySpy).toHaveBeenCalled();
+  });
+
+  it('renders preview templates, per-file progress and the configured file limit', () => {
+    @Component({
+      imports: [NeuUploaderComponent],
+      template: `
+        <ng-template #preview let-item>Preview: {{ item.name }}</ng-template>
+        <neu-uploader [previewTemplate]="preview" [maxFiles]="2" />
+      `,
+    })
+    class PreviewHostComponent {
+      @ViewChild('preview', { read: TemplateRef }) preview!: TemplateRef<any>;
+    }
+
+    const fixture = TestBed.createComponent(PreviewHostComponent);
+    fixture.detectChanges();
+    const uploader = fixture.debugElement.query((debugElement) => debugElement.componentInstance instanceof NeuUploaderComponent)
+      .componentInstance as NeuUploaderComponent;
+    uploader.writeValue([createFile('preview.png'), createFile('second.png')]);
+    const firstId = (uploader as any).fileItems()[0].id;
+    uploader.setFileState(firstId, { status: 'uploading', progress: 50 });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Preview: preview.png');
+    expect(fixture.nativeElement.textContent).toContain('2/2');
+    expect(fixture.nativeElement.querySelectorAll('.neu-uploader__item neu-progress-bar').length).toBe(1);
+  });
 });
 
 describe('NeuUploaderComponent – ReactiveFormsModule integration', () => {
@@ -465,6 +618,7 @@ describe('NeuUploaderComponent – ReactiveFormsModule integration', () => {
 
     const uploader = f.debugElement.children[0].componentInstance as NeuUploaderComponent;
     const file = createFile('avatar.png');
+    expect(uploader.fileInput().nativeElement.type).toBe('file');
     uploader.writeValue([file]);
     uploader['emitValue'](uploader['fileItems']());
     f.detectChanges();

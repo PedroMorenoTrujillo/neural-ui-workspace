@@ -22,6 +22,11 @@ export interface NeuDateRange {
   end: Date | null;
 }
 
+export interface NeuDatePreset {
+  label: string;
+  range: NeuDateRange | (() => NeuDateRange);
+}
+
 // ── Private helpers ──────────────────────────────────────────────────────────
 
 let _neuDateInputIdSeq = 0;
@@ -31,6 +36,7 @@ interface CalendarDay {
   inMonth: boolean;
   isToday: boolean;
   isSelected: boolean;
+  disabled: boolean;
 }
 
 interface DrumSlot {
@@ -50,6 +56,7 @@ interface RangeCell {
   rangeEnd: boolean;
   inRange: boolean;
   label: string;
+  disabled: boolean;
 }
 
 function sameDay(a: Date, b: Date): boolean {
@@ -152,6 +159,15 @@ function cloneDate(d: Date): Date {
           [attr.aria-label]="_texts().rangeAriaLabel"
           (click)="$event.stopPropagation()"
         >
+          @if (presets().length > 0) {
+            <div class="neu-drp__presets" role="list">
+              @for (preset of presets(); track preset.label) {
+                <button type="button" class="neu-drp__preset" (click)="_applyPreset(preset)">
+                  {{ preset.label }}
+                </button>
+              }
+            </div>
+          }
           <div class="neu-drp__calendars">
             <div class="neu-drp__cal">
               <div class="neu-drp__cal-nav">
@@ -177,6 +193,7 @@ function cloneDate(d: Date): Date {
                     [class.neu-drp__cell--range-start]="cell.rangeStart"
                     [class.neu-drp__cell--range-end]="cell.rangeEnd"
                     [class.neu-drp__cell--in-range]="cell.inRange"
+                    [disabled]="cell.disabled"
                     [attr.aria-label]="cell.label"
                     [attr.aria-pressed]="cell.selected"
                     (click)="_selectDay(cell.date)"
@@ -211,6 +228,7 @@ function cloneDate(d: Date): Date {
                     [class.neu-drp__cell--range-start]="cell.rangeStart"
                     [class.neu-drp__cell--range-end]="cell.rangeEnd"
                     [class.neu-drp__cell--in-range]="cell.inRange"
+                    [disabled]="cell.disabled"
                     [attr.aria-label]="cell.label"
                     [attr.aria-pressed]="cell.selected"
                     (click)="_selectDay(cell.date)"
@@ -339,7 +357,32 @@ function cloneDate(d: Date): Date {
                       <polyline points="15 18 9 12 15 6" />
                     </svg>
                   </button>
-                  <span class="neu-date-input__cal-title">{{ monthLabel() }}</span>
+                  @if (showMonthYearPicker()) {
+                    <span class="neu-date-input__cal-title neu-date-input__cal-title--pickers">
+                      <select
+                        class="neu-date-input__picker"
+                        [value]="_viewMonth()"
+                        [attr.aria-label]="_texts().chooseMonth"
+                        (change)="setViewMonth($any($event.target).value)"
+                      >
+                        @for (month of monthOptions(); track month.value) {
+                          <option [value]="month.value">{{ month.label }}</option>
+                        }
+                      </select>
+                      <select
+                        class="neu-date-input__picker"
+                        [value]="_viewYear()"
+                        [attr.aria-label]="_texts().chooseYear"
+                        (change)="setViewYear($any($event.target).value)"
+                      >
+                        @for (year of yearOptions(); track year) {
+                          <option [value]="year">{{ year }}</option>
+                        }
+                      </select>
+                    </span>
+                  } @else {
+                    <span class="neu-date-input__cal-title">{{ monthLabel() }}</span>
+                  }
                   <button
                     class="neu-date-input__cal-arrow"
                     type="button"
@@ -371,6 +414,7 @@ function cloneDate(d: Date): Date {
                       [class.neu-date-input__cal-day--other]="!day.inMonth"
                       [class.neu-date-input__cal-day--today]="day.isToday"
                       [class.neu-date-input__cal-day--selected]="day.isSelected"
+                      [disabled]="day.disabled"
                       [attr.aria-label]="formatDayLabel(day.date)"
                       [attr.aria-pressed]="day.isSelected"
                       (click)="selectDay(day)"
@@ -542,14 +586,24 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   step = input<number | null>(null);
   /** Locale explícito opcional / Optional explicit locale */
   locale = input<string | null>(null);
+  /** Fechas deshabilitadas / Disabled dates */
+  disabledDates = input<((date: Date) => boolean) | Array<Date | string>>([]);
+  /** Permite seleccionar varias fechas en type="date" / Multiple date selection for type="date" */
+  multiple = input<boolean>(false);
+  /** Muestra selectores de mes/año en el calendario / Shows month/year picker controls */
+  showMonthYearPicker = input<boolean>(false);
+  /** Rango de años para el selector / Year picker range */
+  yearRange = input<number>(12);
 
   // ── Range-mode inputs ────────────────────────────────────────────
-  /** Placeholder del trigger de rango / Range trigger placeholder */
+  /** Placeholder del trigger / Trigger placeholder */
   placeholder = input<string>('');
   /** Formato de fecha en modo rango / Date display format in range mode */
   dateFormat = input<'short' | 'medium' | 'long' | 'full' | 'numeric'>('short');
   /** Etiqueta flotante / Floating label */
   floatingLabel = input<boolean>(false);
+  /** Presets rápidos para rangos / Quick range presets */
+  presets = input<NeuDatePreset[]>([]);
 
   // ── Outputs ──────────────────────────────────────────────────────
   /** Emitido al confirmar el rango / Emitted when range is confirmed */
@@ -638,6 +692,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   protected readonly _selDay = signal<number | null>(null);
   protected readonly _selHour = signal(0);
   protected readonly _selMinute = signal(0);
+  protected readonly _selectedDates = signal<string[]>([]);
 
   // ── State — range ─────────────────────────────────────────────────
   private readonly _today = new Date();
@@ -679,6 +734,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
           timePlaceholder: 'hh:mm',
           datePlaceholder: 'dd/mm/aaaa',
           dateTimePlaceholder: 'dd/mm/aaaa, hh:mm',
+          chooseMonth: 'Seleccionar mes',
+          chooseYear: 'Seleccionar año',
         }
       : {
           rangeAriaLabel: 'Select date range',
@@ -697,6 +754,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
           timePlaceholder: 'hh:mm',
           datePlaceholder: 'mm/dd/yyyy',
           dateTimePlaceholder: 'mm/dd/yyyy, hh:mm',
+          chooseMonth: 'Choose month',
+          chooseYear: 'Choose year',
         };
   });
 
@@ -795,6 +854,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
       rangeEnd: e ? sameDay(date, e) : false,
       inRange: !!inRange,
       label: date.toLocaleDateString(this._resolvedLocale()),
+      disabled: this.isDateDisabled(date),
     };
   }
 
@@ -813,6 +873,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   _selectDay(date: Date): void {
+    if (this.isDateDisabled(date)) return;
     const s = this._pickStart();
     if (!s || this._pickEnd()) {
       this._pickStart.set(cloneDate(date));
@@ -841,6 +902,12 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     this.isOpen.set(false);
   }
 
+  _applyPreset(preset: NeuDatePreset): void {
+    const range = typeof preset.range === 'function' ? preset.range() : preset.range;
+    this._pickStart.set(range.start ? cloneDate(range.start) : null);
+    this._pickEnd.set(range.end ? cloneDate(range.end) : null);
+  }
+
   _clearRange(): void {
     this._pickStart.set(null);
     this._pickEnd.set(null);
@@ -855,6 +922,19 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     const v = this._value();
     if (!v) return '';
     const t = this.type();
+    if (t === 'date' && this.multiple()) {
+      return this._selectedDates()
+        .map((value) => new Date(value + 'T00:00:00'))
+        .filter((date) => !isNaN(date.getTime()))
+        .map((date) =>
+          date.toLocaleDateString(this._resolvedLocale(), {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          }),
+        )
+        .join(', ');
+    }
     if (t === 'date') {
       const d = new Date(v + 'T00:00:00');
       return isNaN(d.getTime())
@@ -882,6 +962,10 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   });
 
   readonly placeholderText = computed(() => {
+    if (this.placeholder()) {
+      return this.placeholder();
+    }
+
     switch (this.type()) {
       case 'time':
         return this._texts().timePlaceholder;
@@ -903,6 +987,22 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
 
   readonly weekdays = computed(() => this.#buildWeekdayLabels('narrow'));
 
+  readonly monthOptions = computed(() =>
+    Array.from({ length: 12 }, (_, value) => ({
+      value,
+      label: this.#capitalize(
+        new Date(2024, value, 1).toLocaleDateString(this._resolvedLocale(), { month: 'long' }),
+      ),
+    })),
+  );
+
+  readonly yearOptions = computed(() => {
+    const center = this._viewYear();
+    const span = Math.max(1, this.yearRange());
+    const start = center - span;
+    return Array.from({ length: span * 2 + 1 }, (_, index) => start + index);
+  });
+
   readonly calendarDays = computed((): CalendarDay[] => {
     const year = this._viewYear();
     const month = this._viewMonth();
@@ -916,6 +1016,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
         inMonth: false,
         isToday: false,
         isSelected: false,
+        disabled: this.isDateDisabled(new Date(year, month, 1 - i)),
       });
     }
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -925,7 +1026,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
         date,
         inMonth: true,
         isToday: date.toDateString() === today.toDateString(),
-        isSelected: this._selYear() === year && this._selMonth() === month && this._selDay() === d,
+        isSelected: this.isDateSelected(date),
+        disabled: this.isDateDisabled(date),
       });
     }
     let next = 1;
@@ -935,6 +1037,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
         inMonth: false,
         isToday: false,
         isSelected: false,
+        disabled: this.isDateDisabled(new Date(year, month + 1, next - 1)),
       });
     }
     return days;
@@ -984,12 +1087,35 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   selectDay(day: CalendarDay): void {
-    if (!day.inMonth) return;
+    if (!day.inMonth || day.disabled) return;
+    const value = this._toDateValue(day.date);
+    if (this.type() === 'date' && this.multiple()) {
+      this._selectedDates.update((current) =>
+        current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
+      );
+      this._value.set(this._selectedDates().join(','));
+      this._onChange(this._selectedDates());
+      return;
+    }
     this._selYear.set(day.date.getFullYear());
     this._selMonth.set(day.date.getMonth());
     this._selDay.set(day.date.getDate());
     this._emitValue();
     if (this.type() === 'date') this.close();
+  }
+
+  setViewMonth(value: string | number): void {
+    const month = Number(value);
+    if (Number.isInteger(month) && month >= 0 && month <= 11) {
+      this._viewMonth.set(month);
+    }
+  }
+
+  setViewYear(value: string | number): void {
+    const year = Number(value);
+    if (Number.isInteger(year)) {
+      this._viewYear.set(year);
+    }
   }
 
   formatDayLabel(date: Date): string {
@@ -1005,13 +1131,14 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     const d = new Date();
     this._viewYear.set(d.getFullYear());
     this._viewMonth.set(d.getMonth());
-    this.selectDay({ date: d, inMonth: true, isToday: true, isSelected: false });
+    this.selectDay({ date: d, inMonth: true, isToday: true, isSelected: false, disabled: false });
   }
 
   clear(): void {
     this._selYear.set(null);
     this._selMonth.set(null);
     this._selDay.set(null);
+    this._selectedDates.set([]);
     this._value.set('');
     this._onChange('');
     this.close();
@@ -1056,13 +1183,53 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     this._onChange(v);
   }
 
+  isDateSelected(date: Date): boolean {
+    if (this.type() === 'date' && this.multiple()) {
+      return this._selectedDates().includes(this._toDateValue(date));
+    }
+
+    return (
+      this._selYear() === date.getFullYear() &&
+      this._selMonth() === date.getMonth() &&
+      this._selDay() === date.getDate()
+    );
+  }
+
+  isDateDisabled(date: Date): boolean {
+    const disabled = this.disabledDates();
+    if (typeof disabled === 'function') {
+      return disabled(date);
+    }
+
+    return disabled.some((value) => {
+      const candidate = value instanceof Date ? value : new Date(`${value}T00:00:00`);
+      return !isNaN(candidate.getTime()) && sameDay(candidate, date);
+    });
+  }
+
+  private _toDateValue(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+      date.getDate(),
+    ).padStart(2, '0')}`;
+  }
+
   // ── CVA ───────────────────────────────────────────────────────────
-  writeValue(value: string | NeuDateRange | null): void {
+  writeValue(value: string | string[] | NeuDateRange | null): void {
     if (this.type() === 'range') {
       const v = value as NeuDateRange | null;
       this._pickStart.set(v?.start ?? null);
       this._pickEnd.set(v?.end ?? null);
     } else {
+      if (this.type() === 'date' && this.multiple()) {
+        const values = Array.isArray(value)
+          ? value
+          : typeof value === 'string' && value
+            ? value.split(',').map((item) => item.trim())
+            : [];
+        this._selectedDates.set(values.filter(Boolean));
+        this._value.set(this._selectedDates().join(','));
+        return;
+      }
       const v = (value as string) ?? '';
       this._value.set(v);
       if (!v) return;
@@ -1101,7 +1268,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     }
   }
 
-  registerOnChange(fn: (v: string | NeuDateRange) => void): void {
+  registerOnChange(fn: (v: string | string[] | NeuDateRange) => void): void {
     this._onChange = fn;
   }
   registerOnTouched(fn: () => void): void {

@@ -1,0 +1,24 @@
+.neu-input-mask {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.neu-input-mask__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--neu-text, #111827);
+}
+
+.neu-input-mask__control {
+  min-height: 2.5rem;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.625rem;
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+  padding: 0 0.75rem;
+}
+
+.neu-input-mask__hint {
+  color: var(--neu-text-muted, #6b7280);
+  font-size: 0.8125rem;
+}

@@ -74,6 +74,16 @@ describe('NeuSpinnerComponent', () => {
     expect(df.nativeElement.textContent).toContain('Loading...');
   });
 
+  it('should render a visible label without duplicating the screen-reader label', () => {
+    const df = TestBed.createComponent(NeuSpinnerComponent);
+    df.componentRef.setInput('label', 'Loading data...');
+    df.detectChanges();
+    expect(df.nativeElement.querySelector('.neu-spinner__label')?.textContent).toContain(
+      'Loading data...',
+    );
+    expect(df.nativeElement.querySelector('.neu-spinner__sr-only')).toBeNull();
+  });
+
   it('should apply custom color to arc circle', () => {
     const df = TestBed.createComponent(NeuSpinnerComponent);
     df.componentRef.setInput('color', '#ff0000');

@@ -188,6 +188,47 @@ let _neuSelectIdSeq = 0;
           [style.width]="panelPosition().width"
           [style.max-height]="panelPosition().maxHeight"
         >
+          <ng-template #selectOptionTpl let-option>
+            <div
+              class="neu-select__option"
+              [class.neu-select__option--selected]="option.value === _value()"
+              [class.neu-select__option--disabled]="option.disabled"
+              role="option"
+              [id]="'neu-select-opt-' + option.value"
+              [attr.aria-selected]="option.value === _value()"
+              [attr.aria-disabled]="option.disabled"
+              [attr.tabindex]="option.disabled ? null : '-1'"
+              (click)="selectOption(option)"
+              (keydown.enter)="selectOption(option)"
+              (keydown.space)="selectOption(option)"
+              (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
+              (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
+            >
+              <!-- Checkmark en la seleccionada (siempre reserva el espacio) -->
+              <svg
+                class="neu-select__check"
+                [style.visibility]="option.value === _value() ? 'visible' : 'hidden'"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              @if (itemTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{ $implicit: option }"
+                />
+              } @else {
+                {{ option.label }}
+              }
+            </div>
+          </ng-template>
+
           @if (searchable()) {
             <div class="neu-select__search">
               <input
@@ -201,95 +242,30 @@ let _neuSelectIdSeq = 0;
               />
             </div>
           }
-          @if (virtualScroll()) {
+          @if (loading()) {
+            <div class="neu-select__empty" role="status">{{ loadingLabel() }}</div>
+          } @else if (virtualScroll()) {
             <cdk-virtual-scroll-viewport
               class="neu-select__viewport"
               [itemSize]="virtualScrollItemSize()"
               [style.height]="virtualViewportHeight()"
             >
-              <div
-                *cdkVirtualFor="let option of filteredOptions(); trackBy: trackByOptionValue"
-                class="neu-select__option"
-                [class.neu-select__option--selected]="option.value === _value()"
-                [class.neu-select__option--disabled]="option.disabled"
-                role="option"
-                [id]="'neu-select-opt-' + option.value"
-                [attr.aria-selected]="option.value === _value()"
-                [attr.aria-disabled]="option.disabled"
-                [attr.tabindex]="option.disabled ? null : '-1'"
-                (click)="selectOption(option)"
-                (keydown.enter)="selectOption(option)"
-                (keydown.space)="selectOption(option)"
-                (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
-                (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
-              >
-                <!-- Checkmark en la seleccionada (siempre reserva el espacio) -->
-                <svg
-                  class="neu-select__check"
-                  [style.visibility]="option.value === _value() ? 'visible' : 'hidden'"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                @if (itemTpl()) {
-                  <ng-container
-                    [ngTemplateOutlet]="itemTpl()!.templateRef"
-                    [ngTemplateOutletContext]="{ $implicit: option }"
-                  />
-                } @else {
-                  {{ option.label }}
-                }
-              </div>
+              <ng-container *cdkVirtualFor="let option of filteredOptions(); trackBy: trackByOptionValue">
+                <ng-container
+                  [ngTemplateOutlet]="selectOptionTpl"
+                  [ngTemplateOutletContext]="{ $implicit: option }"
+                />
+              </ng-container>
             </cdk-virtual-scroll-viewport>
           } @else {
             @for (option of filteredOptions(); track option.value) {
-              <div
-                class="neu-select__option"
-                [class.neu-select__option--selected]="option.value === _value()"
-                [class.neu-select__option--disabled]="option.disabled"
-                role="option"
-                [id]="'neu-select-opt-' + option.value"
-                [attr.aria-selected]="option.value === _value()"
-                [attr.aria-disabled]="option.disabled"
-                [attr.tabindex]="option.disabled ? null : '-1'"
-                (click)="selectOption(option)"
-                (keydown.enter)="selectOption(option)"
-                (keydown.space)="selectOption(option)"
-                (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
-                (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
-              >
-                <!-- Checkmark en la seleccionada (siempre reserva el espacio) -->
-                <svg
-                  class="neu-select__check"
-                  [style.visibility]="option.value === _value() ? 'visible' : 'hidden'"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                @if (itemTpl()) {
-                  <ng-container
-                    [ngTemplateOutlet]="itemTpl()!.templateRef"
-                    [ngTemplateOutletContext]="{ $implicit: option }"
-                  />
-                } @else {
-                  {{ option.label }}
-                }
-              </div>
+              <ng-container
+                [ngTemplateOutlet]="selectOptionTpl"
+                [ngTemplateOutletContext]="{ $implicit: option }"
+              />
             }
           }
-          @if (filteredOptions().length === 0) {
+          @if (!loading() && filteredOptions().length === 0) {
             <div class="neu-select__empty">{{ noResultsMessage() }}</div>
           }
         </div>
@@ -377,6 +353,12 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   /** Placeholder del input de búsqueda / Search input placeholder */
   searchPlaceholder = input<string>('Buscar...');
+
+  /** Muestra estado de carga dentro del panel / Shows a loading state inside the panel */
+  loading = input<boolean>(false);
+
+  /** Texto del estado de carga / Loading state text */
+  loadingLabel = input<string>('Loading...');
 
   /** Muestra un botón para limpiar la selección / Shows a button to clear the selection */
   clearable = input<boolean>(false);

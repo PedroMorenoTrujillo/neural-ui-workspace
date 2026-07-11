@@ -19,6 +19,7 @@ export class NeuDialogService {
       data?: T;
       size?: NeuDialogSize;
       disableClose?: boolean;
+      restoreFocus?: boolean;
     },
   ): DialogRef<R> {
     return this.dialog.open<R>(component, {
@@ -26,6 +27,7 @@ export class NeuDialogService {
       panelClass: ['neu-dialog-panel', `neu-dialog-panel--${config?.size ?? 'md'}`],
       backdropClass: 'neu-dialog-backdrop',
       disableClose: config?.disableClose ?? false,
+      restoreFocus: config?.restoreFocus ?? true,
     } satisfies DialogConfig);
   }
 }

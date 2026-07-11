@@ -1,0 +1,61 @@
+.neu-bottom-sheet-host {
+  display: contents;
+}
+
+.neu-bottom-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  border: 0;
+  background: var(--neu-overlay-bg);
+}
+
+.neu-bottom-sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 901;
+  max-height: min(80vh, 42rem);
+  border-radius: 1rem 1rem 0 0;
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+  box-shadow: var(--neu-shadow-lg, 0 -18px 40px rgb(15 23 42 / 18%));
+  overflow: auto;
+}
+
+.neu-bottom-sheet--full {
+  max-height: 100vh;
+  height: 100vh;
+  border-radius: 0;
+}
+
+.neu-bottom-sheet__handle {
+  width: 2.5rem;
+  height: 0.25rem;
+  margin: 0.625rem auto;
+  border-radius: 999px;
+  background: var(--neu-border, #d1d5db);
+}
+
+.neu-bottom-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 1rem 1rem;
+  border-bottom: 1px solid var(--neu-border, #e5e7eb);
+}
+
+.neu-bottom-sheet__header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.neu-bottom-sheet__close {
+  flex: 0 0 auto;
+}
+
+.neu-bottom-sheet__body {
+  padding: 1rem;
+}

@@ -7,15 +7,17 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { NeuButtonComponent } from '@neural-ui/core/button';
+import { NeuIconComponent } from '@neural-ui/core/icon';
 
 export type NeuAlertType = 'info' | 'success' | 'warning' | 'error';
 
 /** Icono por defecto para cada tipo */
-const DEFAULT_ICONS: Record<NeuAlertType, string> = {
-  info: 'ℹ',
-  success: '✓',
-  warning: '⚠',
-  error: '✕',
+const DEFAULT_ICON_NAMES: Record<NeuAlertType, string> = {
+  info: 'lucideInfo',
+  success: 'lucideCheckCircle',
+  warning: 'lucideAlertTriangle',
+  error: 'lucideXCircle',
 };
 
 let _seq = 0;
@@ -30,14 +32,24 @@ let _seq = 0;
  */
 @Component({
   selector: 'neu-alert',
-  imports: [],
+  imports: [NeuButtonComponent, NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class]': 'hostClasses()', role: 'alert', '[attr.aria-live]': 'liveRegion()' },
+  host: {
+    '[class]': 'hostClasses()',
+    '[attr.role]': 'alertRole()',
+    '[attr.aria-live]': 'liveRegion()',
+  },
   template: `
     @if (!_dismissed()) {
       @if (showIcon()) {
-        <span class="neu-alert__icon" aria-hidden="true">{{ _resolvedIcon() }}</span>
+        <span class="neu-alert__icon" aria-hidden="true">
+          @if (icon()) {
+            {{ icon() }}
+          } @else {
+            <neu-icon [name]="_defaultIconName()" size="1.1em" />
+          }
+        </span>
       }
       <div class="neu-alert__body">
         @if (title()) {
@@ -50,13 +62,17 @@ let _seq = 0;
       </div>
       @if (closable()) {
         <button
+          neu-button
           class="neu-alert__close"
           type="button"
+          variant="ghost"
+          size="sm"
+          icon="lucideX"
+          [iconOnly]="true"
+          [ariaLabel]="closeLabel()"
           [attr.aria-label]="closeLabel()"
-          (click)="dismiss()"
-        >
-          ×
-        </button>
+          (neuClick)="dismiss()"
+        ></button>
       }
     }
   `,
@@ -82,7 +98,7 @@ export class NeuAlertComponent {
   readonly outline = input<boolean>(false);
 
   /** Aria-label para el botón de cierre / Aria-label for the close button */
-  readonly closeLabel = input<string>('Cerrar alerta');
+  readonly closeLabel = input<string>('Close alert');
 
   /** Emitido cuando se descarta la alerta / Emitted when the alert is dismissed */
   readonly closed = output<void>();
@@ -90,9 +106,11 @@ export class NeuAlertComponent {
   readonly _id = `neu-alert-${++_seq}`;
   readonly _dismissed = signal(false);
 
-  readonly _resolvedIcon = computed(() => this.icon() || DEFAULT_ICONS[this.type()]);
+  readonly _defaultIconName = computed(() => DEFAULT_ICON_NAMES[this.type()]);
 
   readonly liveRegion = computed(() => (this.type() === 'error' ? 'assertive' : 'polite'));
+
+  readonly alertRole = computed(() => (this.type() === 'error' ? 'alert' : 'status'));
 
   readonly hostClasses = computed(() => ({
     'neu-alert': true,

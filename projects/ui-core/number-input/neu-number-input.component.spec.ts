@@ -496,4 +496,46 @@ describe('NeuNumberInputComponent', () => {
 
     expect((f.componentInstance as any)._value()).toBe(3.5);
   });
+
+  it('focuses vertical and horizontal inputs through template listeners', async () => {
+    const vertical = TestBed.createComponent(NeuNumberInputComponent);
+    vertical.componentRef.setInput('vertical', true);
+    vertical.detectChanges();
+    await vertical.whenStable();
+
+    const verticalInput: HTMLInputElement = vertical.nativeElement.querySelector(
+      '.neu-number-input__field',
+    );
+    verticalInput.dispatchEvent(new Event('focus'));
+    vertical.detectChanges();
+    expect((vertical.componentInstance as any)._focused()).toBe(true);
+
+    const horizontal = TestBed.createComponent(NeuNumberInputComponent);
+    horizontal.componentRef.setInput('stacked', false);
+    horizontal.componentRef.setInput('vertical', false);
+    horizontal.detectChanges();
+    await horizontal.whenStable();
+
+    const horizontalInput: HTMLInputElement = horizontal.nativeElement.querySelector(
+      '.neu-number-input__field',
+    );
+    horizontalInput.dispatchEvent(new Event('focus'));
+    horizontal.detectChanges();
+    expect((horizontal.componentInstance as any)._focused()).toBe(true);
+  });
+
+  it('writeValue handles null and the value state class reflects finite values', async () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    f.componentRef.setInput('label', 'Amount');
+    f.detectChanges();
+    await f.whenStable();
+
+    f.componentInstance.writeValue(null);
+    f.detectChanges();
+
+    expect((f.componentInstance as any)._value()).toBe(0);
+    expect(f.nativeElement.querySelector('.neu-number-input__control').classList).toContain(
+      'neu-number-input__control--has-value',
+    );
+  });
 });

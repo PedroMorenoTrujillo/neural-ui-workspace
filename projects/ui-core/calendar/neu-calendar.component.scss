@@ -126,6 +126,14 @@
     background var(--neu-transition);
 }
 
+html[data-theme='dark'] {
+  .neu-calendar__today {
+    color: #f2f7fb;
+    background: #21262d;
+    border-color: #6e7681;
+  }
+}
+
 .neu-calendar__weekdays,
 .neu-calendar__month-grid,
 .neu-calendar__week-grid {
@@ -242,6 +250,7 @@
   gap: var(--neu-space-2);
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   padding: 0;
   border: 0;
   border-radius: 999px;
@@ -495,9 +504,12 @@
 
 .neu-calendar__week-head {
   display: grid;
+  justify-items: center;
   gap: 4px;
   width: 100%;
-  padding: 14px 12px 12px;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 12px 6px 10px;
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--neu-border) 90%, transparent 10%);
   background: linear-gradient(
@@ -512,6 +524,10 @@
 .neu-calendar__week-date {
   font-size: var(--neu-text-xs);
   color: var(--neu-text-muted);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .neu-calendar__week-events {
@@ -549,5 +565,18 @@
         min-width: 760px;
       }
     }
+  }
+
+  .neu-calendar__week-head {
+    padding: 10px 3px 8px;
+  }
+
+  .neu-calendar__week-head .neu-calendar__day-number {
+    width: 28px;
+    height: 28px;
+  }
+
+  .neu-calendar__week-date {
+    font-size: 11px;
   }
 }

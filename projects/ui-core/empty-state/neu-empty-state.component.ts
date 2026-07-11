@@ -8,6 +8,9 @@ import {
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 
+export type NeuEmptyStateSize = 'sm' | 'md' | 'lg';
+export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'success';
+
 /**
  * NeuEmptyState — Estado vacío con icono Lucide, título, descripción y acción.
  *
@@ -25,7 +28,7 @@ import { NeuButtonComponent } from '@neural-ui/core/button';
   imports: [NeuIconComponent, NeuButtonComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'neu-empty-state' },
+  host: { '[class]': 'hostClasses()' },
   template: `
     <div class="neu-empty-state__inner">
       @if (icon()) {
@@ -60,7 +63,22 @@ export class NeuEmptyStateComponent {
   description = input<string>('');
   /** Texto del botón de acción. Si está vacío, no se muestra el botón. / Action button text. If empty, the button is not shown. */
   actionLabel = input<string>('');
+  /** Tamaño visual del estado vacío / Visual empty state size */
+  size = input<NeuEmptyStateSize>('md');
+  /** Tono semántico del icono y fondo / Semantic tone for icon and background */
+  tone = input<NeuEmptyStateTone>('neutral');
+  /** Reduce espaciado para tablas, listas y overlays compactos / Reduces spacing for tables, lists and compact overlays */
+  compact = input<boolean>(false);
 
   /** Emite cuando el usuario hace clic en el botón de acción. / Emits when the user clicks the action button. */
   action = output<void>();
+
+  hostClasses(): Record<string, boolean> {
+    return {
+      'neu-empty-state': true,
+      [`neu-empty-state--${this.size()}`]: true,
+      [`neu-empty-state--${this.tone()}`]: true,
+      'neu-empty-state--compact': this.compact(),
+    };
+  }
 }

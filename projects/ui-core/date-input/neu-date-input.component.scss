@@ -101,11 +101,13 @@ $drum-item-h: 36px;
   align-items: center;
   gap: var(--neu-space-2);
   width: 100%;
+  min-width: 0;
   min-height: $trigger-height;
   padding: 0 var(--neu-space-3);
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius);
+  overflow: hidden;
   cursor: pointer;
   text-align: left;
   font-family: var(--neu-font-sans);
@@ -149,6 +151,9 @@ $drum-item-h: 36px;
 
 .neu-date-input__display {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--neu-text);
   white-space: nowrap;
 
@@ -303,6 +308,45 @@ $drum-item-h: 36px;
     color: var(--neu-primary-solid-fg, var(--neu-primary-fg)) !important;
     font-weight: 600;
   }
+}
+
+.neu-date-input__cal-day:disabled,
+.neu-drp__cell:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.neu-drp__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--neu-space-2);
+  padding: var(--neu-space-3) var(--neu-space-3) 0;
+}
+
+.neu-drp__preset {
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface);
+  color: var(--neu-text);
+  padding: var(--neu-space-1) var(--neu-space-2);
+  font: inherit;
+  font-size: var(--neu-text-xs);
+  cursor: pointer;
+}
+
+.neu-date-input__cal-title--pickers {
+  display: inline-flex;
+  gap: var(--neu-space-2);
+}
+
+.neu-date-input__picker {
+  min-width: 88px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface);
+  color: var(--neu-text);
+  padding: var(--neu-space-1) var(--neu-space-2);
+  font: inherit;
 }
 
 .neu-date-input__cal-footer {

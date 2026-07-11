@@ -146,6 +146,24 @@ describe('NeuContextMenuDirective', () => {
     expect(detachSpy).toHaveBeenCalled();
     expect(dir._overlayRef).not.toBe(firstOverlayRef);
   });
+
+  it('Escape from the attached overlay component should close the directive overlay', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuContextMenuDirective) as any;
+    const closed: unknown[] = [];
+    dir.menuClosed.subscribe(() => closed.push(1));
+
+    const el = f.nativeElement.querySelector('div');
+    el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 10, clientY: 10 }));
+    f.detectChanges();
+
+    dir._compRef.instance._onEscape();
+
+    expect(closed).toHaveLength(1);
+    expect(dir._overlayRef).toBeNull();
+  });
 });
 
 describe('NeuContextMenuOverlayComponent', () => {

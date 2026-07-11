@@ -103,6 +103,24 @@ describe('NeuAccordionComponent', () => {
     expect(expanded.length).toBe(1);
   });
 
+  it('should not reinitialize expanded state after the first render', async () => {
+    const df = TestBed.createComponent(NeuAccordionComponent);
+    df.componentRef.setInput('items', [
+      { id: 'a', title: 'Abierto', content: 'Contenido', expanded: true },
+    ]);
+    df.detectChanges();
+    await df.whenStable();
+    df.componentRef.setInput('items', [
+      { id: 'a', title: 'Abierto', content: 'Contenido', expanded: false },
+      { id: 'b', title: 'Nuevo', content: 'Nuevo', expanded: true },
+    ]);
+    df.detectChanges();
+    await df.whenStable();
+
+    expect(df.componentInstance.isExpanded('a')).toBe(true);
+    expect(df.componentInstance.isExpanded('b')).toBe(false);
+  });
+
   it('exclusive mode (multiple=false) should close previously open panel on toggle', async () => {
     const df = TestBed.createComponent(NeuAccordionComponent);
     df.componentRef.setInput('multiple', false);
@@ -171,5 +189,13 @@ describe('NeuAccordionComponent', () => {
     const result = df.componentInstance.sanitize('<b>Bold</b>');
     // DomSanitizer returns SafeHtml — just verify it doesn\'t throw and is truthy
     expect(result).toBeTruthy();
+  });
+
+  it('sanitize should return an empty string when the sanitizer rejects content', () => {
+    const df = TestBed.createComponent(NeuAccordionComponent);
+    df.detectChanges();
+    (df.componentInstance as any)._sanitizer = { sanitize: () => null };
+
+    expect(df.componentInstance.sanitize('<script>bad()</script>')).toBe('');
   });
 });

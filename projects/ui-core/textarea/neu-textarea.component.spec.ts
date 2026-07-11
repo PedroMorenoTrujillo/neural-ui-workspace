@@ -283,4 +283,24 @@ describe('NeuTextareaComponent', () => {
       expect(textarea).toBeTruthy();
     }
   });
+
+  it('input and blur before CVA registration use default callbacks safely', async () => {
+    const f = TestBed.createComponent(NeuTextareaComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const textarea = f.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+    textarea.value = 'draft';
+
+    expect(() => textarea.dispatchEvent(new Event('input', { bubbles: true }))).not.toThrow();
+    expect(() => textarea.dispatchEvent(new Event('blur'))).not.toThrow();
+    expect((f.componentInstance as any)._value()).toBe('draft');
+  });
+
+  it('constructor auto-resize effect is safe before a textarea ref is available', () => {
+    const f = TestBed.createComponent(NeuTextareaComponent);
+    f.componentRef.setInput('autoResize', true);
+
+    expect(() => f.componentInstance['_isDisabledState']()).not.toThrow();
+    expect(() => f.detectChanges()).not.toThrow();
+  });
 });

@@ -1,10 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
   ElementRef,
   HostListener,
+  TemplateRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   forwardRef,
   inject,
   input,
@@ -12,7 +15,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -24,6 +27,11 @@ export interface NeuAutocompleteOption {
   label: string;
   /** Desactiva la opción / Disables the option */
   disabled?: boolean;
+}
+
+@Directive({ selector: 'ng-template[neuAutocompleteItem]' })
+export class NeuAutocompleteItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuAutocompleteOption }>) {}
 }
 
 let _seq = 0;
@@ -44,7 +52,7 @@ let _seq = 0;
  */
 @Component({
   selector: 'neu-autocomplete',
-  imports: [OverlayModule, ScrollingModule],
+  imports: [NgTemplateOutlet, OverlayModule, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -113,6 +121,18 @@ let _seq = 0;
           ×
         </button>
       }
+      @if (dropdown()) {
+        <button
+          type="button"
+          class="neu-autocomplete__dropdown"
+          [attr.aria-label]="dropdownAriaLabel()"
+          tabindex="-1"
+          [disabled]="_cvaDisabled()"
+          (click)="openAll()"
+        >
+          ▾
+        </button>
+      }
     </div>
     <div class="neu-autocomplete__sr-status" aria-live="polite" aria-atomic="true">
       {{ resultsAnnouncement() }}
@@ -127,7 +147,33 @@ let _seq = 0;
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
       (detach)="_closePanel()"
     >
-      @if (_filtered().length) {
+      @if (loading()) {
+        <div class="neu-autocomplete__empty" role="status" [style.width.px]="overlayWidth()">
+          {{ loadingLabel() }}
+        </div>
+      } @else if (_filtered().length) {
+        <ng-template #autocompleteOptionTpl let-opt let-i="index">
+          <div
+            class="neu-autocomplete__option"
+            role="option"
+            [id]="_optionId(i)"
+            [class.neu-autocomplete__option--active]="_activeIndex() === i"
+            [class.neu-autocomplete__option--disabled]="opt.disabled"
+            [attr.aria-selected]="_activeIndex() === i"
+            [attr.aria-disabled]="opt.disabled ?? false"
+            (mousedown)="selectOption(opt)"
+          >
+            @if (itemTpl()) {
+              <ng-container
+                [ngTemplateOutlet]="itemTpl()!.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: opt }"
+              />
+            } @else {
+              {{ opt.label }}
+            }
+          </div>
+        </ng-template>
+
         @if (virtualScroll()) {
           <cdk-virtual-scroll-viewport
             class="neu-autocomplete__list neu-autocomplete__list--virtual"
@@ -138,22 +184,15 @@ let _seq = 0;
             [style.height]="virtualViewportHeight()"
             [style.width.px]="overlayWidth()"
           >
-            <div
-              *cdkVirtualFor="let opt of _filtered(); trackBy: trackByOption; let i = index"
-              class="neu-autocomplete__option"
-              role="option"
-              [id]="_optionId(i)"
-              [class.neu-autocomplete__option--active]="_activeIndex() === i"
-              [class.neu-autocomplete__option--disabled]="opt.disabled"
-              [attr.aria-selected]="_activeIndex() === i"
-              [attr.aria-disabled]="opt.disabled ?? false"
-              (mousedown)="selectOption(opt)"
-            >
-              {{ opt.label }}
-            </div>
+            <ng-container *cdkVirtualFor="let opt of _filtered(); trackBy: trackByOption; let i = index">
+              <ng-container
+                [ngTemplateOutlet]="autocompleteOptionTpl"
+                [ngTemplateOutletContext]="{ $implicit: opt, index: i }"
+              />
+            </ng-container>
           </cdk-virtual-scroll-viewport>
         } @else {
-          <ul
+          <div
             class="neu-autocomplete__list"
             role="listbox"
             [id]="_listId"
@@ -161,20 +200,12 @@ let _seq = 0;
             [style.width.px]="overlayWidth()"
           >
             @for (opt of _filtered(); track opt.label; let i = $index) {
-              <li
-                class="neu-autocomplete__option"
-                role="option"
-                [id]="_optionId(i)"
-                [class.neu-autocomplete__option--active]="_activeIndex() === i"
-                [class.neu-autocomplete__option--disabled]="opt.disabled"
-                [attr.aria-selected]="_activeIndex() === i"
-                [attr.aria-disabled]="opt.disabled ?? false"
-                (mousedown)="selectOption(opt)"
-              >
-                {{ opt.label }}
-              </li>
+              <ng-container
+                [ngTemplateOutlet]="autocompleteOptionTpl"
+                [ngTemplateOutletContext]="{ $implicit: opt, index: i }"
+              />
             }
-          </ul>
+          </div>
         }
       } @else {
         <div class="neu-autocomplete__empty" role="status" [style.width.px]="overlayWidth()">
@@ -201,6 +232,11 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   readonly errorMessage = input<string>('');
   readonly emptyLabel = input<string>('Sin resultados');
   readonly minLength = input<number>(0);
+  readonly loading = input<boolean>(false);
+  readonly loadingLabel = input<string>('Loading...');
+  readonly dropdown = input<boolean>(false);
+  readonly dropdownAriaLabel = input<string>('Show suggestions');
+  readonly forceSelection = input<boolean>(false);
   /** Muestra el label como flotante (true) o estático encima del campo (false) / Shows the label as floating (true) or static above the field (false) */
   readonly floatingLabel = input<boolean>(false);
   /** Tamaño del campo: 'sm' = 36px | 'md' = 48px | 'lg' = 56px / Field size */
@@ -217,6 +253,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
 
   /** Emitido al cambiar el texto del input / Emitted on query change */
   readonly queryChange = output<string>();
+  readonly itemTpl = contentChild(NeuAutocompleteItemDirective);
 
   // ── Internal state ───────────────────────────────────────────────
   readonly _id = `neu-autocomplete-${++_seq}`;
@@ -270,9 +307,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   // ── Computed ─────────────────────────────────────────────────────
   readonly _filtered = computed(() => {
     const q = this._query().toLowerCase().trim();
-    // Con query vacía nunca mostramos opciones (no queremos comportarnos como un select).
-    // Empty query → never show options (autocomplete ≠ select).
-    if (!q) return [];
+    if (!q && !this.dropdown()) return [];
     if (q.length < this.minLength()) return [];
     return this.options().filter((o) => o.label.toLowerCase().includes(q));
   });
@@ -380,8 +415,20 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   _onBlur(): void {
     this._focused.set(false);
     this._onTouched();
+    if (this.forceSelection() && this._query()) {
+      const match = this.options().find((option) => option.label === this._query());
+      if (!match) {
+        this.clear();
+      }
+    }
     // Small delay to allow mousedown on option to fire first
     setTimeout(() => this._closePanel(), 150);
+  }
+
+  openAll(): void {
+    this._syncOverlayWidth();
+    this._isOpen.set(true);
+    this._activeIndex.set(this._filtered().findIndex((option) => !option.disabled));
   }
 
   onKeyDown(e: KeyboardEvent): void {

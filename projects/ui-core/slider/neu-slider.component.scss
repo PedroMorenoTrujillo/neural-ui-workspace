@@ -49,6 +49,13 @@ $track-height: 4px;
   text-align: right;
 }
 
+html[data-theme='dark'] {
+  .neu-slider__label,
+  .neu-slider__value {
+    color: #f2f7fb;
+  }
+}
+
 // ---- Track wrapper (posicionamiento relativo input + fill) ----
 .neu-slider__track-wrap {
   position: relative;

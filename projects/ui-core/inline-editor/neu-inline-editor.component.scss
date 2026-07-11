@@ -1,0 +1,87 @@
+.neu-inline-editor {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+
+  &__display {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--neu-space-2, 0.5rem);
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    border-radius: var(--neu-radius-sm, 6px);
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--neu-focus-ring, 0 0 0 3px rgb(14 165 233 / 0.2));
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  &__value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__value--empty {
+    color: var(--neu-text-muted, #64748b);
+    font-style: italic;
+  }
+
+  &__edit {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--neu-space-2, 0.5rem);
+    min-width: min(100%, 260px);
+    max-width: 100%;
+  }
+
+  &__control {
+    flex: 1 1 auto;
+    min-width: 8rem;
+  }
+
+  &__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--neu-space-1, 0.25rem);
+    flex: 0 0 auto;
+  }
+
+  &--sm &__edit {
+    min-width: min(100%, 220px);
+  }
+
+  &--lg &__edit {
+    min-width: min(100%, 320px);
+  }
+}
+
+@media (max-width: 480px) {
+  .neu-inline-editor {
+    width: 100%;
+
+    &__edit {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    &__control {
+      flex-basis: 100%;
+    }
+  }
+}

@@ -1,0 +1,52 @@
+.neu-form-field {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.neu-form-field__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--neu-text, #111827);
+}
+
+.neu-form-field__control,
+.neu-input-group {
+  display: flex;
+  align-items: stretch;
+  border-radius: 0.625rem;
+}
+
+.neu-form-field__control {
+  gap: 0.5rem;
+}
+
+.neu-form-field__prefix,
+.neu-form-field__suffix {
+  display: inline-flex;
+  align-items: center;
+  color: var(--neu-text-muted, #6b7280);
+}
+
+.neu-form-field__hint {
+  color: var(--neu-text-muted, #6b7280);
+  font-size: 0.8125rem;
+}
+
+.neu-form-field__error {
+  color: var(--neu-error, #dc2626);
+  font-size: 0.8125rem;
+}
+
+.neu-input-group--attached > * {
+  border-radius: 0;
+}
+
+.neu-input-group--attached > :first-child {
+  border-top-left-radius: 0.625rem;
+  border-bottom-left-radius: 0.625rem;
+}
+
+.neu-input-group--attached > :last-child {
+  border-top-right-radius: 0.625rem;
+  border-bottom-right-radius: 0.625rem;
+}

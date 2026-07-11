@@ -12,6 +12,29 @@ class TestHostComponent {
   ctrl = new FormControl(false);
 }
 
+@Component({
+  template: `
+    <neu-checkbox
+      label="Controlled"
+      ariaLabel="Controlled checkbox"
+      [checked]="checked"
+      [indeterminate]="indeterminate"
+      (checkedChange)="onCheckedChange($event)"
+    />
+  `,
+  imports: [NeuCheckboxComponent],
+})
+class ControlledHostComponent {
+  checked = false;
+  indeterminate = false;
+  lastChange: boolean | undefined;
+
+  onCheckedChange(value: boolean): void {
+    this.lastChange = value;
+    this.checked = value;
+  }
+}
+
 describe('NeuCheckboxComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
@@ -134,5 +157,50 @@ describe('NeuCheckboxComponent', () => {
     df.detectChanges();
     const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
     expect(input.checked).toBe(false);
+  });
+
+  it('should support controlled checked input and checkedChange output', () => {
+    const df = TestBed.createComponent(ControlledHostComponent);
+    df.detectChanges();
+    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
+
+    expect(input.checked).toBe(false);
+
+    input.click();
+    df.detectChanges();
+
+    expect(df.componentInstance.lastChange).toBe(true);
+    expect(input.checked).toBe(true);
+  });
+
+  it('should expose indeterminate state and mixed aria state', () => {
+    const df = TestBed.createComponent(ControlledHostComponent);
+    df.componentInstance.indeterminate = true;
+    df.detectChanges();
+
+    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
+    expect(input.indeterminate).toBe(true);
+    expect(input.getAttribute('aria-checked')).toBe('mixed');
+    expect(df.nativeElement.querySelector('.neu-checkbox__box--mixed')).toBeTruthy();
+  });
+
+  it('should pass ariaLabel to the native input', () => {
+    const df = TestBed.createComponent(ControlledHostComponent);
+    df.detectChanges();
+
+    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
+    expect(input.getAttribute('aria-label')).toBe('Controlled checkbox');
+  });
+
+  it('native blur event invokes the touched callback through the template listener', () => {
+    const df = TestBed.createComponent(NeuCheckboxComponent);
+    df.detectChanges();
+    const touched = vi.fn();
+    df.componentInstance.registerOnTouched(touched);
+
+    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
+    input.dispatchEvent(new Event('blur'));
+
+    expect(touched).toHaveBeenCalledOnce();
   });
 });

@@ -60,7 +60,7 @@
   gap: var(--neu-space-3);
   flex: 1;
   max-width: 420px;
-  min-width: 0;
+  min-width: min(100%, 240px);
 }
 
 .neu-table__search-wrapper {
@@ -158,10 +158,19 @@
 }
 
 .neu-table__exact-checkbox {
-  width: 14px;
-  height: 14px;
-  accent-color: var(--neu-primary);
-  cursor: pointer;
+  .neu-checkbox {
+    gap: 6px;
+  }
+
+  .neu-checkbox__box {
+    width: 14px;
+    height: 14px;
+  }
+
+  .neu-checkbox__label {
+    color: var(--neu-text-muted);
+    line-height: 1;
+  }
 }
 
 // ---- Scroll container — clave para mobile / key for mobile ----
@@ -175,7 +184,7 @@
   scrollbar-color: var(--neu-surface-3) transparent;
 
   &::-webkit-scrollbar {
-    height: 4px;
+    height: 6px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
@@ -267,7 +276,7 @@
 
 .neu-table__th {
   position: relative;
-  padding: var(--neu-space-3) var(--neu-space-4);
+  padding: 0.7rem var(--neu-space-4);
   font-size: var(--neu-text-xs);
   font-weight: 600;
   color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
@@ -351,10 +360,18 @@
 
 // ---- Selección / Selection ----
 .neu-table__checkbox {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--neu-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  .neu-checkbox {
+    gap: 0;
+  }
+
+  .neu-checkbox__box {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .neu-table__selection-bar {
@@ -425,7 +442,7 @@
 }
 
 .neu-table__td {
-  padding: var(--neu-space-3) var(--neu-space-4);
+  padding: 0.75rem var(--neu-space-4);
   color: var(--neu-text);
   line-height: 1.5;
   vertical-align: middle;
@@ -658,6 +675,30 @@
     background: var(--neu-error-bg);
     border-color: color-mix(in srgb, var(--neu-error) 40%, var(--neu-border) 60%);
     color: var(--neu-error);
+  }
+}
+
+// Keep compact table chrome legible when consumers activate the global dark
+// token set. These elements use smaller type, so muted foregrounds are not
+// sufficient against table surfaces.
+[data-theme='dark'] {
+  .neu-table__th {
+    color: #c8d1da;
+  }
+
+  .neu-table__th--sorted-asc,
+  .neu-table__th--sorted-desc {
+    color: #9ecbff;
+  }
+
+  .neu-table__export-btn {
+    background: var(--neu-surface);
+    border-color: var(--neu-border-hover);
+    color: #c8d1da;
+  }
+
+  .neu-table__export-btn--primary {
+    color: #9ecbff;
   }
 }
 
@@ -922,6 +963,7 @@
 .neu-table__actions {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--neu-space-1);
   flex-wrap: nowrap;
 }
@@ -1000,6 +1042,89 @@
   flex-shrink: 0;
 }
 
+.neu-table__column-chooser {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.neu-table__column-chooser-panel {
+  position: absolute;
+  top: calc(100% + var(--neu-space-2));
+  right: 0;
+  z-index: 20;
+  display: grid;
+  gap: var(--neu-space-2);
+  min-width: 180px;
+  padding: var(--neu-space-3);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-md);
+  background: var(--neu-surface);
+  box-shadow: var(--neu-shadow-lg);
+}
+
+.neu-table__column-chooser-item {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  font-size: var(--neu-text-sm);
+  color: var(--neu-text);
+  cursor: pointer;
+
+  .neu-checkbox__label {
+    font-size: var(--neu-text-sm);
+    color: var(--neu-text);
+    line-height: 1.25;
+  }
+}
+
+.neu-table__reorder-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: var(--neu-space-2);
+  vertical-align: middle;
+}
+
+.neu-table__reorder-btn {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface);
+  color: var(--neu-text-muted);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+}
+
+.neu-table__group-row .neu-table__td--group {
+  background: var(--neu-surface-2);
+  color: var(--neu-text);
+  font-weight: 700;
+}
+
+.neu-table__group-count {
+  color: var(--neu-text-muted);
+  font-weight: 500;
+}
+
+.neu-table__edit-control {
+  width: 100%;
+  min-width: 96px;
+  height: 30px;
+  padding: 0 var(--neu-space-2);
+  border: 1px solid var(--neu-primary);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface);
+  color: var(--neu-text);
+  font: inherit;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.12);
+}
+
 // ── sr-only — visually hidden, accessible / Oculto visualmente pero accesible ──
 .sr-only {
   position: absolute;
@@ -1017,13 +1142,47 @@
 .neu-table__filter-row {
   .neu-table__th--filter,
   .neu-table__th--filter-placeholder {
-    padding: var(--neu-space-2) var(--neu-space-3);
+    height: 42px;
+    padding: 0.35rem var(--neu-space-3);
     background: var(--neu-surface-2);
-    border-bottom: 2px solid var(--neu-border);
+    border-bottom: 1px solid var(--neu-border);
     font-weight: 400;
     text-transform: none;
     letter-spacing: 0;
     vertical-align: middle;
+  }
+
+  .neu-table__th--filter-placeholder {
+    padding-block: 0;
+  }
+
+  .neu-select,
+  .neu-date-input-host,
+  .neu-input-host {
+    display: block;
+    width: 100%;
+  }
+
+  .neu-select__trigger,
+  .neu-date-input__trigger,
+  .neu-input__field {
+    min-height: 30px;
+    height: 30px;
+    border-radius: var(--neu-radius-sm);
+    font-size: var(--neu-text-xs);
+  }
+
+  .neu-select__trigger {
+    padding-inline: var(--neu-space-2);
+  }
+
+  .neu-date-input__trigger {
+    padding-inline: var(--neu-space-2);
+  }
+
+  .neu-date-input__icon {
+    width: 14px;
+    height: 14px;
   }
 }
 

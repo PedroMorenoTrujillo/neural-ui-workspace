@@ -299,6 +299,27 @@ describe('NeuTabsComponent', () => {
     }
   });
 
+  it('endNavDrag should finish a matching pointer without capture or active dragging', async () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
+      ?.componentInstance as NeuTabsComponent;
+    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    const releasePointerCapture = vi.fn();
+    (nav as any).hasPointerCapture = vi.fn(() => false);
+    (nav as any).releasePointerCapture = releasePointerCapture;
+    (tabsComp as any)._dragPointerId = 13;
+    tabsComp.isDraggingNav.set(false);
+
+    tabsComp.endNavDrag({ pointerId: 13, currentTarget: nav } as unknown as PointerEvent);
+
+    expect(releasePointerCapture).not.toHaveBeenCalled();
+    expect((tabsComp as any)._dragPointerId).toBeNull();
+    expect(tabsComp.isDraggingNav()).toBe(false);
+  });
+
   it('startNavDrag should ignore targets outside the tab nav', async () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
@@ -634,6 +655,54 @@ describe('NeuTabsComponent', () => {
     f.detectChanges();
 
     expect(f.nativeElement).toBeTruthy();
+  });
+
+  it('pointercancel DOM event on nav should hit the template cancel handler', async () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    (nav as any).setPointerCapture = vi.fn();
+    (nav as any).hasPointerCapture = vi.fn(() => false);
+    (nav as any).releasePointerCapture = vi.fn();
+
+    nav.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        bubbles: true,
+        pointerId: 31,
+        pointerType: 'touch',
+        clientX: 60,
+      }),
+    );
+    nav.dispatchEvent(
+      new PointerEvent('pointercancel', {
+        bubbles: true,
+        pointerId: 31,
+        pointerType: 'touch',
+        clientX: 60,
+      }),
+    );
+    f.detectChanges();
+
+    expect((nav as any).releasePointerCapture).not.toHaveBeenCalled();
+  });
+
+  it('updates the indicator without forcing scroll when scrollIntoView is unavailable', async () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
+      ?.componentInstance as NeuTabsComponent;
+    const firstTab = f.nativeElement.querySelector('[role="tab"]') as HTMLElement & {
+      scrollIntoView?: unknown;
+    };
+    Object.defineProperty(firstTab, 'scrollIntoView', { configurable: true, value: undefined });
+
+    (tabsComp as any)._updateIndicator();
+
+    expect(tabsComp.indicatorStyle()).toContain('width:');
   });
 
   it('ngAfterViewInit should wire ResizeObserver when available', async () => {

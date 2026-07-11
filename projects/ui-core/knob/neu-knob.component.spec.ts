@@ -1,5 +1,6 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuKnobComponent } from './neu-knob.component';
 
 function mk() {
@@ -356,5 +357,114 @@ describe('NeuKnobComponent', () => {
       f.detectChanges();
     }
     expect(f.nativeElement).toBeTruthy();
+  });
+
+  it('DOM mouse and keyboard events on the dial use the template listeners', async () => {
+    const f = TestBed.createComponent(NeuKnobComponent);
+    f.componentRef.setInput('min', 0);
+    f.componentRef.setInput('max', 100);
+    f.componentRef.setInput('step', 5);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const mouseSpy = vi.spyOn(comp, 'onMouseDown');
+    const keySpy = vi.spyOn(comp, 'onKeyDown');
+    const dial: HTMLElement = f.nativeElement.querySelector('.neu-knob__dial');
+    vi.spyOn(dial, 'getBoundingClientRect').mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    dial.dispatchEvent(
+      new MouseEvent('mousedown', { button: 0, clientX: 50, clientY: 0, bubbles: true, cancelable: true }),
+    );
+    window.dispatchEvent(new MouseEvent('mouseup'));
+    dial.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    f.detectChanges();
+
+    expect(mouseSpy).toHaveBeenCalled();
+    expect(keySpy).toHaveBeenCalled();
+    expect(comp._value()).toBe(5);
+  });
+
+  it('renders the optional label and falls back to the host rect when the dial is unavailable', () => {
+    const f = TestBed.createComponent(NeuKnobComponent);
+    f.componentRef.setInput('label', 'Volume');
+    f.detectChanges();
+
+    expect(f.nativeElement.querySelector('.neu-knob__label')?.textContent).toContain('Volume');
+
+    const comp = f.componentInstance as any;
+    const hostRect = {
+      left: 10,
+      top: 20,
+      width: 80,
+      height: 80,
+      right: 90,
+      bottom: 100,
+      x: 10,
+      y: 20,
+      toJSON: () => ({}),
+    } as DOMRect;
+    vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
+    vi.spyOn(f.nativeElement, 'getBoundingClientRect').mockReturnValue(hostRect);
+
+    expect(typeof comp._getAngle(50, 20)).toBe('number');
+  });
+
+  it('normalizes circular drag deltas when crossing the angle boundary', () => {
+    const f = TestBed.createComponent(NeuKnobComponent);
+    f.componentRef.setInput('min', 0);
+    f.componentRef.setInput('max', 100);
+    f.detectChanges();
+    f.componentInstance.writeValue(50);
+
+    const comp = f.componentInstance as any;
+    const getAngle = vi.spyOn(comp, '_getAngle');
+    getAngle.mockReturnValueOnce(179).mockReturnValueOnce(-179);
+    comp.onMouseDown({ clientX: 0, clientY: 0, preventDefault: () => {} } as MouseEvent);
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 0, clientY: 0 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+    expect(comp._value()).toBeGreaterThan(50);
+
+    f.componentInstance.writeValue(50);
+    getAngle.mockReturnValueOnce(-179).mockReturnValueOnce(179);
+    comp.onMouseDown({ clientX: 0, clientY: 0, preventDefault: () => {} } as MouseEvent);
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 0, clientY: 0 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+    expect(comp._value()).toBeLessThan(50);
+  });
+
+  it('resolves the CVA provider through Reactive Forms', async () => {
+    @Component({
+      imports: [NeuKnobComponent, ReactiveFormsModule],
+      template: `<neu-knob [formControl]="control" [min]="0" [max]="100" />`,
+    })
+    class HostComponent {
+      readonly control = new FormControl(25, { nonNullable: true });
+    }
+
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [HostComponent],
+        providers: [provideZonelessChangeDetection()],
+      })
+      .compileComponents();
+    const host = TestBed.createComponent(HostComponent);
+    host.detectChanges();
+
+    const knob = host.nativeElement.querySelector('.neu-knob__dial') as HTMLElement;
+    knob.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    host.detectChanges();
+
+    expect(host.componentInstance.control.value).toBe(26);
   });
 });

@@ -2,26 +2,39 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  TemplateRef,
   ViewEncapsulation,
   computed,
+  effect,
   forwardRef,
   input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuProgressBarComponent } from '@neural-ui/core/progress-bar';
-import type { NeuUploaderError, NeuUploaderFileItem, NeuUploaderSize } from './neu-uploader.types';
+import type {
+  NeuUploaderError,
+  NeuUploaderFileItem,
+  NeuUploaderFileStatus,
+  NeuUploaderSize,
+} from './neu-uploader.types';
 
-export type { NeuUploaderError, NeuUploaderFileItem, NeuUploaderSize } from './neu-uploader.types';
+export type {
+  NeuUploaderError,
+  NeuUploaderFileItem,
+  NeuUploaderFileStatus,
+  NeuUploaderSize,
+} from './neu-uploader.types';
 
 let _neuUploaderIdSeq = 0;
 
 @Component({
   selector: 'neu-uploader',
-  imports: [NeuButtonComponent, NeuProgressBarComponent],
+  imports: [NgTemplateOutlet, NeuButtonComponent, NeuProgressBarComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -154,11 +167,41 @@ let _neuUploaderIdSeq = 0;
 
         <ul class="neu-uploader__list" [attr.aria-label]="listAriaLabel()">
           @for (item of fileItems(); track item.id) {
-            <li class="neu-uploader__item">
+            <li class="neu-uploader__item neu-uploader__item--{{ item.status }}">
+              @if (previewTemplate()) {
+                <ng-container
+                  [ngTemplateOutlet]="previewTemplate()"
+                  [ngTemplateOutletContext]="{ $implicit: item, item: item }"
+                />
+              }
               <div class="neu-uploader__item-main">
                 <span class="neu-uploader__item-name">{{ item.name }}</span>
-                <span class="neu-uploader__item-meta">{{ formatBytes(item.size) }}</span>
+                <span class="neu-uploader__item-meta">
+                  {{ formatBytes(item.size) }} · {{ item.status }}
+                  @if (item.error) {
+                    · {{ item.error }}
+                  }
+                </span>
+                @if (item.progress !== null) {
+                  <neu-progress-bar
+                    [value]="item.progress"
+                    [label]="item.name"
+                    [showValue]="true"
+                    size="sm"
+                  />
+                }
               </div>
+              @if (item.status === 'error') {
+                <button
+                  class="neu-uploader__retry"
+                  type="button"
+                  [disabled]="isDisabledFinal()"
+                  [attr.aria-label]="retryAriaLabel() + ' ' + item.name"
+                  (click)="retryFile(item.id, $event)"
+                >
+                  {{ retryLabel() }}
+                </button>
+              }
               <button
                 class="neu-uploader__remove"
                 type="button"
@@ -228,9 +271,18 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   maxFiles = input<number | null>(null);
   maxFileSize = input<number | null>(null);
   progress = input<number | null>(null);
+  fileStates = input<
+    Record<string, { status?: NeuUploaderFileStatus; progress?: number | null; error?: string }>
+  >({});
+  previewTemplate = input<TemplateRef<{ $implicit: NeuUploaderFileItem; item: NeuUploaderFileItem }> | null>(
+    null,
+  );
+  retryLabel = input<string>('Retry');
+  retryAriaLabel = input<string>('Retry upload for');
 
   readonly filesSelected = output<File[]>();
   readonly fileRemoved = output<File>();
+  readonly fileRetry = output<NeuUploaderFileItem>();
   readonly filesRejected = output<NeuUploaderError[]>();
   readonly cleared = output<void>();
 
@@ -243,6 +295,19 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   private readonly cvaDisabled = signal(false);
   private onChange: (value: File[]) => void = () => {};
   private onTouched: () => void = () => {};
+
+  constructor() {
+    effect(() => {
+      const states = this.fileStates();
+      if (!Object.keys(states).length) {
+        return;
+      }
+
+      this.fileItems.update((items) =>
+        items.map((item) => ({ ...item, ...(states[item.id] ?? {}) })),
+      );
+    });
+  }
 
   readonly isDisabledFinal = computed(() => this.disabled() || this.cvaDisabled());
   readonly hasError = computed(() => !!this.displayErrorMessage());
@@ -289,7 +354,7 @@ export class NeuUploaderComponent implements ControlValueAccessor {
     }
 
     const files = Array.isArray(value) ? value : [value];
-    this.fileItems.set(files.map((file) => this.toItem(file)));
+    this.fileItems.set(files.map((file) => this.withExternalState(this.toItem(file))));
   }
 
   registerOnChange(fn: (value: File[]) => void): void {
@@ -365,6 +430,28 @@ export class NeuUploaderComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
+  retryFile(id: string, event?: Event): void {
+    event?.stopPropagation();
+    const item = this.fileItems().find((current) => current.id === id);
+    if (!item) return;
+    this.fileItems.update((items) =>
+      items.map((current) =>
+        current.id === id ? { ...current, status: 'uploading', error: undefined } : current,
+      ),
+    );
+    this.fileRetry.emit(item);
+    this.onTouched();
+  }
+
+  setFileState(
+    id: string,
+    state: { status?: NeuUploaderFileStatus; progress?: number | null; error?: string },
+  ): void {
+    this.fileItems.update((items) =>
+      items.map((item) => (item.id === id ? { ...item, ...state } : item)),
+    );
+  }
+
   clearFiles(event?: Event): void {
     event?.stopPropagation();
     this.fileItems.set([]);
@@ -424,7 +511,7 @@ export class NeuUploaderComponent implements ControlValueAccessor {
         continue;
       }
 
-      const item = this.toItem(file);
+      const item = this.withExternalState(this.toItem(file));
       if (existingIds.has(item.id)) {
         errors.push({
           code: 'duplicate',
@@ -475,7 +562,12 @@ export class NeuUploaderComponent implements ControlValueAccessor {
       size: file.size,
       type: file.type,
       progress: this.progress(),
+      status: this.progress() !== null ? 'uploading' : 'idle',
     };
+  }
+
+  private withExternalState(item: NeuUploaderFileItem): NeuUploaderFileItem {
+    return { ...item, ...(this.fileStates()[item.id] ?? {}) };
   }
 
   private fileSignature(file: File): string {

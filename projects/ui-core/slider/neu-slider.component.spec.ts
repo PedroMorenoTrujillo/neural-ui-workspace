@@ -57,6 +57,17 @@ describe('NeuSliderComponent', () => {
     expect(df.nativeElement.textContent).toContain('Volumen');
   });
 
+  it('should render a label without the value when showValue=false', () => {
+    const df = TestBed.createComponent(NeuSliderComponent);
+    df.componentRef.setInput('label', 'Volumen');
+    df.componentRef.setInput('showValue', false);
+    df.componentRef.setInput('value', 75);
+    df.detectChanges();
+
+    expect(df.nativeElement.textContent).toContain('Volumen');
+    expect(df.nativeElement.querySelector('.neu-slider__value')).toBeNull();
+  });
+
   it('should show value when showValue=true', () => {
     const df = TestBed.createComponent(NeuSliderComponent);
     df.componentRef.setInput('showValue', true);
@@ -122,6 +133,16 @@ describe('NeuSliderComponent', () => {
     await df.whenStable();
     expect(df.nativeElement.textContent).toContain('0kg');
     expect(df.nativeElement.textContent).toContain('10kg');
+  });
+
+  it('fillPercent should be zero when min and max are equal', () => {
+    const df = TestBed.createComponent(NeuSliderComponent);
+    df.componentRef.setInput('min', 10);
+    df.componentRef.setInput('max', 10);
+    df.componentRef.setInput('value', 10);
+    df.detectChanges();
+
+    expect(df.componentInstance.fillPercent()).toBe(0);
   });
 
   it('disabled input adds disabled class to inner div', async () => {

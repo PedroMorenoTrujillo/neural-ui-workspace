@@ -40,7 +40,7 @@ export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
       <!-- Backdrop -->
       <div
         class="neu-dialog__backdrop"
-        (click)="!disableClose() && closed.emit()"
+        (click)="!disableClose() && close()"
         aria-hidden="true"
       ></div>
 
@@ -48,6 +48,7 @@ export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
       <div
         #panel
         class="neu-dialog__panel neu-dialog__panel--{{ size() }}"
+        [class.neu-dialog__panel--responsive]="responsive()"
         role="dialog"
         tabindex="-1"
         [id]="'neu-dialog-' + _uid"
@@ -63,7 +64,7 @@ export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
               class="neu-dialog__close"
               type="button"
               aria-label="Close dialog"
-              (click)="closed.emit()"
+              (click)="close()"
             >
               <neu-icon name="lucideX" size="1.125rem" />
             </button>
@@ -91,27 +92,40 @@ export class NeuDialogComponent {
   size = input<NeuDialogSize>('md');
   /** Si es true, el backdrop y el botón cerrar no funcionan. / If true, the backdrop and close button do not work. */
   disableClose = input<boolean>(false);
+  /** Adapta el panel a mobile/full-width cuando el viewport es estrecho. */
+  responsive = input<boolean>(true);
+  /** Devuelve el foco al elemento activo antes de abrir. */
+  restoreFocus = input<boolean>(true);
 
   /** Emite cuando el usuario cierra el diálogo. / Emits when the user closes the dialog. */
-  closed = output<void>();
+  closed = output<unknown>();
 
   private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
+  private previousActiveElement: HTMLElement | null = null;
 
   /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
   readonly _uid = Math.random().toString(36).slice(2, 7);
 
   constructor() {
     effect(() => {
-      if (!this.open()) return;
+      if (!this.open()) {
+        this.restorePreviousFocus();
+        return;
+      }
 
+      this.previousActiveElement = document.activeElement as HTMLElement | null;
       queueMicrotask(() => this.focusInitialElement());
     });
+  }
+
+  close(result?: unknown): void {
+    this.closed.emit(result);
   }
 
   onPanelKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       if (!this.disableClose()) {
-        this.closed.emit();
+        this.close();
       }
       return;
     }
@@ -152,6 +166,18 @@ export class NeuDialogComponent {
 
     const [firstFocusable] = this.getFocusableElements(panel);
     (firstFocusable ?? panel).focus();
+  }
+
+  private restorePreviousFocus(): void {
+    if (!this.restoreFocus() || !this.previousActiveElement?.focus) {
+      this.previousActiveElement = null;
+      return;
+    }
+
+    queueMicrotask(() => {
+      this.previousActiveElement?.focus();
+      this.previousActiveElement = null;
+    });
   }
 
   private getFocusableElements(panel: HTMLElement): HTMLElement[] {

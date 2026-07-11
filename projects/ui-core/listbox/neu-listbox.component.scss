@@ -1,0 +1,57 @@
+.neu-listbox {
+  display: block;
+}
+
+.neu-listbox__label {
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--neu-text, #111827);
+}
+
+.neu-listbox__search {
+  width: 100%;
+  min-height: 2.25rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.5rem;
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+  padding: 0 0.75rem;
+}
+
+.neu-listbox__options {
+  display: grid;
+  gap: 0.25rem;
+  max-height: 18rem;
+  overflow: auto;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.625rem;
+  padding: 0.375rem;
+  background: var(--neu-surface, #fff);
+}
+
+.neu-listbox__option {
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--neu-text, #111827);
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.neu-listbox__option--active {
+  outline: 2px solid var(--neu-primary, #2563eb);
+  outline-offset: 1px;
+}
+
+.neu-listbox__option--selected {
+  background: color-mix(in srgb, var(--neu-primary, #2563eb) 14%, transparent);
+}
+
+.neu-listbox__empty,
+.neu-listbox__hint {
+  color: var(--neu-text-muted, #6b7280);
+  font-size: 0.875rem;
+}

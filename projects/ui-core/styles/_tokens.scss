@@ -28,8 +28,14 @@
   // ------------------------------------------------
   --neu-bg: #f8fafc; // Slate-50 — fondo base
   --neu-surface: #ffffff; // Blanco puro — tarjetas
+  --neu-surface-1: var(--neu-surface); // Alias compatible para superficies base
   --neu-surface-2: #f1f5f9; // Slate-100 — fondos secundarios
   --neu-surface-3: #e2e8f0; // Slate-200 — hover, separadores
+  --neu-surface-raised: var(--neu-surface);
+  --neu-surface-hover: var(--neu-surface-2);
+  --neu-surface-muted: var(--neu-surface-2);
+  --neu-surface-inverse: #020617;
+  --neu-surface-rgb: 255, 255, 255;
 
   // ------------------------------------------------
   // Bordes
@@ -192,9 +198,12 @@
   --neu-alert-warning-text: var(--neu-warning-text);
   --neu-alert-warning-border: rgba(245, 158, 11, 0.2);
 
-  --neu-alert-danger-bg: var(--neu-error-bg);
-  --neu-alert-danger-text: var(--neu-error-text);
-  --neu-alert-danger-border: rgba(239, 68, 68, 0.2);
+  --neu-alert-error-bg: var(--neu-error-bg);
+  --neu-alert-error-text: var(--neu-error-text);
+  --neu-alert-error-border: rgba(239, 68, 68, 0.2);
+  --neu-alert-danger-bg: var(--neu-alert-error-bg);
+  --neu-alert-danger-text: var(--neu-alert-error-text);
+  --neu-alert-danger-border: var(--neu-alert-error-border);
 
   // ------------------------------------------------
   // Popover (v1.3.0)
@@ -307,15 +316,16 @@
   // ------------------------------------------------
   --neu-code-block-bg: #1a1b26;
   --neu-code-block-bar-bg: #16161e;
-  --neu-code-block-border: rgba(255, 255, 255, 0.06);
-  --neu-code-block-text: #cdd6f4;
-  --neu-code-block-accent: #7aa2f7;
+  --neu-code-block-border: rgba(255, 255, 255, 0.14);
+  --neu-code-block-text: #d9e2ff;
+  --neu-code-block-accent: #9ab8ff;
   --neu-code-block-muted: #565f89;
-  --neu-code-block-copy-text: #a9b1d6;
-  --neu-code-block-copy-hover-text: #c0caf5;
-  --neu-code-block-copy-border: rgba(255, 255, 255, 0.1);
-  --neu-code-block-copy-hover-bg: rgba(255, 255, 255, 0.1);
-  --neu-code-block-copy-hover-border: rgba(255, 255, 255, 0.2);
+  --neu-code-block-copy-bg: rgba(255, 255, 255, 0.12);
+  --neu-code-block-copy-text: #d9e2ff;
+  --neu-code-block-copy-hover-text: #ffffff;
+  --neu-code-block-copy-border: rgba(255, 255, 255, 0.22);
+  --neu-code-block-copy-hover-bg: rgba(255, 255, 255, 0.18);
+  --neu-code-block-copy-hover-border: rgba(255, 255, 255, 0.34);
 }
 
 // ============================================================
@@ -337,6 +347,8 @@
   --neu-surface: #161b22; // Tarjetas, paneles
   --neu-surface-2: #21262d; // Hover, fondos secundarios
   --neu-surface-3: #30363d; // Separadores, track de switch
+  --neu-surface-inverse: #e6edf3;
+  --neu-surface-rgb: 22, 27, 34;
 
   // ---- Bordes / Borders ----
   --neu-border: rgba(255, 255, 255, 0.08);
@@ -345,7 +357,7 @@
   // ---- Texto / Text ----
   --neu-text: #e6edf3; // Casi blanco — texto principal
   --neu-text-muted: #8b949e; // Slate-400 equivalent — subtítulos
-  --neu-text-disabled: #484f58; // Elementos deshabilitados
+  --neu-text-disabled: #8b949e; // Elementos deshabilitados; conserva contraste sobre surface-2
   --neu-knob-display-color: #f8fafc;
   --neu-knob-label-color: #8b949e;
 
@@ -391,9 +403,12 @@
   --neu-alert-warning-text: #fcd34d;
   --neu-alert-warning-border: rgba(245, 158, 11, 0.3);
 
-  --neu-alert-danger-bg: rgba(239, 68, 68, 0.15);
-  --neu-alert-danger-text: #fca5a5;
-  --neu-alert-danger-border: rgba(239, 68, 68, 0.3);
+  --neu-alert-error-bg: rgba(239, 68, 68, 0.15);
+  --neu-alert-error-text: #fca5a5;
+  --neu-alert-error-border: rgba(239, 68, 68, 0.3);
+  --neu-alert-danger-bg: var(--neu-alert-error-bg);
+  --neu-alert-danger-text: var(--neu-alert-error-text);
+  --neu-alert-danger-border: var(--neu-alert-error-border);
 
   // ---- Block UI dark override (v1.3.0) ----
   --neu-block-ui-bg: rgba(13, 17, 23, 0.7);

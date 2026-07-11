@@ -1677,4 +1677,115 @@ describe('NeuMultiselectComponent', () => {
       window.requestAnimationFrame = originalRequestAnimationFrame;
     }
   });
+
+  it('wires panel search, select-all, option keyboard handlers and host Escape through the DOM', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('searchable', true);
+    f.componentRef.setInput('selectAll', true);
+    f.detectChanges();
+    const component = f.componentInstance as any;
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+    trigger.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    const search = document.querySelector('.neu-multiselect__search-input') as HTMLInputElement;
+    const click = new MouseEvent('click', { bubbles: true });
+    const stopped = vi.spyOn(click, 'stopPropagation');
+    search.dispatchEvent(click);
+    expect(stopped).toHaveBeenCalled();
+
+    const selectAll = document.querySelector('.neu-multiselect__select-all') as HTMLButtonElement;
+    selectAll.click();
+    expect(component._values()).toEqual(['angular', 'react', 'vue']);
+    selectAll.click();
+    expect(component._values()).toEqual([]);
+
+    const react = document.querySelector('#neu-ms-opt-react') as HTMLElement;
+    react.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(component._values()).toEqual(['react']);
+    react.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    expect(component._values()).toEqual([]);
+    react.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    react.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+
+    f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(component.isOpen()).toBe(false);
+  });
+
+  it('renders loading state and closes through the CDK backdrop', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('loading', true);
+    f.componentRef.setInput('loadingLabel', 'Loading tech');
+    f.detectChanges();
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+
+    trigger.click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(document.querySelector('.neu-multiselect__empty')?.textContent).toContain(
+      'Loading tech',
+    );
+
+    (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
+    f.detectChanges();
+    await f.whenStable();
+    expect((f.componentInstance as any).isOpen()).toBe(false);
+  });
+
+  it('focusOptionByIndex returns cleanly when no enabled option can be focused', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', [{ value: 'disabled', label: 'Disabled', disabled: true }]);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const focusSpy = vi.spyOn(comp, 'focusOption');
+
+    comp.focusOptionByIndex(
+      { preventDefault: vi.fn() } as unknown as Event,
+      { value: 'disabled', label: 'Disabled', disabled: true },
+      1,
+    );
+
+    expect(focusSpy).not.toHaveBeenCalled();
+  });
+
+  it('virtual focus handles unknown values without scrolling', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const scrollToIndex = vi.fn();
+    const checkViewportSize = vi.fn();
+    const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
+    const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
+    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      comp.focusOption('missing');
+      expect(scrollToIndex).not.toHaveBeenCalled();
+      expect(checkViewportSize).not.toHaveBeenCalled();
+    } finally {
+      querySpy.mockRestore();
+      getByIdSpy.mockRestore();
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('exposes stable template and viewport query accessors before projection exists', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    expect(comp._viewport()).toBeUndefined();
+    expect(comp.itemTpl()).toBeUndefined();
+  });
 });

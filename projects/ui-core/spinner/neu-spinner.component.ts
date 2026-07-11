@@ -28,7 +28,7 @@ export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'neu-spinner-host' },
+  host: { class: 'neu-spinner-host', role: 'status', 'aria-live': 'polite' },
   template: `
     <svg
       class="neu-spinner"
@@ -57,7 +57,11 @@ export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 
         [style.stroke]="color() || null"
       />
     </svg>
-    <span class="cdk-visually-hidden">{{ ariaLabel() }}</span>
+    @if (label()) {
+      <span class="neu-spinner__label">{{ label() }}</span>
+    } @else {
+      <span class="neu-spinner__sr-only">{{ ariaLabel() }}</span>
+    }
   `,
   styleUrl: './neu-spinner.component.scss',
 })
@@ -77,8 +81,11 @@ export class NeuSpinnerComponent {
   /** Duración de la animación de rotación / Rotation animation duration */
   animationDuration = input<string>('1s');
 
-  /** Texto accesible para lectores de pantalla / Accessible text for screen readers */
-  ariaLabel = input<string>('Cargando...');
+  /** Etiqueta visible opcional junto al spinner / Optional visible label beside the spinner */
+  label = input<string>('');
+
+  /** Texto accesible cuando no se muestra label / Accessible text when label is not displayed */
+  ariaLabel = input<string>('Loading...');
 
   readonly _severityColor = computed(() => {
     const map: Record<NeuSpinnerSeverity, string> = {

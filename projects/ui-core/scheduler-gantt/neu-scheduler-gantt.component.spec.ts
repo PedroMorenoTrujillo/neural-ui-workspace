@@ -141,6 +141,33 @@ describe('NeuSchedulerGanttComponent', () => {
     expect(fixture.componentInstance.gridRows()[0].items[0].span).toBe(2);
   });
 
+  it('supports Date inputs and Sunday week normalization', () => {
+    const fixture = TestBed.createComponent(NeuSchedulerGanttComponent);
+    fixture.componentRef.setInput('rows', [
+      {
+        id: 'weekend',
+        label: 'Weekend',
+        tasks: [
+          {
+            id: 'sunday',
+            title: 'Sunday',
+            start: new Date(Date.UTC(2026, 4, 10)),
+            end: new Date(Date.UTC(2026, 4, 10)),
+          },
+        ],
+      },
+    ]);
+    fixture.componentRef.setInput('scale', 'week');
+    fixture.componentRef.setInput('startDate', new Date(Date.UTC(2026, 4, 10)));
+    fixture.componentRef.setInput('endDate', new Date(Date.UTC(2026, 4, 10)));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.gridColumns().map((column) => column.id)).toEqual([
+      '2026-05-04',
+    ]);
+    expect(fixture.componentInstance.gridRows()[0].items[0].start).toBe('2026-05-04');
+  });
+
   it('projects the selected slot into the inner timeline grid selection', () => {
     const fixture = TestBed.createComponent(NeuSchedulerGanttComponent);
     fixture.componentRef.setInput('rows', ROWS);
@@ -212,6 +239,20 @@ describe('NeuSchedulerGanttComponent', () => {
     const items = fixture.componentInstance.gridRows()[0].items;
     expect(items).toHaveLength(1);
     expect(items[0].meta).toBe('100%');
+  });
+
+  it('uses a deterministic fallback range when no rows or explicit dates exist', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 6, 12, 10)));
+    try {
+      const fixture = TestBed.createComponent(NeuSchedulerGanttComponent);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.gridColumns()[0].id).toBe('2026-07-12');
+      expect(fixture.componentInstance.rangeLabel()).toContain('2026');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('combines task meta with clamped progress', () => {

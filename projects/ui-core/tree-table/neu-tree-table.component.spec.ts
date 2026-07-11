@@ -1,5 +1,6 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuTableColumn } from '@neural-ui/core/table';
+import { NeuTableColumn, NeuTableExpandDirective } from '@neural-ui/core/table';
 import { By } from '@angular/platform-browser';
 import { NeuTableComponent } from '@neural-ui/core/table';
 import {
@@ -36,8 +37,27 @@ const COLUMNS: NeuTableColumn<NeuTreeTableRow<RepoMeta>>[] = [
   { key: 'status', header: 'Status' },
 ];
 
+@Component({
+  standalone: true,
+  imports: [NeuTreeTableComponent, NeuTableExpandDirective],
+  template: `
+    <neu-tree-table [nodes]="nodes" [columns]="columns" [expandable]="true">
+      <ng-template neuTableExpand let-node let-row="row">
+        <span class="tree-detail">{{ node.label }} / {{ row.__treeLevel }}</span>
+      </ng-template>
+    </neu-tree-table>
+  `,
+})
+class TreeTableExpandHostComponent {
+  nodes = NODES;
+  columns = COLUMNS;
+}
+
 describe('NeuTreeTableComponent', () => {
   beforeEach(async () => {
+    if (!HTMLElement.prototype.scrollTo) {
+      HTMLElement.prototype.scrollTo = vi.fn();
+    }
     await TestBed.configureTestingModule({
       imports: [NeuTreeTableComponent],
     }).compileComponents();
@@ -80,7 +100,9 @@ describe('NeuTreeTableComponent', () => {
     });
 
     fixture.detectChanges();
-    const checkboxes = fixture.nativeElement.querySelectorAll('.neu-table__checkbox');
+    const checkboxes = fixture.nativeElement.querySelectorAll(
+      '.neu-table__checkbox input[type="checkbox"]',
+    );
     checkboxes[1].checked = true;
     checkboxes[1].dispatchEvent(new Event('change'));
     fixture.detectChanges();
@@ -250,5 +272,152 @@ describe('NeuTreeTableComponent', () => {
 
     expect(expansionStates.at(-1)).toEqual(['workspace']);
     expect(fixture.nativeElement.textContent).not.toContain('Admin');
+  });
+
+  it('passes advanced table features through to the inner table', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('loading', true);
+    fixture.componentRef.setInput('pageSize', 20);
+    fixture.componentRef.setInput('exactMatchable', true);
+    fixture.componentRef.setInput('exportable', true);
+    fixture.componentRef.setInput('exportFormats', ['csv', 'json']);
+    fixture.componentRef.setInput('virtualScroll', true);
+    fixture.componentRef.setInput('virtualScrollVisibleItems', 12);
+    fixture.componentRef.setInput('resizableColumns', true);
+    fixture.componentRef.setInput('reorderableColumns', true);
+    fixture.componentRef.setInput('columnChooser', true);
+    fixture.componentRef.setInput('inlineEdit', true);
+    fixture.componentRef.setInput('inlineEditLabel', 'Edit tree cell');
+    fixture.componentRef.setInput('saveInlineEditLabel', 'Save tree cell');
+    fixture.componentRef.setInput('cancelInlineEditLabel', 'Cancel tree cell edit');
+    fixture.componentRef.setInput('multiSort', true);
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.componentRef.setInput('totalItems', 42);
+    fixture.componentRef.setInput('groupBy', 'owner');
+    fixture.detectChanges();
+
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent;
+
+    expect(table.loading()).toBe(true);
+    expect(table.pageSize()).toBe(20);
+    expect(table.exactMatchable()).toBe(true);
+    expect(table.exportable()).toBe(true);
+    expect(table.exportFormats()).toEqual(['csv', 'json']);
+    expect(table.virtualScroll()).toBe(true);
+    expect(table.virtualScrollVisibleItems()).toBe(12);
+    expect(table.resizableColumns()).toBe(true);
+    expect(table.reorderableColumns()).toBe(true);
+    expect(table.columnChooser()).toBe(true);
+    expect(table.inlineEdit()).toBe(true);
+    expect(table.inlineEditLabel()).toBe('Edit tree cell');
+    expect(table.saveInlineEditLabel()).toBe('Save tree cell');
+    expect(table.cancelInlineEditLabel()).toBe('Cancel tree cell edit');
+    expect(table.multiSort()).toBe(true);
+    expect(table.serverSide()).toBe(true);
+    expect(table.totalItems()).toBe(42);
+    expect(table.groupBy()).toBe('owner');
+  });
+
+  it('maps advanced table events back to tree nodes', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    const row = fixture.componentInstance.flatRows()[0] as NeuTreeTableRow<RepoMeta>;
+    const events: string[] = [];
+
+    fixture.componentInstance.nodeDblClick.subscribe((node) => events.push(`dbl:${node.id}`));
+    fixture.componentInstance.actionClick.subscribe((event) =>
+      events.push(`action:${event.action.key}:${event.node.id}`),
+    );
+    fixture.componentInstance.selectionActionClick.subscribe((event) =>
+      events.push(`selection-action:${event.action.key}:${event.nodes.map((node) => node.id).join(',')}`),
+    );
+    fixture.componentInstance.cellEditCommit.subscribe((event) =>
+      events.push(`edit:${event.column.key}:${event.node.id}:${event.value}`),
+    );
+    fixture.detectChanges();
+
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent;
+
+    table.rowDblClick.emit(row);
+    table.actionClick.emit({ action: { key: 'open', label: 'Open', icon: 'open' }, row });
+    table.selectionActionClick.emit({
+      action: { key: 'archive', label: 'Archive', icon: 'archive' },
+      rows: [row],
+    });
+    table.cellEditCommit.emit({
+      row,
+      column: COLUMNS[1] as unknown as NeuTableColumn<Record<string, unknown>>,
+      value: 'DX',
+      previousValue: 'Platform',
+    });
+
+    expect(events).toEqual([
+      'dbl:workspace',
+      'action:open:workspace',
+      'selection-action:archive:workspace',
+      'edit:owner:workspace:DX',
+    ]);
+  });
+
+  it('forwards table state, search, layout and row events without changing their contract', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    const row = fixture.componentInstance.flatRows()[0] as NeuTreeTableRow<RepoMeta>;
+    const received: unknown[] = [];
+    fixture.componentInstance.nodeClick.subscribe((node) => received.push(`click:${node.id}`));
+    fixture.componentInstance.searchChange.subscribe((value) => received.push(`search:${value}`));
+    fixture.componentInstance.serverStateChange.subscribe((value) => received.push(value));
+    fixture.componentInstance.columnResize.subscribe((value) => received.push(value));
+    fixture.componentInstance.columnReorder.subscribe((value) => received.push(value));
+    fixture.componentInstance.layoutChange.subscribe((value) => received.push(value));
+    fixture.detectChanges();
+
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent;
+    const state = { page: 2, pageSize: 20, search: 'core', sort: null, multiSort: [] } as any;
+    const resize = { key: 'label', width: 320 };
+    const reorder = { previousIndex: 0, currentIndex: 1, columns: [] } as any;
+    const layout = { columns: [], pageSize: 20 } as any;
+    table.rowClick.emit(row);
+    table.searchChange.emit('core');
+    table.serverStateChange.emit(state);
+    table.columnResize.emit(resize);
+    table.columnReorder.emit(reorder);
+    table.layoutChange.emit(layout);
+
+    expect(received).toEqual(['click:workspace', 'search:core', state, resize, reorder, layout]);
+  });
+
+  it('forwards projected expand templates to the inner table with node and row context', () => {
+    const fixture = TestBed.createComponent(TreeTableExpandHostComponent);
+    fixture.detectChanges();
+
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent;
+
+    expect(table.expandTemplate()).toBeTruthy();
+    const treeTable = fixture.debugElement.query(By.directive(NeuTreeTableComponent))
+      .componentInstance as NeuTreeTableComponent;
+    expect((treeTable as any).treeCellTpl()).toBeTruthy();
+    const row = treeTable.flatRows()[0];
+    const directive = treeTable.expandTemplate();
+    expect(directive).toBeTruthy();
+    expect(treeTable.expandTemplateRef(directive!)).toBe(directive!.templateRef);
+    expect(treeTable.expandTemplateContext(row)).toEqual(
+      expect.objectContaining({
+        $implicit: NODES[0],
+        node: NODES[0],
+        row: expect.objectContaining({ id: 'workspace' }),
+      }),
+    );
+    (fixture.nativeElement.querySelector('.neu-table__expand-btn') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.tree-detail')?.textContent).toContain('Workspace / 0');
   });
 });

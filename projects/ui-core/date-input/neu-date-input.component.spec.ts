@@ -45,6 +45,16 @@ describe('NeuDateInputComponent', () => {
     expect(f.nativeElement.querySelector('button.neu-date-input__trigger')).toBeTruthy();
   });
 
+  it('should render the custom placeholder in the trigger', async () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('placeholder', 'Filter...');
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.neu-date-input__display')?.textContent).toContain(
+      'Filter...',
+    );
+  });
+
   it('should adapt range labels to html lang when set to english', async () => {
     document.documentElement.lang = 'en';
     const f = TestBed.createComponent(NeuDateInputComponent);
@@ -958,5 +968,323 @@ describe('NeuDateInputComponent', () => {
     comp._hoverDate.set(new Date(2025, 3, 5));
 
     expect(comp._rangeCell(new Date(2025, 3, 10), true).inRange).toBe(true);
+  });
+  it('drives every range overlay action through the mounted panel', async () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.componentRef.setInput('presets', [{ label: 'This week', range: { start: new Date(2026, 0, 5), end: new Date(2026, 0, 9) } }]);
+    f.detectChanges();
+    (f.nativeElement.querySelector('.neu-drp__trigger') as HTMLButtonElement).click();
+    f.detectChanges();
+    await f.whenStable();
+    const panel = document.querySelector('.neu-drp__panel') as HTMLElement;
+    expect(panel).toBeTruthy();
+    const nav = panel.querySelectorAll('.neu-drp__cal-nav button') as NodeListOf<HTMLButtonElement>;
+    nav.forEach((button) => button.click());
+    const cells = panel.querySelectorAll('.neu-drp__cell') as NodeListOf<HTMLButtonElement>;
+    cells[8].dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    cells[8].click();
+    cells[9].dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    cells[9].click();
+    const calendars = panel.querySelectorAll('.neu-drp__cal-grid');
+    const rightCells = calendars[1]?.querySelectorAll('.neu-drp__cell') as NodeListOf<HTMLButtonElement> | undefined;
+    rightCells?.[8]?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    rightCells?.[8]?.click();
+    (panel.querySelector('.neu-drp__preset') as HTMLButtonElement).click();
+    (panel.querySelector('.neu-drp__clear') as HTMLButtonElement).click();
+    cells[10].click();
+    cells[11].click();
+    f.detectChanges();
+    await f.whenStable();
+    (document.querySelector('.neu-drp__apply') as HTMLButtonElement).click();
+    expect(f.componentInstance.isOpen()).toBe(false);
+  });
+
+  it('closes both overlay variants through their CDK backdrops', async () => {
+    const closeFromBackdrop = async (type: 'date' | 'range') => {
+      const f = TestBed.createComponent(NeuDateInputComponent);
+      f.componentRef.setInput('type', type);
+      f.detectChanges();
+      (f.nativeElement.querySelector('button') as HTMLButtonElement).click();
+      f.detectChanges();
+      await f.whenStable();
+      (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
+      f.detectChanges();
+      await f.whenStable();
+      expect(f.componentInstance.isOpen()).toBe(false);
+      f.destroy();
+    };
+
+    await closeFromBackdrop('date');
+    await closeFromBackdrop('range');
+  });
+
+  it('drives calendar pickers, time drums and Escape through the simple overlay', async () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'datetime-local');
+    f.componentRef.setInput('showMonthYearPicker', true);
+    f.detectChanges();
+    (f.nativeElement.querySelector('.neu-date-input__trigger') as HTMLButtonElement).click();
+    f.detectChanges();
+    await f.whenStable();
+    const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
+    const arrows = panel.querySelectorAll('.neu-date-input__cal-arrow') as NodeListOf<HTMLButtonElement>;
+    arrows[0].click();
+    arrows[1].click();
+    const pickers = panel.querySelectorAll('.neu-date-input__picker') as NodeListOf<HTMLSelectElement>;
+    pickers[0].value = '6';
+    pickers[0].dispatchEvent(new Event('change', { bubbles: true }));
+    pickers[1].value = '2030';
+    pickers[1].dispatchEvent(new Event('change', { bubbles: true }));
+    (panel.querySelector('.neu-date-input__cal-day:not([disabled])') as HTMLButtonElement).click();
+    const drums = panel.querySelectorAll('.neu-date-input__drum') as NodeListOf<HTMLElement>;
+    const drumButtons = panel.querySelectorAll('.neu-date-input__drum-arrow') as NodeListOf<HTMLButtonElement>;
+    drumButtons.forEach((button) => button.click());
+    drums[0].querySelector('.neu-date-input__drum-item--adjacent')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    drums[1].querySelector('.neu-date-input__drum-item--adjacent')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    drums[0].querySelector('.neu-date-input__drum-track')?.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 10 }));
+    drums[1].querySelector('.neu-date-input__drum-track')?.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -10 }));
+    const footer = panel.querySelectorAll('.neu-date-input__cal-footer-btn') as NodeListOf<HTMLButtonElement>;
+    footer.forEach((button) => button.click());
+    f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(f.componentInstance.isOpen()).toBe(false);
+  });
+});
+
+describe('NeuDateInputComponent advanced date selection', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [NeuDateInputComponent] }).compileComponents();
+  });
+
+  it('should support multiple date values', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    const onChange = vi.fn();
+    f.componentRef.setInput('type', 'date');
+    f.componentRef.setInput('multiple', true);
+    f.detectChanges();
+    f.componentInstance.registerOnChange(onChange);
+
+    (f.componentInstance as any).selectDay({
+      date: new Date(2026, 0, 10),
+      inMonth: true,
+      isToday: false,
+      isSelected: false,
+      disabled: false,
+    });
+
+    expect(onChange).toHaveBeenCalledWith(['2026-01-10']);
+  });
+
+  it('should prevent disabled date selection', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    const onChange = vi.fn();
+    f.componentRef.setInput('type', 'date');
+    f.componentRef.setInput('disabledDates', ['2026-01-10']);
+    f.detectChanges();
+    f.componentInstance.registerOnChange(onChange);
+
+    (f.componentInstance as any).selectDay({
+      date: new Date(2026, 0, 10),
+      inMonth: true,
+      isToday: false,
+      isSelected: false,
+      disabled: true,
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('should apply range presets without emitting until apply', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    comp._applyPreset({
+      label: 'This week',
+      range: { start: new Date(2026, 0, 1), end: new Date(2026, 0, 7) },
+    });
+
+    expect(comp._pickStart().getDate()).toBe(1);
+    expect(comp._pickEnd().getDate()).toBe(7);
+  });
+
+  it('should update the calendar cursor from month and year pickers', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.detectChanges();
+
+    f.componentInstance.setViewMonth(6);
+    f.componentInstance.setViewYear(2030);
+
+    expect((f.componentInstance as any)._viewMonth()).toBe(6);
+    expect((f.componentInstance as any)._viewYear()).toBe(2030);
+  });
+
+  it('normalizes multiple values from strings and toggles an existing date', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'date');
+    f.componentRef.setInput('multiple', true);
+    f.detectChanges();
+    const component = f.componentInstance as any;
+    const onChange = vi.fn();
+    component.registerOnChange(onChange);
+    component.writeValue('2026-01-10, 2026-01-12');
+    expect(component._selectedDates()).toEqual(['2026-01-10', '2026-01-12']);
+    component.selectDay({
+      date: new Date(2026, 0, 10), inMonth: true, isToday: false, isSelected: true, disabled: false,
+    });
+    expect(component._selectedDates()).toEqual(['2026-01-12']);
+    expect(onChange).toHaveBeenLastCalledWith(['2026-01-12']);
+  });
+
+  it('honours functional and invalid disabled-date values in single and range modes', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.componentRef.setInput('disabledDates', (date: Date) => date.getDay() === 0);
+    f.detectChanges();
+    const component = f.componentInstance as any;
+    expect(component.isDateDisabled(new Date(2026, 0, 4))).toBe(true);
+    expect(component.isDateDisabled(new Date(2026, 0, 5))).toBe(false);
+    component._selectDay(new Date(2026, 0, 4));
+    expect(component._pickStart()).toBeNull();
+    f.componentRef.setInput('disabledDates', ['not-a-date', new Date(2026, 0, 5)]);
+    f.detectChanges();
+    expect(component.isDateDisabled(new Date(2026, 0, 5))).toBe(true);
+  });
+
+  it('handles function presets, invalid pickers and touched range application', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.detectChanges();
+    const component = f.componentInstance as any;
+    const touched = vi.fn();
+    component.registerOnTouched(touched);
+    component._applyPreset({
+      label: 'Today', range: () => ({ start: new Date(2026, 2, 1), end: null }),
+    });
+    expect(component._pickStart()).toEqual(new Date(2026, 2, 1));
+    component.setViewMonth('invalid');
+    component.setViewYear('invalid');
+    component._applyRange();
+    expect(touched).toHaveBeenCalledTimes(1);
+  });
+
+  it('formats multiple date display values and ignores invalid stored dates', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'date');
+    f.componentRef.setInput('multiple', true);
+    f.detectChanges();
+    const component = f.componentInstance as any;
+
+    component.writeValue(['2026-01-10', 'not-a-date', '2026-01-12']);
+
+    expect(component.displayValue()).toContain('2026');
+    expect(component.displayValue()).not.toContain('not-a-date');
+    expect(component.isDateSelected(new Date(2026, 0, 10))).toBe(true);
+    expect(component.isDateSelected(new Date(2026, 0, 11))).toBe(false);
+  });
+
+  it('reacts to document lang mutations and falls back to spanish for blank lang', async () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.detectChanges();
+    const component = f.componentInstance as any;
+
+    document.documentElement.lang = 'en';
+    document.documentElement.setAttribute('lang', 'en');
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(component._rangePlaceholderText()).toBe('Select dates');
+
+    document.documentElement.lang = '';
+    document.documentElement.setAttribute('lang', '');
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(component._rangePlaceholderText()).toBe('Seleccionar fechas');
+  });
+
+  it('renders the floating label branch for the single trigger', async () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('label', 'Due date');
+    f.componentRef.setInput('floatingLabel', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelector('.neu-date-input__float-label')?.textContent).toContain(
+      'Due date',
+    );
+  });
+
+  it('keeps time and datetime defaults when writeValue receives partial invalid values', () => {
+    const time = TestBed.createComponent(NeuDateInputComponent);
+    time.componentRef.setInput('type', 'time');
+    time.detectChanges();
+    (time.componentInstance as any).writeValue('bad:07');
+    expect((time.componentInstance as any)._selHour()).toBe(0);
+    expect((time.componentInstance as any)._selMinute()).toBe(7);
+
+    const dateTime = TestBed.createComponent(NeuDateInputComponent);
+    dateTime.componentRef.setInput('type', 'datetime-local');
+    dateTime.detectChanges();
+    (dateTime.componentInstance as any).writeValue('Tbad:09');
+    expect((dateTime.componentInstance as any)._selHour()).toBe(0);
+    expect((dateTime.componentInstance as any)._selMinute()).toBe(9);
+    expect((dateTime.componentInstance as any).displayValue()).toContain(', ');
+  });
+
+  it('covers remaining range display, preset and guard branches', () => {
+    const range = TestBed.createComponent(NeuDateInputComponent);
+    range.componentRef.setInput('type', 'range');
+    range.detectChanges();
+    const rangeComp = range.componentInstance as any;
+    rangeComp._pickStart.set(new Date(2026, 0, 10));
+    rangeComp._pickEnd.set(null);
+    expect(rangeComp._rangeDisplayValue()).toContain('2026');
+
+    rangeComp._applyPreset({
+      label: 'End only',
+      range: { start: null, end: new Date(2026, 0, 12) },
+    });
+    expect(rangeComp._pickStart()).toBeNull();
+    expect(rangeComp._pickEnd()).toEqual(new Date(2026, 0, 12));
+
+    const disabled = TestBed.createComponent(NeuDateInputComponent);
+    disabled.componentRef.setInput('disabled', true);
+    disabled.detectChanges();
+    disabled.componentInstance.toggle();
+    expect(disabled.componentInstance.isOpen()).toBe(false);
+
+    const readonly = TestBed.createComponent(NeuDateInputComponent);
+    readonly.componentRef.setInput('readonly', true);
+    readonly.detectChanges();
+    readonly.componentInstance.toggle();
+    expect(readonly.componentInstance.isOpen()).toBe(false);
+  });
+
+  it('keeps the overlay open for document clicks inside the date panel', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.detectChanges();
+    f.componentInstance.isOpen.set(true);
+    const panel = document.createElement('div');
+    panel.className = 'neu-date-input__panel';
+    const child = document.createElement('button');
+    panel.appendChild(child);
+    document.body.appendChild(panel);
+
+    try {
+      f.componentInstance.onDocumentClick({ target: child } as unknown as MouseEvent);
+      expect(f.componentInstance.isOpen()).toBe(true);
+    } finally {
+      document.body.removeChild(panel);
+    }
+  });
+
+  it('checks single-date selected state when only part of the date matches', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.detectChanges();
+    const component = f.componentInstance as any;
+    component.writeValue('2026-01-10');
+
+    expect(component.isDateSelected(new Date(2026, 0, 11))).toBe(false);
+    expect(component.isDateSelected(new Date(2026, 1, 10))).toBe(false);
+    expect(component.isDateSelected(new Date(2027, 0, 10))).toBe(false);
   });
 });

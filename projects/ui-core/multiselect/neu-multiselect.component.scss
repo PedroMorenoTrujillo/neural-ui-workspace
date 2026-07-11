@@ -489,6 +489,13 @@ $panel-z: 200;
   font-weight: 500;
 }
 
+html[data-theme='dark'] {
+  .neu-multiselect__count-badge {
+    background: #0b66d4;
+    color: #ffffff;
+  }
+}
+
 .neu-multiselect__chip--overflow {
   background: var(--neu-surface-2);
   color: var(--neu-text-muted);
@@ -522,4 +529,16 @@ $panel-z: 200;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+.neu-multiselect__select-all {
+  width: calc(100% - 16px);
+  margin: 8px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-md);
+  background: var(--neu-surface-2);
+  color: var(--neu-text);
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
 }

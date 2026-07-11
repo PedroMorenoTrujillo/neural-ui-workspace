@@ -109,6 +109,15 @@ neu-dialog {
   }
 }
 
+@media (max-width: 640px) {
+  .neu-dialog__panel--responsive {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    margin: 12px;
+  }
+}
+
 .neu-dialog__header {
   display: flex;
   align-items: center;

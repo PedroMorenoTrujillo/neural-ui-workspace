@@ -43,6 +43,16 @@ describe('NeuCalendarComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.neu-calendar__day').length).toBe(42);
   });
 
+  it('should start weeks on Monday when the selected date is Sunday', async () => {
+    const fixture = TestBed.createComponent(NeuCalendarComponent);
+    fixture.componentRef.setInput('events', []);
+    fixture.componentRef.setInput('selectedDate', '2026-05-17');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(localDayKey(fixture.componentInstance.weekDays()[0].date)).toBe('2026-05-11');
+  });
+
   it('should render week view when configured', async () => {
     const fixture = setup();
     fixture.componentRef.setInput('view', 'week');
@@ -281,6 +291,27 @@ describe('NeuCalendarComponent', () => {
     ).toContain('2 eventos');
   });
 
+  it('falls back to English labels when navigator language is unavailable', async () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+    Object.defineProperty(globalThis, 'navigator', {
+      configurable: true,
+      value: { language: '' },
+    });
+    try {
+      const fixture = TestBed.createComponent(NeuCalendarComponent);
+      fixture.componentRef.setInput('events', []);
+      fixture.componentRef.setInput('selectedDate', '2026-05-14');
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.resolvedLabels().todayButton).toBe('Today');
+    } finally {
+      if (descriptor) {
+        Object.defineProperty(globalThis, 'navigator', descriptor);
+      }
+    }
+  });
+
   it('should expose visible events capped by maxVisibleEvents', async () => {
     const fixture = setup();
     fixture.componentRef.setInput('maxVisibleEvents', 1);
@@ -408,5 +439,73 @@ describe('NeuCalendarComponent', () => {
         .monthDays()
         .some((cell) => cell.isSelected && cell.date.getDate() === today.getDate()),
     ).toBe(true);
+  });
+
+  it('selects a day with Enter and Space keyboard events', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const selected: string[] = [];
+    fixture.componentInstance.dateSelect.subscribe((date) => selected.push(localDayKey(date)));
+
+    const target = new Date('2026-05-20T12:00:00');
+
+    fixture.componentInstance.onDayKeydown(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+      target,
+    );
+    fixture.componentInstance.onDayKeydown(
+      new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }),
+      target,
+    );
+    fixture.detectChanges();
+
+    expect(selected).toEqual(['2026-05-20', '2026-05-20']);
+  });
+
+  it('navigates month and week views and invokes today from the rendered button', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const emitted: string[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) => emitted.push(localDayKey(date)));
+
+    fixture.componentInstance.prev();
+    fixture.componentInstance.next();
+    fixture.componentRef.setInput('view', 'week');
+    fixture.detectChanges();
+    fixture.componentInstance.prev();
+    fixture.componentInstance.next();
+
+    const todayButton = fixture.nativeElement.querySelector('.neu-calendar__today') as HTMLButtonElement;
+    todayButton.click();
+    fixture.detectChanges();
+
+    expect(emitted.length).toBeGreaterThanOrEqual(5);
+    expect(emitted.at(-1)).toBe(localDayKey(new Date()));
+  });
+
+  it('uses the English default labels and empty event tooltip branch', () => {
+    const fixture = setup();
+    const labels = fixture.componentInstance.resolvedLabels();
+    expect(labels.eventCount(1)).toBe('1 event');
+    expect(labels.eventCount(2)).toBe('2 events');
+    expect(
+      fixture.componentInstance.eventTooltip({ id: 'x', title: 'Plain', start: new Date(), allDay: false }),
+    ).toContain('Plain');
+    expect(
+      fixture.componentInstance.eventTooltip({ id: 'plain', title: 'Plain only', start: new Date(), meta: '' }),
+    ).toContain('Plain only');
+    fixture.componentInstance.onDayKeydown(
+      new KeyboardEvent('keydown', { key: 'Spacebar', cancelable: true }),
+      new Date('2026-05-21'),
+    );
+  });
+
+  it('hides the header when requested', async () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('showHeader', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.neu-calendar__header')).toBeNull();
   });
 });

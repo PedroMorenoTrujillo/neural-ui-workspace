@@ -181,6 +181,43 @@ describe('NeuNavComponent', () => {
     expect(f.nativeElement.querySelector('.neu-nav__item-badge')).toBeTruthy();
   });
 
+  it('should use default badge variant when badgeVariant is omitted on group and child items', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [
+      {
+        id: 'group-default-badge',
+        label: 'Grupo',
+        icon: 'lucideChevronRight',
+        badge: 'New',
+        children: [
+          {
+            id: 'child-default-badge',
+            label: 'Child',
+            icon: 'lucideChevronRight',
+            route: '/child',
+            badge: '2',
+          },
+          {
+            id: 'child-href-default-badge',
+            label: 'Child href',
+            icon: 'lucideExternalLink',
+            href: 'https://example.com',
+            badge: '3',
+          },
+        ],
+      },
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+    f.componentInstance.toggleGroup('group-default-badge');
+    f.detectChanges();
+
+    const badges = Array.from(
+      f.nativeElement.querySelectorAll('.neu-nav__item-badge--default'),
+    );
+    expect(badges.length).toBeGreaterThanOrEqual(3);
+  });
+
   it('should render badge on a top-level external item', async () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', [
@@ -198,6 +235,46 @@ describe('NeuNavComponent', () => {
 
     expect(f.nativeElement.textContent).toContain('New');
     expect(f.nativeElement.querySelector('.neu-nav__item-badge')).toBeTruthy();
+  });
+
+  it('should render disabled external links without href at top and child levels', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [
+      {
+        id: 'disabled-external',
+        label: 'Disabled external',
+        icon: 'lucideExternalLink',
+        href: 'https://example.com',
+        disabled: true,
+      },
+      {
+        id: 'group',
+        label: 'Group',
+        icon: 'lucideChevronRight',
+        children: [
+          {
+            id: 'disabled-child-external',
+            label: 'Disabled child external',
+            icon: 'lucideExternalLink',
+            href: 'https://example.com/child',
+            disabled: true,
+          },
+        ],
+      },
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+    f.componentInstance.toggleGroup('group');
+    f.detectChanges();
+
+    const anchors = Array.from(
+      f.nativeElement.querySelectorAll('a.neu-nav__item--disabled'),
+    ) as HTMLAnchorElement[];
+    expect(anchors).toHaveLength(2);
+    expect(anchors.every((anchor) => anchor.getAttribute('aria-disabled') === 'true')).toBe(true);
+    expect(anchors.some((anchor) => anchor.getAttribute('href') === 'https://example.com')).toBe(
+      false,
+    );
   });
 
   it('should render badge on a top-level internal item', async () => {
@@ -1223,5 +1300,75 @@ describe('NeuNavComponent', () => {
     f.detectChanges();
 
     expect(f.componentInstance.isCurrentRoute('/docs')).toBe(true);
+  });
+
+  it('DOM mouseleave handlers close collapsed flyouts through their template listeners', async () => {
+    vi.useFakeTimers();
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', GROUP_ITEMS);
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const groupEl = f.nativeElement.querySelector('.neu-nav__group') as HTMLElement;
+    vi.spyOn(groupEl, 'getBoundingClientRect').mockReturnValue({
+      left: 0,
+      top: 42,
+      right: 80,
+      bottom: 80,
+      width: 80,
+      height: 38,
+      x: 0,
+      y: 42,
+      toJSON: () => ({}),
+    } as DOMRect);
+    groupEl.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    f.detectChanges();
+    expect(f.componentInstance.flyoutState()).not.toBeNull();
+
+    groupEl.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+    f.detectChanges();
+    const flyout = f.nativeElement.querySelector('.neu-nav__flyout') as HTMLElement;
+    flyout.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    f.detectChanges();
+    vi.advanceTimersByTime(160);
+    expect(f.componentInstance.flyoutState()).not.toBeNull();
+
+    flyout.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+    vi.advanceTimersByTime(160);
+    f.detectChanges();
+    expect(f.componentInstance.flyoutState()).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it('non-collapsed group mouseleave is a no-op', () => {
+    vi.useFakeTimers();
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', GROUP_ITEMS);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+
+    f.componentInstance.onGroupMouseLeave();
+    vi.advanceTimersByTime(200);
+
+    expect(f.componentInstance.flyoutState()).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it('isGroupActive returns false for leaf items and flyout enter clears pending timers', () => {
+    vi.useFakeTimers();
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', SIMPLE_ITEMS);
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+
+    expect(f.componentInstance.isGroupActive(SIMPLE_ITEMS[0])).toBe(false);
+    f.componentInstance.onGroupMouseLeave();
+    expect((f.componentInstance as any)._flyoutTimer).not.toBeNull();
+    f.componentInstance.onFlyoutMouseEnter();
+    vi.advanceTimersByTime(200);
+
+    expect((f.componentInstance as any)._flyoutTimer).toBeNull();
+    vi.useRealTimers();
   });
 });

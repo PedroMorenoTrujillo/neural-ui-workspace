@@ -116,3 +116,17 @@
   background: var(--neu-border);
   margin: var(--neu-space-1) 0;
 }
+
+html[data-theme='dark'] {
+  .neu-split-button__main.neu-button--primary,
+  .neu-split-button__chevron.neu-button--primary {
+    background: #0b66d4;
+    border-color: #0b66d4;
+    color: #ffffff;
+  }
+
+  .neu-split-button__main.neu-button--ghost,
+  .neu-split-button__chevron.neu-button--ghost {
+    color: #f2f7fb;
+  }
+}

@@ -20,16 +20,22 @@ import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
+import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
 import { NeuDateInputComponent } from '@neural-ui/core/date-input';
 import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
+import { NeuInlineEditorComponent, NeuInlineEditorType } from '@neural-ui/core/inline-editor';
 import type { NeuSelectOption } from '@neural-ui/core/select';
 import type {
   NeuTableAction,
   NeuTableActionEvent,
+  NeuTableCellEditEvent,
   NeuTableColumn,
+  NeuTableColumnReorderEvent,
+  NeuTableLayout,
   NeuTableSelectionAction,
   NeuTableSelectionActionEvent,
   NeuTableServerState,
@@ -41,8 +47,11 @@ export type {
   NeuTableActionEvent,
   NeuTableBadgeConfig,
   NeuTableBadgeVariant,
+  NeuTableCellEditEvent,
   NeuTableCellType,
   NeuTableColumn,
+  NeuTableColumnReorderEvent,
+  NeuTableLayout,
   NeuTableSelectionAction,
   NeuTableSelectionActionEvent,
   NeuTableServerState,
@@ -50,6 +59,9 @@ export type {
 } from './neu-table.types';
 
 type Row = Record<string, unknown>;
+type NeuTablePageEntry =
+  | { kind: 'group'; key: string; label: string; count: number }
+  | { kind: 'row'; key: unknown; row: Row; rowIndex: number };
 
 // Conversor interno — el input acepta object[] para compatibilidad con
 // interfaces de usuario concretas (User, Product…). Internamente casteamos a Row.
@@ -83,6 +95,8 @@ function asRows(data: object[]): Row[] {
     NeuSelectComponent,
     NeuDateInputComponent,
     NeuIconComponent,
+    NeuCheckboxComponent,
+    NeuInlineEditorComponent,
   ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -100,14 +114,14 @@ function asRows(data: object[]): Row[] {
       [class.neu-table-container--striped]="stripedRows()"
     >
       <!-- ---- Toolbar ---- -->
-      @if (searchable() || title() || exportable() || toolbarExtraRef()) {
+      @if (searchable() || title() || exportable() || _toolbarTemplateRef()) {
         <div class="neu-table__toolbar">
           @if (title()) {
             <h3 class="neu-table__title">{{ title() }}</h3>
           }
-          @if (toolbarExtraRef()) {
+          @if (_toolbarTemplateRef(); as toolbarTpl) {
             <div class="neu-table__toolbar-extra">
-              <ng-container [ngTemplateOutlet]="toolbarExtraRef()!" />
+              <ng-container [ngTemplateOutlet]="toolbarTpl" />
             </div>
           }
           @if (searchable()) {
@@ -156,15 +170,38 @@ function asRows(data: object[]): Row[] {
                 }
               </div>
               @if (exactMatchable()) {
-                <label class="neu-table__exact-label">
-                  <input
+                <neu-checkbox
                     class="neu-table__exact-checkbox"
-                    type="checkbox"
                     [checked]="exactMatch()"
-                    (change)="setExactMatch($any($event.target).checked)"
+                    [label]="exactMatchLabel()"
+                    (checkedChange)="setExactMatch($event)"
                   />
-                  {{ exactMatchLabel() }}
-                </label>
+              }
+            </div>
+          }
+          @if (columnChooser()) {
+            <div class="neu-table__column-chooser">
+              <button
+                class="neu-table__export-btn"
+                type="button"
+                [attr.aria-expanded]="columnChooserOpen()"
+                (click)="toggleColumnChooser()"
+              >
+                {{ columnChooserLabel() }}
+              </button>
+              @if (columnChooserOpen()) {
+                <div class="neu-table__column-chooser-panel" role="menu">
+                  @for (col of orderedColumns(); track col.key) {
+                    <div class="neu-table__column-chooser-item">
+                      <neu-checkbox
+                        class="neu-table__column-chooser-checkbox"
+                        [checked]="isColumnVisible(col.key)"
+                        [label]="col.header"
+                        (checkedChange)="toggleColumnVisibility(col.key)"
+                      />
+                    </div>
+                  }
+                </div>
               }
             </div>
           }
@@ -218,6 +255,31 @@ function asRows(data: object[]): Row[] {
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                   JSON
+                </button>
+              }
+              @if (exportFormats().includes('xlsx')) {
+                <button
+                  class="neu-table__export-btn"
+                  type="button"
+                  (click)="exportXlsx()"
+                  [title]="exportXlsxTitle()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    width="15"
+                    height="15"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  XLSX
                 </button>
               }
             </div>
@@ -300,20 +362,19 @@ function asRows(data: object[]): Row[] {
               }
               @if (selectable()) {
                 <th class="neu-table__th neu-table__th--check" scope="col">
-                  <input
-                    type="checkbox"
+                  <neu-checkbox
                     class="neu-table__checkbox"
                     [checked]="isAllFilteredSelected()"
                     [indeterminate]="isSomeFilteredSelected()"
-                    (change)="toggleAll()"
-                    [attr.aria-label]="selectAllAriaLabel()"
+                    [ariaLabel]="selectAllAriaLabel()"
+                    (checkedChange)="toggleAll()"
                   />
                 </th>
               }
               @if (showRowNumbers()) {
                 <th class="neu-table__th neu-table__th--rn" scope="col">#</th>
               }
-              @for (col of columns(); track col.key) {
+              @for (col of visibleColumns(); track col.key) {
                 <th
                   class="neu-table__th"
                   [class.neu-table__th--sortable]="sortable() && col.sortable !== false"
@@ -338,6 +399,28 @@ function asRows(data: object[]): Row[] {
                   scope="col"
                   (click)="sortable() && col.sortable !== false ? sortBy(col.key, $event) : null"
                 >
+                  @if (reorderableColumns()) {
+                    <span class="neu-table__reorder-controls" (click)="$event.stopPropagation()">
+                      <button
+                        type="button"
+                        class="neu-table__reorder-btn"
+                        [disabled]="isFirstVisibleColumn(col.key)"
+                        [attr.aria-label]="'Move ' + col.header + ' left'"
+                        (click)="moveColumn(col.key, -1)"
+                      >
+                        ‹
+                      </button>
+                      <button
+                        type="button"
+                        class="neu-table__reorder-btn"
+                        [disabled]="isLastVisibleColumn(col.key)"
+                        [attr.aria-label]="'Move ' + col.header + ' right'"
+                        (click)="moveColumn(col.key, 1)"
+                      >
+                        ›
+                      </button>
+                    </span>
+                  }
                   @if (col.headerTemplate) {
                     <ng-container
                       [ngTemplateOutlet]="col.headerTemplate"
@@ -389,7 +472,7 @@ function asRows(data: object[]): Row[] {
                 @if (showRowNumbers()) {
                   <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
                 }
-                @for (col of columns(); track col.key) {
+                @for (col of visibleColumns(); track col.key) {
                   <th
                     class="neu-table__th neu-table__th--filter"
                     scope="col"
@@ -408,6 +491,7 @@ function asRows(data: object[]): Row[] {
                       } @else if (col.filterType === 'date') {
                         <neu-date-input
                           [formControl]="columnFilterControl(col.key)"
+                          [placeholder]="filterPlaceholder()"
                           [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
                         />
                       } @else {
@@ -432,7 +516,7 @@ function asRows(data: object[]): Row[] {
                   <div class="neu-table__skeleton-rows">
                     @for (_ of skeletonRows(); track $index) {
                       <div class="neu-table__skeleton-row">
-                        @for (__ of columns(); track $index) {
+                        @for (__ of visibleColumns(); track $index) {
                           <div class="neu-table__skeleton-cell"></div>
                         }
                       </div>
@@ -482,7 +566,16 @@ function asRows(data: object[]): Row[] {
                   ></td>
                 </tr>
               }
-              @for (row of visiblePageRows(); track getRowKey(row); let rowIdx = $index) {
+              @for (entry of visiblePageEntries(); track entry.key; let entryIdx = $index) {
+                @if (entry.kind === 'group') {
+                  <tr class="neu-table__group-row">
+                    <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--group">
+                      {{ groupHeaderLabel() }} {{ entry.label }}
+                      <span class="neu-table__group-count">({{ entry.count }})</span>
+                    </td>
+                  </tr>
+                } @else {
+                  @let row = entry.row;
                 <tr
                   class="neu-table__row"
                   [class]="getRowClass(row)"
@@ -522,21 +615,20 @@ function asRows(data: object[]): Row[] {
                       class="neu-table__td neu-table__th--check"
                       (click)="$event.stopPropagation()"
                     >
-                      <input
-                        type="checkbox"
+                      <neu-checkbox
                         class="neu-table__checkbox"
                         [checked]="isRowSelected(row)"
-                        (change)="toggleRow(row)"
-                        [attr.aria-label]="selectRowAriaLabel()"
+                        [ariaLabel]="selectRowAriaLabel()"
+                        (checkedChange)="toggleRow(row)"
                       />
                     </td>
                   }
                   @if (showRowNumbers()) {
                     <td class="neu-table__td neu-table__td--rn">
-                      {{ visibleRowNumber(rowIdx) }}
+                      {{ visibleRowNumber(entry.rowIndex) }}
                     </td>
                   }
-                  @for (col of columns(); track col.key) {
+                  @for (col of visibleColumns(); track col.key) {
                     <td
                       class="neu-table__td"
                       [class]="col.cellClass ?? ''"
@@ -555,8 +647,24 @@ function asRows(data: object[]): Row[] {
                       [style.min-width]="columnWidth(col)"
                       [style.max-width]="columnWidth(col)"
                       [style.text-align]="col.align ?? 'left'"
+                      (dblclick)="startCellEdit(row, col, $event)"
                     >
-                      @if (col.cellTemplate) {
+                      @if (isEditingCell(row, col)) {
+                        <neu-inline-editor
+                          class="neu-table__edit-control"
+                          [type]="inlineEditorType(col)"
+                          [value]="$any(editingValue())"
+                          [options]="inlineEditorOptions(col)"
+                          [startInEdit]="true"
+                          [saveOnBlur]="true"
+                          [editLabel]="inlineEditLabel()"
+                          [saveLabel]="saveInlineEditLabel()"
+                          [cancelLabel]="cancelInlineEditLabel()"
+                          (valueChange)="setEditingValue($event)"
+                          (editCommit)="commitCellEdit(row, col)"
+                          (editCancel)="cancelCellEdit()"
+                        />
+                      } @else if (col.cellTemplate) {
                         <ng-container
                           [ngTemplateOutlet]="col.cellTemplate"
                           [ngTemplateOutletContext]="{ $implicit: row, row: row, column: col }"
@@ -649,6 +757,7 @@ function asRows(data: object[]): Row[] {
                     </td>
                   </tr>
                 }
+                }
               }
               @if (_virtualScrollActive() && _virtualBottomSpacerHeight() > 0) {
                 <tr class="neu-table__spacer-row" aria-hidden="true">
@@ -673,7 +782,7 @@ function asRows(data: object[]): Row[] {
                 @if (showRowNumbers()) {
                   <td class="neu-table__td"></td>
                 }
-                @for (col of columns(); track col.key) {
+                @for (col of visibleColumns(); track col.key) {
                   <td
                     class="neu-table__td neu-table__td--footer"
                     [style.width]="columnWidth(col)"
@@ -773,8 +882,6 @@ export class NeuTableComponent {
   private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private readonly _virtualOverscan = 3;
 
-  readonly expandTemplate = contentChild(NeuTableExpandDirective);
-
   // ── Inputs de datos ─────────────────────────────────────────────────
   readonly columns = input<NeuTableColumn[]>([]);
   readonly data = input<object[]>([]);
@@ -786,6 +893,12 @@ export class NeuTableComponent {
   readonly toolbarExtraRef = input<TemplateRef<unknown> | null>(null);
   readonly emptyMessage = input<string>('No results found');
   readonly skeletonRows = input<number[]>([1, 2, 3, 4, 5]);
+
+  readonly expandTemplate = contentChild(NeuTableExpandDirective);
+  readonly toolbarTemplate = contentChild(NeuTableToolbarDirective);
+  protected readonly _toolbarTemplateRef = computed(
+    () => this.toolbarExtraRef() ?? this.toolbarTemplate()?.templateRef ?? null,
+  );
 
   // ── Inputs de funcionalidad ──────────────────────────────────────────
   readonly searchable = input<boolean>(true);
@@ -802,6 +915,7 @@ export class NeuTableComponent {
   readonly paginationAriaLabel = input<string>('Pagination');
   readonly exportCsvTitle = input<string>('Export CSV');
   readonly exportJsonTitle = input<string>('Export JSON');
+  readonly exportXlsxTitle = input<string>('Export XLSX');
   readonly clearSelectionLabel = input<string>('Clear selection');
   readonly selectionSummaryLabel = input<string>('selected');
   readonly tableAriaLabel = input<string>('Data table');
@@ -825,6 +939,16 @@ export class NeuTableComponent {
   readonly virtualScroll = input<boolean>(false);
   readonly virtualScrollVisibleItems = input<number>(8);
   readonly resizableColumns = input<boolean>(false);
+  readonly reorderableColumns = input<boolean>(false);
+  readonly columnChooser = input<boolean>(false);
+  readonly columnChooserLabel = input<string>('Columns');
+  readonly groupBy = input<string>('');
+  readonly groupHeaderLabel = input<string>('Group:');
+  readonly inlineEdit = input<boolean>(false);
+  readonly inlineEditLabel = input<string>('Edit cell');
+  readonly saveInlineEditLabel = input<string>('Save cell');
+  readonly cancelInlineEditLabel = input<string>('Cancel cell edit');
+  readonly initialLayout = input<NeuTableLayout | null>(null);
   readonly rowKey = input<string>('id');
   readonly bordered = input<boolean>(true);
   readonly roundedBorders = input<boolean>(true);
@@ -839,7 +963,7 @@ export class NeuTableComponent {
   readonly serverSide = input<boolean>(false);
   readonly totalItems = input<number | undefined>(undefined);
   readonly multiSort = input<boolean>(false);
-  readonly exportFormats = input<('csv' | 'json')[]>(['csv']);
+  readonly exportFormats = input<('csv' | 'json' | 'xlsx')[]>(['csv']);
   readonly exportColumns = input<string[]>([]);
   readonly exportScope = input<'filtered' | 'selected' | 'auto'>('auto');
   readonly selectionActions = input<NeuTableSelectionAction<Row>[]>([]);
@@ -871,6 +995,9 @@ export class NeuTableComponent {
   readonly serverStateChange = output<NeuTableServerState>();
   readonly searchChange = output<string>();
   readonly columnResize = output<{ key: string; width: number }>();
+  readonly columnReorder = output<NeuTableColumnReorderEvent>();
+  readonly layoutChange = output<NeuTableLayout>();
+  readonly cellEditCommit = output<NeuTableCellEditEvent<Row>>();
 
   // ── Estado interno (usado cuando useUrlState = false) ─────────────────
   // Internal state signals (used when useUrlState = false)
@@ -880,6 +1007,15 @@ export class NeuTableComponent {
   private readonly _internalSortDir = signal<'asc' | 'desc'>('asc');
   private readonly _internalMultiSort = signal('');
   private readonly _columnWidths = signal<Record<string, number>>({});
+  private readonly _columnOrder = signal<string[]>([]);
+  private readonly _hiddenColumns = signal<Set<string>>(new Set());
+  readonly columnChooserOpen = signal(false);
+  private readonly _editingCell = signal<{
+    rowKey: unknown;
+    columnKey: string;
+    value: unknown;
+    previousValue: unknown;
+  } | null>(null);
   private _resizeCleanup: (() => void) | null = null;
 
   // ── URL State ─────────────────────────────────────────────────────────
@@ -948,7 +1084,29 @@ export class NeuTableComponent {
   readonly _pageSizeControl = new FormControl('', { nonNullable: true });
   private readonly _columnFilterControls = new Map<string, FormControl<string>>();
   /** True when at least one column has filterable:true / True si alguna columna tiene filterable:true */
-  readonly _hasFilterableCol = computed(() => this.columns().some((c) => c.filterable));
+  readonly _hasFilterableCol = computed(() => this.visibleColumns().some((c) => c.filterable));
+
+  readonly orderedColumns = computed(() => {
+    const columns = this.columns();
+    const order = this._columnOrder();
+    if (order.length === 0) {
+      return columns;
+    }
+
+    const byKey = new Map(columns.map((col) => [col.key, col]));
+    return [
+      ...order.flatMap((key) => {
+        const col = byKey.get(key);
+        return col ? [col] : [];
+      }),
+      ...columns.filter((col) => !order.includes(col.key)),
+    ];
+  });
+
+  readonly visibleColumns = computed(() => {
+    const hidden = this._hiddenColumns();
+    return this.orderedColumns().filter((col) => !hidden.has(col.key));
+  });
 
   /** Convierte filterOptions de string[] a NeuSelectOption[] con opción "Todos" al inicio.
    *  Converts filterOptions from string[] to NeuSelectOption[] with a leading "All" option. */
@@ -988,6 +1146,25 @@ export class NeuTableComponent {
         if (control.value !== nextValue) {
           control.setValue(nextValue, { emitEvent: false });
         }
+      }
+    });
+
+    effect(() => {
+      const keys = this.columns().map((col) => col.key);
+      const layout = this.initialLayout();
+      const rawOrder = layout?.columnOrder?.length ? layout.columnOrder : this._columnOrder();
+      const nextOrder = [
+        ...rawOrder.filter((key) => keys.includes(key)),
+        ...keys.filter((key) => !rawOrder.includes(key)),
+      ];
+
+      if (nextOrder.join('|') !== this._columnOrder().join('|')) {
+        this._columnOrder.set(nextOrder);
+      }
+
+      if (layout) {
+        this._hiddenColumns.set(new Set(layout.hiddenColumns.filter((key) => keys.includes(key))));
+        this._columnWidths.set(layout.columnWidths ?? {});
       }
     });
 
@@ -1151,6 +1328,47 @@ export class NeuTableComponent {
     return rows.slice(this._virtualStartIndex(), this._virtualEndIndex());
   });
 
+  readonly visiblePageEntries = computed<NeuTablePageEntry[]>(() => {
+    const rows = this.visiblePageRows();
+    const groupKey = this.groupBy();
+    if (!groupKey) {
+      return rows.map((row, rowIndex) => ({
+        kind: 'row' as const,
+        key: this.getRowKey(row),
+        row,
+        rowIndex,
+      }));
+    }
+
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      const label = String(row[groupKey] ?? '—');
+      counts.set(label, (counts.get(label) ?? 0) + 1);
+    }
+
+    const seen = new Set<string>();
+    const entries: NeuTablePageEntry[] = [];
+    rows.forEach((row, rowIndex) => {
+      const label = String(row[groupKey] ?? '—');
+      if (!seen.has(label)) {
+        seen.add(label);
+        entries.push({
+          kind: 'group',
+          key: `group:${label}:${entries.length}`,
+          label,
+          count: counts.get(label) ?? 0,
+        });
+      }
+      entries.push({
+        kind: 'row',
+        key: this.getRowKey(row),
+        row,
+        rowIndex,
+      });
+    });
+    return entries;
+  });
+
   readonly _virtualTopSpacerHeight = computed(() => {
     if (!this._virtualScrollActive()) {
       return 0;
@@ -1194,7 +1412,7 @@ export class NeuTableComponent {
   });
 
   readonly totalColspan = computed(() => {
-    let cols = this.columns().length;
+    let cols = this.visibleColumns().length;
     if (this.selectable()) cols++;
     if (this.expandable()) cols++;
     if (this.showRowNumbers()) cols++;
@@ -1205,7 +1423,7 @@ export class NeuTableComponent {
     this._columnWidths();
     const offsets = new Map<string, number>();
     let leftPx = 0;
-    for (const col of this.columns()) {
+    for (const col of this.visibleColumns()) {
       if (col.frozen === 'left') {
         offsets.set(col.key, leftPx);
         leftPx += this._columnWidthPx(col) ?? 0;
@@ -1215,12 +1433,12 @@ export class NeuTableComponent {
   });
 
   readonly _lastFrozenLeftKey = computed(() => {
-    const frozenLeft = this.columns().filter((col) => col.frozen === 'left');
+    const frozenLeft = this.visibleColumns().filter((col) => col.frozen === 'left');
     return frozenLeft.at(-1)?.key ?? null;
   });
 
   readonly _firstFrozenRightKey = computed(() => {
-    const frozenRight = this.columns().filter((col) => col.frozen === 'right');
+    const frozenRight = this.visibleColumns().filter((col) => col.frozen === 'right');
     return frozenRight[0]?.key ?? null;
   });
 
@@ -1230,6 +1448,72 @@ export class NeuTableComponent {
 
   isFirstFrozenRightColumn(key: string): boolean {
     return this._firstFrozenRightKey() === key;
+  }
+
+  toggleColumnChooser(): void {
+    this.columnChooserOpen.update((value) => !value);
+  }
+
+  isColumnVisible(key: string): boolean {
+    return !this._hiddenColumns().has(key);
+  }
+
+  toggleColumnVisibility(key: string): void {
+    const next = new Set(this._hiddenColumns());
+    if (next.has(key)) {
+      next.delete(key);
+    } else if (this.visibleColumns().length > 1) {
+      next.add(key);
+    }
+    this._hiddenColumns.set(next);
+    this._emitLayoutChange();
+  }
+
+  isFirstVisibleColumn(key: string): boolean {
+    return this.visibleColumns()[0]?.key === key;
+  }
+
+  isLastVisibleColumn(key: string): boolean {
+    return this.visibleColumns().at(-1)?.key === key;
+  }
+
+  moveColumn(key: string, direction: -1 | 1): void {
+    const order = this.orderedColumns().map((col) => col.key);
+    const previousIndex = order.indexOf(key);
+    const targetIndex = previousIndex + direction;
+    if (previousIndex < 0 || targetIndex < 0 || targetIndex >= order.length) {
+      return;
+    }
+
+    const next = [...order];
+    const [moved] = next.splice(previousIndex, 1);
+    next.splice(targetIndex, 0, moved);
+    this._columnOrder.set(next);
+    this.columnReorder.emit({
+      previousIndex,
+      currentIndex: targetIndex,
+      columns: next,
+    });
+    this._emitLayoutChange();
+  }
+
+  applyLayout(layout: NeuTableLayout): void {
+    const keys = this.columns().map((col) => col.key);
+    this._columnOrder.set([
+      ...layout.columnOrder.filter((key) => keys.includes(key)),
+      ...keys.filter((key) => !layout.columnOrder.includes(key)),
+    ]);
+    this._hiddenColumns.set(new Set(layout.hiddenColumns.filter((key) => keys.includes(key))));
+    this._columnWidths.set(layout.columnWidths ?? {});
+    this._emitLayoutChange();
+  }
+
+  currentLayout(): NeuTableLayout {
+    return {
+      columnOrder: this.orderedColumns().map((col) => col.key),
+      hiddenColumns: [...this._hiddenColumns()],
+      columnWidths: this._columnWidths(),
+    };
   }
 
   isColumnResizable(col: NeuTableColumn): boolean {
@@ -1302,6 +1586,7 @@ export class NeuTableComponent {
       delete next[key];
       return next;
     });
+    this._emitLayoutChange();
   }
 
   // ── Expansión de filas ────────────────────────────────────────────────
@@ -1598,6 +1883,34 @@ export class NeuTableComponent {
     );
   }
 
+  exportXlsx(): void {
+    if (!isPlatformBrowser(this._platformId)) return;
+    const cols = this._getExportColumns();
+    const rows = this._getExportRows();
+    const escape = (value: string) =>
+      value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    const table = [
+      '<table>',
+      `<tr>${cols.map((col) => `<th>${escape(col.header)}</th>`).join('')}</tr>`,
+      ...rows.map(
+        (row) =>
+          `<tr>${cols.map((col) => `<td>${escape(this.getCellValue(row, col))}</td>`).join('')}</tr>`,
+      ),
+      '</table>',
+    ].join('');
+    const html = `<!doctype html><html><head><meta charset="utf-8"></head><body>${table}</body></html>`;
+    this._downloadBlob(
+      new Blob([html], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;',
+      }),
+      `${this.exportFileName()}.xlsx`,
+    );
+  }
+
   private _getExportColumns(): NeuTableColumn[] {
     const keys = this.exportColumns();
     const all = this.columns().filter((c) => c.type !== 'actions');
@@ -1679,6 +1992,7 @@ export class NeuTableComponent {
 
   private _setColumnWidth(key: string, width: number): void {
     this._columnWidths.update((current) => ({ ...current, [key]: width }));
+    this._emitLayoutChange();
   }
 
   private _stopColumnResize(): void {
@@ -1711,6 +2025,67 @@ export class NeuTableComponent {
       default:
         return String(val);
     }
+  }
+
+  isEditingCell(row: Row, col: NeuTableColumn): boolean {
+    const editing = this._editingCell();
+    return (
+      editing !== null &&
+      editing.rowKey === this.getRowKey(row) &&
+      editing.columnKey === col.key
+    );
+  }
+
+  editingValue(): unknown {
+    return this._editingCell()?.value ?? '';
+  }
+
+  inlineEditorType(col: NeuTableColumn): NeuInlineEditorType {
+    return col.editor ?? 'text';
+  }
+
+  inlineEditorOptions(col: NeuTableColumn): NeuSelectOption[] {
+    return (col.editOptions ?? []).map((option) => ({ label: option, value: option }));
+  }
+
+  setEditingValue(value: unknown): void {
+    this._editingCell.update((editing) => (editing ? { ...editing, value } : editing));
+  }
+
+  startCellEdit(row: Row, col: NeuTableColumn, event?: Event): void {
+    if (!this.inlineEdit() || !col.editable) {
+      return;
+    }
+
+    event?.stopPropagation();
+    const previousValue = row[col.key];
+    this._editingCell.set({
+      rowKey: this.getRowKey(row),
+      columnKey: col.key,
+      value: previousValue ?? '',
+      previousValue,
+    });
+  }
+
+  commitCellEdit(row: Row, col: NeuTableColumn): void {
+    const editing = this._editingCell();
+    if (!editing || editing.rowKey !== this.getRowKey(row) || editing.columnKey !== col.key) {
+      return;
+    }
+
+    this._editingCell.set(null);
+    this.cellEditCommit.emit({
+      row,
+      column: col,
+      value: editing.value,
+      previousValue: editing.previousValue,
+    });
+  }
+
+  cancelCellEdit(event?: Event): void {
+    event?.stopPropagation();
+    event?.preventDefault();
+    this._editingCell.set(null);
   }
 
   getSortPriority(key: string): number {
@@ -1747,5 +2122,9 @@ export class NeuTableComponent {
       columnFilters: this._columnFilters(),
     };
     this.serverStateChange.emit({ ...current, ...patch });
+  }
+
+  private _emitLayoutChange(): void {
+    this.layoutChange.emit(this.currentLayout());
   }
 }

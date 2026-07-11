@@ -47,6 +47,16 @@ describe('NeuSplitterComponent', () => {
     expect(f.componentInstance._sizes()).toEqual([30, 70]);
   });
 
+  it('should leave sizes empty when panes are empty and preserve explicit zero sizes', async () => {
+    const empty = setup([]);
+    await empty.whenStable();
+    expect(empty.componentInstance._sizes()).toEqual([]);
+
+    const zero = setup([{ size: 0 }, { size: 100 }]);
+    await zero.whenStable();
+    expect(zero.componentInstance._sizes()).toEqual([0, 100]);
+  });
+
   it('_sizes should distribute remaining evenly when sizes not set', async () => {
     const f = setup([{}, {}]);
     await f.whenStable();
@@ -148,6 +158,21 @@ describe('NeuSplitterComponent', () => {
     const before = [...f.componentInstance._sizes()];
     f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'Tab' }), 0);
     expect(f.componentInstance._sizes()).toEqual(before);
+  });
+
+  it('drag move returns without changing sizes when no drag is active or container has no size', async () => {
+    const f = setup([{ size: 50 }, { size: 50 }]);
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    const before = [...comp._sizes()];
+
+    comp._onDragMove(10, 10);
+    expect(comp._sizes()).toEqual(before);
+
+    comp._dragIndex = 0;
+    Object.defineProperty(f.nativeElement, 'offsetWidth', { configurable: true, value: 0 });
+    comp._onDragMove(20, 20);
+    expect(comp._sizes()).toEqual(before);
   });
 
   it('_sizes should handle 3 panes', async () => {

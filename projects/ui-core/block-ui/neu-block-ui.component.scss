@@ -61,8 +61,14 @@
 /* ── Message ─────────────────────────────────────────────────── */
 .neu-block-ui__message {
   font-size: 0.875rem;
-  color: var(--neu-text-secondary, #6b7280);
+  color: var(--neu-text, #111827);
   font-weight: 500;
+}
+
+html[data-theme='dark'] {
+  .neu-block-ui__message {
+    color: #ffffff;
+  }
 }
 
 /* ── Directive host ──────────────────────────────────────────── */

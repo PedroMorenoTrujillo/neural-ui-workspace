@@ -4,7 +4,7 @@
   width: 100%;
   gap: 8px;
   background: var(--neu-toolbar-bg, var(--neu-surface-1, #ffffff));
-  color: var(--neu-toolbar-color, var(--neu-text-primary, #111));
+  color: var(--neu-toolbar-color, var(--neu-text, #111));
 
   &--sm {
     padding: 6px 12px;
@@ -46,6 +46,33 @@
   &--bordered {
     border-bottom: 1px solid var(--neu-border-color, #e5e7eb);
   }
+
+  &--density-compact {
+    gap: 6px;
+
+    &.neu-toolbar--sm {
+      padding: 4px 8px;
+      min-height: 34px;
+    }
+
+    &.neu-toolbar--md {
+      padding: 6px 10px;
+      min-height: 42px;
+    }
+
+    &.neu-toolbar--lg {
+      padding: 8px 12px;
+      min-height: 50px;
+    }
+  }
+
+  &--wrap {
+    flex-wrap: wrap;
+
+    .neu-toolbar__section {
+      min-width: 0;
+    }
+  }
 }
 
 /* ── Sections ───────────────────────────────────────────────── */
@@ -68,4 +95,28 @@
 .neu-toolbar__section--end {
   flex: 0 0 auto;
   margin-left: auto;
+}
+
+.neu-toolbar__section--secondary {
+  flex: 1 1 100%;
+  order: 4;
+  display: none;
+}
+
+.neu-toolbar__section--secondary:not(:empty) {
+  display: flex;
+}
+
+@media (max-width: 640px) {
+  .neu-toolbar--wrap {
+    .neu-toolbar__section--center {
+      order: 3;
+      flex: 1 1 100%;
+      justify-content: flex-start;
+    }
+
+    .neu-toolbar__section--end {
+      margin-left: 0;
+    }
+  }
 }

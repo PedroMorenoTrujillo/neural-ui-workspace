@@ -1059,7 +1059,7 @@ describe('NeuSelectComponent', () => {
     expect(comp._viewport()).toBeTruthy();
   });
 
-  it('virtual option handlers should execute when virtual rows are rendered with a fake viewport', async () => {
+  it('virtual select should keep selection behavior available through its public API', async () => {
     const f = TestBed.createComponent(NeuSelectComponent);
     f.componentRef.setInput('options', OPTIONS);
     f.componentRef.setInput('virtualScroll', true);
@@ -1072,8 +1072,26 @@ describe('NeuSelectComponent', () => {
     expect(document.querySelector('.neu-select__viewport')).toBeTruthy();
     comp.selectOption(OPTIONS[0]);
     f.detectChanges();
-
     expect(comp._value()).toBe('es');
+  });
+
+  it('closes an open panel through Escape and the CDK backdrop', async () => {
+    const { f, comp } = await setup();
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    trigger.click();
+    f.detectChanges();
+    await f.whenStable();
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
+
+    trigger.click();
+    f.detectChanges();
+    await f.whenStable();
+    (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(comp.isOpen()).toBe(false);
   });
 
   it('trigger event handlers should cover ArrowUp and Space template bindings', async () => {
@@ -1180,15 +1198,111 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
-    const searchInput: HTMLInputElement = f.nativeElement.querySelector(
+    const searchInput: HTMLInputElement = document.querySelector(
       '.neu-select__search-input',
+    )!;
+    // This click fires stopPropagation in the template — must not close the panel
+    searchInput.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(true);
+  });
+
+  it('renders loading state inside the overlay panel', async () => {
+    const { f, comp } = await setup({ loading: true, loadingLabel: 'Loading countries' });
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(document.querySelector('.neu-select__empty')?.textContent).toContain(
+      'Loading countries',
     );
-    if (searchInput) {
-      // This click fires stopPropagation in the template — must not close the panel
-      searchInput.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      f.detectChanges();
-      expect(comp.isOpen()).toBe(true);
+  });
+
+  it('focusOptionByIndex returns cleanly when there is no enabled next option', async () => {
+    const { comp } = await setup({
+      options: [{ value: 'disabled', label: 'Disabled', disabled: true }],
+    });
+    const focusSpy = vi.spyOn(
+      comp as object as { focusOption: (value: string) => void },
+      'focusOption',
+    );
+
+    comp.focusOptionByIndex(
+      { preventDefault: vi.fn() } as unknown as Event,
+      { value: 'disabled', label: 'Disabled', disabled: true },
+      1,
+    );
+
+    expect(focusSpy).not.toHaveBeenCalled();
+  });
+
+  it('syncPanelPosition opens above when there is more room above the trigger', async () => {
+    const { f, comp } = await setup();
+    const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+
+    Object.defineProperty(trigger, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ top: 700, left: 900, bottom: 748, width: 260 }),
+    });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      (comp as any).syncPanelPosition();
+      expect(comp.isPanelAbove()).toBe(true);
+      expect(comp.panelPosition().top).toBe('auto');
+      expect(comp.panelPosition().bottom).toBe('106px');
+      expect(comp.panelPosition().left).toBe('748px');
+    } finally {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
     }
+  });
+
+  it('virtual focus handles unknown option values without scrolling', async () => {
+    const { f, comp } = await setup({ virtualScroll: true });
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const scrollToIndex = vi.fn();
+    const checkViewportSize = vi.fn();
+    const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
+    const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
+    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      comp.focusOption('missing');
+      expect(scrollToIndex).not.toHaveBeenCalled();
+      expect(checkViewportSize).not.toHaveBeenCalled();
+    } finally {
+      querySpy.mockRestore();
+      getByIdSpy.mockRestore();
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('exposes stable template and viewport query accessors before projection exists', () => {
+    const f = TestBed.createComponent(NeuSelectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    expect(comp._viewport()).toBeUndefined();
+    expect(comp.itemTpl()).toBeUndefined();
+    expect(comp.selectedItemTpl()).toBeUndefined();
   });
 
   it('URL sync effect should update _value when URL param changes', async () => {

@@ -1,4 +1,5 @@
 export type NeuUploaderSize = 'sm' | 'md' | 'lg';
+export type NeuUploaderFileStatus = 'idle' | 'uploading' | 'success' | 'error';
 
 export type NeuUploaderErrorCode =
   | 'accept'
@@ -20,4 +21,6 @@ export interface NeuUploaderFileItem {
   size: number;
   type: string;
   progress: number | null;
+  status: NeuUploaderFileStatus;
+  error?: string;
 }

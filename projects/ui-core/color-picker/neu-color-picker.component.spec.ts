@@ -493,4 +493,60 @@ describe('NeuColorPickerComponent', () => {
     const f = setup();
     expect(() => f.componentInstance._onTextChange('not-a-color')).not.toThrow();
   });
+
+  it('document mousedown host listener closes the open panel', () => {
+    const f = setup();
+    f.componentInstance._isOpen.set(true);
+    f.detectChanges();
+    const outside = document.createElement('div');
+    document.body.appendChild(outside);
+
+    outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    f.detectChanges();
+
+    expect(f.componentInstance._isOpen()).toBe(false);
+    outside.remove();
+  });
+
+  it('connected overlay backdrop click closes the panel through the template listener', async () => {
+    const f = setup();
+    const trigger = f.nativeElement.querySelector('.neu-cp__trigger') as HTMLButtonElement;
+    trigger.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
+    f.detectChanges();
+
+    expect(f.componentInstance._isOpen()).toBe(false);
+  });
+
+  it('keeps the panel open for clicks inside the overlay panel and covers blue hue conversion', () => {
+    const f = setup();
+    f.componentInstance._isOpen.set(true);
+    f.detectChanges();
+    const panel = document.createElement('div');
+    panel.className = 'neu-cp__panel';
+    document.body.appendChild(panel);
+
+    f.componentInstance._outsideClick({ target: panel } as unknown as MouseEvent);
+    f.componentInstance._onTextChange('rgb(0, 0, 255)');
+    f.componentInstance._activeMode.set('hsl');
+
+    expect(f.componentInstance._isOpen()).toBe(true);
+    expect(f.componentInstance._textValue()).toContain('hsl(240');
+    panel.remove();
+  });
+
+  it('covers grayscale and magenta color conversion branches', () => {
+    const f = setup();
+
+    f.componentInstance._onTextChange('rgb(128, 128, 128)');
+    f.componentInstance._activeMode.set('hsl');
+    expect(f.componentInstance._textValue()).toContain('hsl(0, 0%');
+
+    f.componentInstance._onTextChange('rgb(255, 0, 255)');
+    f.componentInstance._activeMode.set('hsl');
+    expect(f.componentInstance._textValue()).toContain('hsl(300');
+  });
 });

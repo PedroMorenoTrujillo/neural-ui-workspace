@@ -199,6 +199,20 @@ describe('NeuTooltipDirective', () => {
     expect(dir).toBeTruthy();
   });
 
+  it('show() is a no-op when the overlay is already attached', () => {
+    const btn = fixture.nativeElement.querySelector('button');
+    btn.dispatchEvent(new Event('mouseenter'));
+    fixture.detectChanges();
+    const dir = fixture.debugElement.children[0].injector.get(NeuTooltipDirective);
+    const overlayRef = (dir as any)._overlayRef;
+
+    btn.dispatchEvent(new Event('mouseenter'));
+    fixture.detectChanges();
+
+    expect((dir as any)._overlayRef).toBe(overlayRef);
+    expect(overlayRef.hasAttached()).toBe(true);
+  });
+
   it('_getPositions should return an array of 3 positions for all position values', () => {
     // _getPositions debe devolver 3 posiciones válidas
     // _getPositions must return 3 valid positions

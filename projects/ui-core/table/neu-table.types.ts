@@ -47,6 +47,26 @@ export interface NeuTableSelectionActionEvent<T = Record<string, unknown>> {
   rows: T[];
 }
 
+// ── Layout / Editing ───────────────────────────────────────────────────────
+export interface NeuTableLayout {
+  columnOrder: string[];
+  hiddenColumns: string[];
+  columnWidths: Record<string, number>;
+}
+
+export interface NeuTableColumnReorderEvent {
+  previousIndex: number;
+  currentIndex: number;
+  columns: string[];
+}
+
+export interface NeuTableCellEditEvent<T = Record<string, unknown>> {
+  row: T;
+  column: NeuTableColumn<T>;
+  value: unknown;
+  previousValue: unknown;
+}
+
 // ── Sort ──────────────────────────────────────────────────────────────────
 export interface NeuTableSortEntry {
   key: string;
@@ -105,6 +125,10 @@ export interface NeuTableColumn<T = Record<string, unknown>> {
   filterable?: boolean;
   filterType?: 'text' | 'select' | 'number-range' | 'date';
   filterOptions?: string[];
+  // Inline edit
+  editable?: boolean;
+  editor?: 'text' | 'number' | 'select' | 'date';
+  editOptions?: string[];
   // Frozen
   frozen?: 'left' | 'right';
   // Header template

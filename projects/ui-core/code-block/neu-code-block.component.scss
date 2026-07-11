@@ -4,12 +4,12 @@
 // ViewEncapsulation.None — prefijo BEM .neu-code-block
 // ============================================================
 
-$cb-bg: var(--neu-code-block-bg);
-$cb-bg-bar: var(--neu-code-block-bar-bg);
-$cb-border: var(--neu-code-block-border);
-$cb-text: var(--neu-code-block-text);
-$cb-accent: var(--neu-code-block-accent);
-$cb-muted: var(--neu-code-block-muted);
+$cb-bg: var(--neu-code-block-bg, #1a1b26);
+$cb-bg-bar: var(--neu-code-block-bar-bg, #16161e);
+$cb-border: var(--neu-code-block-border, rgba(255, 255, 255, 0.14));
+$cb-text: var(--neu-code-block-text, #d9e2ff);
+$cb-accent: var(--neu-code-block-accent, #9ab8ff);
+$cb-muted: var(--neu-code-block-muted, #8f99bd);
 
 .neu-code-block {
   border-radius: var(--neu-radius-lg);
@@ -69,12 +69,12 @@ $cb-muted: var(--neu-code-block-muted);
   align-items: center;
   gap: 5px;
   padding: 4px 10px;
-  background: var(--neu-code-block-border);
-  border: 1px solid var(--neu-code-block-copy-border);
+  background: var(--neu-code-block-copy-bg, rgba(255, 255, 255, 0.12));
+  border: 1px solid var(--neu-code-block-copy-border, rgba(255, 255, 255, 0.22));
   border-radius: 6px;
   font-size: 11px;
   font-weight: 500;
-  color: var(--neu-code-block-copy-text);
+  color: var(--neu-code-block-copy-text, #d9e2ff);
   cursor: pointer;
   font-family: var(--neu-font-sans);
   transition: all var(--neu-transition);
@@ -87,9 +87,9 @@ $cb-muted: var(--neu-code-block-muted);
   }
 
   &:hover {
-    background: var(--neu-code-block-copy-hover-bg);
-    color: var(--neu-code-block-copy-hover-text);
-    border-color: var(--neu-code-block-copy-hover-border);
+    background: var(--neu-code-block-copy-hover-bg, rgba(255, 255, 255, 0.18));
+    color: var(--neu-code-block-copy-hover-text, #ffffff);
+    border-color: var(--neu-code-block-copy-hover-border, rgba(255, 255, 255, 0.34));
   }
 }
 

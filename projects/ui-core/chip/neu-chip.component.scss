@@ -41,7 +41,7 @@
   // ---- Variantes / Variants ----
   &--default {
     background: var(--neu-surface-2);
-    color: var(--neu-text-muted);
+    color: var(--neu-text);
     border-color: var(--neu-border);
 
     &:hover:not(.neu-chip--disabled) {
@@ -113,6 +113,38 @@
     border-color: var(--neu-border);
     cursor: not-allowed;
     pointer-events: none;
+  }
+}
+
+html[data-theme='dark'] {
+  .neu-chip--default {
+    color: #f2f7fb;
+    background: #21262d;
+    border-color: #6e7681;
+  }
+
+  .neu-chip--primary {
+    color: #e8f4ff;
+    background: #0b3b74;
+    border-color: #65b7ff;
+  }
+
+  .neu-chip--success {
+    color: #d7fbe8;
+    background: #0f5132;
+    border-color: #55d98c;
+  }
+
+  .neu-chip--warning {
+    color: #fff4cc;
+    background: #6b4e00;
+    border-color: #facc15;
+  }
+
+  .neu-chip--danger {
+    color: #ffe2e2;
+    background: #7f1d1d;
+    border-color: #f87171;
   }
 }
 

@@ -1,12 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, PLATFORM_ID } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { lucidePencil } from '@ng-icons/lucide';
 import { NeuTableComponent } from './neu-table.component';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
+import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
 import { NeuTableColumn } from './neu-table.types';
+import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
+import { By } from '@angular/platform-browser';
 
 interface Person {
   id: number;
@@ -225,7 +228,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('selectable', true);
     f.detectChanges();
     await f.whenStable();
-    const checkboxes = f.nativeElement.querySelectorAll('input[type="checkbox"]');
+    const checkboxes = f.nativeElement.querySelectorAll('neu-checkbox input[type="checkbox"]');
     expect(checkboxes.length).toBeGreaterThan(0);
   });
 
@@ -2552,7 +2555,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const checkboxes: NodeListOf<HTMLInputElement> = f.nativeElement.querySelectorAll(
-      'tbody .neu-table__checkbox',
+      'tbody .neu-table__checkbox input[type="checkbox"]',
     );
     expect(checkboxes.length).toBe(DATA.length);
     checkboxes[0].dispatchEvent(new Event('change', { bubbles: true }));
@@ -2571,7 +2574,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const selectAllCb: HTMLInputElement = f.nativeElement.querySelector(
-      'thead .neu-table__checkbox',
+      'thead .neu-table__checkbox input[type="checkbox"]',
     );
     expect(selectAllCb).toBeTruthy();
     selectAllCb.dispatchEvent(new Event('change', { bubbles: true }));
@@ -2632,14 +2635,15 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('exactMatchable', true);
     f.detectChanges();
     await f.whenStable();
-    const exactCb: HTMLInputElement = f.nativeElement.querySelector('.neu-table__exact-checkbox');
+    const exactCb: HTMLInputElement = f.nativeElement.querySelector(
+      '.neu-table__exact-checkbox input[type="checkbox"]',
+    );
     expect(exactCb).toBeTruthy();
-    // Simulate checking the checkbox — Angular reads $event.target.checked
+    exactCb.checked = true;
     exactCb.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
     await f.whenStable();
-    // Default checked value is false, so setExactMatch(false) is called — just verifies handler works
-    expect(f.componentInstance.exactMatch()).toBe(false);
+    expect(f.componentInstance.exactMatch()).toBe(true);
   });
 
   // ── action handleAction via DOM click ────────────────────────────────
@@ -2777,27 +2781,30 @@ describe('NeuTableComponent', () => {
     expect(comp.getColumnFilterValue('name')).toBe('Ana');
   });
 
-  it('toolbar export buttons should call exportCsv and exportJson via DOM', async () => {
+  it('toolbar export buttons should call every enabled exporter via DOM', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('exportable', true);
-    f.componentRef.setInput('exportFormats', ['csv', 'json']);
+    f.componentRef.setInput('exportFormats', ['csv', 'json', 'xlsx']);
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
     vi.spyOn(comp, 'exportCsv');
     vi.spyOn(comp, 'exportJson');
+    vi.spyOn(comp, 'exportXlsx');
 
     const buttons = Array.from(
       f.nativeElement.querySelectorAll('.neu-table__export-btn'),
     ) as HTMLButtonElement[];
     buttons[0].click();
     buttons[1].click();
+    buttons[2].click();
     f.detectChanges();
 
     expect(comp.exportCsv).toHaveBeenCalled();
     expect(comp.exportJson).toHaveBeenCalled();
+    expect(comp.exportXlsx).toHaveBeenCalled();
   });
 
   it('selection clear button via DOM should clear the selected rows', async () => {
@@ -2818,6 +2825,32 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
 
     expect(comp.selectedCount()).toBe(0);
+  });
+
+  it('runs selection action and confirmation controls through the rendered selection bar', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('selectionActions', SELECTION_ACTIONS);
+    const events: any[] = [];
+    f.componentInstance.selectionActionClick.subscribe((event: any) => events.push(event));
+    f.detectChanges();
+    await f.whenStable();
+    (f.componentInstance as any).toggleRow(DATA[0]);
+    f.detectChanges();
+
+    const actions = f.nativeElement.querySelectorAll('.neu-table__selection-actions .neu-table__export-btn') as NodeListOf<HTMLButtonElement>;
+    actions[0].click();
+    expect(events[0].action.key).toBe('archive');
+    actions[1].click();
+    f.detectChanges();
+    (f.nativeElement.querySelector('.neu-table__action-confirm .neu-table__action-btn:last-child') as HTMLButtonElement).click();
+    f.detectChanges();
+    (f.nativeElement.querySelectorAll('.neu-table__selection-actions .neu-table__export-btn')[1] as HTMLButtonElement).click();
+    f.detectChanges();
+    (f.nativeElement.querySelector('.neu-table__action-confirm .neu-table__action-btn--danger') as HTMLButtonElement).click();
+    expect(events.at(-1).action.key).toBe('delete');
   });
 
   it('clicking a table row via DOM should call onRowClick and toggle selection', async () => {
@@ -2943,6 +2976,55 @@ describe('NeuTableComponent', () => {
     }
   });
 
+  it('cellTemplate branch should render a custom cell template context', async () => {
+    @Component({
+      template: `
+        <ng-template #cell let-row let-column="column">
+          <span class="custom-cell">{{ column.header }}:{{ row.name }}</span>
+        </ng-template>
+        <neu-table
+          [columns]="[{ key: 'name', header: 'Nombre', cellTemplate: cell }]"
+          [data]="data"
+        />
+      `,
+      imports: [NeuTableComponent],
+    })
+    class CellTemplateHostComponent {
+      data: Person[] = [DATA[0]];
+    }
+
+    const f = TestBed.createComponent(CellTemplateHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelector('.custom-cell')?.textContent).toContain(
+      'Nombre:Ana García',
+    );
+  });
+
+  it('should render declarative toolbar template content', async () => {
+    @Component({
+      template: `
+        <neu-table [columns]="columns" [data]="data">
+          <ng-template neuTableToolbar>
+            <button class="custom-pdf-action" type="button">PDF</button>
+          </ng-template>
+        </neu-table>
+      `,
+      imports: [NeuTableComponent, NeuTableToolbarDirective],
+    })
+    class ToolbarHostComponent {
+      columns = COLUMNS;
+      data = DATA;
+    }
+
+    const f = TestBed.createComponent(ToolbarHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelector('.custom-pdf-action')?.textContent).toContain('PDF');
+  });
+
   it('emptyStateTemplate branch should render a custom empty template', async () => {
     @Component({
       template: `
@@ -2978,5 +3060,754 @@ describe('NeuTableComponent', () => {
     expect(footerCells[0].textContent?.trim()).toBe('Total');
     expect(footerCells[1].textContent?.trim()).toBe('');
     expect(footerCells[2].textContent?.trim()).toBe('');
+  });
+});
+
+describe('NeuTableComponent advanced layout features', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
+  });
+
+  it('should hide columns through the column chooser state', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('columnChooser', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    f.componentInstance.toggleColumnVisibility('age');
+    f.detectChanges();
+
+    expect(f.nativeElement.textContent).not.toContain('Edad');
+    expect(f.componentInstance.currentLayout().hiddenColumns).toContain('age');
+  });
+
+  it('should emit column reorder events', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const spy = vi.fn();
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentInstance.columnReorder.subscribe(spy);
+    f.detectChanges();
+    await f.whenStable();
+
+    f.componentInstance.moveColumn('age', -1);
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ previousIndex: 1, currentIndex: 0 }),
+    );
+    expect(f.componentInstance.currentLayout().columnOrder[0]).toBe('age');
+  });
+
+  it('should render grouped page entries', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('groupBy', 'city');
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelectorAll('.neu-table__group-row').length).toBe(3);
+  });
+
+  it('should emit controlled inline edit commits', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const spy = vi.fn();
+    f.componentRef.setInput('columns', [{ key: 'name', header: 'Nombre', editable: true }]);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('inlineEdit', true);
+    f.componentInstance.cellEditCommit.subscribe(spy);
+    f.detectChanges();
+    await f.whenStable();
+
+    const row = DATA[0] as any;
+    const col = { key: 'name', header: 'Nombre', editable: true } as any;
+    f.componentInstance.startCellEdit(row, col);
+    f.componentInstance.setEditingValue('Ana Editada');
+    f.componentInstance.commitCellEdit(row, col);
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ value: 'Ana Editada', previousValue: 'Ana García' }),
+    );
+  });
+
+  it('wires column chooser, resize and inline-editor events through the table template', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const editableColumns: NeuTableColumn[] = [
+      { key: 'name', header: 'Nombre', editable: true, width: '160px' },
+      { key: 'age', header: 'Edad' },
+    ];
+    const commits = vi.fn();
+    f.componentRef.setInput('columns', editableColumns);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('columnChooser', true);
+    f.componentRef.setInput('resizableColumns', true);
+    f.componentRef.setInput('inlineEdit', true);
+    f.componentInstance.cellEditCommit.subscribe(commits);
+    f.detectChanges();
+    await f.whenStable();
+
+    (f.nativeElement.querySelector('.neu-table__column-chooser > button') as HTMLButtonElement).click();
+    f.detectChanges();
+    const chooser = f.nativeElement.querySelector('.neu-table__column-chooser-checkbox input') as HTMLInputElement;
+    chooser.checked = false;
+    chooser.dispatchEvent(new Event('change', { bubbles: true }));
+    f.detectChanges();
+    expect(f.componentInstance.isColumnVisible('name')).toBe(false);
+
+    f.componentInstance.toggleColumnVisibility('name');
+    f.detectChanges();
+    const resize = f.nativeElement.querySelector('.neu-table__resize-handle') as HTMLButtonElement;
+    resize.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+
+    const firstCell = f.nativeElement.querySelector('.neu-table__body .neu-table__td') as HTMLTableCellElement;
+    firstCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    f.detectChanges();
+    const editor = f.debugElement.query(By.directive(NeuInlineEditorComponent))?.componentInstance as NeuInlineEditorComponent;
+    expect(editor).toBeTruthy();
+    editor.valueChange.emit('Ana DOM');
+    editor.editCommit.emit({ previousValue: 'Ana García', value: 'Ana DOM' });
+    expect(commits).toHaveBeenCalledWith(expect.objectContaining({ value: 'Ana DOM' }));
+    editor.editCancel.emit(null);
+  });
+
+  it('uses rendered column reorder and selection-cell controls without bubbling to the row', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('reorderableColumns', true);
+    f.componentRef.setInput('selectable', true);
+    const rowClicks = vi.fn();
+    f.componentInstance.rowClick.subscribe(rowClicks);
+    f.detectChanges();
+    await f.whenStable();
+
+    const reorderControls = f.nativeElement.querySelector('.neu-table__reorder-controls') as HTMLElement;
+    reorderControls.click();
+    const reorderButtons = f.nativeElement.querySelectorAll('.neu-table__reorder-btn') as NodeListOf<HTMLButtonElement>;
+    reorderButtons[1].click();
+    reorderButtons[2].click();
+    f.detectChanges();
+    expect((f.componentInstance as any).currentLayout().columnOrder[1]).toBe('name');
+
+    const selectionCell = f.nativeElement.querySelector('.neu-table__row .neu-table__th--check') as HTMLElement;
+    selectionCell.click();
+    expect(rowClicks).not.toHaveBeenCalled();
+  });
+
+  it('updates virtual table state from the rendered scroll container', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', MANY_ROWS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.componentRef.setInput('virtualScrollVisibleItems', 3);
+    f.detectChanges();
+    await f.whenStable();
+    const container = f.nativeElement.querySelector('.neu-table__scroll-container') as HTMLElement;
+    Object.defineProperty(container, 'scrollTop', { configurable: true, value: 120 });
+    container.dispatchEvent(new Event('scroll', { bubbles: true }));
+    expect((f.componentInstance as any)._virtualScrollTop()).toBe(120);
+  });
+
+  it('renders virtual spacers and relaxed density through the DOM after scrolling', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', MANY_ROWS);
+    f.componentRef.setInput('virtualScroll', true);
+    f.componentRef.setInput('virtualScrollVisibleItems', 2);
+    f.componentRef.setInput('pagination', false);
+    f.componentRef.setInput('density', 'relaxed');
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    expect(comp._virtualRowHeight()).toBe(64);
+
+    const container = f.nativeElement.querySelector('.neu-table__scroll-container') as HTMLElement;
+    Object.defineProperty(container, 'scrollTop', { configurable: true, value: 300 });
+    container.dispatchEvent(new Event('scroll', { bubbles: true }));
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelector('.neu-table__spacer-row')).toBeTruthy();
+    expect(comp._virtualTopSpacerHeight()).toBeGreaterThan(0);
+    expect(comp._virtualBottomSpacerHeight()).toBeGreaterThanOrEqual(0);
+  });
+
+  it('applies layouts with stale keys and emits layout changes for real width resets', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const layoutEvents: unknown[] = [];
+    f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('initialLayout', {
+      columnOrder: ['missing', 'city'],
+      hiddenColumns: ['ghost', 'age'],
+      columnWidths: { name: 222, ghost: 99 },
+    });
+    f.componentInstance.layoutChange.subscribe((event) => layoutEvents.push(event));
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.componentInstance.currentLayout().columnOrder).toEqual(['city', 'name', 'age']);
+    expect(f.componentInstance.currentLayout().hiddenColumns).toEqual(['age']);
+    expect(f.componentInstance.columnWidth(RESIZABLE_COLUMNS[0])).toBe('222px');
+
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+    f.componentInstance.resetColumnWidth('name', {
+      preventDefault,
+      stopPropagation,
+    } as unknown as Event);
+
+    expect(preventDefault).toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(f.componentInstance.columnWidth(RESIZABLE_COLUMNS[0])).toBe('120px');
+    expect(layoutEvents.length).toBeGreaterThan(0);
+
+    f.componentInstance.applyLayout({
+      columnOrder: ['age', 'missing'],
+      hiddenColumns: ['city', 'missing'],
+      columnWidths: { age: 188 },
+    });
+
+    expect(f.componentInstance.currentLayout()).toEqual({
+      columnOrder: ['age', 'name', 'city'],
+      hiddenColumns: ['city'],
+      columnWidths: { age: 188 },
+    });
+  });
+
+  it('renders footer structural cells when selection, expansion and row numbers are enabled', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('footerRow', { name: 'Totals', age: 84 });
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('showRowNumbers', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const footerCells = Array.from(
+      f.nativeElement.querySelectorAll('.neu-table__footer-row .neu-table__td'),
+    ) as HTMLTableCellElement[];
+    expect(footerCells.length).toBe(6);
+    expect(footerCells.map((cell) => cell.textContent?.trim())).toContain('Totals');
+  });
+
+  it('covers inline editor guards, null values and cancellation events through public methods', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const editableColumn: NeuTableColumn = {
+      key: 'name',
+      header: 'Nombre',
+      editable: true,
+      editor: 'select',
+      editOptions: ['Ana', 'Luis'],
+    };
+    const row = { id: 10, name: null };
+    f.componentRef.setInput('columns', [editableColumn]);
+    f.componentRef.setInput('data', [row]);
+    f.componentRef.setInput('inlineEdit', false);
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    comp.startCellEdit(row, editableColumn, new MouseEvent('dblclick'));
+    expect(comp.isEditingCell(row, editableColumn)).toBe(false);
+    expect(comp.inlineEditorType(editableColumn)).toBe('select');
+    expect(comp.inlineEditorOptions(editableColumn)).toEqual([
+      { label: 'Ana', value: 'Ana' },
+      { label: 'Luis', value: 'Luis' },
+    ]);
+
+    f.componentRef.setInput('inlineEdit', true);
+    f.detectChanges();
+    await f.whenStable();
+    const stopPropagation = vi.fn();
+    comp.startCellEdit(row, editableColumn, {
+      stopPropagation,
+    } as unknown as Event);
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(comp.editingValue()).toBe('');
+    comp.setEditingValue('Ana');
+    comp.commitCellEdit(row, { key: 'other', header: 'Other', editable: true });
+    expect(comp.isEditingCell(row, editableColumn)).toBe(true);
+
+    const preventDefault = vi.fn();
+    comp.cancelCellEdit({
+      stopPropagation,
+      preventDefault,
+    } as unknown as Event);
+    expect(preventDefault).toHaveBeenCalled();
+    expect(comp.isEditingCell(row, editableColumn)).toBe(false);
+  });
+
+  it('handles selection action visibility, disabled state and non-lucide icons in the rendered bar', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('selectable', true);
+    f.componentRef.setInput('selectionActions', [
+      {
+        key: 'hidden',
+        label: 'Hidden',
+        icon: '*',
+        show: () => false,
+      },
+      {
+        key: 'plain',
+        label: 'Plain',
+        icon: '*',
+        disabled: () => true,
+      },
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+
+    (f.componentInstance as any).toggleRow(DATA[0]);
+    f.detectChanges();
+    await f.whenStable();
+
+    const actions = Array.from(
+      f.nativeElement.querySelectorAll('.neu-table__selection-actions .neu-table__export-btn'),
+    ) as HTMLButtonElement[];
+    expect(actions).toHaveLength(1);
+    expect(actions[0].disabled).toBe(true);
+    expect(actions[0].textContent).toContain('*');
+    expect(actions[0].textContent).not.toContain('Hidden');
+  });
+
+  it('keeps equal multi-sort rows stable when every compared key ties', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', [
+      { id: 1, name: 'Same', age: 30, city: 'A', status: 'active' },
+      { id: 2, name: 'Same', age: 30, city: 'B', status: 'inactive' },
+    ]);
+    f.componentRef.setInput('sortable', true);
+    f.componentRef.setInput('multiSort', true);
+    f.componentRef.setInput('useUrlState', false);
+    f.detectChanges();
+    await f.whenStable();
+
+    f.componentInstance.sortBy('name', { shiftKey: true } as MouseEvent);
+    const sorted = f.componentInstance.sortedData();
+
+    expect(sorted.map((row) => row['id'])).toEqual([1, 2]);
+  });
+
+  it('ignores invalid page-size changes and clamps pagination requests', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', MANY_ROWS);
+    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('pageSize', 5);
+    f.detectChanges();
+    await f.whenStable();
+
+    f.componentInstance.onPageSizeChange({ target: { value: 'nope' } });
+    expect(f.componentInstance.effectivePageSize()).toBe(5);
+    f.componentInstance.onPageSizeChange(0);
+    expect(f.componentInstance.effectivePageSize()).toBe(5);
+
+    f.componentInstance.goToPage(-10);
+    expect(f.componentInstance.currentPage()).toBe(1);
+    f.componentInstance.goToPage(99);
+    expect(f.componentInstance.currentPage()).toBe(f.componentInstance.totalPages());
+  });
+
+  it('covers table computed fallbacks that are not always reached from the default DOM', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', [
+      { key: 'name', header: 'Nombre', cell: (row: Record<string, unknown>) => `Cell ${row['name']}` },
+      {
+        key: 'status',
+        header: 'Estado',
+        type: 'badge',
+        badgeMap: { active: { label: 'Activo', variant: 'success' } },
+        filterable: true,
+        filterOptions: ['active', 'inactive'],
+      },
+      { key: 'missing', header: 'Missing' },
+    ]);
+    f.componentRef.setInput('data', [
+      { id: 1, name: 'Ana', status: 'active' },
+      { id: 2, name: 'Luis', status: null },
+    ]);
+    f.componentRef.setInput('pagination', false);
+    f.componentRef.setInput('density', 'compact');
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+
+    expect(comp.orderedColumns().map((col: NeuTableColumn) => col.key)).toEqual([
+      'name',
+      'status',
+      'missing',
+    ]);
+    expect(comp._filterOpts(comp.columns()[1])).toEqual([
+      { label: 'All', value: '' },
+      { label: 'active', value: 'active' },
+      { label: 'inactive', value: 'inactive' },
+    ]);
+    expect(comp.effectivePageSize()).toBe(2);
+    expect(comp._virtualRowHeight()).toBe(34);
+    expect(comp._virtualEndIndex()).toBe(2);
+    expect(comp._virtualTopSpacerHeight()).toBe(0);
+    expect(comp._virtualBottomSpacerHeight()).toBe(0);
+    expect(comp.visiblePageEntries().map((entry: any) => entry.kind)).toEqual(['row', 'row']);
+
+    comp.setExactMatch(true);
+    comp.onSearch({ target: { value: 'Cell Ana' } } as unknown as Event);
+    expect(comp.filteredData().map((row: any) => row['id'])).toEqual([1]);
+    comp.onSearch({ target: { value: 'Activo' } } as unknown as Event);
+    expect(comp.filteredData().map((row: any) => row['id'])).toEqual([1]);
+    comp.setColumnFilter('status', 'no-match');
+    expect(comp.filteredData()).toEqual([]);
+  });
+
+  it('groups null values, handles inactive virtual rows and formats pagination singular text', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', [{ id: 1, name: 'Only', age: 1, city: null, status: 'active' }]);
+    f.componentRef.setInput('groupBy', 'city');
+    f.componentRef.setInput('pageSize', 10);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+
+    expect(comp._virtualScrollActive()).toBe(false);
+    expect(comp.visiblePageEntries()[0]).toEqual(
+      expect.objectContaining({ kind: 'group', label: '—', count: 1 }),
+    );
+    expect(comp.paginationInfo()).toContain('1 result');
+    expect(comp.totalColspan()).toBe(3);
+  });
+
+  it('uses resize fallback widths and emits only after a dragged width exists', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const resizeEvents: unknown[] = [];
+    const col: NeuTableColumn = { key: 'name', header: 'Nombre', width: 'auto', minWidth: 120, maxWidth: 180 };
+    f.componentRef.setInput('columns', [col]);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('resizableColumns', true);
+    f.componentInstance.columnResize.subscribe((event) => resizeEvents.push(event));
+    f.detectChanges();
+    await f.whenStable();
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+
+    f.componentInstance.startColumnResize(col, {
+      currentTarget: document.createElement('button'),
+      clientX: 50,
+      preventDefault,
+      stopPropagation,
+    } as unknown as MouseEvent);
+    expect(preventDefault).toHaveBeenCalled();
+    window.dispatchEvent(new MouseEvent('mouseup'));
+    expect(resizeEvents).toEqual([]);
+
+    f.componentInstance.startColumnResize(col, {
+      currentTarget: document.createElement('button'),
+      clientX: 50,
+      preventDefault,
+      stopPropagation,
+    } as unknown as MouseEvent);
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 500 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(resizeEvents).toEqual([{ key: 'name', width: 180 }]);
+  });
+
+  it('covers inline edit no-op commit and empty editing value state', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const col: NeuTableColumn = { key: 'name', header: 'Nombre', editable: true };
+    const commits: unknown[] = [];
+    f.componentRef.setInput('columns', [col]);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('inlineEdit', true);
+    f.componentInstance.cellEditCommit.subscribe((event) => commits.push(event));
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+
+    expect(comp.editingValue()).toBe('');
+    comp.setEditingValue('ignored');
+    comp.commitCellEdit(DATA[0], col);
+    expect(commits).toEqual([]);
+  });
+
+  it('covers column ordering, layout and visibility edge cases', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+
+    comp._columnOrder.set([]);
+    expect(comp.orderedColumns()).toEqual(COLUMNS);
+
+    comp._columnOrder.set(['missing', 'age']);
+    expect(comp.orderedColumns().map((col: NeuTableColumn) => col.key)).toEqual([
+      'age',
+      'name',
+      'city',
+    ]);
+
+    comp.toggleColumnVisibility('name');
+    comp.toggleColumnVisibility('age');
+    comp.toggleColumnVisibility('city');
+    expect(comp.visibleColumns().length).toBe(1);
+
+    const layouts: unknown[] = [];
+    f.componentInstance.layoutChange.subscribe((layout) => layouts.push(layout));
+    comp.applyLayout({ columnOrder: ['city', 'ghost'], hiddenColumns: ['ghost'], columnWidths: undefined });
+    expect(comp.currentLayout().columnOrder).toEqual(['city', 'name', 'age']);
+    expect(comp.currentLayout().hiddenColumns).toEqual([]);
+    expect(layouts.length).toBeGreaterThan(0);
+  });
+
+  it('syncs filter controls from external filter state', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', [
+      { key: 'name', header: 'Nombre', filterable: true },
+      { key: 'city', header: 'Ciudad' },
+    ]);
+    f.componentRef.setInput('data', DATA);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    const control = comp.columnFilterControl('name');
+    control.setValue('old');
+    comp._columnFilters.set({ name: 'Ana' });
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(control.value).toBe('Ana');
+  });
+
+  it('covers sorting and pagination edge cases with empty and missing values', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', [
+      { id: 1, name: 'B', age: undefined, city: 'Madrid', status: 'active' },
+      { id: 2, name: 'A', city: undefined, status: 'inactive' },
+    ]);
+    f.componentRef.setInput('sortable', true);
+    f.componentRef.setInput('multiSort', true);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+
+    expect(comp.multiSort()).toBe(true);
+    comp.sortBy('age', { shiftKey: true } as MouseEvent);
+    comp.sortBy('age', { shiftKey: true } as MouseEvent);
+    comp.sortBy('city', { shiftKey: true } as MouseEvent);
+    expect(comp._sortEntries()).toEqual([
+      { key: 'age', dir: 'desc' },
+      { key: 'city', dir: 'asc' },
+    ]);
+    expect(() => comp.sortedData()).not.toThrow();
+
+    comp.sortBy('name');
+    comp.sortBy('name');
+    expect(comp._sortEntries()).toEqual([{ key: 'name', dir: 'desc' }]);
+
+    f.componentRef.setInput('multiSort', false);
+    f.detectChanges();
+    comp.sortBy('missing');
+    expect(() => comp.sortedData()).not.toThrow();
+
+    f.componentRef.setInput('pagination', false);
+    f.componentRef.setInput('data', []);
+    f.detectChanges();
+    await f.whenStable();
+    expect(comp.effectivePageSize()).toBe(1);
+    expect(comp.paginationInfo()).toContain('0-0');
+  });
+
+  it('covers server-side and URL-state table branches', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const states: unknown[] = [];
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('serverSide', true);
+    f.componentRef.setInput('totalItems', 42);
+    f.componentRef.setInput('pageSize', 10);
+    f.componentInstance.serverStateChange.subscribe((state: unknown) => states.push(state));
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+
+    expect(comp.sortedData()).toEqual(comp.filteredData());
+    expect(comp.paginatedData()).toEqual(DATA);
+    expect(comp.totalPages()).toBe(5);
+
+    comp.goToPage(3);
+    comp.sortBy('name');
+    comp.onSearch({ target: { value: 'Ana' } } as unknown as Event);
+    comp.clearSearch();
+    comp.onPageSizeChange({ target: { value: 20 } });
+    comp.setColumnFilter('city', 'Madrid');
+
+    expect(states.length).toBeGreaterThanOrEqual(6);
+
+    f.componentRef.setInput('serverSide', false);
+    f.componentRef.setInput('useUrlState', true);
+    f.detectChanges();
+    await f.whenStable();
+    comp.sortBy('age', { shiftKey: true } as MouseEvent);
+    comp.goToPage(2);
+    comp.onSearch({ target: { value: 'Luis' } } as unknown as Event);
+    comp.clearSearch();
+
+    expect(comp.useUrlState()).toBe(true);
+  });
+
+  it('covers grouped virtual and selection edge cases', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', MANY_ROWS);
+    f.componentRef.setInput('groupBy', 'city');
+    f.componentRef.setInput('virtualScroll', true);
+    f.componentRef.setInput('virtualScrollVisibleItems', 3);
+    f.componentRef.setInput('density', 'relaxed');
+    f.componentRef.setInput('expandMode', 'single');
+    f.componentRef.setInput('selectable', true);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+
+    comp.onTableScroll({ target: { scrollTop: 260 } } as unknown as Event);
+    expect(comp._virtualScrollActive()).toBe(true);
+    expect(comp._virtualRowHeight()).toBe(64);
+    expect(comp._virtualTopSpacerHeight()).toBeGreaterThanOrEqual(0);
+    expect(comp._virtualBottomSpacerHeight()).toBeGreaterThanOrEqual(0);
+    expect(comp.visiblePageEntries().some((entry: any) => entry.kind === 'group')).toBe(true);
+
+    comp.expandRow(MANY_ROWS[0]);
+    comp.toggleExpand(MANY_ROWS[1]);
+    expect(comp.isRowExpanded(MANY_ROWS[0])).toBe(false);
+    expect(comp.isRowExpanded(MANY_ROWS[1])).toBe(true);
+
+    comp.toggleAll();
+    expect(comp.isAllFilteredSelected()).toBe(true);
+    comp.toggleAll();
+    expect(comp.selectedCount()).toBe(0);
+  });
+
+  it('exports CSV, JSON and XLSX for browser consumers', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    const createdUrls: string[] = [];
+    const appended: HTMLAnchorElement[] = [];
+    const originalCreateObjectURL = URL.createObjectURL;
+    const originalRevokeObjectURL = URL.revokeObjectURL;
+    const originalAppendChild = document.body.appendChild;
+    const originalRemoveChild = document.body.removeChild;
+    URL.createObjectURL = vi.fn(() => {
+      const url = `blob:test-${createdUrls.length}`;
+      createdUrls.push(url);
+      return url;
+    }) as any;
+    URL.revokeObjectURL = vi.fn() as any;
+    document.body.appendChild = vi.fn((node: Node) => {
+      appended.push(node as HTMLAnchorElement);
+      return node;
+    }) as any;
+    document.body.removeChild = vi.fn((node: Node) => node) as any;
+    HTMLAnchorElement.prototype.click = vi.fn();
+    f.componentRef.setInput('columns', [
+      { key: 'name', header: 'Nombre "legal"' },
+      { key: 'amount', header: 'Importe', type: 'currency', currencyCode: 'EUR', locale: 'en-US' },
+      { key: 'date', header: 'Fecha', type: 'date', locale: 'en-US' },
+      { key: 'actions', header: 'Actions', type: 'actions' },
+    ]);
+    f.componentRef.setInput('data', [
+      { id: 1, name: 'A&B <test>', amount: 12.5, date: 'invalid-date' },
+      { id: 2, name: 'Chosen', amount: 20, date: new Date('2026-01-02T00:00:00Z') },
+    ]);
+    f.componentRef.setInput('exportFileName', 'people');
+    f.detectChanges();
+    await f.whenStable();
+
+    try {
+      f.componentRef.setInput('exportScope', 'filtered');
+      f.componentInstance.exportCsv();
+      f.componentRef.setInput('exportScope', 'selected');
+      f.componentInstance.toggleRow({ id: 2, name: 'Chosen', amount: 20, date: new Date('2026-01-02T00:00:00Z') });
+      f.componentInstance.exportJson();
+      f.componentRef.setInput('exportScope', 'auto');
+      f.componentInstance.exportXlsx();
+    } finally {
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+      document.body.appendChild = originalAppendChild;
+      document.body.removeChild = originalRemoveChild;
+    }
+
+    expect(createdUrls).toEqual(['blob:test-0', 'blob:test-1', 'blob:test-2']);
+    expect(appended.map((anchor) => anchor.download)).toEqual([
+      'people.csv',
+      'people.json',
+      'people.xlsx',
+    ]);
+  });
+
+  it('does not attempt blob exports while rendered on the server platform', async () => {
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        providers: [...mkProviders(), { provide: PLATFORM_ID, useValue: 'server' }],
+      })
+      .compileComponents();
+    const f = TestBed.createComponent(NeuTableComponent);
+    const createObjectURL = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:ssr');
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.detectChanges();
+    await f.whenStable();
+
+    f.componentInstance.exportCsv();
+    f.componentInstance.exportJson();
+    f.componentInstance.exportXlsx();
+
+    expect(createObjectURL).not.toHaveBeenCalled();
+    createObjectURL.mockRestore();
+  });
+
+  it('covers remaining table formatting and state normalization branches', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', [
+      { key: 'name', header: 'Name', width: 'auto', filterable: true },
+      { key: 'status', header: 'Status', filterable: true },
+      { key: 'price', header: 'Price', type: 'currency', width: 'wide' },
+    ]);
+    f.componentRef.setInput('data', [
+      { id: 1, name: 'Alpha', status: 'active', price: 9 },
+      { id: 2, name: 'Beta', status: 'paused', price: 12 },
+    ]);
+    f.componentRef.setInput('useUrlState', true);
+    f.componentRef.setInput('multiSort', true);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    expect(comp._scrollContainer()).toBeTruthy();
+
+    expect(comp._filterOpts(comp.columns()[0])).toEqual([{ label: 'All', value: '' }]);
+    expect(comp.columnWidth(comp.columns()[0])).toBe('auto');
+    expect(comp._columnWidthPx(comp.columns()[0])).toBeNull();
+    expect(comp._columnWidthPx(comp.columns()[2])).toBeNull();
+    expect(comp.columnWidth(comp.columns()[2])).toBe('wide');
+    expect(comp.getCellValue({ price: 9 }, comp.columns()[2])).toContain('€');
+
+    comp.sortBy('name', { shiftKey: true } as MouseEvent);
+    comp.sortBy('name', { shiftKey: true } as MouseEvent);
+    comp.sortBy('name', { shiftKey: true } as MouseEvent);
+    expect(comp._sortEntries()[0].dir).toBe('asc');
+
+    comp.onSearch({ target: { value: '' } } as unknown as Event);
+    comp.onPageSizeChange({ target: {} });
+    expect(comp.currentPage()).toBe(1);
   });
 });

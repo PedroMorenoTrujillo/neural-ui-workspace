@@ -50,6 +50,17 @@ class HostComponent {
   closedCount = 0;
 }
 
+@Component({
+  template: `
+    <neu-sidebar>
+      <span neu-sidebar-header>Menu</span>
+      <button class="inside-action" type="button">Action</button>
+    </neu-sidebar>
+  `,
+  imports: [NeuSidebarComponent],
+})
+class FocusHostComponent {}
+
 // ── Suite ─────────────────────────────────────────────────────────────────────
 
 describe('NeuSidebarComponent', () => {
@@ -419,5 +430,119 @@ describe('NeuSidebarComponent', () => {
     });
     f.componentInstance.toggleCollapsed();
     expect(emittedValue).toBe(true);
+  });
+
+  it('uses the configured URL parameter and exposes inert semantics while closed', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('urlParam', 'drawer');
+    f.detectChanges();
+    const aside = f.nativeElement.querySelector('aside.neu-sidebar') as HTMLElement;
+    expect(aside.getAttribute('aria-hidden')).toBe('true');
+    expect(aside.getAttribute('inert')).toBe('');
+    f.componentInstance.open();
+    f.componentInstance.close();
+    expect(_mockSetParam).toHaveBeenNthCalledWith(1, 'drawer', 'open', false);
+    expect(_mockSetParam).toHaveBeenNthCalledWith(2, 'drawer', null, true);
+  });
+
+  it('traps Tab navigation and handles Escape only when enabled in drawer mode', () => {
+    _menuParam.set('open');
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.detectChanges();
+    const closeButton = f.nativeElement.querySelector('.neu-sidebar__close') as HTMLButtonElement;
+    closeButton.focus();
+    const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
+    const preventForward = vi.spyOn(forward, 'preventDefault');
+    f.componentInstance.onKeyDown(forward);
+    expect(preventForward).toHaveBeenCalled();
+    expect(document.activeElement).toBe(closeButton);
+
+    const backward = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true });
+    const preventBackward = vi.spyOn(backward, 'preventDefault');
+    f.componentInstance.onKeyDown(backward);
+    expect(preventBackward).toHaveBeenCalled();
+
+    const escape = new KeyboardEvent('keydown', { key: 'Escape' });
+    const preventEscape = vi.spyOn(escape, 'preventDefault');
+    f.componentInstance.onKeyDown(escape);
+    expect(preventEscape).toHaveBeenCalled();
+    expect(_mockSetParam).toHaveBeenCalledWith('menu', null, true);
+  });
+
+  it('does not close with Escape when disabled or operating as persistent navigation', () => {
+    _menuParam.set('open');
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('closeOnEscape', false);
+    f.detectChanges();
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(_mockSetParam).not.toHaveBeenCalled();
+
+    f.componentRef.setInput('persistent', true);
+    f.componentRef.setInput('closeOnEscape', true);
+    f.detectChanges();
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(_mockSetParam).not.toHaveBeenCalled();
+  });
+
+  it('keeps scroll locked until every overlay sidebar is closed', () => {
+    _menuParam.set('open');
+    const first = TestBed.createComponent(NeuSidebarComponent);
+    const second = TestBed.createComponent(NeuSidebarComponent);
+    first.detectChanges();
+    second.detectChanges();
+
+    expect(document.body.style.overflow).toBe('hidden');
+
+    first.destroy();
+    expect(document.body.style.overflow).toBe('hidden');
+
+    second.destroy();
+    expect(document.body.style.overflow).toBe('');
+  });
+
+  it('handles host keydown before the aside is rendered without focusable elements', () => {
+    _menuParam.set('open');
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    const event = new KeyboardEvent('keydown', { key: 'Tab' });
+    const preventDefault = vi.spyOn(event, 'preventDefault');
+
+    f.componentInstance.onKeyDown(event);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('uses the HostListener for Escape keydown events', () => {
+    _menuParam.set('open');
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.detectChanges();
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+    const preventDefault = vi.spyOn(event, 'preventDefault');
+
+    f.nativeElement.dispatchEvent(event);
+
+    expect(preventDefault).toHaveBeenCalled();
+    expect(_mockSetParam).toHaveBeenCalledWith('menu', null, true);
+  });
+
+  it('does not cycle focus when tabbing inside the focusable range', () => {
+    _menuParam.set('open');
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.detectChanges();
+    const closeButton = f.nativeElement.querySelector('.neu-sidebar__close') as HTMLButtonElement;
+    const action = f.nativeElement.querySelector('.inside-action') as HTMLButtonElement;
+    const sidebar = f.debugElement.children[0].componentInstance as NeuSidebarComponent;
+
+    closeButton.focus();
+    const forward = new KeyboardEvent('keydown', { key: 'Tab' });
+    const preventForward = vi.spyOn(forward, 'preventDefault');
+    const backward = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true });
+    const preventBackward = vi.spyOn(backward, 'preventDefault');
+
+    sidebar.onKeyDown(forward);
+    action.focus();
+    sidebar.onKeyDown(backward);
+
+    expect(preventForward).not.toHaveBeenCalled();
+    expect(preventBackward).not.toHaveBeenCalled();
   });
 });

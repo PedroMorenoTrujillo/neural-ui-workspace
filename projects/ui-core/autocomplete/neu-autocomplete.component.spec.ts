@@ -1,7 +1,12 @@
 import { Component } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuAutocompleteComponent, NeuAutocompleteOption } from './neu-autocomplete.component';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {
+  NeuAutocompleteComponent,
+  NeuAutocompleteItemDirective,
+  NeuAutocompleteOption,
+} from './neu-autocomplete.component';
 
 const OPTIONS: NeuAutocompleteOption[] = [
   { value: 1, label: 'Angular' },
@@ -223,6 +228,7 @@ describe('NeuAutocompleteComponent', () => {
     f.componentRef.setInput('minLength', 3);
     f.componentInstance.onQueryChange('ca');
     expect((f.componentInstance as any)._isOpen()).toBe(false);
+    expect(f.componentInstance._filtered()).toEqual([]);
   });
 
   it('minLength=3 should open list when query >= 3 chars', () => {
@@ -545,5 +551,208 @@ describe('NeuAutocompleteComponent', () => {
       querySpy.mockRestore();
       window.requestAnimationFrame = originalRequestAnimationFrame;
     }
+  });
+
+  it('supports dropdown trigger, loading feedback, resize and force-selection contracts', async () => {
+    const f = setup();
+    f.componentRef.setInput('dropdown', true);
+    f.componentRef.setInput('dropdownAriaLabel', 'Open all options');
+    f.detectChanges();
+    const dropdown = f.nativeElement.querySelector('.neu-autocomplete__dropdown') as HTMLButtonElement;
+    dropdown.click();
+    expect(f.componentInstance._isOpen()).toBe(true);
+    expect(f.componentInstance._activeIndex()).toBe(0);
+
+    f.componentRef.setInput('loading', true);
+    f.componentRef.setInput('loadingLabel', 'Loading choices');
+    f.detectChanges();
+    await f.whenStable();
+    expect(document.querySelector('.neu-autocomplete__empty')?.textContent).toContain('Loading choices');
+
+    f.componentInstance.onWindowResize();
+    expect(f.componentInstance.overlayWidth()).not.toBeNull();
+
+    f.componentRef.setInput('forceSelection', true);
+    f.componentInstance._query.set('Not an option');
+    f.componentInstance._isOpen.set(true);
+    f.componentInstance._onBlur();
+    expect(f.componentInstance._query()).toBe('');
+  });
+
+  it('renders the virtual list and scrolls a rendered active option into view', async () => {
+    const f = setup();
+    f.componentRef.setInput('virtualScroll', true);
+    f.componentRef.setInput('dropdown', true);
+    f.componentRef.setInput('virtualScrollVisibleItems', 2);
+    f.componentInstance.openAll();
+    f.detectChanges();
+    await f.whenStable();
+    expect(document.querySelector('cdk-virtual-scroll-viewport')).toBeTruthy();
+    expect(f.componentInstance.virtualViewportHeight()).toBe('80px');
+  });
+
+  it('uses an item template when one is projected', async () => {
+    @Component({
+      imports: [NeuAutocompleteComponent, NeuAutocompleteItemDirective],
+      template: `
+        <neu-autocomplete [options]="options" [dropdown]="true">
+          <ng-template neuAutocompleteItem let-option>Custom {{ option.label }}</ng-template>
+        </neu-autocomplete>
+      `,
+    })
+    class ItemTemplateHostComponent {
+      readonly options = OPTIONS;
+    }
+
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ providers: [provideZonelessChangeDetection()], imports: [ItemTemplateHostComponent] })
+      .compileComponents();
+    const host = TestBed.createComponent(ItemTemplateHostComponent);
+    host.detectChanges();
+    const autocomplete = host.debugElement.children[0].componentInstance as NeuAutocompleteComponent;
+    autocomplete.openAll();
+    host.detectChanges();
+    await host.whenStable();
+    expect(document.body.textContent).toContain('Custom Angular');
+  });
+
+  it('keeps active index at -1 when every matching option is disabled', () => {
+    const f = setup();
+    f.componentRef.setInput('options', [
+      { value: 'a', label: 'Alpha', disabled: true },
+      { value: 'b', label: 'Alpine', disabled: true },
+    ]);
+    f.componentInstance.onQueryChange('al');
+
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+
+    expect(f.componentInstance._activeIndex()).toBe(-1);
+  });
+
+  it('scroll helper returns when there is no active option and scrolls when one exists', async () => {
+    const f = setup();
+    expect(() => (f.componentInstance as any)._scrollActiveOptionIntoView()).not.toThrow();
+
+    const scrollIntoView = vi.fn();
+    const querySpy = vi
+      .spyOn(f.nativeElement, 'querySelector')
+      .mockReturnValue({ scrollIntoView } as unknown as HTMLElement);
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      setTimeout(() => cb(0), 0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+
+    try {
+      f.componentInstance.onQueryChange('ang');
+      f.componentInstance._activeIndex.set(0);
+      (f.componentInstance as any)._scrollActiveOptionIntoView();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    } finally {
+      querySpy.mockRestore();
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
+  it('sync overlay width returns cleanly when the trigger cannot be found', () => {
+    const f = setup();
+    const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
+
+    expect(() => (f.componentInstance as any)._syncOverlayWidth()).not.toThrow();
+
+    querySpy.mockRestore();
+  });
+
+  it('renders projected item templates inside the virtual list branch', async () => {
+    @Component({
+      imports: [NeuAutocompleteComponent, NeuAutocompleteItemDirective],
+      template: `
+        <neu-autocomplete [options]="options" [dropdown]="true" [virtualScroll]="true">
+          <ng-template neuAutocompleteItem let-option>Virtual {{ option.label }}</ng-template>
+        </neu-autocomplete>
+      `,
+    })
+    class VirtualItemTemplateHostComponent {
+      readonly options = OPTIONS;
+    }
+
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        providers: [provideZonelessChangeDetection()],
+        imports: [VirtualItemTemplateHostComponent],
+      })
+      .compileComponents();
+    const host = TestBed.createComponent(VirtualItemTemplateHostComponent);
+    host.detectChanges();
+    const autocomplete = host.debugElement.children[0].componentInstance as NeuAutocompleteComponent;
+    autocomplete.openAll();
+    host.detectChanges();
+    await host.whenStable();
+    autocomplete['_viewport']()?.checkViewportSize();
+    host.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(document.querySelector('.neu-autocomplete__list--virtual')).toBeTruthy();
+    expect(autocomplete._filtered().map((option) => option.label)).toContain('Angular');
+  });
+
+  it('keeps resize closed and forceSelection valid matches intact', () => {
+    const f = setup();
+    const syncSpy = vi.spyOn(f.componentInstance as any, '_syncOverlayWidth');
+
+    f.componentInstance.onWindowResize();
+    expect(syncSpy).not.toHaveBeenCalled();
+
+    f.componentRef.setInput('forceSelection', true);
+    f.componentInstance._query.set('Angular');
+    f.componentInstance._onBlur();
+
+    expect(f.componentInstance._query()).toBe('Angular');
+  });
+
+  it('moveActiveIndex resets to -1 when filtering has no results', () => {
+    const f = setup();
+    f.componentInstance._query.set('zzzz');
+    f.componentInstance._activeIndex.set(2);
+
+    (f.componentInstance as any)._moveActiveIndex(1);
+
+    expect(f.componentInstance._activeIndex()).toBe(-1);
+  });
+
+  it('resolves the CVA provider through Reactive Forms with a projected item template', async () => {
+    @Component({
+      imports: [NeuAutocompleteComponent, NeuAutocompleteItemDirective, ReactiveFormsModule],
+      template: `
+        <neu-autocomplete [options]="options" [formControl]="control" [dropdown]="true">
+          <ng-template neuAutocompleteItem let-option>Form {{ option.label }}</ng-template>
+        </neu-autocomplete>
+      `,
+    })
+    class FormHostComponent {
+      readonly options = OPTIONS;
+      readonly control = new FormControl<number | null>(null);
+    }
+
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [FormHostComponent],
+        providers: [provideZonelessChangeDetection()],
+      })
+      .compileComponents();
+    const host = TestBed.createComponent(FormHostComponent);
+    host.detectChanges();
+    const autocomplete = host.debugElement.children[0].componentInstance as NeuAutocompleteComponent;
+
+    autocomplete.openAll();
+    host.detectChanges();
+    await host.whenStable();
+    expect(autocomplete.itemTpl()).toBeTruthy();
+
+    autocomplete.selectOption(OPTIONS[0]);
+    host.detectChanges();
+
+    expect(host.componentInstance.control.value).toBe(1);
   });
 });

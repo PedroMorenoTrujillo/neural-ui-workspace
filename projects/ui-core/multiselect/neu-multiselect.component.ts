@@ -212,105 +212,83 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
               />
             </div>
           }
+          @if (selectAll()) {
+            <button type="button" class="neu-multiselect__select-all" (click)="toggleAllFiltered($event)">
+              {{ allFilteredSelected() ? unselectAllLabel() : selectAllLabel() }}
+            </button>
+          }
 
           <!-- Opciones -->
           <div class="neu-multiselect__options">
-            @if (virtualScroll()) {
+            <ng-template #multiselectOptionTpl let-option>
+              <div
+                class="neu-multiselect__option"
+                [class.neu-multiselect__option--selected]="isSelected(option.value)"
+                [class.neu-multiselect__option--disabled]="option.disabled"
+                role="option"
+                [id]="'neu-ms-opt-' + option.value"
+                [attr.aria-selected]="isSelected(option.value)"
+                [attr.aria-disabled]="option.disabled"
+                [attr.tabindex]="option.disabled ? null : '-1'"
+                (click)="toggleOption(option)"
+                (keydown.enter)="toggleOption(option)"
+                (keydown.space)="toggleOption(option)"
+                (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
+                (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
+              >
+                <span
+                  class="neu-multiselect__checkbox"
+                  [class.neu-multiselect__checkbox--checked]="isSelected(option.value)"
+                >
+                  <svg
+                    class="neu-multiselect__checkbox-check"
+                    viewBox="0 0 12 10"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="1 5 4.5 9 11 1" />
+                  </svg>
+                </span>
+                @if (itemTpl()) {
+                  <ng-container
+                    [ngTemplateOutlet]="itemTpl()!.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: option }"
+                  />
+                } @else {
+                  {{ option.label }}
+                }
+              </div>
+            </ng-template>
+
+            @if (loading()) {
+              <div class="neu-multiselect__empty" role="status">{{ loadingLabel() }}</div>
+            } @else if (virtualScroll()) {
               <cdk-virtual-scroll-viewport
                 class="neu-multiselect__viewport"
                 [itemSize]="virtualScrollItemSize()"
                 [style.height]="virtualViewportHeight()"
               >
-                <div
-                  *cdkVirtualFor="let option of filteredOptions(); trackBy: trackByOptionValue"
-                  class="neu-multiselect__option"
-                  [class.neu-multiselect__option--selected]="isSelected(option.value)"
-                  [class.neu-multiselect__option--disabled]="option.disabled"
-                  role="option"
-                  [id]="'neu-ms-opt-' + option.value"
-                  [attr.aria-selected]="isSelected(option.value)"
-                  [attr.aria-disabled]="option.disabled"
-                  [attr.tabindex]="option.disabled ? null : '-1'"
-                  (click)="toggleOption(option)"
-                  (keydown.enter)="toggleOption(option)"
-                  (keydown.space)="toggleOption(option)"
-                  (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
-                  (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
-                >
-                  <span
-                    class="neu-multiselect__checkbox"
-                    [class.neu-multiselect__checkbox--checked]="isSelected(option.value)"
-                  >
-                    <svg
-                      class="neu-multiselect__checkbox-check"
-                      viewBox="0 0 12 10"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <polyline points="1 5 4.5 9 11 1" />
-                    </svg>
-                  </span>
-                  @if (itemTpl()) {
-                    <ng-container
-                      [ngTemplateOutlet]="itemTpl()!.templateRef"
-                      [ngTemplateOutletContext]="{ $implicit: option }"
-                    />
-                  } @else {
-                    {{ option.label }}
-                  }
-                </div>
+                <ng-container *cdkVirtualFor="let option of filteredOptions(); trackBy: trackByOptionValue">
+                  <ng-container
+                    [ngTemplateOutlet]="multiselectOptionTpl"
+                    [ngTemplateOutletContext]="{ $implicit: option }"
+                  />
+                </ng-container>
               </cdk-virtual-scroll-viewport>
             } @else {
               @for (option of filteredOptions(); track option.value) {
-                <div
-                  class="neu-multiselect__option"
-                  [class.neu-multiselect__option--selected]="isSelected(option.value)"
-                  [class.neu-multiselect__option--disabled]="option.disabled"
-                  role="option"
-                  [id]="'neu-ms-opt-' + option.value"
-                  [attr.aria-selected]="isSelected(option.value)"
-                  [attr.aria-disabled]="option.disabled"
-                  [attr.tabindex]="option.disabled ? null : '-1'"
-                  (click)="toggleOption(option)"
-                  (keydown.enter)="toggleOption(option)"
-                  (keydown.space)="toggleOption(option)"
-                  (keydown.arrowDown)="focusOptionByIndex($any($event), option, 1)"
-                  (keydown.arrowUp)="focusOptionByIndex($any($event), option, -1)"
-                >
-                  <span
-                    class="neu-multiselect__checkbox"
-                    [class.neu-multiselect__checkbox--checked]="isSelected(option.value)"
-                  >
-                    <svg
-                      class="neu-multiselect__checkbox-check"
-                      viewBox="0 0 12 10"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <polyline points="1 5 4.5 9 11 1" />
-                    </svg>
-                  </span>
-                  @if (itemTpl()) {
-                    <ng-container
-                      [ngTemplateOutlet]="itemTpl()!.templateRef"
-                      [ngTemplateOutletContext]="{ $implicit: option }"
-                    />
-                  } @else {
-                    {{ option.label }}
-                  }
-                </div>
+                <ng-container
+                  [ngTemplateOutlet]="multiselectOptionTpl"
+                  [ngTemplateOutletContext]="{ $implicit: option }"
+                />
               }
             }
 
-            @if (filteredOptions().length === 0) {
+            @if (!loading() && filteredOptions().length === 0) {
               <div class="neu-multiselect__empty">{{ noResultsMessage() }}</div>
             }
           </div>
@@ -430,6 +408,12 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   /** Placeholder del input de búsqueda / Search input placeholder */
   searchPlaceholder = input<string>('Buscar...');
 
+  loading = input<boolean>(false);
+  loadingLabel = input<string>('Loading...');
+  selectAll = input<boolean>(false);
+  selectAllLabel = input<string>('Select all');
+  unselectAllLabel = input<string>('Unselect all');
+
   /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
   noResultsMessage = input<string>('Sin resultados');
 
@@ -530,6 +514,11 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.options();
     return this.options().filter((o) => o.label.toLowerCase().includes(q));
+  });
+
+  readonly allFilteredSelected = computed(() => {
+    const enabled = this.filteredOptions().filter((option) => !option.disabled);
+    return enabled.length > 0 && enabled.every((option) => this._values().includes(option.value));
   });
 
   readonly resultsAnnouncement = computed(() => {
@@ -701,6 +690,25 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this.selectionChange.emit([]);
     const param = this.urlParam();
     if (param) this._urlState.setParam(param, null);
+    this.refreshVirtualViewport();
+  }
+
+  protected toggleAllFiltered(event: MouseEvent): void {
+    event.stopPropagation();
+    const enabled = this.filteredOptions().filter((option) => !option.disabled);
+    const current = new Set(this._values());
+    if (this.allFilteredSelected()) {
+      enabled.forEach((option) => current.delete(option.value));
+    } else {
+      enabled.forEach((option) => current.add(option.value));
+    }
+    const next = [...current];
+    this._values.set(next);
+    this._onChange(next);
+    this._onTouched();
+    this.selectionChange.emit(this.options().filter((option) => next.includes(option.value)));
+    const param = this.urlParam();
+    if (param) this._urlState.setParam(param, next.length ? next.join(',') : null);
     this.refreshVirtualViewport();
   }
 

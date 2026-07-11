@@ -1,5 +1,6 @@
 import { Component, input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { ChartComponent } from 'ng-apexcharts';
 import { NeuChartComponent, NeuChartSeries } from './neu-chart.component';
 
@@ -118,6 +119,13 @@ describe('NeuChartComponent', () => {
     expect(res[0].type).toBe('bar');
     expect(res[1].type).toBe('line');
     expect(res[1].name).toBe('Cumulative %');
+  });
+
+  it('resolvedSeries should keep cumulative values at zero when pareto total is zero', () => {
+    const series: NeuChartSeries[] = [{ name: 'Defectos', data: [0, 0, 0] }];
+    const { comp } = mk({ type: 'pareto', series });
+    const res = comp.resolvedSeries();
+    expect(res[1].data).toEqual([0, 0, 0]);
   });
 
   it('resolvedSeries pareto returns empty array when no series', () => {
@@ -247,6 +255,29 @@ describe('NeuChartComponent', () => {
   it('xaxisConfig should contain provided categories', () => {
     const { comp } = mk({ categories: ['A', 'B'] });
     expect(comp.xaxisConfig().categories).toEqual(['A', 'B']);
+  });
+
+  it('renders the Apex wrapper with computed bindings', () => {
+    const series: NeuChartSeries[] = [{ name: 'Revenue', data: [4, 8] }];
+    const { f } = mk({
+      type: 'bar-horizontal-stacked',
+      series,
+      categories: ['Q1', 'Q2'],
+      colors: ['#111111'],
+      showDataLabels: true,
+      height: 320,
+    });
+    const chartDebug = f.debugElement.query(By.directive(ApxChartStub));
+    const chart = chartDebug.componentInstance as ApxChartStub;
+
+    expect(chartDebug).toBeTruthy();
+    expect(chart.chart().type).toBe('bar');
+    expect(chart.chart().stacked).toBe(true);
+    expect(chart.series()).toEqual(series);
+    expect(chart.xaxis().categories).toEqual(['Q1', 'Q2']);
+    expect(chart.colors()).toEqual(['#111111']);
+    expect(chart.dataLabels().enabled).toBe(true);
+    expect(chart.plotOptions().bar.horizontal).toBe(true);
   });
 
   // ── bar-stacked-horizontal ────────────────────────────────────────────────

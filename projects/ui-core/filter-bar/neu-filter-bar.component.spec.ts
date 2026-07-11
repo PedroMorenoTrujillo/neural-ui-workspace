@@ -183,4 +183,30 @@ describe('NeuFilterBarComponent', () => {
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-filter-bar__clear')).toBeNull();
   });
+
+  it('clicking chips and clear button uses the rendered template handlers', async () => {
+    const f = TestBed.createComponent(NeuFilterBarComponent);
+    const events: NeuFilterChip[][] = [];
+    f.componentRef.setInput('filters', CHIPS);
+    f.componentInstance.filterChange.subscribe((chips) => events.push(chips));
+    f.detectChanges();
+    await f.whenStable();
+
+    const chips = f.nativeElement.querySelectorAll(
+      '.neu-filter-bar__chip',
+    ) as NodeListOf<HTMLButtonElement>;
+    chips[1].click();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(events.at(-1)?.map((chip) => chip.key)).toEqual(['active']);
+    expect(f.nativeElement.querySelector('.neu-filter-bar__clear')).toBeTruthy();
+
+    (f.nativeElement.querySelector('.neu-filter-bar__clear') as HTMLButtonElement).click();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(events.at(-1)).toEqual([]);
+    expect(f.componentInstance._hasActive()).toBe(false);
+  });
 });

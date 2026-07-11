@@ -1,0 +1,65 @@
+.neu-pick-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.neu-pick-list__column,
+.neu-order-list__items {
+  display: grid;
+  gap: 0.375rem;
+  min-height: 12rem;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.75rem;
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+  padding: 0.75rem;
+}
+
+.neu-pick-list__column h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--neu-text, #111827);
+}
+
+.neu-pick-list__column button,
+.neu-pick-list__actions button,
+.neu-order-list__item button {
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.5rem;
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+  padding: 0.5rem 0.625rem;
+}
+
+.neu-pick-list__column button {
+  text-align: left;
+}
+
+.neu-pick-list__column button.is-selected {
+  background: color-mix(in srgb, var(--neu-primary, #2563eb) 14%, transparent);
+}
+
+.neu-pick-list__actions {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.neu-order-list__item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .neu-pick-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .neu-pick-list__actions {
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+  }
+}

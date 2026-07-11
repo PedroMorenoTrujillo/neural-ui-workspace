@@ -7,6 +7,8 @@ import {
 } from '@angular/core';
 
 export type NeuToolbarSize = 'sm' | 'md' | 'lg';
+export type NeuToolbarDensity = 'comfortable' | 'compact';
+export type NeuToolbarWrap = 'nowrap' | 'wrap';
 
 /**
  * NeuralUI Toolbar Component
@@ -36,6 +38,9 @@ export type NeuToolbarSize = 'sm' | 'md' | 'lg';
     <div class="neu-toolbar__section neu-toolbar__section--end">
       <ng-content select="[neu-toolbar-end]" />
     </div>
+    <div class="neu-toolbar__section neu-toolbar__section--secondary">
+      <ng-content select="[neu-toolbar-secondary]" />
+    </div>
     <ng-content />
   `,
   styleUrl: './neu-toolbar.component.scss',
@@ -50,6 +55,12 @@ export class NeuToolbarComponent {
   /** Añade separador inferior / Adds bottom separator */
   readonly bordered = input<boolean>(false);
 
+  /** Densidad visual: comfortable mantiene el espaciado actual, compact reduce huecos / Visual density */
+  readonly density = input<NeuToolbarDensity>('comfortable');
+
+  /** Permite que los grupos pasen a varias líneas en responsive / Allows groups to wrap on narrow surfaces */
+  readonly wrap = input<NeuToolbarWrap>('nowrap');
+
   /** Color de fondo personalizado vía CSS (pasa a la variable local) / Custom background color via CSS */
   readonly surface = input<'primary' | 'surface' | 'none'>('surface');
 
@@ -57,6 +68,8 @@ export class NeuToolbarComponent {
     'neu-toolbar': true,
     [`neu-toolbar--${this.size()}`]: true,
     [`neu-toolbar--${this.surface()}`]: true,
+    [`neu-toolbar--density-${this.density()}`]: true,
+    [`neu-toolbar--${this.wrap()}`]: true,
     'neu-toolbar--shadow': this.shadow(),
     'neu-toolbar--bordered': this.bordered(),
   }));

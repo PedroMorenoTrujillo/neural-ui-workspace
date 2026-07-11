@@ -43,7 +43,7 @@ describe('NeuAlertComponent', () => {
     await f.whenStable();
     const icon = f.nativeElement.querySelector('.neu-alert__icon');
     expect(icon).toBeTruthy();
-    expect(icon.textContent.trim()).toBe('⚠');
+    expect(icon.querySelector('neu-icon')).toBeTruthy();
   });
 
   it('should use custom icon when provided', async () => {
@@ -68,7 +68,10 @@ describe('NeuAlertComponent', () => {
     f.componentRef.setInput('closable', true);
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-alert__close')).toBeTruthy();
+    const close = f.nativeElement.querySelector('.neu-alert__close');
+    expect(close).toBeTruthy();
+    expect(close.classList).toContain('neu-button');
+    expect(close.getAttribute('aria-label')).toBe('Close alert');
   });
 
   it('should not show close button when closable=false', async () => {
@@ -146,5 +149,17 @@ describe('NeuAlertComponent', () => {
     f.componentRef.setInput('type', 'info');
     f.detectChanges();
     expect((f.componentInstance as any).liveRegion()).toBe('polite');
+  });
+
+  it('uses an assertive alert role only for errors', async () => {
+    const f = TestBed.createComponent(NeuAlertComponent);
+    f.componentRef.setInput('type', 'info');
+    f.detectChanges();
+    expect(f.nativeElement.getAttribute('role')).toBe('status');
+
+    f.componentRef.setInput('type', 'error');
+    f.detectChanges();
+    expect(f.nativeElement.getAttribute('role')).toBe('alert');
+    expect(f.nativeElement.getAttribute('aria-live')).toBe('assertive');
   });
 });

@@ -153,6 +153,10 @@ export class NeuSidebarComponent {
 
   /** Etiqueta accesible para el botón cerrar / Accessible label for the close button */
   closeLabel = input<string>('Cerrar menú de navegación');
+  /** Cierra el overlay al pulsar Escape / Closes the overlay when pressing Escape */
+  closeOnEscape = input<boolean>(true);
+  /** Devuelve el foco al elemento activo antes de abrir / Restores focus after close */
+  restoreFocus = input<boolean>(true);
 
   /**
    * Modo colapsado: el sidebar muestra solo iconos (icon-only en desktop).
@@ -202,7 +206,11 @@ export class NeuSidebarComponent {
 
         // Move focus to first focusable element inside the sidebar
         this.focusFirstElement();
-      } else if (this.previousActiveElement && this.previousActiveElement.focus) {
+      } else if (
+        this.restoreFocus() &&
+        this.previousActiveElement &&
+        this.previousActiveElement.focus
+      ) {
         // Restore focus to the element that had it before opening
         setTimeout(() => {
           this.previousActiveElement?.focus();
@@ -262,6 +270,12 @@ export class NeuSidebarComponent {
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if (!this.isOpen() || this.persistent()) {
+      return;
+    }
+
+    if (event.key === 'Escape' && this.closeOnEscape()) {
+      event.preventDefault();
+      this.close();
       return;
     }
 

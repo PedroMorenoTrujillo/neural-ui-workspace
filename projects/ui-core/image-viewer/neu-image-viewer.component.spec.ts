@@ -479,4 +479,37 @@ describe('NeuImageViewerDirective', () => {
     expect(closeSpy).toHaveBeenCalled();
     vi.useRealTimers();
   });
+
+  it('template keyboard, wheel and drag handlers update overlay state', async () => {
+    const data = mkData({ initialIndex: 1 });
+    const { f } = setupOverlay(data);
+    f.detectChanges();
+    await f.whenStable();
+
+    f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    f.detectChanges();
+    expect(f.componentInstance._index()).toBe(2);
+
+    const stage = f.nativeElement.querySelector('.neu-iv__stage') as HTMLElement;
+    stage.dispatchEvent(new WheelEvent('wheel', { deltaY: -1, bubbles: true, cancelable: true }));
+    f.detectChanges();
+    expect(f.componentInstance._scale()).toBeGreaterThan(1);
+
+    stage.dispatchEvent(
+      new MouseEvent('mousedown', { button: 0, clientX: 10, clientY: 10, bubbles: true }),
+    );
+    (f.componentInstance as any)._dragging = false;
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 100, clientY: 100 }));
+    expect(f.componentInstance._panX()).toBe(0);
+    expect(f.componentInstance._panY()).toBe(0);
+    (f.componentInstance as any)._dragging = true;
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 25, clientY: 30 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(f.componentInstance._panX()).toBe(15);
+    expect(f.componentInstance._panY()).toBe(20);
+
+    f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(data.close).toHaveBeenCalled();
+  });
 });
