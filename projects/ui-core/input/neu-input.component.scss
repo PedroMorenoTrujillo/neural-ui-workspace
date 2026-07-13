@@ -226,6 +226,15 @@ $label-font-floating: 12px;
       color: var(--neu-text-disabled);
     }
   }
+
+  // Keep the icon clearance when the static-label rule resets the base padding.
+  &.neu-input__wrapper--has-start-icon .neu-input__field {
+    padding-left: 40px;
+  }
+
+  &.neu-input__wrapper--has-end-icon .neu-input__field {
+    padding-right: 40px;
+  }
 }
 
 // ---- Sizes / Tamaños ----------------------------------------

@@ -38,6 +38,19 @@ describe('NeuInputComponent', () => {
     expect(f.nativeElement.querySelector('.neu-input__static-label')).toBeTruthy();
   });
 
+  it('keeps the start-icon wrapper state when floatingLabel=false', () => {
+    const { f } = mk({
+      label: 'Buscar',
+      floatingLabel: false,
+      icon: 'lucideSearch',
+      iconPosition: 'left',
+    });
+
+    const wrapper = f.nativeElement.querySelector('.neu-input__wrapper') as HTMLElement;
+    expect(wrapper.classList).toContain('neu-input__wrapper--no-float');
+    expect(wrapper.classList).toContain('neu-input__wrapper--has-start-icon');
+  });
+
   it('should set type attribute', () => {
     const { f } = mk({ type: 'email', label: 'Email' });
     const input: HTMLInputElement = f.nativeElement.querySelector('input');
