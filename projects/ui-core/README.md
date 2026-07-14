@@ -110,7 +110,7 @@ export class LoginComponent {
 
 ## Components
 
-Representative entry points in 1.4.0:
+Representative entry points:
 
 - **Forms**: `@neural-ui/core/input`, `@neural-ui/core/select`, `@neural-ui/core/multiselect`, `@neural-ui/core/autocomplete`, `@neural-ui/core/date-input`, `@neural-ui/core/number-input`, `@neural-ui/core/input-otp`
 - **Navigation and layout**: `@neural-ui/core/tabs`, `@neural-ui/core/nav`, `@neural-ui/core/sidebar`, `@neural-ui/core/accordion`, `@neural-ui/core/toolbar`, `@neural-ui/core/dashboard-grid`
@@ -120,7 +120,7 @@ Representative entry points in 1.4.0:
 
 For the complete catalog, examples, and API tables, use the live docs at [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app).
 
-### Highlights in 1.4.0
+### Highlights
 
 - `NeuAutocompleteComponent` supports virtual scroll for large result sets.
 - `@neural-ui/core/modal` now includes `NeuDialogService` for programmatic dialogs.
