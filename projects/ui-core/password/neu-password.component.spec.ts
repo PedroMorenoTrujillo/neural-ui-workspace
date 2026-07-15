@@ -49,7 +49,7 @@ describe('NeuPasswordComponent', () => {
     expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).disabled).toBe(true);
   });
 
-  it('renders configured metadata, toggle labels and strength indicator', () => {
+  it('renders an accessible icon toggle and strength indicator', () => {
     fixture.componentRef.setInput('label', 'Password');
     fixture.componentRef.setInput('placeholder', 'Enter password');
     fixture.componentRef.setInput('showLabel', 'Reveal');
@@ -61,12 +61,28 @@ describe('NeuPasswordComponent', () => {
     expect(fixture.nativeElement.querySelector('label')?.textContent).toContain('Password');
     expect(input.placeholder).toBe('Enter password');
     expect(input.type).toBe('password');
-    expect(toggle.textContent).toContain('Reveal');
+    expect(toggle.getAttribute('aria-label')).toBe('Reveal');
+    expect(toggle.textContent?.trim()).toBe('');
+    expect(toggle.querySelector('svg')).toBeTruthy();
     expect(fixture.nativeElement.querySelectorAll('.neu-password__strength span')).toHaveLength(4);
     toggle.click();
     fixture.detectChanges();
     expect(input.type).toBe('text');
-    expect(toggle.textContent).toContain('Conceal');
+    expect(toggle.getAttribute('aria-label')).toBe('Conceal');
+    expect(toggle.querySelector('svg')).toBeTruthy();
+  });
+
+  it('disables the reveal toggle whenever the password control is disabled', () => {
+    const toggle = fixture.nativeElement.querySelector('.neu-password__toggle') as HTMLButtonElement;
+
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    expect(toggle.disabled).toBe(true);
+
+    fixture.componentRef.setInput('disabled', false);
+    fixture.componentInstance.setDisabledState(true);
+    fixture.detectChanges();
+    expect(toggle.disabled).toBe(true);
   });
 
   it('propagates input, blur and value changes through its template', () => {

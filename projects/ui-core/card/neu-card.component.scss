@@ -40,6 +40,13 @@
   }
 }
 
+// Recorta fondos proyectados en las esquinas sin cortar sombra, focus rings
+// o elementos flotantes que pertenezcan al host de la tarjeta.
+.neu-card__inner {
+  border-radius: inherit;
+  overflow: hidden;
+}
+
 // ---- Header ----
 .neu-card__header {
   padding: var(--neu-space-4) var(--neu-space-5);

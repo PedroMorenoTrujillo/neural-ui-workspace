@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.7.6] - 2026-07-15
+
+### Fixed
+
+- Password and masked-input focus states now render on their rounded control boundaries instead of exposing a rectangular native focus outline.
+- Password reveal now uses an accessible eye toggle, and card content is clipped to its rounded visual surface.
+
 ## [1.7.1] - 2026-07-09
 
 ### Changed

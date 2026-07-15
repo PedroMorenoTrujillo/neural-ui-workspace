@@ -51,6 +51,14 @@ describe('NeuCardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Footer');
   });
 
+  it('should wrap projected content in the clipping surface', () => {
+    const inner = fixture.nativeElement.querySelector('.neu-card__inner') as HTMLElement;
+    expect(inner).toBeTruthy();
+    expect(inner.querySelector('.neu-card__header')).toBeTruthy();
+    expect(inner.querySelector('.neu-card__body')).toBeTruthy();
+    expect(inner.querySelector('.neu-card__footer')).toBeTruthy();
+  });
+
   it('should have hoverable class when hoverable=true', () => {
     const df = TestBed.createComponent(NeuCardComponent);
     df.componentRef.setInput('hoverable', true);

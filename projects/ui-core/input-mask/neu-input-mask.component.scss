@@ -11,11 +11,24 @@
 
 .neu-input-mask__control {
   min-height: 2.5rem;
-  border: 1px solid var(--neu-border, #d1d5db);
-  border-radius: 0.625rem;
+  border: 1.5px solid var(--neu-border, #d1d5db);
+  border-radius: var(--neu-radius, 0.625rem);
   background: var(--neu-surface, #fff);
   color: var(--neu-text, #111827);
   padding: 0 0.75rem;
+  outline: none;
+  transition:
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &:focus {
+    border-color: var(--neu-primary, #2563eb);
+    box-shadow: var(--neu-focus-ring, 0 0 0 3px rgba(37, 99, 235, 0.15));
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
 }
 
 .neu-input-mask__hint {
