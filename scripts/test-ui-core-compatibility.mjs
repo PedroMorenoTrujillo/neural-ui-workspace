@@ -35,8 +35,9 @@ packageJson.dependencies = {
   '@angular/platform-browser': angularVersion,
   '@angular/router': angularVersion,
   '@neural-ui/core': `file:${distRoot}`,
-  '@ng-icons/core': '^33.2.0',
-  '@ng-icons/lucide': '^33.2.0',
+  // v31 is the last ng-icons line whose Angular peer range includes 19 and 20.
+  '@ng-icons/core': '^31.4.0',
+  '@ng-icons/lucide': '^31.4.0',
   apexcharts: '^5.10.4',
   'ng-apexcharts': version === '19' ? '^1.15.0' : '^2.3.0',
   rxjs: '~7.8.0',
