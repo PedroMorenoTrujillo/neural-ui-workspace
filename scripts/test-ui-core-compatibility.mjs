@@ -24,6 +24,7 @@ cpSync(fixtureRoot, fixture, { recursive: true });
 
 const typescriptByAngular = { 19: '~5.7.0', 20: '~5.8.0', 21: '~5.9.0', 22: '~6.0.0' };
 const angularVersion = `^${version}.0.0`;
+const ngApexchartsByAngular = { 19: '1.15.0', 20: '1.16.0', 21: '2.3.0', 22: '2.3.0' };
 const packageJsonPath = join(fixture, 'package.json');
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 packageJson.dependencies = {
@@ -39,7 +40,8 @@ packageJson.dependencies = {
   '@ng-icons/core': '^31.4.0',
   '@ng-icons/lucide': '^31.4.0',
   apexcharts: '^5.10.4',
-  'ng-apexcharts': version === '19' ? '^1.15.0' : '^2.3.0',
+  // Pin the major-specific adapter: newer 1.x releases dropped Angular 19 support.
+  'ng-apexcharts': ngApexchartsByAngular[version],
   rxjs: '~7.8.0',
   tslib: '^2.3.0',
 };
