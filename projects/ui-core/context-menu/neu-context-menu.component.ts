@@ -7,14 +7,17 @@ import {
   HostListener,
   Injector,
   OnDestroy,
+  TemplateRef,
   ViewContainerRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   inject,
   input,
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 
@@ -32,6 +35,8 @@ export interface NeuContextMenuItem {
   /** Variante de color / Color variant */
   variant?: 'default' | 'danger';
 }
+@Directive({ selector: 'ng-template[neuContextMenuItem]' })
+export class NeuContextMenuItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuContextMenuItem }>) {} }
 
 let _seq = 0;
 
@@ -40,7 +45,7 @@ let _seq = 0;
  */
 @Component({
   selector: 'neu-context-menu-overlay',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -64,7 +69,7 @@ let _seq = 0;
         [attr.aria-disabled]="item.disabled ?? false"
         (click)="select(item)"
       >
-        @if (item.icon) {
+        @if (itemTemplate) { <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }" /> } @else if (item.icon) {
           <span class="neu-context-menu__icon" aria-hidden="true">{{ item.icon }}</span>
         }
         {{ item.label }}
@@ -75,6 +80,7 @@ let _seq = 0;
 })
 export class NeuContextMenuOverlayComponent {
   readonly _items = signal<NeuContextMenuItem[]>([]);
+  itemTemplate: TemplateRef<{ $implicit: NeuContextMenuItem }> | null = null;
   _selectFn: ((item: NeuContextMenuItem) => void) | null = null;
   _escapeFn: (() => void) | null = null;
 
@@ -102,6 +108,7 @@ export class NeuContextMenuOverlayComponent {
   exportAs: 'neuContextMenu',
 })
 export class NeuContextMenuDirective implements OnDestroy {
+  readonly itemTpl = contentChild(NeuContextMenuItemDirective);
   /** Ítems del menú / Menu items */
   readonly neuContextMenu = input<NeuContextMenuItem[]>([]);
 
@@ -143,6 +150,7 @@ export class NeuContextMenuDirective implements OnDestroy {
     const portal = new ComponentPortal(NeuContextMenuOverlayComponent, this._vcr, this._injector);
     this._compRef = this._overlayRef.attach(portal);
     this._compRef.instance._items.set(this.neuContextMenu());
+    this._compRef.instance.itemTemplate = this.itemTpl()?.templateRef ?? null;
     this._compRef.instance._selectFn = (item) => {
       this.menuItemClick.emit(item);
       this._close();

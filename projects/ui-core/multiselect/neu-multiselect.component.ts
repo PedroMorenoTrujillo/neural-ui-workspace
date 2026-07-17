@@ -22,7 +22,7 @@ import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay'
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from '@neural-ui/core/select';
-import { NeuMultiselectItemDirective } from './neu-multiselect.directives';
+import { NeuMultiselectEmptyDirective, NeuMultiselectFooterDirective, NeuMultiselectHeaderDirective, NeuMultiselectItemDirective, NeuMultiselectSelectedDirective } from './neu-multiselect.directives';
 
 export type { NeuSelectOption } from '@neural-ui/core/select';
 
@@ -108,7 +108,9 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
           } @else {
             @for (val of _visibleChips(); track val) {
               <span class="neu-multiselect__chip">
-                {{ labelFor(val) }}
+                @if (selectedItemTpl(); as selectedTpl) {
+                  <ng-container [ngTemplateOutlet]="selectedTpl.templateRef" [ngTemplateOutletContext]="{ $implicit: optionFor(val), remove: removeOption.bind(this, val) }" />
+                } @else { {{ labelFor(val) }} }
                 <button
                   class="neu-multiselect__chip-remove"
                   type="button"
@@ -170,6 +172,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
           stroke-linejoin="round"
           aria-hidden="true"
         >
+          @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </div>
@@ -290,7 +293,8 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
             }
 
             @if (!loading() && filteredOptions().length === 0) {
-              <div class="neu-multiselect__empty">{{ noResultsMessage() }}</div>
+              @if (emptyTpl()) { <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" /> }
+              @else { <div class="neu-multiselect__empty">{{ noResultsMessage() }}</div> }
             }
           </div>
 
@@ -319,6 +323,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
               </div>
             </div>
           }
+          @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
         </div>
       </ng-template>
 
@@ -379,6 +384,10 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
   readonly itemTpl = contentChild(NeuMultiselectItemDirective);
+  readonly selectedItemTpl = contentChild(NeuMultiselectSelectedDirective);
+  readonly headerTpl = contentChild(NeuMultiselectHeaderDirective);
+  readonly footerTpl = contentChild(NeuMultiselectFooterDirective);
+  readonly emptyTpl = contentChild(NeuMultiselectEmptyDirective);
 
   /** Opciones del dropdown / Dropdown options */
   options = input<NeuSelectOption[]>([]);
@@ -595,6 +604,18 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   // --- Helpers ---
   protected labelFor(value: string): string {
     return this.options().find((o) => o.value === value)?.label ?? value;
+  }
+
+  protected optionFor(value: string): NeuSelectOption {
+    return this.options().find((option) => option.value === value) ?? { value, label: value };
+  }
+
+  protected removeOption(value: string): void {
+    const next = this._values().filter((item) => item !== value);
+    this._values.set(next);
+    this._onChange(next);
+    this._onTouched();
+    this.selectionChange.emit(this.options().filter((option) => next.includes(option.value)));
   }
 
   protected isSelected(value: string): boolean {

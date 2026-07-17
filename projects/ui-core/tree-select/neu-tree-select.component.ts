@@ -1,13 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  TemplateRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   forwardRef,
   input,
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -24,10 +28,21 @@ interface FlatNode {
   node: NeuTreeSelectNode;
   level: number;
 }
+export interface NeuTreeSelectNodeTemplateContext { $implicit: NeuTreeSelectNode; level: number; selected: boolean; toggle: () => void; }
+@Directive({ selector: 'ng-template[neuTreeSelectNode]' })
+export class NeuTreeSelectNodeDirective { constructor(readonly templateRef: TemplateRef<NeuTreeSelectNodeTemplateContext>) {} }
+@Directive({ selector: 'ng-template[neuTreeSelectSelected]' })
+export class NeuTreeSelectSelectedDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTreeSelectNode | null }>) {} }
+@Directive({ selector: 'ng-template[neuTreeSelectHeader]' })
+export class NeuTreeSelectHeaderDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+@Directive({ selector: 'ng-template[neuTreeSelectFooter]' })
+export class NeuTreeSelectFooterDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+@Directive({ selector: 'ng-template[neuTreeSelectEmpty]' })
+export class NeuTreeSelectEmptyDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
 
 @Component({
   selector: 'neu-tree-select',
-  imports: [OverlayModule],
+  imports: [OverlayModule, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -52,7 +67,7 @@ interface FlatNode {
       [attr.aria-expanded]="open()"
       (click)="toggle()"
     >
-      <span [class.neu-tree-select__placeholder]="!selectedLabel()">{{ selectedLabel() || placeholder() }}</span>
+      <span [class.neu-tree-select__placeholder]="!selectedLabel()">@if (selectedTpl() && selectedNode()) { <ng-container [ngTemplateOutlet]="selectedTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: selectedNode() }" /> } @else { {{ selectedLabel() || placeholder() }} }</span>
       @if (clearable() && values().length) {
         <span class="neu-tree-select__clear" aria-hidden="true" (click)="clear($event)">×</span>
       }
@@ -67,6 +82,7 @@ interface FlatNode {
       (detach)="close()"
     >
       <div class="neu-tree-select__panel" role="tree" [attr.aria-label]="label() || placeholder()">
+        @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
         @if (searchable()) {
           <input
             class="neu-tree-select__search"
@@ -92,18 +108,24 @@ interface FlatNode {
                 {{ expanded().has(item.node.value) ? '−' : '+' }}
               </span>
             }
-            {{ item.node.label }}
+            @if (nodeTpl()) { <ng-container [ngTemplateOutlet]="nodeTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item.node, level: item.level, selected: isSelected(item.node.value), toggle: toggleExpandedFromTemplate.bind(this, item.node) }" /> } @else { {{ item.node.label }} }
           </button>
         }
         @if (!visibleNodes().length) {
-          <div class="neu-tree-select__empty">{{ emptyLabel() }}</div>
+          @if (emptyTpl()) { <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" /> } @else { <div class="neu-tree-select__empty">{{ emptyLabel() }}</div> }
         }
+        @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
       </div>
     </ng-template>
   `,
   styleUrl: './neu-tree-select.component.scss',
 })
 export class NeuTreeSelectComponent implements ControlValueAccessor {
+  readonly nodeTpl = contentChild(NeuTreeSelectNodeDirective);
+  readonly selectedTpl = contentChild(NeuTreeSelectSelectedDirective);
+  readonly headerTpl = contentChild(NeuTreeSelectHeaderDirective);
+  readonly footerTpl = contentChild(NeuTreeSelectFooterDirective);
+  readonly emptyTpl = contentChild(NeuTreeSelectEmptyDirective);
   readonly nodes = input<NeuTreeSelectNode[]>([]);
   readonly label = input('');
   readonly placeholder = input('Select...');
@@ -132,6 +154,7 @@ export class NeuTreeSelectComponent implements ControlValueAccessor {
     }
     return this.multiple() ? `${selected.length} selected` : selected[0]?.node.label ?? '';
   });
+  readonly selectedNode = computed(() => this.flatten(this.nodes()).find((item) => this.values().includes(item.node.value))?.node ?? null);
   readonly visibleNodes = computed(() => {
     const q = this.query().trim().toLowerCase();
     const all = this.flattenVisible(this.nodes(), 0);
@@ -203,6 +226,10 @@ export class NeuTreeSelectComponent implements ControlValueAccessor {
       }
     }
     this.expanded.set(next);
+  }
+
+  toggleExpandedFromTemplate(node: NeuTreeSelectNode): void {
+    this.toggleExpanded(node, new Event('toggle'));
   }
 
   private commit(values: string[]): void {

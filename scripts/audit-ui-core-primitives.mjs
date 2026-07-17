@@ -73,6 +73,7 @@ const allowedInlineSvgDirs = new Set([
   'knob',
   'multiselect',
   'pagination',
+  'password',
   'rating',
   'select',
   'spinner',

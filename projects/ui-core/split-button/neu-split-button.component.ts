@@ -1,14 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
   ElementRef,
+  TemplateRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   inject,
   input,
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonVariant, NeuButtonSize } from '@neural-ui/core/button';
 
@@ -24,6 +28,8 @@ export interface NeuSplitButtonAction {
   /** Separador visual encima de este item / Visual separator above this item */
   divider?: boolean;
 }
+@Directive({ selector: 'ng-template[neuSplitButtonItem]' })
+export class NeuSplitButtonItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuSplitButtonAction }>) {} }
 
 /**
  * NeuralUI SplitButton Component
@@ -40,7 +46,7 @@ export interface NeuSplitButtonAction {
  */
 @Component({
   selector: 'neu-split-button',
-  imports: [OverlayModule],
+  imports: [OverlayModule, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -141,7 +147,7 @@ export interface NeuSplitButtonAction {
               [attr.aria-disabled]="action.disabled ? 'true' : null"
               (click)="onActionClick(action)"
             >
-              {{ action.label }}
+              @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: action }" /> } @else { {{ action.label }} }
             </button>
           }
         </div>
@@ -151,6 +157,7 @@ export interface NeuSplitButtonAction {
   styleUrl: './neu-split-button.component.scss',
 })
 export class NeuSplitButtonComponent {
+  readonly itemTpl = contentChild(NeuSplitButtonItemDirective);
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly overlay = inject(Overlay);
   readonly _viewportMargin = 16;

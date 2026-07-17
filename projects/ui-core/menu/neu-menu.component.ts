@@ -1,11 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  TemplateRef,
   ViewEncapsulation,
+  computed,
+  contentChild,
   input,
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
@@ -21,9 +26,15 @@ export interface NeuMenuItem {
   data?: unknown;
 }
 
+/** Custom visual content for each menu item; menu semantics remain owned by the component. */
+@Directive({ selector: 'ng-template[neuMenuItem]' })
+export class NeuMenuItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuMenuItem }>) {}
+}
+
 @Component({
   selector: 'neu-menu',
-  imports: [NeuButtonComponent, NeuIconComponent],
+  imports: [NeuButtonComponent, NeuIconComponent, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-menu' },
@@ -43,7 +54,9 @@ export interface NeuMenuItem {
             [disabled]="!!item.disabled"
             (click)="activate(item)"
           >
-            @if (item.icon) {
+            @if (itemTemplateRef()) {
+              <ng-container [ngTemplateOutlet]="itemTemplateRef()" [ngTemplateOutletContext]="{ $implicit: item }" />
+            } @else if (item.icon) {
               <neu-icon class="neu-menu__icon" [name]="item.icon" size="1rem" aria-hidden="true" />
             }
             <span class="neu-menu__label">{{ item.label }}</span>
@@ -56,7 +69,7 @@ export interface NeuMenuItem {
           </button>
           @if (item.children?.length) {
             <div class="neu-menu__child">
-              <neu-menu [items]="item.children ?? []" [ariaLabel]="item.label" (itemClick)="itemClick.emit($event)" />
+              <neu-menu [items]="item.children ?? []" [ariaLabel]="item.label" [itemTemplate]="itemTemplateRef()" (itemClick)="itemClick.emit($event)" />
             </div>
           }
         }
@@ -66,6 +79,9 @@ export interface NeuMenuItem {
   styleUrl: './neu-menu.component.scss',
 })
 export class NeuMenuComponent {
+  readonly itemTpl = contentChild(NeuMenuItemDirective);
+  readonly itemTemplate = input<TemplateRef<{ $implicit: NeuMenuItem }> | null>(null);
+  readonly itemTemplateRef = computed(() => this.itemTemplate() ?? this.itemTpl()?.templateRef ?? null);
   readonly items = input<NeuMenuItem[]>([]);
   readonly ariaLabel = input('Menu');
   readonly itemClick = output<NeuMenuItem>();
@@ -107,12 +123,13 @@ export class NeuMenuComponent {
       (backdropClick)="close()"
       (detach)="close()"
     >
-      <neu-menu class="neu-menu-button__panel" [items]="items()" (itemClick)="onItemClick($event)" />
+      <neu-menu class="neu-menu-button__panel" [items]="items()" [itemTemplate]="itemTpl()?.templateRef ?? null" (itemClick)="onItemClick($event)" />
     </ng-template>
   `,
   styleUrl: './neu-menu.component.scss',
 })
 export class NeuMenuButtonComponent {
+  readonly itemTpl = contentChild(NeuMenuItemDirective);
   readonly items = input<NeuMenuItem[]>([]);
   readonly label = input('Menu');
   readonly itemClick = output<NeuMenuItem>();

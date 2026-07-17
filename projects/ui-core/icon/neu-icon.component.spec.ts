@@ -16,6 +16,7 @@ describe('NeuIconComponent', () => {
     fixture.componentRef.setInput('name', 'lucideSave');
     fixture.detectChanges();
     expect(fixture.nativeElement.classList).toContain('neu-icon');
+    expect(fixture.nativeElement.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('should render an icon element inside', () => {
@@ -46,5 +47,16 @@ describe('NeuIconComponent', () => {
     fixture.componentRef.setInput('strokeWidth', '3');
     fixture.detectChanges();
     expect(fixture.componentInstance.strokeWidth()).toBe('3');
+  });
+
+  it('exposes an accessible icon only when explicitly requested', () => {
+    const fixture = TestBed.createComponent(NeuIconComponent);
+    fixture.componentRef.setInput('name', 'lucideSave');
+    fixture.componentRef.setInput('decorative', false);
+    fixture.componentRef.setInput('ariaLabel', 'Guardar');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.getAttribute('aria-hidden')).toBeNull();
+    expect(fixture.nativeElement.getAttribute('role')).toBe('img');
+    expect(fixture.nativeElement.getAttribute('aria-label')).toBe('Guardar');
   });
 });

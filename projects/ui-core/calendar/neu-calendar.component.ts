@@ -1,13 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  TemplateRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   effect,
   input,
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 export type NeuCalendarView = 'month' | 'week';
 export type NeuCalendarEventVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
@@ -22,6 +26,9 @@ export interface NeuCalendarEvent {
   allDay?: boolean;
   variant?: NeuCalendarEventVariant;
 }
+export type NeuCalendarEventView = 'month' | 'week' | 'agenda';
+@Directive({ selector: 'ng-template[neuCalendarEvent]' })
+export class NeuCalendarEventDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuCalendarEvent; view: NeuCalendarEventView }>) {} }
 
 export interface NeuCalendarLabels {
   previousButtonAriaLabel: string;
@@ -107,6 +114,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
 
 @Component({
   selector: 'neu-calendar',
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -188,8 +196,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                       [attr.aria-label]="eventTooltip(event)"
                       (click)="onEventClick($event, event)"
                     >
-                      <span class="neu-calendar__event-title">{{ event.title }}</span>
-                      <span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span>
+                      @if (eventTpl()) { <ng-container [ngTemplateOutlet]="eventTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: event, view: 'month' }" /> } @else { <span class="neu-calendar__event-title">{{ event.title }}</span><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span> }
                     </button>
                   }
                 </div>
@@ -231,8 +238,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                       [attr.aria-label]="eventTooltip(event)"
                       (click)="onEventClick($event, event)"
                     >
-                      <span class="neu-calendar__event-title">{{ event.title }}</span>
-                      <span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span>
+                      @if (eventTpl()) { <ng-container [ngTemplateOutlet]="eventTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: event, view: 'week' }" /> } @else { <span class="neu-calendar__event-title">{{ event.title }}</span><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span> }
                     </button>
                   }
 
@@ -270,8 +276,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                 [attr.aria-label]="eventTooltip(event)"
                 (click)="onEventClick($event, event)"
               >
-                <span class="neu-calendar__event-title">{{ event.title }}</span>
-                <span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span>
+                @if (eventTpl()) { <ng-container [ngTemplateOutlet]="eventTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: event, view: 'agenda' }" /> } @else { <span class="neu-calendar__event-title">{{ event.title }}</span><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span> }
               </button>
             }
           </div>
@@ -282,6 +287,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
   styleUrl: './neu-calendar.component.scss',
 })
 export class NeuCalendarComponent {
+  readonly eventTpl = contentChild(NeuCalendarEventDirective);
   readonly events = input<NeuCalendarEvent[]>([]);
   readonly view = input<NeuCalendarView>('month');
   readonly selectedDate = input<Date | string>(new Date());

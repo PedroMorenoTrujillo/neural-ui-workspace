@@ -2,20 +2,23 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  Directive,
   ElementRef,
   InjectionToken,
   OnDestroy,
   PLATFORM_ID,
   Signal,
+  TemplateRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   effect,
   inject,
   input,
   output,
   signal,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 
 // ----------------------------------------------------------------
@@ -34,6 +37,8 @@ export interface NeuTab {
   /** Deshabilita la pestaña sin ocultarla / Disables the tab without hiding it */
   disabled?: boolean;
 }
+@Directive({ selector: 'ng-template[neuTabLabel]' })
+export class NeuTabLabelDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTab; active: boolean }>) {} }
 
 /**
  * NeuralUI Tabs Component
@@ -49,7 +54,7 @@ export interface NeuTab {
  */
 @Component({
   selector: 'neu-tabs',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{ provide: NEU_TABS_CONTEXT, useExisting: NeuTabsComponent }],
@@ -85,7 +90,7 @@ export interface NeuTab {
             (keydown.home)="focusTab($any($event), 'first')"
             (keydown.end)="focusTab($any($event), 'last')"
           >
-            {{ tab.label }}
+            @if (labelTpl()) { <ng-container [ngTemplateOutlet]="labelTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: tab, active: activeTabId() === tab.id }" /> } @else { {{ tab.label }} }
             @if (tab.badge) {
               <span class="neu-tabs__tab-badge">{{ tab.badge }}</span>
             }
@@ -104,6 +109,7 @@ export interface NeuTab {
   styleUrl: './neu-tabs.component.scss',
 })
 export class NeuTabsComponent implements AfterViewInit, OnDestroy {
+  readonly labelTpl = contentChild(NeuTabLabelDirective);
   private readonly urlState = inject(NeuUrlStateService);
   private readonly elRef = inject(ElementRef);
   private readonly platformId = inject(PLATFORM_ID);

@@ -1,6 +1,6 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuCalendarComponent } from './neu-calendar.component';
+import { NeuCalendarComponent, NeuCalendarEventDirective } from './neu-calendar.component';
 
 const EVENTS = [
   { id: 'a', title: 'Kickoff', start: '2026-05-14T09:00:00', variant: 'info' as const },
@@ -22,6 +22,14 @@ function localDayKey(date: Date): string {
 }
 
 describe('NeuCalendarComponent', () => {
+  it('projects the event template in the calendar views', async () => {
+    @Component({ imports: [NeuCalendarComponent, NeuCalendarEventDirective], template: `<neu-calendar [events]="events" selectedDate="2026-05-14"><ng-template neuCalendarEvent let-event let-view="view">CUSTOM:{{ view }}:{{ event.title }}</ng-template></neu-calendar>` })
+    class Host { events = EVENTS; }
+    await TestBed.resetTestingModule().configureTestingModule({ providers: [provideZonelessChangeDetection()], imports: [Host] }).compileComponents();
+    const host = TestBed.createComponent(Host);
+    host.detectChanges();
+    expect(host.nativeElement.textContent).toContain('CUSTOM:month:Kickoff');
+  });
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],

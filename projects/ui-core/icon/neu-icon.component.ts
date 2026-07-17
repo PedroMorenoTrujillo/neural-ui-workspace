@@ -30,6 +30,9 @@ import { NgIcon } from '@ng-icons/core';
     '[style.justify-content]': '"center"',
     '[style.line-height]': '"1"',
     '[style.color]': '"inherit"',
+    '[attr.aria-hidden]': 'decorative() ? "true" : null',
+    '[attr.role]': 'decorative() ? null : "img"',
+    '[attr.aria-label]': 'decorative() ? null : ariaLabel() || null',
   },
   template: `<ng-icon [name]="name()" [size]="resolvedSize()" [strokeWidth]="strokeWidth()" />`,
   styleUrl: './neu-icon.component.scss',
@@ -37,6 +40,12 @@ import { NgIcon } from '@ng-icons/core';
 export class NeuIconComponent {
   /** Nombre del icono registrado con provideIcons() / Icon name registered with provideIcons() */
   name = input.required<string>();
+
+  /** Los iconos son decorativos por defecto. Para exponer uno al lector de pantalla, usa decorative=false y ariaLabel. */
+  decorative = input<boolean>(true);
+
+  /** Nombre accesible obligatorio cuando decorative=false. */
+  ariaLabel = input<string>('');
 
   /**
    * Grosor del trazo. Default '2' para estética fina y técnica.

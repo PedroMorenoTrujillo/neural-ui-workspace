@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, contentChild, input, output, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 export interface NeuTransferItem {
   value: string;
@@ -6,10 +7,14 @@ export interface NeuTransferItem {
   disabled?: boolean;
   data?: unknown;
 }
+@Directive({ selector: 'ng-template[neuPickListItem]' })
+export class NeuPickListItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTransferItem; selected: boolean; location: 'source' | 'target' }>) {} }
+@Directive({ selector: 'ng-template[neuOrderListItem]' })
+export class NeuOrderListItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTransferItem; index: number }>) {} }
 
 @Component({
   selector: 'neu-pick-list',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-pick-list' },
@@ -18,7 +23,7 @@ export interface NeuTransferItem {
       <h3>{{ sourceHeader() }}</h3>
       @for (item of source(); track item.value) {
         <button type="button" [class.is-selected]="sourceSelection().has(item.value)" [disabled]="item.disabled" (click)="toggleSource(item.value)">
-          {{ item.label }}
+          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, selected: sourceSelection().has(item.value), location: 'source' }" /> } @else { {{ item.label }} }
         </button>
       }
     </section>
@@ -30,7 +35,7 @@ export interface NeuTransferItem {
       <h3>{{ targetHeader() }}</h3>
       @for (item of target(); track item.value) {
         <button type="button" [class.is-selected]="targetSelection().has(item.value)" [disabled]="item.disabled" (click)="toggleTarget(item.value)">
-          {{ item.label }}
+          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, selected: targetSelection().has(item.value), location: 'target' }" /> } @else { {{ item.label }} }
         </button>
       }
     </section>
@@ -38,6 +43,7 @@ export interface NeuTransferItem {
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuPickListComponent {
+  readonly itemTpl = contentChild(NeuPickListItemDirective);
   readonly source = input<NeuTransferItem[]>([]);
   readonly target = input<NeuTransferItem[]>([]);
   readonly sourceHeader = input('Available');
@@ -91,7 +97,7 @@ export class NeuPickListComponent {
 
 @Component({
   selector: 'neu-order-list',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-order-list' },
@@ -99,7 +105,7 @@ export class NeuPickListComponent {
     <div class="neu-order-list__items">
       @for (item of items(); track item.value; let i = $index) {
         <div class="neu-order-list__item">
-          <span>{{ item.label }}</span>
+          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, index: i }" /> } @else { <span>{{ item.label }}</span> }
           <button type="button" [disabled]="i === 0" (click)="move(i, -1)">↑</button>
           <button type="button" [disabled]="i === items().length - 1" (click)="move(i, 1)">↓</button>
         </div>
@@ -109,6 +115,7 @@ export class NeuPickListComponent {
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuOrderListComponent {
+  readonly itemTpl = contentChild(NeuOrderListItemDirective);
   readonly items = input<NeuTransferItem[]>([]);
   readonly orderChange = output<NeuTransferItem[]>();
 

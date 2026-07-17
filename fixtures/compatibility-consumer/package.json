@@ -1,0 +1,7 @@
+{
+  "name": "neural-ui-compatibility-consumer",
+  "private": true,
+  "scripts": {
+    "build": "ng build"
+  }
+}

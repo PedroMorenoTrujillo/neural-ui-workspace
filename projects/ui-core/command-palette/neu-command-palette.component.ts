@@ -1,15 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
   Injectable,
   OnDestroy,
+  TemplateRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   inject,
   input,
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 export interface NeuCommand {
   id: string;
@@ -23,6 +27,8 @@ export interface NeuCommand {
   /** Handler invocado al seleccionar / Handler called on select */
   action: () => void;
 }
+@Directive({ selector: 'ng-template[neuCommandPaletteItem]' })
+export class NeuCommandPaletteItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuCommand; index: number }>) {} }
 
 /**
  * NeuralUI CommandPaletteService
@@ -88,7 +94,7 @@ export class NeuCommandPaletteService {
  */
 @Component({
   selector: 'neu-command-palette',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -136,7 +142,7 @@ export class NeuCommandPaletteService {
               (click)="_svc.execute(cmd.id)"
               (mouseenter)="_activeIndex.set(i)"
             >
-              @if (cmd.icon) {
+              @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: cmd, index: i }" /> } @else if (cmd.icon) {
                 <span class="neu-cmd__item-icon" aria-hidden="true">{{ cmd.icon }}</span>
               }
               <span class="neu-cmd__item-label">{{ cmd.label }}</span>
@@ -161,6 +167,7 @@ export class NeuCommandPaletteService {
   styleUrl: './neu-command-palette.component.scss',
 })
 export class NeuCommandPaletteComponent {
+  readonly itemTpl = contentChild(NeuCommandPaletteItemDirective);
   readonly _svc = inject(NeuCommandPaletteService);
   readonly _activeIndex = signal(0);
 

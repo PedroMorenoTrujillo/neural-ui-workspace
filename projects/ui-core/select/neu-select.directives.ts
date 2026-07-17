@@ -35,3 +35,13 @@ export class NeuSelectItemDirective {
 export class NeuSelectSelectedDirective {
   readonly templateRef = inject<TemplateRef<{ $implicit: NeuSelectOption | null }>>(TemplateRef);
 }
+
+/** Optional content slots for the select panel. */
+@Directive({ selector: '[neuSelectHeader]', standalone: true })
+export class NeuSelectHeaderDirective { readonly templateRef = inject<TemplateRef<void>>(TemplateRef); }
+@Directive({ selector: '[neuSelectFooter]', standalone: true })
+export class NeuSelectFooterDirective { readonly templateRef = inject<TemplateRef<void>>(TemplateRef); }
+@Directive({ selector: '[neuSelectEmpty]', standalone: true })
+export class NeuSelectEmptyDirective { readonly templateRef = inject<TemplateRef<void>>(TemplateRef); }
+@Directive({ selector: '[neuSelectGroup]', standalone: true })
+export class NeuSelectGroupDirective { readonly templateRef = inject<TemplateRef<{ $implicit: string }>>(TemplateRef); }

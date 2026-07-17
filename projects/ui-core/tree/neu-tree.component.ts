@@ -1,7 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  TemplateRef,
   computed,
+  contentChild,
   effect,
   input,
   output,
@@ -24,6 +27,9 @@ export interface NeuTreeNode<T = unknown> {
 }
 
 export type NeuTreeSelectionMode = 'single' | 'multiple';
+export interface NeuTreeNodeTemplateContext { $implicit: NeuTreeNode; level: number; selected: boolean; expanded: boolean; toggle: () => void; }
+@Directive({ selector: 'ng-template[neuTreeNode]' })
+export class NeuTreeNodeDirective { constructor(readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext>) {} }
 
 @Component({
   selector: 'neu-tree',
@@ -129,7 +135,7 @@ export type NeuTreeSelectionMode = 'single' | 'multiple';
               [disabled]="node.disabled"
               (click)="activateNode(node)"
             >
-              <span class="neu-tree__main">
+              @if (nodeTpl()) { <ng-container [ngTemplateOutlet]="nodeTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: node, level, selected: isSelected(node.id), expanded: isRenderedExpanded(node), toggle: toggleNode.bind(this, node) }" /> } @else { <span class="neu-tree__main">
                 <span class="neu-tree__label">{{ node.label }}</span>
                 @if (node.badge) {
                   <span class="neu-tree__badge">{{ node.badge }}</span>
@@ -137,6 +143,7 @@ export type NeuTreeSelectionMode = 'single' | 'multiple';
               </span>
               @if (node.description) {
                 <span class="neu-tree__description">{{ node.description }}</span>
+              }
               }
             </button>
           </div>
@@ -156,6 +163,7 @@ export type NeuTreeSelectionMode = 'single' | 'multiple';
   styleUrl: './neu-tree.component.scss',
 })
 export class NeuTreeComponent {
+  readonly nodeTpl = contentChild(NeuTreeNodeDirective);
   nodes = input<NeuTreeNode[]>([]);
   selectable = input(false);
   searchable = input(false);

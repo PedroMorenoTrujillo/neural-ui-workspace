@@ -18,3 +18,13 @@ import { NeuSelectOption } from '@neural-ui/core/select';
 export class NeuMultiselectItemDirective {
   readonly templateRef = inject<TemplateRef<{ $implicit: NeuSelectOption }>>(TemplateRef);
 }
+
+export interface NeuMultiselectSelectedContext { $implicit: NeuSelectOption; remove: () => void; }
+@Directive({ selector: '[neuMultiselectSelected]', standalone: true })
+export class NeuMultiselectSelectedDirective { readonly templateRef = inject<TemplateRef<NeuMultiselectSelectedContext>>(TemplateRef); }
+@Directive({ selector: '[neuMultiselectHeader]', standalone: true })
+export class NeuMultiselectHeaderDirective { readonly templateRef = inject<TemplateRef<void>>(TemplateRef); }
+@Directive({ selector: '[neuMultiselectFooter]', standalone: true })
+export class NeuMultiselectFooterDirective { readonly templateRef = inject<TemplateRef<void>>(TemplateRef); }
+@Directive({ selector: '[neuMultiselectEmpty]', standalone: true })
+export class NeuMultiselectEmptyDirective { readonly templateRef = inject<TemplateRef<void>>(TemplateRef); }

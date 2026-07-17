@@ -1,13 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  TemplateRef,
   ViewEncapsulation,
   computed,
+  contentChild,
   forwardRef,
   input,
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuButtonSize } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
@@ -22,6 +26,8 @@ export interface NeuToggleOption<T = unknown> {
   /** Deshabilita solo esta opción / Disables this option only */
   disabled?: boolean;
 }
+@Directive({ selector: 'ng-template[neuToggleButtonItem]' })
+export class NeuToggleButtonItemDirective<T = unknown> { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuToggleOption<T>; selected: boolean }>) {} }
 
 /**
  * NeuralUI ToggleButtonGroup Component
@@ -37,7 +43,7 @@ export interface NeuToggleOption<T = unknown> {
  */
 @Component({
   selector: 'neu-toggle-button-group',
-  imports: [NeuIconComponent],
+  imports: [NeuIconComponent, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -66,7 +72,7 @@ export interface NeuToggleOption<T = unknown> {
           (click)="toggle(opt)"
           (blur)="onBlur()"
         >
-          @if (opt.icon) {
+          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: opt, selected: isSelected(opt.value) }" /> } @else if (opt.icon) {
             <neu-icon [name]="opt.icon" size="16px" strokeWidth="2" />
           }
           {{ opt.label }}
@@ -77,6 +83,7 @@ export interface NeuToggleOption<T = unknown> {
   styleUrl: './neu-toggle-button-group.component.scss',
 })
 export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueAccessor {
+  readonly itemTpl = contentChild(NeuToggleButtonItemDirective<T>);
   /** Lista de opciones del grupo / Group option list */
   options = input<NeuToggleOption<T>[]>([]);
 

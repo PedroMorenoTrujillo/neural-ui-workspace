@@ -25,6 +25,12 @@ export interface NeuListboxOption {
 export class NeuListboxItemDirective {
   constructor(readonly templateRef: TemplateRef<{ $implicit: NeuListboxOption }>) {}
 }
+@Directive({ selector: 'ng-template[neuListboxHeader]' })
+export class NeuListboxHeaderDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+@Directive({ selector: 'ng-template[neuListboxFooter]' })
+export class NeuListboxFooterDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+@Directive({ selector: 'ng-template[neuListboxEmpty]' })
+export class NeuListboxEmptyDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
 
 @Component({
   selector: 'neu-listbox',
@@ -65,6 +71,7 @@ export class NeuListboxItemDirective {
       tabindex="0"
       (keydown)="onKeyDown($event)"
     >
+      @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
       @for (option of filteredOptions(); track option.value; let i = $index) {
         <button
           type="button"
@@ -87,8 +94,10 @@ export class NeuListboxItemDirective {
         </button>
       }
       @if (!filteredOptions().length) {
-        <div class="neu-listbox__empty">{{ emptyLabel() }}</div>
+        @if (emptyTpl()) { <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" /> }
+        @else { <div class="neu-listbox__empty">{{ emptyLabel() }}</div> }
       }
+      @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
     </div>
     @if (hint()) {
       <p class="neu-listbox__hint">{{ hint() }}</p>
@@ -109,6 +118,9 @@ export class NeuListboxComponent implements ControlValueAccessor {
 
   readonly selectionChange = output<NeuListboxOption[]>();
   readonly itemTpl = contentChild(NeuListboxItemDirective);
+  readonly headerTpl = contentChild(NeuListboxHeaderDirective);
+  readonly footerTpl = contentChild(NeuListboxFooterDirective);
+  readonly emptyTpl = contentChild(NeuListboxEmptyDirective);
 
   readonly query = signal('');
   readonly activeIndex = signal(0);

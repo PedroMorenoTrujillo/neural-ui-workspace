@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, contentChild, input } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 export type NeuTimelineItemVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -14,6 +15,10 @@ export interface NeuTimelineItem {
   /** Icono SVG path opcional / Optional SVG path icon */
   icon?: string;
 }
+@Directive({ selector: 'ng-template[neuTimelineItem]' })
+export class NeuTimelineItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTimelineItem; index: number }>) {} }
+@Directive({ selector: 'ng-template[neuTimelineMarker]' })
+export class NeuTimelineMarkerDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTimelineItem }>) {} }
 
 /**
  * NeuralUI Timeline Component
@@ -26,7 +31,7 @@ export interface NeuTimelineItem {
  */
 @Component({
   selector: 'neu-timeline',
-  imports: [],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -39,7 +44,7 @@ export interface NeuTimelineItem {
               class="neu-timeline__dot"
               [class]="'neu-timeline__dot--' + (item.variant ?? 'default')"
             >
-              @if (item.icon) {
+              @if (markerTpl()) { <ng-container [ngTemplateOutlet]="markerTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item }" /> } @else if (item.icon) {
                 <svg
                   class="neu-timeline__dot-icon"
                   viewBox="0 0 24 24"
@@ -60,7 +65,7 @@ export interface NeuTimelineItem {
 
           <!-- Contenido -->
           <div class="neu-timeline__content">
-            <div class="neu-timeline__header">
+            @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, index: $index }" /> } @else { <div class="neu-timeline__header">
               <span class="neu-timeline__title">{{ item.title }}</span>
               @if (item.time) {
                 <span class="neu-timeline__time">{{ item.time }}</span>
@@ -68,6 +73,7 @@ export interface NeuTimelineItem {
             </div>
             @if (item.description) {
               <p class="neu-timeline__desc">{{ item.description }}</p>
+            }
             }
           </div>
         </li>
@@ -77,6 +83,8 @@ export interface NeuTimelineItem {
   styleUrl: './neu-timeline.component.scss',
 })
 export class NeuTimelineComponent {
+  readonly itemTpl = contentChild(NeuTimelineItemDirective);
+  readonly markerTpl = contentChild(NeuTimelineMarkerDirective);
   /** Eventos a mostrar / Events to display */
   items = input<NeuTimelineItem[]>([]);
 }

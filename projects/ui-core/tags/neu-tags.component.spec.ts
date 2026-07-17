@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
-import { NeuTagsComponent } from './neu-tags.component';
+import { NeuTagItemDirective, NeuTagSuggestionDirective, NeuTagsComponent } from './neu-tags.component';
 
 describe('NeuTagsComponent', () => {
   let fixture: ComponentFixture<NeuTagsComponent>;
@@ -56,7 +56,7 @@ describe('NeuTagsComponent', () => {
     fixture.componentRef.setInput('suggestions', ['Angular', 'Signals', 'RxJS']);
     component.writeValue(['Angular']);
     component.draft.set('sign');
-    expect(component.filteredSuggestions()).toEqual(['Signals']);
+    expect(component.filteredSuggestions()).toEqual([{ label: 'Signals', value: 'Signals' }]);
 
     const enter = new KeyboardEvent('keydown', { key: 'Enter' });
     const prevent = vi.spyOn(enter, 'preventDefault');
@@ -99,6 +99,35 @@ describe('NeuTagsComponent', () => {
     expect(component.value()).toEqual(['Angular', 'Signals']);
     (fixture.nativeElement.querySelector('[aria-label="Delete Angular"]') as HTMLButtonElement).click();
     expect(component.value()).toEqual(['Signals']);
+  });
+
+  it('normalizes rich suggestions while keeping the public value as strings', () => {
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('suggestions', [
+      { label: 'Angular', value: 'angular', data: { color: 'red' } },
+    ]);
+    component.draft.set('ang');
+    expect(component.filteredSuggestions()).toEqual([
+      { label: 'Angular', value: 'angular', data: { color: 'red' } },
+    ]);
+    component.add(component.filteredSuggestions()[0]!.value);
+    expect(component.value()).toEqual(['angular']);
+  });
+
+  it('renders projected tag and rich-suggestion templates', async () => {
+    @Component({
+      imports: [NeuTagsComponent, NeuTagItemDirective, NeuTagSuggestionDirective],
+      template: `<neu-tags [suggestions]="suggestions"><ng-template neuTagItem let-tag>TAG:{{ tag }}</ng-template><ng-template neuTagSuggestion let-suggestion>SUG:{{ suggestion.data.flag }}</ng-template></neu-tags>`,
+    })
+    class Host { suggestions = [{ label: 'Spain', value: 'es', data: { flag: '🇪🇸' } }]; }
+    await TestBed.resetTestingModule().configureTestingModule({ imports: [Host] }).compileComponents();
+    const host = TestBed.createComponent(Host);
+    const component = host.debugElement.children[0].componentInstance as NeuTagsComponent;
+    component.writeValue(['existing']);
+    component.draft.set('spa');
+    host.detectChanges();
+    expect(host.nativeElement.textContent).toContain('TAG:existing');
+    expect(host.nativeElement.textContent).toContain('SUG:🇪🇸');
   });
 
   it('commits the draft through the input Enter binding', () => {

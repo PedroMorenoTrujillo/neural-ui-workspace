@@ -27,7 +27,7 @@ import {
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from './neu-select.types';
-import { NeuSelectItemDirective, NeuSelectSelectedDirective } from './neu-select.directives';
+import { NeuSelectEmptyDirective, NeuSelectFooterDirective, NeuSelectGroupDirective, NeuSelectHeaderDirective, NeuSelectItemDirective, NeuSelectSelectedDirective } from './neu-select.directives';
 
 export type { NeuSelectOption } from './neu-select.types';
 
@@ -159,6 +159,7 @@ let _neuSelectIdSeq = 0;
           stroke-linejoin="round"
           aria-hidden="true"
         >
+          @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </div>
@@ -260,6 +261,10 @@ let _neuSelectIdSeq = 0;
             </cdk-virtual-scroll-viewport>
           } @else {
             @for (option of filteredOptions(); track option.value) {
+              @if (option.group && option.group !== previousGroup(option)) {
+                @if (groupTpl()) { <ng-container [ngTemplateOutlet]="groupTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: option.group }" /> }
+                @else { <div class="neu-select__group">{{ option.group }}</div> }
+              }
               <ng-container
                 [ngTemplateOutlet]="selectOptionTpl"
                 [ngTemplateOutletContext]="{ $implicit: option }"
@@ -267,8 +272,10 @@ let _neuSelectIdSeq = 0;
             }
           }
           @if (!loading() && filteredOptions().length === 0) {
-            <div class="neu-select__empty">{{ noResultsMessage() }}</div>
+            @if (emptyTpl()) { <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" /> }
+            @else { <div class="neu-select__empty">{{ noResultsMessage() }}</div> }
           }
+          @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
         </div>
       </ng-template>
       <div class="neu-select__sr-status" aria-live="polite" aria-atomic="true">
@@ -328,6 +335,10 @@ export class NeuSelectComponent implements ControlValueAccessor {
 
   /** Template personalizado para el valor seleccionado en el trigger / Custom template for the selected value in the trigger */
   readonly selectedItemTpl = contentChild(NeuSelectSelectedDirective);
+  readonly headerTpl = contentChild(NeuSelectHeaderDirective);
+  readonly footerTpl = contentChild(NeuSelectFooterDirective);
+  readonly emptyTpl = contentChild(NeuSelectEmptyDirective);
+  readonly groupTpl = contentChild(NeuSelectGroupDirective);
   /** Opciones del dropdown / Dropdown options */
   options = input<NeuSelectOption[]>([]);
 
@@ -460,6 +471,11 @@ export class NeuSelectComponent implements ControlValueAccessor {
     if (!q) return this.options();
     return this.options().filter((o) => o.label.toLowerCase().includes(q));
   });
+
+  previousGroup(option: NeuSelectOption): string | undefined {
+    const index = this.filteredOptions().indexOf(option);
+    return index > 0 ? this.filteredOptions()[index - 1]?.group : undefined;
+  }
 
   readonly selectedLabel = computed(
     () => this.options().find((o) => o.value === this._value())?.label ?? null,
