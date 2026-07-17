@@ -169,12 +169,7 @@ For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or new
 2. Run `npm install`
 3. Run tests: `npm test`
 4. Run the release gate: `npm run verify:release`
-5. To test a compiled package against one Angular major: `npm run test:compat -- --angular 22`
-6. Open a pull request
-
-The CI compatibility matrix builds the same packaged artifact with standalone, zoneless consumer
-fixtures on Angular 19, 20, 21 and 22. The fixture exercises subpath imports, Reactive Forms/CVA,
-an overlay, a table, navigation, chart dependencies and SSR-safe module imports.
+5. Open a pull request
 
 ---
 

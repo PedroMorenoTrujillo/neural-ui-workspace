@@ -34,13 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI validates the compiled package through a standalone, zoneless consumer fixture on Angular 19,
   20, 21 and 22 before a release can be published.
 
-### Compatibility
-
-- Angular 19–22 support is verified through the consumer compatibility matrix. Angular packages
-  and CDK must use aligned versions in consuming applications.
-- Angular 20 installations can require aligned Angular/CDK minor versions; Angular 21.2.0–21.2.7
-  have the documented FormsModule declaration issue. See the README troubleshooting guidance.
-
 ## [1.7.6] - 2026-07-15
 
 ### Fixed
