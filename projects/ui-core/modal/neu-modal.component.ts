@@ -48,42 +48,44 @@ export type NeuDialogLayout = 'auto' | 'viewport';
         aria-hidden="true"
       ></div>
 
-      <!-- Panel -->
-      <div
-        #panel
-        class="neu-dialog__panel neu-dialog__panel--{{ size() }}"
-        [class.neu-dialog__panel--responsive]="responsive()"
-        [class.neu-dialog__panel--layout-auto]="layout() === 'auto'"
-        [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
-        role="dialog"
-        tabindex="-1"
-        [id]="'neu-dialog-' + _uid"
-        [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
-        [attr.aria-modal]="true"
-        (keydown)="onPanelKeydown($event)"
-      >
-        <!-- Header -->
-        <div class="neu-dialog__header">
-          <h2 class="neu-dialog__title" [id]="'neu-dialog-title-' + _uid">{{ title() }}</h2>
-          @if (!disableClose()) {
-            <button
-              class="neu-dialog__close"
-              type="button"
-              aria-label="Close dialog"
-              (click)="close()"
-            >
-              <neu-icon name="lucideX" size="1.125rem" />
-            </button>
-          }
-        </div>
+      <div class="neu-dialog__viewport">
+        <!-- Panel -->
+        <div
+          #panel
+          class="neu-dialog__panel neu-dialog__panel--{{ size() }}"
+          [class.neu-dialog__panel--responsive]="responsive()"
+          [class.neu-dialog__panel--layout-auto]="layout() === 'auto'"
+          [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
+          role="dialog"
+          tabindex="-1"
+          [id]="'neu-dialog-' + _uid"
+          [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
+          [attr.aria-modal]="true"
+          (keydown)="onPanelKeydown($event)"
+        >
+          <!-- Header -->
+          <div class="neu-dialog__header">
+            <h2 class="neu-dialog__title" [id]="'neu-dialog-title-' + _uid">{{ title() }}</h2>
+            @if (!disableClose()) {
+              <button
+                class="neu-dialog__close"
+                type="button"
+                aria-label="Close dialog"
+                (click)="close()"
+              >
+                <neu-icon name="lucideX" size="1.125rem" />
+              </button>
+            }
+          </div>
 
-        <!-- Body -->
-        <div class="neu-dialog__body">
-          <ng-content />
-        </div>
+          <!-- Body -->
+          <div class="neu-dialog__body">
+            <ng-content />
+          </div>
 
-        <!-- Footer (opcional via slot) -->
-        <ng-content select="[neu-dialog-footer]" />
+          <!-- Footer (opcional via slot) -->
+          <ng-content select="[neu-dialog-footer]" />
+        </div>
       </div>
     }
   `,

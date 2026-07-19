@@ -11,6 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.8.3] - 2026-07-19
+
+### Fixed
+
+- Declarative dialogs with `layout="auto"` now preserve their intrinsic content height instead
+  of stretching between fixed viewport insets in Safari and other browsers.
+- Declarative dialog centering now uses a safe-area-aware viewport wrapper while preserving
+  responsive widths, internal scrolling and stable footers.
+
+## [1.8.2] - 2026-07-19
+
+### Added
+
+- `NeuDialogComponent` now exposes `layout="auto|viewport"` and public CSS tokens for responsive
+  heights, safe-area insets, body scrolling, footers and size widths.
+
+### Changed
+
+- Dialogs now use dynamic viewport units when available, WebKit momentum scrolling, stable
+  footers and 44px touch targets without requiring `::ng-deep` overrides.
+
 ## [1.8.1] - 2026-07-19
 
 ### Fixed

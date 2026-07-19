@@ -72,7 +72,7 @@
 
 // ---- Uso declarativo (neu-dialog como componente propio) / Declarative use (neu-dialog as own component) ----
 neu-dialog {
-  display: contents; // El host es transparente; el panel está posicionado como fixed
+  display: contents; // El host es transparente; el viewport contiene y centra el panel
 }
 
 :where(neu-dialog.neu-dialog--layout-viewport) {
@@ -101,9 +101,20 @@ neu-dialog {
   animation: neu-backdrop-in 150ms ease both;
 }
 
-.neu-dialog__panel {
+.neu-dialog__viewport {
   position: fixed;
   inset: var(--neu-dialog-inset, 0);
+  z-index: var(--neu-z-modal, 200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  min-width: 0;
+  min-height: 0;
+}
+
+.neu-dialog__panel {
+  position: relative;
   margin: var(--neu-dialog-margin, auto);
   background: var(--neu-surface);
   border-radius: var(--neu-radius-lg, 16px);
@@ -111,26 +122,27 @@ neu-dialog {
   border: 1px solid var(--neu-border);
   display: flex;
   flex-direction: column;
-  z-index: var(--neu-z-modal, 200);
   height: var(--neu-dialog-height, auto);
   max-height: var(--neu-dialog-max-height, 90vh);
+  max-width: 100%;
   overflow: hidden;
+  pointer-events: auto;
   animation: neu-dialog-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
   &--sm {
-    width: min(calc(100vw - 2rem), var(--neu-dialog-width-sm, 400px));
+    width: min(100%, var(--neu-dialog-width-sm, 400px));
   }
   &--md {
-    width: min(calc(100vw - 2rem), var(--neu-dialog-width-md, 560px));
+    width: min(100%, var(--neu-dialog-width-md, 560px));
   }
   &--lg {
-    width: min(calc(100vw - 2rem), var(--neu-dialog-width-lg, 720px));
+    width: min(100%, var(--neu-dialog-width-lg, 720px));
   }
   &--xl {
-    width: min(calc(100vw - 2rem), var(--neu-dialog-width-xl, 900px));
+    width: min(100%, var(--neu-dialog-width-xl, 900px));
   }
   &--full {
-    width: min(calc(100vw - 2rem), var(--neu-dialog-width-full, 1120px));
+    width: min(100%, var(--neu-dialog-width-full, 1120px));
   }
 }
 
@@ -164,11 +176,6 @@ neu-dialog {
   :where(neu-dialog.neu-dialog--responsive.neu-dialog--layout-viewport) {
     --neu-dialog-height: calc(100vh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
     --neu-dialog-max-height: calc(100vh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
-  }
-
-  .neu-dialog__panel--responsive {
-    width: auto;
-    max-width: none;
   }
 
   @supports (height: 100dvh) {

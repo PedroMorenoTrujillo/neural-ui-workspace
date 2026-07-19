@@ -221,7 +221,21 @@ describe('NeuDialogComponent', () => {
 
     expect(f.nativeElement.style.getPropertyValue('--neu-dialog-height')).toBe('31rem');
     expect(f.nativeElement.style.getPropertyValue('--neu-dialog-footer-wrap')).toBe('wrap');
-    expect(panel.parentElement).toBe(f.nativeElement);
+    const viewport = f.nativeElement.querySelector('.neu-dialog__viewport') as HTMLElement;
+    expect(viewport).toBeTruthy();
+    expect(panel.parentElement).toBe(viewport);
+    expect(viewport.parentElement).toBe(f.nativeElement);
+  });
+
+  it('should center declarative panels through a viewport wrapper without stretching auto layout', async () => {
+    const { f } = await mkDialog({ layout: 'auto' });
+    const viewport = f.nativeElement.querySelector('.neu-dialog__viewport') as HTMLElement;
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
+
+    expect(getComputedStyle(viewport).position).toBe('fixed');
+    expect(getComputedStyle(viewport).display).toBe('flex');
+    expect(getComputedStyle(panel).position).toBe('relative');
+    expect(getComputedStyle(panel).height).toBe('var(--neu-dialog-height, auto)');
   });
 
   // ── Accesibilidad ──────────────────────────────────────────────────────────
