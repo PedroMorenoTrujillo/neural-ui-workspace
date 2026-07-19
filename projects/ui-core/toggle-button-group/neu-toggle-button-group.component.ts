@@ -68,7 +68,7 @@ export class NeuToggleButtonItemDirective<T = unknown> { constructor(readonly te
           [class.neu-toggle-group__btn--active]="isSelected(opt.value)"
           [class.neu-toggle-group__btn--disabled]="opt.disabled || _isDisabled()"
           [attr.aria-pressed]="isSelected(opt.value)"
-          [disabled]="opt.disabled || _isDisabled() ? '' : null"
+          [disabled]="opt.disabled || _isDisabled()"
           (click)="toggle(opt)"
           (blur)="onBlur()"
         >
@@ -104,7 +104,8 @@ export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueA
   neuChange = output<T | T[] | null>();
 
   readonly _value = signal<T | T[] | null>(null);
-  readonly _isDisabled = signal(false);
+  private readonly _cvaDisabled = signal(false);
+  readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
 
   readonly groupClasses = computed(() => ({
     'neu-toggle-group': true,
@@ -165,6 +166,6 @@ export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueA
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this._isDisabled.set(isDisabled);
+    this._cvaDisabled.set(isDisabled);
   }
 }

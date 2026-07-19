@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.8.1] - 2026-07-19
+
+### Fixed
+
+- `NeuToggleButtonGroupComponent` now combines its public `disabled` input with the disabled state
+  supplied by Angular Forms and applies the resulting boolean to its native buttons.
+- `NeuInlineEditorComponent` now propagates disabled state through its internal `FormControl`
+  instances, avoiding Angular's reactive-forms warning while keeping its public API unchanged.
+- The CVA release audit now rejects reactive controls that also bind `disabled` directly and
+  rejects string/null values passed to the native boolean `disabled` property.
+
 ## [1.8.0] - 2026-07-17
 
 ### Added

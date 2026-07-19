@@ -137,9 +137,27 @@ describe('NeuToggleButtonGroupComponent', () => {
     expect(comp._isDisabled()).toBe(true);
   });
 
-  it('toggle does nothing when group is disabled', () => {
-    const { comp } = mk({ disabled: true });
+  it('honors the public disabled input without requiring CVA state', () => {
+    const { f, comp } = mk({ disabled: true });
+    const btns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
+
+    expect(comp._isDisabled()).toBe(true);
+    btns.forEach((btn) => expect(btn.disabled).toBe(true));
+  });
+
+  it('keeps the group disabled while either the input or CVA state is disabled', () => {
+    const { f, comp } = mk({ disabled: true });
+    comp.setDisabledState(false);
+    expect(comp._isDisabled()).toBe(true);
+
+    f.componentRef.setInput('disabled', false);
     comp.setDisabledState(true);
+    f.detectChanges();
+    expect(comp._isDisabled()).toBe(true);
+  });
+
+  it('toggle does nothing when the public input disables the group', () => {
+    const { comp } = mk({ disabled: true });
     const emitted: unknown[] = [];
     comp.neuChange.subscribe((v: unknown) => emitted.push(v));
     comp.toggle(OPTIONS[0]);

@@ -71,7 +71,6 @@ export interface NeuInlineEditorCommitEvent<T = string | number | null> {
               [size]="size()"
               [floatingLabel]="false"
               [placeholder]="placeholder()"
-              [disabled]="isDisabled()"
             />
           }
           @case ('number') {
@@ -90,7 +89,6 @@ export interface NeuInlineEditorCommitEvent<T = string | number | null> {
               [formControl]="stringControl"
               [size]="size()"
               [label]="placeholder()"
-              [disabled]="isDisabled()"
               [rows]="rows()"
             />
           }
@@ -100,7 +98,6 @@ export interface NeuInlineEditorCommitEvent<T = string | number | null> {
               [formControl]="stringControl"
               [size]="size()"
               [placeholder]="placeholder()"
-              [disabled]="isDisabled()"
             />
           }
           @default {
@@ -110,7 +107,6 @@ export interface NeuInlineEditorCommitEvent<T = string | number | null> {
               [size]="size()"
               [floatingLabel]="false"
               [placeholder]="placeholder()"
-              [disabled]="isDisabled()"
             />
           }
         }
@@ -213,6 +209,11 @@ export class NeuInlineEditorComponent implements ControlValueAccessor {
   constructor() {
     effect(() => {
       this._setValue(this.value(), false);
+    });
+
+    effect(() => {
+      this.isDisabled();
+      this._syncDisabledState();
     });
 
     effect(() => {

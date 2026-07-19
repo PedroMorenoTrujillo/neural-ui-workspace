@@ -78,6 +78,26 @@ describe('NeuInlineEditorComponent', () => {
     expect(changes).toEqual(['Next']);
   });
 
+  it('syncs the public disabled input through its internal reactive controls', async () => {
+    const fixture = await setup({ value: 'Draft', startInEdit: true });
+    const component = fixture.componentInstance;
+
+    expect(component.stringControl.enabled).toBe(true);
+    fixture.componentRef.setInput('disabled', true);
+    await detectStableChanges(fixture);
+
+    expect(component.stringControl.disabled).toBe(true);
+    expect(component.numberControl.disabled).toBe(true);
+    expect(
+      (fixture.nativeElement.querySelector('.neu-input__field') as HTMLInputElement | null)?.disabled,
+    ).toBe(true);
+
+    fixture.componentRef.setInput('disabled', false);
+    await detectStableChanges(fixture);
+    expect(component.stringControl.enabled).toBe(true);
+    expect(component.numberControl.enabled).toBe(true);
+  });
+
   it('cancels with Escape and commits with Enter', async () => {
     const fixture = await setup({ value: 'Draft' });
     const component = fixture.componentInstance;

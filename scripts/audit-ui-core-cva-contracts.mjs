@@ -37,6 +37,23 @@ const cvaComponents = [];
 
 for (const file of componentFiles(uiCore)) {
   const source = readFileSync(file, 'utf8');
+  const templateTags = source.match(/<[a-z][^>]*>/gs) ?? [];
+  for (const tag of templateTags) {
+    if (/\[disabled\]\s*=\s*"[^"]*\?\s*''\s*:\s*null"/.test(tag)) {
+      violations.push(
+        `${relative(root, file)}: [disabled] is a boolean property; bind a boolean instead of ''/null`,
+      );
+    }
+
+    const hasReactiveControl = /\[(?:formControl)\]|\bformControlName\b/.test(tag);
+    const hasDisabledBinding = /\[disabled\]|\bdisabled\s*=/.test(tag);
+    if (hasReactiveControl && hasDisabledBinding) {
+      violations.push(
+        `${relative(root, file)}: reactive form controls must receive disabled state from their FormControl`,
+      );
+    }
+  }
+
   if (!source.includes('ControlValueAccessor') && !source.includes('NG_VALUE_ACCESSOR')) {
     continue;
   }
