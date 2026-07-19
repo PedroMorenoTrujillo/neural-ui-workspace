@@ -196,6 +196,34 @@ describe('NeuDialogComponent', () => {
     expect(f.nativeElement.querySelector('.neu-dialog__panel--full')).toBeTruthy();
   });
 
+  it('should apply auto layout classes by default', async () => {
+    const { f } = await mkDialog();
+    expect(f.nativeElement.classList.contains('neu-dialog--layout-auto')).toBe(true);
+    expect(f.nativeElement.querySelector('.neu-dialog__panel--layout-auto')).toBeTruthy();
+  });
+
+  it('should apply viewport layout classes', async () => {
+    const { f } = await mkDialog({ layout: 'viewport' });
+    expect(f.nativeElement.classList.contains('neu-dialog--layout-viewport')).toBe(true);
+    expect(f.nativeElement.querySelector('.neu-dialog__panel--layout-viewport')).toBeTruthy();
+  });
+
+  it('should expose responsive state on the host', async () => {
+    const { f } = await mkDialog({ responsive: true });
+    expect(f.nativeElement.classList.contains('neu-dialog--responsive')).toBe(true);
+  });
+
+  it('should keep the panel inside the token-configurable host', async () => {
+    const { f } = await mkDialog();
+    f.nativeElement.style.setProperty('--neu-dialog-height', '31rem');
+    f.nativeElement.style.setProperty('--neu-dialog-footer-wrap', 'wrap');
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
+
+    expect(f.nativeElement.style.getPropertyValue('--neu-dialog-height')).toBe('31rem');
+    expect(f.nativeElement.style.getPropertyValue('--neu-dialog-footer-wrap')).toBe('wrap');
+    expect(panel.parentElement).toBe(f.nativeElement);
+  });
+
   // ── Accesibilidad ──────────────────────────────────────────────────────────
 
   it('should set aria-labelledby matching the title element id', async () => {
@@ -479,6 +507,29 @@ describe('NeuDialogService', () => {
     const service = TestBed.inject(NeuDialogService);
     const ref = service.open(FakeContentComponent, { size: 'lg' });
     expect(ref).toBeTruthy();
+    ref.close();
+  });
+
+  it('open() should apply viewport layout to the CDK panel', () => {
+    const service = TestBed.inject(NeuDialogService);
+    const ref = service.open(FakeContentComponent, { layout: 'viewport' });
+    expect(document.querySelector('.neu-dialog-panel--layout-viewport')).toBeTruthy();
+    ref.close();
+  });
+
+  it('open() should apply responsive layout to the CDK panel by default', () => {
+    const service = TestBed.inject(NeuDialogService);
+    const ref = service.open(FakeContentComponent);
+    const panel = document.querySelector('.neu-dialog-panel--responsive') as HTMLElement;
+    expect(panel).toBeTruthy();
+    expect(panel.style.maxWidth).toBe('none');
+    ref.close();
+  });
+
+  it('open() should allow disabling responsive CDK layout', () => {
+    const service = TestBed.inject(NeuDialogService);
+    const ref = service.open(FakeContentComponent, { responsive: false });
+    expect(document.querySelector('.neu-dialog-panel--responsive')).toBeFalsy();
     ref.close();
   });
 

@@ -124,6 +124,22 @@
   --neu-sidebar-width: 260px;
   --neu-sidebar-bg: var(--neu-surface);
 
+  // Dialog — layout configurable without piercing component encapsulation
+  --neu-dialog-height: auto;
+  --neu-dialog-max-height: 90vh;
+  --neu-dialog-inset: 0;
+  --neu-dialog-margin: auto;
+  --neu-dialog-body-flex: 0 1 auto;
+  --neu-dialog-body-max-height: none;
+  --neu-dialog-body-padding: var(--neu-space-5);
+  --neu-dialog-footer-padding: var(--neu-space-4) var(--neu-space-5);
+  --neu-dialog-footer-wrap: nowrap;
+  --neu-dialog-width-sm: 400px;
+  --neu-dialog-width-md: 560px;
+  --neu-dialog-width-lg: 720px;
+  --neu-dialog-width-xl: 900px;
+  --neu-dialog-width-full: 1120px;
+
   // ------------------------------------------------
   // Z-index
   // ------------------------------------------------

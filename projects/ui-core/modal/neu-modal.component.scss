@@ -30,25 +30,33 @@
   outline: none;
   display: flex;
   flex-direction: column;
-  max-height: 90dvh;
+  width: min(calc(100vw - 2rem), var(--neu-dialog-width-md, 560px));
+  height: var(--neu-dialog-height, auto);
+  max-height: var(--neu-dialog-max-height, 90vh);
+  margin: var(--neu-dialog-margin, auto);
   overflow: hidden;
   animation: neu-dialog-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
   &--sm {
-    width: min(100% - 2rem, 400px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-sm, 400px));
   }
   &--md {
-    width: min(100% - 2rem, 560px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-md, 560px));
   }
   &--lg {
-    width: min(100% - 2rem, 720px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-lg, 720px));
   }
   &--xl {
-    width: min(100% - 2rem, 900px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-xl, 900px));
   }
   &--full {
-    width: min(100% - 2rem, 1120px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-full, 1120px));
   }
+}
+
+:where(.neu-dialog-panel--layout-viewport) {
+  --neu-dialog-height: 90vh;
+  --neu-dialog-body-flex: 1 1 auto;
 }
 
 @keyframes neu-dialog-in {
@@ -67,6 +75,23 @@ neu-dialog {
   display: contents; // El host es transparente; el panel está posicionado como fixed
 }
 
+:where(neu-dialog.neu-dialog--layout-viewport) {
+  --neu-dialog-height: 90vh;
+  --neu-dialog-body-flex: 1 1 auto;
+}
+
+@supports (height: 100dvh) {
+  :where(neu-dialog),
+  :where(.neu-dialog-panel) {
+    --neu-dialog-max-height: 90dvh;
+  }
+
+  :where(neu-dialog.neu-dialog--layout-viewport),
+  :where(.neu-dialog-panel--layout-viewport) {
+    --neu-dialog-height: 90dvh;
+  }
+}
+
 .neu-dialog__backdrop {
   position: fixed;
   inset: 0;
@@ -78,8 +103,8 @@ neu-dialog {
 
 .neu-dialog__panel {
   position: fixed;
-  inset: 0;
-  margin: auto;
+  inset: var(--neu-dialog-inset, 0);
+  margin: var(--neu-dialog-margin, auto);
   background: var(--neu-surface);
   border-radius: var(--neu-radius-lg, 16px);
   box-shadow: var(--neu-shadow-lg);
@@ -87,34 +112,82 @@ neu-dialog {
   display: flex;
   flex-direction: column;
   z-index: var(--neu-z-modal, 200);
-  max-height: 90dvh;
+  height: var(--neu-dialog-height, auto);
+  max-height: var(--neu-dialog-max-height, 90vh);
   overflow: hidden;
   animation: neu-dialog-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  height: fit-content;
 
   &--sm {
-    width: min(100% - 2rem, 400px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-sm, 400px));
   }
   &--md {
-    width: min(100% - 2rem, 560px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-md, 560px));
   }
   &--lg {
-    width: min(100% - 2rem, 720px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-lg, 720px));
   }
   &--xl {
-    width: min(100% - 2rem, 900px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-xl, 900px));
   }
   &--full {
-    width: min(100% - 2rem, 1120px);
+    width: min(calc(100vw - 2rem), var(--neu-dialog-width-full, 1120px));
   }
 }
 
 @media (max-width: 640px) {
+  :where(.neu-dialog-panel--responsive) {
+    width: min(
+      calc(100vw - max(24px, env(safe-area-inset-left)) - max(24px, env(safe-area-inset-right))),
+      var(--neu-dialog-width-full, 1120px)
+    );
+    max-width: none;
+    --neu-dialog-max-height: calc(
+      100vh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom))
+    );
+  }
+
+  :where(.neu-dialog-panel--responsive.neu-dialog-panel--layout-viewport) {
+    --neu-dialog-height: calc(
+      100vh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom))
+    );
+  }
+
+  :where(neu-dialog.neu-dialog--responsive) {
+    --neu-dialog-inset:
+      max(12px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+    --neu-dialog-margin: auto;
+  }
+
+  :where(neu-dialog.neu-dialog--responsive.neu-dialog--layout-viewport) {
+    --neu-dialog-height: calc(100vh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+    --neu-dialog-max-height: calc(100vh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+  }
+
   .neu-dialog__panel--responsive {
-    width: calc(100vw - 24px);
-    max-width: calc(100vw - 24px);
-    max-height: calc(100vh - 24px);
-    margin: 12px;
+    width: auto;
+    max-width: none;
+  }
+
+  @supports (height: 100dvh) {
+    :where(.neu-dialog-panel--responsive) {
+      --neu-dialog-max-height: calc(
+        100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom))
+      );
+    }
+
+    :where(.neu-dialog-panel--responsive.neu-dialog-panel--layout-viewport) {
+      --neu-dialog-height: calc(
+        100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom))
+      );
+    }
+
+    :where(neu-dialog.neu-dialog--responsive.neu-dialog--layout-viewport) {
+      --neu-dialog-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+      --neu-dialog-max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+    }
   }
 }
 
@@ -140,8 +213,11 @@ neu-dialog {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  flex: none;
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius);
   background: transparent;
@@ -159,9 +235,12 @@ neu-dialog {
 }
 
 .neu-dialog__body {
-  padding: var(--neu-space-5, 1.25rem);
+  min-height: 0;
+  max-height: var(--neu-dialog-body-max-height, none);
+  padding: var(--neu-dialog-body-padding, var(--neu-space-5, 1.25rem));
   overflow-y: auto;
-  flex: 1;
+  flex: var(--neu-dialog-body-flex, 0 1 auto);
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   color: var(--neu-text);
   font-size: var(--neu-text-sm, 0.875rem);
@@ -174,7 +253,12 @@ neu-dialog {
   align-items: center;
   justify-content: flex-end;
   gap: var(--neu-space-3, 0.75rem);
-  padding: var(--neu-space-4, 1rem) var(--neu-space-5, 1.25rem);
+  flex-wrap: var(--neu-dialog-footer-wrap, nowrap);
+  padding: var(--neu-dialog-footer-padding, var(--neu-space-4, 1rem) var(--neu-space-5, 1.25rem));
   border-top: 1px solid var(--neu-border);
   flex-shrink: 0;
+
+  :where(button, [role='button']) {
+    min-height: 44px;
+  }
 }

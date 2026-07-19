@@ -22,6 +22,24 @@ const fixture = mkdtempSync(join(tmpdir(), `neural-ui-angular-${version}-`));
 const npmCache = mkdtempSync(join(tmpdir(), 'neural-ui-npm-cache-'));
 cpSync(fixtureRoot, fixture, { recursive: true });
 
+// Install the package exactly as consumers receive it. A `file:` dependency
+// pointing at dist is symlinked by npm and would resolve Angular from this
+// workspace instead of from the compatibility fixture.
+const packResult = spawnSync('npm', ['pack', distRoot, '--pack-destination', fixture], {
+  cwd: workspaceRoot,
+  encoding: 'utf8',
+  env: { ...process.env, npm_config_cache: npmCache },
+});
+if (packResult.error || packResult.status !== 0) {
+  console.error(packResult.stderr || packResult.error?.message || 'Unable to pack the library.');
+  process.exit(packResult.status ?? 1);
+}
+const packageTarball = packResult.stdout.trim().split('\n').at(-1);
+if (!packageTarball) {
+  console.error('npm pack did not return a package filename.');
+  process.exit(1);
+}
+
 const typescriptByAngular = { 19: '~5.7.0', 20: '~5.8.0', 21: '~5.9.0', 22: '~6.0.0' };
 const angularVersion = `^${version}.0.0`;
 const ngApexchartsByAngular = { 19: '1.15.0', 20: '1.16.0', 21: '2.3.0', 22: '2.3.0' };
@@ -35,7 +53,7 @@ packageJson.dependencies = {
   '@angular/forms': angularVersion,
   '@angular/platform-browser': angularVersion,
   '@angular/router': angularVersion,
-  '@neural-ui/core': `file:${distRoot}`,
+  '@neural-ui/core': `file:${join(fixture, packageTarball)}`,
   // v31 is the last ng-icons line whose Angular peer range includes 19 and 20.
   '@ng-icons/core': '^31.4.0',
   '@ng-icons/lucide': '^31.4.0',
@@ -52,6 +70,15 @@ packageJson.devDependencies = {
   typescript: typescriptByAngular[version],
 };
 writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+
+if (version === '19') {
+  const mainPath = join(fixture, 'src', 'main.ts');
+  const mainSource = readFileSync(mainPath, 'utf8').replaceAll(
+    'provideZonelessChangeDetection',
+    'provideExperimentalZonelessChangeDetection',
+  );
+  writeFileSync(mainPath, mainSource);
+}
 
 try {
   const commands = [

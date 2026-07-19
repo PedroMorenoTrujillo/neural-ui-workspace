@@ -11,6 +11,7 @@ import {
 import { NeuIconComponent } from '@neural-ui/core/icon';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type NeuDialogLayout = 'auto' | 'viewport';
 
 /**
  * NeuDialogComponent — Diálogo accesible con header, body y footer. / Accessible dialog with header, body and footer.
@@ -33,6 +34,9 @@ export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.neu-dialog--open]': 'open()',
+    '[class.neu-dialog--responsive]': 'responsive()',
+    '[class.neu-dialog--layout-auto]': 'layout() === "auto"',
+    '[class.neu-dialog--layout-viewport]': 'layout() === "viewport"',
     '[attr.aria-hidden]': '!open()',
   },
   template: `
@@ -49,6 +53,8 @@ export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
         #panel
         class="neu-dialog__panel neu-dialog__panel--{{ size() }}"
         [class.neu-dialog__panel--responsive]="responsive()"
+        [class.neu-dialog__panel--layout-auto]="layout() === 'auto'"
+        [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
         role="dialog"
         tabindex="-1"
         [id]="'neu-dialog-' + _uid"
@@ -90,6 +96,8 @@ export class NeuDialogComponent {
   title = input<string>('');
   /** Tamaño del panel: sm | md | lg | xl | full. / Panel size: sm | md | lg | xl | full. */
   size = input<NeuDialogSize>('md');
+  /** Ajusta la altura al contenido o al viewport disponible. / Fits height to content or to the available viewport. */
+  layout = input<NeuDialogLayout>('auto');
   /** Si es true, el backdrop y el botón cerrar no funcionan. / If true, the backdrop and close button do not work. */
   disableClose = input<boolean>(false);
   /** Adapta el panel a mobile/full-width cuando el viewport es estrecho. */
