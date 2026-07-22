@@ -72,6 +72,15 @@ describe('NeuPasswordComponent', () => {
     expect(toggle.querySelector('svg')).toBeTruthy();
   });
 
+  it('forwards name and autocomplete to the native password input', () => {
+    fixture.componentRef.setInput('name', 'password');
+    fixture.componentRef.setInput('autocomplete', 'current-password');
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    expect(input.name).toBe('password');
+    expect(input.autocomplete).toBe('current-password');
+  });
+
   it('disables the reveal toggle whenever the password control is disabled', () => {
     const toggle = fixture.nativeElement.querySelector('.neu-password__toggle') as HTMLButtonElement;
 

@@ -17,6 +17,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         class="neu-password__control"
         [id]="inputId"
         [type]="visible() ? 'text' : 'password'"
+        [attr.name]="name() || null"
+        [attr.autocomplete]="autocomplete()"
         [placeholder]="placeholder()"
         [value]="value()"
         [disabled]="disabled() || cvaDisabled()"
@@ -58,6 +60,10 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class NeuPasswordComponent implements ControlValueAccessor {
   readonly label = input('');
   readonly placeholder = input('');
+  /** Nombre del campo para formularios nativos / Field name for native forms */
+  readonly name = input('');
+  /** Pista de autofill para el gestor de credenciales / Credential-manager autofill hint */
+  readonly autocomplete = input('current-password');
   readonly disabled = input(false);
   readonly toggleable = input(true);
   readonly showStrength = input(false);

@@ -4,8 +4,8 @@
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
   <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
-  <img src="https://img.shields.io/badge/tests-1615%20passing-22c55e" alt="1615 tests passing" />
-  <img src="https://img.shields.io/badge/coverage-96.75%25-22c55e" alt="96.75% coverage" />
+  <img src="https://img.shields.io/badge/tests-2088%20passing-22c55e" alt="2088 tests passing" />
+  <img src="https://img.shields.io/badge/coverage-97.58%25-22c55e" alt="97.58% coverage" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
 </p>
 
