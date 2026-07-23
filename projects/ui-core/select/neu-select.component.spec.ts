@@ -590,7 +590,7 @@ describe('NeuSelectComponent', () => {
         bottom: 'auto',
         left: '20px',
         width: '180px',
-        maxHeight: '836px',
+        maxHeight: '844px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
@@ -633,7 +633,7 @@ describe('NeuSelectComponent', () => {
         bottom: 'auto',
         left: '24px',
         width: '220px',
-        maxHeight: '730px',
+        maxHeight: '738px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
@@ -1260,7 +1260,7 @@ describe('NeuSelectComponent', () => {
       expect(comp.isPanelAbove()).toBe(true);
       expect(comp.panelPosition().top).toBe('auto');
       expect(comp.panelPosition().bottom).toBe('106px');
-      expect(comp.panelPosition().left).toBe('756px');
+      expect(comp.panelPosition().left).toBe('764px');
     } finally {
       Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
       Object.defineProperty(window, 'innerHeight', {
