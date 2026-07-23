@@ -92,10 +92,11 @@ describe('NeuSelectComponent', () => {
     expect(document.querySelector('.neu-select__panel')).toBeTruthy();
   });
 
-  it('should apply measured trigger width to the CDK overlay pane', async () => {
+  it('should apply measured select host width to the CDK overlay pane', async () => {
     const { f } = await setup();
+    const selectHost: HTMLElement = f.nativeElement.querySelector('.neu-select');
     const trigger: HTMLElement = f.nativeElement.querySelector('.neu-select__trigger');
-    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+    vi.spyOn(selectHost, 'getBoundingClientRect').mockReturnValue({
       x: 40,
       y: 80,
       top: 80,
@@ -559,8 +560,8 @@ describe('NeuSelectComponent', () => {
     const originalInnerHeight = window.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
-    Object.defineProperty(trigger, 'getBoundingClientRect', {
+    const selectHost = f.nativeElement.querySelector('.neu-select') as HTMLElement;
+    Object.defineProperty(selectHost, 'getBoundingClientRect', {
       configurable: true,
       value: () => ({ top: 18, left: 20, bottom: 50, width: 180 }),
     });
@@ -582,7 +583,7 @@ describe('NeuSelectComponent', () => {
 
       (comp as any).syncPanelPosition();
 
-      expect(trigger).toBeTruthy();
+      expect(selectHost).toBeTruthy();
       expect(comp.panelPosition()).toEqual({
         position: 'fixed',
         top: '56px',
@@ -610,10 +611,10 @@ describe('NeuSelectComponent', () => {
     const originalInnerHeight = window.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
-    Object.defineProperty(trigger, 'getBoundingClientRect', {
+    const selectHost = f.nativeElement.querySelector('.neu-select') as HTMLElement;
+    Object.defineProperty(selectHost, 'getBoundingClientRect', {
       configurable: true,
-      value: () => ({ left: 24, bottom: 100, width: 220 }),
+      value: () => ({ top: 52, left: 24, bottom: 100, width: 220 }),
     });
 
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
@@ -1241,9 +1242,9 @@ describe('NeuSelectComponent', () => {
     const originalInnerWidth = window.innerWidth;
     const originalInnerHeight = window.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const selectHost = f.nativeElement.querySelector('.neu-select') as HTMLElement;
 
-    Object.defineProperty(trigger, 'getBoundingClientRect', {
+    Object.defineProperty(selectHost, 'getBoundingClientRect', {
       configurable: true,
       value: () => ({ top: 700, left: 900, bottom: 748, width: 260 }),
     });

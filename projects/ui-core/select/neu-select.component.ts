@@ -71,6 +71,8 @@ let _neuSelectIdSeq = 0;
       }}</label>
     }
     <div
+      cdkOverlayOrigin
+      #selectOrigin="cdkOverlayOrigin"
       class="neu-select"
       [class.neu-select--open]="isOpen()"
       [class.neu-select--open-above]="isPanelAbove()"
@@ -85,8 +87,6 @@ let _neuSelectIdSeq = 0;
     >
       <!-- Trigger ------>
       <div
-        cdkOverlayOrigin
-        #selectOrigin="cdkOverlayOrigin"
         class="neu-select__trigger"
         [id]="_triggerId"
         [attr.tabindex]="isDisabledFinal() ? '-1' : '0'"
@@ -652,11 +652,11 @@ export class NeuSelectComponent implements ControlValueAccessor {
   }
 
   private syncPanelPosition(): void {
-    const trigger =
-      this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select__trigger');
-    if (!trigger) return;
+    const origin =
+      this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select');
+    if (!origin) return;
 
-    const triggerRect = trigger.getBoundingClientRect();
+    const triggerRect = origin.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const gap = 6;
