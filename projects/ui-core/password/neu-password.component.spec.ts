@@ -72,6 +72,19 @@ describe('NeuPasswordComponent', () => {
     expect(toggle.querySelector('svg')).toBeTruthy();
   });
 
+  it('renders a floating label when requested', () => {
+    fixture.componentRef.setInput('label', 'Password');
+    fixture.componentRef.setInput('floatingLabel', true);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    expect(fixture.nativeElement.querySelector('.neu-password__label')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.neu-password__floating-label')?.textContent).toContain('Password');
+    expect(input.placeholder).toBe(' ');
+    input.dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-password__wrap')?.classList).toContain('neu-password__wrap--focused');
+  });
+
   it('forwards name and autocomplete to the native password input', () => {
     fixture.componentRef.setInput('name', 'password');
     fixture.componentRef.setInput('autocomplete', 'current-password');

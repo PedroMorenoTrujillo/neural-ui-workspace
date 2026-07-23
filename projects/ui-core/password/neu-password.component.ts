@@ -9,22 +9,32 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NeuPasswordComponent), multi: true }],
   host: { class: 'neu-password' },
   template: `
-    @if (label()) {
+    @if (!floatingLabel() && label()) {
       <label class="neu-password__label" [for]="inputId">{{ label() }}</label>
     }
-    <div class="neu-password__wrap">
+    <div
+      class="neu-password__wrap"
+      [class.neu-password__wrap--focused]="focused()"
+      [class.neu-password__wrap--has-value]="hasValue()"
+      [class.neu-password__wrap--disabled]="disabled() || cvaDisabled()"
+      [class.neu-password__wrap--no-float]="!floatingLabel()"
+    >
       <input
         class="neu-password__control"
         [id]="inputId"
         [type]="visible() ? 'text' : 'password'"
         [attr.name]="name() || null"
         [attr.autocomplete]="autocomplete()"
-        [placeholder]="placeholder()"
+        [attr.placeholder]="floatingLabel() ? ' ' : placeholder() || null"
         [value]="value()"
         [disabled]="disabled() || cvaDisabled()"
         (input)="setValue($any($event.target).value)"
-        (blur)="onTouched()"
+        (focus)="focused.set(true)"
+        (blur)="focused.set(false); onTouched()"
       />
+      @if (floatingLabel() && label()) {
+        <label class="neu-password__floating-label" [for]="inputId">{{ label() }}</label>
+      }
       @if (toggleable()) {
         <button
           type="button"
@@ -60,6 +70,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class NeuPasswordComponent implements ControlValueAccessor {
   readonly label = input('');
   readonly placeholder = input('');
+  /** Muestra el label dentro del campo y lo eleva al enfocarlo o escribir / Shows the label inside the field and lifts it on focus or value */
+  readonly floatingLabel = input(false);
   /** Nombre del campo para formularios nativos / Field name for native forms */
   readonly name = input('');
   /** Pista de autofill para el gestor de credenciales / Credential-manager autofill hint */
@@ -73,7 +85,9 @@ export class NeuPasswordComponent implements ControlValueAccessor {
   readonly inputId = `neu-password-${Math.random().toString(36).slice(2)}`;
   readonly value = signal('');
   readonly visible = signal(false);
+  readonly focused = signal(false);
   readonly cvaDisabled = signal(false);
+  readonly hasValue = computed(() => !!this.value());
   readonly strength = computed(() => {
     const value = this.value();
     return [value.length >= 8, /[A-Z]/.test(value), /\d/.test(value), /\W/.test(value)].filter(Boolean).length;
