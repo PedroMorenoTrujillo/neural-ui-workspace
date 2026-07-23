@@ -300,7 +300,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
   private readonly _platformId = inject(PLATFORM_ID);
   private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
-  readonly _viewportMargin = 16;
+  readonly _viewportMargin = 8;
   private readonly _panelMaxHeight = 240;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
   private readonly _viewport = viewChild(CdkVirtualScrollViewport);
