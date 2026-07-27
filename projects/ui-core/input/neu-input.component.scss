@@ -137,7 +137,8 @@ $label-font-floating: 12px;
 
   // Cuando el input tiene valor o está enfocado → sube al borde
   .neu-input__wrapper--focused &,
-  .neu-input__wrapper--has-value & {
+  .neu-input__wrapper--has-value &,
+  .neu-input__wrapper:has(.neu-input__field:-webkit-autofill) & {
     top: 0;
     transform: translateY(-50%);
     font-size: $label-font-floating;
