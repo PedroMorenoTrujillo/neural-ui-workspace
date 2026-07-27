@@ -162,6 +162,21 @@ describe('NeuInputComponent', () => {
     expect(comp.hasValue()).toBe(false);
   });
 
+  it('synchronises a browser-autofilled value with the form control state', () => {
+    const { f, comp } = mk({ label: 'Email', floatingLabel: true });
+    const onChange = vi.fn();
+    comp.registerOnChange(onChange);
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'learner@example.com';
+
+    comp.syncNativeValue();
+    f.detectChanges();
+
+    expect(comp.hasValue()).toBe(true);
+    expect(onChange).toHaveBeenCalledWith('learner@example.com');
+    expect(f.nativeElement.querySelector('.neu-input__wrapper')?.classList).toContain('neu-input__wrapper--has-value');
+  });
+
   it('hasError computed should be true when errorMessage is set', () => {
     const { comp } = mk({ errorMessage: 'Error', label: 'Test' });
     expect(comp.hasError()).toBe(true);

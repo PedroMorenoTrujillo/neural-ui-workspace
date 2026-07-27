@@ -98,6 +98,15 @@ $label-font-floating: 12px;
     color: transparent;
     transition: color var(--neu-transition);
   }
+
+  // WebKit fires animationstart when a credential manager autofills the field.
+  &:-webkit-autofill {
+    animation: neu-autofill-start 0.01s both;
+  }
+}
+
+@keyframes neu-autofill-start {
+  to { opacity: 1; }
 }
 
 // Placeholder visible cuando el wrapper está enfocado (label ya flotó)

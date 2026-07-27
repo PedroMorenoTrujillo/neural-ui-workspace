@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, forwardRef, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewEncapsulation, afterNextRender, computed, forwardRef, input, output, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
@@ -20,6 +20,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       [class.neu-password__wrap--no-float]="!floatingLabel()"
     >
       <input
+        #nativeInput
         class="neu-password__control"
         [id]="inputId"
         [type]="visible() ? 'text' : 'password'"
@@ -29,6 +30,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         [value]="value()"
         [disabled]="disabled() || cvaDisabled()"
         (input)="setValue($any($event.target).value)"
+        (animationstart)="onAnimationStart($event)"
         (focus)="focused.set(true)"
         (blur)="focused.set(false); onTouched()"
       />
@@ -87,6 +89,7 @@ export class NeuPasswordComponent implements ControlValueAccessor {
   readonly visible = signal(false);
   readonly focused = signal(false);
   readonly cvaDisabled = signal(false);
+  private readonly nativeInput = viewChild.required<ElementRef<HTMLInputElement>>('nativeInput');
   readonly hasValue = computed(() => !!this.value());
   readonly strength = computed(() => {
     const value = this.value();
@@ -94,6 +97,10 @@ export class NeuPasswordComponent implements ControlValueAccessor {
   });
   private onChange: (value: string) => void = () => {};
   onTouched: () => void = () => {};
+
+  constructor() {
+    afterNextRender(() => queueMicrotask(() => this.syncNativeValue()));
+  }
 
   writeValue(value: string | null): void {
     this.value.set(value ?? '');
@@ -111,5 +118,16 @@ export class NeuPasswordComponent implements ControlValueAccessor {
     this.value.set(value);
     this.onChange(value);
     this.valueChange.emit(value);
+  }
+
+  onAnimationStart(event: AnimationEvent): void {
+    if (event.animationName === 'neu-autofill-start') this.syncNativeValue();
+  }
+
+  /** Synchronises browser autofill with the CVA and floating-label state. */
+  syncNativeValue(): void {
+    const value = this.nativeInput().nativeElement.value;
+    if (value === this.value()) return;
+    this.setValue(value);
   }
 }

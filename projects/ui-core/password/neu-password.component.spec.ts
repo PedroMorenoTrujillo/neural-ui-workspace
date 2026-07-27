@@ -85,6 +85,22 @@ describe('NeuPasswordComponent', () => {
     expect(fixture.nativeElement.querySelector('.neu-password__wrap')?.classList).toContain('neu-password__wrap--focused');
   });
 
+  it('synchronises a browser-autofilled value with the CVA and floating-label state', () => {
+    fixture.componentRef.setInput('floatingLabel', true);
+    const component = fixture.componentInstance;
+    const onChange = vi.fn();
+    component.registerOnChange(onChange);
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'Autofilled1!';
+
+    component.syncNativeValue();
+    fixture.detectChanges();
+
+    expect(component.value()).toBe('Autofilled1!');
+    expect(onChange).toHaveBeenCalledWith('Autofilled1!');
+    expect(fixture.nativeElement.querySelector('.neu-password__wrap')?.classList).toContain('neu-password__wrap--has-value');
+  });
+
   it('forwards name and autocomplete to the native password input', () => {
     fixture.componentRef.setInput('name', 'password');
     fixture.componentRef.setInput('autocomplete', 'current-password');
