@@ -43,14 +43,37 @@ const block = [
 ].join('\n');
 const files = [join(root, 'README.md'), join(root, 'projects/ui-core/README.md')];
 let changed = false;
+let invalid = false;
+const blockPattern = /<!-- neural-ui-metrics:start -->[\s\S]*?<!-- neural-ui-metrics:end -->/;
+const coveragePattern = /- \*\*Coverage:\*\* ([\d.]+)% statements · ([\d.]+)% branches · ([\d.]+)% functions · ([\d.]+)% lines/;
+const coverageValues = [
+  coverage.statements.pct,
+  coverage.branches.pct,
+  coverage.functions.pct,
+  coverage.lines.pct,
+];
 for (const path of files) {
   const source = readFileSync(path, 'utf8');
-  const next = source.replace(/<!-- neural-ui-metrics:start -->[\s\S]*?<!-- neural-ui-metrics:end -->/, block);
+  const currentBlock = source.match(blockPattern)?.[0] ?? '';
+  const next = source.replace(blockPattern, block);
   if (next === source) continue;
   changed = true;
-  if (update) writeFileSync(path, next);
+  if (update) {
+    writeFileSync(path, next);
+    continue;
+  }
+
+  const currentCoverage = currentBlock.match(coveragePattern)?.slice(1).map(Number) ?? [];
+  const currentIdentity = currentBlock.replace(coveragePattern, '<coverage>');
+  const expectedIdentity = block.replace(coveragePattern, '<coverage>');
+  const coverageIsPortable =
+    currentCoverage.length === coverageValues.length &&
+    currentCoverage.every(
+      (value, index) => value >= 95 && Math.abs(value - coverageValues[index]) <= 0.1,
+    );
+  invalid ||= currentIdentity !== expectedIdentity || !coverageIsPortable;
 }
-if (changed && !update) {
+if (changed && !update && invalid) {
   console.error('README metrics are stale. Run npm run docs:sync and review the result.');
   process.exit(1);
 }
