@@ -23,7 +23,7 @@
     justify-content: center;
     gap: var(--neu-space-2);
     border: none;
-    border-right: 1px solid var(--neu-border);
+    border-inline-end: 1px solid var(--neu-border);
     background: transparent;
     color: var(--neu-text-muted);
     font-family: var(--neu-font-sans);
@@ -41,7 +41,7 @@
     user-select: none;
 
     &:last-child {
-      border-right: none;
+      border-inline-end: none;
     }
 
     &:hover:not(:disabled):not(.neu-toggle-group__btn--disabled) {
@@ -59,7 +59,7 @@
     &--active {
       background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
       color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
-      border-right-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+      border-inline-end-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
 
       &:hover:not(:disabled):not(.neu-toggle-group__btn--disabled) {
         background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
@@ -68,7 +68,7 @@
 
       // El siguiente botón al activo ajusta su borde izquierdo
       & + .neu-toggle-group__btn {
-        border-left-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+        border-inline-start-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
       }
     }
 
@@ -110,6 +110,6 @@ html[data-theme='dark'] {
   .neu-toggle-group__btn--active {
     background: #0b66d4;
     color: #ffffff;
-    border-right-color: #0b66d4;
+    border-inline-end-color: #0b66d4;
   }
 }

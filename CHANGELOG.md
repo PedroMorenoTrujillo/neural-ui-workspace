@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.11.0] - 2026-08-06
+
+### Added
+
+- Additive `firstDayOfWeek` inputs for calendar and date input; Monday remains the default.
+- Shared touch-target, reduced-motion, forced-colors, safe-area and RTL behavior.
+
+### Changed
+
+- Component styles use logical directional properties, guarded by a release audit.
+- Overlay surfaces share viewport, stacking, Escape, outside-click and focus-restoration contracts.
+
 ## [1.10.0] - 2026-08-06
 
 ### Added

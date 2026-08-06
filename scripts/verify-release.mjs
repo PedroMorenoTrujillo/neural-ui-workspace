@@ -9,6 +9,7 @@ const commands = [
   ['npm', ['run', 'audit:entrypoints']],
   ['npm', ['run', 'audit:cva']],
   ['npm', ['run', 'audit:bundle']],
+  ['npm', ['run', 'audit:logical-css']],
   ['npm', ['run', 'audit:contracts']],
   ['npm', ['run', 'audit:docs']],
   ['npm', ['run', 'test:schematics']],

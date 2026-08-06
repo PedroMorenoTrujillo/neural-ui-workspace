@@ -25,7 +25,7 @@ neu-timeline-grid {
     .neu-timeline-grid__row-label,
     .neu-timeline-grid__corner {
       position: sticky;
-      left: 0;
+      inset-inline-start: 0;
       z-index: 2;
       background: var(--neu-surface);
     }
@@ -154,7 +154,7 @@ neu-timeline-grid {
   padding: 10px 12px;
   border: 1px solid transparent;
   border-radius: var(--neu-radius-lg);
-  text-align: left;
+  text-align: start;
   background: var(--neu-surface);
   box-shadow: var(--neu-shadow-sm);
   color: var(--neu-text);

@@ -460,6 +460,7 @@
         "disabled",
         "disabledDates",
         "errorMessage",
+        "firstDayOfWeek",
         "floatingLabel",
         "hint",
         "inputId",

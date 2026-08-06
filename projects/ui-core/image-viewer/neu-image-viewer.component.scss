@@ -120,10 +120,10 @@
   }
 
   &--prev {
-    left: 16px;
+    inset-inline-start: 16px;
   }
   &--next {
-    right: 16px;
+    inset-inline-end: 16px;
   }
 }
 

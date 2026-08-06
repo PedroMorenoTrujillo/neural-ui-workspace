@@ -13,7 +13,7 @@
 
 .neu-tree__search-icon {
   position: absolute;
-  left: 0.875rem;
+  inset-inline-start: 0.875rem;
   width: 0.9375rem;
   height: 0.9375rem;
   color: var(--neu-text-muted);
@@ -150,7 +150,7 @@
   gap: 0.125rem;
   border: 0;
   background: transparent;
-  text-align: left;
+  text-align: start;
   padding: 0.55rem 0.75rem 0.6rem 0;
   color: inherit;
   cursor: pointer;

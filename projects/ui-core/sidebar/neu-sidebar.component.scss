@@ -26,11 +26,11 @@
 .neu-sidebar {
   position: fixed;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   height: 100dvh;
   width: 100%;
   background: var(--neu-sidebar-bg, var(--neu-surface));
-  border-right: 1px solid var(--neu-border);
+  border-inline-end: 1px solid var(--neu-border);
   z-index: var(--neu-z-sidebar);
   display: flex;
   flex-direction: column;
@@ -52,10 +52,10 @@
 
   // ---- Variante derecha / Right variant ----
   &--right {
-    left: auto;
-    right: 0;
-    border-right: none;
-    border-left: 1px solid var(--neu-border);
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    border-inline-end: none;
+    border-inline-start: 1px solid var(--neu-border);
     transform: translateX(100%);
 
     &.neu-sidebar--open:not(.neu-sidebar--persistent) {
@@ -71,10 +71,18 @@
     height: calc(100dvh - var(--neu-header-height));
     transform: none;
     box-shadow: none;
-    border-right: 1px solid var(--neu-border);
+    border-inline-end: 1px solid var(--neu-border);
     flex-shrink: 0;
     z-index: var(--neu-z-base);
   }
+}
+
+[dir='rtl'] .neu-sidebar:not(.neu-sidebar--right):not(.neu-sidebar--open) {
+  transform: translateX(100%);
+}
+
+[dir='rtl'] .neu-sidebar--right:not(.neu-sidebar--open) {
+  transform: translateX(-100%);
 }
 
 // ---- Cabecera / Header ----

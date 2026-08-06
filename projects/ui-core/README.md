@@ -30,9 +30,9 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.10.0
+- **Version:** 1.11.0
 - **Entry points:** 80
-- **Automated tests:** 2091
+- **Automated tests:** 2093
 - **Coverage:** ≥97% statements · ≥96% branches · ≥95% functions · ≥99% lines
 <!-- neural-ui-metrics:end -->
 
@@ -114,6 +114,10 @@ import { NeuToastService } from '@neural-ui/core/toast';
 ### Density and high contrast / Densidad y alto contraste
 
 The existing appearance remains the default. Opt in with `data-neu-density="compact|comfortable|spacious"` and optionally `data-neu-theme="high-contrast"`. Remove the attributes to revert. / El aspecto actual sigue siendo el predeterminado; elimina los atributos para revertir.
+
+### Mobile, RTL and calendar locale / Móvil, RTL y calendario
+
+Logical CSS, viewport-safe overlays, touch targets, reduced motion and forced colors are built in. Calendar and date input expose additive `firstDayOfWeek` inputs (`0`–`6`), preserving Monday as the default. / CSS lógico, overlays seguros, objetivos táctiles, movimiento reducido y colores forzados están integrados. Calendar y date input exponen `firstDayOfWeek` de forma aditiva y mantienen el lunes por defecto.
 
 ---
 

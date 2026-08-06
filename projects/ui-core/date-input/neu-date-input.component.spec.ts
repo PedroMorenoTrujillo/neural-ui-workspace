@@ -66,6 +66,17 @@ describe('NeuDateInputComponent', () => {
     expect(comp._rangePlaceholderText()).toBe('Select dates');
   });
 
+  it('supports Sunday as first day while preserving Monday by default', async () => {
+    document.documentElement.lang = 'en';
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('firstDayOfWeek', 0);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    expect(comp.weekdays()[0]).toBe('S');
+    expect(comp.calendarDays()[0].date.getDay()).toBe(0);
+  });
+
   // ── Error / hint ─────────────────────────────────────────────────────────
 
   it('should show error class and message when errorMessage is set', async () => {

@@ -604,6 +604,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   floatingLabel = input<boolean>(false);
   /** Presets rápidos para rangos / Quick range presets */
   presets = input<NeuDatePreset[]>([]);
+  /** First weekday, using JavaScript day numbers (0 Sunday … 6 Saturday). Default: 1 (Monday). */
+  firstDayOfWeek = input<number>(1);
 
   // ── Outputs ──────────────────────────────────────────────────────
   /** Emitido al confirmar el rango / Emitted when range is confirmed */
@@ -815,7 +817,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     const month = cursor.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const startOffset = (firstDay.getDay() + 6) % 7;
+    const startOffset = this.#weekOffset(firstDay);
     const cells: RangeCell[] = [];
     for (let i = startOffset - 1; i >= 0; i--) {
       cells.push(this._rangeCell(new Date(year, month, -i), false));
@@ -1008,7 +1010,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     const month = this._viewMonth();
     const today = new Date();
     const firstDay = new Date(year, month, 1);
-    const startDow = (firstDay.getDay() + 6) % 7;
+    const startDow = this.#weekOffset(firstDay);
     const days: CalendarDay[] = [];
     for (let i = startDow; i > 0; i--) {
       days.push({
@@ -1292,8 +1294,9 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
       timeZone: 'UTC',
     });
     return Array.from({ length: 7 }, (_, index) => {
+      const firstDay = this.#normalizedFirstDayOfWeek();
       const label = formatter
-        .format(new Date(Date.UTC(2024, 0, 1 + index)))
+        .format(new Date(Date.UTC(2024, 0, 7 + firstDay + index)))
         .replace(/\.$/, '')
         .trim();
       if (style === 'narrow') {
@@ -1301,5 +1304,13 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
       }
       return this.#capitalize(label);
     });
+  }
+
+  #normalizedFirstDayOfWeek(): number {
+    return Math.min(6, Math.max(0, Math.trunc(this.firstDayOfWeek())));
+  }
+
+  #weekOffset(date: Date): number {
+    return (date.getDay() - this.#normalizedFirstDayOfWeek() + 7) % 7;
   }
 }

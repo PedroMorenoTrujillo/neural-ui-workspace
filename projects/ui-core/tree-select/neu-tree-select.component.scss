@@ -55,7 +55,7 @@
   background: transparent;
   color: var(--neu-text, #111827);
   padding: 0.5rem 0.75rem;
-  text-align: left;
+  text-align: start;
 }
 
 .neu-tree-select__node--selected {
@@ -66,5 +66,5 @@
   display: inline-flex;
   width: 1rem;
   justify-content: center;
-  margin-right: 0.25rem;
+  margin-inline-end: 0.25rem;
 }
