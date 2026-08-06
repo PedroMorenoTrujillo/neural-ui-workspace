@@ -1,6 +1,6 @@
 # Neural UI Core Quality Status
 
-Last reviewed: 2026-05-05
+Last reviewed: 2026-08-06
 
 ## Executive Summary
 
@@ -8,11 +8,11 @@ Neural UI Core is currently aligned with the project's main engineering standard
 
 Validated coverage snapshot:
 
-- Statements: 96.43%
-- Branches: 95.05%
-- Functions: 95.05%
-- Lines: 97.79%
-- Unit tests: 1763 passing tests in ui-core
+- Statements: 97.51%
+- Branches: 96.99%
+- Functions: 95.37%
+- Lines: 99.58%
+- Unit tests: 2091 passing tests in ui-core
 
 The library presents a strong accessibility baseline across interactive components, but accessibility should be described as high-confidence rather than formally certified 100% component-by-component.
 
@@ -31,12 +31,12 @@ The library presents a strong accessibility baseline across interactive componen
 
 - Zoneless-oriented test setup: yes
 - `provideZonelessChangeDetection()` used broadly across component specs: yes
-- Consumer applications guaranteed zoneless by this audit: not verified here
+- Compiled tarball imports verified without Zone.js on Angular 19–22: yes
 
 ### Testing
 
-- Global coverage above 90%: yes
-- Coverage floor met across the library as a whole: yes
+- Global coverage above 95%: yes
+- Enforced global coverage floor of 95% across the library: yes
 - Residual low-return hotspots still present: yes
   - `virtual-list`
   - `dashboard-grid`
@@ -52,14 +52,17 @@ The library presents a strong accessibility baseline across interactive componen
 
 ### Integration Validation Through Showcase
 
-- Playwright showcase report: 86 passed, 0 failed
-- Accessibility audit summary (`showcase-a11y-summary-final.json`): 67 passed, 0 failed
+- Playwright functional and accessibility suite: 375/375 passing in Chromium, Firefox and WebKit
+- Responsive matrix: 980/980 passing across 320×568, 360×800, 390×844, 768×1024 and 1440×900
+- Visual-baseline gate: 428/428 reproducible Chromium comparisons passed after explicit review
+- Visual baselines: may only be replaced after explicit human review approval
 - Validation model: showcase runs against the compiled `@neural-ui/core` package, so these checks act as integration validation of the library in real consumer flows
 
 ### Documentation / DX
 
-- README quality statement updated to current metrics: yes
+- README metrics generated and release-audited: yes
 - Release-note style quality summary added to changelog: yes
+- Published API snapshot, package lint, type audit and bundle budgets: enforced
 - BEM requirement documented as part of engineering standards: yes
 - Bilingual comments requirement fully re-audited line by line: not fully re-verified in this pass
 
@@ -102,6 +105,6 @@ This is a rapid engineering audit, not a full WCAG certification.
 
 Use this wording in documentation or internal reporting:
 
-"Neural UI Core is aligned with a signals-first, standalone, OnPush and zoneless-oriented Angular architecture, uses BEM as its required styling convention, exceeds 90% coverage in every main metric and in every covered ui-core source file, and maintains a strong accessibility baseline with ARIA, keyboard navigation and focus management across its main interactive components. Accessibility quality is high-confidence, although not formally certified as 100% component-by-component."
+"Neural UI Core is aligned with a signals-first, standalone, OnPush and zoneless-oriented Angular architecture, uses BEM as its required styling convention, exceeds 95% global coverage in every main metric, and maintains a strong accessibility baseline with ARIA, keyboard navigation and focus management across its main interactive components. Accessibility quality is high-confidence, although not formally certified as 100% component-by-component."
 
 For styling standards, component and demo styles are expected to follow BEM naming and BEM-oriented SCSS grouping rather than flat ad hoc selector organization.

@@ -40,7 +40,8 @@
   border: none;
   cursor: pointer;
   font-family: var(--neu-font-sans);
-  text-align: left;
+  color: var(--neu-text);
+  text-align: start;
   transition: background var(--neu-transition);
   outline: none;
 

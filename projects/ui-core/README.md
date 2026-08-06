@@ -4,8 +4,7 @@
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
   <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
-  <img src="https://img.shields.io/badge/tests-2088%20passing-22c55e" alt="2088 tests passing" />
-  <img src="https://img.shields.io/badge/coverage-97.58%25-22c55e" alt="97.58% coverage" />
+  <img src="https://img.shields.io/badge/quality-release%20gated-22c55e" alt="Release gated quality" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
 </p>
 
@@ -18,17 +17,24 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 
 ## Features
 
-- **50+ entry points** — components, overlays, data display primitives, utilities, and styles
+- **80 component entry points** — components, overlays, utilities and styles
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
 - **Accessible by design** — ARIA attributes, keyboard navigation and focus management across the main interactive components
-- **Well-tested** — 1615 passing tests with 96.75% statements coverage, 95.67% branch coverage and 94.98% function coverage
+- **Release-gated** — unit, package, compatibility, SSR, accessibility and browser checks run before publication
 - **Themeable** — full design token system via CSS custom properties
 
 ---
 
 ## Quality Snapshot
+
+<!-- neural-ui-metrics:start -->
+- **Version:** 1.9.0
+- **Entry points:** 80
+- **Automated tests:** 2091
+- **Coverage:** 97.51% statements · 96.99% branches · 95.37% functions · 99.58% lines
+<!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
 - Standalone + OnPush component model

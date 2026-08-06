@@ -4,8 +4,7 @@
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
   <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
-  <img src="https://img.shields.io/badge/tests-2088%20passing-22c55e" alt="2088 tests passing" />
-  <img src="https://img.shields.io/badge/coverage-97.58%25-22c55e" alt="97.58% coverage" />
+  <img src="https://img.shields.io/badge/quality-release%20gated-22c55e" alt="Release gated quality" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
 </p>
 
@@ -23,17 +22,24 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 ## Features
 
-- **50+ entry points** — components, overlays, data display primitives, utilities, and styles
+- **80 component entry points** — components, overlays, utilities and styles
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
 - **Accessible by design** — ARIA attributes, keyboard navigation and focus management across the main interactive components
-- **Well-tested** — 1615+ passing tests with 96.75% statements coverage, 95.67% branch coverage and 94.98% function coverage
+- **Release-gated** — unit, package, compatibility, SSR, accessibility and browser checks run before publication
 - **Themeable** — full design token system via CSS custom properties
 
 ---
 
 ## Quality Snapshot
+
+<!-- neural-ui-metrics:start -->
+- **Version:** 1.9.0
+- **Entry points:** 80
+- **Automated tests:** 2091
+- **Coverage:** 97.51% statements · 96.99% branches · 95.37% functions · 99.58% lines
+<!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
 - Standalone + OnPush component model
@@ -110,7 +116,7 @@ export class LoginComponent {
 
 ## Components
 
-Representative entry points in 1.5.0:
+Representative entry points:
 
 - **Forms**: `@neural-ui/core/input`, `@neural-ui/core/select`, `@neural-ui/core/multiselect`, `@neural-ui/core/autocomplete`, `@neural-ui/core/date-input`, `@neural-ui/core/number-input`, `@neural-ui/core/input-otp`
 - **Navigation and layout**: `@neural-ui/core/tabs`, `@neural-ui/core/nav`, `@neural-ui/core/sidebar`, `@neural-ui/core/accordion`, `@neural-ui/core/toolbar`, `@neural-ui/core/dashboard-grid`
@@ -127,23 +133,12 @@ For the complete catalog, examples, and API tables, use the live docs at [neural
 
 Build production-ready SaaS dashboards, CRM tools, internal business apps and client portals with Neural Admin Pro, a premium Angular dashboard template built with Neural UI.
 
-Neural Admin Pro is frontend-only and backend-ready, so you can connect it to your own API, Firebase, Supabase, Laravel, NestJS, Django, Rails or any custom backend.
+Neural Admin Pro is a full-stack Angular and NestJS product with PostgreSQL, authentication, roles, workspaces and a public static demo. Its source can also be adapted to another backend when required.
 
 - [Live demo](https://neural-ui-admin-pro.vercel.app/login)
 - [Buy on Gumroad](https://trujillopete.gumroad.com/l/epbrur)
 - [Buy on Payhip](https://payhip.com/b/0apB6)
 - [Buy on Lemon Squeezy](https://pedromorenostordeve.lemonsqueezy.com/checkout/buy/52e743fd-bb93-4ce7-ae17-c8bf2718de3c)
-
-### Highlights in 1.5.0
-
-- New components: `NeuTreeComponent`, `NeuTreeTableComponent`, `NeuTimelineGridComponent`, `NeuKanbanComponent`, `NeuImageGalleryComponent`, `NeuUploaderComponent`.
-- `NeuUploaderComponent` — drag-and-drop file upload with type/size/duplicate validation, progress tracking and fully configurable i18n labels.
-- `NeuTreeComponent` and `NeuTreeTableComponent` — hierarchical data display with keyboard navigation, single/multi-selection and lazy loading support.
-- Dark mode fix: uploader dropzone and error state backgrounds now use `color-mix()` over CSS tokens instead of hardcoded `rgba` values.
-- `NeuAutocompleteComponent` supports virtual scroll for large result sets.
-- `@neural-ui/core/modal` includes `NeuDialogService` for programmatic dialogs.
-
----
 
 ## Peer dependencies
 
