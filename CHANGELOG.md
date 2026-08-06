@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.12.0] - 2026-08-06
+
+### Added
+
+- Public `@neural-ui/core/testing` entry point with Component Harnesses for the principal interactive controls.
+- TestBed, Vitest and Playwright guidance in the bilingual showcase.
+
 ## [1.11.0] - 2026-08-06
 
 ### Added

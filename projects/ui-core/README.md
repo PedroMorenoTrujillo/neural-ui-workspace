@@ -17,7 +17,7 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 
 ## Features
 
-- **80 component entry points** — components, overlays, utilities and styles
+- **80 component entry points + testing** — components, overlays, utilities, styles and public harnesses
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
@@ -30,9 +30,9 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.11.0
-- **Entry points:** 80
-- **Automated tests:** 2093
+- **Version:** 1.12.0
+- **Entry points:** 81
+- **Automated tests:** 2095
 - **Coverage:** ≥97% statements · ≥96% branches · ≥95% functions · ≥99% lines
 <!-- neural-ui-metrics:end -->
 
@@ -118,6 +118,14 @@ The existing appearance remains the default. Opt in with `data-neu-density="comp
 ### Mobile, RTL and calendar locale / Móvil, RTL y calendario
 
 Logical CSS, viewport-safe overlays, touch targets, reduced motion and forced colors are built in. Calendar and date input expose additive `firstDayOfWeek` inputs (`0`–`6`), preserving Monday as the default. / CSS lógico, overlays seguros, objetivos táctiles, movimiento reducido y colores forzados están integrados. Calendar y date input exponen `firstDayOfWeek` de forma aditiva y mantienen el lunes por defecto.
+
+### Public testing API / API pública de testing
+
+```typescript
+import { NeuButtonHarness, NeuInputHarness } from '@neural-ui/core/testing';
+```
+
+The testing entry point provides stable Component Harnesses for button, input, checkbox, switch, select, date input, table and dialog. / El entry point de testing ofrece Component Harnesses estables para button, input, checkbox, switch, select, date input, table y dialog sin depender del DOM interno.
 
 ---
 

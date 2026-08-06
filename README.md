@@ -22,7 +22,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 ## Features
 
-- **80 component entry points** — components, overlays, utilities and styles
+- **80 component entry points + testing** — components, overlays, utilities, styles and public harnesses
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
@@ -35,9 +35,9 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.11.0
-- **Entry points:** 80
-- **Automated tests:** 2093
+- **Version:** 1.12.0
+- **Entry points:** 81
+- **Automated tests:** 2095
 - **Coverage:** ≥97% statements · ≥96% branches · ≥95% functions · ≥99% lines
 <!-- neural-ui-metrics:end -->
 
@@ -128,6 +128,19 @@ Available densities are `compact`, `comfortable`, and `spacious`. Remove the att
 Neural UI uses logical CSS, viewport-safe overlays and 44×44 px touch targets where interaction requires them. It respects RTL, reduced motion and forced colors. Calendar and date input accept the additive `firstDayOfWeek` input (`0` Sunday through `6` Saturday); the existing Monday default is unchanged.
 
 Neural UI usa CSS lógico, overlays dentro del viewport y objetivos táctiles de 44×44 px cuando corresponde. Respeta RTL, movimiento reducido y colores forzados. Calendar y date input aceptan el input aditivo `firstDayOfWeek` (`0` domingo a `6` sábado); el lunes continúa siendo el valor por defecto.
+
+### Public testing API / API pública de testing
+
+```typescript
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { NeuInputHarness } from '@neural-ui/core/testing';
+
+const loader = TestbedHarnessEnvironment.loader(fixture);
+const input = await loader.getHarness(NeuInputHarness);
+await input.setValue('Ada');
+```
+
+Harnesses are available for button, input, checkbox, switch, select, date input, table and dialog. / Hay harnesses para button, input, checkbox, switch, select, date input, table y dialog.
 
 ---
 

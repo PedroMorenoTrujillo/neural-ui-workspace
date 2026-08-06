@@ -73,6 +73,7 @@
     "./table",
     "./tabs",
     "./tags",
+    "./testing",
     "./textarea",
     "./timeline",
     "./timeline-grid",
