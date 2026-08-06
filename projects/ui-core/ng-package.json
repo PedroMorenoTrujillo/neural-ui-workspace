@@ -9,6 +9,11 @@
         "./README.md",
         "./styles.scss",
         {
+            "input": "./schematics",
+            "glob": "**",
+            "output": "./schematics"
+        },
+        {
             "input": "./styles",
             "glob": "**",
             "output": "./styles"

@@ -19,6 +19,7 @@
     "verify:release": "node scripts/verify-release.mjs",
     "test:compat": "node scripts/test-ui-core-compatibility.mjs",
     "test:compat:matrix": "node scripts/test-ui-core-compatibility-matrix.mjs",
+    "test:schematics": "node scripts/test-ui-core-schematics.mjs",
     "test:imports": "node scripts/test-ui-core-entrypoint-imports.mjs",
     "test:ssr-smoke": "node scripts/test-ui-core-ssr-smoke.mjs",
     "test": "ng test ui-core --watch=false",

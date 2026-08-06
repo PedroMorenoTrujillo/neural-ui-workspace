@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "schematics": {
+    "ng-add": {
+      "description": "Configure Neural UI without replacing existing application settings.",
+      "factory": "./ng-add/index.cjs#ngAdd",
+      "schema": "./ng-add/schema.json"
+    },
+    "theme": {
+      "description": "Generate an additive Neural UI theme preset.",
+      "factory": "./theme/index.cjs#theme",
+      "schema": "./theme/schema.json"
+    },
+    "layout": {
+      "description": "Generate a responsive standalone application layout.",
+      "factory": "./page/index.cjs#layout",
+      "schema": "./page/schema.json"
+    },
+    "dashboard": {
+      "description": "Generate a responsive standalone dashboard page.",
+      "factory": "./page/index.cjs#dashboard",
+      "schema": "./page/schema.json"
+    },
+    "crud-page": {
+      "description": "Generate a responsive standalone CRUD page.",
+      "factory": "./page/index.cjs#crudPage",
+      "schema": "./page/schema.json"
+    }
+  }
+}

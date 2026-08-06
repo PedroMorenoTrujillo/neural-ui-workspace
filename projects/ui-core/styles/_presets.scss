@@ -1,0 +1,68 @@
+// Additive presets. No selector matches unless an application opts in.
+[data-neu-density='compact'] {
+  --neu-density-scale: 0.875;
+  --neu-control-height: 2.5rem;
+  --neu-control-padding-inline: 0.75rem;
+  --neu-control-gap: 0.375rem;
+}
+
+[data-neu-density='comfortable'] {
+  --neu-density-scale: 1;
+  --neu-control-height: 2.75rem;
+  --neu-control-padding-inline: 1rem;
+  --neu-control-gap: 0.5rem;
+}
+
+[data-neu-density='spacious'] {
+  --neu-density-scale: 1.125;
+  --neu-control-height: 3rem;
+  --neu-control-padding-inline: 1.25rem;
+  --neu-control-gap: 0.75rem;
+}
+
+[data-neu-theme='high-contrast'] {
+  color-scheme: light;
+  --neu-bg: #ffffff;
+  --neu-surface: #ffffff;
+  --neu-surface-1: #ffffff;
+  --neu-surface-2: #f2f2f2;
+  --neu-surface-3: #dedede;
+  --neu-surface-raised: #ffffff;
+  --neu-surface-hover: #e6e6e6;
+  --neu-text: #000000;
+  --neu-text-muted: #202020;
+  --neu-text-disabled: #595959;
+  --neu-border: #000000;
+  --neu-border-hover: #000000;
+  --neu-primary: #0046b8;
+  --neu-primary-dark: #002f7a;
+  --neu-primary-fg: #ffffff;
+  --neu-focus-ring: 0 0 0 3px #ffbf00;
+  --neu-focus-ring-strong: 0 0 0 4px #ffbf00;
+  --neu-shadow-xs: none;
+  --neu-shadow-sm: none;
+  --neu-shadow: none;
+  --neu-shadow-lg: none;
+}
+
+@media (forced-colors: active) {
+  :root {
+    --neu-border: CanvasText;
+    --neu-border-hover: Highlight;
+    --neu-primary: Highlight;
+    --neu-primary-fg: HighlightText;
+    --neu-text: CanvasText;
+    --neu-text-muted: CanvasText;
+    --neu-bg: Canvas;
+    --neu-surface: Canvas;
+    --neu-focus-ring: 0 0 0 3px Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --neu-transition: 0.01ms linear;
+    --neu-transition-slow: 0.01ms linear;
+    --neu-transition-bounce: 0.01ms linear;
+  }
+}

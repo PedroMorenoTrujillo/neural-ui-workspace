@@ -35,7 +35,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.9.0
+- **Version:** 1.10.0
 - **Entry points:** 80
 - **Automated tests:** 2091
 - **Coverage:** ≥97% statements · ≥96% branches · ≥95% functions · ≥99% lines
@@ -61,6 +61,30 @@ npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcha
 ---
 
 ## Setup
+
+Automated setup is additive and idempotent:
+
+```bash
+ng add @neural-ui/core
+ng generate @neural-ui/core:theme --density=comfortable --theme=high-contrast
+ng generate @neural-ui/core:layout app-shell
+ng generate @neural-ui/core:dashboard sales
+ng generate @neural-ui/core:crud-page customers
+```
+
+`ng add` preserves existing providers and styles. Re-running any command is safe; generated files are not replaced unless `--force` is supplied. Use `--skip-styles` to keep style registration manual.
+
+La configuración automática es aditiva e idempotente: conserva providers y estilos existentes. Los archivos generados no se sustituyen salvo que se use `--force`; `--skip-styles` mantiene el registro de estilos manual.
+
+| Schematic | Public options / Opciones públicas | Result / Resultado | Revert / Reversión |
+| --- | --- | --- | --- |
+| `ng add @neural-ui/core` | `--project`, `--skip-styles` | Adds `provideNeuralUI()` and `node_modules/@neural-ui/core/styles.scss` without removing existing providers or styles. / Añade el provider y el estilo sin eliminar configuración existente. | Remove only the provider and style entry added by the command. / Elimina únicamente el provider y la entrada de estilo añadidos. |
+| `:theme [name]` | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; defaults to `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS en la ruta elegida. | Delete the generated file and any import or `data-neu-*` attributes you added. / Elimina el archivo y los imports o atributos añadidos. |
+| `:layout NAME` | `--project`, `--path`, `--force` | Creates `NAME.component.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell. | Delete the generated directory and any route you added; existing routes are not modified automatically. / Elimina el directorio y la ruta añadida; no se alteran rutas existentes. |
+| `:dashboard NAME` | `--project`, `--path`, `--force` | Creates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas. | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
+| `:crud-page NAME` | `--project`, `--path`, `--force` | Creates the three component files with Reactive Forms, input, table and actions. / Genera una base CRUD con formularios reactivos, input, tabla y acciones. | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
+
+Generated page copy is starter content: connect it to the consumer application's translation system before shipping. / Los textos de las páginas generadas son contenido inicial: intégralos con el sistema de traducciones de la aplicación antes de publicar.
 
 Add `provideNeuralUI()` to your `app.config.ts`:
 
@@ -88,6 +112,16 @@ import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuTableComponent } from '@neural-ui/core/table';
 import { NeuToastService } from '@neural-ui/core/toast';
 ```
+
+### Density and high contrast / Densidad y alto contraste
+
+The current appearance remains the default. Opt in on `<html>` or a scoped shell:
+
+```html
+<html data-neu-density="compact" data-neu-theme="high-contrast">
+```
+
+Available densities are `compact`, `comfortable`, and `spacious`. Remove the attributes to revert instantly to the existing default. / Las densidades disponibles son `compact`, `comfortable` y `spacious`. Elimina los atributos para volver al aspecto actual.
 
 ---
 

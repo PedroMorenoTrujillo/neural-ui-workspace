@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.10.0] - 2026-08-06
+
+### Added
+
+- Idempotent `ng add`, `theme`, `layout`, `dashboard` and `crud-page` schematics.
+- Opt-in compact, comfortable and spacious density presets plus a high-contrast theme.
+- Responsive theme builder with copy and SCSS download in the bilingual showcase.
+
 ## [1.9.0] - 2026-08-05
 
 ### Added
