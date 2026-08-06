@@ -22,16 +22,16 @@
 
   // Main button pierde el border-radius derecho
   .neu-split-button__main {
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    border-right: none !important;
+    border-start-end-radius: 0 !important;
+    border-end-end-radius: 0 !important;
+    border-inline-end: none !important;
     flex: 1;
   }
 
   // Chevron pierde el border-radius izquierdo
   .neu-split-button__chevron {
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
+    border-start-start-radius: 0 !important;
+    border-end-start-radius: 0 !important;
     padding-inline: 10px !important;
     min-width: auto;
 
@@ -97,7 +97,7 @@
   font-size: var(--neu-text-sm);
   color: var(--neu-text);
   cursor: pointer;
-  text-align: left;
+  text-align: start;
   transition: background var(--neu-transition);
 
   &:hover:not(:disabled):not(.neu-split-button__dropdown-item--disabled) {

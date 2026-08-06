@@ -83,6 +83,51 @@ if (version === '19') {
 try {
   const commands = [
     ['npm', ['install', '--no-audit', '--no-fund']],
+    [
+      'npx',
+      [
+        'ng',
+        'add',
+        '@neural-ui/core',
+        '--skip-confirmation',
+        '--project',
+        'compatibility-consumer',
+      ],
+    ],
+    ['npx', ['ng', 'generate', '@neural-ui/core:theme', '--name', 'compatibility-theme']],
+    [
+      'npx',
+      [
+        'ng',
+        'generate',
+        '@neural-ui/core:layout',
+        'compatibility-layout',
+        '--project',
+        'compatibility-consumer',
+      ],
+    ],
+    [
+      'npx',
+      [
+        'ng',
+        'generate',
+        '@neural-ui/core:dashboard',
+        'compatibility-dashboard',
+        '--project',
+        'compatibility-consumer',
+      ],
+    ],
+    [
+      'npx',
+      [
+        'ng',
+        'generate',
+        '@neural-ui/core:crud-page',
+        'compatibility-crud',
+        '--project',
+        'compatibility-consumer',
+      ],
+    ],
     ['npm', ['run', 'build']],
     [
       'node',

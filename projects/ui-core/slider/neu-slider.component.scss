@@ -46,7 +46,7 @@ $track-height: 4px;
   font-weight: 600;
   color: var(--neu-primary-dark, var(--neu-primary));
   min-width: 32px;
-  text-align: right;
+  text-align: end;
 }
 
 html[data-theme='dark'] {
@@ -66,8 +66,8 @@ html[data-theme='dark'] {
 
 .neu-slider__track {
   position: absolute;
-  left: 0;
-  right: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
   height: $track-height;
   background: var(--neu-surface-3);
   border-radius: var(--neu-radius-full);

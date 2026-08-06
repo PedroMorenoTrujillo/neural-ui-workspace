@@ -77,11 +77,11 @@ function addMonths(date: Date, amount: number): Date {
   return new Date(date.getFullYear(), date.getMonth() + amount, date.getDate());
 }
 
-function startOfWeek(date: Date): Date {
+function startOfWeek(date: Date, firstDayOfWeek = 1): Date {
   const normalized = startOfDay(date);
   const day = normalized.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  return addDays(normalized, diff);
+  const firstDay = Math.min(6, Math.max(0, Math.trunc(firstDayOfWeek)));
+  return addDays(normalized, -((day - firstDay + 7) % 7));
 }
 
 const EN_CALENDAR_LABELS: NeuCalendarLabels = {
@@ -295,6 +295,8 @@ export class NeuCalendarComponent {
   readonly maxVisibleEvents = input<number>(3);
   readonly showHeader = input<boolean>(true);
   readonly labels = input<NeuCalendarLabelOverrides>({});
+  /** First weekday, using JavaScript day numbers (0 Sunday … 6 Saturday). Default: 1 (Monday). */
+  readonly firstDayOfWeek = input<number>(1);
 
   readonly selectedDateChange = output<Date>();
   readonly dateSelect = output<Date>();
@@ -318,7 +320,7 @@ export class NeuCalendarComponent {
   );
 
   readonly weekdays = computed(() => {
-    const base = startOfWeek(new Date(2026, 0, 5));
+    const base = startOfWeek(new Date(2026, 0, 4), this.firstDayOfWeek());
     return Array.from({ length: 7 }, (_, index) =>
       new Intl.DateTimeFormat(this.locale(), { weekday: 'short' }).format(addDays(base, index)),
     );
@@ -327,7 +329,7 @@ export class NeuCalendarComponent {
   readonly monthDays = computed<CalendarDayCell[]>(() => {
     const selected = this._selectedDate();
     const firstDayOfMonth = new Date(selected.getFullYear(), selected.getMonth(), 1);
-    const gridStart = startOfWeek(firstDayOfMonth);
+    const gridStart = startOfWeek(firstDayOfMonth, this.firstDayOfWeek());
     return Array.from({ length: 42 }, (_, index) => {
       const date = addDays(gridStart, index);
       return this.buildDayCell(date, date.getMonth() === selected.getMonth());
@@ -335,7 +337,7 @@ export class NeuCalendarComponent {
   });
 
   readonly weekDays = computed<CalendarDayCell[]>(() => {
-    const start = startOfWeek(this._selectedDate());
+    const start = startOfWeek(this._selectedDate(), this.firstDayOfWeek());
     return Array.from({ length: 7 }, (_, index) => this.buildDayCell(addDays(start, index), true));
   });
 
@@ -361,7 +363,7 @@ export class NeuCalendarComponent {
       );
     }
 
-    const weekStart = startOfWeek(selected);
+    const weekStart = startOfWeek(selected, this.firstDayOfWeek());
     const weekEnd = addDays(weekStart, 6);
     const formatter = new Intl.DateTimeFormat(this.locale(), { month: 'short', day: 'numeric' });
     return `${formatter.format(weekStart)} - ${formatter.format(weekEnd)}`;

@@ -1,0 +1,48 @@
+// Mobile-first interaction guarantees shared by all public controls.
+@media (pointer: coarse) {
+  button[class*='neu-'],
+  input[class*='neu-'],
+  select[class*='neu-'],
+  textarea[class*='neu-'],
+  [role='button'][class*='neu-'],
+  [role='option'][class*='neu-'],
+  [role='menuitem'][class*='neu-'] {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*='neu-'],
+  [class*='neu-']::before,
+  [class*='neu-']::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  button[class*='neu-'],
+  input[class*='neu-'],
+  select[class*='neu-'],
+  textarea[class*='neu-'],
+  [role='button'][class*='neu-'] {
+    border-color: ButtonText;
+    forced-color-adjust: auto;
+  }
+}
+
+[dir='rtl'] {
+  .neu-calendar__nav-btn,
+  .neu-date-input__cal-nav button,
+  .neu-drp__cal-nav button,
+  .neu-pagination__button--previous,
+  .neu-pagination__button--next,
+  .neu-breadcrumb__separator,
+  .neu-tree__toggle,
+  .neu-tree-table__toggle {
+    transform: scaleX(-1);
+  }
+}

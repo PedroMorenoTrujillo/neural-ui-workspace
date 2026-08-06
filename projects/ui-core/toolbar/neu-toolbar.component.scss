@@ -84,7 +84,7 @@
 
 .neu-toolbar__section--start {
   flex: 0 0 auto;
-  margin-right: auto;
+  margin-inline-end: auto;
 }
 
 .neu-toolbar__section--center {
@@ -94,7 +94,7 @@
 
 .neu-toolbar__section--end {
   flex: 0 0 auto;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .neu-toolbar__section--secondary {
@@ -116,7 +116,7 @@
     }
 
     .neu-toolbar__section--end {
-      margin-left: 0;
+      margin-inline-start: 0;
     }
   }
 }

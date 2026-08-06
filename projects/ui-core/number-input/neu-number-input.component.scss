@@ -47,15 +47,15 @@
       width: auto;
       min-width: var(--neu-number-input-stacked-min-width, 120px);
       border-radius: var(--neu-radius-md, 8px) 0 0 var(--neu-radius-md, 8px);
-      border-right: none;
-      text-align: left;
+      border-inline-end: none;
+      text-align: start;
       padding: 0 10px;
     }
   }
 
   &--horizontal {
     .neu-number-input__floating-label {
-      left: calc(var(--neu-number-input-btn-size, 48px) + 12px);
+      inset-inline-start: calc(var(--neu-number-input-btn-size, 48px) + 12px);
       max-width: calc(100% - (var(--neu-number-input-btn-size, 48px) * 2) - 28px);
     }
   }
@@ -122,7 +122,7 @@
 
 .neu-number-input__floating-label {
   position: absolute;
-  left: 6px;
+  inset-inline-start: 6px;
   top: 50%;
   z-index: 1;
   transform: translateY(-50%);

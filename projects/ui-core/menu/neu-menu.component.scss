@@ -30,7 +30,7 @@
 .neu-menu__item {
   width: 100%;
   justify-content: flex-start;
-  text-align: left;
+  text-align: start;
 }
 
 .neu-menu__item:hover,
@@ -60,9 +60,9 @@
 }
 
 .neu-menu__child {
-  margin-left: 0.75rem;
-  padding-left: 0.5rem;
-  border-left: 1px solid var(--neu-border, #e5e7eb);
+  margin-inline-start: 0.75rem;
+  padding-inline-start: 0.5rem;
+  border-inline-start: 1px solid var(--neu-border, #e5e7eb);
 }
 
 .neu-menubar__list {

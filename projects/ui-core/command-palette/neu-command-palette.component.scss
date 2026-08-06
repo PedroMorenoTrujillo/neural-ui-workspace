@@ -20,7 +20,7 @@
 .neu-cmd {
   position: fixed;
   top: 20%;
-  left: 50%;
+  inset-inline-start: 50%;
   transform: translateX(-50%);
   width: 560px;
   max-width: calc(100vw - 32px);
@@ -152,7 +152,7 @@
   color: var(--neu-text-muted);
 
   kbd {
-    margin-right: 3px;
+    margin-inline-end: 3px;
     padding: 1px 4px;
     background: var(--neu-surface-2);
     border: 1px solid var(--neu-border);

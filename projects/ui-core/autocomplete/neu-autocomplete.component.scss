@@ -92,7 +92,7 @@
 /* ── Floating Label ───────────────────────────────────────────── */
 .neu-autocomplete__floating-label {
   position: absolute;
-  left: var(--neu-space-3, 12px);
+  inset-inline-start: var(--neu-space-3, 12px);
   top: 50%;
   transform: translateY(-50%);
   font-size: var(--neu-text-base, 0.875rem);
@@ -120,7 +120,7 @@
     letter-spacing: 0.01em;
     background: var(--neu-surface, #fff);
     padding: 0 4px;
-    left: calc(var(--neu-space-3, 12px) - 4px);
+    inset-inline-start: calc(var(--neu-space-3, 12px) - 4px);
   }
 
   .neu-autocomplete--focused & {
@@ -132,7 +132,7 @@
 .neu-autocomplete__clear {
   all: unset;
   position: absolute;
-  right: 10px;
+  inset-inline-end: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -255,7 +255,7 @@
 
 .neu-autocomplete__dropdown {
   position: absolute;
-  right: 6px;
+  inset-inline-end: 6px;
   top: 50%;
   transform: translateY(-50%);
   border: 0;

@@ -73,7 +73,7 @@
 
 .neu-table__search-icon {
   position: absolute;
-  left: var(--neu-space-3);
+  inset-inline-start: var(--neu-space-3);
   width: 15px;
   height: 15px;
   color: var(--neu-text-muted);
@@ -114,7 +114,7 @@
 
 .neu-table__search-clear {
   position: absolute;
-  right: var(--neu-space-2);
+  inset-inline-end: var(--neu-space-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -311,7 +311,7 @@
 .neu-table__resize-handle {
   position: absolute;
   top: 0;
-  right: -4px;
+  inset-inline-end: -4px;
   width: 12px;
   height: 100%;
   padding: 0;
@@ -326,7 +326,7 @@
     position: absolute;
     top: 10px;
     bottom: 10px;
-    left: 50%;
+    inset-inline-start: 50%;
     width: 2px;
     border-radius: 999px;
     transform: translateX(-50%);
@@ -347,7 +347,7 @@
 }
 
 .neu-table__sort-icon {
-  margin-left: 4px;
+  margin-inline-start: 4px;
   font-style: normal;
   font-size: 10px;
   opacity: 0.5;
@@ -856,8 +856,8 @@
 .neu-table__th--rn,
 .neu-table__td--rn {
   width: 44px;
-  text-align: right;
-  padding-right: var(--neu-space-4);
+  text-align: end;
+  padding-inline-end: var(--neu-space-4);
   color: var(--neu-text-muted);
   font-variant-numeric: tabular-nums;
   font-size: var(--neu-text-xs);
@@ -873,11 +873,11 @@
 }
 
 .neu-table__th--frozen-left {
-  left: 0;
+  inset-inline-start: 0;
 }
 
 .neu-table__th--frozen-right {
-  right: 0;
+  inset-inline-end: 0;
 }
 
 .neu-table__th--frozen-left-boundary {
@@ -901,11 +901,11 @@
 }
 
 .neu-table__td--frozen-left {
-  left: 0; // sobrescrito por [style.left] cuando hay múltiples / overridden by [style.left] for multiple
+  inset-inline-start: 0; // sobrescrito por [style.left] cuando hay múltiples / overridden by [style.left] for multiple
 }
 
 .neu-table__td--frozen-right {
-  right: 0;
+  inset-inline-end: 0;
 }
 
 .neu-table__td--frozen-left-boundary {
@@ -945,7 +945,7 @@
   color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
   font-size: 9px;
   font-weight: 700;
-  margin-right: 2px;
+  margin-inline-end: 2px;
 }
 
 // ── Cell link ─────────────────────────────────────────────────────────
@@ -1050,7 +1050,7 @@
 .neu-table__column-chooser-panel {
   position: absolute;
   top: calc(100% + var(--neu-space-2));
-  right: 0;
+  inset-inline-end: 0;
   z-index: 20;
   display: grid;
   gap: var(--neu-space-2);
@@ -1081,7 +1081,7 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  margin-right: var(--neu-space-2);
+  margin-inline-end: var(--neu-space-2);
   vertical-align: middle;
 }
 

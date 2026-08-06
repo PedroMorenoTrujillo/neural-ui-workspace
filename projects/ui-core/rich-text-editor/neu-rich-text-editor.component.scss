@@ -145,7 +145,7 @@
 }
 
 .neu-rich-text-editor__surface :where(ul, ol) {
-  padding-left: 1.4rem;
+  padding-inline-start: 1.4rem;
 }
 
 .neu-rich-text-editor__surface :where(a) {
@@ -161,9 +161,9 @@
 }
 
 .neu-rich-text-editor__surface :where(blockquote) {
-  padding-left: var(--neu-space-4, 1rem);
+  padding-inline-start: var(--neu-space-4, 1rem);
   color: var(--neu-text-muted);
-  border-left: 3px solid var(--neu-primary-100, rgb(0 176 160 / 22%));
+  border-inline-start: 3px solid var(--neu-primary-100, rgb(0 176 160 / 22%));
 }
 
 .neu-rich-text-editor__surface :where(table) {

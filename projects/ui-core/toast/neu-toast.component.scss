@@ -10,7 +10,7 @@
 
   // Mobile-first: inferior centrado
   bottom: var(--neu-space-6);
-  left: 50%;
+  inset-inline-start: 50%;
   transform: translateX(-50%);
   width: calc(100vw - var(--neu-space-8));
   max-width: 400px;
@@ -19,7 +19,7 @@
   // Desktop (≥ 400px): posición según clase modificadora
   @media (min-width: 400px) {
     bottom: auto;
-    left: auto;
+    inset-inline-start: auto;
     transform: none;
     width: 360px;
     align-items: flex-end;
@@ -30,27 +30,27 @@
 @media (min-width: 400px) {
   .neu-toast-container--top-right {
     top: calc(var(--neu-header-height, 64px) + var(--neu-space-4));
-    right: var(--neu-space-6);
+    inset-inline-end: var(--neu-space-6);
     align-items: flex-end;
   }
 
   .neu-toast-container--top-left {
     top: calc(var(--neu-header-height, 64px) + var(--neu-space-4));
-    left: var(--neu-space-6);
+    inset-inline-start: var(--neu-space-6);
     align-items: flex-start;
   }
 
   .neu-toast-container--bottom-right {
     top: auto;
     bottom: var(--neu-space-6);
-    right: var(--neu-space-6);
+    inset-inline-end: var(--neu-space-6);
     align-items: flex-end;
   }
 
   .neu-toast-container--bottom-left {
     top: auto;
     bottom: var(--neu-space-6);
-    left: var(--neu-space-6);
+    inset-inline-start: var(--neu-space-6);
     align-items: flex-start;
   }
 }
@@ -69,7 +69,7 @@
     0 8px 24px rgba(15, 23, 42, 0.12),
     0 2px 6px rgba(15, 23, 42, 0.06)
   );
-  border-left: 3px solid transparent;
+  border-inline-start: 3px solid transparent;
   pointer-events: all;
   animation: neu-toast-in 250ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   width: 100%;
@@ -150,7 +150,7 @@
     background-color var(--neu-transition),
     color var(--neu-transition);
   margin-top: -2px;
-  margin-right: -4px;
+  margin-inline-end: -4px;
 
   &:hover {
     background: var(--neu-surface-2);

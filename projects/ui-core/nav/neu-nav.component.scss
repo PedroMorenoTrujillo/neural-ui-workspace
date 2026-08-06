@@ -20,7 +20,7 @@ $item-radius: 8px;
   width: $nav-width-expanded;
   height: 100%;
   background: var(--neu-surface);
-  border-right: 1px solid var(--neu-border);
+  border-inline-end: 1px solid var(--neu-border);
   transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   flex-shrink: 0;
@@ -47,8 +47,8 @@ $item-radius: 8px;
 
     // Ítems: solo icono centrado
     .neu-nav__items {
-      padding-left: 0;
-      padding-right: 0;
+      padding-inline-start: 0;
+      padding-inline-end: 0;
     }
 
     .neu-nav__item {
@@ -58,9 +58,9 @@ $item-radius: 8px;
       gap: 0;
     }
 
-    // Anular el margin-left:auto del chevron en grupos (mayor especificidad)
+    // Anular el margin-inline-start:auto del chevron en grupos (mayor especificidad)
     .neu-nav__item--parent .neu-nav__group-chevron {
-      margin-left: 0;
+      margin-inline-start: 0;
     }
 
     .neu-nav__item-label,
@@ -152,7 +152,7 @@ $item-radius: 8px;
   // ---- Botón collapse/expand — montado sobre el borde derecho / collapse/expand button mounted on right edge ----
   &__toggle-tab {
     position: absolute;
-    right: calc(var(--neu-nav-toggle-size) / -2);
+    inset-inline-end: calc(var(--neu-nav-toggle-size) / -2);
     top: var(--neu-nav-toggle-offset-top);
     transform: none;
     width: var(--neu-nav-toggle-size);
@@ -246,7 +246,7 @@ $item-radius: 8px;
     border: none;
     font-family: inherit;
     width: 100%;
-    text-align: left;
+    text-align: start;
     transition:
       background var(--neu-transition),
       color var(--neu-transition);
@@ -281,7 +281,7 @@ $item-radius: 8px;
       &::before {
         content: '';
         position: absolute;
-        left: 0;
+        inset-inline-start: 0;
         top: 6px;
         bottom: 6px;
         width: 3px;
@@ -305,14 +305,14 @@ $item-radius: 8px;
     // Ítem hijo (submenú) — sangría visual
     &--child {
       height: 36px;
-      padding-left: calc(var(--neu-space-3) + 6px);
+      padding-inline-start: calc(var(--neu-space-3) + 6px);
       font-size: 0.8125rem;
     }
 
     // Ítem padre (con submenú)
     &--parent {
       .neu-nav__group-chevron {
-        margin-left: auto;
+        margin-inline-start: auto;
         flex-shrink: 0;
         transition: transform var(--neu-transition);
         color: var(--neu-text-disabled);
@@ -401,29 +401,29 @@ $item-radius: 8px;
     gap: 1px;
     padding: 2px 0 4px var(--neu-space-3);
     margin-top: 2px;
-    border-left: 2px solid var(--neu-border);
-    margin-left: calc(var(--neu-space-3) + 9px);
+    border-inline-start: 2px solid var(--neu-border);
+    margin-inline-start: calc(var(--neu-space-3) + 9px);
 
     // Nivel 3 — submenú anidado dentro de un subgrupo (nivel 2)
     &--nested {
-      padding-left: var(--neu-space-2);
-      margin-left: calc(var(--neu-space-2) + 7px);
+      padding-inline-start: var(--neu-space-2);
+      margin-inline-start: calc(var(--neu-space-2) + 7px);
       border-color: var(--neu-border);
-      border-left-style: dashed;
+      border-inline-start-style: dashed;
     }
   }
 
   // ---- Ítem nieto (nivel 3) / Grandchild item (level 3) ----
   &__item--grandchild {
     height: 32px;
-    padding-left: calc(var(--neu-space-2) + 4px);
+    padding-inline-start: calc(var(--neu-space-2) + 4px);
     font-size: 0.75rem;
   }
 
   // ---- Icono de enlace externo / External link icon ----
   &__external-icon {
     flex-shrink: 0;
-    margin-left: auto;
+    margin-inline-start: auto;
     color: var(--neu-text-disabled);
     opacity: 0.7;
     transition:
@@ -452,7 +452,7 @@ $item-radius: 8px;
     &::after {
       content: '›';
       position: absolute;
-      right: 8px;
+      inset-inline-end: 8px;
       top: 50%;
       transform: translateY(-50%);
       font-size: 11px;
@@ -473,7 +473,7 @@ $item-radius: 8px;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
     padding: 6px;
-    margin-left: 6px;
+    margin-inline-start: 6px;
   }
 
   &__flyout-title {
@@ -513,7 +513,7 @@ $item-radius: 8px;
     }
 
     .neu-nav__external-icon {
-      margin-left: auto;
+      margin-inline-start: auto;
       opacity: 0.6;
     }
   }

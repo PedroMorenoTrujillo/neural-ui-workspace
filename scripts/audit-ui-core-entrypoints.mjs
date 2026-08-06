@@ -4,8 +4,8 @@ import { join, relative } from 'node:path';
 const root = new URL('..', import.meta.url).pathname;
 const uiCore = join(root, 'projects/ui-core');
 
-const serviceOnlyEntryPoints = new Set(['url-state']);
-const nonDemoEntryPoints = new Set(['button', 'confirm-dialog', 'toggle-button-group']);
+const serviceOnlyEntryPoints = new Set(['url-state', 'testing']);
+const nonDemoEntryPoints = new Set(['button', 'confirm-dialog', 'toggle-button-group', 'testing']);
 
 function dirs(path) {
   return readdirSync(path)
@@ -52,10 +52,7 @@ for (const entry of entryPoints) {
     violations.push(`${rel}: missing package.json exports entry`);
   }
 
-  const componentSpecs = files(dir, '.component.spec.ts');
-  const directiveSpecs = files(dir, '.directive.spec.ts');
-  const serviceSpecs = files(dir, '.service.spec.ts');
-  const hasAnySpec = componentSpecs.length + directiveSpecs.length + serviceSpecs.length > 0;
+  const hasAnySpec = files(dir, '.spec.ts').length > 0;
 
   if (!hasAnySpec) {
     violations.push(`${rel}: missing spec file`);

@@ -4,8 +4,7 @@
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
   <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
-  <img src="https://img.shields.io/badge/tests-2088%20passing-22c55e" alt="2088 tests passing" />
-  <img src="https://img.shields.io/badge/coverage-97.58%25-22c55e" alt="97.58% coverage" />
+  <img src="https://img.shields.io/badge/quality-release%20gated-22c55e" alt="Release gated quality" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
 </p>
 
@@ -23,17 +22,24 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 ## Features
 
-- **50+ entry points** — components, overlays, data display primitives, utilities, and styles
+- **80 component entry points + testing** — components, overlays, utilities, styles and public harnesses
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
 - **Accessible by design** — ARIA attributes, keyboard navigation and focus management across the main interactive components
-- **Well-tested** — 1615+ passing tests with 96.75% statements coverage, 95.67% branch coverage and 94.98% function coverage
+- **Release-gated** — unit, package, compatibility, SSR, accessibility and browser checks run before publication
 - **Themeable** — full design token system via CSS custom properties
 
 ---
 
 ## Quality Snapshot
+
+<!-- neural-ui-metrics:start -->
+- **Version:** 1.12.0
+- **Entry points:** 81
+- **Automated tests:** 2095
+- **Coverage:** 97.5% statements · 96.83% branches · 95.48% functions · 99.56% lines
+<!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
 - Standalone + OnPush component model
@@ -55,6 +61,30 @@ npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcha
 ---
 
 ## Setup
+
+Automated setup is additive and idempotent:
+
+```bash
+ng add @neural-ui/core
+ng generate @neural-ui/core:theme --density=comfortable --theme=high-contrast
+ng generate @neural-ui/core:layout app-shell
+ng generate @neural-ui/core:dashboard sales
+ng generate @neural-ui/core:crud-page customers
+```
+
+`ng add` preserves existing providers and styles. Re-running any command is safe; generated files are not replaced unless `--force` is supplied. Use `--skip-styles` to keep style registration manual.
+
+La configuración automática es aditiva e idempotente: conserva providers y estilos existentes. Los archivos generados no se sustituyen salvo que se use `--force`; `--skip-styles` mantiene el registro de estilos manual.
+
+| Schematic | Public options / Opciones públicas | Result / Resultado | Revert / Reversión |
+| --- | --- | --- | --- |
+| `ng add @neural-ui/core` | `--project`, `--skip-styles` | Adds `provideNeuralUI()` and `node_modules/@neural-ui/core/styles.scss` without removing existing providers or styles. / Añade el provider y el estilo sin eliminar configuración existente. | Remove only the provider and style entry added by the command. / Elimina únicamente el provider y la entrada de estilo añadidos. |
+| `:theme [name]` | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; defaults to `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS en la ruta elegida. | Delete the generated file and any import or `data-neu-*` attributes you added. / Elimina el archivo y los imports o atributos añadidos. |
+| `:layout NAME` | `--project`, `--path`, `--force` | Creates `NAME.component.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell. | Delete the generated directory and any route you added; existing routes are not modified automatically. / Elimina el directorio y la ruta añadida; no se alteran rutas existentes. |
+| `:dashboard NAME` | `--project`, `--path`, `--force` | Creates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas. | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
+| `:crud-page NAME` | `--project`, `--path`, `--force` | Creates the three component files with Reactive Forms, input, table and actions. / Genera una base CRUD con formularios reactivos, input, tabla y acciones. | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
+
+Generated page copy is starter content: connect it to the consumer application's translation system before shipping. / Los textos de las páginas generadas son contenido inicial: intégralos con el sistema de traducciones de la aplicación antes de publicar.
 
 Add `provideNeuralUI()` to your `app.config.ts`:
 
@@ -83,6 +113,29 @@ import { NeuTableComponent } from '@neural-ui/core/table';
 import { NeuToastService } from '@neural-ui/core/toast';
 ```
 
+### Density and high contrast / Densidad y alto contraste
+
+The current appearance remains the default. Opt in on `<html>` or a scoped shell:
+
+```html
+<html data-neu-density="compact" data-neu-theme="high-contrast">
+```
+
+Available densities are `compact`, `comfortable`, and `spacious`. Remove the attributes to revert instantly to the existing default. / Las densidades disponibles son `compact`, `comfortable` y `spacious`. Elimina los atributos para volver al aspecto actual.
+
+### Public testing API / API pública de testing
+
+```typescript
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { NeuInputHarness } from '@neural-ui/core/testing';
+
+const loader = TestbedHarnessEnvironment.loader(fixture);
+const input = await loader.getHarness(NeuInputHarness);
+await input.setValue('Ada');
+```
+
+Harnesses are available for button, input, checkbox, switch, select, date input, table and dialog. / Hay harnesses para button, input, checkbox, switch, select, date input, table y dialog.
+
 ---
 
 ## Usage
@@ -110,7 +163,7 @@ export class LoginComponent {
 
 ## Components
 
-Representative entry points in 1.5.0:
+Representative entry points:
 
 - **Forms**: `@neural-ui/core/input`, `@neural-ui/core/select`, `@neural-ui/core/multiselect`, `@neural-ui/core/autocomplete`, `@neural-ui/core/date-input`, `@neural-ui/core/number-input`, `@neural-ui/core/input-otp`
 - **Navigation and layout**: `@neural-ui/core/tabs`, `@neural-ui/core/nav`, `@neural-ui/core/sidebar`, `@neural-ui/core/accordion`, `@neural-ui/core/toolbar`, `@neural-ui/core/dashboard-grid`
@@ -127,23 +180,12 @@ For the complete catalog, examples, and API tables, use the live docs at [neural
 
 Build production-ready SaaS dashboards, CRM tools, internal business apps and client portals with Neural Admin Pro, a premium Angular dashboard template built with Neural UI.
 
-Neural Admin Pro is frontend-only and backend-ready, so you can connect it to your own API, Firebase, Supabase, Laravel, NestJS, Django, Rails or any custom backend.
+Neural Admin Pro is a full-stack Angular and NestJS product with PostgreSQL, authentication, roles, workspaces and a public static demo. Its source can also be adapted to another backend when required.
 
 - [Live demo](https://neural-ui-admin-pro.vercel.app/login)
 - [Buy on Gumroad](https://trujillopete.gumroad.com/l/epbrur)
 - [Buy on Payhip](https://payhip.com/b/0apB6)
 - [Buy on Lemon Squeezy](https://pedromorenostordeve.lemonsqueezy.com/checkout/buy/52e743fd-bb93-4ce7-ae17-c8bf2718de3c)
-
-### Highlights in 1.5.0
-
-- New components: `NeuTreeComponent`, `NeuTreeTableComponent`, `NeuTimelineGridComponent`, `NeuKanbanComponent`, `NeuImageGalleryComponent`, `NeuUploaderComponent`.
-- `NeuUploaderComponent` — drag-and-drop file upload with type/size/duplicate validation, progress tracking and fully configurable i18n labels.
-- `NeuTreeComponent` and `NeuTreeTableComponent` — hierarchical data display with keyboard navigation, single/multi-selection and lazy loading support.
-- Dark mode fix: uploader dropzone and error state backgrounds now use `color-mix()` over CSS tokens instead of hardcoded `rgba` values.
-- `NeuAutocompleteComponent` supports virtual scroll for large result sets.
-- `@neural-ui/core/modal` includes `NeuDialogService` for programmatic dialogs.
-
----
 
 ## Peer dependencies
 

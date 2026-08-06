@@ -108,7 +108,7 @@ $colors: (
   &__status {
     position: absolute;
     bottom: 3%;
-    right: 3%;
+    inset-inline-end: 3%;
     width: 25%;
     height: 25%;
     min-width: 8px;

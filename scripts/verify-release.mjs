@@ -9,9 +9,17 @@ const commands = [
   ['npm', ['run', 'audit:entrypoints']],
   ['npm', ['run', 'audit:cva']],
   ['npm', ['run', 'audit:bundle']],
+  ['npm', ['run', 'audit:logical-css']],
+  ['npm', ['run', 'audit:contracts']],
+  ['npm', ['run', 'audit:docs']],
+  ['npm', ['run', 'test:schematics']],
+  ...(process.env['NEURAL_UI_FULL_MATRIX'] === '1'
+    ? [['npm', ['run', 'test:compat:matrix']]]
+    : []),
   ['npm', ['run', 'test:imports']],
   ['npm', ['run', 'test:ssr-smoke']],
   ['npm', ['run', 'verify:package']],
+  ['npm', ['run', 'audit:package']],
 ];
 
 for (const [command, args] of commands) {

@@ -11,6 +11,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.12.0] - 2026-08-05
+
+### Added
+
+- Public `@neural-ui/core/testing` entry point with Component Harnesses for the principal interactive controls.
+- TestBed, Vitest and Playwright guidance in the bilingual showcase.
+
+## [1.11.0] - 2026-08-05
+
+### Added
+
+- Additive `firstDayOfWeek` inputs for calendar and date input; Monday remains the default.
+- Shared touch-target, reduced-motion, forced-colors, safe-area and RTL behavior.
+
+### Changed
+
+- Component styles use logical directional properties, guarded by a release audit.
+
+## [1.10.0] - 2026-08-05
+
+### Added
+
+- Idempotent `ng add`, `theme`, `layout`, `dashboard` and `crud-page` schematics.
+- Opt-in compact, comfortable and spacious density presets plus a high-contrast theme.
+- Responsive theme builder with copy and SCSS download in the showcase.
+
+## [1.9.0] - 2026-08-05
+
+### Added
+
+- A checked-in public contract snapshot covering package exports, component selectors, signal inputs and outputs, and public design tokens.
+- Release gates for README metrics, package linting and published type resolution.
+
+### Changed
+
+- README quality metrics are generated from the tested package instead of being maintained as independent claims.
+- The showcase documentation audit now requires every detected public input and output to be documented.
+- Package, showcase and Admin Pro descriptions are synchronized with the current full-stack product architecture.
+- Historical 1.5.12 through 1.8.13 release notes have been restored from repository tags.
+
+### Fixed
+
+- Accordion headers inherit the public text token in customized and dark themes.
+
+## [1.8.13] - 2026-07-27
+
+### Fixed
+
+- Password fields preserve their rounded borders during browser autofill.
+
+## [1.8.12] - 2026-07-27
+
+### Fixed
+
+- Password floating labels remain positioned correctly during autofill.
+
+## [1.8.11] - 2026-07-27
+
+### Fixed
+
+- Password autofill styling targets the native credential control consistently.
+
+## [1.8.10] - 2026-07-27
+
+### Fixed
+
+- Autofilled form controls correctly float their labels.
+
+## [1.8.9] - 2026-07-27
+
+### Fixed
+
+- Form controls synchronize their visual state with browser autofill.
+
+## [1.8.8] - 2026-07-23
+
+### Fixed
+
+- Select overlays remain aligned with their trigger while the layout changes.
+
+## [1.8.7] - 2026-07-23
+
+### Added
+
+- Password fields support floating labels and forward credential-manager metadata.
+
+### Fixed
+
+- Select overlays use a smaller viewport push margin and align to the select host.
+
 ## [1.8.3] - 2026-07-19
 
 ### Fixed
@@ -73,6 +163,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Password and masked-input focus states now render on their rounded control boundaries instead of exposing a rectangular native focus outline.
 - Password reveal now uses an accessible eye toggle, and card content is clipped to its rounded visual surface.
 
+## [1.7.3] - 2026-07-11
+
+### Fixed
+
+- Browser-only APIs are guarded so package consumers can render through SSR safely.
+
+## [1.7.2] - 2026-07-11
+
+### Changed
+
+- Published the synchronized package and documentation release.
+
 ## [1.7.1] - 2026-07-09
 
 ### Changed
@@ -89,6 +191,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Relaxed `@ng-icons/*`, `apexcharts` and `ng-apexcharts` peer ranges so Angular 19 projects can resolve compatible dependency lines.
 - `provideNeuralUI()` now registers internal Lucide aliases using icon names available across the supported `@ng-icons/lucide` range.
+
+## [1.6.0] - 2026-06-27
+
+### Added
+
+- `NeuRichTextEditorComponent` with sanitized content, configurable toolbar, variables and image validation.
+
+### Fixed
+
+- Icon-only buttons center their icons without clipping SVG content.
+
+## [1.5.12] - 2026-06-10
+
+### Changed
+
+- Published a package metadata and release synchronization update.
 
 ---
 

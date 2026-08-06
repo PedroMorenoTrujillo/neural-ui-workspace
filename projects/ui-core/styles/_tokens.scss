@@ -166,10 +166,6 @@
   // ------------------------------------------------
   --neu-focus-ring: 0 0 0 3px rgba(0, 122, 255, 0.15);
   --neu-focus-ring-strong: 0 0 0 3px rgba(0, 122, 255, 0.35);
-  @supports (color: color-mix(in srgb, red, blue)) {
-    --neu-focus-ring: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 25%, transparent);
-    --neu-focus-ring-strong: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 50%, transparent);
-  }
 
   // ------------------------------------------------
   // Iconos (Lucide via @ng-icons)
@@ -342,6 +338,13 @@
   --neu-code-block-copy-border: rgba(255, 255, 255, 0.22);
   --neu-code-block-copy-hover-bg: rgba(255, 255, 255, 0.18);
   --neu-code-block-copy-hover-border: rgba(255, 255, 255, 0.34);
+
+  // Keep nested feature queries after declarations for Sass's CSS-compatible
+  // mixed-declaration ordering.
+  @supports (color: color-mix(in srgb, red, blue)) {
+    --neu-focus-ring: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 25%, transparent);
+    --neu-focus-ring-strong: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 50%, transparent);
+  }
 }
 
 // ============================================================

@@ -34,7 +34,7 @@
 .neu-nc__badge {
   position: absolute;
   top: 4px;
-  right: 4px;
+  inset-inline-end: 4px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
@@ -141,7 +141,7 @@
   &--unread::before {
     content: '';
     position: absolute;
-    left: 4px;
+    inset-inline-start: 4px;
     top: 50%;
     transform: translateY(-50%);
     width: 6px;

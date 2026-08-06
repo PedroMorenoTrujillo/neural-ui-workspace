@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "NeuralUiNgAdd",
+  "title": "Neural UI ng add options",
+  "type": "object",
+  "properties": {
+    "project": { "type": "string", "description": "Angular application to configure." },
+    "skipStyles": { "type": "boolean", "default": false, "description": "Do not register the global Neural UI stylesheet." }
+  },
+  "additionalProperties": false
+}

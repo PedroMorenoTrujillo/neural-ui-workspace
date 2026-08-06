@@ -36,7 +36,7 @@ $select-height: 48px;
   width: 100%;
   height: $select-height;
   padding: 0 var(--neu-space-3);
-  padding-right: 36px; // espacio para el chevron
+  padding-inline-end: 36px; // espacio para el chevron
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius);
@@ -44,7 +44,7 @@ $select-height: 48px;
   font-size: var(--neu-text-base);
   color: var(--neu-text);
   cursor: pointer;
-  text-align: left;
+  text-align: start;
   outline: none;
   transition:
     border-color var(--neu-transition),
@@ -68,15 +68,15 @@ $select-height: 48px;
   .neu-select--open & {
     border-color: var(--neu-primary);
     box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
   }
 
   .neu-select--open-above & {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: var(--neu-radius);
-    border-bottom-right-radius: var(--neu-radius);
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+    border-end-start-radius: var(--neu-radius);
+    border-end-end-radius: var(--neu-radius);
   }
 
   .neu-select--error & {
@@ -91,7 +91,7 @@ $select-height: 48px;
 // ---- Floating Label ----
 .neu-select__label {
   position: absolute;
-  left: var(--neu-space-3);
+  inset-inline-start: var(--neu-space-3);
   top: 50%;
   transform: translateY(-50%);
   font-size: var(--neu-text-base);
@@ -118,7 +118,7 @@ $select-height: 48px;
     letter-spacing: 0.01em;
     background: var(--neu-surface);
     padding: 0 4px;
-    left: calc(var(--neu-space-3) - 4px);
+    inset-inline-start: calc(var(--neu-space-3) - 4px);
   }
 
   .neu-select--open & {
@@ -157,7 +157,7 @@ $select-height: 48px;
 // ---- Chevron ----
 .neu-select__chevron {
   position: absolute;
-  right: var(--neu-space-3);
+  inset-inline-end: var(--neu-space-3);
   top: 50%;
   transform: translateY(-50%);
   width: 18px;
@@ -179,7 +179,7 @@ $select-height: 48px;
   justify-content: center;
   width: 20px;
   height: 20px;
-  margin-right: 2px;
+  margin-inline-end: 2px;
   padding: 0;
   border: none;
   background: transparent;
@@ -216,8 +216,8 @@ $select-height: 48px;
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-primary);
   border-top: none;
-  border-bottom-left-radius: var(--neu-radius);
-  border-bottom-right-radius: var(--neu-radius);
+  border-end-start-radius: var(--neu-radius);
+  border-end-end-radius: var(--neu-radius);
   box-shadow: var(--neu-shadow-lg);
   max-height: 240px;
   overflow-y: auto;
@@ -238,10 +238,10 @@ $select-height: 48px;
 .neu-select__panel--above {
   border-top: 1.5px solid var(--neu-primary);
   border-bottom: none;
-  border-top-left-radius: var(--neu-radius);
-  border-top-right-radius: var(--neu-radius);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+  border-start-start-radius: var(--neu-radius);
+  border-start-end-radius: var(--neu-radius);
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .neu-select__panel--virtual {
@@ -254,8 +254,8 @@ $select-height: 48px;
 
 @media (max-width: 600px) {
   .neu-select__panel {
-    left: auto;
-    right: 0;
+    inset-inline-start: auto;
+    inset-inline-end: 0;
     width: min(max(100%, 220px), calc(100vw - 2rem));
     max-width: calc(100vw - 2rem);
   }

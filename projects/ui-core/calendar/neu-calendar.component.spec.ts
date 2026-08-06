@@ -61,6 +61,18 @@ describe('NeuCalendarComponent', () => {
     expect(localDayKey(fixture.componentInstance.weekDays()[0].date)).toBe('2026-05-11');
   });
 
+  it('supports a Sunday first day without changing the Monday default', async () => {
+    const fixture = TestBed.createComponent(NeuCalendarComponent);
+    fixture.componentRef.setInput('events', []);
+    fixture.componentRef.setInput('selectedDate', '2026-05-17');
+    fixture.componentRef.setInput('firstDayOfWeek', 0);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(localDayKey(fixture.componentInstance.weekDays()[0].date)).toBe('2026-05-17');
+    expect(fixture.componentInstance.weekdays()[0].toLowerCase()).toMatch(/sun|dom/);
+  });
+
   it('should render week view when configured', async () => {
     const fixture = setup();
     fixture.componentRef.setInput('view', 'week');

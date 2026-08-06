@@ -7,7 +7,7 @@
   position: absolute;
   z-index: calc(var(--neu-z-overlay, 99) + 1);
   top: calc(100% + 0.5rem);
-  left: 0;
+  inset-inline-start: 0;
   width: min(18rem, calc(100vw - 2rem));
   border: 1px solid var(--neu-border, #d1d5db);
   border-radius: 0.75rem;
