@@ -1,3 +1,5 @@
+@use '../styles/text-overflow' as text;
+
 .neu-tags {
   display: grid;
   gap: 0.375rem;
@@ -39,8 +41,8 @@
 }
 
 .neu-tags__box input {
-  flex: 1;
-  min-width: 8rem;
+  @include text.ellipsis;
+  flex: 1 1 8rem;
   border: 0;
   outline: 0;
   background: transparent;

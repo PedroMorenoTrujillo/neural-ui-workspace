@@ -1,3 +1,5 @@
+@use '../styles/text-overflow' as text;
+
 .neu-data-view {
   display: block;
   color: var(--neu-text, #111827);
@@ -13,6 +15,7 @@
 }
 
 .neu-data-view__search input {
+  @include text.ellipsis;
   min-height: 2.25rem;
   border: 1px solid var(--neu-border, #d1d5db);
   border-radius: 0.5rem;

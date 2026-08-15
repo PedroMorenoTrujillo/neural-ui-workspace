@@ -1,3 +1,5 @@
+@use '../styles/text-overflow' as text;
+
 .neu-tree {
   display: flex;
   flex-direction: column;
@@ -21,6 +23,7 @@
 }
 
 .neu-tree__search-input {
+  @include text.ellipsis;
   width: 100%;
   min-height: 2.625rem;
   border: 1px solid var(--neu-border);

@@ -1,4 +1,6 @@
 /* ── Backdrop ─────────────────────────────────────────────────── */
+@use '../styles/text-overflow' as text;
+
 .neu-cp-backdrop {
   position: fixed;
   inset: 0;
@@ -61,6 +63,7 @@
 }
 
 .neu-cmd__input {
+  @include text.ellipsis;
   flex: 1;
   border: none;
   outline: none;

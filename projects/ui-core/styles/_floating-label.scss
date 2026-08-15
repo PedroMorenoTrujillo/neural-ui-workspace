@@ -1,0 +1,15 @@
+// Shared behaviour for floating labels that need to remain readable in narrow fields.
+@mixin two-line {
+  display: -webkit-box;
+  inline-size: max-content;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  max-block-size: 2.4em;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+  text-overflow: clip;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}

@@ -3,6 +3,8 @@
 // ViewEncapsulation.None — prefijo BEM .neu-date-input
 // ============================================================
 
+@use '../styles/floating-label' as floating;
+
 $trigger-height: 48px;
 $panel-z: 200;
 $drum-item-h: 36px;
@@ -40,6 +42,7 @@ $drum-item-h: 36px;
   position: relative;
 
   .neu-date-input__float-label {
+    @include floating.two-line;
     position: absolute;
     pointer-events: none;
     // Start after the icon (~24px svg + 8px gap + 12px padding-inline-start)
@@ -49,9 +52,9 @@ $drum-item-h: 36px;
     font-size: var(--neu-text-base);
     color: var(--neu-text-muted);
     background: transparent;
+    max-width: calc(100% - var(--neu-space-3) - 72px);
     padding: 0;
     z-index: 1;
-    white-space: nowrap;
     transition:
       top var(--neu-transition),
       font-size var(--neu-transition),
@@ -72,6 +75,7 @@ $drum-item-h: 36px;
       background: var(--neu-surface);
       padding: 0 4px;
       inset-inline-start: calc(var(--neu-space-3) - 4px);
+      max-width: calc(100% - var(--neu-space-6));
     }
   }
 

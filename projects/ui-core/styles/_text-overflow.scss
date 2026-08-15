@@ -1,0 +1,7 @@
+// Single-line form text (values and placeholders) must stay inside its usable width.
+@mixin ellipsis {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

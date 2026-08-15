@@ -1,3 +1,6 @@
+@use '../styles/floating-label' as floating;
+@use '../styles/text-overflow' as text;
+
 .neu-autocomplete {
   position: relative;
   display: block;
@@ -50,6 +53,7 @@
 }
 
 .neu-autocomplete__input {
+  @include text.ellipsis;
   width: 100%;
   height: 48px; // md default — matches other form inputs
   padding: 0 36px 0 12px;
@@ -91,6 +95,7 @@
 
 /* ── Floating Label ───────────────────────────────────────────── */
 .neu-autocomplete__floating-label {
+  @include floating.two-line;
   position: absolute;
   inset-inline-start: var(--neu-space-3, 12px);
   top: 50%;
@@ -98,9 +103,6 @@
   font-size: var(--neu-text-base, 0.875rem);
   color: var(--neu-text-muted, #6b7280);
   pointer-events: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: calc(100% - var(--neu-space-6, 24px));
   transition:
     top var(--neu-transition, 120ms),

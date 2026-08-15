@@ -1,3 +1,5 @@
+@use '../styles/text-overflow' as text;
+
 .neu-listbox {
   display: block;
 }
@@ -10,6 +12,7 @@
 }
 
 .neu-listbox__search {
+  @include text.ellipsis;
   width: 100%;
   min-height: 2.25rem;
   margin-bottom: 0.5rem;

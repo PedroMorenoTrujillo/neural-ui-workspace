@@ -4,6 +4,7 @@
 // Mobile-first: scroll horizontal elegante bajo 400px
 // ============================================================
 @use '../styles/breakpoints' as *;
+@use '../styles/text-overflow' as text;
 
 // ---- Contenedor principal / Main container ----
 .neu-table-container {
@@ -82,6 +83,7 @@
 }
 
 .neu-table__search {
+  @include text.ellipsis;
   width: 100%;
   height: 36px;
   padding: 0 var(--neu-space-3) 0 36px;

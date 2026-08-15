@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [1.12.1] - 2026-08-15
+
+### Fixed
+
+- Long floating labels wrap to a maximum of two lines across data-entry components.
+- Floating labels with leading icons align to the field border once active.
+- Long single-line placeholders and field values use ellipsis instead of overflowing.
+
 ## [1.12.0] - 2026-08-05
 
 ### Added

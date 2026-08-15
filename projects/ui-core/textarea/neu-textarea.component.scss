@@ -1,3 +1,5 @@
+@use '../styles/floating-label' as floating;
+
 .neu-textarea-host {
   display: block;
   width: 100%;
@@ -79,15 +81,13 @@
 }
 
 .neu-textarea__label {
+  @include floating.two-line;
   position: absolute;
   top: 0.9rem;
   inset-inline-start: var(--neu-space-4);
   font-size: var(--neu-text-base);
   color: var(--neu-text-muted);
   pointer-events: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: calc(100% - var(--neu-space-8));
   transition:
     top var(--neu-transition),

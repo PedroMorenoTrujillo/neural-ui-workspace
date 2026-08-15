@@ -1,4 +1,6 @@
 /* ── Host: flex-column para acomodar label + control ──────────── */
+@use '../styles/floating-label' as floating;
+
 .neu-number-input {
   display: inline-flex;
   flex-direction: column;
@@ -121,6 +123,7 @@
 }
 
 .neu-number-input__floating-label {
+  @include floating.two-line;
   position: absolute;
   inset-inline-start: 6px;
   top: 50%;
@@ -128,19 +131,16 @@
   transform: translateY(-50%);
   max-width: calc(100% - var(--neu-number-input-btn-size, 26px) - 18px);
   padding: 0 4px;
-  overflow: hidden;
   color: var(--neu-text-muted);
   font-size: var(--neu-text-base, 1rem);
   line-height: 1.2;
   pointer-events: none;
-  text-overflow: ellipsis;
   transition:
     top var(--neu-transition),
     color var(--neu-transition),
     font-size var(--neu-transition),
     transform var(--neu-transition),
     background var(--neu-transition);
-  white-space: nowrap;
 }
 
 .neu-number-input__control--focused .neu-number-input__floating-label,

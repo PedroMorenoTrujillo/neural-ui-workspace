@@ -3,6 +3,8 @@
 // ViewEncapsulation.None — prefijo BEM .neu-input
 // ============================================================
 @use '../styles/breakpoints' as *;
+@use '../styles/floating-label' as floating;
+@use '../styles/text-overflow' as text;
 
 $input-height: 48px; // md — default
 $input-height-sm: 36px; // sm
@@ -77,6 +79,7 @@ $label-font-floating: 12px;
 
 // ---- Campo nativo / Native input ----
 .neu-input__field {
+  @include text.ellipsis;
   width: 100%;
   height: 100%;
   padding: 0 var(--neu-space-3);
@@ -116,6 +119,7 @@ $label-font-floating: 12px;
 
 // ---- Floating Label — estilo "outlined" / "outlined" style (floats to top border) ----
 .neu-input__label {
+  @include floating.two-line;
   position: absolute;
   inset-inline-start: var(--neu-space-3);
   top: 50%;
@@ -123,9 +127,6 @@ $label-font-floating: 12px;
   font-size: var(--neu-text-base);
   color: var(--neu-text-muted);
   pointer-events: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: calc(100% - var(--neu-space-6));
   transition:
     top var(--neu-transition),
@@ -166,12 +167,13 @@ $label-font-floating: 12px;
 // Ajuste cuando hay start icon
 .neu-input__wrapper--has-start-icon .neu-input__label {
   inset-inline-start: 40px;
+}
 
-  &.neu-input__wrapper--focused,
-  .neu-input__wrapper--focused &,
-  .neu-input__wrapper--has-value & {
-    inset-inline-start: calc(var(--neu-space-3) - 4px); // vuelve a la izquierda al flotar
-  }
+// Once the label floats, it aligns with the field border rather than the icon.
+.neu-input__wrapper--has-start-icon.neu-input__wrapper--focused .neu-input__label,
+.neu-input__wrapper--has-start-icon.neu-input__wrapper--has-value .neu-input__label,
+.neu-input__wrapper--has-start-icon:has(.neu-input__field:-webkit-autofill) .neu-input__label {
+  inset-inline-start: calc(var(--neu-space-3) - 4px);
 }
 
 // ---- Iconos / Icons ----

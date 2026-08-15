@@ -3,6 +3,8 @@
 // ViewEncapsulation.None — prefijo BEM .neu-select
 // ============================================================
 @use '../styles/breakpoints' as *;
+@use '../styles/floating-label' as floating;
+@use '../styles/text-overflow' as text;
 
 $select-height: 48px;
 
@@ -90,6 +92,7 @@ $select-height: 48px;
 
 // ---- Floating Label ----
 .neu-select__label {
+  @include floating.two-line;
   position: absolute;
   inset-inline-start: var(--neu-space-3);
   top: 50%;
@@ -97,9 +100,6 @@ $select-height: 48px;
   font-size: var(--neu-text-base);
   color: color-mix(in srgb, var(--neu-text) 68%, var(--neu-surface) 32%);
   pointer-events: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: calc(100% - var(--neu-space-6));
   transition:
     top var(--neu-transition),
@@ -136,10 +136,8 @@ $select-height: 48px;
 
 // ---- Valor seleccionado / Selected value ----
 .neu-select__value {
+  @include text.ellipsis;
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 
   .neu-select--no-float & {
     padding-top: 0;
@@ -355,6 +353,7 @@ $select-height: 48px;
 }
 
 .neu-select__search-input {
+  @include text.ellipsis;
   width: 100%;
   height: 34px;
   padding: 0 var(--neu-space-3);
