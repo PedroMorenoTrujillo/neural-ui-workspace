@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
@@ -12,7 +12,9 @@ const performanceEvidencePath = join(uiCoreRoot, 'quality/performance-evidence.j
 const showcaseEvidencePath = join(uiCoreRoot, 'quality/showcase-evidence.json');
 const manualAtEvidencePath = join(uiCoreRoot, 'quality/manual-at-evidence.json');
 const coverageSummaryPath = join(workspaceRoot, 'coverage/ui-core/coverage-summary.json');
-const showcaseRoot = join(workspaceRoot, '../neural-ui-showcase');
+const showcaseRoot = process.env.NEURAL_UI_SHOWCASE_ROOT
+  ? resolve(process.env.NEURAL_UI_SHOWCASE_ROOT)
+  : join(workspaceRoot, '../neural-ui-showcase');
 const showcaseStandardsPath = join(showcaseRoot, 'test-results/showcase-standards-summary.json');
 const showcaseTranslationsPath = join(showcaseRoot, 'projects/showcase/src/assets/i18n/en.json');
 const visualApprovalPath = join(showcaseRoot, 'e2e/visual-baseline-approval.json');
@@ -534,12 +536,28 @@ function countJsonLeaves(value) {
   return 1;
 }
 
-function initialMetadata() {
+function initialMetadata(existingMetadata) {
   const packageJson = JSON.parse(readFileSync(join(uiCoreRoot, 'package.json'), 'utf8'));
   const coverage = JSON.parse(readFileSync(coverageSummaryPath, 'utf8')).total;
-  const showcaseStandards = JSON.parse(readFileSync(showcaseStandardsPath, 'utf8'));
-  const showcaseTranslations = JSON.parse(readFileSync(showcaseTranslationsPath, 'utf8'));
-  const visualApproval = JSON.parse(readFileSync(visualApprovalPath, 'utf8'));
+  const externalPaths = [
+    showcaseStandardsPath,
+    showcaseTranslationsPath,
+    visualApprovalPath,
+  ];
+  if (update && externalPaths.some((path) => !existsSync(path))) {
+    throw new Error(
+      'The sibling showcase evidence is required when regenerating the quality matrix.',
+    );
+  }
+  const showcaseStandards = existsSync(showcaseStandardsPath)
+    ? JSON.parse(readFileSync(showcaseStandardsPath, 'utf8'))
+    : null;
+  const showcaseTranslations = existsSync(showcaseTranslationsPath)
+    ? JSON.parse(readFileSync(showcaseTranslationsPath, 'utf8'))
+    : null;
+  const visualApproval = existsSync(visualApprovalPath)
+    ? JSON.parse(readFileSync(visualApprovalPath, 'utf8'))
+    : null;
   const entryPoints = readdirSync(uiCoreRoot, { withFileTypes: true }).filter(
     (entry) => entry.isDirectory() && existsSync(join(uiCoreRoot, entry.name, 'ng-package.json')),
   ).length;
@@ -560,9 +578,14 @@ function initialMetadata() {
         functions: coverage.functions.pct,
         lines: coverage.lines.pct,
       },
-      showcaseDemoPages: showcaseStandards.demos,
-      translationsPerLocale: countJsonLeaves(showcaseTranslations),
-      trackedVisualSnapshots: visualApproval.snapshots.files,
+      showcaseDemoPages:
+        showcaseStandards?.demos ?? existingMetadata?.baseline?.showcaseDemoPages,
+      translationsPerLocale: showcaseTranslations
+        ? countJsonLeaves(showcaseTranslations)
+        : existingMetadata?.baseline?.translationsPerLocale,
+      trackedVisualSnapshots:
+        visualApproval?.snapshots?.files ??
+        existingMetadata?.baseline?.trackedVisualSnapshots,
     },
     exclusions: [
       'Site Composer',
@@ -842,7 +865,7 @@ function discoverEntryPoints(existingManifest) {
 }
 
 function buildManifest(existingManifest) {
-  const currentMetadata = initialMetadata();
+  const currentMetadata = initialMetadata(existingManifest?.metadata);
   const metadata = existingManifest?.metadata ?? currentMetadata;
   const packageJson = JSON.parse(readFileSync(join(uiCoreRoot, 'package.json'), 'utf8'));
   return {
