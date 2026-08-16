@@ -25,6 +25,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
 - **Accessible by design** — ARIA attributes, keyboard navigation and focus management across the main interactive components
+- **Locale and direction aware** — English/Spanish defaults follow the document language, while Angular CDK `Directionality` drives live LTR/RTL behavior
 - **Release-gated** — unit, package, compatibility, SSR, accessibility and browser checks run before publication
 - **Themeable** — full design token system via CSS custom properties
 
@@ -137,6 +138,16 @@ await input.setValue('Ada');
 ```
 
 The dedicated testing entry point exports 62 Angular CDK harnesses: one for every interactive public entry point. The remaining 19 entry points are presentational, layout or utility APIs and are explicitly classified as not applicable in the quality matrix. / El entry point dedicado de testing exporta 62 harnesses de Angular CDK: uno para cada entry point público interactivo. Los 19 restantes son APIs de presentación, layout o utilidad y constan explícitamente como no aplicables en la matriz de calidad.
+
+### Language and direction / Idioma y dirección
+
+Neural UI reads the document `lang` when creating locale-aware default copy. English is the fallback and Spanish is selected when `<html lang="es">` is active. Consumer inputs such as `placeholder`, `searchPlaceholder`, `ariaLabel` and the component-specific label inputs always take precedence, so applications can supply any language through their own translation system.
+
+Neural UI usa el atributo `lang` del documento al crear los textos por defecto sensibles al idioma. Inglés es el fallback y español se activa con `<html lang="es">`. Los inputs públicos siempre tienen prioridad, por lo que cada aplicación puede proporcionar cualquier idioma desde su propio sistema de traducciones.
+
+Direction-sensitive components subscribe to Angular CDK `Directionality`. Changing the application direction between `ltr` and `rtl` updates layouts, directional icons, overlays and physical arrow-key behavior without recreating the application. The live showcase header exposes an RTL/LTR switch for verification; it changes direction, not language.
+
+Los componentes sensibles a la dirección usan `Directionality` de Angular CDK. El cambio dinámico entre `ltr` y `rtl` adapta layouts, iconos, overlays y navegación física con flechas. El botón RTL/LTR del showcase sirve para verificar esta capacidad y no cambia el idioma.
 
 ---
 

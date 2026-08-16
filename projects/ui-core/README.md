@@ -22,6 +22,7 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
 - **Accessible by design** — ARIA attributes, keyboard navigation and focus management across the main interactive components
+- **Locale and direction aware** — English/Spanish defaults follow the document language, while Angular CDK `Directionality` drives live LTR/RTL behavior
 - **Release-gated** — unit, package, compatibility, SSR, accessibility and browser checks run before publication
 - **Themeable** — full design token system via CSS custom properties
 
@@ -124,6 +125,12 @@ import { NeuButtonHarness, NeuInputHarness } from '@neural-ui/core/testing';
 ```
 
 The dedicated testing entry point exports 62 Angular CDK harnesses: one for every interactive public entry point. The remaining 19 entry points are presentational, layout or utility APIs and are explicitly classified as not applicable in the quality matrix. / El entry point dedicado de testing exporta 62 harnesses de Angular CDK: uno para cada entry point público interactivo. Los 19 restantes son APIs de presentación, layout o utilidad y constan explícitamente como no aplicables en la matriz de calidad.
+
+### Language and direction / Idioma y dirección
+
+Locale-aware defaults read the document `lang` when the component is created: English is the fallback and `<html lang="es">` selects Spanish. Explicit component inputs always win, allowing consumer applications to provide any language through their own translation layer. / Los defaults sensibles al idioma leen `lang` al crear el componente: inglés es el fallback y `<html lang="es">` activa español. Los inputs explícitos siempre tienen prioridad.
+
+Direction-sensitive components subscribe to Angular CDK `Directionality` and react to live `ltr`/`rtl` changes. This covers layout, directional icons, overlays and physical arrow-key behavior. The showcase RTL/LTR switch demonstrates this library behavior; it does not change language. / Los componentes sensibles a dirección reaccionan dinámicamente a `Directionality`, incluidos layout, iconos, overlays y navegación con flechas. El botón RTL/LTR del showcase demuestra esta capacidad y no cambia el idioma.
 
 ---
 

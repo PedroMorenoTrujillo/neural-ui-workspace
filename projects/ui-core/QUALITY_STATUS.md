@@ -1,6 +1,6 @@
 # Neural UI Core Quality Status
 
-Last reviewed: 2026-08-16
+Last reviewed: 2026-08-17
 
 ## Executive Summary
 
@@ -8,11 +8,11 @@ Neural UI Core is currently aligned with the project's main engineering standard
 
 Validated coverage snapshot:
 
-- Statements: 97.73%
-- Branches: 95.61%
-- Functions: 96.65%
-- Lines: 99.39%
-- Unit tests: 2168 passing tests in ui-core
+- Statements: 97.71%
+- Branches: 95.59%
+- Functions: 96.66%
+- Lines: 98.98%
+- Unit tests: 2176 passing tests in ui-core
 
 The library presents a strong accessibility baseline across interactive components, but accessibility should be described as high-confidence rather than formally certified 100% component-by-component.
 
@@ -49,6 +49,14 @@ The library presents a strong accessibility baseline across interactive componen
 - Showcase automated accessibility validation: 348/348 localized/theme routes passed with axe-core WCAG 2.2 AA tags
 - Manual assistive-technology validation for this candidate: not yet recorded; remains `UNVERIFIED`
 - Formal 100% accessibility certification across all library components: no
+
+### Localization and RTL
+
+- Locale-aware English/Spanish defaults: verified for selection controls, tabs, sidebar, filters, inline editing, spinner and tree table
+- Consumer override contract: every localized default remains replaceable through public inputs
+- Angular CDK `Directionality`: used by direction-sensitive interactive components
+- Dynamic direction changes: verified without application reload, including overlays and physical arrow-key behavior
+- Showcase RTL audit: 261/261 route/browser checks passed
 
 ### Integration Validation Through Showcase
 

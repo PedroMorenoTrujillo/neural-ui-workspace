@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pagination now exposes localizable navigation, previous-page, next-page and page labels instead of hard-coded Spanish announcements.
 - Dark-mode pagination now reserves the accent fill for the active page, restoring a clear visual distinction from inactive pages.
 - The local accessibility auditor now fails fast when its server cannot start and prevents an older concurrent run from overwriting newer evidence.
+- Select, Multiselect, Filter Bar, Inline Editor, Spinner, Tabs, Sidebar and Tree Table no longer expose Spanish-only default copy on English pages; defaults now follow the document language and remain overridable through public inputs.
+- Direction-sensitive widgets now use the live Angular CDK `Directionality` state for RTL layout, icons, overlays and physical arrow-key behavior.
+- Showcase test-server shutdown now asks Angular CLI to stop gracefully, avoiding a misleading esbuild deadlock diagnostic after successful audits.
 
 ## [1.12.1] - 2026-08-15
 
