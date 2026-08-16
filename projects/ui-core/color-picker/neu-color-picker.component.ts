@@ -159,6 +159,7 @@ let _seq = 0;
       [attr.aria-label]="'Color: ' + _hexValue()"
       [disabled]="_cvaDisabled()"
       (click)="_toggle()"
+      (blur)="_markTouched()"
     >
       <span class="neu-cp__swatch" [style.background]="_hexValue()"></span>
       <span class="neu-cp__hex-label">{{ _hexValue() }}</span>
@@ -174,8 +175,8 @@ let _seq = 0;
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-      (backdropClick)="_isOpen.set(false)"
-      (detach)="_isOpen.set(false)"
+      (backdropClick)="_close(true)"
+      (detach)="_close()"
     >
       <div class="neu-cp__panel" role="dialog" aria-label="Selector de color">
         <!-- HSV Canvas -->
@@ -238,6 +239,7 @@ let _seq = 0;
             type="text"
             [value]="_textValue()"
             (input)="_onTextChange($any($event.target).value)"
+            (blur)="_markTouched()"
             [attr.aria-label]="'Valor ' + _activeMode()"
           />
           <span class="neu-cp__swatch-sm" [style.background]="_hexValue()"></span>
@@ -280,7 +282,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   private _onChange: (v: string) => void = () => {};
   private _onTouched: () => void = () => {};
 
-  private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly _el = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _overlay = inject(Overlay);
   readonly _viewportMargin = 16;
   readonly overlayPositions: ConnectedPosition[] = [
@@ -314,8 +316,15 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
     const target = e.target as Element | null;
     const isInsidePanel = !!target?.closest('.neu-cp__panel');
     if (!this._el.nativeElement.contains(e.target as Node) && !isInsidePanel) {
-      this._isOpen.set(false);
+      this._close();
     }
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  _onEscape(event: Event): void {
+    if (!this._isOpen()) return;
+    event.preventDefault();
+    this._close(true);
   }
 
   // ── Computed ──────────────────────────────────────────────────
@@ -365,6 +374,21 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   // ── Event handlers ────────────────────────────────────────────
   _toggle(): void {
     this._isOpen.update((v) => !v);
+  }
+
+  _close(restoreFocus = false): void {
+    if (!this._isOpen()) return;
+    this._isOpen.set(false);
+    this._markTouched();
+    if (restoreFocus) {
+      queueMicrotask(() =>
+        this._el.nativeElement.querySelector<HTMLElement>('.neu-cp__trigger')?.focus(),
+      );
+    }
+  }
+
+  _markTouched(): void {
+    this._onTouched();
   }
 
   _onHueChange(v: number): void {

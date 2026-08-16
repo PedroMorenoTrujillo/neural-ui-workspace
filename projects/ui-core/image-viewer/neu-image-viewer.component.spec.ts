@@ -1,4 +1,5 @@
 import { Overlay } from '@angular/cdk/overlay';
+import { Directionality } from '@angular/cdk/bidi';
 import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
@@ -115,6 +116,18 @@ describe('NeuImageViewerOverlayComponent', () => {
     const { f } = setupOverlay(mkData({ initialIndex: 2 }));
     f.componentInstance._onKey(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     expect(f.componentInstance._index()).toBe(1);
+  });
+
+  it('reverses image arrow navigation and glyphs in RTL', () => {
+    const { f } = setupOverlay(mkData({ initialIndex: 1 }));
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+
+    f.componentInstance._onKey(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    f.detectChanges();
+
+    expect(f.componentInstance._index()).toBe(2);
+    expect(f.nativeElement.querySelector('.neu-iv__arrow--prev')?.textContent.trim()).toBe('›');
+    expect(f.nativeElement.querySelector('.neu-iv__arrow--next')?.textContent.trim()).toBe('‹');
   });
 
   it('_onKey + should zoom in', () => {
@@ -486,7 +499,9 @@ describe('NeuImageViewerDirective', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    f.nativeElement.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }),
+    );
     f.detectChanges();
     expect(f.componentInstance._index()).toBe(2);
 

@@ -6,6 +6,7 @@ import { NeuNavComponent, NeuNavItem } from './neu-nav.component';
 import { provideIcons } from '@ng-icons/core';
 import { lucideChevronRight, lucideExternalLink, lucideChevronLeft } from '@ng-icons/lucide';
 import { Router } from '@angular/router';
+import { Directionality } from '@angular/cdk/bidi';
 
 @Component({ template: '' })
 class DummyRouteComponent {}
@@ -212,9 +213,7 @@ describe('NeuNavComponent', () => {
     f.componentInstance.toggleGroup('group-default-badge');
     f.detectChanges();
 
-    const badges = Array.from(
-      f.nativeElement.querySelectorAll('.neu-nav__item-badge--default'),
-    );
+    const badges = Array.from(f.nativeElement.querySelectorAll('.neu-nav__item-badge--default'));
     expect(badges.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -660,6 +659,61 @@ describe('NeuNavComponent', () => {
     expect(flyoutEl.textContent).toContain('FlyoutGrupo');
     expect(flyoutEl.textContent).toContain('FL Ruta');
     expect(flyoutEl.textContent).toContain('FL Externo');
+  });
+
+  it('repositions an open collapsed flyout and its tooltips when direction changes', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', FLYOUT_MIXED);
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    f.componentInstance.onGroupMouseEnter(FLYOUT_MIXED[0], {
+      currentTarget: {
+        getBoundingClientRect: () => ({ top: 50, left: 40, right: 100 }),
+      },
+    } as unknown as MouseEvent);
+    f.detectChanges();
+
+    expect(f.componentInstance.flyoutPosition()).toEqual({ left: 100, right: null });
+    expect(f.componentInstance.tooltipPosition()).toBe('right');
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    f.detectChanges();
+
+    expect(f.componentInstance.flyoutPosition()).toEqual({
+      left: null,
+      right: window.innerWidth - 40,
+    });
+    expect(f.componentInstance.tooltipPosition()).toBe('left');
+    expect((f.nativeElement.querySelector('.neu-nav__flyout') as HTMLElement).style.right).toBe(
+      `${window.innerWidth - 40}px`,
+    );
+  });
+
+  it('mirrors group and collapse chevrons when direction changes dynamically', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', GROUP_ITEMS);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.componentInstance.groupChevronIcon()).toBe('lucideChevronRight');
+    expect(f.componentInstance.toggleChevronIcon()).toBe('lucideChevronLeft');
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    f.detectChanges();
+
+    expect(f.componentInstance.groupChevronIcon()).toBe('lucideChevronLeft');
+    expect(f.componentInstance.toggleChevronIcon()).toBe('lucideChevronRight');
+    expect(
+      f.nativeElement
+        .querySelector('.neu-nav__group-chevron')
+        .classList.contains('neu-nav__group-chevron--rtl'),
+    ).toBe(true);
+
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    expect(f.componentInstance.toggleChevronIcon()).toBe('lucideChevronLeft');
   });
 
   it('should render flyout with nested L3 children', async () => {

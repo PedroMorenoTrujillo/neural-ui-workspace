@@ -1,0 +1,1609 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-16T17:35:54.857Z",
+  "status": "PASS",
+  "sources": {
+    "browserApi": "../neural-ui-showcase/performance/results/browser-api-latest.json",
+    "lighthouse": "../neural-ui-showcase/performance/results/lighthouse-summary.json",
+    "sizeLimit": "projects/ui-core/quality/size-limit-latest.json",
+    "bundle": "test-results/ui-core-bundle-summary.json"
+  },
+  "browserApi": {
+    "capturedAt": "2026-08-16T17:33:40.254Z",
+    "runCount": 3,
+    "routeCount": 81,
+    "budgets": {
+      "firstContentfulPaintMsP95": 1500,
+      "domContentLoadedMsP95": 2000,
+      "loadEventMsP95": 3000,
+      "cumulativeLayoutShiftMax": 0.1,
+      "longTaskTotalMsP95": 300,
+      "transferredBytesP95": 2000000
+    },
+    "entryPoints": [
+      {
+        "name": "accordion",
+        "route": "/en/components/accordion/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 86.4,
+          "loadEventMs": 99.3,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 807716
+        }
+      },
+      {
+        "name": "alert",
+        "route": "/en/components/alert/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 83.8,
+          "loadEventMs": 95.9,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 929347
+        }
+      },
+      {
+        "name": "autocomplete",
+        "route": "/en/components/autocomplete/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 77.3,
+          "loadEventMs": 90.3,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 949843
+        }
+      },
+      {
+        "name": "avatar",
+        "route": "/en/components/avatar/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 86.1,
+          "loadEventMs": 99,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 921643
+        }
+      },
+      {
+        "name": "badge",
+        "route": "/en/components/badge/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 92,
+          "domContentLoadedMs": 82.2,
+          "loadEventMs": 94.3,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 57,
+          "transferredBytes": 919832
+        }
+      },
+      {
+        "name": "block-ui",
+        "route": "/en/components/block-ui/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 76.1,
+          "loadEventMs": 89.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 929348
+        }
+      },
+      {
+        "name": "bottom-sheet",
+        "route": "/en/components/bottom-sheet/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 76.5,
+          "loadEventMs": 87.9,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 777082
+        }
+      },
+      {
+        "name": "breadcrumb",
+        "route": "/en/components/breadcrumb/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 82.4,
+          "loadEventMs": 94.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 906466
+        }
+      },
+      {
+        "name": "button",
+        "route": "/en/components/button/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 86,
+          "loadEventMs": 98.7,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 936622
+        }
+      },
+      {
+        "name": "calendar",
+        "route": "/en/components/calendar/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 116,
+          "domContentLoadedMs": 145.8,
+          "loadEventMs": 160.3,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 50,
+          "transferredBytes": 947348
+        }
+      },
+      {
+        "name": "card",
+        "route": "/en/components/card/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 83.9,
+          "loadEventMs": 96.8,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 912697
+        }
+      },
+      {
+        "name": "chart",
+        "route": "/en/components/chart/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 76.8,
+          "loadEventMs": 89.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 1014607
+        }
+      },
+      {
+        "name": "checkbox",
+        "route": "/en/components/checkbox/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 79.4,
+          "loadEventMs": 91.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 817933
+        }
+      },
+      {
+        "name": "chip",
+        "route": "/en/components/chip/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 86.6,
+          "loadEventMs": 99.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 928116
+        }
+      },
+      {
+        "name": "code-block",
+        "route": "/en/components/code-block/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 85.7,
+          "loadEventMs": 98.8,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 915322
+        }
+      },
+      {
+        "name": "color-picker",
+        "route": "/en/components/color-picker/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 79.2,
+          "loadEventMs": 92.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 915559
+        }
+      },
+      {
+        "name": "command-palette",
+        "route": "/en/components/command-palette/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 68,
+          "domContentLoadedMs": 91.4,
+          "loadEventMs": 104.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 934584
+        }
+      },
+      {
+        "name": "confirm-dialog",
+        "route": "/en/components/confirm-dialog/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 79.1,
+          "loadEventMs": 92.1,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 955574
+        }
+      },
+      {
+        "name": "confirm-popup",
+        "route": "/en/components/confirm-popup/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 77.1,
+          "loadEventMs": 88.9,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 777089
+        }
+      },
+      {
+        "name": "context-menu",
+        "route": "/en/components/context-menu/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 92,
+          "domContentLoadedMs": 82.4,
+          "loadEventMs": 95.7,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 57,
+          "transferredBytes": 888507
+        }
+      },
+      {
+        "name": "dashboard-grid",
+        "route": "/en/components/dashboard-grid/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 83.8,
+          "loadEventMs": 96.3,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 973412
+        }
+      },
+      {
+        "name": "data-view",
+        "route": "/en/components/data-view/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 83.3,
+          "loadEventMs": 95.7,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 923348
+        }
+      },
+      {
+        "name": "date-input",
+        "route": "/en/components/date-input/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 88.4,
+          "loadEventMs": 100.8,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 979071
+        }
+      },
+      {
+        "name": "divider",
+        "route": "/en/components/divider/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 82.3,
+          "loadEventMs": 94.8,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 916454
+        }
+      },
+      {
+        "name": "empty-state",
+        "route": "/en/components/empty-state/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 84.7,
+          "loadEventMs": 97.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 928994
+        }
+      },
+      {
+        "name": "filter-bar",
+        "route": "/en/components/filter-bar/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 85.6,
+          "loadEventMs": 98.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 806548
+        }
+      },
+      {
+        "name": "form-field",
+        "route": "/en/components/form-field/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 80.7,
+          "loadEventMs": 92.7,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 770726
+        }
+      },
+      {
+        "name": "icon",
+        "route": "/en/components/icon/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 78.9,
+          "loadEventMs": 91.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 904412
+        }
+      },
+      {
+        "name": "image-gallery",
+        "route": "/en/components/image-gallery/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 91,
+          "loadEventMs": 398.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 934863
+        }
+      },
+      {
+        "name": "image-viewer",
+        "route": "/en/components/image-viewer/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 88.1,
+          "loadEventMs": 463.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 921097
+        }
+      },
+      {
+        "name": "inline-editor",
+        "route": "/en/components/inline-editor/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 81.1,
+          "loadEventMs": 93.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 1002819
+        }
+      },
+      {
+        "name": "input",
+        "route": "/en/components/input/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 92,
+          "domContentLoadedMs": 83.8,
+          "loadEventMs": 96,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 55,
+          "transferredBytes": 928699
+        }
+      },
+      {
+        "name": "input-mask",
+        "route": "/en/components/input-mask/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 88,
+          "domContentLoadedMs": 77.1,
+          "loadEventMs": 89.3,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 56,
+          "transferredBytes": 816793
+        }
+      },
+      {
+        "name": "input-otp",
+        "route": "/en/components/input-otp/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 74.7,
+          "loadEventMs": 87,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 907701
+        }
+      },
+      {
+        "name": "kanban",
+        "route": "/en/components/kanban/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 92,
+          "domContentLoadedMs": 84.6,
+          "loadEventMs": 98,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 57,
+          "transferredBytes": 978505
+        }
+      },
+      {
+        "name": "knob",
+        "route": "/en/components/knob/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 93,
+          "loadEventMs": 105.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 827248
+        }
+      },
+      {
+        "name": "listbox",
+        "route": "/en/components/listbox/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 89.4,
+          "loadEventMs": 101.5,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 824804
+        }
+      },
+      {
+        "name": "menu",
+        "route": "/en/components/menu/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 80.1,
+          "loadEventMs": 92.9,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 865058
+        }
+      },
+      {
+        "name": "meter-group",
+        "route": "/en/components/meter-group/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 83,
+          "loadEventMs": 95,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 912244
+        }
+      },
+      {
+        "name": "modal",
+        "route": "/en/components/dialog/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 83.8,
+          "loadEventMs": 96.1,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 973871
+        }
+      },
+      {
+        "name": "multiselect",
+        "route": "/en/components/multiselect/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 87.5,
+          "loadEventMs": 99.9,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 969500
+        }
+      },
+      {
+        "name": "nav",
+        "route": "/en/components/nav/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 89.4,
+          "loadEventMs": 102.1,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 933902
+        }
+      },
+      {
+        "name": "notification-center",
+        "route": "/en/components/notification-center/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 80.8,
+          "loadEventMs": 93.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 934740
+        }
+      },
+      {
+        "name": "number-input",
+        "route": "/en/components/number-input/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 90.4,
+          "loadEventMs": 102.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 935073
+        }
+      },
+      {
+        "name": "pagination",
+        "route": "/en/components/pagination/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 81.4,
+          "loadEventMs": 94.3,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 923118
+        }
+      },
+      {
+        "name": "panel",
+        "route": "/en/components/panel/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 82.5,
+          "loadEventMs": 94,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 772149
+        }
+      },
+      {
+        "name": "password",
+        "route": "/en/components/password/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 81,
+          "loadEventMs": 94,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 841491
+        }
+      },
+      {
+        "name": "pick-list",
+        "route": "/en/components/pick-list/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 81.1,
+          "loadEventMs": 92.7,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 777197
+        }
+      },
+      {
+        "name": "popover",
+        "route": "/en/components/popover/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 86.7,
+          "loadEventMs": 99.7,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 933563
+        }
+      },
+      {
+        "name": "progress-bar",
+        "route": "/en/components/progress-bar/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 78.4,
+          "loadEventMs": 91.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 935077
+        }
+      },
+      {
+        "name": "radio",
+        "route": "/en/components/radio/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 82,
+          "loadEventMs": 95,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 806871
+        }
+      },
+      {
+        "name": "rating",
+        "route": "/en/components/rating/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 81.9,
+          "loadEventMs": 94.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 912832
+        }
+      },
+      {
+        "name": "rich-text-editor",
+        "route": "/en/components/rich-text-editor/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 87.2,
+          "loadEventMs": 100.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 952837
+        }
+      },
+      {
+        "name": "scheduler-gantt",
+        "route": "/en/components/scheduler-gantt/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 84.6,
+          "loadEventMs": 97.7,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 929517
+        }
+      },
+      {
+        "name": "select",
+        "route": "/en/components/select/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 100,
+          "domContentLoadedMs": 81.2,
+          "loadEventMs": 93.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 60,
+          "transferredBytes": 939891
+        }
+      },
+      {
+        "name": "sidebar",
+        "route": "/en/components/sidebar/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 84.8,
+          "loadEventMs": 96.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 940984
+        }
+      },
+      {
+        "name": "skeleton",
+        "route": "/en/components/skeleton/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 84.8,
+          "loadEventMs": 97.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 917553
+        }
+      },
+      {
+        "name": "slider",
+        "route": "/en/components/slider/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 84.6,
+          "loadEventMs": 96.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 926424
+        }
+      },
+      {
+        "name": "spinner",
+        "route": "/en/components/spinner/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 86.1,
+          "loadEventMs": 99.6,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 920289
+        }
+      },
+      {
+        "name": "split-button",
+        "route": "/en/components/split-button/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 86,
+          "loadEventMs": 99,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 940451
+        }
+      },
+      {
+        "name": "splitter",
+        "route": "/en/components/splitter/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 88,
+          "domContentLoadedMs": 77.8,
+          "loadEventMs": 89.7,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 54,
+          "transferredBytes": 911372
+        }
+      },
+      {
+        "name": "stats-card",
+        "route": "/en/components/stats-card/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 86.3,
+          "loadEventMs": 98.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 920251
+        }
+      },
+      {
+        "name": "stepper",
+        "route": "/en/components/stepper/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 76.4,
+          "loadEventMs": 89.5,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 943999
+        }
+      },
+      {
+        "name": "switch",
+        "route": "/en/components/switch/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 72.4,
+          "loadEventMs": 84.9,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 811516
+        }
+      },
+      {
+        "name": "table",
+        "route": "/en/components/table/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 68,
+          "domContentLoadedMs": 92.2,
+          "loadEventMs": 105.5,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 1211345
+        }
+      },
+      {
+        "name": "tabs",
+        "route": "/en/components/tabs/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 77.5,
+          "loadEventMs": 90,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 817375
+        }
+      },
+      {
+        "name": "tags",
+        "route": "/en/components/tags/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 75.5,
+          "loadEventMs": 88,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 820502
+        }
+      },
+      {
+        "name": "testing",
+        "route": "/en/components/testing/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 52,
+          "domContentLoadedMs": 77.1,
+          "loadEventMs": 89.5,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 753952
+        }
+      },
+      {
+        "name": "textarea",
+        "route": "/en/components/textarea/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 86.1,
+          "loadEventMs": 98.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 940552
+        }
+      },
+      {
+        "name": "timeline",
+        "route": "/en/components/timeline/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 86.5,
+          "loadEventMs": 99.1,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 909789
+        }
+      },
+      {
+        "name": "timeline-grid",
+        "route": "/en/components/timeline-grid/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 80.8,
+          "loadEventMs": 94,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 920738
+        }
+      },
+      {
+        "name": "toast",
+        "route": "/en/components/toast/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 56,
+          "domContentLoadedMs": 79.3,
+          "loadEventMs": 91.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 927723
+        }
+      },
+      {
+        "name": "toggle-button-group",
+        "route": "/en/components/toggle-button/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 92.4,
+          "loadEventMs": 105.9,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 915797
+        }
+      },
+      {
+        "name": "toolbar",
+        "route": "/en/components/toolbar/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 87.6,
+          "loadEventMs": 101.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 921733
+        }
+      },
+      {
+        "name": "tooltip",
+        "route": "/en/components/tooltip/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 100,
+          "domContentLoadedMs": 84.3,
+          "loadEventMs": 96.5,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 63,
+          "transferredBytes": 943113
+        }
+      },
+      {
+        "name": "tree",
+        "route": "/en/components/tree/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 64,
+          "domContentLoadedMs": 90.1,
+          "loadEventMs": 103.1,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 932742
+        }
+      },
+      {
+        "name": "tree-select",
+        "route": "/en/components/tree-select/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 60,
+          "domContentLoadedMs": 86.4,
+          "loadEventMs": 98.3,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 907525
+        }
+      },
+      {
+        "name": "tree-table",
+        "route": "/en/components/tree-table/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 76,
+          "domContentLoadedMs": 98.4,
+          "loadEventMs": 113.2,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 0,
+          "transferredBytes": 1118698
+        }
+      },
+      {
+        "name": "uploader",
+        "route": "/en/components/uploader/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 92,
+          "domContentLoadedMs": 84.3,
+          "loadEventMs": 96.8,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 54,
+          "transferredBytes": 967798
+        }
+      },
+      {
+        "name": "url-state",
+        "route": "/en/components/url-state/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 92,
+          "domContentLoadedMs": 81.6,
+          "loadEventMs": 93.4,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 58,
+          "transferredBytes": 933480
+        }
+      },
+      {
+        "name": "virtual-list",
+        "route": "/en/components/virtual-list/",
+        "status": "PASS",
+        "p95": {
+          "firstContentfulPaintMs": 88,
+          "domContentLoadedMs": 77.6,
+          "loadEventMs": 89.8,
+          "cumulativeLayoutShift": 0,
+          "longTaskTotalMs": 57,
+          "transferredBytes": 908441
+        }
+      }
+    ]
+  },
+  "lighthouse": {
+    "capturedAt": "2026-08-16T17:35:54.857Z",
+    "version": "13.4.1",
+    "budgets": {
+      "performanceScoreMin": 0.9,
+      "accessibilityScoreMin": 0.95,
+      "bestPracticesScoreMin": 0.95,
+      "seoScoreMin": 0.95,
+      "largestContentfulPaintMsMax": 2800,
+      "cumulativeLayoutShiftMax": 0.1,
+      "totalBlockingTimeMsMax": 300
+    },
+    "results": [
+      {
+        "route": "/en/home/",
+        "runs": 3,
+        "median": {
+          "performanceScore": 0.95,
+          "accessibilityScore": 1,
+          "bestPracticesScore": 1,
+          "seoScore": 1,
+          "firstContentfulPaintMs": 1958.51,
+          "largestContentfulPaintMs": 2625.346,
+          "cumulativeLayoutShift": 0.007,
+          "totalBlockingTimeMs": 10
+        }
+      },
+      {
+        "route": "/en/components/table/",
+        "runs": 3,
+        "median": {
+          "performanceScore": 0.94,
+          "accessibilityScore": 1,
+          "bestPracticesScore": 1,
+          "seoScore": 1,
+          "firstContentfulPaintMs": 1961.961,
+          "largestContentfulPaintMs": 2517.566,
+          "cumulativeLayoutShift": 0,
+          "totalBlockingTimeMs": 148
+        }
+      },
+      {
+        "route": "/en/components/chart/",
+        "runs": 3,
+        "median": {
+          "performanceScore": 0.95,
+          "accessibilityScore": 1,
+          "bestPracticesScore": 1,
+          "seoScore": 1,
+          "firstContentfulPaintMs": 1957.458,
+          "largestContentfulPaintMs": 2655.268,
+          "cumulativeLayoutShift": 0,
+          "totalBlockingTimeMs": 44
+        }
+      },
+      {
+        "route": "/en/components/dialog/",
+        "runs": 3,
+        "median": {
+          "performanceScore": 0.96,
+          "accessibilityScore": 1,
+          "bestPracticesScore": 1,
+          "seoScore": 1,
+          "firstContentfulPaintMs": 1957.641,
+          "largestContentfulPaintMs": 2502.815,
+          "cumulativeLayoutShift": 0,
+          "totalBlockingTimeMs": 41
+        }
+      }
+    ]
+  },
+  "sizeLimit": {
+    "schemaVersion": 1,
+    "compression": "brotli",
+    "status": "PASS",
+    "results": [
+      {
+        "name": "All public ESM entry points (Brotli)",
+        "passed": true,
+        "size": 288185,
+        "sizeLimit": 300000
+      },
+      {
+        "name": "Largest component: table (Brotli)",
+        "passed": true,
+        "size": 20505,
+        "sizeLimit": 35000
+      },
+      {
+        "name": "Public testing harnesses (Brotli)",
+        "passed": true,
+        "size": 6607,
+        "sizeLimit": 12000
+      },
+      {
+        "name": "Chart adapter without Chart.js peer (Brotli)",
+        "passed": true,
+        "size": 5851,
+        "sizeLimit": 8000
+      }
+    ]
+  },
+  "bundle": {
+    "formatVersion": 1,
+    "budgets": {
+      "maxEntryBytes": 266240,
+      "maxEntryGzipBytes": 49152,
+      "maxTotalBytes": 2048000,
+      "maxTotalGzipBytes": 460800
+    },
+    "totals": {
+      "entries": 82,
+      "rawBytes": 1944987,
+      "gzipBytes": 350215
+    },
+    "entries": [
+      {
+        "file": "neural-ui-core-table.mjs",
+        "rawBytes": 199546,
+        "gzipBytes": 32726
+      },
+      {
+        "file": "neural-ui-core-date-input.mjs",
+        "rawBytes": 107394,
+        "gzipBytes": 16879
+      },
+      {
+        "file": "neural-ui-core-multiselect.mjs",
+        "rawBytes": 79635,
+        "gzipBytes": 11604
+      },
+      {
+        "file": "neural-ui-core-select.mjs",
+        "rawBytes": 66203,
+        "gzipBytes": 10504
+      },
+      {
+        "file": "neural-ui-core-autocomplete.mjs",
+        "rawBytes": 51372,
+        "gzipBytes": 8468
+      },
+      {
+        "file": "neural-ui-core-uploader.mjs",
+        "rawBytes": 51675,
+        "gzipBytes": 7893
+      },
+      {
+        "file": "neural-ui-core-testing.mjs",
+        "rawBytes": 57663,
+        "gzipBytes": 7743
+      },
+      {
+        "file": "neural-ui-core-tree-table.mjs",
+        "rawBytes": 54899,
+        "gzipBytes": 7669
+      },
+      {
+        "file": "neural-ui-core-nav.mjs",
+        "rawBytes": 65562,
+        "gzipBytes": 7423
+      },
+      {
+        "file": "neural-ui-core-calendar.mjs",
+        "rawBytes": 55761,
+        "gzipBytes": 7101
+      },
+      {
+        "file": "neural-ui-core-rich-text-editor.mjs",
+        "rawBytes": 42323,
+        "gzipBytes": 6883
+      },
+      {
+        "file": "neural-ui-core-chart.mjs",
+        "rawBytes": 31284,
+        "gzipBytes": 6695
+      },
+      {
+        "file": "neural-ui-core-tree-select.mjs",
+        "rawBytes": 34280,
+        "gzipBytes": 5754
+      },
+      {
+        "file": "neural-ui-core-color-picker.mjs",
+        "rawBytes": 27863,
+        "gzipBytes": 5741
+      },
+      {
+        "file": "neural-ui-core-split-button.mjs",
+        "rawBytes": 33210,
+        "gzipBytes": 5556
+      },
+      {
+        "file": "neural-ui-core-tree.mjs",
+        "rawBytes": 31989,
+        "gzipBytes": 5424
+      },
+      {
+        "file": "neural-ui-core-input.mjs",
+        "rawBytes": 30868,
+        "gzipBytes": 5388
+      },
+      {
+        "file": "neural-ui-core-tabs.mjs",
+        "rawBytes": 23665,
+        "gzipBytes": 5367
+      },
+      {
+        "file": "neural-ui-core-sidebar.mjs",
+        "rawBytes": 23876,
+        "gzipBytes": 5100
+      },
+      {
+        "file": "neural-ui-core-data-view.mjs",
+        "rawBytes": 28999,
+        "gzipBytes": 4896
+      },
+      {
+        "file": "neural-ui-core-inline-editor.mjs",
+        "rawBytes": 25518,
+        "gzipBytes": 4669
+      },
+      {
+        "file": "neural-ui-core-modal.mjs",
+        "rawBytes": 25305,
+        "gzipBytes": 4606
+      },
+      {
+        "file": "neural-ui-core-kanban.mjs",
+        "rawBytes": 26051,
+        "gzipBytes": 4439
+      },
+      {
+        "file": "neural-ui-core-menu.mjs",
+        "rawBytes": 35879,
+        "gzipBytes": 4426
+      },
+      {
+        "file": "neural-ui-core-notification-center.mjs",
+        "rawBytes": 20548,
+        "gzipBytes": 4303
+      },
+      {
+        "file": "neural-ui-core-knob.mjs",
+        "rawBytes": 18086,
+        "gzipBytes": 4173
+      },
+      {
+        "file": "neural-ui-core-number-input.mjs",
+        "rawBytes": 27293,
+        "gzipBytes": 4091
+      },
+      {
+        "file": "neural-ui-core-scheduler-gantt.mjs",
+        "rawBytes": 18022,
+        "gzipBytes": 3899
+      },
+      {
+        "file": "neural-ui-core-image-viewer.mjs",
+        "rawBytes": 16664,
+        "gzipBytes": 3832
+      },
+      {
+        "file": "neural-ui-core-password.mjs",
+        "rawBytes": 20298,
+        "gzipBytes": 3813
+      },
+      {
+        "file": "neural-ui-core-code-block.mjs",
+        "rawBytes": 16835,
+        "gzipBytes": 3739
+      },
+      {
+        "file": "neural-ui-core-listbox.mjs",
+        "rawBytes": 21062,
+        "gzipBytes": 3675
+      },
+      {
+        "file": "neural-ui-core-button.mjs",
+        "rawBytes": 17466,
+        "gzipBytes": 3502
+      },
+      {
+        "file": "neural-ui-core-command-palette.mjs",
+        "rawBytes": 16608,
+        "gzipBytes": 3468
+      },
+      {
+        "file": "neural-ui-core-dashboard-grid.mjs",
+        "rawBytes": 14127,
+        "gzipBytes": 3466
+      },
+      {
+        "file": "neural-ui-core-textarea.mjs",
+        "rawBytes": 17498,
+        "gzipBytes": 3363
+      },
+      {
+        "file": "neural-ui-core-timeline-grid.mjs",
+        "rawBytes": 21593,
+        "gzipBytes": 3277
+      },
+      {
+        "file": "neural-ui-core-stepper.mjs",
+        "rawBytes": 16226,
+        "gzipBytes": 3276
+      },
+      {
+        "file": "neural-ui-core-rating.mjs",
+        "rawBytes": 13640,
+        "gzipBytes": 3265
+      },
+      {
+        "file": "neural-ui-core-popover.mjs",
+        "rawBytes": 12870,
+        "gzipBytes": 3207
+      },
+      {
+        "file": "neural-ui-core-toggle-button-group.mjs",
+        "rawBytes": 14458,
+        "gzipBytes": 3204
+      },
+      {
+        "file": "neural-ui-core-toast.mjs",
+        "rawBytes": 14336,
+        "gzipBytes": 3190
+      },
+      {
+        "file": "neural-ui-core-input-otp.mjs",
+        "rawBytes": 11349,
+        "gzipBytes": 3123
+      },
+      {
+        "file": "neural-ui-core-context-menu.mjs",
+        "rawBytes": 13048,
+        "gzipBytes": 3103
+      },
+      {
+        "file": "neural-ui-core-slider.mjs",
+        "rawBytes": 15272,
+        "gzipBytes": 3083
+      },
+      {
+        "file": "neural-ui-core-accordion.mjs",
+        "rawBytes": 13129,
+        "gzipBytes": 3054
+      },
+      {
+        "file": "neural-ui-core-pick-list.mjs",
+        "rawBytes": 21576,
+        "gzipBytes": 2993
+      },
+      {
+        "file": "neural-ui-core-chip.mjs",
+        "rawBytes": 14499,
+        "gzipBytes": 2987
+      },
+      {
+        "file": "neural-ui-core-virtual-list.mjs",
+        "rawBytes": 12412,
+        "gzipBytes": 2956
+      },
+      {
+        "file": "neural-ui-core-tags.mjs",
+        "rawBytes": 13674,
+        "gzipBytes": 2831
+      },
+      {
+        "file": "neural-ui-core-alert.mjs",
+        "rawBytes": 11241,
+        "gzipBytes": 2811
+      },
+      {
+        "file": "neural-ui-core-image-gallery.mjs",
+        "rawBytes": 16647,
+        "gzipBytes": 2793
+      },
+      {
+        "file": "neural-ui-core-radio.mjs",
+        "rawBytes": 11836,
+        "gzipBytes": 2786
+      },
+      {
+        "file": "neural-ui-core-pagination.mjs",
+        "rawBytes": 13600,
+        "gzipBytes": 2766
+      },
+      {
+        "file": "neural-ui-core-stats-card.mjs",
+        "rawBytes": 12128,
+        "gzipBytes": 2758
+      },
+      {
+        "file": "neural-ui-core-splitter.mjs",
+        "rawBytes": 11921,
+        "gzipBytes": 2668
+      },
+      {
+        "file": "neural-ui-core-empty-state.mjs",
+        "rawBytes": 12372,
+        "gzipBytes": 2655
+      },
+      {
+        "file": "neural-ui-core-tooltip.mjs",
+        "rawBytes": 10124,
+        "gzipBytes": 2645
+      },
+      {
+        "file": "neural-ui-core-avatar.mjs",
+        "rawBytes": 9804,
+        "gzipBytes": 2507
+      },
+      {
+        "file": "neural-ui-core-checkbox.mjs",
+        "rawBytes": 11329,
+        "gzipBytes": 2441
+      },
+      {
+        "file": "neural-ui-core-filter-bar.mjs",
+        "rawBytes": 9641,
+        "gzipBytes": 2362
+      },
+      {
+        "file": "neural-ui-core-meter-group.mjs",
+        "rawBytes": 11285,
+        "gzipBytes": 2321
+      },
+      {
+        "file": "neural-ui-core-spinner.mjs",
+        "rawBytes": 9179,
+        "gzipBytes": 2255
+      },
+      {
+        "file": "neural-ui-core-timeline.mjs",
+        "rawBytes": 11580,
+        "gzipBytes": 2247
+      },
+      {
+        "file": "neural-ui-core-block-ui.mjs",
+        "rawBytes": 8112,
+        "gzipBytes": 2119
+      },
+      {
+        "file": "neural-ui-core-confirm-dialog.mjs",
+        "rawBytes": 9364,
+        "gzipBytes": 2111
+      },
+      {
+        "file": "neural-ui-core-url-state.mjs",
+        "rawBytes": 7042,
+        "gzipBytes": 2095
+      },
+      {
+        "file": "neural-ui-core-toolbar.mjs",
+        "rawBytes": 9194,
+        "gzipBytes": 2085
+      },
+      {
+        "file": "neural-ui-core-switch.mjs",
+        "rawBytes": 7877,
+        "gzipBytes": 2068
+      },
+      {
+        "file": "neural-ui-core-progress-bar.mjs",
+        "rawBytes": 9342,
+        "gzipBytes": 2041
+      },
+      {
+        "file": "neural-ui-core-bottom-sheet.mjs",
+        "rawBytes": 8814,
+        "gzipBytes": 2008
+      },
+      {
+        "file": "neural-ui-core-confirm-popup.mjs",
+        "rawBytes": 8260,
+        "gzipBytes": 1966
+      },
+      {
+        "file": "neural-ui-core-input-mask.mjs",
+        "rawBytes": 7709,
+        "gzipBytes": 1955
+      },
+      {
+        "file": "neural-ui-core-panel.mjs",
+        "rawBytes": 15046,
+        "gzipBytes": 1924
+      },
+      {
+        "file": "neural-ui-core-icon.mjs",
+        "rawBytes": 5551,
+        "gzipBytes": 1802
+      },
+      {
+        "file": "neural-ui-core-badge.mjs",
+        "rawBytes": 7951,
+        "gzipBytes": 1779
+      },
+      {
+        "file": "neural-ui-core-breadcrumb.mjs",
+        "rawBytes": 6533,
+        "gzipBytes": 1688
+      },
+      {
+        "file": "neural-ui-core-card.mjs",
+        "rawBytes": 6775,
+        "gzipBytes": 1642
+      },
+      {
+        "file": "neural-ui-core-form-field.mjs",
+        "rawBytes": 9952,
+        "gzipBytes": 1593
+      },
+      {
+        "file": "neural-ui-core-skeleton.mjs",
+        "rawBytes": 4707,
+        "gzipBytes": 1296
+      },
+      {
+        "file": "neural-ui-core-divider.mjs",
+        "rawBytes": 4021,
+        "gzipBytes": 1199
+      },
+      {
+        "file": "neural-ui-core.mjs",
+        "rawBytes": 2641,
+        "gzipBytes": 1002
+      }
+    ],
+    "violations": []
+  },
+  "failures": []
+}

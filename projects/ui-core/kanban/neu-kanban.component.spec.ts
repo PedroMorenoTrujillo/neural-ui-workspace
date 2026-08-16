@@ -1,6 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { Directionality } from '@angular/cdk/bidi';
 import { By } from '@angular/platform-browser';
 import { NeuKanbanComponent, type NeuKanbanColumn } from './neu-kanban.component';
 
@@ -59,6 +60,101 @@ describe('NeuKanbanComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.neu-kanban__card').length).toBe(3);
   });
 
+  it('exposes a keyboard move contract on every card', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+
+    const card = fixture.nativeElement.querySelector('[data-card-id="card-a"]') as HTMLElement;
+    expect(card.getAttribute('tabindex')).toBe('0');
+    expect(card.getAttribute('role')).toBe('listitem');
+    expect(card.getAttribute('aria-keyshortcuts')).toContain('Alt+ArrowDown');
+    expect(card.getAttribute('aria-label')).toContain('Use Alt plus arrow keys');
+  });
+
+  it('moves a card within its column with Alt+ArrowDown and restores focus', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const events: string[] = [];
+    fixture.componentInstance.cardDrop.subscribe((event) => events.push(event.card.id));
+
+    const card = fixture.nativeElement.querySelector('[data-card-id="card-a"]') as HTMLElement;
+    card.focus();
+    card.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true, bubbles: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance._columns()[0].cards.map((item) => item.id)).toEqual([
+      'card-b',
+      'card-a',
+    ]);
+    expect(events).toEqual(['card-a']);
+    expect((document.activeElement as HTMLElement).dataset['cardId']).toBe('card-a');
+  });
+
+  it('moves a card to the next visual column with Alt+ArrowRight in LTR', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+
+    fixture.componentInstance.onCardKeydown(
+      'card-a',
+      'todo',
+      new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true }),
+    );
+
+    expect(fixture.componentInstance._columns()[0].cards.map((item) => item.id)).toEqual([
+      'card-b',
+    ]);
+    expect(fixture.componentInstance._columns()[1].cards.map((item) => item.id)).toEqual([
+      'card-a',
+      'card-c',
+    ]);
+  });
+
+  it('mirrors horizontal keyboard card movement when direction changes dynamically', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+
+    fixture.componentInstance.onCardKeydown(
+      'card-c',
+      'doing',
+      new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true }),
+    );
+
+    expect(fixture.componentInstance._columns()[0].cards.map((item) => item.id)).toEqual([
+      'card-c',
+      'card-a',
+      'card-b',
+    ]);
+    expect(fixture.componentInstance._columns()[1].cards).toEqual([]);
+  });
+
+  it('ignores unrelated, boundary and missing-card keyboard requests', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const snapshot = fixture.componentInstance._columns();
+
+    fixture.componentInstance.onCardKeydown(
+      'card-a',
+      'todo',
+      new KeyboardEvent('keydown', { key: 'ArrowUp', altKey: true }),
+    );
+    fixture.componentInstance.onCardKeydown(
+      'card-a',
+      'todo',
+      new KeyboardEvent('keydown', { key: 'ArrowDown' }),
+    );
+    fixture.componentInstance.onCardKeydown(
+      'missing',
+      'todo',
+      new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true }),
+    );
+
+    expect(fixture.componentInstance._columns()).toEqual(snapshot);
+  });
+
   it('should show counts and wip limit by default', async () => {
     const fixture = setup();
     await fixture.whenStable();
@@ -101,7 +197,9 @@ describe('NeuKanbanComponent', () => {
     await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain('AM');
-    expect(fixture.componentInstance.assigneeInitials({ name: 'Ignored', initials: 'IM' })).toBe('IM');
+    expect(fixture.componentInstance.assigneeInitials({ name: 'Ignored', initials: 'IM' })).toBe(
+      'IM',
+    );
     expect(fixture.componentInstance.assigneeInitials({ name: '  one   two three  ' })).toBe('OT');
   });
 

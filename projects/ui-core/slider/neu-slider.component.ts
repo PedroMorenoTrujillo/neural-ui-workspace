@@ -3,9 +3,14 @@ import {
   Component,
   ViewEncapsulation,
   computed,
+  forwardRef,
+  inject,
   input,
   output,
+  signal,
 } from '@angular/core';
+import { Directionality } from '@angular/cdk/bidi';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 /**
  * NeuralUI Slider Component
@@ -15,6 +20,7 @@ import {
  *
  * Uso:
  *   <neu-slider [value]="volume" (valueChange)="volume = $event" />
+ *   <neu-slider formControlName="volume" />
  *   <neu-slider [value]="50" [min]="0" [max]="100" [step]="5" [showValue]="true" />
  */
 @Component({
@@ -22,24 +28,32 @@ import {
   imports: [],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[attr.dir]': 'direction()' },
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => NeuSliderComponent),
+      multi: true,
+    },
+  ],
   template: `
-    <div class="neu-slider" [class.neu-slider--disabled]="disabled()">
+    <div class="neu-slider" [class.neu-slider--disabled]="isDisabled()">
       @if (label()) {
         <div class="neu-slider__header">
           <label class="neu-slider__label" [for]="sliderId">{{ label() }}</label>
           @if (showValue()) {
-            <span class="neu-slider__value">{{ value() }}{{ unit() }}</span>
+            <span class="neu-slider__value">{{ currentValue() }}{{ unit() }}</span>
           }
         </div>
       } @else if (showValue()) {
         <div class="neu-slider__header">
           <span></span>
-          <span class="neu-slider__value">{{ value() }}{{ unit() }}</span>
+          <span class="neu-slider__value">{{ currentValue() }}{{ unit() }}</span>
         </div>
       }
       <div class="neu-slider__track-wrap">
         <div class="neu-slider__track">
-          <div class="neu-slider__fill" [style.width.%]="fillPercent()"></div>
+          <div class="neu-slider__fill" [style.inline-size.%]="fillPercent()"></div>
         </div>
         <input
           class="neu-slider__input"
@@ -48,13 +62,14 @@ import {
           [min]="min()"
           [max]="max()"
           [step]="step()"
-          [value]="value()"
-          [disabled]="disabled()"
+          [value]="currentValue()"
+          [disabled]="isDisabled()"
           [attr.aria-label]="label() || 'Slider'"
-          [attr.aria-valuenow]="value()"
+          [attr.aria-valuenow]="currentValue()"
           [attr.aria-valuemin]="min()"
           [attr.aria-valuemax]="max()"
           (input)="onInput($event)"
+          (blur)="markTouched()"
         />
       </div>
       @if (showTicks()) {
@@ -68,7 +83,9 @@ import {
   `,
   styleUrl: './neu-slider.component.scss',
 })
-export class NeuSliderComponent {
+export class NeuSliderComponent implements ControlValueAccessor {
+  private readonly directionality = inject(Directionality);
+  readonly direction = computed(() => this.directionality.valueSignal());
   private static _idCounter = 0;
   protected readonly sliderId = `neu-slider-${++NeuSliderComponent._idCounter}`;
 
@@ -102,14 +119,51 @@ export class NeuSliderComponent {
   /** Emite al mover el slider / Emits when the slider moves */
   valueChange = output<number>();
 
+  readonly cvaDisabled = signal(false);
+  private readonly cvaActive = signal(false);
+  private readonly cvaValue = signal(0);
+  readonly currentValue = computed(() => (this.cvaActive() ? this.cvaValue() : this.value()));
+  readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
+
+  private onChange: (value: number) => void = () => {};
+  private onTouched: () => void = () => {};
+
   readonly fillPercent = computed(() => {
     const range = this.max() - this.min();
     if (range === 0) return 0;
-    return ((this.value() - this.min()) / range) * 100;
+    return ((this.currentValue() - this.min()) / range) * 100;
   });
 
+  writeValue(value: number | null): void {
+    this.cvaActive.set(true);
+    this.cvaValue.set(this.clamp(value ?? this.min()));
+  }
+
+  registerOnChange(fn: (value: number) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(disabled: boolean): void {
+    this.cvaDisabled.set(disabled);
+  }
+
+  markTouched(): void {
+    this.onTouched();
+  }
+
   onInput(event: Event): void {
-    const val = Number((event.target as HTMLInputElement).value);
+    if (this.isDisabled()) return;
+    const val = this.clamp(Number((event.target as HTMLInputElement).value));
+    if (this.cvaActive()) this.cvaValue.set(val);
+    this.onChange(val);
     this.valueChange.emit(val);
+  }
+
+  private clamp(value: number): number {
+    return Math.min(this.max(), Math.max(this.min(), value));
   }
 }

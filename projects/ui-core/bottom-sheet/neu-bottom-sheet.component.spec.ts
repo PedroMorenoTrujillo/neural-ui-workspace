@@ -5,7 +5,9 @@ describe('NeuBottomSheetComponent', () => {
   let fixture: ComponentFixture<NeuBottomSheetComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [NeuBottomSheetComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [NeuBottomSheetComponent],
+    }).compileComponents();
     fixture = TestBed.createComponent(NeuBottomSheetComponent);
   });
 
@@ -59,9 +61,15 @@ describe('NeuBottomSheetComponent', () => {
     const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
     expect(dialog.getAttribute('aria-label')).toBe('Action sheet');
     expect(dialog.classList).toContain('neu-bottom-sheet--full');
-    expect(fixture.nativeElement.querySelector('.neu-bottom-sheet__backdrop')?.getAttribute('aria-label')).toBe('Dismiss');
+    expect(
+      fixture.nativeElement
+        .querySelector('.neu-bottom-sheet__backdrop')
+        ?.getAttribute('aria-label'),
+    ).toBe('Dismiss');
 
-    (fixture.nativeElement.querySelector('.neu-bottom-sheet__backdrop') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector('.neu-bottom-sheet__backdrop') as HTMLButtonElement
+    ).click();
     (fixture.nativeElement.querySelector('.neu-bottom-sheet__close') as HTMLButtonElement).click();
     expect(closed).toHaveBeenCalledTimes(2);
   });
@@ -71,7 +79,9 @@ describe('NeuBottomSheetComponent', () => {
     fixture.componentRef.setInput('title', 'Fallback title');
     fixture.componentRef.setInput('backdrop', false);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[role="dialog"]')?.getAttribute('aria-label')).toBe('Fallback title');
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')?.getAttribute('aria-label')).toBe(
+      'Fallback title',
+    );
     expect(fixture.nativeElement.querySelector('.neu-bottom-sheet__backdrop')).toBeNull();
 
     fixture.componentRef.setInput('title', '');

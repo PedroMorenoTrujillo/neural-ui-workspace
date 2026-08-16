@@ -1,7 +1,11 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { NeuFieldsetComponent, NeuPanelComponent, NeuScrollAreaComponent } from './neu-panel.component';
+import {
+  NeuFieldsetComponent,
+  NeuPanelComponent,
+  NeuScrollAreaComponent,
+} from './neu-panel.component';
 
 describe('NeuPanelComponent', () => {
   let fixture: ComponentFixture<NeuPanelComponent>;
@@ -51,12 +55,16 @@ class PanelProjectionHostComponent {}
 
 describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
   it('renders optional legend and projects fieldset and scroll content', async () => {
-    await TestBed.configureTestingModule({ imports: [PanelProjectionHostComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [PanelProjectionHostComponent],
+    }).compileComponents();
     const fixture = TestBed.createComponent(PanelProjectionHostComponent);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('legend')?.textContent).toContain('Details');
     expect(fixture.nativeElement.querySelector('neu-fieldset input')).toBeTruthy();
-    const viewport = fixture.nativeElement.querySelector('.neu-scroll-area__viewport') as HTMLElement;
+    const viewport = fixture.nativeElement.querySelector(
+      '.neu-scroll-area__viewport',
+    ) as HTMLElement;
     expect(viewport.style.maxHeight).toBe('12rem');
     expect(viewport.textContent).toContain('Scrollable');
   });

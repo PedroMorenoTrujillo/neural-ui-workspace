@@ -4,7 +4,8 @@
   inline-size: max-content;
   min-inline-size: 0;
   max-inline-size: 100%;
-  max-block-size: 2.4em;
+  // Two lines must still fit when users override line-height to 1.5 (WCAG 1.4.12).
+  max-block-size: 3em;
   overflow: hidden;
   overflow-wrap: anywhere;
   line-height: 1.2;

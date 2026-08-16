@@ -9,7 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<!-- next release -->
+### Added
+
+- Expanded the public testing entry point to 62 Component Harnesses, covering every interactive entry point; the remaining 19 entry points are explicitly classified as non-interactive.
+- Added reproducible local release evidence for the 81 entry points across WCAG 2.2 AA automation, dynamic RTL, responsive layouts, browser performance, Lighthouse CI, SSR, Angular 19–22 compatibility, public contracts, bundle budgets, licenses and governance.
+- Added a versioned quality matrix and manual assistive-technology protocol for NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack. JAWS is explicitly not claimed because it is paid.
+
+### Changed
+
+- Replaced the income-restricted ApexCharts runtime and Angular wrapper with direct Chart.js 4.5.1 rendering under the MIT license. `NeuChart` keeps its selector, inputs and documented chart types, adds an accessible data table fallback and no longer requires charting peer dependencies.
+- Made the showcase fully localizable, responsive and direction-aware, with zero static inline styles and an audited allowlist for the 14 runtime style bindings that require computed values.
+- Split the reproducible automated release verification from the final strict human-evidence gate, while keeping the latter mandatory for publication.
+
+### Fixed
+
+- Rating keyboard navigation now uses the real Angular arrow-key event bindings, one roving tab stop, Home/End, wrapping, vertical arrows and direction-aware horizontal behavior in RTL.
+- Rendered IDs in tags, modal, tree select, tooltip, password, input mask and listbox now use Angular CDK's hydration-stable ID generator instead of random values.
+- Pagination now exposes localizable navigation, previous-page, next-page and page labels instead of hard-coded Spanish announcements.
+- Dark-mode pagination now reserves the accent fill for the active page, restoring a clear visual distinction from inactive pages.
+- The local accessibility auditor now fails fast when its server cannot start and prevents an older concurrent run from overwriting newer evidence.
 
 ## [1.12.1] - 2026-08-15
 

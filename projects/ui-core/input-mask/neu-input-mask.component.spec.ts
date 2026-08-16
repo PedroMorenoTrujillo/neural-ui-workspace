@@ -75,7 +75,9 @@ describe('NeuInputMaskComponent', () => {
     const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
     expect(fixture.nativeElement.querySelector('label')?.textContent).toContain('Phone');
     expect(input.placeholder).toBe('000000');
-    expect(fixture.nativeElement.querySelector('.neu-input-mask__hint')?.textContent).toContain('Digits only');
+    expect(fixture.nativeElement.querySelector('.neu-input-mask__hint')?.textContent).toContain(
+      'Digits only',
+    );
 
     input.value = '123456';
     input.dispatchEvent(new Event('input'));

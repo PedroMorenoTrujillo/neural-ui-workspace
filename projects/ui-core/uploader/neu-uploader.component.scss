@@ -31,7 +31,9 @@ $uploader-height-lg: 208px;
 }
 
 .neu-uploader__label {
-  display: block;
+  display: flex;
+  align-items: center;
+  min-height: 24px;
   font-size: var(--neu-text-sm);
   font-weight: 500;
   color: var(--neu-text-muted);

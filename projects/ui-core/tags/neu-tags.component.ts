@@ -1,18 +1,42 @@
-import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, computed, contentChild, forwardRef, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Directive,
+  TemplateRef,
+  ViewEncapsulation,
+  computed,
+  contentChild,
+  forwardRef,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { _IdGenerator } from '@angular/cdk/a11y';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-export interface NeuTagSuggestion { label: string; value: string; data?: unknown; }
+export interface NeuTagSuggestion {
+  label: string;
+  value: string;
+  data?: unknown;
+}
 @Directive({ selector: 'ng-template[neuTagItem]' })
-export class NeuTagItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: string; remove: () => void }>) {} }
+export class NeuTagItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: string; remove: () => void }>) {}
+}
 @Directive({ selector: 'ng-template[neuTagSuggestion]' })
-export class NeuTagSuggestionDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTagSuggestion }>) {} }
+export class NeuTagSuggestionDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTagSuggestion }>) {}
+}
 
 @Component({
   selector: 'neu-tags',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NeuTagsComponent), multi: true }],
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NeuTagsComponent), multi: true },
+  ],
   host: { class: 'neu-tags' },
   template: `
     @if (label()) {
@@ -21,8 +45,17 @@ export class NeuTagSuggestionDirective { constructor(readonly templateRef: Templ
     <div class="neu-tags__box" [class.neu-tags__box--disabled]="disabled() || cvaDisabled()">
       @for (tag of value(); track tag) {
         <span class="neu-tags__tag">
-          @if (tagTpl()) { <ng-container [ngTemplateOutlet]="tagTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: tag, remove: remove.bind(this, tag) }" /> } @else { {{ tag }} }
-          <button type="button" [attr.aria-label]="removeLabel() + ' ' + tag" (click)="remove(tag)">×</button>
+          @if (tagTpl()) {
+            <ng-container
+              [ngTemplateOutlet]="tagTpl()!.templateRef"
+              [ngTemplateOutletContext]="{ $implicit: tag, remove: remove.bind(this, tag) }"
+            />
+          } @else {
+            {{ tag }}
+          }
+          <button type="button" [attr.aria-label]="removeLabel() + ' ' + tag" (click)="remove(tag)">
+            ×
+          </button>
         </span>
       }
       <input
@@ -38,7 +71,16 @@ export class NeuTagSuggestionDirective { constructor(readonly templateRef: Templ
     @if (suggestions().length && draft()) {
       <div class="neu-tags__suggestions">
         @for (suggestion of filteredSuggestions(); track suggestion.value) {
-          <button type="button" (click)="add(suggestion.value)">@if (suggestionTpl()) { <ng-container [ngTemplateOutlet]="suggestionTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: suggestion }" /> } @else { {{ suggestion.label }} }</button>
+          <button type="button" (click)="add(suggestion.value)">
+            @if (suggestionTpl()) {
+              <ng-container
+                [ngTemplateOutlet]="suggestionTpl()!.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: suggestion }"
+              />
+            } @else {
+              {{ suggestion.label }}
+            }
+          </button>
         }
       </div>
     }
@@ -55,13 +97,15 @@ export class NeuTagsComponent implements ControlValueAccessor {
   readonly separators = input<string[]>(['Enter', ',']);
   readonly removeLabel = input('Remove');
   readonly valueChange = output<string[]>();
-  readonly inputId = `neu-tags-${Math.random().toString(36).slice(2)}`;
+  readonly inputId = inject(_IdGenerator).getId('neu-tags-');
   readonly value = signal<string[]>([]);
   readonly draft = signal('');
   readonly cvaDisabled = signal(false);
   readonly filteredSuggestions = computed(() => {
     const q = this.draft().toLowerCase();
-    return this.suggestions().map((item) => typeof item === 'string' ? { label: item, value: item } : item).filter((item) => item.label.toLowerCase().includes(q) && !this.value().includes(item.value));
+    return this.suggestions()
+      .map((item) => (typeof item === 'string' ? { label: item, value: item } : item))
+      .filter((item) => item.label.toLowerCase().includes(q) && !this.value().includes(item.value));
   });
   private onChange: (value: string[]) => void = () => {};
   private onTouched: () => void = () => {};

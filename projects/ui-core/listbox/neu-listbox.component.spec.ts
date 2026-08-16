@@ -4,6 +4,9 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
 import {
   NeuListboxComponent,
+  NeuListboxEmptyDirective,
+  NeuListboxFooterDirective,
+  NeuListboxHeaderDirective,
   NeuListboxItemDirective,
   NeuListboxOption,
 } from './neu-listbox.component';
@@ -30,7 +33,9 @@ describe('NeuListboxComponent', () => {
     const listbox = fixture.nativeElement.querySelector('[role="listbox"]') as HTMLElement;
     expect(fixture.nativeElement.textContent).toContain('Alpha');
     expect(listbox.getAttribute('aria-labelledby')).toContain('neu-listbox-label');
-    expect(fixture.nativeElement.querySelector('.neu-listbox__hint')?.textContent).toContain('Choose one');
+    expect(fixture.nativeElement.querySelector('.neu-listbox__hint')?.textContent).toContain(
+      'Choose one',
+    );
   });
 
   it('implements the CVA selection, touched and disabled contracts', () => {
@@ -104,19 +109,30 @@ describe('NeuListboxComponent', () => {
     (fixture.nativeElement.querySelector('.neu-listbox__option') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(fixture.componentInstance.values()).toEqual(['a']);
-    expect(fixture.nativeElement.querySelector('.neu-listbox__option')?.getAttribute('aria-selected')).toBe('true');
+    expect(
+      fixture.nativeElement.querySelector('.neu-listbox__option')?.getAttribute('aria-selected'),
+    ).toBe('true');
   });
 
-  it('uses DOM keyboard navigation, active boundaries and multiselect semantics', () => {
+  it('uses an APG active descendant, skips disabled options and exposes multiselect semantics', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('multiple', true);
     fixture.detectChanges();
     const listbox = fixture.nativeElement.querySelector('[role="listbox"]') as HTMLElement;
+    const optionButtons = Array.from(
+      fixture.nativeElement.querySelectorAll('[role="option"]'),
+    ) as HTMLButtonElement[];
     expect(listbox.getAttribute('aria-multiselectable')).toBe('true');
-    component.activeIndex.set(2);
+    expect(listbox.getAttribute('aria-activedescendant')).toBe(optionButtons[0].id);
+    expect(optionButtons.map((button) => button.tabIndex)).toEqual([-1, -1, -1]);
+
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    expect(component.activeIndex()).toBe(2);
-    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(component.activeIndex()).toBe(1);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(component.activeIndex()).toBe(1);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(component.activeIndex()).toBe(0);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
     expect(component.activeIndex()).toBe(1);
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     expect(component.values()).toEqual(['b']);
@@ -128,7 +144,9 @@ describe('NeuListboxComponent', () => {
     expect(component.values()).toEqual(['a', 'b']);
     component.setDisabledState(true);
     fixture.detectChanges();
-    const buttons = fixture.nativeElement.querySelectorAll('.neu-listbox__option') as NodeListOf<HTMLButtonElement>;
+    const buttons = fixture.nativeElement.querySelectorAll(
+      '.neu-listbox__option',
+    ) as NodeListOf<HTMLButtonElement>;
     expect(buttons[0].disabled).toBe(true);
     expect(buttons[2].disabled).toBe(true);
   });
@@ -146,13 +164,45 @@ describe('NeuListboxComponent', () => {
       readonly options = [{ label: 'Alpha', value: 'a' }];
     }
 
-    await TestBed.resetTestingModule().configureTestingModule({ imports: [ItemTemplateHostComponent] }).compileComponents();
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ imports: [ItemTemplateHostComponent] })
+      .compileComponents();
     const host = TestBed.createComponent(ItemTemplateHostComponent);
     host.detectChanges();
     expect(host.nativeElement.textContent).toContain('Template: Alpha');
   });
 
-  it('keyboard selection ignores an active index with no option', () => {
+  it('renders projected header, footer and empty templates', async () => {
+    @Component({
+      imports: [
+        NeuListboxComponent,
+        NeuListboxEmptyDirective,
+        NeuListboxFooterDirective,
+        NeuListboxHeaderDirective,
+      ],
+      template: `
+        <neu-listbox [options]="options">
+          <ng-template neuListboxHeader>Custom header</ng-template>
+          <ng-template neuListboxFooter>Custom footer</ng-template>
+          <ng-template neuListboxEmpty>Custom empty</ng-template>
+        </neu-listbox>
+      `,
+    })
+    class ChromeTemplateHostComponent {
+      readonly options: NeuListboxOption[] = [];
+    }
+
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ imports: [ChromeTemplateHostComponent] })
+      .compileComponents();
+    const host = TestBed.createComponent(ChromeTemplateHostComponent);
+    host.detectChanges();
+    expect(host.nativeElement.textContent).toContain('Custom header');
+    expect(host.nativeElement.textContent).toContain('Custom footer');
+    expect(host.nativeElement.textContent).toContain('Custom empty');
+  });
+
+  it('normalizes a stale active index to the first enabled option', () => {
     const component = fixture.componentInstance;
     component.activeIndex.set(99);
     const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
@@ -161,7 +211,21 @@ describe('NeuListboxComponent', () => {
     component.onKeyDown(event);
 
     expect(prevent).toHaveBeenCalled();
-    expect(component.values()).toEqual([]);
+    expect(component.values()).toEqual(['a']);
+  });
+
+  it('removes a disabled listbox from the tab order and ignores keyboard input', () => {
+    fixture.componentInstance.setDisabledState(true);
+    fixture.detectChanges();
+    const listbox = fixture.nativeElement.querySelector('[role="listbox"]') as HTMLElement;
+    const event = new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true });
+    const prevent = vi.spyOn(event, 'preventDefault');
+
+    fixture.componentInstance.onKeyDown(event);
+
+    expect(listbox.tabIndex).toBe(-1);
+    expect(listbox.getAttribute('aria-disabled')).toBe('true');
+    expect(prevent).not.toHaveBeenCalled();
   });
 
   it('single selection before CVA registration uses default callbacks safely', () => {

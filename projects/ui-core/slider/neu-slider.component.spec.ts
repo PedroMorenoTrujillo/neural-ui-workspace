@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { Directionality } from '@angular/cdk/bidi';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuSliderComponent } from './neu-slider.component';
 
 @Component({
@@ -24,6 +27,14 @@ class TestHostComponent {
   showValue = false;
   disabled = false;
   lastValue: number | undefined;
+}
+
+@Component({
+  template: `<neu-slider [formControl]="control" />`,
+  imports: [NeuSliderComponent, ReactiveFormsModule],
+})
+class SliderFormHostComponent {
+  readonly control = new FormControl(25, { nonNullable: true });
 }
 
 describe('NeuSliderComponent', () => {
@@ -145,6 +156,21 @@ describe('NeuSliderComponent', () => {
     expect(df.componentInstance.fillPercent()).toBe(0);
   });
 
+  it('updates its logical fill direction dynamically in RTL', () => {
+    const df = TestBed.createComponent(NeuSliderComponent);
+    df.componentRef.setInput('value', 40);
+    df.detectChanges();
+    const fill = df.nativeElement.querySelector('.neu-slider__fill') as HTMLElement;
+
+    expect(df.nativeElement.getAttribute('dir')).toBe('ltr');
+    expect(fill.style.inlineSize).toBe('40%');
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    df.detectChanges();
+    expect(df.nativeElement.getAttribute('dir')).toBe('rtl');
+    expect(fill.style.inlineSize).toBe('40%');
+  });
+
   it('disabled input adds disabled class to inner div', async () => {
     const df = TestBed.createComponent(NeuSliderComponent);
     df.componentRef.setInput('disabled', true);
@@ -161,12 +187,28 @@ describe('NeuSliderComponent', () => {
     expect(df.nativeElement.querySelector('.neu-slider--disabled')).toBeNull();
   });
 
-  it('onBlur should call registerOnTouched callback', () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
+  it('integrates with reactive forms and propagates value, touched and disabled state', () => {
+    const df = TestBed.createComponent(SliderFormHostComponent);
     df.detectChanges();
-    // NeuSliderComponent is NOT a CVA - onBlur is not available
-    // Just verify the component exists and native blur works
-    const inputEl = df.nativeElement.querySelector('input[type="range"]');
-    expect(() => inputEl?.dispatchEvent(new Event('blur'))).not.toThrow();
+    const slider = df.debugElement.query(By.directive(NeuSliderComponent))
+      .componentInstance as NeuSliderComponent;
+    const input = df.nativeElement.querySelector('input[type="range"]') as HTMLInputElement;
+
+    expect(slider.currentValue()).toBe(25);
+    input.value = '60';
+    input.dispatchEvent(new Event('input'));
+    expect(df.componentInstance.control.value).toBe(60);
+
+    input.dispatchEvent(new Event('blur'));
+    expect(df.componentInstance.control.touched).toBe(true);
+
+    df.componentInstance.control.setValue(40);
+    df.detectChanges();
+    expect(slider.currentValue()).toBe(40);
+
+    df.componentInstance.control.disable();
+    df.detectChanges();
+    expect(slider.cvaDisabled()).toBe(true);
+    expect(input.disabled).toBe(true);
   });
 });

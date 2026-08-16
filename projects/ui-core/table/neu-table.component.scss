@@ -313,8 +313,8 @@
 .neu-table__resize-handle {
   position: absolute;
   top: 0;
-  inset-inline-end: -4px;
-  width: 12px;
+  inset-inline-end: -10px;
+  width: 24px;
   height: 100%;
   padding: 0;
   border: 0;
@@ -772,6 +772,10 @@
 
   &--open svg {
     transform: rotate(90deg);
+  }
+
+  &--open.neu-table__expand-btn--rtl svg {
+    transform: rotate(-90deg);
   }
 }
 

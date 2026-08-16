@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NeuDateInputComponent } from './neu-date-input.component';
+import { Directionality } from '@angular/cdk/bidi';
 
 // ── Host para integración con Reactive Forms ──────────────────────────────────
 
@@ -29,6 +30,24 @@ describe('NeuDateInputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
     document.documentElement.lang = 'es';
+  });
+
+  it('mirrors calendar arrows when direction changes dynamically', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.detectChanges();
+
+    expect(f.componentInstance._previousArrow()).toBe('‹');
+    expect(f.componentInstance._nextArrow()).toBe('›');
+    expect(f.componentInstance._previousChevronPoints()).toBe('15 18 9 12 15 6');
+    expect(f.componentInstance._nextChevronPoints()).toBe('9 18 15 12 9 6');
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    f.detectChanges();
+
+    expect(f.componentInstance._previousArrow()).toBe('›');
+    expect(f.componentInstance._nextArrow()).toBe('‹');
+    expect(f.componentInstance._previousChevronPoints()).toBe('9 18 15 12 9 6');
+    expect(f.componentInstance._nextChevronPoints()).toBe('15 18 9 12 15 6');
   });
 
   // ── Rendering básico ─────────────────────────────────────────────────────
@@ -983,7 +1002,9 @@ describe('NeuDateInputComponent', () => {
   it('drives every range overlay action through the mounted panel', async () => {
     const f = TestBed.createComponent(NeuDateInputComponent);
     f.componentRef.setInput('type', 'range');
-    f.componentRef.setInput('presets', [{ label: 'This week', range: { start: new Date(2026, 0, 5), end: new Date(2026, 0, 9) } }]);
+    f.componentRef.setInput('presets', [
+      { label: 'This week', range: { start: new Date(2026, 0, 5), end: new Date(2026, 0, 9) } },
+    ]);
     f.detectChanges();
     (f.nativeElement.querySelector('.neu-drp__trigger') as HTMLButtonElement).click();
     f.detectChanges();
@@ -998,7 +1019,9 @@ describe('NeuDateInputComponent', () => {
     cells[9].dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     cells[9].click();
     const calendars = panel.querySelectorAll('.neu-drp__cal-grid');
-    const rightCells = calendars[1]?.querySelectorAll('.neu-drp__cell') as NodeListOf<HTMLButtonElement> | undefined;
+    const rightCells = calendars[1]?.querySelectorAll('.neu-drp__cell') as
+      | NodeListOf<HTMLButtonElement>
+      | undefined;
     rightCells?.[8]?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     rightCells?.[8]?.click();
     (panel.querySelector('.neu-drp__preset') as HTMLButtonElement).click();
@@ -1039,23 +1062,39 @@ describe('NeuDateInputComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
-    const arrows = panel.querySelectorAll('.neu-date-input__cal-arrow') as NodeListOf<HTMLButtonElement>;
+    const arrows = panel.querySelectorAll(
+      '.neu-date-input__cal-arrow',
+    ) as NodeListOf<HTMLButtonElement>;
     arrows[0].click();
     arrows[1].click();
-    const pickers = panel.querySelectorAll('.neu-date-input__picker') as NodeListOf<HTMLSelectElement>;
+    const pickers = panel.querySelectorAll(
+      '.neu-date-input__picker',
+    ) as NodeListOf<HTMLSelectElement>;
     pickers[0].value = '6';
     pickers[0].dispatchEvent(new Event('change', { bubbles: true }));
     pickers[1].value = '2030';
     pickers[1].dispatchEvent(new Event('change', { bubbles: true }));
     (panel.querySelector('.neu-date-input__cal-day:not([disabled])') as HTMLButtonElement).click();
     const drums = panel.querySelectorAll('.neu-date-input__drum') as NodeListOf<HTMLElement>;
-    const drumButtons = panel.querySelectorAll('.neu-date-input__drum-arrow') as NodeListOf<HTMLButtonElement>;
+    const drumButtons = panel.querySelectorAll(
+      '.neu-date-input__drum-arrow',
+    ) as NodeListOf<HTMLButtonElement>;
     drumButtons.forEach((button) => button.click());
-    drums[0].querySelector('.neu-date-input__drum-item--adjacent')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    drums[1].querySelector('.neu-date-input__drum-item--adjacent')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    drums[0].querySelector('.neu-date-input__drum-track')?.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 10 }));
-    drums[1].querySelector('.neu-date-input__drum-track')?.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -10 }));
-    const footer = panel.querySelectorAll('.neu-date-input__cal-footer-btn') as NodeListOf<HTMLButtonElement>;
+    drums[0]
+      .querySelector('.neu-date-input__drum-item--adjacent')
+      ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    drums[1]
+      .querySelector('.neu-date-input__drum-item--adjacent')
+      ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    drums[0]
+      .querySelector('.neu-date-input__drum-track')
+      ?.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 10 }));
+    drums[1]
+      .querySelector('.neu-date-input__drum-track')
+      ?.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -10 }));
+    const footer = panel.querySelectorAll(
+      '.neu-date-input__cal-footer-btn',
+    ) as NodeListOf<HTMLButtonElement>;
     footer.forEach((button) => button.click());
     f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(f.componentInstance.isOpen()).toBe(false);
@@ -1142,7 +1181,11 @@ describe('NeuDateInputComponent advanced date selection', () => {
     component.writeValue('2026-01-10, 2026-01-12');
     expect(component._selectedDates()).toEqual(['2026-01-10', '2026-01-12']);
     component.selectDay({
-      date: new Date(2026, 0, 10), inMonth: true, isToday: false, isSelected: true, disabled: false,
+      date: new Date(2026, 0, 10),
+      inMonth: true,
+      isToday: false,
+      isSelected: true,
+      disabled: false,
     });
     expect(component._selectedDates()).toEqual(['2026-01-12']);
     expect(onChange).toHaveBeenLastCalledWith(['2026-01-12']);
@@ -1171,7 +1214,8 @@ describe('NeuDateInputComponent advanced date selection', () => {
     const touched = vi.fn();
     component.registerOnTouched(touched);
     component._applyPreset({
-      label: 'Today', range: () => ({ start: new Date(2026, 2, 1), end: null }),
+      label: 'Today',
+      range: () => ({ start: new Date(2026, 2, 1), end: null }),
     });
     expect(component._pickStart()).toEqual(new Date(2026, 2, 1));
     component.setViewMonth('invalid');

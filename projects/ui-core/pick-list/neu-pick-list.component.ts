@@ -1,5 +1,18 @@
-import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, contentChild, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Directive,
+  TemplateRef,
+  ViewEncapsulation,
+  computed,
+  contentChild,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { Directionality } from '@angular/cdk/bidi';
 
 export interface NeuTransferItem {
   value: string;
@@ -8,9 +21,19 @@ export interface NeuTransferItem {
   data?: unknown;
 }
 @Directive({ selector: 'ng-template[neuPickListItem]' })
-export class NeuPickListItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTransferItem; selected: boolean; location: 'source' | 'target' }>) {} }
+export class NeuPickListItemDirective {
+  constructor(
+    readonly templateRef: TemplateRef<{
+      $implicit: NeuTransferItem;
+      selected: boolean;
+      location: 'source' | 'target';
+    }>,
+  ) {}
+}
 @Directive({ selector: 'ng-template[neuOrderListItem]' })
-export class NeuOrderListItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTransferItem; index: number }>) {} }
+export class NeuOrderListItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTransferItem; index: number }>) {}
+}
 
 @Component({
   selector: 'neu-pick-list',
@@ -22,20 +45,66 @@ export class NeuOrderListItemDirective { constructor(readonly templateRef: Templ
     <section class="neu-pick-list__column">
       <h3>{{ sourceHeader() }}</h3>
       @for (item of source(); track item.value) {
-        <button type="button" [class.is-selected]="sourceSelection().has(item.value)" [disabled]="item.disabled" (click)="toggleSource(item.value)">
-          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, selected: sourceSelection().has(item.value), location: 'source' }" /> } @else { {{ item.label }} }
+        <button
+          type="button"
+          [class.is-selected]="sourceSelection().has(item.value)"
+          [disabled]="item.disabled"
+          (click)="toggleSource(item.value)"
+        >
+          @if (itemTpl()) {
+            <ng-container
+              [ngTemplateOutlet]="itemTpl()!.templateRef"
+              [ngTemplateOutletContext]="{
+                $implicit: item,
+                selected: sourceSelection().has(item.value),
+                location: 'source',
+              }"
+            />
+          } @else {
+            {{ item.label }}
+          }
         </button>
       }
     </section>
     <div class="neu-pick-list__actions">
-      <button type="button" (click)="moveToTarget()" [disabled]="!sourceSelection().size">›</button>
-      <button type="button" (click)="moveToSource()" [disabled]="!targetSelection().size">‹</button>
+      <button
+        type="button"
+        (click)="moveToTarget()"
+        [disabled]="!sourceSelection().size"
+        [attr.aria-label]="moveToTargetLabel()"
+      >
+        {{ moveToTargetArrow() }}
+      </button>
+      <button
+        type="button"
+        (click)="moveToSource()"
+        [disabled]="!targetSelection().size"
+        [attr.aria-label]="moveToSourceLabel()"
+      >
+        {{ moveToSourceArrow() }}
+      </button>
     </div>
     <section class="neu-pick-list__column">
       <h3>{{ targetHeader() }}</h3>
       @for (item of target(); track item.value) {
-        <button type="button" [class.is-selected]="targetSelection().has(item.value)" [disabled]="item.disabled" (click)="toggleTarget(item.value)">
-          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, selected: targetSelection().has(item.value), location: 'target' }" /> } @else { {{ item.label }} }
+        <button
+          type="button"
+          [class.is-selected]="targetSelection().has(item.value)"
+          [disabled]="item.disabled"
+          (click)="toggleTarget(item.value)"
+        >
+          @if (itemTpl()) {
+            <ng-container
+              [ngTemplateOutlet]="itemTpl()!.templateRef"
+              [ngTemplateOutletContext]="{
+                $implicit: item,
+                selected: targetSelection().has(item.value),
+                location: 'target',
+              }"
+            />
+          } @else {
+            {{ item.label }}
+          }
         </button>
       }
     </section>
@@ -43,16 +112,25 @@ export class NeuOrderListItemDirective { constructor(readonly templateRef: Templ
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuPickListComponent {
+  private readonly directionality = inject(Directionality);
   readonly itemTpl = contentChild(NeuPickListItemDirective);
   readonly source = input<NeuTransferItem[]>([]);
   readonly target = input<NeuTransferItem[]>([]);
   readonly sourceHeader = input('Available');
   readonly targetHeader = input('Selected');
+  readonly moveToTargetLabel = input('Move selected items to target');
+  readonly moveToSourceLabel = input('Move selected items to source');
   readonly sourceChange = output<NeuTransferItem[]>();
   readonly targetChange = output<NeuTransferItem[]>();
   readonly itemsChange = output<{ source: NeuTransferItem[]; target: NeuTransferItem[] }>();
   readonly sourceSelection = signal(new Set<string>());
   readonly targetSelection = signal(new Set<string>());
+  readonly moveToTargetArrow = computed(() =>
+    this.directionality.valueSignal() === 'rtl' ? '‹' : '›',
+  );
+  readonly moveToSourceArrow = computed(() =>
+    this.directionality.valueSignal() === 'rtl' ? '›' : '‹',
+  );
 
   toggleSource(value: string): void {
     this.sourceSelection.set(this.toggleSet(this.sourceSelection(), value));
@@ -105,9 +183,30 @@ export class NeuPickListComponent {
     <div class="neu-order-list__items">
       @for (item of items(); track item.value; let i = $index) {
         <div class="neu-order-list__item">
-          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, index: i }" /> } @else { <span>{{ item.label }}</span> }
-          <button type="button" [disabled]="i === 0" (click)="move(i, -1)">↑</button>
-          <button type="button" [disabled]="i === items().length - 1" (click)="move(i, 1)">↓</button>
+          @if (itemTpl()) {
+            <ng-container
+              [ngTemplateOutlet]="itemTpl()!.templateRef"
+              [ngTemplateOutletContext]="{ $implicit: item, index: i }"
+            />
+          } @else {
+            <span>{{ item.label }}</span>
+          }
+          <button
+            type="button"
+            [disabled]="i === 0"
+            [attr.aria-label]="moveUpLabel() + ': ' + item.label"
+            (click)="move(i, -1)"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            [disabled]="i === items().length - 1"
+            [attr.aria-label]="moveDownLabel() + ': ' + item.label"
+            (click)="move(i, 1)"
+          >
+            ↓
+          </button>
         </div>
       }
     </div>
@@ -117,6 +216,8 @@ export class NeuPickListComponent {
 export class NeuOrderListComponent {
   readonly itemTpl = contentChild(NeuOrderListItemDirective);
   readonly items = input<NeuTransferItem[]>([]);
+  readonly moveUpLabel = input('Move up');
+  readonly moveDownLabel = input('Move down');
   readonly orderChange = output<NeuTransferItem[]>();
 
   move(index: number, direction: -1 | 1): void {

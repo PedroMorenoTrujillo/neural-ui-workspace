@@ -446,7 +446,9 @@ describe('NeuUploaderComponent', () => {
     const { f, comp } = mk();
     const input = f.nativeElement.querySelector('input[type="file"]') as HTMLInputElement;
     const pickerClick = vi.spyOn(input, 'click');
-    const action = f.nativeElement.querySelector('.neu-uploader__actions button') as HTMLButtonElement;
+    const action = f.nativeElement.querySelector(
+      '.neu-uploader__actions button',
+    ) as HTMLButtonElement;
     action.click();
     expect(pickerClick).toHaveBeenCalled();
 
@@ -583,8 +585,9 @@ describe('NeuUploaderComponent file states', () => {
 
     const fixture = TestBed.createComponent(PreviewHostComponent);
     fixture.detectChanges();
-    const uploader = fixture.debugElement.query((debugElement) => debugElement.componentInstance instanceof NeuUploaderComponent)
-      .componentInstance as NeuUploaderComponent;
+    const uploader = fixture.debugElement.query(
+      (debugElement) => debugElement.componentInstance instanceof NeuUploaderComponent,
+    ).componentInstance as NeuUploaderComponent;
     uploader.writeValue([createFile('preview.png'), createFile('second.png')]);
     const firstId = (uploader as any).fileItems()[0].id;
     uploader.setFileState(firstId, { status: 'uploading', progress: 50 });
@@ -592,7 +595,9 @@ describe('NeuUploaderComponent file states', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Preview: preview.png');
     expect(fixture.nativeElement.textContent).toContain('2/2');
-    expect(fixture.nativeElement.querySelectorAll('.neu-uploader__item neu-progress-bar').length).toBe(1);
+    expect(
+      fixture.nativeElement.querySelectorAll('.neu-uploader__item neu-progress-bar').length,
+    ).toBe(1);
   });
 });
 

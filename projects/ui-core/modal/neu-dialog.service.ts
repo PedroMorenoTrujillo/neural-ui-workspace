@@ -30,7 +30,7 @@ export class NeuDialogService {
         'neu-dialog-panel',
         `neu-dialog-panel--${config?.size ?? 'md'}`,
         `neu-dialog-panel--layout-${config?.layout ?? 'auto'}`,
-        ...(config?.responsive ?? true ? ['neu-dialog-panel--responsive'] : []),
+        ...((config?.responsive ?? true) ? ['neu-dialog-panel--responsive'] : []),
       ],
       backdropClass: 'neu-dialog-backdrop',
       maxWidth: 'none',

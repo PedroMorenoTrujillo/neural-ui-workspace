@@ -14,9 +14,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 > Building a full admin product? Try [Neural Admin Pro](https://neural-ui-admin-pro.vercel.app/login), a premium Angular dashboard template built with Neural UI and ready to connect to your own backend.
 
-<p align="center">
-  <img src=".github/assets/lighthouse.png" alt="Lighthouse scores: Performance 98, Accessibility 96, Best Practices 100, SEO 91" width="480" />
-</p>
+> Performance evidence is produced by a free, local laboratory using browser Performance APIs, Lighthouse CI and Size Limit. Results are regression budgets, not field-data claims or an adoption comparison with other libraries.
 
 ---
 
@@ -37,15 +35,19 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 <!-- neural-ui-metrics:start -->
 - **Version:** 1.12.1
 - **Entry points:** 81
-- **Automated tests:** 2095
-- **Coverage:** 97.52% statements · 96.83% branches · 95.48% functions · 99.58% lines
+- **Automated tests:** 2168
+- **Coverage:** 97.73% statements · 95.61% branches · 96.65% functions · 98.98% lines
+- **Public component harnesses:** 62 interactive entry points · 19 justified N/A
+- **Showcase evidence:** 82 demos · 79 API pages · 348/348 accessibility · 261 RTL · 2610 responsive checks
+- **Quality matrix:** 1194 PASS · 108 N/A · 480 pending human validation
+- **Visual evidence:** 428 tracked snapshots · explicit human approval required
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
 - Standalone + OnPush component model
 - BEM as the required styling convention for component and demo SCSS
 - Zoneless-oriented test setup
-- Global coverage above 90% in all main metrics and across covered `ui-core` source files
+- Global coverage above the enforced 95% floor in every main metric
 - Strong accessibility baseline validated in showcase and reinforced in core components
 
 For the current quality checklist and accessibility audit snapshot, see [projects/ui-core/QUALITY_STATUS.md](projects/ui-core/QUALITY_STATUS.md).
@@ -55,7 +57,7 @@ For the current quality checklist and accessibility audit snapshot, see [project
 ## Installation
 
 ```bash
-npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
+npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide
 ```
 
 ---
@@ -76,13 +78,13 @@ ng generate @neural-ui/core:crud-page customers
 
 La configuración automática es aditiva e idempotente: conserva providers y estilos existentes. Los archivos generados no se sustituyen salvo que se use `--force`; `--skip-styles` mantiene el registro de estilos manual.
 
-| Schematic | Public options / Opciones públicas | Result / Resultado | Revert / Reversión |
-| --- | --- | --- | --- |
-| `ng add @neural-ui/core` | `--project`, `--skip-styles` | Adds `provideNeuralUI()` and `node_modules/@neural-ui/core/styles.scss` without removing existing providers or styles. / Añade el provider y el estilo sin eliminar configuración existente. | Remove only the provider and style entry added by the command. / Elimina únicamente el provider y la entrada de estilo añadidos. |
-| `:theme [name]` | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; defaults to `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS en la ruta elegida. | Delete the generated file and any import or `data-neu-*` attributes you added. / Elimina el archivo y los imports o atributos añadidos. |
-| `:layout NAME` | `--project`, `--path`, `--force` | Creates `NAME.component.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell. | Delete the generated directory and any route you added; existing routes are not modified automatically. / Elimina el directorio y la ruta añadida; no se alteran rutas existentes. |
-| `:dashboard NAME` | `--project`, `--path`, `--force` | Creates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas. | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
-| `:crud-page NAME` | `--project`, `--path`, `--force` | Creates the three component files with Reactive Forms, input, table and actions. / Genera una base CRUD con formularios reactivos, input, tabla y acciones. | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
+| Schematic                | Public options / Opciones públicas                                                                          | Result / Resultado                                                                                                                                                                           | Revert / Reversión                                                                                                                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ng add @neural-ui/core` | `--project`, `--skip-styles`                                                                                | Adds `provideNeuralUI()` and `node_modules/@neural-ui/core/styles.scss` without removing existing providers or styles. / Añade el provider y el estilo sin eliminar configuración existente. | Remove only the provider and style entry added by the command. / Elimina únicamente el provider y la entrada de estilo añadidos.                                                   |
+| `:theme [name]`          | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; defaults to `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS en la ruta elegida.                                                                       | Delete the generated file and any import or `data-neu-*` attributes you added. / Elimina el archivo y los imports o atributos añadidos.                                            |
+| `:layout NAME`           | `--project`, `--path`, `--force`                                                                            | Creates `NAME.component.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell.                                                                                                  | Delete the generated directory and any route you added; existing routes are not modified automatically. / Elimina el directorio y la ruta añadida; no se alteran rutas existentes. |
+| `:dashboard NAME`        | `--project`, `--path`, `--force`                                                                            | Creates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas.                                                              | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                                                |
+| `:crud-page NAME`        | `--project`, `--path`, `--force`                                                                            | Creates the three component files with Reactive Forms, input, table and actions. / Genera una base CRUD con formularios reactivos, input, tabla y acciones.                                  | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                                                |
 
 Generated page copy is starter content: connect it to the consumer application's translation system before shipping. / Los textos de las páginas generadas son contenido inicial: intégralos con el sistema de traducciones de la aplicación antes de publicar.
 
@@ -118,7 +120,7 @@ import { NeuToastService } from '@neural-ui/core/toast';
 The current appearance remains the default. Opt in on `<html>` or a scoped shell:
 
 ```html
-<html data-neu-density="compact" data-neu-theme="high-contrast">
+<html data-neu-density="compact" data-neu-theme="high-contrast"></html>
 ```
 
 Available densities are `compact`, `comfortable`, and `spacious`. Remove the attributes to revert instantly to the existing default. / Las densidades disponibles son `compact`, `comfortable` y `spacious`. Elimina los atributos para volver al aspecto actual.
@@ -134,7 +136,7 @@ const input = await loader.getHarness(NeuInputHarness);
 await input.setValue('Ada');
 ```
 
-Harnesses are available for button, input, checkbox, switch, select, date input, table and dialog. / Hay harnesses para button, input, checkbox, switch, select, date input, table y dialog.
+The dedicated testing entry point exports 62 Angular CDK harnesses: one for every interactive public entry point. The remaining 19 entry points are presentational, layout or utility APIs and are explicitly classified as not applicable in the quality matrix. / El entry point dedicado de testing exporta 62 harnesses de Angular CDK: uno para cada entry point público interactivo. Los 19 restantes son APIs de presentación, layout o utilidad y constan explícitamente como no aplicables en la matriz de calidad.
 
 ---
 
@@ -198,20 +200,16 @@ Neural Admin Pro is a full-stack Angular and NestJS product with PostgreSQL, aut
 | `@angular/router`  | `>=19.0.0 <23.0.0` |
 | `@ng-icons/core`   | `>=31.4.0 <34.0.0` |
 | `@ng-icons/lucide` | `>=31.4.0 <34.0.0` |
-| `apexcharts`       | `>=4.0.0 <6.0.0`   |
-| `ng-apexcharts`    | `>=1.15.0 <3.0.0`  |
 
-For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or newer. Angular 20+ projects can use the newer `ng-apexcharts@2.x` line.
+The Chart entry point uses the bundled MIT-licensed `chart.js` runtime and requires no charting peer dependency.
 
 ---
 
 ## Contributing
 
-1. Fork the repository and create a feature branch
-2. Run `npm install`
-3. Run tests: `npm test`
-4. Run the release gate: `npm run verify:release`
-5. Open a pull request
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the complete workflow.
+
+Project policies: [security](./SECURITY.md) · [support](./SUPPORT.md) · [deprecations](./DEPRECATIONS.md) · [migrations](./MIGRATIONS.md) · [release checklist](./RELEASE.md)
 
 ---
 
@@ -230,7 +228,7 @@ Make sure all Angular packages, especially `@angular/cdk`, use the same 20.x min
 
 ```bash
 npm install @angular/core@20.x @angular/common@20.x @angular/forms@20.x @angular/router@20.x @angular/cdk@20.x
-npm install @neural-ui/core @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
+npm install @neural-ui/core @ng-icons/core @ng-icons/lucide
 ```
 
 ### Angular 21.2.x — NG3004 with `FormsModule`

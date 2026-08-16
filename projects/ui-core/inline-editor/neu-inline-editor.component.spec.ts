@@ -89,7 +89,8 @@ describe('NeuInlineEditorComponent', () => {
     expect(component.stringControl.disabled).toBe(true);
     expect(component.numberControl.disabled).toBe(true);
     expect(
-      (fixture.nativeElement.querySelector('.neu-input__field') as HTMLInputElement | null)?.disabled,
+      (fixture.nativeElement.querySelector('.neu-input__field') as HTMLInputElement | null)
+        ?.disabled,
     ).toBe(true);
 
     fixture.componentRef.setInput('disabled', false);
@@ -176,14 +177,20 @@ describe('NeuInlineEditorComponent', () => {
     component.beginEdit();
     await detectStableChanges(fixture);
     component.stringControl.setValue('Saved');
-    const buttons = fixture.nativeElement.querySelectorAll('.neu-inline-editor__actions button') as NodeListOf<HTMLButtonElement>;
+    const buttons = fixture.nativeElement.querySelectorAll(
+      '.neu-inline-editor__actions button',
+    ) as NodeListOf<HTMLButtonElement>;
     buttons[0].click();
     expect(component.displayValue()).toBe('Saved');
 
     component.beginEdit();
     component.stringControl.setValue('Discarded');
     await detectStableChanges(fixture);
-    (fixture.nativeElement.querySelectorAll('.neu-inline-editor__actions button') as NodeListOf<HTMLButtonElement>)[1].click();
+    (
+      fixture.nativeElement.querySelectorAll(
+        '.neu-inline-editor__actions button',
+      ) as NodeListOf<HTMLButtonElement>
+    )[1].click();
     expect(component.displayValue()).toBe('Saved');
   });
 
@@ -192,7 +199,9 @@ describe('NeuInlineEditorComponent', () => {
     const component = fixture.componentInstance;
     component.beginEdit();
     await detectStableChanges(fixture);
-    const inside = fixture.nativeElement.querySelector('.neu-inline-editor__actions button') as HTMLButtonElement;
+    const inside = fixture.nativeElement.querySelector(
+      '.neu-inline-editor__actions button',
+    ) as HTMLButtonElement;
     component.onEditFocusout({ relatedTarget: inside } as unknown as FocusEvent);
     expect(component.editing()).toBe(true);
 

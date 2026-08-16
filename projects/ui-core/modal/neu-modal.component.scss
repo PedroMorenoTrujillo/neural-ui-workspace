@@ -165,17 +165,18 @@ neu-dialog {
   }
 
   :where(neu-dialog.neu-dialog--responsive) {
-    --neu-dialog-inset:
-      max(12px, env(safe-area-inset-top))
-      max(12px, env(safe-area-inset-right))
-      max(12px, env(safe-area-inset-bottom))
-      max(12px, env(safe-area-inset-left));
+    --neu-dialog-inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     --neu-dialog-margin: auto;
   }
 
   :where(neu-dialog.neu-dialog--responsive.neu-dialog--layout-viewport) {
-    --neu-dialog-height: calc(100vh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
-    --neu-dialog-max-height: calc(100vh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+    --neu-dialog-height: calc(
+      100vh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom))
+    );
+    --neu-dialog-max-height: calc(
+      100vh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom))
+    );
   }
 
   @supports (height: 100dvh) {
@@ -192,8 +193,12 @@ neu-dialog {
     }
 
     :where(neu-dialog.neu-dialog--responsive.neu-dialog--layout-viewport) {
-      --neu-dialog-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
-      --neu-dialog-max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+      --neu-dialog-height: calc(
+        100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom))
+      );
+      --neu-dialog-max-height: calc(
+        100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom))
+      );
     }
   }
 }

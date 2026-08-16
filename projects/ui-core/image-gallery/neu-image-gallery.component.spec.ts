@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { NeuImageGalleryComponent } from './neu-image-gallery.component';
+import { Directionality } from '@angular/cdk/bidi';
 
 const ITEMS = [
   { src: 'https://picsum.photos/seed/gallery-a/800/600', alt: 'A', caption: 'First' },
@@ -197,5 +198,23 @@ describe('NeuImageGalleryComponent', () => {
       '.neu-image-gallery__nav--next',
     ) as HTMLButtonElement;
     expect(next.disabled).toBe(true);
+  });
+
+  it('mirrors gallery navigation arrows when direction changes dynamically', async () => {
+    const f = TestBed.createComponent(NeuImageGalleryComponent);
+    f.componentRef.setInput('items', ITEMS);
+    f.detectChanges();
+    await f.whenStable();
+
+    const arrow = (modifier: string) =>
+      (f.nativeElement.querySelector(modifier) as HTMLButtonElement).textContent.trim();
+    expect(arrow('.neu-image-gallery__nav--prev')).toBe('‹');
+    expect(arrow('.neu-image-gallery__nav--next')).toBe('›');
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    f.detectChanges();
+
+    expect(arrow('.neu-image-gallery__nav--prev')).toBe('›');
+    expect(arrow('.neu-image-gallery__nav--next')).toBe('‹');
   });
 });

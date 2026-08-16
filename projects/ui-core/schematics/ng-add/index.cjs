@@ -52,12 +52,15 @@ function ngAdd(options = {}) {
     const rules = [];
     if (!hasProvider(tree)) {
       rules.push(
-        addRootProvider(projectName, ({ code, external }) =>
-          code`${external('provideNeuralUI', '@neural-ui/core')}()`,
+        addRootProvider(
+          projectName,
+          ({ code, external }) => code`${external('provideNeuralUI', '@neural-ui/core')}()`,
         ),
       );
     }
-    context.logger.info(`Neural UI configured for ${projectName}. Existing settings were preserved.`);
+    context.logger.info(
+      `Neural UI configured for ${projectName}. Existing settings were preserved.`,
+    );
     return chain(rules)(tree, context);
   };
 }

@@ -36,12 +36,7 @@
           "options": {
             "tsConfig": "projects/ui-core/tsconfig.spec.json",
             "coverage": true,
-            "coverageReporters": [
-              "text",
-              "html",
-              "lcov",
-              "json-summary"
-            ],
+            "coverageReporters": ["text", "html", "lcov", "json-summary"],
             "coverageThresholds": {
               "statements": 95,
               "branches": 95,
@@ -52,6 +47,6 @@
           }
         }
       }
-    },
+    }
   }
 }

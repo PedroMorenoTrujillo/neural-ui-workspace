@@ -17,7 +17,7 @@ const failures = [];
 let checked = 0;
 
 for (const [entry, config] of Object.entries(packageJson.exports ?? {})) {
-  const importPath = typeof config === 'string' ? config : config.default ?? config.import;
+  const importPath = typeof config === 'string' ? config : (config.default ?? config.import);
   if (!importPath || !importPath.endsWith('.mjs')) {
     continue;
   }

@@ -109,7 +109,9 @@ $label-font-floating: 12px;
 }
 
 @keyframes neu-autofill-start {
-  to { opacity: 1; }
+  to {
+    opacity: 1;
+  }
 }
 
 // Placeholder visible cuando el wrapper está enfocado (label ya flotó)

@@ -35,11 +35,17 @@ export class NeuAutocompleteItemDirective {
   constructor(readonly templateRef: TemplateRef<{ $implicit: NeuAutocompleteOption }>) {}
 }
 @Directive({ selector: 'ng-template[neuAutocompleteHeader]' })
-export class NeuAutocompleteHeaderDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuAutocompleteHeaderDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuAutocompleteFooter]' })
-export class NeuAutocompleteFooterDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuAutocompleteFooterDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuAutocompleteEmpty]' })
-export class NeuAutocompleteEmptyDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuAutocompleteEmptyDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 
 let _seq = 0;
 
@@ -154,7 +160,9 @@ let _seq = 0;
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
       (detach)="_closePanel()"
     >
-      @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
+      @if (headerTpl()) {
+        <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
+      }
       @if (loading()) {
         <div class="neu-autocomplete__empty" role="status" [style.width.px]="overlayWidth()">
           {{ loadingLabel() }}
@@ -192,7 +200,9 @@ let _seq = 0;
             [style.height]="virtualViewportHeight()"
             [style.width.px]="overlayWidth()"
           >
-            <ng-container *cdkVirtualFor="let opt of _filtered(); trackBy: trackByOption; let i = index">
+            <ng-container
+              *cdkVirtualFor="let opt of _filtered(); trackBy: trackByOption; let i = index"
+            >
               <ng-container
                 [ngTemplateOutlet]="autocompleteOptionTpl"
                 [ngTemplateOutletContext]="{ $implicit: opt, index: i }"
@@ -216,10 +226,17 @@ let _seq = 0;
           </div>
         }
       } @else {
-        @if (emptyTpl()) { <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" /> }
-        @else { <div class="neu-autocomplete__empty" role="status" [style.width.px]="overlayWidth()">{{ emptyLabel() }}</div> }
+        @if (emptyTpl()) {
+          <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
+        } @else {
+          <div class="neu-autocomplete__empty" role="status" [style.width.px]="overlayWidth()">
+            {{ emptyLabel() }}
+          </div>
+        }
       }
-      @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
+      @if (footerTpl()) {
+        <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+      }
     </ng-template>
     @if (hasError()) {
       <p class="neu-autocomplete__error" [id]="_id + '-error'" role="alert">

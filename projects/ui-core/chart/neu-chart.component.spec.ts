@@ -1,26 +1,6 @@
-import { Component, input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { ChartComponent } from 'ng-apexcharts';
 import { NeuChartComponent, NeuChartSeries } from './neu-chart.component';
-
-/** Stub mínimo para evitar dependencia de ApexCharts en jsdom */
-@Component({ selector: 'apx-chart', template: '', standalone: true })
-class ApxChartStub {
-  chart = input<any>();
-  series = input<any>();
-  labels = input<any>();
-  xaxis = input<any>();
-  yaxis = input<any>();
-  colors = input<any>();
-  stroke = input<any>();
-  fill = input<any>();
-  dataLabels = input<any>();
-  grid = input<any>();
-  legend = input<any>();
-  tooltip = input<any>();
-  plotOptions = input<any>();
-}
+import { Directionality } from '@angular/cdk/bidi';
 
 function mk(inputs: Record<string, unknown> = {}) {
   const f = TestBed.createComponent(NeuChartComponent);
@@ -33,14 +13,7 @@ function mk(inputs: Record<string, unknown> = {}) {
 
 describe('NeuChartComponent', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [NeuChartComponent],
-    })
-      .overrideComponent(NeuChartComponent, {
-        remove: { imports: [ChartComponent] },
-        add: { imports: [ApxChartStub] },
-      })
-      .compileComponents();
+    await TestBed.configureTestingModule({ imports: [NeuChartComponent] }).compileComponents();
   });
 
   // ── Inputs básicos ────────────────────────────────────────────────────────
@@ -250,6 +223,12 @@ describe('NeuChartComponent', () => {
     expect(comp.dataLabelsConfig().enabled).toBe(true);
   });
 
+  it('keeps legacy grid and legend configuration contracts available', () => {
+    const { comp } = mk();
+    expect(comp.gridConfig().yaxis.lines.show).toBe(true);
+    expect(comp.legendConfig().position).toBe('bottom');
+  });
+
   // ── xaxisConfig ───────────────────────────────────────────────────────────
 
   it('xaxisConfig should contain provided categories', () => {
@@ -257,9 +236,9 @@ describe('NeuChartComponent', () => {
     expect(comp.xaxisConfig().categories).toEqual(['A', 'B']);
   });
 
-  it('renders the Apex wrapper with computed bindings', () => {
+  it('renders an accessible canvas and data-table fallback with computed bindings', () => {
     const series: NeuChartSeries[] = [{ name: 'Revenue', data: [4, 8] }];
-    const { f } = mk({
+    const { f, comp } = mk({
       type: 'bar-horizontal-stacked',
       series,
       categories: ['Q1', 'Q2'],
@@ -267,17 +246,252 @@ describe('NeuChartComponent', () => {
       showDataLabels: true,
       height: 320,
     });
-    const chartDebug = f.debugElement.query(By.directive(ApxChartStub));
-    const chart = chartDebug.componentInstance as ApxChartStub;
+    const canvas = f.nativeElement.querySelector('canvas') as HTMLCanvasElement;
+    const table = f.nativeElement.querySelector('.neu-chart__data') as HTMLTableElement;
+    expect(canvas.getAttribute('role')).toBe('img');
+    expect(canvas.getAttribute('aria-label')).toBe('bar-horizontal-stacked chart');
+    expect(table.textContent).toContain('Revenue');
+    expect(table.textContent).toContain('Q1');
+    expect(table.textContent).toContain('4');
+    expect(comp.chartJsConfig().type).toBe('bar');
+    expect(comp.chartJsConfig().options.indexAxis).toBe('y');
+    expect(comp.chartJsConfig().options.scales.x.stacked).toBe(true);
+  });
 
-    expect(chartDebug).toBeTruthy();
-    expect(chart.chart().type).toBe('bar');
-    expect(chart.chart().stacked).toBe(true);
-    expect(chart.series()).toEqual(series);
-    expect(chart.xaxis().categories).toEqual(['Q1', 'Q2']);
-    expect(chart.colors()).toEqual(['#111111']);
-    expect(chart.dataLabels().enabled).toBe(true);
-    expect(chart.plotOptions().bar.horizontal).toBe(true);
+  it('uses the title as the visible and accessible chart name', () => {
+    const { f, comp } = mk({ title: 'Quarterly revenue' });
+    expect(f.nativeElement.querySelector('.neu-chart__title').textContent).toContain(
+      'Quarterly revenue',
+    );
+    expect(comp.accessibleLabel()).toBe('Quarterly revenue');
+  });
+
+  it('supports localized accessible labels and table headers', () => {
+    const { f, comp } = mk({
+      type: 'pareto',
+      ariaLabel: 'Defectos por causa',
+      categoryHeader: 'Causa',
+      valueHeader: 'Valor',
+      cumulativeLabel: 'Acumulado %',
+      series: [{ name: 'Defectos', data: [3, 1] }],
+      categories: ['Interfaz', 'Red'],
+    });
+    const canvas = f.nativeElement.querySelector('canvas') as HTMLCanvasElement;
+    const table = f.nativeElement.querySelector('table') as HTMLTableElement;
+    expect(canvas.getAttribute('aria-label')).toBe('Defectos por causa');
+    expect(table.textContent).toContain('Causa');
+    expect(table.textContent).toContain('Acumulado %');
+    expect(comp.chartJsConfig().data.datasets[1].label).toBe('Acumulado %');
+  });
+
+  it('builds pie and donut datasets with stable colors and cutouts', () => {
+    const { comp: pie } = mk({
+      type: 'pie',
+      pieSeries: [40, 60],
+      labels: ['Direct', 'Search'],
+      colors: ['#112233', '#445566'],
+    });
+    expect(pie.chartJsConfig().type).toBe('pie');
+    expect(pie.chartJsConfig().options.cutout).toBe(0);
+    expect(pie.chartJsConfig().data.datasets[0].backgroundColor).toEqual(['#112233', '#445566']);
+
+    const { comp: donut } = mk({ type: 'donut', pieSeries: [100] });
+    expect(donut.chartJsConfig().type).toBe('doughnut');
+    expect(donut.chartJsConfig().options.cutout).toBe('68%');
+  });
+
+  it('clamps radial values and only exposes the value arc to the tooltip', () => {
+    const { comp } = mk({
+      type: 'radialBar',
+      pieSeries: [-10, 140],
+      labels: ['Low', 'High'],
+    });
+    const config = comp.chartJsConfig();
+    expect(config.data.datasets[0].data).toEqual([0, 100]);
+    expect(config.data.datasets[1].data).toEqual([100, 0]);
+    expect(config.options.plugins.legend.display).toBe(false);
+    expect(config.options.plugins.tooltip.filter({ dataIndex: 0 })).toBe(true);
+    expect(config.options.plugins.tooltip.filter({ dataIndex: 1 })).toBe(false);
+    expect(
+      config.options.plugins.tooltip.callbacks.label({ dataset: { label: 'High' }, raw: 100 }),
+    ).toBe('High: 100%');
+  });
+
+  it('builds an empty Pareto chart safely and formats its percentage axis', () => {
+    const { comp } = mk({ type: 'pareto', series: [], categories: [] });
+    const config = comp.chartJsConfig();
+    expect(config.data.datasets).toEqual([]);
+    expect(config.options.scales.y1.ticks.callback(42)).toBe('42%');
+  });
+
+  it('builds Pareto bar and cumulative line datasets', () => {
+    const { comp } = mk({
+      type: 'pareto',
+      series: [{ name: 'Defects', data: [3, 1] }],
+      categories: ['A', 'B'],
+      colors: ['#112233'],
+    });
+    const datasets = comp.chartJsConfig().data.datasets;
+    expect(datasets[0].type).toBe('bar');
+    expect(datasets[1].type).toBe('line');
+    expect(datasets[1].data).toEqual([75, 100]);
+    expect(datasets[1].borderColor).toBe('#112233');
+  });
+
+  it('builds line and area datasets including non-hex color fallback', () => {
+    const { comp: line } = mk({
+      type: 'line',
+      series: [{ name: 'Users', data: [1, 2] }],
+      colors: ['rebeccapurple'],
+    });
+    expect(line.chartJsConfig().type).toBe('line');
+    expect(line.chartJsConfig().data.datasets[0].fill).toBe(false);
+
+    const { comp: area } = mk({
+      type: 'area',
+      series: [
+        { name: 'A', data: [1] },
+        { name: 'B', data: [2] },
+      ],
+      colors: ['#112233', 'rebeccapurple'],
+    });
+    expect(area.chartJsConfig().data.datasets[0].backgroundColor).toBe('rgba(17, 34, 51, 0.2)');
+    expect(area.chartJsConfig().data.datasets[1].backgroundColor).toBe('rebeccapurple');
+    expect(area.chartJsConfig().data.datasets[0].fill).toBe(true);
+  });
+
+  it('builds non-stacked and stacked bar datasets', () => {
+    const series = [{ name: 'Revenue', data: [1] }];
+    const { comp: bar } = mk({ type: 'bar', series });
+    expect(bar.chartJsConfig().data.datasets[0].borderRadius).toBe(4);
+
+    const { comp: stacked } = mk({ type: 'bar-stacked', series });
+    expect(stacked.chartJsConfig().data.datasets[0].borderRadius).toBe(0);
+    expect(stacked.chartJsConfig().options.scales.y.stacked).toBe(true);
+  });
+
+  it('exposes complete accessible rows for uneven series and circular data', () => {
+    const { comp: axes } = mk({
+      series: [
+        { name: 'A', data: [1, 2] },
+        { name: 'B', data: [3] },
+      ],
+      categories: ['First'],
+    });
+    expect(axes.accessibleRows()).toEqual([
+      { label: 'First', values: [1, 3] },
+      { label: '2', values: [2, ''] },
+    ]);
+
+    const { comp: pie } = mk({
+      type: 'pie',
+      pieSeries: [7, 8],
+      labels: ['Known'],
+      valueHeader: 'Amount',
+    });
+    expect(pie.accessibleSeriesNames()).toEqual(['Amount']);
+    expect(pie.accessibleRows()).toEqual([
+      { label: 'Known', values: [7] },
+      { label: '2', values: [8] },
+    ]);
+  });
+
+  it('draws enabled data labels and skips tracks and missing values', () => {
+    const { comp } = mk({ showDataLabels: true });
+    const plugin = comp.chartJsConfig().plugins[0];
+    const ctx = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      fillText: vi.fn(),
+      fillStyle: '',
+      font: '',
+      textAlign: '',
+      textBaseline: '',
+    };
+    const elements = [
+      { tooltipPosition: () => ({ x: 10, y: 20 }) },
+      { tooltipPosition: () => ({ x: 30, y: 40 }) },
+    ];
+    const chart = {
+      ctx,
+      data: {
+        datasets: [{ data: [5, null] }, { data: [9, 10], neuRadialTrack: true }],
+      },
+      getDatasetMeta: () => ({ data: elements }),
+    };
+    plugin.afterDatasetsDraw(chart, {}, { enabled: false });
+    expect(ctx.save).not.toHaveBeenCalled();
+    plugin.afterDatasetsDraw(chart, {}, { enabled: true });
+    expect(ctx.fillText).toHaveBeenCalledTimes(2);
+    expect(ctx.fillText).toHaveBeenNthCalledWith(1, '5', 10, 20);
+    expect(ctx.fillText).toHaveBeenNthCalledWith(2, '9', 10, 20);
+    expect(ctx.restore).toHaveBeenCalled();
+  });
+
+  it('schedules browser rendering and cancels pending work on destroy', () => {
+    const scheduled: FrameRequestCallback[] = [];
+    const requestFrame = vi.fn((callback: FrameRequestCallback) => {
+      scheduled.push(callback);
+      return scheduled.length;
+    });
+    const cancelFrame = vi.fn();
+    vi.stubGlobal('ResizeObserver', class ResizeObserverStub {});
+    vi.stubGlobal('requestAnimationFrame', requestFrame);
+    vi.stubGlobal('cancelAnimationFrame', cancelFrame);
+    const contextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const { f } = mk({
+      series: [{ name: 'Revenue', data: [1] }],
+      categories: ['Q1'],
+    });
+    const initialFrames = requestFrame.mock.calls.length;
+    expect(initialFrames).toBeGreaterThan(0);
+    scheduled.at(-1)!(0);
+    expect(consoleError).toHaveBeenCalled();
+
+    f.componentRef.setInput('type', 'area');
+    f.detectChanges();
+    const updatedFrames = requestFrame.mock.calls.length;
+    expect(updatedFrames).toBeGreaterThan(initialFrames);
+    expect(cancelFrame).toHaveBeenCalled();
+
+    f.destroy();
+    expect(cancelFrame).toHaveBeenCalledWith(updatedFrames);
+    contextSpy.mockRestore();
+    consoleError.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
+  it('mirrors axes, legend and tooltip when direction changes dynamically', () => {
+    const { f, comp } = mk({
+      type: 'bar',
+      series: [{ name: 'Revenue', data: [1, 2] }],
+      categories: ['Q1', 'Q2'],
+    });
+    expect(comp.chartJsConfig().options.scales.x.reverse).toBe(false);
+    expect(comp.chartJsConfig().options.plugins.legend.rtl).toBe(false);
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    f.detectChanges();
+
+    expect(comp.chartJsConfig().options.scales.x.reverse).toBe(true);
+    expect(comp.chartJsConfig().options.plugins.legend.rtl).toBe(true);
+    expect(comp.chartJsConfig().options.plugins.tooltip.rtl).toBe(true);
+  });
+
+  it('mirrors horizontal and Pareto axis placement in RTL', () => {
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    const { comp: horizontal } = mk({ type: 'bar-horizontal' });
+    expect(horizontal.chartJsConfig().options.scales.x.position).toBe('top');
+    expect(horizontal.chartJsConfig().options.scales.y.position).toBe('right');
+
+    const { comp: pareto } = mk({
+      type: 'pareto',
+      series: [{ name: 'Defects', data: [1] }],
+    });
+    expect(pareto.chartJsConfig().options.scales.y.position).toBe('right');
+    expect(pareto.chartJsConfig().options.scales.y1.position).toBe('left');
   });
 
   // ── bar-stacked-horizontal ────────────────────────────────────────────────

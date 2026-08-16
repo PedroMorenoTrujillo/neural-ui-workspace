@@ -1,6 +1,6 @@
 # Neural UI Core Quality Status
 
-Last reviewed: 2026-08-05
+Last reviewed: 2026-08-16
 
 ## Executive Summary
 
@@ -8,11 +8,11 @@ Neural UI Core is currently aligned with the project's main engineering standard
 
 Validated coverage snapshot:
 
-- Statements: 97.50%
-- Branches: 96.83%
-- Functions: 95.48%
-- Lines: 99.56%
-- Unit tests: 2095 passing tests in ui-core
+- Statements: 97.73%
+- Branches: 95.61%
+- Functions: 96.65%
+- Lines: 99.39%
+- Unit tests: 2168 passing tests in ui-core
 
 The library presents a strong accessibility baseline across interactive components, but accessibility should be described as high-confidence rather than formally certified 100% component-by-component.
 
@@ -32,29 +32,35 @@ The library presents a strong accessibility baseline across interactive componen
 - Zoneless-oriented test setup: yes
 - `provideZonelessChangeDetection()` used broadly across component specs: yes
 - Compiled tarball imports verified without Zone.js on Angular 19–22: yes
+- Rendered component IDs use Angular CDK's hydration-stable ID generator rather than random values: yes
 
 ### Testing
 
 - Global coverage above 95%: yes
 - Enforced global coverage floor of 95% across the library: yes
-- Residual low-return hotspots still present: yes
-  - `virtual-list`
-  - `dashboard-grid`
-  - some complex CDK-driven branches in `nav`, `popover`, and similar components
+- Per-entry-point coverage gate: 81/81 entry points pass their applicable thresholds
 
 ### Accessibility
 
 - ARIA usage present across major interactive components: yes
 - Keyboard interaction patterns present in key widgets: yes
+- Rating follows a roving-tabstop keyboard model with arrows, Home/End, wrapping and direction-aware horizontal behavior: yes
 - Focus management present in key widgets: yes
-- Showcase accessibility validation completed previously: yes
+- Showcase automated accessibility validation: 348/348 localized/theme routes passed with axe-core WCAG 2.2 AA tags
+- Manual assistive-technology validation for this candidate: not yet recorded; remains `UNVERIFIED`
 - Formal 100% accessibility certification across all library components: no
 
 ### Integration Validation Through Showcase
 
-- Playwright functional and accessibility suite: 375/375 passing in Chromium, Firefox and WebKit
-- Responsive matrix: 980/980 passing across 320×568, 360×800, 390×844, 768×1024 and 1440×900
-- Visual-baseline gate: pending explicit human approval before the first baseline is created
+- Automated axe-core audit: 348/348 localized pages passing with zero errors
+- Functional browser gate: 1200/1200 scenarios passed across Chromium, Firefox and WebKit
+- Presentation-resilience coverage inside the browser gate: 522/522 route/browser checks passed for 320×720 reflow, text spacing, forced colors, reduced motion, touch targets, clipping and focus
+- Responsive browser gate: 2610/2610 route/viewport/direction checks passed
+- Dynamic RTL browser gate: 261/261 checks passed
+- Browser performance gate: all 81 public routes passed three cold-load samples and their budgets
+- Lighthouse CI: 12/12 representative reports passed the committed local budgets
+- Visual-baseline comparison: 363/428 snapshots match exactly; 65 candidate differences remain pending explicit human review
+- Strict matrix: 1194 automated cells pass and 108 are justified `N/A`; 480 applicable human cells remain `UNVERIFIED` (400 assistive-technology and 80 visual)
 - Visual baselines: may only be created or replaced after explicit human review approval
 - Validation model: showcase runs against the compiled `@neural-ui/core` package, so these checks act as integration validation of the library in real consumer flows
 
@@ -64,13 +70,15 @@ The library presents a strong accessibility baseline across interactive componen
 - Release-note style quality summary added to changelog: yes
 - Published API snapshot, package lint, type audit and bundle budgets: enforced
 - `ng add`, theme, layout, dashboard and CRUD schematics compile on Angular 19–22: yes
-- Public Component Harness entry point: included in the API contract
+- Public Component Harness entry point: 62 interactive entry points covered; 19 non-interactive entry points classified `N/A` with rationale; zero unclassified
+- Angular Forms: 24 CVA entry points verified; all 57 non-form entry points classified `N/A` with rationale
+- Showcase static inline-style debt: zero; 14 runtime style bindings retained under an exact audited allowlist
 - BEM requirement documented as part of engineering standards: yes
 - Bilingual comments requirement fully re-audited line by line: not fully re-verified in this pass
 
 ## Accessibility Audit Snapshot
 
-This is a rapid engineering audit, not a full WCAG certification.
+This is an evidence-backed engineering audit, not a paid or external WCAG certification.
 
 ### Strong evidence found
 
@@ -82,7 +90,7 @@ This is a rapid engineering audit, not a full WCAG certification.
 - Live-region and role behavior in `toast`
 - Separator semantics and keyboard resizing in `splitter`
 
-### Components reviewed with explicit accessibility signals in source
+### Representative components reviewed with explicit accessibility signals in source
 
 - `autocomplete`
 - `chip`
@@ -99,9 +107,9 @@ This is a rapid engineering audit, not a full WCAG certification.
 
 ### Why this is not labeled 100%
 
-- Not every component was verified against a complete WCAG checklist.
-- Some advanced widgets would benefit from deeper scenario-based audits.
-- CDK-heavy interactions can be semantically acceptable while still requiring manual screen-reader validation.
+- The five free assistive-technology combinations have not yet been recorded by a human tester for this release candidate.
+- The changed visual baselines have not yet been approved by a named human reviewer.
+- Automated semantics and keyboard checks cannot prove what a screen reader announces.
 
 ## Recommended Wording
 

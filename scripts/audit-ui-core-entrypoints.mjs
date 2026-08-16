@@ -25,9 +25,7 @@ function read(path) {
 }
 
 const distPackageJsonPath = join(root, 'dist/neural-ui/core/package.json');
-const packageJson = existsSync(distPackageJsonPath)
-  ? JSON.parse(read(distPackageJsonPath))
-  : null;
+const packageJson = existsSync(distPackageJsonPath) ? JSON.parse(read(distPackageJsonPath)) : null;
 const exported = new Set();
 
 if (packageJson) {

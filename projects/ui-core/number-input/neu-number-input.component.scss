@@ -35,7 +35,6 @@
       border: none;
       border-radius: 0;
     }
-
   }
 
   &--stacked {
@@ -47,6 +46,7 @@
     .neu-number-input__field {
       flex: 1 1 auto;
       width: auto;
+      height: max(var(--neu-number-input-height, 48px), 48px);
       min-width: var(--neu-number-input-stacked-min-width, 120px);
       border-radius: var(--neu-radius-md, 8px) 0 0 var(--neu-radius-md, 8px);
       border-inline-end: none;
@@ -161,8 +161,10 @@
 .neu-number-input__stack {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--neu-border);
+  height: max(var(--neu-number-input-height, 48px), 48px);
+  border: none;
   border-radius: 0 var(--neu-radius-md, 8px) var(--neu-radius-md, 8px) 0;
+  box-shadow: inset 0 0 0 1px var(--neu-border);
   overflow: hidden;
   flex-shrink: 0;
 
@@ -174,6 +176,7 @@
     align-items: center;
     justify-content: center;
     flex: 1;
+    min-height: 24px;
     width: var(--neu-number-input-btn-size, 26px);
     border: none;
     border-radius: 0;

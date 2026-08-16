@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   ViewEncapsulation,
   afterNextRender,
@@ -10,6 +11,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { Directionality } from '@angular/cdk/bidi';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -89,7 +91,7 @@ export interface NeuNavItem {
                   [attr.aria-haspopup]="true"
                   [attr.disabled]="item.disabled ? '' : null"
                   [neuTooltip]="isCollapsed() ? item.label : ''"
-                  neuTooltipPosition="right"
+                  [neuTooltipPosition]="tooltipPosition()"
                   (click)="!isCollapsed() && toggleGroup(item.id)"
                 >
                   <neu-icon
@@ -108,9 +110,10 @@ export interface NeuNavItem {
                     >
                   }
                   <neu-icon
-                    name="lucideChevronRight"
+                    [name]="groupChevronIcon()"
                     size="14px"
                     class="neu-nav__group-chevron"
+                    [class.neu-nav__group-chevron--rtl]="isRtl()"
                     aria-hidden="true"
                   />
                 </button>
@@ -152,9 +155,10 @@ export interface NeuNavItem {
                               >
                             }
                             <neu-icon
-                              name="lucideChevronRight"
+                              [name]="groupChevronIcon()"
                               size="13px"
                               class="neu-nav__group-chevron"
+                              [class.neu-nav__group-chevron--rtl]="isRtl()"
                               aria-hidden="true"
                             />
                           </button>
@@ -297,7 +301,7 @@ export interface NeuNavItem {
                 rel="noopener noreferrer"
                 [attr.aria-disabled]="item.disabled ? 'true' : null"
                 [neuTooltip]="isCollapsed() ? item.label : ''"
-                neuTooltipPosition="right"
+                [neuTooltipPosition]="tooltipPosition()"
                 role="listitem"
               >
                 <neu-icon
@@ -332,7 +336,7 @@ export interface NeuNavItem {
                 [routerLinkActiveOptions]="{ exact: item.route === '/' }"
                 [attr.aria-current]="isCurrentRoute(item.route ?? '') ? 'page' : null"
                 [neuTooltip]="isCollapsed() ? item.label : ''"
-                neuTooltipPosition="right"
+                [neuTooltipPosition]="tooltipPosition()"
                 role="listitem"
               >
                 <neu-icon
@@ -366,7 +370,8 @@ export interface NeuNavItem {
         <div
           class="neu-nav__flyout"
           [style.top.px]="flyout.top"
-          [style.left.px]="flyout.left"
+          [style.left.px]="flyoutPosition()?.left"
+          [style.right.px]="flyoutPosition()?.right"
           role="menu"
           (mouseenter)="onFlyoutMouseEnter()"
           (mouseleave)="onFlyoutMouseLeave()"
@@ -446,11 +451,7 @@ export interface NeuNavItem {
           [attr.aria-expanded]="!isCollapsed()"
           (click)="toggleCollapse()"
         >
-          <neu-icon
-            [name]="isCollapsed() ? 'lucideChevronRight' : 'lucideChevronLeft'"
-            size="12px"
-            aria-hidden="true"
-          />
+          <neu-icon [name]="toggleChevronIcon()" size="12px" aria-hidden="true" />
         </button>
       }
     </div>
@@ -497,7 +498,40 @@ export class NeuNavComponent {
   private readonly openGroups = signal<Set<string>>(new Set());
 
   // ---- Flyout para modo colapsado / Flyout for collapsed mode ----
-  readonly flyoutState = signal<{ item: NeuNavItem; top: number; left: number } | null>(null);
+  private readonly _directionality = inject(Directionality);
+  readonly isRtl = computed(() => this._directionality.valueSignal() === 'rtl');
+  readonly groupChevronIcon = computed(() =>
+    this.isRtl() ? 'lucideChevronLeft' : 'lucideChevronRight',
+  );
+  readonly toggleChevronIcon = computed(() => {
+    const pointsTowardInlineEnd = this.isCollapsed();
+    if (this.isRtl()) {
+      return pointsTowardInlineEnd ? 'lucideChevronLeft' : 'lucideChevronRight';
+    }
+    return pointsTowardInlineEnd ? 'lucideChevronRight' : 'lucideChevronLeft';
+  });
+  readonly tooltipPosition = computed<'left' | 'right'>(() =>
+    this._directionality.valueSignal() === 'rtl' ? 'left' : 'right',
+  );
+  readonly flyoutState = signal<{
+    item: NeuNavItem;
+    top: number;
+    left: number;
+    anchorLeft?: number;
+    viewportWidth?: number;
+  } | null>(null);
+  readonly flyoutPosition = computed(() => {
+    const flyout = this.flyoutState();
+    if (!flyout) return null;
+    if (
+      this._directionality.valueSignal() === 'rtl' &&
+      flyout.anchorLeft !== undefined &&
+      flyout.viewportWidth !== undefined
+    ) {
+      return { left: null, right: flyout.viewportWidth - flyout.anchorLeft };
+    }
+    return { left: flyout.left, right: null };
+  });
   private _flyoutTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
@@ -557,7 +591,13 @@ export class NeuNavComponent {
       this._flyoutTimer = null;
     }
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    this.flyoutState.set({ item, top: rect.top, left: rect.right });
+    this.flyoutState.set({
+      item,
+      top: rect.top,
+      left: rect.right,
+      anchorLeft: rect.left,
+      viewportWidth: window.innerWidth,
+    });
   }
 
   onGroupMouseLeave(): void {

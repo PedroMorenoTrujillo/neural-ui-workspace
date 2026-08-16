@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "compression": "brotli",
+  "status": "PASS",
+  "results": [
+    {
+      "name": "All public ESM entry points (Brotli)",
+      "passed": true,
+      "size": 288185,
+      "sizeLimit": 300000
+    },
+    {
+      "name": "Largest component: table (Brotli)",
+      "passed": true,
+      "size": 20505,
+      "sizeLimit": 35000
+    },
+    {
+      "name": "Public testing harnesses (Brotli)",
+      "passed": true,
+      "size": 6607,
+      "sizeLimit": 12000
+    },
+    {
+      "name": "Chart adapter without Chart.js peer (Brotli)",
+      "passed": true,
+      "size": 5851,
+      "sizeLimit": 8000
+    }
+  ]
+}

@@ -1,5 +1,11 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuTimelineComponent, NeuTimelineItem } from './neu-timeline.component';
+import {
+  NeuTimelineComponent,
+  NeuTimelineItem,
+  NeuTimelineItemDirective,
+  NeuTimelineMarkerDirective,
+} from './neu-timeline.component';
 
 const ITEMS: NeuTimelineItem[] = [
   { title: 'Evento A', time: 'Hace 2h', description: 'Descripción A', variant: 'success' },
@@ -130,5 +136,32 @@ describe('NeuTimelineComponent', () => {
     const lines = fixture.nativeElement.querySelectorAll('.neu-timeline__line');
     const items = fixture.nativeElement.querySelectorAll('.neu-timeline__item');
     expect(lines.length).toBe(items.length - 1);
+  });
+
+  it('renders projected item and marker templates with their documented contexts', async () => {
+    @Component({
+      imports: [NeuTimelineComponent, NeuTimelineItemDirective, NeuTimelineMarkerDirective],
+      template: `
+        <neu-timeline [items]="items">
+          <ng-template neuTimelineMarker let-item>Marker {{ item.title }}</ng-template>
+          <ng-template neuTimelineItem let-item let-index="index">
+            Custom {{ index }}: {{ item.title }}
+          </ng-template>
+        </neu-timeline>
+      `,
+    })
+    class TimelineTemplateHostComponent {
+      readonly items = [{ title: 'Projected event' }];
+    }
+
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ imports: [TimelineTemplateHostComponent] })
+      .compileComponents();
+    const host = TestBed.createComponent(TimelineTemplateHostComponent);
+    host.detectChanges();
+
+    expect(host.nativeElement.textContent).toContain('Marker Projected event');
+    expect(host.nativeElement.textContent).toContain('Custom 0: Projected event');
+    expect(host.nativeElement.querySelector('.neu-timeline__title')).toBeNull();
   });
 });

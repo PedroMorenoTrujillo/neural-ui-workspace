@@ -3,9 +3,11 @@ import {
   Component,
   ViewEncapsulation,
   computed,
+  inject,
   input,
   output,
 } from '@angular/core';
+import { Directionality } from '@angular/cdk/bidi';
 
 /**
  * NeuralUI Pagination Component
@@ -22,13 +24,13 @@ import {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nav class="neu-pagination" aria-label="Paginación">
+    <nav class="neu-pagination" [attr.aria-label]="ariaLabel()">
       <!-- Anterior -->
       <button
         class="neu-pagination__btn neu-pagination__btn--nav"
         type="button"
         [disabled]="page() <= 1"
-        [attr.aria-label]="'Página anterior'"
+        [attr.aria-label]="previousPageLabel()"
         (click)="go(page() - 1)"
       >
         <svg
@@ -42,7 +44,7 @@ import {
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          <polyline points="15 18 9 12 15 6" />
+          <polyline [attr.points]="previousChevronPoints()" />
         </svg>
       </button>
 
@@ -55,7 +57,7 @@ import {
             class="neu-pagination__btn"
             [class.neu-pagination__btn--active]="p === page()"
             type="button"
-            [attr.aria-label]="'Página ' + p"
+            [attr.aria-label]="pageLabel() + ' ' + p"
             [attr.aria-current]="p === page() ? 'page' : null"
             (click)="go(p)"
           >
@@ -69,7 +71,7 @@ import {
         class="neu-pagination__btn neu-pagination__btn--nav"
         type="button"
         [disabled]="page() >= totalPages()"
-        [attr.aria-label]="'Página siguiente'"
+        [attr.aria-label]="nextPageLabel()"
         (click)="go(page() + 1)"
       >
         <svg
@@ -83,7 +85,7 @@ import {
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          <polyline points="9 18 15 12 9 6" />
+          <polyline [attr.points]="nextChevronPoints()" />
         </svg>
       </button>
     </nav>
@@ -91,6 +93,26 @@ import {
   styleUrl: './neu-pagination.component.scss',
 })
 export class NeuPaginationComponent {
+  private readonly directionality = inject(Directionality);
+  readonly previousChevronPoints = computed(() =>
+    this.directionality.valueSignal() === 'rtl' ? '9 18 15 12 9 6' : '15 18 9 12 15 6',
+  );
+  readonly nextChevronPoints = computed(() =>
+    this.directionality.valueSignal() === 'rtl' ? '15 18 9 12 15 6' : '9 18 15 12 9 6',
+  );
+
+  /** Nombre accesible de la navegación. / Accessible navigation name. */
+  ariaLabel = input<string>('Pagination');
+
+  /** Etiqueta del botón de página anterior. / Previous-page button label. */
+  previousPageLabel = input<string>('Previous page');
+
+  /** Etiqueta del botón de página siguiente. / Next-page button label. */
+  nextPageLabel = input<string>('Next page');
+
+  /** Prefijo accesible para cada número de página. / Accessible prefix for each page number. */
+  pageLabel = input<string>('Page');
+
   /** Página actual (1-indexed) / Current page (1-indexed) */
   page = input<number>(1);
 

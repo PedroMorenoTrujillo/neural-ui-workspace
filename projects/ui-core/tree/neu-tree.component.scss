@@ -61,6 +61,14 @@
 
 .neu-tree__node {
   position: relative;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible > .neu-tree__row {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 18%, transparent);
+  }
 }
 
 .neu-tree__row {

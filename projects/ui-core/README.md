@@ -32,14 +32,18 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 <!-- neural-ui-metrics:start -->
 - **Version:** 1.12.1
 - **Entry points:** 81
-- **Automated tests:** 2095
-- **Coverage:** 97.52% statements · 96.83% branches · 95.48% functions · 99.58% lines
+- **Automated tests:** 2168
+- **Coverage:** 97.73% statements · 95.61% branches · 96.65% functions · 98.98% lines
+- **Public component harnesses:** 62 interactive entry points · 19 justified N/A
+- **Showcase evidence:** 82 demos · 79 API pages · 348/348 accessibility · 261 RTL · 2610 responsive checks
+- **Quality matrix:** 1194 PASS · 108 N/A · 480 pending human validation
+- **Visual evidence:** 428 tracked snapshots · explicit human approval required
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
 - Standalone + OnPush component model
 - Zoneless-oriented test setup
-- Global coverage above 90% in all main metrics
+- Global coverage above the enforced 95% floor in every main metric
 - Strong accessibility baseline validated in showcase and reinforced in core components
 
 For the current quality checklist and accessibility audit snapshot, see [QUALITY_STATUS.md](./QUALITY_STATUS.md).
@@ -49,7 +53,7 @@ For the current quality checklist and accessibility audit snapshot, see [QUALITY
 ## Installation
 
 ```bash
-npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
+npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide
 ```
 
 ---
@@ -68,13 +72,13 @@ ng generate @neural-ui/core:crud-page customers
 
 Commands are idempotent. Existing providers and styles are preserved, and generated files require `--force` to be replaced. Use `--skip-styles` with `ng add` for manual style registration. / Los comandos son idempotentes, conservan providers y estilos y solo sustituyen archivos con `--force`.
 
-| Schematic | Public options / Opciones públicas | Result / Resultado | Revert / Reversión |
-| --- | --- | --- | --- |
-| `ng add @neural-ui/core` | `--project`, `--skip-styles` | Adds `provideNeuralUI()` and the global Neural UI stylesheet without deleting existing configuration. / Añade el provider y el estilo global sin borrar configuración. | Remove only the provider and style entry added by the command. / Elimina solo el provider y la entrada de estilo añadidos. |
-| `:theme [name]` | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; default: `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS. | Delete the file and any import or `data-neu-*` attributes added by the consumer. / Elimina el archivo y los imports o atributos añadidos. |
-| `:layout NAME` | `--project`, `--path`, `--force` | Generates `.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell. / Genera una base mobile-first con sidebar y toolbar. | Delete the directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
-| `:dashboard NAME` | `--project`, `--path`, `--force` | Generates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas. | Delete the directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
-| `:crud-page NAME` | `--project`, `--path`, `--force` | Generates the three component files with Reactive Forms, input, table and actions. / Genera una base CRUD con formularios reactivos, input, tabla y acciones. | Delete the directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente. |
+| Schematic                | Public options / Opciones públicas                                                                          | Result / Resultado                                                                                                                                                     | Revert / Reversión                                                                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `ng add @neural-ui/core` | `--project`, `--skip-styles`                                                                                | Adds `provideNeuralUI()` and the global Neural UI stylesheet without deleting existing configuration. / Añade el provider y el estilo global sin borrar configuración. | Remove only the provider and style entry added by the command. / Elimina solo el provider y la entrada de estilo añadidos.                |
+| `:theme [name]`          | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; default: `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS.                                                                       | Delete the file and any import or `data-neu-*` attributes added by the consumer. / Elimina el archivo y los imports o atributos añadidos. |
+| `:layout NAME`           | `--project`, `--path`, `--force`                                                                            | Generates `.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell. / Genera una base mobile-first con sidebar y toolbar.                                  | Delete the directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                 |
+| `:dashboard NAME`        | `--project`, `--path`, `--force`                                                                            | Generates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas.                                      | Delete the directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                 |
+| `:crud-page NAME`        | `--project`, `--path`, `--force`                                                                            | Generates the three component files with Reactive Forms, input, table and actions. / Genera una base CRUD con formularios reactivos, input, tabla y acciones.          | Delete the directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                 |
 
 Generated page copy is starter content and must be connected to the consumer application's translation system before release. / Los textos generados son contenido inicial y deben conectarse al sistema de traducciones de la aplicación antes de publicar.
 
@@ -119,7 +123,7 @@ The existing appearance remains the default. Opt in with `data-neu-density="comp
 import { NeuButtonHarness, NeuInputHarness } from '@neural-ui/core/testing';
 ```
 
-The testing entry point provides stable Component Harnesses for button, input, checkbox, switch, select, date input, table and dialog. / El entry point de testing ofrece Component Harnesses estables sin depender del DOM interno.
+The dedicated testing entry point exports 62 Angular CDK harnesses: one for every interactive public entry point. The remaining 19 entry points are presentational, layout or utility APIs and are explicitly classified as not applicable in the quality matrix. / El entry point dedicado de testing exporta 62 harnesses de Angular CDK: uno para cada entry point público interactivo. Los 19 restantes son APIs de presentación, layout o utilidad y constan explícitamente como no aplicables en la matriz de calidad.
 
 ---
 
@@ -206,10 +210,8 @@ For the full token list, see `styles/_tokens.scss` in the published package sour
 | `@angular/router`  | `>=19.0.0 <23.0.0` |
 | `@ng-icons/core`   | `>=31.4.0 <34.0.0` |
 | `@ng-icons/lucide` | `>=31.4.0 <34.0.0` |
-| `apexcharts`       | `>=4.0.0 <6.0.0`   |
-| `ng-apexcharts`    | `>=1.15.0 <3.0.0`  |
 
-For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or newer. Angular 20+ projects can use the newer `ng-apexcharts@2.x` line.
+The Chart entry point uses the bundled MIT-licensed `chart.js` runtime and requires no charting peer dependency.
 
 ---
 

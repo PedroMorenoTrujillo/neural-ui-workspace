@@ -256,7 +256,9 @@ describe('NeuTreeComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('NEW');
-    const input = fixture.nativeElement.querySelector('.neu-tree__search-input') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector(
+      '.neu-tree__search-input',
+    ) as HTMLInputElement;
     input.value = 'leaf';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -276,7 +278,9 @@ describe('NeuTreeComponent', () => {
     fixture.componentRef.setInput('searchable', true);
     fixture.detectChanges();
 
-    const input = fixture.nativeElement.querySelector('.neu-tree__search-input') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector(
+      '.neu-tree__search-input',
+    ) as HTMLInputElement;
     input.value = 'root';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -308,7 +312,9 @@ describe('NeuTreeComponent', () => {
     fixture.componentRef.setInput('selectable', true);
     fixture.componentRef.setInput('selectionMode', 'multiple');
     const emitted: string[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((nodes) => emitted.push(nodes.map((node) => node.id)));
+    fixture.componentInstance.selectionChange.subscribe((nodes) =>
+      emitted.push(nodes.map((node) => node.id)),
+    );
     fixture.detectChanges();
 
     fixture.componentInstance.activateNode(NODES[0]);
@@ -350,5 +356,82 @@ describe('NeuTreeComponent', () => {
     fixture.componentInstance.activateNode(NODES[1]);
 
     expect(clicks).toBe(0);
+  });
+
+  it('places treeitem semantics and roving tabindex on direct tree children', () => {
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.detectChanges();
+    const items = Array.from(
+      fixture.nativeElement.querySelectorAll('.neu-tree__node[role="treeitem"]'),
+    ) as HTMLLIElement[];
+
+    expect(items[0].getAttribute('role')).toBe('treeitem');
+    expect(items[0].getAttribute('aria-level')).toBe('1');
+    expect(items[0].tabIndex).toBe(0);
+    expect(items.slice(1).every((item) => item.tabIndex === -1)).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector(
+        '.neu-tree__list--root > .neu-tree__node[role="treeitem"]',
+      ),
+    ).toBe(items[0]);
+  });
+
+  it('supports Arrow, Home and End navigation across visible nodes', () => {
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.detectChanges();
+    const items = Array.from(
+      fixture.nativeElement.querySelectorAll(
+        '.neu-tree__node[role="treeitem"]:not([aria-disabled="true"])',
+      ),
+    ) as HTMLLIElement[];
+
+    items[0].focus();
+    items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(items[1]);
+    items[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(document.activeElement).toBe(items.at(-1));
+    items.at(-1)?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(document.activeElement).toBe(items[0]);
+  });
+
+  it('expands with ArrowRight and returns to the parent with ArrowLeft', async () => {
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.detectChanges();
+    const apps = fixture.nativeElement.querySelector('[data-tree-node-id="apps"]') as HTMLLIElement;
+
+    apps.focus();
+    apps.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(apps.getAttribute('aria-expanded')).toBe('true');
+
+    const admin = fixture.nativeElement.querySelector(
+      '[data-tree-node-id="admin"]',
+    ) as HTMLLIElement;
+    admin.focus();
+    admin.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(document.activeElement).toBe(apps);
+  });
+
+  it('activates the focused treeitem with Enter and Space', () => {
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('selectable', true);
+    const selected: string[][] = [];
+    fixture.componentInstance.selectionChange.subscribe((nodes) =>
+      selected.push(nodes.map((node) => node.id)),
+    );
+    fixture.detectChanges();
+    const workspace = fixture.nativeElement.querySelector(
+      '[data-tree-node-id="workspace"]',
+    ) as HTMLLIElement;
+
+    workspace.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    workspace.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+
+    expect(selected).toEqual([['workspace'], ['workspace']]);
   });
 });

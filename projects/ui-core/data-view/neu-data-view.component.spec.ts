@@ -88,7 +88,11 @@ describe('NeuDataViewComponent', () => {
   it('sorts configured items and displays primitive values', () => {
     const component = fixture.debugElement.children[0].componentInstance as NeuDataViewComponent;
     component.setSort('name');
-    expect(component.filteredItems().map((item: any) => item.name)).toEqual(['Alpha', 'Beta', 'Gamma']);
+    expect(component.filteredItems().map((item: any) => item.name)).toEqual([
+      'Alpha',
+      'Beta',
+      'Gamma',
+    ]);
     expect(component.displayItem(null)).toBe('');
     expect(component.displayItem(undefined)).toBe('');
     expect(component.displayItem(3)).toBe('3');
@@ -112,7 +116,9 @@ describe('NeuDataViewComponent', () => {
     const search = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
     search.value = 'beta';
     search.dispatchEvent(new Event('input'));
-    const modeButtons = fixture.nativeElement.querySelectorAll('.neu-data-view__mode') as NodeListOf<HTMLButtonElement>;
+    const modeButtons = fixture.nativeElement.querySelectorAll(
+      '.neu-data-view__mode',
+    ) as NodeListOf<HTMLButtonElement>;
     modeButtons[1].click();
     component._sortControl.setValue('name');
     fixture.detectChanges();
@@ -126,7 +132,9 @@ describe('NeuDataViewComponent', () => {
 
   it('uses rendered pagination controls in both directions', () => {
     const component = fixture.debugElement.children[0].componentInstance as NeuDataViewComponent;
-    const buttons = fixture.nativeElement.querySelectorAll('.neu-data-view__pagination button') as NodeListOf<HTMLButtonElement>;
+    const buttons = fixture.nativeElement.querySelectorAll(
+      '.neu-data-view__pagination button',
+    ) as NodeListOf<HTMLButtonElement>;
     expect(buttons).toHaveLength(2);
     buttons[1].click();
     fixture.detectChanges();
@@ -145,12 +153,16 @@ describe('NeuDataViewComponent', () => {
     direct.componentRef.setInput('emptyLabel', 'Nothing here');
     direct.detectChanges();
     expect(direct.nativeElement.querySelector('.neu-data-view__toolbar')).toBeFalsy();
-    expect(direct.nativeElement.querySelector('.neu-data-view__empty')?.textContent).toContain('Nothing here');
+    expect(direct.nativeElement.querySelector('.neu-data-view__empty')?.textContent).toContain(
+      'Nothing here',
+    );
 
     direct.componentRef.setInput('loading', true);
     direct.componentRef.setInput('loadingLabel', 'Working');
     direct.detectChanges();
-    expect(direct.nativeElement.querySelector('.neu-data-view__loading')?.textContent).toContain('Working');
+    expect(direct.nativeElement.querySelector('.neu-data-view__loading')?.textContent).toContain(
+      'Working',
+    );
   });
 
   it('sorts nested values in descending order and handles pagination boundaries', () => {
@@ -160,12 +172,18 @@ describe('NeuDataViewComponent', () => {
       { meta: { name: 'Zoe' } },
       { meta: { name: 'Bob' } },
     ]);
-    direct.componentRef.setInput('sortOptions', [{ label: 'Name', value: 'meta.name', direction: 'desc' }]);
+    direct.componentRef.setInput('sortOptions', [
+      { label: 'Name', value: 'meta.name', direction: 'desc' },
+    ]);
     direct.componentRef.setInput('pageSize', 0);
     direct.detectChanges();
     const component = direct.componentInstance;
     component.setSort('meta.name');
-    expect(component.filteredItems().map((item: any) => item.meta.name)).toEqual(['Zoe', 'Bob', 'Ada']);
+    expect(component.filteredItems().map((item: any) => item.meta.name)).toEqual([
+      'Zoe',
+      'Bob',
+      'Ada',
+    ]);
     expect(component.pageCount()).toBe(3);
     component.nextPage();
     component.nextPage();
@@ -179,7 +197,12 @@ describe('NeuDataViewComponent', () => {
 
   it('synchronizes the sort control and searches primitive, null and incomplete nested values', async () => {
     const direct = TestBed.createComponent(NeuDataViewComponent);
-    direct.componentRef.setInput('items', [null, 'Plain text', { meta: null }, { meta: { name: 'Nested' } }]);
+    direct.componentRef.setInput('items', [
+      null,
+      'Plain text',
+      { meta: null },
+      { meta: { name: 'Nested' } },
+    ]);
     direct.componentRef.setInput('searchFields', ['meta.name']);
     direct.componentRef.setInput('sortOptions', [{ label: 'Name', value: 'meta.name' }]);
     direct.detectChanges();
@@ -209,7 +232,13 @@ describe('NeuDataViewComponent', () => {
         NeuDataViewItemDirective,
       ],
       template: `
-        <neu-data-view [items]="items" mode="table" [searchable]="false" [viewSwitcher]="false" [pagination]="false">
+        <neu-data-view
+          [items]="items"
+          mode="table"
+          [searchable]="false"
+          [viewSwitcher]="false"
+          [pagination]="false"
+        >
           <ng-template neuDataViewHeader>Header slot</ng-template>
           <ng-template neuDataViewItem let-item>Item slot {{ item }}</ng-template>
           <ng-template neuDataViewFooter>Footer slot</ng-template>
@@ -220,7 +249,9 @@ describe('NeuDataViewComponent', () => {
       readonly items = ['One', { name: 'Two' }, null];
     }
 
-    await TestBed.resetTestingModule().configureTestingModule({ imports: [SlotsHostComponent] }).compileComponents();
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ imports: [SlotsHostComponent] })
+      .compileComponents();
     const slotsFixture = TestBed.createComponent(SlotsHostComponent);
     slotsFixture.detectChanges();
     const component = slotsFixture.debugElement.children[0]
@@ -231,7 +262,9 @@ describe('NeuDataViewComponent', () => {
     expect(component.itemTpl()).toBeTruthy();
     expect(component.headerTpl()).toBeTruthy();
     expect(component.footerTpl()).toBeTruthy();
-    expect(slotsFixture.nativeElement.querySelector('.neu-data-view__items')?.getAttribute('role')).toBe('table');
+    expect(
+      slotsFixture.nativeElement.querySelector('.neu-data-view__items')?.getAttribute('role'),
+    ).toBe('table');
     expect(slotsFixture.nativeElement.querySelectorAll('[role="row"]').length).toBe(3);
     expect(slotsFixture.nativeElement.textContent).toContain('Item slot [object Object]');
   });

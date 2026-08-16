@@ -56,6 +56,10 @@
     radial-gradient(farthest-side at 50% 0, rgb(0 0 0 / 12%), transparent),
     radial-gradient(farthest-side at 50% 100%, rgb(0 0 0 / 12%), transparent) bottom;
   background-repeat: no-repeat;
-  background-size: 100% 24px, 100% 24px, 100% 8px, 100% 8px;
+  background-size:
+    100% 24px,
+    100% 24px,
+    100% 8px,
+    100% 8px;
   background-attachment: local, local, scroll, scroll;
 }

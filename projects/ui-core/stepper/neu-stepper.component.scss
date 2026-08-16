@@ -132,7 +132,9 @@
 .neu-stepper__connector {
   position: absolute;
   top: calc(var(--neu-stepper-indicator-radius) - 1px);
-  inset-inline-start: calc(50% + var(--neu-stepper-indicator-radius) + var(--neu-stepper-connector-gap));
+  inset-inline-start: calc(
+    50% + var(--neu-stepper-indicator-radius) + var(--neu-stepper-connector-gap)
+  );
   width: calc(100% - var(--neu-stepper-indicator-size) - (var(--neu-stepper-connector-gap) * 2));
   height: 2px;
   background: var(--neu-border);
@@ -166,7 +168,9 @@
   }
 
   .neu-stepper__connector {
-    inset-inline-start: calc(50% + var(--neu-stepper-indicator-radius) + var(--neu-stepper-connector-gap));
+    inset-inline-start: calc(
+      50% + var(--neu-stepper-indicator-radius) + var(--neu-stepper-connector-gap)
+    );
     width: calc(100% - var(--neu-stepper-indicator-size) - (var(--neu-stepper-connector-gap) * 2));
   }
 

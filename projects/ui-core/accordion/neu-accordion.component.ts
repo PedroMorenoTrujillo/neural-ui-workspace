@@ -16,6 +16,8 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
+let _neuAccordionIdSeq = 0;
+
 export interface NeuAccordionItem {
   /** ID único del panel / Unique panel ID */
   id: string;
@@ -29,7 +31,11 @@ export interface NeuAccordionItem {
   disabled?: boolean;
 }
 @Directive({ selector: 'ng-template[neuAccordionHeader]' })
-export class NeuAccordionHeaderDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuAccordionItem; expanded: boolean }>) {} }
+export class NeuAccordionHeaderDirective {
+  constructor(
+    readonly templateRef: TemplateRef<{ $implicit: NeuAccordionItem; expanded: boolean }>,
+  ) {}
+}
 
 /**
  * NeuralUI Accordion Component
@@ -57,13 +63,20 @@ export class NeuAccordionHeaderDirective { constructor(readonly templateRef: Tem
           <button
             class="neu-accordion__header"
             type="button"
-            [id]="'neu-acc-btn-' + item.id"
+            [id]="headerId(item.id)"
             [attr.aria-expanded]="isExpanded(item.id)"
-            [attr.aria-controls]="'neu-acc-panel-' + item.id"
+            [attr.aria-controls]="panelId(item.id)"
             [disabled]="item.disabled"
             (click)="toggle(item.id)"
           >
-            @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, expanded: isExpanded(item.id) }" /> } @else { <span class="neu-accordion__title">{{ item.title }}</span> }
+            @if (headerTpl()) {
+              <ng-container
+                [ngTemplateOutlet]="headerTpl()!.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: item, expanded: isExpanded(item.id) }"
+              />
+            } @else {
+              <span class="neu-accordion__title">{{ item.title }}</span>
+            }
             <span class="neu-accordion__chevron" aria-hidden="true">
               <svg
                 width="16"
@@ -81,9 +94,9 @@ export class NeuAccordionHeaderDirective { constructor(readonly templateRef: Tem
           </button>
           <div
             class="neu-accordion__panel"
-            [id]="'neu-acc-panel-' + item.id"
+            [id]="panelId(item.id)"
             role="region"
-            [attr.aria-labelledby]="'neu-acc-btn-' + item.id"
+            [attr.aria-labelledby]="headerId(item.id)"
           >
             <div class="neu-accordion__body" [innerHTML]="sanitize(item.content)"></div>
           </div>
@@ -96,6 +109,7 @@ export class NeuAccordionHeaderDirective { constructor(readonly templateRef: Tem
 export class NeuAccordionComponent {
   readonly headerTpl = contentChild(NeuAccordionHeaderDirective);
   private readonly _sanitizer = inject(DomSanitizer);
+  private readonly _instanceId = `neu-acc-${++_neuAccordionIdSeq}`;
 
   /** Lista de paneles / Panel list */
   items = input<NeuAccordionItem[]>([]);
@@ -131,6 +145,9 @@ export class NeuAccordionComponent {
   }
 
   readonly isExpanded = (id: string) => this._expanded().has(id);
+
+  readonly headerId = (itemId: string) => `${this._instanceId}-btn-${itemId}`;
+  readonly panelId = (itemId: string) => `${this._instanceId}-panel-${itemId}`;
 
   sanitize(html: string): SafeHtml {
     return this._sanitizer.sanitize(SecurityContext.HTML, html) ?? '';

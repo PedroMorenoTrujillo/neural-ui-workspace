@@ -1,6 +1,7 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
+import { Directionality } from '@angular/cdk/bidi';
 import { By } from '@angular/platform-browser';
 import { NeuDashboardGridComponent, NeuDashboardTileConfig } from './neu-dashboard-grid.component';
 
@@ -138,6 +139,65 @@ describe('NeuDashboardGridComponent', () => {
     contents.forEach((content: HTMLDivElement) => {
       expect(content.getAttribute('tabindex')).toBe('0');
     });
+  });
+
+  it('reorders tiles with Alt+Arrow keys and keeps the handle focused', async () => {
+    const f = setup();
+    await f.whenStable();
+    const changes: NeuDashboardTileConfig[][] = [];
+    f.componentInstance.orderChange.subscribe((tiles) => changes.push(tiles));
+
+    const firstHandle = f.nativeElement.querySelector(
+      '[data-dashboard-tile-id="a"] .neu-dg__tile-handle',
+    ) as HTMLElement;
+    expect(firstHandle.getAttribute('role')).toBe('button');
+    expect(firstHandle.getAttribute('aria-keyshortcuts')).toContain('Alt+ArrowRight');
+    firstHandle.focus();
+    firstHandle.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true }),
+    );
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.componentInstance._orderedTiles().map((tile) => tile.id)).toEqual(['b', 'a', 'c']);
+    expect(changes).toHaveLength(1);
+    expect(
+      (
+        (document.activeElement as HTMLElement).closest(
+          '[data-dashboard-tile-id]',
+        ) as HTMLElement | null
+      )?.dataset['dashboardTileId'],
+    ).toBe('a');
+  });
+
+  it('ignores non-reordering keys and boundary moves', async () => {
+    const f = setup();
+    await f.whenStable();
+    const event = new KeyboardEvent('keydown', { key: 'ArrowLeft', altKey: true });
+    const preventDefault = vi.spyOn(event, 'preventDefault');
+
+    f.componentInstance._onTileKeydown('a', event);
+    f.componentInstance._onTileKeydown(
+      'missing',
+      new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true }),
+    );
+    f.componentInstance._onTileKeydown('a', new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+
+    expect(f.componentInstance._orderedTiles()).toEqual(TILES);
+    expect(preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('mirrors horizontal keyboard reordering when direction changes dynamically', async () => {
+    const f = setup();
+    await f.whenStable();
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+
+    f.componentInstance._onTileKeydown(
+      'b',
+      new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true }),
+    );
+
+    expect(f.componentInstance._orderedTiles().map((tile) => tile.id)).toEqual(['b', 'a', 'c']);
   });
 
   it('should render no tiles when the input list is empty', async () => {

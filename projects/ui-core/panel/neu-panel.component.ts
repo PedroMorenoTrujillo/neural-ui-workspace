@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 
 @Component({
   selector: 'neu-panel',
@@ -65,7 +72,9 @@ export class NeuFieldsetComponent {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-scroll-area' },
-  template: `<div class="neu-scroll-area__viewport" [style.max-height]="maxHeight()"><ng-content /></div>`,
+  template: `<div class="neu-scroll-area__viewport" [style.max-height]="maxHeight()">
+    <ng-content />
+  </div>`,
   styleUrl: './neu-panel.component.scss',
 })
 export class NeuScrollAreaComponent {

@@ -57,7 +57,9 @@ describe('NeuPasswordComponent', () => {
     fixture.componentRef.setInput('showStrength', true);
     fixture.detectChanges();
     const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
-    const toggle = fixture.nativeElement.querySelector('.neu-password__toggle') as HTMLButtonElement;
+    const toggle = fixture.nativeElement.querySelector(
+      '.neu-password__toggle',
+    ) as HTMLButtonElement;
     expect(fixture.nativeElement.querySelector('label')?.textContent).toContain('Password');
     expect(input.placeholder).toBe('Enter password');
     expect(input.type).toBe('password');
@@ -78,11 +80,15 @@ describe('NeuPasswordComponent', () => {
     fixture.detectChanges();
     const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
     expect(fixture.nativeElement.querySelector('.neu-password__label')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.neu-password__floating-label')?.textContent).toContain('Password');
+    expect(
+      fixture.nativeElement.querySelector('.neu-password__floating-label')?.textContent,
+    ).toContain('Password');
     expect(input.placeholder).toBe(' ');
     input.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.neu-password__wrap')?.classList).toContain('neu-password__wrap--focused');
+    expect(fixture.nativeElement.querySelector('.neu-password__wrap')?.classList).toContain(
+      'neu-password__wrap--focused',
+    );
   });
 
   it('synchronises a browser-autofilled value with the CVA and floating-label state', () => {
@@ -98,7 +104,9 @@ describe('NeuPasswordComponent', () => {
 
     expect(component.value()).toBe('Autofilled1!');
     expect(onChange).toHaveBeenCalledWith('Autofilled1!');
-    expect(fixture.nativeElement.querySelector('.neu-password__wrap')?.classList).toContain('neu-password__wrap--has-value');
+    expect(fixture.nativeElement.querySelector('.neu-password__wrap')?.classList).toContain(
+      'neu-password__wrap--has-value',
+    );
   });
 
   it('forwards name and autocomplete to the native password input', () => {
@@ -111,7 +119,9 @@ describe('NeuPasswordComponent', () => {
   });
 
   it('disables the reveal toggle whenever the password control is disabled', () => {
-    const toggle = fixture.nativeElement.querySelector('.neu-password__toggle') as HTMLButtonElement;
+    const toggle = fixture.nativeElement.querySelector(
+      '.neu-password__toggle',
+    ) as HTMLButtonElement;
 
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
@@ -152,7 +162,9 @@ describe('NeuPasswordComponent', () => {
       readonly control = new FormControl('Initial1!');
     }
 
-    await TestBed.resetTestingModule().configureTestingModule({ imports: [FormHostComponent] }).compileComponents();
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ imports: [FormHostComponent] })
+      .compileComponents();
     const formFixture = TestBed.createComponent(FormHostComponent);
     formFixture.detectChanges();
     const input = formFixture.nativeElement.querySelector('input') as HTMLInputElement;

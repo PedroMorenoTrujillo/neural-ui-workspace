@@ -105,7 +105,7 @@ describe('NeuSchedulerGanttComponent', () => {
     const fixture = TestBed.createComponent(NeuSchedulerGanttComponent);
     fixture.componentRef.setInput('rows', ROWS);
     fixture.componentRef.setInput('startDate', '2026-05-05');
-    fixture.componentRef.setInput('endDate', '2026-05-10');
+    fixture.componentRef.setInput('endDate', '2026-05-11');
     const emitted: string[] = [];
 
     fixture.componentInstance.slotClick.subscribe((event) => {
@@ -113,9 +113,9 @@ describe('NeuSchedulerGanttComponent', () => {
     });
 
     fixture.detectChanges();
-    fixture.nativeElement.querySelector('[data-slot-key="platform:2026-05-06"]').click();
+    fixture.nativeElement.querySelector('[data-slot-key="platform:2026-05-11"]').click();
 
-    expect(emitted).toEqual(['platform:2026-05-06:day']);
+    expect(emitted).toEqual(['platform:2026-05-11:day']);
   });
 
   it('maps the range and span by week when week scale is active', () => {

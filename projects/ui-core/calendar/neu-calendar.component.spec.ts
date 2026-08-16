@@ -1,6 +1,7 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NeuCalendarComponent, NeuCalendarEventDirective } from './neu-calendar.component';
+import { Directionality } from '@angular/cdk/bidi';
 
 const EVENTS = [
   { id: 'a', title: 'Kickoff', start: '2026-05-14T09:00:00', variant: 'info' as const },
@@ -23,9 +24,20 @@ function localDayKey(date: Date): string {
 
 describe('NeuCalendarComponent', () => {
   it('projects the event template in the calendar views', async () => {
-    @Component({ imports: [NeuCalendarComponent, NeuCalendarEventDirective], template: `<neu-calendar [events]="events" selectedDate="2026-05-14"><ng-template neuCalendarEvent let-event let-view="view">CUSTOM:{{ view }}:{{ event.title }}</ng-template></neu-calendar>` })
-    class Host { events = EVENTS; }
-    await TestBed.resetTestingModule().configureTestingModule({ providers: [provideZonelessChangeDetection()], imports: [Host] }).compileComponents();
+    @Component({
+      imports: [NeuCalendarComponent, NeuCalendarEventDirective],
+      template: `<neu-calendar [events]="events" selectedDate="2026-05-14"
+        ><ng-template neuCalendarEvent let-event let-view="view"
+          >CUSTOM:{{ view }}:{{ event.title }}</ng-template
+        ></neu-calendar
+      >`,
+    })
+    class Host {
+      events = EVENTS;
+    }
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ providers: [provideZonelessChangeDetection()], imports: [Host] })
+      .compileComponents();
     const host = TestBed.createComponent(Host);
     host.detectChanges();
     expect(host.nativeElement.textContent).toContain('CUSTOM:month:Kickoff');
@@ -164,6 +176,22 @@ describe('NeuCalendarComponent', () => {
     (navButtons[1] as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(fixture.componentInstance.currentLabel().toLowerCase()).toContain('may');
+  });
+
+  it('mirrors the month navigation arrows when direction changes dynamically', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const arrows = () =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll(
+          '.neu-calendar__nav-btn',
+        ) as NodeListOf<HTMLButtonElement>,
+      ).map((button) => button.textContent.trim());
+
+    expect(arrows()).toEqual(['‹', '›']);
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    fixture.detectChanges();
+    expect(arrows()).toEqual(['›', '‹']);
   });
 
   it('selectDate should emit selectedDateChange and dateSelect', async () => {
@@ -486,7 +514,9 @@ describe('NeuCalendarComponent', () => {
     const fixture = setup();
     await fixture.whenStable();
     const emitted: string[] = [];
-    fixture.componentInstance.selectedDateChange.subscribe((date) => emitted.push(localDayKey(date)));
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      emitted.push(localDayKey(date)),
+    );
 
     fixture.componentInstance.prev();
     fixture.componentInstance.next();
@@ -495,7 +525,9 @@ describe('NeuCalendarComponent', () => {
     fixture.componentInstance.prev();
     fixture.componentInstance.next();
 
-    const todayButton = fixture.nativeElement.querySelector('.neu-calendar__today') as HTMLButtonElement;
+    const todayButton = fixture.nativeElement.querySelector(
+      '.neu-calendar__today',
+    ) as HTMLButtonElement;
     todayButton.click();
     fixture.detectChanges();
 
@@ -509,10 +541,20 @@ describe('NeuCalendarComponent', () => {
     expect(labels.eventCount(1)).toBe('1 event');
     expect(labels.eventCount(2)).toBe('2 events');
     expect(
-      fixture.componentInstance.eventTooltip({ id: 'x', title: 'Plain', start: new Date(), allDay: false }),
+      fixture.componentInstance.eventTooltip({
+        id: 'x',
+        title: 'Plain',
+        start: new Date(),
+        allDay: false,
+      }),
     ).toContain('Plain');
     expect(
-      fixture.componentInstance.eventTooltip({ id: 'plain', title: 'Plain only', start: new Date(), meta: '' }),
+      fixture.componentInstance.eventTooltip({
+        id: 'plain',
+        title: 'Plain only',
+        start: new Date(),
+        meta: '',
+      }),
     ).toContain('Plain only');
     fixture.componentInstance.onDayKeydown(
       new KeyboardEvent('keydown', { key: 'Spacebar', cancelable: true }),

@@ -26,6 +26,9 @@
 }
 
 .neu-breadcrumb__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   color: var(--neu-text);
   text-decoration: none;
   transition: color var(--neu-transition);

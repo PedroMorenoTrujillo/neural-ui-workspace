@@ -290,8 +290,8 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    const readAllBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find(
-      (b: any) => b.textContent.includes('Leer'),
+    const readAllBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find((b: any) =>
+      b.textContent.includes('Leer'),
     ) as HTMLButtonElement;
     expect(readAllBtn).toBeTruthy();
     readAllBtn.click();
@@ -307,8 +307,8 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance._toggle();
     f.detectChanges();
     await f.whenStable();
-    const clearBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find(
-      (b: any) => b.textContent.includes('Limpiar'),
+    const clearBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find((b: any) =>
+      b.textContent.includes('Limpiar'),
     ) as HTMLButtonElement;
     expect(clearBtn).toBeTruthy();
     clearBtn.click();
@@ -332,6 +332,36 @@ describe('NeuNotificationCenterComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__empty')).toBeTruthy();
+  });
+
+  it('closes with Escape and restores focus to the bell', async () => {
+    const f = setup();
+    const bell = f.nativeElement.querySelector('.neu-nc__bell') as HTMLButtonElement;
+    bell.click();
+    f.detectChanges();
+    await f.whenStable();
+    const escape = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+
+    document.dispatchEvent(escape);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(escape.defaultPrevented).toBe(true);
+    expect(f.componentInstance._isOpen()).toBe(false);
+    expect(document.activeElement).toBe(bell);
+  });
+
+  it('does not consume Escape while closed', () => {
+    const f = setup();
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+
+    f.componentInstance._onEscape(escape);
+
+    expect(escape.defaultPrevented).toBe(false);
   });
 
   it('push with duration=0 should NOT auto-dismiss', async () => {

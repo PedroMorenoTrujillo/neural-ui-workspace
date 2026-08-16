@@ -558,7 +558,9 @@ describe('NeuAutocompleteComponent', () => {
     f.componentRef.setInput('dropdown', true);
     f.componentRef.setInput('dropdownAriaLabel', 'Open all options');
     f.detectChanges();
-    const dropdown = f.nativeElement.querySelector('.neu-autocomplete__dropdown') as HTMLButtonElement;
+    const dropdown = f.nativeElement.querySelector(
+      '.neu-autocomplete__dropdown',
+    ) as HTMLButtonElement;
     dropdown.click();
     expect(f.componentInstance._isOpen()).toBe(true);
     expect(f.componentInstance._activeIndex()).toBe(0);
@@ -567,7 +569,9 @@ describe('NeuAutocompleteComponent', () => {
     f.componentRef.setInput('loadingLabel', 'Loading choices');
     f.detectChanges();
     await f.whenStable();
-    expect(document.querySelector('.neu-autocomplete__empty')?.textContent).toContain('Loading choices');
+    expect(document.querySelector('.neu-autocomplete__empty')?.textContent).toContain(
+      'Loading choices',
+    );
 
     f.componentInstance.onWindowResize();
     expect(f.componentInstance.overlayWidth()).not.toBeNull();
@@ -587,7 +591,18 @@ describe('NeuAutocompleteComponent', () => {
     f.componentInstance.openAll();
     f.detectChanges();
     await f.whenStable();
-    expect(document.querySelector('cdk-virtual-scroll-viewport')).toBeTruthy();
+    const viewportElement = document.querySelector('cdk-virtual-scroll-viewport') as HTMLElement;
+    expect(viewportElement).toBeTruthy();
+    Object.defineProperty(viewportElement, 'clientHeight', { configurable: true, value: 80 });
+    Object.defineProperty(viewportElement, 'clientWidth', { configurable: true, value: 320 });
+    viewportElement.scrollTo = vi.fn();
+    f.componentInstance['_viewport']()?.checkViewportSize();
+    f.componentInstance['_viewport']()?.scrollToIndex(0);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    f.detectChanges();
+    await f.whenStable();
+    expect(viewportElement.querySelectorAll('.neu-autocomplete__option').length).toBeGreaterThan(0);
+    expect(viewportElement.textContent).toContain('Angular');
     expect(f.componentInstance.virtualViewportHeight()).toBe('80px');
   });
 
@@ -605,11 +620,15 @@ describe('NeuAutocompleteComponent', () => {
     }
 
     await TestBed.resetTestingModule()
-      .configureTestingModule({ providers: [provideZonelessChangeDetection()], imports: [ItemTemplateHostComponent] })
+      .configureTestingModule({
+        providers: [provideZonelessChangeDetection()],
+        imports: [ItemTemplateHostComponent],
+      })
       .compileComponents();
     const host = TestBed.createComponent(ItemTemplateHostComponent);
     host.detectChanges();
-    const autocomplete = host.debugElement.children[0].componentInstance as NeuAutocompleteComponent;
+    const autocomplete = host.debugElement.children[0]
+      .componentInstance as NeuAutocompleteComponent;
     autocomplete.openAll();
     host.detectChanges();
     await host.whenStable();
@@ -685,7 +704,8 @@ describe('NeuAutocompleteComponent', () => {
       .compileComponents();
     const host = TestBed.createComponent(VirtualItemTemplateHostComponent);
     host.detectChanges();
-    const autocomplete = host.debugElement.children[0].componentInstance as NeuAutocompleteComponent;
+    const autocomplete = host.debugElement.children[0]
+      .componentInstance as NeuAutocompleteComponent;
     autocomplete.openAll();
     host.detectChanges();
     await host.whenStable();
@@ -743,7 +763,8 @@ describe('NeuAutocompleteComponent', () => {
       .compileComponents();
     const host = TestBed.createComponent(FormHostComponent);
     host.detectChanges();
-    const autocomplete = host.debugElement.children[0].componentInstance as NeuAutocompleteComponent;
+    const autocomplete = host.debugElement.children[0]
+      .componentInstance as NeuAutocompleteComponent;
 
     autocomplete.openAll();
     host.detectChanges();

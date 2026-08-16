@@ -12,6 +12,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Directionality } from '@angular/cdk/bidi';
 
 let _seq = 0;
 
@@ -88,6 +89,7 @@ export class NeuInputOTPComponent implements ControlValueAccessor {
   }));
 
   private readonly _cellEls = viewChildren<ElementRef<HTMLInputElement>>('cellEl');
+  private readonly _directionality = inject(Directionality);
   private _onChange: (v: string) => void = () => {};
   private _onTouched: () => void = () => {};
 
@@ -141,10 +143,14 @@ export class NeuInputOTPComponent implements ControlValueAccessor {
       } else if (index > 0) {
         this._focusCell(index - 1);
       }
-    } else if (event.key === 'ArrowLeft' && index > 0) {
-      this._focusCell(index - 1);
-    } else if (event.key === 'ArrowRight' && index < this.length() - 1) {
-      this._focusCell(index + 1);
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const physicalDelta = event.key === 'ArrowRight' ? 1 : -1;
+      const logicalDelta = this._directionality.value === 'rtl' ? -physicalDelta : physicalDelta;
+      const nextIndex = index + logicalDelta;
+      if (nextIndex >= 0 && nextIndex < this.length()) {
+        event.preventDefault();
+        this._focusCell(nextIndex);
+      }
     }
   }
 

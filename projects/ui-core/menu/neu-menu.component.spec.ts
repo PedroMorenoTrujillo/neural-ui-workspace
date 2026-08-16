@@ -7,6 +7,7 @@ import {
   NeuMenubarComponent,
   NeuTieredMenuComponent,
 } from './neu-menu.component';
+import { Directionality } from '@angular/cdk/bidi';
 
 describe('NeuMenuComponent', () => {
   let fixture: ComponentFixture<NeuMenuComponent>;
@@ -36,7 +37,9 @@ describe('NeuMenuComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.neu-menu__icon svg')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.neu-menu__icon')?.textContent).not.toContain('lucidePencil');
+    expect(fixture.nativeElement.querySelector('.neu-menu__icon')?.textContent).not.toContain(
+      'lucidePencil',
+    );
   });
 
   it('renders separators, shortcuts and nested menus while ignoring disabled items', () => {
@@ -51,17 +54,60 @@ describe('NeuMenuComponent', () => {
     ]);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe('Actions');
+    expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe(
+      'Actions',
+    );
     expect(fixture.nativeElement.querySelector('.neu-menu__separator')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.neu-menu__shortcut')?.textContent).toContain('Ctrl+S');
+    expect(fixture.nativeElement.querySelector('.neu-menu__shortcut')?.textContent).toContain(
+      'Ctrl+S',
+    );
     expect(fixture.nativeElement.querySelector('.neu-menu__chevron')).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain('Child');
 
-    const buttons = fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'button',
+    ) as NodeListOf<HTMLButtonElement>;
     buttons[0].click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'save' }));
     buttons[1].click();
     expect(clicked).not.toHaveBeenCalledWith(expect.objectContaining({ key: 'disabled' }));
+  });
+
+  it('mirrors nested-menu chevrons when direction changes dynamically', () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'parent', label: 'Parent', children: [{ key: 'child', label: 'Child' }] },
+    ]);
+    fixture.detectChanges();
+
+    const firstChevron = () =>
+      (fixture.nativeElement.querySelector('.neu-menu__chevron') as HTMLElement).textContent.trim();
+    expect(firstChevron()).toBe('›');
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    fixture.detectChanges();
+    expect(firstChevron()).toBe('‹');
+  });
+
+  it('uses roving focus for Arrow, Home and End menu navigation', () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'one', label: 'One' },
+      { key: 'disabled', label: 'Disabled', disabled: true },
+      { key: 'two', label: 'Two' },
+      { key: 'three', label: 'Three' },
+    ]);
+    fixture.detectChanges();
+    const enabled = Array.from(
+      fixture.nativeElement.querySelectorAll('.neu-menu__item:not(:disabled)'),
+    ) as HTMLButtonElement[];
+
+    expect(enabled.map((item) => item.tabIndex)).toEqual([0, -1, -1]);
+    enabled[0].focus();
+    enabled[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(document.activeElement).toBe(enabled[2]);
+    enabled[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(document.activeElement).toBe(enabled[0]);
+    enabled[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(document.activeElement).toBe(enabled[2]);
   });
 });
 
@@ -111,6 +157,26 @@ describe('NeuMenuButtonComponent', () => {
     expect(component.open()).toBe(false);
   });
 
+  it('focuses the first item on open and closes with Escape while restoring trigger focus', async () => {
+    const trigger = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect((document.activeElement as HTMLElement).textContent).toContain('Edit');
+
+    const escape = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(escape);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(escape.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.open()).toBe(false);
+    expect(document.activeElement).toBe(trigger);
+  });
 });
 
 describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
@@ -129,10 +195,15 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     const component = fixture.componentInstance;
     const clicked = vi.spyOn(component.itemClick, 'emit');
 
-    expect(fixture.nativeElement.querySelector('nav')?.getAttribute('aria-label')).toBe('Main navigation');
+    expect(fixture.nativeElement.querySelector('nav')?.getAttribute('aria-label')).toBe(
+      'Main navigation',
+    );
     (fixture.nativeElement.querySelector('.neu-menubar__item') as HTMLButtonElement).click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'help' }));
-    expect((fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)[2].disabled).toBe(true);
+    expect(
+      (fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)[2]
+        .disabled,
+    ).toBe(true);
 
     (fixture.nativeElement.querySelector('.neu-menu-button__trigger') as HTMLButtonElement).click();
     fixture.detectChanges();
@@ -149,8 +220,27 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     const component = fixture.componentInstance;
     const clicked = vi.spyOn(component.itemClick, 'emit');
 
-    expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe('Tree actions');
+    expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe(
+      'Tree actions',
+    );
     (fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)[1].click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'new' }));
+  });
+
+  it('moves menubar focus horizontally and skips disabled items', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuMenubarComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(NeuMenubarComponent);
+    fixture.componentRef.setInput('items', items);
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-menu-button__trigger',
+    ) as HTMLButtonElement;
+    const help = fixture.nativeElement.querySelector('.neu-menubar__item') as HTMLButtonElement;
+
+    trigger.focus();
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(document.activeElement).toBe(help);
+    help.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(document.activeElement).toBe(trigger);
   });
 });

@@ -188,9 +188,7 @@ $item-radius: 8px;
 
     &:focus-visible {
       outline: none;
-      box-shadow:
-        var(--neu-focus-ring-strong),
-        var(--neu-nav-toggle-shadow);
+      box-shadow: var(--neu-focus-ring-strong), var(--neu-nav-toggle-shadow);
     }
   }
 
@@ -381,6 +379,10 @@ $item-radius: 8px;
     &--open {
       .neu-nav__group-chevron {
         transform: rotate(90deg);
+      }
+
+      .neu-nav__group-chevron--rtl {
+        transform: rotate(-90deg);
       }
 
       > .neu-nav__item--parent {

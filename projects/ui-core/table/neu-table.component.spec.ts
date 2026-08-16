@@ -10,6 +10,7 @@ import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
 import { NeuTableColumn } from './neu-table.types';
 import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
 import { By } from '@angular/platform-browser';
+import { Directionality } from '@angular/cdk/bidi';
 
 interface Person {
   id: number;
@@ -86,6 +87,54 @@ describe('NeuTableComponent', () => {
     await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
   });
 
+  it('mirrors pagination chevrons when direction changes dynamically', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', MANY_ROWS);
+    f.componentRef.setInput('pageSize', 5);
+    f.detectChanges();
+    await f.whenStable();
+
+    const chevrons = () =>
+      Array.from(
+        f.nativeElement.querySelectorAll(
+          '.neu-table__pagination polyline',
+        ) as NodeListOf<SVGPolylineElement>,
+      ).map((node) => node.getAttribute('points'));
+    expect(chevrons()).toEqual(['15 18 9 12 15 6', '9 18 15 12 9 6']);
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    f.detectChanges();
+    expect(chevrons()).toEqual(['9 18 15 12 9 6', '15 18 9 12 15 6']);
+  });
+
+  it('mirrors logical reorder and row expansion controls dynamically in RTL', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('reorderableColumns', true);
+    f.componentRef.setInput('expandable', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const reorder = () =>
+      f.nativeElement.querySelectorAll('.neu-table__reorder-btn') as NodeListOf<HTMLButtonElement>;
+    expect(reorder()[0].textContent.trim()).toBe('‹');
+    expect(reorder()[0].getAttribute('aria-label')).toBe('Move Nombre before');
+    expect(reorder()[1].textContent.trim()).toBe('›');
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    f.detectChanges();
+
+    expect(reorder()[0].textContent.trim()).toBe('›');
+    expect(reorder()[1].textContent.trim()).toBe('‹');
+    const expandButton = f.nativeElement.querySelector(
+      '.neu-table__expand-btn',
+    ) as HTMLButtonElement;
+    expect(expandButton.classList.contains('neu-table__expand-btn--rtl')).toBe(true);
+    expect(expandButton.querySelector('polyline')?.getAttribute('points')).toBe('15 18 9 12 15 6');
+  });
+
   // ── Rendering básico ─────────────────────────────────────────────────────
 
   it('should render column headers', async () => {
@@ -157,6 +206,20 @@ describe('NeuTableComponent', () => {
     expect(f.nativeElement.textContent).toContain('Usuarios del sistema');
   });
 
+  it('should expose the configured semantic level for the toolbar title', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('title', 'Usuarios del sistema');
+    f.componentRef.setInput('titleHeadingLevel', 2);
+    f.detectChanges();
+    await f.whenStable();
+
+    const title = f.nativeElement.querySelector('.neu-table__title');
+    expect(title?.getAttribute('role')).toBe('heading');
+    expect(title?.getAttribute('aria-level')).toBe('2');
+  });
+
   // ── Búsqueda ─────────────────────────────────────────────────────────────
 
   it('should show search box when searchable=true', async () => {
@@ -217,6 +280,43 @@ describe('NeuTableComponent', () => {
     expect(() => comp.sortBy('name')).not.toThrow();
     // Call again for desc direction
     expect(() => comp.sortBy('name')).not.toThrow();
+  });
+
+  it('exposes sortable headers to keyboard users with aria-sort state', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('sortable', true);
+    f.componentRef.setInput('useUrlState', false);
+    f.detectChanges();
+    await f.whenStable();
+
+    const header = f.nativeElement.querySelector(
+      '.neu-table__th--sortable',
+    ) as HTMLTableCellElement;
+    expect(header.tabIndex).toBe(0);
+    expect(header.getAttribute('aria-sort')).toBe('none');
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      bubbles: true,
+      cancelable: true,
+    });
+    header.dispatchEvent(event);
+    f.detectChanges();
+    expect(event.defaultPrevented).toBe(true);
+    expect(f.componentInstance.sortKey()).toBe('name');
+    expect(header.getAttribute('aria-sort')).toBe('ascending');
+
+    header.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: ' ',
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    f.detectChanges();
+    expect(header.getAttribute('aria-sort')).toBe('descending');
   });
 
   // ── Selección ────────────────────────────────────────────────────────────
@@ -2840,16 +2940,30 @@ describe('NeuTableComponent', () => {
     (f.componentInstance as any).toggleRow(DATA[0]);
     f.detectChanges();
 
-    const actions = f.nativeElement.querySelectorAll('.neu-table__selection-actions .neu-table__export-btn') as NodeListOf<HTMLButtonElement>;
+    const actions = f.nativeElement.querySelectorAll(
+      '.neu-table__selection-actions .neu-table__export-btn',
+    ) as NodeListOf<HTMLButtonElement>;
     actions[0].click();
     expect(events[0].action.key).toBe('archive');
     actions[1].click();
     f.detectChanges();
-    (f.nativeElement.querySelector('.neu-table__action-confirm .neu-table__action-btn:last-child') as HTMLButtonElement).click();
+    (
+      f.nativeElement.querySelector(
+        '.neu-table__action-confirm .neu-table__action-btn:last-child',
+      ) as HTMLButtonElement
+    ).click();
     f.detectChanges();
-    (f.nativeElement.querySelectorAll('.neu-table__selection-actions .neu-table__export-btn')[1] as HTMLButtonElement).click();
+    (
+      f.nativeElement.querySelectorAll(
+        '.neu-table__selection-actions .neu-table__export-btn',
+      )[1] as HTMLButtonElement
+    ).click();
     f.detectChanges();
-    (f.nativeElement.querySelector('.neu-table__action-confirm .neu-table__action-btn--danger') as HTMLButtonElement).click();
+    (
+      f.nativeElement.querySelector(
+        '.neu-table__action-confirm .neu-table__action-btn--danger',
+      ) as HTMLButtonElement
+    ).click();
     expect(events.at(-1).action.key).toBe('delete');
   });
 
@@ -3148,9 +3262,13 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
 
-    (f.nativeElement.querySelector('.neu-table__column-chooser > button') as HTMLButtonElement).click();
+    (
+      f.nativeElement.querySelector('.neu-table__column-chooser > button') as HTMLButtonElement
+    ).click();
     f.detectChanges();
-    const chooser = f.nativeElement.querySelector('.neu-table__column-chooser-checkbox input') as HTMLInputElement;
+    const chooser = f.nativeElement.querySelector(
+      '.neu-table__column-chooser-checkbox input',
+    ) as HTMLInputElement;
     chooser.checked = false;
     chooser.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
@@ -3161,10 +3279,13 @@ describe('NeuTableComponent advanced layout features', () => {
     const resize = f.nativeElement.querySelector('.neu-table__resize-handle') as HTMLButtonElement;
     resize.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
 
-    const firstCell = f.nativeElement.querySelector('.neu-table__body .neu-table__td') as HTMLTableCellElement;
+    const firstCell = f.nativeElement.querySelector(
+      '.neu-table__body .neu-table__td',
+    ) as HTMLTableCellElement;
     firstCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
     f.detectChanges();
-    const editor = f.debugElement.query(By.directive(NeuInlineEditorComponent))?.componentInstance as NeuInlineEditorComponent;
+    const editor = f.debugElement.query(By.directive(NeuInlineEditorComponent))
+      ?.componentInstance as NeuInlineEditorComponent;
     expect(editor).toBeTruthy();
     editor.valueChange.emit('Ana DOM');
     editor.editCommit.emit({ previousValue: 'Ana García', value: 'Ana DOM' });
@@ -3183,15 +3304,21 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const reorderControls = f.nativeElement.querySelector('.neu-table__reorder-controls') as HTMLElement;
+    const reorderControls = f.nativeElement.querySelector(
+      '.neu-table__reorder-controls',
+    ) as HTMLElement;
     reorderControls.click();
-    const reorderButtons = f.nativeElement.querySelectorAll('.neu-table__reorder-btn') as NodeListOf<HTMLButtonElement>;
+    const reorderButtons = f.nativeElement.querySelectorAll(
+      '.neu-table__reorder-btn',
+    ) as NodeListOf<HTMLButtonElement>;
     reorderButtons[1].click();
     reorderButtons[2].click();
     f.detectChanges();
     expect((f.componentInstance as any).currentLayout().columnOrder[1]).toBe('name');
 
-    const selectionCell = f.nativeElement.querySelector('.neu-table__row .neu-table__th--check') as HTMLElement;
+    const selectionCell = f.nativeElement.querySelector(
+      '.neu-table__row .neu-table__th--check',
+    ) as HTMLElement;
     selectionCell.click();
     expect(rowClicks).not.toHaveBeenCalled();
   });
@@ -3420,7 +3547,11 @@ describe('NeuTableComponent advanced layout features', () => {
   it('covers table computed fallbacks that are not always reached from the default DOM', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', [
-      { key: 'name', header: 'Nombre', cell: (row: Record<string, unknown>) => `Cell ${row['name']}` },
+      {
+        key: 'name',
+        header: 'Nombre',
+        cell: (row: Record<string, unknown>) => `Cell ${row['name']}`,
+      },
       {
         key: 'status',
         header: 'Estado',
@@ -3470,7 +3601,9 @@ describe('NeuTableComponent advanced layout features', () => {
   it('groups null values, handles inactive virtual rows and formats pagination singular text', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
-    f.componentRef.setInput('data', [{ id: 1, name: 'Only', age: 1, city: null, status: 'active' }]);
+    f.componentRef.setInput('data', [
+      { id: 1, name: 'Only', age: 1, city: null, status: 'active' },
+    ]);
     f.componentRef.setInput('groupBy', 'city');
     f.componentRef.setInput('pageSize', 10);
     f.detectChanges();
@@ -3488,7 +3621,13 @@ describe('NeuTableComponent advanced layout features', () => {
   it('uses resize fallback widths and emits only after a dragged width exists', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     const resizeEvents: unknown[] = [];
-    const col: NeuTableColumn = { key: 'name', header: 'Nombre', width: 'auto', minWidth: 120, maxWidth: 180 };
+    const col: NeuTableColumn = {
+      key: 'name',
+      header: 'Nombre',
+      width: 'auto',
+      minWidth: 120,
+      maxWidth: 180,
+    };
     f.componentRef.setInput('columns', [col]);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('resizableColumns', true);
@@ -3563,7 +3702,11 @@ describe('NeuTableComponent advanced layout features', () => {
 
     const layouts: unknown[] = [];
     f.componentInstance.layoutChange.subscribe((layout) => layouts.push(layout));
-    comp.applyLayout({ columnOrder: ['city', 'ghost'], hiddenColumns: ['ghost'], columnWidths: undefined });
+    comp.applyLayout({
+      columnOrder: ['city', 'ghost'],
+      hiddenColumns: ['ghost'],
+      columnWidths: undefined,
+    });
     expect(comp.currentLayout().columnOrder).toEqual(['city', 'name', 'age']);
     expect(comp.currentLayout().hiddenColumns).toEqual([]);
     expect(layouts.length).toBeGreaterThan(0);
@@ -3736,7 +3879,12 @@ describe('NeuTableComponent advanced layout features', () => {
       f.componentRef.setInput('exportScope', 'filtered');
       f.componentInstance.exportCsv();
       f.componentRef.setInput('exportScope', 'selected');
-      f.componentInstance.toggleRow({ id: 2, name: 'Chosen', amount: 20, date: new Date('2026-01-02T00:00:00Z') });
+      f.componentInstance.toggleRow({
+        id: 2,
+        name: 'Chosen',
+        amount: 20,
+        date: new Date('2026-01-02T00:00:00Z'),
+      });
       f.componentInstance.exportJson();
       f.componentRef.setInput('exportScope', 'auto');
       f.componentInstance.exportXlsx();

@@ -1,0 +1,8 @@
+# Generated release evidence has its own deterministic serializer.
+projects/ui-core/public-contract.snapshot.json
+projects/ui-core/quality/*.json
+projects/ui-core/QUALITY_MATRIX.md
+
+# Metrics sections are generated and audited by docs:sync/audit:docs.
+README.md
+projects/ui-core/README.md

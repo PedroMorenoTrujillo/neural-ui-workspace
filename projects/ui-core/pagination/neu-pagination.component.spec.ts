@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { NeuPaginationComponent } from './neu-pagination.component';
+import { Directionality } from '@angular/cdk/bidi';
 
 @Component({
   template: `<neu-pagination
@@ -48,6 +49,24 @@ describe('NeuPaginationComponent', () => {
     const active = df.nativeElement.querySelector('[class*="--active"], [aria-current="page"]');
     expect(active).toBeTruthy();
     expect(active.textContent.trim()).toBe('3');
+  });
+
+  it('uses localizable accessible navigation and page labels', async () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('total', 20);
+    df.componentRef.setInput('ariaLabel', 'Paginación de resultados');
+    df.componentRef.setInput('previousPageLabel', 'Página anterior');
+    df.componentRef.setInput('nextPageLabel', 'Página siguiente');
+    df.componentRef.setInput('pageLabel', 'Página');
+    df.detectChanges();
+    await df.whenStable();
+
+    const nav = df.nativeElement.querySelector('nav') as HTMLElement;
+    const buttons = nav.querySelectorAll('button');
+    expect(nav.getAttribute('aria-label')).toBe('Paginación de resultados');
+    expect(buttons[0]?.getAttribute('aria-label')).toBe('Página anterior');
+    expect(buttons[1]?.getAttribute('aria-label')).toBe('Página 1');
+    expect(buttons[buttons.length - 1]?.getAttribute('aria-label')).toBe('Página siguiente');
   });
 
   it('should emit pageChange when next page is clicked', () => {
@@ -189,5 +208,22 @@ describe('NeuPaginationComponent', () => {
     df.detectChanges();
 
     expect(emitted).toEqual([1]);
+  });
+
+  it('mirrors previous and next chevrons when direction changes dynamically', () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('total', 20);
+    df.detectChanges();
+
+    const chevrons = () =>
+      Array.from(
+        df.nativeElement.querySelectorAll('polyline') as NodeListOf<SVGPolylineElement>,
+      ).map((node) => node.getAttribute('points'));
+    expect(chevrons()).toEqual(['15 18 9 12 15 6', '9 18 15 12 9 6']);
+
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    df.detectChanges();
+
+    expect(chevrons()).toEqual(['9 18 15 12 9 6', '15 18 9 12 15 6']);
   });
 });
