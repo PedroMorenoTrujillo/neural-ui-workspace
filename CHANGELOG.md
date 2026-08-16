@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Direction-sensitive widgets now use the live Angular CDK `Directionality` state for RTL layout, icons, overlays and physical arrow-key behavior.
 - Showcase test-server shutdown now asks Angular CLI to stop gracefully, avoiding a misleading esbuild deadlock diagnostic after successful audits.
 - Isolated CI now validates the checked-in showcase and performance evidence and runs the automated release gate; the strict human-evidence gate remains mandatory for publication tags.
+- CI and npm publication now use the repository-pinned Node.js 22.22.3 runtime so V8 coverage evidence is reproducible across local and hosted release gates.
 
 ## [1.12.1] - 2026-08-15
 
