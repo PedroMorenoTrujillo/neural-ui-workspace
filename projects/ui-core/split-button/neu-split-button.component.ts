@@ -11,6 +11,7 @@ import {
   input,
   output,
   signal,
+  viewChildren,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
@@ -29,7 +30,9 @@ export interface NeuSplitButtonAction {
   divider?: boolean;
 }
 @Directive({ selector: 'ng-template[neuSplitButtonItem]' })
-export class NeuSplitButtonItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuSplitButtonAction }>) {} }
+export class NeuSplitButtonItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuSplitButtonAction }>) {}
+}
 
 /**
  * NeuralUI SplitButton Component
@@ -52,7 +55,7 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
   host: {
     class: 'neu-split-button-host',
     '(document:click)': 'onDocumentClick($event)',
-    '(keydown.escape)': 'closeDropdown()',
+    '(document:keydown.escape)': 'onEscape($event)',
   },
   template: `
     <div class="neu-split-button" [class.neu-split-button--disabled]="isDisabled()">
@@ -100,6 +103,8 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
         [attr.aria-expanded]="isOpen()"
         [attr.aria-label]="moreActionsAriaLabel()"
         (click)="toggleDropdown($event)"
+        (keydown.arrowdown)="openDropdown($event)"
+        (keydown.arrowup)="openDropdown($event, true)"
       >
         <svg
           viewBox="0 0 24 24"
@@ -125,7 +130,7 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
         [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
         [cdkConnectedOverlayPush]="true"
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-        (backdropClick)="closeDropdown()"
+        (backdropClick)="closeDropdown(true)"
         (detach)="closeDropdown()"
       >
         <div
@@ -133,21 +138,31 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
           role="menu"
           [attr.aria-label]="actionsAriaLabel()"
           (click)="$event.stopPropagation()"
+          (keydown)="onMenuKeydown($event)"
         >
           @for (action of actions(); track action.id) {
             @if (action.divider) {
               <div class="neu-split-button__dropdown-sep" role="separator" aria-hidden="true"></div>
             }
             <button
+              #actionButton
               class="neu-split-button__dropdown-item"
               [class.neu-split-button__dropdown-item--disabled]="action.disabled"
               type="button"
               role="menuitem"
               [disabled]="action.disabled || null"
               [attr.aria-disabled]="action.disabled ? 'true' : null"
+              [attr.tabindex]="action.disabled ? -1 : action.id === firstEnabledActionId() ? 0 : -1"
               (click)="onActionClick(action)"
             >
-              @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: action }" /> } @else { {{ action.label }} }
+              @if (itemTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{ $implicit: action }"
+                />
+              } @else {
+                {{ action.label }}
+              }
             </button>
           }
         </div>
@@ -158,6 +173,7 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
 })
 export class NeuSplitButtonComponent {
   readonly itemTpl = contentChild(NeuSplitButtonItemDirective);
+  readonly actionButtons = viewChildren<ElementRef<HTMLButtonElement>>('actionButton');
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly overlay = inject(Overlay);
   readonly _viewportMargin = 16;
@@ -219,6 +235,9 @@ export class NeuSplitButtonComponent {
   readonly isOpen = signal(false);
 
   readonly isDisabled = computed(() => this.disabled() || this.loading());
+  readonly firstEnabledActionId = computed(
+    () => this.actions().find((action) => !action.disabled)?.id ?? null,
+  );
 
   readonly mainClasses = computed(
     () =>
@@ -234,8 +253,55 @@ export class NeuSplitButtonComponent {
     this.isOpen.update((v) => !v);
   }
 
-  closeDropdown(): void {
+  openDropdown(event: Event, focusLast = false): void {
+    if (this.isDisabled()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.isOpen.set(true);
+    queueMicrotask(() => this.focusAction(focusLast ? -1 : 0));
+  }
+
+  closeDropdown(restoreFocus = false): void {
     this.isOpen.set(false);
+    if (restoreFocus) {
+      queueMicrotask(() =>
+        this.el.nativeElement.querySelector<HTMLElement>('.neu-split-button__chevron')?.focus(),
+      );
+    }
+  }
+
+  onEscape(event: Event): void {
+    if (!this.isOpen()) return;
+    event.preventDefault();
+    this.closeDropdown(true);
+  }
+
+  onMenuKeydown(event: KeyboardEvent): void {
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    const buttons = this.enabledActionButtons();
+    if (!buttons.length) return;
+    event.preventDefault();
+    const activeIndex = buttons.indexOf(event.target as HTMLButtonElement);
+    const nextIndex =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? buttons.length - 1
+          : event.key === 'ArrowDown'
+            ? (Math.max(activeIndex, -1) + 1) % buttons.length
+            : (activeIndex <= 0 ? buttons.length : activeIndex) - 1;
+    buttons[nextIndex]?.focus();
+  }
+
+  private focusAction(index: number): void {
+    const buttons = this.enabledActionButtons();
+    buttons[index < 0 ? buttons.length - 1 : index]?.focus();
+  }
+
+  private enabledActionButtons(): HTMLButtonElement[] {
+    return this.actionButtons()
+      .map((button) => button.nativeElement)
+      .filter((button) => !button.disabled);
   }
 
   onDocumentClick(event: MouseEvent): void {
@@ -253,7 +319,7 @@ export class NeuSplitButtonComponent {
 
   onActionClick(action: NeuSplitButtonAction): void {
     if (action.disabled) return;
-    this.closeDropdown();
+    this.closeDropdown(true);
     this.actionClick.emit(action);
   }
 }

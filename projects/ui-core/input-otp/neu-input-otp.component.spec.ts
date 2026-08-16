@@ -1,4 +1,5 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Directionality } from '@angular/cdk/bidi';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuInputOTPComponent } from './neu-input-otp.component';
@@ -246,6 +247,26 @@ describe('NeuInputOTPComponent', () => {
     ).not.toThrow();
   });
 
+  it('moves focus according to the physical arrow direction in RTL', () => {
+    const f = TestBed.createComponent(NeuInputOTPComponent);
+    f.componentRef.setInput('length', 4);
+    f.detectChanges();
+    const focusSpy = vi.spyOn(f.componentInstance as any, '_focusCell');
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+
+    f.componentInstance.onKeyDown(
+      { key: 'ArrowLeft', preventDefault: vi.fn() } as unknown as KeyboardEvent,
+      1,
+    );
+    f.componentInstance.onKeyDown(
+      { key: 'ArrowRight', preventDefault: vi.fn() } as unknown as KeyboardEvent,
+      2,
+    );
+
+    expect(focusSpy).toHaveBeenNthCalledWith(1, 2);
+    expect(focusSpy).toHaveBeenNthCalledWith(2, 1);
+  });
+
   it('completed output should emit when all cells filled', () => {
     const f = TestBed.createComponent(NeuInputOTPComponent);
     f.componentRef.setInput('length', 4);
@@ -445,7 +466,9 @@ describe('NeuInputOTPComponent', () => {
 
     const comp = f.componentInstance as any;
     const keySpy = vi.spyOn(comp, 'onKeyDown');
-    const cells = f.nativeElement.querySelectorAll('.neu-input-otp__cell') as NodeListOf<HTMLInputElement>;
+    const cells = f.nativeElement.querySelectorAll(
+      '.neu-input-otp__cell',
+    ) as NodeListOf<HTMLInputElement>;
     const focusSpy = vi.spyOn(cells[0], 'focus');
 
     cells[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));

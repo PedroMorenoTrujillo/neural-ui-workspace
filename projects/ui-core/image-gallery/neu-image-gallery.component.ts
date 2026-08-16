@@ -3,10 +3,12 @@ import {
   Component,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
+import { Directionality } from '@angular/cdk/bidi';
 import { NeuImageViewerDirective, type NeuImageViewerItem } from '@neural-ui/core/image-viewer';
 
 @Component({
@@ -47,7 +49,7 @@ import { NeuImageViewerDirective, type NeuImageViewerItem } from '@neural-ui/cor
               aria-label="Previous image"
               (click)="goPrev()"
             >
-              ‹
+              {{ previousArrow() }}
             </button>
             <button
               type="button"
@@ -56,7 +58,7 @@ import { NeuImageViewerDirective, type NeuImageViewerItem } from '@neural-ui/cor
               aria-label="Next image"
               (click)="goNext()"
             >
-              ›
+              {{ nextArrow() }}
             </button>
           }
 
@@ -103,6 +105,12 @@ import { NeuImageViewerDirective, type NeuImageViewerItem } from '@neural-ui/cor
   styleUrl: './neu-image-gallery.component.scss',
 })
 export class NeuImageGalleryComponent {
+  private readonly directionality = inject(Directionality);
+  readonly previousArrow = computed(() =>
+    this.directionality.valueSignal() === 'rtl' ? '›' : '‹',
+  );
+  readonly nextArrow = computed(() => (this.directionality.valueSignal() === 'rtl' ? '‹' : '›'));
+
   readonly items = input<NeuImageViewerItem[]>([]);
   readonly initialIndex = input<number>(0);
   readonly showThumbnails = input<boolean>(true);

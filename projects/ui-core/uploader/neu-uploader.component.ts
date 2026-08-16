@@ -274,9 +274,10 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   fileStates = input<
     Record<string, { status?: NeuUploaderFileStatus; progress?: number | null; error?: string }>
   >({});
-  previewTemplate = input<TemplateRef<{ $implicit: NeuUploaderFileItem; item: NeuUploaderFileItem }> | null>(
-    null,
-  );
+  previewTemplate = input<TemplateRef<{
+    $implicit: NeuUploaderFileItem;
+    item: NeuUploaderFileItem;
+  }> | null>(null);
   retryLabel = input<string>('Retry');
   retryAriaLabel = input<string>('Retry upload for');
 

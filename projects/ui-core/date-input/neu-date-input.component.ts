@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
+import { Directionality } from '@angular/cdk/bidi';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 // ── Exported types ───────────────────────────────────────────────────────────
@@ -172,11 +173,11 @@ function cloneDate(d: Date): Date {
             <div class="neu-drp__cal">
               <div class="neu-drp__cal-nav">
                 <button type="button" [attr.aria-label]="_texts().prevMonth" (click)="_prevLeft()">
-                  ‹
+                  {{ _previousArrow() }}
                 </button>
                 <span class="neu-drp__cal-title">{{ _leftTitle() }}</span>
                 <button type="button" [attr.aria-label]="_texts().nextMonth" (click)="_nextLeft()">
-                  ›
+                  {{ _nextArrow() }}
                 </button>
               </div>
               <div class="neu-drp__cal-grid">
@@ -207,11 +208,11 @@ function cloneDate(d: Date): Date {
             <div class="neu-drp__cal">
               <div class="neu-drp__cal-nav">
                 <button type="button" [attr.aria-label]="_texts().prevMonth" (click)="_prevRight()">
-                  ‹
+                  {{ _previousArrow() }}
                 </button>
                 <span class="neu-drp__cal-title">{{ _rightTitle() }}</span>
                 <button type="button" [attr.aria-label]="_texts().nextMonth" (click)="_nextRight()">
-                  ›
+                  {{ _nextArrow() }}
                 </button>
               </div>
               <div class="neu-drp__cal-grid">
@@ -354,7 +355,7 @@ function cloneDate(d: Date): Date {
                       stroke-linecap="round"
                       aria-hidden="true"
                     >
-                      <polyline points="15 18 9 12 15 6" />
+                      <polyline [attr.points]="_previousChevronPoints()" />
                     </svg>
                   </button>
                   @if (showMonthYearPicker()) {
@@ -397,7 +398,7 @@ function cloneDate(d: Date): Date {
                       stroke-linecap="round"
                       aria-hidden="true"
                     >
-                      <polyline points="9 18 15 12 9 6" />
+                      <polyline [attr.points]="_nextChevronPoints()" />
                     </svg>
                   </button>
                 </div>
@@ -556,6 +557,17 @@ function cloneDate(d: Date): Date {
 export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   private readonly doc = inject(DOCUMENT);
   private readonly overlay = inject(Overlay);
+  private readonly directionality = inject(Directionality);
+  readonly _previousArrow = computed(() =>
+    this.directionality.valueSignal() === 'rtl' ? '›' : '‹',
+  );
+  readonly _nextArrow = computed(() => (this.directionality.valueSignal() === 'rtl' ? '‹' : '›'));
+  readonly _previousChevronPoints = computed(() =>
+    this.directionality.valueSignal() === 'rtl' ? '9 18 15 12 9 6' : '15 18 9 12 15 6',
+  );
+  readonly _nextChevronPoints = computed(() =>
+    this.directionality.valueSignal() === 'rtl' ? '15 18 9 12 15 6' : '9 18 15 12 9 6',
+  );
   private _langObserver?: MutationObserver;
 
   /** Tipo del campo / Field type */

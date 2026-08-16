@@ -25,12 +25,7 @@ function componentFiles(dir) {
   return files;
 }
 
-const requiredMethods = [
-  'writeValue',
-  'registerOnChange',
-  'registerOnTouched',
-  'setDisabledState',
-];
+const requiredMethods = ['writeValue', 'registerOnChange', 'registerOnTouched', 'setDisabledState'];
 
 const violations = [];
 const cvaComponents = [];
@@ -75,7 +70,11 @@ for (const file of componentFiles(uiCore)) {
     }
   }
 
-  if (!/setDisabledState\s*\([^)]*\)\s*:\s*void\s*\{[\s\S]*?(disabled|isDisabled|_disabled|_cvaDisabled)/.test(source)) {
+  if (
+    !/setDisabledState\s*\([^)]*\)\s*:\s*void\s*\{[\s\S]*?(disabled|isDisabled|_disabled|_cvaDisabled)/.test(
+      source,
+    )
+  ) {
     violations.push(`${rel}: setDisabledState does not appear to update disabled state`);
   }
 }

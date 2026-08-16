@@ -28,6 +28,7 @@ import { NeuDateInputComponent } from '@neural-ui/core/date-input';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import { NeuInlineEditorComponent, NeuInlineEditorType } from '@neural-ui/core/inline-editor';
+import { Directionality } from '@angular/cdk/bidi';
 import type { NeuSelectOption } from '@neural-ui/core/select';
 import type {
   NeuTableAction,
@@ -117,7 +118,9 @@ function asRows(data: object[]): Row[] {
       @if (searchable() || title() || exportable() || _toolbarTemplateRef()) {
         <div class="neu-table__toolbar">
           @if (title()) {
-            <h3 class="neu-table__title">{{ title() }}</h3>
+            <div class="neu-table__title" role="heading" [attr.aria-level]="titleHeadingLevel()">
+              {{ title() }}
+            </div>
           }
           @if (_toolbarTemplateRef(); as toolbarTpl) {
             <div class="neu-table__toolbar-extra">
@@ -171,11 +174,11 @@ function asRows(data: object[]): Row[] {
               </div>
               @if (exactMatchable()) {
                 <neu-checkbox
-                    class="neu-table__exact-checkbox"
-                    [checked]="exactMatch()"
-                    [label]="exactMatchLabel()"
-                    (checkedChange)="setExactMatch($event)"
-                  />
+                  class="neu-table__exact-checkbox"
+                  [checked]="exactMatch()"
+                  [label]="exactMatchLabel()"
+                  (checkedChange)="setExactMatch($event)"
+                />
               }
             </div>
           }
@@ -397,7 +400,17 @@ function asRows(data: object[]): Row[] {
                   [style.max-width]="columnWidth(col)"
                   [style.text-align]="col.align ?? 'left'"
                   scope="col"
+                  [attr.tabindex]="sortable() && col.sortable !== false ? 0 : null"
+                  [attr.aria-sort]="
+                    sortable() && col.sortable !== false ? columnAriaSort(col.key) : null
+                  "
                   (click)="sortable() && col.sortable !== false ? sortBy(col.key, $event) : null"
+                  (keydown.enter)="
+                    sortable() && col.sortable !== false ? sortBy(col.key, $any($event)) : null
+                  "
+                  (keydown.space)="
+                    sortable() && col.sortable !== false ? sortBy(col.key, $any($event)) : null
+                  "
                 >
                   @if (reorderableColumns()) {
                     <span class="neu-table__reorder-controls" (click)="$event.stopPropagation()">
@@ -405,19 +418,19 @@ function asRows(data: object[]): Row[] {
                         type="button"
                         class="neu-table__reorder-btn"
                         [disabled]="isFirstVisibleColumn(col.key)"
-                        [attr.aria-label]="'Move ' + col.header + ' left'"
+                        [attr.aria-label]="'Move ' + col.header + ' before'"
                         (click)="moveColumn(col.key, -1)"
                       >
-                        ‹
+                        {{ previousArrow() }}
                       </button>
                       <button
                         type="button"
                         class="neu-table__reorder-btn"
                         [disabled]="isLastVisibleColumn(col.key)"
-                        [attr.aria-label]="'Move ' + col.header + ' right'"
+                        [attr.aria-label]="'Move ' + col.header + ' after'"
                         (click)="moveColumn(col.key, 1)"
                       >
-                        ›
+                        {{ nextArrow() }}
                       </button>
                     </span>
                   }
@@ -576,187 +589,190 @@ function asRows(data: object[]): Row[] {
                   </tr>
                 } @else {
                   @let row = entry.row;
-                <tr
-                  class="neu-table__row"
-                  [class]="getRowClass(row)"
-                  [class.neu-table__row--selected]="isRowSelected(row)"
-                  [class.neu-table__row--clickable]="selectable()"
-                  (click)="onRowClick(row, $event)"
-                  (dblclick)="rowDblClick.emit(row)"
-                >
-                  @if (expandable()) {
-                    <td
-                      class="neu-table__td neu-table__td--expand-col"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <button
-                        class="neu-table__expand-btn"
-                        type="button"
-                        (click)="toggleExpand(row)"
-                        [class.neu-table__expand-btn--open]="isRowExpanded(row)"
-                        [attr.aria-expanded]="isRowExpanded(row)"
-                        [attr.aria-label]="expandRowAriaLabel()"
+                  <tr
+                    class="neu-table__row"
+                    [class]="getRowClass(row)"
+                    [class.neu-table__row--selected]="isRowSelected(row)"
+                    [class.neu-table__row--clickable]="selectable()"
+                    (click)="onRowClick(row, $event)"
+                    (dblclick)="rowDblClick.emit(row)"
+                  >
+                    @if (expandable()) {
+                      <td
+                        class="neu-table__td neu-table__td--expand-col"
+                        (click)="$event.stopPropagation()"
                       >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                        <button
+                          class="neu-table__expand-btn"
+                          type="button"
+                          (click)="toggleExpand(row)"
+                          [class.neu-table__expand-btn--open]="isRowExpanded(row)"
+                          [class.neu-table__expand-btn--rtl]="isRtl()"
+                          [attr.aria-expanded]="isRowExpanded(row)"
+                          [attr.aria-label]="expandRowAriaLabel()"
                         >
-                          <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                      </button>
-                    </td>
-                  }
-                  @if (selectable()) {
-                    <td
-                      class="neu-table__td neu-table__th--check"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <neu-checkbox
-                        class="neu-table__checkbox"
-                        [checked]="isRowSelected(row)"
-                        [ariaLabel]="selectRowAriaLabel()"
-                        (checkedChange)="toggleRow(row)"
-                      />
-                    </td>
-                  }
-                  @if (showRowNumbers()) {
-                    <td class="neu-table__td neu-table__td--rn">
-                      {{ visibleRowNumber(entry.rowIndex) }}
-                    </td>
-                  }
-                  @for (col of visibleColumns(); track col.key) {
-                    <td
-                      class="neu-table__td"
-                      [class]="col.cellClass ?? ''"
-                      [class.neu-table__td--frozen-left]="col.frozen === 'left'"
-                      [class.neu-table__td--frozen-right]="col.frozen === 'right'"
-                      [class.neu-table__td--frozen-left-boundary]="isLastFrozenLeftColumn(col.key)"
-                      [class.neu-table__td--frozen-right-boundary]="
-                        isFirstFrozenRightColumn(col.key)
-                      "
-                      [style.left]="
-                        col.frozen === 'left'
-                          ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
-                          : null
-                      "
-                      [style.width]="columnWidth(col)"
-                      [style.min-width]="columnWidth(col)"
-                      [style.max-width]="columnWidth(col)"
-                      [style.text-align]="col.align ?? 'left'"
-                      (dblclick)="startCellEdit(row, col, $event)"
-                    >
-                      @if (isEditingCell(row, col)) {
-                        <neu-inline-editor
-                          class="neu-table__edit-control"
-                          [type]="inlineEditorType(col)"
-                          [value]="$any(editingValue())"
-                          [options]="inlineEditorOptions(col)"
-                          [startInEdit]="true"
-                          [saveOnBlur]="true"
-                          [editLabel]="inlineEditLabel()"
-                          [saveLabel]="saveInlineEditLabel()"
-                          [cancelLabel]="cancelInlineEditLabel()"
-                          (valueChange)="setEditingValue($event)"
-                          (editCommit)="commitCellEdit(row, col)"
-                          (editCancel)="cancelCellEdit()"
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline [attr.points]="nextChevronPoints()" />
+                          </svg>
+                        </button>
+                      </td>
+                    }
+                    @if (selectable()) {
+                      <td
+                        class="neu-table__td neu-table__th--check"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <neu-checkbox
+                          class="neu-table__checkbox"
+                          [checked]="isRowSelected(row)"
+                          [ariaLabel]="selectRowAriaLabel()"
+                          (checkedChange)="toggleRow(row)"
                         />
-                      } @else if (col.cellTemplate) {
-                        <ng-container
-                          [ngTemplateOutlet]="col.cellTemplate"
-                          [ngTemplateOutletContext]="{ $implicit: row, row: row, column: col }"
-                        />
-                      } @else if (col.type === 'badge') {
-                        @let badgeVal = getCellValue(row, col);
-                        @let badgeCfg = col.badgeMap?.[badgeVal];
-                        <span
-                          class="neu-table__cell-badge neu-table__cell-badge--{{
-                            badgeCfg?.variant ?? 'default'
-                          }}"
-                        >
-                          {{ badgeCfg?.label ?? badgeVal }}
-                        </span>
-                      } @else if (col.type === 'link') {
-                        <a
-                          class="neu-table__cell-link"
-                          [href]="col.linkHref ? col.linkHref(row) : '#'"
-                          [target]="col.linkTarget ?? '_self'"
-                          (click)="$event.stopPropagation()"
-                          >{{ getCellValue(row, col) }}</a
-                        >
-                      } @else if (col.type === 'actions') {
-                        <div class="neu-table__actions">
-                          @for (action of col.actions ?? []; track action.key) {
-                            @if (action.show === undefined || action.show(row)) {
-                              @if (isConfirmPending(row, action)) {
-                                <span class="neu-table__action-confirm">
-                                  <span>{{ action.confirm }}</span>
+                      </td>
+                    }
+                    @if (showRowNumbers()) {
+                      <td class="neu-table__td neu-table__td--rn">
+                        {{ visibleRowNumber(entry.rowIndex) }}
+                      </td>
+                    }
+                    @for (col of visibleColumns(); track col.key) {
+                      <td
+                        class="neu-table__td"
+                        [class]="col.cellClass ?? ''"
+                        [class.neu-table__td--frozen-left]="col.frozen === 'left'"
+                        [class.neu-table__td--frozen-right]="col.frozen === 'right'"
+                        [class.neu-table__td--frozen-left-boundary]="
+                          isLastFrozenLeftColumn(col.key)
+                        "
+                        [class.neu-table__td--frozen-right-boundary]="
+                          isFirstFrozenRightColumn(col.key)
+                        "
+                        [style.left]="
+                          col.frozen === 'left'
+                            ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
+                            : null
+                        "
+                        [style.width]="columnWidth(col)"
+                        [style.min-width]="columnWidth(col)"
+                        [style.max-width]="columnWidth(col)"
+                        [style.text-align]="col.align ?? 'left'"
+                        (dblclick)="startCellEdit(row, col, $event)"
+                      >
+                        @if (isEditingCell(row, col)) {
+                          <neu-inline-editor
+                            class="neu-table__edit-control"
+                            [type]="inlineEditorType(col)"
+                            [value]="$any(editingValue())"
+                            [options]="inlineEditorOptions(col)"
+                            [startInEdit]="true"
+                            [saveOnBlur]="true"
+                            [editLabel]="inlineEditLabel()"
+                            [saveLabel]="saveInlineEditLabel()"
+                            [cancelLabel]="cancelInlineEditLabel()"
+                            (valueChange)="setEditingValue($event)"
+                            (editCommit)="commitCellEdit(row, col)"
+                            (editCancel)="cancelCellEdit()"
+                          />
+                        } @else if (col.cellTemplate) {
+                          <ng-container
+                            [ngTemplateOutlet]="col.cellTemplate"
+                            [ngTemplateOutletContext]="{ $implicit: row, row: row, column: col }"
+                          />
+                        } @else if (col.type === 'badge') {
+                          @let badgeVal = getCellValue(row, col);
+                          @let badgeCfg = col.badgeMap?.[badgeVal];
+                          <span
+                            class="neu-table__cell-badge neu-table__cell-badge--{{
+                              badgeCfg?.variant ?? 'default'
+                            }}"
+                          >
+                            {{ badgeCfg?.label ?? badgeVal }}
+                          </span>
+                        } @else if (col.type === 'link') {
+                          <a
+                            class="neu-table__cell-link"
+                            [href]="col.linkHref ? col.linkHref(row) : '#'"
+                            [target]="col.linkTarget ?? '_self'"
+                            (click)="$event.stopPropagation()"
+                            >{{ getCellValue(row, col) }}</a
+                          >
+                        } @else if (col.type === 'actions') {
+                          <div class="neu-table__actions">
+                            @for (action of col.actions ?? []; track action.key) {
+                              @if (action.show === undefined || action.show(row)) {
+                                @if (isConfirmPending(row, action)) {
+                                  <span class="neu-table__action-confirm">
+                                    <span>{{ action.confirm }}</span>
+                                    <button
+                                      class="neu-table__action-btn neu-table__action-btn--danger"
+                                      type="button"
+                                      (click)="handleAction(row, action); $event.stopPropagation()"
+                                    >
+                                      Sí
+                                    </button>
+                                    <button
+                                      class="neu-table__action-btn"
+                                      type="button"
+                                      (click)="cancelConfirm(); $event.stopPropagation()"
+                                    >
+                                      No
+                                    </button>
+                                  </span>
+                                } @else {
                                   <button
-                                    class="neu-table__action-btn neu-table__action-btn--danger"
+                                    class="neu-table__action-btn neu-table__action-btn--{{
+                                      action.variant ?? 'ghost'
+                                    }}"
                                     type="button"
+                                    [disabled]="action.disabled ? action.disabled(row) : false"
+                                    [title]="action.label"
                                     (click)="handleAction(row, action); $event.stopPropagation()"
                                   >
-                                    Sí
+                                    @if (action.icon.startsWith('lucide')) {
+                                      <neu-icon
+                                        class="neu-table__action-icon"
+                                        [name]="action.icon"
+                                        size="1rem"
+                                        aria-hidden="true"
+                                      />
+                                    } @else {
+                                      <span class="neu-table__action-icon" aria-hidden="true">{{
+                                        action.icon
+                                      }}</span>
+                                    }
+                                    <span class="sr-only">{{ action.label }}</span>
                                   </button>
-                                  <button
-                                    class="neu-table__action-btn"
-                                    type="button"
-                                    (click)="cancelConfirm(); $event.stopPropagation()"
-                                  >
-                                    No
-                                  </button>
-                                </span>
-                              } @else {
-                                <button
-                                  class="neu-table__action-btn neu-table__action-btn--{{
-                                    action.variant ?? 'ghost'
-                                  }}"
-                                  type="button"
-                                  [disabled]="action.disabled ? action.disabled(row) : false"
-                                  [title]="action.label"
-                                  (click)="handleAction(row, action); $event.stopPropagation()"
-                                >
-                                  @if (action.icon.startsWith('lucide')) {
-                                    <neu-icon
-                                      class="neu-table__action-icon"
-                                      [name]="action.icon"
-                                      size="1rem"
-                                      aria-hidden="true"
-                                    />
-                                  } @else {
-                                    <span class="neu-table__action-icon" aria-hidden="true">{{
-                                      action.icon
-                                    }}</span>
-                                  }
-                                  <span class="sr-only">{{ action.label }}</span>
-                                </button>
+                                }
                               }
                             }
+                          </div>
+                        } @else {
+                          {{ getCellValue(row, col) }}
+                        }
+                      </td>
+                    }
+                  </tr>
+                  @if (expandable() && isRowExpanded(row)) {
+                    <tr class="neu-table__row-expand-detail">
+                      <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
+                        <div class="neu-table__expand-content">
+                          @if (expandTemplate(); as tpl) {
+                            <ng-container
+                              [ngTemplateOutlet]="tpl.templateRef"
+                              [ngTemplateOutletContext]="{ $implicit: row }"
+                            />
                           }
                         </div>
-                      } @else {
-                        {{ getCellValue(row, col) }}
-                      }
-                    </td>
+                      </td>
+                    </tr>
                   }
-                </tr>
-                @if (expandable() && isRowExpanded(row)) {
-                  <tr class="neu-table__row-expand-detail">
-                    <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
-                      <div class="neu-table__expand-content">
-                        @if (expandTemplate(); as tpl) {
-                          <ng-container
-                            [ngTemplateOutlet]="tpl.templateRef"
-                            [ngTemplateOutletContext]="{ $implicit: row }"
-                          />
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                }
                 }
               }
               @if (_virtualScrollActive() && _virtualBottomSpacerHeight() > 0) {
@@ -835,7 +851,7 @@ function asRows(data: object[]): Row[] {
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <polyline points="15 18 9 12 15 6" />
+                  <polyline [attr.points]="previousChevronPoints()" />
                 </svg>
               </button>
               @for (page of pageNumbers(); track page) {
@@ -864,7 +880,7 @@ function asRows(data: object[]): Row[] {
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <polyline points="9 18 15 12 9 6" />
+                  <polyline [attr.points]="nextChevronPoints()" />
                 </svg>
               </button>
             </nav>
@@ -876,6 +892,17 @@ function asRows(data: object[]): Row[] {
   styleUrl: './neu-table.component.scss',
 })
 export class NeuTableComponent {
+  private readonly _directionality = inject(Directionality);
+  readonly isRtl = computed(() => this._directionality.valueSignal() === 'rtl');
+  readonly previousArrow = computed(() => (this.isRtl() ? '›' : '‹'));
+  readonly nextArrow = computed(() => (this.isRtl() ? '‹' : '›'));
+  readonly previousChevronPoints = computed(() =>
+    this.isRtl() ? '9 18 15 12 9 6' : '15 18 9 12 15 6',
+  );
+  readonly nextChevronPoints = computed(() =>
+    this.isRtl() ? '15 18 9 12 15 6' : '9 18 15 12 9 6',
+  );
+
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _platformId = inject(PLATFORM_ID);
@@ -890,6 +917,8 @@ export class NeuTableComponent {
   readonly pagination = input<boolean>(true);
   readonly loading = input<boolean>(false);
   readonly title = input<string>('');
+  /** Heading level exposed by the optional toolbar title. Match it to the consumer page outline. */
+  readonly titleHeadingLevel = input<2 | 3 | 4 | 5 | 6>(3);
   readonly toolbarExtraRef = input<TemplateRef<unknown> | null>(null);
   readonly emptyMessage = input<string>('No results found');
   readonly skeletonRows = input<number[]>([1, 2, 3, 4, 5]);
@@ -1695,7 +1724,8 @@ export class NeuTableComponent {
     }
   }
 
-  sortBy(key: string, event?: MouseEvent): void {
+  sortBy(key: string, event?: MouseEvent | KeyboardEvent): void {
+    if (event?.type === 'keydown') event.preventDefault();
     if (this.multiSort() && event?.shiftKey) {
       // Shift+click: toggle or add column / Shift+click: alterna o añade columna
       const entries = [...this._sortEntries()];
@@ -1737,6 +1767,15 @@ export class NeuTableComponent {
         this._internalPage.set(1);
       }
     }
+  }
+
+  columnAriaSort(key: string): 'ascending' | 'descending' | 'none' {
+    if (this.multiSort()) {
+      const entry = this._sortEntries().find((candidate) => candidate.key === key);
+      return entry?.dir === 'asc' ? 'ascending' : entry?.dir === 'desc' ? 'descending' : 'none';
+    }
+    if (this.sortKey() !== key) return 'none';
+    return this.sortDir() === 'asc' ? 'ascending' : 'descending';
   }
 
   onRowClick(row: Row, _event: MouseEvent): void {
@@ -2031,9 +2070,7 @@ export class NeuTableComponent {
   isEditingCell(row: Row, col: NeuTableColumn): boolean {
     const editing = this._editingCell();
     return (
-      editing !== null &&
-      editing.rowKey === this.getRowKey(row) &&
-      editing.columnKey === col.key
+      editing !== null && editing.rowKey === this.getRowKey(row) && editing.columnKey === col.key
     );
   }
 

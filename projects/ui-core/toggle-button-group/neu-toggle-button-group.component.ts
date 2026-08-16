@@ -27,7 +27,11 @@ export interface NeuToggleOption<T = unknown> {
   disabled?: boolean;
 }
 @Directive({ selector: 'ng-template[neuToggleButtonItem]' })
-export class NeuToggleButtonItemDirective<T = unknown> { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuToggleOption<T>; selected: boolean }>) {} }
+export class NeuToggleButtonItemDirective<T = unknown> {
+  constructor(
+    readonly templateRef: TemplateRef<{ $implicit: NeuToggleOption<T>; selected: boolean }>,
+  ) {}
+}
 
 /**
  * NeuralUI ToggleButtonGroup Component
@@ -72,7 +76,12 @@ export class NeuToggleButtonItemDirective<T = unknown> { constructor(readonly te
           (click)="toggle(opt)"
           (blur)="onBlur()"
         >
-          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: opt, selected: isSelected(opt.value) }" /> } @else if (opt.icon) {
+          @if (itemTpl()) {
+            <ng-container
+              [ngTemplateOutlet]="itemTpl()!.templateRef"
+              [ngTemplateOutletContext]="{ $implicit: opt, selected: isSelected(opt.value) }"
+            />
+          } @else if (opt.icon) {
             <neu-icon [name]="opt.icon" size="16px" strokeWidth="2" />
           }
           {{ opt.label }}

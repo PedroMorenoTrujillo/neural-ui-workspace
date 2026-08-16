@@ -174,7 +174,9 @@ describe('NeuInputComponent', () => {
 
     expect(comp.hasValue()).toBe(true);
     expect(onChange).toHaveBeenCalledWith('learner@example.com');
-    expect(f.nativeElement.querySelector('.neu-input__wrapper')?.classList).toContain('neu-input__wrapper--has-value');
+    expect(f.nativeElement.querySelector('.neu-input__wrapper')?.classList).toContain(
+      'neu-input__wrapper--has-value',
+    );
   });
 
   it('hasError computed should be true when errorMessage is set', () => {

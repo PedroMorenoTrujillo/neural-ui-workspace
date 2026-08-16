@@ -1,0 +1,22 @@
+[
+  {
+    "name": "All public ESM entry points (Brotli)",
+    "path": "dist/neural-ui/core/fesm2022/*.mjs",
+    "limit": "300 kB"
+  },
+  {
+    "name": "Largest component: table (Brotli)",
+    "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table.mjs",
+    "limit": "35 kB"
+  },
+  {
+    "name": "Public testing harnesses (Brotli)",
+    "path": "dist/neural-ui/core/fesm2022/neural-ui-core-testing.mjs",
+    "limit": "12 kB"
+  },
+  {
+    "name": "Chart adapter without Chart.js peer (Brotli)",
+    "path": "dist/neural-ui/core/fesm2022/neural-ui-core-chart.mjs",
+    "limit": "8 kB"
+  }
+]

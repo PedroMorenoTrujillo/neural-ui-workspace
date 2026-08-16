@@ -41,7 +41,8 @@
   &--week {
     .neu-calendar__weekdays,
     .neu-calendar__week-grid {
-      min-width: 0;
+      // Seven interactive day columns must not collapse below usable touch targets.
+      min-width: 700px;
     }
   }
 }
@@ -350,11 +351,31 @@ html[data-theme='dark'] {
   box-shadow: none;
 }
 
+.neu-calendar__event-content {
+  display: grid;
+  gap: inherit;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.neu-calendar__event--compact .neu-calendar__event-content,
+.neu-calendar__event--compact .neu-calendar__event-content > * {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .neu-calendar__event--compact .neu-calendar__event-title,
 .neu-calendar__event--compact .neu-calendar__event-meta {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  inline-size: 100%;
+  min-inline-size: 0;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-overflow: clip;
 }
 
 .neu-calendar__event--compact .neu-calendar__event-title {

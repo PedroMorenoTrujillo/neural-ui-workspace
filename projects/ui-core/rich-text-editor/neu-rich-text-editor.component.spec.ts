@@ -168,7 +168,9 @@ describe('NeuRichTextEditorComponent', () => {
     const execCommand = vi.fn(() => true);
     Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
     const { fixture, component } = createComponent();
-    const surface = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLDivElement;
+    const surface = fixture.nativeElement.querySelector(
+      '.neu-rich-text-editor__surface',
+    ) as HTMLDivElement;
     let touched = 0;
     component.registerOnTouched(() => touched++);
     surface.dispatchEvent(new Event('focus'));
@@ -236,17 +238,25 @@ describe('NeuRichTextEditorComponent', () => {
   });
 
   it('renders error, hint and preview states with the correct aria relationship', () => {
-    const { fixture, component } = createComponent({ hint: 'Helpful', showPreview: true, previewLabel: 'Result' });
+    const { fixture, component } = createComponent({
+      hint: 'Helpful',
+      showPreview: true,
+      previewLabel: 'Result',
+    });
     component.writeValue('<p>Preview</p>');
     fixture.detectChanges();
-    const surface = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLDivElement;
+    const surface = fixture.nativeElement.querySelector(
+      '.neu-rich-text-editor__surface',
+    ) as HTMLDivElement;
     expect(surface.getAttribute('aria-describedby')).toBe(`${surface.id}-hint`);
     expect(fixture.nativeElement.querySelector('summary')?.textContent).toContain('Result');
     fixture.componentRef.setInput('errorMessage', 'Required');
     fixture.detectChanges();
     expect(surface.getAttribute('aria-invalid')).toBe('true');
     expect(surface.getAttribute('aria-describedby')).toBe(`${surface.id}-error`);
-    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain('Required');
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
+      'Required',
+    );
   });
 
   it('sanitizes pasted HTML and converts pasted plain text', () => {
@@ -256,7 +266,10 @@ describe('NeuRichTextEditorComponent', () => {
     const preventHtml = vi.fn();
     component.handlePaste({
       preventDefault: preventHtml,
-      clipboardData: { files: [], getData: (type: string) => (type === 'text/html' ? '<p onclick="x">Safe</p>' : '') },
+      clipboardData: {
+        files: [],
+        getData: (type: string) => (type === 'text/html' ? '<p onclick="x">Safe</p>' : ''),
+      },
     } as unknown as ClipboardEvent);
     expect(preventHtml).toHaveBeenCalled();
     expect(execCommand).toHaveBeenLastCalledWith('insertHTML', false, '<p>Safe</p>');
@@ -264,7 +277,10 @@ describe('NeuRichTextEditorComponent', () => {
     const preventText = vi.fn();
     component.handlePaste({
       preventDefault: preventText,
-      clipboardData: { files: [], getData: (type: string) => (type === 'text/plain' ? 'One\n\nTwo' : '') },
+      clipboardData: {
+        files: [],
+        getData: (type: string) => (type === 'text/plain' ? 'One\n\nTwo' : ''),
+      },
     } as unknown as ClipboardEvent);
     expect(execCommand).toHaveBeenLastCalledWith('insertHTML', false, '<p>One</p><p>Two</p>');
   });
@@ -273,18 +289,26 @@ describe('NeuRichTextEditorComponent', () => {
     const { fixture, component } = createComponent({ maxPastedImageBytes: 1 });
     const rejected = vi.spyOn(component.imageRejected, 'emit');
     const file = new File(['too large'], 'image.png', { type: 'image/png' });
-    component.handlePaste({ preventDefault: vi.fn(), clipboardData: { files: [file], getData: () => '' } } as unknown as ClipboardEvent);
+    component.handlePaste({
+      preventDefault: vi.fn(),
+      clipboardData: { files: [file], getData: () => '' },
+    } as unknown as ClipboardEvent);
     expect(rejected).toHaveBeenCalledWith({ file, maxBytes: 1, reason: 'size' });
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
-    component.handlePaste({ preventDefault: vi.fn(), clipboardData: { files: [], getData: () => 'text' } } as unknown as ClipboardEvent);
+    component.handlePaste({
+      preventDefault: vi.fn(),
+      clipboardData: { files: [], getData: () => 'text' },
+    } as unknown as ClipboardEvent);
   });
 
   it('wires every toolbar command and the surface paste listener', () => {
     const execCommand = vi.fn(() => true);
     Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
     const { fixture } = createComponent();
-    const buttons = fixture.nativeElement.querySelectorAll('.neu-rich-text-editor__toolbar button') as NodeListOf<HTMLButtonElement>;
+    const buttons = fixture.nativeElement.querySelectorAll(
+      '.neu-rich-text-editor__toolbar button',
+    ) as NodeListOf<HTMLButtonElement>;
     buttons[0].click();
     buttons[1].click();
     buttons[2].click();
@@ -303,7 +327,9 @@ describe('NeuRichTextEditorComponent', () => {
     buttons[7].click();
     expect(execCommand).toHaveBeenLastCalledWith('removeFormat');
 
-    const surface = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLDivElement;
+    const surface = fixture.nativeElement.querySelector(
+      '.neu-rich-text-editor__surface',
+    ) as HTMLDivElement;
     const paste = new Event('paste', { bubbles: true }) as ClipboardEvent;
     Object.defineProperty(paste, 'clipboardData', {
       value: { files: [], getData: (type: string) => (type === 'text/plain' ? 'Pasted' : '') },
@@ -350,7 +376,10 @@ describe('NeuRichTextEditorComponent', () => {
     try {
       const { fixture, component } = createComponent();
       const image = new File(['ok'], 'image.png', { type: 'image/png' });
-      component.handlePaste({ preventDefault: vi.fn(), clipboardData: { files: [image], getData: () => '' } } as unknown as ClipboardEvent);
+      component.handlePaste({
+        preventDefault: vi.fn(),
+        clipboardData: { files: [image], getData: () => '' },
+      } as unknown as ClipboardEvent);
       expect(execCommand).toHaveBeenCalledWith(
         'insertHTML',
         false,
@@ -362,7 +391,10 @@ describe('NeuRichTextEditorComponent', () => {
       component.insertVariable('{{name}}');
       expect(execCommand).toHaveBeenCalledTimes(1);
     } finally {
-      Object.defineProperty(window, 'FileReader', { configurable: true, value: originalFileReader });
+      Object.defineProperty(window, 'FileReader', {
+        configurable: true,
+        value: originalFileReader,
+      });
     }
   });
 
@@ -377,7 +409,10 @@ describe('NeuRichTextEditorComponent', () => {
         this.onload?.({} as ProgressEvent<FileReader>);
       }
     }
-    Object.defineProperty(window, 'FileReader', { configurable: true, value: ArrayBufferFileReader });
+    Object.defineProperty(window, 'FileReader', {
+      configurable: true,
+      value: ArrayBufferFileReader,
+    });
     try {
       const { component } = createComponent();
       const image = new File(['ok'], 'image.png', { type: 'image/png' });
@@ -385,13 +420,12 @@ describe('NeuRichTextEditorComponent', () => {
         preventDefault: vi.fn(),
         clipboardData: { files: [image], getData: () => '' },
       } as unknown as ClipboardEvent);
-      expect(execCommand).toHaveBeenCalledWith(
-        'insertHTML',
-        false,
-        '<img alt="Pasted image">',
-      );
+      expect(execCommand).toHaveBeenCalledWith('insertHTML', false, '<img alt="Pasted image">');
     } finally {
-      Object.defineProperty(window, 'FileReader', { configurable: true, value: originalFileReader });
+      Object.defineProperty(window, 'FileReader', {
+        configurable: true,
+        value: originalFileReader,
+      });
     }
   });
 });
@@ -440,9 +474,13 @@ describe('rich text html utils', () => {
       sanitizeRichTextHtml(
         '<img src="https://example.com/photo.png" alt="photo" width="120" height="x"><td colspan="2" rowspan="3">Cell</td>',
       ),
-    ).toBe('<img src="https://example.com/photo.png" alt="photo" width="120"><td colspan="2" rowspan="3">Cell</td>');
+    ).toBe(
+      '<img src="https://example.com/photo.png" alt="photo" width="120"><td colspan="2" rowspan="3">Cell</td>',
+    );
     expect(
-      sanitizeRichTextHtml('<img src="data:image/png;base64,aGVsbG8=" alt="inline"><img src="ftp://bad">'),
+      sanitizeRichTextHtml(
+        '<img src="data:image/png;base64,aGVsbG8=" alt="inline"><img src="ftp://bad">',
+      ),
     ).toBe('<img src="data:image/png;base64,aGVsbG8=" alt="inline"><img>');
   });
 
@@ -452,7 +490,9 @@ describe('rich text html utils', () => {
         '<iframe src="https://bad">x</iframe><custom title="x">gone</custom><a href="tel:+34123" style="x" onload="x">Phone</a>',
       ),
     ).toBe('gone<a href="tel:+34123" target="_blank" rel="noopener noreferrer">Phone</a>');
-    expect(sanitizeRichTextHtml('<a href="mailto:test@example.com">Mail</a>')).toContain('mailto:test@example.com');
+    expect(sanitizeRichTextHtml('<a href="mailto:test@example.com">Mail</a>')).toContain(
+      'mailto:test@example.com',
+    );
   });
 
   it('sanitizes quoted, bare and disallowed attributes consistently', () => {
@@ -460,9 +500,7 @@ describe('rich text html utils', () => {
       sanitizeRichTextHtml(
         `<a href='tel:+34123' title=Call target="_self" rel="external" onclick="bad()">Phone</a>`,
       ),
-    ).toBe(
-      '<a href="tel:+34123" target="_blank" rel="noopener noreferrer" title="Call">Phone</a>',
-    );
+    ).toBe('<a href="tel:+34123" target="_blank" rel="noopener noreferrer" title="Call">Phone</a>');
     expect(
       sanitizeRichTextHtml('<p data-test="x" style="color:red" onmouseover="bad()">Copy</p>'),
     ).toBe('<p>Copy</p>');

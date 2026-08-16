@@ -327,9 +327,7 @@ describe('NeuSplitButtonComponent', () => {
     fixture.componentInstance.isOpen.set(true);
     fixture.detectChanges();
 
-    const dropdown = document.querySelector(
-      '.neu-split-button__dropdown',
-    ) as HTMLDivElement;
+    const dropdown = document.querySelector('.neu-split-button__dropdown') as HTMLDivElement;
     dropdown.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     fixture.detectChanges();
 
@@ -353,5 +351,98 @@ describe('NeuSplitButtonComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.isOpen()).toBe(false);
+  });
+
+  it('opens with ArrowDown, focuses the first enabled action and supports roving focus', async () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.detectChanges();
+    const chevron = fixture.nativeElement.querySelector(
+      '.neu-split-button__chevron',
+    ) as HTMLButtonElement;
+
+    chevron.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const actions = Array.from(
+      document.querySelectorAll('.neu-split-button__dropdown-item:not(:disabled)'),
+    ) as HTMLButtonElement[];
+    expect(fixture.componentInstance.isOpen()).toBe(true);
+    expect(document.activeElement).toBe(actions[0]);
+    expect(actions.map((action) => action.tabIndex)).toEqual([0, -1]);
+
+    actions[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(actions[1]);
+    actions[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(actions[0]);
+  });
+
+  it('opens on the last action with ArrowUp and Escape restores chevron focus', async () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.detectChanges();
+    const chevron = fixture.nativeElement.querySelector(
+      '.neu-split-button__chevron',
+    ) as HTMLButtonElement;
+
+    chevron.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const actions = Array.from(
+      document.querySelectorAll('.neu-split-button__dropdown-item:not(:disabled)'),
+    ) as HTMLButtonElement[];
+    expect(document.activeElement).toBe(actions[1]);
+
+    const escape = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(escape);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(escape.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(document.activeElement).toBe(chevron);
+  });
+
+  it('does not open from the keyboard while disabled', () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('disabled', true);
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.detectChanges();
+    const event = new KeyboardEvent('keydown', {
+      key: 'ArrowDown',
+      cancelable: true,
+    });
+
+    fixture.componentInstance.openDropdown(event);
+
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('ignores Escape while closed and unrelated menu keys', () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.detectChanges();
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    const unrelated = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+
+    fixture.componentInstance.onEscape(escape);
+    fixture.componentInstance.onMenuKeydown(unrelated);
+
+    expect(escape.defaultPrevented).toBe(false);
+    expect(unrelated.defaultPrevented).toBe(false);
   });
 });

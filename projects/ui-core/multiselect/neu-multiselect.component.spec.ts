@@ -375,9 +375,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const button = document.querySelector(
-      '.neu-multiselect__footer-mode',
-    ) as HTMLButtonElement;
+    const button = document.querySelector('.neu-multiselect__footer-mode') as HTMLButtonElement;
     button.click();
     f.detectChanges();
 
@@ -396,9 +394,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const button = document.querySelector(
-      '.neu-multiselect__footer-clear',
-    ) as HTMLButtonElement;
+    const button = document.querySelector('.neu-multiselect__footer-clear') as HTMLButtonElement;
     expect(button.textContent?.trim()).toBe('Borrar');
     button.click();
     f.detectChanges();
@@ -944,9 +940,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(document.querySelector('.custom-option')?.textContent).toContain(
-      'custom-Angular',
-    );
+    expect(document.querySelector('.custom-option')?.textContent).toContain('custom-Angular');
   });
 
   // ── toggle() disabled guard ───────────────────────────────────────────────
@@ -1425,9 +1419,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const input = document.querySelector(
-      '.neu-multiselect__search-input',
-    ) as HTMLInputElement;
+    const input = document.querySelector('.neu-multiselect__search-input') as HTMLInputElement;
     input.value = 'rea';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     f.detectChanges();

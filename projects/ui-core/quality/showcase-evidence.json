@@ -1,0 +1,785 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-16T16:58:44.217Z",
+  "status": "PASS",
+  "accessibility": {
+    "standard": "WCAG 2.2 AA automated axe-core rules",
+    "routes": 87,
+    "locales": 2,
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "checks": 348,
+    "passed": 348,
+    "source": "test-results/showcase-a11y-summary.json"
+  },
+  "responsive": {
+    "browsers": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "viewports": [
+      "mobile-320",
+      "mobile-360",
+      "mobile-390",
+      "tablet-768",
+      "desktop-1440"
+    ],
+    "checks": 2610,
+    "source": "test-results/showcase-responsive-summary.json"
+  },
+  "rtl": {
+    "browsers": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "routes": 87,
+    "checks": 261,
+    "source": "test-results/showcase-rtl-summary.json"
+  },
+  "docs": {
+    "apiPages": 79,
+    "missingInputs": 0,
+    "missingOutputs": 0,
+    "source": "test-results/docs-api-summary.json"
+  },
+  "entryPoints": [
+    {
+      "name": "accordion",
+      "route": "/components/accordion",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "alert",
+      "route": "/components/alert",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "autocomplete",
+      "route": "/components/autocomplete",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "avatar",
+      "route": "/components/avatar",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "badge",
+      "route": "/components/badge",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "block-ui",
+      "route": "/components/block-ui",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "bottom-sheet",
+      "route": "/components/bottom-sheet",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "breadcrumb",
+      "route": "/components/breadcrumb",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "button",
+      "route": "/components/button",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "calendar",
+      "route": "/components/calendar",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "card",
+      "route": "/components/card",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "chart",
+      "route": "/components/chart",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "checkbox",
+      "route": "/components/checkbox",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "chip",
+      "route": "/components/chip",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "code-block",
+      "route": "/components/code-block",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "color-picker",
+      "route": "/components/color-picker",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "command-palette",
+      "route": "/components/command-palette",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "confirm-dialog",
+      "route": "/components/confirm-dialog",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "confirm-popup",
+      "route": "/components/confirm-popup",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "context-menu",
+      "route": "/components/context-menu",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "dashboard-grid",
+      "route": "/components/dashboard-grid",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "data-view",
+      "route": "/components/data-view",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "date-input",
+      "route": "/components/date-input",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "divider",
+      "route": "/components/divider",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "empty-state",
+      "route": "/components/empty-state",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "filter-bar",
+      "route": "/components/filter-bar",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "form-field",
+      "route": "/components/form-field",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "icon",
+      "route": "/components/icon",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "image-gallery",
+      "route": "/components/image-gallery",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "image-viewer",
+      "route": "/components/image-viewer",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "inline-editor",
+      "route": "/components/inline-editor",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "input",
+      "route": "/components/input",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "input-mask",
+      "route": "/components/input-mask",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "input-otp",
+      "route": "/components/input-otp",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "kanban",
+      "route": "/components/kanban",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "knob",
+      "route": "/components/knob",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "listbox",
+      "route": "/components/listbox",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "menu",
+      "route": "/components/menu",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "meter-group",
+      "route": "/components/meter-group",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "modal",
+      "route": "/components/dialog",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "multiselect",
+      "route": "/components/multiselect",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "nav",
+      "route": "/components/nav",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "notification-center",
+      "route": "/components/notification-center",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "number-input",
+      "route": "/components/number-input",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "pagination",
+      "route": "/components/pagination",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "panel",
+      "route": "/components/panel",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "password",
+      "route": "/components/password",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "pick-list",
+      "route": "/components/pick-list",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "popover",
+      "route": "/components/popover",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "progress-bar",
+      "route": "/components/progress-bar",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "radio",
+      "route": "/components/radio",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "rating",
+      "route": "/components/rating",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "rich-text-editor",
+      "route": "/components/rich-text-editor",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "scheduler-gantt",
+      "route": "/components/scheduler-gantt",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "select",
+      "route": "/components/select",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "sidebar",
+      "route": "/components/sidebar",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "skeleton",
+      "route": "/components/skeleton",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "slider",
+      "route": "/components/slider",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "spinner",
+      "route": "/components/spinner",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "split-button",
+      "route": "/components/split-button",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "splitter",
+      "route": "/components/splitter",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "stats-card",
+      "route": "/components/stats-card",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "stepper",
+      "route": "/components/stepper",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "switch",
+      "route": "/components/switch",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "table",
+      "route": "/components/table",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "tabs",
+      "route": "/components/tabs",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "tags",
+      "route": "/components/tags",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "testing",
+      "route": "/components/testing",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "projects/showcase/src/app/pages/testing/testing.component.html"
+    },
+    {
+      "name": "textarea",
+      "route": "/components/textarea",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "timeline",
+      "route": "/components/timeline",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "timeline-grid",
+      "route": "/components/timeline-grid",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "toast",
+      "route": "/components/toast",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "toggle-button-group",
+      "route": "/components/toggle-button",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "toolbar",
+      "route": "/components/toolbar",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "tooltip",
+      "route": "/components/tooltip",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "tree",
+      "route": "/components/tree",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "tree-select",
+      "route": "/components/tree-select",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "tree-table",
+      "route": "/components/tree-table",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "uploader",
+      "route": "/components/uploader",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "url-state",
+      "route": "/components/url-state",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "projects/showcase/src/app/pages/url-state-demo/url-state-demo.component.html"
+    },
+    {
+      "name": "virtual-list",
+      "route": "/components/virtual-list",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    }
+  ],
+  "limitations": [
+    "Automated axe-core results do not replace keyboard or screen-reader manual validation.",
+    "Responsive checks cover layout integrity; visual baseline approval remains a separate human gate.",
+    "Dynamic RTL checks verify live inheritance, route stability and overflow; direction-sensitive interaction details additionally require unit contracts."
+  ]
+}

@@ -7,7 +7,9 @@ describe('NeuConfirmPopupComponent', () => {
   let service: NeuConfirmPopupService;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [NeuConfirmPopupComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [NeuConfirmPopupComponent],
+    }).compileComponents();
     fixture = TestBed.createComponent(NeuConfirmPopupComponent);
     service = TestBed.inject(NeuConfirmPopupService);
   });
@@ -26,11 +28,18 @@ describe('NeuConfirmPopupComponent', () => {
 
   it('prefers service state and resolves accepted confirmations', async () => {
     const accepted = vi.spyOn(fixture.componentInstance.accepted, 'emit');
-    const promise = service.confirm({ title: 'Continue', message: 'Proceed?', acceptLabel: 'Yes', rejectLabel: 'No' });
+    const promise = service.confirm({
+      title: 'Continue',
+      message: 'Proceed?',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
+    });
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Proceed?');
     expect(fixture.nativeElement.textContent).toContain('Yes');
-    (fixture.nativeElement.querySelector('.neu-confirm-popup__accept') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector('.neu-confirm-popup__accept') as HTMLButtonElement
+    ).click();
     expect(accepted).toHaveBeenCalled();
     await expect(promise).resolves.toBe(true);
     expect(service.state()).toBeNull();
@@ -41,7 +50,9 @@ describe('NeuConfirmPopupComponent', () => {
     service.close(false);
     const promise = service.confirm({ message: 'Discard?' });
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('.neu-confirm-popup__reject') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector('.neu-confirm-popup__reject') as HTMLButtonElement
+    ).click();
     expect(rejected).toHaveBeenCalled();
     await expect(promise).resolves.toBe(false);
     service.close(true);

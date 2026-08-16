@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "candidateCommit": null,
+  "targets": [
+    {
+      "id": "nvda",
+      "platform": "Windows",
+      "browser": "Firefox or Chrome",
+      "cost": "FREE"
+    },
+    {
+      "id": "narrator",
+      "platform": "Windows",
+      "browser": "Edge",
+      "cost": "INCLUDED"
+    },
+    {
+      "id": "voiceover-macos",
+      "platform": "macOS",
+      "browser": "Safari",
+      "cost": "INCLUDED"
+    },
+    {
+      "id": "voiceover-ios",
+      "platform": "iOS or iPadOS",
+      "browser": "Safari",
+      "cost": "INCLUDED"
+    },
+    {
+      "id": "talkback",
+      "platform": "Android",
+      "browser": "Chrome",
+      "cost": "FREE_OR_INCLUDED"
+    }
+  ],
+  "excludedTargets": [
+    {
+      "id": "jaws",
+      "status": "NOT_VALIDATED_PAID",
+      "reason": "JAWS requires a paid licence and is outside the zero-cost quality program."
+    }
+  ],
+  "results": []
+}

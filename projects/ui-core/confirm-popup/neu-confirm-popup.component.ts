@@ -1,4 +1,12 @@
-import { Injectable, signal, ChangeDetectionStrategy, Component, ViewEncapsulation, input, output } from '@angular/core';
+import {
+  Injectable,
+  signal,
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  input,
+  output,
+} from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 
 export interface NeuConfirmPopupOptions {
@@ -41,10 +49,24 @@ export class NeuConfirmPopupService {
         }
         <p>{{ currentMessage() }}</p>
         <div class="neu-confirm-popup__actions">
-          <button neu-button type="button" class="neu-confirm-popup__reject" variant="secondary" size="sm" (click)="reject()">
+          <button
+            neu-button
+            type="button"
+            class="neu-confirm-popup__reject"
+            variant="secondary"
+            size="sm"
+            (click)="reject()"
+          >
             {{ currentRejectLabel() }}
           </button>
-          <button neu-button type="button" class="neu-confirm-popup__accept" variant="primary" size="sm" (click)="accept()">
+          <button
+            neu-button
+            type="button"
+            class="neu-confirm-popup__accept"
+            variant="primary"
+            size="sm"
+            (click)="accept()"
+          >
             {{ currentAcceptLabel() }}
           </button>
         </div>

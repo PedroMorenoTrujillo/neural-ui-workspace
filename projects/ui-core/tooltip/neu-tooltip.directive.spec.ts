@@ -40,9 +40,9 @@ describe('NeuTooltipDirective', () => {
     expect(btn).toBeTruthy();
   });
 
-  it('should set aria-describedby on host element', () => {
+  it('should not expose a dangling aria-describedby before the tooltip exists', () => {
     const btn = fixture.nativeElement.querySelector('button');
-    expect(btn.getAttribute('aria-describedby')).toMatch(/^neu-tooltip-/);
+    expect(btn.getAttribute('aria-describedby')).toBeNull();
   });
 
   it('should not add tabindex to focusable elements', () => {
@@ -98,18 +98,21 @@ describe('NeuTooltipDirective', () => {
     const btn = fixture.nativeElement.querySelector('button');
     btn.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
-    expect(fixture.nativeElement).toBeTruthy();
+    const descriptionId = btn.getAttribute('aria-describedby');
+    expect(descriptionId).toMatch(/^neu-tooltip-/);
+    expect(document.getElementById(descriptionId!)).toBeTruthy();
   });
 
-  it('should hide tooltip on blur event', () => {
+  it('should remove aria-describedby when the tooltip is hidden', async () => {
     // El tooltip debe ocultarse con blur
     // Tooltip must hide on blur
     const btn = fixture.nativeElement.querySelector('button');
     btn.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
     btn.dispatchEvent(new Event('blur'));
+    await new Promise((resolve) => setTimeout(resolve, 110));
     fixture.detectChanges();
-    expect(fixture.nativeElement).toBeTruthy();
+    expect(btn.getAttribute('aria-describedby')).toBeNull();
   });
 
   it('neuTooltipPosition bottom should render without error', () => {

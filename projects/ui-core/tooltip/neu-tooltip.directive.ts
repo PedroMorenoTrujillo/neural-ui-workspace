@@ -7,8 +7,10 @@ import {
   OnDestroy,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { _IdGenerator } from '@angular/cdk/a11y';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { NeuTooltipOverlayComponent } from './neu-tooltip.component';
@@ -28,7 +30,7 @@ export type NeuTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 @Directive({
   selector: '[neuTooltip]',
   host: {
-    '[attr.aria-describedby]': '_tooltipId',
+    '[attr.aria-describedby]': '_isVisible() ? _tooltipId : null',
     // Sólo añadimos tabindex en elementos que no son nativamente focusables
     '[attr.tabindex]': '_needsTabindex() ? "0" : null',
   },
@@ -42,7 +44,8 @@ export class NeuTooltipDirective implements OnDestroy {
   private readonly _elementRef = inject(ElementRef<HTMLElement>);
   private readonly _injector = inject(Injector);
 
-  readonly _tooltipId = `neu-tooltip-${Math.random().toString(36).slice(2, 7)}`;
+  readonly _tooltipId = inject(_IdGenerator).getId('neu-tooltip-');
+  readonly _isVisible = signal(false);
 
   /** Elementos HTML nativamente focusables que no necesitan tabindex extra / Natively focusable HTML elements that don't need extra tabindex */
   private readonly _NATIVE_FOCUSABLE = /^(a|button|input|select|textarea|details|summary)$/i;
@@ -68,6 +71,7 @@ export class NeuTooltipDirective implements OnDestroy {
     this._tooltipRef = this._overlayRef!.attach(portal);
     this._tooltipRef!.setInput('text', this.neuTooltip());
     this._tooltipRef!.setInput('tooltipId', this._tooltipId);
+    this._isVisible.set(true);
   }
 
   @HostListener('mouseleave')
@@ -128,6 +132,7 @@ export class NeuTooltipDirective implements OnDestroy {
   private _detach(): void {
     this._overlayRef?.detach();
     this._tooltipRef = null;
+    this._isVisible.set(false);
   }
 
   ngOnDestroy(): void {

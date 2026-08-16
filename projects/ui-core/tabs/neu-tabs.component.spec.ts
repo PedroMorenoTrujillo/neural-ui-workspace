@@ -3,6 +3,7 @@ import { Component, provideZonelessChangeDetection, signal } from '@angular/core
 import { provideRouter } from '@angular/router';
 import { NeuTabsComponent, NeuTab, NeuTabPanelComponent } from './neu-tabs.component';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
+import { Directionality } from '@angular/cdk/bidi';
 
 const TABS: NeuTab[] = [
   { id: 'preview', label: 'Preview' },
@@ -592,6 +593,26 @@ describe('NeuTabsComponent', () => {
     tabBtns[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
     f.detectChanges();
     expect(f.nativeElement).toBeTruthy();
+  });
+
+  it('reverses horizontal arrow navigation in RTL', async () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.tabs = [
+      { id: 'first', label: 'First' },
+      { id: 'second', label: 'Second' },
+      { id: 'third', label: 'Third' },
+    ];
+    f.detectChanges();
+    await f.whenStable();
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+
+    const tabs = f.debugElement.query(
+      (debugElement) => debugElement.componentInstance instanceof NeuTabsComponent,
+    ).componentInstance as NeuTabsComponent;
+    tabs.focusTabFromArrow(new KeyboardEvent('keydown'), 1);
+    f.detectChanges();
+
+    expect(tabs.activeTabId()).toBe('third');
   });
 
   it('keydown Home DOM event on tab button should call focusTab("first")', async () => {

@@ -9,7 +9,14 @@ import { NeuChartComponent } from '@neural-ui/core/chart';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ReactiveFormsModule, NeuInputComponent, NeuDialogComponent, NeuTableComponent, NeuNavComponent, NeuChartComponent],
+  imports: [
+    ReactiveFormsModule,
+    NeuInputComponent,
+    NeuDialogComponent,
+    NeuTableComponent,
+    NeuNavComponent,
+    NeuChartComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <neu-nav [items]="navItems"></neu-nav>
@@ -21,7 +28,9 @@ import { NeuChartComponent } from '@neural-ui/core/chart';
 })
 export class AppComponent {
   readonly name = new FormControl('', { nonNullable: true });
-  readonly navItems: NeuNavItem[] = [{ id: 'home', label: 'Home', icon: 'lucideHouse', route: '/' }];
+  readonly navItems: NeuNavItem[] = [
+    { id: 'home', label: 'Home', icon: 'lucideHouse', route: '/' },
+  ];
   readonly columns: NeuTableColumn[] = [{ key: 'name', header: 'Name' }];
   readonly rows = [{ id: 1, name: 'Neural UI' }];
   readonly series = [{ name: 'Users', data: [1] }];

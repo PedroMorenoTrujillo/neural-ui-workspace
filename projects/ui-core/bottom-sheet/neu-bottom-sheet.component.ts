@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, HostListener, ViewEncapsulation, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  ViewEncapsulation,
+  input,
+  output,
+} from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 
 export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';

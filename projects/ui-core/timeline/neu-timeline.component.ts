@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, contentChild, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Directive,
+  TemplateRef,
+  ViewEncapsulation,
+  contentChild,
+  input,
+} from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 
 export type NeuTimelineItemVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
@@ -16,9 +24,13 @@ export interface NeuTimelineItem {
   icon?: string;
 }
 @Directive({ selector: 'ng-template[neuTimelineItem]' })
-export class NeuTimelineItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTimelineItem; index: number }>) {} }
+export class NeuTimelineItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTimelineItem; index: number }>) {}
+}
 @Directive({ selector: 'ng-template[neuTimelineMarker]' })
-export class NeuTimelineMarkerDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTimelineItem }>) {} }
+export class NeuTimelineMarkerDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTimelineItem }>) {}
+}
 
 /**
  * NeuralUI Timeline Component
@@ -44,7 +56,12 @@ export class NeuTimelineMarkerDirective { constructor(readonly templateRef: Temp
               class="neu-timeline__dot"
               [class]="'neu-timeline__dot--' + (item.variant ?? 'default')"
             >
-              @if (markerTpl()) { <ng-container [ngTemplateOutlet]="markerTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item }" /> } @else if (item.icon) {
+              @if (markerTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="markerTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{ $implicit: item }"
+                />
+              } @else if (item.icon) {
                 <svg
                   class="neu-timeline__dot-icon"
                   viewBox="0 0 24 24"
@@ -65,15 +82,21 @@ export class NeuTimelineMarkerDirective { constructor(readonly templateRef: Temp
 
           <!-- Contenido -->
           <div class="neu-timeline__content">
-            @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, index: $index }" /> } @else { <div class="neu-timeline__header">
-              <span class="neu-timeline__title">{{ item.title }}</span>
-              @if (item.time) {
-                <span class="neu-timeline__time">{{ item.time }}</span>
+            @if (itemTpl()) {
+              <ng-container
+                [ngTemplateOutlet]="itemTpl()!.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: item, index: $index }"
+              />
+            } @else {
+              <div class="neu-timeline__header">
+                <span class="neu-timeline__title">{{ item.title }}</span>
+                @if (item.time) {
+                  <span class="neu-timeline__time">{{ item.time }}</span>
+                }
+              </div>
+              @if (item.description) {
+                <p class="neu-timeline__desc">{{ item.description }}</p>
               }
-            </div>
-            @if (item.description) {
-              <p class="neu-timeline__desc">{{ item.description }}</p>
-            }
             }
           </div>
         </li>

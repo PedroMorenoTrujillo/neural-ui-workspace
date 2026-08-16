@@ -11,6 +11,14 @@
   color: var(--neu-text, #111827);
 }
 
+.neu-tree-select__control {
+  position: relative;
+
+  &:has(.neu-tree-select__clear) .neu-tree-select__trigger {
+    padding-inline-end: 2.5rem;
+  }
+}
+
 .neu-tree-select__trigger,
 .neu-tree-select__search {
   min-height: 2.5rem;
@@ -26,11 +34,28 @@
   align-items: center;
   justify-content: space-between;
   min-width: 14rem;
+  width: 100%;
 
   > span {
     @include text.ellipsis;
     flex: 1;
   }
+}
+
+.neu-tree-select__clear {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 0.5rem;
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--neu-text-muted, #6b7280);
+  cursor: pointer;
 }
 
 .neu-tree-select__placeholder,

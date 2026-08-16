@@ -207,9 +207,7 @@ describe('NeuColorPickerComponent', () => {
     await f.whenStable();
     const previousHex = f.componentInstance._hexValue();
 
-    const swatches = Array.from(
-      document.querySelectorAll('.neu-cp__sw'),
-    ) as HTMLButtonElement[];
+    const swatches = Array.from(document.querySelectorAll('.neu-cp__sw')) as HTMLButtonElement[];
     swatches[0].click();
     f.detectChanges();
     await f.whenStable();
@@ -519,6 +517,45 @@ describe('NeuColorPickerComponent', () => {
     f.detectChanges();
 
     expect(f.componentInstance._isOpen()).toBe(false);
+  });
+
+  it('closes with Escape, reports touched and restores focus to the trigger', async () => {
+    const f = setup();
+    let touched = 0;
+    f.componentInstance.registerOnTouched(() => touched++);
+    const trigger = f.nativeElement.querySelector('.neu-cp__trigger') as HTMLButtonElement;
+    trigger.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    const escape = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(escape);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(escape.defaultPrevented).toBe(true);
+    expect(f.componentInstance._isOpen()).toBe(false);
+    expect(touched).toBeGreaterThan(0);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('does not consume Escape while closed and wires blur to the touched callback', () => {
+    const f = setup();
+    let touched = 0;
+    f.componentInstance.registerOnTouched(() => touched++);
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+
+    f.componentInstance._onEscape(escape);
+    (f.nativeElement.querySelector('.neu-cp__trigger') as HTMLButtonElement).dispatchEvent(
+      new FocusEvent('blur'),
+    );
+
+    expect(escape.defaultPrevented).toBe(false);
+    expect(touched).toBe(1);
   });
 
   it('keeps the panel open for clicks inside the overlay panel and covers blue hue conversion', () => {

@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
+import { Directionality } from '@angular/cdk/bidi';
 
 export interface NeuImageViewerItem {
   src: string;
@@ -102,7 +103,7 @@ interface _NeuIvData {
           [disabled]="_index() === 0"
           (click)="_navigate(-1)"
         >
-          ‹
+          {{ _isRtl() ? '›' : '‹' }}
         </button>
         <button
           type="button"
@@ -111,7 +112,7 @@ interface _NeuIvData {
           [disabled]="_index() === _data.items.length - 1"
           (click)="_navigate(1)"
         >
-          ›
+          {{ _isRtl() ? '‹' : '›' }}
         </button>
       }
     </div>
@@ -120,6 +121,8 @@ interface _NeuIvData {
 })
 export class NeuImageViewerOverlayComponent {
   readonly _data = inject(NEU_IV_DATA);
+  private readonly _directionality = inject(Directionality);
+  readonly _isRtl = computed(() => this._directionality.valueSignal() === 'rtl');
   readonly _index = signal(this._data.initialIndex);
   readonly _scale = signal(1);
   readonly _panX = signal(0);
@@ -184,10 +187,10 @@ export class NeuImageViewerOverlayComponent {
   _onKey(e: KeyboardEvent): void {
     switch (e.key) {
       case 'ArrowLeft':
-        this._navigate(-1);
+        this._navigate(this._isRtl() ? 1 : -1);
         break;
       case 'ArrowRight':
-        this._navigate(1);
+        this._navigate(this._isRtl() ? -1 : 1);
         break;
       case 'Escape':
         this._data.close();
@@ -230,6 +233,7 @@ export class NeuImageViewerDirective implements OnDestroy {
 
   private readonly _overlay = inject(Overlay);
   private readonly _injector = inject(Injector);
+  private readonly _directionality = inject(Directionality);
   private _overlayRef: OverlayRef | null = null;
 
   open(): void {
@@ -237,6 +241,7 @@ export class NeuImageViewerDirective implements OnDestroy {
 
     const items = this._normalizeItems();
     const overlayRef = this._overlay.create({
+      direction: this._directionality,
       hasBackdrop: false,
       scrollStrategy: this._overlay.scrollStrategies.block(),
       positionStrategy: this._overlay.position().global().centerHorizontally().centerVertically(),

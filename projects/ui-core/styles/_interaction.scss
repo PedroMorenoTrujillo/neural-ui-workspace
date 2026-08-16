@@ -32,6 +32,13 @@
     border-color: ButtonText;
     forced-color-adjust: auto;
   }
+
+  [class*='neu-']:focus-visible,
+  [class*='neu-'] :focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px !important;
+    box-shadow: none !important;
+  }
 }
 
 [dir='rtl'] {

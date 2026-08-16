@@ -8,7 +8,10 @@ const cache = mkdtempSync(join(tmpdir(), 'neural-ui-package-audit-'));
 const env = { ...process.env, npm_config_cache: cache };
 const commands = [
   ['publint', ['dist/neural-ui/core']],
-  ['attw', ['--pack', 'dist/neural-ui/core', '--ignore-rules', 'cjs-resolves-to-esm', 'no-resolution']],
+  [
+    'attw',
+    ['--pack', 'dist/neural-ui/core', '--ignore-rules', 'cjs-resolves-to-esm', 'no-resolution'],
+  ],
 ];
 
 try {

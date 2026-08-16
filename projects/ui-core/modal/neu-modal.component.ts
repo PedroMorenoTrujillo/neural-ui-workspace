@@ -4,10 +4,12 @@ import {
   ElementRef,
   ViewEncapsulation,
   effect,
+  inject,
   input,
   output,
   viewChild,
 } from '@angular/core';
+import { _IdGenerator } from '@angular/cdk/a11y';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -58,14 +60,14 @@ export type NeuDialogLayout = 'auto' | 'viewport';
           [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
           role="dialog"
           tabindex="-1"
-          [id]="'neu-dialog-' + _uid"
-          [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
+          [id]="_uid"
+          [attr.aria-labelledby]="_uid + '-title'"
           [attr.aria-modal]="true"
           (keydown)="onPanelKeydown($event)"
         >
           <!-- Header -->
           <div class="neu-dialog__header">
-            <h2 class="neu-dialog__title" [id]="'neu-dialog-title-' + _uid">{{ title() }}</h2>
+            <h2 class="neu-dialog__title" [id]="_uid + '-title'">{{ title() }}</h2>
             @if (!disableClose()) {
               <button
                 class="neu-dialog__close"
@@ -114,7 +116,7 @@ export class NeuDialogComponent {
   private previousActiveElement: HTMLElement | null = null;
 
   /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
-  readonly _uid = Math.random().toString(36).slice(2, 7);
+  readonly _uid = inject(_IdGenerator).getId('neu-dialog-');
 
   constructor() {
     effect(() => {

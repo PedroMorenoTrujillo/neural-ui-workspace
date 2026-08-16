@@ -28,7 +28,9 @@ export interface NeuCommand {
   action: () => void;
 }
 @Directive({ selector: 'ng-template[neuCommandPaletteItem]' })
-export class NeuCommandPaletteItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuCommand; index: number }>) {} }
+export class NeuCommandPaletteItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuCommand; index: number }>) {}
+}
 
 /**
  * NeuralUI CommandPaletteService
@@ -142,7 +144,12 @@ export class NeuCommandPaletteService {
               (click)="_svc.execute(cmd.id)"
               (mouseenter)="_activeIndex.set(i)"
             >
-              @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: cmd, index: i }" /> } @else if (cmd.icon) {
+              @if (itemTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{ $implicit: cmd, index: i }"
+                />
+              } @else if (cmd.icon) {
                 <span class="neu-cmd__item-icon" aria-hidden="true">{{ cmd.icon }}</span>
               }
               <span class="neu-cmd__item-label">{{ cmd.label }}</span>

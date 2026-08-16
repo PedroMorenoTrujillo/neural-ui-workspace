@@ -384,10 +384,18 @@ describe('NeuKnobComponent', () => {
     } as DOMRect);
 
     dial.dispatchEvent(
-      new MouseEvent('mousedown', { button: 0, clientX: 50, clientY: 0, bubbles: true, cancelable: true }),
+      new MouseEvent('mousedown', {
+        button: 0,
+        clientX: 50,
+        clientY: 0,
+        bubbles: true,
+        cancelable: true,
+      }),
     );
     window.dispatchEvent(new MouseEvent('mouseup'));
-    dial.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    dial.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
     f.detectChanges();
 
     expect(mouseSpy).toHaveBeenCalled();

@@ -27,7 +27,14 @@ import {
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuSelectOption } from './neu-select.types';
-import { NeuSelectEmptyDirective, NeuSelectFooterDirective, NeuSelectGroupDirective, NeuSelectHeaderDirective, NeuSelectItemDirective, NeuSelectSelectedDirective } from './neu-select.directives';
+import {
+  NeuSelectEmptyDirective,
+  NeuSelectFooterDirective,
+  NeuSelectGroupDirective,
+  NeuSelectHeaderDirective,
+  NeuSelectItemDirective,
+  NeuSelectSelectedDirective,
+} from './neu-select.directives';
 
 export type { NeuSelectOption } from './neu-select.types';
 
@@ -159,7 +166,9 @@ let _neuSelectIdSeq = 0;
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
+          @if (headerTpl()) {
+            <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
+          }
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </div>
@@ -252,7 +261,9 @@ let _neuSelectIdSeq = 0;
               [itemSize]="virtualScrollItemSize()"
               [style.height]="virtualViewportHeight()"
             >
-              <ng-container *cdkVirtualFor="let option of filteredOptions(); trackBy: trackByOptionValue">
+              <ng-container
+                *cdkVirtualFor="let option of filteredOptions(); trackBy: trackByOptionValue"
+              >
                 <ng-container
                   [ngTemplateOutlet]="selectOptionTpl"
                   [ngTemplateOutletContext]="{ $implicit: option }"
@@ -262,8 +273,14 @@ let _neuSelectIdSeq = 0;
           } @else {
             @for (option of filteredOptions(); track option.value) {
               @if (option.group && option.group !== previousGroup(option)) {
-                @if (groupTpl()) { <ng-container [ngTemplateOutlet]="groupTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: option.group }" /> }
-                @else { <div class="neu-select__group">{{ option.group }}</div> }
+                @if (groupTpl()) {
+                  <ng-container
+                    [ngTemplateOutlet]="groupTpl()!.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: option.group }"
+                  />
+                } @else {
+                  <div class="neu-select__group">{{ option.group }}</div>
+                }
               }
               <ng-container
                 [ngTemplateOutlet]="selectOptionTpl"
@@ -272,10 +289,15 @@ let _neuSelectIdSeq = 0;
             }
           }
           @if (!loading() && filteredOptions().length === 0) {
-            @if (emptyTpl()) { <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" /> }
-            @else { <div class="neu-select__empty">{{ noResultsMessage() }}</div> }
+            @if (emptyTpl()) {
+              <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
+            } @else {
+              <div class="neu-select__empty">{{ noResultsMessage() }}</div>
+            }
           }
-          @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
+          @if (footerTpl()) {
+            <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+          }
         </div>
       </ng-template>
       <div class="neu-select__sr-status" aria-live="polite" aria-atomic="true">
@@ -652,8 +674,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
   }
 
   private syncPanelPosition(): void {
-    const origin =
-      this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select');
+    const origin = this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select');
     if (!origin) return;
 
     const triggerRect = origin.getBoundingClientRect();
@@ -705,9 +726,9 @@ export class NeuSelectComponent implements ControlValueAccessor {
         this._viewport()?.checkViewportSize();
       }
       this._requestFrame(() => {
-        const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
-          `#neu-select-opt-${value}`,
-        ) ?? this._document.getElementById(`neu-select-opt-${value}`);
+        const optionElement =
+          this.elementRef.nativeElement.querySelector<HTMLElement>(`#neu-select-opt-${value}`) ??
+          this._document.getElementById(`neu-select-opt-${value}`);
         optionElement?.focus();
       });
       return;

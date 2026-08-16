@@ -89,12 +89,12 @@
 // ---- Indicador deslizante / Sliding indicator (animated underline) ----
 .neu-tabs__indicator {
   position: absolute;
-  bottom: -1.5px;
-  height: 2.5px;
+  inset-block-end: -1.5px;
+  block-size: 2.5px;
   background: var(--neu-primary);
   border-radius: var(--neu-radius-full) var(--neu-radius-full) 0 0;
   transition:
-    left var(--neu-transition-slow),
+    inset-inline-start var(--neu-transition-slow),
     width var(--neu-transition-slow);
   pointer-events: none;
 }

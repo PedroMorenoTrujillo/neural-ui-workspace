@@ -4,11 +4,23 @@
   "title": "Neural UI theme options",
   "type": "object",
   "properties": {
-    "name": { "type": "string", "default": "neural-ui-theme", "description": "Generated SCSS filename." },
+    "name": {
+      "type": "string",
+      "default": "neural-ui-theme",
+      "description": "Generated SCSS filename."
+    },
     "path": { "type": "string", "default": "src/styles", "description": "Output directory." },
-    "density": { "type": "string", "enum": ["compact", "comfortable", "spacious"], "default": "comfortable" },
+    "density": {
+      "type": "string",
+      "enum": ["compact", "comfortable", "spacious"],
+      "default": "comfortable"
+    },
     "theme": { "type": "string", "enum": ["default", "high-contrast"], "default": "default" },
-    "force": { "type": "boolean", "default": false, "description": "Replace an existing generated file." }
+    "force": {
+      "type": "boolean",
+      "default": false,
+      "description": "Replace an existing generated file."
+    }
   },
   "additionalProperties": false
 }

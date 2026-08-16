@@ -19,7 +19,8 @@ if (!existsSync(join(distRoot, 'package.json'))) {
 }
 
 const fixture = mkdtempSync(join(tmpdir(), `neural-ui-angular-${version}-`));
-const npmCache = mkdtempSync(join(tmpdir(), 'neural-ui-npm-cache-'));
+const inheritedNpmCache = process.env.NEURAL_UI_COMPAT_NPM_CACHE;
+const npmCache = inheritedNpmCache || mkdtempSync(join(tmpdir(), 'neural-ui-npm-cache-'));
 cpSync(fixtureRoot, fixture, { recursive: true });
 
 // Install the package exactly as consumers receive it. A `file:` dependency
@@ -42,7 +43,6 @@ if (!packageTarball) {
 
 const typescriptByAngular = { 19: '~5.7.0', 20: '~5.8.0', 21: '~5.9.0', 22: '~6.0.0' };
 const angularVersion = `^${version}.0.0`;
-const ngApexchartsByAngular = { 19: '1.15.0', 20: '1.16.0', 21: '2.3.0', 22: '2.3.0' };
 const packageJsonPath = join(fixture, 'package.json');
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 packageJson.dependencies = {
@@ -57,9 +57,7 @@ packageJson.dependencies = {
   // v31 is the last ng-icons line whose Angular peer range includes 19 and 20.
   '@ng-icons/core': '^31.4.0',
   '@ng-icons/lucide': '^31.4.0',
-  apexcharts: '^5.10.4',
-  // Pin the major-specific adapter: newer 1.x releases dropped Angular 19 support.
-  'ng-apexcharts': ngApexchartsByAngular[version],
+  'chart.js': '^4.5.1',
   rxjs: '~7.8.0',
   tslib: '^2.3.0',
 };
@@ -79,6 +77,30 @@ if (version === '19') {
   );
   writeFileSync(mainPath, mainSource);
 }
+
+const entrypointSmokePath = join(fixture, 'verify-entrypoints.mjs');
+writeFileSync(
+  entrypointSmokePath,
+  [
+    "import { readFileSync } from 'node:fs';",
+    "import { createRequire } from 'node:module';",
+    "await import('@angular/compiler');",
+    'const require = createRequire(import.meta.url);',
+    "const packagePath = require.resolve('@neural-ui/core/package.json');",
+    "const packageJson = JSON.parse(readFileSync(packagePath, 'utf8'));",
+    'let checked = 0;',
+    'for (const [subpath, config] of Object.entries(packageJson.exports ?? {})) {',
+    "  const target = typeof config === 'string' ? config : config.default ?? config.import;",
+    "  if (!target?.endsWith('.mjs')) continue;",
+    "  const specifier = subpath === '.' ? '@neural-ui/core' : `@neural-ui/core/${subpath.slice(2)}`;",
+    '  const module = await import(specifier);',
+    '  if (Object.keys(module).length === 0) throw new Error(`${specifier} has no public exports`);',
+    '  checked += 1;',
+    '}',
+    'console.log(`Angular compatibility entrypoint imports passed (${checked})`);',
+    '',
+  ].join('\n'),
+);
 
 try {
   const commands = [
@@ -129,14 +151,7 @@ try {
       ],
     ],
     ['npm', ['run', 'build']],
-    [
-      'node',
-      [
-        '--input-type=module',
-        '--eval',
-        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/chart'); console.log('SSR entrypoint imports passed')",
-      ],
-    ],
+    ['node', [entrypointSmokePath]],
   ];
   for (const [command, args] of commands) {
     const result = spawnSync(command, args, {
@@ -153,5 +168,7 @@ try {
   console.log(`Angular ${version} compatibility fixture passed`);
 } finally {
   rmSync(fixture, { recursive: true, force: true });
-  rmSync(npmCache, { recursive: true, force: true });
+  if (!inheritedNpmCache) {
+    rmSync(npmCache, { recursive: true, force: true });
+  }
 }

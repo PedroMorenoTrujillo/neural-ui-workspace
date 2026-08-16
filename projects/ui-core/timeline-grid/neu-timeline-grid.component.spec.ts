@@ -85,8 +85,25 @@ describe('NeuTimelineGridComponent', () => {
     );
     fixture.detectChanges();
 
-    fixture.nativeElement.querySelector('[data-slot-key="design:mon"]').click();
-    expect(emitted).toEqual(['design:mon']);
+    fixture.nativeElement.querySelector('[data-slot-key="design:wed"]').click();
+    expect(emitted).toEqual(['design:wed']);
+  });
+
+  it('does not expose slot actions underneath occupied timeline items', () => {
+    const fixture = TestBed.createComponent(NeuTimelineGridComponent);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('rows', ROWS);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-slot-key="design:mon"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-slot-key="design:tue"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-slot-key="engineering:wed"]')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.neu-timeline-grid__slot-button').length).toBe(
+      3,
+    );
+    expect(
+      fixture.nativeElement.querySelectorAll('.neu-timeline-grid__slot--occupied').length,
+    ).toBe(3);
   });
 
   it('applies the sticky labels modifier when enabled', () => {
@@ -154,6 +171,9 @@ describe('NeuTimelineGridComponent', () => {
       component.itemGridColumn({ id: 'fallback', title: 'Fallback', start: 'unknown', span: 0 }),
     ).toBe('1 / span 1');
     expect(component.slotGridColumn('unknown')).toBe('1 / span 1');
+    expect(component.isSlotOccupied(ROWS[0], 'mon')).toBe(true);
+    expect(component.isSlotOccupied(ROWS[0], 'wed')).toBe(false);
+    expect(component.isSlotOccupied(ROWS[0], 'unknown')).toBe(false);
     expect(component.itemClass({ id: 'plain', title: 'Plain', start: 'mon' })).toBe(
       'neu-timeline-grid__item neu-timeline-grid__item--default',
     );

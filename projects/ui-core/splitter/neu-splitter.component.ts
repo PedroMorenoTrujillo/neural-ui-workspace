@@ -10,6 +10,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { Directionality } from '@angular/cdk/bidi';
 
 export type NeuSplitterDirection = 'horizontal' | 'vertical';
 
@@ -65,6 +66,7 @@ export class NeuSplitterComponent {
   readonly sizeChange = output<number[]>();
 
   private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly _directionality = inject(Directionality);
   readonly _sizes = signal<number[]>([]);
 
   constructor() {
@@ -120,10 +122,22 @@ export class NeuSplitterComponent {
 
   _onHandleKey(e: KeyboardEvent, index: number): void {
     const step = 2;
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      this._adjustPair(
+        index,
+        this.direction() === 'horizontal' && this._directionality.value === 'rtl' ? step : -step,
+      );
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      this._adjustPair(
+        index,
+        this.direction() === 'horizontal' && this._directionality.value === 'rtl' ? -step : step,
+      );
+    } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       this._adjustPair(index, -step);
-    } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       this._adjustPair(index, step);
     }
@@ -138,7 +152,9 @@ export class NeuSplitterComponent {
     const total =
       this.direction() === 'horizontal' ? container.offsetWidth : container.offsetHeight;
     if (total === 0) return;
-    this._adjustPair(this._dragIndex, (delta / total) * 100);
+    const directionalDelta =
+      this.direction() === 'horizontal' && this._directionality.value === 'rtl' ? -delta : delta;
+    this._adjustPair(this._dragIndex, (directionalDelta / total) * 100);
   }
 
   private _adjustPair(index: number, delta: number): void {

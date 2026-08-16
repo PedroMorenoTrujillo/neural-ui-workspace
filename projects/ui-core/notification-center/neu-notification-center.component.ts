@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  HostListener,
   Injectable,
   OnDestroy,
   ViewEncapsulation,
@@ -133,6 +135,7 @@ let _panelSeq = 0;
       type="button"
       class="neu-nc__bell"
       [attr.aria-expanded]="_isOpen()"
+      aria-haspopup="dialog"
       [attr.aria-controls]="_panelId"
       [attr.aria-label]="'Notificaciones. ' + _svc.unreadCount() + ' sin leer'"
       (click)="_toggle()"
@@ -156,8 +159,8 @@ let _panelSeq = 0;
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-      (backdropClick)="_isOpen.set(false)"
-      (detach)="_isOpen.set(false)"
+      (backdropClick)="_close(true)"
+      (detach)="_close()"
     >
       <div
         class="neu-nc__panel"
@@ -222,6 +225,7 @@ let _panelSeq = 0;
 export class NeuNotificationCenterComponent {
   readonly _svc = inject(NeuNotificationService);
   private readonly overlay = inject(Overlay);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly _isOpen = signal(false);
   readonly _panelId = `neu-nc-panel-${++_panelSeq}`;
   readonly _viewportMargin = 16;
@@ -257,6 +261,23 @@ export class NeuNotificationCenterComponent {
       // Mark all as read when panel opens
       setTimeout(() => this._svc.markAllRead(), 500);
     }
+  }
+
+  _close(restoreFocus = false): void {
+    if (!this._isOpen()) return;
+    this._isOpen.set(false);
+    if (restoreFocus) {
+      queueMicrotask(() =>
+        this.host.nativeElement.querySelector<HTMLElement>('.neu-nc__bell')?.focus(),
+      );
+    }
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  _onEscape(event: Event): void {
+    if (!this._isOpen()) return;
+    event.preventDefault();
+    this._close(true);
   }
 
   _relativeTime(date: Date): string {

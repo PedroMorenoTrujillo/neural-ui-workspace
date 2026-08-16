@@ -2,7 +2,11 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
-import { NeuTagItemDirective, NeuTagSuggestionDirective, NeuTagsComponent } from './neu-tags.component';
+import {
+  NeuTagItemDirective,
+  NeuTagSuggestionDirective,
+  NeuTagsComponent,
+} from './neu-tags.component';
 
 describe('NeuTagsComponent', () => {
   let fixture: ComponentFixture<NeuTagsComponent>;
@@ -85,9 +89,13 @@ describe('NeuTagsComponent', () => {
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     expect(component.draft()).toBe('Ang');
-    expect(fixture.nativeElement.querySelector('.neu-tags__suggestions button')?.textContent).toContain('Angular');
+    expect(
+      fixture.nativeElement.querySelector('.neu-tags__suggestions button')?.textContent,
+    ).toContain('Angular');
 
-    (fixture.nativeElement.querySelector('.neu-tags__suggestions button') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector('.neu-tags__suggestions button') as HTMLButtonElement
+    ).click();
     fixture.detectChanges();
     expect(component.value()).toEqual(['Angular']);
     expect(fixture.nativeElement.querySelector('[aria-label="Delete Angular"]')).toBeTruthy();
@@ -97,7 +105,9 @@ describe('NeuTagsComponent', () => {
     input.dispatchEvent(new Event('blur'));
     fixture.detectChanges();
     expect(component.value()).toEqual(['Angular', 'Signals']);
-    (fixture.nativeElement.querySelector('[aria-label="Delete Angular"]') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector('[aria-label="Delete Angular"]') as HTMLButtonElement
+    ).click();
     expect(component.value()).toEqual(['Signals']);
   });
 
@@ -117,10 +127,19 @@ describe('NeuTagsComponent', () => {
   it('renders projected tag and rich-suggestion templates', async () => {
     @Component({
       imports: [NeuTagsComponent, NeuTagItemDirective, NeuTagSuggestionDirective],
-      template: `<neu-tags [suggestions]="suggestions"><ng-template neuTagItem let-tag>TAG:{{ tag }}</ng-template><ng-template neuTagSuggestion let-suggestion>SUG:{{ suggestion.data.flag }}</ng-template></neu-tags>`,
+      template: `<neu-tags [suggestions]="suggestions"
+        ><ng-template neuTagItem let-tag>TAG:{{ tag }}</ng-template
+        ><ng-template neuTagSuggestion let-suggestion
+          >SUG:{{ suggestion.data.flag }}</ng-template
+        ></neu-tags
+      >`,
     })
-    class Host { suggestions = [{ label: 'Spain', value: 'es', data: { flag: '🇪🇸' } }]; }
-    await TestBed.resetTestingModule().configureTestingModule({ imports: [Host] }).compileComponents();
+    class Host {
+      suggestions = [{ label: 'Spain', value: 'es', data: { flag: '🇪🇸' } }];
+    }
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ imports: [Host] })
+      .compileComponents();
     const host = TestBed.createComponent(Host);
     const component = host.debugElement.children[0].componentInstance as NeuTagsComponent;
     component.writeValue(['existing']);

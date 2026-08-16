@@ -5,7 +5,11 @@ import { NeuAccordionComponent, NeuAccordionItem } from './neu-accordion.compone
 const ITEMS: NeuAccordionItem[] = [
   { id: '1', title: '¿Qué es NeuralUI?', content: 'Una librería de componentes Angular.' },
   { id: '2', title: '¿Cómo se instala?', content: 'npm install @neural-ui/core' },
-  { id: '3', title: '¿Es accesible?', content: 'Sí, cumple WCAG 2.1 AA.' },
+  {
+    id: '3',
+    title: '¿Es accesible?',
+    content: 'Sí, con semántica y teclado verificables mediante WCAG 2.2 AA.',
+  },
 ];
 
 @Component({
@@ -38,6 +42,28 @@ describe('NeuAccordionComponent', () => {
     expect(text).toContain('¿Qué es NeuralUI?');
     expect(text).toContain('¿Cómo se instala?');
     expect(text).toContain('¿Es accesible?');
+  });
+
+  it('should generate unique linked ARIA ids across component instances', () => {
+    @Component({
+      template: `<neu-accordion [items]="items" /><neu-accordion [items]="items" />`,
+      imports: [NeuAccordionComponent],
+    })
+    class MultipleAccordionsHost {
+      readonly items = [{ id: 'shared', title: 'Shared', content: 'Content' }];
+    }
+
+    const multiple = TestBed.createComponent(MultipleAccordionsHost);
+    multiple.detectChanges();
+    const buttons = [...multiple.nativeElement.querySelectorAll('button')] as HTMLButtonElement[];
+    const panels = [...multiple.nativeElement.querySelectorAll('[role="region"]')] as HTMLElement[];
+
+    expect(new Set(buttons.map((button) => button.id)).size).toBe(2);
+    expect(new Set(panels.map((panel) => panel.id)).size).toBe(2);
+    buttons.forEach((button, index) => {
+      expect(button.getAttribute('aria-controls')).toBe(panels[index].id);
+      expect(panels[index].getAttribute('aria-labelledby')).toBe(button.id);
+    });
   });
 
   it('should have all panels collapsed by default', () => {

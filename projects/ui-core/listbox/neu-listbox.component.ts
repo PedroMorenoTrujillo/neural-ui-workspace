@@ -7,11 +7,13 @@ import {
   computed,
   contentChild,
   forwardRef,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { _IdGenerator } from '@angular/cdk/a11y';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface NeuListboxOption {
@@ -26,11 +28,17 @@ export class NeuListboxItemDirective {
   constructor(readonly templateRef: TemplateRef<{ $implicit: NeuListboxOption }>) {}
 }
 @Directive({ selector: 'ng-template[neuListboxHeader]' })
-export class NeuListboxHeaderDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuListboxHeaderDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuListboxFooter]' })
-export class NeuListboxFooterDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuListboxFooterDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuListboxEmpty]' })
-export class NeuListboxEmptyDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuListboxEmptyDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 
 @Component({
   selector: 'neu-listbox',
@@ -68,20 +76,27 @@ export class NeuListboxEmptyDirective { constructor(readonly templateRef: Templa
       [attr.aria-labelledby]="label() ? labelId : null"
       [attr.aria-label]="label() ? null : ariaLabel()"
       [attr.aria-multiselectable]="multiple()"
-      tabindex="0"
+      [attr.aria-activedescendant]="activeOptionId()"
+      [attr.aria-disabled]="isDisabled()"
+      [attr.tabindex]="isDisabled() ? -1 : 0"
       (keydown)="onKeyDown($event)"
     >
-      @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
+      @if (headerTpl()) {
+        <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
+      }
       @for (option of filteredOptions(); track option.value; let i = $index) {
         <button
           type="button"
           class="neu-listbox__option"
           role="option"
-          [class.neu-listbox__option--active]="activeIndex() === i"
+          [id]="optionId(i)"
+          tabindex="-1"
+          [class.neu-listbox__option--active]="resolvedActiveIndex() === i"
           [class.neu-listbox__option--selected]="isSelected(option.value)"
           [disabled]="isDisabled() || option.disabled"
+          [attr.aria-disabled]="isDisabled() || option.disabled"
           [attr.aria-selected]="isSelected(option.value)"
-          (click)="toggleOption(option)"
+          (click)="activateOption(option, i)"
         >
           @if (itemTpl()) {
             <ng-container
@@ -94,10 +109,15 @@ export class NeuListboxEmptyDirective { constructor(readonly templateRef: Templa
         </button>
       }
       @if (!filteredOptions().length) {
-        @if (emptyTpl()) { <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" /> }
-        @else { <div class="neu-listbox__empty">{{ emptyLabel() }}</div> }
+        @if (emptyTpl()) {
+          <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
+        } @else {
+          <div class="neu-listbox__empty">{{ emptyLabel() }}</div>
+        }
       }
-      @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
+      @if (footerTpl()) {
+        <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+      }
     </div>
     @if (hint()) {
       <p class="neu-listbox__hint">{{ hint() }}</p>
@@ -126,12 +146,25 @@ export class NeuListboxComponent implements ControlValueAccessor {
   readonly activeIndex = signal(0);
   readonly values = signal<string[]>([]);
   readonly cvaDisabled = signal(false);
-  readonly labelId = `neu-listbox-label-${Math.random().toString(36).slice(2)}`;
+  readonly labelId = inject(_IdGenerator).getId('neu-listbox-label-');
 
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
   readonly filteredOptions = computed(() => {
     const q = this.query().trim().toLowerCase();
-    return q ? this.options().filter((option) => option.label.toLowerCase().includes(q)) : this.options();
+    return q
+      ? this.options().filter((option) => option.label.toLowerCase().includes(q))
+      : this.options();
+  });
+  readonly resolvedActiveIndex = computed(() => {
+    const options = this.filteredOptions();
+    const current = options[this.activeIndex()];
+    return current && !current.disabled
+      ? this.activeIndex()
+      : options.findIndex((option) => !option.disabled);
+  });
+  readonly activeOptionId = computed(() => {
+    const index = this.resolvedActiveIndex();
+    return index < 0 ? null : this.optionId(index);
   });
 
   private onChange: (value: string | string[] | null) => void = () => {};
@@ -157,6 +190,15 @@ export class NeuListboxComponent implements ControlValueAccessor {
     return this.values().includes(value);
   }
 
+  optionId(index: number): string {
+    return `${this.labelId}-option-${index}`;
+  }
+
+  activateOption(option: NeuListboxOption, index: number): void {
+    this.activeIndex.set(index);
+    this.toggleOption(option);
+  }
+
   toggleOption(option: NeuListboxOption): void {
     if (option.disabled || this.isDisabled()) {
       return;
@@ -173,20 +215,30 @@ export class NeuListboxComponent implements ControlValueAccessor {
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    const enabled = this.filteredOptions().filter((option) => !option.disabled);
-    if (!enabled.length) {
+    if (this.isDisabled()) return;
+    const options = this.filteredOptions();
+    const enabledIndexes = options.flatMap((option, index) => (option.disabled ? [] : [index]));
+    if (!enabledIndexes.length) {
       return;
     }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       const step = event.key === 'ArrowDown' ? 1 : -1;
+      const currentPosition = Math.max(0, enabledIndexes.indexOf(this.resolvedActiveIndex()));
+      const nextPosition = Math.max(0, Math.min(enabledIndexes.length - 1, currentPosition + step));
+      this.activeIndex.set(enabledIndexes[nextPosition] ?? 0);
+    }
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
       this.activeIndex.set(
-        Math.max(0, Math.min(this.filteredOptions().length - 1, this.activeIndex() + step)),
+        event.key === 'Home'
+          ? (enabledIndexes[0] ?? 0)
+          : (enabledIndexes[enabledIndexes.length - 1] ?? 0),
       );
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      const option = this.filteredOptions()[this.activeIndex()];
+      const option = options[this.resolvedActiveIndex()];
       if (option) {
         this.toggleOption(option);
       }

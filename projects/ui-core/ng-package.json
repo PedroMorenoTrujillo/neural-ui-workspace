@@ -1,22 +1,23 @@
 {
-    "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
-    "dest": "../../dist/neural-ui/core",
-    "deleteDestPath": false,
-    "lib": {
-        "entryFile": "public-api.ts"
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist/neural-ui/core",
+  "deleteDestPath": false,
+  "allowedNonPeerDependencies": ["chart.js"],
+  "lib": {
+    "entryFile": "public-api.ts"
+  },
+  "assets": [
+    "./README.md",
+    "./styles.scss",
+    {
+      "input": "./schematics",
+      "glob": "**",
+      "output": "./schematics"
     },
-    "assets": [
-        "./README.md",
-        "./styles.scss",
-        {
-            "input": "./schematics",
-            "glob": "**",
-            "output": "./schematics"
-        },
-        {
-            "input": "./styles",
-            "glob": "**",
-            "output": "./styles"
-        }
-    ]
+    {
+      "input": "./styles",
+      "glob": "**",
+      "output": "./styles"
+    }
+  ]
 }

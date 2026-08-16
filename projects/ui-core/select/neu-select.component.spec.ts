@@ -350,9 +350,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
 
-    const searchInput = document.querySelector(
-      '.neu-select__search-input',
-    ) as HTMLInputElement;
+    const searchInput = document.querySelector('.neu-select__search-input') as HTMLInputElement;
     searchInput.value = 'xico';
     searchInput.dispatchEvent(new Event('input', { bubbles: true }));
     f.detectChanges();
@@ -1012,9 +1010,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const checks = Array.from(
-      document.querySelectorAll('.neu-select__check'),
-    ) as SVGElement[];
+    const checks = Array.from(document.querySelectorAll('.neu-select__check')) as SVGElement[];
     expect(checks.some((check) => check.style.visibility === 'hidden')).toBe(true);
   });
 
@@ -1199,9 +1195,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
-    const searchInput: HTMLInputElement = document.querySelector(
-      '.neu-select__search-input',
-    )!;
+    const searchInput: HTMLInputElement = document.querySelector('.neu-select__search-input')!;
     // This click fires stopPropagation in the template — must not close the panel
     searchInput.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     f.detectChanges();
@@ -1262,7 +1256,10 @@ describe('NeuSelectComponent', () => {
       expect(comp.panelPosition().bottom).toBe('106px');
       expect(comp.panelPosition().left).toBe('764px');
     } finally {
-      Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: originalInnerWidth,
+      });
       Object.defineProperty(window, 'innerHeight', {
         configurable: true,
         value: originalInnerHeight,

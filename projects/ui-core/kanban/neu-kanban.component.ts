@@ -1,13 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  PLATFORM_ID,
   ViewEncapsulation,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Directionality } from '@angular/cdk/bidi';
 import {
   CdkDrag,
   CdkDropList,
@@ -90,6 +95,7 @@ export interface NeuKanbanCardDropEvent {
 
           <div
             class="neu-kanban__list"
+            role="list"
             cdkDropList
             [id]="column.id"
             [cdkDropListData]="column.cards"
@@ -101,7 +107,17 @@ export interface NeuKanbanCardDropEvent {
             }
 
             @for (card of column.cards; track card.id) {
-              <article class="neu-kanban__card" cdkDrag [cdkDragData]="card">
+              <article
+                class="neu-kanban__card"
+                cdkDrag
+                role="listitem"
+                tabindex="0"
+                [cdkDragData]="card"
+                [attr.data-card-id]="card.id"
+                aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight"
+                [attr.aria-label]="card.title + '. ' + keyboardMoveLabel()"
+                (keydown)="onCardKeydown(card.id, column.id, $event)"
+              >
                 <div class="neu-kanban__card-header">
                   <div>
                     <h4 class="neu-kanban__title">{{ card.title }}</h4>
@@ -158,10 +174,17 @@ export interface NeuKanbanCardDropEvent {
   styleUrl: './neu-kanban.component.scss',
 })
 export class NeuKanbanComponent {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly directionality = inject(Directionality);
+
   readonly columns = input<NeuKanbanColumn[]>([]);
   readonly columnWidth = input<string>('320px');
   readonly showCounts = input<boolean>(true);
   readonly showWipLimit = input<boolean>(true);
+  readonly keyboardMoveLabel = input(
+    'Use Alt plus arrow keys to move this card within or between columns',
+  );
 
   readonly columnsChange = output<NeuKanbanColumn[]>();
   readonly cardDrop = output<NeuKanbanCardDropEvent>();
@@ -216,6 +239,75 @@ export class NeuKanbanComponent {
         columns: nextColumns,
       });
     }
+  }
+
+  onCardKeydown(cardId: string, sourceColumnId: string, event: KeyboardEvent): void {
+    if (!event.altKey || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      return;
+    }
+
+    const nextColumns = this._cloneColumns(this._columns());
+    const sourceColumnIndex = nextColumns.findIndex((column) => column.id === sourceColumnId);
+    const sourceColumn = nextColumns[sourceColumnIndex];
+    const previousIndex = sourceColumn?.cards.findIndex((card) => card.id === cardId) ?? -1;
+    if (!sourceColumn || previousIndex < 0) {
+      return;
+    }
+
+    let targetColumnIndex = sourceColumnIndex;
+    let currentIndex = previousIndex;
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      currentIndex = Math.max(
+        0,
+        Math.min(
+          sourceColumn.cards.length - 1,
+          previousIndex + (event.key === 'ArrowDown' ? 1 : -1),
+        ),
+      );
+    } else {
+      const physicalDelta = event.key === 'ArrowRight' ? 1 : -1;
+      const directionDelta =
+        this.directionality.valueSignal() === 'rtl' ? -physicalDelta : physicalDelta;
+      targetColumnIndex = Math.max(
+        0,
+        Math.min(nextColumns.length - 1, sourceColumnIndex + directionDelta),
+      );
+    }
+
+    if (targetColumnIndex === sourceColumnIndex && currentIndex === previousIndex) {
+      return;
+    }
+
+    event.preventDefault();
+    const [card] = sourceColumn.cards.splice(previousIndex, 1);
+    const targetColumn = nextColumns[targetColumnIndex];
+    if (!card || !targetColumn) {
+      return;
+    }
+    currentIndex =
+      targetColumn === sourceColumn
+        ? currentIndex
+        : Math.min(previousIndex, targetColumn.cards.length);
+    targetColumn.cards.splice(currentIndex, 0, card);
+
+    this._columns.set(nextColumns);
+    this.columnsChange.emit(nextColumns);
+    this.cardDrop.emit({
+      card,
+      fromColumnId: sourceColumnId,
+      toColumnId: targetColumn.id,
+      previousIndex,
+      currentIndex,
+      columns: nextColumns,
+    });
+    queueMicrotask(() => this.focusCard(cardId));
+  }
+
+  private focusCard(cardId: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('[data-card-id]'))
+      .find((candidate) => candidate.dataset['cardId'] === cardId)
+      ?.focus();
   }
 
   private _cloneColumns(columns: NeuKanbanColumn[]): NeuKanbanColumn[] {

@@ -13,6 +13,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Directionality } from '@angular/cdk/bidi';
 import {
   CdkDrag,
   CdkDragDrop,
@@ -68,11 +69,20 @@ export interface NeuDashboardTileConfig {
           class="neu-dg__tile"
           cdkDrag
           [cdkDragData]="tile"
+          [attr.data-dashboard-tile-id]="tile.id"
           [style.--tile-cols]="tile.cols ?? 1"
           [style.--tile-rows]="tile.rows ?? 1"
         >
           <!-- Drag handle -->
-          <div class="neu-dg__tile-handle" cdkDragHandle>
+          <div
+            class="neu-dg__tile-handle"
+            cdkDragHandle
+            role="button"
+            tabindex="0"
+            aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
+            [attr.aria-label]="(tile.title ?? tile.id) + '. ' + keyboardReorderLabel()"
+            (keydown)="_onTileKeydown(tile.id, $event)"
+          >
             @if (tile.title) {
               <span class="neu-dg__tile-title">{{ tile.title }}</span>
             }
@@ -95,9 +105,11 @@ export interface NeuDashboardTileConfig {
 export class NeuDashboardGridComponent {
   private readonly _host = inject(ElementRef) as ElementRef<HTMLElement>;
   private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _directionality = inject(Directionality);
 
   readonly tiles = input<NeuDashboardTileConfig[]>([]);
   readonly columns = input<number>(3);
+  readonly keyboardReorderLabel = input('Use Alt plus Left or Right Arrow to reorder');
 
   /** Emitido cuando el orden cambia / Emitted when order changes */
   readonly orderChange = output<NeuDashboardTileConfig[]>();
@@ -127,13 +139,45 @@ export class NeuDashboardGridComponent {
     this.orderChange.emit(tiles);
   }
 
+  _onTileKeydown(tileId: string, event: KeyboardEvent): void {
+    if (!event.altKey || !['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      return;
+    }
+
+    const tiles = [...this._orderedTiles()];
+    const previousIndex = tiles.findIndex((tile) => tile.id === tileId);
+    if (previousIndex < 0) {
+      return;
+    }
+
+    const physicalDelta = event.key === 'ArrowRight' ? 1 : -1;
+    const delta = this._directionality.valueSignal() === 'rtl' ? -physicalDelta : physicalDelta;
+    const currentIndex = Math.max(0, Math.min(tiles.length - 1, previousIndex + delta));
+    if (currentIndex === previousIndex) {
+      return;
+    }
+
+    event.preventDefault();
+    moveItemInArray(tiles, previousIndex, currentIndex);
+    this._orderedTiles.set(tiles);
+    this.orderChange.emit(tiles);
+    queueMicrotask(() => this._focusTileHandle(tileId));
+  }
+
+  private _focusTileHandle(tileId: string): void {
+    if (!isPlatformBrowser(this._platformId)) return;
+    const tile = Array.from(
+      this._host.nativeElement.querySelectorAll<HTMLElement>('[data-dashboard-tile-id]'),
+    ).find((candidate) => candidate.dataset['dashboardTileId'] === tileId);
+    tile?.querySelector<HTMLElement>('.neu-dg__tile-handle')?.focus();
+  }
+
   private _attachProjectedTiles(): void {
     if (!isPlatformBrowser(this._platformId)) return;
     const slots = new Map(
-      this._tileSlots().filter(Boolean).map((slotRef) => [
-        slotRef.nativeElement.dataset['slotId'],
-        slotRef.nativeElement,
-      ]),
+      this._tileSlots()
+        .filter(Boolean)
+        .map((slotRef) => [slotRef.nativeElement.dataset['slotId'], slotRef.nativeElement]),
     );
 
     const projectedTiles = this._host.nativeElement.querySelectorAll(

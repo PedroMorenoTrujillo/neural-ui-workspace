@@ -36,7 +36,9 @@ export interface NeuContextMenuItem {
   variant?: 'default' | 'danger';
 }
 @Directive({ selector: 'ng-template[neuContextMenuItem]' })
-export class NeuContextMenuItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuContextMenuItem }>) {} }
+export class NeuContextMenuItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuContextMenuItem }>) {}
+}
 
 let _seq = 0;
 
@@ -69,7 +71,12 @@ let _seq = 0;
         [attr.aria-disabled]="item.disabled ?? false"
         (click)="select(item)"
       >
-        @if (itemTemplate) { <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }" /> } @else if (item.icon) {
+        @if (itemTemplate) {
+          <ng-container
+            [ngTemplateOutlet]="itemTemplate"
+            [ngTemplateOutletContext]="{ $implicit: item }"
+          />
+        } @else if (item.icon) {
           <span class="neu-context-menu__icon" aria-hidden="true">{{ item.icon }}</span>
         }
         {{ item.label }}

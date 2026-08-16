@@ -81,16 +81,25 @@ export interface NeuTimelineGridSlotSelection {
               [style.gridTemplateColumns]="gridTemplateColumns()"
             >
               @for (column of columns(); track column.id) {
-                <button
-                  type="button"
-                  class="neu-timeline-grid__slot neu-timeline-grid__slot-button"
-                  [class.neu-timeline-grid__slot--selected]="isSlotSelected(row.id, column.id)"
-                  [style.gridColumn]="slotGridColumn(column.id)"
-                  [attr.aria-label]="slotAriaLabel(row, column)"
-                  [attr.aria-pressed]="isSlotSelected(row.id, column.id)"
-                  [attr.data-slot-key]="slotKey(row.id, column.id)"
-                  (click)="onSlotClick(row.id, column.id)"
-                ></button>
+                @if (isSlotOccupied(row, column.id)) {
+                  <div
+                    class="neu-timeline-grid__slot neu-timeline-grid__slot--occupied"
+                    [class.neu-timeline-grid__slot--selected]="isSlotSelected(row.id, column.id)"
+                    [style.gridColumn]="slotGridColumn(column.id)"
+                    aria-hidden="true"
+                  ></div>
+                } @else {
+                  <button
+                    type="button"
+                    class="neu-timeline-grid__slot neu-timeline-grid__slot-button"
+                    [class.neu-timeline-grid__slot--selected]="isSlotSelected(row.id, column.id)"
+                    [style.gridColumn]="slotGridColumn(column.id)"
+                    [attr.aria-label]="slotAriaLabel(row, column)"
+                    [attr.aria-pressed]="isSlotSelected(row.id, column.id)"
+                    [attr.data-slot-key]="slotKey(row.id, column.id)"
+                    (click)="onSlotClick(row.id, column.id)"
+                  ></button>
+                }
               }
 
               @for (item of validItems(row); track item.id) {
@@ -158,6 +167,17 @@ export class NeuTimelineGridComponent {
   slotGridColumn(columnId: string): string {
     const start = this._columnIndexMap().get(columnId) ?? 1;
     return `${start} / span 1`;
+  }
+
+  isSlotOccupied(row: NeuTimelineGridRow, columnId: string): boolean {
+    const columnIndex = this._columnIndexMap().get(columnId);
+    if (columnIndex === undefined) return false;
+
+    return this.validItems(row).some((item) => {
+      const start = this._columnIndexMap().get(item.start);
+      if (start === undefined) return false;
+      return columnIndex >= start && columnIndex < start + Math.max(1, item.span ?? 1);
+    });
   }
 
   itemClass(item: NeuTimelineGridItem): string {

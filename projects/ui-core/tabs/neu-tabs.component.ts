@@ -19,6 +19,7 @@ import {
   signal,
 } from '@angular/core';
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { Directionality } from '@angular/cdk/bidi';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 
 // ----------------------------------------------------------------
@@ -38,7 +39,9 @@ export interface NeuTab {
   disabled?: boolean;
 }
 @Directive({ selector: 'ng-template[neuTabLabel]' })
-export class NeuTabLabelDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTab; active: boolean }>) {} }
+export class NeuTabLabelDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTab; active: boolean }>) {}
+}
 
 /**
  * NeuralUI Tabs Component
@@ -85,12 +88,19 @@ export class NeuTabLabelDirective { constructor(readonly templateRef: TemplateRe
             [disabled]="tab.disabled"
             type="button"
             (click)="handleTabClick($event, tab)"
-            (keydown.arrowRight)="focusTab($any($event), 1)"
-            (keydown.arrowLeft)="focusTab($any($event), -1)"
+            (keydown.arrowRight)="focusTabFromArrow($any($event), 1)"
+            (keydown.arrowLeft)="focusTabFromArrow($any($event), -1)"
             (keydown.home)="focusTab($any($event), 'first')"
             (keydown.end)="focusTab($any($event), 'last')"
           >
-            @if (labelTpl()) { <ng-container [ngTemplateOutlet]="labelTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: tab, active: activeTabId() === tab.id }" /> } @else { {{ tab.label }} }
+            @if (labelTpl()) {
+              <ng-container
+                [ngTemplateOutlet]="labelTpl()!.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: tab, active: activeTabId() === tab.id }"
+              />
+            } @else {
+              {{ tab.label }}
+            }
             @if (tab.badge) {
               <span class="neu-tabs__tab-badge">{{ tab.badge }}</span>
             }
@@ -113,6 +123,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   private readonly urlState = inject(NeuUrlStateService);
   private readonly elRef = inject(ElementRef);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly directionality = inject(Directionality);
   private resizeObserver?: ResizeObserver;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
   private _dragPointerId: number | null = null;
@@ -145,6 +156,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     // Actualizar indicador cuando activeTabId cambie — debe estar en el constructor (injection context)
     effect(() => {
       this.activeTabId(); // dependencia reactiva
+      this.directionality.valueSignal();
       this._requestFrame(() => this._updateIndicator());
     });
   }
@@ -180,11 +192,10 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   });
 
   /** Posición del indicador calculada mediante medición DOM / Indicator position calculated via DOM measurement */
-  private readonly _indicatorLeft = signal('0px');
-  private readonly _indicatorWidth = signal('0px');
-
+  readonly _indicatorInlineStart = signal('0px');
+  readonly _indicatorWidth = signal('0px');
   readonly indicatorStyle = computed(
-    () => `left: ${this._indicatorLeft()}; width: ${this._indicatorWidth()}`,
+    () => `inset-inline-start: ${this._indicatorInlineStart()}; width: ${this._indicatorWidth()}`,
   );
 
   ngAfterViewInit(): void {
@@ -208,7 +219,11 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     const idx = this.tabs().findIndex((t) => t.id === this.activeTabId());
     const tabEl = tabEls[idx];
     if (tabEl) {
-      this._indicatorLeft.set(tabEl.offsetLeft + 'px');
+      const inlineStart =
+        this.directionality.value === 'rtl'
+          ? nav.scrollWidth - tabEl.offsetLeft - tabEl.offsetWidth
+          : tabEl.offsetLeft;
+      this._indicatorInlineStart.set(inlineStart + 'px');
       this._indicatorWidth.set(tabEl.offsetWidth + 'px');
       if (typeof tabEl.scrollIntoView === 'function') {
         tabEl.scrollIntoView({
@@ -281,6 +296,12 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   }
 
   /** Mueve el foco entre tabs con flechas (roving tabindex — WAI-ARIA Tabs Pattern) / Moves focus between tabs with arrows (roving tabindex — WAI-ARIA Tabs Pattern) */
+  focusTabFromArrow(event: Event, physicalDirection: 1 | -1): void {
+    const logicalDirection: 1 | -1 =
+      this.directionality.value === 'rtl' ? (physicalDirection === 1 ? -1 : 1) : physicalDirection;
+    this.focusTab(event, logicalDirection);
+  }
+
   focusTab(event: Event, dir: 1 | -1 | 'first' | 'last'): void {
     event.preventDefault();
     const enabledTabs = this.tabs().filter((t) => !t.disabled);

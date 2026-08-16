@@ -1,5 +1,7 @@
 function normalizeName(value) {
-  return String(value || 'neural-ui-theme').replace(/\.scss$/i, '').replace(/[^a-zA-Z0-9-_]/g, '-');
+  return String(value || 'neural-ui-theme')
+    .replace(/\.scss$/i, '')
+    .replace(/[^a-zA-Z0-9-_]/g, '-');
 }
 
 function theme(options = {}) {

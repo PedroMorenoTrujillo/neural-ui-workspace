@@ -58,7 +58,9 @@ class ProjectionHostComponent {}
 
 describe('NeuInputGroupComponent', () => {
   it('projects controls and exposes size and attachment classes', async () => {
-    await TestBed.configureTestingModule({ imports: [NeuInputGroupComponent, ProjectionHostComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [NeuInputGroupComponent, ProjectionHostComponent],
+    }).compileComponents();
     const fixture = TestBed.createComponent(NeuInputGroupComponent);
     fixture.componentRef.setInput('size', 'sm');
     fixture.componentRef.setInput('attached', false);
@@ -70,6 +72,8 @@ describe('NeuInputGroupComponent', () => {
     const projected = TestBed.createComponent(ProjectionHostComponent);
     projected.detectChanges();
     expect(projected.nativeElement.querySelector('neu-form-field input')).toBeTruthy();
-    expect(projected.nativeElement.querySelector('neu-input-group button')?.textContent).toContain('Go');
+    expect(projected.nativeElement.querySelector('neu-input-group button')?.textContent).toContain(
+      'Go',
+    );
   });
 });

@@ -333,7 +333,9 @@ describe('NeuTreeTableComponent', () => {
       events.push(`action:${event.action.key}:${event.node.id}`),
     );
     fixture.componentInstance.selectionActionClick.subscribe((event) =>
-      events.push(`selection-action:${event.action.key}:${event.nodes.map((node) => node.id).join(',')}`),
+      events.push(
+        `selection-action:${event.action.key}:${event.nodes.map((node) => node.id).join(',')}`,
+      ),
     );
     fixture.componentInstance.cellEditCommit.subscribe((event) =>
       events.push(`edit:${event.column.key}:${event.node.id}:${event.value}`),
@@ -418,6 +420,8 @@ describe('NeuTreeTableComponent', () => {
     );
     (fixture.nativeElement.querySelector('.neu-table__expand-btn') as HTMLButtonElement).click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.tree-detail')?.textContent).toContain('Workspace / 0');
+    expect(fixture.nativeElement.querySelector('.tree-detail')?.textContent).toContain(
+      'Workspace / 0',
+    );
   });
 });

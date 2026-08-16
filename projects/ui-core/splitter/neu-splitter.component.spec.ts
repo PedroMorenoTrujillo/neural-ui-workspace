@@ -1,4 +1,5 @@
 import { provideZonelessChangeDetection } from '@angular/core';
+import { Directionality } from '@angular/cdk/bidi';
 import { TestBed } from '@angular/core/testing';
 import { NeuSplitterComponent, NeuSplitterPane } from './neu-splitter.component';
 
@@ -84,6 +85,17 @@ describe('NeuSplitterComponent', () => {
     await f.whenStable();
     const initial = f.componentInstance._sizes()[0];
     f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
+    expect(f.componentInstance._sizes()[0]).toBeLessThan(initial);
+  });
+
+  it('reverses horizontal keyboard resizing in RTL', async () => {
+    const f = setup([{ size: 50 }, { size: 50 }]);
+    await f.whenStable();
+    const initial = f.componentInstance._sizes()[0];
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+
+    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 0);
+
     expect(f.componentInstance._sizes()[0]).toBeLessThan(initial);
   });
 
