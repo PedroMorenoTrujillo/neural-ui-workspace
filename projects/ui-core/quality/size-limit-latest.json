@@ -6,7 +6,7 @@
     {
       "name": "All public ESM entry points (Brotli)",
       "passed": true,
-      "size": 288185,
+      "size": 289250,
       "sizeLimit": 300000
     },
     {

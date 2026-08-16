@@ -87,7 +87,7 @@ function unlockDocumentScroll(document: Document): void {
       [class.neu-sidebar--right]="side() === 'right'"
       [attr.role]="persistent() ? 'navigation' : 'dialog'"
       [attr.aria-modal]="persistent() ? null : 'true'"
-      [attr.aria-label]="ariaLabel()"
+      [attr.aria-label]="resolvedAriaLabel()"
       [attr.aria-hidden]="!isOpen() && !persistent()"
       [attr.inert]="!isOpen() && !persistent() ? '' : null"
     >
@@ -101,7 +101,7 @@ function unlockDocumentScroll(document: Document): void {
             <button
               class="neu-sidebar__close"
               (click)="close()"
-              [attr.aria-label]="closeLabel()"
+              [attr.aria-label]="resolvedCloseLabel()"
               type="button"
             >
               <neu-icon name="lucideX" size="18px" aria-hidden="true" />
@@ -149,10 +149,29 @@ export class NeuSidebarComponent {
   hideHeader = input<boolean>(false);
 
   /** Etiqueta accesible para el <aside> / Accessible label for the <aside> */
-  ariaLabel = input<string>('Menú de navegación');
+  ariaLabel = input<string>('');
 
   /** Etiqueta accesible para el botón cerrar / Accessible label for the close button */
-  closeLabel = input<string>('Cerrar menú de navegación');
+  closeLabel = input<string>('');
+
+  /** Uses explicit labels first and otherwise follows the document language. */
+  protected resolvedAriaLabel(): string {
+    const explicitLabel = this.ariaLabel().trim();
+    if (explicitLabel) return explicitLabel;
+    return this._usesSpanishDefaults() ? 'Menú de navegación' : 'Navigation menu';
+  }
+
+  protected resolvedCloseLabel(): string {
+    const explicitLabel = this.closeLabel().trim();
+    if (explicitLabel) return explicitLabel;
+    return this._usesSpanishDefaults()
+      ? 'Cerrar menú de navegación'
+      : 'Close navigation menu';
+  }
+
+  private _usesSpanishDefaults(): boolean {
+    return this.document.documentElement.lang.toLowerCase().startsWith('es');
+  }
   /** Cierra el overlay al pulsar Escape / Closes the overlay when pressing Escape */
   closeOnEscape = input<boolean>(true);
   /** Devuelve el foco al elemento activo antes de abrir / Restores focus after close */

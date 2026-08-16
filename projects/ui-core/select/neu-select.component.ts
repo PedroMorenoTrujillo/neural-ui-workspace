@@ -368,7 +368,7 @@ export class NeuSelectComponent implements ControlValueAccessor {
   label = input<string>('');
 
   /** Placeholder cuando no hay selección / Placeholder when there is no selection */
-  placeholder = input<string>('Seleccionar...');
+  placeholder = input<string>(this._localizedDefault('Select...', 'Seleccionar...'));
 
   /** Mensaje de error / Error message */
   errorMessage = input<string>('');
@@ -387,13 +387,13 @@ export class NeuSelectComponent implements ControlValueAccessor {
   searchable = input<boolean>(false);
 
   /** Placeholder del input de búsqueda / Search input placeholder */
-  searchPlaceholder = input<string>('Buscar...');
+  searchPlaceholder = input<string>(this._localizedDefault('Search...', 'Buscar...'));
 
   /** Muestra estado de carga dentro del panel / Shows a loading state inside the panel */
   loading = input<boolean>(false);
 
   /** Texto del estado de carga / Loading state text */
-  loadingLabel = input<string>('Loading...');
+  loadingLabel = input<string>(this._localizedDefault('Loading...', 'Cargando...'));
 
   /** Muestra un botón para limpiar la selección / Shows a button to clear the selection */
   clearable = input<boolean>(false);
@@ -405,10 +405,10 @@ export class NeuSelectComponent implements ControlValueAccessor {
   virtualScrollVisibleItems = input<number>(8);
 
   /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
-  noResultsMessage = input<string>('Sin resultados');
+  noResultsMessage = input<string>(this._localizedDefault('No results', 'Sin resultados'));
 
   /** Aria-label del botón de limpiar / Aria-label for the clear button */
-  clearAriaLabel = input<string>('Limpiar selección');
+  clearAriaLabel = input<string>(this._localizedDefault('Clear selection', 'Limpiar selección'));
 
   /**
    * Sincroniza el valor seleccionado con este query param de la URL.
@@ -750,6 +750,10 @@ export class NeuSelectComponent implements ControlValueAccessor {
       maxHeight: null,
     });
     this.isPanelAbove.set(false);
+  }
+
+  private _localizedDefault(english: string, spanish: string): string {
+    return this._document.documentElement.lang.toLowerCase().startsWith('es') ? spanish : english;
   }
 
   private _requestFrame(callback: FrameRequestCallback): void {

@@ -6,12 +6,13 @@ import {
   computed,
   contentChild,
   effect,
+  inject,
   input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import {
   NeuTableAction,
   NeuTableCellEditEvent,
@@ -225,40 +226,59 @@ export interface NeuTreeTableCellEditEvent<
   styleUrl: './neu-tree-table.component.scss',
 })
 export class NeuTreeTableComponent {
+  private readonly _document = inject(DOCUMENT);
+
   readonly nodes = input<NeuTreeTableNode[]>([]);
   readonly columns = input<NeuTableColumn<any>[]>([]);
   readonly title = input('');
   readonly toolbarExtraRef = input<TemplateRef<unknown> | null>(null);
   readonly treeColumnKey = input('label');
   readonly rowKey = input('id');
-  readonly tableAriaLabel = input('Tree table');
-  readonly searchPlaceholder = input('Search rows');
-  readonly exactMatchLabel = input('Exact match');
-  readonly searchAriaLabel = input('Search tree table');
-  readonly clearSearchAriaLabel = input('Clear search');
-  readonly clearFilterLabel = input('Clear filter');
-  readonly previousPageAriaLabel = input('Previous page');
-  readonly nextPageAriaLabel = input('Next page');
-  readonly pageSizeLabel = input('Rows:');
-  readonly pageSizeAriaLabel = input('Rows per page');
-  readonly paginationAriaLabel = input('Tree table pagination');
-  readonly exportCsvTitle = input('Export CSV');
-  readonly exportJsonTitle = input('Export JSON');
-  readonly exportXlsxTitle = input('Export XLSX');
-  readonly clearSelectionLabel = input('Clear selection');
-  readonly selectionSummaryLabel = input('selected');
-  readonly selectAllAriaLabel = input('Select all visible tree rows');
-  readonly selectRowAriaLabel = input('Select tree row');
-  readonly expandRowAriaLabel = input('Expand detail row');
-  readonly filterPlaceholder = input('Filter...');
-  readonly filterAriaPrefix = input('Filter by');
-  readonly allFilterOptionLabel = input('All');
-  readonly ofLabel = input('of');
-  readonly resultLabelSingular = input('result');
-  readonly resultLabelPlural = input('results');
-  readonly emptyMessage = input('No rows found');
-  readonly expandLabel = input('Expand row');
-  readonly collapseLabel = input('Collapse row');
+  readonly tableAriaLabel = input(this._localizedDefault('Tree table', 'Tabla de árbol'));
+  readonly searchPlaceholder = input(this._localizedDefault('Search rows', 'Buscar filas'));
+  readonly exactMatchLabel = input(this._localizedDefault('Exact match', 'Coincidencia exacta'));
+  readonly searchAriaLabel = input(
+    this._localizedDefault('Search tree table', 'Buscar en la tabla de árbol'),
+  );
+  readonly clearSearchAriaLabel = input(this._localizedDefault('Clear search', 'Limpiar búsqueda'));
+  readonly clearFilterLabel = input(this._localizedDefault('Clear filter', 'Limpiar filtro'));
+  readonly previousPageAriaLabel = input(
+    this._localizedDefault('Previous page', 'Página anterior'),
+  );
+  readonly nextPageAriaLabel = input(this._localizedDefault('Next page', 'Página siguiente'));
+  readonly pageSizeLabel = input(this._localizedDefault('Rows:', 'Filas:'));
+  readonly pageSizeAriaLabel = input(this._localizedDefault('Rows per page', 'Filas por página'));
+  readonly paginationAriaLabel = input(
+    this._localizedDefault('Tree table pagination', 'Paginación de la tabla de árbol'),
+  );
+  readonly exportCsvTitle = input(this._localizedDefault('Export CSV', 'Exportar CSV'));
+  readonly exportJsonTitle = input(this._localizedDefault('Export JSON', 'Exportar JSON'));
+  readonly exportXlsxTitle = input(this._localizedDefault('Export XLSX', 'Exportar XLSX'));
+  readonly clearSelectionLabel = input(
+    this._localizedDefault('Clear selection', 'Limpiar selección'),
+  );
+  readonly selectionSummaryLabel = input(this._localizedDefault('selected', 'seleccionadas'));
+  readonly selectAllAriaLabel = input(
+    this._localizedDefault(
+      'Select all visible tree rows',
+      'Seleccionar todas las filas visibles del árbol',
+    ),
+  );
+  readonly selectRowAriaLabel = input(
+    this._localizedDefault('Select tree row', 'Seleccionar fila del árbol'),
+  );
+  readonly expandRowAriaLabel = input(
+    this._localizedDefault('Expand detail row', 'Expandir fila de detalle'),
+  );
+  readonly filterPlaceholder = input(this._localizedDefault('Filter...', 'Filtrar...'));
+  readonly filterAriaPrefix = input(this._localizedDefault('Filter by', 'Filtrar por'));
+  readonly allFilterOptionLabel = input(this._localizedDefault('All', 'Todas'));
+  readonly ofLabel = input(this._localizedDefault('of', 'de'));
+  readonly resultLabelSingular = input(this._localizedDefault('result', 'resultado'));
+  readonly resultLabelPlural = input(this._localizedDefault('results', 'resultados'));
+  readonly emptyMessage = input(this._localizedDefault('No rows found', 'No se encontraron filas'));
+  readonly expandLabel = input(this._localizedDefault('Expand row', 'Expandir fila'));
+  readonly collapseLabel = input(this._localizedDefault('Collapse row', 'Contraer fila'));
   readonly indentSize = input(18);
 
   readonly loading = input(false);
@@ -489,6 +509,10 @@ export class NeuTreeTableComponent {
       }
     }
     return expanded;
+  }
+
+  private _localizedDefault(english: string, spanish: string): string {
+    return this._document.documentElement.lang.toLowerCase().startsWith('es') ? spanish : english;
   }
 
   private asFlatRow(row: Record<string, unknown>): NeuTreeTableRow {

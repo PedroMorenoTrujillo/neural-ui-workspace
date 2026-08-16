@@ -57,6 +57,29 @@ describe('NeuTabsComponent', () => {
     expect(f.nativeElement.querySelectorAll('[role="tablist"]').length).toBe(1);
   });
 
+  it('should localize the default tablist label from the document language', () => {
+    const originalLanguage = document.documentElement.lang;
+    try {
+      document.documentElement.lang = 'en';
+      const englishFixture = TestBed.createComponent(HostComponent);
+      englishFixture.detectChanges();
+      expect(
+        englishFixture.nativeElement.querySelector('[role="tablist"]').getAttribute('aria-label'),
+      ).toBe('Content tabs');
+      englishFixture.destroy();
+
+      document.documentElement.lang = 'es';
+      const spanishFixture = TestBed.createComponent(HostComponent);
+      spanishFixture.detectChanges();
+      expect(
+        spanishFixture.nativeElement.querySelector('[role="tablist"]').getAttribute('aria-label'),
+      ).toBe('Pestañas de contenido');
+      spanishFixture.destroy();
+    } finally {
+      document.documentElement.lang = originalLanguage;
+    }
+  });
+
   it('should render tab buttons', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();

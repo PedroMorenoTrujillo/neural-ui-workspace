@@ -3,8 +3,10 @@ import {
   Component,
   ViewEncapsulation,
   computed,
+  inject,
   input,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -66,6 +68,8 @@ export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 
   styleUrl: './neu-spinner.component.scss',
 })
 export class NeuSpinnerComponent {
+  private readonly _document = inject(DOCUMENT);
+
   /** Variante de color semántica / Semantic color variant */
   severity = input<NeuSpinnerSeverity>('primary');
 
@@ -85,7 +89,7 @@ export class NeuSpinnerComponent {
   label = input<string>('');
 
   /** Texto accesible cuando no se muestra label / Accessible text when label is not displayed */
-  ariaLabel = input<string>('Loading...');
+  ariaLabel = input<string>(this._localizedDefault('Loading...', 'Cargando...'));
 
   readonly _severityColor = computed(() => {
     const map: Record<NeuSpinnerSeverity, string> = {
@@ -97,4 +101,8 @@ export class NeuSpinnerComponent {
     };
     return map[this.severity()];
   });
+
+  private _localizedDefault(english: string, spanish: string): string {
+    return this._document.documentElement.lang.toLowerCase().startsWith('es') ? spanish : english;
+  }
 }

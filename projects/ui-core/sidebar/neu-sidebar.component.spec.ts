@@ -98,6 +98,39 @@ describe('NeuSidebarComponent', () => {
     expect(f.nativeElement.querySelector('neu-sidebar')).toBeTruthy();
   });
 
+  it('should localize its default navigation and close labels from the document language', () => {
+    const originalLanguage = document.documentElement.lang;
+    try {
+      document.documentElement.lang = 'en';
+      const englishFixture = TestBed.createComponent(FocusHostComponent);
+      englishFixture.detectChanges();
+      expect(englishFixture.nativeElement.querySelector('aside').getAttribute('aria-label')).toBe(
+        'Navigation menu',
+      );
+      expect(
+        englishFixture.nativeElement
+          .querySelector('.neu-sidebar__close')
+          .getAttribute('aria-label'),
+      ).toBe('Close navigation menu');
+      englishFixture.destroy();
+
+      document.documentElement.lang = 'es';
+      const spanishFixture = TestBed.createComponent(FocusHostComponent);
+      spanishFixture.detectChanges();
+      expect(spanishFixture.nativeElement.querySelector('aside').getAttribute('aria-label')).toBe(
+        'Menú de navegación',
+      );
+      expect(
+        spanishFixture.nativeElement
+          .querySelector('.neu-sidebar__close')
+          .getAttribute('aria-label'),
+      ).toBe('Cerrar menú de navegación');
+      spanishFixture.destroy();
+    } finally {
+      document.documentElement.lang = originalLanguage;
+    }
+  });
+
   it('should render aside element', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.detectChanges();

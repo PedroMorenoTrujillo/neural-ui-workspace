@@ -74,6 +74,25 @@ describe('NeuSpinnerComponent', () => {
     expect(df.nativeElement.textContent).toContain('Loading...');
   });
 
+  it('localizes the default accessible label from the document language', async () => {
+    const originalLanguage = document.documentElement.lang;
+    try {
+      document.documentElement.lang = 'en';
+      const english = TestBed.createComponent(NeuSpinnerComponent);
+      expect(english.componentInstance.ariaLabel()).toBe('Loading...');
+      english.destroy();
+
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({ imports: [NeuSpinnerComponent] }).compileComponents();
+      document.documentElement.lang = 'es';
+      const spanish = TestBed.createComponent(NeuSpinnerComponent);
+      expect(spanish.componentInstance.ariaLabel()).toBe('Cargando...');
+      spanish.destroy();
+    } finally {
+      document.documentElement.lang = originalLanguage;
+    }
+  });
+
   it('should render a visible label without duplicating the screen-reader label', () => {
     const df = TestBed.createComponent(NeuSpinnerComponent);
     df.componentRef.setInput('label', 'Loading data...');

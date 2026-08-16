@@ -82,6 +82,28 @@ describe('NeuSelectComponent', () => {
     expect(trigger).toBeTruthy();
   });
 
+  it('localizes default UI text from the document language', async () => {
+    const originalLanguage = document.documentElement.lang;
+    try {
+      document.documentElement.lang = 'en';
+      const english = await setup();
+      expect(english.f.nativeElement.querySelector('.neu-select__placeholder').textContent).toContain(
+        'Select...',
+      );
+      english.f.destroy();
+
+      TestBed.resetTestingModule();
+      document.documentElement.lang = 'es';
+      const spanish = await setup();
+      expect(spanish.f.nativeElement.querySelector('.neu-select__placeholder').textContent).toContain(
+        'Seleccionar...',
+      );
+      spanish.f.destroy();
+    } finally {
+      document.documentElement.lang = originalLanguage;
+    }
+  });
+
   // ── Apertura/cierre ────────────────────────────────────────────────────────
 
   it('should open panel when trigger is clicked', async () => {

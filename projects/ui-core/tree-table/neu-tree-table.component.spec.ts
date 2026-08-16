@@ -63,6 +63,27 @@ describe('NeuTreeTableComponent', () => {
     }).compileComponents();
   });
 
+  it('localizes default table controls from the document language', async () => {
+    const originalLanguage = document.documentElement.lang;
+    try {
+      document.documentElement.lang = 'en';
+      const english = TestBed.createComponent(NeuTreeTableComponent);
+      expect(english.componentInstance.allFilterOptionLabel()).toBe('All');
+      expect(english.componentInstance.expandLabel()).toBe('Expand row');
+      english.destroy();
+
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({ imports: [NeuTreeTableComponent] }).compileComponents();
+      document.documentElement.lang = 'es';
+      const spanish = TestBed.createComponent(NeuTreeTableComponent);
+      expect(spanish.componentInstance.allFilterOptionLabel()).toBe('Todas');
+      expect(spanish.componentInstance.expandLabel()).toBe('Expandir fila');
+      spanish.destroy();
+    } finally {
+      document.documentElement.lang = originalLanguage;
+    }
+  });
+
   it('renders visible rows from expanded nodes', () => {
     const fixture = TestBed.createComponent(NeuTreeTableComponent);
     fixture.componentRef.setInput('nodes', NODES);

@@ -110,7 +110,9 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
           @if (_values().length === 0) {
             <span class="neu-multiselect__placeholder">{{ placeholder() }}</span>
           } @else if (_chipMode() === 'count') {
-            <span class="neu-multiselect__count-badge">{{ _values().length }} seleccionados</span>
+            <span class="neu-multiselect__count-badge"
+              >{{ _values().length }} {{ _localizedDefault('selected', 'seleccionados') }}</span
+            >
           } @else {
             @for (val of _visibleChips(); track val) {
               <span class="neu-multiselect__chip">
@@ -327,7 +329,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
           @if (_values().length > 0) {
             <div class="neu-multiselect__footer">
               <span class="neu-multiselect__footer-count"
-                >{{ _values().length }} seleccionados</span
+                >{{ _values().length }} {{ _localizedDefault('selected', 'seleccionados') }}</span
               >
               <div class="neu-multiselect__footer-actions">
                 <button
@@ -429,7 +431,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   size = input<'sm' | 'md' | 'lg'>('md');
 
   /** Placeholder cuando no hay selección / Placeholder when there is no selection */
-  placeholder = input<string>('Seleccionar...');
+  placeholder = input<string>(this._localizedDefault('Select...', 'Seleccionar...'));
 
   /** Mensaje de error / Error message */
   errorMessage = input<string>('');
@@ -444,19 +446,19 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   searchable = input<boolean>(false);
 
   /** Placeholder del input de búsqueda / Search input placeholder */
-  searchPlaceholder = input<string>('Buscar...');
+  searchPlaceholder = input<string>(this._localizedDefault('Search...', 'Buscar...'));
 
   loading = input<boolean>(false);
-  loadingLabel = input<string>('Loading...');
+  loadingLabel = input<string>(this._localizedDefault('Loading...', 'Cargando...'));
   selectAll = input<boolean>(false);
-  selectAllLabel = input<string>('Select all');
-  unselectAllLabel = input<string>('Unselect all');
+  selectAllLabel = input<string>(this._localizedDefault('Select all', 'Seleccionar todo'));
+  unselectAllLabel = input<string>(this._localizedDefault('Unselect all', 'Deseleccionar todo'));
 
   /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
-  noResultsMessage = input<string>('Sin resultados');
+  noResultsMessage = input<string>(this._localizedDefault('No results', 'Sin resultados'));
 
   /** Texto del botón de limpiar todas las selecciones / Button text to clear all selections */
-  clearAllLabel = input<string>('Limpiar todo');
+  clearAllLabel = input<string>(this._localizedDefault('Clear all', 'Limpiar todo'));
 
   /** Muestra un botón × en el trigger para limpiar la selección de una vez / Shows a × button in the trigger to clear the selection at once */
   clearable = input<boolean>(false);
@@ -468,7 +470,7 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   virtualScrollVisibleItems = input<number>(8);
 
   /** Aria-label del botón clear que aparece en el trigger / Aria-label for the clear button shown in the trigger */
-  clearAriaLabel = input<string>('Limpiar selección');
+  clearAriaLabel = input<string>(this._localizedDefault('Clear selection', 'Limpiar selección'));
 
   /**
    * Sincroniza los valores seleccionados con este query param de la URL.
@@ -868,6 +870,10 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this._requestFrame(() => {
       this._viewport()?.checkViewportSize();
     });
+  }
+
+  protected _localizedDefault(english: string, spanish: string): string {
+    return this._document.documentElement.lang.toLowerCase().startsWith('es') ? spanish : english;
   }
 
   private _requestFrame(callback: FrameRequestCallback): void {

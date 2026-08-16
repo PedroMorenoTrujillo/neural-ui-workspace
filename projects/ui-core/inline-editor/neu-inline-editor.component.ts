@@ -12,6 +12,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import {
   ControlValueAccessor,
   FormControl,
@@ -164,16 +165,17 @@ export interface NeuInlineEditorCommitEvent<T = string | number | null> {
 })
 export class NeuInlineEditorComponent implements ControlValueAccessor {
   private readonly _host = inject(ElementRef<HTMLElement>);
+  private readonly _document = inject(DOCUMENT);
 
   readonly value = input<string | number | null>(null);
   readonly type = input<NeuInlineEditorType>('text');
   readonly size = input<NeuInlineEditorSize>('sm');
   readonly options = input<NeuSelectOption[]>([]);
   readonly placeholder = input('');
-  readonly emptyLabel = input('Empty');
-  readonly editLabel = input('Edit value');
-  readonly saveLabel = input('Save value');
-  readonly cancelLabel = input('Cancel edit');
+  readonly emptyLabel = input(this._localizedDefault('Empty', 'Vacío'));
+  readonly editLabel = input(this._localizedDefault('Edit value', 'Editar valor'));
+  readonly saveLabel = input(this._localizedDefault('Save value', 'Guardar valor'));
+  readonly cancelLabel = input(this._localizedDefault('Cancel edit', 'Cancelar edición'));
   readonly disabled = input(false);
   readonly readonly = input(false);
   readonly startInEdit = input(false);
@@ -237,6 +239,10 @@ export class NeuInlineEditorComponent implements ControlValueAccessor {
         this._value.set(Number.isFinite(value) ? value : null);
       }
     });
+  }
+
+  private _localizedDefault(english: string, spanish: string): string {
+    return this._document.documentElement.lang.toLowerCase().startsWith('es') ? spanish : english;
   }
 
   writeValue(value: string | number | null): void {

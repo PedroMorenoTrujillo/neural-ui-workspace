@@ -1155,7 +1155,7 @@
       {
         "name": "All public ESM entry points (Brotli)",
         "passed": true,
-        "size": 288185,
+        "size": 289250,
         "sizeLimit": 300000
       },
       {
@@ -1188,8 +1188,8 @@
     },
     "totals": {
       "entries": 82,
-      "rawBytes": 1944987,
-      "gzipBytes": 350215
+      "rawBytes": 1949546,
+      "gzipBytes": 351545
     },
     "entries": [
       {
@@ -1204,18 +1204,23 @@
       },
       {
         "file": "neural-ui-core-multiselect.mjs",
-        "rawBytes": 79635,
-        "gzipBytes": 11604
+        "rawBytes": 80319,
+        "gzipBytes": 11734
       },
       {
         "file": "neural-ui-core-select.mjs",
-        "rawBytes": 66203,
-        "gzipBytes": 10504
+        "rawBytes": 66548,
+        "gzipBytes": 10602
       },
       {
         "file": "neural-ui-core-autocomplete.mjs",
         "rawBytes": 51372,
         "gzipBytes": 8468
+      },
+      {
+        "file": "neural-ui-core-tree-table.mjs",
+        "rawBytes": 56343,
+        "gzipBytes": 8048
       },
       {
         "file": "neural-ui-core-uploader.mjs",
@@ -1226,11 +1231,6 @@
         "file": "neural-ui-core-testing.mjs",
         "rawBytes": 57663,
         "gzipBytes": 7743
-      },
-      {
-        "file": "neural-ui-core-tree-table.mjs",
-        "rawBytes": 54899,
-        "gzipBytes": 7669
       },
       {
         "file": "neural-ui-core-nav.mjs",
@@ -1268,6 +1268,11 @@
         "gzipBytes": 5556
       },
       {
+        "file": "neural-ui-core-tabs.mjs",
+        "rawBytes": 24079,
+        "gzipBytes": 5518
+      },
+      {
         "file": "neural-ui-core-tree.mjs",
         "rawBytes": 31989,
         "gzipBytes": 5424
@@ -1278,14 +1283,9 @@
         "gzipBytes": 5388
       },
       {
-        "file": "neural-ui-core-tabs.mjs",
-        "rawBytes": 23665,
-        "gzipBytes": 5367
-      },
-      {
         "file": "neural-ui-core-sidebar.mjs",
-        "rawBytes": 23876,
-        "gzipBytes": 5100
+        "rawBytes": 24574,
+        "gzipBytes": 5274
       },
       {
         "file": "neural-ui-core-data-view.mjs",
@@ -1294,8 +1294,8 @@
       },
       {
         "file": "neural-ui-core-inline-editor.mjs",
-        "rawBytes": 25518,
-        "gzipBytes": 4669
+        "rawBytes": 25907,
+        "gzipBytes": 4812
       },
       {
         "file": "neural-ui-core-modal.mjs",
@@ -1488,24 +1488,24 @@
         "gzipBytes": 2507
       },
       {
+        "file": "neural-ui-core-filter-bar.mjs",
+        "rawBytes": 9950,
+        "gzipBytes": 2489
+      },
+      {
         "file": "neural-ui-core-checkbox.mjs",
         "rawBytes": 11329,
         "gzipBytes": 2441
       },
       {
-        "file": "neural-ui-core-filter-bar.mjs",
-        "rawBytes": 9641,
-        "gzipBytes": 2362
+        "file": "neural-ui-core-spinner.mjs",
+        "rawBytes": 9455,
+        "gzipBytes": 2383
       },
       {
         "file": "neural-ui-core-meter-group.mjs",
         "rawBytes": 11285,
         "gzipBytes": 2321
-      },
-      {
-        "file": "neural-ui-core-spinner.mjs",
-        "rawBytes": 9179,
-        "gzipBytes": 2255
       },
       {
         "file": "neural-ui-core-timeline.mjs",

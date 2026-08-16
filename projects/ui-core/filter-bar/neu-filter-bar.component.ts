@@ -4,11 +4,13 @@ import {
   ViewEncapsulation,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
   untracked,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 export interface NeuFilterChip {
   /** Identificador único del filtro / Unique filter identifier */
@@ -63,6 +65,8 @@ let _seq = 0;
   styleUrl: './neu-filter-bar.component.scss',
 })
 export class NeuFilterBarComponent {
+  private readonly _document = inject(DOCUMENT);
+
   /** Lista inicial de filtros / Initial filter chips list */
   readonly filters = input<NeuFilterChip[]>([]);
 
@@ -70,13 +74,13 @@ export class NeuFilterBarComponent {
   readonly clearable = input<boolean>(true);
 
   /** Texto del botón de limpiar / Clear button text */
-  readonly clearLabel = input<string>('Limpiar todo');
+  readonly clearLabel = input<string>(this._localizedDefault('Clear all', 'Limpiar todo'));
 
   /** Permite selección múltiple / Allows multi-selection */
   readonly multi = input<boolean>(true);
 
   /** Aria-label de la barra / Aria-label for the bar */
-  readonly ariaLabel = input<string>('Filtros');
+  readonly ariaLabel = input<string>(this._localizedDefault('Filters', 'Filtros'));
 
   /** Emitido con los chips activos al cambiar / Emitted with active chips on change */
   readonly filterChange = output<NeuFilterChip[]>();
@@ -96,6 +100,10 @@ export class NeuFilterBarComponent {
       const src = this.filters();
       untracked(() => this._chips.set(src.map((f) => ({ ...f }))));
     });
+  }
+
+  private _localizedDefault(english: string, spanish: string): string {
+    return this._document.documentElement.lang.toLowerCase().startsWith('es') ? spanish : english;
   }
 
   toggle(chip: NeuFilterChip): void {

@@ -19,6 +19,24 @@ async function setup(inputs: Record<string, unknown> = {}) {
 }
 
 describe('NeuInlineEditorComponent', () => {
+  it('localizes default visible and accessible labels from the document language', async () => {
+    const originalLanguage = document.documentElement.lang;
+    try {
+      document.documentElement.lang = 'en';
+      const english = await setup();
+      expect(english.componentInstance.displayValue()).toBe('Empty');
+      english.destroy();
+
+      TestBed.resetTestingModule();
+      document.documentElement.lang = 'es';
+      const spanish = await setup();
+      expect(spanish.componentInstance.displayValue()).toBe('Vacío');
+      expect(spanish.componentInstance.editLabel()).toBe('Editar valor');
+      spanish.destroy();
+    } finally {
+      document.documentElement.lang = originalLanguage;
+    }
+  });
   it('renders the display value and enters edit mode', async () => {
     const fixture = await setup({ value: 'Draft' });
 

@@ -2,21 +2,21 @@
   "metadata": {
     "schemaVersion": 1,
     "capturedAt": "2026-08-16",
-    "auditedCoreCommit": "4985b558b915f5208c69f9ef49db45528fa479a6",
-    "auditedShowcaseCommit": "84ca37a538d00b34ca73a9aea410423cb693492d",
+    "auditedCoreCommit": "20272dcb6ffa457cc30f30a1f214bedda5665376",
+    "auditedShowcaseCommit": "54d17aedc517f1e21318a2e330a22055df451ad3",
     "libraryVersion": "1.12.1",
     "evidenceFreshness": "Current working-tree evidence; reproduce with the release gates before publication.",
     "baseline": {
       "entryPoints": 81,
-      "automatedTests": 2168,
+      "automatedTests": 2176,
       "coverage": {
-        "statements": 97.73,
-        "branches": 95.61,
-        "functions": 96.65,
+        "statements": 97.71,
+        "branches": 95.59,
+        "functions": 96.66,
         "lines": 98.98
       },
       "showcaseDemoPages": 82,
-      "translationsPerLocale": 3190,
+      "translationsPerLocale": 3209,
       "trackedVisualSnapshots": 428
     },
     "exclusions": [
@@ -4082,7 +4082,7 @@
           "evidence": [
             "projects/ui-core/filter-bar/neu-filter-bar.component.spec.ts"
           ],
-          "note": "Rendered specifications exercise public state transitions for: busy and feedback, selection and value, data and navigation."
+          "note": "Rendered specifications exercise public state transitions for: busy and feedback, selection and value, data and navigation, lifecycle and defaults."
         },
         "cva": {
           "status": "N/A",
@@ -4881,7 +4881,7 @@
           "evidence": [
             "projects/ui-core/inline-editor/neu-inline-editor.component.spec.ts"
           ],
-          "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, selection and value, appearance and layout, lifecycle and defaults."
+          "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, visibility and disclosure, selection and value, appearance and layout, lifecycle and defaults."
         },
         "cva": {
           "status": "PASS",
@@ -9416,7 +9416,7 @@
           "evidence": [
             "projects/ui-core/spinner/neu-spinner.component.spec.ts"
           ],
-          "note": "Rendered specifications exercise public state transitions for: busy and feedback, visibility and disclosure, appearance and layout."
+          "note": "Rendered specifications exercise public state transitions for: busy and feedback, visibility and disclosure, appearance and layout, lifecycle and defaults."
         },
         "cva": {
           "status": "N/A",
@@ -12465,7 +12465,7 @@
           "evidence": [
             "projects/ui-core/tree-table/neu-tree-table.component.spec.ts"
           ],
-          "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, visibility and disclosure, selection and value, appearance and layout, data and navigation."
+          "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
         },
         "cva": {
           "status": "N/A",

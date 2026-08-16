@@ -15,6 +15,27 @@ function mk() {
 describe('NeuFilterBarComponent', () => {
   beforeEach(() => mk().compileComponents());
 
+  it('localizes its default accessible labels from the document language', async () => {
+    const originalLanguage = document.documentElement.lang;
+    try {
+      document.documentElement.lang = 'en';
+      const english = TestBed.createComponent(NeuFilterBarComponent);
+      expect(english.componentInstance.clearLabel()).toBe('Clear all');
+      expect(english.componentInstance.ariaLabel()).toBe('Filters');
+      english.destroy();
+
+      TestBed.resetTestingModule();
+      await mk().compileComponents();
+      document.documentElement.lang = 'es';
+      const spanish = TestBed.createComponent(NeuFilterBarComponent);
+      expect(spanish.componentInstance.clearLabel()).toBe('Limpiar todo');
+      expect(spanish.componentInstance.ariaLabel()).toBe('Filtros');
+      spanish.destroy();
+    } finally {
+      document.documentElement.lang = originalLanguage;
+    }
+  });
+
   it('should render filter chips', async () => {
     const f = TestBed.createComponent(NeuFilterBarComponent);
     f.componentRef.setInput('filters', CHIPS);

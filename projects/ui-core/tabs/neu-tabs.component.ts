@@ -18,7 +18,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { Directionality } from '@angular/cdk/bidi';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 
@@ -67,7 +67,7 @@ export class NeuTabLabelDirective {
       <div
         class="neu-tabs__nav"
         role="tablist"
-        [attr.aria-label]="ariaLabel()"
+        [attr.aria-label]="resolvedAriaLabel()"
         [class.neu-tabs__nav--dragging]="isDraggingNav()"
         #navRef
         (pointerdown)="startNavDrag($event)"
@@ -122,6 +122,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   readonly labelTpl = contentChild(NeuTabLabelDirective);
   private readonly urlState = inject(NeuUrlStateService);
   private readonly elRef = inject(ElementRef);
+  private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly directionality = inject(Directionality);
   private resizeObserver?: ResizeObserver;
@@ -171,7 +172,16 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   flush = input<boolean>(false);
 
   /** Etiqueta accesible del rol tablist / Accessible label for the tablist role */
-  ariaLabel = input<string>('Pestañas de contenido');
+  ariaLabel = input<string>('');
+
+  /** Uses the explicit label or a locale-aware English/Spanish fallback. */
+  protected resolvedAriaLabel(): string {
+    const explicitLabel = this.ariaLabel().trim();
+    if (explicitLabel) return explicitLabel;
+    return this.document.documentElement.lang.toLowerCase().startsWith('es')
+      ? 'Pestañas de contenido'
+      : 'Content tabs';
+  }
 
   /** Emite al cambiar de pestaña / Emits when the tab changes */
   tabChange = output<string>();

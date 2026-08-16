@@ -132,6 +132,34 @@ describe('NeuMultiselectComponent', () => {
     expect(f.nativeElement.querySelector('.neu-multiselect__trigger')).toBeTruthy();
   });
 
+  it('localizes default UI text from the document language', async () => {
+    const originalLanguage = document.documentElement.lang;
+    try {
+      document.documentElement.lang = 'en';
+      const english = TestBed.createComponent(NeuMultiselectComponent);
+      english.detectChanges();
+      expect(english.nativeElement.querySelector('.neu-multiselect__placeholder').textContent).toContain(
+        'Select...',
+      );
+      english.destroy();
+
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [NeuMultiselectComponent],
+        providers: [provideZonelessChangeDetection()],
+      }).compileComponents();
+      document.documentElement.lang = 'es';
+      const spanish = TestBed.createComponent(NeuMultiselectComponent);
+      spanish.detectChanges();
+      expect(spanish.nativeElement.querySelector('.neu-multiselect__placeholder').textContent).toContain(
+        'Seleccionar...',
+      );
+      spanish.destroy();
+    } finally {
+      document.documentElement.lang = originalLanguage;
+    }
+  });
+
   it('should open dropdown and show options when clicked', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
@@ -263,7 +291,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     f.componentInstance.ctrl.setValue(['angular', 'vue']);
     f.detectChanges();
-    expect(f.nativeElement.textContent).toContain('2 seleccionados');
+    expect(f.nativeElement.textContent).toContain('2 selected');
   });
 
   // ── Select all then deselect one (edge case) ─────────────────────────────
