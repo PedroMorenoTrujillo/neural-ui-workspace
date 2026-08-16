@@ -10,6 +10,7 @@ const automatedCommands = [
   ['npm', ['run', 'build']],
   ['npm', ['run', 'audit:entrypoints']],
   ['npm', ['run', 'audit:showcase-evidence']],
+  ['npm', ['run', 'audit:quality-matrix']],
   ['npm', ['run', 'audit:manual-at-evidence']],
   ['npm', ['run', 'audit:cva']],
   ['npm', ['run', 'audit:bundle']],

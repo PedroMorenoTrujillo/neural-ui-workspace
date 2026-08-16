@@ -850,8 +850,12 @@ function buildManifest(existingManifest) {
       ...metadata,
       schemaVersion: 1,
       capturedAt: currentMetadata.capturedAt,
-      auditedCoreCommit: currentMetadata.auditedCoreCommit,
-      auditedShowcaseCommit: currentMetadata.auditedShowcaseCommit,
+      auditedCoreCommit: update
+        ? currentMetadata.auditedCoreCommit
+        : metadata.auditedCoreCommit,
+      auditedShowcaseCommit: update
+        ? currentMetadata.auditedShowcaseCommit
+        : metadata.auditedShowcaseCommit,
       evidenceFreshness: currentMetadata.evidenceFreshness,
       libraryVersion: packageJson.version,
       baseline: currentMetadata.baseline,

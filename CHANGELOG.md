@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Select, Multiselect, Filter Bar, Inline Editor, Spinner, Tabs, Sidebar and Tree Table no longer expose Spanish-only default copy on English pages; defaults now follow the document language and remain overridable through public inputs.
 - Direction-sensitive widgets now use the live Angular CDK `Directionality` state for RTL layout, icons, overlays and physical arrow-key behavior.
 - Showcase test-server shutdown now asks Angular CLI to stop gracefully, avoiding a misleading esbuild deadlock diagnostic after successful audits.
+- Isolated CI now validates the checked-in showcase and performance evidence and runs the automated release gate; the strict human-evidence gate remains mandatory for publication tags.
 
 ## [1.12.1] - 2026-08-15
 
