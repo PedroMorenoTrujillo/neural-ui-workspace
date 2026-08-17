@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-08-17
+
+### Fixed
+
+- Updated the published package metadata and README links to use the canonical showcase URL at [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app).
+
 ## [1.13.0] - 2026-08-17
 
 ### Added

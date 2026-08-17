@@ -10,7 +10,7 @@
 
 Modern Angular UI component library — **signals-first**, fully **standalone**, with dedicated subpath entry points and no Zone.js requirement.
 
-> Live documentation and examples → [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app)
+> Live documentation and examples → [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app)
 
 > Building a full admin product? Try [Neural Admin Pro](https://neural-ui-admin-pro.vercel.app/login), a premium Angular dashboard template built with Neural UI and ready to connect to your own backend.
 
@@ -34,7 +34,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.13.0
+- **Version:** 1.13.1
 - **Entry points:** 81
 - **Automated tests:** 2176
 - **Coverage:** 97.71% statements · 95.59% branches · 96.66% functions · 98.98% lines
@@ -185,7 +185,7 @@ Representative entry points:
 - **Feedback and utilities**: `@neural-ui/core/alert`, `@neural-ui/core/toast`, `@neural-ui/core/tooltip`, `@neural-ui/core/block-ui`, `@neural-ui/core/url-state`
 - **Visualization and display**: `@neural-ui/core/chart`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
 
-For the complete catalog, examples, and API tables, use the live docs at [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app).
+For the complete catalog, examples, and API tables, use the live docs at [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app).
 
 ---
 
