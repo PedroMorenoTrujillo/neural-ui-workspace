@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replaced the income-restricted ApexCharts runtime and Angular wrapper with direct Chart.js 4.5.1 rendering under the MIT license. `NeuChart` keeps its selector, inputs and documented chart types, adds an accessible data table fallback and no longer requires charting peer dependencies.
 - Made the showcase fully localizable, responsive and direction-aware, with zero static inline styles and an audited allowlist for the 14 runtime style bindings that require computed values.
-- Split the reproducible automated release verification from the final strict human-evidence gate, while keeping the latter mandatory for publication.
+- Split the reproducible automated publication gate from the strict human-evidence certification gate. Publication remains blocked by all automated checks; full human-validation claims additionally require the separate strict gate.
 
 ### Fixed
 
@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Select, Multiselect, Filter Bar, Inline Editor, Spinner, Tabs, Sidebar and Tree Table no longer expose Spanish-only default copy on English pages; defaults now follow the document language and remain overridable through public inputs.
 - Direction-sensitive widgets now use the live Angular CDK `Directionality` state for RTL layout, icons, overlays and physical arrow-key behavior.
 - Showcase test-server shutdown now asks Angular CLI to stop gracefully, avoiding a misleading esbuild deadlock diagnostic after successful audits.
-- Isolated CI now validates the checked-in showcase and performance evidence and runs the automated release gate; the strict human-evidence gate remains mandatory for publication tags.
+- Isolated CI and publication tags now validate the checked-in showcase and performance evidence through the automated release gate; the separate strict gate continues to report incomplete human evidence without allowing it to be claimed as validated.
 - CI and npm publication now use the repository-pinned Node.js 22.22.3 runtime so V8 coverage evidence is reproducible across local and hosted release gates.
 - GitHub-hosted release workflows now use the current Node-runtime action majors for checkout, setup and artifact transfer.
 
