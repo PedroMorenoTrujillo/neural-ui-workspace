@@ -20,7 +20,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 ## Features
 
-- **89 component entry points + testing** — components, overlays, utilities, styles and public harnesses
+- **88 component entry points + url-state + testing** — components, overlays, utilities, styles and public harnesses
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
@@ -34,13 +34,13 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.14.1
+- **Version:** 1.14.2
 - **Entry points:** 90
 - **Automated tests:** 2218
 - **Coverage:** 97.45% statements · 95.36% branches · 96.19% functions · 98.82% lines
-- **Public component harnesses:** 62 interactive entry points · 28 justified N/A
+- **Public component harnesses:** 71 interactive entry points · 19 justified N/A
 - **Showcase evidence:** 91 demos · 88 API pages · 384/384 accessibility · 288 RTL · 2880 responsive checks
-- **Quality matrix:** 1312 PASS · 108 N/A · 560 pending human validation
+- **Quality matrix:** 1419 PASS · 116 N/A · 445 pending human validation
 - **Visual evidence:** 464 tracked snapshots · explicit human approval required
 <!-- neural-ui-metrics:end -->
 
@@ -137,7 +137,7 @@ const input = await loader.getHarness(NeuInputHarness);
 await input.setValue('Ada');
 ```
 
-The dedicated testing entry point exports 62 Angular CDK harnesses: one for every interactive public entry point. The remaining 19 entry points are presentational, layout or utility APIs and are explicitly classified as not applicable in the quality matrix. / El entry point dedicado de testing exporta 62 harnesses de Angular CDK: uno para cada entry point público interactivo. Los 19 restantes son APIs de presentación, layout o utilidad y constan explícitamente como no aplicables en la matriz de calidad.
+The dedicated testing entry point exports 71 Angular CDK harnesses: one for every interactive public entry point. The remaining 19 entry points (17 non-interactive components plus the `url-state` and `testing` utilities) are explicitly classified as not applicable in the quality matrix. / El entry point dedicado de testing exporta 71 harnesses de Angular CDK: uno para cada entry point público interactivo. Los 19 restantes (17 componentes no interactivos más las utilidades `url-state` y `testing`) constan explícitamente como no aplicables en la matriz de calidad.
 
 ### Language and direction / Idioma y dirección
 

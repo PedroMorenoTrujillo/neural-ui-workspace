@@ -2,9 +2,9 @@
   "metadata": {
     "schemaVersion": 1,
     "capturedAt": "2026-08-16",
-    "auditedCoreCommit": "89c1034799547fd4e3769453a331e7a0dde0606c",
+    "auditedCoreCommit": "4d7c63b98ec2a81fd95bb367a8f5032c0b20c91e",
     "auditedShowcaseCommit": "cfa9502203bf320bbd771dac80d22123433c3e2a",
-    "libraryVersion": "1.14.1",
+    "libraryVersion": "1.14.2",
     "evidenceFreshness": "Current working-tree evidence; reproduce with the release gates before publication.",
     "baseline": {
       "entryPoints": 90,
@@ -93,9 +93,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -255,9 +257,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -418,9 +422,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -577,9 +583,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -734,9 +742,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -891,9 +901,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -1050,9 +1062,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -1211,9 +1225,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -1373,9 +1389,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -1534,9 +1552,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -1693,9 +1713,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -1814,7 +1836,7 @@
     {
       "name": "carousel",
       "kind": "component",
-      "interactive": "UNVERIFIED",
+      "interactive": "INTERACTIVE",
       "source": "projects/ui-core/carousel",
       "checks": {
         "tests": {
@@ -1832,14 +1854,16 @@
           "note": "Rendered specifications exercise public state transitions for: busy and feedback, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
         },
         "cva": {
-          "status": "UNVERIFIED",
+          "status": "N/A",
           "evidence": [],
-          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+          "note": "This entry point exposes actions, navigation, presentation or composite state rather than one Angular form value."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/carousel/neu-carousel.component.spec.ts"
+          ],
+          "note": "Component specifications exercise its custom keyboard interaction contract."
         },
         "aria": {
           "status": "PASS",
@@ -1850,9 +1874,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -1906,9 +1932,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuCarouselHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -1996,9 +2024,11 @@
           "note": "A ControlValueAccessor implementation is present; behavioral completeness is enforced separately."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/cascade-select/neu-cascade-select.component.spec.ts"
+          ],
+          "note": "Component specifications exercise its custom keyboard interaction contract."
         },
         "aria": {
           "status": "PASS",
@@ -2009,9 +2039,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -2065,9 +2097,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuCascadeSelectHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -2166,9 +2200,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -2328,9 +2364,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -2489,9 +2527,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -2651,9 +2691,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -2814,9 +2856,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -2975,9 +3019,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -3137,9 +3183,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -3299,9 +3347,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -3460,9 +3510,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -3621,9 +3673,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -3783,9 +3837,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -3946,9 +4002,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -4105,9 +4163,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -4226,7 +4286,7 @@
     {
       "name": "dock",
       "kind": "component",
-      "interactive": "UNVERIFIED",
+      "interactive": "INTERACTIVE",
       "source": "projects/ui-core/dock",
       "checks": {
         "tests": {
@@ -4244,14 +4304,16 @@
           "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
         },
         "cva": {
-          "status": "UNVERIFIED",
+          "status": "N/A",
           "evidence": [],
-          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+          "note": "This entry point exposes actions, navigation, presentation or composite state rather than one Angular form value."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/dock/neu-dock.component.spec.ts"
+          ],
+          "note": "Component specifications exercise its custom keyboard interaction contract."
         },
         "aria": {
           "status": "PASS",
@@ -4262,9 +4324,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -4318,9 +4382,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuDockHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -4419,9 +4485,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -4579,9 +4647,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -4738,9 +4808,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -4895,9 +4967,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -5016,7 +5090,7 @@
     {
       "name": "image-compare",
       "kind": "component",
-      "interactive": "UNVERIFIED",
+      "interactive": "INTERACTIVE",
       "source": "projects/ui-core/image-compare",
       "checks": {
         "tests": {
@@ -5034,14 +5108,17 @@
           "note": "Rendered specifications exercise public state transitions for: appearance and layout, lifecycle and defaults."
         },
         "cva": {
-          "status": "UNVERIFIED",
+          "status": "N/A",
           "evidence": [],
-          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+          "note": "This entry point exposes actions, navigation, presentation or composite state rather than one Angular form value."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/image-compare/neu-image-compare.component.ts",
+            "projects/ui-core/image-compare/neu-image-compare.component.spec.ts"
+          ],
+          "note": "The comparison handle is backed by a native range input with browser keyboard semantics."
         },
         "aria": {
           "status": "PASS",
@@ -5052,9 +5129,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -5108,9 +5187,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuImageCompareHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -5212,9 +5293,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -5373,9 +5456,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -5536,9 +5621,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -5700,9 +5787,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -5864,9 +5953,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -6027,9 +6118,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -6188,9 +6281,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -6351,9 +6446,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -6514,9 +6611,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -6637,7 +6736,7 @@
     {
       "name": "mega-menu",
       "kind": "component",
-      "interactive": "UNVERIFIED",
+      "interactive": "INTERACTIVE",
       "source": "projects/ui-core/mega-menu",
       "checks": {
         "tests": {
@@ -6655,14 +6754,16 @@
           "note": "Rendered specifications exercise public state transitions for: availability, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
         },
         "cva": {
-          "status": "UNVERIFIED",
+          "status": "N/A",
           "evidence": [],
-          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+          "note": "This entry point exposes actions, navigation, presentation or composite state rather than one Angular form value."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/mega-menu/neu-mega-menu.component.spec.ts"
+          ],
+          "note": "Component specifications exercise its custom keyboard interaction contract."
         },
         "aria": {
           "status": "PASS",
@@ -6673,9 +6774,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -6729,9 +6832,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuMegaMenuHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -6832,9 +6937,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -6991,9 +7098,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -7150,9 +7259,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -7313,9 +7424,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -7474,9 +7587,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -7635,9 +7750,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -7799,9 +7916,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -7922,7 +8041,7 @@
     {
       "name": "org-chart",
       "kind": "component",
-      "interactive": "UNVERIFIED",
+      "interactive": "INTERACTIVE",
       "source": "projects/ui-core/org-chart",
       "checks": {
         "tests": {
@@ -7940,14 +8059,16 @@
           "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
         },
         "cva": {
-          "status": "UNVERIFIED",
+          "status": "N/A",
           "evidence": [],
-          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+          "note": "This entry point exposes actions, navigation, presentation or composite state rather than one Angular form value."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/org-chart/neu-org-chart.component.spec.ts"
+          ],
+          "note": "Component specifications exercise its custom keyboard interaction contract."
         },
         "aria": {
           "status": "PASS",
@@ -7958,9 +8079,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -8014,9 +8137,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuOrgChartHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -8118,9 +8243,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -8277,9 +8404,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -8398,7 +8527,7 @@
     {
       "name": "panel-menu",
       "kind": "component",
-      "interactive": "UNVERIFIED",
+      "interactive": "INTERACTIVE",
       "source": "projects/ui-core/panel-menu",
       "checks": {
         "tests": {
@@ -8416,14 +8545,16 @@
           "note": "Rendered specifications exercise public state transitions for: availability, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
         },
         "cva": {
-          "status": "UNVERIFIED",
+          "status": "N/A",
           "evidence": [],
-          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+          "note": "This entry point exposes actions, navigation, presentation or composite state rather than one Angular form value."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/panel-menu/neu-panel-menu.component.spec.ts"
+          ],
+          "note": "Component specifications exercise its custom keyboard interaction contract."
         },
         "aria": {
           "status": "PASS",
@@ -8434,9 +8565,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -8490,9 +8623,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuPanelMenuHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -8595,9 +8730,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -8757,9 +8894,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -8919,9 +9058,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -9078,9 +9219,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -9245,9 +9388,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -9408,9 +9553,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -9572,9 +9719,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -9734,9 +9883,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -9897,9 +10048,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -10058,9 +10211,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -10217,9 +10372,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -10379,9 +10536,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -10502,7 +10661,7 @@
     {
       "name": "speed-dial",
       "kind": "component",
-      "interactive": "UNVERIFIED",
+      "interactive": "INTERACTIVE",
       "source": "projects/ui-core/speed-dial",
       "checks": {
         "tests": {
@@ -10520,14 +10679,16 @@
           "note": "Rendered specifications exercise public state transitions for: availability, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
         },
         "cva": {
-          "status": "UNVERIFIED",
+          "status": "N/A",
           "evidence": [],
-          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+          "note": "This entry point exposes actions, navigation, presentation or composite state rather than one Angular form value."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/speed-dial/neu-speed-dial.component.spec.ts"
+          ],
+          "note": "Component specifications exercise its custom keyboard interaction contract."
         },
         "aria": {
           "status": "PASS",
@@ -10538,9 +10699,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -10594,9 +10757,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuSpeedDialHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -10695,9 +10860,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -10854,9 +11021,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -11015,9 +11184,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -11174,9 +11345,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -11334,9 +11507,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -11498,9 +11673,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -11662,9 +11839,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -11823,9 +12002,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -11986,9 +12167,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -12109,7 +12292,7 @@
     {
       "name": "terminal",
       "kind": "component",
-      "interactive": "UNVERIFIED",
+      "interactive": "INTERACTIVE",
       "source": "projects/ui-core/terminal",
       "checks": {
         "tests": {
@@ -12127,14 +12310,16 @@
           "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, selection and value, appearance and layout, lifecycle and defaults."
         },
         "cva": {
-          "status": "UNVERIFIED",
+          "status": "N/A",
           "evidence": [],
-          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+          "note": "This entry point exposes actions, navigation, presentation or composite state rather than one Angular form value."
         },
         "keyboard": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/terminal/neu-terminal.component.spec.ts"
+          ],
+          "note": "Component specifications exercise its custom keyboard interaction contract."
         },
         "aria": {
           "status": "PASS",
@@ -12145,9 +12330,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -12201,9 +12388,11 @@
           "note": "Applicability and evidence have not yet been reviewed."
         },
         "harness": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Harness applicability has not yet been classified."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/testing/harnesses.ts"
+          ],
+          "note": "NeuTerminalHarness is exported by the public testing entry point."
         },
         "docs": {
           "status": "PASS",
@@ -12448,9 +12637,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -12607,9 +12798,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -12767,9 +12960,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -12932,9 +13127,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -13096,9 +13293,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -13255,9 +13454,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -13418,9 +13619,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -13579,9 +13782,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -13742,9 +13947,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -13904,9 +14111,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -14067,9 +14276,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -14226,9 +14437,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",
@@ -14378,9 +14591,11 @@
           "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
         },
         "screenReaderNvda": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Manual nvda validation has not been recorded for this release candidate."
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/manual-at-evidence.json"
+          ],
+          "note": "Pedro Moreno Trujillo tested Google Chrome with NVDA 2026.1.1 on 2026-08-18: Complete project-owner validation of the public entry-point route, including the nine new components; no blocking issue reported."
         },
         "screenReaderNarrator": {
           "status": "UNVERIFIED",

@@ -91,7 +91,7 @@ git diff --check
 
 Risk: accidental overlap with user work. Mitigation: never reset, clean, amend or overwrite unrelated changes; stop when an overlapping edit cannot be isolated.
 
-### P1 — Canonical 81-entry-point quality matrix
+### P1 — Canonical 90-entry-point quality matrix
 
 Dependencies: P0.
 
@@ -102,7 +102,7 @@ Deliverables:
 
 Acceptance:
 
-- Exactly 81 public entry points are represented once.
+- Exactly 90 public entry points are represented once.
 - Unknown evidence remains `UNVERIFIED`; it is never inferred as passing.
 - Applicable failures and missing rationales fail the strict completion gate.
 
@@ -127,8 +127,8 @@ Deliverables:
 
 Acceptance:
 
-- Unit tests, coverage, package build, 81 entry points, CVA, bundle budgets, logical CSS, public contracts, schematics, imports, SSR, package contents, `publint`, `attw` and Angular 19–22 all pass.
-- All 428 visual comparisons pass against the candidate baselines.
+- Unit tests, coverage, package build, 90 entry points, CVA, bundle budgets, logical CSS, public contracts, schematics, imports, SSR, package contents, `publint`, `attw` and Angular 19–22 all pass.
+- All 464 tracked visual baselines match the reviewed candidate set.
 - Baseline digest is approved by a named human reviewer and matches Git exactly.
 
 Verification:

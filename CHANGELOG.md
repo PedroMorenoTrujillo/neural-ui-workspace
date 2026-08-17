@@ -9,11 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.2] - 2026-08-18
+
+### Fixed
+
+- Registered the nine public harnesses added in 1.14.0 in the generated quality matrix, closing their keyboard, CVA-applicability and harness classifications without unverified technical cells.
+- Corrected the public catalog taxonomy to 88 component entry points plus the `url-state` and `testing` utilities, and synchronized current test, evidence and quality-matrix metrics across both published READMEs.
+
+### Added
+
+- Recorded the project owner's complete NVDA 2026.1.1 validation across all 89 public runtime entry-point routes on Windows 11 with current Chrome; the other free assistive-technology targets remain explicitly unverified.
+
 ## [1.14.1] - 2026-08-17
 
 ### Fixed
 
-- Corrected the published README feature summary to report 89 component entry points plus the public testing entry point, consistently with the 90-entry-point quality snapshot.
+- Updated the published README feature summary to distinguish the public testing entry point from the 90-entry-point package snapshot.
 
 ## [1.14.0] - 2026-08-17
 

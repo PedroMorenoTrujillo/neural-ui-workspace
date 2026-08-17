@@ -1,6 +1,6 @@
 # Neural UI Core Quality Status
 
-Last reviewed: 2026-08-17
+Last reviewed: 2026-08-18
 
 ## Executive Summary
 
@@ -8,11 +8,11 @@ Neural UI Core is currently aligned with the project's main engineering standard
 
 Validated coverage snapshot:
 
-- Statements: 97.71%
-- Branches: 95.59%
-- Functions: 96.66%
-- Lines: 98.98%
-- Unit tests: 2176 passing tests in ui-core
+- Statements: 97.45%
+- Branches: 95.36%
+- Functions: 96.19%
+- Lines: 98.82%
+- Unit tests: 2218 passing tests in ui-core
 
 The library presents a strong accessibility baseline across interactive components, but accessibility should be described as high-confidence rather than formally certified 100% component-by-component.
 
@@ -38,7 +38,7 @@ The library presents a strong accessibility baseline across interactive componen
 
 - Global coverage above 95%: yes
 - Enforced global coverage floor of 95% across the library: yes
-- Per-entry-point coverage gate: 81/81 entry points pass their applicable thresholds
+- Per-entry-point coverage gate: 90/90 entry points pass their applicable thresholds
 
 ### Accessibility
 
@@ -46,8 +46,8 @@ The library presents a strong accessibility baseline across interactive componen
 - Keyboard interaction patterns present in key widgets: yes
 - Rating follows a roving-tabstop keyboard model with arrows, Home/End, wrapping and direction-aware horizontal behavior: yes
 - Focus management present in key widgets: yes
-- Showcase automated accessibility validation: 348/348 localized/theme routes passed with axe-core WCAG 2.2 AA tags
-- Manual assistive-technology validation for this candidate: not yet recorded; remains `UNVERIFIED`
+- Showcase automated accessibility validation: 384/384 localized/theme routes passed with axe-core WCAG 2.2 AA tags
+- Manual NVDA 2026.1.1 validation: 89/89 public entry-point routes passed on Windows 11 with current Chrome; Narrator, VoiceOver macOS/iOS and TalkBack remain `UNVERIFIED`
 - Formal 100% accessibility certification across all library components: no
 
 ### Localization and RTL
@@ -56,19 +56,19 @@ The library presents a strong accessibility baseline across interactive componen
 - Consumer override contract: every localized default remains replaceable through public inputs
 - Angular CDK `Directionality`: used by direction-sensitive interactive components
 - Dynamic direction changes: verified without application reload, including overlays and physical arrow-key behavior
-- Showcase RTL audit: 261/261 route/browser checks passed
+- Showcase RTL audit: 288/288 route/browser checks passed
 
 ### Integration Validation Through Showcase
 
-- Automated axe-core audit: 348/348 localized pages passing with zero errors
-- Functional browser gate: 1200/1200 scenarios passed across Chromium, Firefox and WebKit
-- Presentation-resilience coverage inside the browser gate: 522/522 route/browser checks passed for 320×720 reflow, text spacing, forced colors, reduced motion, touch targets, clipping and focus
-- Responsive browser gate: 2610/2610 route/viewport/direction checks passed
-- Dynamic RTL browser gate: 261/261 checks passed
-- Browser performance gate: all 81 public routes passed three cold-load samples and their budgets
+- Automated axe-core audit: 384/384 localized pages passing with zero errors
+- Functional browser gate: 1308/1308 scenarios passed across Chromium, Firefox and WebKit
+- Presentation-resilience coverage inside the browser gate: 576/576 route/browser checks passed for 320×720 reflow, text spacing, forced colors, reduced motion, touch targets, clipping and focus
+- Responsive browser gate: 2880/2880 route/viewport/direction checks passed
+- Dynamic RTL browser gate: 288/288 checks passed
+- Browser performance gate: all 90 public routes passed three cold-load samples and their budgets
 - Lighthouse CI: 12/12 representative reports passed the committed local budgets
-- Visual-baseline comparison: 363/428 snapshots match exactly; 65 candidate differences remain pending explicit human review
-- Strict matrix: 1194 automated cells pass and 108 are justified `N/A`; 480 applicable human cells remain `UNVERIFIED` (400 assistive-technology and 80 visual)
+- Visual-baseline inventory: 464 reference snapshots are tracked; the current candidate still requires explicit human review
+- Strict matrix: 1419 cells pass and 116 are justified `N/A`; 445 human cells remain `UNVERIFIED` (356 assistive-technology and 89 visual)
 - Visual baselines: may only be created or replaced after explicit human review approval
 - Validation model: showcase runs against the compiled `@neural-ui/core` package, so these checks act as integration validation of the library in real consumer flows
 
@@ -78,8 +78,8 @@ The library presents a strong accessibility baseline across interactive componen
 - Release-note style quality summary added to changelog: yes
 - Published API snapshot, package lint, type audit and bundle budgets: enforced
 - `ng add`, theme, layout, dashboard and CRUD schematics compile on Angular 19–22: yes
-- Public Component Harness entry point: 62 interactive entry points covered; 19 non-interactive entry points classified `N/A` with rationale; zero unclassified
-- Angular Forms: 24 CVA entry points verified; all 57 non-form entry points classified `N/A` with rationale
+- Public Component Harness entry point: 71 interactive entry points covered; 19 non-interactive or utility entry points classified `N/A` with rationale; zero unclassified
+- Angular Forms: 25 CVA entry points verified; all 65 non-form entry points classified `N/A` with rationale
 - Showcase static inline-style debt: zero; 14 runtime style bindings retained under an exact audited allowlist
 - BEM requirement documented as part of engineering standards: yes
 - Bilingual comments requirement fully re-audited line by line: not fully re-verified in this pass
@@ -115,7 +115,7 @@ This is an evidence-backed engineering audit, not a paid or external WCAG certif
 
 ### Why this is not labeled 100%
 
-- The five free assistive-technology combinations have not yet been recorded by a human tester for this release candidate.
+- NVDA is recorded as 89/89 PASS; Narrator, VoiceOver on macOS/iOS and TalkBack have not yet been recorded for this release candidate.
 - The changed visual baselines have not yet been approved by a named human reviewer.
 - Automated semantics and keyboard checks cannot prove what a screen reader announces.
 
