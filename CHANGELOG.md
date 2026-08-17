@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-08-17
+
 ### Added
 
 - Expanded the public testing entry point to 62 Component Harnesses, covering every interactive entry point; the remaining 19 entry points are explicitly classified as non-interactive.

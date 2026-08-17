@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Run release verification
-        run: npm run verify:release
+        run: npm run verify:release:automated
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v7

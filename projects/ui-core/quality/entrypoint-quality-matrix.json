@@ -2,9 +2,9 @@
   "metadata": {
     "schemaVersion": 1,
     "capturedAt": "2026-08-16",
-    "auditedCoreCommit": "8fae73c0444cebeff60e15361331dbfc216f4dd1",
-    "auditedShowcaseCommit": "ee40a751a68f7a0e94dcf1ad094937b19246fd77",
-    "libraryVersion": "1.12.1",
+    "auditedCoreCommit": "62f99845cd44dbe47a51171ce6bb24d5f8532260",
+    "auditedShowcaseCommit": "e7014a9bddea2a8cc7998e31126af083c3d2da46",
+    "libraryVersion": "1.13.0",
     "evidenceFreshness": "Current working-tree evidence; reproduce with the release gates before publication.",
     "baseline": {
       "entryPoints": 81,
