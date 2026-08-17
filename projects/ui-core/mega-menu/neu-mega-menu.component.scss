@@ -1,0 +1,16 @@
+.neu-mega-menu-host { display: block; position: relative; inline-size: 100%; }
+.neu-mega-menu { position: relative; }
+.neu-mega-menu__bar { display: flex; align-items: center; gap: .25rem; padding: .375rem; border: 1px solid var(--neu-border); border-radius: var(--neu-radius-lg); background: var(--neu-surface); }
+.neu-mega-menu__trigger { display: inline-flex; align-items: center; gap: .35rem; min-block-size: 2.5rem; padding: .5rem .75rem; border: 0; border-radius: var(--neu-radius); background: transparent; color: var(--neu-text); font: inherit; cursor: pointer; }
+.neu-mega-menu__trigger:hover, .neu-mega-menu__trigger[aria-expanded='true'] { background: var(--neu-surface-2); color: var(--neu-primary); }
+.neu-mega-menu__trigger:focus-visible, .neu-mega-menu__item:focus-visible { outline: 2px solid var(--neu-primary); outline-offset: -2px; }
+.neu-mega-menu__panel { position: absolute; inset-block-start: calc(100% + .375rem); inset-inline: 0; z-index: var(--neu-z-dropdown); display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--neu-space-4); max-block-size: min(70vh, 34rem); overflow: auto; padding: var(--neu-space-4); border: 1px solid var(--neu-border); border-radius: var(--neu-radius-lg); background: var(--neu-surface); box-shadow: var(--neu-shadow-lg); }
+.neu-mega-menu__group h3 { margin: 0 0 .25rem; font-size: var(--neu-text-sm); }
+.neu-mega-menu__group > p { margin: 0 0 .75rem; color: var(--neu-text-muted); font-size: var(--neu-text-xs); }
+.neu-mega-menu__items { display: grid; gap: .25rem; }
+.neu-mega-menu__item { display: flex; align-items: center; gap: .65rem; inline-size: 100%; padding: .65rem; border: 0; border-radius: var(--neu-radius); background: transparent; color: var(--neu-text); text-align: start; font: inherit; cursor: pointer; }
+.neu-mega-menu__item:hover { background: var(--neu-surface-2); }
+.neu-mega-menu__item > span:nth-child(2) { display: grid; }
+.neu-mega-menu__item small { color: var(--neu-text-muted); }
+.neu-mega-menu__badge { margin-inline-start: auto; padding: .1rem .4rem; border-radius: var(--neu-radius-full); background: var(--neu-primary-50); color: var(--neu-primary-dark); font-size: var(--neu-text-xs); }
+@media (max-width: 720px) { .neu-mega-menu__bar { overflow-x: auto; } .neu-mega-menu__panel { grid-template-columns: 1fr; } }

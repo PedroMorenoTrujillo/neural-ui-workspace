@@ -6,8 +6,8 @@
     {
       "name": "All public ESM entry points (Brotli)",
       "passed": true,
-      "size": 289250,
-      "sizeLimit": 300000
+      "size": 315799,
+      "sizeLimit": 335000
     },
     {
       "name": "Largest component: table (Brotli)",
@@ -18,7 +18,7 @@
     {
       "name": "Public testing harnesses (Brotli)",
       "passed": true,
-      "size": 6607,
+      "size": 7292,
       "sizeLimit": 12000
     },
     {

@@ -2,7 +2,7 @@
   {
     "name": "All public ESM entry points (Brotli)",
     "path": "dist/neural-ui/core/fesm2022/*.mjs",
-    "limit": "300 kB"
+    "limit": "335 kB"
   },
   {
     "name": "Largest component: table (Brotli)",

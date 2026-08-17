@@ -41,12 +41,12 @@ const requiredBrowsers = ['chromium', 'firefox', 'webkit'];
 const requiredViewports = ['mobile-320', 'mobile-360', 'mobile-390', 'tablet-768', 'desktop-1440'];
 if (
   responsive.full !== true ||
-  responsive.checks !== 2610 ||
+  responsive.checks !== 2880 ||
   responsive.failures?.length !== 0 ||
   requiredBrowsers.some((browser) => !responsive.browsers?.includes(browser)) ||
   requiredViewports.some((viewport) => !responsive.viewports?.includes(viewport))
 ) {
-  failures.push('responsive evidence is not a complete 2,610-check cross-browser pass');
+  failures.push('responsive evidence is not a complete 2,880-check cross-browser pass');
 }
 
 const rtlRouteSet = new Set(rtl.routes ?? []);
@@ -63,9 +63,9 @@ const docsByEntryPoint = new Map((docs.summary ?? []).map((entry) => [entry.entr
 const invalidDocs = (docs.summary ?? []).filter(
   (entry) => entry.missingInputs?.length || entry.missingOutputs?.length,
 );
-if (docsByEntryPoint.size !== 79 || invalidDocs.length) {
+if (docsByEntryPoint.size !== 88 || invalidDocs.length) {
   failures.push(
-    `API documentation evidence is incomplete (${docsByEntryPoint.size}/79 pages, ${invalidDocs.length} invalid)`,
+    `API documentation evidence is incomplete (${docsByEntryPoint.size}/88 pages, ${invalidDocs.length} invalid)`,
   );
 }
 

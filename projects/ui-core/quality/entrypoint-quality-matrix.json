@@ -2,22 +2,22 @@
   "metadata": {
     "schemaVersion": 1,
     "capturedAt": "2026-08-16",
-    "auditedCoreCommit": "b4889184cbd33f8863c99d118b90f7f5ee29bfd7",
-    "auditedShowcaseCommit": "1122bf9fd74e65222cdfad6afc1aeffdb7492566",
+    "auditedCoreCommit": "2e3d605e7847a63bdded1af567085af57f682a24",
+    "auditedShowcaseCommit": "5b46fdd1f79a0b0397b9f6d70f54a1eeeb08a87f",
     "libraryVersion": "1.13.1",
     "evidenceFreshness": "Current working-tree evidence; reproduce with the release gates before publication.",
     "baseline": {
-      "entryPoints": 81,
-      "automatedTests": 2176,
+      "entryPoints": 90,
+      "automatedTests": 2217,
       "coverage": {
-        "statements": 97.71,
-        "branches": 95.59,
-        "functions": 96.66,
-        "lines": 98.98
+        "statements": 97.42,
+        "branches": 95.34,
+        "functions": 96.19,
+        "lines": 98.84
       },
-      "showcaseDemoPages": 82,
-      "translationsPerLocale": 3209,
-      "trackedVisualSnapshots": 428
+      "showcaseDemoPages": 91,
+      "translationsPerLocale": 3311,
+      "trackedVisualSnapshots": 464
     },
     "exclusions": [
       "Site Composer",
@@ -1769,6 +1769,322 @@
             ".size-limit.json"
           ],
           "note": "Cold production-route budgets pass for /en/components/card/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
+      "name": "carousel",
+      "kind": "component",
+      "interactive": "UNVERIFIED",
+      "source": "projects/ui-core/carousel",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/carousel/neu-carousel.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/carousel/neu-carousel.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: busy and feedback, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/carousel/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
+      "name": "cascade-select",
+      "kind": "component",
+      "interactive": "INTERACTIVE",
+      "source": "projects/ui-core/cascade-select",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/cascade-select/neu-cascade-select.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/cascade-select/neu-cascade-select.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/cascade-select/neu-cascade-select.component.ts"
+          ],
+          "note": "A ControlValueAccessor implementation is present; behavioral completeness is enforced separately."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/cascade-select/; package Brotli, gzip and raw-size budgets also pass."
         },
         "ssr": {
           "status": "PASS",
@@ -3908,6 +4224,163 @@
       }
     },
     {
+      "name": "dock",
+      "kind": "component",
+      "interactive": "UNVERIFIED",
+      "source": "projects/ui-core/dock",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/dock/neu-dock.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/dock/neu-dock.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/dock/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
       "name": "empty-state",
       "kind": "component",
       "interactive": "NON_INTERACTIVE",
@@ -4498,6 +4971,163 @@
             ".size-limit.json"
           ],
           "note": "Cold production-route budgets pass for /en/components/icon/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
+      "name": "image-compare",
+      "kind": "component",
+      "interactive": "UNVERIFIED",
+      "source": "projects/ui-core/image-compare",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/image-compare/neu-image-compare.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/image-compare/neu-image-compare.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: appearance and layout, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/image-compare/; package Brotli, gzip and raw-size budgets also pass."
         },
         "ssr": {
           "status": "PASS",
@@ -6005,6 +6635,163 @@
       }
     },
     {
+      "name": "mega-menu",
+      "kind": "component",
+      "interactive": "UNVERIFIED",
+      "source": "projects/ui-core/mega-menu",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/mega-menu/neu-mega-menu.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/mega-menu/neu-mega-menu.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: availability, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/mega-menu/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
       "name": "menu",
       "kind": "component",
       "interactive": "INTERACTIVE",
@@ -7133,6 +7920,163 @@
       }
     },
     {
+      "name": "org-chart",
+      "kind": "component",
+      "interactive": "UNVERIFIED",
+      "source": "projects/ui-core/org-chart",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/org-chart/neu-org-chart.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/org-chart/neu-org-chart.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/org-chart/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
       "name": "pagination",
       "kind": "component",
       "interactive": "INTERACTIVE",
@@ -7409,6 +8353,163 @@
             ".size-limit.json"
           ],
           "note": "Cold production-route budgets pass for /en/components/panel/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
+      "name": "panel-menu",
+      "kind": "component",
+      "interactive": "UNVERIFIED",
+      "source": "projects/ui-core/panel-menu",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/panel-menu/neu-panel-menu.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/panel-menu/neu-panel-menu.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: availability, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/panel-menu/; package Brotli, gzip and raw-size budgets also pass."
         },
         "ssr": {
           "status": "PASS",
@@ -9399,6 +10500,163 @@
       }
     },
     {
+      "name": "speed-dial",
+      "kind": "component",
+      "interactive": "UNVERIFIED",
+      "source": "projects/ui-core/speed-dial",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/speed-dial/neu-speed-dial.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/speed-dial/neu-speed-dial.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: availability, visibility and disclosure, selection and value, appearance and layout, data and navigation, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/speed-dial/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
       "name": "spinner",
       "kind": "component",
       "interactive": "NON_INTERACTIVE",
@@ -10806,6 +12064,163 @@
             ".size-limit.json"
           ],
           "note": "Cold production-route budgets pass for /en/components/tags/; package Brotli, gzip and raw-size budgets also pass."
+        },
+        "ssr": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-ssr-smoke.mjs"
+          ],
+          "note": "The release gate imports every JavaScript package export without browser globals."
+        },
+        "angular19": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 19."
+        },
+        "angular20": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 20."
+        },
+        "angular21": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 21."
+        },
+        "angular22": {
+          "status": "PASS",
+          "evidence": [
+            "scripts/test-ui-core-compatibility-matrix.mjs",
+            "scripts/test-ui-core-compatibility.mjs"
+          ],
+          "note": "The release gate installs the tarball and imports every JavaScript package export on Angular 22."
+        }
+      }
+    },
+    {
+      "name": "terminal",
+      "kind": "component",
+      "interactive": "UNVERIFIED",
+      "source": "projects/ui-core/terminal",
+      "checks": {
+        "tests": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/terminal/neu-terminal.component.spec.ts"
+          ],
+          "note": "1 specification file(s) discovered for this entry point."
+        },
+        "states": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/terminal/neu-terminal.component.spec.ts"
+          ],
+          "note": "Rendered specifications exercise public state transitions for: availability, busy and feedback, selection and value, appearance and layout, lifecycle and defaults."
+        },
+        "cva": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "CVA applicability has not yet been classified; absence is not treated as N/A."
+        },
+        "keyboard": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "aria": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-a11y-summary.json"
+          ],
+          "note": "The public route passes automated WCAG 2.2 AA axe-core checks in both locales and themes; manual assistive-technology validation remains separate."
+        },
+        "screenReaderNvda": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual nvda validation has not been recorded for this release candidate."
+        },
+        "screenReaderNarrator": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual narrator validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverMacos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-macos validation has not been recorded for this release candidate."
+        },
+        "screenReaderVoiceOverIos": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual voiceover-ios validation has not been recorded for this release candidate."
+        },
+        "screenReaderTalkBack": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Manual talkback validation has not been recorded for this release candidate."
+        },
+        "rtl": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral implementation uses logical CSS and its documented route passes live LTR↔RTL cross-browser checks without reload or overflow."
+        },
+        "rtlDynamic": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-rtl-summary.json",
+            "scripts/audit-ui-core-logical-css.mjs"
+          ],
+          "note": "The direction-neutral component inherits the live CDK direction context in Chromium, Firefox and WebKit without reload or overflow."
+        },
+        "responsive": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/showcase-responsive-summary.json"
+          ],
+          "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
+        },
+        "visual": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Applicability and evidence have not yet been reviewed."
+        },
+        "harness": {
+          "status": "UNVERIFIED",
+          "evidence": [],
+          "note": "Harness applicability has not yet been classified."
+        },
+        "docs": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/showcase-evidence.json",
+            "../neural-ui-showcase/test-results/docs-api-summary.json"
+          ],
+          "note": "The public showcase documentation exists and its API contract audit reports no missing inputs or outputs."
+        },
+        "performance": {
+          "status": "PASS",
+          "evidence": [
+            "projects/ui-core/quality/performance-evidence.json",
+            "projects/ui-core/quality/size-limit-latest.json",
+            ".size-limit.json"
+          ],
+          "note": "Cold production-route budgets pass for /en/components/terminal/; package Brotli, gzip and raw-size budgets also pass."
         },
         "ssr": {
           "status": "PASS",

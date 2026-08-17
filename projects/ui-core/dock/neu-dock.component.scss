@@ -1,0 +1,16 @@
+.neu-dock-host { display: inline-block; }
+.neu-dock { display: inline-flex; padding: .45rem; border: 1px solid color-mix(in srgb, var(--neu-border) 75%, transparent); border-radius: var(--neu-radius-xl); background: color-mix(in srgb, var(--neu-surface) 88%, transparent); box-shadow: var(--neu-shadow-lg); backdrop-filter: blur(16px); }
+.neu-dock__list { display: flex; align-items: flex-end; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.neu-dock--start .neu-dock__list, .neu-dock--end .neu-dock__list { flex-direction: column; align-items: center; }
+.neu-dock__item { position: relative; display: grid; place-items: center; inline-size: 3rem; block-size: 3rem; padding: 0; border: 0; border-radius: var(--neu-radius); background: var(--neu-surface-2); color: var(--neu-text); font: inherit; cursor: pointer; transition: scale var(--neu-transition), translate var(--neu-transition); }
+.neu-dock__item:hover, .neu-dock__item:focus-visible { z-index: 1; scale: 1.22; translate: 0 -.25rem; }
+.neu-dock--start .neu-dock__item:hover, .neu-dock--start .neu-dock__item:focus-visible { translate: .25rem 0; }
+.neu-dock--end .neu-dock__item:hover, .neu-dock--end .neu-dock__item:focus-visible { translate: -.25rem 0; }
+.neu-dock__item:focus-visible { outline: 2px solid var(--neu-primary); outline-offset: 2px; }
+.neu-dock__item.is-active::after { content: ''; position: absolute; inset-block-end: -.25rem; inline-size: .3rem; block-size: .3rem; border-radius: 50%; background: var(--neu-primary); }
+.neu-dock__item img { inline-size: 2rem; block-size: 2rem; border-radius: .4rem; object-fit: cover; }
+.neu-dock__icon { font-size: 1.25rem; }
+.neu-dock__badge { position: absolute; inset-block-start: -.25rem; inset-inline-end: -.25rem; min-inline-size: 1.15rem; padding: .1rem .25rem; border-radius: var(--neu-radius-full); background: var(--neu-error); color: white; font-size: .625rem; }
+.neu-dock__tooltip { position: absolute; inset-block-end: calc(100% + .5rem); inline-size: max-content; max-inline-size: 12rem; padding: .25rem .5rem; border-radius: var(--neu-radius-sm); background: var(--neu-surface-inverse); color: var(--neu-text-inverse); font-size: var(--neu-text-xs); opacity: 0; pointer-events: none; }
+.neu-dock__item:hover .neu-dock__tooltip, .neu-dock__item:focus-visible .neu-dock__tooltip { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .neu-dock__item { transition: none; } }

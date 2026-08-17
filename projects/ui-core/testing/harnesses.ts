@@ -1581,3 +1581,114 @@ export class NeuDialogHarness extends ComponentHarness {
     if (close) await close.click();
   }
 }
+
+export class NeuCascadeSelectHarness extends ComponentHarness {
+  static hostSelector = 'neu-cascade-select';
+  private readonly trigger = this.locatorFor('.neu-cascade-select__trigger');
+  async open(): Promise<void> { if (!(await this.isOpen())) await (await this.trigger()).click(); }
+  async close(): Promise<void> { if (await this.isOpen()) await (await this.trigger()).sendKeys(TestKey.ESCAPE); }
+  async isOpen(): Promise<boolean> { return (await this.trigger()).getAttribute('aria-expanded').then((value) => value === 'true'); }
+  async getValueText(): Promise<string> { return (await this.locatorFor('.neu-cascade-select__value')()).text(); }
+  async getOptions(): Promise<string[]> { return Promise.all((await this.documentRootLocatorFactory().locatorForAll('.neu-cascade-select__option')()).map((option) => option.text())); }
+  async selectPath(labels: Array<string | RegExp>): Promise<void> {
+    await this.open();
+    for (const label of labels) {
+      const options = await this.documentRootLocatorFactory().locatorForAll('.neu-cascade-select__option')();
+      const option = await this.findByText(options, label);
+      if (!option) throw new Error(`Neural UI cascade option was not found: ${String(label)}`);
+      await option.click();
+    }
+  }
+  private async findByText<T extends { text(): Promise<string> }>(items: T[], text: string | RegExp): Promise<T | null> {
+    for (const item of items) if (await HarnessPredicate.stringMatches(await item.text(), text)) return item;
+    return null;
+  }
+}
+
+export class NeuOrgChartHarness extends ComponentHarness {
+  static hostSelector = 'neu-org-chart';
+  private readonly nodes = this.locatorForAll('.neu-org-chart__node');
+  async getNodes(): Promise<string[]> { return Promise.all((await this.nodes()).map((node) => node.text())); }
+  async selectNode(text: string | RegExp): Promise<void> {
+    for (const node of await this.nodes()) if (await HarnessPredicate.stringMatches(await node.text(), text)) { await node.click(); return; }
+    throw new Error(`Neural UI org-chart node was not found: ${String(text)}`);
+  }
+  async toggleNode(index: number): Promise<void> {
+    const toggles = await this.locatorForAll('.neu-org-chart__toggle')();
+    if (!toggles[index]) throw new Error(`Neural UI org-chart toggle ${index} does not exist.`);
+    await toggles[index].click();
+  }
+}
+
+export class NeuCarouselHarness extends ComponentHarness {
+  static hostSelector = 'neu-carousel';
+  async getSlides(): Promise<string[]> { return Promise.all((await this.locatorForAll('.neu-carousel__slide')()).map((slide) => slide.text())); }
+  async next(): Promise<void> { await (await this.locatorFor('.neu-carousel__nav--next')()).click(); }
+  async previous(): Promise<void> { await (await this.locatorFor('.neu-carousel__nav--previous')()).click(); }
+  async goToPage(index: number): Promise<void> {
+    const indicators = await this.locatorForAll('.neu-carousel__indicator')();
+    if (!indicators[index]) throw new Error(`Neural UI carousel page ${index} does not exist.`);
+    await indicators[index].click();
+  }
+}
+
+export class NeuImageCompareHarness extends ComponentHarness {
+  static hostSelector = 'neu-image-compare';
+  private readonly range = this.locatorFor('.neu-image-compare__range');
+  async getPosition(): Promise<number> { return Number(await (await this.range()).getProperty<string>('value')); }
+  async setPosition(value: number): Promise<void> { await (await this.range()).setInputValue(String(value)); }
+  async getLabels(): Promise<string[]> { return Promise.all((await this.locatorForAll('.neu-image-compare__label')()).map((label) => label.text())); }
+}
+
+export class NeuMegaMenuHarness extends ComponentHarness {
+  static hostSelector = 'neu-mega-menu';
+  async getTopItems(): Promise<string[]> { return Promise.all((await this.locatorForAll('.neu-mega-menu__trigger')()).map((item) => item.text())); }
+  async openItem(text: string | RegExp): Promise<void> {
+    for (const item of await this.locatorForAll('.neu-mega-menu__trigger')()) if (await HarnessPredicate.stringMatches(await item.text(), text)) { await item.click(); return; }
+    throw new Error(`Neural UI mega-menu item was not found: ${String(text)}`);
+  }
+  async selectItem(text: string | RegExp): Promise<void> {
+    for (const item of await this.locatorForAll('.neu-mega-menu__item')()) if (await HarnessPredicate.stringMatches(await item.text(), text)) { await item.click(); return; }
+    throw new Error(`Neural UI mega-menu leaf was not found: ${String(text)}`);
+  }
+}
+
+export class NeuPanelMenuHarness extends ComponentHarness {
+  static hostSelector = 'neu-panel-menu';
+  async getItems(): Promise<string[]> { return Promise.all((await this.locatorForAll('.neu-panel-menu__item')()).map((item) => item.text())); }
+  async activateItem(text: string | RegExp): Promise<void> {
+    for (const item of await this.locatorForAll('.neu-panel-menu__item')()) if (await HarnessPredicate.stringMatches(await item.text(), text)) { await item.click(); return; }
+    throw new Error(`Neural UI panel-menu item was not found: ${String(text)}`);
+  }
+}
+
+export class NeuSpeedDialHarness extends ComponentHarness {
+  static hostSelector = 'neu-speed-dial';
+  private readonly trigger = this.locatorFor('.neu-speed-dial__trigger');
+  async open(): Promise<void> { if (!(await this.isOpen())) await (await this.trigger()).click(); }
+  async isOpen(): Promise<boolean> { return (await this.trigger()).getAttribute('aria-expanded').then((value) => value === 'true'); }
+  async getActions(): Promise<string[]> { await this.open(); return Promise.all((await this.locatorForAll('.neu-speed-dial__action')()).map(async (action) => (await action.getAttribute('aria-label')) ?? '')); }
+  async selectAction(label: string): Promise<void> {
+    await this.open();
+    for (const action of await this.locatorForAll('.neu-speed-dial__action')()) if ((await action.getAttribute('aria-label')) === label) { await action.click(); return; }
+    throw new Error(`Neural UI speed-dial action was not found: ${label}`);
+  }
+}
+
+export class NeuDockHarness extends ComponentHarness {
+  static hostSelector = 'neu-dock';
+  private readonly items = this.locatorForAll('.neu-dock__item');
+  async getItems(): Promise<string[]> { return Promise.all((await this.items()).map(async (item) => (await item.getAttribute('aria-label')) ?? '')); }
+  async selectItem(label: string): Promise<void> {
+    for (const item of await this.items()) if ((await item.getAttribute('aria-label')) === label) { await item.click(); return; }
+    throw new Error(`Neural UI dock item was not found: ${label}`);
+  }
+}
+
+export class NeuTerminalHarness extends ComponentHarness {
+  static hostSelector = 'neu-terminal';
+  private readonly input = this.locatorFor('.neu-terminal__input');
+  async run(command: string): Promise<void> { const input = await this.input(); await input.setInputValue(command); await input.sendKeys(TestKey.ENTER); }
+  async getLines(): Promise<string[]> { return Promise.all((await this.locatorForAll('.neu-terminal__line')()).map((line) => line.text())); }
+  async isBusy(): Promise<boolean> { return (await this.locatorFor('.neu-terminal')()).getAttribute('aria-busy').then((value) => value === 'true'); }
+}

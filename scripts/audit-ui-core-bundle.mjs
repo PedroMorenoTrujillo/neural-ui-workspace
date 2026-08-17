@@ -8,7 +8,8 @@ const reportPath = join(root, 'test-results/ui-core-bundle-summary.json');
 
 const maxEntryBytes = 260 * 1024;
 const maxEntryGzipBytes = 48 * 1024;
-const maxTotalBytes = 2_000 * 1024;
+// Scaled from the 81-entry-point 2,000KB budget for the 90-entry-point catalog.
+const maxTotalBytes = 2_250 * 1024;
 const maxTotalGzipBytes = 450 * 1024;
 const heavyDependencyPatterns = [
   { pattern: /jspdf|pdfmake|xlsx\.full|exceljs/i, label: 'heavy export dependency' },

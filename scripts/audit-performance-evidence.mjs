@@ -29,14 +29,14 @@ const browserEntries = browser?.entryPoints ?? [];
 const browserNames = new Set(browserEntries.map(({ name }) => name));
 if (
   browser?.runCount !== 3 ||
-  browser?.routeCount !== 81 ||
-  browserEntries.length !== 81 ||
-  browserNames.size !== 81 ||
+  browser?.routeCount !== 90 ||
+  browserEntries.length !== 90 ||
+  browserNames.size !== 90 ||
   browserEntries.some(
     (entry) => entry.status !== 'PASS' || !entry.route?.startsWith('/en/components/'),
   )
 ) {
-  failures.push('browser Performance API evidence must cover three runs for 81 entry points');
+  failures.push('browser Performance API evidence must cover three runs for 90 entry points');
 }
 
 const browserBudgets = browser?.budgets ?? {};
@@ -91,7 +91,7 @@ if (
 const bundle = evidence.bundle;
 if (
   bundle?.formatVersion !== 1 ||
-  bundle?.totals?.entries !== 82 ||
+  bundle?.totals?.entries !== 91 ||
   bundle?.totals?.rawBytes > bundle?.budgets?.maxTotalBytes ||
   bundle?.totals?.gzipBytes > bundle?.budgets?.maxTotalGzipBytes ||
   bundle?.entries?.length !== bundle?.totals?.entries ||

@@ -32,13 +32,13 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 
 <!-- neural-ui-metrics:start -->
 - **Version:** 1.13.1
-- **Entry points:** 81
-- **Automated tests:** 2176
-- **Coverage:** 97.71% statements · 95.59% branches · 96.66% functions · 98.98% lines
-- **Public component harnesses:** 62 interactive entry points · 19 justified N/A
-- **Showcase evidence:** 82 demos · 79 API pages · 348/348 accessibility · 261 RTL · 2610 responsive checks
-- **Quality matrix:** 1194 PASS · 108 N/A · 480 pending human validation
-- **Visual evidence:** 428 tracked snapshots · explicit human approval required
+- **Entry points:** 90
+- **Automated tests:** 2217
+- **Coverage:** 97.42% statements · 95.34% branches · 96.19% functions · 98.84% lines
+- **Public component harnesses:** 62 interactive entry points · 28 justified N/A
+- **Showcase evidence:** 91 demos · 88 API pages · 384/384 accessibility · 288 RTL · 2880 responsive checks
+- **Quality matrix:** 1312 PASS · 108 N/A · 560 pending human validation
+- **Visual evidence:** 464 tracked snapshots · explicit human approval required
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`

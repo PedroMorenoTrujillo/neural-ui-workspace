@@ -30,7 +30,7 @@ if (evidence.schemaVersion !== 1 || evidence.status !== 'PASS') {
 
 if (
   Number.isNaN(Date.parse(evidence.capturedAt)) ||
-  evidence.accessibility?.checks !== 348 ||
+  evidence.accessibility?.checks !== 384 ||
   evidence.accessibility?.passed !== evidence.accessibility?.checks ||
   evidence.accessibility?.routes *
       evidence.accessibility?.locales *
@@ -39,15 +39,15 @@ if (
   !evidence.accessibility?.themes?.includes('light') ||
   !evidence.accessibility?.themes?.includes('dark')
 ) {
-  failures.push('accessibility snapshot is not a complete 348-check pass');
+  failures.push('accessibility snapshot is not a complete 384-check pass');
 }
 
 if (
-  evidence.responsive?.checks !== 2610 ||
+  evidence.responsive?.checks !== 2880 ||
   requiredBrowsers.some((browser) => !evidence.responsive?.browsers?.includes(browser)) ||
   requiredViewports.some((viewport) => !evidence.responsive?.viewports?.includes(viewport))
 ) {
-  failures.push('responsive snapshot is not a complete 2,610-check cross-browser pass');
+  failures.push('responsive snapshot is not a complete 2,880-check cross-browser pass');
 }
 
 if (
@@ -58,7 +58,7 @@ if (
 }
 
 if (
-  evidence.docs?.apiPages !== 79 ||
+  evidence.docs?.apiPages !== 88 ||
   evidence.docs?.missingInputs !== 0 ||
   evidence.docs?.missingOutputs !== 0
 ) {
@@ -68,11 +68,11 @@ if (
 const matrixNames = new Set((matrix.entryPoints ?? []).map(({ name }) => name));
 const evidenceNames = new Set((evidence.entryPoints ?? []).map(({ name }) => name));
 if (
-  matrixNames.size !== 81 ||
+  matrixNames.size !== 90 ||
   evidenceNames.size !== matrixNames.size ||
   [...matrixNames].some((name) => !evidenceNames.has(name))
 ) {
-  failures.push('showcase evidence does not cover all 81 quality-matrix entry points');
+  failures.push('showcase evidence does not cover all 90 quality-matrix entry points');
 }
 
 for (const entry of evidence.entryPoints ?? []) {

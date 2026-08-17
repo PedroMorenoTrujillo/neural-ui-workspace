@@ -1,0 +1,12 @@
+.neu-terminal-host { display: block; inline-size: 100%; }
+.neu-terminal { overflow: hidden; border: 1px solid #334155; border-radius: var(--neu-radius-lg); background: #020617; color: #e2e8f0; font-family: var(--neu-font-mono); box-shadow: var(--neu-shadow-lg); }
+.neu-terminal__header { display: flex; align-items: center; gap: .75rem; padding: .6rem .8rem; border-block-end: 1px solid #334155; background: #0f172a; font-family: var(--neu-font-sans); font-size: var(--neu-text-sm); }
+.neu-terminal__header span { color: #64748b; letter-spacing: .15rem; }
+.neu-terminal__output { min-block-size: 14rem; max-block-size: 28rem; overflow: auto; padding: .85rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.neu-terminal__line { display: flex; gap: .55rem; }
+.neu-terminal__line--success { color: #4ade80; }.neu-terminal__line--warning { color: #fbbf24; }.neu-terminal__line--error { color: #fb7185; }.neu-terminal__line--muted { color: #94a3b8; }
+.neu-terminal__prompt { flex: 0 0 auto; color: #38bdf8; font-weight: 700; }
+.neu-terminal__input-row { display: flex; align-items: center; gap: .55rem; padding: .7rem .85rem; border-block-start: 1px solid #334155; background: #0f172a; }
+.neu-terminal__input { flex: 1; min-inline-size: 0; border: 0; outline: 0; background: transparent; color: #f8fafc; caret-color: #38bdf8; font: inherit; }
+.neu-terminal__input::placeholder { color: #64748b; }.neu-terminal__input:focus-visible { box-shadow: 0 2px 0 #38bdf8; }
+.neu-terminal__sr-only { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

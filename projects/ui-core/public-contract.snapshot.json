@@ -14,6 +14,8 @@
     "./button",
     "./calendar",
     "./card",
+    "./carousel",
+    "./cascade-select",
     "./chart",
     "./checkbox",
     "./chip",
@@ -27,10 +29,12 @@
     "./data-view",
     "./date-input",
     "./divider",
+    "./dock",
     "./empty-state",
     "./filter-bar",
     "./form-field",
     "./icon",
+    "./image-compare",
     "./image-gallery",
     "./image-viewer",
     "./inline-editor",
@@ -40,6 +44,7 @@
     "./kanban",
     "./knob",
     "./listbox",
+    "./mega-menu",
     "./menu",
     "./meter-group",
     "./modal",
@@ -47,9 +52,11 @@
     "./nav",
     "./notification-center",
     "./number-input",
+    "./org-chart",
     "./package.json",
     "./pagination",
     "./panel",
+    "./panel-menu",
     "./password",
     "./pick-list",
     "./popover",
@@ -62,6 +69,7 @@
     "./sidebar",
     "./skeleton",
     "./slider",
+    "./speed-dial",
     "./spinner",
     "./split-button",
     "./splitter",
@@ -73,6 +81,7 @@
     "./table",
     "./tabs",
     "./tags",
+    "./terminal",
     "./testing",
     "./textarea",
     "./timeline",
@@ -466,6 +475,57 @@
       ],
       "outputs": []
     },
+    "carousel/neu-carousel.component.ts#NeuCarouselComponent": {
+      "selector": "neu-carousel",
+      "inputs": [
+        "ariaLabel",
+        "autoplayInterval",
+        "circular",
+        "emptyLabel",
+        "goToLabel",
+        "items",
+        "nextLabel",
+        "ofLabel",
+        "paginationLabel",
+        "previousLabel",
+        "showIndicators",
+        "slideLabel",
+        "step",
+        "trackBy",
+        "visibleItems"
+      ],
+      "outputs": [
+        "activeIndexChange",
+        "itemChange"
+      ]
+    },
+    "carousel/neu-carousel.component.ts#NeuCarouselItemDirective": {
+      "selector": "ng-template[neuCarouselItem]",
+      "inputs": [],
+      "outputs": []
+    },
+    "cascade-select/neu-cascade-select.component.ts#NeuCascadeSelectComponent": {
+      "selector": "neu-cascade-select",
+      "inputs": [
+        "describedBy",
+        "disabled",
+        "emptyLabel",
+        "error",
+        "floatingLabel",
+        "hint",
+        "label",
+        "levelAriaLabel",
+        "options",
+        "panelAriaLabel",
+        "placeholder",
+        "separator"
+      ],
+      "outputs": [
+        "openChange",
+        "pathChange",
+        "valueChange"
+      ]
+    },
     "chart/neu-chart.component.ts#NeuChartComponent": {
       "selector": "neu-chart",
       "inputs": [
@@ -683,6 +743,19 @@
       ],
       "outputs": []
     },
+    "dock/neu-dock.component.ts#NeuDockComponent": {
+      "selector": "neu-dock",
+      "inputs": [
+        "activeKey",
+        "ariaLabel",
+        "items",
+        "position"
+      ],
+      "outputs": [
+        "activeKeyChange",
+        "itemClick"
+      ]
+    },
     "empty-state/neu-empty-state.component.ts#NeuEmptyStateComponent": {
       "selector": "neu-empty-state",
       "inputs": [
@@ -743,6 +816,25 @@
         "strokeWidth"
       ],
       "outputs": []
+    },
+    "image-compare/neu-image-compare.component.ts#NeuImageCompareComponent": {
+      "selector": "neu-image-compare",
+      "inputs": [
+        "afterAlt",
+        "afterLabel",
+        "afterSrc",
+        "ariaLabel",
+        "aspectRatio",
+        "beforeAlt",
+        "beforeLabel",
+        "beforeSrc",
+        "description",
+        "initialPosition",
+        "loading"
+      ],
+      "outputs": [
+        "positionChange"
+      ]
     },
     "image-gallery/neu-image-gallery.component.ts#NeuImageGalleryComponent": {
       "selector": "neu-image-gallery",
@@ -917,6 +1009,17 @@
       "inputs": [],
       "outputs": []
     },
+    "mega-menu/neu-mega-menu.component.ts#NeuMegaMenuComponent": {
+      "selector": "neu-mega-menu",
+      "inputs": [
+        "ariaLabel",
+        "items"
+      ],
+      "outputs": [
+        "itemClick",
+        "openChange"
+      ]
+    },
     "menu/neu-menu.component.ts#NeuMenubarComponent": {
       "selector": "neu-menubar",
       "inputs": [
@@ -1083,6 +1186,29 @@
         "valueChange"
       ]
     },
+    "org-chart/neu-org-chart.component.ts#NeuOrgChartComponent": {
+      "selector": "neu-org-chart",
+      "inputs": [
+        "ariaLabel",
+        "collapseLabel",
+        "collapsible",
+        "emptyLabel",
+        "expandLabel",
+        "nodes",
+        "orientation",
+        "selectable"
+      ],
+      "outputs": [
+        "expansionChange",
+        "nodeClick",
+        "selectionChange"
+      ]
+    },
+    "org-chart/neu-org-chart.component.ts#NeuOrgChartNodeDirective": {
+      "selector": "ng-template[neuOrgChartNode]",
+      "inputs": [],
+      "outputs": []
+    },
     "pagination/neu-pagination.component.ts#NeuPaginationComponent": {
       "selector": "neu-pagination",
       "inputs": [
@@ -1097,6 +1223,19 @@
       ],
       "outputs": [
         "pageChange"
+      ]
+    },
+    "panel-menu/neu-panel-menu.component.ts#NeuPanelMenuComponent": {
+      "selector": "neu-panel-menu",
+      "inputs": [
+        "ariaLabel",
+        "items",
+        "multiple"
+      ],
+      "outputs": [
+        "expansionChange",
+        "itemClick",
+        "selectionChange"
       ]
     },
     "panel/neu-panel.component.ts#NeuFieldsetComponent": {
@@ -1388,6 +1527,25 @@
         "valueChange"
       ]
     },
+    "speed-dial/neu-speed-dial.component.ts#NeuSpeedDialComponent": {
+      "selector": "neu-speed-dial",
+      "inputs": [
+        "actions",
+        "closeIcon",
+        "closeLabel",
+        "direction",
+        "icon",
+        "menuAriaLabel",
+        "radius",
+        "showLabels",
+        "triggerLabel",
+        "type"
+      ],
+      "outputs": [
+        "actionClick",
+        "openChange"
+      ]
+    },
     "spinner/neu-spinner.component.ts#NeuSpinnerComponent": {
       "selector": "neu-spinner",
       "inputs": [
@@ -1621,6 +1779,26 @@
       "selector": "ng-template[neuTagSuggestion]",
       "inputs": [],
       "outputs": []
+    },
+    "terminal/neu-terminal.component.ts#NeuTerminalComponent": {
+      "selector": "neu-terminal",
+      "inputs": [
+        "ariaLabel",
+        "busyLabel",
+        "commands",
+        "disabled",
+        "inputLabel",
+        "outputAriaLabel",
+        "placeholder",
+        "prompt",
+        "title",
+        "welcome"
+      ],
+      "outputs": [
+        "clear",
+        "command",
+        "linesChange"
+      ]
     },
     "textarea/neu-textarea.component.ts#NeuTextareaComponent": {
       "selector": "neu-textarea",

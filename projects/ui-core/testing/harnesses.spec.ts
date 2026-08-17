@@ -12,6 +12,8 @@ import {
   NeuButtonHarness,
   NeuCheckboxHarness,
   NeuCalendarHarness,
+  NeuCarouselHarness,
+  NeuCascadeSelectHarness,
   NeuChipHarness,
   NeuCodeBlockHarness,
   NeuColorPickerHarness,
@@ -23,8 +25,10 @@ import {
   NeuDashboardGridHarness,
   NeuDateInputHarness,
   NeuDialogHarness,
+  NeuDockHarness,
   NeuFilterBarHarness,
   NeuImageGalleryHarness,
+  NeuImageCompareHarness,
   NeuImageViewerHarness,
   NeuInputHarness,
   NeuInputMaskHarness,
@@ -34,11 +38,14 @@ import {
   NeuKanbanHarness,
   NeuListboxHarness,
   NeuMenuHarness,
+  NeuMegaMenuHarness,
   NeuMultiselectHarness,
   NeuNavHarness,
   NeuNotificationCenterHarness,
   NeuNumberInputHarness,
+  NeuOrgChartHarness,
   NeuPaginationHarness,
+  NeuPanelMenuHarness,
   NeuPasswordHarness,
   NeuPickListHarness,
   NeuPopoverHarness,
@@ -49,6 +56,7 @@ import {
   NeuSelectHarness,
   NeuSidebarHarness,
   NeuSliderHarness,
+  NeuSpeedDialHarness,
   NeuSplitButtonHarness,
   NeuSplitterHarness,
   NeuStepperHarness,
@@ -56,6 +64,7 @@ import {
   NeuTableHarness,
   NeuTabsHarness,
   NeuTagsHarness,
+  NeuTerminalHarness,
   NeuTextareaHarness,
   NeuToggleButtonGroupHarness,
   NeuToastHarness,
@@ -481,6 +490,35 @@ class HarnessHostComponent {}
         <neu-virtual-list-row>Ada</neu-virtual-list-row
         ><neu-virtual-list-row>Grace</neu-virtual-list-row>
       </div></neu-virtual-list
+    >
+    <neu-cascade-select
+      ><button class="neu-cascade-select__trigger" aria-expanded="true"></button
+      ><span class="neu-cascade-select__value">Europe / Spain</span></neu-cascade-select
+    >
+    <div><button class="neu-cascade-select__option">Europe</button><button class="neu-cascade-select__option">Spain</button></div>
+    <neu-org-chart
+      ><button class="neu-org-chart__node">CEO</button><button class="neu-org-chart__toggle">Toggle</button></neu-org-chart
+    >
+    <neu-carousel
+      ><article class="neu-carousel__slide">One</article><button class="neu-carousel__nav--previous">Previous</button
+      ><button class="neu-carousel__nav--next">Next</button><button class="neu-carousel__indicator">Page 1</button></neu-carousel
+    >
+    <neu-image-compare
+      ><span class="neu-image-compare__label">Before</span><span class="neu-image-compare__label">After</span
+      ><input class="neu-image-compare__range" type="range" value="50" /></neu-image-compare
+    >
+    <neu-mega-menu
+      ><button class="neu-mega-menu__trigger">Products</button><button class="neu-mega-menu__item">Docs</button></neu-mega-menu
+    >
+    <neu-panel-menu><button class="neu-panel-menu__item">Account</button></neu-panel-menu>
+    <neu-speed-dial
+      ><button class="neu-speed-dial__trigger" aria-expanded="true"></button
+      ><button class="neu-speed-dial__action" aria-label="Create">Create</button></neu-speed-dial
+    >
+    <neu-dock><button class="neu-dock__item" aria-label="Home">Home</button></neu-dock>
+    <neu-terminal
+      ><section class="neu-terminal" aria-busy="false"><div class="neu-terminal__line">Ready</div
+      ><input class="neu-terminal__input" /></section></neu-terminal
     >
   `,
 })
@@ -985,5 +1023,68 @@ describe('Neural UI public harnesses', () => {
     expect(await virtualList.getRenderedItemCount()).toBe(2);
     expect(await virtualList.getEmptyText()).toBeNull();
     await virtualList.focusViewport();
+  });
+
+  it('provides harnesses for the extended navigation and content suite', async () => {
+    const fixture = TestBed.createComponent(StaticHarnessHostComponent);
+    fixture.detectChanges();
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+
+    const cascade = await loader.getHarness(NeuCascadeSelectHarness);
+    expect(await cascade.isOpen()).toBe(true);
+    expect(await cascade.getValueText()).toBe('Europe / Spain');
+    expect(await cascade.getOptions()).toEqual(['Europe', 'Spain']);
+    await cascade.open();
+    await cascade.selectPath(['Europe', /Spain/]);
+    await expect(cascade.selectPath(['Missing'])).rejects.toThrow(/was not found/);
+    await cascade.close();
+
+    const org = await loader.getHarness(NeuOrgChartHarness);
+    expect(await org.getNodes()).toEqual(['CEO']);
+    await org.selectNode('CEO');
+    await expect(org.selectNode('Missing')).rejects.toThrow(/was not found/);
+    await org.toggleNode(0);
+    await expect(org.toggleNode(2)).rejects.toThrow(/toggle 2/);
+
+    const carousel = await loader.getHarness(NeuCarouselHarness);
+    expect(await carousel.getSlides()).toEqual(['One']);
+    await carousel.previous();
+    await carousel.next();
+    await carousel.goToPage(0);
+    await expect(carousel.goToPage(2)).rejects.toThrow(/page 2/);
+
+    const compare = await loader.getHarness(NeuImageCompareHarness);
+    expect(await compare.getPosition()).toBe(50);
+    expect(await compare.getLabels()).toEqual(['Before', 'After']);
+    await compare.setPosition(70);
+
+    const mega = await loader.getHarness(NeuMegaMenuHarness);
+    expect(await mega.getTopItems()).toEqual(['Products']);
+    await mega.openItem('Products');
+    await mega.selectItem('Docs');
+    await expect(mega.openItem('Missing')).rejects.toThrow(/was not found/);
+    await expect(mega.selectItem('Missing')).rejects.toThrow(/was not found/);
+
+    const panel = await loader.getHarness(NeuPanelMenuHarness);
+    expect(await panel.getItems()).toEqual(['Account']);
+    await panel.activateItem('Account');
+    await expect(panel.activateItem('Missing')).rejects.toThrow(/was not found/);
+
+    const speedDial = await loader.getHarness(NeuSpeedDialHarness);
+    expect(await speedDial.isOpen()).toBe(true);
+    expect(await speedDial.getActions()).toEqual(['Create']);
+    await speedDial.open();
+    await speedDial.selectAction('Create');
+    await expect(speedDial.selectAction('Missing')).rejects.toThrow(/was not found/);
+
+    const dock = await loader.getHarness(NeuDockHarness);
+    expect(await dock.getItems()).toEqual(['Home']);
+    await dock.selectItem('Home');
+    await expect(dock.selectItem('Missing')).rejects.toThrow(/was not found/);
+
+    const terminal = await loader.getHarness(NeuTerminalHarness);
+    expect(await terminal.getLines()).toEqual(['Ready']);
+    expect(await terminal.isBusy()).toBe(false);
+    await terminal.run('help');
   });
 });

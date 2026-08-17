@@ -1,0 +1,17 @@
+.neu-speed-dial-host { display: inline-block; }
+.neu-speed-dial { position: relative; display: inline-grid; place-items: center; }
+.neu-speed-dial__trigger, .neu-speed-dial__action { display: inline-grid; place-items: center; border: 0; border-radius: 50%; color: var(--neu-primary-fg); box-shadow: var(--neu-shadow); cursor: pointer; }
+.neu-speed-dial__trigger { z-index: 2; inline-size: 3.25rem; block-size: 3.25rem; background: var(--neu-primary); font-size: 1.5rem; }
+.neu-speed-dial__trigger:hover { background: var(--neu-primary-dark); }
+.neu-speed-dial__action { inline-size: 2.75rem; block-size: 2.75rem; background: var(--neu-surface-inverse); }
+.neu-speed-dial__trigger:focus-visible, .neu-speed-dial__action:focus-visible { outline: 3px solid color-mix(in srgb, var(--neu-primary) 38%, transparent); outline-offset: 2px; }
+.neu-speed-dial__menu { position: absolute; inset: 0; z-index: 1; }
+.neu-speed-dial--linear .neu-speed-dial__menu { display: flex; gap: .625rem; }
+.neu-speed-dial--linear.neu-speed-dial--up .neu-speed-dial__menu { inset-block: auto calc(100% + .625rem); inset-inline: auto; flex-direction: column-reverse; }
+.neu-speed-dial--linear.neu-speed-dial--down .neu-speed-dial__menu { inset-block-start: calc(100% + .625rem); flex-direction: column; }
+.neu-speed-dial--linear.neu-speed-dial--start .neu-speed-dial__menu { inset-inline: auto calc(100% + .625rem); flex-direction: row-reverse; }
+.neu-speed-dial--linear.neu-speed-dial--end .neu-speed-dial__menu { inset-inline-start: calc(100% + .625rem); flex-direction: row; }
+.neu-speed-dial--circle .neu-speed-dial__action, .neu-speed-dial--semi-circle .neu-speed-dial__action, .neu-speed-dial--quarter-circle .neu-speed-dial__action { position: absolute; inset: .25rem; transform: rotate(var(--neu-speed-angle)) translateY(calc(var(--neu-speed-radius) * -1)) rotate(calc(var(--neu-speed-angle) * -1)); transform-origin: center; }
+.neu-speed-dial__label { position: absolute; inset-inline-end: calc(100% + .5rem); inline-size: max-content; max-inline-size: 12rem; padding: .25rem .5rem; border-radius: var(--neu-radius-sm); background: var(--neu-surface-inverse); color: var(--neu-text-inverse); font-size: var(--neu-text-xs); pointer-events: none; }
+.neu-speed-dial__action:disabled { opacity: .45; cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) { .neu-speed-dial__action { transition: none; } }

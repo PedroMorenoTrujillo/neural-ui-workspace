@@ -980,7 +980,7 @@ function validate(manifest) {
   if (new Set(matrixNames).size !== matrixNames.length)
     failures.push('entry-point names must be unique');
   if (JSON.stringify(matrixNames) !== JSON.stringify(discoveredNames)) {
-    failures.push('entry-point rows do not match the 81 discovered package entry points');
+    failures.push('entry-point rows do not match the 90 discovered package entry points');
   }
 
   for (const entryPoint of manifest.entryPoints) {
@@ -1014,8 +1014,8 @@ function validate(manifest) {
     }
   }
 
-  if (manifest.entryPoints.length !== 81) {
-    failures.push(`expected 81 entry points, found ${manifest.entryPoints.length}`);
+  if (manifest.entryPoints.length !== 90) {
+    failures.push(`expected 90 entry points, found ${manifest.entryPoints.length}`);
   }
   return failures;
 }

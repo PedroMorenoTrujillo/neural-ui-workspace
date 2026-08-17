@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-08-16T22:11:52.372Z",
+  "capturedAt": "2026-08-17T12:27:03.042Z",
   "status": "PASS",
   "accessibility": {
     "standard": "WCAG 2.2 AA automated axe-core rules",
-    "routes": 87,
+    "routes": 96,
     "locales": 2,
     "themes": [
       "light",
       "dark"
     ],
-    "checks": 348,
-    "passed": 348,
+    "checks": 384,
+    "passed": 384,
     "source": "test-results/showcase-a11y-summary.json"
   },
   "responsive": {
@@ -27,7 +27,7 @@
       "tablet-768",
       "desktop-1440"
     ],
-    "checks": 2610,
+    "checks": 2880,
     "source": "test-results/showcase-responsive-summary.json"
   },
   "rtl": {
@@ -36,12 +36,12 @@
       "firefox",
       "webkit"
     ],
-    "routes": 87,
-    "checks": 261,
+    "routes": 96,
+    "checks": 288,
     "source": "test-results/showcase-rtl-summary.json"
   },
   "docs": {
-    "apiPages": 79,
+    "apiPages": 88,
     "missingInputs": 0,
     "missingOutputs": 0,
     "source": "test-results/docs-api-summary.json"
@@ -140,6 +140,24 @@
     {
       "name": "card",
       "route": "/components/card",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "carousel",
+      "route": "/components/carousel",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "cascade-select",
+      "route": "/components/cascade-select",
       "accessibility": "PASS",
       "responsive": "PASS",
       "rtl": "PASS",
@@ -264,6 +282,15 @@
       "docsEvidence": "test-results/docs-api-summary.json"
     },
     {
+      "name": "dock",
+      "route": "/components/dock",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
       "name": "empty-state",
       "route": "/components/empty-state",
       "accessibility": "PASS",
@@ -293,6 +320,15 @@
     {
       "name": "icon",
       "route": "/components/icon",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "image-compare",
+      "route": "/components/image-compare",
       "accessibility": "PASS",
       "responsive": "PASS",
       "rtl": "PASS",
@@ -381,6 +417,15 @@
       "docsEvidence": "test-results/docs-api-summary.json"
     },
     {
+      "name": "mega-menu",
+      "route": "/components/mega-menu",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
       "name": "menu",
       "route": "/components/menu",
       "accessibility": "PASS",
@@ -444,6 +489,15 @@
       "docsEvidence": "test-results/docs-api-summary.json"
     },
     {
+      "name": "org-chart",
+      "route": "/components/org-chart",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
       "name": "pagination",
       "route": "/components/pagination",
       "accessibility": "PASS",
@@ -455,6 +509,15 @@
     {
       "name": "panel",
       "route": "/components/panel",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "panel-menu",
+      "route": "/components/panel-menu",
       "accessibility": "PASS",
       "responsive": "PASS",
       "rtl": "PASS",
@@ -570,6 +633,15 @@
       "docsEvidence": "test-results/docs-api-summary.json"
     },
     {
+      "name": "speed-dial",
+      "route": "/components/speed-dial",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
       "name": "spinner",
       "route": "/components/spinner",
       "accessibility": "PASS",
@@ -644,6 +716,15 @@
     {
       "name": "tags",
       "route": "/components/tags",
+      "accessibility": "PASS",
+      "responsive": "PASS",
+      "rtl": "PASS",
+      "docs": "PASS",
+      "docsEvidence": "test-results/docs-api-summary.json"
+    },
+    {
+      "name": "terminal",
+      "route": "/components/terminal",
       "accessibility": "PASS",
       "responsive": "PASS",
       "rtl": "PASS",

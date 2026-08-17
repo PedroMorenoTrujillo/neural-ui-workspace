@@ -44,8 +44,8 @@ if (browser.status !== 'PASS') failures.push('browser Performance API gate is no
 if (lighthouse.status !== 'PASS') failures.push('Lighthouse CI gate is not PASS');
 if (sizeLimit.status !== 'PASS') failures.push('Size Limit gate is not PASS');
 if (bundle.status && bundle.status !== 'PASS') failures.push('bundle audit is not PASS');
-if (entryPoints.length !== 81 || new Set(entryPoints.map((item) => item.name)).size !== 81) {
-  failures.push(`expected 81 unique entry-point routes, found ${entryPoints.length}`);
+if (entryPoints.length !== 90 || new Set(entryPoints.map((item) => item.name)).size !== 90) {
+  failures.push(`expected 90 unique entry-point routes, found ${entryPoints.length}`);
 }
 
 const report = {

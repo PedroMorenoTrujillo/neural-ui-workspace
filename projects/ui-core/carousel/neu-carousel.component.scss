@@ -1,0 +1,17 @@
+.neu-carousel-host { display: block; inline-size: 100%; }
+.neu-carousel { position: relative; padding-inline: 3rem; }
+.neu-carousel__viewport { overflow: hidden; border-radius: var(--neu-radius-lg); }
+.neu-carousel__track { display: grid; grid-template-columns: repeat(var(--neu-carousel-visible, 1), minmax(0, 1fr)); gap: var(--neu-space-4); }
+.neu-carousel__slide { min-inline-size: 0; border-radius: var(--neu-radius-lg); }
+.neu-carousel__nav { position: absolute; inset-block-start: 50%; display: inline-grid; place-items: center; inline-size: 2.5rem; block-size: 2.5rem; translate: 0 -50%; border: 1px solid var(--neu-border); border-radius: 50%; background: var(--neu-surface); color: var(--neu-text); box-shadow: var(--neu-shadow-sm); cursor: pointer; z-index: 1; }
+.neu-carousel__nav--previous { inset-inline-start: 0; }
+.neu-carousel__nav--next { inset-inline-end: 0; }
+.neu-carousel__nav:hover:not(:disabled) { border-color: var(--neu-primary); color: var(--neu-primary); }
+.neu-carousel__nav:focus-visible, .neu-carousel__indicator:focus-visible { outline: 2px solid var(--neu-primary); outline-offset: 2px; }
+.neu-carousel__nav:disabled { opacity: .35; cursor: not-allowed; }
+.neu-carousel__indicators { display: flex; justify-content: center; gap: .5rem; margin-block-start: var(--neu-space-4); }
+.neu-carousel__indicator { inline-size: 1.5rem; block-size: 1.5rem; padding: 0; border: .4375rem solid transparent; border-radius: 50%; background: var(--neu-border-hover) padding-box; cursor: pointer; transition: inline-size var(--neu-transition), background var(--neu-transition); }
+.neu-carousel__indicator.is-active { inline-size: 1.75rem; border-radius: var(--neu-radius-full); background: var(--neu-primary); }
+.neu-carousel__empty { grid-column: 1 / -1; padding: var(--neu-space-8); border: 1px dashed var(--neu-border); border-radius: var(--neu-radius-lg); color: var(--neu-text-muted); text-align: center; }
+@media (max-width: 640px) { .neu-carousel { padding-inline: 2.5rem; } }
+@media (prefers-reduced-motion: reduce) { .neu-carousel__indicator { transition: none; } }

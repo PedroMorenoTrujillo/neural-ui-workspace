@@ -1,0 +1,24 @@
+.neu-org-chart-host { display: block; inline-size: 100%; overflow: auto; }
+.neu-org-chart { min-inline-size: max-content; padding: var(--neu-space-4); }
+.neu-org-chart__level { position: relative; display: flex; justify-content: center; gap: var(--neu-space-4); margin: 0; padding: var(--neu-space-6) 0 0; list-style: none; }
+.neu-org-chart__level--root { padding-block-start: 0; }
+.neu-org-chart__branch { position: relative; display: flex; flex-direction: column; align-items: center; min-inline-size: 11rem; }
+.neu-org-chart__branch::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 50% auto; block-size: var(--neu-space-6); border-inline-start: 1px solid var(--neu-border); }
+.neu-org-chart__level--root > .neu-org-chart__branch::before { display: none; }
+.neu-org-chart__node { display: flex; align-items: center; gap: .75rem; min-inline-size: 11rem; max-inline-size: 17rem; padding: .75rem; border: 1px solid var(--neu-border); border-radius: var(--neu-radius-lg); background: var(--neu-surface); color: var(--neu-text); box-shadow: var(--neu-shadow-sm); text-align: start; font: inherit; cursor: pointer; }
+.neu-org-chart__node:hover { border-color: var(--neu-border-hover); box-shadow: var(--neu-shadow); }
+.neu-org-chart__node.is-selected { border-color: var(--neu-primary); box-shadow: var(--neu-focus-ring); }
+.neu-org-chart__node:focus-visible { outline: 2px solid var(--neu-primary); outline-offset: 2px; }
+.neu-org-chart__avatar { inline-size: 2.5rem; block-size: 2.5rem; border-radius: 50%; object-fit: cover; }
+.neu-org-chart__copy { display: grid; min-inline-size: 0; }
+.neu-org-chart__copy strong, .neu-org-chart__copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.neu-org-chart__copy span { color: var(--neu-text-muted); font-size: var(--neu-text-xs); }
+.neu-org-chart__badge { margin-inline-start: auto; padding: .125rem .4rem; border-radius: var(--neu-radius-full); background: var(--neu-primary-50); color: var(--neu-primary-dark); font-size: var(--neu-text-xs); }
+.neu-org-chart__toggle { z-index: 1; inline-size: 1.75rem; block-size: 1.75rem; margin-block: .35rem -.9rem; border: 1px solid var(--neu-border); border-radius: 50%; background: var(--neu-surface); color: var(--neu-text); cursor: pointer; }
+.neu-org-chart__empty { padding: var(--neu-space-6); border: 1px dashed var(--neu-border); border-radius: var(--neu-radius); color: var(--neu-text-muted); text-align: center; }
+.neu-org-chart--horizontal > .neu-org-chart__level { flex-direction: column; align-items: flex-start; }
+.neu-org-chart--horizontal .neu-org-chart__branch { flex-direction: row; align-items: center; gap: var(--neu-space-4); }
+.neu-org-chart--horizontal .neu-org-chart__level { flex-direction: column; justify-content: flex-start; padding: 0 0 0 var(--neu-space-6); }
+.neu-org-chart--horizontal .neu-org-chart__branch::before { inset-block: 50% auto; inset-inline: 0 auto; inline-size: var(--neu-space-6); block-size: 0; border-block-start: 1px solid var(--neu-border); border-inline-start: 0; }
+.neu-org-chart--horizontal .neu-org-chart__toggle { margin: 0 calc(var(--neu-space-4) * -1); }
+@media (prefers-reduced-motion: reduce) { .neu-org-chart__node { scroll-behavior: auto; } }
