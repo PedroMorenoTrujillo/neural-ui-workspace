@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.1] - 2026-08-17
+
+### Fixed
+
+- Corrected the published README feature summary to report 89 component entry points plus the public testing entry point, consistently with the 90-entry-point quality snapshot.
+
 ## [1.14.0] - 2026-08-17
 
 ### Added

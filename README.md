@@ -20,7 +20,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 ## Features
 
-- **80 component entry points + testing** — components, overlays, utilities, styles and public harnesses
+- **89 component entry points + testing** — components, overlays, utilities, styles and public harnesses
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
@@ -34,7 +34,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.14.0
+- **Version:** 1.14.1
 - **Entry points:** 90
 - **Automated tests:** 2218
 - **Coverage:** 97.45% statements · 95.36% branches · 96.19% functions · 98.82% lines
