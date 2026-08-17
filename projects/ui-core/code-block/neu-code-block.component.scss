@@ -15,6 +15,7 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
   border-radius: var(--neu-radius-lg);
   overflow: hidden;
   border: 1px solid $cb-border;
+  background: $cb-bg;
   font-family: var(--neu-font-mono);
 }
 
@@ -95,7 +96,7 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
 
 // ---- Bloque <pre><code> / Code block ----
 .neu-code-block__pre {
-  margin: 0;
+  margin: 0 0 2px;
   padding: 20px 24px;
   background: $cb-bg;
   overflow-x: auto;
@@ -103,13 +104,15 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
   scrollbar-color: $cb-muted transparent;
 
   &::-webkit-scrollbar {
-    height: 4px;
+    height: 8px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
     background: $cb-muted;
+    background-clip: padding-box;
+    border: 2px solid transparent;
     border-radius: 99px;
   }
 }

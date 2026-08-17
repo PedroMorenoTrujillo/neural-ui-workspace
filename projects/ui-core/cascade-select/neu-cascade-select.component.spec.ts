@@ -9,7 +9,9 @@ describe('NeuCascadeSelectComponent', () => {
   const root: NeuCascadeOption = { value: 'eu', label: 'Europe', children: [disabled, leaf] };
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [NeuCascadeSelectComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [NeuCascadeSelectComponent],
+    }).compileComponents();
     fixture = TestBed.createComponent(NeuCascadeSelectComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('options', [root]);
@@ -37,6 +39,17 @@ describe('NeuCascadeSelectComponent', () => {
     expect(touched).toHaveBeenCalled();
   });
 
+  it('uses the same SVG chevron treatment as select and rotates it while open', () => {
+    const chevron = fixture.nativeElement.querySelector(
+      '.neu-cascade-select__chevron',
+    ) as SVGElement;
+    expect(chevron.tagName.toLowerCase()).toBe('svg');
+    expect(chevron.querySelector('polyline')?.getAttribute('points')).toBe('6 9 12 15 18 9');
+    component.openPanel();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-cascade-select--open')).not.toBeNull();
+  });
+
   it('opens, toggles, ignores disabled options and selects branches and leaves', async () => {
     const changes: Array<string | null> = [];
     component.registerOnChange((value) => changes.push(value));
@@ -58,7 +71,8 @@ describe('NeuCascadeSelectComponent', () => {
   });
 
   it('supports complete keyboard navigation and skips disabled options', () => {
-    const keyboard = (key: string) => ({ key, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+    const keyboard = (key: string) =>
+      ({ key, preventDefault: vi.fn() }) as unknown as KeyboardEvent;
     component.openPanel();
     component.onPanelKeydown(keyboard('ArrowDown'));
     expect(component.activeRow()).toBe(0);
@@ -83,7 +97,7 @@ describe('NeuCascadeSelectComponent', () => {
     const direction = (component as any).directionality.valueSignal;
     if (typeof direction.set === 'function') direction.set('rtl');
     expect(component.childArrow()).toBe('‹');
-    const event = (key: string) => ({ key, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+    const event = (key: string) => ({ key, preventDefault: vi.fn() }) as unknown as KeyboardEvent;
     component.openPanel();
     component.onPanelKeydown(event('ArrowLeft'));
     component.onPanelKeydown(event('ArrowRight'));

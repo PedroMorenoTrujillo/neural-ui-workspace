@@ -2,21 +2,21 @@
   "metadata": {
     "schemaVersion": 1,
     "capturedAt": "2026-08-16",
-    "auditedCoreCommit": "2e3d605e7847a63bdded1af567085af57f682a24",
-    "auditedShowcaseCommit": "5b46fdd1f79a0b0397b9f6d70f54a1eeeb08a87f",
-    "libraryVersion": "1.13.1",
+    "auditedCoreCommit": "2e69fa7dfb73af43ed341af1a85012aa384bf579",
+    "auditedShowcaseCommit": "cfa9502203bf320bbd771dac80d22123433c3e2a",
+    "libraryVersion": "1.14.0",
     "evidenceFreshness": "Current working-tree evidence; reproduce with the release gates before publication.",
     "baseline": {
       "entryPoints": 90,
-      "automatedTests": 2217,
+      "automatedTests": 2218,
       "coverage": {
-        "statements": 97.42,
-        "branches": 95.34,
+        "statements": 97.45,
+        "branches": 95.36,
         "functions": 96.19,
-        "lines": 98.84
+        "lines": 98.82
       },
       "showcaseDemoPages": 91,
-      "translationsPerLocale": 3311,
+      "translationsPerLocale": 3334,
       "trackedVisualSnapshots": 464
     },
     "exclusions": [

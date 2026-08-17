@@ -15,8 +15,12 @@ describe('NeuTerminalComponent', () => {
       list: () => ['one', 'two'],
       rich: () => [{ id: 0, text: 'ok', tone: 'success' }],
       empty: () => undefined,
-      fail: () => { throw new Error('failed'); },
-      reject: async () => { throw 'rejected'; },
+      fail: () => {
+        throw new Error('failed');
+      },
+      reject: async () => {
+        throw 'rejected';
+      },
     });
     fixture.detectChanges();
   });
@@ -42,15 +46,20 @@ describe('NeuTerminalComponent', () => {
     expect(component.lines().some((line) => line.text === 'hello world')).toBe(true);
     expect(component.lines().some((line) => line.text === 'two words')).toBe(true);
     expect(component.lines().some((line) => line.text === 'one')).toBe(true);
-    expect(component.lines().some((line) => line.text === 'ok' && line.tone === 'success')).toBe(true);
+    expect(component.lines().some((line) => line.text === 'ok' && line.tone === 'success')).toBe(
+      true,
+    );
   });
 
   it('supports built-in help, clear, unknown commands and failures', async () => {
+    fixture.componentRef.setInput('commandsLabel', 'Comandos');
+    fixture.componentRef.setInput('commandNotFoundLabel', 'Comando no encontrado');
     component.currentInput.set('help');
     await component.submit();
-    expect(component.lines().at(-1)?.text).toContain('Commands:');
+    expect(component.lines().at(-1)?.text).toContain('Comandos:');
     component.currentInput.set('unknown');
     await component.submit();
+    expect(component.lines().at(-1)?.text).toBe('Comando no encontrado: unknown');
     expect(component.lines().at(-1)?.tone).toBe('error');
     component.currentInput.set('fail');
     await component.submit();
@@ -99,9 +108,17 @@ describe('NeuTerminalComponent', () => {
 
   it('clears only with the expected shortcut and appends non-empty lines', async () => {
     component.append([]);
-    const plain = { ctrlKey: false, metaKey: false, preventDefault: vi.fn() } as unknown as KeyboardEvent;
+    const plain = {
+      ctrlKey: false,
+      metaKey: false,
+      preventDefault: vi.fn(),
+    } as unknown as KeyboardEvent;
     component.clearShortcut(plain);
-    const meta = { ctrlKey: false, metaKey: true, preventDefault: vi.fn() } as unknown as KeyboardEvent;
+    const meta = {
+      ctrlKey: false,
+      metaKey: true,
+      preventDefault: vi.fn(),
+    } as unknown as KeyboardEvent;
     component.clearShortcut(meta);
     expect(component.lines()).toEqual([]);
     const lines: NeuTerminalLine[] = [{ id: 1, text: 'manual' }];

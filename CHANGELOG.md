@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-08-17
+
+### Added
+
+- Added nine standalone, signals-first entry points: Carousel, Cascade Select, Dock, Image Compare, Mega Menu, Organization Chart, Panel Menu, Speed Dial and Terminal.
+- Added public Component Harness coverage and showcase documentation for the new interactive components, including bilingual examples, API tables, RTL scenarios and responsive evidence.
+
+### Changed
+
+- Aligned Cascade Select's trigger icon, logical spacing, progressive keyboard navigation and dynamic RTL behavior with Select and Multiselect.
+- Made Terminal's visible defaults, ARIA labels and command-not-found output explicitly localizable.
+- Refined showcase demo panels and code examples with consistent rounded borders in light and dark themes.
+
+### Fixed
+
+- Kept Code Block's horizontal scrollbar inset from its rounded lower corners across Chromium/WebKit and standards-based scrollbar implementations.
+- Removed mixed Spanish/English defaults from the nine new showcase demos.
+
 ## [1.13.1] - 2026-08-17
 
 ### Fixed

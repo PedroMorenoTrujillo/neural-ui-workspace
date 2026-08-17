@@ -1785,7 +1785,9 @@
       "inputs": [
         "ariaLabel",
         "busyLabel",
+        "commandNotFoundLabel",
         "commands",
+        "commandsLabel",
         "disabled",
         "inputLabel",
         "outputAriaLabel",

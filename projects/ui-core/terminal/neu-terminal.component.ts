@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewEncapsulation, effect, inject, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  ViewEncapsulation,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 
 export type NeuTerminalTone = 'default' | 'success' | 'warning' | 'error' | 'muted';
 
@@ -16,7 +26,12 @@ export interface NeuTerminalCommandEvent {
 
 export type NeuTerminalCommandHandler = (
   event: NeuTerminalCommandEvent,
-) => string | string[] | NeuTerminalLine[] | void | Promise<string | string[] | NeuTerminalLine[] | void>;
+) =>
+  | string
+  | string[]
+  | NeuTerminalLine[]
+  | void
+  | Promise<string | string[] | NeuTerminalLine[] | void>;
 
 let terminalLineId = 0;
 
@@ -29,16 +44,32 @@ let terminalLineId = 0;
   template: `
     <section class="neu-terminal" [attr.aria-label]="ariaLabel()" [attr.aria-busy]="busy()">
       @if (title()) {
-        <header class="neu-terminal__header"><span aria-hidden="true">● ● ●</span><strong>{{ title() }}</strong></header>
+        <header class="neu-terminal__header">
+          <span aria-hidden="true">● ● ●</span><strong>{{ title() }}</strong>
+        </header>
       }
-      <div #output class="neu-terminal__output" role="log" aria-live="polite" aria-relevant="additions text" [attr.aria-label]="outputAriaLabel()">
+      <div
+        #output
+        class="neu-terminal__output"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        [attr.aria-label]="outputAriaLabel()"
+      >
         @for (line of lines(); track line.id) {
-          <div class="neu-terminal__line neu-terminal__line--{{ line.tone || 'default' }}" [class.is-command]="line.command">
-            @if (line.command) { <span class="neu-terminal__prompt" aria-hidden="true">{{ prompt() }}</span> }
+          <div
+            class="neu-terminal__line neu-terminal__line--{{ line.tone || 'default' }}"
+            [class.is-command]="line.command"
+          >
+            @if (line.command) {
+              <span class="neu-terminal__prompt" aria-hidden="true">{{ prompt() }}</span>
+            }
             <span>{{ line.text }}</span>
           </div>
         }
-        @if (busy()) { <div class="neu-terminal__line neu-terminal__line--muted">{{ busyLabel() }}</div> }
+        @if (busy()) {
+          <div class="neu-terminal__line neu-terminal__line--muted">{{ busyLabel() }}</div>
+        }
       </div>
       <label class="neu-terminal__input-row">
         <span class="neu-terminal__prompt" aria-hidden="true">{{ prompt() }}</span>
@@ -73,6 +104,8 @@ export class NeuTerminalComponent {
   readonly outputAriaLabel = input('Terminal output');
   readonly inputLabel = input('Command');
   readonly busyLabel = input('Working…');
+  readonly commandsLabel = input('Commands');
+  readonly commandNotFoundLabel = input('Command not found');
   readonly disabled = input(false);
   readonly welcome = input<string[]>([]);
   readonly commands = input<Record<string, NeuTerminalCommandHandler>>({});
@@ -103,27 +136,40 @@ export class NeuTerminalComponent {
     this.history.update((items) => [...items.filter((item) => item !== raw), raw]);
     this.historyIndex = this.history().length;
     this.currentInput.set('');
-    if (name === 'clear') { this.clearOutput(); return; }
+    if (name === 'clear') {
+      this.clearOutput();
+      return;
+    }
     if (name === 'help' && !this.commands()[name]) {
       const names = Object.keys(this.commands()).sort();
-      this.append([this.createLine(names.length ? `Commands: ${['clear', 'help', ...names].join(', ')}` : 'Commands: clear, help', 'muted')]);
+      const commandNames = names.length ? ['clear', 'help', ...names] : ['clear', 'help'];
+      this.append([
+        this.createLine(`${this.commandsLabel()}: ${commandNames.join(', ')}`, 'muted'),
+      ]);
       return;
     }
     this.command.emit(event);
     const handler = this.commands()[name];
-    if (!handler) { this.append([this.createLine(`Command not found: ${name}`, 'error')]); return; }
+    if (!handler) {
+      this.append([this.createLine(`${this.commandNotFoundLabel()}: ${name}`, 'error')]);
+      return;
+    }
     try {
       this.busy.set(true);
       const result = await handler(event);
       this.append(this.normalizeResult(result));
     } catch (error) {
-      this.append([this.createLine(error instanceof Error ? error.message : String(error), 'error')]);
+      this.append([
+        this.createLine(error instanceof Error ? error.message : String(error), 'error'),
+      ]);
     } finally {
       this.busy.set(false);
     }
   }
   clearOutput(): void {
-    this.lines.set([]); this.linesChange.emit([]); this.clear.emit();
+    this.lines.set([]);
+    this.linesChange.emit([]);
+    this.clear.emit();
   }
   append(lines: NeuTerminalLine[]): void {
     if (!lines.length) return;
@@ -136,14 +182,19 @@ export class NeuTerminalComponent {
   }
   navigateHistory(direction: -1 | 1, event: Event): void {
     event.preventDefault();
-    const history = this.history(); if (!history.length) return;
+    const history = this.history();
+    if (!history.length) return;
     this.historyIndex = Math.max(0, Math.min(history.length, this.historyIndex + direction));
-    this.currentInput.set(this.historyIndex === history.length ? '' : history[this.historyIndex] ?? '');
+    this.currentInput.set(
+      this.historyIndex === history.length ? '' : (history[this.historyIndex] ?? ''),
+    );
   }
   complete(event: Event): void {
     const query = this.currentInput().trim();
     if (!query || query.includes(' ')) return;
-    const matches = ['clear', 'help', ...Object.keys(this.commands())].filter((name) => name.startsWith(query));
+    const matches = ['clear', 'help', ...Object.keys(this.commands())].filter((name) =>
+      name.startsWith(query),
+    );
     if (!matches.length) return;
     event.preventDefault();
     if (matches.length === 1) this.currentInput.set(matches[0] + ' ');
@@ -159,8 +210,24 @@ export class NeuTerminalComponent {
   private normalizeResult(result: string | string[] | NeuTerminalLine[] | void): NeuTerminalLine[] {
     if (result == null) return [];
     if (typeof result === 'string') return [this.createLine(result)];
-    return result.map((line) => typeof line === 'string' ? this.createLine(line) : { ...line, id: line.id || ++terminalLineId });
+    return result.map((line) =>
+      typeof line === 'string'
+        ? this.createLine(line)
+        : { ...line, id: line.id || ++terminalLineId },
+    );
   }
-  private createLine(text: string, tone: NeuTerminalTone = 'default', command = false): NeuTerminalLine { return { id: ++terminalLineId, text, tone, command }; }
-  private tokenize(command: string): string[] { return command.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)?.map((part) => part.replace(/^(?:"|')|(?:"|')$/g, '')) ?? []; }
+  private createLine(
+    text: string,
+    tone: NeuTerminalTone = 'default',
+    command = false,
+  ): NeuTerminalLine {
+    return { id: ++terminalLineId, text, tone, command };
+  }
+  private tokenize(command: string): string[] {
+    return (
+      command
+        .match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)
+        ?.map((part) => part.replace(/^(?:"|')|(?:"|')$/g, '')) ?? []
+    );
+  }
 }

@@ -77,7 +77,18 @@ let cascadeId = 0;
         <span class="neu-cascade-select__value" [class.is-placeholder]="!selectedPath().length">
           {{ displayValue() || placeholder() }}
         </span>
-        <span class="neu-cascade-select__chevron" aria-hidden="true">⌄</span>
+        <svg
+          class="neu-cascade-select__chevron"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
       </button>
     </div>
 
@@ -114,7 +125,9 @@ let cascadeId = 0;
                 [attr.data-index]="optionIndex"
                 [attr.aria-selected]="selectedPath()[columnIndex]?.value === option.value"
                 [class.is-active]="selectedPath()[columnIndex]?.value === option.value"
-                [attr.tabindex]="columnIndex === activeColumn() && optionIndex === activeRow() ? 0 : -1"
+                [attr.tabindex]="
+                  columnIndex === activeColumn() && optionIndex === activeRow() ? 0 : -1
+                "
                 (click)="choose(option, columnIndex)"
               >
                 <span>{{ option.label }}</span>
@@ -168,9 +181,7 @@ export class NeuCascadeSelectComponent implements ControlValueAccessor {
   private readonly cvaDisabled = signal(false);
   private readonly value = signal<string | null>(null);
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
-  readonly childArrow = computed(() =>
-    this.directionality.valueSignal() === 'rtl' ? '‹' : '›',
-  );
+  readonly childArrow = computed(() => (this.directionality.valueSignal() === 'rtl' ? '‹' : '›'));
   readonly selectedPath = computed(() => this.findPath(this.options(), this.value()) ?? []);
   readonly columns = computed(() => {
     const path = this.selectedPath();
@@ -192,7 +203,8 @@ export class NeuCascadeSelectComponent implements ControlValueAccessor {
   constructor() {
     effect(() => {
       const columns = this.columns();
-      if (this.activeColumn() >= columns.length) this.activeColumn.set(Math.max(0, columns.length - 1));
+      if (this.activeColumn() >= columns.length)
+        this.activeColumn.set(Math.max(0, columns.length - 1));
     });
   }
 
@@ -224,14 +236,22 @@ export class NeuCascadeSelectComponent implements ControlValueAccessor {
     this.open.set(false);
     this.openChange.emit(false);
     this.onTouched();
-    if (restoreFocus) queueMicrotask(() => this.host.nativeElement.querySelector<HTMLElement>('.neu-cascade-select__trigger')?.focus());
+    if (restoreFocus)
+      queueMicrotask(() =>
+        this.host.nativeElement.querySelector<HTMLElement>('.neu-cascade-select__trigger')?.focus(),
+      );
   }
 
   choose(option: NeuCascadeOption, columnIndex: number): void {
     if (option.disabled) return;
     this.value.set(option.value);
     this.activeColumn.set(columnIndex);
-    this.activeRow.set(Math.max(0, this.columns()[columnIndex]?.findIndex((item) => item.value === option.value) ?? 0));
+    this.activeRow.set(
+      Math.max(
+        0,
+        this.columns()[columnIndex]?.findIndex((item) => item.value === option.value) ?? 0,
+      ),
+    );
     this.onChange(option.value);
     this.valueChange.emit(option.value);
     this.pathChange.emit(this.selectedPath());
@@ -248,7 +268,12 @@ export class NeuCascadeSelectComponent implements ControlValueAccessor {
     const rtl = this.directionality.valueSignal() === 'rtl';
     const nextKey = rtl ? 'ArrowLeft' : 'ArrowRight';
     const previousKey = rtl ? 'ArrowRight' : 'ArrowLeft';
-    if (!['ArrowDown', 'ArrowUp', nextKey, previousKey, 'Home', 'End', 'Enter', ' '].includes(event.key)) return;
+    if (
+      !['ArrowDown', 'ArrowUp', nextKey, previousKey, 'Home', 'End', 'Enter', ' '].includes(
+        event.key,
+      )
+    )
+      return;
     event.preventDefault();
     const column = this.columns()[this.activeColumn()] ?? [];
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -264,7 +289,14 @@ export class NeuCascadeSelectComponent implements ControlValueAccessor {
     } else if (event.key === previousKey && this.activeColumn() > 0) {
       this.activeColumn.update((value) => value - 1);
       const selected = this.selectedPath()[this.activeColumn()];
-      this.activeRow.set(Math.max(0, this.columns()[this.activeColumn()]?.findIndex((item) => item.value === selected?.value) ?? 0));
+      this.activeRow.set(
+        Math.max(
+          0,
+          this.columns()[this.activeColumn()]?.findIndex(
+            (item) => item.value === selected?.value,
+          ) ?? 0,
+        ),
+      );
     } else {
       const active = column[this.activeRow()];
       if (active) this.choose(active, this.activeColumn());
@@ -273,18 +305,27 @@ export class NeuCascadeSelectComponent implements ControlValueAccessor {
   }
 
   private focusActive(): void {
-    this.document.querySelector<HTMLElement>(
-      `#${this.panelId} .neu-cascade-select__option[data-column="${this.activeColumn()}"][data-index="${this.activeRow()}"]`,
-    )?.focus();
+    this.document
+      .querySelector<HTMLElement>(
+        `#${this.panelId} .neu-cascade-select__option[data-column="${this.activeColumn()}"][data-index="${this.activeRow()}"]`,
+      )
+      ?.focus();
   }
   private firstEnabledIndex(options: NeuCascadeOption[]): number {
-    return Math.max(0, options.findIndex((option) => !option.disabled));
+    return Math.max(
+      0,
+      options.findIndex((option) => !option.disabled),
+    );
   }
   private lastEnabledIndex(options: NeuCascadeOption[]): number {
     const index = [...options].reverse().findIndex((option) => !option.disabled);
     return index < 0 ? 0 : options.length - index - 1;
   }
-  private nextEnabledIndex(options: NeuCascadeOption[], current: number, direction: 1 | -1): number {
+  private nextEnabledIndex(
+    options: NeuCascadeOption[],
+    current: number,
+    direction: 1 | -1,
+  ): number {
     if (!options.length) return 0;
     let index = current;
     for (let attempt = 0; attempt < options.length; attempt += 1) {
