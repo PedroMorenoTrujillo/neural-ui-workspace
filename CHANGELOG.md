@@ -453,7 +453,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Corregida la URL del showcase en `README.md` y `package.json` (`homepage`) — ahora apunta a [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app).
+- Corregida la URL del showcase en `README.md` y `package.json` (`homepage`) para usar el dominio de producción vigente en ese lanzamiento. El dominio canónico actual figura en la documentación de la versión más reciente.
 
 ---
 
