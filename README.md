@@ -34,7 +34,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.14.2
+- **Version:** 1.14.3
 - **Entry points:** 90
 - **Automated tests:** 2218
 - **Coverage:** 97.45% statements · 95.36% branches · 96.19% functions · 98.82% lines

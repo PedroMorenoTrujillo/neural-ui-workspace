@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.3] - 2026-08-18
+
 ### Added
 
 - Recorded Pedro Moreno Trujillo's approval of the exact digest covering all 464 tracked visual baselines across the 89 public runtime routes, closing the strict quality matrix with 1864 `PASS`, 116 justified `N/A` and zero unresolved cells.
