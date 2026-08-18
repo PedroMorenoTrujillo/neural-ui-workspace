@@ -47,7 +47,7 @@ The library presents a strong accessibility baseline across interactive componen
 - Rating follows a roving-tabstop keyboard model with arrows, Home/End, wrapping and direction-aware horizontal behavior: yes
 - Focus management present in key widgets: yes
 - Showcase automated accessibility validation: 384/384 localized/theme routes passed with axe-core WCAG 2.2 AA tags
-- Manual NVDA 2026.1.1 validation: 89/89 public entry-point routes passed on Windows 11 with current Chrome; Narrator, VoiceOver macOS/iOS and TalkBack remain `UNVERIFIED`
+- Manual assistive-technology validation: 89/89 public entry-point routes passed with NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack. NVDA was recorded as 2026.1.1 on Windows 11 with current Chrome; exact device and software versions were not recorded for the other four targets.
 - Formal 100% accessibility certification across all library components: no
 
 ### Localization and RTL
@@ -68,7 +68,7 @@ The library presents a strong accessibility baseline across interactive componen
 - Browser performance gate: all 90 public routes passed three cold-load samples and their budgets
 - Lighthouse CI: 12/12 representative reports passed the committed local budgets
 - Visual-baseline inventory: 464 reference snapshots are tracked; the current candidate still requires explicit human review
-- Strict matrix: 1419 cells pass and 116 are justified `N/A`; 445 human cells remain `UNVERIFIED` (356 assistive-technology and 89 visual)
+- Strict matrix: 1775 cells pass and 116 are justified `N/A`; the 89 remaining `UNVERIFIED` human cells are visual review only
 - Visual baselines: may only be created or replaced after explicit human review approval
 - Validation model: showcase runs against the compiled `@neural-ui/core` package, so these checks act as integration validation of the library in real consumer flows
 
@@ -115,7 +115,7 @@ This is an evidence-backed engineering audit, not a paid or external WCAG certif
 
 ### Why this is not labeled 100%
 
-- NVDA is recorded as 89/89 PASS; Narrator, VoiceOver on macOS/iOS and TalkBack have not yet been recorded for this release candidate.
+- NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack are recorded as 89/89 PASS. Exact device and software versions remain unrecorded for the four non-NVDA targets.
 - The changed visual baselines have not yet been approved by a named human reviewer.
 - Automated semantics and keyboard checks cannot prove what a screen reader announces.
 

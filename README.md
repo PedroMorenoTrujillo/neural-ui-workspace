@@ -40,7 +40,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 - **Coverage:** 97.45% statements · 95.36% branches · 96.19% functions · 98.82% lines
 - **Public component harnesses:** 71 interactive entry points · 19 justified N/A
 - **Showcase evidence:** 91 demos · 88 API pages · 384/384 accessibility · 288 RTL · 2880 responsive checks
-- **Quality matrix:** 1419 PASS · 116 N/A · 445 pending human validation
+- **Quality matrix:** 1775 PASS · 116 N/A · 89 pending human validation
 - **Visual evidence:** 464 tracked snapshots · explicit human approval required
 <!-- neural-ui-metrics:end -->
 

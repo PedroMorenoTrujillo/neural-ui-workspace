@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Recorded the project owner's complete NVDA 2026.1.1 validation across all 89 public runtime entry-point routes on Windows 11 with current Chrome; the other free assistive-technology targets remain explicitly unverified.
+- Recorded the project owner's complete validation across all 89 public runtime entry-point routes with NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack. NVDA was captured as 2026.1.1 on Windows 11 with current Chrome; exact versions were not recorded for the other four targets.
 
 ## [1.14.1] - 2026-08-17
 
