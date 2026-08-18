@@ -67,8 +67,8 @@ The library presents a strong accessibility baseline across interactive componen
 - Dynamic RTL browser gate: 288/288 checks passed
 - Browser performance gate: all 90 public routes passed three cold-load samples and their budgets
 - Lighthouse CI: 12/12 representative reports passed the committed local budgets
-- Visual-baseline inventory: 464 reference snapshots are tracked; the current candidate still requires explicit human review
-- Strict matrix: 1775 cells pass and 116 are justified `N/A`; the 89 remaining `UNVERIFIED` human cells are visual review only
+- Visual-baseline inventory: all 464 tracked reference snapshots across the 89 public runtime routes were reviewed and approved by Pedro Moreno Trujillo
+- Strict matrix: 1864 cells pass and 116 are justified `N/A`; no applicable cell remains `FAIL`, `BLOCKED` or `UNVERIFIED`
 - Visual baselines: may only be created or replaced after explicit human review approval
 - Validation model: showcase runs against the compiled `@neural-ui/core` package, so these checks act as integration validation of the library in real consumer flows
 
@@ -113,11 +113,11 @@ This is an evidence-backed engineering audit, not a paid or external WCAG certif
 - `toast`
 - `tooltip`
 
-### Why this is not labeled 100%
+### Why this is not called an external certification
 
 - NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack are recorded as 89/89 PASS. Exact device and software versions remain unrecorded for the four non-NVDA targets.
-- The changed visual baselines have not yet been approved by a named human reviewer.
-- Automated semantics and keyboard checks cannot prove what a screen reader announces.
+- All 89 public runtime routes and the exact digest of their 464 tracked visual baselines have named human approval.
+- The complete engineering validation is project-owned and intentionally does not claim a paid third-party accessibility certification.
 
 ## Recommended Wording
 

@@ -1,9 +1,9 @@
 {
   "metadata": {
     "schemaVersion": 1,
-    "capturedAt": "2026-08-16",
-    "auditedCoreCommit": "226486df73d67b1d64f0a405ed3338a256cfbf07",
-    "auditedShowcaseCommit": "f206904d83a6542b56e569f548a4f3a936a458fb",
+    "capturedAt": "2026-08-18",
+    "auditedCoreCommit": "e15cf1e742106dbb5da58e77679d2bef76f8a1e0",
+    "auditedShowcaseCommit": "905779c60aab85ac639ae30082fa376122a9a579",
     "libraryVersion": "1.14.2",
     "evidenceFreshness": "Current working-tree evidence; reproduce with the release gates before publication.",
     "baseline": {
@@ -154,9 +154,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -326,9 +328,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -499,9 +503,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -668,9 +674,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -835,9 +843,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -1002,9 +1012,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -1171,9 +1183,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -1342,9 +1356,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -1514,9 +1530,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -1685,9 +1703,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -1854,9 +1874,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -2023,9 +2045,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -2196,9 +2220,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -2365,9 +2391,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -2537,9 +2565,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -2708,9 +2738,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -2880,9 +2912,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -3053,9 +3087,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -3224,9 +3260,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -3396,9 +3434,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -3568,9 +3608,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -3739,9 +3781,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -3910,9 +3954,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -4082,9 +4128,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -4255,9 +4303,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -4424,9 +4474,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -4593,9 +4645,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -4762,9 +4816,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -4932,9 +4988,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -5101,9 +5159,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -5268,9 +5328,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -5438,9 +5500,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -5610,9 +5674,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -5781,9 +5847,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -5954,9 +6022,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -6128,9 +6198,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -6302,9 +6374,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -6475,9 +6549,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -6646,9 +6722,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -6819,9 +6897,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -6992,9 +7072,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -7163,9 +7245,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -7334,9 +7418,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -7503,9 +7589,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -7672,9 +7760,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -7845,9 +7935,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -8016,9 +8108,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -8187,9 +8281,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -8361,9 +8457,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -8532,9 +8630,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -8704,9 +8804,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -8873,9 +8975,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -9042,9 +9146,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -9215,9 +9321,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -9387,9 +9495,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -9559,9 +9669,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -9728,9 +9840,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -9905,9 +10019,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -10078,9 +10194,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -10252,9 +10370,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -10424,9 +10544,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -10597,9 +10719,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -10768,9 +10892,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -10937,9 +11063,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -11109,9 +11237,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -11280,9 +11410,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -11449,9 +11581,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -11618,9 +11752,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -11789,9 +11925,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -11958,9 +12096,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -12128,9 +12268,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -12302,9 +12444,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -12476,9 +12620,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -12647,9 +12793,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -12820,9 +12968,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -12991,9 +13141,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -13306,9 +13458,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -13475,9 +13629,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -13645,9 +13801,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -13820,9 +13978,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -13994,9 +14154,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -14163,9 +14325,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -14336,9 +14500,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -14507,9 +14673,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -14680,9 +14848,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -14852,9 +15022,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -15025,9 +15197,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",
@@ -15186,9 +15360,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "N/A",
@@ -15356,9 +15532,11 @@
           "note": "The public route passes the five-viewport audit in Chromium, Firefox and WebKit."
         },
         "visual": {
-          "status": "UNVERIFIED",
-          "evidence": [],
-          "note": "Applicability and evidence have not yet been reviewed."
+          "status": "PASS",
+          "evidence": [
+            "../neural-ui-showcase/e2e/visual-baseline-approval.json"
+          ],
+          "note": "Pedro Moreno Trujillo reviewed and approved the 464 tracked visual baselines on 2026-08-18T05:24:34.793Z."
         },
         "harness": {
           "status": "PASS",

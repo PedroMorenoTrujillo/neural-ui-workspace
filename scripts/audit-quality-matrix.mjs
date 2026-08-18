@@ -35,6 +35,9 @@ const showcaseByEntryPoint = new Map(
 const manualAtEvidence = existsSync(manualAtEvidencePath)
   ? JSON.parse(readFileSync(manualAtEvidencePath, 'utf8'))
   : { results: [] };
+const visualApproval = existsSync(visualApprovalPath)
+  ? JSON.parse(readFileSync(visualApprovalPath, 'utf8'))
+  : null;
 const manualAtByEntryPointAndTarget = new Map(
   (manualAtEvidence.results ?? []).map((result) => [
     `${result.entryPoint}:${result.target}`,
@@ -592,7 +595,7 @@ function initialMetadata(existingMetadata) {
   ).length;
   return {
     schemaVersion: 1,
-    capturedAt: '2026-08-16',
+    capturedAt: '2026-08-18',
     auditedCoreCommit: gitHead(workspaceRoot),
     auditedShowcaseCommit: gitHead(join(workspaceRoot, '../neural-ui-showcase')),
     libraryVersion: packageJson.version,
@@ -854,6 +857,17 @@ function discoverEntryPoints(existingManifest) {
             'The public route passes the five-viewport audit in Chromium, Firefox and WebKit.',
           );
         }
+      }
+
+      if (
+        !isTestingUtility &&
+        visualApproval?.approval?.status === 'APPROVED' &&
+        visualApproval.approval.approvedSnapshotDigest === visualApproval.snapshots?.digest
+      ) {
+        checks.visual = passing(
+          ['../neural-ui-showcase/e2e/visual-baseline-approval.json'],
+          `${visualApproval.approval.reviewer} reviewed and approved the ${visualApproval.snapshots.files} tracked visual baselines on ${visualApproval.approval.reviewedAt}.`,
+        );
       }
 
       checks.ssr = passing(

@@ -61,6 +61,9 @@ const qualityStatuses = qualityMatrix.entryPoints
 const harnesses = qualityMatrix.entryPoints.filter(
   (entryPoint) => entryPoint.checks.harness.status === 'PASS',
 ).length;
+const pendingVisualReviews = qualityMatrix.entryPoints.filter(
+  (entryPoint) => entryPoint.checks.visual.status === 'UNVERIFIED',
+).length;
 const showcaseBaseline = qualityMatrix.metadata.baseline;
 const block = [
   '<!-- neural-ui-metrics:start -->',
@@ -71,7 +74,7 @@ const block = [
   `- **Public component harnesses:** ${harnesses} interactive entry points · ${entryPoints - harnesses} justified N/A`,
   `- **Showcase evidence:** ${showcaseBaseline.showcaseDemoPages} demos · ${showcaseEvidence.docs.apiPages} API pages · ${showcaseEvidence.accessibility.passed}/${showcaseEvidence.accessibility.checks} accessibility · ${showcaseEvidence.rtl.checks} RTL · ${showcaseEvidence.responsive.checks} responsive checks`,
   `- **Quality matrix:** ${qualityStatuses.PASS ?? 0} PASS · ${qualityStatuses['N/A'] ?? 0} N/A · ${qualityStatuses.UNVERIFIED ?? 0} pending human validation`,
-  `- **Visual evidence:** ${showcaseBaseline.trackedVisualSnapshots} tracked snapshots · explicit human approval required`,
+  `- **Visual evidence:** ${showcaseBaseline.trackedVisualSnapshots} tracked snapshots · ${pendingVisualReviews ? 'explicit human approval required' : 'human review approved'}`,
   '<!-- neural-ui-metrics:end -->',
 ].join('\n');
 const files = [join(root, 'README.md'), join(root, 'projects/ui-core/README.md')];
