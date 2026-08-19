@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 import { NeuTreeSelectComponent, NeuTreeSelectNode } from './neu-tree-select.component';
 
 describe('NeuTreeSelectComponent', () => {
-  let fixture: ComponentFixture<NeuTreeSelectComponent>;
+  let fixture: ComponentFixture<NeuTreeSelectComponent<NeuTreeSelectNode, string>>;
   const nodes: NeuTreeSelectNode[] = [
     {
       value: 'admin',
@@ -18,7 +18,9 @@ describe('NeuTreeSelectComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [NeuTreeSelectComponent] }).compileComponents();
-    fixture = TestBed.createComponent(NeuTreeSelectComponent);
+    fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
+      NeuTreeSelectComponent<NeuTreeSelectNode, string>
+    >;
     fixture.componentRef.setInput('nodes', nodes);
     fixture.detectChanges();
   });
@@ -93,11 +95,17 @@ describe('NeuTreeSelectComponent', () => {
     component.nodeExpand.subscribe((node) => expanded.push(node));
     const event = new Event('click');
     const stop = vi.spyOn(event, 'stopPropagation');
+    expect(component.expanded().has('admin')).toBe(false);
 
     expect(component.visibleNodes().map((item) => item.node.value)).toEqual(['admin', 'lazy', 'disabled']);
     component.toggleExpanded(nodes[0], event);
     expect(stop).toHaveBeenCalled();
     expect(component.visibleNodes().map((item) => item.node.value)).toEqual(['admin', 'editor', 'lazy', 'disabled']);
+    expect(component.expanded().has('admin')).toBe(true);
+
+    component.toggleExpanded(nodes[0], new Event('click'));
+    expect(component.expanded().has('admin')).toBe(false);
+    expect(component.visibleNodes().map((item) => item.node.value)).toEqual(['admin', 'lazy', 'disabled']);
 
     component.toggleExpanded(nodes[1], new Event('click'));
     expect(expanded).toEqual([nodes[1]]);
@@ -209,5 +217,207 @@ describe('NeuTreeSelectComponent', () => {
     expect(() => fresh.componentInstance.selectNode(nodes[0])).not.toThrow();
     expect(() => fresh.componentInstance.clear(new MouseEvent('click'))).not.toThrow();
     expect(fresh.componentInstance.values()).toEqual([]);
+  });
+
+  it('searches across full tree even with collapsed nodes', () => {
+    interface Department {
+      id: number;
+      name: string;
+      children?: Department[];
+    }
+
+    const departments: Department[] = [{ id: 1, name: 'Root', children: [{ id: 2, name: 'Child' }] }];
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
+      NeuTreeSelectComponent<Department, number>
+    >;
+    const component = fixture.componentInstance;
+
+    fixture.componentRef.setInput('nodes', departments);
+    fixture.componentRef.setInput('optionLabel', 'name');
+    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.detectChanges();
+
+    component.query.set('child');
+    expect(component.visibleNodes().map((item) => item.label)).toEqual(['Child']);
+  });
+
+  it('supports key-based optionLabel, optionValue and optionDisabled accessors', () => {
+    interface Department {
+      id: number;
+      name: string;
+      disabled?: boolean;
+      children?: Department[];
+    }
+
+    const departments: Department[] = [
+      { id: 1, name: 'Platform', children: [{ id: 11, name: 'Users' }] },
+      { id: 2, name: 'Operations', disabled: true },
+    ];
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
+      NeuTreeSelectComponent<Department, number>
+    >;
+    fixture.componentRef.setInput('nodes', departments);
+    fixture.componentRef.setInput('optionLabel', 'name');
+    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionDisabled', 'disabled');
+    fixture.componentRef.setInput('multiple', true);
+    fixture.detectChanges();
+
+    const events: Department[][] = [];
+    fixture.componentInstance.selectionChange.subscribe((selection) => events.push(selection));
+    const values: Array<number | number[] | null> = [];
+    fixture.componentInstance.registerOnChange((value) => values.push(value));
+
+    fixture.componentInstance.selectNode(departments[0]);
+    fixture.componentInstance.selectNode(departments[1]);
+
+    expect(fixture.componentInstance.values()).toEqual([1]);
+    expect(values.at(-1)).toEqual([1]);
+    expect(events.at(-1)).toEqual([departments[0]]);
+  });
+
+  it('supports numeric optionValue and numeric zero through writeValue', () => {
+    interface MetricNode {
+      id: number;
+      name: string;
+    }
+
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
+      NeuTreeSelectComponent<MetricNode, number>
+    >;
+    const component = fixture.componentInstance;
+
+    fixture.componentRef.setInput('nodes', [
+      { id: 0, name: 'Zero' },
+      { id: 1, name: 'One' },
+    ]);
+    fixture.componentRef.setInput('optionLabel', 'name');
+    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.detectChanges();
+
+    component.writeValue(0);
+    expect(component.values()).toEqual([0]);
+
+    component.selectNode({ id: 0, name: 'Zero' });
+    expect(component.values()).toEqual([0]);
+  });
+
+  it('supports function-based accessors and full-domain values when optionValue is omitted', () => {
+    interface Department {
+      id: number;
+      name: string;
+      disabled?: boolean;
+      descendants?: Department[];
+    }
+
+    const departments: Department[] = [{ id: 1, name: 'Root', descendants: [{ id: 2, name: 'Child' }] }];
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
+      NeuTreeSelectComponent<Department, Department>
+    >;
+    const component = fixture.componentInstance as NeuTreeSelectComponent<Department, Department>;
+
+    fixture.componentRef.setInput('nodes', departments);
+    fixture.componentRef.setInput('optionLabel', (node: Department) => node.name);
+    fixture.componentRef.setInput('optionChildren', (node: Department) => node.descendants ?? []);
+    fixture.detectChanges();
+
+    const cvaValues: Array<Department | Department[] | null> = [];
+    const emitted: Department[][] = [];
+    component.registerOnChange((value) => {
+      cvaValues.push(value as Department | Department[] | null);
+    });
+    component.selectionChange.subscribe((selection) => emitted.push(selection));
+
+    const child = departments[0]?.descendants?.[0];
+    expect(component.optionValueOf(child!)).toEqual(child);
+    component.selectNode(child!);
+
+    expect(component.values()).toEqual([child]);
+    expect(cvaValues.at(-1)).toBe(child);
+    expect(emitted.at(-1)).toEqual([child]);
+  });
+
+  it('supports legacy optionValue behavior and primitive default option values', () => {
+    const primitive = ['admin', 'editor', 'viewer'];
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
+      NeuTreeSelectComponent<string, string>
+    >;
+
+    fixture.componentRef.setInput('nodes', primitive);
+    fixture.componentRef.setInput('searchable', false);
+    fixture.detectChanges();
+
+    fixture.componentInstance.writeValue('editor');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.values()).toEqual(['editor']);
+    fixture.componentInstance.selectNode('admin');
+    expect(fixture.componentInstance.isSelected('admin')).toBe(true);
+  });
+
+  it('supports optionValue function accessors for expanded/collapsed state', () => {
+    interface Department {
+      id: number;
+      name: string;
+      children?: Department[];
+    }
+
+    const departments: Department[] = [
+      {
+        id: 1,
+        name: 'Platform',
+        children: [{ id: 11, name: 'Users' }],
+      },
+    ];
+
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
+      NeuTreeSelectComponent<Department, string>
+    >;
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('nodes', departments);
+    fixture.componentRef.setInput('optionLabel', 'name');
+    fixture.componentRef.setInput('optionValue', (node: Department) => `id:${node.id}`);
+    fixture.detectChanges();
+
+    component.toggleExpanded(departments[0], new Event('click'));
+    expect(component.expanded().has('id:1')).toBe(true);
+    expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Platform', 'Users']);
+
+    component.toggleExpanded(departments[0], new Event('click'));
+    expect(component.expanded().has('id:1')).toBe(false);
+    expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Platform']);
+  });
+
+  it('supports full-domain V expansion, collapse and selection without optionValue', () => {
+    interface Department {
+      id: number;
+      name: string;
+      descendants?: Department[];
+    }
+
+    const departments: Department[] = [{ id: 1, name: 'Root', descendants: [{ id: 2, name: 'Child' }] }];
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
+      NeuTreeSelectComponent<Department, Department>
+    >;
+    const component = fixture.componentInstance as NeuTreeSelectComponent<Department, Department>;
+
+    fixture.componentRef.setInput('nodes', departments);
+    fixture.componentRef.setInput('optionLabel', (node: Department) => node.name);
+    fixture.componentRef.setInput('optionChildren', 'descendants');
+    fixture.detectChanges();
+
+    const root = departments[0];
+    const child = departments[0]?.descendants?.[0];
+    expect(component.expanded().size).toBe(0);
+
+    component.toggleExpanded(root, new Event('click'));
+    expect(component.expanded().has(root)).toBe(true);
+    expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Root', 'Child']);
+
+    component.selectNode(child!);
+    expect(component.values()).toEqual([child]);
+
+    component.toggleExpanded(root, new Event('click'));
+    expect(component.expanded().has(root)).toBe(false);
+    expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Root']);
   });
 });
