@@ -13,6 +13,16 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValue,
+  NeuOptionValueAccessor,
+  neuOptionValuesEqual,
+  resolveNeuOptionDisabled,
+  resolveNeuOptionLabel,
+  resolveNeuOptionValue,
+} from '@neural-ui/core/option-api';
 
 export interface NeuListboxOption {
   value: string;
@@ -22,8 +32,8 @@ export interface NeuListboxOption {
 }
 
 @Directive({ selector: 'ng-template[neuListboxItem]' })
-export class NeuListboxItemDirective {
-  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuListboxOption }>) {}
+export class NeuListboxItemDirective<T = NeuListboxOption> {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: T }>) {}
 }
 @Directive({ selector: 'ng-template[neuListboxHeader]' })
 export class NeuListboxHeaderDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
@@ -72,15 +82,15 @@ export class NeuListboxEmptyDirective { constructor(readonly templateRef: Templa
       (keydown)="onKeyDown($event)"
     >
       @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
-      @for (option of filteredOptions(); track option.value; let i = $index) {
+      @for (option of filteredOptions(); track trackByOption($index, option); let i = $index) {
         <button
           type="button"
           class="neu-listbox__option"
           role="option"
           [class.neu-listbox__option--active]="activeIndex() === i"
-          [class.neu-listbox__option--selected]="isSelected(option.value)"
-          [disabled]="isDisabled() || option.disabled"
-          [attr.aria-selected]="isSelected(option.value)"
+          [class.neu-listbox__option--selected]="isSelected(optionValueOf(option))"
+          [disabled]="isDisabled() || isOptionDisabled(option)"
+          [attr.aria-selected]="isSelected(optionValueOf(option))"
           (click)="toggleOption(option)"
         >
           @if (itemTpl()) {
@@ -89,7 +99,7 @@ export class NeuListboxEmptyDirective { constructor(readonly templateRef: Templa
               [ngTemplateOutletContext]="{ $implicit: option }"
             />
           } @else {
-            {{ option.label }}
+            {{ optionLabelOf(option) }}
           }
         </button>
       }
@@ -105,8 +115,11 @@ export class NeuListboxEmptyDirective { constructor(readonly templateRef: Templa
   `,
   styleUrl: './neu-listbox.component.scss',
 })
-export class NeuListboxComponent implements ControlValueAccessor {
-  readonly options = input<NeuListboxOption[]>([]);
+export class NeuListboxComponent<
+  T = NeuListboxOption,
+  V = NeuOptionValue<T>,
+> implements ControlValueAccessor {
+  readonly options = input<readonly T[]>([]);
   readonly label = input('');
   readonly ariaLabel = input('Options');
   readonly hint = input('');
@@ -116,32 +129,60 @@ export class NeuListboxComponent implements ControlValueAccessor {
   readonly searchPlaceholder = input('Search...');
   readonly disabled = input(false);
 
-  readonly selectionChange = output<NeuListboxOption[]>();
-  readonly itemTpl = contentChild(NeuListboxItemDirective);
+  /** Property or function used to obtain the visible option label. */
+  readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
+
+  /** Property or function used to obtain the form value. Defaults to complete domain model. */
+  readonly optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
+
+  /** Property or function used to determine whether an option is disabled. */
+  readonly optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
+
+  readonly selectionChange = output<T[]>();
+  readonly itemTpl = contentChild(NeuListboxItemDirective<T>);
   readonly headerTpl = contentChild(NeuListboxHeaderDirective);
   readonly footerTpl = contentChild(NeuListboxFooterDirective);
   readonly emptyTpl = contentChild(NeuListboxEmptyDirective);
 
   readonly query = signal('');
   readonly activeIndex = signal(0);
-  readonly values = signal<string[]>([]);
+  readonly values = signal<V[]>([]);
   readonly cvaDisabled = signal(false);
   readonly labelId = `neu-listbox-label-${Math.random().toString(36).slice(2)}`;
 
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
   readonly filteredOptions = computed(() => {
     const q = this.query().trim().toLowerCase();
-    return q ? this.options().filter((option) => option.label.toLowerCase().includes(q)) : this.options();
+    return q
+      ? this.options().filter((option) => this.optionLabelOf(option).toLowerCase().includes(q))
+      : this.options();
   });
+  readonly trackByOption = (_index: number, option: T) => this.optionValueOf(option);
 
-  private onChange: (value: string | string[] | null) => void = () => {};
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string | string[] | null): void {
-    this.values.set(Array.isArray(value) ? value : value ? [value] : []);
+  optionLabelOf(option: T): string {
+    return resolveNeuOptionLabel(option, this.optionLabel());
   }
 
-  registerOnChange(fn: (value: string | string[] | null) => void): void {
+  optionValueOf(option: T): V {
+    return resolveNeuOptionValue<T, V>(option, this.optionValue());
+  }
+
+  isOptionDisabled(option: T): boolean {
+    return resolveNeuOptionDisabled(option, this.optionDisabled());
+  }
+
+  private onChange: (value: V | V[] | null) => void = () => {};
+  private onTouched: () => void = () => {};
+
+  writeValue(value: V | V[] | null): void {
+    if (value === null || value === undefined) {
+      this.values.set([]);
+      return;
+    }
+    this.values.set(Array.isArray(value) ? [...value] : [value]);
+  }
+
+  registerOnChange(fn: (value: V | V[] | null) => void): void {
     this.onChange = fn;
   }
 
@@ -153,27 +194,28 @@ export class NeuListboxComponent implements ControlValueAccessor {
     this.cvaDisabled.set(isDisabled);
   }
 
-  isSelected(value: string): boolean {
-    return this.values().includes(value);
+  isSelected(value: V): boolean {
+    return this.values().some((selected) => neuOptionValuesEqual(selected, value));
   }
 
-  toggleOption(option: NeuListboxOption): void {
-    if (option.disabled || this.isDisabled()) {
+  toggleOption(option: T): void {
+    if (this.isOptionDisabled(option) || this.isDisabled()) {
       return;
     }
+    const value = this.optionValueOf(option);
     const next = this.multiple()
-      ? this.isSelected(option.value)
-        ? this.values().filter((value) => value !== option.value)
-        : [...this.values(), option.value]
-      : [option.value];
+      ? this.isSelected(value)
+        ? this.values().filter((item) => !neuOptionValuesEqual(item, value))
+        : [...this.values(), value]
+      : [value];
     this.values.set(next);
     this.onTouched();
     this.onChange(this.multiple() ? next : (next[0] ?? null));
-    this.selectionChange.emit(this.options().filter((item) => next.includes(item.value)));
+    this.selectionChange.emit(this.selectedOptions(next));
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    const enabled = this.filteredOptions().filter((option) => !option.disabled);
+    const enabled = this.filteredOptions().filter((option) => !this.isOptionDisabled(option));
     if (!enabled.length) {
       return;
     }
@@ -191,5 +233,11 @@ export class NeuListboxComponent implements ControlValueAccessor {
         this.toggleOption(option);
       }
     }
+  }
+
+  private selectedOptions(values: readonly V[]): T[] {
+    return this.options().filter((option) =>
+      values.some((value) => neuOptionValuesEqual(this.optionValueOf(option), value)),
+    );
   }
 }

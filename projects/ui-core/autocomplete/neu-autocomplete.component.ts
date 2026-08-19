@@ -20,6 +20,16 @@ import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValue,
+  NeuOptionValueAccessor,
+  neuOptionValuesEqual,
+  resolveNeuOptionDisabled,
+  resolveNeuOptionLabel,
+  resolveNeuOptionValue,
+} from '@neural-ui/core/option-api';
 
 export interface NeuAutocompleteOption {
   /** Valor / Value */
@@ -31,8 +41,8 @@ export interface NeuAutocompleteOption {
 }
 
 @Directive({ selector: 'ng-template[neuAutocompleteItem]' })
-export class NeuAutocompleteItemDirective {
-  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuAutocompleteOption }>) {}
+export class NeuAutocompleteItemDirective<T = NeuAutocompleteOption> {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: T }>) {}
 }
 @Directive({ selector: 'ng-template[neuAutocompleteHeader]' })
 export class NeuAutocompleteHeaderDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
@@ -166,9 +176,9 @@ let _seq = 0;
             role="option"
             [id]="_optionId(i)"
             [class.neu-autocomplete__option--active]="_activeIndex() === i"
-            [class.neu-autocomplete__option--disabled]="opt.disabled"
+            [class.neu-autocomplete__option--disabled]="isOptionDisabled(opt)"
             [attr.aria-selected]="_activeIndex() === i"
-            [attr.aria-disabled]="opt.disabled ?? false"
+            [attr.aria-disabled]="isOptionDisabled(opt)"
             (mousedown)="selectOption(opt)"
           >
             @if (itemTpl()) {
@@ -177,7 +187,7 @@ let _seq = 0;
                 [ngTemplateOutletContext]="{ $implicit: opt }"
               />
             } @else {
-              {{ opt.label }}
+              {{ optionLabelOf(opt) }}
             }
           </div>
         </ng-template>
@@ -207,7 +217,7 @@ let _seq = 0;
             [attr.aria-label]="label() || placeholder()"
             [style.width.px]="overlayWidth()"
           >
-            @for (opt of _filtered(); track opt.label; let i = $index) {
+            @for (opt of _filtered(); track trackByOption($index, opt); let i = $index) {
               <ng-container
                 [ngTemplateOutlet]="autocompleteOptionTpl"
                 [ngTemplateOutletContext]="{ $implicit: opt, index: i }"
@@ -231,9 +241,12 @@ let _seq = 0;
   `,
   styleUrl: './neu-autocomplete.component.scss',
 })
-export class NeuAutocompleteComponent implements ControlValueAccessor {
+export class NeuAutocompleteComponent<
+  T = NeuAutocompleteOption,
+  V = NeuOptionValue<T>,
+> implements ControlValueAccessor {
   // ── Inputs / Outputs ────────────────────────────────────────────
-  readonly options = input<NeuAutocompleteOption[]>([]);
+  readonly options = input<readonly T[]>([]);
   readonly placeholder = input<string>('');
   readonly label = input<string>('');
   readonly hint = input<string>('');
@@ -256,12 +269,21 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   /** Número de resultados visibles en el viewport virtual / Number of visible results in the virtual viewport */
   readonly virtualScrollVisibleItems = input<number>(8);
 
+  /** Propiedad o función para mostrar la etiqueta de cada opción. */
+  readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
+
+  /** Propiedad o función para obtener el valor de cada opción. Por defecto se usa el modelo completo. */
+  readonly optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
+
+  /** Propiedad o función para decidir si una opción está deshabilitada. */
+  readonly optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
+
   /** Emitido al seleccionar una opción / Emitted when an option is selected */
-  readonly optionSelected = output<NeuAutocompleteOption>();
+  readonly optionSelected = output<T | null>();
 
   /** Emitido al cambiar el texto del input / Emitted on query change */
   readonly queryChange = output<string>();
-  readonly itemTpl = contentChild(NeuAutocompleteItemDirective);
+  readonly itemTpl = contentChild(NeuAutocompleteItemDirective<T>);
   readonly headerTpl = contentChild(NeuAutocompleteHeaderDirective);
   readonly footerTpl = contentChild(NeuAutocompleteFooterDirective);
   readonly emptyTpl = contentChild(NeuAutocompleteEmptyDirective);
@@ -313,7 +335,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   private readonly _overlay = inject(Overlay);
   readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
 
-  private _onChange: (v: unknown) => void = () => {};
+  private _onChange: (v: V | null) => void = () => {};
   private _onTouched: () => void = () => {};
 
   // ── Computed ─────────────────────────────────────────────────────
@@ -321,7 +343,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     const q = this._query().toLowerCase().trim();
     if (!q && !this.dropdown()) return [];
     if (q.length < this.minLength()) return [];
-    return this.options().filter((o) => o.label.toLowerCase().includes(q));
+    return this.options().filter((o) => this.optionLabelOf(o).toLowerCase().includes(q));
   });
 
   readonly _activeId = computed(() => {
@@ -370,8 +392,15 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     () => `${this.virtualScrollVisibleItems() * this.virtualScrollItemSize()}px`,
   );
 
-  readonly trackByOption = (index: number, option: NeuAutocompleteOption) =>
-    option.value ?? option.label ?? index;
+  readonly trackByOption = (index: number, option: T) => {
+    const value = this.optionValueOf(option);
+    if (value !== null && value !== undefined) {
+      return value;
+    }
+
+    const label = this.optionLabelOf(option);
+    return label ? label : index;
+  };
 
   _optionId(i: number): string {
     return `${this._listId}-opt-${i}`;
@@ -428,7 +457,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     this._focused.set(false);
     this._onTouched();
     if (this.forceSelection() && this._query()) {
-      const match = this.options().find((option) => option.label === this._query());
+      const match = this.options().find((option) => this.optionLabelOf(option) === this._query());
       if (!match) {
         this.clear();
       }
@@ -440,7 +469,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   openAll(): void {
     this._syncOverlayWidth();
     this._isOpen.set(true);
-    this._activeIndex.set(this._filtered().findIndex((option) => !option.disabled));
+    this._activeIndex.set(this._filtered().findIndex((option) => !this.isOptionDisabled(option)));
   }
 
   onKeyDown(e: KeyboardEvent): void {
@@ -462,7 +491,7 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
       case 'Enter': {
         const idx = this._activeIndex();
         const opt = this._filtered()[idx];
-        if (opt && !opt.disabled) this.selectOption(opt);
+        if (opt && !this.isOptionDisabled(opt)) this.selectOption(opt);
         break;
       }
       case 'Escape':
@@ -486,7 +515,8 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
       nextIndex =
         step === 1 ? Math.min(nextIndex + 1, filtered.length - 1) : Math.max(nextIndex - 1, 0);
 
-      if (!filtered[nextIndex]?.disabled) {
+      const candidate = filtered[nextIndex];
+      if (!this.isOptionDisabled(candidate)) {
         this._activeIndex.set(nextIndex);
         return;
       }
@@ -497,16 +527,16 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
     }
 
     if (currentIndex === -1) {
-      this._activeIndex.set(filtered.findIndex((option) => !option.disabled));
+      this._activeIndex.set(filtered.findIndex((option) => !this.isOptionDisabled(option)));
     }
   }
 
-  selectOption(opt: NeuAutocompleteOption): void {
-    if (opt.disabled) return;
-    this._query.set(opt.label);
+  selectOption(opt: T): void {
+    if (this.isOptionDisabled(opt)) return;
+    this._query.set(this.optionLabelOf(opt));
     this._isOpen.set(false);
     this._activeIndex.set(-1);
-    this._onChange(opt.value);
+    this._onChange(this.optionValueOf(opt));
     this.optionSelected.emit(opt);
   }
 
@@ -576,16 +606,16 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
   }
 
   // ── CVA ──────────────────────────────────────────────────────────
-  writeValue(val: unknown): void {
+  writeValue(val: V | null | undefined): void {
     if (val === null || val === undefined) {
       this._query.set('');
       return;
     }
-    const match = this.options().find((o) => o.value === val);
-    this._query.set(match ? match.label : String(val));
+    const match = this.options().find((o) => neuOptionValuesEqual(this.optionValueOf(o), val as V));
+    this._query.set(match ? this.optionLabelOf(match) : String(val));
   }
 
-  registerOnChange(fn: (v: unknown) => void): void {
+  registerOnChange(fn: (v: V | null) => void): void {
     this._onChange = fn;
   }
 
@@ -595,5 +625,17 @@ export class NeuAutocompleteComponent implements ControlValueAccessor {
 
   setDisabledState(d: boolean): void {
     this._cvaDisabled.set(d);
+  }
+
+  optionLabelOf(option: T): string {
+    return resolveNeuOptionLabel(option, this.optionLabel());
+  }
+
+  optionValueOf(option: T): V {
+    return resolveNeuOptionValue<T, V>(option, this.optionValue());
+  }
+
+  isOptionDisabled(option: T): boolean {
+    return resolveNeuOptionDisabled(option, this.optionDisabled());
   }
 }

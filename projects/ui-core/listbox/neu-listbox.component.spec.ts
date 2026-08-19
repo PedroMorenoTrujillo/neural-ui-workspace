@@ -9,7 +9,7 @@ import {
 } from './neu-listbox.component';
 
 describe('NeuListboxComponent', () => {
-  let fixture: ComponentFixture<NeuListboxComponent>;
+  let fixture: ComponentFixture<NeuListboxComponent<NeuListboxOption, string>>;
   const options: NeuListboxOption[] = [
     { label: 'Alpha', value: 'a' },
     { label: 'Beta', value: 'b' },
@@ -18,7 +18,9 @@ describe('NeuListboxComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [NeuListboxComponent] }).compileComponents();
-    fixture = TestBed.createComponent(NeuListboxComponent);
+    fixture = TestBed.createComponent(
+      NeuListboxComponent as unknown as new () => NeuListboxComponent<NeuListboxOption, string>,
+    );
     fixture.componentRef.setInput('options', options);
     fixture.detectChanges();
   });
@@ -175,7 +177,7 @@ describe('NeuListboxComponent', () => {
 
     fixture.componentInstance.toggleOption({ label: 'Broken' } as NeuListboxOption);
 
-    expect(changes).toEqual([null]);
+    expect(changes).toEqual([{ label: 'Broken' }]);
   });
 
   it('resolves the CVA provider through Reactive Forms with a projected template', async () => {
@@ -209,5 +211,147 @@ describe('NeuListboxComponent', () => {
     host.detectChanges();
 
     expect(host.componentInstance.control.value).toBe('b');
+  });
+
+  it('supports key-based optionLabel / optionValue / optionDisabled accessors', () => {
+    const fixture = TestBed.createComponent(NeuListboxComponent) as ComponentFixture<
+      NeuListboxComponent<any, string>
+    >;
+    const users = [
+      { id: 'a', name: 'Alice', disabled: false },
+      { id: 'b', name: 'Bob', disabled: false },
+      { id: 'c', name: 'Charlie', disabled: true },
+    ];
+
+    fixture.componentRef.setInput('options', users);
+    fixture.componentRef.setInput('optionLabel', 'name');
+    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionDisabled', 'disabled');
+    fixture.componentRef.setInput('multiple', true);
+    fixture.detectChanges();
+
+    const emitted: any[] = [];
+    fixture.componentInstance.selectionChange.subscribe((value) => emitted.push(value));
+
+    const values: Array<string | string[] | null> = [];
+    fixture.componentInstance.registerOnChange((value) => values.push(value));
+    fixture.componentInstance.toggleOption(users[0]);
+    fixture.componentInstance.toggleOption(users[1]);
+    fixture.componentInstance.toggleOption(users[2]);
+
+    expect(values.at(-1)).toEqual(['a', 'b']);
+    expect(fixture.componentInstance.values()).toEqual(['a', 'b']);
+    expect(fixture.componentInstance.isSelected('a')).toBe(true);
+    expect(emitted.at(-1)).toEqual([users[0], users[1]]);
+  });
+
+  it('supports function-based accessors and emits complete selected options', () => {
+    const users = [
+      { id: 'u-1', label: 'alpha', unavailable: false },
+      { id: 'u-2', label: 'bravo', unavailable: true },
+    ];
+    const fixture = TestBed.createComponent(NeuListboxComponent) as ComponentFixture<
+      NeuListboxComponent<any, string>
+    >;
+    const listbox = fixture.componentInstance as NeuListboxComponent<any, string>;
+
+    fixture.componentRef.setInput('options', users);
+    fixture.componentRef.setInput('optionLabel', (option: typeof users[number]) => option.label.toUpperCase());
+    fixture.componentRef.setInput('optionValue', (option: typeof users[number]) => option.id);
+    fixture.componentRef.setInput(
+      'optionDisabled',
+      (option: typeof users[number]) => option.unavailable,
+    );
+    fixture.componentRef.setInput('multiple', false);
+    fixture.detectChanges();
+
+    const emitted: any[] = [];
+    fixture.componentInstance.selectionChange.subscribe((value) => emitted.push(value));
+
+    listbox.toggleOption(users[1]);
+    listbox.toggleOption(users[0]);
+
+    expect(fixture.componentInstance.values()).toEqual(['u-1']);
+    expect(emitted.at(-1)).toEqual([users[0]]);
+  });
+
+  it('supports full-domain option objects when optionValue is omitted', () => {
+    const users = [
+      { uid: 1, fullName: 'Admin', isDisabled: false },
+      { uid: 2, fullName: 'Viewer', isDisabled: false },
+    ];
+    const fixture = TestBed.createComponent(NeuListboxComponent) as ComponentFixture<
+      NeuListboxComponent<any, (typeof users)[number]>
+    >;
+    const listbox = fixture.componentInstance as NeuListboxComponent<any, (typeof users)[number]>;
+
+    fixture.componentRef.setInput('options', users as any);
+    fixture.componentRef.setInput('optionLabel', 'fullName');
+    fixture.componentRef.setInput('optionDisabled', 'isDisabled');
+    fixture.detectChanges();
+
+    listbox.toggleOption(users[1]);
+
+    expect(fixture.componentInstance.values()).toEqual([users[1]]);
+    expect(listbox.optionValueOf(users[1])).toEqual(users[1]);
+  });
+
+  it('supports single-selection with numeric optionValue and disabled domain options', () => {
+    interface User {
+      id: number;
+      fullName: string;
+      disabled: boolean;
+    }
+
+    const users: User[] = [
+      { id: 1, fullName: 'Admin', disabled: false },
+      { id: 2, fullName: 'Viewer', disabled: false },
+      { id: 3, fullName: 'Guest', disabled: true },
+    ];
+
+    const fixture = TestBed.createComponent(NeuListboxComponent) as ComponentFixture<
+      NeuListboxComponent<User, number>
+    >;
+    const listbox = fixture.componentInstance;
+
+    fixture.componentRef.setInput('options', users);
+    fixture.componentRef.setInput('optionLabel', 'fullName');
+    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionDisabled', 'disabled');
+    fixture.componentRef.setInput('multiple', false);
+    fixture.detectChanges();
+
+    const values: Array<number | number[] | null> = [];
+    const selectionChanges: User[][] = [];
+    fixture.componentInstance.registerOnChange((value) => values.push(value));
+    fixture.componentInstance.selectionChange.subscribe((value) => selectionChanges.push(value));
+
+    fixture.componentInstance.toggleOption(users[1]);
+
+    expect(values.at(-1)).toBe(2);
+    expect(fixture.componentInstance.values()).toEqual([2]);
+    expect(selectionChanges.at(-1)).toEqual([users[1]]);
+
+    fixture.componentInstance.toggleOption(users[2]);
+    expect(fixture.componentInstance.values()).toEqual([2]);
+  });
+
+  it('supports primitive options as values when optionValue is omitted', () => {
+    const primitiveOptions = ['read', 'write', 'admin'];
+    const fixture = TestBed.createComponent(NeuListboxComponent) as ComponentFixture<
+      NeuListboxComponent<string, string>
+    >;
+
+    fixture.componentRef.setInput('options', primitiveOptions);
+    fixture.componentRef.setInput('multiple', false);
+    fixture.componentRef.setInput('searchable', false);
+    fixture.detectChanges();
+
+    fixture.componentInstance.writeValue('admin');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.values()).toEqual(['admin']);
+    fixture.componentInstance.toggleOption('read' as any);
+    expect(fixture.componentInstance.isSelected('read')).toBe(true);
   });
 });

@@ -52,7 +52,9 @@ describe('NeuAutocompleteComponent', () => {
   it('_filtered should filter by label (case-insensitive)', () => {
     const f = setup();
     f.componentInstance.onQueryChange('ang');
-    expect(f.componentInstance._filtered().map((o) => o.label)).toContain('Angular');
+    expect((f.componentInstance._filtered() as NeuAutocompleteOption[]).map((o) => o.label)).toContain(
+      'Angular',
+    );
     expect(f.componentInstance._filtered().length).toBe(1);
   });
 
@@ -90,10 +92,10 @@ describe('NeuAutocompleteComponent', () => {
 
   it('optionSelected output should emit the selected option', () => {
     const f = setup();
-    const selected: NeuAutocompleteOption[] = [];
-    f.componentInstance.optionSelected.subscribe((o: NeuAutocompleteOption) => selected.push(o));
+    const selected: unknown[] = [];
+    f.componentInstance.optionSelected.subscribe((o) => selected.push(o));
     f.componentInstance.selectOption(OPTIONS[1]);
-    expect(selected[0].label).toBe('React');
+    expect((selected[0] as NeuAutocompleteOption).label).toBe('React');
   });
 
   it('clear() should reset query and emit null', () => {
@@ -472,7 +474,7 @@ describe('NeuAutocompleteComponent', () => {
     expect(f.componentInstance.trackByOption(1, { value: null, label: 'React' } as any)).toBe(
       'React',
     );
-    expect(f.componentInstance.trackByOption(2, { value: null, label: null } as any)).toBe(2);
+    expect(f.componentInstance.trackByOption(2, { value: null, label: '' } as any)).toBe(2);
   });
 
   it('onKeyDown should ignore non-Escape keys when there are no filtered results', () => {
@@ -754,5 +756,66 @@ describe('NeuAutocompleteComponent', () => {
     host.detectChanges();
 
     expect(host.componentInstance.control.value).toBe(1);
+  });
+
+  it('supports domain options with key-based optionLabel/optionValue/optionDisabled', () => {
+    const users = [
+      { id: 1, fullName: 'Alice', inactive: false },
+      { id: 2, fullName: 'Bob', inactive: true },
+      { id: 3, fullName: 'Carol', inactive: false },
+    ];
+    const fixture = TestBed.createComponent(NeuAutocompleteComponent) as any;
+
+    fixture.componentRef.setInput('options', users);
+    fixture.componentRef.setInput('optionLabel', 'fullName');
+    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionDisabled', 'inactive');
+    fixture.detectChanges();
+
+    const selected = vi.fn();
+    fixture.componentInstance.optionSelected.subscribe(selected);
+
+    fixture.componentInstance.onQueryChange('a');
+    fixture.componentInstance.selectOption(users[2]);
+
+    expect(fixture.componentInstance._query()).toBe('Carol');
+    expect(selected).toHaveBeenCalledWith(users[2]);
+    expect(fixture.componentInstance['_query']()).toBe('Carol');
+    expect(fixture.componentInstance['_isOpen']()).toBe(false);
+  });
+
+  it('supports function accessors and full object values when optionValue is omitted', () => {
+    const fixtures = [
+      { key: 'ts', title: 'TypeScript', disabled: false },
+      { key: 'kt', title: 'Kotlin', disabled: false },
+    ];
+    const fixture = TestBed.createComponent(NeuAutocompleteComponent) as any;
+
+    fixture.componentRef.setInput('options', fixtures);
+    fixture.componentRef.setInput('optionLabel', (option: (typeof fixtures)[number]) => option.title);
+    fixture.componentRef.setInput(
+      'optionDisabled',
+      (option: (typeof fixtures)[number]) => option.disabled,
+    );
+    fixture.detectChanges();
+
+    fixture.componentInstance.onQueryChange('K');
+    fixture.componentInstance.selectOption(fixtures[1]);
+
+    expect(fixture.componentInstance._query()).toBe('Kotlin');
+    expect(fixture.componentInstance.optionValueOf(fixtures[1])).toBe(fixtures[1]);
+  });
+
+  it('supports primitive options when optionValue is omitted', () => {
+    const fixture = TestBed.createComponent(NeuAutocompleteComponent) as any;
+
+    fixture.componentRef.setInput('options', ['alpha', 'beta', 'gamma']);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onQueryChange('be');
+    fixture.componentInstance.selectOption('beta');
+
+    expect(fixture.componentInstance._query()).toBe('beta');
+    expect(fixture.componentInstance.optionLabelOf('beta')).toBe('beta');
   });
 });
