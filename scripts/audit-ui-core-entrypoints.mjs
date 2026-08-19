@@ -4,7 +4,7 @@ import { join, relative } from 'node:path';
 const root = new URL('..', import.meta.url).pathname;
 const uiCore = join(root, 'projects/ui-core');
 
-const serviceOnlyEntryPoints = new Set(['url-state', 'testing']);
+const nonVisualEntryPoints = new Set(['option-api', 'url-state', 'testing']);
 const nonDemoEntryPoints = new Set(['button', 'confirm-dialog', 'toggle-button-group', 'testing']);
 
 function dirs(path) {
@@ -58,7 +58,7 @@ for (const entry of entryPoints) {
     violations.push(`${rel}: missing spec file`);
   }
 
-  if (!serviceOnlyEntryPoints.has(entry)) {
+  if (!nonVisualEntryPoints.has(entry)) {
     const componentFiles = files(dir, '.component.ts');
     if (componentFiles.length === 0) {
       violations.push(`${rel}: missing standalone component file`);
@@ -77,7 +77,7 @@ if (packageJson) {
 const showcasePagesRoot = join(root, '..', 'neural-ui-showcase', 'projects/showcase/src/app/pages');
 if (existsSync(showcasePagesRoot)) {
   for (const entry of entryPoints) {
-    if (serviceOnlyEntryPoints.has(entry) || nonDemoEntryPoints.has(entry)) {
+    if (nonVisualEntryPoints.has(entry) || nonDemoEntryPoints.has(entry)) {
       continue;
     }
 

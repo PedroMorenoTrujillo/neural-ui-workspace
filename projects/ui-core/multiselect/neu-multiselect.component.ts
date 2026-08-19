@@ -21,6 +21,18 @@ import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValue,
+  NeuOptionValueAccessor,
+  deserializeNeuOptionValue,
+  neuOptionValuesEqual,
+  resolveNeuOptionDisabled,
+  resolveNeuOptionLabel,
+  resolveNeuOptionValue,
+  serializeNeuOptionValue,
+} from '@neural-ui/core/option-api';
 import { NeuSelectOption } from '@neural-ui/core/select';
 import { NeuMultiselectEmptyDirective, NeuMultiselectFooterDirective, NeuMultiselectHeaderDirective, NeuMultiselectItemDirective, NeuMultiselectSelectedDirective } from './neu-multiselect.directives';
 
@@ -28,8 +40,11 @@ export type { NeuSelectOption } from '@neural-ui/core/select';
 
 let _neuMultiselectIdSeq = 0;
 
-function arraysEqual(left: readonly string[], right: readonly string[]): boolean {
-  return left.length === right.length && left.every((value, index) => value === right[index]);
+function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => neuOptionValuesEqual(value, right[index] as T))
+  );
 }
 
 /**
@@ -227,13 +242,13 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
             <ng-template #multiselectOptionTpl let-option>
               <div
                 class="neu-multiselect__option"
-                [class.neu-multiselect__option--selected]="isSelected(option.value)"
-                [class.neu-multiselect__option--disabled]="option.disabled"
+                [class.neu-multiselect__option--selected]="isOptionSelected(option)"
+                [class.neu-multiselect__option--disabled]="isOptionDisabled(option)"
                 role="option"
-                [id]="'neu-ms-opt-' + option.value"
-                [attr.aria-selected]="isSelected(option.value)"
-                [attr.aria-disabled]="option.disabled"
-                [attr.tabindex]="option.disabled ? null : '-1'"
+                [id]="optionDomId(option)"
+                [attr.aria-selected]="isOptionSelected(option)"
+                [attr.aria-disabled]="isOptionDisabled(option)"
+                [attr.tabindex]="isOptionDisabled(option) ? null : '-1'"
                 (click)="toggleOption(option)"
                 (keydown.enter)="toggleOption(option)"
                 (keydown.space)="toggleOption(option)"
@@ -242,7 +257,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
               >
                 <span
                   class="neu-multiselect__checkbox"
-                  [class.neu-multiselect__checkbox--checked]="isSelected(option.value)"
+                  [class.neu-multiselect__checkbox--checked]="isOptionSelected(option)"
                 >
                   <svg
                     class="neu-multiselect__checkbox-check"
@@ -263,7 +278,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
                     [ngTemplateOutletContext]="{ $implicit: option }"
                   />
                 } @else {
-                  {{ option.label }}
+                  {{ optionLabelOf(option) }}
                 }
               </div>
             </ng-template>
@@ -284,7 +299,7 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
                 </ng-container>
               </cdk-virtual-scroll-viewport>
             } @else {
-              @for (option of filteredOptions(); track option.value) {
+              @for (option of filteredOptions(); track trackByOptionValue($index, option)) {
                 <ng-container
                   [ngTemplateOutlet]="multiselectOptionTpl"
                   [ngTemplateOutletContext]="{ $implicit: option }"
@@ -342,7 +357,9 @@ function arraysEqual(left: readonly string[], right: readonly string[]): boolean
   `,
   styleUrl: './neu-multiselect.component.scss',
 })
-export class NeuMultiselectComponent implements ControlValueAccessor {
+export class NeuMultiselectComponent<T = NeuSelectOption, V = NeuOptionValue<T>>
+  implements ControlValueAccessor
+{
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _document = inject(DOCUMENT);
   private readonly _platformId = inject(PLATFORM_ID);
@@ -367,7 +384,13 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
       const param = this.urlParam();
       if (!param) return;
       const urlRaw = this._getUrlParamSignal(param)();
-      const urlVals = urlRaw ? urlRaw.split(',').filter(Boolean) : [];
+      const urlVals = urlRaw
+        ? urlRaw
+            .split(',')
+            .filter(Boolean)
+            .map((value) => this.valueFromUrl(value))
+            .filter((value): value is V => value !== null)
+        : [];
       const current = untracked(() => this._values());
       if (!arraysEqual(urlVals, current)) {
         untracked(() => {
@@ -383,14 +406,23 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   readonly _panelId = `${this._triggerId}-panel`;
 
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
-  readonly itemTpl = contentChild(NeuMultiselectItemDirective);
-  readonly selectedItemTpl = contentChild(NeuMultiselectSelectedDirective);
+  readonly itemTpl = contentChild(NeuMultiselectItemDirective<T>);
+  readonly selectedItemTpl = contentChild(NeuMultiselectSelectedDirective<T>);
   readonly headerTpl = contentChild(NeuMultiselectHeaderDirective);
   readonly footerTpl = contentChild(NeuMultiselectFooterDirective);
   readonly emptyTpl = contentChild(NeuMultiselectEmptyDirective);
 
   /** Opciones del dropdown / Dropdown options */
-  options = input<NeuSelectOption[]>([]);
+  options = input<readonly T[]>([]);
+
+  /** Property or function used to obtain the visible option label. */
+  optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
+
+  /** Property or function used to obtain each form value. Defaults to the complete domain model. */
+  optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
+
+  /** Property or function used to determine whether an option is disabled. */
+  optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
 
   /** Etiqueta del componente / Component label */
   label = input<string>('');
@@ -446,19 +478,20 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   /**
    * Sincroniza los valores seleccionados con este query param de la URL.
    * Los valores se codifican como lista separada por comas: `?{urlParam}=a,b,c`.
+   * Los valores que no puedan serializarse a string URL (objetos) no sincronizan en URL.
+   * Esto evita serializaciones ambiguas o engañosas. Usa `optionValue` para URL-safe.
    * Pasar `null` (default) deshabilita la sincronización.
    */
   urlParam = input<string | null>(null);
 
   /**
-   * Emite el array de NeuSelectOption completo (incluyendo data) al cambiar la selección.
-   * Emite [] al limpiar toda la selección.
-   * Los valores del formControl siguen siendo string[].
+   * Emite los modelos originales seleccionados y [] al limpiar.
+   * Con NeuSelectOption mantiene el contrato legacy, incluido el campo data.
    */
-  readonly selectionChange = output<NeuSelectOption[]>();
+  readonly selectionChange = output<T[]>();
 
   // --- Estado interno ---
-  protected readonly _values = signal<string[]>([]);
+  protected readonly _values = signal<V[]>([]);
   readonly isOpen = signal(false);
   readonly searchQuery = signal('');
   readonly _chipMode = signal<'chips' | 'count'>('count');
@@ -524,12 +557,12 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   readonly filteredOptions = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.options();
-    return this.options().filter((o) => o.label.toLowerCase().includes(q));
+    return this.options().filter((option) => this.optionLabelOf(option).toLowerCase().includes(q));
   });
 
   readonly allFilteredSelected = computed(() => {
-    const enabled = this.filteredOptions().filter((option) => !option.disabled);
-    return enabled.length > 0 && enabled.every((option) => this._values().includes(option.value));
+    const enabled = this.filteredOptions().filter((option) => !this.isOptionDisabled(option));
+    return enabled.length > 0 && enabled.every((option) => this.isOptionSelected(option));
   });
 
   readonly resultsAnnouncement = computed(() => {
@@ -577,17 +610,17 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     return `${Math.min(desiredHeight, availableHeight)}px`;
   });
 
-  readonly trackByOptionValue = (_index: number, option: NeuSelectOption) => option.value;
+  readonly trackByOptionValue = (_index: number, option: T) => this.optionValueOf(option);
 
   // --- CVA ---
-  private _onChange: (v: string[]) => void = () => {};
+  private _onChange: (v: V[]) => void = () => {};
   private _onTouched: () => void = () => {};
 
-  writeValue(value: string[] | null): void {
+  writeValue(value: V[] | null): void {
     this._values.set(Array.isArray(value) ? value : []);
   }
 
-  registerOnChange(fn: (v: string[]) => void): void {
+  registerOnChange(fn: (v: V[]) => void): void {
     this._onChange = fn;
   }
 
@@ -602,24 +635,87 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
 
   // --- Helpers ---
-  protected labelFor(value: string): string {
-    return this.options().find((o) => o.value === value)?.label ?? value;
+  protected labelFor(value: V): string {
+    const option = this.options().find((candidate) =>
+      neuOptionValuesEqual(this.optionValueOf(candidate), value),
+    );
+    return option === undefined ? String(value) : this.optionLabelOf(option);
   }
 
-  protected optionFor(value: string): NeuSelectOption {
-    return this.options().find((option) => option.value === value) ?? { value, label: value };
+  protected optionFor(value: V): T | NeuSelectOption<V> {
+    return (
+      this.options().find((option) => neuOptionValuesEqual(this.optionValueOf(option), value)) ??
+      { value, label: String(value) }
+    );
   }
 
-  protected removeOption(value: string): void {
-    const next = this._values().filter((item) => item !== value);
+  protected removeOption(value: V): void {
+    const next = this._values().filter((item) => !neuOptionValuesEqual(item, value));
     this._values.set(next);
     this._onChange(next);
     this._onTouched();
-    this.selectionChange.emit(this.options().filter((option) => next.includes(option.value)));
+    this.selectionChange.emit(this.selectedOptions(next));
+    this.syncUrl(next);
   }
 
-  protected isSelected(value: string): boolean {
-    return this._values().includes(value);
+  protected isSelected(value: V): boolean {
+    return this._values().some((current) => neuOptionValuesEqual(current, value));
+  }
+
+  optionLabelOf(option: T): string {
+    return resolveNeuOptionLabel(option, this.optionLabel());
+  }
+
+  optionValueOf(option: T): V {
+    return resolveNeuOptionValue<T, V>(option, this.optionValue());
+  }
+
+  isOptionDisabled(option: T): boolean {
+    return resolveNeuOptionDisabled(option, this.optionDisabled());
+  }
+
+  isOptionSelected(option: T): boolean {
+    return this.isSelected(this.optionValueOf(option));
+  }
+
+  optionDomId(option: T): string {
+    const index = this.options().indexOf(option);
+    return `${this._panelId}-option-${Math.max(index, 0)}`;
+  }
+
+  private selectedOptions(values: readonly V[]): T[] {
+    return this.options().filter((option) =>
+      values.some((value) => neuOptionValuesEqual(this.optionValueOf(option), value)),
+    );
+  }
+
+  private valueFromUrl(serialized: string): V | null {
+    const matchingOption = this.options().find(
+      (option) => serializeNeuOptionValue(this.optionValueOf(option)) === serialized,
+    );
+    if (matchingOption !== undefined) {
+      return this.optionValueOf(matchingOption);
+    }
+
+    const canSerializeAny = this.options().some(
+      (option) => serializeNeuOptionValue(this.optionValueOf(option)) !== null,
+    );
+    if (!canSerializeAny) {
+      return null;
+    }
+
+    return deserializeNeuOptionValue(serialized) as V;
+  }
+
+  private syncUrl(values: readonly V[]): void {
+    const param = this.urlParam();
+    if (!param) {
+      return;
+    }
+    const serializedValues = values
+      .map((value) => serializeNeuOptionValue(value))
+      .filter((value): value is string => value !== null);
+    this._urlState.setParam(param, serializedValues.length ? serializedValues.join(',') : null);
   }
 
   protected toggle(): void {
@@ -662,13 +758,13 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   }
 
   /** Navega entre opciones con flechas / Navigates between options with arrows */
-  focusOptionByIndex(event: Event, current: NeuSelectOption, dir: 1 | -1): void {
+  focusOptionByIndex(event: Event, current: T, dir: 1 | -1): void {
     event.preventDefault();
-    const opts = this.filteredOptions().filter((o) => !o.disabled);
-    const idx = opts.findIndex((o) => o.value === current.value);
+    const opts = this.filteredOptions().filter((option) => !this.isOptionDisabled(option));
+    const idx = opts.indexOf(current);
     const next = opts[(idx + dir + opts.length) % opts.length];
     if (next) {
-      this.focusOption(next.value);
+      this.focusOption(next);
     }
   }
 
@@ -679,29 +775,28 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
     this._onTouched();
   }
 
-  protected toggleOption(option: NeuSelectOption): void {
-    if (option.disabled) return;
+  protected toggleOption(option: T): void {
+    if (this.isOptionDisabled(option)) return;
+    const value = this.optionValueOf(option);
     const current = this._values();
-    const next = current.includes(option.value)
-      ? current.filter((v) => v !== option.value)
-      : [...current, option.value];
+    const next = this.isSelected(value)
+      ? current.filter((currentValue) => !neuOptionValuesEqual(currentValue, value))
+      : [...current, value];
     this._values.set(next);
     this._onChange(next);
-    this.selectionChange.emit(this.options().filter((o) => next.includes(o.value)));
-    const param = this.urlParam();
-    if (param) this._urlState.setParam(param, next.length ? next.join(',') : null);
+    this.selectionChange.emit(this.selectedOptions(next));
+    this.syncUrl(next);
     this.refreshVirtualViewport();
   }
 
-  protected removeValue(value: string, event: MouseEvent): void {
+  protected removeValue(value: V, event: MouseEvent): void {
     event.stopPropagation();
-    const next = this._values().filter((v) => v !== value);
+    const next = this._values().filter((current) => !neuOptionValuesEqual(current, value));
     this._values.set(next);
     this._onChange(next);
     this._onTouched();
-    this.selectionChange.emit(this.options().filter((o) => next.includes(o.value)));
-    const param = this.urlParam();
-    if (param) this._urlState.setParam(param, next.length ? next.join(',') : null);
+    this.selectionChange.emit(this.selectedOptions(next));
+    this.syncUrl(next);
     this.refreshVirtualViewport();
   }
 
@@ -718,20 +813,26 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
 
   protected toggleAllFiltered(event: MouseEvent): void {
     event.stopPropagation();
-    const enabled = this.filteredOptions().filter((option) => !option.disabled);
-    const current = new Set(this._values());
+    const enabled = this.filteredOptions().filter((option) => !this.isOptionDisabled(option));
+    let next = [...this._values()];
     if (this.allFilteredSelected()) {
-      enabled.forEach((option) => current.delete(option.value));
+      const enabledValues = enabled.map((option) => this.optionValueOf(option));
+      next = next.filter(
+        (value) => !enabledValues.some((enabledValue) => neuOptionValuesEqual(enabledValue, value)),
+      );
     } else {
-      enabled.forEach((option) => current.add(option.value));
+      enabled.forEach((option) => {
+        const value = this.optionValueOf(option);
+        if (!next.some((current) => neuOptionValuesEqual(current, value))) {
+          next.push(value);
+        }
+      });
     }
-    const next = [...current];
     this._values.set(next);
     this._onChange(next);
     this._onTouched();
-    this.selectionChange.emit(this.options().filter((option) => next.includes(option.value)));
-    const param = this.urlParam();
-    if (param) this._urlState.setParam(param, next.length ? next.join(',') : null);
+    this.selectionChange.emit(this.selectedOptions(next));
+    this.syncUrl(next);
     this.refreshVirtualViewport();
   }
 
@@ -793,33 +894,41 @@ export class NeuMultiselectComponent implements ControlValueAccessor {
   }
 
   private focusFirstOption(): void {
-    const firstEnabled = this.filteredOptions().find((option) => !option.disabled);
+    const firstEnabled = this.filteredOptions().find((option) => !this.isOptionDisabled(option));
     if (!firstEnabled) {
       return;
     }
 
-    this.focusOption(firstEnabled.value);
+    this.focusOption(firstEnabled);
   }
 
-  private focusOption(value: string): void {
+  private focusOption(optionOrValue: T | V): void {
+    const option = this.options().find(
+      (candidate) =>
+        candidate === optionOrValue ||
+        neuOptionValuesEqual(this.optionValueOf(candidate), optionOrValue as V),
+    );
+    const optionId = option
+      ? this.optionDomId(option)
+      : `${this._panelId}-option-missing`;
     if (this.virtualScroll()) {
-      const optionIndex = this.filteredOptions().findIndex((option) => option.value === value);
+      const optionIndex = option === undefined ? -1 : this.filteredOptions().indexOf(option);
       if (optionIndex >= 0) {
         this._viewport()?.scrollToIndex(optionIndex, 'auto');
         this._viewport()?.checkViewportSize();
       }
       this._requestFrame(() => {
         const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
-          `#neu-ms-opt-${value}`,
-        ) ?? this._document.getElementById(`neu-ms-opt-${value}`);
+          `#${optionId}`,
+        ) ?? this._document.getElementById(optionId);
         optionElement?.focus();
       });
       return;
     }
 
     const optionElement =
-      this.elementRef.nativeElement.querySelector<HTMLElement>(`#neu-ms-opt-${value}`) ??
-      this._document.getElementById(`neu-ms-opt-${value}`);
+      this.elementRef.nativeElement.querySelector<HTMLElement>(`#${optionId}`) ??
+      this._document.getElementById(optionId);
     optionElement?.focus();
   }
 

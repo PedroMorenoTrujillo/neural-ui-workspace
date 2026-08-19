@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 <!-- next release -->
+### Changed
+
+- The Select and Multiselect `ng-template` slot contexts retain explicit `ngTemplateContextGuard` typing while
+  Angular 21.2.17 does not propagate host component generics into projected template contexts during
+  compile-time checks. This is a documented DX limitation; runtime rendering and value mapping behavior
+  is unchanged.
 
 ## [1.12.1] - 2026-08-15
 

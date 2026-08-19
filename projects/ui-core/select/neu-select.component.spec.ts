@@ -21,6 +21,37 @@ const OPTIONS: NeuSelectOption[] = [
   { value: 'ar', label: 'Argentina', disabled: true },
 ];
 
+interface CountryModel {
+  id: number;
+  name: string;
+  archived: boolean;
+}
+
+const COUNTRY_MODELS: CountryModel[] = [
+  { id: 34, name: 'España', archived: false },
+  { id: 52, name: 'México', archived: false },
+  { id: 54, name: 'Argentina', archived: true },
+];
+
+@Component({
+  template: `<neu-select
+    [options]="countries"
+    optionLabel="name"
+    optionValue="id"
+    optionDisabled="archived"
+    [formControl]="ctrl"
+  >
+    <ng-template neuSelectItem let-country>
+      <span class="raw-country">{{ $any(country).name }}</span>
+    </ng-template>
+  </neu-select>`,
+  imports: [NeuSelectComponent, NeuSelectItemDirective, ReactiveFormsModule],
+})
+class RawCountrySelectHostComponent {
+  countries = COUNTRY_MODELS;
+  ctrl = new FormControl<number | null>(null);
+}
+
 @Component({
   selector: 'cdk-virtual-scroll-viewport',
   template: '<ng-content />',
@@ -69,6 +100,12 @@ async function setup(extraInputs: Record<string, unknown> = {}) {
 }
 
 describe('NeuSelectComponent', () => {
+  it('should instantiate without options and default options to an empty list', async () => {
+    const f = TestBed.createComponent(NeuSelectComponent);
+    f.detectChanges();
+    expect(f.componentInstance.options()).toEqual([]);
+  });
+
   // ── Rendering ─────────────────────────────────────────────────────────────
 
   it('should render label', async () => {
@@ -527,14 +564,149 @@ describe('NeuSelectComponent', () => {
       .spyOn(f.nativeElement, 'querySelector')
       .mockImplementation((...args: unknown[]) => {
         const selector = args[0];
-        if (selector === '#neu-select-opt-mx') return target;
+        if (typeof selector === 'string' && selector.startsWith('#neu-select-trigger-')) {
+          return null;
+        }
+        if (typeof selector === 'string' && selector.includes('option-')) {
+          return target;
+        }
         return null;
       });
+    const documentQuerySpy = vi.spyOn(document, 'getElementById').mockImplementation((id) => {
+      return id.includes('option-') ? target : null;
+    });
 
     comp.focusOptionByIndex({ preventDefault: vi.fn() } as unknown as Event, OPTIONS[0], 1);
 
     expect(target.focus).toHaveBeenCalled();
     querySpy.mockRestore();
+    documentQuerySpy.mockRestore();
+  });
+
+  it('should project the full item model into neuSelectItem template context', async () => {
+    @Component({
+      template: `
+        <neu-select [options]="countries" optionLabel="name" optionValue="id">
+        <ng-template neuSelectItem let-country>
+            <span class="select-item-context">
+              {{ $any(country).id }}-{{ $any(country).name }}
+            </span>
+          </ng-template>
+        </neu-select>
+      `,
+      imports: [NeuSelectComponent, NeuSelectItemDirective],
+    })
+    class SelectItemTemplateHostComponent {
+      countries = COUNTRY_MODELS;
+    }
+
+    const f = TestBed.createComponent(SelectItemTemplateHostComponent);
+    f.detectChanges();
+    const comp = f.componentInstance;
+    const selectComp = f.debugElement.query(By.css('neu-select')).componentInstance as NeuSelectComponent<
+      CountryModel,
+      number
+    >;
+    selectComp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const renderedItems = Array.from(document.querySelectorAll('.select-item-context')).map(
+      (item) => item.textContent?.trim(),
+    );
+    expect(renderedItems).toContain('34-España');
+    expect(renderedItems).toContain('52-México');
+  });
+
+  it('should project the selected model into neuSelectSelected template context', async () => {
+    @Component({
+      template: `
+        <neu-select [options]="countries" optionLabel="name" optionValue="id" [formControl]="ctrl">
+          <ng-template neuSelectSelected let-country>
+            <span class="select-selected-context">
+              {{ $any(country)?.id }}:{{ $any(country)?.name }}
+            </span>
+          </ng-template>
+        </neu-select>
+      `,
+      imports: [NeuSelectComponent, NeuSelectSelectedDirective, ReactiveFormsModule],
+    })
+    class SelectSelectedTemplateHostComponent {
+      countries = COUNTRY_MODELS;
+      ctrl = new FormControl<number | null>(null);
+    }
+
+    const f = TestBed.createComponent(SelectSelectedTemplateHostComponent);
+    f.detectChanges();
+    const comp = f.debugElement.query(By.css('neu-select')).componentInstance as any;
+    comp.writeValue(52);
+    f.detectChanges();
+
+    expect(f.nativeElement.textContent).toContain('52:México');
+  });
+
+  it('focusOption should not break with arbitrary option values and should use non-selector option ids', async () => {
+    const { f, comp } = await setup({
+      options: [
+        { value: 'user:23/test value', label: 'Especial' },
+        { value: 'normal', label: 'Normal' },
+      ],
+      optionValue: null,
+    });
+    comp.isOpen.set(true);
+    f.detectChanges();
+
+    const seenSelectors: string[] = [];
+    const querySpy = vi
+      .spyOn(f.nativeElement, 'querySelector')
+      .mockImplementation((...args: unknown[]) => {
+        const selector = args[0];
+        if (typeof selector === 'string') {
+          seenSelectors.push(selector);
+        }
+        return null;
+      });
+
+    expect(() => comp.focusOption('user:23/test value')).not.toThrow();
+    expect(
+      seenSelectors.every((selector) => !selector.includes('user:23/test value')),
+    ).toBe(true);
+
+    querySpy.mockRestore();
+  });
+
+  it('focusOption should handle arbitrary option values in virtual scroll without selector escaping', async () => {
+    const { f, comp } = await setup({
+      options: [
+        { value: 'user:23/test value', label: 'Especial' },
+        { value: 'normal', label: 'Normal' },
+      ],
+      virtualScroll: true,
+    });
+    const seenSelectors: string[] = [];
+    const querySpy = vi
+      .spyOn(f.nativeElement, 'querySelector')
+      .mockImplementation((...args: unknown[]) => {
+        const selector = args[0];
+        if (typeof selector === 'string') {
+          seenSelectors.push(selector);
+        }
+        return null;
+      });
+    const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
+    const scrollToIndex = vi.fn();
+    const checkViewportSize = vi.fn();
+    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+
+    comp.isOpen.set(true);
+    f.detectChanges();
+    expect(() => comp.focusOption('user:23/test value')).not.toThrow();
+    expect(
+      seenSelectors.every((selector) => !selector.includes('user:23/test value')),
+    ).toBe(true);
+
+    querySpy.mockRestore();
+    getByIdSpy.mockRestore();
   });
 
   it('onWindowResize and onWindowScroll should sync panel position only when open', async () => {
@@ -836,6 +1008,101 @@ describe('NeuSelectComponent', () => {
     const { comp, mockSetParam } = await setupWithMockUrlState('country');
     comp.selectOption(OPTIONS[2]); // Argentina — disabled
     expect(mockSetParam).not.toHaveBeenCalled();
+  });
+
+  it('urlParam: numeric optionValue should restore number from urlParam', async () => {
+    const mockSetParam = vi.fn();
+    const mockGetParam = vi.fn(() => signal<string | null>('52'));
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: NeuUrlStateService,
+          useValue: {
+            params: signal<Record<string, string>>({ country: '52' }),
+            getParam: mockGetParam,
+            setParam: mockSetParam,
+            patchParams: vi.fn(),
+            clearParams: vi.fn(),
+          },
+        },
+      ],
+    });
+
+    const f = TestBed.createComponent(NeuSelectComponent);
+    f.componentRef.setInput('options', COUNTRY_MODELS);
+    f.componentRef.setInput('optionLabel', 'name');
+    f.componentRef.setInput('optionValue', 'id');
+    f.componentRef.setInput('urlParam', 'country');
+    f.detectChanges();
+    await f.whenStable();
+
+    expect((f.componentInstance as any)._value()).toBe(52);
+    expect(typeof (f.componentInstance as any)._value()).toBe('number');
+  });
+
+  it('urlParam: object option values should not serialize to [object Object] and should not restore', async () => {
+    const mockSetParam = vi.fn();
+    const mockGetParam = vi.fn(() => signal<string | null>('[object Object]'));
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: NeuUrlStateService,
+          useValue: {
+            params: signal<Record<string, string>>({ country: '[object Object]' }),
+            getParam: mockGetParam,
+            setParam: mockSetParam,
+            patchParams: vi.fn(),
+            clearParams: vi.fn(),
+          },
+        },
+      ],
+    });
+
+    const f = TestBed.createComponent(NeuSelectComponent);
+    f.componentRef.setInput('options', COUNTRY_MODELS);
+    f.componentRef.setInput('optionLabel', 'name');
+    f.componentRef.setInput('urlParam', 'country');
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    expect(comp._value()).toBeNull();
+    expect(mockSetParam).not.toHaveBeenCalled();
+
+    f.componentRef.setInput('optionValue', null);
+    f.componentRef.setInput('optionLabel', 'name');
+    comp.selectOption(COUNTRY_MODELS[0]);
+    expect(mockSetParam).toHaveBeenCalledWith('country', null);
+  });
+
+  it('urlParam: full-object option model without optionValue should never write [object Object] to URL', async () => {
+    const mockSetParam = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: NeuUrlStateService,
+          useValue: {
+            params: signal<Record<string, string>>({}),
+            getParam: (_key: string) => signal<string | null>(null),
+            setParam: mockSetParam,
+            patchParams: vi.fn(),
+            clearParams: vi.fn(),
+          },
+        },
+      ],
+    });
+
+    const f = TestBed.createComponent(NeuSelectComponent);
+    f.componentRef.setInput('options', COUNTRY_MODELS);
+    f.componentRef.setInput('optionLabel', 'name');
+    f.componentRef.setInput('urlParam', 'country');
+    f.detectChanges();
+
+    const comp = f.componentInstance as any;
+    comp.selectOption(COUNTRY_MODELS[0]);
+
+    expect(mockSetParam).toHaveBeenCalledWith('country', null);
+    expect(mockSetParam).not.toHaveBeenCalledWith('country', '[object Object]');
   });
 
   // ── onTriggerKey cuando el panel ya está abierto ──────────────────────────
@@ -1362,5 +1629,51 @@ describe('NeuSelectComponent', () => {
 
     expect(comp._value()).toBe('es');
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('accepts domain models with keyof accessors and keeps custom templates on the raw model', async () => {
+    await TestBed.configureTestingModule({
+      imports: [RawCountrySelectHostComponent],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+    const f = TestBed.createComponent(RawCountrySelectHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const select = f.debugElement.query(By.directive(NeuSelectComponent)).componentInstance as any;
+    const emitted: CountryModel[] = [];
+    select.selectionChange.subscribe((option: CountryModel | null) => {
+      if (option) emitted.push(option);
+    });
+
+    select.isOpen.set(true);
+    f.detectChanges();
+    expect(document.querySelector('.raw-country')?.textContent).toContain('España');
+    select.selectOption(COUNTRY_MODELS[1]);
+    f.detectChanges();
+
+    expect(f.componentInstance.ctrl.value).toBe(52);
+    expect(select.selectedLabel()).toBe('México');
+    expect(emitted).toEqual([COUNTRY_MODELS[1]]);
+
+    select.selectOption(COUNTRY_MODELS[2]);
+    expect(f.componentInstance.ctrl.value).toBe(52);
+  });
+
+  it('returns the complete domain object when optionValue is omitted', async () => {
+    const f = TestBed.createComponent(NeuSelectComponent);
+    f.componentRef.setInput('options', COUNTRY_MODELS);
+    f.componentRef.setInput('optionLabel', (country: CountryModel) => country.name.toUpperCase());
+    f.componentRef.setInput('optionDisabled', (country: CountryModel) => country.archived);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as unknown as NeuSelectComponent<CountryModel, CountryModel>;
+    const onChange = vi.fn();
+    comp.registerOnChange(onChange);
+
+    comp.selectOption(COUNTRY_MODELS[0]);
+
+    expect((comp as any)._value()).toBe(COUNTRY_MODELS[0]);
+    expect(comp.selectedLabel()).toBe('ESPAÑA');
+    expect(onChange).toHaveBeenCalledWith(COUNTRY_MODELS[0]);
   });
 });

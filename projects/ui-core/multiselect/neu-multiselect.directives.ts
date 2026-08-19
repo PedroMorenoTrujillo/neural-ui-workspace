@@ -1,6 +1,15 @@
 import { Directive, TemplateRef, inject } from '@angular/core';
 import { NeuSelectOption } from '@neural-ui/core/select';
 
+export interface NeuMultiselectItemContext<T> {
+  $implicit: T;
+}
+
+export interface NeuMultiselectSelectedContext<T> {
+  $implicit: T;
+  remove: () => void;
+}
+
 /**
  * Directiva para personalizar el template de cada ítem del dropdown de Multiselect. / Directive to customize the template of each Multiselect dropdown item.
  *
@@ -14,14 +23,29 @@ import { NeuSelectOption } from '@neural-ui/core/select';
  * </neu-multiselect>
  * ```
  */
-@Directive({ selector: '[neuMultiselectItem]', standalone: true })
-export class NeuMultiselectItemDirective {
-  readonly templateRef = inject<TemplateRef<{ $implicit: NeuSelectOption }>>(TemplateRef);
+@Directive({ selector: 'ng-template[neuMultiselectItem]', standalone: true })
+export class NeuMultiselectItemDirective<T> {
+  readonly templateRef = inject<TemplateRef<NeuMultiselectItemContext<T>>>(TemplateRef);
+
+  static ngTemplateContextGuard<T>(
+    _dir: NeuMultiselectItemDirective<T>,
+    context: unknown,
+  ): context is NeuMultiselectItemContext<T> {
+    return true;
+  }
 }
 
-export interface NeuMultiselectSelectedContext { $implicit: NeuSelectOption; remove: () => void; }
-@Directive({ selector: '[neuMultiselectSelected]', standalone: true })
-export class NeuMultiselectSelectedDirective { readonly templateRef = inject<TemplateRef<NeuMultiselectSelectedContext>>(TemplateRef); }
+@Directive({ selector: 'ng-template[neuMultiselectSelected]', standalone: true })
+export class NeuMultiselectSelectedDirective<T> {
+  readonly templateRef = inject<TemplateRef<NeuMultiselectSelectedContext<T>>>(TemplateRef);
+
+  static ngTemplateContextGuard<T>(
+    _dir: NeuMultiselectSelectedDirective<T>,
+    context: unknown,
+  ): context is NeuMultiselectSelectedContext<T> {
+    return true;
+  }
+}
 @Directive({ selector: '[neuMultiselectHeader]', standalone: true })
 export class NeuMultiselectHeaderDirective { readonly templateRef = inject<TemplateRef<void>>(TemplateRef); }
 @Directive({ selector: '[neuMultiselectFooter]', standalone: true })

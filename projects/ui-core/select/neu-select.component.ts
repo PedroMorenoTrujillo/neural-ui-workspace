@@ -26,6 +26,19 @@ import {
 } from '@angular/cdk/overlay';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValue,
+  NeuOptionValueAccessor,
+  deserializeNeuOptionValue,
+  neuOptionValuesEqual,
+  resolveNeuOptionDisabled,
+  resolveNeuOptionGroup,
+  resolveNeuOptionLabel,
+  resolveNeuOptionValue,
+  serializeNeuOptionValue,
+} from '@neural-ui/core/option-api';
 import { NeuSelectOption } from './neu-select.types';
 import { NeuSelectEmptyDirective, NeuSelectFooterDirective, NeuSelectGroupDirective, NeuSelectHeaderDirective, NeuSelectItemDirective, NeuSelectSelectedDirective } from './neu-select.directives';
 
@@ -78,8 +91,8 @@ let _neuSelectIdSeq = 0;
       [class.neu-select--open-above]="isPanelAbove()"
       [class.neu-select--disabled]="isDisabledFinal()"
       [class.neu-select--error]="hasError()"
-      [class.neu-select--has-value]="!!_value()"
-      [class.neu-select--has-placeholder]="!!placeholder() && !_value()"
+      [class.neu-select--has-value]="hasValue()"
+      [class.neu-select--has-placeholder]="!!placeholder() && !hasValue()"
       [class.neu-select--no-float]="!floatingLabel()"
       [class.neu-select--sm]="size() === 'sm'"
       [class.neu-select--lg]="size() === 'lg'"
@@ -97,7 +110,7 @@ let _neuSelectIdSeq = 0;
         [attr.aria-disabled]="isDisabledFinal() ? 'true' : null"
         [attr.aria-invalid]="hasError() ? 'true' : null"
         [attr.aria-describedby]="describedBy()"
-        [attr.aria-activedescendant]="isOpen() && _value() ? 'neu-select-opt-' + _value() : null"
+        [attr.aria-activedescendant]="isOpen() ? selectedOptionId() : null"
         [attr.aria-label]="label() || placeholder() || null"
         (click)="toggle()"
         (keydown.arrowDown)="onTriggerKey($any($event))"
@@ -126,7 +139,7 @@ let _neuSelectIdSeq = 0;
         </span>
 
         <!-- Clear button -->
-        @if (clearable() && !!_value() && !isDisabledFinal()) {
+        @if (clearable() && hasValue() && !isDisabledFinal()) {
           <button
             class="neu-select__clear"
             type="button"
@@ -193,13 +206,13 @@ let _neuSelectIdSeq = 0;
           <ng-template #selectOptionTpl let-option>
             <div
               class="neu-select__option"
-              [class.neu-select__option--selected]="option.value === _value()"
-              [class.neu-select__option--disabled]="option.disabled"
+              [class.neu-select__option--selected]="isOptionSelected(option)"
+              [class.neu-select__option--disabled]="isOptionDisabled(option)"
               role="option"
-              [id]="'neu-select-opt-' + option.value"
-              [attr.aria-selected]="option.value === _value()"
-              [attr.aria-disabled]="option.disabled"
-              [attr.tabindex]="option.disabled ? null : '-1'"
+              [id]="optionDomId(option)"
+              [attr.aria-selected]="isOptionSelected(option)"
+              [attr.aria-disabled]="isOptionDisabled(option)"
+              [attr.tabindex]="isOptionDisabled(option) ? null : '-1'"
               (click)="selectOption(option)"
               (keydown.enter)="selectOption(option)"
               (keydown.space)="selectOption(option)"
@@ -209,7 +222,7 @@ let _neuSelectIdSeq = 0;
               <!-- Checkmark en la seleccionada (siempre reserva el espacio) -->
               <svg
                 class="neu-select__check"
-                [style.visibility]="option.value === _value() ? 'visible' : 'hidden'"
+                [style.visibility]="isOptionSelected(option) ? 'visible' : 'hidden'"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -226,7 +239,7 @@ let _neuSelectIdSeq = 0;
                   [ngTemplateOutletContext]="{ $implicit: option }"
                 />
               } @else {
-                {{ option.label }}
+                {{ optionLabelOf(option) }}
               }
             </div>
           </ng-template>
@@ -260,10 +273,12 @@ let _neuSelectIdSeq = 0;
               </ng-container>
             </cdk-virtual-scroll-viewport>
           } @else {
-            @for (option of filteredOptions(); track option.value) {
-              @if (option.group && option.group !== previousGroup(option)) {
-                @if (groupTpl()) { <ng-container [ngTemplateOutlet]="groupTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: option.group }" /> }
-                @else { <div class="neu-select__group">{{ option.group }}</div> }
+            @for (option of filteredOptions(); track trackByOptionValue($index, option)) {
+              @if (optionGroup(option); as group) {
+                @if (group !== previousGroup(option)) {
+                  @if (groupTpl()) { <ng-container [ngTemplateOutlet]="groupTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: group }" /> }
+                  @else { <div class="neu-select__group">{{ group }}</div> }
+                }
               }
               <ng-container
                 [ngTemplateOutlet]="selectOptionTpl"
@@ -294,7 +309,9 @@ let _neuSelectIdSeq = 0;
   `,
   styleUrl: './neu-select.component.scss',
 })
-export class NeuSelectComponent implements ControlValueAccessor {
+export class NeuSelectComponent<T = NeuSelectOption, V = NeuOptionValue<T>>
+  implements ControlValueAccessor
+{
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _document = inject(DOCUMENT);
   private readonly _platformId = inject(PLATFORM_ID);
@@ -319,10 +336,11 @@ export class NeuSelectComponent implements ControlValueAccessor {
       const param = this.urlParam();
       if (!param) return;
       const urlVal = this._getUrlParamSignal(param)();
-      if (urlVal !== untracked(() => this._value())) {
+      const nextValue = urlVal === null ? null : this.valueFromUrl(urlVal);
+      if (!neuOptionValuesEqual(nextValue, untracked(() => this._value()))) {
         untracked(() => {
-          this._value.set(urlVal);
-          this._onChange(urlVal);
+          this._value.set(nextValue);
+          this._onChange(nextValue);
         });
       }
     });
@@ -331,16 +349,25 @@ export class NeuSelectComponent implements ControlValueAccessor {
   readonly _triggerId = `neu-select-trigger-${_neuSelectIdSeq++}`;
   readonly _panelId = `${this._triggerId}-panel`;
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
-  readonly itemTpl = contentChild(NeuSelectItemDirective);
+  readonly itemTpl = contentChild(NeuSelectItemDirective<T>);
 
   /** Template personalizado para el valor seleccionado en el trigger / Custom template for the selected value in the trigger */
-  readonly selectedItemTpl = contentChild(NeuSelectSelectedDirective);
+  readonly selectedItemTpl = contentChild(NeuSelectSelectedDirective<T>);
   readonly headerTpl = contentChild(NeuSelectHeaderDirective);
   readonly footerTpl = contentChild(NeuSelectFooterDirective);
   readonly emptyTpl = contentChild(NeuSelectEmptyDirective);
   readonly groupTpl = contentChild(NeuSelectGroupDirective);
   /** Opciones del dropdown / Dropdown options */
-  options = input<NeuSelectOption[]>([]);
+  options = input<readonly T[]>([]);
+
+  /** Property or function used to obtain the visible option label. */
+  optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
+
+  /** Property or function used to obtain the form value. Defaults to the complete domain model. */
+  optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
+
+  /** Property or function used to determine whether an option is disabled. */
+  optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
 
   /** Texto del floating label / Floating label text */
   label = input<string>('');
@@ -391,19 +418,21 @@ export class NeuSelectComponent implements ControlValueAccessor {
   /**
    * Sincroniza el valor seleccionado con este query param de la URL.
    * Al seleccionar una opción se añade `?{urlParam}=value` a la URL.
+   * Los valores que no puedan serializarse a string URL (objetos) no sincronizan en URL.
+   * Esto es intencional para evitar serializaciones ambiguas o engañosas.
+   * Usa `optionValue` para persistir valores completos en URL.
    * Pasar `null` (default) deshabilita la sincronización.
    */
   urlParam = input<string | null>(null);
 
   /**
-   * Emite el objeto NeuSelectOption completo (incluyendo data) al seleccionar una opción.
-   * Emite null al limpiar la selección.
-   * El valor del formControl sigue siendo string.
+   * Emite el modelo original al seleccionar una opción y null al limpiar.
+   * Con NeuSelectOption mantiene el contrato legacy, incluido el campo data.
    */
-  readonly selectionChange = output<NeuSelectOption | null>();
+  readonly selectionChange = output<T | null>();
 
   // Estado interno
-  protected readonly _value = signal<string | null>(null);
+  protected readonly _value = signal<V | null>(null);
   readonly isOpen = signal(false);
   readonly searchQuery = signal('');
   readonly overlayPositions: ConnectedPosition[] = [
@@ -466,24 +495,35 @@ export class NeuSelectComponent implements ControlValueAccessor {
     return null;
   });
 
+  readonly hasValue = computed(() => this._value() !== null);
+
   readonly filteredOptions = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.options();
-    return this.options().filter((o) => o.label.toLowerCase().includes(q));
+    return this.options().filter((option) => this.optionLabelOf(option).toLowerCase().includes(q));
   });
 
-  previousGroup(option: NeuSelectOption): string | undefined {
+  previousGroup(option: T): string | undefined {
     const index = this.filteredOptions().indexOf(option);
-    return index > 0 ? this.filteredOptions()[index - 1]?.group : undefined;
+    const previous = index > 0 ? this.filteredOptions()[index - 1] : undefined;
+    return previous === undefined ? undefined : this.optionGroup(previous);
   }
 
   readonly selectedLabel = computed(
-    () => this.options().find((o) => o.value === this._value())?.label ?? null,
+    () => {
+      const selected = this._selectedOption();
+      return selected === null ? null : this.optionLabelOf(selected);
+    },
   );
 
   readonly _selectedOption = computed(
-    () => this.options().find((o) => o.value === this._value()) ?? null,
+    () => this.options().find((option) => this.isOptionSelected(option)) ?? null,
   );
+
+  readonly selectedOptionId = computed(() => {
+    const selected = this._selectedOption();
+    return selected === null ? null : this.optionDomId(selected);
+  });
 
   readonly resultsAnnouncement = computed(() => {
     if (!this.isOpen()) {
@@ -529,17 +569,17 @@ export class NeuSelectComponent implements ControlValueAccessor {
     return `${Math.min(desiredHeight, availableHeight)}px`;
   });
 
-  readonly trackByOptionValue = (_index: number, option: NeuSelectOption) => option.value;
+  readonly trackByOptionValue = (_index: number, option: T) => this.optionValueOf(option);
 
   // CVA
-  private _onChange: (v: string | null) => void = () => {};
+  private _onChange: (v: V | null) => void = () => {};
   private _onTouched: () => void = () => {};
 
-  writeValue(val: string | null): void {
+  writeValue(val: V | null): void {
     this._value.set(val ?? null);
   }
 
-  registerOnChange(fn: (v: string | null) => void): void {
+  registerOnChange(fn: (v: V | null) => void): void {
     this._onChange = fn;
   }
 
@@ -599,13 +639,13 @@ export class NeuSelectComponent implements ControlValueAccessor {
   }
 
   /** Navega entre opciones con flechas / Navigates between options with arrows */
-  focusOptionByIndex(event: Event, current: NeuSelectOption, dir: 1 | -1): void {
+  focusOptionByIndex(event: Event, current: T, dir: 1 | -1): void {
     event.preventDefault();
-    const opts = this.filteredOptions().filter((o) => !o.disabled);
-    const idx = opts.findIndex((o) => o.value === current.value);
+    const opts = this.filteredOptions().filter((option) => !this.isOptionDisabled(option));
+    const idx = opts.indexOf(current);
     const next = opts[(idx + dir + opts.length) % opts.length];
     if (next) {
-      this.focusOption(next.value);
+      this.focusOption(next);
     }
   }
 
@@ -620,14 +660,61 @@ export class NeuSelectComponent implements ControlValueAccessor {
     this.close();
   }
 
-  selectOption(option: NeuSelectOption): void {
-    if (option.disabled) return;
-    this._value.set(option.value);
-    this._onChange(option.value);
+  selectOption(option: T): void {
+    if (this.isOptionDisabled(option)) return;
+    const value = this.optionValueOf(option);
+    this._value.set(value);
+    this._onChange(value);
     const param = this.urlParam();
-    if (param) this._urlState.setParam(param, option.value);
+    if (param) this._urlState.setParam(param, serializeNeuOptionValue(value));
     this.selectionChange.emit(option);
     this.close();
+  }
+
+  optionLabelOf(option: T): string {
+    return resolveNeuOptionLabel(option, this.optionLabel());
+  }
+
+  optionValueOf(option: T): V {
+    return resolveNeuOptionValue<T, V>(option, this.optionValue());
+  }
+
+  isOptionDisabled(option: T): boolean {
+    return resolveNeuOptionDisabled(option, this.optionDisabled());
+  }
+
+  optionGroup(option: T): string | undefined {
+    return resolveNeuOptionGroup(option);
+  }
+
+  isOptionSelected(option: T): boolean {
+    const current = this._value();
+    return current !== null && neuOptionValuesEqual(this.optionValueOf(option), current);
+  }
+
+  optionDomId(option: T): string {
+    const index = this.options().indexOf(option);
+    return `${this._panelId}-option-${Math.max(index, 0)}`;
+  }
+
+  private valueFromUrl(serialized: string): V | null {
+    const matchingOption = this.options().find(
+      (option) => serializeNeuOptionValue(this.optionValueOf(option)) === serialized,
+    );
+
+    if (matchingOption !== undefined) {
+      return this.optionValueOf(matchingOption);
+    }
+
+    const canSerializeAny = this.options().some(
+      (option) => serializeNeuOptionValue(this.optionValueOf(option)) !== null,
+    );
+    if (!canSerializeAny) {
+      return null;
+    }
+
+    const parsed = deserializeNeuOptionValue(serialized);
+    return parsed as V;
   }
 
   onDocumentClick(event: MouseEvent): void {
@@ -689,33 +776,39 @@ export class NeuSelectComponent implements ControlValueAccessor {
   }
 
   private focusFirstOption(): void {
-    const firstEnabled = this.filteredOptions().find((option) => !option.disabled);
+    const firstEnabled = this.filteredOptions().find((option) => !this.isOptionDisabled(option));
     if (!firstEnabled) {
       return;
     }
 
-    this.focusOption(firstEnabled.value);
+    this.focusOption(firstEnabled);
   }
 
-  private focusOption(value: string): void {
+  private focusOption(optionOrValue: T | V): void {
+    const option = this.options().find(
+      (candidate) =>
+        candidate === optionOrValue ||
+        neuOptionValuesEqual(this.optionValueOf(candidate), optionOrValue as V),
+    );
+    const optionId = option ? this.optionDomId(option) : `${this._panelId}-option-missing`;
     if (this.virtualScroll()) {
-      const optionIndex = this.filteredOptions().findIndex((option) => option.value === value);
+      const optionIndex = option === undefined ? -1 : this.filteredOptions().indexOf(option);
       if (optionIndex >= 0) {
         this._viewport()?.scrollToIndex(optionIndex, 'auto');
         this._viewport()?.checkViewportSize();
       }
       this._requestFrame(() => {
-        const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
-          `#neu-select-opt-${value}`,
-        ) ?? this._document.getElementById(`neu-select-opt-${value}`);
+        const optionElement =
+          this.elementRef.nativeElement.querySelector<HTMLElement>(`#${optionId}`) ??
+          this._document.getElementById(optionId);
         optionElement?.focus();
       });
       return;
     }
 
     const optionElement =
-      this.elementRef.nativeElement.querySelector<HTMLElement>(`#neu-select-opt-${value}`) ??
-      this._document.getElementById(`neu-select-opt-${value}`);
+      this.elementRef.nativeElement.querySelector<HTMLElement>(`#${optionId}`) ??
+      this._document.getElementById(optionId);
     optionElement?.focus();
   }
 

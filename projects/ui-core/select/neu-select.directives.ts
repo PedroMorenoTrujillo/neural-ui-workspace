@@ -1,6 +1,14 @@
 import { Directive, TemplateRef, inject } from '@angular/core';
 import { NeuSelectOption } from './neu-select.types';
 
+export interface NeuSelectItemContext<T> {
+  $implicit: T;
+}
+
+export interface NeuSelectSelectedContext<T> {
+  $implicit: T | null;
+}
+
 /**
  * Directiva para personalizar el template de cada ítem del dropdown.
  *
@@ -14,9 +22,16 @@ import { NeuSelectOption } from './neu-select.types';
  * </neu-select>
  * ```
  */
-@Directive({ selector: '[neuSelectItem]', standalone: true })
-export class NeuSelectItemDirective {
-  readonly templateRef = inject<TemplateRef<{ $implicit: NeuSelectOption }>>(TemplateRef);
+@Directive({ selector: 'ng-template[neuSelectItem]', standalone: true })
+export class NeuSelectItemDirective<T> {
+  readonly templateRef = inject<TemplateRef<NeuSelectItemContext<T>>>(TemplateRef);
+
+  static ngTemplateContextGuard<T>(
+    _dir: NeuSelectItemDirective<T>,
+    context: unknown,
+  ): context is NeuSelectItemContext<T> {
+    return true;
+  }
 }
 
 /**
@@ -31,9 +46,16 @@ export class NeuSelectItemDirective {
  * </neu-select>
  * ```
  */
-@Directive({ selector: '[neuSelectSelected]', standalone: true })
-export class NeuSelectSelectedDirective {
-  readonly templateRef = inject<TemplateRef<{ $implicit: NeuSelectOption | null }>>(TemplateRef);
+@Directive({ selector: 'ng-template[neuSelectSelected]', standalone: true })
+export class NeuSelectSelectedDirective<T> {
+  readonly templateRef = inject<TemplateRef<NeuSelectSelectedContext<T>>>(TemplateRef);
+
+  static ngTemplateContextGuard<T>(
+    _dir: NeuSelectSelectedDirective<T>,
+    context: unknown,
+  ): context is NeuSelectSelectedContext<T> {
+    return true;
+  }
 }
 
 /** Optional content slots for the select panel. */

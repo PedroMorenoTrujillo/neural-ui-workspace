@@ -12,7 +12,10 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NeuMultiselectComponent } from './neu-multiselect.component';
-import { NeuMultiselectItemDirective } from './neu-multiselect.directives';
+import {
+  NeuMultiselectItemDirective,
+  NeuMultiselectSelectedDirective,
+} from './neu-multiselect.directives';
 import { NeuSelectOption } from '../select/neu-select.types';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 
@@ -22,6 +25,40 @@ const OPTIONS: NeuSelectOption[] = [
   { value: 'vue', label: 'Vue' },
   { value: 'svelte', label: 'Svelte', disabled: true },
 ];
+
+interface FrameworkModel {
+  id: number;
+  displayName: string;
+  maintenanceOnly: boolean;
+}
+
+const FRAMEWORK_MODELS: FrameworkModel[] = [
+  { id: 1, displayName: 'Angular', maintenanceOnly: false },
+  { id: 2, displayName: 'React', maintenanceOnly: false },
+  { id: 3, displayName: 'Backbone', maintenanceOnly: true },
+];
+
+@Component({
+  template: `<neu-multiselect
+    [options]="frameworks"
+    [optionLabel]="frameworkLabel"
+    [optionValue]="frameworkValue"
+    [optionDisabled]="frameworkDisabled"
+    [formControl]="ctrl"
+  >
+    <ng-template neuMultiselectItem let-framework>
+      <span class="raw-framework">{{ $any(framework).displayName }}</span>
+    </ng-template>
+  </neu-multiselect>`,
+  imports: [NeuMultiselectComponent, NeuMultiselectItemDirective, ReactiveFormsModule],
+})
+class RawFrameworkMultiselectHostComponent {
+  frameworks = FRAMEWORK_MODELS;
+  ctrl = new FormControl<number[]>([], { nonNullable: true });
+  frameworkLabel = (framework: FrameworkModel) => framework.displayName;
+  frameworkValue = (framework: FrameworkModel) => framework.id;
+  frameworkDisabled = (framework: FrameworkModel) => framework.maintenanceOnly;
+}
 
 @Component({
   selector: 'cdk-virtual-scroll-viewport',
@@ -113,9 +150,21 @@ class TemplateHostComponent {
 describe('NeuMultiselectComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HostComponent, ChipHostComponent, UrlSyncHostComponent, TemplateHostComponent],
+      imports: [
+        HostComponent,
+        ChipHostComponent,
+        UrlSyncHostComponent,
+        TemplateHostComponent,
+        RawFrameworkMultiselectHostComponent,
+      ],
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
+  });
+
+  it('should instantiate without options and default options to an empty list', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.detectChanges();
+    expect(f.componentInstance.options()).toEqual([]);
   });
 
   // ── Rendering básico ─────────────────────────────────────────────────────
@@ -1003,6 +1052,100 @@ describe('NeuMultiselectComponent', () => {
     expect(mockSetParam).toHaveBeenCalledWith('techs', 'angular');
   });
 
+  it('urlParam: numeric optionValue should restore number[] from query param', async () => {
+    const mockSetParam = vi.fn();
+    const mockGetParam = vi.fn(() => signal<string | null>('1,3'));
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: NeuUrlStateService,
+          useValue: {
+            params: signal<Record<string, string>>({ techs: '1,3' }),
+            getParam: mockGetParam,
+            setParam: mockSetParam,
+            patchParams: vi.fn(),
+            clearParams: vi.fn(),
+          },
+        },
+      ],
+    });
+
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', FRAMEWORK_MODELS);
+    f.componentRef.setInput('optionLabel', 'displayName');
+    f.componentRef.setInput('optionValue', (option: FrameworkModel) => option.id);
+    f.componentRef.setInput('urlParam', 'techs');
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    expect(comp._values()).toEqual([1, 3]);
+  });
+
+  it('urlParam: object option values should not sync as strings; restore as empty state', async () => {
+    const mockSetParam = vi.fn();
+    const mockGetParam = vi.fn(() => signal<string | null>('[object Object]'));
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: NeuUrlStateService,
+          useValue: {
+            params: signal<Record<string, string>>({ techs: '[object Object]' }),
+            getParam: mockGetParam,
+            setParam: mockSetParam,
+            patchParams: vi.fn(),
+            clearParams: vi.fn(),
+          },
+        },
+      ],
+    });
+
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', FRAMEWORK_MODELS);
+    f.componentRef.setInput('optionLabel', 'displayName');
+    f.componentRef.setInput('urlParam', 'techs');
+    f.detectChanges();
+    await f.whenStable();
+
+    const comp = f.componentInstance as any;
+    const values = comp._values();
+    expect(values).toEqual([]);
+    expect(mockSetParam).not.toHaveBeenCalled();
+
+    comp.toggleOption(FRAMEWORK_MODELS[0]);
+    expect(mockSetParam).toHaveBeenCalledWith('techs', null);
+  });
+
+  it('urlParam: full-object option model without optionValue should never write [object Object] to URL', async () => {
+    const mockSetParam = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: NeuUrlStateService,
+          useValue: {
+            params: signal<Record<string, string>>({}),
+            getParam: (_key: string) => signal<string | null>(null),
+            setParam: mockSetParam,
+            patchParams: vi.fn(),
+            clearParams: vi.fn(),
+          },
+        },
+      ],
+    });
+
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', FRAMEWORK_MODELS);
+    f.componentRef.setInput('optionLabel', 'displayName');
+    f.componentRef.setInput('urlParam', 'techs');
+    f.detectChanges();
+
+    const comp = f.componentInstance as any;
+    comp.toggleOption(FRAMEWORK_MODELS[0]);
+
+    expect(mockSetParam).toHaveBeenCalledWith('techs', null);
+    expect(mockSetParam).not.toHaveBeenCalledWith('techs', '[object Object]');
+  });
+
   it('clearAll with urlParam should call setParam with null', () => {
     // clearAll debe limpiar el parámetro de URL cuando urlParam está activo
     // clearAll must clear the URL parameter when urlParam is active
@@ -1220,7 +1363,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     f.componentInstance.searchQuery.set('angular');
     expect(f.componentInstance.filteredOptions().length).toBe(1);
-    expect(f.componentInstance.filteredOptions()[0].value).toBe('angular');
+    expect((f.componentInstance.filteredOptions()[0] as NeuSelectOption).value).toBe('angular');
   });
 
   it('labelFor returns the option label for a matching value', () => {
@@ -1573,7 +1716,9 @@ describe('NeuMultiselectComponent', () => {
       .spyOn(f.nativeElement, 'querySelector')
       .mockImplementation((...args: unknown[]) => {
         const selector = args[0];
-        if (selector === '#neu-ms-opt-react') return target;
+        if (typeof selector === 'string' && selector.includes('option-')) {
+          return target;
+        }
         return null;
       });
 
@@ -1581,6 +1726,146 @@ describe('NeuMultiselectComponent', () => {
 
     expect(target.focus).toHaveBeenCalled();
     querySpy.mockRestore();
+  });
+
+  it('focusOption should handle arbitrary values without CSS selector fragility (non-virtual)', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', [
+      { value: 'user:23/test value', label: 'Special User' },
+      { value: 'normal', label: 'Normal User' },
+    ]);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.isOpen.set(true);
+    f.detectChanges();
+
+    const seenSelectors: string[] = [];
+    const querySpy = vi
+      .spyOn(f.nativeElement, 'querySelector')
+      .mockImplementation((...args: unknown[]) => {
+        const selector = args[0];
+        if (typeof selector === 'string') {
+          seenSelectors.push(selector);
+        }
+        return null;
+      });
+    const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
+
+    expect(() => comp.focusOption({ value: 'user:23/test value', label: 'Special User' })).not.toThrow();
+    expect(
+      seenSelectors.every((selector) => !selector.includes('user:23/test value')),
+    ).toBe(true);
+
+    querySpy.mockRestore();
+    getByIdSpy.mockRestore();
+  });
+
+  it('focusOption should handle arbitrary values without CSS selector fragility (virtual)', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', [
+      { value: 'user:23/test value', label: 'Special User' },
+      { value: 'normal', label: 'Normal User' },
+    ]);
+    f.componentRef.setInput('virtualScroll', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const seenSelectors: string[] = [];
+    const querySpy = vi
+      .spyOn(f.nativeElement, 'querySelector')
+      .mockImplementation((...args: unknown[]) => {
+        const selector = args[0];
+        if (typeof selector === 'string') {
+          seenSelectors.push(selector);
+        }
+        return null;
+      });
+    const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
+    const scrollToIndex = vi.fn();
+    const checkViewportSize = vi.fn();
+    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+
+    expect(() =>
+      comp.focusOption({ value: 'user:23/test value', label: 'Special User' }),
+    ).not.toThrow();
+    expect(seenSelectors.every((selector) => !selector.includes('user:23/test value'))).toBe(
+      true,
+    );
+
+    querySpy.mockRestore();
+    getByIdSpy.mockRestore();
+  });
+
+  it('should render item template context with the original model object', async () => {
+    @Component({
+      template: `
+        <neu-multiselect [options]="frameworks" [optionLabel]="label" [optionValue]="value">
+          <ng-template neuMultiselectItem let-framework>
+            <span class="item-context"
+              >{{ $any(framework).id }}:{{ $any(framework).displayName }}</span
+            >
+          </ng-template>
+        </neu-multiselect>
+      `,
+      imports: [NeuMultiselectComponent, NeuMultiselectItemDirective],
+    })
+    class MultiselectItemContextHost {
+      frameworks = FRAMEWORK_MODELS;
+      label = (framework: FrameworkModel) => framework.displayName;
+      value = (framework: FrameworkModel) => framework.id;
+    }
+
+    const f = TestBed.createComponent(MultiselectItemContextHost);
+    f.detectChanges();
+
+    const comp = f.debugElement.query(By.css('neu-multiselect')).componentInstance as NeuMultiselectComponent<
+      FrameworkModel,
+      number
+    >;
+    comp.isOpen.set(true);
+    f.detectChanges();
+    await f.whenStable();
+
+    const renderedItems = Array.from(document.querySelectorAll('.item-context') as NodeListOf<HTMLElement>).map(
+      (item) => item.textContent?.trim(),
+    );
+    expect(renderedItems).toContain('1:Angular');
+    expect(renderedItems).toContain('2:React');
+  });
+
+  it('should render selected template context as original model and expose remove handler', async () => {
+    @Component({
+      template: `
+        <neu-multiselect [options]="frameworks" [optionLabel]="label" [optionValue]="value">
+          <ng-template neuMultiselectSelected let-framework let-remove="remove">
+            <span class="selected-context"
+              >{{ $any(framework).id }}:{{ $any(framework).displayName }}</span
+            >
+            <button class="selected-remove" (click)="remove()">remove</button>
+          </ng-template>
+        </neu-multiselect>
+      `,
+      imports: [NeuMultiselectComponent, NeuMultiselectSelectedDirective],
+    })
+    class MultiselectSelectedContextHost {
+      frameworks = FRAMEWORK_MODELS;
+      label = (framework: FrameworkModel) => framework.displayName;
+      value = (framework: FrameworkModel) => framework.id;
+    }
+
+    const f = TestBed.createComponent(MultiselectSelectedContextHost);
+    f.detectChanges();
+    const comp = f.debugElement.query(By.css('neu-multiselect')).componentInstance as any;
+    comp._chipMode.set('chips');
+    comp._values.set([1, 3]);
+    f.detectChanges();
+
+    const removeBtn = f.nativeElement.querySelector('.selected-remove') as HTMLButtonElement;
+    expect(removeBtn).toBeTruthy();
+    removeBtn.click();
+    f.detectChanges();
+
+    expect(comp._values()).toEqual([3]);
+    expect(f.nativeElement.textContent).toContain('3:Backbone');
   });
 
   it('onWindowResize and onWindowScroll should sync panel position only when open', () => {
@@ -1702,9 +1987,9 @@ describe('NeuMultiselectComponent', () => {
     selectAll.click();
     expect(component._values()).toEqual([]);
 
-    const react = document.querySelector('#neu-ms-opt-react') as HTMLElement;
+    const react = document.querySelector('.neu-multiselect__option') as HTMLElement;
     react.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    expect(component._values()).toEqual(['react']);
+    expect(component._values()).toEqual(['angular']);
     react.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     expect(component._values()).toEqual([]);
     react.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
@@ -1787,5 +2072,48 @@ describe('NeuMultiselectComponent', () => {
 
     expect(comp._viewport()).toBeUndefined();
     expect(comp.itemTpl()).toBeUndefined();
+  });
+
+  it('accepts function accessors for domain models and emits their resolved values', async () => {
+    const f = TestBed.createComponent(RawFrameworkMultiselectHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const multiselect = f.debugElement.query(By.directive(NeuMultiselectComponent))
+      .componentInstance as any;
+    const emitted: FrameworkModel[][] = [];
+    multiselect.selectionChange.subscribe((options: FrameworkModel[]) => emitted.push(options));
+
+    multiselect.isOpen.set(true);
+    f.detectChanges();
+    expect(document.querySelector('.raw-framework')?.textContent).toContain('Angular');
+
+    multiselect.toggleOption(FRAMEWORK_MODELS[0]);
+    multiselect.toggleOption(FRAMEWORK_MODELS[1]);
+    f.detectChanges();
+
+    expect(f.componentInstance.ctrl.value).toEqual([1, 2]);
+    expect(emitted.at(-1)).toEqual([FRAMEWORK_MODELS[0], FRAMEWORK_MODELS[1]]);
+
+    multiselect.toggleOption(FRAMEWORK_MODELS[2]);
+    expect(f.componentInstance.ctrl.value).toEqual([1, 2]);
+  });
+
+  it('returns complete domain objects when optionValue is omitted', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', FRAMEWORK_MODELS);
+    f.componentRef.setInput('optionLabel', 'displayName');
+    f.detectChanges();
+    const comp = f.componentInstance as unknown as NeuMultiselectComponent<
+      FrameworkModel,
+      FrameworkModel
+    >;
+    const onChange = vi.fn();
+    comp.registerOnChange(onChange);
+
+    (comp as any).toggleOption(FRAMEWORK_MODELS[0]);
+
+    expect((comp as any)._values()).toEqual([FRAMEWORK_MODELS[0]]);
+    expect(onChange).toHaveBeenCalledWith([FRAMEWORK_MODELS[0]]);
+    expect((comp as any).labelFor(FRAMEWORK_MODELS[0])).toBe('Angular');
   });
 });
