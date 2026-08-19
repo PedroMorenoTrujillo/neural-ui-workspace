@@ -1,0 +1,194 @@
+@use '../styles/text-overflow' as text;
+
+.neu-cascade-select {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.neu-cascade-select__label {
+  color: var(--neu-text, #111827);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.neu-cascade-select__control {
+  position: relative;
+}
+
+.neu-cascade-select__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 14rem;
+  min-height: 2.5rem;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.625rem;
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+  padding: 0.5rem 0.75rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.neu-cascade-select__trigger:focus-visible,
+.neu-cascade-select__option:focus-visible,
+.neu-cascade-select__breadcrumb:focus-visible,
+.neu-cascade-select__back:focus-visible {
+  outline: 2px solid var(--neu-primary, #2563eb);
+  outline-offset: 2px;
+}
+
+.neu-cascade-select__trigger--open {
+  border-color: var(--neu-primary, #2563eb);
+}
+
+.neu-cascade-select__trigger--has-clear {
+  padding-inline-end: 4.5rem;
+}
+
+.neu-cascade-select__value {
+  @include text.ellipsis;
+  flex: 1;
+}
+
+.neu-cascade-select__placeholder,
+.neu-cascade-select__empty {
+  color: var(--neu-text-muted, #6b7280);
+}
+
+.neu-cascade-select__clear,
+.neu-cascade-select__chevron {
+  flex: 0 0 auto;
+  color: var(--neu-text-muted, #6b7280);
+}
+
+.neu-cascade-select__clear {
+  position: absolute;
+  inset-inline-end: 2.25rem;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.neu-cascade-select__clear:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.neu-cascade-select__clear:focus-visible {
+  outline: 2px solid var(--neu-primary, #2563eb);
+  outline-offset: 2px;
+}
+
+.neu-cascade-select__panel {
+  display: grid;
+  min-width: 17rem;
+  overflow: auto;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: 0.75rem;
+  background: var(--neu-surface, #fff);
+  box-shadow: var(--neu-shadow-lg, 0 18px 40px rgb(15 23 42 / 18%));
+  padding: 0.5rem;
+}
+
+.neu-cascade-select__breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--neu-border-subtle, #e5e7eb);
+  white-space: nowrap;
+}
+
+.neu-cascade-select__breadcrumb,
+.neu-cascade-select__back {
+  border: 0;
+  background: transparent;
+  color: var(--neu-text-muted, #6b7280);
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.neu-cascade-select__breadcrumb--active {
+  color: var(--neu-text, #111827);
+  font-weight: 600;
+}
+
+.neu-cascade-select__separator {
+  color: var(--neu-text-muted, #6b7280);
+}
+
+.neu-cascade-select__level-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2.5rem;
+  color: var(--neu-text, #111827);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.neu-cascade-select__back {
+  font-size: 1.125rem;
+}
+
+.neu-cascade-select__options {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.neu-cascade-select__option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--neu-text, #111827);
+  padding: 0.5rem 0.625rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.neu-cascade-select__option:hover,
+.neu-cascade-select__option--active {
+  background: var(--neu-surface-hover, #f3f4f6);
+}
+
+.neu-cascade-select__option--selected {
+  background: color-mix(in srgb, var(--neu-primary, #2563eb) 14%, transparent);
+}
+
+.neu-cascade-select__option--disabled {
+  color: var(--neu-text-muted, #9ca3af);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.neu-cascade-select__option-label {
+  @include text.ellipsis;
+  flex: 1;
+}
+
+.neu-cascade-select__option-arrow {
+  flex: 0 0 auto;
+  color: var(--neu-text-muted, #6b7280);
+}
+
+.neu-cascade-select__empty {
+  padding: 1rem 0.75rem;
+  text-align: center;
+}
