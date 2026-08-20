@@ -85,6 +85,185 @@ export interface NeuTableCellEditEvent<T = Record<string, unknown>> {
   previousValue: unknown;
 }
 
+// ── Typed filtering ───────────────────────────────────────────────────────
+
+export type NeuTableFilterKind =
+  | 'text'
+  | 'number'
+  | 'date'
+  | 'boolean'
+  | 'select'
+  | 'multiSelect'
+  | 'custom';
+
+export type NeuTableTextFilterMode =
+  | 'contains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'equals'
+  | 'notEquals'
+  | 'notContains';
+
+export type NeuTableNumberFilterMode =
+  | 'equals'
+  | 'notEquals'
+  | 'lt'
+  | 'lte'
+  | 'gt'
+  | 'gte'
+  | 'between';
+
+export type NeuTableDateFilterMode = 'is' | 'isNot' | 'before' | 'after' | 'between';
+
+export type NeuTableBooleanFilterMode = 'true' | 'false' | 'all';
+
+export type NeuTableSelectFilterMode = 'equals';
+
+export type NeuTableMultiSelectFilterMode = 'in';
+
+/**
+ * Match modes configurable by consumers. Boolean and custom filtering derive
+ * their behavior from the filter value/configuration instead of this union.
+ */
+export type NeuTableFilterMatchMode =
+  | NeuTableTextFilterMode
+  | NeuTableNumberFilterMode
+  | NeuTableDateFilterMode
+  | NeuTableSelectFilterMode
+  | NeuTableMultiSelectFilterMode;
+
+/** Internal/public compatibility union for all typed filter state modes. */
+export type NeuTableFilterMode =
+  | NeuTableFilterMatchMode
+  | NeuTableBooleanFilterMode
+  | 'custom';
+
+export type NeuTableDatePrecision = 'date-only' | 'instant';
+
+/** Canonical date point used by the typed filter state. */
+export interface NeuTableDatePoint {
+  precision: NeuTableDatePrecision;
+  value: string;
+}
+
+export interface NeuTableDateRangeValue {
+  from: NeuTableDatePoint | null;
+  to: NeuTableDatePoint | null;
+}
+
+export interface NeuTableNumberRangeValue {
+  from: number | null;
+  to: number | null;
+}
+
+export type NeuTableFilterAccessor<T, V = unknown> = (row: T) => V;
+
+export interface NeuTableFilterBaseConfig<T, K extends NeuTableFilterKind, M extends string, V> {
+  kind: K;
+  mode?: M;
+  accessor?: NeuTableFilterAccessor<T, V>;
+}
+
+export interface NeuTableTextFilterConfig<T = NeuTableRow>
+  extends NeuTableFilterBaseConfig<T, 'text', NeuTableTextFilterMode, string> {}
+
+export interface NeuTableNumberFilterConfig<T = NeuTableRow>
+  extends NeuTableFilterBaseConfig<T, 'number', NeuTableNumberFilterMode, number | null> {}
+
+export interface NeuTableDateFilterConfig<T = NeuTableRow>
+  extends NeuTableFilterBaseConfig<
+    T,
+    'date',
+    NeuTableDateFilterMode,
+    Date | string | null | undefined
+  > {
+  precision?: NeuTableDatePrecision;
+}
+
+export interface NeuTableBooleanFilterConfig<T = NeuTableRow>
+  extends Omit<
+    NeuTableFilterBaseConfig<T, 'boolean', NeuTableBooleanFilterMode, boolean | null | undefined>,
+    'mode'
+  > {}
+
+export interface NeuTableSelectFilterConfig<T = NeuTableRow>
+  extends NeuTableFilterBaseConfig<T, 'select', 'equals', unknown> {}
+
+export interface NeuTableMultiSelectFilterConfig<T = NeuTableRow>
+  extends NeuTableFilterBaseConfig<
+    T,
+    'multiSelect',
+    NeuTableMultiSelectFilterMode,
+    readonly unknown[]
+  > {}
+
+/** Custom predicates remain local-only and intentionally use unknown values in P2.2B. */
+export interface NeuTableCustomFilterConfig<T = NeuTableRow>
+  extends NeuTableFilterBaseConfig<T, 'custom', 'custom', unknown> {
+  predicate: (value: unknown, filterValue: unknown, row: T) => boolean;
+}
+
+export type NeuTableFilterConfig<T = NeuTableRow> =
+  | NeuTableTextFilterConfig<T>
+  | NeuTableNumberFilterConfig<T>
+  | NeuTableDateFilterConfig<T>
+  | NeuTableBooleanFilterConfig<T>
+  | NeuTableSelectFilterConfig<T>
+  | NeuTableMultiSelectFilterConfig<T>
+  | NeuTableCustomFilterConfig<T>;
+
+export interface NeuTableTextFilterState {
+  kind: 'text';
+  mode: NeuTableTextFilterMode;
+  value: string;
+}
+
+export interface NeuTableNumberFilterState {
+  kind: 'number';
+  mode: NeuTableNumberFilterMode;
+  value: number | NeuTableNumberRangeValue | null;
+}
+
+export interface NeuTableDateFilterState {
+  kind: 'date';
+  mode: NeuTableDateFilterMode;
+  value: NeuTableDatePoint | NeuTableDateRangeValue | null;
+}
+
+export interface NeuTableBooleanFilterState {
+  kind: 'boolean';
+  mode: NeuTableBooleanFilterMode;
+  value: boolean | null;
+}
+
+export interface NeuTableSelectFilterState {
+  kind: 'select';
+  mode: 'equals';
+  value: unknown;
+}
+
+export interface NeuTableMultiSelectFilterState {
+  kind: 'multiSelect';
+  mode: 'in';
+  value: readonly unknown[];
+}
+
+export interface NeuTableCustomFilterState {
+  kind: 'custom';
+  mode: 'custom';
+  value: unknown;
+  localOnly: true;
+}
+
+export type NeuTableFilterState =
+  | NeuTableTextFilterState
+  | NeuTableNumberFilterState
+  | NeuTableDateFilterState
+  | NeuTableBooleanFilterState
+  | NeuTableSelectFilterState
+  | NeuTableMultiSelectFilterState
+  | NeuTableCustomFilterState;
+
 // ── Sort ──────────────────────────────────────────────────────────────────
 export interface NeuTableSortEntry {
   key: string;
@@ -100,6 +279,10 @@ export interface NeuTableServerState {
   sortDir: 'asc' | 'desc';
   sortEntries: NeuTableSortEntry[];
   columnFilters: Record<string, unknown>;
+  /** Typed filter state. Legacy columnFilters remains unchanged. */
+  typedColumnFilters?: Record<string, NeuTableFilterState>;
+  /** Known local-only predicates. Full serialization is a later contract. */
+  localOnlyFilters?: string[];
 }
 
 // ── Cell type ─────────────────────────────────────────────────────────────
@@ -144,6 +327,8 @@ export interface NeuTableColumn<T = Record<string, unknown>, K extends string = 
   filterable?: boolean;
   filterType?: 'text' | 'select' | 'number-range' | 'date';
   filterOptions?: string[];
+  /** Additive typed filter configuration. Legacy filterType remains supported. */
+  filterConfig?: NeuTableFilterConfig<T>;
   // Inline edit
   editable?: boolean;
   editor?: 'text' | 'number' | 'select' | 'date';

@@ -21,6 +21,11 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
+import {
+  buildNeuTableFilterState,
+  isNeuTableFilterValueEmpty,
+  matchesNeuTableFilter,
+} from './neu-table-filter.engine';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
@@ -40,6 +45,13 @@ import type {
   NeuTableRowKey,
   NeuTableSelectionAction,
   NeuTableSelectionActionEvent,
+  NeuTableDatePoint,
+  NeuTableDateRangeValue,
+  NeuTableFilterConfig,
+  NeuTableFilterKind,
+  NeuTableFilterMatchMode,
+  NeuTableFilterState,
+  NeuTableNumberRangeValue,
   NeuTableServerState,
   NeuTableSortEntry,
 } from './neu-table.types';
@@ -56,6 +68,13 @@ export type {
   NeuTableLayout,
   NeuTableSelectionAction,
   NeuTableSelectionActionEvent,
+  NeuTableDatePoint,
+  NeuTableDateRangeValue,
+  NeuTableFilterConfig,
+  NeuTableFilterKind,
+  NeuTableFilterMatchMode,
+  NeuTableFilterState,
+  NeuTableNumberRangeValue,
   NeuTableServerState,
   NeuTableSortEntry,
   NeuTableRow,
@@ -1221,7 +1240,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly filteredData = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (this.serverSide()) return this._rows();
     const rows = this._rows();
+    const columns = this._typedColumns();
     const colFilters = this._columnFilters();
+    const columnsByKey = new Map<string, NeuTableColumn<T>>();
+    for (const column of columns) {
+      columnsByKey.set(column.key, column);
+    }
+    const activeColumnFilters: Array<{ column: NeuTableColumn<T>; value: unknown }> = [];
+    for (const [colKey, value] of Object.entries(colFilters)) {
+      if (isNeuTableFilterValueEmpty(value)) continue;
+      const column = columnsByKey.get(colKey);
+      if (column) activeColumnFilters.push({ column, value });
+    }
     const q = this.searchQuery().trim().toLowerCase();
     const exact = this._exactMatch();
     const matches = (text: string) =>
@@ -1229,7 +1259,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return rows.filter((row) => {
       const passesGlobal =
         !q ||
-        this._typedColumns().some((col) => {
+        columns.some((col) => {
           const rawVal = String(this.getRowValue(row, col.key) ?? '');
           const displayVal = col.cell
             ? col.cell(row)
@@ -1239,14 +1269,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           return matches(displayVal) || matches(rawVal);
         });
       if (!passesGlobal) return false;
-      for (const [colKey, filterVal] of Object.entries(colFilters)) {
-        if (filterVal === null || filterVal === '' || filterVal === undefined) continue;
-        if (
-          !String(this.getRowValue(row, colKey) ?? '')
-            .toLowerCase()
-            .includes(String(filterVal).toLowerCase())
-        )
-          return false;
+      for (const { column, value } of activeColumnFilters) {
+        if (!matchesNeuTableFilter(row, column, value)) return false;
       }
       return true;
     });
@@ -2182,8 +2206,30 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       sortDir: this.sortDir(),
       sortEntries: this._sortEntries(),
       columnFilters: this._columnFilters(),
+      typedColumnFilters: this._typedColumnFiltersState(),
+      localOnlyFilters: this._localOnlyFilters(),
     };
     this.serverStateChange.emit({ ...current, ...patch });
+  }
+  private _typedColumnFiltersState(): Record<string, NeuTableFilterState> {
+    const result: Record<string, NeuTableFilterState> = {};
+    for (const column of this._typedColumns()) {
+      const value = this._columnFilters()[column.key];
+      if (isNeuTableFilterValueEmpty(value)) continue;
+      const state = buildNeuTableFilterState(column as NeuTableColumn<T, string>, value);
+      if (state) result[column.key] = state;
+    }
+    return result;
+  }
+
+  private _localOnlyFilters(): string[] {
+    return this._typedColumns()
+      .filter(
+        (column) =>
+          column.filterConfig?.kind === 'custom' &&
+          !isNeuTableFilterValueEmpty(this._columnFilters()[column.key]),
+      )
+      .map((column) => column.key);
   }
 
   private _emitLayoutChange(): void {

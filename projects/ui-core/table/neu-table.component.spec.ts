@@ -7,7 +7,12 @@ import { lucidePencil } from '@ng-icons/lucide';
 import { NeuTableColumnInput, NeuTableComponent } from './neu-table.component';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
-import { NeuTableAction, NeuTableActionEvent, NeuTableColumn } from './neu-table.types';
+import {
+  NeuTableAction,
+  NeuTableActionEvent,
+  NeuTableColumn,
+  NeuTableServerState,
+} from './neu-table.types';
 import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
 import { By } from '@angular/platform-browser';
 
@@ -23,6 +28,14 @@ interface TypedUser {
   id: number;
   name: string;
   email: string;
+  active: boolean;
+}
+
+interface FilterUser {
+  id: number;
+  name: string;
+  score: number;
+  createdAt: string;
   active: boolean;
 }
 
@@ -816,6 +829,177 @@ describe('NeuTableComponent', () => {
     comp.clearColumnFilters();
     f.detectChanges();
     expect(comp.filteredData().length).toBe(DATA.length);
+  });
+
+  it('applies modern text, number, date, and boolean filters with AND semantics', async () => {
+    const columns: NeuTableColumn<FilterUser>[] = [
+      {
+        key: 'name',
+        header: 'Name',
+        filterConfig: { kind: 'text', mode: 'startsWith', accessor: (row) => row.name },
+      },
+      {
+        key: 'score',
+        header: 'Score',
+        filterConfig: { kind: 'number', mode: 'gte', accessor: (row) => row.score },
+      },
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: {
+          kind: 'date',
+          mode: 'is',
+          precision: 'date-only',
+          accessor: (row) => row.createdAt,
+        },
+      },
+      {
+        key: 'active',
+        header: 'Active',
+        filterConfig: { kind: 'boolean', accessor: (row) => row.active },
+      },
+    ];
+    const data: FilterUser[] = [
+      { id: 1, name: 'Ana', score: 90, createdAt: '2026-08-20', active: true },
+      { id: 2, name: 'Anaïs', score: 80, createdAt: '2026-08-20', active: false },
+      { id: 3, name: 'Luis', score: 95, createdAt: '2026-08-20', active: true },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', data);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const table = fixture.componentInstance;
+    table.setColumnFilter('name', 'Ana');
+    table.setColumnFilter('score', 85);
+    table.setColumnFilter('createdAt', '2026-08-20');
+    table.setColumnFilter('active', true);
+
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+  });
+
+  it('keeps legacy number-range textual and legacy select filtering', async () => {
+    const columns: NeuTableColumn<FilterUser>[] = [
+      { key: 'score', header: 'Score', filterable: true, filterType: 'number-range' },
+      {
+        key: 'active',
+        header: 'Active',
+        filterable: true,
+        filterType: 'select',
+        filterOptions: ['true', 'false'],
+      },
+    ];
+    const data: FilterUser[] = [
+      { id: 1, name: 'Ana', score: 120, createdAt: '2026-08-20', active: true },
+      { id: 2, name: 'Luis', score: 12, createdAt: '2026-08-20', active: false },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', data);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const table = fixture.componentInstance;
+    table.setColumnFilter('score', '20');
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+    table.clearColumnFilters();
+    table.setColumnFilter('active', 'false');
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+  });
+
+  it('keeps legacy date columns on textual matching', async () => {
+    const columns: NeuTableColumn<FilterUser>[] = [
+      { key: 'createdAt', header: 'Created', filterable: true, filterType: 'date' },
+    ];
+    const data: FilterUser[] = [
+      { id: 1, name: 'Ana', score: 1, createdAt: '2026-08-20T10:30:00Z', active: true },
+      { id: 2, name: 'Luis', score: 1, createdAt: '2026-08-21', active: true },
+      { id: 3, name: 'Invalid', score: 1, createdAt: 'not-a-date', active: true },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', data);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    fixture.componentInstance.setColumnFilter('createdAt', '10:30');
+    expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([1]);
+  });
+
+  it('emits raw legacy and typed modern server filter state separately', async () => {
+    const columns: NeuTableColumn<FilterUser>[] = [
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: {
+          kind: 'date',
+          mode: 'is',
+          precision: 'date-only',
+          accessor: (row) => row.createdAt,
+        },
+      },
+      {
+        key: 'score',
+        header: 'Score',
+        filterConfig: { kind: 'number', mode: 'between', accessor: (row) => row.score },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', []);
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.componentRef.setInput('totalItems', 100);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const events: NeuTableServerState[] = [];
+    fixture.componentInstance.serverStateChange.subscribe((state) => events.push(state));
+
+    const legacyDate = new Date('2026-08-20T10:30:00Z');
+    fixture.componentInstance.setColumnFilter('createdAt', legacyDate);
+    fixture.componentInstance.setColumnFilter('score', { from: 10, to: 20 });
+
+    const latest = events.at(-1);
+    expect(latest?.columnFilters['createdAt']).toBe(legacyDate);
+    expect(latest?.typedColumnFilters?.['createdAt']).toEqual({
+      kind: 'date',
+      mode: 'is',
+      value: { precision: 'date-only', value: '2026-08-20' },
+    });
+    expect(latest?.typedColumnFilters?.['score']).toEqual({
+      kind: 'number',
+      mode: 'between',
+      value: { from: 10, to: 20 },
+    });
+  });
+
+  it('reports only active custom filters as local-only server state', async () => {
+    const columns: NeuTableColumn<FilterUser>[] = [
+      {
+        key: 'name',
+        header: 'Name',
+        filterConfig: {
+          kind: 'custom',
+          predicate: (value, filterValue) => value === filterValue,
+        },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', []);
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const events: NeuTableServerState[] = [];
+    fixture.componentInstance.serverStateChange.subscribe((state) => events.push(state));
+
+    for (const inactiveValue of [null, '', [], { from: null, to: null }]) {
+      fixture.componentInstance.setColumnFilter('name', inactiveValue);
+      expect(events.at(-1)?.localOnlyFilters).toEqual([]);
+    }
+
+    fixture.componentInstance.setColumnFilter('name', 'Ana');
+    expect(events.at(-1)?.localOnlyFilters).toEqual(['name']);
   });
 
   // ── v1.3.0: multiSort ────────────────────────────────────────────────────
