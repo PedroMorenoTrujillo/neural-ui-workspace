@@ -36,6 +36,8 @@ import type {
   NeuTableColumn,
   NeuTableColumnReorderEvent,
   NeuTableLayout,
+  NeuTableRow,
+  NeuTableRowKey,
   NeuTableSelectionAction,
   NeuTableSelectionActionEvent,
   NeuTableServerState,
@@ -56,18 +58,31 @@ export type {
   NeuTableSelectionActionEvent,
   NeuTableServerState,
   NeuTableSortEntry,
+  NeuTableRow,
+  NeuTableRowKey,
 } from './neu-table.types';
 
-type Row = Record<string, unknown>;
-type NeuTablePageEntry =
-  | { kind: 'group'; key: string; label: string; count: number }
-  | { kind: 'row'; key: unknown; row: Row; rowIndex: number };
+type NeuTableRuntimeRow<T extends object> = T & Record<string, unknown>;
 
-// Conversor interno — el input acepta object[] para compatibilidad con
-// interfaces de usuario concretas (User, Product…). Internamente casteamos a Row.
-function asRows(data: object[]): Row[] {
-  return data as Row[];
-}
+type NeuTablePageEntry<T extends object> =
+  | { kind: 'group'; key: string; label: string; count: number }
+  | { kind: 'row'; key: unknown; row: NeuTableRuntimeRow<T>; rowIndex: number };
+
+type NeuTableData<T> = [T] extends [Record<string, unknown>]
+  ? readonly T[] | readonly object[]
+  : readonly T[];
+
+export type NeuTableColumnInput<T extends object> =
+  | NeuTableColumn<T>
+  | NeuTableColumn<T, string>
+  /**
+   * Angular checks a generic standalone component in templates at its default
+   * instantiation, so a typed callback such as (row: User) => string is not
+   * assignable to the legacy Record<string, unknown> callback under strict
+   * function variance. The minimum structural column contract keeps this
+   * bridge column-only and rejects `{}` without widening to object.
+   */
+  | Pick<NeuTableColumn<NeuTableRow, string>, 'key' | 'header'>;
 
 /**
  * NeuralUI Table — Componente Estrella
@@ -875,7 +890,7 @@ function asRows(data: object[]): Row[] {
   `,
   styleUrl: './neu-table.component.scss',
 })
-export class NeuTableComponent {
+export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _platformId = inject(PLATFORM_ID);
@@ -883,8 +898,8 @@ export class NeuTableComponent {
   private readonly _virtualOverscan = 3;
 
   // ── Inputs de datos ─────────────────────────────────────────────────
-  readonly columns = input<NeuTableColumn[]>([]);
-  readonly data = input<object[]>([]);
+  readonly columns = input<readonly NeuTableColumnInput<T>[]>([]);
+  readonly data = input<NeuTableData<T>>([]);
   readonly pageSize = input<number>(10);
   /** Controla si la paginación está activa. Si es false, se muestran todos los datos y se ocultan los controles de paginación y pageSize. */
   readonly pagination = input<boolean>(true);
@@ -894,7 +909,7 @@ export class NeuTableComponent {
   readonly emptyMessage = input<string>('No results found');
   readonly skeletonRows = input<number[]>([1, 2, 3, 4, 5]);
 
-  readonly expandTemplate = contentChild(NeuTableExpandDirective);
+  readonly expandTemplate = contentChild<NeuTableExpandDirective<T>>(NeuTableExpandDirective);
   readonly toolbarTemplate = contentChild(NeuTableToolbarDirective);
   protected readonly _toolbarTemplateRef = computed(
     () => this.toolbarExtraRef() ?? this.toolbarTemplate()?.templateRef ?? null,
@@ -949,7 +964,7 @@ export class NeuTableComponent {
   readonly saveInlineEditLabel = input<string>('Save cell');
   readonly cancelInlineEditLabel = input<string>('Cancel cell edit');
   readonly initialLayout = input<NeuTableLayout | null>(null);
-  readonly rowKey = input<string>('id');
+  readonly rowKey = input<NeuTableRowKey<T>>('id' as NeuTableRowKey<T>);
   readonly bordered = input<boolean>(true);
   readonly roundedBorders = input<boolean>(true);
   readonly stripedRows = input<boolean>(false);
@@ -957,7 +972,7 @@ export class NeuTableComponent {
   // ── Inputs nuevos v1.3.0 ──────────────────────────────────────────────
   readonly density = input<'compact' | 'normal' | 'relaxed'>('normal');
   readonly showRowNumbers = input<boolean>(false);
-  readonly rowClass = input<((row: Row) => string) | undefined>(undefined);
+  readonly rowClass = input<((row: T) => string) | undefined>(undefined);
   readonly footerRow = input<Record<string, string | number> | undefined>(undefined);
   readonly emptyStateTemplate = input<TemplateRef<void> | undefined>(undefined);
   readonly serverSide = input<boolean>(false);
@@ -966,7 +981,7 @@ export class NeuTableComponent {
   readonly exportFormats = input<('csv' | 'json' | 'xlsx')[]>(['csv']);
   readonly exportColumns = input<string[]>([]);
   readonly exportScope = input<'filtered' | 'selected' | 'auto'>('auto');
-  readonly selectionActions = input<NeuTableSelectionAction<Row>[]>([]);
+  readonly selectionActions = input<readonly NeuTableSelectionAction<T>[]>([]);
 
   // ── URL params ────────────────────────────────────────────────────────
   readonly pageParam = input<string>('page');
@@ -987,17 +1002,17 @@ export class NeuTableComponent {
   readonly useUrlState = input<boolean>(true);
 
   // ── Outputs ───────────────────────────────────────────────────────────
-  readonly selectionChange = output<Row[]>();
-  readonly rowClick = output<Row>();
-  readonly rowDblClick = output<Row>();
-  readonly actionClick = output<NeuTableActionEvent<Row>>();
-  readonly selectionActionClick = output<NeuTableSelectionActionEvent<Row>>();
+  readonly selectionChange = output<T[]>();
+  readonly rowClick = output<T>();
+  readonly rowDblClick = output<T>();
+  readonly actionClick = output<NeuTableActionEvent<T>>();
+  readonly selectionActionClick = output<NeuTableSelectionActionEvent<T>>();
   readonly serverStateChange = output<NeuTableServerState>();
   readonly searchChange = output<string>();
   readonly columnResize = output<{ key: string; width: number }>();
   readonly columnReorder = output<NeuTableColumnReorderEvent>();
   readonly layoutChange = output<NeuTableLayout>();
-  readonly cellEditCommit = output<NeuTableCellEditEvent<Row>>();
+  readonly cellEditCommit = output<NeuTableCellEditEvent<T>>();
 
   // ── Estado interno (usado cuando useUrlState = false) ─────────────────
   // Internal state signals (used when useUrlState = false)
@@ -1058,8 +1073,6 @@ export class NeuTableComponent {
   });
 
   // ---- Pipeline de datos / Data pipeline ----
-  private readonly rows = computed(() => asRows(this.data()));
-
   // ── Estado interno ────────────────────────────────────────────────────
   private readonly _exactMatch = signal(false);
   readonly exactMatch = this._exactMatch.asReadonly();
@@ -1087,13 +1100,15 @@ export class NeuTableComponent {
   readonly _hasFilterableCol = computed(() => this.visibleColumns().some((c) => c.filterable));
 
   readonly orderedColumns = computed(() => {
-    const columns = this.columns();
+    const columns = this._typedColumns();
     const order = this._columnOrder();
     if (order.length === 0) {
       return columns;
     }
 
-    const byKey = new Map(columns.map((col) => [col.key, col]));
+    const byKey = new Map<string, NeuTableColumn<T>>(
+      columns.map((col) => [col.key, col] as [string, NeuTableColumn<T>]),
+    );
     return [
       ...order.flatMap((key) => {
         const col = byKey.get(key);
@@ -1108,9 +1123,18 @@ export class NeuTableComponent {
     return this.orderedColumns().filter((col) => !hidden.has(col.key));
   });
 
+  /**
+   * Normalize the three supported column contracts: direct T keys, the
+   * explicit T/string escape for computed/action/path-like columns, and the
+   * unparameterized legacy column form used by existing templates.
+   */
+  private readonly _typedColumns = computed<readonly NeuTableColumn<T>[]>(
+    () => this.columns().map((column) => this.asRuntimeColumn(column)),
+  );
+
   /** Convierte filterOptions de string[] a NeuSelectOption[] con opción "Todos" al inicio.
    *  Converts filterOptions from string[] to NeuSelectOption[] with a leading "All" option. */
-  _filterOpts(col: NeuTableColumn): NeuSelectOption[] {
+  _filterOpts(col: NeuTableColumn<T>): NeuSelectOption[] {
     return [
       { label: this.allFilterOptionLabel(), value: '' },
       ...(col.filterOptions ?? []).map((o) => ({ label: o, value: o })),
@@ -1139,7 +1163,7 @@ export class NeuTableComponent {
 
     effect(() => {
       const filters = this._columnFilters();
-      for (const col of this.columns()) {
+      for (const col of this._typedColumns()) {
         if (!col.filterable) continue;
         const control = this.columnFilterControl(col.key);
         const nextValue = String(filters[col.key] ?? '');
@@ -1150,7 +1174,7 @@ export class NeuTableComponent {
     });
 
     effect(() => {
-      const keys = this.columns().map((col) => col.key);
+      const keys = this._typedColumns().map((col): string => col.key);
       const layout = this.initialLayout();
       const rawOrder = layout?.columnOrder?.length ? layout.columnOrder : this._columnOrder();
       const nextOrder = [
@@ -1188,9 +1212,13 @@ export class NeuTableComponent {
   private readonly _confirmPending = signal<{ rowKey: unknown; actionKey: string } | null>(null);
 
   // ── Pipeline de datos ─────────────────────────────────────────────────
-  private readonly _rows = computed(() => asRows(this.data()));
+  private readonly _rows = computed<NeuTableRuntimeRow<T>[]>(
+    () => [...this.data()] as NeuTableRuntimeRow<T>[],
+  );
+  // Kept as a private signal alias for existing white-box tests/helpers.
+  private readonly rows = computed<NeuTableRuntimeRow<T>[]>(() => this._rows());
 
-  readonly filteredData = computed<Row[]>(() => {
+  readonly filteredData = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (this.serverSide()) return this._rows();
     const rows = this._rows();
     const colFilters = this._columnFilters();
@@ -1201,8 +1229,8 @@ export class NeuTableComponent {
     return rows.filter((row) => {
       const passesGlobal =
         !q ||
-        this.columns().some((col) => {
-          const rawVal = String(row[col.key] ?? '');
+        this._typedColumns().some((col) => {
+          const rawVal = String(this.getRowValue(row, col.key) ?? '');
           const displayVal = col.cell
             ? col.cell(row)
             : col.type === 'badge' && col.badgeMap?.[rawVal]?.label
@@ -1214,7 +1242,7 @@ export class NeuTableComponent {
       for (const [colKey, filterVal] of Object.entries(colFilters)) {
         if (filterVal === null || filterVal === '' || filterVal === undefined) continue;
         if (
-          !String(row[colKey] ?? '')
+          !String(this.getRowValue(row, colKey) ?? '')
             .toLowerCase()
             .includes(String(filterVal).toLowerCase())
         )
@@ -1224,7 +1252,7 @@ export class NeuTableComponent {
     });
   });
 
-  readonly sortedData = computed<Row[]>(() => {
+  readonly sortedData = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (this.serverSide()) return this.filteredData();
     const data = [...this.filteredData()];
     if (!this.sortable()) return data;
@@ -1232,8 +1260,8 @@ export class NeuTableComponent {
       const entries = this._sortEntries();
       return data.sort((a, b) => {
         for (const entry of entries) {
-          const cmp = String(a[entry.key] ?? '').localeCompare(
-            String(b[entry.key] ?? ''),
+          const cmp = String(this.getRowValue(a, entry.key) ?? '').localeCompare(
+            String(this.getRowValue(b, entry.key) ?? ''),
             undefined,
             { numeric: true },
           );
@@ -1246,9 +1274,13 @@ export class NeuTableComponent {
     if (!key) return data;
     const dir = this.sortDir();
     return data.sort((a, b) => {
-      const cmp = String(a[key] ?? '').localeCompare(String(b[key] ?? ''), undefined, {
+      const cmp = String(this.getRowValue(a, key) ?? '').localeCompare(
+        String(this.getRowValue(b, key) ?? ''),
+        undefined,
+        {
         numeric: true,
-      });
+        },
+      );
       return dir === 'asc' ? cmp : -cmp;
     });
   });
@@ -1328,7 +1360,7 @@ export class NeuTableComponent {
     return rows.slice(this._virtualStartIndex(), this._virtualEndIndex());
   });
 
-  readonly visiblePageEntries = computed<NeuTablePageEntry[]>(() => {
+  readonly visiblePageEntries = computed<NeuTablePageEntry<T>[]>(() => {
     const rows = this.visiblePageRows();
     const groupKey = this.groupBy();
     if (!groupKey) {
@@ -1342,14 +1374,14 @@ export class NeuTableComponent {
 
     const counts = new Map<string, number>();
     for (const row of rows) {
-      const label = String(row[groupKey] ?? '—');
+      const label = String(this.getRowValue(row, groupKey) ?? '—');
       counts.set(label, (counts.get(label) ?? 0) + 1);
     }
 
     const seen = new Set<string>();
-    const entries: NeuTablePageEntry[] = [];
+    const entries: NeuTablePageEntry<T>[] = [];
     rows.forEach((row, rowIndex) => {
-      const label = String(row[groupKey] ?? '—');
+      const label = String(this.getRowValue(row, groupKey) ?? '—');
       if (!seen.has(label)) {
         seen.add(label);
         entries.push({
@@ -1478,7 +1510,7 @@ export class NeuTableComponent {
   }
 
   moveColumn(key: string, direction: -1 | 1): void {
-    const order = this.orderedColumns().map((col) => col.key);
+    const order = this.orderedColumns().map((col): string => col.key);
     const previousIndex = order.indexOf(key);
     const targetIndex = previousIndex + direction;
     if (previousIndex < 0 || targetIndex < 0 || targetIndex >= order.length) {
@@ -1498,7 +1530,7 @@ export class NeuTableComponent {
   }
 
   applyLayout(layout: NeuTableLayout): void {
-    const keys = this.columns().map((col) => col.key);
+    const keys = this._typedColumns().map((col): string => col.key);
     this._columnOrder.set([
       ...layout.columnOrder.filter((key) => keys.includes(key)),
       ...keys.filter((key) => !layout.columnOrder.includes(key)),
@@ -1516,20 +1548,22 @@ export class NeuTableComponent {
     };
   }
 
-  isColumnResizable(col: NeuTableColumn): boolean {
-    return this.resizableColumns() && col.resizable !== false;
+  isColumnResizable(col: NeuTableColumnInput<T>): boolean {
+    const typedColumn = this.asRuntimeColumn(col);
+    return this.resizableColumns() && typedColumn.resizable !== false;
   }
 
-  columnWidth(col: NeuTableColumn): string | null {
-    const resized = this._columnWidths()[col.key];
+  columnWidth(col: NeuTableColumnInput<T>): string | null {
+    const typedColumn = this.asRuntimeColumn(col);
+    const resized = this._columnWidths()[typedColumn.key];
     if (resized != null) {
       return `${resized}px`;
     }
 
-    return col.width ?? null;
+    return typedColumn.width ?? null;
   }
 
-  startColumnResize(col: NeuTableColumn, event: MouseEvent): void {
+  startColumnResize(col: NeuTableColumnInput<T>, event: MouseEvent): void {
     if (!this.isColumnResizable(col) || !isPlatformBrowser(this._platformId)) {
       return;
     }
@@ -1543,8 +1577,9 @@ export class NeuTableComponent {
       this._columnWidthPx(col) ||
       160;
     const startX = event.clientX;
-    const minWidth = col.minWidth ?? 96;
-    const maxWidth = col.maxWidth ?? Number.POSITIVE_INFINITY;
+    const typedColumn = this.asRuntimeColumn(col);
+    const minWidth = typedColumn.minWidth ?? 96;
+    const maxWidth = typedColumn.maxWidth ?? Number.POSITIVE_INFINITY;
 
     this._stopColumnResize();
 
@@ -1553,13 +1588,13 @@ export class NeuTableComponent {
         maxWidth,
         Math.max(minWidth, Math.round(startWidth + (moveEvent.clientX - startX))),
       );
-      this._setColumnWidth(col.key, nextWidth);
+      this._setColumnWidth(typedColumn.key, nextWidth);
     };
 
     const onUp = () => {
-      const width = this._columnWidths()[col.key];
+      const width = this._columnWidths()[typedColumn.key];
       if (width != null) {
-        this.columnResize.emit({ key: col.key, width });
+        this.columnResize.emit({ key: typedColumn.key, width });
       }
       this._stopColumnResize();
     };
@@ -1592,25 +1627,25 @@ export class NeuTableComponent {
   // ── Expansión de filas ────────────────────────────────────────────────
   private readonly _expandedKeys = signal<Set<unknown>>(new Set());
 
-  isRowExpanded(row: Row): boolean {
+  isRowExpanded(row: T): boolean {
     return this._expandedKeys().has(this.getRowKey(row));
   }
 
-  expandRow(row: Row): void {
+  expandRow(row: T): void {
     const key = this.getRowKey(row);
     const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
     set.add(key);
     this._expandedKeys.set(set);
   }
 
-  collapseRow(row: Row): void {
+  collapseRow(row: T): void {
     const key = this.getRowKey(row);
     const set = new Set(this._expandedKeys());
     set.delete(key);
     this._expandedKeys.set(set);
   }
 
-  toggleExpand(row: Row): void {
+  toggleExpand(row: T): void {
     const key = this.getRowKey(row);
     const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
     if (this._expandedKeys().has(key)) set.delete(key);
@@ -1647,11 +1682,11 @@ export class NeuTableComponent {
       !this.isAllFilteredSelected(),
   );
 
-  isRowSelected(row: Row): boolean {
+  isRowSelected(row: T): boolean {
     return this._selectedKeys().has(this.getRowKey(row));
   }
 
-  toggleRow(row: Row): void {
+  toggleRow(row: T): void {
     const key = this.getRowKey(row);
     const set = new Set(this._selectedKeys());
     if (set.has(key)) set.delete(key);
@@ -1739,7 +1774,7 @@ export class NeuTableComponent {
     }
   }
 
-  onRowClick(row: Row, _event: MouseEvent): void {
+  onRowClick(row: T, _event: MouseEvent): void {
     if (this.selectable()) this.toggleRow(row);
     this.rowClick.emit(row);
   }
@@ -1806,12 +1841,12 @@ export class NeuTableComponent {
   }
 
   // ── Actions ───────────────────────────────────────────────────────────
-  isConfirmPending(row: Row, action: NeuTableAction<Row>): boolean {
+  isConfirmPending(row: T, action: NeuTableAction<T>): boolean {
     const p = this._confirmPending();
     return p !== null && p.rowKey === this.getRowKey(row) && p.actionKey === action.key;
   }
 
-  handleAction(row: Row, action: NeuTableAction<Row>): void {
+  handleAction(row: T, action: NeuTableAction<T>): void {
     if (action.confirm) {
       const p = this._confirmPending();
       const rowKey = this.getRowKey(row);
@@ -1830,11 +1865,11 @@ export class NeuTableComponent {
     this._confirmPending.set(null);
   }
 
-  isSelectionConfirmPending(action: NeuTableSelectionAction<Row>): boolean {
+  isSelectionConfirmPending(action: NeuTableSelectionAction<T>): boolean {
     return this._selectionConfirmPending() === action.key;
   }
 
-  handleSelectionAction(action: NeuTableSelectionAction<Row>): void {
+  handleSelectionAction(action: NeuTableSelectionAction<T>): void {
     const rows = this.selectedRows();
 
     if (action.confirm) {
@@ -1911,13 +1946,13 @@ export class NeuTableComponent {
     );
   }
 
-  private _getExportColumns(): NeuTableColumn[] {
+  private _getExportColumns(): NeuTableColumn<T>[] {
     const keys = this.exportColumns();
-    const all = this.columns().filter((c) => c.type !== 'actions');
+    const all = this._typedColumns().filter((c) => c.type !== 'actions');
     return keys.length ? all.filter((c) => keys.includes(c.key)) : all;
   }
 
-  private _getExportRows(): Row[] {
+  private _getExportRows(): T[] {
     const scope = this.exportScope();
 
     if (scope === 'filtered') {
@@ -1955,8 +1990,22 @@ export class NeuTableComponent {
     this._virtualScrollTop.set((event.target as HTMLElement).scrollTop);
   }
 
-  getRowKey(row: Row): unknown {
-    return row[this.rowKey()] ?? JSON.stringify(row);
+  /**
+   * Dynamic string keys are required by the legacy API for paths/computed
+   * columns. Keep that boundary local; the rest of the component stays T.
+   */
+  private getRowValue(row: T, key: string): unknown {
+    return (row as Record<string, unknown>)[key];
+  }
+
+  private asRuntimeColumn(col: NeuTableColumnInput<T>): NeuTableColumn<T> {
+    // The input union is intentionally limited to known NeuTableColumn shapes;
+    // this cast only normalizes the legacy and explicit string-key boundaries.
+    return col as NeuTableColumn<T>;
+  }
+
+  getRowKey(row: T): unknown {
+    return this.getRowValue(row, this.rowKey()) ?? JSON.stringify(row);
   }
 
   visibleRowNumber(rowIdx: number): number {
@@ -1973,21 +2022,22 @@ export class NeuTableComponent {
     });
   }
 
-  getRowClass(row: Row): string {
+  getRowClass(row: T): string {
     return this.rowClass()?.(row) ?? '';
   }
 
-  private _columnWidthPx(col: NeuTableColumn): number | null {
-    const resized = this._columnWidths()[col.key];
+  private _columnWidthPx(col: NeuTableColumnInput<T>): number | null {
+    const typedColumn = this.asRuntimeColumn(col);
+    const resized = this._columnWidths()[typedColumn.key];
     if (resized != null) {
       return resized;
     }
 
-    if (!col.width || col.width === 'auto') {
+    if (!typedColumn.width || typedColumn.width === 'auto') {
       return null;
     }
 
-    const px = Number.parseFloat(col.width);
+    const px = Number.parseFloat(typedColumn.width);
     return Number.isNaN(px) ? null : px;
   }
 
@@ -2000,40 +2050,42 @@ export class NeuTableComponent {
     this._resizeCleanup?.();
   }
 
-  getCellValue(row: Row, col: NeuTableColumn): string {
-    if (col.cell) return col.cell(row);
-    const val = row[col.key];
+  getCellValue(row: T, col: NeuTableColumnInput<T>): string {
+    const typedColumn = this.asRuntimeColumn(col);
+    if (typedColumn.cell) return typedColumn.cell(row);
+    const val = this.getRowValue(row, typedColumn.key);
     if (val == null) return '—';
-    const locale = col.locale ?? 'es-ES';
-    switch (col.type) {
+    const locale = typedColumn.locale ?? 'es-ES';
+    switch (typedColumn.type) {
       case 'date': {
         const d = val instanceof Date ? val : new Date(String(val));
         return isNaN(d.getTime())
           ? String(val)
           : d.toLocaleDateString(
               locale,
-              col.dateFormat ?? { day: '2-digit', month: '2-digit', year: 'numeric' },
+              typedColumn.dateFormat ?? { day: '2-digit', month: '2-digit', year: 'numeric' },
             );
       }
       case 'number':
-        return new Intl.NumberFormat(locale, col.numberFormat).format(Number(val));
+        return new Intl.NumberFormat(locale, typedColumn.numberFormat).format(Number(val));
       case 'currency':
         return new Intl.NumberFormat(locale, {
           style: 'currency',
-          currency: col.currencyCode ?? 'EUR',
-          ...col.numberFormat,
+          currency: typedColumn.currencyCode ?? 'EUR',
+          ...typedColumn.numberFormat,
         }).format(Number(val));
       default:
         return String(val);
     }
   }
 
-  isEditingCell(row: Row, col: NeuTableColumn): boolean {
+  isEditingCell(row: T, col: NeuTableColumnInput<T>): boolean {
+    const typedColumn = this.asRuntimeColumn(col);
     const editing = this._editingCell();
     return (
       editing !== null &&
       editing.rowKey === this.getRowKey(row) &&
-      editing.columnKey === col.key
+      editing.columnKey === typedColumn.key
     );
   }
 
@@ -2041,43 +2093,52 @@ export class NeuTableComponent {
     return this._editingCell()?.value ?? '';
   }
 
-  inlineEditorType(col: NeuTableColumn): NeuInlineEditorType {
-    return col.editor ?? 'text';
+  inlineEditorType(col: NeuTableColumnInput<T>): NeuInlineEditorType {
+    return this.asRuntimeColumn(col).editor ?? 'text';
   }
 
-  inlineEditorOptions(col: NeuTableColumn): NeuSelectOption[] {
-    return (col.editOptions ?? []).map((option) => ({ label: option, value: option }));
+  inlineEditorOptions(col: NeuTableColumnInput<T>): NeuSelectOption[] {
+    return (this.asRuntimeColumn(col).editOptions ?? []).map((option) => ({
+      label: option,
+      value: option,
+    }));
   }
 
   setEditingValue(value: unknown): void {
     this._editingCell.update((editing) => (editing ? { ...editing, value } : editing));
   }
 
-  startCellEdit(row: Row, col: NeuTableColumn, event?: Event): void {
-    if (!this.inlineEdit() || !col.editable) {
+  startCellEdit(row: T, col: NeuTableColumnInput<T>, event?: Event): void {
+    const typedColumn = this.asRuntimeColumn(col);
+    if (!this.inlineEdit() || !typedColumn.editable) {
       return;
     }
 
     event?.stopPropagation();
-    const previousValue = row[col.key];
+    const previousValue = this.getRowValue(row, typedColumn.key);
     this._editingCell.set({
       rowKey: this.getRowKey(row),
-      columnKey: col.key,
+      columnKey: typedColumn.key,
       value: previousValue ?? '',
       previousValue,
     });
   }
 
-  commitCellEdit(row: Row, col: NeuTableColumn): void {
+  commitCellEdit(row: T, col: NeuTableColumnInput<T>): void {
+    const typedColumn = this.asRuntimeColumn(col);
     const editing = this._editingCell();
-    if (!editing || editing.rowKey !== this.getRowKey(row) || editing.columnKey !== col.key) {
+    if (
+      !editing ||
+      editing.rowKey !== this.getRowKey(row) ||
+      editing.columnKey !== typedColumn.key
+    ) {
       return;
     }
 
     this._editingCell.set(null);
     this.cellEditCommit.emit({
       row,
-      column: col,
+      column: typedColumn,
       value: editing.value,
       previousValue: editing.previousValue,
     });

@@ -1,5 +1,23 @@
 import { TemplateRef } from '@angular/core';
 
+/**
+ * Legacy row shape used by the unparameterized public API. Parameterized
+ * tables use their concrete domain model instead.
+ */
+export type NeuTableRow = Record<string, unknown>;
+
+/**
+ * Default direct keys are Extract<keyof T, string>, so concrete row models get
+ * completion and type checking. The unparameterized legacy API continues to
+ * accept strings, while computed, action and path-like typed columns opt into
+ * NeuTableColumn<T, string> explicitly.
+ */
+export type NeuTableColumnKey<T> = [keyof T] extends [never]
+  ? string
+  : Extract<keyof T, string>;
+
+export type NeuTableRowKey<T> = NeuTableColumnKey<T>;
+
 // ── Badge ─────────────────────────────────────────────────────────────────
 export type NeuTableBadgeVariant =
   | 'primary'
@@ -95,15 +113,16 @@ export type NeuTableCellType =
   | 'actions';
 
 // ── Column ────────────────────────────────────────────────────────────────
-export interface NeuTableColumn<T = Record<string, unknown>> {
-  key: string;
+export interface NeuTableColumn<T = Record<string, unknown>, K extends string = NeuTableColumnKey<T>> {
+  /** Direct property key for typed columns; legacy columns may use any string. */
+  key: K;
   header: string;
   width?: string;
   minWidth?: number;
   maxWidth?: number;
   align?: 'left' | 'center' | 'right';
   cell?: (row: T) => string;
-  cellTemplate?: TemplateRef<{ $implicit: T; row: T; column: NeuTableColumn<T> }>;
+  cellTemplate?: TemplateRef<{ $implicit: T; row: T; column: NeuTableColumn<T, K> }>;
   cellClass?: string;
   sortable?: boolean;
   resizable?: boolean;
@@ -132,5 +151,5 @@ export interface NeuTableColumn<T = Record<string, unknown>> {
   // Frozen
   frozen?: 'left' | 'right';
   // Header template
-  headerTemplate?: TemplateRef<{ $implicit: NeuTableColumn<T> }>;
+  headerTemplate?: TemplateRef<{ $implicit: NeuTableColumn<T, K> }>;
 }

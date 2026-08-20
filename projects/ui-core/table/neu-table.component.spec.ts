@@ -4,10 +4,10 @@ import { provideRouter } from '@angular/router';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { lucidePencil } from '@ng-icons/lucide';
-import { NeuTableComponent } from './neu-table.component';
+import { NeuTableColumnInput, NeuTableComponent } from './neu-table.component';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
-import { NeuTableColumn } from './neu-table.types';
+import { NeuTableAction, NeuTableActionEvent, NeuTableColumn } from './neu-table.types';
 import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
 import { By } from '@angular/platform-browser';
 
@@ -18,6 +18,25 @@ interface Person {
   city: string;
   status: string;
 }
+
+interface TypedUser {
+  id: number;
+  name: string;
+  email: string;
+  active: boolean;
+}
+
+const TYPED_USER_COLUMNS = [
+  { key: 'id', header: 'ID' },
+  { key: 'name', header: 'Name', cell: (row: TypedUser) => row.name },
+  { key: 'email', header: 'Email' },
+  { key: 'active', header: 'Active' },
+] satisfies NeuTableColumn<TypedUser>[];
+
+const READONLY_TYPED_USERS: readonly TypedUser[] = [
+  { id: 0, name: 'Zero', email: 'zero@example.com', active: true },
+  { id: 1, name: 'Ana', email: 'ana@example.com', active: false },
+];
 
 const COLUMNS: NeuTableColumn[] = [
   { key: 'name', header: 'Nombre' },
@@ -84,6 +103,25 @@ describe('NeuTableComponent', () => {
       HTMLElement.prototype.scrollTo = vi.fn();
     }
     await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
+  });
+
+  it('preserves a typed domain row through readonly data, columns and row output', async () => {
+    const f = TestBed.createComponent(NeuTableComponent<TypedUser>);
+    const typedTable: NeuTableComponent<TypedUser> = f.componentInstance;
+    const typedData: readonly TypedUser[] = READONLY_TYPED_USERS;
+    const emittedRows: TypedUser[] = [];
+
+    f.componentRef.setInput('columns', TYPED_USER_COLUMNS);
+    f.componentRef.setInput('data', typedData);
+    typedTable.rowClick.subscribe((row) => emittedRows.push(row));
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.textContent).toContain('zero@example.com');
+    expect(typedTable.getRowKey(READONLY_TYPED_USERS[0])).toBe(0);
+
+    typedTable.onRowClick(READONLY_TYPED_USERS[0], new MouseEvent('click'));
+    expect(emittedRows).toEqual([READONLY_TYPED_USERS[0]]);
   });
 
   // ── Rendering básico ─────────────────────────────────────────────────────
@@ -3060,6 +3098,172 @@ describe('NeuTableComponent', () => {
     expect(footerCells[0].textContent?.trim()).toBe('Total');
     expect(footerCells[1].textContent?.trim()).toBe('');
     expect(footerCells[2].textContent?.trim()).toBe('');
+  });
+});
+
+describe('NeuTableComponent generic data API', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
+  });
+
+  it('emits the original TypedUser model through selectionChange', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<TypedUser>);
+    const table: NeuTableComponent<TypedUser> = fixture.componentInstance;
+    const emitted: TypedUser[][] = [];
+
+    fixture.componentRef.setInput('columns', TYPED_USER_COLUMNS);
+    fixture.componentRef.setInput('data', READONLY_TYPED_USERS);
+    table.selectionChange.subscribe((rows) => emitted.push(rows));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    table.toggleRow(READONLY_TYPED_USERS[0]);
+
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]).toEqual([READONLY_TYPED_USERS[0]]);
+    expect(emitted[0]?.[0]).toBe(READONLY_TYPED_USERS[0]);
+  });
+
+  it('keeps selection and expansion identity for id 0 and reconstructed rows', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<TypedUser>);
+    const table: NeuTableComponent<TypedUser> = fixture.componentInstance;
+    const original = READONLY_TYPED_USERS[0];
+    const reconstructed: TypedUser = { ...original };
+
+    fixture.componentRef.setInput('columns', TYPED_USER_COLUMNS);
+    fixture.componentRef.setInput('data', READONLY_TYPED_USERS);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(table.getRowKey(original)).toBe(0);
+    table.toggleRow(original);
+    table.expandRow(original);
+
+    expect(table.isRowSelected(reconstructed)).toBe(true);
+    expect(table.isRowExpanded(reconstructed)).toBe(true);
+  });
+
+  it('emits a typed action event with the original row reference', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<TypedUser>);
+    const table: NeuTableComponent<TypedUser> = fixture.componentInstance;
+    const action: NeuTableAction<TypedUser> = {
+      key: 'edit',
+      label: 'Edit',
+      icon: 'edit',
+    };
+    const emitted: NeuTableActionEvent<TypedUser>[] = [];
+
+    fixture.componentRef.setInput('columns', TYPED_USER_COLUMNS);
+    fixture.componentRef.setInput('data', READONLY_TYPED_USERS);
+    table.actionClick.subscribe((event) => emitted.push(event));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    table.handleAction(READONLY_TYPED_USERS[0], action);
+
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]?.action).toBe(action);
+    expect(emitted[0]?.row).toBe(READONLY_TYPED_USERS[0]);
+  });
+
+  it('commits a typed editable column with the original row model', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<TypedUser>);
+    const table: NeuTableComponent<TypedUser> = fixture.componentInstance;
+    const editableColumn: NeuTableColumn<TypedUser> = {
+      key: 'name',
+      header: 'Name',
+      editable: true,
+    };
+    const emitted: Array<{
+      row: TypedUser;
+      column: NeuTableColumn<TypedUser>;
+      value: unknown;
+      previousValue: unknown;
+    }> = [];
+
+    fixture.componentRef.setInput('columns', [editableColumn]);
+    fixture.componentRef.setInput('data', READONLY_TYPED_USERS);
+    fixture.componentRef.setInput('inlineEdit', true);
+    table.cellEditCommit.subscribe((event) => emitted.push(event));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    table.startCellEdit(READONLY_TYPED_USERS[0], editableColumn);
+    table.setEditingValue('Zero edited');
+    table.commitCellEdit(READONLY_TYPED_USERS[0], editableColumn);
+
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]?.row).toBe(READONLY_TYPED_USERS[0]);
+    expect(emitted[0]?.column).toBe(editableColumn);
+    expect(emitted[0]?.value).toBe('Zero edited');
+  });
+
+  it('renders a computed column using the explicit string-key escape', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<TypedUser>);
+    const computedColumn: NeuTableColumn<TypedUser, string> = {
+      key: 'displayName',
+      header: 'Display name',
+      cell: (row) => `${row.name} <${row.email}>`,
+    };
+
+    fixture.componentRef.setInput('columns', [computedColumn]);
+    fixture.componentRef.setInput('data', READONLY_TYPED_USERS);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('Zero <zero@example.com>');
+    expect(fixture.componentInstance.getCellValue(READONLY_TYPED_USERS[0], computedColumn)).toBe(
+      'Zero <zero@example.com>',
+    );
+  });
+
+  it('accepts a legacy column alongside typed columns without any cast', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<TypedUser>);
+    const legacyColumn: NeuTableColumn = { key: 'legacyLabel', header: 'Legacy label' };
+    const columns: Array<NeuTableColumn<TypedUser> | NeuTableColumn> = [
+      TYPED_USER_COLUMNS[0],
+      legacyColumn,
+    ];
+
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', READONLY_TYPED_USERS);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('ID');
+    expect(fixture.nativeElement.textContent).toContain('Legacy label');
+  });
+
+  it('accepts a legacy callback column alongside typed columns', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<TypedUser>);
+    const legacyColumn: NeuTableColumn = {
+      key: 'name',
+      header: 'Legacy name',
+      cell: (row) => String(row['name'] ?? ''),
+    };
+    const columns = [TYPED_USER_COLUMNS[0], legacyColumn];
+
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', READONLY_TYPED_USERS);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('ID');
+    expect(fixture.nativeElement.textContent).toContain('Legacy name');
+    expect(fixture.nativeElement.textContent).toContain('Zero');
+  });
+
+  it('keeps the column input closed to arbitrary objects', () => {
+    const validLegacyBridge: NeuTableColumnInput<TypedUser> = {
+      key: 'legacyLabel',
+      header: 'Legacy label',
+    };
+
+    // @ts-expect-error A column must provide at least key and header.
+    const invalidColumn: NeuTableColumnInput<TypedUser> = {};
+
+    expect(validLegacyBridge.key).toBe('legacyLabel');
+    expect(invalidColumn).toEqual({});
   });
 });
 
