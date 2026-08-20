@@ -15,6 +15,15 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuButtonSize } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
+import {
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValueAccessor,
+  neuOptionValuesEqual,
+  resolveNeuOptionDisabled,
+  resolveNeuOptionLabel,
+  resolveNeuOptionValue,
+} from '@neural-ui/core/option-api';
 
 export interface NeuToggleOption<T = unknown> {
   /** Texto visible del botón / Visible button text */
@@ -26,8 +35,26 @@ export interface NeuToggleOption<T = unknown> {
   /** Deshabilita solo esta opción / Disables this option only */
   disabled?: boolean;
 }
+
+declare const neuToggleValueNotProvided: unique symbol;
+type NeuToggleValueNotProvided = typeof neuToggleValueNotProvided;
+type NeuToggleOptionModel<T, V> = [V] extends [NeuToggleValueNotProvided]
+  ? T extends { label: string; value: infer LegacyValue }
+    ? T
+    : T extends object
+      ? T
+      : NeuToggleOption<T>
+  : T;
+type NeuToggleValue<T, V> = [V] extends [NeuToggleValueNotProvided]
+  ? T extends { label: string; value: infer LegacyValue }
+    ? LegacyValue
+    : T
+  : V;
+
 @Directive({ selector: 'ng-template[neuToggleButtonItem]' })
-export class NeuToggleButtonItemDirective<T = unknown> { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuToggleOption<T>; selected: boolean }>) {} }
+export class NeuToggleButtonItemDirective<T = unknown, V = NeuToggleValueNotProvided> {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuToggleOptionModel<T, V>; selected: boolean }>) {}
+}
 
 /**
  * NeuralUI ToggleButtonGroup Component
@@ -61,36 +88,45 @@ export class NeuToggleButtonItemDirective<T = unknown> { constructor(readonly te
       role="group"
       [attr.aria-disabled]="_isDisabled() || null"
     >
-      @for (opt of options(); track opt.value) {
+      @for (opt of options(); track optionValueOf(opt)) {
         <button
           type="button"
           class="neu-toggle-group__btn"
-          [class.neu-toggle-group__btn--active]="isSelected(opt.value)"
-          [class.neu-toggle-group__btn--disabled]="opt.disabled || _isDisabled()"
-          [attr.aria-pressed]="isSelected(opt.value)"
-          [disabled]="opt.disabled || _isDisabled()"
+          [class.neu-toggle-group__btn--active]="isSelected(optionValueOf(opt))"
+          [class.neu-toggle-group__btn--disabled]="isOptionDisabled(opt) || _isDisabled()"
+          [attr.aria-pressed]="isSelected(optionValueOf(opt))"
+          [disabled]="isOptionDisabled(opt) || _isDisabled()"
           (click)="toggle(opt)"
           (blur)="onBlur()"
         >
-          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: opt, selected: isSelected(opt.value) }" /> } @else if (opt.icon) {
-            <neu-icon [name]="opt.icon" size="16px" strokeWidth="2" />
+          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: opt, selected: isSelected(optionValueOf(opt)) }" /> } @else if (optionIconOf(opt)) {
+            <neu-icon [name]="optionIconOf(opt)!" size="16px" strokeWidth="2" />
           }
-          {{ opt.label }}
+          {{ optionLabelOf(opt) }}
         </button>
       }
     </div>
   `,
   styleUrl: './neu-toggle-button-group.component.scss',
 })
-export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueAccessor {
-  readonly itemTpl = contentChild(NeuToggleButtonItemDirective<T>);
+export class NeuToggleButtonGroupComponent<T = unknown, V = NeuToggleValueNotProvided> implements ControlValueAccessor {
+  readonly itemTpl = contentChild(NeuToggleButtonItemDirective<T, V>);
   /** Lista de opciones del grupo / Group option list */
-  options = input<NeuToggleOption<T>[]>([]);
+  options = input<readonly NeuToggleOptionModel<T, V>[]>([]);
+
+  /** Property or function used to obtain the visible option label. */
+  optionLabel = input<NeuOptionLabelAccessor<NeuToggleOptionModel<T, V>> | null>(null);
+
+  /** Property or function used to obtain the form value. Defaults to the legacy value or full T. */
+  optionValue = input<NeuOptionValueAccessor<NeuToggleOptionModel<T, V>, NeuToggleValue<T, V>> | null>(null);
+
+  /** Property or function used to determine whether an option is disabled. */
+  optionDisabled = input<NeuOptionDisabledAccessor<NeuToggleOptionModel<T, V>> | null>(null);
 
   /**
    * Permite seleccionar múltiples opciones.
-   * - false (por defecto): valor es `T | null`
-   * - true: valor es `T[]`
+   * - false (por defecto): valor es `V | null`
+   * - true: valor es `V[]`
    */
   multiple = input<boolean>(false);
 
@@ -101,9 +137,9 @@ export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueA
   disabled = input<boolean>(false);
 
   /** Emite el nuevo valor al cambiar (útil sin formControl) / Emits the new value on change (useful without formControl) */
-  neuChange = output<T | T[] | null>();
+  neuChange = output<NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null>();
 
-  readonly _value = signal<T | T[] | null>(null);
+  readonly _value = signal<NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null>(null);
   private readonly _cvaDisabled = signal(false);
   readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
 
@@ -113,25 +149,30 @@ export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueA
     'neu-toggle-group--disabled': this._isDisabled(),
   }));
 
-  isSelected(value: T): boolean {
+  isSelected(value: NeuToggleValue<T, V>): boolean {
     const v = this._value();
     if (this.multiple()) {
-      return Array.isArray(v) && (v as T[]).includes(value);
+      return Array.isArray(v) && (v as NeuToggleValue<T, V>[]).some((selected) => neuOptionValuesEqual(selected, value));
     }
-    return v === value;
+    const current = v as NeuToggleValue<T, V> | null;
+    return current !== null && neuOptionValuesEqual(current, value);
   }
 
-  toggle(opt: NeuToggleOption<T>): void {
-    if (opt.disabled || this._isDisabled()) return;
+  toggle(opt: NeuToggleOptionModel<T, V>): void {
+    if (this.isOptionDisabled(opt) || this._isDisabled()) return;
 
-    let next: T | T[] | null;
+    const value = this.optionValueOf(opt);
+
+    let next: NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null;
 
     if (this.multiple()) {
-      const current: T[] = Array.isArray(this._value()) ? (this._value() as T[]) : [];
-      const idx = current.indexOf(opt.value);
-      next = idx >= 0 ? current.filter((_, i) => i !== idx) : [...current, opt.value];
+      const current: NeuToggleValue<T, V>[] = Array.isArray(this._value())
+        ? (this._value() as NeuToggleValue<T, V>[])
+        : [];
+      const idx = current.findIndex((selected) => neuOptionValuesEqual(selected, value));
+      next = idx >= 0 ? current.filter((_, i) => i !== idx) : [...current, value];
     } else {
-      next = this._value() === opt.value ? null : opt.value;
+      next = this.isSelected(value) ? null : value;
     }
 
     this._value.set(next);
@@ -146,18 +187,18 @@ export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueA
 
   // ---- CVA ----
 
-  private _onChange: (v: unknown) => void = () => {};
+  private _onChange: (v: NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null) => void = () => {};
   private _onTouched: () => void = () => {};
 
-  writeValue(val: T | T[] | null): void {
+  writeValue(val: NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null): void {
     if (val === null || val === undefined) {
-      this._value.set(this.multiple() ? ([] as T[]) : null);
+      this._value.set(this.multiple() ? ([] as NeuToggleValue<T, V>[]) : null);
     } else {
       this._value.set(val);
     }
   }
 
-  registerOnChange(fn: (v: unknown) => void): void {
+  registerOnChange(fn: (v: NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null) => void): void {
     this._onChange = fn;
   }
 
@@ -167,5 +208,23 @@ export class NeuToggleButtonGroupComponent<T = unknown> implements ControlValueA
 
   setDisabledState(isDisabled: boolean): void {
     this._cvaDisabled.set(isDisabled);
+  }
+
+  optionLabelOf(option: NeuToggleOptionModel<T, V>): string {
+    return resolveNeuOptionLabel(option, this.optionLabel());
+  }
+
+  optionValueOf(option: NeuToggleOptionModel<T, V>): NeuToggleValue<T, V> {
+    return resolveNeuOptionValue<NeuToggleOptionModel<T, V>, NeuToggleValue<T, V>>(option, this.optionValue());
+  }
+
+  isOptionDisabled(option: NeuToggleOptionModel<T, V>): boolean {
+    return resolveNeuOptionDisabled(option, this.optionDisabled());
+  }
+
+  optionIconOf(option: NeuToggleOptionModel<T, V>): string | null {
+    if (typeof option !== 'object' || option === null || !('icon' in option)) return null;
+    const icon = (option as { icon?: unknown }).icon;
+    return typeof icon === 'string' ? icon : null;
   }
 }
