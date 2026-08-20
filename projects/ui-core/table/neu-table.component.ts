@@ -25,11 +25,13 @@ import {
   buildNeuTableFilterState,
   isNeuTableFilterValueEmpty,
   matchesNeuTableFilter,
+  normalizeNeuTableDatePoint,
 } from './neu-table-filter.engine';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NeuInputComponent } from '@neural-ui/core/input';
+import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
-import { NeuDateInputComponent } from '@neural-ui/core/date-input';
+import { NeuDateInputComponent, NeuDateRange } from '@neural-ui/core/date-input';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import { NeuInlineEditorComponent, NeuInlineEditorType } from '@neural-ui/core/inline-editor';
@@ -126,6 +128,7 @@ export type NeuTableColumnInput<T extends object> =
     NgTemplateOutlet,
     ReactiveFormsModule,
     NeuInputComponent,
+    NeuNumberInputComponent,
     NeuSelectComponent,
     NeuDateInputComponent,
     NeuIconComponent,
@@ -514,7 +517,79 @@ export type NeuTableColumnInput<T extends object> =
                     [style.min-width]="columnWidth(col)"
                     [style.max-width]="columnWidth(col)"
                   >
-                    @if (col.filterable) {
+                    @if (col.filterConfig; as config) {
+                      @switch (config.kind) {
+                        @case ('text') {
+                          <neu-input
+                            [floatingLabel]="false"
+                            [label]="modernFilterLabel(col)"
+                            [placeholder]="filterPlaceholder()"
+                            [formControl]="typedColumnFilterControl(col)"
+                          />
+                        }
+                        @case ('number') {
+                          @if (modernFilterMode(col) === 'between') {
+                            <div class="neu-table__filter-range">
+                              <neu-number-input
+                                [nullable]="true"
+                                [label]="rangeFilterLabel(col, 'from')"
+                                [formControl]="typedRangeStartControl(col)"
+                              />
+                              <neu-number-input
+                                [nullable]="true"
+                                [label]="rangeFilterLabel(col, 'to')"
+                                [formControl]="typedRangeEndControl(col)"
+                              />
+                            </div>
+                          } @else {
+                            <neu-number-input
+                              [nullable]="true"
+                              [label]="modernFilterLabel(col)"
+                              [formControl]="typedColumnFilterControl(col)"
+                            />
+                          }
+                        }
+                        @case ('date') {
+                          @if (isDateOnlyRange(col)) {
+                            <neu-date-input
+                              type="range"
+                              [label]="modernFilterLabel(col)"
+                              [placeholder]="filterPlaceholder()"
+                              [formControl]="typedColumnFilterControl(col)"
+                            />
+                          } @else if (isInstantRange(col)) {
+                            <div class="neu-table__filter-range">
+                              <neu-date-input
+                                type="datetime-local"
+                                [label]="rangeFilterLabel(col, 'from')"
+                                [formControl]="typedInstantRangeStartControl(col)"
+                              />
+                              <neu-date-input
+                                type="datetime-local"
+                                [label]="rangeFilterLabel(col, 'to')"
+                                [formControl]="typedInstantRangeEndControl(col)"
+                              />
+                            </div>
+                          } @else {
+                            <neu-date-input
+                              [type]="dateInputType(col)"
+                              [label]="modernFilterLabel(col)"
+                              [formControl]="typedColumnFilterControl(col)"
+                            />
+                          }
+                        }
+                        @case ('boolean') {
+                          <neu-select
+                            [floatingLabel]="false"
+                            [label]="modernFilterLabel(col)"
+                            [placeholder]="allFilterOptionLabel()"
+                            [options]="typedBooleanFilterOptions()"
+                            [clearable]="true"
+                            [formControl]="typedColumnFilterControl(col)"
+                          />
+                        }
+                      }
+                    } @else if (col.filterable) {
                       @if (col.filterType === 'select') {
                         <neu-select
                           [floatingLabel]="false"
@@ -958,6 +1033,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly expandRowAriaLabel = input<string>('Expand row');
   readonly filterPlaceholder = input<string>('Filter...');
   readonly filterAriaPrefix = input<string>('Filter by');
+  readonly filterFromLabel = input<string>('From');
+  readonly filterToLabel = input<string>('To');
+  readonly filterTrueLabel = input<string>('Yes');
+  readonly filterFalseLabel = input<string>('No');
   readonly allFilterOptionLabel = input<string>('All');
   readonly ofLabel = input<string>('of');
   readonly resultLabelSingular = input<string>('result');
@@ -1115,8 +1194,19 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly _columnFilters = signal<Record<string, unknown>>({});
   readonly _pageSizeControl = new FormControl('', { nonNullable: true });
   private readonly _columnFilterControls = new Map<string, FormControl<string>>();
-  /** True when at least one column has filterable:true / True si alguna columna tiene filterable:true */
-  readonly _hasFilterableCol = computed(() => this.visibleColumns().some((c) => c.filterable));
+  private readonly _typedColumnFilterControls = new Map<string, FormControl<unknown>>();
+  private readonly _typedRangeStartControls = new Map<string, FormControl<number | null>>();
+  private readonly _typedRangeEndControls = new Map<string, FormControl<number | null>>();
+  private readonly _typedInstantRangeStartControls = new Map<string, FormControl<string>>();
+  private readonly _typedInstantRangeEndControls = new Map<string, FormControl<string>>();
+  /** True when a legacy or typed column filter is available. */
+  readonly _hasFilterableCol = computed(() =>
+    this.visibleColumns().some((column) => column.filterable || column.filterConfig),
+  );
+  protected readonly typedBooleanFilterOptions = computed<NeuSelectOption<boolean>[]>(() => [
+    { label: this.filterTrueLabel(), value: true },
+    { label: this.filterFalseLabel(), value: false },
+  ]);
 
   readonly orderedColumns = computed(() => {
     const columns = this._typedColumns();
@@ -1183,11 +1273,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     effect(() => {
       const filters = this._columnFilters();
       for (const col of this._typedColumns()) {
-        if (!col.filterable) continue;
-        const control = this.columnFilterControl(col.key);
-        const nextValue = String(filters[col.key] ?? '');
-        if (control.value !== nextValue) {
-          control.setValue(nextValue, { emitEvent: false });
+        if (col.filterConfig) {
+          this._syncTypedFilterControl(col, filters[col.key]);
+        } else if (col.filterable) {
+          const control = this.columnFilterControl(col.key);
+          const nextValue = String(filters[col.key] ?? '');
+          if (control.value !== nextValue) {
+            control.setValue(nextValue, { emitEvent: false });
+          }
         }
       }
     });
@@ -2177,6 +2270,262 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   getSortPriority(key: string): number {
     if (!this.multiSort()) return -1;
     return this._sortEntries().findIndex((e) => e.key === key);
+  }
+
+  protected modernFilterMode(col: NeuTableColumn<T>): NeuTableFilterMatchMode | null {
+    const config = col.filterConfig;
+    if (!config || config.kind === 'boolean' || config.kind === 'custom') return null;
+    switch (config.kind) {
+      case 'number':
+        return config.mode ?? 'equals';
+      case 'date':
+        return config.mode ?? 'is';
+      case 'select':
+        return 'equals';
+      case 'multiSelect':
+        return 'in';
+      default:
+        return config.mode ?? 'contains';
+    }
+  }
+
+  protected modernFilterLabel(col: NeuTableColumn<T>): string {
+    const mode = this.modernFilterMode(col);
+    return mode ? `${this.filterAriaPrefix()} ${col.header} (${mode})` : `${this.filterAriaPrefix()} ${col.header}`;
+  }
+
+  protected rangeFilterLabel(col: NeuTableColumn<T>, boundary: 'from' | 'to'): string {
+    return `${boundary === 'from' ? this.filterFromLabel() : this.filterToLabel()} ${col.header}`;
+  }
+
+  protected dateInputType(col: NeuTableColumn<T>): 'date' | 'datetime-local' {
+    return col.filterConfig?.kind === 'date' && col.filterConfig.precision === 'instant'
+      ? 'datetime-local'
+      : 'date';
+  }
+
+  protected isDateOnlyRange(col: NeuTableColumn<T>): boolean {
+    return col.filterConfig?.kind === 'date' &&
+      this.modernFilterMode(col) === 'between' &&
+      (col.filterConfig.precision ?? 'date-only') === 'date-only';
+  }
+
+  protected isInstantRange(col: NeuTableColumn<T>): boolean {
+    return col.filterConfig?.kind === 'date' &&
+      this.modernFilterMode(col) === 'between' &&
+      col.filterConfig.precision === 'instant';
+  }
+
+  protected typedColumnFilterControl(col: NeuTableColumn<T>): FormControl<unknown> {
+    let control = this._typedColumnFilterControls.get(col.key);
+    if (!control) {
+      control = new FormControl<unknown>(this._typedFilterControlValue(col, this._columnFilters()[col.key]));
+      control.valueChanges
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe((value) => {
+          const currentColumn = this._currentTypedColumn(col.key);
+          if (currentColumn) {
+            this.setColumnFilter(col.key, this._typedFilterValueFromControl(currentColumn, value));
+          }
+        });
+      this._typedColumnFilterControls.set(col.key, control);
+    }
+    return control;
+  }
+
+  protected typedRangeStartControl(col: NeuTableColumn<T>): FormControl<number | null> {
+    return this._typedNumberRangeControl(col, 'from');
+  }
+
+  protected typedRangeEndControl(col: NeuTableColumn<T>): FormControl<number | null> {
+    return this._typedNumberRangeControl(col, 'to');
+  }
+
+  protected typedInstantRangeStartControl(col: NeuTableColumn<T>): FormControl<string> {
+    return this._typedInstantRangeControl(col, 'from');
+  }
+
+  protected typedInstantRangeEndControl(col: NeuTableColumn<T>): FormControl<string> {
+    return this._typedInstantRangeControl(col, 'to');
+  }
+
+  private _typedNumberRangeControl(
+    col: NeuTableColumn<T>,
+    boundary: 'from' | 'to',
+  ): FormControl<number | null> {
+    const controls = boundary === 'from' ? this._typedRangeStartControls : this._typedRangeEndControls;
+    let control = controls.get(col.key);
+    if (!control) {
+      control = new FormControl<number | null>(this._numberRangeValue(this._columnFilters()[col.key])[boundary]);
+      control.valueChanges
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe((value) => {
+          const currentColumn = this._currentTypedColumn(col.key);
+          if (currentColumn?.filterConfig?.kind !== 'number') return;
+          const range = this._numberRangeValue(this._columnFilters()[col.key]);
+          this.setColumnFilter(col.key, { ...range, [boundary]: value });
+        });
+      controls.set(col.key, control);
+    }
+    return control;
+  }
+
+  private _typedInstantRangeControl(
+    col: NeuTableColumn<T>,
+    boundary: 'from' | 'to',
+  ): FormControl<string> {
+    const controls =
+      boundary === 'from' ? this._typedInstantRangeStartControls : this._typedInstantRangeEndControls;
+    let control = controls.get(col.key);
+    if (!control) {
+      control = new FormControl<string>(this._instantRangeControlValue(this._columnFilters()[col.key], boundary), {
+        nonNullable: true,
+      });
+      control.valueChanges
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe((value) => {
+          const currentColumn = this._currentTypedColumn(col.key);
+          if (!currentColumn || !this.isInstantRange(currentColumn)) return;
+          const range = this._dateRangeFilterValue(this._columnFilters()[col.key]);
+          this.setColumnFilter(col.key, { ...range, [boundary]: this._instantFilterValue(value) });
+        });
+      controls.set(col.key, control);
+    }
+    return control;
+  }
+
+  private _syncTypedFilterControl(col: NeuTableColumn<T>, value: unknown): void {
+    if (col.filterConfig?.kind === 'number' && this.modernFilterMode(col) === 'between') {
+      const range = this._numberRangeValue(value);
+      this._typedRangeStartControls.get(col.key)?.setValue(range.from, { emitEvent: false });
+      this._typedRangeEndControls.get(col.key)?.setValue(range.to, { emitEvent: false });
+      return;
+    }
+    if (this.isInstantRange(col)) {
+      this._typedInstantRangeStartControls
+        .get(col.key)
+        ?.setValue(this._instantRangeControlValue(value, 'from'), { emitEvent: false });
+      this._typedInstantRangeEndControls
+        .get(col.key)
+        ?.setValue(this._instantRangeControlValue(value, 'to'), { emitEvent: false });
+      return;
+    }
+    this._typedColumnFilterControls
+      .get(col.key)
+      ?.setValue(this._typedFilterControlValue(col, value), { emitEvent: false });
+  }
+
+  private _typedFilterControlValue(col: NeuTableColumn<T>, value: unknown): unknown {
+    const config = col.filterConfig;
+    if (!config) return '';
+    if (config.kind === 'text') return typeof value === 'string' ? value : '';
+    if (config.kind === 'number') return value ?? null;
+    if (config.kind === 'boolean') return value === true || value === false ? value : null;
+    if (config.kind === 'date') {
+      if (this.isDateOnlyRange(col)) {
+        return this._dateRangeControlValue(value);
+      }
+      return this._dateInputControlValue(value, config.precision ?? 'date-only');
+    }
+    return value;
+  }
+
+  private _typedFilterValueFromControl(col: NeuTableColumn<T>, value: unknown): unknown {
+    const config = col.filterConfig;
+    if (!config || config.kind !== 'date') return value;
+    const precision = config.precision ?? 'date-only';
+    if (this.isInstantRange(col)) return value;
+    if (this.modernFilterMode(col) !== 'between') {
+      return precision === 'instant' ? this._instantFilterValue(value) : value;
+    }
+    if (!this._isNeuDateRange(value)) return { from: null, to: null };
+    return {
+      from: this._dateFilterValue(value.start, precision),
+      to: this._dateFilterValue(value.end, precision),
+    };
+  }
+
+  private _numberRangeValue(value: unknown): NeuTableNumberRangeValue {
+    if (!this._isRecord(value)) return { from: null, to: null };
+    return {
+      from: typeof value['from'] === 'number' ? value['from'] : null,
+      to: typeof value['to'] === 'number' ? value['to'] : null,
+    };
+  }
+
+  private _dateRangeControlValue(
+    value: unknown,
+  ): NeuDateRange {
+    if (!this._isRecord(value)) return { start: null, end: null };
+    return {
+      start: this._dateOnlyControlDate(value['from']),
+      end: this._dateOnlyControlDate(value['to']),
+    };
+  }
+
+  private _dateRangeFilterValue(value: unknown): { from: unknown; to: unknown } {
+    if (!this._isRecord(value)) return { from: null, to: null };
+    return { from: value['from'] ?? null, to: value['to'] ?? null };
+  }
+
+  private _instantRangeControlValue(value: unknown, boundary: 'from' | 'to'): string {
+    return this._dateInputControlValue(this._dateRangeFilterValue(value)[boundary], 'instant');
+  }
+
+  private _dateInputControlValue(value: unknown, precision: 'date-only' | 'instant'): string {
+    if (precision === 'date-only') {
+      return normalizeNeuTableDatePoint(value, 'date-only')?.value ?? '';
+    }
+    const date = this._dateControlDate(value);
+    if (!date) return '';
+    return this._formatLocalDateTime(date);
+  }
+
+  private _dateOnlyControlDate(value: unknown): Date | null {
+    const canonicalDate = normalizeNeuTableDatePoint(value, 'date-only')?.value;
+    if (!canonicalDate) return null;
+    const [year, month, day] = canonicalDate.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  private _dateControlDate(value: unknown): Date | null {
+    const source =
+      this._isRecord(value) && typeof value['value'] === 'string' ? value['value'] : value;
+    if (source instanceof Date) return Number.isNaN(source.getTime()) ? null : new Date(source.getTime());
+    if (typeof source !== 'string' || !source) return null;
+    const date = new Date(source);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private _currentTypedColumn(key: string): NeuTableColumn<T> | null {
+    return this._typedColumns().find((candidate) => candidate.key === key) ?? null;
+  }
+
+  private _dateFilterValue(date: Date | null, precision: 'date-only' | 'instant'): string | null {
+    if (!date || Number.isNaN(date.getTime())) return null;
+    return precision === 'date-only' ? this._formatLocalDate(date) : date.toISOString();
+  }
+
+  private _instantFilterValue(value: unknown): string | null {
+    if (typeof value !== 'string' || !value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+
+  private _formatLocalDate(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  private _formatLocalDateTime(date: Date): string {
+    return `${this._formatLocalDate(date)}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  }
+
+  private _isNeuDateRange(value: unknown): value is NeuDateRange {
+    return this._isRecord(value) && ('start' in value || 'end' in value);
+  }
+
+  private _isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
   }
 
   columnFilterControl(key: string): FormControl<string> {

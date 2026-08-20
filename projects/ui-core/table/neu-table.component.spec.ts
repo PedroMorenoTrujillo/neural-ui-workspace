@@ -14,7 +14,12 @@ import {
   NeuTableServerState,
 } from './neu-table.types';
 import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
+import { NeuInputComponent } from '@neural-ui/core/input';
+import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
+import { NeuDateInputComponent } from '@neural-ui/core/date-input';
+import { NeuSelectComponent } from '@neural-ui/core/select';
 import { By } from '@angular/platform-browser';
+import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
 
 interface Person {
   id: number;
@@ -37,6 +42,22 @@ interface FilterUser {
   score: number;
   createdAt: string;
   active: boolean;
+}
+
+interface TemporalFilterUser {
+  id: number;
+  createdAt: Date | string;
+  dateOnly?: Date | string;
+  dateOnlyRange?: Date | string;
+}
+
+function localDateTimeValue(value: string): string {
+  const date = new Date(value);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')}T${String(date.getHours()).padStart(2, '0')}:${String(
+    date.getMinutes(),
+  ).padStart(2, '0')}`;
 }
 
 const TYPED_USER_COLUMNS = [
@@ -877,6 +898,472 @@ describe('NeuTableComponent', () => {
     table.setColumnFilter('active', true);
 
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+  });
+
+  it('renders typed inline controls and keeps them synchronized with Table filter state', async () => {
+    const columns: NeuTableColumn<FilterUser>[] = [
+      { key: 'name', header: 'Name', filterConfig: { kind: 'text', mode: 'contains' } },
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number', mode: 'gte' } },
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: { kind: 'date', mode: 'is', precision: 'date-only' },
+      },
+      { key: 'active', header: 'Active', filterConfig: { kind: 'boolean' } },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', [
+      { id: 1, name: 'Ana', score: 0, createdAt: '2026-08-20', active: true },
+      { id: 2, name: 'Luis', score: 50, createdAt: '2026-08-19', active: false },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+
+    expect(fixture.debugElement.query(By.directive(NeuInputComponent))).toBeTruthy();
+    expect(fixture.debugElement.query(By.directive(NeuNumberInputComponent))).toBeTruthy();
+    expect(fixture.debugElement.query(By.directive(NeuDateInputComponent))).toBeTruthy();
+    expect(fixture.debugElement.query(By.directive(NeuSelectComponent))).toBeTruthy();
+    const booleanSelect = fixture.debugElement.query(By.directive(NeuSelectComponent))
+      .nativeElement as HTMLElement;
+    expect(booleanSelect.querySelector('.neu-select__placeholder')?.textContent).toContain('All');
+
+    const textInput: HTMLInputElement = fixture.nativeElement.querySelector('.neu-input__field');
+    textInput.value = 'Luis';
+    textInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('name')).toBe('Luis');
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+
+    table.clearColumnFilters();
+    table.setColumnFilter('score', 0);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const numberInput: HTMLInputElement = fixture.nativeElement.querySelector(
+      '.neu-number-input__field',
+    );
+    expect(numberInput.value).toBe('0');
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+
+    numberInput.value = '50';
+    numberInput.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('score')).toBe(50);
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+
+    table.clearColumnFilters();
+    table.setColumnFilter('active', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('active')).toBe(false);
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+    expect(booleanSelect.querySelector('.neu-select__value')?.textContent).toContain('No');
+
+    table.setColumnFilter('active', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('active')).toBe(true);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+    expect(booleanSelect.querySelector('.neu-select__value')?.textContent).toContain('Yes');
+
+    table.clearColumnFilters();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(numberInput.value).toBe('');
+    expect(table.getColumnFilterValue('active')).toBe('');
+    expect(booleanSelect.querySelector('.neu-select__placeholder')?.textContent).toContain('All');
+
+    const dateInput = fixture.debugElement.query(By.directive(NeuDateInputComponent))
+      .componentInstance as NeuDateInputComponent;
+    dateInput.writeValue('2026-08-19');
+    const selectedDay = dateInput
+      .calendarDays()
+      .find((candidate) => candidate.date.getFullYear() === 2026 && candidate.date.getMonth() === 7 && candidate.date.getDate() === 19);
+    expect(selectedDay).toBeTruthy();
+    dateInput.selectDay(selectedDay!);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('createdAt')).toBe('2026-08-19');
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+  });
+
+  it('keeps instant filtering independent from cell display and normalizes single-control values to ISO UTC', async () => {
+    const firstInstant = '2026-08-20T10:30:00Z';
+    const secondInstant = new Date('2026-08-21T14:45:00');
+    const rows: TemporalFilterUser[] = [
+      { id: 1, createdAt: firstInstant },
+      { id: 2, createdAt: secondInstant.toISOString() },
+    ];
+    const columns: NeuTableColumn<TemporalFilterUser>[] = [
+      {
+        key: 'createdAt',
+        header: 'Created',
+        cell: () => '20/08/2026 12:30',
+        filterConfig: {
+          kind: 'date',
+          mode: 'is',
+          precision: 'instant',
+          accessor: (row) => row.createdAt,
+        },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<TemporalFilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+
+    table.setColumnFilter('createdAt', firstInstant);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const instantInput = fixture.debugElement.query(By.directive(NeuDateInputComponent))
+      .componentInstance as NeuDateInputComponent;
+    expect(instantInput.type()).toBe('datetime-local');
+    expect(instantInput.isDateSelected(new Date(firstInstant))).toBe(true);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+    expect(fixture.nativeElement.textContent).toContain('20/08/2026 12:30');
+    columns[0].cell = () => 'August 20, 2026 12:30';
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+
+    const secondLocalValue = localDateTimeValue(secondInstant.toISOString());
+    instantInput.writeValue(secondLocalValue);
+    const secondDay = instantInput
+      .calendarDays()
+      .find((candidate) =>
+        candidate.date.getFullYear() === secondInstant.getFullYear() &&
+        candidate.date.getMonth() === secondInstant.getMonth() &&
+        candidate.date.getDate() === secondInstant.getDate(),
+      );
+    expect(secondDay).toBeTruthy();
+    instantInput.selectDay(secondDay!);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('createdAt')).toBe(secondInstant.toISOString());
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+  });
+
+  it('preserves row and Date references while date-only filtering uses the typed accessor value', async () => {
+    const dateReference = new Date('2026-08-20T12:00:00Z');
+    const rows: TemporalFilterUser[] = [
+      { id: 1, createdAt: dateReference },
+      { id: 2, createdAt: '2026-08-20T10:30:00Z' },
+      { id: 3, createdAt: '2026-08-20' },
+    ];
+    const columns: NeuTableColumn<TemporalFilterUser>[] = [
+      {
+        key: 'createdAt',
+        header: 'Created',
+        cell: () => '20 August 2026',
+        filterConfig: {
+          kind: 'date',
+          mode: 'is',
+          precision: 'date-only',
+          accessor: (row) => row.createdAt,
+        },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<TemporalFilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    fixture.componentInstance.setColumnFilter('createdAt', '2026-08-20');
+    expect(fixture.componentInstance.filteredData()).toEqual(rows);
+    expect(fixture.componentInstance.filteredData()[0]).toBe(rows[0]);
+    expect(rows[0].createdAt).toBe(dateReference);
+    expect(fixture.componentInstance.data()).toBe(rows);
+  });
+
+  it('uses the engine UTC calendar day for date-only controls and ranges at a local-day boundary', async () => {
+    const boundaryInstant = '2026-08-20T23:30:00Z';
+    const rows: TemporalFilterUser[] = [
+      { id: 1, createdAt: boundaryInstant },
+      { id: 2, createdAt: '2026-08-21T00:30:00Z' },
+    ];
+    const columns: NeuTableColumn<TemporalFilterUser>[] = [
+      {
+        key: 'dateOnly',
+        header: 'Date only',
+        filterConfig: {
+          kind: 'date',
+          mode: 'is',
+          precision: 'date-only',
+          accessor: (row) => row.createdAt,
+        },
+      },
+      {
+        key: 'dateOnlyRange',
+        header: 'Date only range',
+        filterConfig: {
+          kind: 'date',
+          mode: 'between',
+          precision: 'date-only',
+          accessor: (row) => row.createdAt,
+        },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<TemporalFilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+
+    expect(normalizeNeuTableDatePoint(boundaryInstant, 'date-only')).toEqual({
+      precision: 'date-only',
+      value: '2026-08-20',
+    });
+    table.setColumnFilter('dateOnly', boundaryInstant);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const singleDateInput = fixture.debugElement
+      .queryAll(By.directive(NeuDateInputComponent))
+      .map((debugElement) => debugElement.componentInstance as NeuDateInputComponent)
+      .find((component) => component.type() === 'date');
+    expect(singleDateInput).toBeTruthy();
+    expect(singleDateInput!.isDateSelected(new Date(2026, 7, 20))).toBe(true);
+    expect(singleDateInput!.isDateSelected(new Date(2026, 7, 21))).toBe(false);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+
+    table.setColumnFilter('dateOnlyRange', { from: boundaryInstant, to: boundaryInstant });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rangeDateInput = fixture.debugElement
+      .queryAll(By.directive(NeuDateInputComponent))
+      .map((debugElement) => debugElement.componentInstance as NeuDateInputComponent)
+      .find((component) => component.type() === 'range');
+    expect(rangeDateInput).toBeTruthy();
+    rangeDateInput!._leftCursor.set(new Date(2026, 7, 1));
+    const rangeDay = rangeDateInput!._leftDays().find((cell) => cell.rangeStart || cell.rangeEnd);
+    expect(rangeDay?.date.getDate()).toBe(20);
+  });
+
+  it('uses the current column config when a cached filter control key changes precision', async () => {
+    const rows: TemporalFilterUser[] = [{ id: 1, createdAt: '2026-08-20T10:30:00Z' }];
+    const dateOnlyColumns: NeuTableColumn<TemporalFilterUser>[] = [
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: {
+          kind: 'date',
+          mode: 'is',
+          precision: 'date-only',
+          accessor: (row) => row.createdAt,
+        },
+      },
+    ];
+    const instantColumns: NeuTableColumn<TemporalFilterUser>[] = [
+      {
+        ...dateOnlyColumns[0],
+        filterConfig: {
+          kind: 'date',
+          mode: 'is',
+          precision: 'instant',
+          accessor: (row) => row.createdAt,
+        },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<TemporalFilterUser>);
+    fixture.componentRef.setInput('columns', dateOnlyColumns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.componentRef.setInput('columns', instantColumns);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const instantInput = fixture.debugElement.query(By.directive(NeuDateInputComponent))
+      .componentInstance as NeuDateInputComponent;
+    expect(instantInput.type()).toBe('datetime-local');
+    const localValue = '2026-08-20T10:30';
+    instantInput.writeValue(localValue);
+    const selectedDay = instantInput
+      .calendarDays()
+      .find((candidate) => candidate.date.getFullYear() === 2026 && candidate.date.getMonth() === 7 && candidate.date.getDate() === 20);
+    expect(selectedDay).toBeTruthy();
+    instantInput.selectDay(selectedDay!);
+    expect(fixture.componentInstance.getColumnFilterValue('createdAt')).toBe(
+      new Date(localValue).toISOString(),
+    );
+  });
+
+  it('uses two datetime controls for instant ranges and preserves both time boundaries', async () => {
+    const rows: TemporalFilterUser[] = [
+      { id: 1, createdAt: '2026-08-20T10:30:00Z' },
+      { id: 2, createdAt: '2026-08-20T12:00:00Z' },
+      { id: 3, createdAt: '2026-08-20T15:45:00Z' },
+    ];
+    const columns: NeuTableColumn<TemporalFilterUser>[] = [
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: {
+          kind: 'date',
+          mode: 'between',
+          precision: 'instant',
+          accessor: (row) => row.createdAt,
+        },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<TemporalFilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const [fromInput, toInput] = fixture.debugElement
+      .queryAll(By.directive(NeuDateInputComponent))
+      .map((debugElement) => debugElement.componentInstance as NeuDateInputComponent);
+
+    expect(
+      fixture.debugElement
+        .queryAll(By.directive(NeuDateInputComponent))
+        .filter((debugElement) =>
+          (debugElement.componentInstance as NeuDateInputComponent).type() === 'datetime-local',
+        ),
+    ).toHaveLength(2);
+
+    table.setColumnFilter('createdAt', { from: '2026-08-20T10:30:00Z', to: null });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fromInput.isDateSelected(new Date('2026-08-20T10:30:00Z'))).toBe(true);
+    expect(toInput.displayValue()).toBe('');
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2, 3]);
+
+    table.setColumnFilter('createdAt', { from: null, to: '2026-08-20T12:00:00Z' });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+    table.setColumnFilter('createdAt', {
+      from: '2026-08-20T10:30:00Z',
+      to: '2026-08-20T12:00:00Z',
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+
+    const localFrom = '2026-08-20T11:00';
+    const localTo = '2026-08-20T14:00';
+    fromInput.writeValue(localFrom);
+    const fromDay = fromInput
+      .calendarDays()
+      .find((candidate) => candidate.date.getFullYear() === 2026 && candidate.date.getMonth() === 7 && candidate.date.getDate() === 20);
+    toInput.writeValue(localTo);
+    const toDay = toInput
+      .calendarDays()
+      .find((candidate) => candidate.date.getFullYear() === 2026 && candidate.date.getMonth() === 7 && candidate.date.getDate() === 20);
+    expect(fromDay).toBeTruthy();
+    expect(toDay).toBeTruthy();
+    fromInput.selectDay(fromDay!);
+    toInput.selectDay(toDay!);
+    expect(table.getColumnFilterValue('createdAt')).toEqual({
+      from: new Date(localFrom).toISOString(),
+      to: new Date(localTo).toISOString(),
+    });
+
+    table.clearColumnFilters();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fromInput.displayValue()).toBe('');
+    expect(toInput.displayValue()).toBe('');
+  });
+
+  it('adapts number and date ranges through Neural controls without changing the engine value shapes', async () => {
+    const columns: NeuTableColumn<FilterUser>[] = [
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number', mode: 'between' } },
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: { kind: 'date', mode: 'between', precision: 'date-only' },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', [
+      { id: 1, name: 'Ana', score: -2.5, createdAt: '2026-08-01', active: true },
+      { id: 2, name: 'Luis', score: 0, createdAt: '2026-08-20', active: false },
+      { id: 3, name: 'Marta', score: 12.5, createdAt: '2026-08-25', active: true },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+
+    table.setColumnFilter('score', { from: 0, to: null });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const numberInputs = fixture.nativeElement.querySelectorAll('.neu-number-input__field');
+    expect((numberInputs[0] as HTMLInputElement).value).toBe('0');
+    expect((numberInputs[1] as HTMLInputElement).value).toBe('');
+    expect(table.filteredData().map((row) => row.id)).toEqual([2, 3]);
+
+    table.setColumnFilter('score', { from: null, to: 0 });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+    table.setColumnFilter('score', { from: -2.5, to: 0 });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+
+    table.setColumnFilter('score', { from: null, to: null });
+    table.setColumnFilter('createdAt', { from: '2026-08-20', to: null });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rangeDateInput = fixture.debugElement
+      .queryAll(By.directive(NeuDateInputComponent))
+      .map((debugElement) => debugElement.componentInstance as NeuDateInputComponent)
+      .find((component) => component.type() === 'range');
+    expect(rangeDateInput).toBeTruthy();
+    const fromCell = rangeDateInput!._leftDays().find((cell) => cell.rangeStart);
+    expect(fromCell?.date.getFullYear()).toBe(2026);
+    expect(fromCell?.date.getMonth()).toBe(7);
+    expect(fromCell?.date.getDate()).toBe(20);
+    expect(table.filteredData().map((row) => row.id)).toEqual([2, 3]);
+
+    table.setColumnFilter('createdAt', { from: null, to: '2026-08-20' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const toCell = rangeDateInput!._leftDays().find((cell) => cell.rangeEnd);
+    expect(toCell?.date.getDate()).toBe(20);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+
+    rangeDateInput!._selectDay(new Date(2026, 7, 1));
+    rangeDateInput!._selectDay(new Date(2026, 7, 20));
+    rangeDateInput!._applyRange();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('createdAt')).toEqual({
+      from: '2026-08-01',
+      to: '2026-08-20',
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+
+    rangeDateInput!._clearRange();
+    expect(table.getColumnFilterValue('createdAt')).toEqual({ from: null, to: null });
+  });
+
+  it('routes typed control changes to the raw and typed server filter state', async () => {
+    const columns: NeuTableColumn<FilterUser>[] = [
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number', mode: 'gte' } },
+      { key: 'active', header: 'Active', filterConfig: { kind: 'boolean' } },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', []);
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const states: NeuTableServerState[] = [];
+    fixture.componentInstance.serverStateChange.subscribe((state) => states.push(state));
+
+    fixture.componentInstance.setColumnFilter('score', 50);
+    fixture.componentInstance.setColumnFilter('active', false);
+
+    const state = states.at(-1);
+    expect(state?.columnFilters).toEqual({ score: 50, active: false });
+    expect(state?.typedColumnFilters?.['score']).toEqual({ kind: 'number', mode: 'gte', value: 50 });
+    expect(state?.typedColumnFilters?.['active']).toEqual({
+      kind: 'boolean',
+      mode: 'false',
+      value: false,
+    });
   });
 
   it('keeps legacy number-range textual and legacy select filtering', async () => {

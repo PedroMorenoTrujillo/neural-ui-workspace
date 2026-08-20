@@ -1160,14 +1160,34 @@
 
   .neu-select,
   .neu-date-input-host,
-  .neu-input-host {
+  .neu-input-host,
+  .neu-number-input {
     display: block;
     width: 100%;
   }
 
+  .neu-input__static-label,
+  .neu-number-input__label,
+  .neu-date-input__label,
+  .neu-drp__label,
+  .neu-select__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .neu-select__trigger,
   .neu-date-input__trigger,
-  .neu-input__field {
+  .neu-drp__trigger,
+  .neu-input__field,
+  .neu-number-input__field,
+  .neu-number-input__btn {
     min-height: 30px;
     height: 30px;
     border-radius: var(--neu-radius-sm);
@@ -1186,6 +1206,13 @@
     width: 14px;
     height: 14px;
   }
+}
+
+.neu-table__filter-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--neu-space-2);
+  min-width: 0;
 }
 
 .neu-table__col-filter-input,
