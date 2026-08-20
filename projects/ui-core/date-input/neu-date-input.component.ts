@@ -711,8 +711,16 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     const l = this._leftCursor();
     return new Date(l.getFullYear(), l.getMonth() + 1, 1);
   });
-  readonly _hasRange = computed(() => !!this._pickStart());
-  readonly _canApply = computed(() => this._pickStart() !== null && this._pickEnd() !== null);
+  readonly _hasRange = computed(() => !!this._pickStart() || !!this._pickEnd());
+  readonly _canApply = computed(() => {
+    const start = this._pickStart();
+    const end = this._pickEnd();
+    if (!start && !end) return false;
+    return (
+      (start === null || this.#isValidRangeDate(start)) &&
+      (end === null || this.#isValidRangeDate(end))
+    );
+  });
   readonly _resolvedLocale = computed(
     () => this.#normalizedLocale(this.locale()) || this._documentLang() || 'es',
   );
@@ -795,7 +803,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   readonly _rangeDisplayValue = computed(() => {
     const s = this._pickStart();
     const e = this._pickEnd();
-    if (!s) return this.placeholder();
+    if (!s && !e) return this.placeholder();
+    if (!s) return this._fmtDate(e!);
     if (!e) return this._fmtDate(s);
     return `${this._fmtDate(s)} – ${this._fmtDate(e)}`;
   });
@@ -897,7 +906,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   _applyRange(): void {
-    const range: NeuDateRange = { start: this._pickStart(), end: this._pickEnd() };
+    if (!this._canApply()) return;
+    const range = this.#rangeValue();
     this._onChange(range);
     this.rangeChange.emit(range);
     this._onTouched();
@@ -917,6 +927,19 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     const range: NeuDateRange = { start: null, end: null };
     this._onChange(range);
     this.rangeChange.emit(range);
+  }
+
+  #rangeValue(): NeuDateRange {
+    const start = this._pickStart();
+    const end = this._pickEnd();
+    return {
+      start: start ? cloneDate(start) : null,
+      end: end ? cloneDate(end) : null,
+    };
+  }
+
+  #isValidRangeDate(value: Date): boolean {
+    return !Number.isNaN(value.getTime()) && !this.isDateDisabled(value);
   }
 
   // ── Single computed ───────────────────────────────────────────────
@@ -1219,8 +1242,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   writeValue(value: string | string[] | NeuDateRange | null): void {
     if (this.type() === 'range') {
       const v = value as NeuDateRange | null;
-      this._pickStart.set(v?.start ?? null);
-      this._pickEnd.set(v?.end ?? null);
+      this._pickStart.set(v?.start ? cloneDate(v.start) : null);
+      this._pickEnd.set(v?.end ? cloneDate(v.end) : null);
     } else {
       if (this.type() === 'date' && this.multiple()) {
         const values = Array.isArray(value)

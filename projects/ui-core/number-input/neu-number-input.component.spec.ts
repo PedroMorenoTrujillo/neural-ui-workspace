@@ -1,9 +1,30 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuNumberInputComponent } from './neu-number-input.component';
 
 function mk() {
   return TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+}
+
+@Component({
+  imports: [ReactiveFormsModule, NeuNumberInputComponent],
+  template: `<neu-number-input [nullable]="true" [formControl]="control" />`,
+})
+class NullableNumberHostComponent {
+  readonly control = new FormControl<number | null>(null);
+}
+
+@Component({
+  imports: [NeuNumberInputComponent],
+  template: `<neu-number-input (valueChange)="handleLegacyValue($event)" />`,
+})
+class LegacyNumberOutputHostComponent {
+  legacyValue = 0;
+
+  handleLegacyValue(value: number): void {
+    this.legacyValue = value;
+  }
 }
 
 describe('NeuNumberInputComponent', () => {
@@ -83,7 +104,7 @@ describe('NeuNumberInputComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(5);
     const emitted: number[] = [];
-    f.componentInstance.valueChange.subscribe((v: number) => emitted.push(v));
+    f.componentInstance.valueChange.subscribe((v) => emitted.push(v));
     f.componentInstance.increment();
     expect(emitted).toEqual([6]);
   });
@@ -101,8 +122,8 @@ describe('NeuNumberInputComponent', () => {
   it('should call onChange when value changes via increment', async () => {
     const f = TestBed.createComponent(NeuNumberInputComponent);
     f.detectChanges();
-    const changes: number[] = [];
-    f.componentInstance.registerOnChange((v: number) => changes.push(v));
+    const changes: Array<number | null> = [];
+    f.componentInstance.registerOnChange((v) => changes.push(v));
     f.componentInstance.writeValue(10);
     f.componentInstance.increment();
     expect(changes).toContain(11);
@@ -278,8 +299,8 @@ describe('NeuNumberInputComponent', () => {
   it('registerOnChange is stored and called on increment', () => {
     const f = TestBed.createComponent(NeuNumberInputComponent);
     f.detectChanges();
-    const values: number[] = [];
-    f.componentInstance.registerOnChange((v: number) => values.push(v));
+    const values: Array<number | null> = [];
+    f.componentInstance.registerOnChange((v) => values.push(v));
     f.componentInstance.writeValue(5);
     f.componentInstance.increment();
     expect(values).toContain(6);
@@ -345,8 +366,7 @@ describe('NeuNumberInputComponent', () => {
     const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
     input.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
-    // valueAsNumber is NaN for type=text → component defaults to 0 or min
-    expect((f.componentInstance as any)._value()).toBeGreaterThanOrEqual(0);
+    expect((f.componentInstance as any)._value()).toBe(0);
   });
 
   it('DOM blur event on stacked input invokes onBlur via template listener', async () => {
@@ -372,7 +392,7 @@ describe('NeuNumberInputComponent', () => {
     const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
     input.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBeGreaterThanOrEqual(0);
+    expect((f.componentInstance as any)._value()).toBe(0);
   });
 
   it('DOM blur event on vertical input invokes onBlur via template listener', async () => {
@@ -418,7 +438,7 @@ describe('NeuNumberInputComponent', () => {
     const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
     input.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBeGreaterThanOrEqual(0);
+    expect((f.componentInstance as any)._value()).toBe(0);
   });
 
   it('DOM blur event on horizontal input invokes onBlur via template listener', async () => {
@@ -524,18 +544,117 @@ describe('NeuNumberInputComponent', () => {
     expect((horizontal.componentInstance as any)._focused()).toBe(true);
   });
 
-  it('writeValue handles null and the value state class reflects finite values', async () => {
+  it('preserves the legacy default state, null handling, and numeric output contract', async () => {
     const f = TestBed.createComponent(NeuNumberInputComponent);
     f.componentRef.setInput('label', 'Amount');
     f.detectChanges();
     await f.whenStable();
 
+    const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
+    expect((f.componentInstance as any)._value()).toBe(0);
+    expect(input.value).toBe('0');
+
     f.componentInstance.writeValue(null);
+    f.detectChanges();
+    expect((f.componentInstance as any)._value()).toBe(0);
+    expect(input.value).toBe('0');
+
+    f.componentInstance.writeValue(0);
+    f.detectChanges();
+    expect((f.componentInstance as any)._value()).toBe(0);
+    expect(input.value).toBe('0');
+
+    f.componentInstance.writeValue(12.5);
+    f.detectChanges();
+    expect((f.componentInstance as any)._value()).toBe(12.5);
+    expect(input.value).toBe('12.5');
+  });
+
+  it('keeps an empty user input as zero by default', async () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const changes: Array<number | null> = [];
+    const emitted: number[] = [];
+    f.componentInstance.registerOnChange((value) => changes.push(value));
+    f.componentInstance.valueChange.subscribe((value) => emitted.push(value));
+    const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
+    input.value = '';
+    input.dispatchEvent(new Event('change'));
     f.detectChanges();
 
     expect((f.componentInstance as any)._value()).toBe(0);
-    expect(f.nativeElement.querySelector('.neu-number-input__control').classList).toContain(
-      'neu-number-input__control--has-value',
-    );
+    expect(changes).toEqual([0]);
+    expect(emitted).toEqual([0]);
+  });
+
+  it('supports nullable writeValue, zero, and clear only when opted in', async () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    f.componentRef.setInput('nullable', true);
+    f.detectChanges();
+    await f.whenStable();
+    const changes: Array<number | null> = [];
+    const emitted: number[] = [];
+    f.componentInstance.registerOnChange((value) => changes.push(value));
+    f.componentInstance.valueChange.subscribe((value) => emitted.push(value));
+    const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
+
+    f.componentInstance.writeValue(null);
+    f.detectChanges();
+    expect((f.componentInstance as any)._value()).toBeNull();
+    expect(input.value).toBe('');
+
+    f.componentInstance.writeValue(0);
+    f.detectChanges();
+    expect((f.componentInstance as any)._value()).toBe(0);
+    expect(input.value).toBe('0');
+
+    input.value = '';
+    input.dispatchEvent(new Event('change'));
+    f.detectChanges();
+    expect(changes).toEqual([null]);
+    expect(emitted).toEqual([]);
+  });
+
+  it('keeps nullable Reactive Forms values synchronized through setValue and reset', async () => {
+    const f = TestBed.createComponent(NullableNumberHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
+    expect(input.value).toBe('');
+
+    f.componentInstance.control.setValue(0);
+    f.detectChanges();
+    expect(input.value).toBe('0');
+
+    f.componentInstance.control.reset();
+    f.detectChanges();
+    expect(f.componentInstance.control.value).toBeNull();
+    expect(input.value).toBe('');
+  });
+
+  it('uses the historical clamped 0 ± step behavior when incrementing or decrementing from nullable null', () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    f.componentRef.setInput('nullable', true);
+    f.componentRef.setInput('step', 2);
+    f.detectChanges();
+
+    f.componentInstance.writeValue(null);
+    f.componentInstance.increment();
+    expect((f.componentInstance as any)._value()).toBe(2);
+
+    f.componentInstance.writeValue(null);
+    f.componentInstance.decrement();
+    expect((f.componentInstance as any)._value()).toBe(-2);
+  });
+
+  it('keeps legacy number-only valueChange handlers valid in templates', async () => {
+    const f = TestBed.createComponent(LegacyNumberOutputHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const numberInput = f.debugElement.children[0].componentInstance as NeuNumberInputComponent;
+    numberInput.increment();
+    expect(f.componentInstance.legacyValue).toBe(1);
   });
 });

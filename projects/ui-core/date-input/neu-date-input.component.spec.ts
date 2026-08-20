@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NeuDateInputComponent } from './neu-date-input.component';
+import { NeuDateInputComponent, NeuDateRange } from './neu-date-input.component';
 
 // ── Host para integración con Reactive Forms ──────────────────────────────────
 
@@ -23,6 +24,14 @@ class HostComponent {
   readonly = false;
   type: 'date' | 'time' | 'datetime-local' = 'date';
   ctrl = new FormControl<string | null>(null);
+}
+
+@Component({
+  imports: [ReactiveFormsModule, NeuDateInputComponent],
+  template: `<neu-date-input type="range" [formControl]="ctrl" />`,
+})
+class RangeHostComponent {
+  readonly ctrl = new FormControl<NeuDateRange | null>(null);
 }
 
 describe('NeuDateInputComponent', () => {
@@ -564,6 +573,57 @@ describe('NeuDateInputComponent', () => {
     expect((f.componentInstance as any)._pickEnd()).toBeNull();
   });
 
+  it('preserves programmatic empty, from-only, to-only, and full ranges without retaining consumer dates', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const from = new Date(2025, 3, 1);
+    const to = new Date(2025, 3, 30);
+
+    comp.writeValue({ start: from, end: null });
+    expect(comp._pickStart()).toEqual(from);
+    expect(comp._pickEnd()).toBeNull();
+    expect(comp._pickStart()).not.toBe(from);
+
+    comp.writeValue({ start: null, end: to });
+    expect(comp._pickStart()).toBeNull();
+    expect(comp._pickEnd()).toEqual(to);
+    expect(comp._pickEnd()).not.toBe(to);
+
+    comp.writeValue({ start: from, end: to });
+    expect(comp._pickStart()).toEqual(from);
+    expect(comp._pickEnd()).toEqual(to);
+
+    comp.writeValue(null);
+    expect(comp._pickStart()).toBeNull();
+    expect(comp._pickEnd()).toBeNull();
+  });
+
+  it('keeps partial ranges synchronized through Reactive Forms', async () => {
+    const f = TestBed.createComponent(RangeHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const component = f.debugElement.query(By.directive(NeuDateInputComponent)).componentInstance as any;
+    const from = new Date(2025, 3, 1);
+    const to = new Date(2025, 3, 30);
+
+    f.componentInstance.ctrl.setValue({ start: from, end: null });
+    f.detectChanges();
+    expect(component._pickStart()).toEqual(from);
+    expect(component._pickEnd()).toBeNull();
+
+    f.componentInstance.ctrl.setValue({ start: null, end: to });
+    f.detectChanges();
+    expect(component._pickStart()).toBeNull();
+    expect(component._pickEnd()).toEqual(to);
+
+    f.componentInstance.ctrl.setValue({ start: from, end: to });
+    f.detectChanges();
+    expect(component._pickStart()).toEqual(from);
+    expect(component._pickEnd()).toEqual(to);
+  });
+
   it('_selectDay in range mode: first click sets start, second sets end', () => {
     const f = TestBed.createComponent(NeuDateInputComponent);
     f.componentRef.setInput('type', 'range');
@@ -612,6 +672,36 @@ describe('NeuDateInputComponent', () => {
     expect(f.componentInstance.isOpen()).toBe(false);
   });
 
+  it('_applyRange accepts an interactive from-only range while keeping full-range behavior', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const from = new Date(2025, 3, 1);
+    const ranges: NeuDateRange[] = [];
+    comp.rangeChange.subscribe((value: NeuDateRange) => ranges.push(value));
+
+    comp._selectDay(from);
+    expect(comp._canApply()).toBe(true);
+    comp._applyRange();
+
+    expect(ranges).toEqual([{ start: from, end: null }]);
+  });
+
+  it('does not allow applying empty, invalid, or disabled partial ranges', () => {
+    const f = TestBed.createComponent(NeuDateInputComponent);
+    f.componentRef.setInput('type', 'range');
+    f.componentRef.setInput('disabledDates', ['2025-04-01']);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    expect(comp._canApply()).toBe(false);
+    comp._pickStart.set(new Date('invalid'));
+    expect(comp._canApply()).toBe(false);
+    comp._pickStart.set(new Date(2025, 3, 1));
+    expect(comp._canApply()).toBe(false);
+  });
+
   it('_clearRange resets start/end and emits rangeChange', () => {
     const f = TestBed.createComponent(NeuDateInputComponent);
     f.componentRef.setInput('type', 'range');
@@ -624,6 +714,7 @@ describe('NeuDateInputComponent', () => {
     expect((f.componentInstance as any)._pickStart()).toBeNull();
     expect((f.componentInstance as any)._pickEnd()).toBeNull();
     expect(ranges.length).toBe(1);
+    expect(ranges[0]).toEqual({ start: null, end: null });
   });
 
   it('_prevRight and _nextRight navigate the right calendar in range mode', () => {

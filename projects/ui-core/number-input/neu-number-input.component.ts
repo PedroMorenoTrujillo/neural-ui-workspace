@@ -51,7 +51,7 @@ let _seq = 0;
         <button
           type="button"
           class="neu-number-input__btn neu-number-input__btn--inc"
-          [disabled]="_cvaDisabled() || _value() >= max()"
+          [disabled]="_cvaDisabled() || !canIncrement()"
           [attr.aria-label]="incrementLabel()"
           (click)="increment()"
         >
@@ -63,11 +63,11 @@ let _seq = 0;
           inputmode="numeric"
           role="spinbutton"
           [id]="_id"
-          [attr.aria-valuenow]="_value()"
+          [attr.aria-valuenow]="_value() ?? null"
           [attr.aria-valuemin]="min()"
           [attr.aria-valuemax]="max()"
           [disabled]="_cvaDisabled()"
-          [value]="_value()"
+          [value]="_value() ?? ''"
           (change)="onInputChange($event)"
           (focus)="onFocus()"
           (blur)="onBlur()"
@@ -75,7 +75,7 @@ let _seq = 0;
         <button
           type="button"
           class="neu-number-input__btn neu-number-input__btn--dec"
-          [disabled]="_cvaDisabled() || _value() <= min()"
+          [disabled]="_cvaDisabled() || !canDecrement()"
           [attr.aria-label]="decrementLabel()"
           (click)="decrement()"
         >
@@ -89,11 +89,11 @@ let _seq = 0;
           inputmode="numeric"
           role="spinbutton"
           [id]="_id"
-          [attr.aria-valuenow]="_value()"
+          [attr.aria-valuenow]="_value() ?? null"
           [attr.aria-valuemin]="min()"
           [attr.aria-valuemax]="max()"
           [disabled]="_cvaDisabled()"
-          [value]="_value()"
+          [value]="_value() ?? ''"
           (change)="onInputChange($event)"
           (focus)="onFocus()"
           (blur)="onBlur()"
@@ -102,7 +102,7 @@ let _seq = 0;
           <button
             type="button"
             class="neu-number-input__btn neu-number-input__btn--inc"
-            [disabled]="_cvaDisabled() || _value() >= max()"
+            [disabled]="_cvaDisabled() || !canIncrement()"
             [attr.aria-label]="incrementLabel()"
             (click)="increment()"
           >
@@ -111,7 +111,7 @@ let _seq = 0;
           <button
             type="button"
             class="neu-number-input__btn neu-number-input__btn--dec"
-            [disabled]="_cvaDisabled() || _value() <= min()"
+            [disabled]="_cvaDisabled() || !canDecrement()"
             [attr.aria-label]="decrementLabel()"
             (click)="decrement()"
           >
@@ -123,7 +123,7 @@ let _seq = 0;
         <button
           type="button"
           class="neu-number-input__btn neu-number-input__btn--dec"
-          [disabled]="_cvaDisabled() || _value() <= min()"
+          [disabled]="_cvaDisabled() || !canDecrement()"
           [attr.aria-label]="decrementLabel()"
           (click)="decrement()"
         >
@@ -135,11 +135,11 @@ let _seq = 0;
           inputmode="numeric"
           role="spinbutton"
           [id]="_id"
-          [attr.aria-valuenow]="_value()"
+          [attr.aria-valuenow]="_value() ?? null"
           [attr.aria-valuemin]="min()"
           [attr.aria-valuemax]="max()"
           [disabled]="_cvaDisabled()"
-          [value]="_value()"
+          [value]="_value() ?? ''"
           (change)="onInputChange($event)"
           (focus)="onFocus()"
           (blur)="onBlur()"
@@ -147,7 +147,7 @@ let _seq = 0;
         <button
           type="button"
           class="neu-number-input__btn neu-number-input__btn--inc"
-          [disabled]="_cvaDisabled() || _value() >= max()"
+          [disabled]="_cvaDisabled() || !canIncrement()"
           [attr.aria-label]="incrementLabel()"
           (click)="increment()"
         >
@@ -183,15 +183,25 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   readonly stacked = input<boolean>(true);
   /** Tamaño del campo: 'sm' = 36px | 'md' = 48px | 'lg' = 56px / Field size */
   readonly size = input<'sm' | 'md' | 'lg'>('md');
-  /** Emitido en cada cambio / Emitted on each change */
+  /** Permite representar null como campo vacío. Por defecto conserva el contrato numérico histórico. / Allows null to render as an empty field. Defaults to the historical numeric contract. */
+  readonly nullable = input(false);
+  /** Emitido en cada cambio numérico / Emitted on each numeric change */
   readonly valueChange = output<number>();
 
   readonly _id = `neu-number-input-${++_seq}`;
   readonly _cvaDisabled = signal(false);
-  readonly _value = signal(0);
+  readonly _value = signal<number | null>(0);
   readonly _focused = signal(false);
 
-  readonly hasValue = computed(() => Number.isFinite(this._value()));
+  readonly hasValue = computed(() => this._value() !== null);
+  readonly canIncrement = computed(() => {
+    const value = this._value() ?? this._clamp(0);
+    return value < this.max();
+  });
+  readonly canDecrement = computed(() => {
+    const value = this._value() ?? this._clamp(0);
+    return value > this.min();
+  });
   readonly effectiveFloatingLabel = computed(() => this.floatingLabel() && !this.vertical());
 
   readonly hostClasses = computed(() => ({
@@ -204,14 +214,14 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
     'neu-number-input--lg': this.size() === 'lg',
   }));
 
-  private _onChange: (v: number) => void = () => {};
+  private _onChange: (v: number | null) => void = () => {};
   private _onTouched: () => void = () => {};
 
   writeValue(val: number | null): void {
-    this._value.set(this._clamp(val ?? 0));
+    this._value.set(val === null && this.nullable() ? null : this._clamp(val ?? 0));
   }
 
-  registerOnChange(fn: (v: number) => void): void {
+  registerOnChange(fn: (v: number | null) => void): void {
     this._onChange = fn;
   }
   registerOnTouched(fn: () => void): void {
@@ -222,15 +232,20 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   }
 
   increment(): void {
-    this._emit(this._clamp(this._value() + this.step()));
+    this._emit(this._clamp(this._valueFromEmpty() + this.step()));
   }
 
   decrement(): void {
-    this._emit(this._clamp(this._value() - this.step()));
+    this._emit(this._clamp(this._valueFromEmpty() - this.step()));
   }
 
   onInputChange(event: Event): void {
-    const raw = parseFloat((event.target as HTMLInputElement).value);
+    const rawValue = (event.target as HTMLInputElement).value.trim();
+    if (rawValue === '') {
+      this._emit(this.nullable() ? null : 0);
+      return;
+    }
+    const raw = parseFloat(rawValue);
     this._emit(this._clamp(isNaN(raw) ? 0 : raw));
   }
 
@@ -243,10 +258,14 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
     this._onTouched();
   }
 
-  private _emit(value: number): void {
+  private _emit(value: number | null): void {
     this._value.set(value);
     this._onChange(value);
-    this.valueChange.emit(value);
+    if (value !== null) this.valueChange.emit(value);
+  }
+
+  private _valueFromEmpty(): number {
+    return this._value() ?? this._clamp(0);
   }
 
   private _clamp(v: number): number {
