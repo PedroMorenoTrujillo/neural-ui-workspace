@@ -31,11 +31,17 @@ import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
+import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
 import { NeuDateInputComponent, NeuDateRange } from '@neural-ui/core/date-input';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import { NeuInlineEditorComponent, NeuInlineEditorType } from '@neural-ui/core/inline-editor';
 import type { NeuSelectOption } from '@neural-ui/core/select';
+import type {
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValueAccessor,
+} from '@neural-ui/core/option-api';
 import type {
   NeuTableAction,
   NeuTableActionEvent,
@@ -130,6 +136,7 @@ export type NeuTableColumnInput<T extends object> =
     NeuInputComponent,
     NeuNumberInputComponent,
     NeuSelectComponent,
+    NeuMultiselectComponent,
     NeuDateInputComponent,
     NeuIconComponent,
     NeuCheckboxComponent,
@@ -586,6 +593,38 @@ export type NeuTableColumnInput<T extends object> =
                             [options]="typedBooleanFilterOptions()"
                             [clearable]="true"
                             [formControl]="typedColumnFilterControl(col)"
+                          />
+                        }
+                        @case ('select') {
+                          <neu-select
+                            [floatingLabel]="false"
+                            [label]="modernFilterLabel(col)"
+                            [placeholder]="allFilterOptionLabel()"
+                            [options]="typedFilterOptions(col)"
+                            [optionLabel]="typedFilterOptionLabel(col)"
+                            [optionValue]="typedFilterOptionValue(col)"
+                            [optionDisabled]="typedFilterOptionDisabled(col)"
+                            [searchable]="typedFilterSearchable(col)"
+                            [virtualScroll]="typedFilterVirtualScroll(col)"
+                            [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(col)"
+                            [clearable]="true"
+                            [formControl]="typedColumnFilterControl(col)"
+                          />
+                        }
+                        @case ('multiSelect') {
+                          <neu-multiselect
+                            [floatingLabel]="false"
+                            [label]="modernFilterLabel(col)"
+                            [placeholder]="allFilterOptionLabel()"
+                            [options]="typedFilterOptions(col)"
+                            [optionLabel]="typedFilterOptionLabel(col)"
+                            [optionValue]="typedFilterOptionValue(col)"
+                            [optionDisabled]="typedFilterOptionDisabled(col)"
+                            [searchable]="typedFilterSearchable(col)"
+                            [virtualScroll]="typedFilterVirtualScroll(col)"
+                            [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(col)"
+                            [clearable]="true"
+                            [formControl]="typedMultiSelectFilterControl(col)"
                           />
                         }
                       }
@@ -1199,6 +1238,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _typedRangeEndControls = new Map<string, FormControl<number | null>>();
   private readonly _typedInstantRangeStartControls = new Map<string, FormControl<string>>();
   private readonly _typedInstantRangeEndControls = new Map<string, FormControl<string>>();
+  private readonly _typedMultiSelectFilterControls = new Map<string, FormControl<unknown[]>>();
   /** True when a legacy or typed column filter is available. */
   readonly _hasFilterableCol = computed(() =>
     this.visibleColumns().some((column) => column.filterable || column.filterConfig),
@@ -2349,6 +2389,65 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._typedInstantRangeControl(col, 'to');
   }
 
+  protected typedMultiSelectFilterControl(col: NeuTableColumn<T>): FormControl<unknown[]> {
+    let control = this._typedMultiSelectFilterControls.get(col.key);
+    if (!control) {
+      control = new FormControl<unknown[]>(this._multiSelectFilterControlValue(this._columnFilters()[col.key]), {
+        nonNullable: true,
+      });
+      control.valueChanges
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe((value) => {
+          const currentColumn = this._currentTypedColumn(col.key);
+          if (currentColumn?.filterConfig?.kind === 'multiSelect') {
+            this.setColumnFilter(col.key, value);
+          }
+        });
+      this._typedMultiSelectFilterControls.set(col.key, control);
+    }
+    return control;
+  }
+
+  protected typedFilterOptions(col: NeuTableColumn<T>): readonly unknown[] {
+    const config = col.filterConfig;
+    return config?.kind === 'select' || config?.kind === 'multiSelect' ? (config.options ?? []) : [];
+  }
+
+  protected typedFilterOptionLabel(col: NeuTableColumn<T>): NeuOptionLabelAccessor<unknown> | null {
+    const config = col.filterConfig;
+    if (config?.kind !== 'select' && config?.kind !== 'multiSelect') return null;
+    return (config.optionLabel ?? null) as NeuOptionLabelAccessor<unknown> | null;
+  }
+
+  protected typedFilterOptionValue(col: NeuTableColumn<T>): NeuOptionValueAccessor<unknown, unknown> | null {
+    const config = col.filterConfig;
+    if (config?.kind !== 'select' && config?.kind !== 'multiSelect') return null;
+    return (config.optionValue ?? null) as NeuOptionValueAccessor<unknown, unknown> | null;
+  }
+
+  protected typedFilterOptionDisabled(col: NeuTableColumn<T>): NeuOptionDisabledAccessor<unknown> | null {
+    const config = col.filterConfig;
+    if (config?.kind !== 'select' && config?.kind !== 'multiSelect') return null;
+    return (config.optionDisabled ?? null) as NeuOptionDisabledAccessor<unknown> | null;
+  }
+
+  protected typedFilterSearchable(col: NeuTableColumn<T>): boolean {
+    const config = col.filterConfig;
+    return (config?.kind === 'select' || config?.kind === 'multiSelect') && config.searchable === true;
+  }
+
+  protected typedFilterVirtualScroll(col: NeuTableColumn<T>): boolean {
+    const config = col.filterConfig;
+    return (config?.kind === 'select' || config?.kind === 'multiSelect') && config.virtualScroll === true;
+  }
+
+  protected typedFilterVirtualScrollVisibleItems(col: NeuTableColumn<T>): number {
+    const config = col.filterConfig;
+    return config?.kind === 'select' || config?.kind === 'multiSelect'
+      ? (config.virtualScrollVisibleItems ?? 8)
+      : 8;
+  }
+
   private _typedNumberRangeControl(
     col: NeuTableColumn<T>,
     boundary: 'from' | 'to',
@@ -2395,6 +2494,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   private _syncTypedFilterControl(col: NeuTableColumn<T>, value: unknown): void {
+    if (col.filterConfig?.kind === 'multiSelect') {
+      this._typedMultiSelectFilterControls
+        .get(col.key)
+        ?.setValue(this._multiSelectFilterControlValue(value), { emitEvent: false });
+      return;
+    }
     if (col.filterConfig?.kind === 'number' && this.modernFilterMode(col) === 'between') {
       const range = this._numberRangeValue(value);
       this._typedRangeStartControls.get(col.key)?.setValue(range.from, { emitEvent: false });
@@ -2421,6 +2526,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     if (config.kind === 'text') return typeof value === 'string' ? value : '';
     if (config.kind === 'number') return value ?? null;
     if (config.kind === 'boolean') return value === true || value === false ? value : null;
+    if (config.kind === 'select') return isNeuTableFilterValueEmpty(value) ? null : value;
+    if (config.kind === 'multiSelect') return this._multiSelectFilterControlValue(value);
     if (config.kind === 'date') {
       if (this.isDateOnlyRange(col)) {
         return this._dateRangeControlValue(value);
@@ -2443,6 +2550,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       from: this._dateFilterValue(value.start, precision),
       to: this._dateFilterValue(value.end, precision),
     };
+  }
+
+  private _multiSelectFilterControlValue(value: unknown): unknown[] {
+    return Array.isArray(value) ? [...value] : [];
   }
 
   private _numberRangeValue(value: unknown): NeuTableNumberRangeValue {

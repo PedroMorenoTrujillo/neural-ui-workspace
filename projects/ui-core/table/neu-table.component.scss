@@ -1161,16 +1161,20 @@
   .neu-select,
   .neu-date-input-host,
   .neu-input-host,
-  .neu-number-input {
+  .neu-number-input,
+  .neu-multiselect {
     display: block;
     width: 100%;
+    min-width: 0;
   }
 
   .neu-input__static-label,
   .neu-number-input__label,
   .neu-date-input__label,
   .neu-drp__label,
-  .neu-select__label {
+  .neu-select__label,
+  .neu-multiselect__static-label,
+  .neu-multiselect__label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -1185,6 +1189,7 @@
   .neu-select__trigger,
   .neu-date-input__trigger,
   .neu-drp__trigger,
+  .neu-multiselect__trigger,
   .neu-input__field,
   .neu-number-input__field,
   .neu-number-input__btn {
@@ -1196,6 +1201,26 @@
 
   .neu-select__trigger {
     padding-inline: var(--neu-space-2);
+  }
+
+  .neu-multiselect__trigger {
+    min-width: 0;
+    padding: var(--neu-space-1) var(--neu-space-2);
+  }
+
+  .neu-multiselect__chips {
+    min-width: 0;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .neu-multiselect__count-badge {
+    max-width: 100%;
+    padding: 1px var(--neu-space-2);
+    overflow: hidden;
+    font-size: var(--neu-text-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .neu-date-input__trigger {

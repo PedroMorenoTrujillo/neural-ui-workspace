@@ -317,6 +317,17 @@ describe('NeuTable filter engine', () => {
   });
 
   describe('select and multiSelect', () => {
+    it('matches primitive Select values including zero without string coercion', () => {
+      const column: NeuTableColumn<FilterUser, string> = {
+        key: 'score',
+        header: 'Score',
+        filterConfig: { kind: 'select', options: [0, 1], accessor: (row) => row.score },
+      };
+
+      expect(matchesNeuTableFilter({ score: 0 } as FilterUser, column, 0)).toBe(true);
+      expect(matchesNeuTableFilter({ score: 0 } as FilterUser, column, '0')).toBe(false);
+    });
+
     it('matches select values with Neural option identity semantics', () => {
       const selected = { id: 1, label: 'One' };
       const column: NeuTableColumn<OptionFilterRow, string> = {

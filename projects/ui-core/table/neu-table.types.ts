@@ -1,4 +1,10 @@
 import { TemplateRef } from '@angular/core';
+import type {
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValue,
+  NeuOptionValueAccessor,
+} from '@neural-ui/core/option-api';
 
 /**
  * Legacy row shape used by the unparameterized public API. Parameterized
@@ -158,6 +164,28 @@ export interface NeuTableNumberRangeValue {
 
 export type NeuTableFilterAccessor<T, V = unknown> = (row: T) => V;
 
+type NeuTableBivariantOptionAccessor<O, R> = {
+  read(option: O): R;
+}['read'];
+
+/**
+ * The default column-level option model is intentionally broad so existing
+ * `NeuTableColumn<T>[]` declarations can use primitive options and property
+ * keys. Consumers that need option-function parameter checking can declare a
+ * `NeuTableSelectFilterConfig<T, O, V>` or `NeuTableMultiSelectFilterConfig<T, O, V>`.
+ */
+type NeuTableOptionConfigAccessor<O, R> = unknown extends O
+  ? PropertyKey | NeuTableBivariantOptionAccessor<O, R>
+  : NeuOptionLabelAccessor<O>;
+
+type NeuTableOptionValueConfigAccessor<O, V> = unknown extends O
+  ? PropertyKey | NeuTableBivariantOptionAccessor<O, V>
+  : NeuOptionValueAccessor<O, V>;
+
+type NeuTableOptionDisabledConfigAccessor<O> = unknown extends O
+  ? PropertyKey | NeuTableBivariantOptionAccessor<O, boolean>
+  : NeuOptionDisabledAccessor<O>;
+
 export interface NeuTableFilterBaseConfig<T, K extends NeuTableFilterKind, M extends string, V> {
   kind: K;
   mode?: M;
@@ -186,16 +214,39 @@ export interface NeuTableBooleanFilterConfig<T = NeuTableRow>
     'mode'
   > {}
 
-export interface NeuTableSelectFilterConfig<T = NeuTableRow>
-  extends NeuTableFilterBaseConfig<T, 'select', 'equals', unknown> {}
+export interface NeuTableSelectFilterConfig<
+  T = NeuTableRow,
+  O = unknown,
+  V = NeuOptionValue<O>,
+> extends NeuTableFilterBaseConfig<T, 'select', 'equals', V> {
+  options?: readonly O[];
+  optionLabel?: NeuTableOptionConfigAccessor<O, string> | null;
+  optionValue?: NeuTableOptionValueConfigAccessor<O, V> | null;
+  optionDisabled?: NeuTableOptionDisabledConfigAccessor<O> | null;
+  searchable?: boolean;
+  virtualScroll?: boolean;
+  virtualScrollVisibleItems?: number;
+}
 
-export interface NeuTableMultiSelectFilterConfig<T = NeuTableRow>
+export interface NeuTableMultiSelectFilterConfig<
+  T = NeuTableRow,
+  O = unknown,
+  V = NeuOptionValue<O>,
+>
   extends NeuTableFilterBaseConfig<
     T,
     'multiSelect',
     NeuTableMultiSelectFilterMode,
-    readonly unknown[]
-  > {}
+    V
+  > {
+  options?: readonly O[];
+  optionLabel?: NeuTableOptionConfigAccessor<O, string> | null;
+  optionValue?: NeuTableOptionValueConfigAccessor<O, V> | null;
+  optionDisabled?: NeuTableOptionDisabledConfigAccessor<O> | null;
+  searchable?: boolean;
+  virtualScroll?: boolean;
+  virtualScrollVisibleItems?: number;
+}
 
 /** Custom predicates remain local-only and intentionally use unknown values in P2.2B. */
 export interface NeuTableCustomFilterConfig<T = NeuTableRow>

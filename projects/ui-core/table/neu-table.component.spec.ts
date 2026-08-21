@@ -11,6 +11,9 @@ import {
   NeuTableAction,
   NeuTableActionEvent,
   NeuTableColumn,
+  NeuTableCustomFilterConfig,
+  NeuTableMultiSelectFilterConfig,
+  NeuTableSelectFilterConfig,
   NeuTableServerState,
 } from './neu-table.types';
 import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
@@ -18,6 +21,7 @@ import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import { NeuDateInputComponent } from '@neural-ui/core/date-input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
+import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
 import { By } from '@angular/platform-browser';
 import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
 
@@ -50,6 +54,55 @@ interface TemporalFilterUser {
   dateOnly?: Date | string;
   dateOnlyRange?: Date | string;
 }
+
+interface RoleFilterOption {
+  id: number;
+  name: string;
+  disabled?: boolean;
+}
+
+interface StatusFilterOption {
+  id: string;
+  label: string;
+  disabled?: boolean;
+}
+
+interface OptionFilterUser {
+  id: number;
+  roleId: number;
+  role: RoleFilterOption;
+  status: string;
+  account: { status: string };
+}
+
+const ROLE_FILTER_OPTIONS: readonly RoleFilterOption[] = [
+  { id: 0, name: 'Guest' },
+  { id: 1, name: 'Admin' },
+  { id: 2, name: 'Archived', disabled: true },
+];
+
+const ROLE_SELECT_FILTER: NeuTableSelectFilterConfig<OptionFilterUser, RoleFilterOption, number> = {
+  kind: 'select',
+  options: ROLE_FILTER_OPTIONS,
+  optionLabel: (role) => role.name,
+  optionValue: (role) => role.id,
+  optionDisabled: (role) => role.disabled === true,
+  accessor: (row) => row.roleId,
+};
+
+const STATUS_MULTISELECT_FILTER: NeuTableMultiSelectFilterConfig<OptionFilterUser, string, string> = {
+  kind: 'multiSelect',
+  options: ['active', 'pending', 'suspended'],
+  searchable: true,
+  accessor: (row) => row.account.status,
+};
+
+const CUSTOM_STATUS_FILTER: NeuTableCustomFilterConfig<OptionFilterUser> = {
+  kind: 'custom',
+  accessor: (row) => `${row.account.status}:${row.roleId}`,
+  predicate: (value, filterValue, row) =>
+    value === filterValue && row.account.status === String(filterValue).split(':')[0],
+};
 
 function localDateTimeValue(value: string): string {
   const date = new Date(value);
@@ -4649,6 +4702,220 @@ describe('NeuTableComponent advanced layout features', () => {
 
     expect(createObjectURL).not.toHaveBeenCalled();
     createObjectURL.mockRestore();
+  });
+
+  it('renders typed Select filters with the Option API, programmatic sync and dynamic options', async () => {
+    const roles = ROLE_FILTER_OPTIONS;
+    const rows: OptionFilterUser[] = [
+      { id: 1, roleId: 0, role: roles[0], status: 'active', account: { status: 'active' } },
+      { id: 2, roleId: 1, role: roles[1], status: 'pending', account: { status: 'pending' } },
+      { id: 3, roleId: 2, role: roles[2], status: 'suspended', account: { status: 'suspended' } },
+    ];
+    const columns: NeuTableColumn<OptionFilterUser, string>[] = [
+      { key: 'roleId', header: 'Role', filterConfig: ROLE_SELECT_FILTER },
+      {
+        key: 'role',
+        header: 'Full role',
+        filterConfig: {
+          kind: 'select',
+          options: roles,
+          optionLabel: 'name',
+          accessor: (row) => row.role,
+        },
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<OptionFilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const selects = fixture.debugElement
+      .queryAll(By.directive(NeuSelectComponent))
+      .map((debugElement) => debugElement.componentInstance as NeuSelectComponent<RoleFilterOption, number>);
+    expect(selects).toHaveLength(2);
+    expect(selects[0].isOptionDisabled(roles[2])).toBe(true);
+
+    table.setColumnFilter('roleId', 1);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('roleId')).toBe(1);
+    expect(selects[0].selectedLabel()).toBe('Admin');
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+
+    selects[0].selectOption(roles[2]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('roleId')).toBe(1);
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+
+    const nextRoles = [roles[0], { ...roles[1], name: 'Administrator' }, roles[2]];
+    fixture.componentRef.setInput('columns', [
+      { key: 'roleId', header: 'Role', filterConfig: { ...ROLE_SELECT_FILTER, options: nextRoles } },
+      columns[1],
+    ]);
+    table.setColumnFilter('roleId', 1);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(selects[0].selectedLabel()).toBe('Administrator');
+
+    table.setColumnFilter('role', roles[1]);
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+    table.setColumnFilter('role', { ...roles[1] });
+    expect(table.filteredData()).toHaveLength(0);
+    table.clearColumnFilters();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(selects[0].selectedLabel()).toBeNull();
+    expect(table.filteredData()).toHaveLength(3);
+  });
+
+  it('renders typed MultiSelect filters with Option API state synchronization', async () => {
+    const rows: OptionFilterUser[] = [
+      { id: 1, roleId: 0, role: ROLE_FILTER_OPTIONS[0], status: 'active', account: { status: 'active' } },
+      { id: 2, roleId: 1, role: ROLE_FILTER_OPTIONS[1], status: 'pending', account: { status: 'pending' } },
+      { id: 3, roleId: 2, role: ROLE_FILTER_OPTIONS[2], status: 'suspended', account: { status: 'suspended' } },
+    ];
+    const columns: NeuTableColumn<OptionFilterUser, string>[] = [
+      { key: 'status', header: 'Status', filterConfig: STATUS_MULTISELECT_FILTER },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<OptionFilterUser>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const multiselect = fixture.debugElement.query(By.directive(NeuMultiselectComponent))
+      .componentInstance as NeuMultiselectComponent<string, string>;
+
+    table.setColumnFilter('status', ['active', 'pending']);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toEqual(['active', 'pending']);
+    expect(fixture.nativeElement.textContent).toContain('active');
+    expect(fixture.nativeElement.textContent).toContain('pending');
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+    expect(multiselect.options()).toEqual(['active', 'pending', 'suspended']);
+
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'status',
+        header: 'Status',
+        filterConfig: { ...STATUS_MULTISELECT_FILTER, options: ['active', 'pending', 'archived'] },
+      },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(multiselect.options()).toEqual(['active', 'pending', 'archived']);
+    table.clearColumnFilters();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toBe('');
+    expect(fixture.nativeElement.textContent).toContain('All');
+    expect(table.filteredData()).toHaveLength(3);
+  });
+
+  it('keeps disabled typed MultiSelect options out of filter state through the rendered control', async () => {
+    const statuses: readonly StatusFilterOption[] = [
+      { id: 'active', label: 'Active' },
+      { id: 'pending', label: 'Pending' },
+      { id: 'archived', label: 'Archived', disabled: true },
+    ];
+    const rows: OptionFilterUser[] = [
+      { id: 1, roleId: 0, role: ROLE_FILTER_OPTIONS[0], status: 'active', account: { status: 'active' } },
+      { id: 2, roleId: 1, role: ROLE_FILTER_OPTIONS[1], status: 'pending', account: { status: 'pending' } },
+      { id: 3, roleId: 2, role: ROLE_FILTER_OPTIONS[2], status: 'archived', account: { status: 'archived' } },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<OptionFilterUser>);
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'status',
+        header: 'Status',
+        filterConfig: {
+          kind: 'multiSelect',
+          options: statuses,
+          optionLabel: 'label',
+          optionValue: 'id',
+          optionDisabled: 'disabled',
+          accessor: (row: OptionFilterUser) => row.account.status,
+        },
+      },
+    ] satisfies NeuTableColumn<OptionFilterUser, string>[]);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const multiselect = fixture.debugElement.query(By.directive(NeuMultiselectComponent))
+      .componentInstance as NeuMultiselectComponent<StatusFilterOption, string>;
+    const trigger = fixture.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement | null;
+    expect(trigger).toBeTruthy();
+    expect(multiselect.isOptionDisabled(statuses[2])).toBe(true);
+
+    trigger?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const optionByLabel = (label: string): HTMLElement | undefined =>
+      Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option')).find((option) =>
+        option.textContent?.includes(label),
+      );
+    const activeOption = optionByLabel('Active');
+    expect(activeOption).toBeTruthy();
+    activeOption!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toEqual(['active']);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+    expect(fixture.nativeElement.querySelector('.neu-multiselect__count-badge')?.textContent).toContain('1');
+
+    const archivedOption = optionByLabel('Archived');
+    expect(archivedOption).toBeTruthy();
+    archivedOption!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toEqual(['active']);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+
+    const clear = fixture.nativeElement.querySelector('.neu-multiselect__clear') as HTMLElement | null;
+    expect(clear).toBeTruthy();
+    clear!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toEqual([]);
+    expect(table.filteredData()).toHaveLength(3);
+  });
+
+  it('keeps custom predicates local-only while receiving the original row and computed accessor value', async () => {
+    const rows: OptionFilterUser[] = [
+      { id: 1, roleId: 0, role: ROLE_FILTER_OPTIONS[0], status: 'active', account: { status: 'active' } },
+      { id: 2, roleId: 1, role: ROLE_FILTER_OPTIONS[1], status: 'pending', account: { status: 'pending' } },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<OptionFilterUser>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'customStatus', header: 'Custom status', filterConfig: CUSTOM_STATUS_FILTER },
+    ]);
+    fixture.componentRef.setInput('data', rows);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const states: NeuTableServerState[] = [];
+    table.serverStateChange.subscribe((state) => states.push(state));
+
+    table.setColumnFilter('customStatus', 'active:0');
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+    table.setColumnFilter('customStatus', 'pending:1');
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    table.setColumnFilter('customStatus', 'active:0');
+    expect(states.at(-1)?.localOnlyFilters).toEqual(['customStatus']);
+    expect(states.at(-1)?.typedColumnFilters?.['customStatus']).toMatchObject({
+      kind: 'custom',
+      localOnly: true,
+      value: 'active:0',
+    });
+    table.clearColumnFilters();
+    expect(table.filteredData()).toHaveLength(2);
   });
 
   it('covers remaining table formatting and state normalization branches', async () => {
