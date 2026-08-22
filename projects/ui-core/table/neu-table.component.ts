@@ -7,6 +7,7 @@ import {
   Signal,
   TemplateRef,
   ViewEncapsulation,
+  WritableSignal,
   computed,
   contentChild,
   effect,
@@ -14,18 +15,22 @@ import {
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import type { Subscription } from 'rxjs';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
 import {
   buildNeuTableFilterState,
   isNeuTableFilterValueEmpty,
   matchesNeuTableFilter,
+  normalizeNeuTableAppliedFilterValue,
   normalizeNeuTableDatePoint,
+  resolveNeuTableFilterMatchMode,
 } from './neu-table-filter.engine';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NeuInputComponent } from '@neural-ui/core/input';
@@ -98,6 +103,33 @@ type NeuTablePageEntry<T extends object> =
 type NeuTableData<T> = [T] extends [Record<string, unknown>]
   ? readonly T[] | readonly object[]
   : readonly T[];
+
+type InternalAppliedFilterOperator = 'and' | 'or';
+
+interface InternalAppliedFilterConstraint {
+  mode?: NeuTableFilterMatchMode;
+  value: unknown;
+  projectionValue?: unknown;
+}
+
+interface InternalAppliedColumnFilter {
+  operator: InternalAppliedFilterOperator;
+  constraints: readonly InternalAppliedFilterConstraint[];
+}
+
+interface InternalFilterColumnSignature {
+  kind: NeuTableFilterKind | 'legacy' | 'none';
+  mode?: NeuTableFilterMatchMode;
+  datePrecision?: 'date-only' | 'instant';
+  optionValue?: unknown;
+  controlKind: string;
+}
+
+interface InternalResolvedAppliedColumnFilter<T> {
+  column: NeuTableColumn<T>;
+  operator: InternalAppliedFilterOperator;
+  constraints: readonly InternalAppliedFilterConstraint[];
+}
 
 export type NeuTableColumnInput<T extends object> =
   | NeuTableColumn<T>
@@ -1230,7 +1262,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return [{ key, dir: (dir === 'desc' ? 'desc' : 'asc') as 'asc' | 'desc' }];
     });
   });
-  readonly _columnFilters = signal<Record<string, unknown>>({});
+  private readonly _appliedFilters = signal<Record<string, InternalAppliedColumnFilter>>({});
+  readonly _columnFilters = this._createLegacyColumnFiltersFacade();
   readonly _pageSizeControl = new FormControl('', { nonNullable: true });
   private readonly _columnFilterControls = new Map<string, FormControl<string>>();
   private readonly _typedColumnFilterControls = new Map<string, FormControl<unknown>>();
@@ -1239,6 +1272,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _typedInstantRangeStartControls = new Map<string, FormControl<string>>();
   private readonly _typedInstantRangeEndControls = new Map<string, FormControl<string>>();
   private readonly _typedMultiSelectFilterControls = new Map<string, FormControl<unknown[]>>();
+  private readonly _filterControlSubscriptions = new Map<object, Subscription>();
+  private _filterColumnSignatures = new Map<string, InternalFilterColumnSignature>();
   /** True when a legacy or typed column filter is available. */
   readonly _hasFilterableCol = computed(() =>
     this.visibleColumns().some((column) => column.filterable || column.filterConfig),
@@ -1297,7 +1332,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _virtualScrollTop = signal(0);
 
   constructor() {
-    this._destroyRef.onDestroy(() => this._stopColumnResize());
+    this._destroyRef.onDestroy(() => {
+      this._stopColumnResize();
+      this._disposeAllFilterControls();
+    });
 
     this._pageSizeControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
@@ -1311,13 +1349,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     });
 
     effect(() => {
-      const filters = this._columnFilters();
+      this._handleFilterColumnLifecycle(this._typedColumns());
+    });
+
+    effect(() => {
+      let legacyFilters: Record<string, unknown> | null = null;
       for (const col of this._typedColumns()) {
         if (col.filterConfig) {
-          this._syncTypedFilterControl(col, filters[col.key]);
+          this._syncTypedFilterControl(col, this._appliedSingleFilterValue(col.key));
         } else if (col.filterable) {
+          legacyFilters ??= this._columnFilters();
           const control = this.columnFilterControl(col.key);
-          const nextValue = String(filters[col.key] ?? '');
+          const nextValue = String(legacyFilters[col.key] ?? '');
           if (control.value !== nextValue) {
             control.setValue(nextValue, { emitEvent: false });
           }
@@ -1354,7 +1397,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this.sortKey();
       this.sortDir();
       this._sortEntries();
-      this._columnFilters();
+      this._appliedFilters();
       this.effectivePageSize();
       this.paginatedData().length;
       this.resetVirtualScrollPosition();
@@ -1370,21 +1413,31 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   // Kept as a private signal alias for existing white-box tests/helpers.
   private readonly rows = computed<NeuTableRuntimeRow<T>[]>(() => this._rows());
 
+  private readonly _resolvedAppliedFilters = computed<
+    readonly InternalResolvedAppliedColumnFilter<T>[]
+  >(() => {
+    const columnsByKey = new Map<string, NeuTableColumn<T>>();
+    for (const column of this._typedColumns()) columnsByKey.set(column.key, column);
+
+    const resolved: InternalResolvedAppliedColumnFilter<T>[] = [];
+    for (const [key, filter] of Object.entries(this._appliedFilters())) {
+      const column = columnsByKey.get(key);
+      if (!column) continue;
+      const constraints = filter.constraints.filter(
+        (constraint) => !isNeuTableFilterValueEmpty(constraint.value),
+      );
+      if (constraints.length > 0) {
+        resolved.push({ column, operator: filter.operator, constraints });
+      }
+    }
+    return resolved;
+  });
+
   readonly filteredData = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (this.serverSide()) return this._rows();
     const rows = this._rows();
     const columns = this._typedColumns();
-    const colFilters = this._columnFilters();
-    const columnsByKey = new Map<string, NeuTableColumn<T>>();
-    for (const column of columns) {
-      columnsByKey.set(column.key, column);
-    }
-    const activeColumnFilters: Array<{ column: NeuTableColumn<T>; value: unknown }> = [];
-    for (const [colKey, value] of Object.entries(colFilters)) {
-      if (isNeuTableFilterValueEmpty(value)) continue;
-      const column = columnsByKey.get(colKey);
-      if (column) activeColumnFilters.push({ column, value });
-    }
+    const activeColumnFilters = this._resolvedAppliedFilters();
     const q = this.searchQuery().trim().toLowerCase();
     const exact = this._exactMatch();
     const matches = (text: string) =>
@@ -1402,8 +1455,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           return matches(displayVal) || matches(rawVal);
         });
       if (!passesGlobal) return false;
-      for (const { column, value } of activeColumnFilters) {
-        if (!matchesNeuTableFilter(row, column, value)) return false;
+      for (const filter of activeColumnFilters) {
+        if (!this._matchesAppliedColumnFilter(row, filter)) return false;
       }
       return true;
     });
@@ -1984,17 +2037,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     // paginatedData already clamps currentPage to totalPages automatically.
     // Los filtros de columna son locales — sin URL para evitar saltos de scroll.
     // paginatedData ya adapta currentPage a totalPages automáticamente.
-    this._columnFilters.update((f) => ({ ...f, [colKey]: value }));
-    if (this.serverSide()) {
-      this._emitServerState({
-        columnFilters: { ...this._columnFilters(), [colKey]: value },
-        page: 1,
+    this._writeAppliedFilter(colKey, {
+      operator: 'and',
+      constraints: [{ value }],
       });
+    if (this.serverSide()) {
+      this._emitServerState({ page: 1 });
     }
   }
 
   clearColumnFilters(): void {
-    this._columnFilters.set({});
+    this._appliedFilters.set({});
   }
 
   // ── Actions ───────────────────────────────────────────────────────────
@@ -2359,8 +2412,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   protected typedColumnFilterControl(col: NeuTableColumn<T>): FormControl<unknown> {
     let control = this._typedColumnFilterControls.get(col.key);
     if (!control) {
-      control = new FormControl<unknown>(this._typedFilterControlValue(col, this._columnFilters()[col.key]));
-      control.valueChanges
+      control = new FormControl<unknown>(
+        this._typedFilterControlValue(col, this._appliedSingleFilterValue(col.key)),
+      );
+      const subscription = control.valueChanges
         .pipe(takeUntilDestroyed(this._destroyRef))
         .subscribe((value) => {
           const currentColumn = this._currentTypedColumn(col.key);
@@ -2368,6 +2423,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
             this.setColumnFilter(col.key, this._typedFilterValueFromControl(currentColumn, value));
           }
         });
+      this._trackFilterControl(control, subscription);
       this._typedColumnFilterControls.set(col.key, control);
     }
     return control;
@@ -2392,10 +2448,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   protected typedMultiSelectFilterControl(col: NeuTableColumn<T>): FormControl<unknown[]> {
     let control = this._typedMultiSelectFilterControls.get(col.key);
     if (!control) {
-      control = new FormControl<unknown[]>(this._multiSelectFilterControlValue(this._columnFilters()[col.key]), {
-        nonNullable: true,
-      });
-      control.valueChanges
+      control = new FormControl<unknown[]>(
+        this._multiSelectFilterControlValue(this._appliedSingleFilterValue(col.key)),
+        {
+          nonNullable: true,
+        },
+      );
+      const subscription = control.valueChanges
         .pipe(takeUntilDestroyed(this._destroyRef))
         .subscribe((value) => {
           const currentColumn = this._currentTypedColumn(col.key);
@@ -2403,6 +2462,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
             this.setColumnFilter(col.key, value);
           }
         });
+      this._trackFilterControl(control, subscription);
       this._typedMultiSelectFilterControls.set(col.key, control);
     }
     return control;
@@ -2455,15 +2515,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const controls = boundary === 'from' ? this._typedRangeStartControls : this._typedRangeEndControls;
     let control = controls.get(col.key);
     if (!control) {
-      control = new FormControl<number | null>(this._numberRangeValue(this._columnFilters()[col.key])[boundary]);
-      control.valueChanges
+      control = new FormControl<number | null>(
+        this._numberRangeValue(this._appliedSingleFilterValue(col.key))[boundary],
+      );
+      const subscription = control.valueChanges
         .pipe(takeUntilDestroyed(this._destroyRef))
         .subscribe((value) => {
           const currentColumn = this._currentTypedColumn(col.key);
           if (currentColumn?.filterConfig?.kind !== 'number') return;
-          const range = this._numberRangeValue(this._columnFilters()[col.key]);
+          const range = this._numberRangeValue(this._appliedSingleFilterValue(col.key));
           this.setColumnFilter(col.key, { ...range, [boundary]: value });
         });
+      this._trackFilterControl(control, subscription);
       controls.set(col.key, control);
     }
     return control;
@@ -2477,17 +2540,21 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       boundary === 'from' ? this._typedInstantRangeStartControls : this._typedInstantRangeEndControls;
     let control = controls.get(col.key);
     if (!control) {
-      control = new FormControl<string>(this._instantRangeControlValue(this._columnFilters()[col.key], boundary), {
-        nonNullable: true,
-      });
-      control.valueChanges
+      control = new FormControl<string>(
+        this._instantRangeControlValue(this._appliedSingleFilterValue(col.key), boundary),
+        {
+          nonNullable: true,
+        },
+      );
+      const subscription = control.valueChanges
         .pipe(takeUntilDestroyed(this._destroyRef))
         .subscribe((value) => {
           const currentColumn = this._currentTypedColumn(col.key);
           if (!currentColumn || !this.isInstantRange(currentColumn)) return;
-          const range = this._dateRangeFilterValue(this._columnFilters()[col.key]);
+          const range = this._dateRangeFilterValue(this._appliedSingleFilterValue(col.key));
           this.setColumnFilter(col.key, { ...range, [boundary]: this._instantFilterValue(value) });
         });
+      this._trackFilterControl(control, subscription);
       controls.set(col.key, control);
     }
     return control;
@@ -2639,15 +2706,284 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return typeof value === 'object' && value !== null;
   }
 
+  private _writeAppliedFilter(key: string, input: InternalAppliedColumnFilter): void {
+    const column = this._currentTypedColumn(key);
+    const normalized = this._normalizeAppliedFilterInput(column, input);
+    this._appliedFilters.update((current) => {
+      if (normalized.constraints.length === 0) {
+        if (!(key in current)) return current;
+        const next = { ...current };
+        delete next[key];
+        return next;
+      }
+      return { ...current, [key]: normalized };
+    });
+  }
+
+  private _appliedSingleFilterValue(key: string): unknown {
+    const filter = this._appliedFilters()[key];
+    return filter?.constraints.length === 1 ? filter.constraints[0].value : undefined;
+  }
+
+  private _createLegacyColumnFiltersFacade(): WritableSignal<Record<string, unknown>> {
+    const projection = computed<Record<string, unknown>>(() =>
+      this._projectLegacyColumnFilters(this._appliedFilters()),
+    );
+    const readonlyProjection = computed(() => projection());
+    const facade = projection as WritableSignal<Record<string, unknown>>;
+    facade.set = (filters) => this._replaceAppliedFiltersFromLegacyProjection(filters);
+    facade.update = (update) =>
+      this._replaceAppliedFiltersFromLegacyProjection(update(projection()));
+    facade.asReadonly = () => readonlyProjection;
+    return facade;
+  }
+
+  private _replaceAppliedFiltersFromLegacyProjection(
+    filters: Record<string, unknown>,
+  ): void {
+    const applied: Record<string, InternalAppliedColumnFilter> = {};
+    for (const [key, value] of Object.entries(filters)) {
+      applied[key] = this._normalizeAppliedFilterInput(this._currentTypedColumn(key), {
+        operator: 'and',
+        constraints: [{ value }],
+      });
+    }
+    this._appliedFilters.set(applied);
+  }
+
+  private _matchesAppliedColumnFilter(
+    row: NeuTableRuntimeRow<T>,
+    filter: InternalResolvedAppliedColumnFilter<T>,
+  ): boolean {
+    if (filter.operator === 'or') {
+      for (const constraint of filter.constraints) {
+        if (matchesNeuTableFilter(row, filter.column, constraint.value, constraint.mode)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    for (const constraint of filter.constraints) {
+      if (!matchesNeuTableFilter(row, filter.column, constraint.value, constraint.mode)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private _normalizeAppliedFilterInput(
+    column: NeuTableColumn<T> | null,
+    input: InternalAppliedColumnFilter,
+  ): InternalAppliedColumnFilter {
+    return {
+      operator: input.operator,
+      constraints: input.constraints.map((constraint) => {
+        const mode = column
+          ? resolveNeuTableFilterMatchMode(column as NeuTableColumn<T, string>, constraint.mode)
+          : undefined;
+        const value = column
+          ? normalizeNeuTableAppliedFilterValue(
+              column as NeuTableColumn<T, string>,
+              constraint.value,
+              mode,
+            )
+          : constraint.value;
+        const normalizedConstraint: InternalAppliedFilterConstraint =
+          mode === undefined ? { value } : { mode, value };
+        if (!Object.is(value, constraint.value)) {
+          normalizedConstraint.projectionValue = constraint.value;
+        }
+        return normalizedConstraint;
+      }),
+    };
+  }
+
+  private _projectLegacyColumnFilters(
+    appliedFilters: Record<string, InternalAppliedColumnFilter>,
+  ): Record<string, unknown> {
+    const projection: Record<string, unknown> = {};
+    for (const [key, filter] of Object.entries(appliedFilters)) {
+      if (filter.constraints.length === 1) {
+        const constraint = filter.constraints[0];
+        projection[key] = this._appliedConstraintProjectionValue(constraint);
+      }
+    }
+    return projection;
+  }
+
+  private _handleFilterColumnLifecycle(columns: readonly NeuTableColumn<T>[]): void {
+    const nextSignatures = new Map<string, InternalFilterColumnSignature>();
+    const columnsByKey = new Map<string, NeuTableColumn<T>>();
+    for (const column of columns) {
+      nextSignatures.set(column.key, this._filterColumnSignature(column));
+      columnsByKey.set(column.key, column);
+    }
+
+    const invalidatedKeys = new Set<string>();
+    const controlsToDispose = new Set<string>();
+    const modeChanges = new Map<
+      string,
+      { previous: NeuTableFilterMatchMode | undefined; next: NeuTableFilterMatchMode | undefined }
+    >();
+
+    for (const [key, previous] of this._filterColumnSignatures) {
+      const next = nextSignatures.get(key);
+      if (!next) {
+        invalidatedKeys.add(key);
+        controlsToDispose.add(key);
+        continue;
+      }
+
+      const kindChanged = previous.kind !== next.kind;
+      const precisionChanged = previous.datePrecision !== next.datePrecision;
+      const optionValueChanged = this._optionValueSemanticsChanged(
+        previous.optionValue,
+        next.optionValue,
+      );
+      if (kindChanged || precisionChanged || optionValueChanged) {
+        invalidatedKeys.add(key);
+      }
+      if (kindChanged || optionValueChanged || previous.controlKind !== next.controlKind) {
+        controlsToDispose.add(key);
+      }
+      if (!kindChanged && !precisionChanged && previous.mode !== next.mode) {
+        modeChanges.set(key, { previous: previous.mode, next: next.mode });
+      }
+    }
+
+    this._filterColumnSignatures = nextSignatures;
+
+    if (invalidatedKeys.size > 0 || modeChanges.size > 0) {
+      untracked(() => {
+        this._appliedFilters.update((current) => {
+          let next = current;
+          const writable = () => {
+            if (next === current) next = { ...current };
+            return next;
+          };
+
+          for (const key of invalidatedKeys) {
+            if (key in next) delete writable()[key];
+          }
+
+          for (const [key, change] of modeChanges) {
+            if (invalidatedKeys.has(key)) continue;
+            const filter = next[key];
+            const column = columnsByKey.get(key);
+            if (
+              !filter ||
+              !column ||
+              filter.constraints.length !== 1 ||
+              filter.constraints[0].mode !== change.previous
+            ) {
+              continue;
+            }
+            writable()[key] = this._normalizeAppliedFilterInput(column, {
+              operator: filter.operator,
+              constraints: [
+                {
+                  mode: change.next,
+                  value: filter.constraints[0].value,
+                },
+              ],
+            });
+          }
+          return next;
+        });
+      });
+    }
+
+    for (const key of controlsToDispose) this._disposeFilterControlsForKey(key);
+  }
+
+  private _filterColumnSignature(column: NeuTableColumn<T>): InternalFilterColumnSignature {
+    const config = column.filterConfig;
+    if (!config) {
+      return {
+        kind: column.filterable ? 'legacy' : 'none',
+        controlKind: column.filterable ? `legacy:${column.filterType ?? 'text'}` : 'none',
+      };
+    }
+
+    const mode = resolveNeuTableFilterMatchMode(column as NeuTableColumn<T, string>);
+    const datePrecision = config.kind === 'date' ? (config.precision ?? 'date-only') : undefined;
+    const optionValue =
+      config.kind === 'select' || config.kind === 'multiSelect'
+        ? (config.optionValue ?? null)
+        : undefined;
+    const controlKind =
+      config.kind === 'number'
+        ? mode === 'between'
+          ? 'number:between'
+          : 'number:single'
+        : config.kind === 'date'
+          ? `date:${datePrecision}:${mode === 'between' ? 'between' : 'single'}`
+          : config.kind;
+    return { kind: config.kind, mode, datePrecision, optionValue, controlKind };
+  }
+
+  private _optionValueSemanticsChanged(previous: unknown, next: unknown): boolean {
+    if (typeof previous === 'function' && typeof next === 'function') return false;
+    return !Object.is(previous, next);
+  }
+
+  private _appliedConstraintProjectionValue(constraint: InternalAppliedFilterConstraint): unknown {
+    return Object.prototype.hasOwnProperty.call(constraint, 'projectionValue')
+      ? constraint.projectionValue
+      : constraint.value;
+  }
+
+  private _trackFilterControl(control: object, subscription: Subscription): void {
+    this._filterControlSubscriptions.set(control, subscription);
+  }
+
+  private _disposeFilterControlsForKey(key: string): void {
+    this._disposeControlFromMap(this._columnFilterControls, key);
+    this._disposeControlFromMap(this._typedColumnFilterControls, key);
+    this._disposeControlFromMap(this._typedRangeStartControls, key);
+    this._disposeControlFromMap(this._typedRangeEndControls, key);
+    this._disposeControlFromMap(this._typedInstantRangeStartControls, key);
+    this._disposeControlFromMap(this._typedInstantRangeEndControls, key);
+    this._disposeControlFromMap(this._typedMultiSelectFilterControls, key);
+  }
+
+  private _disposeControlFromMap<C extends object>(map: Map<string, C>, key: string): void {
+    const control = map.get(key);
+    if (!control) return;
+    this._filterControlSubscriptions.get(control)?.unsubscribe();
+    this._filterControlSubscriptions.delete(control);
+    map.delete(key);
+  }
+
+  private _disposeAllFilterControls(): void {
+    const keys = new Set<string>([
+      ...this._columnFilterControls.keys(),
+      ...this._typedColumnFilterControls.keys(),
+      ...this._typedRangeStartControls.keys(),
+      ...this._typedRangeEndControls.keys(),
+      ...this._typedInstantRangeStartControls.keys(),
+      ...this._typedInstantRangeEndControls.keys(),
+      ...this._typedMultiSelectFilterControls.keys(),
+    ]);
+    for (const key of keys) this._disposeFilterControlsForKey(key);
+    for (const subscription of this._filterControlSubscriptions.values()) {
+      subscription.unsubscribe();
+    }
+    this._filterControlSubscriptions.clear();
+    this._filterColumnSignatures.clear();
+  }
+
   columnFilterControl(key: string): FormControl<string> {
     let control = this._columnFilterControls.get(key);
     if (!control) {
       control = new FormControl(String(this.getColumnFilterValue(key)), {
         nonNullable: true,
       });
-      control.valueChanges
+      const subscription = control.valueChanges
         .pipe(takeUntilDestroyed(this._destroyRef))
         .subscribe((value) => this.setColumnFilter(key, value));
+      this._trackFilterControl(control, subscription);
       this._columnFilterControls.set(key, control);
     }
     return control;
@@ -2673,23 +3009,37 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
   private _typedColumnFiltersState(): Record<string, NeuTableFilterState> {
     const result: Record<string, NeuTableFilterState> = {};
-    for (const column of this._typedColumns()) {
-      const value = this._columnFilters()[column.key];
-      if (isNeuTableFilterValueEmpty(value)) continue;
-      const state = buildNeuTableFilterState(column as NeuTableColumn<T, string>, value);
-      if (state) result[column.key] = state;
+    const columnsByKey = new Map<string, NeuTableColumn<T>>(
+      this._typedColumns().map((column) => [column.key, column] as const),
+    );
+    for (const [key, filter] of Object.entries(this._appliedFilters())) {
+      if (filter.constraints.length !== 1) continue;
+      const constraint = filter.constraints[0];
+      if (isNeuTableFilterValueEmpty(constraint.value)) continue;
+      const column = columnsByKey.get(key);
+      if (!column) continue;
+      const state = buildNeuTableFilterState(
+        column as NeuTableColumn<T, string>,
+        constraint.value,
+        constraint.mode,
+      );
+      if (state) result[key] = state;
     }
     return result;
   }
 
   private _localOnlyFilters(): string[] {
-    return this._typedColumns()
-      .filter(
-        (column) =>
-          column.filterConfig?.kind === 'custom' &&
-          !isNeuTableFilterValueEmpty(this._columnFilters()[column.key]),
-      )
-      .map((column) => column.key);
+    const customKeys = new Set<string>(
+      this._typedColumns()
+        .filter((column) => column.filterConfig?.kind === 'custom')
+        .map((column) => column.key),
+    );
+    return Object.entries(this._appliedFilters()).flatMap(([key, filter]) =>
+      customKeys.has(key) &&
+      filter.constraints.some((constraint) => !isNeuTableFilterValueEmpty(constraint.value))
+        ? [key]
+        : [],
+    );
   }
 
   private _emitLayoutChange(): void {

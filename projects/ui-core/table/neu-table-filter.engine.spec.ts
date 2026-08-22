@@ -316,6 +316,45 @@ describe('NeuTable filter engine', () => {
     expect(matchesNeuTableFilter(row, modern, { from: 0, to: 100 })).toBe(false);
   });
 
+  it('evaluates and projects a constraint mode override without mutating column config', () => {
+    const textColumn: NeuTableColumn<FilterUser, string> = {
+      key: 'name',
+      header: 'Name',
+      filterConfig: { kind: 'text', mode: 'contains' },
+    };
+    const numberColumn: NeuTableColumn<FilterUser, string> = {
+      key: 'score',
+      header: 'Score',
+      filterConfig: { kind: 'number', mode: 'equals' },
+    };
+    const dateColumn: NeuTableColumn<FilterUser, string> = {
+      key: 'createdAt',
+      header: 'Created',
+      filterConfig: { kind: 'date', mode: 'is', precision: 'date-only' },
+    };
+    const row = {
+      name: 'Pedro Neural',
+      score: 50,
+      createdAt: '2026-08-20',
+    } as FilterUser;
+
+    expect(matchesNeuTableFilter(row, textColumn, 'test', 'notContains')).toBe(true);
+    expect(matchesNeuTableFilter(row, numberColumn, 10, 'gte')).toBe(true);
+    expect(matchesNeuTableFilter(row, dateColumn, '2026-08-01', 'after')).toBe(true);
+    expect(buildNeuTableFilterState(numberColumn, 10, 'gte')).toEqual({
+      kind: 'number',
+      mode: 'gte',
+      value: 10,
+    });
+    expect(textColumn.filterConfig).toEqual({ kind: 'text', mode: 'contains' });
+    expect(numberColumn.filterConfig).toEqual({ kind: 'number', mode: 'equals' });
+    expect(dateColumn.filterConfig).toEqual({
+      kind: 'date',
+      mode: 'is',
+      precision: 'date-only',
+    });
+  });
+
   describe('select and multiSelect', () => {
     it('matches primitive Select values including zero without string coercion', () => {
       const column: NeuTableColumn<FilterUser, string> = {

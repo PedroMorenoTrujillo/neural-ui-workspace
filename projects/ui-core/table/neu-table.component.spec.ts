@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { Component, PLATFORM_ID } from '@angular/core';
+import { Component, PLATFORM_ID, type WritableSignal } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { provideRouter } from '@angular/router';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
@@ -12,6 +13,7 @@ import {
   NeuTableActionEvent,
   NeuTableColumn,
   NeuTableCustomFilterConfig,
+  NeuTableFilterMatchMode,
   NeuTableMultiSelectFilterConfig,
   NeuTableSelectFilterConfig,
   NeuTableServerState,
@@ -73,6 +75,38 @@ interface OptionFilterUser {
   role: RoleFilterOption;
   status: string;
   account: { status: string };
+}
+
+interface TestAppliedFilterConstraint {
+  mode?: NeuTableFilterMatchMode;
+  value: unknown;
+}
+
+interface TestAppliedColumnFilter {
+  operator: 'and' | 'or';
+  constraints: readonly TestAppliedFilterConstraint[];
+}
+
+interface InternalTableFilterHarness {
+  _appliedFilters: WritableSignal<Record<string, TestAppliedColumnFilter>>;
+  _writeAppliedFilter(key: string, filter: TestAppliedColumnFilter): void;
+  _typedColumnFiltersState(): Record<string, unknown>;
+  _localOnlyFilters(): string[];
+  _emitServerState(patch: Record<string, never>): void;
+  _columnFilterControls: Map<string, FormControl<string>>;
+  _typedColumnFilterControls: Map<string, FormControl<unknown>>;
+  _typedRangeStartControls: Map<string, FormControl<number | null>>;
+  _typedRangeEndControls: Map<string, FormControl<number | null>>;
+  _typedInstantRangeStartControls: Map<string, FormControl<string>>;
+  _typedInstantRangeEndControls: Map<string, FormControl<string>>;
+  _typedMultiSelectFilterControls: Map<string, FormControl<unknown[]>>;
+  _filterControlSubscriptions: Map<object, unknown>;
+}
+
+function internalFilters<T extends object>(
+  table: NeuTableComponent<T>,
+): InternalTableFilterHarness {
+  return table as unknown as InternalTableFilterHarness;
 }
 
 const ROLE_FILTER_OPTIONS: readonly RoleFilterOption[] = [
@@ -2975,7 +3009,8 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
     // Setting an empty column filter should not reduce results
-    comp._columnFilters.set({ name: '', city: null });
+    comp.setColumnFilter('name', '');
+    comp.setColumnFilter('city', null);
     f.detectChanges();
     await f.whenStable();
     expect(comp.filteredData().length).toBe(DATA.length);
@@ -4509,7 +4544,7 @@ describe('NeuTableComponent advanced layout features', () => {
     const comp = f.componentInstance as any;
     const control = comp.columnFilterControl('name');
     control.setValue('old');
-    comp._columnFilters.set({ name: 'Ana' });
+    comp.setColumnFilter('name', 'Ana');
     f.detectChanges();
     await f.whenStable();
 
@@ -4951,5 +4986,681 @@ describe('NeuTableComponent advanced layout features', () => {
     comp.onSearch({ target: { value: '' } } as unknown as Event);
     comp.onPageSizeChange({ target: {} });
     expect(comp.currentPage()).toBe(1);
+  });
+});
+
+describe('NeuTableComponent canonical applied filter state', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
+  });
+
+  it('keeps one mutable applied store while preserving exact legacy and typed single projections', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'name', header: 'Name', filterable: true },
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number' } },
+    ] satisfies NeuTableColumn<FilterUser>[]);
+    fixture.componentRef.setInput('data', [
+      { id: 1, name: 'Ana', score: 10, createdAt: '2026-08-20', active: true },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+
+    table.setColumnFilter('name', 'Ana');
+    table.setColumnFilter('score', 'invalid');
+
+    expect(table.getColumnFilterValue('name')).toBe('Ana');
+    expect(table.getColumnFilterValue('score')).toBe('invalid');
+    expect(table._columnFilters()).toEqual({ name: 'Ana', score: 'invalid' });
+    expect(internal._appliedFilters()['name']).toEqual({
+      operator: 'and',
+      constraints: [{ value: 'Ana' }],
+    });
+    expect(internal._appliedFilters()['score']).toEqual({
+      operator: 'and',
+      constraints: [{ mode: 'equals', value: 'invalid' }],
+    });
+    expect(internal._appliedFilters()['score'].constraints[0]).not.toHaveProperty('validity');
+    expect(internal._typedColumnFiltersState()).toEqual({});
+    expect(table.filteredData()).toEqual([]);
+    expect(typeof table._columnFilters).toBe('function');
+    expect(typeof table._columnFilters.set).toBe('function');
+    expect(typeof table._columnFilters.update).toBe('function');
+
+    const legacySignal: WritableSignal<Record<string, unknown>> = table._columnFilters;
+    legacySignal.set({ name: 'Bea' });
+    expect(internal._appliedFilters()).toEqual({
+      name: { operator: 'and', constraints: [{ value: 'Bea' }] },
+    });
+    legacySignal.update((filters) => ({ ...filters, score: 10 }));
+    expect(table._columnFilters()).toEqual({ name: 'Bea', score: 10 });
+    expect(internal._appliedFilters()['score']).toEqual({
+      operator: 'and',
+      constraints: [{ mode: 'equals', value: 10 }],
+    });
+  });
+
+  it('canonicalizes applied date values while preserving the simple compatibility projection', async () => {
+    const boundaryInstant = '2026-08-20T23:30:00Z';
+    const instantDate = new Date('2026-08-20T10:30:00Z');
+    const rangeInput = { from: boundaryInstant, to: boundaryInstant };
+    const fixture = TestBed.createComponent(NeuTableComponent<TemporalFilterUser>);
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'dateOnly',
+        header: 'Date only',
+        filterConfig: { kind: 'date', precision: 'date-only' },
+      },
+      {
+        key: 'createdAt',
+        header: 'Instant',
+        filterConfig: { kind: 'date', precision: 'instant' },
+      },
+      {
+        key: 'dateOnlyRange',
+        header: 'Date range',
+        filterConfig: { kind: 'date', mode: 'between', precision: 'date-only' },
+      },
+    ] satisfies NeuTableColumn<TemporalFilterUser, string>[]);
+    fixture.componentRef.setInput('data', []);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+
+    table.setColumnFilter('dateOnly', boundaryInstant);
+    table.setColumnFilter('createdAt', instantDate);
+    table.setColumnFilter('dateOnlyRange', rangeInput);
+
+    expect(internal._appliedFilters()['dateOnly'].constraints[0]).toEqual({
+      mode: 'is',
+      value: '2026-08-20',
+      projectionValue: boundaryInstant,
+    });
+    expect(internal._appliedFilters()['createdAt'].constraints[0]).toEqual({
+      mode: 'is',
+      value: instantDate.toISOString(),
+      projectionValue: instantDate,
+    });
+    expect(internal._appliedFilters()['dateOnlyRange'].constraints[0]).toEqual({
+      mode: 'between',
+      value: { from: '2026-08-20', to: '2026-08-20' },
+      projectionValue: rangeInput,
+    });
+    expect(table.getColumnFilterValue('dateOnly')).toBe(boundaryInstant);
+    expect(table.getColumnFilterValue('createdAt')).toBe(instantDate);
+    expect(table.getColumnFilterValue('dateOnlyRange')).toBe(rangeInput);
+
+    table.setColumnFilter('dateOnly', 'not-a-date');
+    expect(internal._appliedFilters()['dateOnly'].constraints[0]).toEqual({
+      mode: 'is',
+      value: 'not-a-date',
+    });
+    expect(internal._typedColumnFiltersState()['dateOnly']).toBeUndefined();
+  });
+
+  it('keeps typed Date and instant-range controls on canonical snapshots after consumer mutation', async () => {
+    const original = new Date('2026-08-20T10:30:00Z');
+    const range = {
+      from: '2026-08-01T00:00:00Z',
+      to: '2026-08-20T23:59:59Z',
+    };
+    const fixture = TestBed.createComponent(NeuTableComponent<TemporalFilterUser>);
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'createdAt',
+        header: 'Instant',
+        filterConfig: { kind: 'date', precision: 'instant' },
+      },
+      {
+        key: 'dateOnlyRange',
+        header: 'Instant range',
+        filterConfig: { kind: 'date', mode: 'between', precision: 'instant' },
+      },
+    ] satisfies NeuTableColumn<TemporalFilterUser, string>[]);
+    fixture.componentRef.setInput('data', [
+      {
+        id: 1,
+        dateOnly: '2026-08-20',
+        createdAt: '2026-08-20T10:30:00Z',
+        dateOnlyRange: '2026-08-10T12:00:00Z',
+      },
+      {
+        id: 2,
+        dateOnly: '2035-08-20',
+        createdAt: '2035-08-20T10:30:00Z',
+        dateOnlyRange: '2026-08-25T12:00:00Z',
+      },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+
+    table.setColumnFilter('createdAt', original);
+    table.setColumnFilter('dateOnlyRange', range);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const appliedBeforeMutation = internal._appliedFilters();
+    const matchingBeforeMutation = table.filteredData().map((row) => row.id);
+    const dateControl = internal._typedColumnFilterControls.get('createdAt');
+    const rangeStartControl = internal._typedInstantRangeStartControls.get('dateOnlyRange');
+    const rangeEndControl = internal._typedInstantRangeEndControls.get('dateOnlyRange');
+    const dateControlValue = dateControl?.value;
+    const rangeStartValue = rangeStartControl?.value;
+    const rangeEndValue = rangeEndControl?.value;
+    const update = vi.spyOn(internal._appliedFilters, 'update');
+
+    original.setUTCFullYear(2035);
+    range.from = '2035-08-24T00:00:00Z';
+
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'createdAt',
+        header: 'Updated instant',
+        filterConfig: { kind: 'date', precision: 'instant' },
+      },
+      {
+        key: 'dateOnlyRange',
+        header: 'Updated instant range',
+        filterConfig: { kind: 'date', mode: 'between', precision: 'instant' },
+      },
+    ] satisfies NeuTableColumn<TemporalFilterUser, string>[]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(update).not.toHaveBeenCalled();
+    expect(internal._appliedFilters()).toBe(appliedBeforeMutation);
+    expect(internal._appliedFilters()['createdAt'].constraints[0].value).toBe(
+      '2026-08-20T10:30:00.000Z',
+    );
+    expect(internal._appliedFilters()['dateOnlyRange'].constraints[0].value).toEqual({
+      from: '2026-08-01T00:00:00.000Z',
+      to: '2026-08-20T23:59:59.000Z',
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual(matchingBeforeMutation);
+    expect(dateControl?.value).toBe(dateControlValue);
+    expect(rangeStartControl?.value).toBe(rangeStartValue);
+    expect(rangeEndControl?.value).toBe(rangeEndValue);
+    expect(table.getColumnFilterValue('createdAt')).toBe(original);
+    expect(table.getColumnFilterValue('dateOnlyRange')).toBe(range);
+  });
+
+  it('shallow-snapshots MultiSelect arrays while preserving option object identity', async () => {
+    interface MultiSelectSnapshotRow {
+      id: number;
+      status: { id: string };
+    }
+    const active = { id: 'active' };
+    const pending = { id: 'pending' };
+    const selected = [active];
+    const fixture = TestBed.createComponent(NeuTableComponent<MultiSelectSnapshotRow>);
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'status',
+        header: 'Status',
+        filterConfig: { kind: 'multiSelect', options: [active, pending] },
+      },
+    ] satisfies NeuTableColumn<MultiSelectSnapshotRow>[]);
+    fixture.componentRef.setInput('data', [
+      { id: 1, status: active },
+      { id: 2, status: pending },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+
+    table.setColumnFilter('status', selected);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const canonical = internal._appliedFilters()['status'].constraints[0].value as unknown[];
+    const control = internal._typedMultiSelectFilterControls.get('status');
+    const update = vi.spyOn(internal._appliedFilters, 'update');
+    selected[0] = pending;
+
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'status',
+        header: 'Updated status',
+        filterConfig: { kind: 'multiSelect', options: [pending, active] },
+      },
+    ] satisfies NeuTableColumn<MultiSelectSnapshotRow>[]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(update).not.toHaveBeenCalled();
+    expect(canonical).toEqual([active]);
+    expect(canonical[0]).toBe(active);
+    expect(canonical).not.toBe(selected);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+    expect(internal._typedMultiSelectFilterControls.get('status')).toBe(control);
+    expect(control?.value).toEqual([active]);
+    expect(table.getColumnFilterValue('status')).toBe(selected);
+  });
+
+  it('matches internal AND/OR constraints and omits untruthful simple projections', async () => {
+    interface AdvancedRow {
+      id: number;
+      name: string;
+      score: number;
+      createdAt: string;
+      role: string;
+    }
+    const fixture = TestBed.createComponent(NeuTableComponent<AdvancedRow>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'name', header: 'Name', filterConfig: { kind: 'text' } },
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number' } },
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: { kind: 'date', precision: 'date-only' },
+      },
+      { key: 'role', header: 'Role', filterConfig: { kind: 'text', mode: 'equals' } },
+    ] satisfies NeuTableColumn<AdvancedRow>[]);
+    fixture.componentRef.setInput('data', [
+      { id: 1, name: 'Pedro', score: 10, createdAt: '2026-08-01', role: 'admin' },
+      { id: 2, name: 'Pedro test', score: 50, createdAt: '2026-08-20', role: 'editor' },
+      { id: 3, name: 'Pedro Neural', score: 100, createdAt: '2026-08-31', role: 'viewer' },
+      { id: 4, name: 'Ana', score: 101, createdAt: '2026-09-01', role: 'guest' },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+
+    internal._writeAppliedFilter('name', {
+      operator: 'and',
+      constraints: [
+        { mode: 'contains', value: 'pedro' },
+        { mode: 'notContains', value: 'test' },
+      ],
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 3]);
+    expect(table.getColumnFilterValue('name')).toBe('');
+    expect(table._columnFilters()).toEqual({});
+    expect(internal._typedColumnFiltersState()).toEqual({});
+
+    table.clearColumnFilters();
+    internal._writeAppliedFilter('score', {
+      operator: 'and',
+      constraints: [
+        { mode: 'gte', value: 10 },
+        { mode: 'lte', value: 100 },
+      ],
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2, 3]);
+
+    table.clearColumnFilters();
+    internal._writeAppliedFilter('createdAt', {
+      operator: 'and',
+      constraints: [
+        { mode: 'after', value: '2026-08-01' },
+        { mode: 'before', value: '2026-09-01' },
+      ],
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([2, 3]);
+
+    table.clearColumnFilters();
+    internal._writeAppliedFilter('role', {
+      operator: 'or',
+      constraints: [
+        { mode: 'equals', value: 'admin' },
+        { mode: 'equals', value: 'editor' },
+      ],
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+
+    table.setColumnFilter('role', 'viewer');
+    expect(internal._appliedFilters()['role']).toEqual({
+      operator: 'and',
+      constraints: [{ mode: 'equals', value: 'viewer' }],
+    });
+    expect(table.getColumnFilterValue('role')).toBe('viewer');
+    expect(table.filteredData().map((row) => row.id)).toEqual([3]);
+  });
+
+  it('composes boolean, Select and MultiSelect constraints while keeping empty rules inactive', async () => {
+    interface ConstraintRow {
+      id: number;
+      active: boolean;
+      role: number;
+      status: string;
+      score: number;
+    }
+    const fixture = TestBed.createComponent(NeuTableComponent<ConstraintRow>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'active', header: 'Active', filterConfig: { kind: 'boolean' } },
+      { key: 'role', header: 'Role', filterConfig: { kind: 'select' } },
+      { key: 'status', header: 'Status', filterConfig: { kind: 'multiSelect' } },
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number' } },
+    ] satisfies NeuTableColumn<ConstraintRow>[]);
+    fixture.componentRef.setInput('data', [
+      { id: 1, active: true, role: 0, status: 'active', score: 10 },
+      { id: 2, active: false, role: 1, status: 'pending', score: 20 },
+      { id: 3, active: true, role: 2, status: 'archived', score: 30 },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+
+    internal._writeAppliedFilter('active', {
+      operator: 'or',
+      constraints: [{ value: true }, { value: false }],
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2, 3]);
+
+    table.clearColumnFilters();
+    internal._writeAppliedFilter('role', {
+      operator: 'or',
+      constraints: [
+        { mode: 'equals', value: 0 },
+        { mode: 'equals', value: 1 },
+      ],
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+
+    table.clearColumnFilters();
+    internal._writeAppliedFilter('status', {
+      operator: 'and',
+      constraints: [
+        { mode: 'in', value: ['active', 'pending'] },
+        { mode: 'in', value: ['pending'] },
+      ],
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+
+    table.clearColumnFilters();
+    internal._writeAppliedFilter('score', {
+      operator: 'and',
+      constraints: [{ value: null }, { value: 'invalid' }],
+    });
+    expect(table.filteredData()).toEqual([]);
+
+    internal._writeAppliedFilter('score', {
+      operator: 'and',
+      constraints: [{ value: null }],
+    });
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2, 3]);
+  });
+
+  it('projects multiple custom constraints once as local-only without serializing a partial rule', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<OptionFilterUser>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'customStatus', header: 'Custom status', filterConfig: CUSTOM_STATUS_FILTER },
+    ]);
+    fixture.componentRef.setInput('data', [
+      {
+        id: 1,
+        roleId: 0,
+        role: ROLE_FILTER_OPTIONS[0],
+        status: 'active',
+        account: { status: 'active' },
+      },
+      {
+        id: 2,
+        roleId: 1,
+        role: ROLE_FILTER_OPTIONS[1],
+        status: 'pending',
+        account: { status: 'pending' },
+      },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    const states: NeuTableServerState[] = [];
+    table.serverStateChange.subscribe((state) => states.push(state));
+
+    internal._writeAppliedFilter('customStatus', {
+      operator: 'or',
+      constraints: [{ value: 'active:0' }, { value: 'pending:1' }],
+    });
+
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+    expect(internal._localOnlyFilters()).toEqual(['customStatus']);
+    expect(table._columnFilters()).toEqual({});
+    expect(internal._typedColumnFiltersState()).toEqual({});
+    internal._emitServerState({});
+    expect(states).toHaveLength(1);
+    expect(states[0].columnFilters).toEqual({});
+    expect(states[0].typedColumnFilters).toEqual({});
+    expect(states[0].localOnlyFilters).toEqual(['customStatus']);
+
+    internal._writeAppliedFilter('customStatus', {
+      operator: 'and',
+      constraints: [{ value: 'active:0' }, { value: 'pending:1' }],
+    });
+    expect(table.filteredData()).toEqual([]);
+  });
+
+  it('keeps applied writes and FormControl synchronization loop-free', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'name', header: 'Name', filterConfig: { kind: 'text' } },
+    ] satisfies NeuTableColumn<FilterUser>[]);
+    fixture.componentRef.setInput('data', []);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    const control = internal._typedColumnFilterControls.get('name');
+    expect(control).toBeTruthy();
+    const update = vi.spyOn(internal._appliedFilters, 'update');
+
+    table.setColumnFilter('name', 'one');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(control!.value).toBe('one');
+
+    update.mockClear();
+    internal._writeAppliedFilter('name', {
+      operator: 'and',
+      constraints: [{ mode: 'endsWith', value: 'two' }],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(control!.value).toBe('two');
+
+    update.mockClear();
+    control!.setValue('three');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(table.getColumnFilterValue('name')).toBe('three');
+
+    update.mockClear();
+    const set = vi.spyOn(internal._appliedFilters, 'set');
+    table.clearColumnFilters();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(update).not.toHaveBeenCalled();
+    expect(control!.value).toBe('');
+  });
+
+  it('emits one server event per simple filter write across repeated set and clear cycles', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'name', header: 'Name', filterConfig: { kind: 'text' } },
+    ] satisfies NeuTableColumn<FilterUser>[]);
+    fixture.componentRef.setInput('data', []);
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const events: NeuTableServerState[] = [];
+    fixture.componentInstance.serverStateChange.subscribe((state) => events.push(state));
+
+    fixture.componentInstance.setColumnFilter('name', 'one');
+    expect(events).toHaveLength(1);
+    expect(events[0].columnFilters).toEqual({ name: 'one' });
+    fixture.componentInstance.clearColumnFilters();
+    fixture.componentInstance.setColumnFilter('name', 'two');
+    fixture.componentInstance.clearColumnFilters();
+    expect(events).toHaveLength(2);
+    expect(events[1].columnFilters).toEqual({ name: 'two' });
+  });
+
+  it('preserves compatible accessor/options changes and invalidates detectable optionValue changes', async () => {
+    interface DynamicRow {
+      id: number;
+      primary: number;
+      secondary: number;
+      roleId: number;
+    }
+    const fixture = TestBed.createComponent(NeuTableComponent<DynamicRow>);
+    const numberColumn: NeuTableColumn<DynamicRow, string> = {
+      key: 'score',
+      header: 'Score',
+      filterConfig: { kind: 'number', accessor: (row) => row.primary },
+    };
+    fixture.componentRef.setInput('columns', [numberColumn]);
+    fixture.componentRef.setInput('data', [
+      { id: 1, primary: 10, secondary: 20, roleId: 1 },
+      { id: 2, primary: 20, secondary: 10, roleId: 2 },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+
+    table.setColumnFilter('score', 10);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+    fixture.componentRef.setInput('columns', [
+      {
+        ...numberColumn,
+        filterConfig: { kind: 'number', accessor: (row: DynamicRow) => row.secondary },
+      },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('score')).toBe(10);
+    expect(table.filteredData().map((row) => row.id)).toEqual([2]);
+
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'role',
+        header: 'Role',
+        filterConfig: {
+          kind: 'select',
+          options: [
+            { id: 1, code: 10 },
+            { id: 2, code: 20 },
+          ],
+          optionValue: 'id',
+          accessor: (row: DynamicRow) => row.roleId,
+        },
+      },
+    ] satisfies NeuTableColumn<DynamicRow, string>[]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    table.setColumnFilter('role', 1);
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'role',
+        header: 'Role',
+        filterConfig: {
+          kind: 'select',
+          options: [
+            { id: 1, code: 10 },
+            { id: 2, code: 20 },
+          ],
+          optionValue: 'code',
+          accessor: (row: DynamicRow) => row.roleId,
+        },
+      },
+    ] satisfies NeuTableColumn<DynamicRow, string>[]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('role')).toBe('');
+  });
+
+  it('cleans canonical state, cached controls and subscriptions across dynamic column changes', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<Record<string, unknown>>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'value', header: 'Value', filterConfig: { kind: 'text' } },
+    ]);
+    fixture.componentRef.setInput('data', [{ id: 1, value: '10' }]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    const textControl = internal._typedColumnFilterControls.get('value');
+    expect(textControl).toBeTruthy();
+    table.setColumnFilter('value', '10');
+
+    fixture.componentRef.setInput('columns', [
+      { key: 'value', header: 'Value', filterConfig: { kind: 'number' } },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('value')).toBe('');
+    const numberControl = internal._typedColumnFilterControls.get('value');
+    expect(numberControl).toBeTruthy();
+    expect(numberControl).not.toBe(textControl);
+    textControl!.setValue('orphaned');
+    expect(table.getColumnFilterValue('value')).toBe('');
+
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'value',
+        header: 'Value',
+        filterConfig: { kind: 'date', precision: 'date-only' },
+      },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    table.setColumnFilter('value', '2026-08-20');
+    const dateOnlyControl = internal._typedColumnFilterControls.get('value');
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'value',
+        header: 'Value',
+        filterConfig: { kind: 'date', precision: 'instant' },
+      },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('value')).toBe('');
+    expect(internal._typedColumnFilterControls.get('value')).not.toBe(dateOnlyControl);
+    dateOnlyControl!.setValue('2026-08-20');
+    expect(table.getColumnFilterValue('value')).toBe('');
+
+    table.setColumnFilter('value', '2026-08-20T10:30:00.000Z');
+    const instantControl = internal._typedColumnFilterControls.get('value');
+    fixture.componentRef.setInput('columns', []);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('value')).toBe('');
+    expect(internal._typedColumnFilterControls.has('value')).toBe(false);
+    expect(internal._appliedFilters()).toEqual({});
+    instantControl!.setValue('2026-08-21T10:30');
+    expect(internal._appliedFilters()).toEqual({});
+  });
+
+  it('stops cached filter controls from writing after Table destruction', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'name', header: 'Name', filterable: true },
+    ] satisfies NeuTableColumn<FilterUser>[]);
+    fixture.componentRef.setInput('data', []);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    const control = internal._columnFilterControls.get('name');
+    expect(control).toBeTruthy();
+    const update = vi.spyOn(internal._appliedFilters, 'update');
+
+    fixture.destroy();
+    update.mockClear();
+    control!.setValue('after destroy');
+
+    expect(update).not.toHaveBeenCalled();
+    expect(internal._filterControlSubscriptions.size).toBe(0);
   });
 });

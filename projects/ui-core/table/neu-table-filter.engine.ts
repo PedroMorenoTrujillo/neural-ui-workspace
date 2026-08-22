@@ -5,6 +5,7 @@ import type {
   NeuTableDatePrecision,
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
+  NeuTableFilterMatchMode,
   NeuTableFilterState,
   NeuTableNumberFilterMode,
   NeuTableNumberRangeValue,
@@ -38,6 +39,57 @@ export function isNeuTableFilterValueEmpty(value: unknown): boolean {
 
 function normalizedText(value: unknown): string {
   return String(value ?? '').toLowerCase();
+}
+
+function resolveTextFilterMode(
+  override: NeuTableFilterMatchMode | undefined,
+  configured: NeuTableTextFilterMode | undefined,
+): NeuTableTextFilterMode {
+  switch (override) {
+    case 'contains':
+    case 'startsWith':
+    case 'endsWith':
+    case 'equals':
+    case 'notEquals':
+    case 'notContains':
+      return override;
+    default:
+      return configured ?? 'contains';
+  }
+}
+
+function resolveNumberFilterMode(
+  override: NeuTableFilterMatchMode | undefined,
+  configured: NeuTableNumberFilterMode | undefined,
+): NeuTableNumberFilterMode {
+  switch (override) {
+    case 'equals':
+    case 'notEquals':
+    case 'lt':
+    case 'lte':
+    case 'gt':
+    case 'gte':
+    case 'between':
+      return override;
+    default:
+      return configured ?? 'equals';
+  }
+}
+
+function resolveDateFilterMode(
+  override: NeuTableFilterMatchMode | undefined,
+  configured: NeuTableDateFilterMode | undefined,
+): NeuTableDateFilterMode {
+  switch (override) {
+    case 'is':
+    case 'isNot':
+    case 'before':
+    case 'after':
+    case 'between':
+      return override;
+    default:
+      return configured ?? 'is';
+  }
 }
 
 export function matchNeuTableText(
@@ -189,6 +241,14 @@ export function normalizeNeuTableDatePoint(
       : dateOnlyFromDate(parsed);
 }
 
+function normalizeDatePointForPrecision(
+  value: unknown,
+  precision: NeuTableDatePrecision,
+): NeuTableDatePoint | null {
+  const source = isRecord(value) && typeof value['value'] === 'string' ? value['value'] : value;
+  return normalizeNeuTableDatePoint(source, precision);
+}
+
 function dateRangeValue(
   value: unknown,
   precision: NeuTableDatePrecision,
@@ -199,9 +259,11 @@ function dateRangeValue(
   const normalizedFrom =
     from === null || from === undefined || from === ''
       ? null
-      : normalizeNeuTableDatePoint(from, precision);
+      : normalizeDatePointForPrecision(from, precision);
   const normalizedTo =
-    to === null || to === undefined || to === '' ? null : normalizeNeuTableDatePoint(to, precision);
+    to === null || to === undefined || to === ''
+      ? null
+      : normalizeDatePointForPrecision(to, precision);
   if (from !== null && from !== undefined && from !== '' && normalizedFrom === null) return null;
   if (to !== null && to !== undefined && to !== '' && normalizedTo === null) return null;
   return { from: normalizedFrom, to: normalizedTo };
@@ -300,6 +362,7 @@ export function matchesNeuTableFilter<T>(
   row: T,
   column: FilterableColumn<T>,
   filterValue: unknown,
+  modeOverride?: NeuTableFilterMatchMode,
 ): boolean {
   const config = column.filterConfig;
   if (isNeuTableFilterValueEmpty(filterValue)) return true;
@@ -309,12 +372,16 @@ export function matchesNeuTableFilter<T>(
 
   switch (config.kind) {
     case 'number':
-      return matchNeuTableNumber(value, filterValue, config.mode ?? 'equals');
+      return matchNeuTableNumber(
+        value,
+        filterValue,
+        resolveNumberFilterMode(modeOverride, config.mode),
+      );
     case 'date':
       return matchNeuTableDate(
         value,
         filterValue,
-        config.mode ?? 'is',
+        resolveDateFilterMode(modeOverride, config.mode),
         config.precision ?? 'date-only',
       );
     case 'boolean':
@@ -322,7 +389,11 @@ export function matchesNeuTableFilter<T>(
     case 'custom':
       return config.predicate(value, filterValue, row);
     case 'text':
-      return matchNeuTableText(value, filterValue, config.mode ?? 'contains');
+      return matchNeuTableText(
+        value,
+        filterValue,
+        resolveTextFilterMode(modeOverride, config.mode),
+      );
     case 'select':
       return neuOptionValuesEqual(value, filterValue);
     case 'multiSelect':
@@ -334,9 +405,67 @@ export function matchesNeuTableFilter<T>(
   return false;
 }
 
+export function normalizeNeuTableAppliedFilterValue<T>(
+  column: FilterableColumn<T>,
+  filterValue: unknown,
+  modeOverride?: NeuTableFilterMatchMode,
+): unknown {
+  if (isNeuTableFilterValueEmpty(filterValue)) return filterValue;
+  const config = column.filterConfig;
+  if (!config) return filterValue;
+
+  switch (config.kind) {
+    case 'text':
+      return String(filterValue);
+    case 'number': {
+      const mode = resolveNumberFilterMode(modeOverride, config.mode);
+      const value = mode === 'between' ? numberFilterRange(filterValue) : numericValue(filterValue);
+      return value ?? snapshotNeuTableRangeValue(filterValue);
+    }
+    case 'date': {
+      const mode = resolveDateFilterMode(modeOverride, config.mode);
+      const precision = config.precision ?? 'date-only';
+      if (mode === 'between') {
+        const range = dateRangeValue(filterValue, precision);
+        return range
+          ? { from: range.from?.value ?? null, to: range.to?.value ?? null }
+          : snapshotNeuTableRangeValue(filterValue);
+      }
+      return (
+        normalizeDatePointForPrecision(filterValue, precision)?.value ??
+        snapshotNeuTableDateValue(filterValue)
+      );
+    }
+    case 'multiSelect':
+      return Array.isArray(filterValue) ? [...filterValue] : filterValue;
+    default:
+      return filterValue;
+  }
+}
+
+function snapshotNeuTableDateValue(value: unknown): unknown {
+  if (value instanceof Date) return new Date(value.getTime());
+  if (!isRecord(value)) return value;
+  return { ...value };
+}
+
+function snapshotNeuTableRangeValue(value: unknown): unknown {
+  if (!isRecord(value)) return value;
+  return {
+    ...value,
+    ...(Object.prototype.hasOwnProperty.call(value, 'from')
+      ? { from: snapshotNeuTableDateValue(value['from']) }
+      : {}),
+    ...(Object.prototype.hasOwnProperty.call(value, 'to')
+      ? { to: snapshotNeuTableDateValue(value['to']) }
+      : {}),
+  };
+}
+
 export function buildNeuTableFilterState<T>(
   column: FilterableColumn<T>,
   filterValue: unknown,
+  modeOverride?: NeuTableFilterMatchMode,
 ): NeuTableFilterState | null {
   if (isNeuTableFilterValueEmpty(filterValue)) return null;
   const config = column.filterConfig;
@@ -347,14 +476,14 @@ export function buildNeuTableFilterState<T>(
   }
 
   if (config.kind === 'number') {
-    const mode = config.mode ?? 'equals';
+    const mode = resolveNumberFilterMode(modeOverride, config.mode);
     const value = mode === 'between' ? numberFilterRange(filterValue) : numericValue(filterValue);
     return value === null || value === undefined
       ? null
       : { kind: 'number', mode, value };
   }
   if (config.kind === 'date') {
-    const mode = config.mode ?? 'is';
+    const mode = resolveDateFilterMode(modeOverride, config.mode);
     const precision = config.precision ?? 'date-only';
     const value =
       mode === 'between'
@@ -379,8 +508,28 @@ export function buildNeuTableFilterState<T>(
       value: filterValue,
     };
   }
-  const mode = config.mode ?? 'contains';
+  const mode = resolveTextFilterMode(modeOverride, config.mode);
   return { kind: 'text', mode, value: String(filterValue) };
+}
+
+export function resolveNeuTableFilterMatchMode<T>(
+  column: FilterableColumn<T>,
+  modeOverride?: NeuTableFilterMatchMode,
+): NeuTableFilterMatchMode | undefined {
+  const config = column.filterConfig;
+  if (!config || config.kind === 'boolean' || config.kind === 'custom') return undefined;
+  switch (config.kind) {
+    case 'number':
+      return resolveNumberFilterMode(modeOverride, config.mode);
+    case 'date':
+      return resolveDateFilterMode(modeOverride, config.mode);
+    case 'select':
+      return 'equals';
+    case 'multiSelect':
+      return 'in';
+    case 'text':
+      return resolveTextFilterMode(modeOverride, config.mode);
+  }
 }
 
 export function resolveNeuTableFilterAccessor<T>(row: T, column: FilterableColumn<T>): unknown {
