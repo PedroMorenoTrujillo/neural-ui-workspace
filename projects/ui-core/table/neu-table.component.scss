@@ -27,6 +27,114 @@
   }
 }
 
+// ---- Advanced filter overlay foundation (E2) ----
+.neu-table__filter-overlay-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 26px;
+  block-size: 26px;
+  margin-inline-start: var(--neu-space-1);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--neu-radius-sm);
+  background: transparent;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  vertical-align: middle;
+
+  svg {
+    inline-size: 14px;
+    block-size: 14px;
+  }
+
+  &:hover,
+  &--open {
+    border-color: var(--neu-border);
+    background: var(--neu-surface-3);
+    color: var(--neu-text);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--neu-focus-ring);
+  }
+}
+
+.neu-table__filter-overlay {
+  display: flex;
+  flex-direction: column;
+  inline-size: min(320px, calc(100vw - 16px));
+  max-block-size: min(420px, calc(100dvh - 16px));
+  overflow: auto;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-md);
+  background: var(--neu-surface);
+  color: var(--neu-text);
+  box-shadow: var(--neu-shadow-lg);
+  text-align: start;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+}
+
+.neu-table__filter-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neu-space-3);
+  padding: var(--neu-space-3) var(--neu-space-4);
+  border-bottom: 1px solid var(--neu-border);
+}
+
+.neu-table__filter-overlay-title {
+  margin: 0;
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+}
+
+.neu-table__filter-overlay-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  inline-size: 28px;
+  block-size: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--neu-radius-sm);
+  background: transparent;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+
+  svg {
+    inline-size: 15px;
+    block-size: 15px;
+  }
+
+  &:hover {
+    background: var(--neu-surface-3);
+    color: var(--neu-text);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--neu-focus-ring);
+  }
+}
+
+.neu-table__filter-overlay-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neu-space-3);
+  padding: var(--neu-space-4);
+}
+
+.neu-table__filter-overlay-control {
+  display: block;
+  inline-size: 100%;
+}
+
 // ---- Toolbar ----
 .neu-table__toolbar {
   display: flex;

@@ -18,9 +18,11 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import type { Subscription } from 'rxjs';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
@@ -131,6 +133,12 @@ interface InternalResolvedAppliedColumnFilter<T> {
   constraints: readonly InternalAppliedFilterConstraint[];
 }
 
+let _neuTableFilterOverlayIdSeq = 0;
+
+const _NEU_TABLE_FILTER_SESSION_OPENED = 'neu-table-filter-session-opened';
+const _NEU_TABLE_FILTER_CHILD_TRIGGER =
+  '.neu-select__trigger, .neu-multiselect__trigger, .neu-date-input__trigger, .neu-drp__trigger';
+
 export type NeuTableColumnInput<T extends object> =
   | NeuTableColumn<T>
   | NeuTableColumn<T, string>
@@ -165,6 +173,8 @@ export type NeuTableColumnInput<T extends object> =
   imports: [
     NgTemplateOutlet,
     ReactiveFormsModule,
+    OverlayModule,
+    ScrollingModule,
     NeuInputComponent,
     NeuNumberInputComponent,
     NeuSelectComponent,
@@ -182,6 +192,57 @@ export type NeuTableColumnInput<T extends object> =
     '[class.neu-table__host--relaxed]': 'density() === "relaxed"',
   },
   template: `
+    <!--
+      E2 boundary: this content is independent from the desktop connected-overlay host so a
+      future mobile dialog can render the same surface without moving filter state into the host.
+    -->
+    <ng-template #filterOverlayContent let-column>
+      <div class="neu-table__filter-overlay-content">
+        @switch (_filterOverlayControlKind(column)) {
+          @case ('select') {
+            <neu-select
+              class="neu-table__filter-overlay-control"
+              [floatingLabel]="false"
+              [label]="_filterOverlayControlLabel(column)"
+              [placeholder]="allFilterOptionLabel()"
+              [options]="_filterOverlayOptions(column)"
+              [optionLabel]="typedFilterOptionLabel(column)"
+              [optionValue]="typedFilterOptionValue(column)"
+              [optionDisabled]="typedFilterOptionDisabled(column)"
+              [searchable]="typedFilterSearchable(column)"
+              [clearable]="true"
+              [formControl]="_filterOverlaySelectControl"
+              (selectionChange)="_onFilterOverlaySingleValueCommitted()"
+            />
+          }
+          @case ('multiSelect') {
+            <neu-multiselect
+              class="neu-table__filter-overlay-control"
+              [floatingLabel]="false"
+              [label]="_filterOverlayControlLabel(column)"
+              [placeholder]="allFilterOptionLabel()"
+              [options]="_filterOverlayOptions(column)"
+              [optionLabel]="typedFilterOptionLabel(column)"
+              [optionValue]="typedFilterOptionValue(column)"
+              [optionDisabled]="typedFilterOptionDisabled(column)"
+              [searchable]="typedFilterSearchable(column)"
+              [clearable]="true"
+              [formControl]="_filterOverlayMultiSelectControl"
+            />
+          }
+          @case ('date') {
+            <neu-date-input
+              class="neu-table__filter-overlay-control"
+              type="date"
+              [floatingLabel]="false"
+              [label]="_filterOverlayControlLabel(column)"
+              [formControl]="_filterOverlayDateControl"
+            />
+          }
+        }
+      </div>
+    </ng-template>
+
     <div
       class="neu-table-container"
       [class.neu-table--sticky-header]="stickyHeader()"
@@ -422,6 +483,7 @@ export type NeuTableColumnInput<T extends object> =
       <!-- ---- Scroll container ---- -->
       <div
         #scrollContainer
+        cdkScrollable
         class="neu-table__scroll-container"
         [class.neu-table__scroll-container--virtual]="_virtualScrollActive()"
         role="region"
@@ -504,6 +566,89 @@ export type NeuTableColumnInput<T extends object> =
                     />
                   } @else {
                     {{ col.header }}
+                  }
+                  @if (_isFilterOverlayEligible(col)) {
+                    <button
+                      cdkOverlayOrigin
+                      #filterOverlayOrigin="cdkOverlayOrigin"
+                      type="button"
+                      class="neu-table__filter-overlay-trigger"
+                      [class.neu-table__filter-overlay-trigger--open]="_openFilterKey() === col.key"
+                      [id]="_filterOverlayTriggerId(col.key)"
+                      aria-haspopup="dialog"
+                      [attr.aria-expanded]="_openFilterKey() === col.key ? 'true' : 'false'"
+                      [attr.aria-controls]="_filterOverlayPanelId(col.key)"
+                      [attr.aria-label]="_filterOverlayTriggerLabel(col)"
+                      (click)="_toggleFilterOverlay(col.key, $event)"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M4 5h16" />
+                        <path d="M7 12h10" />
+                        <path d="M10 19h4" />
+                      </svg>
+                    </button>
+                    <ng-template
+                      cdkConnectedOverlay
+                      [cdkConnectedOverlayOrigin]="filterOverlayOrigin"
+                      [cdkConnectedOverlayOpen]="_openFilterKey() === col.key"
+                      [cdkConnectedOverlayPositions]="_filterOverlayPositions"
+                      [cdkConnectedOverlayHasBackdrop]="false"
+                      [cdkConnectedOverlayPush]="true"
+                      [cdkConnectedOverlayFlexibleDimensions]="true"
+                      [cdkConnectedOverlayViewportMargin]="8"
+                      (attach)="_onFilterOverlayAttached(col.key)"
+                      (detach)="_onFilterOverlayDetached(col.key)"
+                      (overlayOutsideClick)="_onFilterOverlayOutsideClick(col.key, $event)"
+                    >
+                      <section
+                        class="neu-table__filter-overlay"
+                        role="dialog"
+                        tabindex="-1"
+                        aria-modal="false"
+                        [id]="_filterOverlayPanelId(col.key)"
+                        [attr.aria-labelledby]="_filterOverlayTitleId(col.key)"
+                      >
+                        <header class="neu-table__filter-overlay-header">
+                          <h2
+                            class="neu-table__filter-overlay-title"
+                            [id]="_filterOverlayTitleId(col.key)"
+                          >
+                            {{ _filterOverlayTitle(col) }}
+                          </h2>
+                          <button
+                            type="button"
+                            class="neu-table__filter-overlay-close"
+                            data-neu-table-filter-initial-focus
+                            [attr.aria-label]="_filterOverlayCloseLabel(col)"
+                            (click)="_closeFilterOverlay()"
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              aria-hidden="true"
+                            >
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </header>
+                        <ng-container
+                          [ngTemplateOutlet]="filterOverlayContent"
+                          [ngTemplateOutletContext]="{ $implicit: col }"
+                        />
+                      </section>
+                    </ng-template>
                   }
                   @if (sortable() && col.sortable !== false) {
                     <span class="neu-table__sort-icon" aria-hidden="true">
@@ -1059,8 +1204,33 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _document = inject(DOCUMENT);
   private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private readonly _virtualOverscan = 3;
+  private readonly _filterOverlayUid = _neuTableFilterOverlayIdSeq++;
+  private _activeFilterTrigger: HTMLElement | null = null;
+  private _lastFilterWorkflowFocus: HTMLElement | null = null;
+  private _escapeReturnFocus: HTMLElement | null = null;
+  private _filterOverlayFocusCleanup: (() => void) | null = null;
+  private readonly _filterOverlayOwnedChildPanes = new Map<HTMLElement, HTMLElement>();
+  private readonly _filterOverlayOwnedChildBackdrops = new Map<HTMLElement, HTMLElement>();
+  private _pendingFilterOverlayChildTrigger: HTMLElement | null = null;
+  private _destroyed = false;
+
+  /** @internal E2 test seam. The production surface remains dormant until E3. */
+  private readonly _filterOverlayFoundationEnabled = signal(false);
+  protected readonly _openFilterKey = signal<string | null>(null);
+  protected readonly _filterOverlaySelectControl = new FormControl<unknown>(null);
+  protected readonly _filterOverlayMultiSelectControl = new FormControl<unknown[]>([], {
+    nonNullable: true,
+  });
+  protected readonly _filterOverlayDateControl = new FormControl<unknown>(null);
+  protected readonly _filterOverlayPositions: ConnectedPosition[] = [
+    { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
 
   // ── Inputs de datos ─────────────────────────────────────────────────
   readonly columns = input<readonly NeuTableColumnInput<T>[]>([]);
@@ -1333,9 +1503,20 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   constructor() {
     this._destroyRef.onDestroy(() => {
+      this._destroyed = true;
+      this._stopFilterOverlayFocusContainment();
+      this._clearFilterOverlayOwnership();
+      this._openFilterKey.set(null);
+      this._activeFilterTrigger = null;
+      this._lastFilterWorkflowFocus = null;
+      this._escapeReturnFocus = null;
       this._stopColumnResize();
       this._disposeAllFilterControls();
     });
+
+    this._filterOverlayDateControl.valueChanges
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(() => this._focusOverlayChildTrigger('date'));
 
     this._pageSizeControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
@@ -1350,6 +1531,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
     effect(() => {
       this._handleFilterColumnLifecycle(this._typedColumns());
+    });
+
+    effect(() => {
+      const visibleKeys = new Set<string>(
+        this.visibleColumns().map((column): string => column.key),
+      );
+      const activeKey = this._openFilterKey();
+      if (activeKey && !visibleKeys.has(activeKey)) {
+        untracked(() => this._closeFilterOverlay(false));
+      }
     });
 
     effect(() => {
@@ -1405,6 +1596,412 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   private readonly _confirmPending = signal<{ rowKey: unknown; actionKey: string } | null>(null);
+
+  // ── Advanced filter overlay foundation (internal, E2) ─────────────────
+  protected _isFilterOverlayEligible(column: NeuTableColumn<T>): boolean {
+    return this._filterOverlayFoundationEnabled() && (!!column.filterConfig || !!column.filterable);
+  }
+
+  protected _filterOverlayControlKind(column: NeuTableColumn<T>): string {
+    const kind = column.filterConfig?.kind;
+    if (kind === 'select' || kind === 'multiSelect' || kind === 'date') return kind;
+    if (!column.filterConfig && column.filterType === 'select') return 'select';
+    if (!column.filterConfig && column.filterType === 'date') return 'date';
+    return 'none';
+  }
+
+  protected _filterOverlayOptions(column: NeuTableColumn<T>): readonly unknown[] {
+    const config = column.filterConfig;
+    if (config?.kind === 'select' || config?.kind === 'multiSelect') {
+      return config.options ?? [];
+    }
+    return column.filterType === 'select' ? this._filterOpts(column) : [];
+  }
+
+  protected _filterOverlayTriggerId(key: string): string {
+    return `neu-table-filter-trigger-${this._filterOverlayUid}-${encodeURIComponent(key)}`;
+  }
+
+  protected _filterOverlayPanelId(key: string): string {
+    return `neu-table-filter-panel-${this._filterOverlayUid}-${encodeURIComponent(key)}`;
+  }
+
+  protected _filterOverlayTitleId(key: string): string {
+    return `${this._filterOverlayPanelId(key)}-title`;
+  }
+
+  protected _filterOverlayTriggerLabel(column: NeuTableColumn<T>): string {
+    return `Open filters for ${column.header}`;
+  }
+
+  protected _filterOverlayTitle(column: NeuTableColumn<T>): string {
+    return `Filter ${column.header}`;
+  }
+
+  protected _filterOverlayCloseLabel(column: NeuTableColumn<T>): string {
+    return `Close filters for ${column.header}`;
+  }
+
+  protected _filterOverlayControlLabel(column: NeuTableColumn<T>): string {
+    return `Filter value for ${column.header}`;
+  }
+
+  protected _toggleFilterOverlay(key: string, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this._openFilterKey() === key) {
+      this._closeFilterOverlay();
+      return;
+    }
+
+    this._activeFilterTrigger = event.currentTarget as HTMLElement;
+    this._lastFilterWorkflowFocus = null;
+    this._escapeReturnFocus = null;
+    this._filterOverlaySelectControl.setValue(null, { emitEvent: false });
+    this._filterOverlayMultiSelectControl.setValue([], { emitEvent: false });
+    this._filterOverlayDateControl.setValue(null, { emitEvent: false });
+    this._openFilterKey.set(key);
+  }
+
+  protected _closeFilterOverlay(restoreFocus = true): void {
+    const trigger = restoreFocus ? this._activeFilterTrigger : null;
+    this._openFilterKey.set(null);
+    this._stopFilterOverlayFocusContainment();
+    this._clearFilterOverlayOwnership();
+    this._lastFilterWorkflowFocus = null;
+    this._escapeReturnFocus = null;
+    this._activeFilterTrigger = null;
+    if (trigger) this._focusElementIfAvailable(trigger);
+  }
+
+  protected _onFilterOverlayAttached(key: string): void {
+    if (this._openFilterKey() !== key || !isPlatformBrowser(this._platformId)) return;
+    this._startFilterOverlayFocusContainment();
+    this._document.dispatchEvent(
+      new CustomEvent(_NEU_TABLE_FILTER_SESSION_OPENED, { detail: this._filterOverlayUid }),
+    );
+    const initialFocus = this._filterOverlayPanel(key)?.querySelector<HTMLElement>(
+      '[data-neu-table-filter-initial-focus]',
+    );
+    initialFocus?.focus();
+    this._lastFilterWorkflowFocus = initialFocus ?? null;
+  }
+
+  protected _onFilterOverlayDetached(key: string): void {
+    if (this._openFilterKey() !== key) return;
+    this._closeFilterOverlay();
+  }
+
+  protected _onFilterOverlayOutsideClick(key: string, event: MouseEvent): void {
+    if (this._openFilterKey() !== key) return;
+    const target = event.target;
+    const panel = this._filterOverlayPanel(key);
+    if (!(target instanceof Element) || !panel) {
+      this._closeFilterOverlay();
+      return;
+    }
+
+    const ownedBackdropTrigger = this._ownedFilterOverlayBackdropTrigger(target);
+    if (ownedBackdropTrigger && this._eventPointInside(panel, event)) {
+      this._focusElementIfAvailable(ownedBackdropTrigger);
+      return;
+    }
+
+    if (this._isInFilterOverlaySession(target)) {
+      return;
+    }
+
+    this._closeFilterOverlay();
+  }
+
+  protected _onFilterOverlaySingleValueCommitted(): void {
+    this._focusOverlayChildTrigger('select');
+  }
+
+  private _startFilterOverlayFocusContainment(): void {
+    if (this._filterOverlayFocusCleanup || !isPlatformBrowser(this._platformId)) return;
+
+    const overlayContainer = this._filterOverlayPanel()?.closest('.cdk-overlay-container');
+    const pendingBackdrops = new Set<HTMLElement>();
+    const observer = overlayContainer
+      ? new MutationObserver((records) => {
+          const trigger = this._pendingFilterOverlayChildTrigger;
+          if (!trigger || !trigger.isConnected || trigger.getAttribute('aria-expanded') !== 'true') {
+            return;
+          }
+
+          const addedElements = records.flatMap((record) =>
+            Array.from(record.addedNodes).filter(
+              (node): node is HTMLElement => node instanceof HTMLElement,
+            ),
+          );
+          for (const element of addedElements) {
+            if (element.classList.contains('cdk-overlay-backdrop')) pendingBackdrops.add(element);
+            element
+              .querySelectorAll<HTMLElement>('.cdk-overlay-backdrop')
+              .forEach((backdrop) => pendingBackdrops.add(backdrop));
+          }
+
+          const addedPanes = addedElements.flatMap((element) => [
+            ...(element.classList.contains('cdk-overlay-pane') ? [element] : []),
+            ...Array.from(element.querySelectorAll<HTMLElement>('.cdk-overlay-pane')),
+          ]);
+          const ownedPane = addedPanes.find((pane) =>
+            this._filterOverlayPaneMatchesTrigger(pane, trigger),
+          );
+          if (!ownedPane) return;
+
+          this._filterOverlayOwnedChildPanes.set(ownedPane, trigger);
+          pendingBackdrops.forEach((backdrop) =>
+            this._filterOverlayOwnedChildBackdrops.set(backdrop, trigger),
+          );
+          pendingBackdrops.clear();
+          this._pendingFilterOverlayChildTrigger = null;
+        })
+      : null;
+    observer?.observe(overlayContainer!, { childList: true, subtree: true });
+
+    const onClick = (event: MouseEvent) => {
+      this._captureFilterOverlayChildActivation(event.target);
+    };
+
+    const onKeydown = (event: KeyboardEvent) => {
+      if (!this._openFilterKey()) return;
+      if (event.key === 'Enter' || event.key === ' ') {
+        this._captureFilterOverlayChildActivation(event.target);
+      }
+      if (event.key === 'Escape') {
+        this._escapeReturnFocus = this._escapeFocusTarget(event.target);
+        return;
+      }
+      if (event.key !== 'Tab' || event.defaultPrevented) return;
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !this._isInFilterOverlaySession(target)) return;
+      const focusable = this._filterOverlaySessionFocusableElements();
+      if (!focusable.length) return;
+      const currentIndex = focusable.indexOf(target);
+      const baseIndex = currentIndex < 0 ? 0 : currentIndex;
+      const nextIndex = event.shiftKey
+        ? (baseIndex - 1 + focusable.length) % focusable.length
+        : (baseIndex + 1) % focusable.length;
+      event.preventDefault();
+      focusable[nextIndex]?.focus();
+    };
+    const onKeyup = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || !this._openFilterKey()) return;
+      const returnTarget = this._escapeReturnFocus;
+      this._escapeReturnFocus = null;
+      if (returnTarget) {
+        this._focusElementIfAvailable(returnTarget);
+      } else if (!this._isInFilterOverlaySession(this._document.activeElement)) {
+        this._focusInitialFilterOverlayElement();
+      }
+    };
+    const onFocusin = (event: FocusEvent) => {
+      if (!this._openFilterKey()) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && this._isInFilterOverlaySession(target)) {
+        this._lastFilterWorkflowFocus = target;
+        return;
+      }
+      this._restoreFilterWorkflowFocus();
+    };
+    const onOtherTableSessionOpened = (event: Event) => {
+      if (
+        event instanceof CustomEvent &&
+        event.detail !== this._filterOverlayUid &&
+        this._openFilterKey()
+      ) {
+        this._closeFilterOverlay(false);
+      }
+    };
+
+    this._document.addEventListener('click', onClick, true);
+    this._document.addEventListener('keydown', onKeydown, true);
+    this._document.addEventListener('keyup', onKeyup, true);
+    this._document.addEventListener('focusin', onFocusin, true);
+    this._document.addEventListener(_NEU_TABLE_FILTER_SESSION_OPENED, onOtherTableSessionOpened);
+    this._filterOverlayFocusCleanup = () => {
+      observer?.disconnect();
+      this._document.removeEventListener('click', onClick, true);
+      this._document.removeEventListener('keydown', onKeydown, true);
+      this._document.removeEventListener('keyup', onKeyup, true);
+      this._document.removeEventListener('focusin', onFocusin, true);
+      this._document.removeEventListener(
+        _NEU_TABLE_FILTER_SESSION_OPENED,
+        onOtherTableSessionOpened,
+      );
+      this._filterOverlayFocusCleanup = null;
+    };
+  }
+
+  private _stopFilterOverlayFocusContainment(): void {
+    this._filterOverlayFocusCleanup?.();
+  }
+
+  private _filterOverlayPanel(key = this._openFilterKey()): HTMLElement | null {
+    if (!key || !isPlatformBrowser(this._platformId)) return null;
+    return this._document.getElementById(this._filterOverlayPanelId(key));
+  }
+
+  private _filterOverlaySessionPanes(): HTMLElement[] {
+    const panel = this._filterOverlayPanel();
+    const parentPane = panel?.closest<HTMLElement>('.cdk-overlay-pane');
+    if (!panel || !parentPane) return [];
+    this._refreshFilterOverlayOwnership(panel);
+    return [parentPane, ...this._filterOverlayOwnedChildPanes.keys()];
+  }
+
+  private _captureFilterOverlayChildActivation(target: EventTarget | null): void {
+    const panel = this._filterOverlayPanel();
+    const trigger =
+      target instanceof Element ? target.closest<HTMLElement>(_NEU_TABLE_FILTER_CHILD_TRIGGER) : null;
+    this._pendingFilterOverlayChildTrigger = trigger && panel?.contains(trigger) ? trigger : null;
+  }
+
+  private _refreshFilterOverlayOwnership(panel: HTMLElement): void {
+    for (const [pane, trigger] of this._filterOverlayOwnedChildPanes) {
+      if (!pane.isConnected || !trigger.isConnected || trigger.getAttribute('aria-expanded') !== 'true') {
+        this._filterOverlayOwnedChildPanes.delete(pane);
+      }
+    }
+    for (const [backdrop, trigger] of this._filterOverlayOwnedChildBackdrops) {
+      if (!backdrop.isConnected || !trigger.isConnected || trigger.getAttribute('aria-expanded') !== 'true') {
+        this._filterOverlayOwnedChildBackdrops.delete(backdrop);
+      }
+    }
+
+    panel
+      .querySelectorAll<HTMLElement>('[aria-expanded="true"][aria-controls]')
+      .forEach((trigger) => {
+        const controlledId = trigger.getAttribute('aria-controls');
+        const controlledPanel = controlledId ? this._document.getElementById(controlledId) : null;
+        const pane = controlledPanel?.closest<HTMLElement>('.cdk-overlay-pane');
+        if (pane) this._filterOverlayOwnedChildPanes.set(pane, trigger);
+      });
+  }
+
+  private _filterOverlayPaneMatchesTrigger(pane: HTMLElement, trigger: HTMLElement): boolean {
+    const controlledId = trigger.getAttribute('aria-controls');
+    if (controlledId) {
+      return this._document.getElementById(controlledId)?.closest('.cdk-overlay-pane') === pane;
+    }
+    return (
+      trigger.matches('.neu-date-input__trigger, .neu-drp__trigger') &&
+      !!pane.querySelector('.neu-date-input__panel, .neu-drp__panel')
+    );
+  }
+
+  private _ownedFilterOverlayBackdropTrigger(target: Element): HTMLElement | null {
+    for (const [backdrop, trigger] of this._filterOverlayOwnedChildBackdrops) {
+      if (!backdrop.isConnected || trigger.getAttribute('aria-expanded') !== 'true') {
+        this._filterOverlayOwnedChildBackdrops.delete(backdrop);
+      } else if (backdrop === target) {
+        return trigger;
+      }
+    }
+    return null;
+  }
+
+  private _clearFilterOverlayOwnership(): void {
+    this._filterOverlayOwnedChildPanes.clear();
+    this._filterOverlayOwnedChildBackdrops.clear();
+    this._pendingFilterOverlayChildTrigger = null;
+  }
+
+  private _isInFilterOverlaySession(target: EventTarget | null): boolean {
+    return (
+      target instanceof Node &&
+      this._filterOverlaySessionPanes().some((pane) => pane.contains(target))
+    );
+  }
+
+  private _filterOverlaySessionFocusableElements(): HTMLElement[] {
+    const selector =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [role="option"]:not([aria-disabled="true"]), [tabindex]:not([tabindex="-1"])';
+    const seen = new Set<HTMLElement>();
+    return this._filterOverlaySessionPanes().flatMap((pane) =>
+      Array.from(pane.querySelectorAll<HTMLElement>(selector)).filter((element) => {
+        if (
+          seen.has(element) ||
+          !element.isConnected ||
+          element.getAttribute('aria-hidden') === 'true'
+        ) {
+          return false;
+        }
+        seen.add(element);
+        return true;
+      }),
+    );
+  }
+
+  private _escapeFocusTarget(target: EventTarget | null): HTMLElement | null {
+    if (!(target instanceof Element)) return null;
+    const panel = this._filterOverlayPanel();
+    const parentPane = panel?.closest('.cdk-overlay-pane');
+    const targetPane = target.closest('.cdk-overlay-pane');
+    if (!panel || !targetPane || targetPane === parentPane) return null;
+
+    this._refreshFilterOverlayOwnership(panel);
+    return this._filterOverlayOwnedChildPanes.get(targetPane as HTMLElement) ?? null;
+  }
+
+  private _expandedOverlayChildTrigger(panel: HTMLElement): HTMLElement | null {
+    return panel.querySelector<HTMLElement>(
+      '.neu-select__trigger[aria-expanded="true"], .neu-multiselect__trigger[aria-expanded="true"], .neu-date-input__trigger[aria-expanded="true"], .neu-drp__trigger[aria-expanded="true"]',
+    );
+  }
+
+  private _focusExpandedOverlayChildTrigger(panel: HTMLElement): void {
+    this._focusElementIfAvailable(this._expandedOverlayChildTrigger(panel));
+  }
+
+  private _focusOverlayChildTrigger(kind: 'select' | 'date'): void {
+    const panel = this._filterOverlayPanel();
+    if (!panel) return;
+    const selector =
+      kind === 'select'
+        ? 'neu-select .neu-select__trigger'
+        : 'neu-date-input .neu-date-input__trigger, neu-date-input .neu-drp__trigger';
+    this._focusElementIfAvailable(panel.querySelector<HTMLElement>(selector));
+  }
+
+  private _focusInitialFilterOverlayElement(): void {
+    const initial = this._filterOverlayPanel()?.querySelector<HTMLElement>(
+      '[data-neu-table-filter-initial-focus]',
+    );
+    this._focusElementIfAvailable(initial ?? null);
+  }
+
+  private _restoreFilterWorkflowFocus(): void {
+    if (this._lastFilterWorkflowFocus?.isConnected) {
+      this._lastFilterWorkflowFocus.focus();
+    } else {
+      this._focusInitialFilterOverlayElement();
+    }
+  }
+
+  private _focusElementIfAvailable(element: HTMLElement | null): void {
+    if (
+      !element ||
+      this._destroyed ||
+      !isPlatformBrowser(this._platformId) ||
+      !element.isConnected
+    ) {
+      return;
+    }
+    element.focus();
+  }
+
+  private _eventPointInside(element: HTMLElement, event: MouseEvent): boolean {
+    const rect = element.getBoundingClientRect();
+    return (
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
+    );
+  }
 
   // ── Pipeline de datos ─────────────────────────────────────────────────
   private readonly _rows = computed<NeuTableRuntimeRow<T>[]>(

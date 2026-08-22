@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, PLATFORM_ID, type WritableSignal } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { provideRouter } from '@angular/router';
@@ -87,7 +87,7 @@ interface TestAppliedColumnFilter {
   constraints: readonly TestAppliedFilterConstraint[];
 }
 
-interface InternalTableFilterHarness {
+interface InternalTableFilterHarness<T extends object = Record<string, unknown>> {
   _appliedFilters: WritableSignal<Record<string, TestAppliedColumnFilter>>;
   _writeAppliedFilter(key: string, filter: TestAppliedColumnFilter): void;
   _typedColumnFiltersState(): Record<string, unknown>;
@@ -101,12 +101,26 @@ interface InternalTableFilterHarness {
   _typedInstantRangeEndControls: Map<string, FormControl<string>>;
   _typedMultiSelectFilterControls: Map<string, FormControl<unknown[]>>;
   _filterControlSubscriptions: Map<object, unknown>;
+  _filterOverlayFoundationEnabled: WritableSignal<boolean>;
+  _openFilterKey: WritableSignal<string | null>;
+  _filterOverlayFocusCleanup: (() => void) | null;
+  _filterOverlaySelectControl: FormControl<unknown>;
+  _filterOverlayMultiSelectControl: FormControl<unknown[]>;
+  _filterOverlayDateControl: FormControl<unknown>;
+  _filterOverlayPositions: readonly { originX: string; originY: string }[];
+  _filterOverlayControlKind(column: NeuTableColumn<T>): string;
+  _filterOverlayOptions(column: NeuTableColumn<T>): readonly unknown[];
+  _closeFilterOverlay(restoreFocus?: boolean): void;
+  _onFilterOverlayAttached(key: string): void;
+  _onFilterOverlayDetached(key: string): void;
+  _onFilterOverlayOutsideClick(key: string, event: MouseEvent): void;
+  _filterOverlaySessionPanes(): HTMLElement[];
 }
 
 function internalFilters<T extends object>(
   table: NeuTableComponent<T>,
-): InternalTableFilterHarness {
-  return table as unknown as InternalTableFilterHarness;
+): InternalTableFilterHarness<T> {
+  return table as unknown as InternalTableFilterHarness<T>;
 }
 
 const ROLE_FILTER_OPTIONS: readonly RoleFilterOption[] = [
@@ -5662,5 +5676,692 @@ describe('NeuTableComponent canonical applied filter state', () => {
 
     expect(update).not.toHaveBeenCalled();
     expect(internal._filterControlSubscriptions.size).toBe(0);
+  });
+});
+
+interface OverlayFilterRow {
+  id: number;
+  name: string;
+  status: string;
+  tags: string[];
+  createdAt: string;
+}
+
+const OVERLAY_FILTER_COLUMNS = [
+  {
+    key: 'status',
+    header: 'Status',
+    filterConfig: { kind: 'select', options: ['active', 'pending', 'archived'] },
+  },
+  {
+    key: 'tags',
+    header: 'Tags',
+    filterConfig: { kind: 'multiSelect', options: ['core', 'design', 'ops'] },
+  },
+  {
+    key: 'createdAt',
+    header: 'Created',
+    filterConfig: { kind: 'date', precision: 'date-only' },
+  },
+  { key: 'name', header: 'Name', filterConfig: { kind: 'text' } },
+] satisfies NeuTableColumn<OverlayFilterRow>[];
+
+const OVERLAY_FILTER_DATA: OverlayFilterRow[] = [
+  {
+    id: 1,
+    name: 'Alpha',
+    status: 'active',
+    tags: ['core'],
+    createdAt: '2026-08-20',
+  },
+  {
+    id: 2,
+    name: 'Beta',
+    status: 'pending',
+    tags: ['design'],
+    createdAt: '2026-08-21',
+  },
+];
+
+describe('NeuTableComponent advanced filter overlay foundation', () => {
+  beforeEach(async () => {
+    if (!HTMLElement.prototype.scrollTo) {
+      HTMLElement.prototype.scrollTo = vi.fn();
+    }
+    await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
+  });
+
+  async function settle(
+    fixture: ComponentFixture<NeuTableComponent<OverlayFilterRow>>,
+  ): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  async function createOverlayTable(
+    columns: readonly NeuTableColumn<OverlayFilterRow>[] = OVERLAY_FILTER_COLUMNS,
+  ): Promise<ComponentFixture<NeuTableComponent<OverlayFilterRow>>> {
+    const fixture = TestBed.createComponent(NeuTableComponent<OverlayFilterRow>);
+    internalFilters(fixture.componentInstance)._filterOverlayFoundationEnabled.set(true);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', OVERLAY_FILTER_DATA);
+    fixture.componentRef.setInput('useUrlState', false);
+    await settle(fixture);
+    return fixture;
+  }
+
+  async function openFilterOverlay(
+    fixture: ComponentFixture<NeuTableComponent<OverlayFilterRow>>,
+    header: string,
+  ): Promise<HTMLButtonElement> {
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      `[aria-label="Open filters for ${header}"]`,
+    );
+    expect(trigger).toBeTruthy();
+    trigger!.click();
+    await settle(fixture);
+    return trigger!;
+  }
+
+  async function openChild(
+    fixture: ComponentFixture<NeuTableComponent<OverlayFilterRow>>,
+    selector: string,
+  ): Promise<HTMLElement> {
+    const trigger = document.querySelector<HTMLElement>(`.neu-table__filter-overlay ${selector}`);
+    expect(trigger).toBeTruthy();
+    trigger!.click();
+    await settle(fixture);
+    return trigger!;
+  }
+
+  function escape(target: EventTarget, type: 'keydown' | 'keyup' = 'keydown'): void {
+    const event = new KeyboardEvent(type, { key: 'Escape', bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'keyCode', { configurable: true, get: () => 27 });
+    target.dispatchEvent(event);
+  }
+
+  it('keeps the E2 overlay infrastructure dormant in normal production usage', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<OverlayFilterRow>);
+    fixture.componentRef.setInput('columns', OVERLAY_FILTER_COLUMNS);
+    fixture.componentRef.setInput('data', OVERLAY_FILTER_DATA);
+    fixture.componentRef.setInput('useUrlState', false);
+    await settle(fixture);
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        '.neu-table__filter-overlay-trigger',
+      ),
+    ).toHaveLength(0);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+  });
+
+  it('opens and closes the parent dialog shell with a stable trigger contract', async () => {
+    const fixture = await createOverlayTable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[aria-label="Open filters for Status"]',
+    )!;
+    const controls = trigger.getAttribute('aria-controls');
+    expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+
+    trigger.click();
+    await settle(fixture);
+    const panel = document.getElementById(controls!);
+    expect(panel?.getAttribute('role')).toBe('dialog');
+    expect(panel?.getAttribute('aria-labelledby')).toBeTruthy();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+    expect(document.getElementById(controls!)).toBeNull();
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(trigger.getAttribute('aria-controls')).toBe(controls);
+  });
+
+  it('moves focus into the panel and restores it to the owning trigger', async () => {
+    const fixture = await createOverlayTable();
+    const trigger = await openFilterOverlay(fixture, 'Status');
+    expect(document.activeElement).toBe(document.querySelector('.neu-table__filter-overlay-close'));
+
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('closes on a genuine outside click across a child backdrop and restores focus', async () => {
+    const fixture = await createOverlayTable();
+    const trigger = await openFilterOverlay(fixture, 'Status');
+    await openChild(fixture, '.neu-select__trigger');
+    const childBackdrop = Array.from(
+      document.querySelectorAll<HTMLElement>('.cdk-overlay-backdrop'),
+    ).at(-1)!;
+    childBackdrop.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, clientX: 999, clientY: 999 }),
+    );
+    childBackdrop.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, clientX: 999, clientY: 999 }),
+    );
+    await settle(fixture);
+
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.querySelector('.neu-select__panel')).toBeNull();
+    expect(document.querySelector('.cdk-overlay-backdrop')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('closes the parent on Escape and restores focus to its trigger', async () => {
+    const fixture = await createOverlayTable();
+    const trigger = await openFilterOverlay(fixture, 'Name');
+    const close = document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!;
+    escape(close);
+    await settle(fixture);
+
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('keeps the parent open when a real Select option is activated', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Status');
+    await openChild(fixture, '.neu-select__trigger');
+    expect(internalFilters(fixture.componentInstance)._filterOverlaySessionPanes()).toHaveLength(2);
+    const option = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option')).find(
+      (item) => item.textContent?.includes('active'),
+    )!;
+    option.click();
+    await settle(fixture);
+
+    expect(internalFilters(fixture.componentInstance)._filterOverlaySelectControl.value).toBe(
+      'active',
+    );
+    expect(document.querySelector('.neu-select__panel')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+    expect(document.activeElement).toBe(
+      document.querySelector('.neu-table__filter-overlay .neu-select__trigger'),
+    );
+  });
+
+  it('gives Select the first Escape and the Table parent the second Escape', async () => {
+    const fixture = await createOverlayTable();
+    const parentTrigger = await openFilterOverlay(fixture, 'Status');
+    const childTrigger = await openChild(fixture, '.neu-select__trigger');
+    const option = document.querySelector<HTMLElement>('.neu-select__option')!;
+    option.focus();
+    escape(option);
+    await settle(fixture);
+    escape(document, 'keyup');
+
+    expect(document.querySelector('.neu-select__panel')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+    expect(document.activeElement).toBe(childTrigger);
+
+    escape(childTrigger);
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.activeElement).toBe(parentTrigger);
+  });
+
+  it('keeps the parent open through repeated real MultiSelect interactions', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Tags');
+    await openChild(fixture, '.neu-multiselect__trigger');
+    expect(internalFilters(fixture.componentInstance)._filterOverlaySessionPanes()).toHaveLength(2);
+    const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option'));
+    options[0].click();
+    options[1].click();
+    await settle(fixture);
+
+    expect(
+      internalFilters(fixture.componentInstance)._filterOverlayMultiSelectControl.value,
+    ).toEqual(['core', 'design']);
+    expect(document.querySelector('.neu-multiselect__panel')).toBeTruthy();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+  });
+
+  it('gives MultiSelect the first Escape and the Table parent the second Escape', async () => {
+    const fixture = await createOverlayTable();
+    const parentTrigger = await openFilterOverlay(fixture, 'Tags');
+    const childTrigger = await openChild(fixture, '.neu-multiselect__trigger');
+    const option = document.querySelector<HTMLElement>('.neu-multiselect__option')!;
+    option.focus();
+    escape(option);
+    await settle(fixture);
+    escape(document, 'keyup');
+
+    expect(document.querySelector('.neu-multiselect__panel')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+    expect(document.activeElement).toBe(childTrigger);
+
+    escape(childTrigger);
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.activeElement).toBe(parentTrigger);
+  });
+
+  it('keeps the parent open when a real DateInput calendar day is selected', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Created');
+    await openChild(fixture, '.neu-date-input__trigger');
+    expect(internalFilters(fixture.componentInstance)._filterOverlaySessionPanes()).toHaveLength(2);
+    const day = document.querySelector<HTMLButtonElement>(
+      '.neu-date-input__cal-day:not(.neu-date-input__cal-day--other):not([disabled])',
+    )!;
+    day.click();
+    await settle(fixture);
+
+    expect(internalFilters(fixture.componentInstance)._filterOverlayDateControl.value).toMatch(
+      /^\d{4}-\d{2}-\d{2}$/,
+    );
+    expect(document.querySelector('.neu-date-input__panel')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+    expect(document.activeElement).toBe(
+      document.querySelector('.neu-table__filter-overlay .neu-date-input__trigger'),
+    );
+  });
+
+  it('gives DateInput the first Escape and the Table parent the second Escape', async () => {
+    const fixture = await createOverlayTable();
+    const parentTrigger = await openFilterOverlay(fixture, 'Created');
+    const childTrigger = await openChild(fixture, '.neu-date-input__trigger');
+    const day = document.querySelector<HTMLElement>('.neu-date-input__cal-day')!;
+    day.focus();
+    escape(day);
+    await settle(fixture);
+    escape(document, 'keyup');
+
+    expect(document.querySelector('.neu-date-input__panel')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+    expect(document.activeElement).toBe(childTrigger);
+
+    escape(childTrigger);
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.activeElement).toBe(parentTrigger);
+  });
+
+  it('remains stable across repeated open and close cycles without duplicate attached surfaces', async () => {
+    const fixture = await createOverlayTable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[aria-label="Open filters for Name"]',
+    )!;
+    for (let index = 0; index < 3; index++) {
+      trigger.click();
+      await settle(fixture);
+      expect(document.querySelectorAll('.neu-table__filter-overlay')).toHaveLength(1);
+      document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+      await settle(fixture);
+      expect(document.querySelectorAll('.neu-table__filter-overlay')).toHaveLength(0);
+      expect(document.querySelectorAll('.cdk-overlay-backdrop')).toHaveLength(0);
+    }
+    expect(internalFilters(fixture.componentInstance)._openFilterKey()).toBeNull();
+  });
+
+  it('switches columns in one activation without orphaning the first overlay', async () => {
+    const fixture = await createOverlayTable();
+    const first = await openFilterOverlay(fixture, 'Status');
+    const second = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[aria-label="Open filters for Tags"]',
+    )!;
+    second.click();
+    await settle(fixture);
+
+    expect(first.getAttribute('aria-expanded')).toBe('false');
+    expect(second.getAttribute('aria-expanded')).toBe('true');
+    expect(document.querySelectorAll('.neu-table__filter-overlay')).toHaveLength(1);
+    expect(document.querySelector('.neu-table__filter-overlay-title')?.textContent).toContain(
+      'Tags',
+    );
+    expect(internalFilters(fixture.componentInstance)._openFilterKey()).toBe('tags');
+  });
+
+  it('closes safely when the active column disappears without focusing its destroyed trigger', async () => {
+    const fixture = await createOverlayTable();
+    const trigger = await openFilterOverlay(fixture, 'Status');
+    fixture.componentRef.setInput(
+      'columns',
+      OVERLAY_FILTER_COLUMNS.filter((column) => column.key !== 'status'),
+    );
+    await settle(fixture);
+
+    expect(trigger.isConnected).toBe(false);
+    expect(document.activeElement).not.toBe(trigger);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(internalFilters(fixture.componentInstance)._openFilterKey()).toBeNull();
+  });
+
+  it('disposes the parent overlay and focus listeners when Table is destroyed open', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Name');
+    const internal = internalFilters(fixture.componentInstance);
+    expect(internal._filterOverlayFocusCleanup).toBeTypeOf('function');
+
+    fixture.destroy();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.querySelector('.cdk-overlay-backdrop')).toBeNull();
+    expect(internal._filterOverlayFocusCleanup).toBeNull();
+    expect(internal._openFilterKey()).toBeNull();
+  });
+
+  it('disposes both parent and real child overlays when Table is destroyed', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Status');
+    await openChild(fixture, '.neu-select__trigger');
+    const internal = internalFilters(fixture.componentInstance);
+
+    fixture.destroy();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.querySelector('.neu-select__panel')).toBeNull();
+    expect(document.querySelector('.cdk-overlay-backdrop')).toBeNull();
+    expect(internal._filterOverlayFocusCleanup).toBeNull();
+  });
+
+  it('renders the closed overlay state safely with a server platform id', async () => {
+    TestBed.overrideProvider(PLATFORM_ID, { useValue: 'server' });
+    const fixture = await createOverlayTable();
+
+    expect(
+      fixture.nativeElement.querySelectorAll('.neu-table__filter-overlay-trigger'),
+    ).toHaveLength(4);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(internalFilters(fixture.componentInstance)._openFilterKey()).toBeNull();
+  });
+
+  it('never mutates applied filters, rows, pagination or selection while opening and closing', async () => {
+    const fixture = await createOverlayTable();
+    fixture.componentRef.setInput('selectable', true);
+    await settle(fixture);
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.neu-table__row')!.click();
+    await settle(fixture);
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    const appliedBefore = internal._appliedFilters();
+    const rowsBefore = table.filteredData();
+
+    await openFilterOverlay(fixture, 'Status');
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+
+    expect(internal._appliedFilters()).toBe(appliedBefore);
+    expect(table.filteredData()).toBe(rowsBefore);
+    expect(table.currentPage()).toBe(1);
+    expect(table.selectedCount()).toBe(1);
+  });
+
+  it('does not emit server state while the infrastructure-only overlay is used', async () => {
+    const fixture = await createOverlayTable();
+    fixture.componentRef.setInput('serverSide', true);
+    await settle(fixture);
+    const events: NeuTableServerState[] = [];
+    fixture.componentInstance.serverStateChange.subscribe((event) => events.push(event));
+
+    await openFilterOverlay(fixture, 'Tags');
+    await openChild(fixture, '.neu-multiselect__trigger');
+    document.querySelector<HTMLElement>('.neu-multiselect__option')!.click();
+    await settle(fixture);
+    escape(document.querySelector<HTMLElement>('.neu-multiselect__option')!);
+    await settle(fixture);
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+
+    expect(events).toEqual([]);
+  });
+
+  it('installs one focus lifecycle resource per open session and removes it on close', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Name');
+    const internal = internalFilters(fixture.componentInstance);
+    const cleanup = internal._filterOverlayFocusCleanup;
+    expect(cleanup).toBeTypeOf('function');
+
+    internal._onFilterOverlayAttached('name');
+    expect(internal._filterOverlayFocusCleanup).toBe(cleanup);
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+    expect(internal._filterOverlayFocusCleanup).toBeNull();
+
+    await openFilterOverlay(fixture, 'Name');
+    expect(internal._filterOverlayFocusCleanup).toBeTypeOf('function');
+    expect(internal._filterOverlayFocusCleanup).not.toBe(cleanup);
+  });
+
+  it('contains Tab and programmatic focus across the parent and child overlay panes', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Status');
+    await openChild(fixture, '.neu-select__trigger');
+    const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
+    const lastOption = options.at(-1)!;
+    lastOption.focus();
+    lastOption.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(document.querySelector('.neu-table__filter-overlay-close'));
+
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    outside.focus();
+    expect(document.activeElement).not.toBe(outside);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+    outside.remove();
+  });
+
+  it('excludes an unrelated later CDK overlay from ownership and focus containment', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Status');
+    await openChild(fixture, '.neu-select__trigger');
+    const internal = internalFilters(fixture.componentInstance);
+    const ownedOptions = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
+
+    const unrelated = TestBed.createComponent(NeuSelectComponent);
+    unrelated.componentRef.setInput('options', [{ label: 'Outside', value: 'outside' }]);
+    unrelated.detectChanges();
+    unrelated.componentInstance.toggle();
+    unrelated.detectChanges();
+    await unrelated.whenStable();
+    unrelated.detectChanges();
+    await settle(fixture);
+
+    const unrelatedPanel = document.getElementById(unrelated.componentInstance._panelId)!;
+    const unrelatedPane = unrelatedPanel.closest<HTMLElement>('.cdk-overlay-pane')!;
+    expect(unrelatedPanel).toBeTruthy();
+    expect(internal._filterOverlaySessionPanes()).toHaveLength(2);
+    expect(internal._filterOverlaySessionPanes()).not.toContain(unrelatedPane);
+
+    const unrelatedOption = unrelatedPanel.querySelector<HTMLElement>('[role="option"]')!;
+    unrelatedOption.focus();
+    expect(document.activeElement).not.toBe(unrelatedOption);
+
+    const ownedLastOption = ownedOptions.at(-1)!;
+    ownedLastOption.focus();
+    ownedLastOption.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(document.querySelector('.neu-table__filter-overlay-close'));
+
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.getElementById(unrelated.componentInstance._panelId)).toBe(unrelatedPanel);
+
+    unrelated.destroy();
+  });
+
+  it('closes the first Table when a second Table opens and keeps lifecycle ownership isolated', async () => {
+    const tableA = await createOverlayTable();
+    const tableB = await createOverlayTable();
+    const triggerA = await openFilterOverlay(tableA, 'Status');
+    const panelAId = triggerA.getAttribute('aria-controls')!;
+    const triggerB = await openFilterOverlay(tableB, 'Status');
+    await settle(tableA);
+
+    const internalA = internalFilters(tableA.componentInstance);
+    const internalB = internalFilters(tableB.componentInstance);
+    expect(document.getElementById(panelAId)).toBeNull();
+    expect(internalA._openFilterKey()).toBeNull();
+    expect(internalA._filterOverlaySessionPanes()).toEqual([]);
+    expect(internalB._openFilterKey()).toBe('status');
+    expect(document.activeElement).toBe(
+      document.querySelector(`#${triggerB.getAttribute('aria-controls')} .neu-table__filter-overlay-close`),
+    );
+
+    await openChild(tableB, '.neu-select__trigger');
+    expect(internalB._filterOverlaySessionPanes()).toHaveLength(2);
+    internalA._closeFilterOverlay();
+    await settle(tableB);
+    expect(internalB._openFilterKey()).toBe('status');
+    expect(internalB._filterOverlaySessionPanes()).toHaveLength(2);
+
+    tableA.destroy();
+    expect(internalB._openFilterKey()).toBe('status');
+    expect(document.querySelector('.neu-select__panel')).toBeTruthy();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+
+    tableB.destroy();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.querySelector('.neu-select__panel')).toBeNull();
+  });
+
+  it('registers the Table scroll surface and four collision-aware connected positions', async () => {
+    const fixture = await createOverlayTable();
+    expect(fixture.nativeElement.querySelector('[cdkscrollable]')).toBeTruthy();
+    const positions = internalFilters(fixture.componentInstance)._filterOverlayPositions;
+    expect(positions).toHaveLength(4);
+    expect(positions.map((position) => `${position.originY}:${position.originX}`)).toEqual([
+      'bottom:start',
+      'bottom:end',
+      'top:start',
+      'top:end',
+    ]);
+  });
+
+  it('keeps the provisional overlay controls isolated from canonical state after interaction', async () => {
+    const fixture = await createOverlayTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    await openFilterOverlay(fixture, 'Status');
+    await openChild(fixture, '.neu-select__trigger');
+    document.querySelector<HTMLElement>('.neu-select__option')!.click();
+    await settle(fixture);
+
+    expect(table._columnFilters()).toEqual({});
+    expect(internal._appliedFilters()).toEqual({});
+    expect(table.filteredData()).toEqual(OVERLAY_FILTER_DATA);
+  });
+
+  it('supports legacy Select and Date hosts without introducing a new column contract', async () => {
+    const legacyColumns = [
+      {
+        key: 'status',
+        header: 'Legacy status',
+        filterable: true,
+        filterType: 'select',
+        filterOptions: ['active', 'pending'],
+      },
+      {
+        key: 'createdAt',
+        header: 'Legacy date',
+        filterable: true,
+        filterType: 'date',
+      },
+    ] satisfies NeuTableColumn<OverlayFilterRow>[];
+    const fixture = await createOverlayTable(legacyColumns);
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+
+    expect(internal._filterOverlayControlKind(legacyColumns[0])).toBe('select');
+    expect(internal._filterOverlayControlKind(legacyColumns[1])).toBe('date');
+    expect(internal._filterOverlayOptions(legacyColumns[0])).toEqual([
+      { label: 'All', value: '' },
+      { label: 'active', value: 'active' },
+      { label: 'pending', value: 'pending' },
+    ]);
+    expect(
+      internal._filterOverlayOptions({
+        key: 'status',
+        header: 'No options',
+        filterConfig: { kind: 'select' },
+      }),
+    ).toEqual([]);
+
+    const trigger = await openFilterOverlay(fixture, 'Legacy status');
+    trigger.click();
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('ignores stale lifecycle callbacks and closes defensively for an invalid outside target', async () => {
+    const fixture = await createOverlayTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    await openFilterOverlay(fixture, 'Name');
+
+    internal._onFilterOverlayAttached('stale');
+    internal._onFilterOverlayDetached('stale');
+    internal._onFilterOverlayOutsideClick('stale', new MouseEvent('click'));
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+
+    internal._onFilterOverlayOutsideClick('name', new MouseEvent('click'));
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+  });
+
+  it('treats an explicitly owned child backdrop as parent-workflow interaction', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Status');
+    const childTrigger = await openChild(fixture, '.neu-select__trigger');
+    const panel = document.querySelector<HTMLElement>('.neu-table__filter-overlay')!;
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue({
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: 400,
+      bottom: 400,
+      width: 400,
+      height: 400,
+      toJSON: () => ({}),
+    });
+    const childBackdrop = document.querySelector<HTMLElement>('.cdk-overlay-backdrop')!;
+    childBackdrop.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, clientX: 20, clientY: 20 }),
+    );
+    childBackdrop.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, clientX: 20, clientY: 20 }),
+    );
+    await settle(fixture);
+
+    expect(document.querySelector('.neu-select__panel')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+    expect(document.activeElement).toBe(childTrigger);
+  });
+
+  it('cycles focus backwards across sibling panes and leaves handled Tab events untouched', async () => {
+    const fixture = await createOverlayTable();
+    await openFilterOverlay(fixture, 'Status');
+    await openChild(fixture, '.neu-select__trigger');
+    const close = document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!;
+    const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
+    close.focus();
+    close.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Tab',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    expect(document.activeElement).toBe(options.at(-1));
+
+    const handledTab = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true,
+      cancelable: true,
+    });
+    handledTab.preventDefault();
+    options.at(-1)!.dispatchEvent(handledTab);
+    expect(document.activeElement).toBe(options.at(-1));
+    options.at(-1)!.dispatchEvent(new KeyboardEvent('keydown', { key: 'A', bubbles: true }));
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
   });
 });
