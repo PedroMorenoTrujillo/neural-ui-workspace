@@ -368,7 +368,8 @@ export function matchesNeuTableFilter<T>(
   if (isNeuTableFilterValueEmpty(filterValue)) return true;
   const value = filterAccessor(row, column, config);
 
-  if (!config) return matchNeuTableText(value, filterValue, 'contains');
+  if (!config)
+    return matchNeuTableText(value, filterValue, resolveTextFilterMode(modeOverride, undefined));
 
   switch (config.kind) {
     case 'number':
@@ -517,7 +518,12 @@ export function resolveNeuTableFilterMatchMode<T>(
   modeOverride?: NeuTableFilterMatchMode,
 ): NeuTableFilterMatchMode | undefined {
   const config = column.filterConfig;
-  if (!config || config.kind === 'boolean' || config.kind === 'custom') return undefined;
+  if (!config) {
+    return column.filterable && (!column.filterType || column.filterType === 'text')
+      ? resolveTextFilterMode(modeOverride, undefined)
+      : undefined;
+  }
+  if (config.kind === 'boolean' || config.kind === 'custom') return undefined;
   switch (config.kind) {
     case 'number':
       return resolveNumberFilterMode(modeOverride, config.mode);

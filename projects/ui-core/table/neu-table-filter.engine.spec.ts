@@ -6,6 +6,7 @@ import {
   matchNeuTableText,
   matchesNeuTableFilter,
   normalizeNeuTableDatePoint,
+  resolveNeuTableFilterMatchMode,
 } from './neu-table-filter.engine';
 import type { NeuTableColumn, NeuTableFilterMatchMode } from './neu-table.types';
 
@@ -314,6 +315,30 @@ describe('NeuTable filter engine', () => {
     expect(matchesNeuTableFilter(row, legacy, '20')).toBe(true);
     expect(matchesNeuTableFilter(row, modern, { from: 100, to: 130 })).toBe(true);
     expect(matchesNeuTableFilter(row, modern, { from: 0, to: 100 })).toBe(false);
+  });
+
+  it('supports explicit advanced text modes for truthful legacy text columns', () => {
+    const legacy: NeuTableColumn<FilterUser, string> = {
+      key: 'name',
+      header: 'Name',
+      filterable: true,
+      filterType: 'text',
+    };
+    const legacySelect: NeuTableColumn<FilterUser, string> = {
+      key: 'name',
+      header: 'Name select',
+      filterable: true,
+      filterType: 'select',
+    };
+    const row = { name: 'Pedro Neural' } as FilterUser;
+
+    expect(matchesNeuTableFilter(row, legacy, 'Pedro', 'startsWith')).toBe(true);
+    expect(matchesNeuTableFilter(row, legacy, 'Neural', 'startsWith')).toBe(false);
+    expect(resolveNeuTableFilterMatchMode(legacy, 'endsWith')).toBe('endsWith');
+    expect(resolveNeuTableFilterMatchMode(legacySelect, 'endsWith')).toBeUndefined();
+    expect(
+      resolveNeuTableFilterMatchMode({ key: 'name', header: 'Not filterable' }, 'endsWith'),
+    ).toBeUndefined();
   });
 
   it('evaluates and projects a constraint mode override without mutating column config', () => {

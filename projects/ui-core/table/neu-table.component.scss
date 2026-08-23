@@ -27,7 +27,7 @@
   }
 }
 
-// ---- Advanced filter overlay foundation (E2) ----
+// ---- Advanced filter overlay ----
 .neu-table__filter-overlay-trigger {
   display: inline-flex;
   align-items: center;
@@ -53,6 +53,20 @@
     border-color: var(--neu-border);
     background: var(--neu-surface-3);
     color: var(--neu-text);
+  }
+
+  &--active {
+    border-color: var(--neu-primary);
+    background: color-mix(in srgb, var(--neu-primary) 12%, var(--neu-surface));
+    color: var(--neu-primary);
+
+    &::after {
+      inline-size: 5px;
+      block-size: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      content: '';
+    }
   }
 
   &:focus-visible {
@@ -133,6 +147,30 @@
 .neu-table__filter-overlay-control {
   display: block;
   inline-size: 100%;
+}
+
+.neu-table__filter-overlay-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--neu-space-3);
+}
+
+.neu-table__filter-overlay-summary {
+  margin: 0;
+  color: var(--neu-text-muted);
+  font-size: var(--neu-text-sm);
+  line-height: 1.5;
+}
+
+.neu-table__filter-overlay-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-space-2);
+  padding-top: var(--neu-space-1);
+}
+
+.neu-table__filter-overlay-actions-spacer {
+  flex: 1 1 auto;
 }
 
 // ---- Toolbar ----

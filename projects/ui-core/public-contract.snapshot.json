@@ -1048,6 +1048,8 @@
       "selector": "neu-table",
       "inputs": [
         "allFilterOptionLabel",
+        "advancedFilterMode",
+        "advancedFilterTexts",
         "bordered",
         "cancelInlineEditLabel",
         "clearFilterLabel",

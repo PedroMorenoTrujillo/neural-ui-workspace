@@ -102,6 +102,41 @@ export type NeuTableFilterKind =
   | 'multiSelect'
   | 'custom';
 
+export type NeuTableAdvancedFilterMode = 'off' | 'menu';
+
+export interface NeuTableAdvancedFilterTexts {
+  openFilter: string;
+  filterTitle: string;
+  closeFilter: string;
+  matchMode: string;
+  value: string;
+  from: string;
+  to: string;
+  all: string;
+  yes: string;
+  no: string;
+  clear: string;
+  cancel: string;
+  apply: string;
+  filterActive: string;
+  multipleRulesActive: string;
+  contains: string;
+  startsWith: string;
+  endsWith: string;
+  equals: string;
+  notEquals: string;
+  notContains: string;
+  lt: string;
+  lte: string;
+  gt: string;
+  gte: string;
+  between: string;
+  is: string;
+  isNot: string;
+  before: string;
+  after: string;
+}
+
 export type NeuTableTextFilterMode =
   | 'contains'
   | 'startsWith'

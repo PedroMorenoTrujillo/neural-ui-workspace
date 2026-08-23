@@ -23,6 +23,7 @@ import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import { NeuDateInputComponent } from '@neural-ui/core/date-input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
+import type { NeuSelectOption } from '@neural-ui/core/select';
 import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
 import { By } from '@angular/platform-browser';
 import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
@@ -103,13 +104,30 @@ interface InternalTableFilterHarness<T extends object = Record<string, unknown>>
   _filterControlSubscriptions: Map<object, unknown>;
   _filterOverlayFoundationEnabled: WritableSignal<boolean>;
   _openFilterKey: WritableSignal<string | null>;
+  _filterDraftMode: WritableSignal<NeuTableFilterMatchMode | null>;
+  _filterDraftValue: WritableSignal<unknown>;
+  _filterDraftValid: WritableSignal<boolean>;
+  _filterDraftHasMultipleRules: WritableSignal<boolean>;
+  _filterOverlayModeControl: FormControl<unknown>;
+  _filterOverlayTextControl: FormControl<string>;
+  _filterOverlayNumberControl: FormControl<number | null>;
+  _filterOverlayNumberFromControl: FormControl<number | null>;
+  _filterOverlayNumberToControl: FormControl<number | null>;
+  _filterOverlayInstantFromControl: FormControl<string>;
+  _filterOverlayInstantToControl: FormControl<string>;
+  _filterOverlayBooleanControl: FormControl<unknown>;
   _filterOverlayFocusCleanup: (() => void) | null;
   _filterOverlaySelectControl: FormControl<unknown>;
   _filterOverlayMultiSelectControl: FormControl<unknown[]>;
   _filterOverlayDateControl: FormControl<unknown>;
   _filterOverlayPositions: readonly { originX: string; originY: string }[];
   _filterOverlayControlKind(column: NeuTableColumn<T>): string;
+  _isFilterOverlayEligible(column: NeuTableColumn<T>): boolean;
+  _filterOverlayDatePrecision(column: NeuTableColumn<T>): 'date-only' | 'instant';
+  _filterOverlayModeOptions(column: NeuTableColumn<T>): readonly NeuSelectOption[];
   _filterOverlayOptions(column: NeuTableColumn<T>): readonly unknown[];
+  _clearFilterDraft(): void;
+  _applyFilterDraft(): void;
   _closeFilterOverlay(restoreFocus?: boolean): void;
   _onFilterOverlayAttached(key: string): void;
   _onFilterOverlayDetached(key: string): void;
@@ -5744,6 +5762,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
   ): Promise<ComponentFixture<NeuTableComponent<OverlayFilterRow>>> {
     const fixture = TestBed.createComponent(NeuTableComponent<OverlayFilterRow>);
     internalFilters(fixture.componentInstance)._filterOverlayFoundationEnabled.set(true);
+    fixture.componentRef.setInput('advancedFilterMode', 'menu');
     fixture.componentRef.setInput('columns', columns);
     fixture.componentRef.setInput('data', OVERLAY_FILTER_DATA);
     fixture.componentRef.setInput('useUrlState', false);
@@ -5756,7 +5775,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     header: string,
   ): Promise<HTMLButtonElement> {
     const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
-      `[aria-label="Open filters for ${header}"]`,
+      `[aria-label="Open filter for ${header}"]`,
     );
     expect(trigger).toBeTruthy();
     trigger!.click();
@@ -5799,7 +5818,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
   it('opens and closes the parent dialog shell with a stable trigger contract', async () => {
     const fixture = await createOverlayTable();
     const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
-      '[aria-label="Open filters for Status"]',
+      '[aria-label="Open filter for Status"]',
     )!;
     const controls = trigger.getAttribute('aria-controls');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
@@ -5983,7 +6002,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
   it('remains stable across repeated open and close cycles without duplicate attached surfaces', async () => {
     const fixture = await createOverlayTable();
     const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
-      '[aria-label="Open filters for Name"]',
+      '[aria-label="Open filter for Name"]',
     )!;
     for (let index = 0; index < 3; index++) {
       trigger.click();
@@ -6001,7 +6020,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     const fixture = await createOverlayTable();
     const first = await openFilterOverlay(fixture, 'Status');
     const second = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
-      '[aria-label="Open filters for Tags"]',
+      '[aria-label="Open filter for Tags"]',
     )!;
     second.click();
     await settle(fixture);
@@ -6363,5 +6382,492 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     expect(document.activeElement).toBe(options.at(-1));
     options.at(-1)!.dispatchEvent(new KeyboardEvent('keydown', { key: 'A', bubbles: true }));
     expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+  });
+});
+
+interface AdvancedFilterRow {
+  id: number;
+  name: string;
+  score: number;
+  createdAt: string;
+  instant: string;
+  active: boolean;
+  status: string;
+}
+
+const ADVANCED_FILTER_COLUMNS = [
+  { key: 'name', header: 'Name', filterConfig: { kind: 'text' } },
+  { key: 'score', header: 'Score', filterConfig: { kind: 'number' } },
+  {
+    key: 'createdAt',
+    header: 'Created',
+    filterConfig: { kind: 'date', precision: 'date-only' },
+  },
+  {
+    key: 'instant',
+    header: 'Instant',
+    filterConfig: { kind: 'date', precision: 'instant' },
+  },
+  { key: 'active', header: 'Active', filterConfig: { kind: 'boolean' } },
+  {
+    key: 'status',
+    header: 'Status',
+    filterConfig: { kind: 'select', options: ['active', 'pending'] },
+  },
+] satisfies NeuTableColumn<AdvancedFilterRow>[];
+
+const ADVANCED_FILTER_DATA: AdvancedFilterRow[] = [
+  {
+    id: 1,
+    name: 'Alpha',
+    score: 5,
+    createdAt: '2026-08-19',
+    instant: '2026-08-20T22:30:00.000Z',
+    active: true,
+    status: 'active',
+  },
+  {
+    id: 2,
+    name: 'Beta',
+    score: 15,
+    createdAt: '2026-08-21',
+    instant: '2026-08-21T22:30:00.000Z',
+    active: false,
+    status: 'pending',
+  },
+];
+
+describe('NeuTableComponent functional advanced filter menu', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
+  });
+
+  async function settle(
+    fixture: ComponentFixture<NeuTableComponent<AdvancedFilterRow>>,
+  ): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  async function createAdvancedTable(
+    inputs: Record<string, unknown> = {},
+  ): Promise<ComponentFixture<NeuTableComponent<AdvancedFilterRow>>> {
+    const fixture = TestBed.createComponent(NeuTableComponent<AdvancedFilterRow>);
+    fixture.componentRef.setInput('columns', ADVANCED_FILTER_COLUMNS);
+    fixture.componentRef.setInput('data', ADVANCED_FILTER_DATA);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('advancedFilterMode', 'menu');
+    for (const [key, value] of Object.entries(inputs)) fixture.componentRef.setInput(key, value);
+    await settle(fixture);
+    return fixture;
+  }
+
+  async function open(
+    fixture: ComponentFixture<NeuTableComponent<AdvancedFilterRow>>,
+    header: string,
+  ): Promise<HTMLButtonElement> {
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      `.neu-table__filter-overlay-trigger[aria-label^="Open filter for ${header}"]`,
+    )!;
+    expect(trigger).toBeTruthy();
+    trigger.click();
+    await settle(fixture);
+    return trigger;
+  }
+
+  it('opts in explicitly and exposes only E3 production filter kinds', async () => {
+    const fixture = await createAdvancedTable();
+    const labels = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+        '.neu-table__filter-overlay-trigger',
+      ),
+    ).map((trigger) => trigger.getAttribute('aria-label'));
+
+    expect(labels).toHaveLength(5);
+    expect(labels.some((label) => label?.includes('Status'))).toBe(false);
+  });
+
+  it('maps eligibility, precision, and human match-mode labels without exposing deferred kinds', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    const legacyText = {
+      key: 'name',
+      header: 'Legacy name',
+      filterable: true,
+      filterType: 'text',
+    } satisfies NeuTableColumn<AdvancedFilterRow>;
+    const legacySelect = {
+      key: 'status',
+      header: 'Legacy status',
+      filterable: true,
+      filterType: 'select',
+    } satisfies NeuTableColumn<AdvancedFilterRow>;
+    const custom = {
+      key: 'name',
+      header: 'Custom',
+      filterConfig: { kind: 'custom', predicate: () => true },
+    } satisfies NeuTableColumn<AdvancedFilterRow>;
+
+    expect(internal._isFilterOverlayEligible(legacyText)).toBe(true);
+    expect(internal._isFilterOverlayEligible(legacySelect)).toBe(false);
+    expect(internal._isFilterOverlayEligible(custom)).toBe(false);
+    expect(internal._isFilterOverlayEligible({ key: 'name', header: 'Plain' })).toBe(false);
+    expect(internal._filterOverlayDatePrecision(ADVANCED_FILTER_COLUMNS[2])).toBe('date-only');
+    expect(internal._filterOverlayDatePrecision(ADVANCED_FILTER_COLUMNS[3])).toBe('instant');
+    expect(
+      internal._filterOverlayDatePrecision({
+        key: 'createdAt',
+        header: 'Default precision',
+        filterConfig: { kind: 'date' },
+      }),
+    ).toBe('date-only');
+    expect(internal._filterOverlayDatePrecision(legacyText)).toBe('date-only');
+    expect(
+      internal._filterOverlayModeOptions(ADVANCED_FILTER_COLUMNS[0]).map((option) => option.label),
+    ).toEqual(['Contains', 'Starts with', 'Ends with', 'Is', 'Is not', 'Does not contain']);
+    expect(
+      internal._filterOverlayModeOptions(ADVANCED_FILTER_COLUMNS[1]).map((option) => option.label),
+    ).toEqual(['Is', 'Is not', 'Less than', 'At most', 'Greater than', 'At least', 'Between']);
+    expect(
+      internal._filterOverlayModeOptions(ADVANCED_FILTER_COLUMNS[2]).map((option) => option.label),
+    ).toEqual(['Is', 'Is not', 'Before', 'After', 'Between']);
+
+    fixture.componentRef.setInput('advancedFilterMode', 'off');
+    await settle(fixture);
+    expect(internal._isFilterOverlayEligible(ADVANCED_FILTER_COLUMNS[0])).toBe(false);
+  });
+
+  it('keeps text edits in draft until Apply and synchronizes the inline control afterwards', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    await open(fixture, 'Name');
+
+    internal._filterOverlayModeControl.setValue('startsWith');
+    internal._filterOverlayTextControl.setValue('Be');
+    await settle(fixture);
+    expect(table.filteredData()).toEqual(ADVANCED_FILTER_DATA);
+
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(table.filteredData().map((row) => row.name)).toEqual(['Beta']);
+    expect(internal._appliedFilters()['name']).toEqual({
+      operator: 'and',
+      constraints: [{ mode: 'startsWith', value: 'Be' }],
+    });
+    expect(internal._typedColumnFilterControls.get('name')?.value).toBe('Be');
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '.neu-table__filter-overlay-trigger--active[aria-pressed="true"]',
+    );
+    expect(trigger?.getAttribute('aria-label')).toContain('Filter active');
+
+    internal._typedColumnFilterControls.get('name')!.setValue('Alpha');
+    await settle(fixture);
+    expect(internal._appliedFilters()['name'].constraints[0]).toEqual({
+      mode: 'contains',
+      value: 'Alpha',
+    });
+    expect(table.filteredData().map((row) => row.name)).toEqual(['Alpha']);
+
+    await open(fixture, 'Name');
+    expect(internal._filterDraftMode()).toBe('contains');
+    expect(internal._filterDraftValue()).toBe('Alpha');
+    expect(internal._filterOverlayTextControl.value).toBe('Alpha');
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+  });
+
+  it('uses Cancel semantics for close and for Clear followed by Cancel', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    table.setColumnFilter('name', 'Alpha');
+    await settle(fixture);
+
+    await open(fixture, 'Name');
+    internal._filterOverlayTextControl.setValue('Beta');
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+    expect(table.getColumnFilterValue('name')).toBe('Alpha');
+    expect(table.filteredData().map((row) => row.name)).toEqual(['Alpha']);
+
+    await open(fixture, 'Name');
+    internal._clearFilterDraft();
+    const cancel = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.neu-table__filter-overlay-actions button'),
+    ).find((button) => button.textContent?.trim() === 'Cancel')!;
+    cancel.click();
+    await settle(fixture);
+    expect(table.getColumnFilterValue('name')).toBe('Alpha');
+  });
+
+  it('preserves applied filters when Escape or an outside click cancels a draft', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    table.setColumnFilter('name', 'Alpha');
+    await settle(fixture);
+    const applied = internal._appliedFilters()['name'];
+
+    await open(fixture, 'Name');
+    internal._filterOverlayTextControl.setValue('Beta');
+    const escapeEvent = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(escapeEvent, 'keyCode', { configurable: true, get: () => 27 });
+    document.querySelector<HTMLElement>('.neu-table__filter-overlay')!.dispatchEvent(escapeEvent);
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+
+    await open(fixture, 'Name');
+    internal._filterOverlayTextControl.setValue('Beta');
+    document.body.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, clientX: 999, clientY: 999 }),
+    );
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+  });
+
+  it('removes an applied filter only after Clear and Apply', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    table.setColumnFilter('name', 'Alpha');
+    await settle(fixture);
+
+    await open(fixture, 'Name');
+    internal._clearFilterDraft();
+    expect(table.filteredData().map((row) => row.name)).toEqual(['Alpha']);
+    internal._applyFilterDraft();
+    await settle(fixture);
+
+    expect(internal._appliedFilters()['name']).toBeUndefined();
+    expect(table.filteredData()).toEqual(ADVANCED_FILTER_DATA);
+  });
+
+  it('emits server state once per Apply and never for draft, Cancel, or Clear alone', async () => {
+    const fixture = await createAdvancedTable({ serverSide: true });
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    const events: NeuTableServerState[] = [];
+    table.serverStateChange.subscribe((event) => events.push(event));
+
+    await open(fixture, 'Name');
+    internal._filterOverlayTextControl.setValue('Beta');
+    internal._clearFilterDraft();
+    internal._filterOverlayTextControl.setValue('Beta');
+    expect(events).toEqual([]);
+    internal._applyFilterDraft();
+    await settle(fixture);
+
+    expect(events).toHaveLength(1);
+    expect(events[0].typedColumnFilters?.['name']).toEqual({
+      kind: 'text',
+      mode: 'contains',
+      value: 'Beta',
+    });
+    expect(table.filteredData()).toEqual(ADVANCED_FILTER_DATA);
+
+    await open(fixture, 'Name');
+    internal._clearFilterDraft();
+    expect(events).toHaveLength(1);
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(events).toHaveLength(2);
+    expect(events[1].typedColumnFilters).toEqual({});
+  });
+
+  it('validates inclusive number ranges and rejects a reversed draft without overwriting state', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    table.setColumnFilter('score', 5);
+    await settle(fixture);
+    await open(fixture, 'Score');
+    internal._filterOverlayModeControl.setValue('between');
+    internal._filterOverlayNumberFromControl.setValue(20);
+    internal._filterOverlayNumberToControl.setValue(10);
+    expect(internal._filterDraftValid()).toBe(false);
+    internal._applyFilterDraft();
+    expect(table.getColumnFilterValue('score')).toBe(5);
+
+    internal._filterOverlayNumberFromControl.setValue(5);
+    internal._filterOverlayNumberToControl.setValue(15);
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(table.filteredData().map((row) => row.score)).toEqual([5, 15]);
+
+    await open(fixture, 'Score');
+    expect(internal._filterDraftMode()).toBe('between');
+    expect(internal._filterOverlayNumberFromControl.value).toBe(5);
+    expect(internal._filterOverlayNumberToControl.value).toBe(15);
+    internal._clearFilterDraft();
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(table.filteredData()).toEqual(ADVANCED_FILTER_DATA);
+  });
+
+  it('keeps date-only and instant draft values canonical', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Created');
+    internal._filterOverlayModeControl.setValue('after');
+    internal._filterOverlayDateControl.setValue('2026-08-20');
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(internal._appliedFilters()['createdAt'].constraints[0].value).toBe('2026-08-20');
+
+    await open(fixture, 'Instant');
+    internal._filterOverlayModeControl.setValue('after');
+    internal._filterOverlayDateControl.setValue('2026-08-20T23:30');
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(internal._appliedFilters()['instant'].constraints[0].value).toBe(
+      new Date('2026-08-20T23:30').toISOString(),
+    );
+  });
+
+  it('supports open date-only ranges and validates instant ranges before Apply', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Created');
+    internal._filterOverlayModeControl.setValue('between');
+    internal._filterOverlayDateControl.setValue({
+      start: new Date(2026, 7, 20),
+      end: null,
+    });
+    expect(internal._filterDraftValue()).toEqual({ from: '2026-08-20', to: null });
+    expect(internal._filterDraftValid()).toBe(true);
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(fixture.componentInstance.filteredData().map((row) => row.name)).toEqual(['Beta']);
+
+    await open(fixture, 'Created');
+    expect(internal._filterDraftMode()).toBe('between');
+    expect(internal._filterOverlayDateControl.value).toMatchObject({ end: null });
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+
+    await open(fixture, 'Instant');
+    internal._filterOverlayModeControl.setValue('between');
+    internal._filterOverlayInstantFromControl.setValue('2026-08-22T12:00');
+    internal._filterOverlayInstantToControl.setValue('2026-08-21T12:00');
+    expect(internal._filterDraftValid()).toBe(false);
+    internal._filterOverlayInstantFromControl.setValue('');
+    expect(internal._filterDraftValid()).toBe(true);
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(internal._appliedFilters()['instant'].constraints[0].value).toEqual({
+      from: null,
+      to: new Date('2026-08-21T12:00').toISOString(),
+    });
+
+    await open(fixture, 'Instant');
+    expect(internal._filterOverlayInstantFromControl.value).toBe('');
+    expect(internal._filterOverlayInstantToControl.value).toBe('2026-08-21T12:00');
+    internal._clearFilterDraft();
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(internal._appliedFilters()['instant']).toBeUndefined();
+  });
+
+  it('rejects invalid date drafts and retains values across compatible mode changes', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Created');
+    internal._filterOverlayDateControl.setValue('not-a-date');
+    expect(internal._filterDraftValid()).toBe(false);
+    internal._filterOverlayDateControl.setValue('');
+    expect(internal._filterDraftValid()).toBe(true);
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+
+    await open(fixture, 'Name');
+    internal._filterOverlayTextControl.setValue('ta');
+    internal._filterOverlayModeControl.setValue(42);
+    expect(internal._filterDraftMode()).toBe('contains');
+    internal._filterOverlayModeControl.setValue('in');
+    expect(internal._filterDraftMode()).toBe('contains');
+    internal._filterOverlayModeControl.setValue('endsWith');
+    expect(internal._filterDraftValue()).toBe('ta');
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(fixture.componentInstance.filteredData().map((row) => row.name)).toEqual(['Beta']);
+    internal._applyFilterDraft();
+  });
+
+  it('uses a tri-state boolean control without a match-mode selector', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Active');
+    expect(document.querySelector('.neu-table__filter-overlay-mode')).toBeNull();
+    internal._filterOverlayBooleanControl.setValue(false);
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(fixture.componentInstance.filteredData().map((row) => row.name)).toEqual(['Beta']);
+
+    await open(fixture, 'Active');
+    expect(internal._filterOverlayBooleanControl.value).toBe(false);
+    internal._clearFilterDraft();
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(fixture.componentInstance.filteredData()).toEqual(ADVANCED_FILTER_DATA);
+  });
+
+  it('shows existing multiple constraints read-only and preserves them on close', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    const applied: TestAppliedColumnFilter = {
+      operator: 'or',
+      constraints: [
+        { mode: 'startsWith', value: 'Al' },
+        { mode: 'endsWith', value: 'ta' },
+      ],
+    };
+    internal._appliedFilters.set({ name: applied });
+    await settle(fixture);
+
+    await open(fixture, 'Name');
+    expect(internal._filterDraftHasMultipleRules()).toBe(true);
+    expect(document.querySelector('.neu-table__filter-overlay-summary')?.textContent).toContain(
+      'Multiple rules are active',
+    );
+    expect(document.querySelector('.neu-table__filter-overlay-mode')).toBeNull();
+    internal._applyFilterDraft();
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
+    await settle(fixture);
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+  });
+
+  it('uses consumer-provided Spanish labels without a translation service dependency', async () => {
+    const fixture = await createAdvancedTable({
+      advancedFilterTexts: {
+        openFilter: 'Abrir filtro de {column}',
+        filterTitle: 'Filtrar {column}',
+        closeFilter: 'Cerrar filtro de {column}',
+        matchMode: 'Modo de coincidencia',
+        value: 'Valor',
+        clear: 'Limpiar',
+        cancel: 'Cancelar',
+        apply: 'Aplicar',
+      },
+    });
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[aria-label="Abrir filtro de Name"]',
+    )!;
+    trigger.click();
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay-title')?.textContent).toContain(
+      'Filtrar Name',
+    );
+    expect(document.querySelector('.neu-table__filter-overlay-content')?.textContent).toContain(
+      'Aplicar',
+    );
   });
 });
