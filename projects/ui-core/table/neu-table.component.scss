@@ -788,6 +788,33 @@
   }
 }
 
+.neu-table__row--placeholder {
+  pointer-events: none;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+.neu-table__td--placeholder {
+  background-color: var(--neu-surface);
+}
+
+.neu-table__lazy-skeleton {
+  display: block;
+  width: min(100%, 10rem);
+  height: 0.875rem;
+  border-radius: var(--neu-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--neu-surface-2) 0%,
+    var(--neu-surface-3) 50%,
+    var(--neu-surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: neu-skeleton 1.4s ease infinite;
+}
+
 @keyframes neu-skeleton {
   0% {
     background-position: 200% 0;

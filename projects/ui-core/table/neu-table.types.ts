@@ -83,7 +83,7 @@ export type NeuTableSelection<T> = T | readonly T[] | null;
 export interface NeuTableRowSelectionEvent<T = Record<string, unknown>> {
   row: T;
   key: unknown;
-  /** Index in the current data input. */
+  /** Index in the current data input, or the logical index in sparse virtual mode. */
   index: number;
   source: Exclude<NeuTableSelectionSource, 'header'>;
   /** Proposed whole selection after this action. */
@@ -477,6 +477,45 @@ export interface NeuTableQueryState {
   /** Complete applied column filters, including ordered constraints and AND/OR. */
   readonly filters: Readonly<Record<string, NeuTableQueryColumnFilter>>;
   readonly serialization: NeuTableQuerySerializationStatus;
+}
+
+// ── Sparse virtual data ───────────────────────────────────────────
+
+/**
+ * Half-open logical ranges. `first/end` is the overscan-aware requested
+ * window; `visibleFirst/visibleEnd` is the viewport-only window.
+ */
+export interface NeuTableVirtualRange {
+  readonly first: number;
+  readonly end: number;
+  readonly visibleFirst: number;
+  readonly visibleEnd: number;
+}
+
+/** Context for a consumer-owned sparse placeholder. No fake row value is exposed. */
+export interface NeuTableLazyPlaceholderContext<T extends object = NeuTableRow> {
+  /** Logical index, also available as the implicit template value. */
+  readonly $implicit: number;
+  readonly logicalIndex: number;
+  readonly columns: readonly NeuTableColumn<T>[];
+  readonly colspan: number;
+}
+
+export type NeuTableLazyRequestReason =
+  | 'initial'
+  | 'scroll'
+  | 'query'
+  | 'total-change'
+  | 'viewport-change'
+  | 'programmatic';
+
+/** Atomic server fetch proposal for sparse virtual mode. */
+export interface NeuTableLazyRequest {
+  /** Monotonic per Table instance; consumers use this to discard stale responses. */
+  readonly requestId: number;
+  readonly reason: NeuTableLazyRequestReason;
+  readonly query: NeuTableQueryState;
+  readonly range: NeuTableVirtualRange;
 }
 
 // ── Server state ──────────────────────────────────────────────────────────

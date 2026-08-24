@@ -80,10 +80,14 @@ import type {
   NeuTableFilterKind,
   NeuTableFilterMatchMode,
   NeuTableFilterState,
+  NeuTableLazyPlaceholderContext,
+  NeuTableLazyRequest,
+  NeuTableLazyRequestReason,
   NeuTableQueryState,
   NeuTableServerState,
   NeuTableSortEntry,
   NeuTableSortState,
+  NeuTableVirtualRange,
 } from './neu-table.types';
 import {
   NeuTableAdvancedFilterController,
@@ -118,6 +122,10 @@ import {
   type NeuTableRowNavigationIntent,
 } from './neu-table-keyboard.controller';
 import { NeuTableQueryController } from './neu-table-query.controller';
+import {
+  NeuTableLazyDataController,
+  type NeuTableVirtualSlot,
+} from './neu-table-lazy-data.controller';
 
 export type {
   NeuTableAction,
@@ -147,6 +155,9 @@ export type {
   NeuTableFilterKind,
   NeuTableFilterMatchMode,
   NeuTableFilterState,
+  NeuTableLazyPlaceholderContext,
+  NeuTableLazyRequest,
+  NeuTableLazyRequestReason,
   NeuTableQueryColumnFilter,
   NeuTableQueryFilterConstraint,
   NeuTableQuerySerializability,
@@ -156,6 +167,7 @@ export type {
   NeuTableServerState,
   NeuTableSortEntry,
   NeuTableSortState,
+  NeuTableVirtualRange,
   NeuTableRow,
   NeuTableRowKey,
 } from './neu-table.types';
@@ -164,7 +176,14 @@ type NeuTableRuntimeRow<T extends object> = T & Record<string, unknown>;
 
 type NeuTablePageEntry<T extends object> =
   | { kind: 'group'; key: string; label: string; count: number }
-  | { kind: 'row'; key: unknown; row: NeuTableRuntimeRow<T>; rowIndex: number };
+  | { kind: 'placeholder'; key: string; logicalIndex: number }
+  | {
+      kind: 'row';
+      key: unknown;
+      row: NeuTableRuntimeRow<T>;
+      rowIndex: number;
+      logicalIndex: number;
+    };
 
 type NeuTableData<T> = [T] extends [Record<string, unknown>]
   ? readonly T[] | readonly object[]
@@ -779,14 +798,15 @@ export type NeuTableColumnInput<T extends object> =
         [class.neu-table__scroll-container--virtual]="_virtualScrollActive()"
         role="region"
         [attr.aria-label]="title() || tableAriaLabel()"
+        [attr.aria-busy]="loading() ? true : null"
         [style.max-height]="_virtualScrollActive() ? virtualContainerMaxHeight() : null"
         (scroll)="onTableScroll($event)"
       >
-        <table class="neu-table" [attr.aria-rowcount]="filteredData().length">
+        <table class="neu-table" [attr.aria-rowcount]="_logicalTotalItems()">
           <thead class="neu-table__head">
             <tr>
               <!-- Checkbox de selección global -->
-              @if (expandable()) {
+              @if (_expansionEnabled()) {
                 <th class="neu-table__th neu-table__th--expand-col" scope="col"></th>
               }
               @if (selectionEnabled()) {
@@ -998,7 +1018,7 @@ export type NeuTableColumnInput<T extends object> =
             <!-- ── Fila de filtros de columna / Column filter row ── -->
             @if (_hasFilterableCol()) {
               <tr class="neu-table__filter-row">
-                @if (expandable()) {
+                @if (_expansionEnabled()) {
                   <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
                 }
                 @if (selectionEnabled()) {
@@ -1153,7 +1173,7 @@ export type NeuTableColumnInput<T extends object> =
           </thead>
 
           <tbody class="neu-table__body">
-            @if (loading()) {
+            @if (loading() && !_lazyVirtualActive()) {
               <tr class="neu-table__row--loading">
                 <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--center">
                   <div class="neu-table__skeleton-rows">
@@ -1167,7 +1187,7 @@ export type NeuTableColumnInput<T extends object> =
                   </div>
                 </td>
               </tr>
-            } @else if (paginatedData().length === 0) {
+            } @else if (_tableEmpty()) {
               <tr>
                 <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--empty">
                   @if (emptyStateTemplate()) {
@@ -1210,7 +1230,48 @@ export type NeuTableColumnInput<T extends object> =
                 </tr>
               }
               @for (entry of visiblePageEntries(); track entry.key; let entryIdx = $index) {
-                @if (entry.kind === 'group') {
+                @if (entry.kind === 'placeholder') {
+                  <tr
+                    class="neu-table__row neu-table__row--placeholder"
+                    aria-hidden="true"
+                    inert
+                    [style.height.px]="_virtualItemSize()"
+                    [attr.data-neu-table-placeholder-index]="entry.logicalIndex"
+                  >
+                    @if (lazyPlaceholderTemplate(); as placeholderTemplate) {
+                      <ng-container
+                        [ngTemplateOutlet]="placeholderTemplate"
+                        [ngTemplateOutletContext]="lazyPlaceholderContext(entry.logicalIndex)"
+                      />
+                    } @else {
+                      @if (selectionEnabled()) {
+                        <td class="neu-table__td neu-table__th--check"></td>
+                      }
+                      @if (showRowNumbers()) {
+                        <td class="neu-table__td neu-table__td--rn">
+                          <span class="neu-table__lazy-skeleton"></span>
+                        </td>
+                      }
+                      @for (col of visibleColumns(); track col.key) {
+                        <td
+                          class="neu-table__td neu-table__td--placeholder"
+                          [class.neu-table__td--frozen-left]="col.frozen === 'left'"
+                          [class.neu-table__td--frozen-right]="col.frozen === 'right'"
+                          [style.left]="
+                            col.frozen === 'left'
+                              ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
+                              : null
+                          "
+                          [style.width]="columnWidth(col)"
+                          [style.min-width]="columnWidth(col)"
+                          [style.max-width]="columnWidth(col)"
+                        >
+                          <span class="neu-table__lazy-skeleton"></span>
+                        </td>
+                      }
+                    }
+                  </tr>
+                } @else if (entry.kind === 'group') {
                   <tr class="neu-table__group-row">
                     <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--group">
                       {{ groupHeaderLabel() }} {{ entry.label }}
@@ -1221,6 +1282,7 @@ export type NeuTableColumnInput<T extends object> =
                   @let row = entry.row;
                   <tr
                     class="neu-table__row"
+                    [style.height.px]="_virtualScrollActive() ? _virtualItemSize() : null"
                     [class]="getRowClass(row)"
                     [class.neu-table__row--selected]="isRowSelected(row)"
                     [class.neu-table__row--disabled]="!isRowSelectable(row)"
@@ -1233,12 +1295,18 @@ export type NeuTableColumnInput<T extends object> =
                       selectionEnabled() && isRowSelectable(row) ? isRowSelected(row) : null
                     "
                     [attr.aria-disabled]="selectionEnabled() && !isRowSelectable(row) ? true : null"
+                    [attr.aria-rowindex]="
+                      _lazyVirtualActive()
+                        ? entry.logicalIndex + (_hasFilterableCol() ? 3 : 2)
+                        : null
+                    "
+                    [attr.data-neu-table-logical-index]="entry.logicalIndex"
                     (click)="onRowClick(row, $event)"
                     (dblclick)="rowDblClick.emit(row)"
                     (focus)="onRowFocus(row, $event)"
                     (keydown)="onRowKeydown(row, $event)"
                   >
-                    @if (expandable()) {
+                    @if (_expansionEnabled()) {
                       <td
                         class="neu-table__td neu-table__td--expand-col"
                         (click)="$event.stopPropagation()"
@@ -1292,7 +1360,11 @@ export type NeuTableColumnInput<T extends object> =
                     }
                     @if (showRowNumbers()) {
                       <td class="neu-table__td neu-table__td--rn">
-                        {{ visibleRowNumber(entry.rowIndex) }}
+                        {{
+                          visibleRowNumber(
+                            _lazyVirtualActive() ? entry.logicalIndex : entry.rowIndex
+                          )
+                        }}
                       </td>
                     }
                     @for (col of visibleColumns(); track col.key) {
@@ -1412,7 +1484,7 @@ export type NeuTableColumnInput<T extends object> =
                       </td>
                     }
                   </tr>
-                  @if (expandable() && isRowExpanded(row)) {
+                  @if (_expansionEnabled() && isRowExpanded(row)) {
                     <tr class="neu-table__row-expand-detail">
                       <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
                         <div class="neu-table__expand-content">
@@ -1442,7 +1514,7 @@ export type NeuTableColumnInput<T extends object> =
           @if (footerRow()) {
             <tfoot class="neu-table__foot">
               <tr class="neu-table__footer-row">
-                @if (expandable()) {
+                @if (_expansionEnabled()) {
                   <td class="neu-table__td"></td>
                 }
                 @if (selectionEnabled()) {
@@ -1469,7 +1541,7 @@ export type NeuTableColumnInput<T extends object> =
       </div>
 
       <!-- ---- Footer ---- -->
-      @if (!loading() && filteredData().length > 0) {
+      @if (!loading() && filteredData().length > 0 && !_lazyVirtualActive()) {
         <div class="neu-table__footer">
           @if (pagination() && pageSizeOptions().length > 0) {
             <div class="neu-table__page-size">
@@ -1553,13 +1625,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   );
   private readonly _sortController = new NeuTableSortController<T>();
   private readonly _queryController = new NeuTableQueryController<T>();
+  private readonly _lazyDataController = new NeuTableLazyDataController<NeuTableRuntimeRow<T>>();
   private readonly _keyboardController = new NeuTableKeyboardController<unknown>();
   protected readonly _selectionRadioName = `neu-table-selection-${_neuTableSelectionIdSeq++}`;
   private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
   private readonly _platformId = inject(PLATFORM_ID);
   private readonly _document = inject(DOCUMENT);
   private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
-  private readonly _virtualOverscan = 3;
+  private _virtualScrollTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly _filterOverlayUid = _neuTableFilterOverlayIdSeq++;
   private _activeFilterTrigger: HTMLElement | null = null;
   private _lastFilterWorkflowFocus: HTMLElement | null = null;
@@ -1680,6 +1753,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly stickyHeader = input<boolean>(false);
   readonly virtualScroll = input<boolean>(false);
   readonly virtualScrollVisibleItems = input<number>(8);
+  /** Fixed virtual row height in pixels; density height is the fallback. */
+  readonly virtualScrollItemSize = input<number | undefined>(undefined);
+  /** Additional logical rows rendered/requested before and after the viewport. */
+  readonly virtualScrollOverscan = input<number>(3);
+  /** Debounce applied to virtual range rendering and lazy requests. */
+  readonly virtualScrollDelay = input<number>(0);
+  /** Presentation-only cells for unloaded sparse rows; no fake T is exposed. */
+  readonly lazyPlaceholderTemplate = input<
+    TemplateRef<NeuTableLazyPlaceholderContext<T>> | undefined
+  >(undefined);
   readonly resizableColumns = input<boolean>(false);
   readonly reorderableColumns = input<boolean>(false);
   readonly columnChooser = input<boolean>(false);
@@ -1708,6 +1791,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   /** Opt-in one-time initial server/query event after initial inputs and URL restore. */
   readonly lazyLoadOnInit = input<boolean>(false);
   readonly totalItems = input<number | undefined>(undefined);
+  /** Logical index of data[0]. Presence opts server virtual scrolling into sparse mode. */
+  readonly dataFirst = input<number | undefined>(undefined);
   readonly multiSort = input<boolean>(false);
   readonly exportFormats = input<('csv' | 'json' | 'xlsx')[]>(['csv']);
   readonly exportColumns = input<string[]>([]);
@@ -1746,6 +1831,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly serverStateChange = output<NeuTableServerState>();
   /** One immutable canonical proposal per semantic query action. */
   readonly queryChange = output<NeuTableQueryState>();
+  /** Atomic fetch trigger for server-backed sparse virtual scrolling. */
+  readonly lazyRequest = output<NeuTableLazyRequest>();
   readonly searchChange = output<string>();
   /** One immutable canonical snapshot per user sort action. */
   readonly sortChange = output<NeuTableSortState>();
@@ -1930,6 +2017,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this._lastFilterWorkflowFocus = null;
       this._escapeReturnFocus = null;
       this._stopColumnResize();
+      this._cancelPendingVirtualScroll();
       this._disposeAllFilterControls();
     });
 
@@ -2112,6 +2200,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         return;
       }
 
+      if (this._lazyVirtualActive()) return;
+
       this.currentPage();
       this.searchQuery();
       this.sortKey();
@@ -2121,6 +2211,61 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this.effectivePageSize();
       this.paginatedData().length;
       this.resetVirtualScrollPosition();
+    });
+
+    let previousLazyViewport: {
+      total: number;
+      itemSize: number;
+      visibleItems: number;
+      overscan: number;
+    } | null = null;
+    effect(() => {
+      const active = this._lazyVirtualActive();
+      const total = this._logicalTotalItems();
+      const itemSize = this._virtualItemSize();
+      const visibleItems = this._virtualVisibleItems();
+      const overscan = this._virtualOverscan();
+      untracked(() => {
+        if (!active) {
+          previousLazyViewport = null;
+          this._lazyDataController.forgetRange();
+          return;
+        }
+
+        const previous = previousLazyViewport;
+        previousLazyViewport = { total, itemSize, visibleItems, overscan };
+        if (previous === null) return;
+
+        if (total < previous.total) {
+          const maxFirst = Math.max(0, total - visibleItems);
+          const maxScrollTop =
+            maxFirst === 0 ? 0 : this._virtualHeaderHeight() + maxFirst * itemSize;
+          if (this._virtualScrollTop() > maxScrollTop) {
+            this._cancelPendingVirtualScroll();
+            this._virtualScrollTop.set(maxScrollTop);
+            this._scrollVirtualElementTo(maxScrollTop);
+            this._emitLazyRequest('total-change');
+            return;
+          }
+        }
+
+        if (
+          previous.itemSize !== itemSize ||
+          previous.visibleItems !== visibleItems ||
+          previous.overscan !== overscan
+        ) {
+          this._cancelPendingVirtualScroll();
+          this._emitLazyRequest('viewport-change');
+        }
+      });
+    });
+
+    effect(() => {
+      const editing = this._editingCell();
+      const rows = this._rows();
+      if (!editing || !this._lazyVirtualActive()) return;
+      if (rows.some((row) => Object.is(this.getRowKey(row), editing.rowKey))) return;
+      untracked(() => this.cancelCellEdit());
     });
 
     effect(() => {
@@ -2886,6 +3031,26 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this.sortedData().slice((page - 1) * size, page * size);
   });
 
+  /**
+   * Sparse mode is deliberately explicit: existing server/preloaded virtual
+   * tables do not change behavior until a logical data window start is bound.
+   */
+  readonly _lazyVirtualActive = computed(
+    () =>
+      this.serverSide() &&
+      this.virtualScroll() &&
+      this.dataFirst() !== undefined &&
+      this.totalItems() !== undefined,
+  );
+
+  readonly _logicalTotalItems = computed(() =>
+    this._lazyVirtualActive()
+      ? this._lazyDataController.total(this.totalItems())
+      : this.filteredData().length,
+  );
+
+  readonly _tableEmpty = computed(() => this._logicalTotalItems() === 0);
+
   readonly _virtualRowHeight = computed(() => {
     switch (this.density()) {
       case 'compact':
@@ -2897,15 +3062,43 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     }
   });
 
+  readonly _virtualItemSize = computed(() =>
+    this._lazyDataController.itemSize(this.virtualScrollItemSize(), this._virtualRowHeight()),
+  );
+
+  readonly _virtualVisibleItems = computed(() =>
+    Math.max(1, Math.floor(this.virtualScrollVisibleItems()) || 1),
+  );
+
+  readonly _virtualOverscan = computed(() =>
+    Math.max(0, Math.floor(this.virtualScrollOverscan()) || 0),
+  );
+
+  readonly _virtualDelay = computed(() => Math.max(0, Math.floor(this.virtualScrollDelay()) || 0));
+
   readonly _virtualHeaderHeight = computed(() => 44 + (this._hasFilterableCol() ? 52 : 0));
 
   readonly _virtualScrollActive = computed(
-    () => this.virtualScroll() && this.paginatedData().length > this.virtualScrollVisibleItems(),
+    () =>
+      this.virtualScroll() &&
+      (this._lazyVirtualActive() || this.paginatedData().length > this._virtualVisibleItems()),
   );
 
   readonly virtualContainerMaxHeight = computed(
     () =>
-      `${this._virtualHeaderHeight() + this.virtualScrollVisibleItems() * this._virtualRowHeight()}px`,
+      `${this._virtualHeaderHeight() + this._virtualVisibleItems() * this._virtualItemSize()}px`,
+  );
+
+  readonly _virtualRange = computed<NeuTableVirtualRange>(() =>
+    this._lazyDataController.range({
+      scrollTop: Math.max(0, this._virtualScrollTop() - this._virtualHeaderHeight()),
+      itemSize: this._virtualItemSize(),
+      visibleItems: this._virtualVisibleItems(),
+      totalItems: this._lazyVirtualActive()
+        ? this._logicalTotalItems()
+        : this.paginatedData().length,
+      overscan: this._virtualOverscan(),
+    }),
   );
 
   readonly _virtualStartIndex = computed(() => {
@@ -2913,9 +3106,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return 0;
     }
 
+    if (this._lazyVirtualActive()) return this._virtualRange().first;
+
     const bodyScrollTop = Math.max(0, this._virtualScrollTop() - this._virtualHeaderHeight());
-    const startIndex = Math.floor(bodyScrollTop / this._virtualRowHeight());
-    return Math.max(0, startIndex - this._virtualOverscan);
+    const startIndex = Math.floor(bodyScrollTop / this._virtualItemSize());
+    return Math.max(0, startIndex - this._virtualOverscan());
   });
 
   readonly _virtualEndIndex = computed(() => {
@@ -2923,13 +3118,24 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return this.paginatedData().length;
     }
 
+    if (this._lazyVirtualActive()) return this._virtualRange().end;
+
     return Math.min(
       this.paginatedData().length,
-      this._virtualStartIndex() + this.virtualScrollVisibleItems() + this._virtualOverscan * 2,
+      this._virtualStartIndex() + this._virtualVisibleItems() + this._virtualOverscan() * 2,
     );
   });
 
   readonly visiblePageRows = computed(() => {
+    if (this._lazyVirtualActive()) {
+      return this._virtualSlots()
+        .filter(
+          (slot): slot is Extract<NeuTableVirtualSlot<NeuTableRuntimeRow<T>>, { kind: 'loaded' }> =>
+            slot.kind === 'loaded',
+        )
+        .map((slot) => slot.row);
+    }
+
     const rows = this.paginatedData();
     if (!this._virtualScrollActive()) {
       return rows;
@@ -2938,12 +3144,38 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return rows.slice(this._virtualStartIndex(), this._virtualEndIndex());
   });
 
+  readonly _virtualSlots = computed(() =>
+    this._lazyVirtualActive()
+      ? this._lazyDataController.slots(this._virtualRange(), this.dataFirst()!, this._rows())
+      : Object.freeze([] as NeuTableVirtualSlot<NeuTableRuntimeRow<T>>[]),
+  );
+
+  readonly _expansionEnabled = computed(() => this.expandable() && !this._lazyVirtualActive());
+
   private readonly _navigableRows = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (!this.selectionEnabled()) return [];
     return this.visiblePageRows().filter((row) => this.isRowSelectable(row));
   });
 
   readonly visiblePageEntries = computed<NeuTablePageEntry<T>[]>(() => {
+    if (this._lazyVirtualActive()) {
+      return this._virtualSlots().map((slot) =>
+        slot.kind === 'placeholder'
+          ? {
+              kind: 'placeholder' as const,
+              key: `placeholder:${slot.logicalIndex}`,
+              logicalIndex: slot.logicalIndex,
+            }
+          : {
+              kind: 'row' as const,
+              key: this.getRowKey(slot.row),
+              row: slot.row,
+              rowIndex: slot.logicalIndex - this._virtualRange().first,
+              logicalIndex: slot.logicalIndex,
+            },
+      );
+    }
+
     const rows = this.visiblePageRows();
     const groupKey = this.groupBy();
     if (!groupKey) {
@@ -2952,6 +3184,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         key: this.getRowKey(row),
         row,
         rowIndex,
+        logicalIndex:
+          (this.pagination() ? (this.currentPage() - 1) * this.effectivePageSize() : 0) +
+          this._virtualStartIndex() +
+          rowIndex,
       }));
     }
 
@@ -2979,6 +3215,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         key: this.getRowKey(row),
         row,
         rowIndex,
+        logicalIndex:
+          (this.pagination() ? (this.currentPage() - 1) * this.effectivePageSize() : 0) +
+          this._virtualStartIndex() +
+          rowIndex,
       });
     });
     return entries;
@@ -2989,7 +3229,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return 0;
     }
 
-    return this._virtualStartIndex() * this._virtualRowHeight();
+    return this._virtualStartIndex() * this._virtualItemSize();
   });
 
   readonly _virtualBottomSpacerHeight = computed(() => {
@@ -2999,7 +3239,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
     return Math.max(
       0,
-      (this.paginatedData().length - this._virtualEndIndex()) * this._virtualRowHeight(),
+      ((this._lazyVirtualActive() ? this._logicalTotalItems() : this.paginatedData().length) -
+        this._virtualEndIndex()) *
+        this._virtualItemSize(),
     );
   });
 
@@ -3029,7 +3271,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly totalColspan = computed(() => {
     let cols = this.visibleColumns().length;
     if (this.selectionEnabled()) cols++;
-    if (this.expandable()) cols++;
+    if (this._expansionEnabled()) cols++;
     if (this.showRowNumbers()) cols++;
     return cols;
   });
@@ -3220,6 +3462,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   expandRow(row: T): void {
+    if (this._lazyVirtualActive()) return;
     const key = this.getRowKey(row);
     const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
     set.add(key);
@@ -3227,6 +3470,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   collapseRow(row: T): void {
+    if (this._lazyVirtualActive()) return;
     const key = this.getRowKey(row);
     const set = new Set(this._expandedKeys());
     set.delete(key);
@@ -3234,6 +3478,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   toggleExpand(row: T): void {
+    if (this._lazyVirtualActive()) return;
     const key = this.getRowKey(row);
     const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
     if (this._expandedKeys().has(key)) set.delete(key);
@@ -3289,7 +3534,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       'filtered',
       this.paginatedData(),
       this.filteredData(),
-      (row, index) => this._rowSelectableAt(row, index),
+      (row) => this._rowSelectableAt(row, this._logicalRowIndex(row)),
       this._rows(),
     ),
   );
@@ -3299,7 +3544,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this.selectAllScope(),
       this.paginatedData(),
       this.filteredData(),
-      (row, index) => this._rowSelectableAt(row, index),
+      (row) => this._rowSelectableAt(row, this._logicalRowIndex(row)),
       this._rows(),
     ),
   );
@@ -3328,7 +3573,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   isRowSelectable(row: T): boolean {
-    return this._rowSelectableAt(row, this._selectionController.indexOf(row, this._rows()));
+    return this._rowSelectableAt(row, this._logicalRowIndex(row));
   }
 
   toggleRow(
@@ -3418,7 +3663,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const event = {
       row,
       key: this.getRowKey(row),
-      index: this._selectionController.indexOf(row, this._rows()),
+      index: this._logicalRowIndex(row),
       source,
       selection: [...selection],
     } satisfies NeuTableRowSelectionEvent<T>;
@@ -3435,7 +3680,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         this.rowUnselect.emit({
           row: previousRow,
           key,
-          index: this._selectionController.indexOf(previousRow, this._rows()),
+          index: this._logicalRowIndex(previousRow),
           source,
           selection: [...selection],
         });
@@ -3457,8 +3702,15 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this.rowSelectable()?.(row, index) ?? true;
   }
 
+  private _logicalRowIndex(row: T): number {
+    const localIndex = this._selectionController.indexOf(row, this._rows());
+    if (!this._lazyVirtualActive() || localIndex < 0) return localIndex;
+    return Math.max(0, Math.floor(this.dataFirst() ?? 0)) + localIndex;
+  }
+
   // ── Navegación ────────────────────────────────────────────────────────
   goToPage(page: number): void {
+    if (this._lazyVirtualActive()) return;
     const clamped = Math.max(1, Math.min(page, this.totalPages()));
     const changed = this._state.setPage(clamped, 'ui');
     if (!changed) return;
@@ -3881,7 +4133,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return;
     }
 
-    this._virtualScrollTop.set((event.target as HTMLElement).scrollTop);
+    const scrollTop = (event.target as HTMLElement).scrollTop;
+    const applyScroll = () => {
+      this._virtualScrollTimer = null;
+      if (this._destroyed) return;
+      this._virtualScrollTop.set(scrollTop);
+      if (this._lazyVirtualActive()) this._emitLazyRequest('scroll');
+    };
+
+    this._cancelPendingVirtualScroll();
+    const delay = this._virtualDelay();
+    if (delay === 0) applyScroll();
+    else this._virtualScrollTimer = setTimeout(applyScroll, delay);
   }
 
   /**
@@ -3937,17 +4200,80 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   visibleRowNumber(rowIdx: number): number {
+    if (this._lazyVirtualActive()) return rowIdx + 1;
     return (
       (this.currentPage() - 1) * this.effectivePageSize() + this._virtualStartIndex() + rowIdx + 1
     );
   }
 
-  private resetVirtualScrollPosition(): void {
+  /** Moves a virtual Table to a logical row without requiring a loaded T object. */
+  scrollToIndex(index: number, behavior: ScrollBehavior = 'auto'): void {
+    const total = this._logicalTotalItems();
+    if (!this.virtualScroll() || total === 0) {
+      this.resetVirtualScroll(behavior);
+      return;
+    }
+    const normalized = Number.isFinite(index) ? Math.floor(index) : 0;
+    const clamped = Math.max(0, Math.min(normalized, total - 1));
+    const visibleItems = this._virtualVisibleItems();
+    const visibleFirst = Math.min(clamped, Math.max(0, total - visibleItems));
+    this._moveVirtualViewport(visibleFirst * this._virtualItemSize(), behavior);
+  }
+
+  /** Moves to a vertical pixel offset measured from the first logical row. */
+  scrollToOffset(offset: number, behavior: ScrollBehavior = 'auto'): void {
+    const normalized = Number.isFinite(offset) ? Math.max(0, offset) : 0;
+    const total = this._logicalTotalItems();
+    const visibleItems = this._virtualVisibleItems();
+    const maxOffset = Math.max(0, total - visibleItems) * this._virtualItemSize();
+    this._moveVirtualViewport(Math.min(normalized, maxOffset), behavior);
+  }
+
+  /** Resets virtual positioning to the first logical row. */
+  resetVirtualScroll(behavior: ScrollBehavior = 'auto'): void {
+    this._cancelPendingVirtualScroll();
     this._virtualScrollTop.set(0);
+    this._scrollVirtualElementTo(0, behavior);
+    if (this._lazyVirtualActive()) this._emitLazyRequest('programmatic');
+  }
+
+  private resetVirtualScrollPosition(): void {
+    this._cancelPendingVirtualScroll();
+    this._virtualScrollTop.set(0);
+    this._scrollVirtualElementTo(0);
+  }
+
+  private _moveVirtualViewport(bodyOffset: number, behavior: ScrollBehavior): void {
+    this._cancelPendingVirtualScroll();
+    const top = bodyOffset === 0 ? 0 : this._virtualHeaderHeight() + bodyOffset;
+    this._virtualScrollTop.set(top);
+    this._scrollVirtualElementTo(top, behavior);
+    if (this._lazyVirtualActive()) this._emitLazyRequest('programmatic');
+  }
+
+  private _cancelPendingVirtualScroll(): void {
+    if (this._virtualScrollTimer === null) return;
+    clearTimeout(this._virtualScrollTimer);
+    this._virtualScrollTimer = null;
+  }
+
+  private _scrollVirtualElementTo(top: number, behavior: ScrollBehavior = 'auto'): void {
     if (!isPlatformBrowser(this._platformId)) return;
     requestAnimationFrame(() => {
-      this._scrollContainer()?.nativeElement.scrollTo({ top: 0 });
+      const element = this._scrollContainer()?.nativeElement;
+      if (!element) return;
+      if (typeof element.scrollTo === 'function') element.scrollTo({ top, behavior });
+      else element.scrollTop = top;
     });
+  }
+
+  protected lazyPlaceholderContext(logicalIndex: number): NeuTableLazyPlaceholderContext<T> {
+    return {
+      $implicit: logicalIndex,
+      logicalIndex,
+      columns: this.visibleColumns(),
+      colspan: this.totalColspan(),
+    };
   }
 
   getRowClass(row: T): string {
@@ -4687,9 +5013,23 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return;
     }
     this._lastEmittedQuery = query;
+    if (this._lazyVirtualActive()) this.resetVirtualScrollPosition();
     this.queryChange.emit(query);
     if (!this.serverSide()) return;
     this.serverStateChange.emit(this._legacyServerState(query, state));
+    if (this._lazyVirtualActive()) {
+      this._emitLazyRequest(force ? 'initial' : 'query', query, true);
+    }
+  }
+
+  private _emitLazyRequest(
+    reason: NeuTableLazyRequestReason,
+    query = this._queryController.build(this._state.snapshot(), this._queryConfig()),
+    force = false,
+  ): void {
+    if (!this._lazyVirtualActive()) return;
+    const request = this._lazyDataController.request(query, this._virtualRange(), reason, force);
+    if (request) this.lazyRequest.emit(request);
   }
 
   /** Internal F4 compatibility shim; all projection logic lives in the query controller. */
