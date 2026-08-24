@@ -1055,6 +1055,7 @@
         "clearFilterLabel",
         "clearSearchAriaLabel",
         "clearSelectionLabel",
+        "collapseRowAriaLabel",
         "columnChooser",
         "columnChooserLabel",
         "columns",
@@ -1134,6 +1135,7 @@
         "title",
         "toolbarExtraRef",
         "totalItems",
+        "unselectRowAriaLabel",
         "useUrlState",
         "virtualScroll",
         "virtualScrollVisibleItems"

@@ -111,6 +111,10 @@ import {
 } from './neu-table-url-state.adapter';
 import { NeuTableSelectionController } from './neu-table-selection.controller';
 import { NeuTableSortController } from './neu-table-sort.controller';
+import {
+  NeuTableKeyboardController,
+  type NeuTableRowNavigationIntent,
+} from './neu-table-keyboard.controller';
 
 export type {
   NeuTableAction,
@@ -817,7 +821,12 @@ export type NeuTableColumnInput<T extends object> =
                   [style.max-width]="columnWidth(col)"
                   [style.text-align]="col.align ?? 'left'"
                   scope="col"
-                  (click)="sortable() && col.sortable !== false ? sortBy(col.key, $event) : null"
+                  [attr.tabindex]="sortable() && col.sortable !== false ? 0 : null"
+                  [attr.aria-sort]="
+                    sortable() && col.sortable !== false ? sortAriaValue(col.key) : null
+                  "
+                  (click)="onSortableHeaderClick(col.key, $event)"
+                  (keydown)="onSortableHeaderKeydown(col.key, $event)"
                 >
                   @if (reorderableColumns()) {
                     <span class="neu-table__reorder-controls" (click)="$event.stopPropagation()">
@@ -945,6 +954,9 @@ export type NeuTableColumnInput<T extends object> =
                     </ng-template>
                   }
                   @if (sortable() && col.sortable !== false) {
+                    @if (sortPriorityDescription(col.key); as description) {
+                      <span class="sr-only">{{ description }}</span>
+                    }
                     <span class="neu-table__sort-icon" aria-hidden="true">
                       @if (multiSort()) {
                         @let pri = getSortPriority(col.key);
@@ -1211,10 +1223,16 @@ export type NeuTableColumnInput<T extends object> =
                   [class.neu-table__row--clickable]="
                     selectionEnabled() && selectOnRowClick() && isRowSelectable(row)
                   "
-                  [attr.aria-selected]="selectionEnabled() ? isRowSelected(row) : null"
+                  [attr.tabindex]="rowTabIndex(row)"
+                  [attr.data-neu-table-navigable]="isNavigableRow(row) ? 'true' : null"
+                  [attr.aria-selected]="
+                    selectionEnabled() && isRowSelectable(row) ? isRowSelected(row) : null
+                  "
                   [attr.aria-disabled]="selectionEnabled() && !isRowSelectable(row) ? true : null"
                   (click)="onRowClick(row, $event)"
                   (dblclick)="rowDblClick.emit(row)"
+                  (focus)="onRowFocus(row, $event)"
+                  (keydown)="onRowKeydown(row, $event)"
                 >
                   @if (expandable()) {
                     <td
@@ -1227,7 +1245,7 @@ export type NeuTableColumnInput<T extends object> =
                         (click)="toggleExpand(row)"
                         [class.neu-table__expand-btn--open]="isRowExpanded(row)"
                         [attr.aria-expanded]="isRowExpanded(row)"
-                        [attr.aria-label]="expandRowAriaLabel()"
+                        [attr.aria-label]="rowExpansionAriaLabel(row)"
                       >
                         <svg
                           viewBox="0 0 24 24"
@@ -1252,7 +1270,7 @@ export type NeuTableColumnInput<T extends object> =
                           class="neu-table__checkbox"
                           [checked]="isRowSelected(row)"
                           [disabled]="!isRowSelectable(row)"
-                          [ariaLabel]="selectRowAriaLabel()"
+                          [ariaLabel]="rowSelectionAriaLabel(row)"
                           (checkedChange)="toggleRow(row, 'checkbox')"
                         />
                       } @else {
@@ -1262,7 +1280,7 @@ export type NeuTableColumnInput<T extends object> =
                           [name]="_selectionRadioName"
                           [checked]="isRowSelected(row)"
                           [disabled]="!isRowSelectable(row)"
-                          [attr.aria-label]="selectRowAriaLabel()"
+                          [attr.aria-label]="rowSelectionAriaLabel(row)"
                           (change)="toggleRow(row, 'radio')"
                         />
                       }
@@ -1528,6 +1546,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this.getRowKey(row),
   );
   private readonly _sortController = new NeuTableSortController<T>();
+  private readonly _keyboardController = new NeuTableKeyboardController<unknown>();
   protected readonly _selectionRadioName = `neu-table-selection-${_neuTableSelectionIdSeq++}`;
   private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
   private readonly _platformId = inject(PLATFORM_ID);
@@ -1611,7 +1630,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   /** Optional override; when omitted the accessible label follows selectAllScope. */
   readonly selectAllAriaLabel = input<string | undefined>(undefined);
   readonly selectRowAriaLabel = input<string>('Select row');
+  readonly unselectRowAriaLabel = input<string>('Unselect row');
   readonly expandRowAriaLabel = input<string>('Expand row');
+  readonly collapseRowAriaLabel = input<string>('Collapse row');
   readonly filterPlaceholder = input<string>('Filter...');
   readonly filterAriaPrefix = input<string>('Filter by');
   readonly filterFromLabel = input<string>('From');
@@ -2040,6 +2061,26 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this.effectivePageSize();
       this.paginatedData().length;
       this.resetVirtualScrollPosition();
+    });
+
+    effect(() => {
+      const keys = this._navigableRows().map((row) => this.getRowKey(row));
+      const selected = this._selectedKeys();
+      untracked(() => this._keyboardController.reconcile(keys, selected));
+    });
+
+    let keyboardAnchorInitialized = false;
+    effect(() => {
+      this.currentPage();
+      this.searchQuery();
+      this.currentSort();
+      this._appliedFilters();
+      this.data();
+      this.effectiveSelectionMode();
+      untracked(() => {
+        if (keyboardAnchorInitialized) this._keyboardController.resetAnchor();
+        keyboardAnchorInitialized = true;
+      });
     });
   }
 
@@ -2807,6 +2848,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return rows.slice(this._virtualStartIndex(), this._virtualEndIndex());
   });
 
+  private readonly _navigableRows = computed<NeuTableRuntimeRow<T>[]>(() => {
+    if (!this.selectionEnabled()) return [];
+    return this.visiblePageRows().filter((row) => this.isRowSelectable(row));
+  });
+
   readonly visiblePageEntries = computed<NeuTablePageEntry<T>[]>(() => {
     const rows = this.visiblePageRows();
     const groupKey = this.groupBy();
@@ -3222,7 +3268,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       replaceMultiple,
     );
     this._applyRowSelection(row, next, source);
+    if (source !== 'api') {
+      const key = this.getRowKey(row);
+      this._keyboardController.focus(key, this._navigableRowKeys());
+      this._keyboardController.establishAnchor(key);
     }
+  }
 
   selectRow(row: T): void {
     if (!this.isRowSelectable(row) || this.isRowSelected(row)) return;
@@ -3361,9 +3412,184 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     }
   }
 
+  protected sortAriaValue(key: string): 'none' | 'ascending' | 'descending' | null {
+    const activeIndex = this.currentSort().findIndex((entry) => entry.key === key);
+    if (activeIndex < 0) return 'none';
+    // ARIA cannot encode multi-sort priority and recommends only one aria-sort
+    // header per table. Secondary keys are announced by the adjacent text.
+    if (this.multiSort() && activeIndex > 0) return null;
+    return this.currentSort()[activeIndex].dir === 'asc' ? 'ascending' : 'descending';
+  }
+
+  protected sortPriorityDescription(key: string): string | null {
+    if (!this.multiSort()) return null;
+    const priority = this.getSortPriority(key);
+    if (priority < 0) return null;
+    const direction = this.currentSort()[priority]?.dir === 'desc' ? 'descending' : 'ascending';
+    return `Sort priority ${priority + 1}, ${direction}.`;
+  }
+
+  protected onSortableHeaderClick(key: string, event: MouseEvent): void {
+    if (
+      !this.sortable() ||
+      this._currentTypedColumn(key)?.sortable === false ||
+      this._eventOriginatesFromInteractiveDescendant(event)
+    ) {
+      return;
+    }
+    this.sortBy(key, event);
+  }
+
+  protected onSortableHeaderKeydown(key: string, event: KeyboardEvent): void {
+    if (
+      event.target !== event.currentTarget ||
+      event.repeat ||
+      !this.sortable() ||
+      (event.key !== 'Enter' && event.key !== ' ')
+    ) {
+      return;
+    }
+    const column = this._currentTypedColumn(key);
+    if (!column || column.sortable === false) return;
+    event.preventDefault();
+    this.sortBy(key, event as unknown as MouseEvent);
+  }
+
   onRowClick(row: T, event: MouseEvent): void {
-    if (this.selectionEnabled() && this.selectOnRowClick()) this.toggleRow(row, 'row', event);
+    if (this.selectionEnabled() && this.selectOnRowClick() && this.isRowSelectable(row)) {
+      if (this.multipleSelection() && event.shiftKey) {
+        this._applyRangeSelection(row);
+      } else {
+        this.toggleRow(row, 'row', event);
+      }
+    }
     this.rowClick.emit(row);
+  }
+
+  protected isNavigableRow(row: T): boolean {
+    return this.selectionEnabled() && this.isRowSelectable(row);
+  }
+
+  protected rowTabIndex(row: T): number | null {
+    if (!this.isNavigableRow(row)) return null;
+    const key = this.getRowKey(row);
+    if (!Object.is(this._keyboardController.focusedKey(), key)) return -1;
+    return this._navigableRows().find((candidate) => Object.is(this.getRowKey(candidate), key)) ===
+      row
+      ? 0
+      : -1;
+  }
+
+  protected rowSelectionAriaLabel(row: T): string {
+    return this.multipleSelection() && this.isRowSelected(row)
+      ? this.unselectRowAriaLabel()
+      : this.selectRowAriaLabel();
+  }
+
+  protected rowExpansionAriaLabel(row: T): string {
+    return this.isRowExpanded(row) ? this.collapseRowAriaLabel() : this.expandRowAriaLabel();
+  }
+
+  protected onRowFocus(row: T, event: FocusEvent): void {
+    if (event.target !== event.currentTarget || !this.isNavigableRow(row)) return;
+    this._keyboardController.focus(this.getRowKey(row), this._navigableRowKeys());
+  }
+
+  protected onRowKeydown(row: T, event: KeyboardEvent): void {
+    if (event.target !== event.currentTarget || !this.isNavigableRow(row)) return;
+    const key = event.key;
+    const currentKey = this.getRowKey(row);
+    const navigableRows = this._navigableRows();
+    const navigableKeys = navigableRows.map((candidate) => this.getRowKey(candidate));
+    this._keyboardController.focus(currentKey, navigableKeys);
+
+    if (
+      this.multipleSelection() &&
+      (event.ctrlKey || event.metaKey) &&
+      !event.altKey &&
+      key.toLowerCase() === 'a'
+    ) {
+      event.preventDefault();
+      this.toggleAll();
+      return;
+    }
+
+    if (key === 'Enter' || key === ' ') {
+      event.preventDefault();
+      if (this.multipleSelection() && event.shiftKey) {
+        this._applyRangeSelection(row);
+      } else {
+        this.toggleRow(row, 'row', event as unknown as MouseEvent);
+      }
+      return;
+    }
+
+    let intent: NeuTableRowNavigationIntent | null = null;
+    if (key === 'ArrowUp') intent = 'previous';
+    if (key === 'ArrowDown') intent = 'next';
+    if (key === 'Home') intent = 'first';
+    if (key === 'End') intent = 'last';
+    if (!intent) return;
+
+    event.preventDefault();
+    const extendRange = this.multipleSelection() && event.shiftKey;
+    if (extendRange) this._keyboardController.ensureAnchor(currentKey);
+    const nextKey = this._keyboardController.move(navigableKeys, currentKey, intent);
+    if (nextKey === null) return;
+    const nextRow = navigableRows.find((candidate) =>
+      Object.is(this.getRowKey(candidate), nextKey),
+    );
+    if (!nextRow) return;
+    if (extendRange) this._applyRangeSelection(nextRow, currentKey);
+    this._focusKeyboardRow(nextKey);
+  }
+
+  private _navigableRowKeys(): unknown[] {
+    return this._navigableRows().map((row) => this.getRowKey(row));
+  }
+
+  private _applyRangeSelection(row: T, fallbackAnchor = this.getRowKey(row)): void {
+    if (!this.multipleSelection() || !this.isRowSelectable(row)) return;
+    const rows = this._navigableRows();
+    const keys = rows.map((candidate) => this.getRowKey(candidate));
+    const targetKey = this.getRowKey(row);
+    const range = this._keyboardController.transitionRange(keys, targetKey, fallbackAnchor);
+    if (range.current.length === 0) return;
+    this._keyboardController.focus(targetKey, keys);
+
+    const next = new Set(this._selectedKeys());
+    for (const key of range.previous) next.delete(key);
+    for (const key of range.current) next.add(key);
+    const changed = this._state.setSelectionKeys(next, 'ui');
+    if (!changed) return;
+    this.selectionChange.emit([...this._resolveSelection(next)]);
+  }
+
+  private _focusKeyboardRow(key: unknown): void {
+    if (!isPlatformBrowser(this._platformId)) return;
+    const index = this._navigableRowKeys().findIndex((candidate) => Object.is(candidate, key));
+    if (index < 0) return;
+    const rows = this._scrollContainer()?.nativeElement.querySelectorAll<HTMLElement>(
+      '.neu-table__row[data-neu-table-navigable="true"]',
+    );
+    rows?.item(index)?.focus();
+  }
+
+  private _eventOriginatesFromInteractiveDescendant(event: Event): boolean {
+    const currentTarget = event.currentTarget;
+    for (const target of event.composedPath()) {
+      if (target === currentTarget) return false;
+      if (!(target instanceof HTMLElement)) continue;
+      if (
+        target.matches(
+          'a[href], button, input, select, textarea, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="checkbox"], [role="combobox"], [role="link"], [role="radio"], [role="slider"], [role="spinbutton"], [role="switch"], [role="textbox"]',
+        ) ||
+        target.tabIndex >= 0
+      ) {
+        return true;
+      }
+    }
+    return event.target !== currentTarget;
   }
 
   onSearch(event: Event): void {
