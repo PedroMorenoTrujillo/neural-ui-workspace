@@ -395,14 +395,40 @@ export interface NeuTableSortEntry {
   dir: 'asc' | 'desc';
 }
 
+/** Public current/controlled sort shape. Empty means no active sort. */
+export type NeuTableSortState = readonly NeuTableSortEntry[];
+
+/** A computed global-search value. `serverField` is optional backend metadata. */
+export interface NeuTableGlobalFilterAccessor<T = NeuTableRow> {
+  accessor: NeuTableFilterAccessor<T>;
+  /** Stable backend field identifier; the accessor function itself is never serialized. */
+  serverField?: string;
+}
+
+/** Direct row fields stay typed; computed values opt into an accessor. */
+export type NeuTableGlobalFilterField<T = NeuTableRow> =
+  | NeuTableColumnKey<T>
+  | NeuTableGlobalFilterAccessor<T>;
+
 // ── Server state ──────────────────────────────────────────────────────────
 export interface NeuTableServerState {
   page: number;
   pageSize: number;
   search: string;
+  /**
+   * Legacy single-sort projection. Empty string plus `asc` represents no active single sort.
+   * Prefer `sort` for an explicit nullable state.
+   */
   sortKey: string;
+  /** Legacy direction paired with `sortKey`. Prefer `sort` for new integrations. */
   sortDir: 'asc' | 'desc';
+  /** Explicit single-sort projection. Null in unsorted and multisort modes. */
+  sort?: NeuTableSortEntry | null;
   sortEntries: NeuTableSortEntry[];
+  /** Serializable configured global fields. Omitted when the default all-column policy applies. */
+  globalFilterFields?: string[];
+  /** True when at least one configured global field is an accessor without backend metadata. */
+  localOnlyGlobalFilterFields?: boolean;
   columnFilters: Record<string, unknown>;
   /** Typed filter state. Legacy columnFilters remains unchanged. */
   typedColumnFilters?: Record<string, NeuTableFilterState>;
@@ -433,6 +459,10 @@ export interface NeuTableColumn<T = Record<string, unknown>, K extends string = 
   cellTemplate?: TemplateRef<{ $implicit: T; row: T; column: NeuTableColumn<T, K> }>;
   cellClass?: string;
   sortable?: boolean;
+  /** Value used by built-in sorting, independent of display rendering. */
+  sortAccessor?: (row: T) => unknown;
+  /** Ascending/base row comparator; Table applies the active direction exactly once. */
+  sortComparator?: (a: T, b: T) => number;
   resizable?: boolean;
   type?: NeuTableCellType;
   // Badge

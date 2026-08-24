@@ -117,7 +117,7 @@ describe('NeuTable canonical state integration', () => {
     });
   });
 
-  it('restores URL state into the canonical boundary', async () => {
+  it('restores URL state using the active sort mode as canonical precedence', async () => {
     const router = TestBed.inject(Router);
     await router.navigate([], {
       queryParams: {
@@ -139,7 +139,7 @@ describe('NeuTable canonical state integration', () => {
     const state = (fixture.componentInstance as any)._state.snapshot();
     expect(state.page).toBe(2);
     expect(state.search).toBe('Beta');
-    expect(state.sort).toEqual({ key: 'name', dir: 'desc' });
+    expect(state.sort).toBeNull();
     expect(state.sortEntries).toEqual([
       { key: 'name', dir: 'asc' },
       { key: 'id', dir: 'desc' },
@@ -390,7 +390,7 @@ describe('NeuTable canonical state integration', () => {
     expect(events).toHaveLength(0);
   });
 
-  it('does not add server multisort behavior beyond the E5 contract', async () => {
+  it('projects complete ordered server multisort metadata once', async () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
@@ -403,10 +403,19 @@ describe('NeuTable canonical state integration', () => {
     fixture.componentInstance.serverStateChange.subscribe((event) => events.push(event));
 
     fixture.componentInstance.sortBy('name', { shiftKey: true } as MouseEvent);
+    fixture.componentInstance.sortBy('id', { shiftKey: true } as MouseEvent);
 
-    expect(events).toEqual([]);
+    expect(events).toHaveLength(2);
+    expect(events[1]).toMatchObject({
+      page: 1,
+      sortEntries: [
+        { key: 'name', dir: 'asc' },
+        { key: 'id', dir: 'asc' },
+      ],
+    });
     expect((fixture.componentInstance as any)._state.sortEntries()).toEqual([
       { key: 'name', dir: 'asc' },
+      { key: 'id', dir: 'asc' },
     ]);
   });
 

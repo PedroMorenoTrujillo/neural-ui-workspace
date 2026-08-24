@@ -76,11 +76,14 @@ import type {
   NeuTableDatePoint,
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
+  NeuTableGlobalFilterAccessor,
+  NeuTableGlobalFilterField,
   NeuTableFilterKind,
   NeuTableFilterMatchMode,
   NeuTableFilterState,
   NeuTableServerState,
   NeuTableSortEntry,
+  NeuTableSortState,
 } from './neu-table.types';
 import {
   NeuTableAdvancedFilterController,
@@ -107,6 +110,7 @@ import {
   type InternalNeuTableUrlStateConfig,
 } from './neu-table-url-state.adapter';
 import { NeuTableSelectionController } from './neu-table-selection.controller';
+import { NeuTableSortController } from './neu-table-sort.controller';
 
 export type {
   NeuTableAction,
@@ -131,12 +135,15 @@ export type {
   NeuTableDatePoint,
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
+  NeuTableGlobalFilterAccessor,
+  NeuTableGlobalFilterField,
   NeuTableFilterKind,
   NeuTableFilterMatchMode,
   NeuTableFilterState,
   NeuTableNumberRangeValue,
   NeuTableServerState,
   NeuTableSortEntry,
+  NeuTableSortState,
   NeuTableRow,
   NeuTableRowKey,
 } from './neu-table.types';
@@ -163,6 +170,10 @@ interface InternalResolvedAppliedColumnFilter<T> {
   column: NeuTableColumn<T>;
   operator: InternalAppliedFilterOperator;
   constraints: readonly InternalAppliedFilterConstraint[];
+}
+
+interface InternalResolvedGlobalFilterField<T> {
+  values: (row: T) => readonly unknown[];
 }
 
 type InternalResolvedAdvancedFilterTexts = Required<NeuTableAdvancedFilterTexts>;
@@ -1516,6 +1527,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _selectionController = new NeuTableSelectionController<T, unknown>((row) =>
     this.getRowKey(row),
   );
+  private readonly _sortController = new NeuTableSortController<T>();
   protected readonly _selectionRadioName = `neu-table-selection-${_neuTableSelectionIdSeq++}`;
   private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
   private readonly _platformId = inject(PLATFORM_ID);
@@ -1611,6 +1623,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly resultLabelSingular = input<string>('result');
   readonly resultLabelPlural = input<string>('results');
   readonly sortable = input<boolean>(false);
+  /** Opt-in asc -> desc -> unsorted cycle. The legacy two-state cycle remains the default. */
+  readonly removableSort = input<boolean>(false);
+  /** Presence controls the active sort slice. Empty means unsorted. */
+  readonly sort = input<NeuTableSortState | undefined>(undefined);
+  /** Omit to preserve the historical all-column global-search policy. */
+  readonly globalFilterFields = input<readonly NeuTableGlobalFilterField<T>[] | undefined>(
+    undefined,
+  );
   readonly selectable = input<boolean>(false);
   /** Typed selection supersedes legacy selectable=true, which remains multiple mode. */
   readonly selectionMode = input<NeuTableSelectionMode>('none');
@@ -1689,6 +1709,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly selectionActionClick = output<NeuTableSelectionActionEvent<T>>();
   readonly serverStateChange = output<NeuTableServerState>();
   readonly searchChange = output<string>();
+  /** One immutable canonical snapshot per user sort action. */
+  readonly sortChange = output<NeuTableSortState>();
   readonly columnResize = output<{ key: string; width: number }>();
   readonly columnReorder = output<NeuTableColumnReorderEvent>();
   readonly layoutChange = output<NeuTableLayout>();
@@ -1713,6 +1735,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly searchQuery = this._state.search;
   readonly sortKey = computed(() => this._state.sort()?.key ?? '');
   readonly sortDir = computed<'asc' | 'desc'>(() => this._state.sort()?.dir ?? 'asc');
+  /** Immutable current sort projection. Empty means no active sort. */
+  readonly currentSort = computed<NeuTableSortState>(() =>
+    this.multiSort()
+      ? this._freezeSortState(this._state.sortEntries())
+      : this._freezeSortState(this._state.sort() ? [this._state.sort()!] : []),
+  );
 
   // ---- Pipeline de datos / Data pipeline ----
   // ── Estado interno ────────────────────────────────────────────────────
@@ -1788,6 +1816,38 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     () => this.columns().map((column) => this.asRuntimeColumn(column)),
   );
 
+  private readonly _resolvedGlobalFilterFields = computed<
+    readonly InternalResolvedGlobalFilterField<T>[]
+  >(() => {
+    const columns = this._typedColumns();
+    const columnsByKey = new Map<string, NeuTableColumn<T>>(
+      columns.map((column) => [column.key, column] as [string, NeuTableColumn<T>]),
+    );
+    const configured = this.globalFilterFields();
+    if (configured === undefined) {
+      return columns.map((column) => ({
+        values: (row: T) => this._globalColumnValues(row, column),
+      }));
+    }
+    const directKeys = new Set<string>();
+    return configured.flatMap((field) => {
+      if (this._isGlobalFilterAccessor(field)) {
+        return [{ values: (row: T) => [field.accessor(row)] }];
+      }
+      const key = String(field);
+      if (directKeys.has(key)) return [];
+      directKeys.add(key);
+      const column = columnsByKey.get(key);
+      return [
+        {
+          values: column
+            ? (row: T) => this._globalColumnValues(row, column)
+            : (row: T) => [this.getRowValue(row, key)],
+        },
+      ];
+    });
+  });
+
   /** Convierte filterOptions de string[] a NeuSelectOption[] con opción "Todos" al inicio.
    *  Converts filterOptions from string[] to NeuSelectOption[] with a leading "All" option. */
   _filterOpts(col: NeuTableColumn<T>): NeuSelectOption[] {
@@ -1851,6 +1911,41 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         }
         this._state.setControlledSelectionKeys(
           this._selectionController.keysFromSelection(selection, mode),
+        );
+      });
+    });
+
+    effect(() => {
+      const controlled = this.sort();
+      const multiple = this.multiSort();
+      const currentSingle = this._state.sort();
+      const currentEntries = this._state.sortEntries();
+      untracked(() => {
+        if (controlled === undefined) {
+          this._state.releaseControlledSort();
+          this._state.update(
+            multiple
+              ? {
+                  sort: null,
+                  sortEntries:
+                    currentEntries.length > 0
+                      ? currentEntries
+                      : currentSingle
+                        ? [currentSingle]
+                        : [],
+                }
+              : {
+                  sort: currentSingle ?? currentEntries[0] ?? null,
+                  sortEntries: [],
+                },
+            'input',
+          );
+          return;
+        }
+        const entries = this._normalizeSortState(controlled, multiple);
+        this._state.setControlledSort(
+          multiple ? null : entries[0] ?? null,
+          multiple ? entries : [],
         );
       });
     });
@@ -2613,7 +2708,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly filteredData = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (this.serverSide()) return this._rows();
     const rows = this._rows();
-    const columns = this._typedColumns();
+    const globalFields = this._resolvedGlobalFilterFields();
     const activeColumnFilters = this._resolvedAppliedFilters();
     const q = this.searchQuery().trim().toLowerCase();
     const exact = this._exactMatch();
@@ -2622,15 +2717,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return rows.filter((row) => {
       const passesGlobal =
         !q ||
-        columns.some((col) => {
-          const rawVal = String(this.getRowValue(row, col.key) ?? '');
-          const displayVal = col.cell
-            ? col.cell(row)
-            : col.type === 'badge' && col.badgeMap?.[rawVal]?.label
-              ? col.badgeMap[rawVal].label!
-              : rawVal;
-          return matches(displayVal) || matches(rawVal);
-        });
+        globalFields.some((field) => field.values(row).some((value) => matches(String(value ?? ''))));
       if (!passesGlobal) return false;
       for (const filter of activeColumnFilters) {
         if (!this._matchesAppliedColumnFilter(row, filter)) return false;
@@ -2641,35 +2728,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   readonly sortedData = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (this.serverSide()) return this.filteredData();
-    const data = [...this.filteredData()];
-    if (!this.sortable()) return data;
-    if (this.multiSort() && this._sortEntries().length > 0) {
-      const entries = this._sortEntries();
-      return data.sort((a, b) => {
-        for (const entry of entries) {
-          const cmp = String(this.getRowValue(a, entry.key) ?? '').localeCompare(
-            String(this.getRowValue(b, entry.key) ?? ''),
-            undefined,
-            { numeric: true },
-          );
-          if (cmp !== 0) return entry.dir === 'asc' ? cmp : -cmp;
-        }
-        return 0;
-      });
-    }
-    const key = this.sortKey();
-    if (!key) return data;
-    const dir = this.sortDir();
-    return data.sort((a, b) => {
-      const cmp = String(this.getRowValue(a, key) ?? '').localeCompare(
-        String(this.getRowValue(b, key) ?? ''),
-        undefined,
-        {
-        numeric: true,
-        },
-      );
-      return dir === 'asc' ? cmp : -cmp;
-    });
+    const data = this.filteredData();
+    if (!this.sortable()) return [...data];
+    return this._sortController.sort(data, this.currentSort(), this._typedColumns()) as NeuTableRuntimeRow<T>[];
   });
 
   readonly effectivePageSize = computed(() => {
@@ -3271,36 +3332,32 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     }
   }
 
+  /**
+   * Imperative sorting accepts any runtime row key, including hidden/computed columns.
+   * Template interaction separately enforces table/column sortability.
+   */
   sortBy(key: string, event?: MouseEvent): void {
-    if (this.multiSort() && event?.shiftKey) {
-      // Shift+click: toggle or add column / Shift+click: alterna o añade columna
-      const entries = [...this._sortEntries()];
-      const idx = entries.findIndex((e) => e.key === key);
-      if (idx >= 0) {
-        entries[idx] = { key, dir: entries[idx].dir === 'asc' ? 'desc' : 'asc' };
-      } else {
-        entries.push({ key, dir: 'asc' });
-      }
-      const changed = this._state.setSortEntries(entries, 'ui');
-      if (!changed) return;
-      if (this.useUrlState()) this._urlAdapter.writeSortEntries(this.multiSortParam(), entries);
-    } else if (this.multiSort()) {
-      // Single click: replace sort / Click simple: reemplaza el orden
-      const current = this._sortEntries().find((e) => e.key === key);
-      const dir: 'asc' | 'desc' = current?.dir === 'asc' ? 'desc' : 'asc';
-      const entries = [{ key, dir }];
-      const changed = this._state.setSortEntries(entries, 'ui');
-      if (!changed) return;
-      if (this.useUrlState()) this._urlAdapter.writeSortEntries(this.multiSortParam(), entries);
-    } else {
-      const dir = this.sortKey() === key && this.sortDir() === 'asc' ? 'desc' : 'asc';
-      const changed = this._state.update({ sort: { key, dir }, page: 1 }, 'ui');
-      if (!changed) return;
-      if (this.serverSide()) {
-        this._emitServerState();
-      } else if (this.useUrlState()) {
-        this._urlAdapter.writeSort(this._urlConfig(), key, dir);
-      }
+    const multiple = this.multiSort();
+    const entries = this._sortController.next(this.currentSort(), key, {
+      multiple,
+      additive: multiple && event?.shiftKey === true,
+      removable: this.removableSort(),
+    });
+    const changed = this._state.update(
+      multiple
+        ? { sortEntries: entries, page: 1 }
+        : { sort: entries[0] ?? null, page: 1 },
+      'ui',
+    );
+    if (!changed) return;
+
+    const snapshot = this._freezeSortState(entries);
+    this.sortChange.emit(snapshot);
+    if (this.serverSide()) {
+      this._emitServerState(changed.current);
+    } else if (this.useUrlState() && this.sort() === undefined) {
+      if (multiple) this._urlAdapter.writeSortEntries(this._urlConfig(), snapshot);
+      else this._urlAdapter.writeSort(this._urlConfig(), snapshot[0] ?? null);
     }
   }
 
@@ -3522,6 +3579,67 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
    */
   private getRowValue(row: T, key: string): unknown {
     return (row as Record<string, unknown>)[key];
+  }
+
+  private _globalColumnValues(row: T, column: NeuTableColumn<T>): readonly unknown[] {
+    const raw = this.getRowValue(row, column.key);
+    const rawText = String(raw ?? '');
+    const display = column.cell
+      ? column.cell(row)
+      : column.type === 'badge' && column.badgeMap?.[rawText]?.label
+        ? column.badgeMap[rawText].label
+        : raw;
+    return Object.is(display, raw) ? [raw] : [display, raw];
+  }
+
+  private _isGlobalFilterAccessor(
+    field: NeuTableGlobalFilterField<T>,
+  ): field is NeuTableGlobalFilterAccessor<T> {
+    return typeof field === 'object' && field !== null && typeof field.accessor === 'function';
+  }
+
+  private _normalizeSortState(
+    entries: NeuTableSortState,
+    multiple: boolean,
+  ): NeuTableSortEntry[] {
+    const seen = new Set<string>();
+    const normalized: NeuTableSortEntry[] = [];
+    for (const entry of entries) {
+      const key = String(entry?.key ?? '');
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      normalized.push({ key, dir: entry.dir === 'desc' ? 'desc' : 'asc' });
+      if (!multiple) break;
+    }
+    return normalized;
+  }
+
+  private _freezeSortState(entries: readonly NeuTableSortEntry[]): NeuTableSortState {
+    return Object.freeze(
+      entries.map((entry) => Object.freeze({ ...entry })),
+    ) as NeuTableSortState;
+  }
+
+  private _globalFilterServerProjection(): Pick<
+    NeuTableServerState,
+    'globalFilterFields' | 'localOnlyGlobalFilterFields'
+  > {
+    const configured = this.globalFilterFields();
+    if (configured === undefined) return {};
+    const fields: string[] = [];
+    let localOnly = false;
+    for (const field of configured) {
+      if (this._isGlobalFilterAccessor(field)) {
+        if (field.serverField) fields.push(field.serverField);
+        else localOnly = true;
+      } else {
+        fields.push(String(field));
+      }
+    }
+    return {
+      globalFilterFields: [...new Set(fields)],
+      ...(localOnly ? { localOnlyGlobalFilterFields: true } : {}),
+    };
   }
 
   private asRuntimeColumn(col: NeuTableColumnInput<T>): NeuTableColumn<T> {
@@ -4245,14 +4363,19 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._columnFilters()[key] ?? '';
   }
 
-  private _emitServerState(): void {
+  private _emitServerState(state = this._state.snapshot()): void {
+    const sort = this.multiSort() ? null : state.sort;
+    const sortEntries = this.multiSort() ? state.sortEntries.map((entry) => ({ ...entry })) : [];
+    const globalFilterProjection = this._globalFilterServerProjection();
     const current: NeuTableServerState = {
-      page: this.currentPage(),
-      pageSize: this.effectivePageSize(),
-      search: this.searchQuery(),
-      sortKey: this.sortKey(),
-      sortDir: this.sortDir(),
-      sortEntries: [...this._sortEntries()],
+      page: state.page,
+      pageSize: this.pagination() ? state.pageSize : this.filteredData().length || 1,
+      search: state.search,
+      sortKey: sort?.key ?? '',
+      sortDir: sort?.dir ?? 'asc',
+      sort: sort ? { ...sort } : null,
+      sortEntries,
+      ...globalFilterProjection,
       columnFilters: this._columnFilters(),
       typedColumnFilters: this._typedColumnFiltersState(),
       localOnlyFilters: this._localOnlyFilters(),

@@ -208,6 +208,29 @@ describe('NeuTableStateController', () => {
     expect(events.map((event) => event.changedKeys)).toEqual([['selectionKeys'], ['page']]);
   });
 
+  it('controls only sort slices while committing an atomic page reset proposal', () => {
+    const controller = new NeuTableStateController();
+    controller.setPage(3, 'api');
+    controller.setControlledSort({ key: 'name', dir: 'asc' }, []);
+
+    const proposal = controller.update(
+      { sort: { key: 'name', dir: 'desc' }, page: 1 },
+      'ui',
+    );
+
+    expect(proposal).toMatchObject({
+      committed: false,
+      current: { page: 1, sort: { key: 'name', dir: 'desc' } },
+    });
+    expect(controller.page()).toBe(1);
+    expect(controller.sort()).toEqual({ key: 'name', dir: 'asc' });
+
+    controller.setControlledSort({ key: 'name', dir: 'desc' }, []);
+    expect(controller.sort()).toEqual({ key: 'name', dir: 'desc' });
+    controller.releaseControlledSort();
+    expect(controller.controlled()).toBe(false);
+  });
+
   it('commits uncontrolled slices from a mixed proposal without committing selection', () => {
     const controller = new NeuTableStateController<number>();
     controller.setControlledSelectionKeys(new Set([1]));

@@ -183,6 +183,25 @@ export class NeuTableStateController<K = unknown> {
     this._controlledKeys.set(controlledKeys);
   }
 
+  /** Controls only the single/multiple sort slices. */
+  setControlledSort(
+    sort: InternalNeuTableSort | null,
+    sortEntries: readonly NeuTableSortEntry[],
+  ): InternalNeuTableStateChange<K> | null {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.add('sort');
+    controlledKeys.add('sortEntries');
+    this._controlledKeys.set(controlledKeys);
+    return this._commit({ ...this.snapshot(), sort, sortEntries }, 'controlled');
+  }
+
+  releaseControlledSort(): void {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.delete('sort');
+    controlledKeys.delete('sortEntries');
+    this._controlledKeys.set(controlledKeys);
+  }
+
   update(
     patch: Partial<InternalNeuTableState<K>>,
     origin: InternalNeuTableStateOrigin,

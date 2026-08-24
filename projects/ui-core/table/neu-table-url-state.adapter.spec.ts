@@ -48,10 +48,15 @@ describe('NeuTableUrlStateAdapter', () => {
   it('writes empty multisort and search projections without retaining empty strings', () => {
     const { adapter, service } = createAdapter();
 
-    adapter.writeSortEntries('msort', []);
+    adapter.writeSortEntries(CONFIG, []);
     adapter.writeSearch(CONFIG, '');
 
-    expect(service.setParam).toHaveBeenCalledWith('msort', null);
+    expect(service.patchParams).toHaveBeenCalledWith({
+      msort: null,
+      sort: null,
+      sortDir: null,
+      page: '1',
+    });
     expect(service.patchParams).toHaveBeenCalledWith({ q: null, page: '1' });
   });
 
@@ -59,19 +64,32 @@ describe('NeuTableUrlStateAdapter', () => {
     const { adapter, service } = createAdapter();
 
     adapter.writePage('page', 3);
-    adapter.writeSortEntries('msort', [{ key: 'name', dir: 'desc' }]);
-    adapter.writeSort(CONFIG, 'name', 'desc');
+    adapter.writeSortEntries(CONFIG, [{ key: 'name', dir: 'desc' }]);
+    adapter.writeSort(CONFIG, { key: 'name', dir: 'desc' });
+    adapter.writeSort(CONFIG, null);
     adapter.clearSearch(CONFIG);
     adapter.resetPage('page');
 
     expect(service.setParam).toHaveBeenNthCalledWith(1, 'page', '3');
-    expect(service.setParam).toHaveBeenNthCalledWith(2, 'msort', 'name:desc');
     expect(service.patchParams).toHaveBeenNthCalledWith(1, {
-      sort: 'name',
-      sortDir: 'desc',
+      msort: 'name:desc',
+      sort: null,
+      sortDir: null,
       page: '1',
     });
-    expect(service.patchParams).toHaveBeenNthCalledWith(2, { q: null, page: '1' });
-    expect(service.patchParams).toHaveBeenNthCalledWith(3, { page: '1' });
+    expect(service.patchParams).toHaveBeenNthCalledWith(2, {
+      sort: 'name',
+      sortDir: 'desc',
+      msort: null,
+      page: '1',
+    });
+    expect(service.patchParams).toHaveBeenNthCalledWith(3, {
+      sort: null,
+      sortDir: null,
+      msort: null,
+      page: '1',
+    });
+    expect(service.patchParams).toHaveBeenNthCalledWith(4, { q: null, page: '1' });
+    expect(service.patchParams).toHaveBeenNthCalledWith(5, { page: '1' });
   });
 });

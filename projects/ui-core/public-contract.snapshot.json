@@ -1078,6 +1078,7 @@
         "filterAriaPrefix",
         "filterPlaceholder",
         "footerRow",
+        "globalFilterFields",
         "groupBy",
         "groupHeaderLabel",
         "initialLayout",
@@ -1097,6 +1098,7 @@
         "pagination",
         "paginationAriaLabel",
         "previousPageAriaLabel",
+        "removableSort",
         "reorderableColumns",
         "resizableColumns",
         "resultLabelPlural",
@@ -1122,6 +1124,7 @@
         "serverSide",
         "showRowNumbers",
         "skeletonRows",
+        "sort",
         "sortable",
         "sortDirParam",
         "sortParam",
@@ -1148,7 +1151,8 @@
         "selectAllChange",
         "selectionActionClick",
         "selectionChange",
-        "serverStateChange"
+        "serverStateChange",
+        "sortChange"
       ]
     },
     "textarea/neu-textarea.component.ts": {
