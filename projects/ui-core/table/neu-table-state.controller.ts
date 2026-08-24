@@ -169,6 +169,29 @@ export class NeuTableStateController<K = unknown> {
     this._controlledKeys.set(new Set());
   }
 
+  /** Controls only server/query slices while selection, expansion and layout stay independent. */
+  setControlledQuery(
+    query: Pick<
+      InternalNeuTableState<K>,
+      'page' | 'pageSize' | 'search' | 'sort' | 'sortEntries' | 'filters'
+    >,
+  ): InternalNeuTableStateChange<K> | null {
+    const controlledKeys = new Set(this._controlledKeys());
+    for (const key of ['page', 'pageSize', 'search', 'sort', 'sortEntries', 'filters'] as const) {
+      controlledKeys.add(key);
+    }
+    this._controlledKeys.set(controlledKeys);
+    return this._commit({ ...this.snapshot(), ...query }, 'controlled');
+  }
+
+  releaseControlledQuery(): void {
+    const controlledKeys = new Set(this._controlledKeys());
+    for (const key of ['page', 'pageSize', 'search', 'sort', 'sortEntries', 'filters'] as const) {
+      controlledKeys.delete(key);
+    }
+    this._controlledKeys.set(controlledKeys);
+  }
+
   /** Controls only selection while every other canonical state slice remains uncontrolled. */
   setControlledSelectionKeys(selectionKeys: ReadonlySet<K>): InternalNeuTableStateChange<K> | null {
     const controlledKeys = new Set(this._controlledKeys());
@@ -223,9 +246,7 @@ export class NeuTableStateController<K = unknown> {
     };
     if (controlledProposal) {
       const uncontrolledPatch = Object.fromEntries(
-        changedKeys
-          .filter((key) => !controlledKeys.has(key))
-          .map((key) => [key, proposed[key]]),
+        changedKeys.filter((key) => !controlledKeys.has(key)).map((key) => [key, proposed[key]]),
       ) as Partial<InternalNeuTableState<K>>;
       const committed = normalizeUpdate(previous, uncontrolledPatch);
       if (stateChangedKeys(previous, committed).length > 0) this._state.set(committed);
@@ -394,6 +415,7 @@ function cloneState<K>(state: InternalNeuTableState<K>): InternalNeuTableState<K
 function cloneFilters(
   filters: Readonly<Record<string, InternalAppliedColumnFilter>>,
 ): Record<string, InternalAppliedColumnFilter> {
+  const seen = new WeakMap<object, unknown>();
   return Object.fromEntries(
     Object.entries(filters).map(([key, filter]) => [
       key,
@@ -401,7 +423,7 @@ function cloneFilters(
         operator: filter.operator,
         constraints: filter.constraints.map((constraint) => ({
           ...constraint,
-          value: cloneFilterValue(constraint.value),
+          value: cloneFilterValue(constraint.value, seen),
           ...(Object.prototype.hasOwnProperty.call(constraint, 'projectionValue')
             ? { projectionValue: constraint.projectionValue }
             : {}),
@@ -411,11 +433,24 @@ function cloneFilters(
   );
 }
 
-function cloneFilterValue(value: unknown): unknown {
+function cloneFilterValue(value: unknown, seen = new WeakMap<object, unknown>()): unknown {
   if (value instanceof Date) return new Date(value.getTime());
-  if (Array.isArray(value)) return value.map((entry) => cloneFilterValue(entry));
+  if (Array.isArray(value)) {
+    const existing = seen.get(value);
+    if (existing) return existing;
+    const clone: unknown[] = [];
+    seen.set(value, clone);
+    for (const entry of value) clone.push(cloneFilterValue(entry, seen));
+    return clone;
+  }
   if (isRangeRecord(value)) {
-    return { from: cloneFilterValue(value['from']), to: cloneFilterValue(value['to']) };
+    const existing = seen.get(value);
+    if (existing) return existing;
+    const clone: { from?: unknown; to?: unknown } = {};
+    seen.set(value, clone);
+    clone.from = cloneFilterValue(value['from'], seen);
+    clone.to = cloneFilterValue(value['to'], seen);
+    return clone;
   }
   if (isDatePointRecord(value)) {
     return { precision: value['precision'], value: value['value'] };
@@ -477,23 +512,38 @@ function filtersEqual(
   });
 }
 
-function filterValueEqual(left: unknown, right: unknown): boolean {
+function filterValueEqual(
+  left: unknown,
+  right: unknown,
+  seen = new WeakMap<object, WeakSet<object>>(),
+): boolean {
   if (Object.is(left, right)) return true;
   if (left instanceof Date && right instanceof Date) return left.getTime() === right.getTime();
   if (Array.isArray(left) && Array.isArray(right)) {
+    if (pairSeen(left, right, seen)) return true;
     return (
       left.length === right.length &&
-      left.every((value, index) => filterValueEqual(value, right[index]))
+      left.every((value, index) => filterValueEqual(value, right[index], seen))
     );
   }
   if (isRangeRecord(left) && isRangeRecord(right)) {
+    if (pairSeen(left, right, seen)) return true;
     return (
-      filterValueEqual(left['from'], right['from']) && filterValueEqual(left['to'], right['to'])
+      filterValueEqual(left['from'], right['from'], seen) &&
+      filterValueEqual(left['to'], right['to'], seen)
     );
   }
   if (isDatePointRecord(left) && isDatePointRecord(right)) {
     return left['precision'] === right['precision'] && left['value'] === right['value'];
   }
+  return false;
+}
+
+function pairSeen(left: object, right: object, seen: WeakMap<object, WeakSet<object>>): boolean {
+  const rights = seen.get(left);
+  if (rights?.has(right)) return true;
+  if (rights) rights.add(right);
+  else seen.set(left, new WeakSet([right]));
   return false;
 }
 

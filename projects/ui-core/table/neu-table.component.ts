@@ -32,7 +32,6 @@ import {
   type NeuTableFilterTemplateContext,
 } from './neu-table-filter-template.directive';
 import {
-  buildNeuTableFilterState,
   isNeuTableFilterValueEmpty,
   matchesNeuTableFilter,
   normalizeNeuTableAppliedFilterValue,
@@ -81,6 +80,7 @@ import type {
   NeuTableFilterKind,
   NeuTableFilterMatchMode,
   NeuTableFilterState,
+  NeuTableQueryState,
   NeuTableServerState,
   NeuTableSortEntry,
   NeuTableSortState,
@@ -104,6 +104,8 @@ import {
   type InternalAppliedColumnFilter,
   type InternalAppliedFilterConstraint,
   type InternalAppliedFilterOperator,
+  type InternalNeuTableState,
+  type InternalNeuTableStateChange,
 } from './neu-table-state.controller';
 import {
   NeuTableUrlStateAdapter,
@@ -115,6 +117,7 @@ import {
   NeuTableKeyboardController,
   type NeuTableRowNavigationIntent,
 } from './neu-table-keyboard.controller';
+import { NeuTableQueryController } from './neu-table-query.controller';
 
 export type {
   NeuTableAction,
@@ -144,6 +147,11 @@ export type {
   NeuTableFilterKind,
   NeuTableFilterMatchMode,
   NeuTableFilterState,
+  NeuTableQueryColumnFilter,
+  NeuTableQueryFilterConstraint,
+  NeuTableQuerySerializability,
+  NeuTableQuerySerializationStatus,
+  NeuTableQueryState,
   NeuTableNumberRangeValue,
   NeuTableServerState,
   NeuTableSortEntry,
@@ -297,208 +305,208 @@ export type NeuTableColumnInput<T extends object> =
               {{ _advancedFilterText().multipleRulesActive }}
             </p>
           } @else {
-          @if (_filterDraftHasMultipleRules()) {
-            <neu-select
-              class="neu-table__filter-overlay-control neu-table__filter-overlay-operator"
-              [floatingLabel]="false"
-              [label]="_advancedFilterText().operator"
-              [options]="_filterOverlayOperatorOptions()"
-              [formControl]="_filterOverlayOperatorControl"
-            />
-          }
-          <div class="neu-table__filter-overlay-rules">
-            @for (rule of _filterDraftRules(); track rule.id; let index = $index) {
-              <div
-                class="neu-table__filter-overlay-rule"
-                role="group"
-                [attr.data-neu-table-filter-rule-id]="rule.id"
-                [attr.aria-labelledby]="_filterOverlayRuleLabelId(column.key, rule.id)"
-              >
-                <div class="neu-table__filter-overlay-rule-header">
-                  <span
-                    class="neu-table__filter-overlay-rule-label"
-                    [id]="_filterOverlayRuleLabelId(column.key, rule.id)"
-                  >
-                    {{ _filterOverlayRuleLabel(index) }}
-                  </span>
-                  <button
-                    type="button"
-                    class="neu-table__filter-overlay-remove-rule"
-                    [attr.aria-label]="_filterOverlayRemoveRuleLabel(index)"
-                    (click)="_removeFilterDraftRule(rule.id)"
-                  >
-                    <span aria-hidden="true">×</span>
-                  </button>
-                </div>
-                @if (
-                  _filterDraftKind() === 'text' ||
-                  _filterDraftKind() === 'number' ||
-                  _filterDraftKind() === 'date'
-                ) {
-                  <neu-select
-                    class="neu-table__filter-overlay-control neu-table__filter-overlay-mode"
-                    [floatingLabel]="false"
-                    [label]="_advancedFilterText().matchMode"
-                    [options]="_filterOverlayModeOptions(column)"
-                    [formControl]="rule.modeControl"
-                  />
-                }
-                @switch (_filterDraftKind()) {
-                  @case ('text') {
-                    <neu-input
-                      class="neu-table__filter-overlay-control"
+            @if (_filterDraftHasMultipleRules()) {
+              <neu-select
+                class="neu-table__filter-overlay-control neu-table__filter-overlay-operator"
+                [floatingLabel]="false"
+                [label]="_advancedFilterText().operator"
+                [options]="_filterOverlayOperatorOptions()"
+                [formControl]="_filterOverlayOperatorControl"
+              />
+            }
+            <div class="neu-table__filter-overlay-rules">
+              @for (rule of _filterDraftRules(); track rule.id; let index = $index) {
+                <div
+                  class="neu-table__filter-overlay-rule"
+                  role="group"
+                  [attr.data-neu-table-filter-rule-id]="rule.id"
+                  [attr.aria-labelledby]="_filterOverlayRuleLabelId(column.key, rule.id)"
+                >
+                  <div class="neu-table__filter-overlay-rule-header">
+                    <span
+                      class="neu-table__filter-overlay-rule-label"
+                      [id]="_filterOverlayRuleLabelId(column.key, rule.id)"
+                    >
+                      {{ _filterOverlayRuleLabel(index) }}
+                    </span>
+                    <button
+                      type="button"
+                      class="neu-table__filter-overlay-remove-rule"
+                      [attr.aria-label]="_filterOverlayRemoveRuleLabel(index)"
+                      (click)="_removeFilterDraftRule(rule.id)"
+                    >
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  </div>
+                  @if (
+                    _filterDraftKind() === 'text' ||
+                    _filterDraftKind() === 'number' ||
+                    _filterDraftKind() === 'date'
+                  ) {
+                    <neu-select
+                      class="neu-table__filter-overlay-control neu-table__filter-overlay-mode"
                       [floatingLabel]="false"
-                      [label]="_advancedFilterText().value"
-                      [formControl]="rule.textControl"
+                      [label]="_advancedFilterText().matchMode"
+                      [options]="_filterOverlayModeOptions(column)"
+                      [formControl]="rule.modeControl"
                     />
                   }
-                  @case ('number') {
-                    @if (rule.mode() === 'between') {
-                      <div class="neu-table__filter-overlay-range">
-                        <neu-number-input
-                          [nullable]="true"
-                          [label]="_advancedFilterText().from"
-                          [formControl]="rule.numberFromControl"
-                        />
-                        <neu-number-input
-                          [nullable]="true"
-                          [label]="_advancedFilterText().to"
-                          [formControl]="rule.numberToControl"
-                        />
-                      </div>
-                    } @else {
-                      <neu-number-input
+                  @switch (_filterDraftKind()) {
+                    @case ('text') {
+                      <neu-input
                         class="neu-table__filter-overlay-control"
-                        [nullable]="true"
+                        [floatingLabel]="false"
                         [label]="_advancedFilterText().value"
-                        [formControl]="rule.numberControl"
+                        [formControl]="rule.textControl"
                       />
                     }
-                  }
-                  @case ('date') {
-                    @if (rule.mode() === 'between') {
-                      @if (_filterOverlayDatePrecision(column) === 'instant') {
+                    @case ('number') {
+                      @if (rule.mode() === 'between') {
                         <div class="neu-table__filter-overlay-range">
-                          <neu-date-input
-                            type="datetime-local"
+                          <neu-number-input
+                            [nullable]="true"
                             [label]="_advancedFilterText().from"
-                            [formControl]="rule.instantFromControl"
+                            [formControl]="rule.numberFromControl"
                           />
-                          <neu-date-input
-                            type="datetime-local"
+                          <neu-number-input
+                            [nullable]="true"
                             [label]="_advancedFilterText().to"
-                            [formControl]="rule.instantToControl"
+                            [formControl]="rule.numberToControl"
                           />
                         </div>
                       } @else {
+                        <neu-number-input
+                          class="neu-table__filter-overlay-control"
+                          [nullable]="true"
+                          [label]="_advancedFilterText().value"
+                          [formControl]="rule.numberControl"
+                        />
+                      }
+                    }
+                    @case ('date') {
+                      @if (rule.mode() === 'between') {
+                        @if (_filterOverlayDatePrecision(column) === 'instant') {
+                          <div class="neu-table__filter-overlay-range">
+                            <neu-date-input
+                              type="datetime-local"
+                              [label]="_advancedFilterText().from"
+                              [formControl]="rule.instantFromControl"
+                            />
+                            <neu-date-input
+                              type="datetime-local"
+                              [label]="_advancedFilterText().to"
+                              [formControl]="rule.instantToControl"
+                            />
+                          </div>
+                        } @else {
+                          <neu-date-input
+                            class="neu-table__filter-overlay-control"
+                            type="range"
+                            [label]="_advancedFilterText().value"
+                            [formControl]="rule.dateControl"
+                          />
+                        }
+                      } @else {
                         <neu-date-input
                           class="neu-table__filter-overlay-control"
-                          type="range"
+                          [type]="
+                            _filterOverlayDatePrecision(column) === 'instant'
+                              ? 'datetime-local'
+                              : 'date'
+                          "
                           [label]="_advancedFilterText().value"
                           [formControl]="rule.dateControl"
                         />
                       }
-                    } @else {
-                      <neu-date-input
+                    }
+                    @case ('boolean') {
+                      <neu-select
                         class="neu-table__filter-overlay-control"
-                        [type]="
-                          _filterOverlayDatePrecision(column) === 'instant'
-                            ? 'datetime-local'
-                            : 'date'
-                        "
+                        [floatingLabel]="false"
                         [label]="_advancedFilterText().value"
-                        [formControl]="rule.dateControl"
+                        [placeholder]="_advancedFilterText().all"
+                        [options]="_filterOverlayBooleanOptions()"
+                        [clearable]="true"
+                        [clearAriaLabel]="_advancedFilterText().all"
+                        [formControl]="rule.booleanControl"
                       />
                     }
-                  }
-                  @case ('boolean') {
-                    <neu-select
-                      class="neu-table__filter-overlay-control"
-                      [floatingLabel]="false"
-                      [label]="_advancedFilterText().value"
-                      [placeholder]="_advancedFilterText().all"
-                      [options]="_filterOverlayBooleanOptions()"
-                      [clearable]="true"
-                      [clearAriaLabel]="_advancedFilterText().all"
-                      [formControl]="rule.booleanControl"
-                    />
-                  }
-                  @case ('select') {
-                    <neu-select
-                      class="neu-table__filter-overlay-control"
-                      [floatingLabel]="false"
-                      [label]="_filterOverlayControlLabel(column)"
-                      [placeholder]="allFilterOptionLabel()"
-                      [options]="_filterOverlayOptions(column)"
-                      [optionLabel]="typedFilterOptionLabel(column)"
-                      [optionValue]="typedFilterOptionValue(column)"
-                      [optionDisabled]="typedFilterOptionDisabled(column)"
-                      [searchable]="typedFilterSearchable(column)"
-                      [virtualScroll]="typedFilterVirtualScroll(column)"
-                      [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(column)"
-                      [clearable]="true"
-                      [clearAriaLabel]="_advancedFilterText().clear"
-                      [formControl]="rule.selectControl"
-                      (selectionChange)="_onFilterOverlaySingleValueCommitted(rule.id)"
-                    />
-                  }
-                  @case ('multiSelect') {
-                    <neu-multiselect
-                      class="neu-table__filter-overlay-control"
-                      [floatingLabel]="false"
-                      [label]="_filterOverlayControlLabel(column)"
-                      [placeholder]="allFilterOptionLabel()"
-                      [options]="_filterOverlayOptions(column)"
-                      [optionLabel]="typedFilterOptionLabel(column)"
-                      [optionValue]="typedFilterOptionValue(column)"
-                      [optionDisabled]="typedFilterOptionDisabled(column)"
-                      [searchable]="typedFilterSearchable(column)"
-                      [virtualScroll]="typedFilterVirtualScroll(column)"
-                      [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(column)"
-                      [clearable]="true"
-                      [clearAriaLabel]="_advancedFilterText().clear"
-                      [formControl]="rule.multiSelectControl"
-                    />
-                  }
-                  @case ('custom') {
-                    @if (_filterOverlayCustomTemplate(column); as customTemplate) {
-                      <div class="neu-table__filter-overlay-custom">
-                        <ng-container
-                          [ngTemplateOutlet]="customTemplate"
-                          [ngTemplateOutletContext]="_filterOverlayCustomContext(column)"
-                        />
-                      </div>
+                    @case ('select') {
+                      <neu-select
+                        class="neu-table__filter-overlay-control"
+                        [floatingLabel]="false"
+                        [label]="_filterOverlayControlLabel(column)"
+                        [placeholder]="allFilterOptionLabel()"
+                        [options]="_filterOverlayOptions(column)"
+                        [optionLabel]="typedFilterOptionLabel(column)"
+                        [optionValue]="typedFilterOptionValue(column)"
+                        [optionDisabled]="typedFilterOptionDisabled(column)"
+                        [searchable]="typedFilterSearchable(column)"
+                        [virtualScroll]="typedFilterVirtualScroll(column)"
+                        [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(column)"
+                        [clearable]="true"
+                        [clearAriaLabel]="_advancedFilterText().clear"
+                        [formControl]="rule.selectControl"
+                        (selectionChange)="_onFilterOverlaySingleValueCommitted(rule.id)"
+                      />
+                    }
+                    @case ('multiSelect') {
+                      <neu-multiselect
+                        class="neu-table__filter-overlay-control"
+                        [floatingLabel]="false"
+                        [label]="_filterOverlayControlLabel(column)"
+                        [placeholder]="allFilterOptionLabel()"
+                        [options]="_filterOverlayOptions(column)"
+                        [optionLabel]="typedFilterOptionLabel(column)"
+                        [optionValue]="typedFilterOptionValue(column)"
+                        [optionDisabled]="typedFilterOptionDisabled(column)"
+                        [searchable]="typedFilterSearchable(column)"
+                        [virtualScroll]="typedFilterVirtualScroll(column)"
+                        [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(column)"
+                        [clearable]="true"
+                        [clearAriaLabel]="_advancedFilterText().clear"
+                        [formControl]="rule.multiSelectControl"
+                      />
+                    }
+                    @case ('custom') {
+                      @if (_filterOverlayCustomTemplate(column); as customTemplate) {
+                        <div class="neu-table__filter-overlay-custom">
+                          <ng-container
+                            [ngTemplateOutlet]="customTemplate"
+                            [ngTemplateOutletContext]="_filterOverlayCustomContext(column)"
+                          />
+                        </div>
+                      }
                     }
                   }
-                }
-              </div>
+                </div>
+              }
+            </div>
+            @if (_filterDraftCanAddRule()) {
+              <button
+                neu-button
+                type="button"
+                variant="secondary"
+                size="sm"
+                class="neu-table__filter-overlay-add-rule"
+                data-neu-table-filter-add-rule
+                (click)="_addFilterDraftRule()"
+              >
+                {{ _advancedFilterText().addRule }}
+              </button>
             }
-          </div>
-          @if (_filterDraftCanAddRule()) {
-            <button
-              neu-button
-              type="button"
-              variant="secondary"
-              size="sm"
-              class="neu-table__filter-overlay-add-rule"
-              data-neu-table-filter-add-rule
-              (click)="_addFilterDraftRule()"
-            >
-              {{ _advancedFilterText().addRule }}
-            </button>
-          }
           }
           <div class="neu-table__filter-overlay-actions">
             @if (!_filterDraftReadOnly()) {
-            <button
-              neu-button
-              type="button"
-              variant="ghost"
-              size="sm"
-              (click)="_clearFilterDraft()"
-            >
-              {{ _advancedFilterText().clear }}
-            </button>
+              <button
+                neu-button
+                type="button"
+                variant="ghost"
+                size="sm"
+                (click)="_clearFilterDraft()"
+              >
+                {{ _advancedFilterText().clear }}
+              </button>
             }
             <span class="neu-table__filter-overlay-actions-spacer"></span>
             <button
@@ -591,11 +599,11 @@ export type NeuTableColumnInput<T extends object> =
               </div>
               @if (exactMatchable()) {
                 <neu-checkbox
-                    class="neu-table__exact-checkbox"
-                    [checked]="exactMatch()"
-                    [label]="exactMatchLabel()"
-                    (checkedChange)="setExactMatch($event)"
-                  />
+                  class="neu-table__exact-checkbox"
+                  [checked]="exactMatch()"
+                  [label]="exactMatchLabel()"
+                  (checkedChange)="setExactMatch($event)"
+                />
               }
             </div>
           }
@@ -1012,113 +1020,109 @@ export type NeuTableColumnInput<T extends object> =
                         {{ _filterOverlayActiveRuleSummary(_filterOverlayRuleCount(col.key)) }}
                       </span>
                     } @else if (col.filterConfig; as config) {
-                        @switch (config.kind) {
-                          @case ('text') {
-                            <neu-input
-                              [floatingLabel]="false"
+                      @switch (config.kind) {
+                        @case ('text') {
+                          <neu-input
+                            [floatingLabel]="false"
+                            [label]="modernFilterLabel(col)"
+                            [placeholder]="filterPlaceholder()"
+                            [formControl]="typedColumnFilterControl(col)"
+                          />
+                        }
+                        @case ('number') {
+                          @if (modernFilterMode(col) === 'between') {
+                            <div class="neu-table__filter-range">
+                              <neu-number-input
+                                [nullable]="true"
+                                [label]="rangeFilterLabel(col, 'from')"
+                                [formControl]="typedRangeStartControl(col)"
+                              />
+                              <neu-number-input
+                                [nullable]="true"
+                                [label]="rangeFilterLabel(col, 'to')"
+                                [formControl]="typedRangeEndControl(col)"
+                              />
+                            </div>
+                          } @else {
+                            <neu-number-input
+                              [nullable]="true"
+                              [label]="modernFilterLabel(col)"
+                              [formControl]="typedColumnFilterControl(col)"
+                            />
+                          }
+                        }
+                        @case ('date') {
+                          @if (isDateOnlyRange(col)) {
+                            <neu-date-input
+                              type="range"
                               [label]="modernFilterLabel(col)"
                               [placeholder]="filterPlaceholder()"
                               [formControl]="typedColumnFilterControl(col)"
                             />
-                          }
-                          @case ('number') {
-                            @if (modernFilterMode(col) === 'between') {
-                              <div class="neu-table__filter-range">
-                                <neu-number-input
-                                  [nullable]="true"
-                                  [label]="rangeFilterLabel(col, 'from')"
-                                  [formControl]="typedRangeStartControl(col)"
-                                />
-                                <neu-number-input
-                                  [nullable]="true"
-                                  [label]="rangeFilterLabel(col, 'to')"
-                                  [formControl]="typedRangeEndControl(col)"
-                                />
-                              </div>
-                            } @else {
-                              <neu-number-input
-                                [nullable]="true"
-                                [label]="modernFilterLabel(col)"
-                                [formControl]="typedColumnFilterControl(col)"
-                              />
-                            }
-                          }
-                          @case ('date') {
-                            @if (isDateOnlyRange(col)) {
+                          } @else if (isInstantRange(col)) {
+                            <div class="neu-table__filter-range">
                               <neu-date-input
-                                type="range"
-                                [label]="modernFilterLabel(col)"
-                                [placeholder]="filterPlaceholder()"
-                                [formControl]="typedColumnFilterControl(col)"
+                                type="datetime-local"
+                                [label]="rangeFilterLabel(col, 'from')"
+                                [formControl]="typedInstantRangeStartControl(col)"
                               />
-                            } @else if (isInstantRange(col)) {
-                              <div class="neu-table__filter-range">
-                                <neu-date-input
-                                  type="datetime-local"
-                                  [label]="rangeFilterLabel(col, 'from')"
-                                  [formControl]="typedInstantRangeStartControl(col)"
-                                />
-                                <neu-date-input
-                                  type="datetime-local"
-                                  [label]="rangeFilterLabel(col, 'to')"
-                                  [formControl]="typedInstantRangeEndControl(col)"
-                                />
-                              </div>
-                            } @else {
                               <neu-date-input
-                                [type]="dateInputType(col)"
-                                [label]="modernFilterLabel(col)"
-                                [formControl]="typedColumnFilterControl(col)"
+                                type="datetime-local"
+                                [label]="rangeFilterLabel(col, 'to')"
+                                [formControl]="typedInstantRangeEndControl(col)"
                               />
-                            }
-                          }
-                          @case ('boolean') {
-                            <neu-select
-                              [floatingLabel]="false"
+                            </div>
+                          } @else {
+                            <neu-date-input
+                              [type]="dateInputType(col)"
                               [label]="modernFilterLabel(col)"
-                              [placeholder]="allFilterOptionLabel()"
-                              [options]="typedBooleanFilterOptions()"
-                              [clearable]="true"
                               [formControl]="typedColumnFilterControl(col)"
-                            />
-                          }
-                          @case ('select') {
-                            <neu-select
-                              [floatingLabel]="false"
-                              [label]="modernFilterLabel(col)"
-                              [placeholder]="allFilterOptionLabel()"
-                              [options]="typedFilterOptions(col)"
-                              [optionLabel]="typedFilterOptionLabel(col)"
-                              [optionValue]="typedFilterOptionValue(col)"
-                              [optionDisabled]="typedFilterOptionDisabled(col)"
-                              [searchable]="typedFilterSearchable(col)"
-                              [virtualScroll]="typedFilterVirtualScroll(col)"
-                              [virtualScrollVisibleItems]="
-                                typedFilterVirtualScrollVisibleItems(col)
-                              "
-                              [clearable]="true"
-                              [formControl]="typedColumnFilterControl(col)"
-                            />
-                          }
-                          @case ('multiSelect') {
-                            <neu-multiselect
-                              [floatingLabel]="false"
-                              [label]="modernFilterLabel(col)"
-                              [placeholder]="allFilterOptionLabel()"
-                              [options]="typedFilterOptions(col)"
-                              [optionLabel]="typedFilterOptionLabel(col)"
-                              [optionValue]="typedFilterOptionValue(col)"
-                              [optionDisabled]="typedFilterOptionDisabled(col)"
-                              [searchable]="typedFilterSearchable(col)"
-                              [virtualScroll]="typedFilterVirtualScroll(col)"
-                              [virtualScrollVisibleItems]="
-                                typedFilterVirtualScrollVisibleItems(col)
-                              "
-                              [clearable]="true"
-                              [formControl]="typedMultiSelectFilterControl(col)"
                             />
                           }
                         }
+                        @case ('boolean') {
+                          <neu-select
+                            [floatingLabel]="false"
+                            [label]="modernFilterLabel(col)"
+                            [placeholder]="allFilterOptionLabel()"
+                            [options]="typedBooleanFilterOptions()"
+                            [clearable]="true"
+                            [formControl]="typedColumnFilterControl(col)"
+                          />
+                        }
+                        @case ('select') {
+                          <neu-select
+                            [floatingLabel]="false"
+                            [label]="modernFilterLabel(col)"
+                            [placeholder]="allFilterOptionLabel()"
+                            [options]="typedFilterOptions(col)"
+                            [optionLabel]="typedFilterOptionLabel(col)"
+                            [optionValue]="typedFilterOptionValue(col)"
+                            [optionDisabled]="typedFilterOptionDisabled(col)"
+                            [searchable]="typedFilterSearchable(col)"
+                            [virtualScroll]="typedFilterVirtualScroll(col)"
+                            [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(col)"
+                            [clearable]="true"
+                            [formControl]="typedColumnFilterControl(col)"
+                          />
+                        }
+                        @case ('multiSelect') {
+                          <neu-multiselect
+                            [floatingLabel]="false"
+                            [label]="modernFilterLabel(col)"
+                            [placeholder]="allFilterOptionLabel()"
+                            [options]="typedFilterOptions(col)"
+                            [optionLabel]="typedFilterOptionLabel(col)"
+                            [optionValue]="typedFilterOptionValue(col)"
+                            [optionDisabled]="typedFilterOptionDisabled(col)"
+                            [searchable]="typedFilterSearchable(col)"
+                            [virtualScroll]="typedFilterVirtualScroll(col)"
+                            [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(col)"
+                            [clearable]="true"
+                            [formControl]="typedMultiSelectFilterControl(col)"
+                          />
+                        }
+                      }
                     } @else if (col.filterable) {
                       @if (col.filterType === 'select') {
                         <neu-select
@@ -1215,211 +1219,213 @@ export type NeuTableColumnInput<T extends object> =
                   </tr>
                 } @else {
                   @let row = entry.row;
-                <tr
-                  class="neu-table__row"
-                  [class]="getRowClass(row)"
-                  [class.neu-table__row--selected]="isRowSelected(row)"
-                  [class.neu-table__row--disabled]="!isRowSelectable(row)"
-                  [class.neu-table__row--clickable]="
-                    selectionEnabled() && selectOnRowClick() && isRowSelectable(row)
-                  "
-                  [attr.tabindex]="rowTabIndex(row)"
-                  [attr.data-neu-table-navigable]="isNavigableRow(row) ? 'true' : null"
-                  [attr.aria-selected]="
-                    selectionEnabled() && isRowSelectable(row) ? isRowSelected(row) : null
-                  "
-                  [attr.aria-disabled]="selectionEnabled() && !isRowSelectable(row) ? true : null"
-                  (click)="onRowClick(row, $event)"
-                  (dblclick)="rowDblClick.emit(row)"
-                  (focus)="onRowFocus(row, $event)"
-                  (keydown)="onRowKeydown(row, $event)"
-                >
-                  @if (expandable()) {
-                    <td
-                      class="neu-table__td neu-table__td--expand-col"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <button
-                        class="neu-table__expand-btn"
-                        type="button"
-                        (click)="toggleExpand(row)"
-                        [class.neu-table__expand-btn--open]="isRowExpanded(row)"
-                        [attr.aria-expanded]="isRowExpanded(row)"
-                        [attr.aria-label]="rowExpansionAriaLabel(row)"
+                  <tr
+                    class="neu-table__row"
+                    [class]="getRowClass(row)"
+                    [class.neu-table__row--selected]="isRowSelected(row)"
+                    [class.neu-table__row--disabled]="!isRowSelectable(row)"
+                    [class.neu-table__row--clickable]="
+                      selectionEnabled() && selectOnRowClick() && isRowSelectable(row)
+                    "
+                    [attr.tabindex]="rowTabIndex(row)"
+                    [attr.data-neu-table-navigable]="isNavigableRow(row) ? 'true' : null"
+                    [attr.aria-selected]="
+                      selectionEnabled() && isRowSelectable(row) ? isRowSelected(row) : null
+                    "
+                    [attr.aria-disabled]="selectionEnabled() && !isRowSelectable(row) ? true : null"
+                    (click)="onRowClick(row, $event)"
+                    (dblclick)="rowDblClick.emit(row)"
+                    (focus)="onRowFocus(row, $event)"
+                    (keydown)="onRowKeydown(row, $event)"
+                  >
+                    @if (expandable()) {
+                      <td
+                        class="neu-table__td neu-table__td--expand-col"
+                        (click)="$event.stopPropagation()"
                       >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                        <button
+                          class="neu-table__expand-btn"
+                          type="button"
+                          (click)="toggleExpand(row)"
+                          [class.neu-table__expand-btn--open]="isRowExpanded(row)"
+                          [attr.aria-expanded]="isRowExpanded(row)"
+                          [attr.aria-label]="rowExpansionAriaLabel(row)"
                         >
-                          <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                      </button>
-                    </td>
-                  }
-                  @if (selectionEnabled()) {
-                    <td
-                      class="neu-table__td neu-table__th--check"
-                      (click)="$event.stopPropagation()"
-                    >
-                      @if (multipleSelection()) {
-                        <neu-checkbox
-                          class="neu-table__checkbox"
-                          [checked]="isRowSelected(row)"
-                          [disabled]="!isRowSelectable(row)"
-                          [ariaLabel]="rowSelectionAriaLabel(row)"
-                          (checkedChange)="toggleRow(row, 'checkbox')"
-                        />
-                      } @else {
-                        <input
-                          class="neu-table__radio"
-                          type="radio"
-                          [name]="_selectionRadioName"
-                          [checked]="isRowSelected(row)"
-                          [disabled]="!isRowSelectable(row)"
-                          [attr.aria-label]="rowSelectionAriaLabel(row)"
-                          (change)="toggleRow(row, 'radio')"
-                        />
-                      }
-                    </td>
-                  }
-                  @if (showRowNumbers()) {
-                    <td class="neu-table__td neu-table__td--rn">
-                      {{ visibleRowNumber(entry.rowIndex) }}
-                    </td>
-                  }
-                  @for (col of visibleColumns(); track col.key) {
-                    <td
-                      class="neu-table__td"
-                      [class]="col.cellClass ?? ''"
-                      [class.neu-table__td--frozen-left]="col.frozen === 'left'"
-                      [class.neu-table__td--frozen-right]="col.frozen === 'right'"
-                      [class.neu-table__td--frozen-left-boundary]="isLastFrozenLeftColumn(col.key)"
-                      [class.neu-table__td--frozen-right-boundary]="
-                        isFirstFrozenRightColumn(col.key)
-                      "
-                      [style.left]="
-                        col.frozen === 'left'
-                          ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
-                          : null
-                      "
-                      [style.width]="columnWidth(col)"
-                      [style.min-width]="columnWidth(col)"
-                      [style.max-width]="columnWidth(col)"
-                      [style.text-align]="col.align ?? 'left'"
-                      (dblclick)="startCellEdit(row, col, $event)"
-                    >
-                      @if (isEditingCell(row, col)) {
-                        <neu-inline-editor
-                          class="neu-table__edit-control"
-                          [type]="inlineEditorType(col)"
-                          [value]="$any(editingValue())"
-                          [options]="inlineEditorOptions(col)"
-                          [startInEdit]="true"
-                          [saveOnBlur]="true"
-                          [editLabel]="inlineEditLabel()"
-                          [saveLabel]="saveInlineEditLabel()"
-                          [cancelLabel]="cancelInlineEditLabel()"
-                          (valueChange)="setEditingValue($event)"
-                          (editCommit)="commitCellEdit(row, col)"
-                          (editCancel)="cancelCellEdit()"
-                        />
-                      } @else if (col.cellTemplate) {
-                        <ng-container
-                          [ngTemplateOutlet]="col.cellTemplate"
-                          [ngTemplateOutletContext]="{ $implicit: row, row: row, column: col }"
-                        />
-                      } @else if (col.type === 'badge') {
-                        @let badgeVal = getCellValue(row, col);
-                        @let badgeCfg = col.badgeMap?.[badgeVal];
-                        <span
-                          class="neu-table__cell-badge neu-table__cell-badge--{{
-                            badgeCfg?.variant ?? 'default'
-                          }}"
-                        >
-                          {{ badgeCfg?.label ?? badgeVal }}
-                        </span>
-                      } @else if (col.type === 'link') {
-                        <a
-                          class="neu-table__cell-link"
-                          [href]="col.linkHref ? col.linkHref(row) : '#'"
-                          [target]="col.linkTarget ?? '_self'"
-                          (click)="$event.stopPropagation()"
-                          >{{ getCellValue(row, col) }}</a
-                        >
-                      } @else if (col.type === 'actions') {
-                        <div class="neu-table__actions">
-                          @for (action of col.actions ?? []; track action.key) {
-                            @if (action.show === undefined || action.show(row)) {
-                              @if (isConfirmPending(row, action)) {
-                                <span class="neu-table__action-confirm">
-                                  <span>{{ action.confirm }}</span>
-                                  <button
-                                    class="neu-table__action-btn neu-table__action-btn--danger"
-                                    type="button"
-                                    (click)="handleAction(row, action); $event.stopPropagation()"
-                                  >
-                                    Sí
-                                  </button>
-                                  <button
-                                    class="neu-table__action-btn"
-                                    type="button"
-                                    (click)="cancelConfirm(); $event.stopPropagation()"
-                                  >
-                                    No
-                                  </button>
-                                </span>
-                              } @else {
-                                <button
-                                  class="neu-table__action-btn neu-table__action-btn--{{
-                                    action.variant ?? 'ghost'
-                                  }}"
-                                  type="button"
-                                  [disabled]="action.disabled ? action.disabled(row) : false"
-                                  [title]="action.label"
-                                  (click)="handleAction(row, action); $event.stopPropagation()"
-                                >
-                                  @if (action.icon.startsWith('lucide')) {
-                                    <neu-icon
-                                      class="neu-table__action-icon"
-                                      [name]="action.icon"
-                                      size="1rem"
-                                      aria-hidden="true"
-                                    />
-                                  } @else {
-                                    <span class="neu-table__action-icon" aria-hidden="true">{{
-                                      action.icon
-                                    }}</span>
-                                  }
-                                  <span class="sr-only">{{ action.label }}</span>
-                                </button>
-                              }
-                            }
-                          }
-                        </div>
-                      } @else {
-                        {{ getCellValue(row, col) }}
-                      }
-                    </td>
-                  }
-                </tr>
-                @if (expandable() && isRowExpanded(row)) {
-                  <tr class="neu-table__row-expand-detail">
-                    <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
-                      <div class="neu-table__expand-content">
-                        @if (expandTemplate(); as tpl) {
-                          <ng-container
-                            [ngTemplateOutlet]="tpl.templateRef"
-                            [ngTemplateOutletContext]="{ $implicit: row }"
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </button>
+                      </td>
+                    }
+                    @if (selectionEnabled()) {
+                      <td
+                        class="neu-table__td neu-table__th--check"
+                        (click)="$event.stopPropagation()"
+                      >
+                        @if (multipleSelection()) {
+                          <neu-checkbox
+                            class="neu-table__checkbox"
+                            [checked]="isRowSelected(row)"
+                            [disabled]="!isRowSelectable(row)"
+                            [ariaLabel]="rowSelectionAriaLabel(row)"
+                            (checkedChange)="toggleRow(row, 'checkbox')"
+                          />
+                        } @else {
+                          <input
+                            class="neu-table__radio"
+                            type="radio"
+                            [name]="_selectionRadioName"
+                            [checked]="isRowSelected(row)"
+                            [disabled]="!isRowSelectable(row)"
+                            [attr.aria-label]="rowSelectionAriaLabel(row)"
+                            (change)="toggleRow(row, 'radio')"
                           />
                         }
-                      </div>
-                    </td>
+                      </td>
+                    }
+                    @if (showRowNumbers()) {
+                      <td class="neu-table__td neu-table__td--rn">
+                        {{ visibleRowNumber(entry.rowIndex) }}
+                      </td>
+                    }
+                    @for (col of visibleColumns(); track col.key) {
+                      <td
+                        class="neu-table__td"
+                        [class]="col.cellClass ?? ''"
+                        [class.neu-table__td--frozen-left]="col.frozen === 'left'"
+                        [class.neu-table__td--frozen-right]="col.frozen === 'right'"
+                        [class.neu-table__td--frozen-left-boundary]="
+                          isLastFrozenLeftColumn(col.key)
+                        "
+                        [class.neu-table__td--frozen-right-boundary]="
+                          isFirstFrozenRightColumn(col.key)
+                        "
+                        [style.left]="
+                          col.frozen === 'left'
+                            ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
+                            : null
+                        "
+                        [style.width]="columnWidth(col)"
+                        [style.min-width]="columnWidth(col)"
+                        [style.max-width]="columnWidth(col)"
+                        [style.text-align]="col.align ?? 'left'"
+                        (dblclick)="startCellEdit(row, col, $event)"
+                      >
+                        @if (isEditingCell(row, col)) {
+                          <neu-inline-editor
+                            class="neu-table__edit-control"
+                            [type]="inlineEditorType(col)"
+                            [value]="$any(editingValue())"
+                            [options]="inlineEditorOptions(col)"
+                            [startInEdit]="true"
+                            [saveOnBlur]="true"
+                            [editLabel]="inlineEditLabel()"
+                            [saveLabel]="saveInlineEditLabel()"
+                            [cancelLabel]="cancelInlineEditLabel()"
+                            (valueChange)="setEditingValue($event)"
+                            (editCommit)="commitCellEdit(row, col)"
+                            (editCancel)="cancelCellEdit()"
+                          />
+                        } @else if (col.cellTemplate) {
+                          <ng-container
+                            [ngTemplateOutlet]="col.cellTemplate"
+                            [ngTemplateOutletContext]="{ $implicit: row, row: row, column: col }"
+                          />
+                        } @else if (col.type === 'badge') {
+                          @let badgeVal = getCellValue(row, col);
+                          @let badgeCfg = col.badgeMap?.[badgeVal];
+                          <span
+                            class="neu-table__cell-badge neu-table__cell-badge--{{
+                              badgeCfg?.variant ?? 'default'
+                            }}"
+                          >
+                            {{ badgeCfg?.label ?? badgeVal }}
+                          </span>
+                        } @else if (col.type === 'link') {
+                          <a
+                            class="neu-table__cell-link"
+                            [href]="col.linkHref ? col.linkHref(row) : '#'"
+                            [target]="col.linkTarget ?? '_self'"
+                            (click)="$event.stopPropagation()"
+                            >{{ getCellValue(row, col) }}</a
+                          >
+                        } @else if (col.type === 'actions') {
+                          <div class="neu-table__actions">
+                            @for (action of col.actions ?? []; track action.key) {
+                              @if (action.show === undefined || action.show(row)) {
+                                @if (isConfirmPending(row, action)) {
+                                  <span class="neu-table__action-confirm">
+                                    <span>{{ action.confirm }}</span>
+                                    <button
+                                      class="neu-table__action-btn neu-table__action-btn--danger"
+                                      type="button"
+                                      (click)="handleAction(row, action); $event.stopPropagation()"
+                                    >
+                                      Sí
+                                    </button>
+                                    <button
+                                      class="neu-table__action-btn"
+                                      type="button"
+                                      (click)="cancelConfirm(); $event.stopPropagation()"
+                                    >
+                                      No
+                                    </button>
+                                  </span>
+                                } @else {
+                                  <button
+                                    class="neu-table__action-btn neu-table__action-btn--{{
+                                      action.variant ?? 'ghost'
+                                    }}"
+                                    type="button"
+                                    [disabled]="action.disabled ? action.disabled(row) : false"
+                                    [title]="action.label"
+                                    (click)="handleAction(row, action); $event.stopPropagation()"
+                                  >
+                                    @if (action.icon.startsWith('lucide')) {
+                                      <neu-icon
+                                        class="neu-table__action-icon"
+                                        [name]="action.icon"
+                                        size="1rem"
+                                        aria-hidden="true"
+                                      />
+                                    } @else {
+                                      <span class="neu-table__action-icon" aria-hidden="true">{{
+                                        action.icon
+                                      }}</span>
+                                    }
+                                    <span class="sr-only">{{ action.label }}</span>
+                                  </button>
+                                }
+                              }
+                            }
+                          </div>
+                        } @else {
+                          {{ getCellValue(row, col) }}
+                        }
+                      </td>
+                    }
                   </tr>
-                }
+                  @if (expandable() && isRowExpanded(row)) {
+                    <tr class="neu-table__row-expand-detail">
+                      <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
+                        <div class="neu-table__expand-content">
+                          @if (expandTemplate(); as tpl) {
+                            <ng-container
+                              [ngTemplateOutlet]="tpl.templateRef"
+                              [ngTemplateOutletContext]="{ $implicit: row }"
+                            />
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
                 }
               }
               @if (_virtualScrollActive() && _virtualBottomSpacerHeight() > 0) {
@@ -1546,6 +1552,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this.getRowKey(row),
   );
   private readonly _sortController = new NeuTableSortController<T>();
+  private readonly _queryController = new NeuTableQueryController<T>();
   private readonly _keyboardController = new NeuTableKeyboardController<unknown>();
   protected readonly _selectionRadioName = `neu-table-selection-${_neuTableSelectionIdSeq++}`;
   private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
@@ -1562,6 +1569,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _filterOverlayOwnedChildBackdrops = new Map<HTMLElement, HTMLElement>();
   private _pendingFilterOverlayChildTrigger: HTMLElement | null = null;
   private _destroyed = false;
+  private _initialQueryHandled = false;
+  private _lastEmittedQuery: NeuTableQueryState | null = null;
 
   private readonly _advancedFilter = new NeuTableAdvancedFilterController<T>(
     () => this._focusOverlayChildTrigger('date'),
@@ -1662,8 +1671,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly selectOnRowClick = input<boolean>(true);
   readonly metaKeySelection = input<boolean>(false);
   readonly expandable = input<boolean>(false);
-  readonly expandMode: _angular_core.InputSignal<"multiple" | "single"> =
-    input<'multiple' | 'single'>('multiple');
+  readonly expandMode: _angular_core.InputSignal<'multiple' | 'single'> = input<
+    'multiple' | 'single'
+  >('multiple');
   readonly exportable = input<boolean>(false);
   readonly exportFileName = input<string>('export');
   readonly pageSizeOptions = input<number[]>([]);
@@ -1693,12 +1703,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly footerRow = input<Record<string, string | number> | undefined>(undefined);
   readonly emptyStateTemplate = input<TemplateRef<void> | undefined>(undefined);
   readonly serverSide = input<boolean>(false);
+  /** Presence makes every server/query slice consumer-authoritative. */
+  readonly query = input<NeuTableQueryState | undefined>(undefined);
+  /** Opt-in one-time initial server/query event after initial inputs and URL restore. */
+  readonly lazyLoadOnInit = input<boolean>(false);
   readonly totalItems = input<number | undefined>(undefined);
   readonly multiSort = input<boolean>(false);
   readonly exportFormats = input<('csv' | 'json' | 'xlsx')[]>(['csv']);
   readonly exportColumns = input<string[]>([]);
-  readonly exportScope: _angular_core.InputSignal<"selected" | "filtered" | "auto"> =
-    input<'selected' | 'filtered' | 'auto'>('auto');
+  readonly exportScope: _angular_core.InputSignal<'selected' | 'filtered' | 'auto'> = input<
+    'selected' | 'filtered' | 'auto'
+  >('auto');
   readonly selectionActions = input<readonly NeuTableSelectionAction<T>[]>([]);
 
   // ── URL params ────────────────────────────────────────────────────────
@@ -1729,6 +1744,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly actionClick = output<NeuTableActionEvent<T>>();
   readonly selectionActionClick = output<NeuTableSelectionActionEvent<T>>();
   readonly serverStateChange = output<NeuTableServerState>();
+  /** One immutable canonical proposal per semantic query action. */
+  readonly queryChange = output<NeuTableQueryState>();
   readonly searchChange = output<string>();
   /** One immutable canonical snapshot per user sort action. */
   readonly sortChange = output<NeuTableSortState>();
@@ -1833,8 +1850,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
    * explicit T/string escape for computed/action/path-like columns, and the
    * unparameterized legacy column form used by existing templates.
    */
-  private readonly _typedColumns = computed<readonly NeuTableColumn<T>[]>(
-    () => this.columns().map((column) => this.asRuntimeColumn(column)),
+  private readonly _typedColumns = computed<readonly NeuTableColumn<T>[]>(() =>
+    this.columns().map((column) => this.asRuntimeColumn(column)),
   );
 
   private readonly _resolvedGlobalFilterFields = computed<
@@ -1892,6 +1909,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     };
   }
 
+  private _queryConfig() {
+    return {
+      columns: this._typedColumns(),
+      globalFilterFields: this.globalFilterFields(),
+      multiSort: this.multiSort(),
+    } as const;
+  }
+
   private readonly _virtualScrollTop = signal(0);
 
   constructor() {
@@ -1913,7 +1938,21 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       .subscribe((value) => this.onPageSizeChange(value));
 
     effect(() => {
+      const controlled = this.query();
+      const config = this._queryConfig();
+      untracked(() => {
+        if (controlled === undefined) {
+          this._state.releaseControlledQuery();
+          return;
+        }
+        this._state.setControlledQuery(this._queryController.controlledPatch(controlled));
+        this._lastEmittedQuery = this._queryController.build(this._state.snapshot(), config);
+      });
+    });
+
+    effect(() => {
       const pageSize = this.pageSize();
+      if (this.query() !== undefined) return;
       untracked(() => this._state.setPageSize(pageSize, 'input'));
     });
 
@@ -1926,7 +1965,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           this._state.releaseControlledSelection();
           if (mode === 'single' && this._state.selectionKeys().size > 1) {
             const first = this._state.selectionKeys().values().next().value;
-            this._state.setSelectionKeys(first === undefined ? new Set() : new Set([first]), 'input');
+            this._state.setSelectionKeys(
+              first === undefined ? new Set() : new Set([first]),
+              'input',
+            );
           }
           return;
         }
@@ -1938,10 +1980,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
     effect(() => {
       const controlled = this.sort();
+      const queryControlled = this.query() !== undefined;
       const multiple = this.multiSort();
       const currentSingle = this._state.sort();
       const currentEntries = this._state.sortEntries();
       untracked(() => {
+        if (queryControlled) return;
         if (controlled === undefined) {
           this._state.releaseControlledSort();
           this._state.update(
@@ -1965,14 +2009,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         }
         const entries = this._normalizeSortState(controlled, multiple);
         this._state.setControlledSort(
-          multiple ? null : entries[0] ?? null,
+          multiple ? null : (entries[0] ?? null),
           multiple ? entries : [],
         );
       });
     });
 
     effect(() => {
-      if (!this.useUrlState()) return;
+      if (!this.useUrlState() || this.query() !== undefined) return;
       const snapshot = this._urlAdapter.read(this._urlConfig());
       untracked(() => this._state.update(snapshot, 'url'));
     });
@@ -1986,6 +2030,22 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
     effect(() => {
       this._handleFilterColumnLifecycle(this._typedColumns());
+    });
+
+    let queryConfigInitialized = false;
+    effect(() => {
+      const config = this._queryConfig();
+      untracked(() => {
+        const state = this._state.snapshot();
+        const projected = this._queryController.build(state, config);
+        if (!queryConfigInitialized) {
+          queryConfigInitialized = true;
+          this._lastEmittedQuery ??= projected;
+          return;
+        }
+        if (this._queryController.equal(this._lastEmittedQuery, projected)) return;
+        this._emitQueryState(state);
+      });
     });
 
     effect(() => {
@@ -2082,6 +2142,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         keyboardAnchorInitialized = true;
       });
     });
+
+    effect(() => {
+      const serverSide = this.serverSide();
+      const lazyLoadOnInit = this.lazyLoadOnInit();
+      const state = this._state.snapshot();
+      this._queryConfig();
+      untracked(() => {
+        if (this._initialQueryHandled) return;
+        this._initialQueryHandled = true;
+        if (serverSide && lazyLoadOnInit) this._emitQueryState(state, true);
+      });
+    });
   }
 
   private readonly _confirmPending = signal<{ rowKey: unknown; actionKey: string } | null>(null);
@@ -2101,7 +2173,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return true;
     }
     if (kind === 'custom') {
-      return !this.serverSide() && this._filterOverlayCustomTemplate(column) !== null;
+      return this._filterOverlayCustomTemplate(column) !== null;
     }
     if (
       !column.filterConfig &&
@@ -2293,9 +2365,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._escapeReturnFocus = null;
     const column = this._currentTypedColumn(key);
     if (!column || !this._isFilterOverlayEligible(column)) return;
-    this._advancedFilter.initialize(column, this._appliedFilters()[column.key], {
-      allowMultipleRules: !this.serverSide(),
-    });
+    this._advancedFilter.initialize(column, this._appliedFilters()[column.key]);
     this._openFilterKey.set(key);
   }
 
@@ -2401,7 +2471,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const result = this._advancedFilter.buildApplyResult();
     if (!key || !column || !result || result.key !== key) return;
     const changed = this._writeAppliedFilter(key, result.filter);
-    if (changed && this.serverSide()) this._emitServerState();
+    if (changed) this._emitQueryState(changed.current);
     this._closeFilterOverlay();
   }
 
@@ -2442,7 +2512,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const observer = overlayContainer
       ? new MutationObserver((records) => {
           const trigger = this._pendingFilterOverlayChildTrigger;
-          if (!trigger || !trigger.isConnected || trigger.getAttribute('aria-expanded') !== 'true') {
+          if (
+            !trigger ||
+            !trigger.isConnected ||
+            trigger.getAttribute('aria-expanded') !== 'true'
+          ) {
             return;
           }
 
@@ -2571,18 +2645,28 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _captureFilterOverlayChildActivation(target: EventTarget | null): void {
     const panel = this._filterOverlayPanel();
     const trigger =
-      target instanceof Element ? target.closest<HTMLElement>(_NEU_TABLE_FILTER_CHILD_TRIGGER) : null;
+      target instanceof Element
+        ? target.closest<HTMLElement>(_NEU_TABLE_FILTER_CHILD_TRIGGER)
+        : null;
     this._pendingFilterOverlayChildTrigger = trigger && panel?.contains(trigger) ? trigger : null;
   }
 
   private _refreshFilterOverlayOwnership(panel: HTMLElement): void {
     for (const [pane, trigger] of this._filterOverlayOwnedChildPanes) {
-      if (!pane.isConnected || !trigger.isConnected || trigger.getAttribute('aria-expanded') !== 'true') {
+      if (
+        !pane.isConnected ||
+        !trigger.isConnected ||
+        trigger.getAttribute('aria-expanded') !== 'true'
+      ) {
         this._filterOverlayOwnedChildPanes.delete(pane);
       }
     }
     for (const [backdrop, trigger] of this._filterOverlayOwnedChildBackdrops) {
-      if (!backdrop.isConnected || !trigger.isConnected || trigger.getAttribute('aria-expanded') !== 'true') {
+      if (
+        !backdrop.isConnected ||
+        !trigger.isConnected ||
+        trigger.getAttribute('aria-expanded') !== 'true'
+      ) {
         this._filterOverlayOwnedChildBackdrops.delete(backdrop);
       }
     }
@@ -2758,7 +2842,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return rows.filter((row) => {
       const passesGlobal =
         !q ||
-        globalFields.some((field) => field.values(row).some((value) => matches(String(value ?? ''))));
+        globalFields.some((field) =>
+          field.values(row).some((value) => matches(String(value ?? ''))),
+        );
       if (!passesGlobal) return false;
       for (const filter of activeColumnFilters) {
         if (!this._matchesAppliedColumnFilter(row, filter)) return false;
@@ -2771,7 +2857,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     if (this.serverSide()) return this.filteredData();
     const data = this.filteredData();
     if (!this.sortable()) return [...data];
-    return this._sortController.sort(data, this.currentSort(), this._typedColumns()) as NeuTableRuntimeRow<T>[];
+    return this._sortController.sort(
+      data,
+      this.currentSort(),
+      this._typedColumns(),
+    ) as NeuTableRuntimeRow<T>[];
   });
 
   readonly effectivePageSize = computed(() => {
@@ -3016,10 +3106,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const next = [...order];
     const [moved] = next.splice(previousIndex, 1);
     next.splice(targetIndex, 0, moved);
-    const changed = this._state.setLayout(
-      { ...this._state.layout(), columnOrder: next },
-      'ui',
-    );
+    const changed = this._state.setLayout({ ...this._state.layout(), columnOrder: next }, 'ui');
     if (!changed) return;
     this.columnReorder.emit({
       previousIndex,
@@ -3121,10 +3208,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     if (!(key in current)) return;
     const next = { ...current };
     delete next[key];
-    const changed = this._state.setLayout(
-      { ...this._state.layout(), columnWidths: next },
-      'api',
-    );
+    const changed = this._state.setLayout({ ...this._state.layout(), columnWidths: next }, 'api');
     if (changed) this._emitLayoutChange();
   }
 
@@ -3166,7 +3250,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return mode !== 'none' ? mode : this.selectable() ? 'multiple' : 'none';
   });
   protected readonly selectionEnabled = computed(() => this.effectiveSelectionMode() !== 'none');
-  protected readonly multipleSelection = computed(() => this.effectiveSelectionMode() === 'multiple');
+  protected readonly multipleSelection = computed(
+    () => this.effectiveSelectionMode() === 'multiple',
+  );
   protected readonly resolvedSelectAllAriaLabel = computed(
     () =>
       this.selectAllAriaLabel() ??
@@ -3376,9 +3462,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const clamped = Math.max(1, Math.min(page, this.totalPages()));
     const changed = this._state.setPage(clamped, 'ui');
     if (!changed) return;
-    if (this.serverSide()) {
-      this._emitServerState();
-    } else if (this.useUrlState()) {
+    this._emitQueryState(changed.current);
+    if (!this.serverSide() && this.query() === undefined && this.useUrlState()) {
       this._urlAdapter.writePage(this.pageParam(), clamped);
     }
   }
@@ -3395,18 +3480,20 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       removable: this.removableSort(),
     });
     const changed = this._state.update(
-      multiple
-        ? { sortEntries: entries, page: 1 }
-        : { sort: entries[0] ?? null, page: 1 },
+      multiple ? { sortEntries: entries, page: 1 } : { sort: entries[0] ?? null, page: 1 },
       'ui',
     );
     if (!changed) return;
 
     const snapshot = this._freezeSortState(entries);
     this.sortChange.emit(snapshot);
-    if (this.serverSide()) {
-      this._emitServerState(changed.current);
-    } else if (this.useUrlState() && this.sort() === undefined) {
+    this._emitQueryState(changed.current);
+    if (
+      !this.serverSide() &&
+      this.query() === undefined &&
+      this.useUrlState() &&
+      this.sort() === undefined
+    ) {
       if (multiple) this._urlAdapter.writeSortEntries(this._urlConfig(), snapshot);
       else this._urlAdapter.writeSort(this._urlConfig(), snapshot[0] ?? null);
     }
@@ -3597,19 +3684,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const changed = this._state.update({ search: q, page: 1 }, 'ui');
     if (!changed) return;
     this.searchChange.emit(q);
-    if (this.serverSide()) {
-      this._emitServerState();
-    } else if (this.useUrlState()) {
+    this._emitQueryState(changed.current);
+    if (!this.serverSide() && this.query() === undefined && this.useUrlState()) {
       this._urlAdapter.writeSearch(this._urlConfig(), q);
     }
   }
 
   clearSearch(): void {
     const changed = this._state.update({ search: '', page: 1 }, 'ui');
-    if (this.serverSide()) {
-      this._emitServerState();
-    } else if (this.useUrlState()) {
-      if (!changed) return;
+    if (!changed) return;
+    this._emitQueryState(changed.current);
+    if (!this.serverSide() && this.query() === undefined && this.useUrlState()) {
       this._urlAdapter.clearSearch(this._urlConfig());
     }
   }
@@ -3621,9 +3706,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     if (!Number.isFinite(size) || size <= 0) return;
     const changed = this._state.update({ pageSize: size, page: 1 }, 'ui');
     if (!changed) return;
-    if (this.serverSide()) {
-      this._emitServerState();
-    } else if (this.useUrlState()) {
+    this._emitQueryState(changed.current);
+    if (!this.serverSide() && this.query() === undefined && this.useUrlState()) {
       this._urlAdapter.resetPage(this.pageParam());
     }
   }
@@ -3641,11 +3725,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       operator: 'and',
       constraints: [{ value }],
     });
-    if (changed && this.serverSide()) this._emitServerState();
+    if (changed) this._emitQueryState(changed.current);
   }
 
   clearColumnFilters(): void {
-    this._appliedFilters.set({});
+    const changed = this._state.update({ filters: {}, page: 1 }, 'api');
+    if (changed) this._emitQueryState(changed.current);
     if (this._openFilterKey()) this._closeFilterOverlay(false);
   }
 
@@ -3824,10 +3909,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return typeof field === 'object' && field !== null && typeof field.accessor === 'function';
   }
 
-  private _normalizeSortState(
-    entries: NeuTableSortState,
-    multiple: boolean,
-  ): NeuTableSortEntry[] {
+  private _normalizeSortState(entries: NeuTableSortState, multiple: boolean): NeuTableSortEntry[] {
     const seen = new Set<string>();
     const normalized: NeuTableSortEntry[] = [];
     for (const entry of entries) {
@@ -3841,31 +3923,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   private _freezeSortState(entries: readonly NeuTableSortEntry[]): NeuTableSortState {
-    return Object.freeze(
-      entries.map((entry) => Object.freeze({ ...entry })),
-    ) as NeuTableSortState;
-  }
-
-  private _globalFilterServerProjection(): Pick<
-    NeuTableServerState,
-    'globalFilterFields' | 'localOnlyGlobalFilterFields'
-  > {
-    const configured = this.globalFilterFields();
-    if (configured === undefined) return {};
-    const fields: string[] = [];
-    let localOnly = false;
-    for (const field of configured) {
-      if (this._isGlobalFilterAccessor(field)) {
-        if (field.serverField) fields.push(field.serverField);
-        else localOnly = true;
-      } else {
-        fields.push(String(field));
-      }
-    }
-    return {
-      globalFilterFields: [...new Set(fields)],
-      ...(localOnly ? { localOnlyGlobalFilterFields: true } : {}),
-    };
+    return Object.freeze(entries.map((entry) => Object.freeze({ ...entry }))) as NeuTableSortState;
   }
 
   private asRuntimeColumn(col: NeuTableColumnInput<T>): NeuTableColumn<T> {
@@ -4050,7 +4108,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   protected modernFilterLabel(col: NeuTableColumn<T>): string {
     const mode = this.modernFilterMode(col);
-    return mode ? `${this.filterAriaPrefix()} ${col.header} (${mode})` : `${this.filterAriaPrefix()} ${col.header}`;
+    return mode
+      ? `${this.filterAriaPrefix()} ${col.header} (${mode})`
+      : `${this.filterAriaPrefix()} ${col.header}`;
   }
 
   protected rangeFilterLabel(col: NeuTableColumn<T>, boundary: 'from' | 'to'): string {
@@ -4064,15 +4124,19 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   protected isDateOnlyRange(col: NeuTableColumn<T>): boolean {
-    return col.filterConfig?.kind === 'date' &&
+    return (
+      col.filterConfig?.kind === 'date' &&
       this.modernFilterMode(col) === 'between' &&
-      (col.filterConfig.precision ?? 'date-only') === 'date-only';
+      (col.filterConfig.precision ?? 'date-only') === 'date-only'
+    );
   }
 
   protected isInstantRange(col: NeuTableColumn<T>): boolean {
-    return col.filterConfig?.kind === 'date' &&
+    return (
+      col.filterConfig?.kind === 'date' &&
       this.modernFilterMode(col) === 'between' &&
-      col.filterConfig.precision === 'instant';
+      col.filterConfig.precision === 'instant'
+    );
   }
 
   protected typedColumnFilterControl(col: NeuTableColumn<T>): FormControl<unknown> {
@@ -4136,7 +4200,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   protected typedFilterOptions(col: NeuTableColumn<T>): readonly unknown[] {
     const config = col.filterConfig;
-    return config?.kind === 'select' || config?.kind === 'multiSelect' ? (config.options ?? []) : [];
+    return config?.kind === 'select' || config?.kind === 'multiSelect'
+      ? (config.options ?? [])
+      : [];
   }
 
   protected typedFilterOptionLabel(col: NeuTableColumn<T>): NeuOptionLabelAccessor<unknown> | null {
@@ -4145,13 +4211,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return (config.optionLabel ?? null) as NeuOptionLabelAccessor<unknown> | null;
   }
 
-  protected typedFilterOptionValue(col: NeuTableColumn<T>): NeuOptionValueAccessor<unknown, unknown> | null {
+  protected typedFilterOptionValue(
+    col: NeuTableColumn<T>,
+  ): NeuOptionValueAccessor<unknown, unknown> | null {
     const config = col.filterConfig;
     if (config?.kind !== 'select' && config?.kind !== 'multiSelect') return null;
     return (config.optionValue ?? null) as NeuOptionValueAccessor<unknown, unknown> | null;
   }
 
-  protected typedFilterOptionDisabled(col: NeuTableColumn<T>): NeuOptionDisabledAccessor<unknown> | null {
+  protected typedFilterOptionDisabled(
+    col: NeuTableColumn<T>,
+  ): NeuOptionDisabledAccessor<unknown> | null {
     const config = col.filterConfig;
     if (config?.kind !== 'select' && config?.kind !== 'multiSelect') return null;
     return (config.optionDisabled ?? null) as NeuOptionDisabledAccessor<unknown> | null;
@@ -4159,12 +4229,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   protected typedFilterSearchable(col: NeuTableColumn<T>): boolean {
     const config = col.filterConfig;
-    return (config?.kind === 'select' || config?.kind === 'multiSelect') && config.searchable === true;
+    return (
+      (config?.kind === 'select' || config?.kind === 'multiSelect') && config.searchable === true
+    );
   }
 
   protected typedFilterVirtualScroll(col: NeuTableColumn<T>): boolean {
     const config = col.filterConfig;
-    return (config?.kind === 'select' || config?.kind === 'multiSelect') && config.virtualScroll === true;
+    return (
+      (config?.kind === 'select' || config?.kind === 'multiSelect') && config.virtualScroll === true
+    );
   }
 
   protected typedFilterVirtualScrollVisibleItems(col: NeuTableColumn<T>): number {
@@ -4178,7 +4252,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     col: NeuTableColumn<T>,
     boundary: 'from' | 'to',
   ): FormControl<number | null> {
-    const controls = boundary === 'from' ? this._typedRangeStartControls : this._typedRangeEndControls;
+    const controls =
+      boundary === 'from' ? this._typedRangeStartControls : this._typedRangeEndControls;
     let control = controls.get(col.key);
     if (!control) {
       control = new FormControl<number | null>(
@@ -4203,7 +4278,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     boundary: 'from' | 'to',
   ): FormControl<string> {
     const controls =
-      boundary === 'from' ? this._typedInstantRangeStartControls : this._typedInstantRangeEndControls;
+      boundary === 'from'
+        ? this._typedInstantRangeStartControls
+        : this._typedInstantRangeEndControls;
     let control = controls.get(col.key);
     if (!control) {
       control = new FormControl<string>(
@@ -4218,7 +4295,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           const currentColumn = this._currentTypedColumn(col.key);
           if (!currentColumn || !this.isInstantRange(currentColumn)) return;
           const range = neuTableDateRangeFilterValue(this._appliedSingleFilterValue(col.key));
-          this.setColumnFilter(col.key, { ...range, [boundary]: neuTableInstantFilterValue(value) });
+          this.setColumnFilter(col.key, {
+            ...range,
+            [boundary]: neuTableInstantFilterValue(value),
+          });
         });
       this._trackFilterControl(control, subscription);
       controls.set(col.key, control);
@@ -4293,23 +4373,28 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._typedColumns().find((candidate) => candidate.key === key) ?? null;
   }
 
-  private _writeAppliedFilter(key: string, input: InternalAppliedColumnFilter): boolean {
+  private _writeAppliedFilter(
+    key: string,
+    input: InternalAppliedColumnFilter,
+  ): InternalNeuTableStateChange<unknown> | null {
     const column = this._currentTypedColumn(key);
     const normalized = this._normalizeAppliedFilterInput(column, input);
     const current = this._appliedFilters();
     let filters: Record<string, InternalAppliedColumnFilter>;
     if (normalized.constraints.length === 0) {
-      if (!(key in current)) return false;
+      if (!(key in current)) return null;
       filters = { ...current };
       delete filters[key];
     } else {
       filters = { ...current, [key]: normalized };
     }
-    const previousFilters = this._state.filters();
-    const previousPage = this._state.page();
-    this._appliedFilters.update(() => filters);
-    if (this.serverSide()) this._state.setPage(1, 'api');
-    return previousFilters !== this._state.filters() || previousPage !== this._state.page();
+    return this._state.update(
+      {
+        filters,
+        ...(this.serverSide() || this.query() !== undefined ? { page: 1 } : {}),
+      },
+      'api',
+    );
   }
 
   private _appliedSingleFilterValue(key: string): unknown {
@@ -4330,9 +4415,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return facade;
   }
 
-  private _replaceAppliedFiltersFromLegacyProjection(
-    filters: Record<string, unknown>,
-  ): void {
+  private _replaceAppliedFiltersFromLegacyProjection(filters: Record<string, unknown>): void {
     const applied: Record<string, InternalAppliedColumnFilter> = {};
     for (const [key, value] of Object.entries(filters)) {
       applied[key] = this._normalizeAppliedFilterInput(this._currentTypedColumn(key), {
@@ -4452,41 +4535,43 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       untracked(() => {
         const activeKey = this._openFilterKey();
         if (activeKey && invalidatedKeys.has(activeKey)) this._closeFilterOverlay(false);
-        this._appliedFilters.update((current) => {
-          let next = current;
-          const writable = () => {
-            if (next === current) next = { ...current };
-            return next;
-          };
-
-          for (const key of invalidatedKeys) {
-            if (key in next) delete writable()[key];
-          }
-
-          for (const [key, change] of modeChanges) {
-            if (invalidatedKeys.has(key)) continue;
-            const filter = next[key];
-            const column = columnsByKey.get(key);
-            if (
-              !filter ||
-              !column ||
-              filter.constraints.length !== 1 ||
-              filter.constraints[0].mode !== change.previous
-            ) {
-              continue;
-            }
-            writable()[key] = this._normalizeAppliedFilterInput(column, {
-              operator: filter.operator,
-              constraints: [
-                {
-                  mode: change.next,
-                  value: filter.constraints[0].value,
-                },
-              ],
-            });
-          }
+        const current = this._appliedFilters();
+        let next = current;
+        const writable = () => {
+          if (next === current) next = { ...current };
           return next;
-        });
+        };
+
+        for (const key of invalidatedKeys) {
+          if (key in next) delete writable()[key];
+        }
+
+        for (const [key, change] of modeChanges) {
+          if (invalidatedKeys.has(key)) continue;
+          const filter = next[key];
+          const column = columnsByKey.get(key);
+          if (
+            !filter ||
+            !column ||
+            filter.constraints.length !== 1 ||
+            filter.constraints[0].mode !== change.previous
+          ) {
+            continue;
+          }
+          writable()[key] = this._normalizeAppliedFilterInput(column, {
+            operator: filter.operator,
+            constraints: [
+              {
+                mode: change.next,
+                value: filter.constraints[0].value,
+              },
+            ],
+          });
+        }
+        if (next !== current) {
+          const changed = this._state.setFilters(next, 'column-lifecycle');
+          if (changed?.committed) this._emitQueryState(changed.current);
+        }
       });
     }
 
@@ -4589,58 +4674,68 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._columnFilters()[key] ?? '';
   }
 
-  private _emitServerState(state = this._state.snapshot()): void {
-    const sort = this.multiSort() ? null : state.sort;
-    const sortEntries = this.multiSort() ? state.sortEntries.map((entry) => ({ ...entry })) : [];
-    const globalFilterProjection = this._globalFilterServerProjection();
-    const current: NeuTableServerState = {
-      page: state.page,
-      pageSize: this.pagination() ? state.pageSize : this.filteredData().length || 1,
-      search: state.search,
-      sortKey: sort?.key ?? '',
-      sortDir: sort?.dir ?? 'asc',
-      sort: sort ? { ...sort } : null,
-      sortEntries,
-      ...globalFilterProjection,
-      columnFilters: this._columnFilters(),
-      typedColumnFilters: this._typedColumnFiltersState(),
-      localOnlyFilters: this._localOnlyFilters(),
-    };
-    this.serverStateChange.emit(current);
-  }
-  private _typedColumnFiltersState(): Record<string, NeuTableFilterState> {
-    const result: Record<string, NeuTableFilterState> = {};
-    const columnsByKey = new Map<string, NeuTableColumn<T>>(
-      this._typedColumns().map((column) => [column.key, column] as const),
-    );
-    for (const [key, filter] of Object.entries(this._appliedFilters())) {
-      if (filter.constraints.length !== 1) continue;
-      const constraint = filter.constraints[0];
-      if (isNeuTableFilterValueEmpty(constraint.value)) continue;
-      const column = columnsByKey.get(key);
-      if (!column) continue;
-      const state = buildNeuTableFilterState(
-        column as NeuTableColumn<T, string>,
-        constraint.value,
-        constraint.mode,
-      );
-      if (state) result[key] = state;
+  private _emitQueryState(
+    state: InternalNeuTableState<unknown> = this._state.snapshot(),
+    force = false,
+  ): void {
+    const query = this._queryController.build(state, this._queryConfig());
+    if (
+      !force &&
+      this.query() !== undefined &&
+      this._queryController.equal(this._lastEmittedQuery, query)
+    ) {
+      return;
     }
-    return result;
+    this._lastEmittedQuery = query;
+    this.queryChange.emit(query);
+    if (!this.serverSide()) return;
+    this.serverStateChange.emit(this._legacyServerState(query, state));
+  }
+
+  /** Internal F4 compatibility shim; all projection logic lives in the query controller. */
+  private _emitServerState(): void {
+    const state = this._state.snapshot();
+    this.serverStateChange.emit(
+      this._legacyServerState(this._queryController.build(state, this._queryConfig()), state),
+    );
+  }
+
+  private _legacyServerState(
+    query: NeuTableQueryState,
+    state: InternalNeuTableState<unknown>,
+  ): NeuTableServerState {
+    return this._queryController.legacy(query, state, {
+      effectivePageSize: this.pagination() ? query.pageSize : this.filteredData().length || 1,
+      configuredGlobalFilterFields: this.globalFilterFields() !== undefined,
+      typedFilterKeys: new Set(
+        this._typedColumns()
+          .filter((column) => column.filterConfig !== undefined)
+          .map((column) => column.key),
+      ),
+    });
+  }
+
+  private _typedColumnFiltersState(): Record<string, NeuTableFilterState> {
+    const state = this._state.snapshot();
+    const query = this._queryController.build(state, this._queryConfig());
+    return (
+      this._queryController.legacy(query, state, {
+        effectivePageSize: state.pageSize,
+        configuredGlobalFilterFields: this.globalFilterFields() !== undefined,
+        typedFilterKeys: new Set(
+          this._typedColumns()
+            .filter((column) => column.filterConfig !== undefined)
+            .map((column) => column.key),
+        ),
+      }).typedColumnFilters ?? {}
+    );
   }
 
   private _localOnlyFilters(): string[] {
-    const customKeys = new Set<string>(
-      this._typedColumns()
-        .filter((column) => column.filterConfig?.kind === 'custom')
-        .map((column) => column.key),
-    );
-    return Object.entries(this._appliedFilters()).flatMap(([key, filter]) =>
-      customKeys.has(key) &&
-      filter.constraints.some((constraint) => !isNeuTableFilterValueEmpty(constraint.value))
-        ? [key]
-        : [],
-    );
+    return [
+      ...this._queryController.build(this._state.snapshot(), this._queryConfig()).serialization
+        .localOnlyFilters,
+    ];
   }
 
   private _emitLayoutChange(): void {

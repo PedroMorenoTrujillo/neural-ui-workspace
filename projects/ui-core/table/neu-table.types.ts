@@ -18,9 +18,7 @@ export type NeuTableRow = Record<string, unknown>;
  * accept strings, while computed, action and path-like typed columns opt into
  * NeuTableColumn<T, string> explicitly.
  */
-export type NeuTableColumnKey<T> = [keyof T] extends [never]
-  ? string
-  : Extract<keyof T, string>;
+export type NeuTableColumnKey<T> = [keyof T] extends [never] ? string : Extract<keyof T, string>;
 
 export type NeuTableRowKey<T> = NeuTableColumnKey<T>;
 
@@ -213,10 +211,7 @@ export type NeuTableFilterMatchMode =
   | NeuTableMultiSelectFilterMode;
 
 /** Internal/public compatibility union for all typed filter state modes. */
-export type NeuTableFilterMode =
-  | NeuTableFilterMatchMode
-  | NeuTableBooleanFilterMode
-  | 'custom';
+export type NeuTableFilterMode = NeuTableFilterMatchMode | NeuTableBooleanFilterMode | 'custom';
 
 export type NeuTableDatePrecision = 'date-only' | 'instant';
 
@@ -237,6 +232,22 @@ export interface NeuTableNumberRangeValue {
 }
 
 export type NeuTableFilterAccessor<T, V = unknown> = (row: T) => V;
+
+export interface NeuTableFilterServerSerializerContext {
+  columnKey: string;
+  kind: NeuTableFilterKind;
+  mode: NeuTableFilterMode;
+}
+
+/**
+ * Converts an applied client filter value into backend metadata. The original
+ * value remains in the query snapshot so controlled queries can echo it
+ * without losing Select/MultiSelect object identity.
+ */
+export type NeuTableFilterServerSerializer = (
+  value: unknown,
+  context: NeuTableFilterServerSerializerContext,
+) => unknown;
 
 type NeuTableBivariantOptionAccessor<O, R> = {
   read(option: O): R;
@@ -264,29 +275,37 @@ export interface NeuTableFilterBaseConfig<T, K extends NeuTableFilterKind, M ext
   kind: K;
   mode?: M;
   accessor?: NeuTableFilterAccessor<T, V>;
+  /** Optional backend projection for custom or opaque option values. */
+  serverSerializer?: NeuTableFilterServerSerializer;
 }
 
-export interface NeuTableTextFilterConfig<T = NeuTableRow>
-  extends NeuTableFilterBaseConfig<T, 'text', NeuTableTextFilterMode, string> {}
+export interface NeuTableTextFilterConfig<T = NeuTableRow> extends NeuTableFilterBaseConfig<
+  T,
+  'text',
+  NeuTableTextFilterMode,
+  string
+> {}
 
-export interface NeuTableNumberFilterConfig<T = NeuTableRow>
-  extends NeuTableFilterBaseConfig<T, 'number', NeuTableNumberFilterMode, number | null> {}
+export interface NeuTableNumberFilterConfig<T = NeuTableRow> extends NeuTableFilterBaseConfig<
+  T,
+  'number',
+  NeuTableNumberFilterMode,
+  number | null
+> {}
 
-export interface NeuTableDateFilterConfig<T = NeuTableRow>
-  extends NeuTableFilterBaseConfig<
-    T,
-    'date',
-    NeuTableDateFilterMode,
-    Date | string | null | undefined
-  > {
+export interface NeuTableDateFilterConfig<T = NeuTableRow> extends NeuTableFilterBaseConfig<
+  T,
+  'date',
+  NeuTableDateFilterMode,
+  Date | string | null | undefined
+> {
   precision?: NeuTableDatePrecision;
 }
 
-export interface NeuTableBooleanFilterConfig<T = NeuTableRow>
-  extends Omit<
-    NeuTableFilterBaseConfig<T, 'boolean', NeuTableBooleanFilterMode, boolean | null | undefined>,
-    'mode'
-  > {}
+export interface NeuTableBooleanFilterConfig<T = NeuTableRow> extends Omit<
+  NeuTableFilterBaseConfig<T, 'boolean', NeuTableBooleanFilterMode, boolean | null | undefined>,
+  'mode'
+> {}
 
 export interface NeuTableSelectFilterConfig<
   T = NeuTableRow,
@@ -306,13 +325,7 @@ export interface NeuTableMultiSelectFilterConfig<
   T = NeuTableRow,
   O = unknown,
   V = NeuOptionValue<O>,
->
-  extends NeuTableFilterBaseConfig<
-    T,
-    'multiSelect',
-    NeuTableMultiSelectFilterMode,
-    V
-  > {
+> extends NeuTableFilterBaseConfig<T, 'multiSelect', NeuTableMultiSelectFilterMode, V> {
   options?: readonly O[];
   optionLabel?: NeuTableOptionConfigAccessor<O, string> | null;
   optionValue?: NeuTableOptionValueConfigAccessor<O, V> | null;
@@ -323,8 +336,12 @@ export interface NeuTableMultiSelectFilterConfig<
 }
 
 /** Custom predicates remain local-only and intentionally use unknown values in P2.2B. */
-export interface NeuTableCustomFilterConfig<T = NeuTableRow>
-  extends NeuTableFilterBaseConfig<T, 'custom', 'custom', unknown> {
+export interface NeuTableCustomFilterConfig<T = NeuTableRow> extends NeuTableFilterBaseConfig<
+  T,
+  'custom',
+  'custom',
+  unknown
+> {
   predicate: (value: unknown, filterValue: unknown, row: T) => boolean;
 }
 
@@ -410,6 +427,58 @@ export type NeuTableGlobalFilterField<T = NeuTableRow> =
   | NeuTableColumnKey<T>
   | NeuTableGlobalFilterAccessor<T>;
 
+// ── Canonical query state ────────────────────────────────────────────────
+
+export type NeuTableQueryFilterConstraint =
+  | (Readonly<NeuTableTextFilterState> & { readonly serverValue?: unknown })
+  | (Readonly<NeuTableNumberFilterState> & { readonly serverValue?: unknown })
+  | (Readonly<NeuTableDateFilterState> & { readonly serverValue?: unknown })
+  | (Readonly<NeuTableBooleanFilterState> & { readonly serverValue?: unknown })
+  | (Readonly<NeuTableSelectFilterState> & { readonly serverValue?: unknown })
+  | (Readonly<NeuTableMultiSelectFilterState> & { readonly serverValue?: unknown })
+  | {
+      readonly kind: 'custom';
+      readonly mode: 'custom';
+      readonly value: unknown;
+      readonly serverValue?: unknown;
+    };
+
+/** Exact backend reproducibility of one filter or the whole query. */
+export type NeuTableQuerySerializability = 'serializable' | 'requires-consumer' | 'local-only';
+
+export interface NeuTableQueryColumnFilter {
+  readonly operator: 'and' | 'or';
+  readonly constraints: readonly NeuTableQueryFilterConstraint[];
+  readonly serializability: NeuTableQuerySerializability;
+}
+
+export interface NeuTableQuerySerializationStatus {
+  readonly status: NeuTableQuerySerializability;
+  readonly localOnlyFilters: readonly string[];
+  readonly requiresConsumerSerializationFilters: readonly string[];
+  readonly localOnlyGlobalFilterFields: boolean;
+}
+
+/**
+ * Server/query-oriented Table state. Selection, expansion, layout, keyboard
+ * focus and filter drafts deliberately remain outside this contract.
+ */
+export interface NeuTableQueryState {
+  /** Neural's historical page contract is 1-based. */
+  readonly page: number;
+  readonly pageSize: number;
+  readonly search: string;
+  /** Present only in single-sort mode; null means unsorted or multisort. */
+  readonly sort: Readonly<NeuTableSortEntry> | null;
+  /** Complete ordered entries in multisort mode; empty in single-sort mode. */
+  readonly sortEntries: readonly Readonly<NeuTableSortEntry>[];
+  /** Stable backend field identifiers used by global search. */
+  readonly globalFilterFields: readonly string[];
+  /** Complete applied column filters, including ordered constraints and AND/OR. */
+  readonly filters: Readonly<Record<string, NeuTableQueryColumnFilter>>;
+  readonly serialization: NeuTableQuerySerializationStatus;
+}
+
 // ── Server state ──────────────────────────────────────────────────────────
 export interface NeuTableServerState {
   page: number;
@@ -447,7 +516,10 @@ export type NeuTableCellType =
   | 'actions';
 
 // ── Column ────────────────────────────────────────────────────────────────
-export interface NeuTableColumn<T = Record<string, unknown>, K extends string = NeuTableColumnKey<T>> {
+export interface NeuTableColumn<
+  T = Record<string, unknown>,
+  K extends string = NeuTableColumnKey<T>,
+> {
   /** Direct property key for typed columns; legacy columns may use any string. */
   key: K;
   header: string;

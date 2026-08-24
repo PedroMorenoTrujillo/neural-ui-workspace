@@ -20,6 +20,7 @@ import {
   NeuTableSelectFilterConfig,
   NeuTableRowSelectionEvent,
   NeuTableSelectAllChangeEvent,
+  NeuTableQueryState,
   NeuTableServerState,
 } from './neu-table.types';
 import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
@@ -124,8 +125,9 @@ class CustomFilterTemplateHostComponent {
   readonly showTemplate = signal(true);
   readonly showDuplicate = signal(false);
   readonly serverSide = signal(false);
-  readonly predicate = vi.fn((value: unknown, filterValue: unknown, row: CustomTemplateRow) =>
-    String(value).includes(String(filterValue)) && row.id > 0,
+  readonly predicate = vi.fn(
+    (value: unknown, filterValue: unknown, row: CustomTemplateRow) =>
+      String(value).includes(String(filterValue)) && row.id > 0,
   );
   readonly columns: NeuTableColumn<CustomTemplateRow>[] = [
     {
@@ -298,12 +300,13 @@ const ROLE_SELECT_FILTER: NeuTableSelectFilterConfig<OptionFilterUser, RoleFilte
   accessor: (row) => row.roleId,
 };
 
-const STATUS_MULTISELECT_FILTER: NeuTableMultiSelectFilterConfig<OptionFilterUser, string, string> = {
-  kind: 'multiSelect',
-  options: ['active', 'pending', 'suspended'],
-  searchable: true,
-  accessor: (row) => row.account.status,
-};
+const STATUS_MULTISELECT_FILTER: NeuTableMultiSelectFilterConfig<OptionFilterUser, string, string> =
+  {
+    kind: 'multiSelect',
+    options: ['active', 'pending', 'suspended'],
+    searchable: true,
+    accessor: (row) => row.account.status,
+  };
 
 const CUSTOM_STATUS_FILTER: NeuTableCustomFilterConfig<OptionFilterUser> = {
   kind: 'custom',
@@ -581,8 +584,9 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
       selectAllAriaLabel: 'Choose the visible people',
     });
     const headerLabel = (fixture: Awaited<ReturnType<typeof createTable>>) =>
-      (fixture.nativeElement.querySelector('thead neu-checkbox input') as HTMLInputElement)
-        .getAttribute('aria-label');
+      (
+        fixture.nativeElement.querySelector('thead neu-checkbox input') as HTMLInputElement
+      ).getAttribute('aria-label');
 
     expect(headerLabel(filtered)).toBe('Select all filtered rows');
     expect(headerLabel(page)).toBe('Select all rows on this page');
@@ -704,9 +708,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
       selectionMode: 'multiple',
       serverSide: true,
       data: rows.slice(0, 2),
-      selectionActions: [
-        { key: 'archive', label: 'Archive', icon: 'archive', handler: vi.fn() },
-      ],
+      selectionActions: [{ key: 'archive', label: 'Archive', icon: 'archive', handler: vi.fn() }],
     });
     const table = fixture.componentInstance;
     const serverEvents: NeuTableServerState[] = [];
@@ -1720,7 +1722,12 @@ describe('NeuTableComponent', () => {
     dateInput.writeValue('2026-08-19');
     const selectedDay = dateInput
       .calendarDays()
-      .find((candidate) => candidate.date.getFullYear() === 2026 && candidate.date.getMonth() === 7 && candidate.date.getDate() === 19);
+      .find(
+        (candidate) =>
+          candidate.date.getFullYear() === 2026 &&
+          candidate.date.getMonth() === 7 &&
+          candidate.date.getDate() === 19,
+      );
     expect(selectedDay).toBeTruthy();
     dateInput.selectDay(selectedDay!);
     fixture.detectChanges();
@@ -1772,10 +1779,11 @@ describe('NeuTableComponent', () => {
     instantInput.writeValue(secondLocalValue);
     const secondDay = instantInput
       .calendarDays()
-      .find((candidate) =>
-        candidate.date.getFullYear() === secondInstant.getFullYear() &&
-        candidate.date.getMonth() === secondInstant.getMonth() &&
-        candidate.date.getDate() === secondInstant.getDate(),
+      .find(
+        (candidate) =>
+          candidate.date.getFullYear() === secondInstant.getFullYear() &&
+          candidate.date.getMonth() === secondInstant.getMonth() &&
+          candidate.date.getDate() === secondInstant.getDate(),
       );
     expect(secondDay).toBeTruthy();
     instantInput.selectDay(secondDay!);
@@ -1923,7 +1931,12 @@ describe('NeuTableComponent', () => {
     instantInput.writeValue(localValue);
     const selectedDay = instantInput
       .calendarDays()
-      .find((candidate) => candidate.date.getFullYear() === 2026 && candidate.date.getMonth() === 7 && candidate.date.getDate() === 20);
+      .find(
+        (candidate) =>
+          candidate.date.getFullYear() === 2026 &&
+          candidate.date.getMonth() === 7 &&
+          candidate.date.getDate() === 20,
+      );
     expect(selectedDay).toBeTruthy();
     instantInput.selectDay(selectedDay!);
     expect(fixture.componentInstance.getColumnFilterValue('createdAt')).toBe(
@@ -1962,8 +1975,9 @@ describe('NeuTableComponent', () => {
     expect(
       fixture.debugElement
         .queryAll(By.directive(NeuDateInputComponent))
-        .filter((debugElement) =>
-          (debugElement.componentInstance as NeuDateInputComponent).type() === 'datetime-local',
+        .filter(
+          (debugElement) =>
+            (debugElement.componentInstance as NeuDateInputComponent).type() === 'datetime-local',
         ),
     ).toHaveLength(2);
 
@@ -1987,11 +2001,21 @@ describe('NeuTableComponent', () => {
     fromInput.writeValue(localFrom);
     const fromDay = fromInput
       .calendarDays()
-      .find((candidate) => candidate.date.getFullYear() === 2026 && candidate.date.getMonth() === 7 && candidate.date.getDate() === 20);
+      .find(
+        (candidate) =>
+          candidate.date.getFullYear() === 2026 &&
+          candidate.date.getMonth() === 7 &&
+          candidate.date.getDate() === 20,
+      );
     toInput.writeValue(localTo);
     const toDay = toInput
       .calendarDays()
-      .find((candidate) => candidate.date.getFullYear() === 2026 && candidate.date.getMonth() === 7 && candidate.date.getDate() === 20);
+      .find(
+        (candidate) =>
+          candidate.date.getFullYear() === 2026 &&
+          candidate.date.getMonth() === 7 &&
+          candidate.date.getDate() === 20,
+      );
     expect(fromDay).toBeTruthy();
     expect(toDay).toBeTruthy();
     fromInput.selectDay(fromDay!);
@@ -2097,7 +2121,11 @@ describe('NeuTableComponent', () => {
 
     const state = states.at(-1);
     expect(state?.columnFilters).toEqual({ score: 50, active: false });
-    expect(state?.typedColumnFilters?.['score']).toEqual({ kind: 'number', mode: 'gte', value: 50 });
+    expect(state?.typedColumnFilters?.['score']).toEqual({
+      kind: 'number',
+      mode: 'gte',
+      value: 50,
+    });
     expect(state?.typedColumnFilters?.['active']).toEqual({
       kind: 'boolean',
       mode: 'false',
@@ -2662,9 +2690,7 @@ describe('NeuTableComponent', () => {
 
   // ── Server-side: clearSearch ──────────────────────────────────────────
 
-  it('clearSearch with serverSide=true should emit serverStateChange with empty search', async () => {
-    // Con serverSide=true, clearSearch debe emitir serverStateChange con búsqueda vacía
-    // With serverSide=true, clearSearch must emit serverStateChange with empty search
+  it('clearSearch with serverSide=true suppresses an already-empty semantic no-op', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
@@ -2675,9 +2701,7 @@ describe('NeuTableComponent', () => {
     const events: any[] = [];
     f.componentInstance.serverStateChange.subscribe((e: any) => events.push(e));
     (f.componentInstance as any).clearSearch();
-    expect(events.length).toBe(1);
-    expect(events[0].search).toBe('');
-    expect(events[0].page).toBe(1);
+    expect(events.length).toBe(0);
   });
 
   it('clearSearch with serverSide=false should use URL params', async () => {
@@ -4289,16 +4313,30 @@ describe('NeuTableComponent', () => {
     (f.componentInstance as any).toggleRow(DATA[0]);
     f.detectChanges();
 
-    const actions = f.nativeElement.querySelectorAll('.neu-table__selection-actions .neu-table__export-btn') as NodeListOf<HTMLButtonElement>;
+    const actions = f.nativeElement.querySelectorAll(
+      '.neu-table__selection-actions .neu-table__export-btn',
+    ) as NodeListOf<HTMLButtonElement>;
     actions[0].click();
     expect(events[0].action.key).toBe('archive');
     actions[1].click();
     f.detectChanges();
-    (f.nativeElement.querySelector('.neu-table__action-confirm .neu-table__action-btn:last-child') as HTMLButtonElement).click();
+    (
+      f.nativeElement.querySelector(
+        '.neu-table__action-confirm .neu-table__action-btn:last-child',
+      ) as HTMLButtonElement
+    ).click();
     f.detectChanges();
-    (f.nativeElement.querySelectorAll('.neu-table__selection-actions .neu-table__export-btn')[1] as HTMLButtonElement).click();
+    (
+      f.nativeElement.querySelectorAll(
+        '.neu-table__selection-actions .neu-table__export-btn',
+      )[1] as HTMLButtonElement
+    ).click();
     f.detectChanges();
-    (f.nativeElement.querySelector('.neu-table__action-confirm .neu-table__action-btn--danger') as HTMLButtonElement).click();
+    (
+      f.nativeElement.querySelector(
+        '.neu-table__action-confirm .neu-table__action-btn--danger',
+      ) as HTMLButtonElement
+    ).click();
     expect(events.at(-1).action.key).toBe('delete');
   });
 
@@ -4763,9 +4801,13 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
 
-    (f.nativeElement.querySelector('.neu-table__column-chooser > button') as HTMLButtonElement).click();
+    (
+      f.nativeElement.querySelector('.neu-table__column-chooser > button') as HTMLButtonElement
+    ).click();
     f.detectChanges();
-    const chooser = f.nativeElement.querySelector('.neu-table__column-chooser-checkbox input') as HTMLInputElement;
+    const chooser = f.nativeElement.querySelector(
+      '.neu-table__column-chooser-checkbox input',
+    ) as HTMLInputElement;
     chooser.checked = false;
     chooser.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
@@ -4776,10 +4818,13 @@ describe('NeuTableComponent advanced layout features', () => {
     const resize = f.nativeElement.querySelector('.neu-table__resize-handle') as HTMLButtonElement;
     resize.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
 
-    const firstCell = f.nativeElement.querySelector('.neu-table__body .neu-table__td') as HTMLTableCellElement;
+    const firstCell = f.nativeElement.querySelector(
+      '.neu-table__body .neu-table__td',
+    ) as HTMLTableCellElement;
     firstCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
     f.detectChanges();
-    const editor = f.debugElement.query(By.directive(NeuInlineEditorComponent))?.componentInstance as NeuInlineEditorComponent;
+    const editor = f.debugElement.query(By.directive(NeuInlineEditorComponent))
+      ?.componentInstance as NeuInlineEditorComponent;
     expect(editor).toBeTruthy();
     editor.valueChange.emit('Ana DOM');
     editor.editCommit.emit({ previousValue: 'Ana García', value: 'Ana DOM' });
@@ -4798,15 +4843,21 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const reorderControls = f.nativeElement.querySelector('.neu-table__reorder-controls') as HTMLElement;
+    const reorderControls = f.nativeElement.querySelector(
+      '.neu-table__reorder-controls',
+    ) as HTMLElement;
     reorderControls.click();
-    const reorderButtons = f.nativeElement.querySelectorAll('.neu-table__reorder-btn') as NodeListOf<HTMLButtonElement>;
+    const reorderButtons = f.nativeElement.querySelectorAll(
+      '.neu-table__reorder-btn',
+    ) as NodeListOf<HTMLButtonElement>;
     reorderButtons[1].click();
     reorderButtons[2].click();
     f.detectChanges();
     expect((f.componentInstance as any).currentLayout().columnOrder[1]).toBe('name');
 
-    const selectionCell = f.nativeElement.querySelector('.neu-table__row .neu-table__th--check') as HTMLElement;
+    const selectionCell = f.nativeElement.querySelector(
+      '.neu-table__row .neu-table__th--check',
+    ) as HTMLElement;
     selectionCell.click();
     expect(rowClicks).not.toHaveBeenCalled();
   });
@@ -5035,7 +5086,11 @@ describe('NeuTableComponent advanced layout features', () => {
   it('covers table computed fallbacks that are not always reached from the default DOM', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', [
-      { key: 'name', header: 'Nombre', cell: (row: Record<string, unknown>) => `Cell ${row['name']}` },
+      {
+        key: 'name',
+        header: 'Nombre',
+        cell: (row: Record<string, unknown>) => `Cell ${row['name']}`,
+      },
       {
         key: 'status',
         header: 'Estado',
@@ -5085,7 +5140,9 @@ describe('NeuTableComponent advanced layout features', () => {
   it('groups null values, handles inactive virtual rows and formats pagination singular text', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
-    f.componentRef.setInput('data', [{ id: 1, name: 'Only', age: 1, city: null, status: 'active' }]);
+    f.componentRef.setInput('data', [
+      { id: 1, name: 'Only', age: 1, city: null, status: 'active' },
+    ]);
     f.componentRef.setInput('groupBy', 'city');
     f.componentRef.setInput('pageSize', 10);
     f.detectChanges();
@@ -5103,7 +5160,13 @@ describe('NeuTableComponent advanced layout features', () => {
   it('uses resize fallback widths and emits only after a dragged width exists', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     const resizeEvents: unknown[] = [];
-    const col: NeuTableColumn = { key: 'name', header: 'Nombre', width: 'auto', minWidth: 120, maxWidth: 180 };
+    const col: NeuTableColumn = {
+      key: 'name',
+      header: 'Nombre',
+      width: 'auto',
+      minWidth: 120,
+      maxWidth: 180,
+    };
     f.componentRef.setInput('columns', [col]);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('resizableColumns', true);
@@ -5178,7 +5241,11 @@ describe('NeuTableComponent advanced layout features', () => {
 
     const layouts: unknown[] = [];
     f.componentInstance.layoutChange.subscribe((layout) => layouts.push(layout));
-    comp.applyLayout({ columnOrder: ['city', 'ghost'], hiddenColumns: ['ghost'], columnWidths: undefined });
+    comp.applyLayout({
+      columnOrder: ['city', 'ghost'],
+      hiddenColumns: ['ghost'],
+      columnWidths: undefined,
+    });
     expect(comp.currentLayout().columnOrder).toEqual(['city', 'name', 'age']);
     expect(comp.currentLayout().hiddenColumns).toEqual([]);
     expect(layouts.length).toBeGreaterThan(0);
@@ -5351,7 +5418,12 @@ describe('NeuTableComponent advanced layout features', () => {
       f.componentRef.setInput('exportScope', 'filtered');
       f.componentInstance.exportCsv();
       f.componentRef.setInput('exportScope', 'selected');
-      f.componentInstance.toggleRow({ id: 2, name: 'Chosen', amount: 20, date: new Date('2026-01-02T00:00:00Z') });
+      f.componentInstance.toggleRow({
+        id: 2,
+        name: 'Chosen',
+        amount: 20,
+        date: new Date('2026-01-02T00:00:00Z'),
+      });
       f.componentInstance.exportJson();
       f.componentRef.setInput('exportScope', 'auto');
       f.componentInstance.exportXlsx();
@@ -5419,7 +5491,10 @@ describe('NeuTableComponent advanced layout features', () => {
     const table = fixture.componentInstance;
     const selects = fixture.debugElement
       .queryAll(By.directive(NeuSelectComponent))
-      .map((debugElement) => debugElement.componentInstance as NeuSelectComponent<RoleFilterOption, number>);
+      .map(
+        (debugElement) =>
+          debugElement.componentInstance as NeuSelectComponent<RoleFilterOption, number>,
+      );
     expect(selects).toHaveLength(2);
     expect(selects[0].isOptionDisabled(roles[2])).toBe(true);
 
@@ -5438,7 +5513,11 @@ describe('NeuTableComponent advanced layout features', () => {
 
     const nextRoles = [roles[0], { ...roles[1], name: 'Administrator' }, roles[2]];
     fixture.componentRef.setInput('columns', [
-      { key: 'roleId', header: 'Role', filterConfig: { ...ROLE_SELECT_FILTER, options: nextRoles } },
+      {
+        key: 'roleId',
+        header: 'Role',
+        filterConfig: { ...ROLE_SELECT_FILTER, options: nextRoles },
+      },
       columns[1],
     ]);
     table.setColumnFilter('roleId', 1);
@@ -5459,9 +5538,27 @@ describe('NeuTableComponent advanced layout features', () => {
 
   it('renders typed MultiSelect filters with Option API state synchronization', async () => {
     const rows: OptionFilterUser[] = [
-      { id: 1, roleId: 0, role: ROLE_FILTER_OPTIONS[0], status: 'active', account: { status: 'active' } },
-      { id: 2, roleId: 1, role: ROLE_FILTER_OPTIONS[1], status: 'pending', account: { status: 'pending' } },
-      { id: 3, roleId: 2, role: ROLE_FILTER_OPTIONS[2], status: 'suspended', account: { status: 'suspended' } },
+      {
+        id: 1,
+        roleId: 0,
+        role: ROLE_FILTER_OPTIONS[0],
+        status: 'active',
+        account: { status: 'active' },
+      },
+      {
+        id: 2,
+        roleId: 1,
+        role: ROLE_FILTER_OPTIONS[1],
+        status: 'pending',
+        account: { status: 'pending' },
+      },
+      {
+        id: 3,
+        roleId: 2,
+        role: ROLE_FILTER_OPTIONS[2],
+        status: 'suspended',
+        account: { status: 'suspended' },
+      },
     ];
     const columns: NeuTableColumn<OptionFilterUser, string>[] = [
       { key: 'status', header: 'Status', filterConfig: STATUS_MULTISELECT_FILTER },
@@ -5509,9 +5606,27 @@ describe('NeuTableComponent advanced layout features', () => {
       { id: 'archived', label: 'Archived', disabled: true },
     ];
     const rows: OptionFilterUser[] = [
-      { id: 1, roleId: 0, role: ROLE_FILTER_OPTIONS[0], status: 'active', account: { status: 'active' } },
-      { id: 2, roleId: 1, role: ROLE_FILTER_OPTIONS[1], status: 'pending', account: { status: 'pending' } },
-      { id: 3, roleId: 2, role: ROLE_FILTER_OPTIONS[2], status: 'archived', account: { status: 'archived' } },
+      {
+        id: 1,
+        roleId: 0,
+        role: ROLE_FILTER_OPTIONS[0],
+        status: 'active',
+        account: { status: 'active' },
+      },
+      {
+        id: 2,
+        roleId: 1,
+        role: ROLE_FILTER_OPTIONS[1],
+        status: 'pending',
+        account: { status: 'pending' },
+      },
+      {
+        id: 3,
+        roleId: 2,
+        role: ROLE_FILTER_OPTIONS[2],
+        status: 'archived',
+        account: { status: 'archived' },
+      },
     ];
     const fixture = TestBed.createComponent(NeuTableComponent<OptionFilterUser>);
     fixture.componentRef.setInput('columns', [
@@ -5534,7 +5649,9 @@ describe('NeuTableComponent advanced layout features', () => {
     const table = fixture.componentInstance;
     const multiselect = fixture.debugElement.query(By.directive(NeuMultiselectComponent))
       .componentInstance as NeuMultiselectComponent<StatusFilterOption, string>;
-    const trigger = fixture.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement | null;
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-multiselect__trigger',
+    ) as HTMLElement | null;
     expect(trigger).toBeTruthy();
     expect(multiselect.isOptionDisabled(statuses[2])).toBe(true);
 
@@ -5542,8 +5659,8 @@ describe('NeuTableComponent advanced layout features', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const optionByLabel = (label: string): HTMLElement | undefined =>
-      Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option')).find((option) =>
-        option.textContent?.includes(label),
+      Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option')).find(
+        (option) => option.textContent?.includes(label),
       );
     const activeOption = optionByLabel('Active');
     expect(activeOption).toBeTruthy();
@@ -5552,7 +5669,9 @@ describe('NeuTableComponent advanced layout features', () => {
     await fixture.whenStable();
     expect(table.getColumnFilterValue('status')).toEqual(['active']);
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
-    expect(fixture.nativeElement.querySelector('.neu-multiselect__count-badge')?.textContent).toContain('1');
+    expect(
+      fixture.nativeElement.querySelector('.neu-multiselect__count-badge')?.textContent,
+    ).toContain('1');
 
     const archivedOption = optionByLabel('Archived');
     expect(archivedOption).toBeTruthy();
@@ -5562,7 +5681,9 @@ describe('NeuTableComponent advanced layout features', () => {
     expect(table.getColumnFilterValue('status')).toEqual(['active']);
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
 
-    const clear = fixture.nativeElement.querySelector('.neu-multiselect__clear') as HTMLElement | null;
+    const clear = fixture.nativeElement.querySelector(
+      '.neu-multiselect__clear',
+    ) as HTMLElement | null;
     expect(clear).toBeTruthy();
     clear!.click();
     fixture.detectChanges();
@@ -5573,8 +5694,20 @@ describe('NeuTableComponent advanced layout features', () => {
 
   it('keeps custom predicates local-only while receiving the original row and computed accessor value', async () => {
     const rows: OptionFilterUser[] = [
-      { id: 1, roleId: 0, role: ROLE_FILTER_OPTIONS[0], status: 'active', account: { status: 'active' } },
-      { id: 2, roleId: 1, role: ROLE_FILTER_OPTIONS[1], status: 'pending', account: { status: 'pending' } },
+      {
+        id: 1,
+        roleId: 0,
+        role: ROLE_FILTER_OPTIONS[0],
+        status: 'active',
+        account: { status: 'active' },
+      },
+      {
+        id: 2,
+        roleId: 1,
+        role: ROLE_FILTER_OPTIONS[1],
+        status: 'pending',
+        account: { status: 'pending' },
+      },
     ];
     const fixture = TestBed.createComponent(NeuTableComponent<OptionFilterUser>);
     fixture.componentRef.setInput('columns', [
@@ -6101,38 +6234,28 @@ describe('NeuTableComponent canonical applied filter state', () => {
     const internal = internalFilters(table);
     const control = internal._typedColumnFilterControls.get('name');
     expect(control).toBeTruthy();
-    const update = vi.spyOn(internal._appliedFilters, 'update');
-
     table.setColumnFilter('name', 'one');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(update).toHaveBeenCalledTimes(1);
     expect(control!.value).toBe('one');
 
-    update.mockClear();
     internal._writeAppliedFilter('name', {
       operator: 'and',
       constraints: [{ mode: 'endsWith', value: 'two' }],
     });
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(update).toHaveBeenCalledTimes(1);
     expect(control!.value).toBe('two');
 
-    update.mockClear();
     control!.setValue('three');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(update).toHaveBeenCalledTimes(1);
     expect(table.getColumnFilterValue('name')).toBe('three');
 
-    update.mockClear();
-    const set = vi.spyOn(internal._appliedFilters, 'set');
     table.clearColumnFilters();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(set).toHaveBeenCalledTimes(1);
-    expect(update).not.toHaveBeenCalled();
+    expect(internal._appliedFilters()).toEqual({});
     expect(control!.value).toBe('');
   });
 
@@ -6154,8 +6277,10 @@ describe('NeuTableComponent canonical applied filter state', () => {
     fixture.componentInstance.clearColumnFilters();
     fixture.componentInstance.setColumnFilter('name', 'two');
     fixture.componentInstance.clearColumnFilters();
-    expect(events).toHaveLength(2);
-    expect(events[1].columnFilters).toEqual({ name: 'two' });
+    expect(events).toHaveLength(4);
+    expect(events[1].columnFilters).toEqual({});
+    expect(events[2].columnFilters).toEqual({ name: 'two' });
+    expect(events[3].columnFilters).toEqual({});
   });
 
   it('preserves compatible accessor/options changes and invalidates detectable optionValue changes', async () => {
@@ -6427,9 +6552,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     await settle(fixture);
 
     expect(
-      (fixture.nativeElement as HTMLElement).querySelectorAll(
-        '.neu-table__filter-overlay-trigger',
-      ),
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.neu-table__filter-overlay-trigger'),
     ).toHaveLength(0);
     expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
   });
@@ -6839,7 +6962,9 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     expect(internalA._filterOverlaySessionPanes()).toEqual([]);
     expect(internalB._openFilterKey()).toBe('status');
     expect(document.activeElement).toBe(
-      document.querySelector(`#${triggerB.getAttribute('aria-controls')} .neu-table__filter-overlay-close`),
+      document.querySelector(
+        `#${triggerB.getAttribute('aria-controls')} .neu-table__filter-overlay-close`,
+      ),
     );
 
     await openChild(tableB, '.neu-select__trigger');
@@ -6924,9 +7049,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     expect(internal._isFilterOverlayEligible(legacyColumns[0])).toBe(false);
     expect(internal._isFilterOverlayEligible(legacyColumns[1])).toBe(false);
     expect(
-      (fixture.nativeElement as HTMLElement).querySelectorAll(
-        '.neu-table__filter-overlay-trigger',
-      ),
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.neu-table__filter-overlay-trigger'),
     ).toHaveLength(0);
     expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
   });
@@ -7079,7 +7202,9 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
   });
 
-  async function settle<T extends object>(fixture: ComponentFixture<NeuTableComponent<T>>): Promise<void> {
+  async function settle<T extends object>(
+    fixture: ComponentFixture<NeuTableComponent<T>>,
+  ): Promise<void> {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -7316,7 +7441,7 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     fixture.componentInstance.serverStateChange.subscribe((event) => events.push(event));
 
     await openOptionFilter(fixture, 'Role');
-    expect(internal._filterDraftCanAddRule()).toBe(false);
+    expect(internal._filterDraftCanAddRule()).toBe(true);
     internal._filterDraftRules()[0].selectControl.setValue(0);
     expect(events).toEqual([]);
     overlayAction('Apply').click();
@@ -7462,7 +7587,7 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     ).toBeNull();
   });
 
-  it('keeps custom advanced editing unavailable in server mode without emitting state', async () => {
+  it('keeps custom server editing draft-only until Apply and marks it local-only', async () => {
     const fixture = await createCustomHost();
     const table = fixture.debugElement.query(By.directive(NeuTableComponent))
       .componentInstance as NeuTableComponent<CustomTemplateRow>;
@@ -7472,13 +7597,17 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(
-      (fixture.nativeElement as HTMLElement).querySelector(
-        '[aria-label^="Open filter for Account status"]',
-      ),
-    ).toBeNull();
+    await openCustomFilter(fixture);
+    const input = document.querySelector<HTMLInputElement>('.custom-filter-input')!;
+    input.value = 'active';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
     expect(events).toEqual([]);
-    expect(internalFilters(table)._localOnlyFilters()).toEqual([]);
+    overlayAction('Apply').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(events).toHaveLength(1);
+    expect(events[0].localOnlyFilters).toEqual(['status']);
+    expect(internalFilters(table)._localOnlyFilters()).toEqual(['status']);
   });
 });
 
@@ -7755,8 +7884,8 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     table.serverStateChange.subscribe((event) => events.push(event));
 
     await open(fixture, 'Name');
-    expect(internal._filterDraftCanAddRule()).toBe(false);
-    expect(document.querySelector('[data-neu-table-filter-add-rule]')).toBeNull();
+    expect(internal._filterDraftCanAddRule()).toBe(true);
+    expect(document.querySelector('[data-neu-table-filter-add-rule]')).toBeTruthy();
     expect(document.querySelector('.neu-table__filter-overlay-operator')).toBeNull();
     internal._filterOverlayTextControl.setValue('Beta');
     internal._clearFilterDraft();
@@ -7948,7 +8077,6 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     const fixture = await createAdvancedTable();
     const table = fixture.componentInstance;
     const internal = internalFilters(table);
-    const update = vi.spyOn(internal._appliedFilters, 'update');
     await open(fixture, 'Name');
 
     internal._filterOverlayModeControl.setValue('startsWith');
@@ -7961,7 +8089,6 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     internal._applyFilterDraft();
     await settle(fixture);
 
-    expect(update).toHaveBeenCalledTimes(1);
     expect(internal._appliedFilters()['name']).toEqual({
       operator: 'and',
       constraints: [
@@ -8193,11 +8320,13 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     });
   });
 
-  it('protects an existing server-side multi-rule filter as a truthful read-only state', async () => {
+  it('lets server-side multi-rule filters remain editable and emits one complete query', async () => {
     const fixture = await createAdvancedTable({ serverSide: true });
     const internal = internalFilters(fixture.componentInstance);
     const events: NeuTableServerState[] = [];
+    const queries: NeuTableQueryState[] = [];
     fixture.componentInstance.serverStateChange.subscribe((state) => events.push(state));
+    fixture.componentInstance.queryChange.subscribe((query) => queries.push(query));
     const applied: TestAppliedColumnFilter = {
       operator: 'or',
       constraints: [
@@ -8209,25 +8338,31 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     await settle(fixture);
     await open(fixture, 'Name');
 
-    expect(internal._filterDraftReadOnly()).toBe(true);
+    expect(internal._filterDraftReadOnly()).toBe(false);
     expect(internal._filterDraftRules()).toHaveLength(2);
-    expect(document.querySelector('.neu-table__filter-overlay-summary')?.textContent).toContain(
-      '2 filter rules active',
-    );
-    expect(document.querySelector('.neu-table__filter-overlay-rule')).toBeNull();
-    expect(document.querySelector('.neu-table__filter-overlay-operator')).toBeNull();
-    expect(document.querySelector('[data-neu-table-filter-add-rule]')).toBeNull();
-    const actionLabels = Array.from(
-      document.querySelectorAll<HTMLButtonElement>('.neu-table__filter-overlay-actions button'),
-    ).map((button) => button.textContent?.trim());
-    expect(actionLabels).toEqual(['Cancel']);
-
-    internal._clearFilterDraft();
-    internal._removeFilterDraftRule(internal._filterDraftRules()[0].id);
+    expect(document.querySelectorAll('.neu-table__filter-overlay-rule')).toHaveLength(2);
+    expect(document.querySelector('.neu-table__filter-overlay-operator')).toBeTruthy();
+    internal._filterDraftRules()[0].textControl.setValue('Be');
     internal._applyFilterDraft();
     await settle(fixture);
-    expect(events).toEqual([]);
-    expect(internal._appliedFilters()['name']).toEqual(applied);
+    expect(events).toHaveLength(1);
+    expect(events[0].typedColumnFilters).toEqual({});
+    expect(queries).toHaveLength(1);
+    expect(queries[0].filters['name']).toEqual({
+      operator: 'or',
+      serializability: 'serializable',
+      constraints: [
+        { kind: 'text', mode: 'startsWith', value: 'Be' },
+        { kind: 'text', mode: 'endsWith', value: 'ta' },
+      ],
+    });
+    expect(internal._appliedFilters()['name']).toEqual({
+      operator: 'or',
+      constraints: [
+        { mode: 'startsWith', value: 'Be' },
+        { mode: 'endsWith', value: 'ta' },
+      ],
+    });
   });
 
   it('applies canonical date-only and instant rules together and rejects one reversed range', async () => {

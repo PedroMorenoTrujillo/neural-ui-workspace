@@ -5,7 +5,7 @@ import { provideIcons } from '@ng-icons/core';
 import { lucidePencil } from '@ng-icons/lucide';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { NeuTableComponent } from './neu-table.component';
-import type { NeuTableColumn, NeuTableServerState } from './neu-table.types';
+import type { NeuTableColumn, NeuTableQueryState, NeuTableServerState } from './neu-table.types';
 
 interface StateRow {
   id: number;
@@ -387,7 +387,8 @@ describe('NeuTable canonical state integration', () => {
 
     events.length = 0;
     table.clearColumnFilters();
-    expect(events).toHaveLength(0);
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ page: 1, columnFilters: {}, typedColumnFilters: {} });
   });
 
   it('projects complete ordered server multisort metadata once', async () => {
@@ -417,6 +418,296 @@ describe('NeuTable canonical state integration', () => {
       { key: 'name', dir: 'asc' },
       { key: 'id', dir: 'asc' },
     ]);
+  });
+
+  it('emits one opt-in initial query after URL and input restoration', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate([], {
+      queryParams: { page: 2, q: 'Beta', sort: 'name', sortDir: 'desc' },
+    });
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS.slice(1, 2));
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.componentRef.setInput('lazyLoadOnInit', true);
+    fixture.componentRef.setInput('totalItems', 3);
+    fixture.componentRef.setInput('pageSize', 1);
+    const queries: NeuTableQueryState[] = [];
+    const legacy: NeuTableServerState[] = [];
+    fixture.componentInstance.queryChange.subscribe((event) => queries.push(event));
+    fixture.componentInstance.serverStateChange.subscribe((event) => legacy.push(event));
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(queries).toHaveLength(1);
+    expect(legacy).toHaveLength(1);
+    expect(queries[0]).toMatchObject({
+      page: 2,
+      pageSize: 1,
+      search: 'Beta',
+      sort: { key: 'name', dir: 'desc' },
+    });
+  });
+
+  it('emits exactly once for plain, controlled and controlled-plus-URL initial loading', async () => {
+    const authoritative: NeuTableQueryState = {
+      page: 4,
+      pageSize: 25,
+      search: 'Query',
+      sort: { key: 'name', dir: 'desc' },
+      sortEntries: [],
+      globalFilterFields: ['id', 'name'],
+      filters: {},
+      serialization: {
+        status: 'serializable',
+        localOnlyFilters: [],
+        requiresConsumerSerializationFilters: [],
+        localOnlyGlobalFilterFields: false,
+      },
+    };
+    const create = async (query: NeuTableQueryState | undefined, useUrlState: boolean) => {
+      const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+      fixture.componentRef.setInput('columns', COLUMNS);
+      fixture.componentRef.setInput('data', ROWS);
+      fixture.componentRef.setInput('serverSide', true);
+      fixture.componentRef.setInput('lazyLoadOnInit', true);
+      fixture.componentRef.setInput('useUrlState', useUrlState);
+      if (query) fixture.componentRef.setInput('query', query);
+      const queries: NeuTableQueryState[] = [];
+      const legacy: NeuTableServerState[] = [];
+      fixture.componentInstance.queryChange.subscribe((event) => queries.push(event));
+      fixture.componentInstance.serverStateChange.subscribe((event) => legacy.push(event));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      return { queries, legacy };
+    };
+
+    const plain = await create(undefined, false);
+    expect(plain.queries).toHaveLength(1);
+    expect(plain.legacy).toHaveLength(1);
+    expect(plain.queries[0]).toMatchObject({ page: 1, pageSize: 10, search: '', sort: null });
+
+    const controlled = await create(authoritative, false);
+    expect(controlled.queries).toHaveLength(1);
+    expect(controlled.legacy).toHaveLength(1);
+    expect(controlled.queries[0]).toMatchObject(authoritative);
+
+    const router = TestBed.inject(Router);
+    await router.navigate([], { queryParams: { page: 2, q: 'URL', sort: 'id' } });
+    const controlledWithUrl = await create(authoritative, true);
+    expect(controlledWithUrl.queries).toHaveLength(1);
+    expect(controlledWithUrl.legacy).toHaveLength(1);
+    expect(controlledWithUrl.queries[0]).toMatchObject(authoritative);
+  });
+
+  it('keeps initial loading disabled by default for legacy server consumers', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.componentRef.setInput('useUrlState', false);
+    const queries: NeuTableQueryState[] = [];
+    const legacy: NeuTableServerState[] = [];
+    fixture.componentInstance.queryChange.subscribe((event) => queries.push(event));
+    fixture.componentInstance.serverStateChange.subscribe((event) => legacy.push(event));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(queries).toEqual([]);
+    expect(legacy).toEqual([]);
+  });
+
+  it('treats initial lazy loading as a server-only mount-time decision', async () => {
+    const clientFixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    clientFixture.componentRef.setInput('columns', COLUMNS);
+    clientFixture.componentRef.setInput('data', ROWS);
+    clientFixture.componentRef.setInput('useUrlState', false);
+    clientFixture.componentRef.setInput('lazyLoadOnInit', true);
+    const clientQueries: NeuTableQueryState[] = [];
+    clientFixture.componentInstance.queryChange.subscribe((event) => clientQueries.push(event));
+    clientFixture.detectChanges();
+    await clientFixture.whenStable();
+    expect(clientQueries).toEqual([]);
+
+    clientFixture.componentRef.setInput('serverSide', true);
+    clientFixture.detectChanges();
+    await clientFixture.whenStable();
+    expect(clientQueries).toEqual([]);
+
+    const serverFixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    serverFixture.componentRef.setInput('columns', COLUMNS);
+    serverFixture.componentRef.setInput('data', ROWS);
+    serverFixture.componentRef.setInput('useUrlState', false);
+    serverFixture.componentRef.setInput('serverSide', true);
+    const serverQueries: NeuTableQueryState[] = [];
+    serverFixture.componentInstance.queryChange.subscribe((event) => serverQueries.push(event));
+    serverFixture.detectChanges();
+    await serverFixture.whenStable();
+    serverFixture.componentRef.setInput('lazyLoadOnInit', true);
+    serverFixture.detectChanges();
+    await serverFixture.whenStable();
+    expect(serverQueries).toEqual([]);
+  });
+
+  it('emits canonical query changes in client mode without legacy server events', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const queries: NeuTableQueryState[] = [];
+    const legacy: NeuTableServerState[] = [];
+    fixture.componentInstance.queryChange.subscribe((event) => queries.push(event));
+    fixture.componentInstance.serverStateChange.subscribe((event) => legacy.push(event));
+
+    fixture.componentInstance.onSearch({ target: { value: 'Beta' } } as unknown as Event);
+
+    expect(queries).toHaveLength(1);
+    expect(queries[0].search).toBe('Beta');
+    expect(legacy).toEqual([]);
+  });
+
+  it('treats query as authoritative over URL, pageSize and sort inputs with atomic silent echo', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate([], { queryParams: { page: 3, q: 'URL', sort: 'id' } });
+    const authoritative: NeuTableQueryState = {
+      page: 1,
+      pageSize: 1,
+      search: '',
+      sort: null,
+      sortEntries: [],
+      globalFilterFields: ['id', 'name'],
+      filters: {},
+      serialization: {
+        status: 'serializable',
+        localOnlyFilters: [],
+        requiresConsumerSerializationFilters: [],
+        localOnlyGlobalFilterFields: false,
+      },
+    };
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS.slice(0, 1));
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.componentRef.setInput('totalItems', 3);
+    fixture.componentRef.setInput('pageSize', 25);
+    fixture.componentRef.setInput('sort', [{ key: 'name', dir: 'desc' }]);
+    fixture.componentRef.setInput('query', authoritative);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const queries: NeuTableQueryState[] = [];
+    const legacy: NeuTableServerState[] = [];
+    table.queryChange.subscribe((event) => queries.push(event));
+    table.serverStateChange.subscribe((event) => legacy.push(event));
+    const adapter = (table as any)._urlAdapter;
+    const writers = [
+      vi.spyOn(adapter, 'writePage'),
+      vi.spyOn(adapter, 'writeSearch'),
+      vi.spyOn(adapter, 'writeSort'),
+      vi.spyOn(adapter, 'resetPage'),
+    ];
+
+    expect(table.currentPage()).toBe(1);
+    expect(table.searchQuery()).toBe('');
+    expect(table.currentSort()).toEqual([]);
+    expect((table as any)._state.pageSize()).toBe(1);
+
+    table.goToPage(2);
+    expect(queries).toHaveLength(1);
+    expect(legacy).toHaveLength(1);
+    expect(queries[0]).toMatchObject({ page: 2, pageSize: 1 });
+    expect(table.currentPage()).toBe(1);
+
+    table.goToPage(2);
+    expect(queries).toHaveLength(1);
+    expect(legacy).toHaveLength(1);
+
+    fixture.componentRef.setInput('query', queries[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.currentPage()).toBe(2);
+    expect(queries).toHaveLength(1);
+    expect(legacy).toHaveLength(1);
+
+    table.onPageSizeChange(2);
+    expect(queries).toHaveLength(2);
+    expect(queries[1]).toMatchObject({ page: 1, pageSize: 2 });
+    expect(table.currentPage()).toBe(2);
+    expect((table as any)._state.pageSize()).toBe(1);
+    expect(writers.every((writer) => writer.mock.calls.length === 0)).toBe(true);
+
+    fixture.componentRef.setInput('sort', [{ key: 'id', dir: 'asc' }]);
+    fixture.componentRef.setInput('query', { ...authoritative, page: 2, search: 'Echo' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.currentPage()).toBe(2);
+    expect(table.searchQuery()).toBe('Echo');
+    expect(table.currentSort()).toEqual([]);
+    expect(queries).toHaveLength(2);
+
+    fixture.componentRef.setInput('query', undefined);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.currentPage()).toBe(3);
+    expect(table.searchQuery()).toBe('URL');
+    expect((table as any)._state.pageSize()).toBe(25);
+    expect(table.currentSort()).toEqual([{ key: 'id', dir: 'asc' }]);
+  });
+
+  it('emits one semantic query for serializer/global-field changes and column invalidation', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
+    fixture.componentRef.setInput('columns', SERVER_COLUMNS);
+    fixture.componentRef.setInput('data', SERVER_ROWS);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const queries: NeuTableQueryState[] = [];
+    fixture.componentInstance.queryChange.subscribe((event) => queries.push(event));
+
+    fixture.componentInstance.setColumnFilter('role', ROLE_ADMIN);
+    queries.length = 0;
+    fixture.componentRef.setInput(
+      'columns',
+      SERVER_COLUMNS.map((column) =>
+        column.key === 'role'
+          ? {
+              ...column,
+              filterConfig: {
+                ...column.filterConfig!,
+                serverSerializer: (value: unknown) => (value as { id: string }).id,
+              },
+            }
+          : column,
+      ),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(queries).toHaveLength(1);
+    expect(queries[0].filters['role'].constraints[0].serverValue).toBe('admin');
+
+    queries.length = 0;
+    fixture.componentRef.setInput('globalFilterFields', ['name']);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(queries).toHaveLength(1);
+    expect(queries[0].globalFilterFields).toEqual(['name']);
+
+    queries.length = 0;
+    fixture.componentRef.setInput(
+      'columns',
+      SERVER_COLUMNS.filter((column) => column.key !== 'role'),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(queries).toHaveLength(1);
+    expect(queries[0].filters).not.toHaveProperty('role');
   });
 
   it('keeps canonical layout isolated from input and returned-layout mutation', async () => {
