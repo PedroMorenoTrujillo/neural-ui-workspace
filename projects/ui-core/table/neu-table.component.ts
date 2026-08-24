@@ -18,6 +18,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import type * as _angular_core from '@angular/core';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -66,6 +67,12 @@ import type {
   NeuTableRowKey,
   NeuTableSelectionAction,
   NeuTableSelectionActionEvent,
+  NeuTableSelection,
+  NeuTableSelectionMode,
+  NeuTableSelectionSource,
+  NeuTableRowSelectionEvent,
+  NeuTableSelectAllChangeEvent,
+  NeuTableSelectAllScope,
   NeuTableDatePoint,
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
@@ -99,6 +106,7 @@ import {
   NeuTableUrlStateAdapter,
   type InternalNeuTableUrlStateConfig,
 } from './neu-table-url-state.adapter';
+import { NeuTableSelectionController } from './neu-table-selection.controller';
 
 export type {
   NeuTableAction,
@@ -114,6 +122,12 @@ export type {
   NeuTableLayout,
   NeuTableSelectionAction,
   NeuTableSelectionActionEvent,
+  NeuTableSelection,
+  NeuTableSelectionMode,
+  NeuTableSelectionSource,
+  NeuTableRowSelectionEvent,
+  NeuTableSelectAllChangeEvent,
+  NeuTableSelectAllScope,
   NeuTableDatePoint,
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
@@ -195,6 +209,7 @@ const _NEU_TABLE_ADVANCED_FILTER_TEXTS: InternalResolvedAdvancedFilterTexts = {
 };
 
 let _neuTableFilterOverlayIdSeq = 0;
+let _neuTableSelectionIdSeq = 0;
 
 const _NEU_TABLE_FILTER_SESSION_OPENED = 'neu-table-filter-session-opened';
 const _NEU_TABLE_FILTER_CHILD_TRIGGER =
@@ -678,11 +693,11 @@ export type NeuTableColumnInput<T extends object> =
       }
 
       <!-- Barra de selección (aparece al seleccionar) -->
-      @if (selectable() && selectedCount() > 0) {
+      @if (selectionEnabled() && selectedCount() > 0) {
         <div class="neu-table__selection-bar">
           <div class="neu-table__selection-main">
             <span>{{ selectedRowsInfo() }}</span>
-            @if (selectionActions().length > 0) {
+            @if (selectionActions().length > 0 && selectedRows().length > 0) {
               <div class="neu-table__selection-actions">
                 @for (action of selectionActions(); track action.key) {
                   @if (action.show === undefined || action.show(selectedRows())) {
@@ -751,15 +766,18 @@ export type NeuTableColumnInput<T extends object> =
               @if (expandable()) {
                 <th class="neu-table__th neu-table__th--expand-col" scope="col"></th>
               }
-              @if (selectable()) {
+              @if (selectionEnabled()) {
                 <th class="neu-table__th neu-table__th--check" scope="col">
-                  <neu-checkbox
-                    class="neu-table__checkbox"
-                    [checked]="isAllFilteredSelected()"
-                    [indeterminate]="isSomeFilteredSelected()"
-                    [ariaLabel]="selectAllAriaLabel()"
-                    (checkedChange)="toggleAll()"
-                  />
+                  @if (multipleSelection()) {
+                    <neu-checkbox
+                      class="neu-table__checkbox"
+                      [checked]="headerSelectionState().checked"
+                      [indeterminate]="headerSelectionState().indeterminate"
+                      [disabled]="headerSelectionState().disabled"
+                      [ariaLabel]="resolvedSelectAllAriaLabel()"
+                      (checkedChange)="toggleAll()"
+                    />
+                  }
                 </th>
               }
               @if (showRowNumbers()) {
@@ -952,7 +970,7 @@ export type NeuTableColumnInput<T extends object> =
                 @if (expandable()) {
                   <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
                 }
-                @if (selectable()) {
+                @if (selectionEnabled()) {
                   <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
                 }
                 @if (showRowNumbers()) {
@@ -1178,7 +1196,12 @@ export type NeuTableColumnInput<T extends object> =
                   class="neu-table__row"
                   [class]="getRowClass(row)"
                   [class.neu-table__row--selected]="isRowSelected(row)"
-                  [class.neu-table__row--clickable]="selectable()"
+                  [class.neu-table__row--disabled]="!isRowSelectable(row)"
+                  [class.neu-table__row--clickable]="
+                    selectionEnabled() && selectOnRowClick() && isRowSelectable(row)
+                  "
+                  [attr.aria-selected]="selectionEnabled() ? isRowSelected(row) : null"
+                  [attr.aria-disabled]="selectionEnabled() && !isRowSelectable(row) ? true : null"
                   (click)="onRowClick(row, $event)"
                   (dblclick)="rowDblClick.emit(row)"
                 >
@@ -1208,17 +1231,30 @@ export type NeuTableColumnInput<T extends object> =
                       </button>
                     </td>
                   }
-                  @if (selectable()) {
+                  @if (selectionEnabled()) {
                     <td
                       class="neu-table__td neu-table__th--check"
                       (click)="$event.stopPropagation()"
                     >
-                      <neu-checkbox
-                        class="neu-table__checkbox"
-                        [checked]="isRowSelected(row)"
-                        [ariaLabel]="selectRowAriaLabel()"
-                        (checkedChange)="toggleRow(row)"
-                      />
+                      @if (multipleSelection()) {
+                        <neu-checkbox
+                          class="neu-table__checkbox"
+                          [checked]="isRowSelected(row)"
+                          [disabled]="!isRowSelectable(row)"
+                          [ariaLabel]="selectRowAriaLabel()"
+                          (checkedChange)="toggleRow(row, 'checkbox')"
+                        />
+                      } @else {
+                        <input
+                          class="neu-table__radio"
+                          type="radio"
+                          [name]="_selectionRadioName"
+                          [checked]="isRowSelected(row)"
+                          [disabled]="!isRowSelectable(row)"
+                          [attr.aria-label]="selectRowAriaLabel()"
+                          (change)="toggleRow(row, 'radio')"
+                        />
+                      }
                     </td>
                   }
                   @if (showRowNumbers()) {
@@ -1374,7 +1410,7 @@ export type NeuTableColumnInput<T extends object> =
                 @if (expandable()) {
                   <td class="neu-table__td"></td>
                 }
-                @if (selectable()) {
+                @if (selectionEnabled()) {
                   <td class="neu-table__td"></td>
                 }
                 @if (showRowNumbers()) {
@@ -1477,6 +1513,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _state = new NeuTableStateController<unknown>();
+  private readonly _selectionController = new NeuTableSelectionController<T, unknown>((row) =>
+    this.getRowKey(row),
+  );
+  protected readonly _selectionRadioName = `neu-table-selection-${_neuTableSelectionIdSeq++}`;
   private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
   private readonly _platformId = inject(PLATFORM_ID);
   private readonly _document = inject(DOCUMENT);
@@ -1556,7 +1596,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly clearSelectionLabel = input<string>('Clear selection');
   readonly selectionSummaryLabel = input<string>('selected');
   readonly tableAriaLabel = input<string>('Data table');
-  readonly selectAllAriaLabel = input<string>('Select all filtered rows');
+  /** Optional override; when omitted the accessible label follows selectAllScope. */
+  readonly selectAllAriaLabel = input<string | undefined>(undefined);
   readonly selectRowAriaLabel = input<string>('Select row');
   readonly expandRowAriaLabel = input<string>('Expand row');
   readonly filterPlaceholder = input<string>('Filter...');
@@ -1571,8 +1612,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly resultLabelPlural = input<string>('results');
   readonly sortable = input<boolean>(false);
   readonly selectable = input<boolean>(false);
+  /** Typed selection supersedes legacy selectable=true, which remains multiple mode. */
+  readonly selectionMode = input<NeuTableSelectionMode>('none');
+  /** Presence of this input makes only the canonical selection slice controlled. */
+  readonly selection = input<NeuTableSelection<T> | undefined>(undefined);
+  readonly rowSelectable = input<((row: T, index: number) => boolean) | undefined>(undefined);
+  readonly selectAllScope = input<NeuTableSelectAllScope>('filtered');
+  readonly selectOnRowClick = input<boolean>(true);
+  readonly metaKeySelection = input<boolean>(false);
   readonly expandable = input<boolean>(false);
-  readonly expandMode = input<'multiple' | 'single'>('multiple');
+  readonly expandMode: _angular_core.InputSignal<"multiple" | "single"> =
+    input<'multiple' | 'single'>('multiple');
   readonly exportable = input<boolean>(false);
   readonly exportFileName = input<string>('export');
   readonly pageSizeOptions = input<number[]>([]);
@@ -1606,7 +1656,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly multiSort = input<boolean>(false);
   readonly exportFormats = input<('csv' | 'json' | 'xlsx')[]>(['csv']);
   readonly exportColumns = input<string[]>([]);
-  readonly exportScope = input<'filtered' | 'selected' | 'auto'>('auto');
+  readonly exportScope: _angular_core.InputSignal<"selected" | "filtered" | "auto"> =
+    input<'selected' | 'filtered' | 'auto'>('auto');
   readonly selectionActions = input<readonly NeuTableSelectionAction<T>[]>([]);
 
   // ── URL params ────────────────────────────────────────────────────────
@@ -1629,6 +1680,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   // ── Outputs ───────────────────────────────────────────────────────────
   readonly selectionChange = output<T[]>();
+  readonly rowSelect = output<NeuTableRowSelectionEvent<T>>();
+  readonly rowUnselect = output<NeuTableRowSelectionEvent<T>>();
+  readonly selectAllChange = output<NeuTableSelectAllChangeEvent<T>>();
   readonly rowClick = output<T>();
   readonly rowDblClick = output<T>();
   readonly actionClick = output<NeuTableActionEvent<T>>();
@@ -1780,6 +1834,25 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     effect(() => {
       const pageSize = this.pageSize();
       untracked(() => this._state.setPageSize(pageSize, 'input'));
+    });
+
+    effect(() => {
+      const selection = this.selection();
+      const mode = this.effectiveSelectionMode();
+      this.rowKey();
+      untracked(() => {
+        if (selection === undefined) {
+          this._state.releaseControlledSelection();
+          if (mode === 'single' && this._state.selectionKeys().size > 1) {
+            const first = this._state.selectionKeys().values().next().value;
+            this._state.setSelectionKeys(first === undefined ? new Set() : new Set([first]), 'input');
+          }
+          return;
+        }
+        this._state.setControlledSelectionKeys(
+          this._selectionController.keysFromSelection(selection, mode),
+        );
+      });
     });
 
     effect(() => {
@@ -2758,7 +2831,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   readonly totalColspan = computed(() => {
     let cols = this.visibleColumns().length;
-    if (this.selectable()) cols++;
+    if (this.selectionEnabled()) cols++;
     if (this.expandable()) cols++;
     if (this.showRowNumbers()) cols++;
     return cols;
@@ -2981,12 +3054,65 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _selectedKeys = this._state.selectionKeys;
   private readonly _selectionConfirmPending = signal<string | null>(null);
 
+  private readonly effectiveSelectionMode = computed<NeuTableSelectionMode>(() => {
+    const mode = this.selectionMode();
+    return mode !== 'none' ? mode : this.selectable() ? 'multiple' : 'none';
+  });
+  protected readonly selectionEnabled = computed(() => this.effectiveSelectionMode() !== 'none');
+  protected readonly multipleSelection = computed(() => this.effectiveSelectionMode() === 'multiple');
+  protected readonly resolvedSelectAllAriaLabel = computed(
+    () =>
+      this.selectAllAriaLabel() ??
+      (this.selectAllScope() === 'page'
+        ? 'Select all rows on this page'
+        : 'Select all filtered rows'),
+  );
+
+  private readonly _suppliedSelectionRows = computed<T[]>(() => {
+    const selection = this.selection();
+    if (selection === undefined || selection === null) return [];
+    return Array.isArray(selection) ? [...selection] : [selection as T];
+  });
+
   readonly selectedCount = computed(() => this._selectedKeys().size);
   readonly selectedRows = computed(() =>
-    this._rows().filter((row) => this._selectedKeys().has(this.getRowKey(row))),
+    this._freezeProjection(
+      this._selectionController.resolveRows(
+        this._selectedKeys(),
+        this._rows(),
+        this._suppliedSelectionRows(),
+      ),
+    ),
   );
-  readonly selectedRowsInfo = computed(
-    () => `${this.selectedCount()} ${this.selectionSummaryLabel()}`,
+  readonly selectedRowsInfo = computed(() => {
+    const canonical = this.selectedCount();
+    const resolved = this.selectedRows().length;
+    const count = resolved === canonical ? `${canonical}` : `${resolved}/${canonical}`;
+    return `${count} ${this.selectionSummaryLabel()}`;
+  });
+
+  private readonly _filteredSelectableRows = computed(() =>
+    this._selectionController.scopedRows(
+      'filtered',
+      this.paginatedData(),
+      this.filteredData(),
+      (row, index) => this._rowSelectableAt(row, index),
+      this._rows(),
+    ),
+  );
+
+  private readonly selectionScopeRows = computed(() =>
+    this._selectionController.scopedRows(
+      this.selectAllScope(),
+      this.paginatedData(),
+      this.filteredData(),
+      (row, index) => this._rowSelectableAt(row, index),
+      this._rows(),
+    ),
+  );
+
+  protected readonly headerSelectionState = computed(() =>
+    this._selectionController.headerState(this._selectedKeys(), this.selectionScopeRows()),
   );
 
   /**
@@ -2994,41 +3120,84 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
    * A diferencia de una selección global, actúa solo sobre el subconjunto filtrado.
    */
   readonly isAllFilteredSelected = computed(() => {
-    const filtered = this.filteredData();
-    return (
-      filtered.length > 0 && filtered.every((r) => this._selectedKeys().has(this.getRowKey(r)))
-    );
+    const filtered = this._filteredSelectableRows();
+    return this._selectionController.headerState(this._selectedKeys(), filtered).checked;
   });
 
   readonly isSomeFilteredSelected = computed(
     () =>
-      this.filteredData().some((r) => this._selectedKeys().has(this.getRowKey(r))) &&
-      !this.isAllFilteredSelected(),
+      this._selectionController.headerState(this._selectedKeys(), this._filteredSelectableRows())
+        .indeterminate,
   );
 
   isRowSelected(row: T): boolean {
     return this._selectedKeys().has(this.getRowKey(row));
   }
 
-  toggleRow(row: T): void {
-    const key = this.getRowKey(row);
-    const set = new Set(this._selectedKeys());
-    if (set.has(key)) set.delete(key);
-    else set.add(key);
-    const changed = this._state.setSelectionKeys(set, 'ui');
-    if (changed) this._emitSelection(set);
+  isRowSelectable(row: T): boolean {
+    return this._rowSelectableAt(row, this._selectionController.indexOf(row, this._rows()));
   }
 
-  /** Selecciona/deselecciona SOLO los datos filtrados activos. */
-  toggleAll(): void {
-    const set = new Set(this._selectedKeys());
-    if (this.isAllFilteredSelected()) {
-      this.filteredData().forEach((r) => set.delete(this.getRowKey(r)));
-    } else {
-      this.filteredData().forEach((r) => set.add(this.getRowKey(r)));
+  toggleRow(
+    row: T,
+    source: Exclude<NeuTableSelectionSource, 'header'> = 'api',
+    event?: MouseEvent,
+  ): void {
+    if (!this.isRowSelectable(row)) return;
+    const configuredMode = this.effectiveSelectionMode();
+    // Legacy imperative toggleRow has always worked even when the checkbox
+    // column is hidden; preserve that API as an uncontrolled multiple toggle.
+    const mode = configuredMode === 'none' && source === 'api' ? 'multiple' : configuredMode;
+    const metaPressed = event?.metaKey === true || event?.ctrlKey === true;
+    const toggleSelected =
+      source !== 'radio' && !(source === 'row' && this.metaKeySelection() && !metaPressed);
+    const replaceMultiple =
+      mode === 'multiple' && source === 'row' && this.metaKeySelection() && !metaPressed;
+    const next = this._selectionController.toggleRow(
+      this._selectedKeys(),
+      row,
+      mode,
+      toggleSelected,
+      replaceMultiple,
+    );
+    this._applyRowSelection(row, next, source);
     }
-    const changed = this._state.setSelectionKeys(set, 'ui');
-    if (changed) this._emitSelection(set);
+
+  selectRow(row: T): void {
+    if (!this.isRowSelectable(row) || this.isRowSelected(row)) return;
+    const current = this._selectedKeys();
+    const next =
+      this.effectiveSelectionMode() === 'single'
+        ? new Set([this.getRowKey(row)])
+        : new Set([...current, this.getRowKey(row)]);
+    this._applyRowSelection(row, next, 'api');
+  }
+
+  unselectRow(row: T): void {
+    if (!this.isRowSelected(row)) return;
+    const next = new Set(this._selectedKeys());
+    next.delete(this.getRowKey(row));
+    this._applyRowSelection(row, next, 'api');
+  }
+
+  /** Applies the configured page or filtered/loaded scope. */
+  toggleAll(): void {
+    if (!this.multipleSelection()) return;
+    const rows = this.selectionScopeRows();
+    const header = this.headerSelectionState();
+    if (header.disabled) return;
+    const next = this._selectionController.toggleAll(this._selectedKeys(), rows);
+    const changed = this._state.setSelectionKeys(next, 'ui');
+    if (!changed) return;
+    const selection = this._resolveSelection(next);
+    this.selectionChange.emit([...selection]);
+    this.selectAllChange.emit({
+      checked: !header.checked,
+      scope: this.selectAllScope(),
+      rows: [...rows],
+      keys: rows.map((row) => this.getRowKey(row)),
+      selection: [...selection],
+    });
   }
 
   clearSelection(): void {
@@ -3038,9 +3207,56 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this.selectionChange.emit([]);
   }
 
-  private _emitSelection(keys: Set<unknown>): void {
-    const selected = this._rows().filter((r) => keys.has(this.getRowKey(r)));
-    this.selectionChange.emit(selected);
+  private _applyRowSelection(
+    row: T,
+    next: ReadonlySet<unknown>,
+    source: Exclude<NeuTableSelectionSource, 'header'>,
+  ): void {
+    const previous = this._selectedKeys();
+    const changed = this._state.setSelectionKeys(next, source === 'api' ? 'api' : 'ui');
+    if (!changed) return;
+    const selection = this._resolveSelection(next);
+    this.selectionChange.emit([...selection]);
+    const event = {
+      row,
+      key: this.getRowKey(row),
+      index: this._selectionController.indexOf(row, this._rows()),
+      source,
+      selection: [...selection],
+    } satisfies NeuTableRowSelectionEvent<T>;
+    // Replacement contract: whole-selection proposal, previous-row delta, next-row delta.
+    if (this.effectiveSelectionMode() === 'single' && next.has(event.key)) {
+      for (const key of previous) {
+        if (next.has(key)) continue;
+        const previousRow = this._selectionController.rowForKey(
+          key,
+          this._rows(),
+          this._suppliedSelectionRows(),
+        );
+        if (!previousRow) continue;
+        this.rowUnselect.emit({
+          row: previousRow,
+          key,
+          index: this._selectionController.indexOf(previousRow, this._rows()),
+          source,
+          selection: [...selection],
+        });
+      }
+    }
+    if (next.has(event.key) && !previous.has(event.key)) this.rowSelect.emit(event);
+    if (!next.has(event.key) && previous.has(event.key)) this.rowUnselect.emit(event);
+  }
+
+  private _resolveSelection(keys: ReadonlySet<unknown>): T[] {
+    return this._selectionController.resolveRows(keys, this._rows(), this._suppliedSelectionRows());
+  }
+
+  private _freezeProjection(rows: T[]): T[] {
+    return Object.freeze([...rows]) as unknown as T[];
+  }
+
+  private _rowSelectableAt(row: T, index: number): boolean {
+    return this.rowSelectable()?.(row, index) ?? true;
   }
 
   // ── Navegación ────────────────────────────────────────────────────────
@@ -3088,8 +3304,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     }
   }
 
-  onRowClick(row: T, _event: MouseEvent): void {
-    if (this.selectable()) this.toggleRow(row);
+  onRowClick(row: T, event: MouseEvent): void {
+    if (this.selectionEnabled() && this.selectOnRowClick()) this.toggleRow(row, 'row', event);
     this.rowClick.emit(row);
   }
 

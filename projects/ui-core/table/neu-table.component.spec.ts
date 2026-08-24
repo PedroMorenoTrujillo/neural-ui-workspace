@@ -18,6 +18,8 @@ import {
   NeuTableFilterMatchMode,
   NeuTableMultiSelectFilterConfig,
   NeuTableSelectFilterConfig,
+  NeuTableRowSelectionEvent,
+  NeuTableSelectAllChangeEvent,
   NeuTableServerState,
 } from './neu-table.types';
 import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
@@ -401,6 +403,470 @@ describe('NeuTableAdvancedFilterTexts compatibility', () => {
 
     expect(E3_ADVANCED_FILTER_TEXTS.matchMode).toBe('Match mode');
     expect(fixture.componentInstance.overrides.matchAll).toBe('All conditions');
+  });
+});
+
+describe('NeuTableComponent P2.2F2 selection parity', () => {
+  interface SelectionRow {
+    id: number;
+    name: string;
+    disabled?: boolean;
+  }
+
+  const columns: NeuTableColumn<SelectionRow>[] = [
+    { key: 'id', header: 'ID', sortable: true },
+    { key: 'name', header: 'Name', sortable: true },
+  ];
+  const rows: SelectionRow[] = [
+    { id: 0, name: 'Zero' },
+    { id: 1, name: 'One', disabled: true },
+    { id: 2, name: 'Two' },
+    { id: 3, name: 'Three' },
+  ];
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
+  });
+
+  async function createTable(inputs: Record<string, unknown> = {}) {
+    const fixture = TestBed.createComponent(NeuTableComponent<SelectionRow>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.componentRef.setInput('useUrlState', false);
+    for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return fixture;
+  }
+
+  it('renders native radio selection and atomically replaces a single selected key', async () => {
+    const fixture = await createTable({ selectionMode: 'single' });
+    const table = fixture.componentInstance;
+    const changes: SelectionRow[][] = [];
+    const selected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    const unselected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    table.selectionChange.subscribe((event) => changes.push(event));
+    table.rowSelect.subscribe((event) => selected.push(event));
+    table.rowUnselect.subscribe((event) => unselected.push(event));
+
+    expect(fixture.nativeElement.querySelectorAll('input[type="radio"]')).toHaveLength(4);
+    table.toggleRow(rows[0], 'radio');
+    table.toggleRow(rows[2], 'radio');
+
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([2]));
+    expect(changes).toEqual([[rows[0]], [rows[2]]]);
+    expect(selected.map((event) => [event.row.id, event.source])).toEqual([
+      [0, 'radio'],
+      [2, 'radio'],
+    ]);
+    expect(unselected.map((event) => event.row.id)).toEqual([0]);
+  });
+
+  it('supports controlled preselection, proposal authority and echo without double emission', async () => {
+    const fixture = await createTable({ selectionMode: 'single', selection: rows[0] });
+    const table = fixture.componentInstance;
+    const changes: SelectionRow[][] = [];
+    table.selectionChange.subscribe((event) => changes.push(event));
+
+    expect(table.isRowSelected(rows[0])).toBe(true);
+    table.toggleRow(rows[2], 'radio');
+
+    expect(changes).toEqual([[rows[2]]]);
+    expect(table.isRowSelected(rows[0])).toBe(true);
+    expect(table.isRowSelected(rows[2])).toBe(false);
+
+    fixture.componentRef.setInput('selection', rows[2]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(changes).toHaveLength(1);
+    expect(table.isRowSelected(rows[2])).toBe(true);
+  });
+
+  it('emits single replacement in selectionChange, previous unselect, next select order without echo replay', async () => {
+    const fixture = await createTable({ selectionMode: 'single', selection: rows[0] });
+    const table = fixture.componentInstance;
+    const order: string[] = [];
+    let proposal: SelectionRow | null = null;
+    table.selectionChange.subscribe((selection) => {
+      proposal = selection[0] ?? null;
+      order.push(`change:${selection.map((row) => row.id).join(',')}`);
+    });
+    table.rowUnselect.subscribe((event) => order.push(`unselect:${event.row.id}`));
+    table.rowSelect.subscribe((event) => order.push(`select:${event.row.id}`));
+
+    table.toggleRow(rows[2], 'radio');
+    expect(order).toEqual(['change:2', 'unselect:0', 'select:2']);
+
+    fixture.componentRef.setInput('selection', proposal);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(order).toEqual(['change:2', 'unselect:0', 'select:2']);
+  });
+
+  it('does not replay aggregate or row delta events when controlled multiple selection is echoed', async () => {
+    const fixture = await createTable({ selectionMode: 'multiple', selection: [] });
+    const table = fixture.componentInstance;
+    const changes: SelectionRow[][] = [];
+    const selected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    const unselected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    const aggregate: NeuTableSelectAllChangeEvent<SelectionRow>[] = [];
+    table.selectionChange.subscribe((event) => changes.push(event));
+    table.rowSelect.subscribe((event) => selected.push(event));
+    table.rowUnselect.subscribe((event) => unselected.push(event));
+    table.selectAllChange.subscribe((event) => aggregate.push(event));
+
+    table.toggleAll();
+    expect(changes).toHaveLength(1);
+    expect(aggregate).toHaveLength(1);
+    fixture.componentRef.setInput('selection', changes[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(changes).toHaveLength(1);
+    expect(aggregate).toHaveLength(1);
+
+    table.unselectRow(rows[0]);
+    expect(unselected).toHaveLength(1);
+    expect(selected).toHaveLength(0);
+    fixture.componentRef.setInput('selection', changes[1]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(unselected).toHaveLength(1);
+    expect(selected).toHaveLength(0);
+    expect(aggregate).toHaveLength(1);
+  });
+
+  it('resolves controlled selection to immutable replacement rows by key', async () => {
+    const fixture = await createTable({ selectionMode: 'multiple', selection: [rows[0], rows[2]] });
+    const replacements = rows.map((row) => ({ ...row, name: `New ${row.name}` }));
+
+    fixture.componentRef.setInput('data', replacements);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.selectedRows()).toEqual([replacements[0], replacements[2]]);
+    expect(fixture.componentInstance.selectedRows()[0]).toBe(replacements[0]);
+    expect((fixture.componentInstance as any)._state.selectionKeys()).toEqual(new Set([0, 2]));
+  });
+
+  it('resolves controlled single selection to a new immutable row instance without events', async () => {
+    const fixture = await createTable({ selectionMode: 'single', selection: rows[0] });
+    const table = fixture.componentInstance;
+    const replacements = rows.map((row) => ({ ...row, name: `Fresh ${row.name}` }));
+    const changes: SelectionRow[][] = [];
+    const selected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    const unselected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    table.selectionChange.subscribe((event) => changes.push(event));
+    table.rowSelect.subscribe((event) => selected.push(event));
+    table.rowUnselect.subscribe((event) => unselected.push(event));
+
+    fixture.componentRef.setInput('data', replacements);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(table.selectedRows()).toEqual([replacements[0]]);
+    expect(table.selectedRows()[0]).toBe(replacements[0]);
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0]));
+    expect(changes).toEqual([]);
+    expect(selected).toEqual([]);
+    expect(unselected).toEqual([]);
+  });
+
+  it('derives filtered and page select-all labels while preserving a custom override', async () => {
+    const filtered = await createTable({ selectionMode: 'multiple' });
+    const page = await createTable({ selectionMode: 'multiple', selectAllScope: 'page' });
+    const custom = await createTable({
+      selectionMode: 'multiple',
+      selectAllScope: 'page',
+      selectAllAriaLabel: 'Choose the visible people',
+    });
+    const headerLabel = (fixture: Awaited<ReturnType<typeof createTable>>) =>
+      (fixture.nativeElement.querySelector('thead neu-checkbox input') as HTMLInputElement)
+        .getAttribute('aria-label');
+
+    expect(headerLabel(filtered)).toBe('Select all filtered rows');
+    expect(headerLabel(page)).toBe('Select all rows on this page');
+    expect(headerLabel(custom)).toBe('Choose the visible people');
+  });
+
+  it('excludes disabled rows from row, checkbox and header interactions', async () => {
+    const fixture = await createTable({
+      selectionMode: 'multiple',
+      rowSelectable: (row: SelectionRow) => row.disabled !== true,
+    });
+    const table = fixture.componentInstance;
+
+    table.toggleRow(rows[1], 'row');
+    expect(table.selectedCount()).toBe(0);
+    table.toggleAll();
+
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0, 2, 3]));
+    expect((table as any).headerSelectionState()).toEqual({
+      checked: true,
+      indeterminate: false,
+      disabled: false,
+    });
+    const rowControls = fixture.nativeElement.querySelectorAll(
+      '.neu-table__row neu-checkbox input',
+    ) as NodeListOf<HTMLInputElement>;
+    expect(rowControls[1].disabled).toBe(true);
+    expect(fixture.nativeElement.querySelectorAll('.neu-table__row--disabled')).toHaveLength(1);
+  });
+
+  it('renders disabled radio semantics without removing controlled disabled preselection', async () => {
+    const fixture = await createTable({
+      selectionMode: 'single',
+      selection: rows[1],
+      rowSelectable: (row: SelectionRow) => row.disabled !== true,
+    });
+    const radios = fixture.nativeElement.querySelectorAll(
+      '.neu-table__row input[type="radio"]',
+    ) as NodeListOf<HTMLInputElement>;
+
+    expect(radios[1].disabled).toBe(true);
+    expect(radios[1].checked).toBe(true);
+    expect(fixture.componentInstance.isRowSelected(rows[1])).toBe(true);
+    fixture.componentInstance.toggleRow(rows[1], 'radio');
+    expect(fixture.componentInstance.isRowSelected(rows[1])).toBe(true);
+  });
+
+  it('disables the header when the scope contains zero selectable rows', async () => {
+    const fixture = await createTable({
+      selectionMode: 'multiple',
+      rowSelectable: () => false,
+    });
+
+    expect((fixture.componentInstance as any).headerSelectionState()).toEqual({
+      checked: false,
+      indeterminate: false,
+      disabled: true,
+    });
+    expect(
+      (fixture.nativeElement.querySelector('thead neu-checkbox input') as HTMLInputElement | null)
+        ?.disabled,
+    ).toBe(true);
+  });
+
+  it('page select-all preserves off-page keys and emits one aggregate event per action', async () => {
+    const fixture = await createTable({
+      selectionMode: 'multiple',
+      selectAllScope: 'page',
+      pageSize: 2,
+      rowSelectable: (row: SelectionRow) => row.disabled !== true,
+    });
+    const table = fixture.componentInstance;
+    const aggregate: NeuTableSelectAllChangeEvent<SelectionRow>[] = [];
+    const rowEvents: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    table.selectAllChange.subscribe((event) => aggregate.push(event));
+    table.rowSelect.subscribe((event) => rowEvents.push(event));
+
+    table.toggleAll();
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0]));
+    table.goToPage(2);
+    table.toggleAll();
+
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0, 2, 3]));
+    table.toggleAll();
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0]));
+    table.goToPage(1);
+
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0]));
+    expect((table as any).headerSelectionState().checked).toBe(true);
+    expect(aggregate).toHaveLength(3);
+    expect(aggregate.map((event) => event.rows.map((row) => row.id))).toEqual([
+      [0],
+      [2, 3],
+      [2, 3],
+    ]);
+    expect(rowEvents).toEqual([]);
+  });
+
+  it('derives indeterminate state from only the configured filtered scope', async () => {
+    const fixture = await createTable({ selectionMode: 'multiple' });
+    const table = fixture.componentInstance;
+    table.toggleRow(rows[0], 'checkbox');
+
+    expect((table as any).headerSelectionState().indeterminate).toBe(true);
+    table.onSearch({ target: { value: 'Zero' } } as unknown as Event);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect((table as any).headerSelectionState()).toEqual({
+      checked: true,
+      indeterminate: false,
+      disabled: false,
+    });
+    expect(table.selectedCount()).toBe(1);
+  });
+
+  it('keeps unknown server-page keys canonical without emitting server state for selection', async () => {
+    const fixture = await createTable({
+      selectionMode: 'multiple',
+      serverSide: true,
+      data: rows.slice(0, 2),
+      selectionActions: [
+        { key: 'archive', label: 'Archive', icon: 'archive', handler: vi.fn() },
+      ],
+    });
+    const table = fixture.componentInstance;
+    const serverEvents: NeuTableServerState[] = [];
+    table.serverStateChange.subscribe((event) => serverEvents.push(event));
+    table.toggleRow(rows[0], 'checkbox');
+
+    fixture.componentRef.setInput('data', rows.slice(2));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(table.selectedCount()).toBe(1);
+    expect(table.selectedRows()).toEqual([]);
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0]));
+    expect(table.selectedRowsInfo()).toBe('0/1 selected');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-table__selection-bar')?.textContent).toContain(
+      '0/1 selected',
+    );
+    expect(fixture.nativeElement.querySelector('.neu-table__selection-actions')).toBeNull();
+    table.toggleAll();
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0, 2, 3]));
+    expect(serverEvents).toEqual([]);
+  });
+
+  it('keeps key selection through sorting and virtual-window recycling', async () => {
+    const virtualRows = Array.from(
+      { length: 20 },
+      (_, index): SelectionRow => ({
+        id: index,
+        name: `Row ${String(20 - index).padStart(2, '0')}`,
+      }),
+    );
+    const fixture = await createTable({
+      data: virtualRows,
+      selectionMode: 'multiple',
+      sortable: true,
+      pagination: false,
+      virtualScroll: true,
+      virtualScrollVisibleItems: 3,
+    });
+    const table = fixture.componentInstance;
+    table.toggleRow(virtualRows[15], 'checkbox');
+    table.sortBy('name');
+    table.onTableScroll({ target: { scrollTop: 500 } } as unknown as Event);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(table.isRowSelected({ ...virtualRows[15] })).toBe(true);
+    expect(table.selectedRows()).toEqual([virtualRows[15]]);
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([15]));
+  });
+
+  it('clear emits one whole-selection change without row event storms', async () => {
+    const fixture = await createTable({ selectionMode: 'multiple' });
+    const table = fixture.componentInstance;
+    table.toggleAll();
+    const changes: SelectionRow[][] = [];
+    const selected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    const unselected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
+    table.selectionChange.subscribe((event) => changes.push(event));
+    table.rowSelect.subscribe((event) => selected.push(event));
+    table.rowUnselect.subscribe((event) => unselected.push(event));
+
+    table.clearSelection();
+
+    expect(changes).toEqual([[]]);
+    expect(selected).toEqual([]);
+    expect(unselected).toEqual([]);
+  });
+
+  it('uses first-row projection deterministically for duplicate keys and restores removed keys', async () => {
+    const fixture = await createTable({ selectionMode: 'multiple' });
+    const table = fixture.componentInstance;
+    table.toggleRow(rows[0], 'checkbox');
+
+    fixture.componentRef.setInput('data', rows.slice(1));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.selectedCount()).toBe(1);
+    expect(table.selectedRows()).toEqual([]);
+
+    const first = { id: 0, name: 'First duplicate' };
+    const second = { id: 0, name: 'Second duplicate' };
+    fixture.componentRef.setInput('data', [first, second, ...rows.slice(1)]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(table.selectedRows()).toEqual([first]);
+    expect(table.isRowSelected(second)).toBe(true);
+  });
+
+  it('supports Prime-style meta-key row replacement without changing checkbox additivity', async () => {
+    const fixture = await createTable({ selectionMode: 'multiple', metaKeySelection: true });
+    const table = fixture.componentInstance;
+    table.toggleRow(rows[0], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);
+    table.toggleRow(rows[2], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([2]));
+
+    table.toggleRow(rows[3], 'row', { metaKey: true, ctrlKey: false } as MouseEvent);
+    table.toggleRow(rows[0], 'checkbox');
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([2, 3, 0]));
+
+    table.toggleRow(rows[0], 'row', { metaKey: false, ctrlKey: true } as MouseEvent);
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([2, 3]));
+    table.toggleRow(rows[0], 'row', { metaKey: false, ctrlKey: true } as MouseEvent);
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([2, 3, 0]));
+  });
+
+  it('isolates row event arrays and freezes selectedRows projections without cloning T rows', async () => {
+    const fixture = await createTable({ selectionMode: 'multiple' });
+    const table = fixture.componentInstance;
+    let rowEvent: NeuTableRowSelectionEvent<SelectionRow> | undefined;
+    table.selectionChange.subscribe((selection) => selection.push(rows[1]));
+    table.rowSelect.subscribe((event) => {
+      rowEvent = event;
+      (event.selection as SelectionRow[]).push(rows[2]);
+    });
+
+    table.toggleRow(rows[0], 'checkbox');
+
+    expect(rowEvent?.selection).toEqual([rows[0], rows[2]]);
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0]));
+    const projection = table.selectedRows();
+    expect(projection).toEqual([rows[0]]);
+    expect(projection[0]).toBe(rows[0]);
+    expect(Object.isFrozen(projection)).toBe(true);
+    expect(() => projection.push(rows[3])).toThrow();
+    expect(table.selectedRows()).toEqual([rows[0]]);
+  });
+
+  it('isolates select-all event arrays from canonical state and later aggregate events', async () => {
+    const fixture = await createTable({ selectionMode: 'multiple' });
+    const table = fixture.componentInstance;
+    const aggregate: NeuTableSelectAllChangeEvent<SelectionRow>[] = [];
+    table.selectionChange.subscribe((selection) => selection.splice(0));
+    table.selectAllChange.subscribe((event) => {
+      aggregate.push({
+        ...event,
+        rows: [...event.rows],
+        keys: [...event.keys],
+        selection: [...event.selection],
+      });
+      (event.rows as SelectionRow[]).splice(0);
+      (event.keys as unknown[]).splice(0);
+      (event.selection as SelectionRow[]).splice(0);
+    });
+
+    table.toggleAll();
+    expect((table as any)._state.selectionKeys()).toEqual(new Set([0, 1, 2, 3]));
+    expect(table.selectedRows()).toEqual(rows);
+    expect((table as any).headerSelectionState().checked).toBe(true);
+    table.toggleAll();
+
+    expect((table as any)._state.selectionKeys()).toEqual(new Set());
+    expect(aggregate).toHaveLength(2);
+    expect(aggregate[0].rows).toEqual(rows);
+    expect(aggregate[0].keys).toEqual([0, 1, 2, 3]);
+    expect(aggregate[0].selection).toEqual(rows);
+    expect(aggregate[1].checked).toBe(false);
+    expect(aggregate[1].selection).toEqual([]);
   });
 });
 

@@ -193,6 +193,46 @@ describe('NeuTableStateController', () => {
     expect(events).toHaveLength(1);
   });
 
+  it('controls only selection while pagination remains independently uncontrolled', () => {
+    const events: InternalNeuTableStateChange<number>[] = [];
+    const controller = new NeuTableStateController<number>((event) => events.push(event));
+    controller.setControlledSelectionKeys(new Set([1]));
+
+    const selectionProposal = controller.setSelectionKeys(new Set([2]), 'ui');
+    const pageCommit = controller.setPage(2, 'ui');
+
+    expect(selectionProposal?.committed).toBe(false);
+    expect(controller.selectionKeys()).toEqual(new Set([1]));
+    expect(pageCommit?.committed).toBe(true);
+    expect(controller.page()).toBe(2);
+    expect(events.map((event) => event.changedKeys)).toEqual([['selectionKeys'], ['page']]);
+  });
+
+  it('commits uncontrolled slices from a mixed proposal without committing selection', () => {
+    const controller = new NeuTableStateController<number>();
+    controller.setControlledSelectionKeys(new Set([1]));
+
+    const proposal = controller.update({ page: 3, selectionKeys: new Set([2]) }, 'ui');
+
+    expect(proposal?.committed).toBe(false);
+    expect(proposal?.current.page).toBe(3);
+    expect(proposal?.current.selectionKeys).toEqual(new Set([2]));
+    expect(controller.page()).toBe(3);
+    expect(controller.selectionKeys()).toEqual(new Set([1]));
+  });
+
+  it('commits a controlled selection echo without emitting a second intent', () => {
+    const listener = vi.fn();
+    const controller = new NeuTableStateController<number>(listener);
+    controller.setControlledSelectionKeys(new Set([1]));
+    controller.setSelectionKeys(new Set([2]), 'ui');
+
+    controller.setControlledSelectionKeys(new Set([2]));
+
+    expect(controller.selectionKeys()).toEqual(new Set([2]));
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
   it('replaces controlled state only when the consumer supplies a new snapshot', () => {
     const controller = new NeuTableStateController();
     controller.setControlledState({ ...controller.snapshot(), page: 3 });

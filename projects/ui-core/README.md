@@ -111,6 +111,14 @@ import { NeuTableComponent } from '@neural-ui/core/table';
 import { NeuToastService } from '@neural-ui/core/toast';
 ```
 
+### Table selection / Selección de Table
+
+Use `selectionMode="single"` for radio selection or `selectionMode="multiple"` for checkbox selection. `[selectable]="true"` remains the legacy uncontrolled-multiple alias. Passing `[selection]` makes only that slice controlled and supports preselection by `rowKey`; `selectionChange` emits the proposed `T[]` once, then the consumer echoes the authoritative replacement. / Usa `selectionMode="single"` para radio o `selectionMode="multiple"` para checkbox. `[selectable]="true"` conserva la compatibilidad múltiple no controlada. `[selection]` controla solo esa parte y permite preselección por `rowKey`.
+
+`rowSelectable` disables interaction without deleting an existing controlled selection. `selectAllScope="page"` affects the current page and `"filtered"` affects filtered client rows; the default accessible label follows that scope and `selectAllAriaLabel` remains an override. In server mode both are truthful loaded-row scopes, never all server records. If canonical keys cannot resolve to loaded rows, the bar reports resolved/canonical counts and hides row-dependent actions at zero resolved rows without deleting unknown keys. / `rowSelectable` deshabilita la interacción sin borrar una selección controlada. La etiqueta accesible predeterminada distingue “todas las filas filtradas” de “todas las filas de esta página”. En servidor se muestran los recuentos resuelto/canónico y se ocultan las acciones que necesitan filas cuando no hay ninguna resuelta, sin borrar claves desconocidas.
+
+`rowSelect`/`rowUnselect` are row deltas and `selectAllChange` is aggregate. Single replacement order is `selectionChange`, `rowUnselect(previous)`, `rowSelect(next)`; a controlled echo is silent. Event arrays are isolated and `selectedRows()` is shallow-frozen while preserving `T` identity. `rowKey` values should be unique; with duplicates all matching rows render selected and the first current-data occurrence wins resolution. Selection persists across filtering, sorting, pagination, virtual scrolling and immutable row replacement. / Los arrays de eventos están aislados, la proyección conserva la identidad de `T` y la primera fila actual gana si hay claves duplicadas.
+
 ### Presets and testing / Presets y testing
 
 The existing appearance remains the default. Opt in with `data-neu-density="compact|comfortable|spacious"` and optionally `data-neu-theme="high-contrast"`. Remove the attributes to revert.

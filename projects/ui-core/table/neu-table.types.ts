@@ -71,6 +71,37 @@ export interface NeuTableSelectionActionEvent<T = Record<string, unknown>> {
   rows: T[];
 }
 
+// ── Selection ───────────────────────────────────────────────────────────
+export type NeuTableSelectionMode = 'none' | 'single' | 'multiple';
+
+/** Rows affected by the header checkbox. Server mode always means loaded rows. */
+export type NeuTableSelectAllScope = 'page' | 'filtered';
+
+export type NeuTableSelectionSource = 'row' | 'checkbox' | 'radio' | 'header' | 'api';
+
+/** Consumer-facing controlled value. Canonical Table state continues to store keys. */
+export type NeuTableSelection<T> = T | readonly T[] | null;
+
+export interface NeuTableRowSelectionEvent<T = Record<string, unknown>> {
+  row: T;
+  key: unknown;
+  /** Index in the current data input. */
+  index: number;
+  source: Exclude<NeuTableSelectionSource, 'header'>;
+  /** Proposed whole selection after this action. */
+  selection: readonly T[];
+}
+
+export interface NeuTableSelectAllChangeEvent<T = Record<string, unknown>> {
+  checked: boolean;
+  scope: NeuTableSelectAllScope;
+  /** Selectable rows in the active scope, not every row in the Table. */
+  rows: readonly T[];
+  keys: readonly unknown[];
+  /** Proposed whole selection after this action. */
+  selection: readonly T[];
+}
+
 // ── Layout / Editing ───────────────────────────────────────────────────────
 export interface NeuTableLayout {
   columnOrder: string[];

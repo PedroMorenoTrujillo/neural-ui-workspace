@@ -92,7 +92,7 @@ export class NeuTableStateController<K = unknown> {
       layout: _DEFAULT_LAYOUT,
     }),
   );
-  private readonly _controlled = signal(false);
+  private readonly _controlledKeys = signal<ReadonlySet<InternalNeuTableStateKey>>(new Set());
   private readonly _sortState = computed(() => this._state().sort);
   private readonly _sortEntriesState = computed(() => this._state().sortEntries);
   private readonly _filtersState = computed(() => this._state().filters);
@@ -100,7 +100,7 @@ export class NeuTableStateController<K = unknown> {
   private readonly _expansionKeysState = computed(() => this._state().expansionKeys);
   private readonly _layoutState = computed(() => this._state().layout);
 
-  readonly controlled = this._controlled.asReadonly();
+  readonly controlled = computed(() => this._controlledKeys().size > 0);
   readonly page = computed(() => this._state().page);
   readonly pageSize = computed(() => this._state().pageSize);
   readonly search = computed(() => this._state().search);
@@ -149,12 +149,38 @@ export class NeuTableStateController<K = unknown> {
   }
 
   setControlledState(state: InternalNeuTableState<K>): InternalNeuTableStateChange<K> | null {
-    this._controlled.set(true);
+    this._controlledKeys.set(
+      new Set<InternalNeuTableStateKey>([
+        'page',
+        'pageSize',
+        'search',
+        'sort',
+        'sortEntries',
+        'filters',
+        'selectionKeys',
+        'expansionKeys',
+        'layout',
+      ]),
+    );
     return this._commit(state, 'controlled');
   }
 
   releaseControlledState(): void {
-    this._controlled.set(false);
+    this._controlledKeys.set(new Set());
+  }
+
+  /** Controls only selection while every other canonical state slice remains uncontrolled. */
+  setControlledSelectionKeys(selectionKeys: ReadonlySet<K>): InternalNeuTableStateChange<K> | null {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.add('selectionKeys');
+    this._controlledKeys.set(controlledKeys);
+    return this._commit({ ...this.snapshot(), selectionKeys }, 'controlled');
+  }
+
+  releaseControlledSelection(): void {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.delete('selectionKeys');
+    this._controlledKeys.set(controlledKeys);
   }
 
   update(
@@ -166,7 +192,9 @@ export class NeuTableStateController<K = unknown> {
     const changedKeys = stateChangedKeys(previous, proposed);
     if (changedKeys.length === 0) return null;
 
-    const controlledProposal = this._controlled() && origin !== 'controlled';
+    const controlledKeys = this._controlledKeys();
+    const controlledProposal =
+      origin !== 'controlled' && changedKeys.some((key) => controlledKeys.has(key));
     const change: InternalNeuTableStateChange<K> = {
       previous: cloneState(previous),
       current: cloneState(proposed),
@@ -174,7 +202,17 @@ export class NeuTableStateController<K = unknown> {
       origin,
       committed: !controlledProposal,
     };
-    if (!controlledProposal) this._state.set(proposed);
+    if (controlledProposal) {
+      const uncontrolledPatch = Object.fromEntries(
+        changedKeys
+          .filter((key) => !controlledKeys.has(key))
+          .map((key) => [key, proposed[key]]),
+      ) as Partial<InternalNeuTableState<K>>;
+      const committed = normalizeUpdate(previous, uncontrolledPatch);
+      if (stateChangedKeys(previous, committed).length > 0) this._state.set(committed);
+    } else {
+      this._state.set(proposed);
+    }
     this._onChange?.(change);
     return change;
   }

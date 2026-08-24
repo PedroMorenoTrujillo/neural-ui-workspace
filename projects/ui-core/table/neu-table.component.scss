@@ -608,6 +608,18 @@
   }
 }
 
+.neu-table__radio {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--neu-primary);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
 .neu-table__selection-bar {
   display: flex;
   align-items: center;
@@ -672,6 +684,14 @@
 
   &--clickable {
     cursor: pointer;
+  }
+
+  &--disabled {
+    color: var(--neu-text-muted);
+
+    .neu-table__td {
+      opacity: 0.62;
+    }
   }
 }
 

@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 <!-- next release -->
+
+### Added
+
+- Table selection migration parity: typed none/single/multiple modes, radio and checkbox surfaces, focused controlled row selection, row preselection by `rowKey`, disabled rows, page or filtered/loaded header scopes, granular row events and aggregate select-all events.
+- Selection remains key-canonical across immutable row replacement, filters, sorting, pagination, virtual scrolling and server page replacement; server select-all explicitly covers loaded rows only.
+- Scope-derived select-all labels distinguish filtered rows from the current page unless a consumer supplies an override. Partial server selections report resolved/canonical counts and hide row-dependent actions when no selected row object is loaded.
+- Selection event arrays are isolated, `selectedRows()` is a shallow-frozen projection that preserves row identity, and single replacement emits `selectionChange`, then `rowUnselect(previous)`, then `rowSelect(next)`.
+
 ### Changed
 
 - The Select and Multiselect `ng-template` slot contexts retain explicit `ngTemplateContextGuard` typing while
