@@ -4,7 +4,6 @@ import {
   DestroyRef,
   ElementRef,
   PLATFORM_ID,
-  Signal,
   TemplateRef,
   ViewEncapsulation,
   WritableSignal,
@@ -90,6 +89,16 @@ import {
   neuTableInstantRangeControlValue,
   neuTableNumberRangeValue,
 } from './neu-table-advanced-filter.controller';
+import {
+  NeuTableStateController,
+  type InternalAppliedColumnFilter,
+  type InternalAppliedFilterConstraint,
+  type InternalAppliedFilterOperator,
+} from './neu-table-state.controller';
+import {
+  NeuTableUrlStateAdapter,
+  type InternalNeuTableUrlStateConfig,
+} from './neu-table-url-state.adapter';
 
 export type {
   NeuTableAction,
@@ -127,19 +136,6 @@ type NeuTablePageEntry<T extends object> =
 type NeuTableData<T> = [T] extends [Record<string, unknown>]
   ? readonly T[] | readonly object[]
   : readonly T[];
-
-type InternalAppliedFilterOperator = 'and' | 'or';
-
-interface InternalAppliedFilterConstraint {
-  mode?: NeuTableFilterMatchMode;
-  value: unknown;
-  projectionValue?: unknown;
-}
-
-interface InternalAppliedColumnFilter {
-  operator: InternalAppliedFilterOperator;
-  constraints: readonly InternalAppliedFilterConstraint[];
-}
 
 interface InternalFilterColumnSignature {
   kind: NeuTableFilterKind | 'legacy' | 'none';
@@ -1480,6 +1476,8 @@ export type NeuTableColumnInput<T extends object> =
 export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
+  private readonly _state = new NeuTableStateController<unknown>();
+  private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
   private readonly _platformId = inject(PLATFORM_ID);
   private readonly _document = inject(DOCUMENT);
   private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
@@ -1642,16 +1640,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly layoutChange = output<NeuTableLayout>();
   readonly cellEditCommit = output<NeuTableCellEditEvent<T>>();
 
-  // ── Estado interno (usado cuando useUrlState = false) ─────────────────
-  // Internal state signals (used when useUrlState = false)
-  private readonly _internalPage = signal(1);
-  private readonly _internalSearch = signal('');
-  private readonly _internalSortKey = signal('');
-  private readonly _internalSortDir = signal<'asc' | 'desc'>('asc');
-  private readonly _internalMultiSort = signal('');
-  private readonly _columnWidths = signal<Record<string, number>>({});
-  private readonly _columnOrder = signal<string[]>([]);
-  private readonly _hiddenColumns = signal<Set<string>>(new Set());
+  // ── Canonical consumer-relevant state ─────────────────────────────────
+  private readonly _columnWidths = computed(() => this._state.layout().columnWidths);
+  private readonly _columnOrder = this._state.createColumnOrderFacade();
+  private readonly _hiddenColumns = computed(
+    () => new Set<string>(this._state.layout().hiddenColumns),
+  );
   readonly columnChooserOpen = signal(false);
   private readonly _editingCell = signal<{
     rowKey: unknown;
@@ -1661,44 +1655,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   } | null>(null);
   private _resizeCleanup: (() => void) | null = null;
 
-  // ── URL State ─────────────────────────────────────────────────────────
-  private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
-
-  private _getUrlParamSignal(key: string): Signal<string | null> {
-    let paramSignal = this._urlParamSignals.get(key);
-    if (!paramSignal) {
-      paramSignal = this._urlState.getParam(key);
-      this._urlParamSignals.set(key, paramSignal);
-    }
-    return paramSignal;
-  }
-
-  private _readUrlParam(key: string): string | null {
-    return this._getUrlParamSignal(key)();
-  }
-
-  readonly currentPage = computed(() => {
-    if (!this.useUrlState()) return this._internalPage();
-    const raw = this._readUrlParam(this.pageParam());
-    const n = Number(raw);
-    return !raw || isNaN(n) || n < 1 ? 1 : n;
-  });
-
-  readonly searchQuery = computed(() => {
-    if (!this.useUrlState()) return this._internalSearch();
-    return this._readUrlParam(this.searchParam()) ?? '';
-  });
-
-  readonly sortKey = computed(() => {
-    if (!this.useUrlState()) return this._internalSortKey();
-    return this._readUrlParam(this.sortParam()) ?? '';
-  });
-
-  readonly sortDir = computed<'asc' | 'desc'>(() => {
-    if (!this.useUrlState()) return this._internalSortDir();
-    const d = this._readUrlParam(this.sortDirParam());
-    return d === 'desc' ? 'desc' : 'asc';
-  });
+  readonly currentPage = this._state.page;
+  readonly searchQuery = this._state.search;
+  readonly sortKey = computed(() => this._state.sort()?.key ?? '');
+  readonly sortDir = computed<'asc' | 'desc'>(() => this._state.sort()?.dir ?? 'asc');
 
   // ---- Pipeline de datos / Data pipeline ----
   // ── Estado interno ────────────────────────────────────────────────────
@@ -1709,19 +1669,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
    * Multi-sort entries derived from URL param or internal state.
    * Entradas de multisort derivadas del param de URL o del estado interno.
    */
-  readonly _sortEntries = computed<NeuTableSortEntry[]>(() => {
-    if (!this.multiSort()) return [];
-    const param = this.useUrlState()
-      ? this._readUrlParam(this.multiSortParam())
-      : this._internalMultiSort();
-    if (!param) return [];
-    return param.split(',').flatMap((chunk) => {
-      const [key, dir] = chunk.split(':');
-      if (!key) return [];
-      return [{ key, dir: (dir === 'desc' ? 'desc' : 'asc') as 'asc' | 'desc' }];
-    });
-  });
-  private readonly _appliedFilters = signal<Record<string, InternalAppliedColumnFilter>>({});
+  readonly _sortEntries = computed<NeuTableSortEntry[]>(() =>
+    this.multiSort() ? [...this._state.sortEntries()] : [],
+  );
+  private readonly _appliedFilters = this._state.createFiltersFacade();
   readonly _columnFilters = this._createLegacyColumnFiltersFacade();
   readonly _pageSizeControl = new FormControl('', { nonNullable: true });
   private readonly _columnFilterControls = new Map<string, FormControl<string>>();
@@ -1796,6 +1747,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this.pageSizeOptions().map((size) => ({ label: String(size), value: String(size) })),
   );
 
+  private _urlConfig(): InternalNeuTableUrlStateConfig {
+    return {
+      pageParam: this.pageParam(),
+      searchParam: this.searchParam(),
+      sortParam: this.sortParam(),
+      sortDirParam: this.sortDirParam(),
+      multiSortParam: this.multiSortParam(),
+    };
+  }
+
   private readonly _virtualScrollTop = signal(0);
 
   constructor() {
@@ -1815,6 +1776,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._pageSizeControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => this.onPageSizeChange(value));
+
+    effect(() => {
+      const pageSize = this.pageSize();
+      untracked(() => this._state.setPageSize(pageSize, 'input'));
+    });
+
+    effect(() => {
+      if (!this.useUrlState()) return;
+      const snapshot = this._urlAdapter.read(this._urlConfig());
+      untracked(() => this._state.update(snapshot, 'url'));
+    });
 
     effect(() => {
       const nextSize = String(this.effectivePageSize());
@@ -1867,20 +1839,23 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     effect(() => {
       const keys = this._typedColumns().map((col): string => col.key);
       const layout = this.initialLayout();
-      const rawOrder = layout?.columnOrder?.length ? layout.columnOrder : this._columnOrder();
-      const nextOrder = [
-        ...rawOrder.filter((key) => keys.includes(key)),
-        ...keys.filter((key) => !rawOrder.includes(key)),
-      ];
-
-      if (nextOrder.join('|') !== this._columnOrder().join('|')) {
-        this._columnOrder.set(nextOrder);
-      }
-
-      if (layout) {
-        this._hiddenColumns.set(new Set(layout.hiddenColumns.filter((key) => keys.includes(key))));
-        this._columnWidths.set(layout.columnWidths ?? {});
-      }
+      untracked(() => {
+        const current = this._state.layout();
+        const rawOrder = layout?.columnOrder?.length ? layout.columnOrder : current.columnOrder;
+        this._state.setLayout(
+          {
+            columnOrder: [
+              ...rawOrder.filter((key) => keys.includes(key)),
+              ...keys.filter((key) => !rawOrder.includes(key)),
+            ],
+            hiddenColumns: (layout?.hiddenColumns ?? current.hiddenColumns).filter((key) =>
+              keys.includes(key),
+            ),
+            columnWidths: layout?.columnWidths ?? current.columnWidths,
+          },
+          'input',
+        );
+      });
     });
 
     effect(() => {
@@ -2216,8 +2191,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const column = key ? this._currentTypedColumn(key) : null;
     const result = this._advancedFilter.buildApplyResult();
     if (!key || !column || !result || result.key !== key) return;
-    this._writeAppliedFilter(key, result.filter);
-    if (this.serverSide()) this._emitServerState({ page: 1 });
+    const changed = this._writeAppliedFilter(key, result.filter);
+    if (changed && this.serverSide()) this._emitServerState();
     this._closeFilterOverlay();
   }
 
@@ -2624,10 +2599,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     });
   });
 
-  private readonly _dynamicPageSize = signal<number | null>(null);
   readonly effectivePageSize = computed(() => {
     if (!this.pagination()) return this.filteredData().length || 1;
-    return this._dynamicPageSize() ?? this.pageSize();
+    return this._state.pageSize();
   });
 
   readonly totalPages = computed(() => {
@@ -2836,8 +2810,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     } else if (this.visibleColumns().length > 1) {
       next.add(key);
     }
-    this._hiddenColumns.set(next);
-    this._emitLayoutChange();
+    const changed = this._state.setLayout(
+      { ...this._state.layout(), hiddenColumns: [...next] },
+      'ui',
+    );
+    if (changed) this._emitLayoutChange();
   }
 
   isFirstVisibleColumn(key: string): boolean {
@@ -2859,7 +2836,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const next = [...order];
     const [moved] = next.splice(previousIndex, 1);
     next.splice(targetIndex, 0, moved);
-    this._columnOrder.set(next);
+    const changed = this._state.setLayout(
+      { ...this._state.layout(), columnOrder: next },
+      'ui',
+    );
+    if (!changed) return;
     this.columnReorder.emit({
       previousIndex,
       currentIndex: targetIndex,
@@ -2870,20 +2851,25 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   applyLayout(layout: NeuTableLayout): void {
     const keys = this._typedColumns().map((col): string => col.key);
-    this._columnOrder.set([
-      ...layout.columnOrder.filter((key) => keys.includes(key)),
-      ...keys.filter((key) => !layout.columnOrder.includes(key)),
-    ]);
-    this._hiddenColumns.set(new Set(layout.hiddenColumns.filter((key) => keys.includes(key))));
-    this._columnWidths.set(layout.columnWidths ?? {});
-    this._emitLayoutChange();
+    const changed = this._state.setLayout(
+      {
+        columnOrder: [
+          ...layout.columnOrder.filter((key) => keys.includes(key)),
+          ...keys.filter((key) => !layout.columnOrder.includes(key)),
+        ],
+        hiddenColumns: layout.hiddenColumns.filter((key) => keys.includes(key)),
+        columnWidths: layout.columnWidths ?? {},
+      },
+      'api',
+    );
+    if (changed) this._emitLayoutChange();
   }
 
   currentLayout(): NeuTableLayout {
     return {
       columnOrder: this.orderedColumns().map((col) => col.key),
       hiddenColumns: [...this._hiddenColumns()],
-      columnWidths: this._columnWidths(),
+      columnWidths: { ...this._columnWidths() },
     };
   }
 
@@ -2951,20 +2937,19 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     event?.preventDefault();
     event?.stopPropagation();
 
-    this._columnWidths.update((current) => {
-      if (!(key in current)) {
-        return current;
-      }
-
-      const next = { ...current };
-      delete next[key];
-      return next;
-    });
-    this._emitLayoutChange();
+    const current = this._columnWidths();
+    if (!(key in current)) return;
+    const next = { ...current };
+    delete next[key];
+    const changed = this._state.setLayout(
+      { ...this._state.layout(), columnWidths: next },
+      'api',
+    );
+    if (changed) this._emitLayoutChange();
   }
 
   // ── Expansión de filas ────────────────────────────────────────────────
-  private readonly _expandedKeys = signal<Set<unknown>>(new Set());
+  private readonly _expandedKeys = this._state.expansionKeys;
 
   isRowExpanded(row: T): boolean {
     return this._expandedKeys().has(this.getRowKey(row));
@@ -2974,14 +2959,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const key = this.getRowKey(row);
     const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
     set.add(key);
-    this._expandedKeys.set(set);
+    this._state.setExpansionKeys(set, 'api');
   }
 
   collapseRow(row: T): void {
     const key = this.getRowKey(row);
     const set = new Set(this._expandedKeys());
     set.delete(key);
-    this._expandedKeys.set(set);
+    this._state.setExpansionKeys(set, 'api');
   }
 
   toggleExpand(row: T): void {
@@ -2989,11 +2974,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
     if (this._expandedKeys().has(key)) set.delete(key);
     else set.add(key);
-    this._expandedKeys.set(set);
+    this._state.setExpansionKeys(set, 'ui');
   }
 
   // ── Selección ─────────────────────────────────────────────────────────
-  private readonly _selectedKeys = signal<Set<unknown>>(new Set());
+  private readonly _selectedKeys = this._state.selectionKeys;
   private readonly _selectionConfirmPending = signal<string | null>(null);
 
   readonly selectedCount = computed(() => this._selectedKeys().size);
@@ -3030,8 +3015,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const set = new Set(this._selectedKeys());
     if (set.has(key)) set.delete(key);
     else set.add(key);
-    this._selectedKeys.set(set);
-    this._emitSelection(set);
+    const changed = this._state.setSelectionKeys(set, 'ui');
+    if (changed) this._emitSelection(set);
   }
 
   /** Selecciona/deselecciona SOLO los datos filtrados activos. */
@@ -3042,12 +3027,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     } else {
       this.filteredData().forEach((r) => set.add(this.getRowKey(r)));
     }
-    this._selectedKeys.set(set);
-    this._emitSelection(set);
+    const changed = this._state.setSelectionKeys(set, 'ui');
+    if (changed) this._emitSelection(set);
   }
 
   clearSelection(): void {
-    this._selectedKeys.set(new Set());
+    const changed = this._state.setSelectionKeys(new Set(), 'api');
+    if (!changed) return;
     this._selectionConfirmPending.set(null);
     this.selectionChange.emit([]);
   }
@@ -3060,12 +3046,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   // ── Navegación ────────────────────────────────────────────────────────
   goToPage(page: number): void {
     const clamped = Math.max(1, Math.min(page, this.totalPages()));
+    const changed = this._state.setPage(clamped, 'ui');
+    if (!changed) return;
     if (this.serverSide()) {
-      this._emitServerState({ page: clamped });
+      this._emitServerState();
     } else if (this.useUrlState()) {
-      this._urlState.setParam(this.pageParam(), String(clamped));
-    } else {
-      this._internalPage.set(clamped);
+      this._urlAdapter.writePage(this.pageParam(), clamped);
     }
   }
 
@@ -3079,36 +3065,25 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       } else {
         entries.push({ key, dir: 'asc' });
       }
-      const val = entries.map((e) => `${e.key}:${e.dir}`).join(',') || null;
-      if (this.useUrlState()) {
-        this._urlState.setParam(this.multiSortParam(), val);
-      } else {
-        this._internalMultiSort.set(val ?? '');
-      }
+      const changed = this._state.setSortEntries(entries, 'ui');
+      if (!changed) return;
+      if (this.useUrlState()) this._urlAdapter.writeSortEntries(this.multiSortParam(), entries);
     } else if (this.multiSort()) {
       // Single click: replace sort / Click simple: reemplaza el orden
       const current = this._sortEntries().find((e) => e.key === key);
       const dir: 'asc' | 'desc' = current?.dir === 'asc' ? 'desc' : 'asc';
-      const val = `${key}:${dir}`;
-      if (this.useUrlState()) {
-        this._urlState.setParam(this.multiSortParam(), val);
-      } else {
-        this._internalMultiSort.set(val);
-      }
+      const entries = [{ key, dir }];
+      const changed = this._state.setSortEntries(entries, 'ui');
+      if (!changed) return;
+      if (this.useUrlState()) this._urlAdapter.writeSortEntries(this.multiSortParam(), entries);
     } else {
       const dir = this.sortKey() === key && this.sortDir() === 'asc' ? 'desc' : 'asc';
+      const changed = this._state.update({ sort: { key, dir }, page: 1 }, 'ui');
+      if (!changed) return;
       if (this.serverSide()) {
-        this._emitServerState({ sortKey: key, sortDir: dir, page: 1 });
+        this._emitServerState();
       } else if (this.useUrlState()) {
-        this._urlState.patchParams({
-          [this.sortParam()]: key,
-          [this.sortDirParam()]: dir,
-          [this.pageParam()]: '1',
-        });
-      } else {
-        this._internalSortKey.set(key);
-        this._internalSortDir.set(dir);
-        this._internalPage.set(1);
+        this._urlAdapter.writeSort(this._urlConfig(), key, dir);
       }
     }
   }
@@ -3120,25 +3095,23 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   onSearch(event: Event): void {
     const q = (event.target as HTMLInputElement).value;
+    const changed = this._state.update({ search: q, page: 1 }, 'ui');
+    if (!changed) return;
     this.searchChange.emit(q);
     if (this.serverSide()) {
-      this._emitServerState({ search: q, page: 1 });
+      this._emitServerState();
     } else if (this.useUrlState()) {
-      this._urlState.patchParams({ [this.searchParam()]: q || null, [this.pageParam()]: '1' });
-    } else {
-      this._internalSearch.set(q);
-      this._internalPage.set(1);
+      this._urlAdapter.writeSearch(this._urlConfig(), q);
     }
   }
 
   clearSearch(): void {
+    const changed = this._state.update({ search: '', page: 1 }, 'ui');
     if (this.serverSide()) {
-      this._emitServerState({ search: '', page: 1 });
+      this._emitServerState();
     } else if (this.useUrlState()) {
-      this._urlState.patchParams({ [this.searchParam()]: null, [this.pageParam()]: '1' });
-    } else {
-      this._internalSearch.set('');
-      this._internalPage.set(1);
+      if (!changed) return;
+      this._urlAdapter.clearSearch(this._urlConfig());
     }
   }
 
@@ -3147,13 +3120,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       value && typeof value === 'object' ? (value.target?.value ?? null) : value;
     const size = Number(normalizedValue);
     if (!Number.isFinite(size) || size <= 0) return;
-    this._dynamicPageSize.set(size);
+    const changed = this._state.update({ pageSize: size, page: 1 }, 'ui');
+    if (!changed) return;
     if (this.serverSide()) {
-      this._emitServerState({ pageSize: size, page: 1 });
+      this._emitServerState();
     } else if (this.useUrlState()) {
-      this._urlState.patchParams({ [this.pageParam()]: '1' });
-    } else {
-      this._internalPage.set(1);
+      this._urlAdapter.resetPage(this.pageParam());
     }
   }
 
@@ -3166,13 +3138,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     // paginatedData already clamps currentPage to totalPages automatically.
     // Los filtros de columna son locales — sin URL para evitar saltos de scroll.
     // paginatedData ya adapta currentPage a totalPages automáticamente.
-    this._writeAppliedFilter(colKey, {
+    const changed = this._writeAppliedFilter(colKey, {
       operator: 'and',
       constraints: [{ value }],
-      });
-    if (this.serverSide()) {
-      this._emitServerState({ page: 1 });
-    }
+    });
+    if (changed && this.serverSide()) this._emitServerState();
   }
 
   clearColumnFilters(): void {
@@ -3382,8 +3352,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   private _setColumnWidth(key: string, width: number): void {
-    this._columnWidths.update((current) => ({ ...current, [key]: width }));
-    this._emitLayoutChange();
+    const changed = this._state.setLayout(
+      {
+        ...this._state.layout(),
+        columnWidths: { ...this._columnWidths(), [key]: width },
+      },
+      'ui',
+    );
+    if (changed) this._emitLayoutChange();
   }
 
   private _stopColumnResize(): void {
@@ -3757,18 +3733,23 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._typedColumns().find((candidate) => candidate.key === key) ?? null;
   }
 
-  private _writeAppliedFilter(key: string, input: InternalAppliedColumnFilter): void {
+  private _writeAppliedFilter(key: string, input: InternalAppliedColumnFilter): boolean {
     const column = this._currentTypedColumn(key);
     const normalized = this._normalizeAppliedFilterInput(column, input);
-    this._appliedFilters.update((current) => {
-      if (normalized.constraints.length === 0) {
-        if (!(key in current)) return current;
-        const next = { ...current };
-        delete next[key];
-        return next;
-      }
-      return { ...current, [key]: normalized };
-    });
+    const current = this._appliedFilters();
+    let filters: Record<string, InternalAppliedColumnFilter>;
+    if (normalized.constraints.length === 0) {
+      if (!(key in current)) return false;
+      filters = { ...current };
+      delete filters[key];
+    } else {
+      filters = { ...current, [key]: normalized };
+    }
+    const previousFilters = this._state.filters();
+    const previousPage = this._state.page();
+    this._appliedFilters.update(() => filters);
+    if (this.serverSide()) this._state.setPage(1, 'api');
+    return previousFilters !== this._state.filters() || previousPage !== this._state.page();
   }
 
   private _appliedSingleFilterValue(key: string): unknown {
@@ -3799,7 +3780,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         constraints: [{ value }],
       });
     }
-    this._appliedFilters.set(applied);
+    this._state.setFilters(applied, 'api');
   }
 
   private _matchesAppliedColumnFilter(
@@ -4048,19 +4029,19 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._columnFilters()[key] ?? '';
   }
 
-  private _emitServerState(patch: Partial<NeuTableServerState>): void {
+  private _emitServerState(): void {
     const current: NeuTableServerState = {
       page: this.currentPage(),
       pageSize: this.effectivePageSize(),
       search: this.searchQuery(),
       sortKey: this.sortKey(),
       sortDir: this.sortDir(),
-      sortEntries: this._sortEntries(),
+      sortEntries: [...this._sortEntries()],
       columnFilters: this._columnFilters(),
       typedColumnFilters: this._typedColumnFiltersState(),
       localOnlyFilters: this._localOnlyFilters(),
     };
-    this.serverStateChange.emit({ ...current, ...patch });
+    this.serverStateChange.emit(current);
   }
   private _typedColumnFiltersState(): Record<string, NeuTableFilterState> {
     const result: Record<string, NeuTableFilterState> = {};

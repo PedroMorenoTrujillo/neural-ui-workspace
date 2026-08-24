@@ -1,0 +1,77 @@
+import { signal } from '@angular/core';
+import { describe, expect, it, vi } from 'vitest';
+import { NeuTableUrlStateAdapter } from './neu-table-url-state.adapter';
+
+const CONFIG = {
+  pageParam: 'page',
+  searchParam: 'q',
+  sortParam: 'sort',
+  sortDirParam: 'sortDir',
+  multiSortParam: 'msort',
+};
+
+function createAdapter(params: Record<string, string | null> = {}) {
+  const values = new Map<string, ReturnType<typeof signal<string | null>>>();
+  const service = {
+    getParam: vi.fn((key: string) => {
+      let value = values.get(key);
+      if (!value) {
+        value = signal(params[key] ?? null);
+        values.set(key, value);
+      }
+      return value;
+    }),
+    setParam: vi.fn(),
+    patchParams: vi.fn(),
+  };
+  return { adapter: new NeuTableUrlStateAdapter(service as any), service, values };
+}
+
+describe('NeuTableUrlStateAdapter', () => {
+  it('normalizes invalid URL values and caches parameter signals', () => {
+    const { adapter, service } = createAdapter({
+      page: '-1',
+      msort: ',name:unexpected',
+    });
+
+    expect(adapter.read(CONFIG)).toEqual({
+      page: 1,
+      search: '',
+      sort: null,
+      sortEntries: [{ key: 'name', dir: 'asc' }],
+    });
+    adapter.read(CONFIG);
+
+    expect(service.getParam).toHaveBeenCalledTimes(4);
+  });
+
+  it('writes empty multisort and search projections without retaining empty strings', () => {
+    const { adapter, service } = createAdapter();
+
+    adapter.writeSortEntries('msort', []);
+    adapter.writeSearch(CONFIG, '');
+
+    expect(service.setParam).toHaveBeenCalledWith('msort', null);
+    expect(service.patchParams).toHaveBeenCalledWith({ q: null, page: '1' });
+  });
+
+  it('writes page, sort, clear-search and reset-page projections', () => {
+    const { adapter, service } = createAdapter();
+
+    adapter.writePage('page', 3);
+    adapter.writeSortEntries('msort', [{ key: 'name', dir: 'desc' }]);
+    adapter.writeSort(CONFIG, 'name', 'desc');
+    adapter.clearSearch(CONFIG);
+    adapter.resetPage('page');
+
+    expect(service.setParam).toHaveBeenNthCalledWith(1, 'page', '3');
+    expect(service.setParam).toHaveBeenNthCalledWith(2, 'msort', 'name:desc');
+    expect(service.patchParams).toHaveBeenNthCalledWith(1, {
+      sort: 'name',
+      sortDir: 'desc',
+      page: '1',
+    });
+    expect(service.patchParams).toHaveBeenNthCalledWith(2, { q: null, page: '1' });
+    expect(service.patchParams).toHaveBeenNthCalledWith(3, { page: '1' });
+  });
+});

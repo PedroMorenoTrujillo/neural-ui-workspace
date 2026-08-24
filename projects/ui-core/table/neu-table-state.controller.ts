@@ -1,0 +1,488 @@
+import { computed, signal, type WritableSignal } from '@angular/core';
+import type { NeuTableFilterMatchMode, NeuTableLayout, NeuTableSortEntry } from './neu-table.types';
+
+export type InternalNeuTableStateOrigin =
+  | 'ui'
+  | 'api'
+  | 'input'
+  | 'url'
+  | 'controlled'
+  | 'persistence'
+  | 'server'
+  | 'column-lifecycle';
+
+export type InternalNeuTableStateKey =
+  | 'page'
+  | 'pageSize'
+  | 'search'
+  | 'sort'
+  | 'sortEntries'
+  | 'filters'
+  | 'selectionKeys'
+  | 'expansionKeys'
+  | 'layout';
+
+export type InternalAppliedFilterOperator = 'and' | 'or';
+
+export interface InternalAppliedFilterConstraint {
+  mode?: NeuTableFilterMatchMode;
+  value: unknown;
+  projectionValue?: unknown;
+}
+
+export interface InternalAppliedColumnFilter {
+  operator: InternalAppliedFilterOperator;
+  constraints: readonly InternalAppliedFilterConstraint[];
+}
+
+export interface InternalNeuTableSort {
+  key: string;
+  dir: 'asc' | 'desc';
+}
+
+export interface InternalNeuTableState<K = unknown> {
+  page: number;
+  pageSize: number;
+  search: string;
+  sort: InternalNeuTableSort | null;
+  sortEntries: readonly NeuTableSortEntry[];
+  filters: Readonly<Record<string, InternalAppliedColumnFilter>>;
+  selectionKeys: ReadonlySet<K>;
+  expansionKeys: ReadonlySet<K>;
+  layout: NeuTableLayout;
+}
+
+export interface InternalNeuTableStateChange<K = unknown> {
+  previous: InternalNeuTableState<K>;
+  current: InternalNeuTableState<K>;
+  changedKeys: readonly InternalNeuTableStateKey[];
+  origin: InternalNeuTableStateOrigin;
+  committed: boolean;
+}
+
+export type InternalNeuTableStateChangeListener<K = unknown> = (
+  change: InternalNeuTableStateChange<K>,
+) => void;
+
+const _DEFAULT_LAYOUT: NeuTableLayout = {
+  columnOrder: [],
+  hiddenColumns: [],
+  columnWidths: {},
+};
+
+/**
+ * Instance-local canonical owner for consumer-relevant Table state.
+ *
+ * The controller deliberately knows nothing about DOM, controls, rows, URL
+ * routing or server payloads. Those remain adapters/projections around this
+ * boundary. Controlled mode records change intent without mutating the
+ * authoritative snapshot; uncontrolled mode commits the same normalized intent.
+ */
+export class NeuTableStateController<K = unknown> {
+  private readonly _state = signal<InternalNeuTableState<K>>(
+    cloneState({
+      page: 1,
+      pageSize: 10,
+      search: '',
+      sort: null,
+      sortEntries: [],
+      filters: {},
+      selectionKeys: new Set<K>(),
+      expansionKeys: new Set<K>(),
+      layout: _DEFAULT_LAYOUT,
+    }),
+  );
+  private readonly _controlled = signal(false);
+  private readonly _sortState = computed(() => this._state().sort);
+  private readonly _sortEntriesState = computed(() => this._state().sortEntries);
+  private readonly _filtersState = computed(() => this._state().filters);
+  private readonly _selectionKeysState = computed(() => this._state().selectionKeys);
+  private readonly _expansionKeysState = computed(() => this._state().expansionKeys);
+  private readonly _layoutState = computed(() => this._state().layout);
+
+  readonly controlled = this._controlled.asReadonly();
+  readonly page = computed(() => this._state().page);
+  readonly pageSize = computed(() => this._state().pageSize);
+  readonly search = computed(() => this._state().search);
+  readonly sort = computed(() => {
+    const sort = this._sortState();
+    return sort ? { ...sort } : null;
+  });
+  readonly sortEntries = computed(() => this._sortEntriesState().map((entry) => ({ ...entry })));
+  readonly filters = computed(() => cloneFilters(this._filtersState()));
+  readonly selectionKeys = computed<ReadonlySet<K>>(() => new Set(this._selectionKeysState()));
+  readonly expansionKeys = computed<ReadonlySet<K>>(() => new Set(this._expansionKeysState()));
+  readonly layout = computed(() => cloneLayout(this._layoutState()));
+
+  constructor(private readonly _onChange?: InternalNeuTableStateChangeListener<K>) {}
+
+  snapshot(): InternalNeuTableState<K> {
+    return cloneState(this._state());
+  }
+
+  createFiltersFacade(
+    origin: InternalNeuTableStateOrigin = 'api',
+  ): WritableSignal<Record<string, InternalAppliedColumnFilter>> {
+    const projection = computed<Record<string, InternalAppliedColumnFilter>>(
+      () => this.filters() as Record<string, InternalAppliedColumnFilter>,
+    );
+    const readonlyProjection = computed(() => projection());
+    const facade = projection as WritableSignal<Record<string, InternalAppliedColumnFilter>>;
+    facade.set = (filters) => {
+      this.setFilters(filters, origin);
+    };
+    facade.update = (update) => facade.set(update(projection()));
+    facade.asReadonly = () => readonlyProjection;
+    return facade;
+  }
+
+  createColumnOrderFacade(origin: InternalNeuTableStateOrigin = 'api'): WritableSignal<string[]> {
+    const projection = computed<string[]>(() => [...this.layout().columnOrder]);
+    const readonlyProjection = computed(() => projection());
+    const facade = projection as WritableSignal<string[]>;
+    facade.set = (columnOrder) => {
+      this.setLayout({ ...this.layout(), columnOrder }, origin);
+    };
+    facade.update = (update) => facade.set(update(projection()));
+    facade.asReadonly = () => readonlyProjection;
+    return facade;
+  }
+
+  setControlledState(state: InternalNeuTableState<K>): InternalNeuTableStateChange<K> | null {
+    this._controlled.set(true);
+    return this._commit(state, 'controlled');
+  }
+
+  releaseControlledState(): void {
+    this._controlled.set(false);
+  }
+
+  update(
+    patch: Partial<InternalNeuTableState<K>>,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    const previous = this._state();
+    const proposed = normalizeUpdate(previous, patch);
+    const changedKeys = stateChangedKeys(previous, proposed);
+    if (changedKeys.length === 0) return null;
+
+    const controlledProposal = this._controlled() && origin !== 'controlled';
+    const change: InternalNeuTableStateChange<K> = {
+      previous: cloneState(previous),
+      current: cloneState(proposed),
+      changedKeys,
+      origin,
+      committed: !controlledProposal,
+    };
+    if (!controlledProposal) this._state.set(proposed);
+    this._onChange?.(change);
+    return change;
+  }
+
+  setPage(
+    page: number,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ page }, origin);
+  }
+
+  setPageSize(
+    pageSize: number,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ pageSize }, origin);
+  }
+
+  setSearch(
+    search: string,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ search }, origin);
+  }
+
+  setSort(
+    sort: InternalNeuTableSort | null,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ sort }, origin);
+  }
+
+  setSortEntries(
+    sortEntries: readonly NeuTableSortEntry[],
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ sortEntries }, origin);
+  }
+
+  setFilters(
+    filters: Readonly<Record<string, InternalAppliedColumnFilter>>,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ filters }, origin);
+  }
+
+  setSelectionKeys(
+    selectionKeys: ReadonlySet<K>,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ selectionKeys }, origin);
+  }
+
+  setExpansionKeys(
+    expansionKeys: ReadonlySet<K>,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ expansionKeys }, origin);
+  }
+
+  setLayout(
+    layout: NeuTableLayout,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ layout }, origin);
+  }
+
+  private _commit(
+    state: InternalNeuTableState<K>,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    const previous = this._state();
+    const current = normalizeState(state);
+    const changedKeys = stateChangedKeys(previous, current);
+    if (changedKeys.length === 0) return null;
+    this._state.set(current);
+    const change: InternalNeuTableStateChange<K> = {
+      previous: cloneState(previous),
+      current: cloneState(current),
+      changedKeys,
+      origin,
+      committed: true,
+    };
+    // Controlled replacement is an authoritative input, not a change intent.
+    // Returning the record keeps internal observability without writing back
+    // through the listener that a future public stateChange output will use.
+    return change;
+  }
+}
+
+function normalizeUpdate<K>(
+  previous: InternalNeuTableState<K>,
+  patch: Partial<InternalNeuTableState<K>>,
+): InternalNeuTableState<K> {
+  const owns = (key: keyof InternalNeuTableState<K>) =>
+    Object.prototype.hasOwnProperty.call(patch, key);
+  return {
+    page: owns('page') ? normalizePositiveInteger(patch.page, 1) : previous.page,
+    pageSize: owns('pageSize') ? normalizePositiveInteger(patch.pageSize, 1) : previous.pageSize,
+    search: owns('search') ? String(patch.search ?? '') : previous.search,
+    sort: owns('sort')
+      ? patch.sort
+        ? { key: String(patch.sort.key), dir: patch.sort.dir === 'desc' ? 'desc' : 'asc' }
+        : null
+      : previous.sort,
+    sortEntries: owns('sortEntries')
+      ? (patch.sortEntries ?? []).map((entry) => ({
+          key: String(entry.key),
+          dir: entry.dir === 'desc' ? 'desc' : 'asc',
+        }))
+      : previous.sortEntries,
+    filters: owns('filters') ? cloneFilters(patch.filters ?? {}) : previous.filters,
+    selectionKeys: owns('selectionKeys')
+      ? new Set(patch.selectionKeys ?? [])
+      : previous.selectionKeys,
+    expansionKeys: owns('expansionKeys')
+      ? new Set(patch.expansionKeys ?? [])
+      : previous.expansionKeys,
+    layout: owns('layout') ? cloneLayout(patch.layout ?? _DEFAULT_LAYOUT) : previous.layout,
+  };
+}
+
+function normalizeState<K>(state: InternalNeuTableState<K>): InternalNeuTableState<K> {
+  return {
+    page: normalizePositiveInteger(state.page, 1),
+    pageSize: normalizePositiveInteger(state.pageSize, 1),
+    search: String(state.search ?? ''),
+    sort: state.sort
+      ? { key: String(state.sort.key), dir: state.sort.dir === 'desc' ? 'desc' : 'asc' }
+      : null,
+    sortEntries: state.sortEntries.map((entry) => ({
+      key: String(entry.key),
+      dir: entry.dir === 'desc' ? 'desc' : 'asc',
+    })),
+    filters: cloneFilters(state.filters),
+    selectionKeys: new Set(state.selectionKeys),
+    expansionKeys: new Set(state.expansionKeys),
+    layout: cloneLayout(state.layout),
+  };
+}
+
+function normalizePositiveInteger(value: number | undefined, fallback: number): number {
+  return Number.isFinite(value) ? Math.max(1, Math.trunc(value!)) : fallback;
+}
+
+function cloneState<K>(state: InternalNeuTableState<K>): InternalNeuTableState<K> {
+  return {
+    page: state.page,
+    pageSize: state.pageSize,
+    search: state.search,
+    sort: state.sort ? { ...state.sort } : null,
+    sortEntries: state.sortEntries.map((entry) => ({ ...entry })),
+    filters: cloneFilters(state.filters),
+    selectionKeys: new Set(state.selectionKeys),
+    expansionKeys: new Set(state.expansionKeys),
+    layout: cloneLayout(state.layout),
+  };
+}
+
+function cloneFilters(
+  filters: Readonly<Record<string, InternalAppliedColumnFilter>>,
+): Record<string, InternalAppliedColumnFilter> {
+  return Object.fromEntries(
+    Object.entries(filters).map(([key, filter]) => [
+      key,
+      {
+        operator: filter.operator,
+        constraints: filter.constraints.map((constraint) => ({
+          ...constraint,
+          value: cloneFilterValue(constraint.value),
+          ...(Object.prototype.hasOwnProperty.call(constraint, 'projectionValue')
+            ? { projectionValue: constraint.projectionValue }
+            : {}),
+        })),
+      },
+    ]),
+  );
+}
+
+function cloneFilterValue(value: unknown): unknown {
+  if (value instanceof Date) return new Date(value.getTime());
+  if (Array.isArray(value)) return value.map((entry) => cloneFilterValue(entry));
+  if (isRangeRecord(value)) {
+    return { from: cloneFilterValue(value['from']), to: cloneFilterValue(value['to']) };
+  }
+  if (isDatePointRecord(value)) {
+    return { precision: value['precision'], value: value['value'] };
+  }
+  return value;
+}
+
+function cloneLayout(layout: NeuTableLayout): NeuTableLayout {
+  return {
+    columnOrder: [...(layout.columnOrder ?? [])],
+    hiddenColumns: [...(layout.hiddenColumns ?? [])],
+    columnWidths: { ...(layout.columnWidths ?? {}) },
+  };
+}
+
+function stateChangedKeys<K>(
+  previous: InternalNeuTableState<K>,
+  current: InternalNeuTableState<K>,
+): InternalNeuTableStateKey[] {
+  const changed: InternalNeuTableStateKey[] = [];
+  if (previous.page !== current.page) changed.push('page');
+  if (previous.pageSize !== current.pageSize) changed.push('pageSize');
+  if (previous.search !== current.search) changed.push('search');
+  if (!semanticEqual(previous.sort, current.sort)) changed.push('sort');
+  if (!semanticEqual(previous.sortEntries, current.sortEntries)) changed.push('sortEntries');
+  if (!filtersEqual(previous.filters, current.filters)) changed.push('filters');
+  if (!setEqual(previous.selectionKeys, current.selectionKeys)) changed.push('selectionKeys');
+  if (!setEqual(previous.expansionKeys, current.expansionKeys)) changed.push('expansionKeys');
+  if (!semanticEqual(previous.layout, current.layout)) changed.push('layout');
+  return changed;
+}
+
+function setEqual<T>(left: ReadonlySet<T>, right: ReadonlySet<T>): boolean {
+  if (left.size !== right.size) return false;
+  for (const value of left) if (!right.has(value)) return false;
+  return true;
+}
+
+function filtersEqual(
+  left: Readonly<Record<string, InternalAppliedColumnFilter>>,
+  right: Readonly<Record<string, InternalAppliedColumnFilter>>,
+): boolean {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  if (leftKeys.length !== rightKeys.length) return false;
+  return leftKeys.every((key) => {
+    const leftFilter = left[key];
+    const rightFilter = right[key];
+    if (!rightFilter || leftFilter.operator !== rightFilter.operator) return false;
+    if (leftFilter.constraints.length !== rightFilter.constraints.length) return false;
+    return leftFilter.constraints.every((constraint, index) => {
+      const candidate = rightFilter.constraints[index];
+      return (
+        constraint.mode === candidate.mode &&
+        filterValueEqual(constraint.value, candidate.value) &&
+        filterValueEqual(constraint.projectionValue, candidate.projectionValue)
+      );
+    });
+  });
+}
+
+function filterValueEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true;
+  if (left instanceof Date && right instanceof Date) return left.getTime() === right.getTime();
+  if (Array.isArray(left) && Array.isArray(right)) {
+    return (
+      left.length === right.length &&
+      left.every((value, index) => filterValueEqual(value, right[index]))
+    );
+  }
+  if (isRangeRecord(left) && isRangeRecord(right)) {
+    return (
+      filterValueEqual(left['from'], right['from']) && filterValueEqual(left['to'], right['to'])
+    );
+  }
+  if (isDatePointRecord(left) && isDatePointRecord(right)) {
+    return left['precision'] === right['precision'] && left['value'] === right['value'];
+  }
+  return false;
+}
+
+function isRangeRecord(value: unknown): value is Record<'from' | 'to', unknown> {
+  return (
+    isPlainRecord(value) &&
+    Object.keys(value).every((key) => key === 'from' || key === 'to') &&
+    Object.prototype.hasOwnProperty.call(value, 'from') &&
+    Object.prototype.hasOwnProperty.call(value, 'to')
+  );
+}
+
+function isDatePointRecord(value: unknown): value is Record<'precision' | 'value', unknown> {
+  return (
+    isPlainRecord(value) &&
+    Object.keys(value).every((key) => key === 'precision' || key === 'value') &&
+    Object.prototype.hasOwnProperty.call(value, 'precision') &&
+    Object.prototype.hasOwnProperty.call(value, 'value')
+  );
+}
+
+function semanticEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true;
+  if (left instanceof Date && right instanceof Date) return left.getTime() === right.getTime();
+  if (Array.isArray(left) && Array.isArray(right)) {
+    return (
+      left.length === right.length &&
+      left.every((value, index) => semanticEqual(value, right[index]))
+    );
+  }
+  if (isPlainRecord(left) && isPlainRecord(right)) {
+    const leftKeys = Object.keys(left);
+    const rightKeys = Object.keys(right);
+    return (
+      leftKeys.length === rightKeys.length &&
+      leftKeys.every(
+        (key) =>
+          Object.prototype.hasOwnProperty.call(right, key) && semanticEqual(left[key], right[key]),
+      )
+    );
+  }
+  return false;
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object') return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
