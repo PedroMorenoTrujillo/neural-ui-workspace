@@ -1,4 +1,9 @@
-import { NeuTableAdvancedFilterController } from './neu-table-advanced-filter.controller';
+import {
+  NeuTableAdvancedFilterController,
+  isNeuTableDateRange,
+  neuTableDateFilterValue,
+  neuTableInstantFilterValue,
+} from './neu-table-advanced-filter.controller';
 import type { NeuTableColumn } from './neu-table.types';
 
 interface FilterRow {
@@ -46,6 +51,13 @@ describe('NeuTableAdvancedFilterController', () => {
     expect(controller.hasMultipleRules()).toBe(false);
     expect(controller.modeControl.value).toBeNull();
     expect(controller.textControl.value).toBe('');
+    expect(controller.numberControl.value).toBeNull();
+    expect(controller.numberFromControl.value).toBeNull();
+    expect(controller.numberToControl.value).toBeNull();
+    expect(controller.instantFromControl.value).toBe('');
+    expect(controller.instantToControl.value).toBe('');
+    expect(controller.booleanControl.value).toBeNull();
+    expect(controller.dateControl.value).toBeNull();
     expect(controller.buildApplyResult()).toBeNull();
 
     controller.destroy();
@@ -66,7 +78,10 @@ describe('NeuTableAdvancedFilterController', () => {
     controller.textControl.setValue('Be');
     expect(controller.buildApplyResult()).toEqual({
       key: 'name',
-      constraint: { mode: 'startsWith', value: 'Be' },
+      filter: {
+        operator: 'and',
+        constraints: [{ mode: 'startsWith', value: 'Be' }],
+      },
     });
     expect(applied).toEqual({ constraints: [{ mode: 'startsWith', value: 'Al' }] });
 
@@ -80,7 +95,10 @@ describe('NeuTableAdvancedFilterController', () => {
       constraints: [{ mode: 'gte', value: 10 }],
     });
     expect(controller.numberControl.value).toBe(10);
-    expect(controller.buildApplyResult()?.constraint).toEqual({ mode: 'gte', value: 10 });
+    expect(controller.buildApplyResult()?.filter.constraints[0]).toEqual({
+      mode: 'gte',
+      value: 10,
+    });
 
     controller.initialize(numberColumn, {
       constraints: [{ mode: 'between', value: { from: 5, to: 15 } }],
@@ -92,7 +110,7 @@ describe('NeuTableAdvancedFilterController', () => {
     expect(controller.buildApplyResult()).toBeNull();
     controller.numberToControl.setValue(25);
     expect(controller.valid()).toBe(true);
-    expect(controller.buildApplyResult()?.constraint).toEqual({
+    expect(controller.buildApplyResult()?.filter.constraints[0]).toEqual({
       mode: 'between',
       value: { from: 20, to: 25 },
     });
@@ -108,7 +126,7 @@ describe('NeuTableAdvancedFilterController', () => {
     });
     expect(controller.dateControl.value).toBe('2026-08-20');
     controller.dateControl.setValue('2026-08-21');
-    expect(controller.buildApplyResult()?.constraint).toEqual({
+    expect(controller.buildApplyResult()?.filter.constraints[0]).toEqual({
       mode: 'is',
       value: '2026-08-21',
     });
@@ -124,7 +142,7 @@ describe('NeuTableAdvancedFilterController', () => {
       start: new Date(2026, 7, 21),
       end: new Date(2026, 7, 23),
     });
-    expect(controller.buildApplyResult()?.constraint).toEqual({
+    expect(controller.buildApplyResult()?.filter.constraints[0]).toEqual({
       mode: 'between',
       value: { from: '2026-08-21', to: '2026-08-23' },
     });
@@ -137,7 +155,7 @@ describe('NeuTableAdvancedFilterController', () => {
 
     controller.initialize(instantColumn, { constraints: [] });
     controller.dateControl.setValue('2026-08-20T23:30');
-    expect(controller.buildApplyResult()?.constraint).toEqual({
+    expect(controller.buildApplyResult()?.filter.constraints[0]).toEqual({
       mode: 'is',
       value: new Date('2026-08-20T23:30').toISOString(),
     });
@@ -149,11 +167,33 @@ describe('NeuTableAdvancedFilterController', () => {
     expect(controller.buildApplyResult()).toBeNull();
     controller.instantFromControl.setValue('');
     expect(controller.valid()).toBe(true);
-    expect(controller.buildApplyResult()?.constraint).toEqual({
+    expect(controller.buildApplyResult()?.filter.constraints[0]).toEqual({
       mode: 'between',
       value: { from: null, to: new Date('2026-08-21T12:00').toISOString() },
     });
 
+    controller.destroy();
+  });
+
+  it('covers invalid temporal adapters and both structural date-range boundaries', () => {
+    const instant = new Date('2026-08-20T10:30:00.000Z');
+    expect(neuTableDateFilterValue(instant, 'instant')).toBe(instant.toISOString());
+    expect(neuTableInstantFilterValue('not-a-date')).toBeNull();
+    expect(isNeuTableDateRange({ end: null })).toBe(true);
+    expect(isNeuTableDateRange({ other: null })).toBe(false);
+
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(instantColumn, {
+      constraints: [
+        {
+          mode: 'is',
+          value: { precision: 'instant', value: '2026-08-20T10:30:00.000Z' },
+        },
+      ],
+    });
+    expect(controller.dateControl.value).toMatch(/^2026-08-20T\d{2}:30$/);
+    controller.dateControl.setValue(new Date('invalid'));
+    expect(controller.value()).toBeNull();
     controller.destroy();
   });
 
@@ -168,7 +208,7 @@ describe('NeuTableAdvancedFilterController', () => {
     expect(controller.booleanControl.value).toBe(false);
     expect(controller.buildApplyResult()).toEqual({
       key: 'active',
-      constraint: { value: false },
+      filter: { operator: 'and', constraints: [{ value: false }] },
     });
 
     controller.destroy();
@@ -206,7 +246,10 @@ describe('NeuTableAdvancedFilterController', () => {
     controller.clear();
     expect(controller.value()).toBeNull();
     expect(controller.textControl.value).toBe('');
-    expect(controller.buildApplyResult()).toEqual({ key: 'name', constraint: null });
+    expect(controller.buildApplyResult()).toEqual({
+      key: 'name',
+      filter: { operator: 'and', constraints: [] },
+    });
 
     controller.destroy();
   });
@@ -227,9 +270,10 @@ describe('NeuTableAdvancedFilterController', () => {
     controller.destroy();
   });
 
-  it('guards multiple applied rules as read-only', () => {
+  it('initializes and edits multiple applied rules with their operator intact', () => {
     const controller = new NeuTableAdvancedFilterController<FilterRow>();
     controller.initialize(textColumn, {
+      operator: 'or',
       constraints: [
         { mode: 'startsWith', value: 'Al' },
         { mode: 'endsWith', value: 'ta' },
@@ -237,9 +281,171 @@ describe('NeuTableAdvancedFilterController', () => {
     });
 
     expect(controller.hasMultipleRules()).toBe(true);
-    expect(controller.value()).toBeNull();
-    expect(controller.buildApplyResult()).toBeNull();
+    expect(controller.operator()).toBe('or');
+    expect(controller.rules().map((rule) => rule.value())).toEqual(['Al', 'ta']);
+    expect(controller.buildApplyResult()?.filter).toEqual({
+      operator: 'or',
+      constraints: [
+        { mode: 'startsWith', value: 'Al' },
+        { mode: 'endsWith', value: 'ta' },
+      ],
+    });
 
+    controller.destroy();
+  });
+
+  it('creates one empty rule for zero constraints and appends independent rules with stable ids', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(textColumn, { constraints: [] });
+    const first = controller.rules()[0];
+    expect(controller.rules()).toHaveLength(1);
+    expect(first.mode()).toBe('contains');
+    expect(first.value()).toBeNull();
+
+    const secondId = controller.addRule();
+    const second = controller.rules()[1];
+    expect(secondId).toBe(second.id);
+    expect(second.id).not.toBe(first.id);
+    first.textControl.setValue('Al');
+    second.modeControl.setValue('endsWith');
+    second.textControl.setValue('ta');
+    controller.operatorControl.setValue('or');
+
+    expect(controller.buildApplyResult()?.filter).toEqual({
+      operator: 'or',
+      constraints: [
+        { mode: 'contains', value: 'Al' },
+        { mode: 'endsWith', value: 'ta' },
+      ],
+    });
+    expect(controller.rules().map((rule) => rule.id)).toEqual([first.id, second.id]);
+    controller.destroy();
+  });
+
+  it('removes first, middle, and last rules without re-keying survivors', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(textColumn, {
+      operator: 'and',
+      constraints: [
+        { mode: 'contains', value: 'one' },
+        { mode: 'contains', value: 'two' },
+        { mode: 'contains', value: 'three' },
+        { mode: 'contains', value: 'four' },
+      ],
+    });
+    const [first, second, third, fourth] = controller.rules();
+
+    expect(controller.removeRule(second.id)).toBe(true);
+    expect(controller.rules().map((rule) => rule.id)).toEqual([first.id, third.id, fourth.id]);
+    expect(controller.removeRule(first.id)).toBe(true);
+    expect(controller.rules().map((rule) => rule.id)).toEqual([third.id, fourth.id]);
+    expect(controller.removeRule(fourth.id)).toBe(true);
+    expect(controller.rules().map((rule) => rule.id)).toEqual([third.id]);
+    expect(controller.removeRule(third.id)).toBe(true);
+    expect(controller.rules()).toHaveLength(1);
+    expect(controller.rules()[0].id).not.toBe(third.id);
+    expect(controller.rules()[0].value()).toBeNull();
+    controller.destroy();
+  });
+
+  it('omits empty rules, normalizes a single constraint to AND, and blocks all on one invalid rule', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(numberColumn, { operator: 'or', constraints: [] });
+    controller.numberControl.setValue(10);
+    controller.addRule();
+    controller.operatorControl.setValue('or');
+    expect(controller.buildApplyResult()?.filter).toEqual({
+      operator: 'and',
+      constraints: [{ mode: 'equals', value: 10 }],
+    });
+
+    const invalidRule = controller.rules()[1];
+    invalidRule.modeControl.setValue('between');
+    invalidRule.numberFromControl.setValue(20);
+    invalidRule.numberToControl.setValue(5);
+    expect(invalidRule.valid()).toBe(false);
+    expect(controller.valid()).toBe(false);
+    expect(controller.buildApplyResult()).toBeNull();
+    controller.destroy();
+  });
+
+  it('keeps boolean truthfully single-rule and rejects Add rule', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(booleanColumn, { constraints: [{ value: true }] });
+    expect(controller.canAddRule()).toBe(false);
+    expect(controller.addRule()).toBeNull();
+    expect(controller.rules()).toHaveLength(1);
+    controller.booleanControl.setValue('invalid');
+    expect(controller.value()).toBeNull();
+    controller.destroy();
+  });
+
+  it('keeps server-side single-rule drafts editable without enabling Add rule', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(
+      textColumn,
+      { constraints: [{ mode: 'contains', value: 'Alpha' }] },
+      { allowMultipleRules: false },
+    );
+
+    expect(controller.multipleRulesEnabled()).toBe(false);
+    expect(controller.readOnly()).toBe(false);
+    expect(controller.canAddRule()).toBe(false);
+    expect(controller.addRule()).toBeNull();
+    controller.textControl.setValue('Beta');
+    expect(controller.buildApplyResult()?.filter).toEqual({
+      operator: 'and',
+      constraints: [{ mode: 'contains', value: 'Beta' }],
+    });
+
+    controller.destroy();
+  });
+
+  it('protects existing server-side multiple rules from destructive draft operations', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    const applied = {
+      operator: 'or' as const,
+      constraints: [
+        { mode: 'startsWith' as const, value: 'Al' },
+        { mode: 'endsWith' as const, value: 'ta' },
+      ],
+    };
+    controller.initialize(textColumn, applied, { allowMultipleRules: false });
+    const firstId = controller.rules()[0].id;
+
+    expect(controller.readOnly()).toBe(true);
+    expect(controller.rules().map((rule) => rule.value())).toEqual(['Al', 'ta']);
+    expect(controller.addRule()).toBeNull();
+    expect(controller.removeRule(firstId)).toBe(false);
+    controller.clear();
+    controller.operatorControl.setValue('and');
+    expect(controller.operator()).toBe('or');
+    expect(controller.rules().map((rule) => rule.value())).toEqual(['Al', 'ta']);
+    expect(controller.buildApplyResult()).toBeNull();
+    expect(applied.constraints).toEqual([
+      { mode: 'startsWith', value: 'Al' },
+      { mode: 'endsWith', value: 'ta' },
+    ]);
+
+    controller.destroy();
+  });
+
+  it('tears down removed and cleared rule subscriptions across repeated cycles', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(textColumn, { constraints: [] });
+
+    for (let index = 0; index < 5; index++) {
+      const id = controller.addRule()!;
+      const removed = controller.rules().find((rule) => rule.id === id)!;
+      expect(controller.removeRule(id)).toBe(true);
+      removed.textControl.setValue(`stale-${index}`);
+      expect(controller.rules().some((rule) => rule.value() === `stale-${index}`)).toBe(false);
+    }
+
+    const beforeClear = controller.rules()[0];
+    controller.clear();
+    beforeClear.textControl.setValue('stale-clear');
+    expect(controller.rules()[0].value()).toBeNull();
     controller.destroy();
   });
 

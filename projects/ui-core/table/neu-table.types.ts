@@ -108,6 +108,9 @@ export interface NeuTableAdvancedFilterTexts {
   openFilter: string;
   filterTitle: string;
   closeFilter: string;
+  operator?: string;
+  matchAll?: string;
+  matchAny?: string;
   matchMode: string;
   value: string;
   from: string;
@@ -119,6 +122,11 @@ export interface NeuTableAdvancedFilterTexts {
   cancel: string;
   apply: string;
   filterActive: string;
+  addRule?: string;
+  removeRule?: string;
+  rule?: string;
+  ruleActive?: string;
+  rulesActive?: string;
   multipleRulesActive: string;
   contains: string;
   startsWith: string;

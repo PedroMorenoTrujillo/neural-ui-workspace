@@ -11,6 +11,7 @@ import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
 import {
   NeuTableAction,
   NeuTableActionEvent,
+  NeuTableAdvancedFilterTexts,
   NeuTableColumn,
   NeuTableCustomFilterConfig,
   NeuTableFilterMatchMode,
@@ -27,6 +28,51 @@ import type { NeuSelectOption } from '@neural-ui/core/select';
 import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
 import { By } from '@angular/platform-browser';
 import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
+
+const E3_ADVANCED_FILTER_TEXTS = {
+  openFilter: 'Open filter for {column}',
+  filterTitle: 'Filter {column}',
+  closeFilter: 'Close filter for {column}',
+  matchMode: 'Match mode',
+  value: 'Value',
+  from: 'From',
+  to: 'To',
+  all: 'All',
+  yes: 'Yes',
+  no: 'No',
+  clear: 'Clear',
+  cancel: 'Cancel',
+  apply: 'Apply',
+  filterActive: 'Filter active',
+  multipleRulesActive: 'Multiple rules are active',
+  contains: 'Contains',
+  startsWith: 'Starts with',
+  endsWith: 'Ends with',
+  equals: 'Is',
+  notEquals: 'Is not',
+  notContains: 'Does not contain',
+  lt: 'Less than',
+  lte: 'At most',
+  gt: 'Greater than',
+  gte: 'At least',
+  between: 'Between',
+  is: 'Is',
+  isNot: 'Is not',
+  before: 'Before',
+  after: 'After',
+} satisfies NeuTableAdvancedFilterTexts;
+
+@Component({
+  selector: 'neu-table-advanced-filter-texts-compatibility-host',
+  standalone: true,
+  imports: [NeuTableComponent],
+  template: '<neu-table [advancedFilterTexts]="overrides" />',
+})
+class AdvancedFilterTextsCompatibilityHostComponent {
+  readonly overrides = {
+    matchAll: 'All conditions',
+  } satisfies Partial<NeuTableAdvancedFilterTexts>;
+}
 
 interface Person {
   id: number;
@@ -88,6 +134,22 @@ interface TestAppliedColumnFilter {
   constraints: readonly TestAppliedFilterConstraint[];
 }
 
+interface TestAdvancedFilterDraftRule {
+  id: string;
+  mode: WritableSignal<NeuTableFilterMatchMode | null>;
+  value: WritableSignal<unknown>;
+  valid: WritableSignal<boolean>;
+  modeControl: FormControl<unknown>;
+  textControl: FormControl<string>;
+  numberControl: FormControl<number | null>;
+  numberFromControl: FormControl<number | null>;
+  numberToControl: FormControl<number | null>;
+  instantFromControl: FormControl<string>;
+  instantToControl: FormControl<string>;
+  booleanControl: FormControl<unknown>;
+  dateControl: FormControl<unknown>;
+}
+
 interface InternalTableFilterHarness<T extends object = Record<string, unknown>> {
   _appliedFilters: WritableSignal<Record<string, TestAppliedColumnFilter>>;
   _writeAppliedFilter(key: string, filter: TestAppliedColumnFilter): void;
@@ -108,6 +170,11 @@ interface InternalTableFilterHarness<T extends object = Record<string, unknown>>
   _filterDraftValue: WritableSignal<unknown>;
   _filterDraftValid: WritableSignal<boolean>;
   _filterDraftHasMultipleRules: WritableSignal<boolean>;
+  _filterDraftCanAddRule: () => boolean;
+  _filterDraftReadOnly: () => boolean;
+  _filterDraftOperator: WritableSignal<'and' | 'or'>;
+  _filterDraftRules: WritableSignal<readonly TestAdvancedFilterDraftRule[]>;
+  _filterOverlayOperatorControl: FormControl<'and' | 'or'>;
   _filterOverlayModeControl: FormControl<unknown>;
   _filterOverlayTextControl: FormControl<string>;
   _filterOverlayNumberControl: FormControl<number | null>;
@@ -126,7 +193,11 @@ interface InternalTableFilterHarness<T extends object = Record<string, unknown>>
   _filterOverlayDatePrecision(column: NeuTableColumn<T>): 'date-only' | 'instant';
   _filterOverlayModeOptions(column: NeuTableColumn<T>): readonly NeuSelectOption[];
   _filterOverlayOptions(column: NeuTableColumn<T>): readonly unknown[];
+  _filterOverlayRuleCount(key: string): number;
+  _hasMultipleAppliedRules(key: string): boolean;
   _clearFilterDraft(): void;
+  _addFilterDraftRule(): void;
+  _removeFilterDraftRule(id: string): void;
   _applyFilterDraft(): void;
   _closeFilterOverlay(restoreFocus?: boolean): void;
   _onFilterOverlayAttached(key: string): void;
@@ -249,6 +320,20 @@ const MANY_ROWS = Array.from({ length: 15 }, (_, i) => ({
 function mkProviders() {
   return [provideRouter([]), provideZonelessChangeDetection(), provideIcons({ lucidePencil })];
 }
+
+describe('NeuTableAdvancedFilterTexts compatibility', () => {
+  it('accepts an E3-complete object and partial E4 input overrides', async () => {
+    await TestBed.configureTestingModule({
+      imports: [AdvancedFilterTextsCompatibilityHostComponent],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(AdvancedFilterTextsCompatibilityHostComponent);
+    fixture.detectChanges();
+
+    expect(E3_ADVANCED_FILTER_TEXTS.matchMode).toBe('Match mode');
+    expect(fixture.componentInstance.overrides.matchAll).toBe('All conditions');
+  });
+});
 
 describe('NeuTableComponent', () => {
   beforeEach(async () => {
@@ -6658,6 +6743,9 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     table.serverStateChange.subscribe((event) => events.push(event));
 
     await open(fixture, 'Name');
+    expect(internal._filterDraftCanAddRule()).toBe(false);
+    expect(document.querySelector('[data-neu-table-filter-add-rule]')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay-operator')).toBeNull();
     internal._filterOverlayTextControl.setValue('Beta');
     internal._clearFilterDraft();
     internal._filterOverlayTextControl.setValue('Beta');
@@ -6834,15 +6922,412 @@ describe('NeuTableComponent functional advanced filter menu', () => {
 
     await open(fixture, 'Name');
     expect(internal._filterDraftHasMultipleRules()).toBe(true);
-    expect(document.querySelector('.neu-table__filter-overlay-summary')?.textContent).toContain(
-      'Multiple rules are active',
-    );
-    expect(document.querySelector('.neu-table__filter-overlay-mode')).toBeNull();
-    internal._applyFilterDraft();
-    expect(internal._appliedFilters()['name']).toEqual(applied);
+    expect(internal._filterDraftOperator()).toBe('or');
+    expect(document.querySelectorAll('.neu-table__filter-overlay-rule')).toHaveLength(2);
+    expect(document.querySelector('.neu-table__filter-overlay-operator')).toBeTruthy();
+    expect(document.querySelectorAll('.neu-table__filter-overlay-mode')).toHaveLength(2);
+    internal._filterDraftRules()[0].textControl.setValue('Changed');
     document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
     await settle(fixture);
     expect(internal._appliedFilters()['name']).toEqual(applied);
+  });
+
+  it('applies two text rules atomically with AND and exposes an active count without lying inline', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    const update = vi.spyOn(internal._appliedFilters, 'update');
+    await open(fixture, 'Name');
+
+    internal._filterOverlayModeControl.setValue('startsWith');
+    internal._filterOverlayTextControl.setValue('A');
+    internal._addFilterDraftRule();
+    await settle(fixture);
+    const second = internal._filterDraftRules()[1];
+    second.modeControl.setValue('notContains');
+    second.textControl.setValue('Beta');
+    internal._applyFilterDraft();
+    await settle(fixture);
+
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(internal._appliedFilters()['name']).toEqual({
+      operator: 'and',
+      constraints: [
+        { mode: 'startsWith', value: 'A' },
+        { mode: 'notContains', value: 'Beta' },
+      ],
+    });
+    expect(table.filteredData().map((row) => row.name)).toEqual(['Alpha']);
+    expect(table.getColumnFilterValue('name')).toBe('');
+    expect(internal._typedColumnFiltersState()).toEqual({});
+    expect(internal._filterOverlayRuleCount('name')).toBe(2);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.neu-table__filter-overlay-rule-count')
+        ?.textContent,
+    ).toContain('2');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.neu-table__filter-multiple-summary')
+        ?.textContent,
+    ).toContain('2 filter rules active');
+  });
+
+  it('shows a truthful non-editable inline summary for legacy text multi-rules', async () => {
+    const legacyNameColumn = {
+      key: 'name',
+      header: 'Legacy name',
+      filterable: true,
+      filterType: 'text',
+    } satisfies NeuTableColumn<AdvancedFilterRow>;
+    const fixture = await createAdvancedTable({ columns: [legacyNameColumn] });
+    const internal = internalFilters(fixture.componentInstance);
+    internal._appliedFilters.set({
+      name: {
+        operator: 'and',
+        constraints: [
+          { mode: 'startsWith', value: 'A' },
+          { mode: 'notContains', value: 'Beta' },
+        ],
+      },
+    });
+    await settle(fixture);
+
+    const filterCell = (fixture.nativeElement as HTMLElement).querySelector(
+      '.neu-table__filter-row .neu-table__th--filter',
+    )!;
+    expect(filterCell.querySelector('.neu-table__filter-multiple-summary')?.textContent).toContain(
+      '2 filter rules active',
+    );
+    expect(filterCell.querySelector('neu-input')).toBeNull();
+    expect(filterCell.querySelector('input')).toBeNull();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector(
+        '.neu-table__filter-overlay-trigger[aria-label^="Open filter for Legacy name"]',
+      ),
+    ).toBeTruthy();
+  });
+
+  it('applies OR with independent modes and keeps other columns combined through AND', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    table.setColumnFilter('active', true);
+    await settle(fixture);
+    await open(fixture, 'Name');
+
+    internal._filterOverlayModeControl.setValue('startsWith');
+    internal._filterOverlayTextControl.setValue('Al');
+    internal._addFilterDraftRule();
+    await settle(fixture);
+    const second = internal._filterDraftRules()[1];
+    second.modeControl.setValue('endsWith');
+    second.textControl.setValue('ta');
+    internal._filterOverlayOperatorControl.setValue('or');
+    internal._applyFilterDraft();
+    await settle(fixture);
+
+    expect(internal._appliedFilters()['name'].operator).toBe('or');
+    expect(table.filteredData().map((row) => row.name)).toEqual(['Alpha']);
+  });
+
+  it('moves focus predictably after Add and Remove while keeping stable rule grouping ids', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Name');
+    const firstId = internal._filterDraftRules()[0].id;
+
+    internal._addFilterDraftRule();
+    await settle(fixture);
+    const secondId = internal._filterDraftRules()[1].id;
+    const secondGroup = document.querySelector<HTMLElement>(
+      `[data-neu-table-filter-rule-id="${secondId}"]`,
+    )!;
+    expect(document.activeElement).toBe(
+      secondGroup.querySelector('.neu-table__filter-overlay-mode .neu-select__trigger'),
+    );
+    expect(secondGroup.getAttribute('aria-labelledby')).toBeTruthy();
+    expect(document.getElementById(secondGroup.getAttribute('aria-labelledby')!)).toBeTruthy();
+
+    internal._removeFilterDraftRule(firstId);
+    await settle(fixture);
+    expect(internal._filterDraftRules().map((rule) => rule.id)).toEqual([secondId]);
+    expect(document.activeElement).toBe(
+      document.querySelector(
+        `[data-neu-table-filter-rule-id="${secondId}"] .neu-table__filter-overlay-mode .neu-select__trigger`,
+      ),
+    );
+  });
+
+  it('keeps Clear draft-only for multiple rules and clears the whole column only on Apply', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    const applied: TestAppliedColumnFilter = {
+      operator: 'or',
+      constraints: [
+        { mode: 'startsWith', value: 'Al' },
+        { mode: 'endsWith', value: 'ta' },
+      ],
+    };
+    internal._appliedFilters.set({ name: applied });
+    await settle(fixture);
+
+    await open(fixture, 'Name');
+    internal._clearFilterDraft();
+    expect(internal._filterDraftRules()).toHaveLength(1);
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+    internal._closeFilterOverlay();
+    await settle(fixture);
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+
+    await open(fixture, 'Name');
+    internal._clearFilterDraft();
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(internal._appliedFilters()['name']).toBeUndefined();
+  });
+
+  it('cancels the entire multi-rule draft on Escape and outside click', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    const applied: TestAppliedColumnFilter = {
+      operator: 'and',
+      constraints: [
+        { mode: 'contains', value: 'a' },
+        { mode: 'notContains', value: 'z' },
+      ],
+    };
+    internal._appliedFilters.set({ name: applied });
+    await settle(fixture);
+
+    await open(fixture, 'Name');
+    internal._filterDraftRules()[0].textControl.setValue('changed');
+    internal._filterOverlayOperatorControl.setValue('or');
+    const escapeEvent = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(escapeEvent, 'keyCode', { configurable: true, get: () => 27 });
+    document.querySelector<HTMLElement>('.neu-table__filter-overlay')!.dispatchEvent(escapeEvent);
+    await settle(fixture);
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+
+    await open(fixture, 'Name');
+    internal._removeFilterDraftRule(internal._filterDraftRules()[0].id);
+    document.body.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, clientX: 999, clientY: 999 }),
+    );
+    await settle(fixture);
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+  });
+
+  it('discards an open draft when global Clear or an incompatible column change occurs', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    table.setColumnFilter('name', 'Alpha');
+    await settle(fixture);
+    await open(fixture, 'Name');
+    internal._filterOverlayTextControl.setValue('draft');
+    table.clearColumnFilters();
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(internal._filterDraftRules()).toEqual([]);
+    expect(internal._appliedFilters()).toEqual({});
+
+    await open(fixture, 'Created');
+    fixture.componentRef.setInput(
+      'columns',
+      ADVANCED_FILTER_COLUMNS.map((column) =>
+        column.key === 'createdAt'
+          ? {
+              ...column,
+              filterConfig: { kind: 'date' as const, precision: 'instant' as const },
+            }
+          : column,
+      ),
+    );
+    await settle(fixture);
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(internal._filterDraftRules()).toEqual([]);
+  });
+
+  it('blocks Apply when any active rule is invalid and allows empty companion rules', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Score');
+    internal._filterOverlayNumberControl.setValue(5);
+    internal._addFilterDraftRule();
+    await settle(fixture);
+    const second = internal._filterDraftRules()[1];
+    second.modeControl.setValue('between');
+    second.numberFromControl.setValue(20);
+    second.numberToControl.setValue(10);
+    await settle(fixture);
+    const apply = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.neu-table__filter-overlay-actions button'),
+    ).find((button) => button.textContent?.trim() === 'Apply')!;
+    expect(apply.disabled).toBe(true);
+    expect(internal._filterDraftValid()).toBe(false);
+
+    second.numberFromControl.setValue(null);
+    second.numberToControl.setValue(null);
+    await settle(fixture);
+    expect(apply.disabled).toBe(false);
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(internal._appliedFilters()['score']).toEqual({
+      operator: 'and',
+      constraints: [{ mode: 'equals', value: 5 }],
+    });
+  });
+
+  it('protects an existing server-side multi-rule filter as a truthful read-only state', async () => {
+    const fixture = await createAdvancedTable({ serverSide: true });
+    const internal = internalFilters(fixture.componentInstance);
+    const events: NeuTableServerState[] = [];
+    fixture.componentInstance.serverStateChange.subscribe((state) => events.push(state));
+    const applied: TestAppliedColumnFilter = {
+      operator: 'or',
+      constraints: [
+        { mode: 'startsWith', value: 'Al' },
+        { mode: 'endsWith', value: 'ta' },
+      ],
+    };
+    internal._appliedFilters.set({ name: applied });
+    await settle(fixture);
+    await open(fixture, 'Name');
+
+    expect(internal._filterDraftReadOnly()).toBe(true);
+    expect(internal._filterDraftRules()).toHaveLength(2);
+    expect(document.querySelector('.neu-table__filter-overlay-summary')?.textContent).toContain(
+      '2 filter rules active',
+    );
+    expect(document.querySelector('.neu-table__filter-overlay-rule')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay-operator')).toBeNull();
+    expect(document.querySelector('[data-neu-table-filter-add-rule]')).toBeNull();
+    const actionLabels = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.neu-table__filter-overlay-actions button'),
+    ).map((button) => button.textContent?.trim());
+    expect(actionLabels).toEqual(['Cancel']);
+
+    internal._clearFilterDraft();
+    internal._removeFilterDraftRule(internal._filterDraftRules()[0].id);
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(events).toEqual([]);
+    expect(internal._appliedFilters()['name']).toEqual(applied);
+  });
+
+  it('applies canonical date-only and instant rules together and rejects one reversed range', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Created');
+    internal._filterOverlayModeControl.setValue('between');
+    internal._filterOverlayDateControl.setValue({
+      start: new Date(2026, 7, 18),
+      end: null,
+    });
+    internal._addFilterDraftRule();
+    await settle(fixture);
+    const dateRule = internal._filterDraftRules()[1];
+    dateRule.modeControl.setValue('before');
+    dateRule.dateControl.setValue('2026-08-22');
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(internal._appliedFilters()['createdAt'].operator).toBe('and');
+    expect(
+      internal._appliedFilters()['createdAt'].constraints.map(({ mode, value }) => ({
+        mode,
+        value,
+      })),
+    ).toEqual([
+      { mode: 'between', value: { from: '2026-08-18', to: null } },
+      { mode: 'before', value: '2026-08-22' },
+    ]);
+
+    await open(fixture, 'Instant');
+    internal._filterOverlayModeControl.setValue('between');
+    internal._filterOverlayInstantFromControl.setValue('2026-08-20T20:00');
+    internal._filterOverlayInstantToControl.setValue('2026-08-22T00:00');
+    internal._addFilterDraftRule();
+    await settle(fixture);
+    const instantRule = internal._filterDraftRules()[1];
+    instantRule.modeControl.setValue('between');
+    instantRule.instantFromControl.setValue('2026-08-22T00:00');
+    instantRule.instantToControl.setValue('2026-08-21T00:00');
+    expect(internal._filterDraftValid()).toBe(false);
+    instantRule.instantFromControl.setValue('');
+    expect(internal._filterDraftValid()).toBe(true);
+    internal._applyFilterDraft();
+    await settle(fixture);
+    expect(
+      internal._appliedFilters()['instant'].constraints.map(({ mode, value }) => ({ mode, value })),
+    ).toEqual([
+      {
+        mode: 'between',
+        value: {
+          from: new Date('2026-08-20T20:00').toISOString(),
+          to: new Date('2026-08-22T00:00').toISOString(),
+        },
+      },
+      {
+        mode: 'between',
+        value: { from: null, to: new Date('2026-08-21T00:00').toISOString() },
+      },
+    ]);
+  });
+
+  it('supports meaningful date-only OR rules without timezone conversion', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Created');
+    internal._filterOverlayDateControl.setValue('2026-08-19');
+    internal._addFilterDraftRule();
+    await settle(fixture);
+    internal._filterDraftRules()[1].dateControl.setValue('2026-08-21');
+    internal._filterOverlayOperatorControl.setValue('or');
+    internal._applyFilterDraft();
+    await settle(fixture);
+
+    expect(internal._appliedFilters()['createdAt']).toEqual({
+      operator: 'or',
+      constraints: [
+        { mode: 'is', value: '2026-08-19' },
+        { mode: 'is', value: '2026-08-21' },
+      ],
+    });
+    expect(fixture.componentInstance.filteredData()).toEqual(ADVANCED_FILTER_DATA);
+  });
+
+  it('keeps boolean single-rule and lets setColumnFilter explicitly collapse advanced rules', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    await open(fixture, 'Active');
+    expect(document.querySelector('[data-neu-table-filter-add-rule]')).toBeNull();
+    expect(internal._filterDraftRules()).toHaveLength(1);
+    internal._closeFilterOverlay();
+    await settle(fixture);
+
+    internal._appliedFilters.set({
+      name: {
+        operator: 'or',
+        constraints: [
+          { mode: 'startsWith', value: 'Al' },
+          { mode: 'endsWith', value: 'ta' },
+        ],
+      },
+    });
+    await settle(fixture);
+    expect(internal._hasMultipleAppliedRules('name')).toBe(true);
+    table.setColumnFilter('name', 'Beta');
+    await settle(fixture);
+    expect(internal._appliedFilters()['name']).toEqual({
+      operator: 'and',
+      constraints: [{ mode: 'contains', value: 'Beta' }],
+    });
+    expect(table.getColumnFilterValue('name')).toBe('Beta');
+    expect(internal._hasMultipleAppliedRules('name')).toBe(false);
   });
 
   it('uses consumer-provided Spanish labels without a translation service dependency', async () => {

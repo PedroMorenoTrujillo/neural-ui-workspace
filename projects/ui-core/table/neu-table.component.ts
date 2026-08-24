@@ -150,10 +150,15 @@ interface InternalResolvedAppliedColumnFilter<T> {
   constraints: readonly InternalAppliedFilterConstraint[];
 }
 
-const _NEU_TABLE_ADVANCED_FILTER_TEXTS: NeuTableAdvancedFilterTexts = {
+type InternalResolvedAdvancedFilterTexts = Required<NeuTableAdvancedFilterTexts>;
+
+const _NEU_TABLE_ADVANCED_FILTER_TEXTS: InternalResolvedAdvancedFilterTexts = {
   openFilter: 'Open filter for {column}',
   filterTitle: 'Filter {column}',
   closeFilter: 'Close filter for {column}',
+  operator: 'Operator',
+  matchAll: 'Match all',
+  matchAny: 'Match any',
   matchMode: 'Match mode',
   value: 'Value',
   from: 'From',
@@ -165,7 +170,12 @@ const _NEU_TABLE_ADVANCED_FILTER_TEXTS: NeuTableAdvancedFilterTexts = {
   cancel: 'Cancel',
   apply: 'Apply',
   filterActive: 'Filter active',
-  multipleRulesActive: 'Multiple rules are active. Editing will be available in a future release.',
+  addRule: 'Add rule',
+  removeRule: 'Remove rule',
+  rule: 'Rule {count}',
+  ruleActive: '1 filter rule active',
+  rulesActive: '{count} filter rules active',
+  multipleRulesActive: 'Multiple rules are active. Server-side editing is unavailable.',
   contains: 'Contains',
   startsWith: 'Starts with',
   endsWith: 'Ends with',
@@ -249,102 +259,193 @@ export type NeuTableColumnInput<T extends object> =
     -->
     <ng-template #filterOverlayContent let-column>
       <div class="neu-table__filter-overlay-content">
-        @if (_filterDraftHasMultipleRules()) {
-          <p class="neu-table__filter-overlay-summary" role="status">
-            {{ _advancedFilterText().multipleRulesActive }}
-          </p>
-        } @else {
-          @if (
-            _filterDraftKind() === 'text' ||
-            _filterDraftKind() === 'number' ||
-            _filterDraftKind() === 'date'
-          ) {
+        @if (_filterDraftKind()) {
+          @if (_filterDraftReadOnly()) {
+            <p class="neu-table__filter-overlay-summary" role="status">
+              {{ _filterOverlayActiveRuleSummary(_filterDraftRules().length) }}
+              {{ _advancedFilterText().multipleRulesActive }}
+            </p>
+          } @else {
+          @if (_filterDraftHasMultipleRules()) {
             <neu-select
-              class="neu-table__filter-overlay-control neu-table__filter-overlay-mode"
+              class="neu-table__filter-overlay-control neu-table__filter-overlay-operator"
               [floatingLabel]="false"
-              [label]="_advancedFilterText().matchMode"
-              [options]="_filterOverlayModeOptions(column)"
-              [formControl]="_filterOverlayModeControl"
+              [label]="_advancedFilterText().operator"
+              [options]="_filterOverlayOperatorOptions()"
+              [formControl]="_filterOverlayOperatorControl"
             />
           }
-          @switch (_filterOverlayControlKind(column)) {
-            @case ('text') {
-              <neu-input
-                class="neu-table__filter-overlay-control"
-                [floatingLabel]="false"
-                [label]="_advancedFilterText().value"
-                [formControl]="_filterOverlayTextControl"
-              />
-            }
-            @case ('number') {
-              @if (_filterDraftMode() === 'between') {
-                <div class="neu-table__filter-overlay-range">
-                  <neu-number-input
-                    [nullable]="true"
-                    [label]="_advancedFilterText().from"
-                    [formControl]="_filterOverlayNumberFromControl"
-                  />
-                  <neu-number-input
-                    [nullable]="true"
-                    [label]="_advancedFilterText().to"
-                    [formControl]="_filterOverlayNumberToControl"
-                  />
+          <div class="neu-table__filter-overlay-rules">
+            @for (rule of _filterDraftRules(); track rule.id; let index = $index) {
+              <div
+                class="neu-table__filter-overlay-rule"
+                role="group"
+                [attr.data-neu-table-filter-rule-id]="rule.id"
+                [attr.aria-labelledby]="_filterOverlayRuleLabelId(column.key, rule.id)"
+              >
+                <div class="neu-table__filter-overlay-rule-header">
+                  <span
+                    class="neu-table__filter-overlay-rule-label"
+                    [id]="_filterOverlayRuleLabelId(column.key, rule.id)"
+                  >
+                    {{ _filterOverlayRuleLabel(index) }}
+                  </span>
+                  <button
+                    type="button"
+                    class="neu-table__filter-overlay-remove-rule"
+                    [attr.aria-label]="_filterOverlayRemoveRuleLabel(index)"
+                    (click)="_removeFilterDraftRule(rule.id)"
+                  >
+                    <span aria-hidden="true">×</span>
+                  </button>
                 </div>
-              } @else {
-                <neu-number-input
-                  class="neu-table__filter-overlay-control"
-                  [nullable]="true"
-                  [label]="_advancedFilterText().value"
-                  [formControl]="_filterOverlayNumberControl"
-                />
-              }
-            }
-            @case ('date') {
-              @if (_filterDraftMode() === 'between') {
-                @if (_filterOverlayDatePrecision(column) === 'instant') {
-                  <div class="neu-table__filter-overlay-range">
-                    <neu-date-input
-                      type="datetime-local"
-                      [label]="_advancedFilterText().from"
-                      [formControl]="_filterOverlayInstantFromControl"
-                    />
-                    <neu-date-input
-                      type="datetime-local"
-                      [label]="_advancedFilterText().to"
-                      [formControl]="_filterOverlayInstantToControl"
-                    />
-                  </div>
-                } @else {
-                  <neu-date-input
-                    class="neu-table__filter-overlay-control"
-                    type="range"
-                    [label]="_advancedFilterText().value"
-                    [formControl]="_filterOverlayDateControl"
+                @if (
+                  _filterDraftKind() === 'text' ||
+                  _filterDraftKind() === 'number' ||
+                  _filterDraftKind() === 'date'
+                ) {
+                  <neu-select
+                    class="neu-table__filter-overlay-control neu-table__filter-overlay-mode"
+                    [floatingLabel]="false"
+                    [label]="_advancedFilterText().matchMode"
+                    [options]="_filterOverlayModeOptions(column)"
+                    [formControl]="rule.modeControl"
                   />
                 }
-              } @else {
-                <neu-date-input
-                  class="neu-table__filter-overlay-control"
-                  [type]="
-                    _filterOverlayDatePrecision(column) === 'instant' ? 'datetime-local' : 'date'
-                  "
-                  [label]="_advancedFilterText().value"
-                  [formControl]="_filterOverlayDateControl"
-                />
-              }
+                @switch (_filterDraftKind()) {
+                  @case ('text') {
+                    <neu-input
+                      class="neu-table__filter-overlay-control"
+                      [floatingLabel]="false"
+                      [label]="_advancedFilterText().value"
+                      [formControl]="rule.textControl"
+                    />
+                  }
+                  @case ('number') {
+                    @if (rule.mode() === 'between') {
+                      <div class="neu-table__filter-overlay-range">
+                        <neu-number-input
+                          [nullable]="true"
+                          [label]="_advancedFilterText().from"
+                          [formControl]="rule.numberFromControl"
+                        />
+                        <neu-number-input
+                          [nullable]="true"
+                          [label]="_advancedFilterText().to"
+                          [formControl]="rule.numberToControl"
+                        />
+                      </div>
+                    } @else {
+                      <neu-number-input
+                        class="neu-table__filter-overlay-control"
+                        [nullable]="true"
+                        [label]="_advancedFilterText().value"
+                        [formControl]="rule.numberControl"
+                      />
+                    }
+                  }
+                  @case ('date') {
+                    @if (rule.mode() === 'between') {
+                      @if (_filterOverlayDatePrecision(column) === 'instant') {
+                        <div class="neu-table__filter-overlay-range">
+                          <neu-date-input
+                            type="datetime-local"
+                            [label]="_advancedFilterText().from"
+                            [formControl]="rule.instantFromControl"
+                          />
+                          <neu-date-input
+                            type="datetime-local"
+                            [label]="_advancedFilterText().to"
+                            [formControl]="rule.instantToControl"
+                          />
+                        </div>
+                      } @else {
+                        <neu-date-input
+                          class="neu-table__filter-overlay-control"
+                          type="range"
+                          [label]="_advancedFilterText().value"
+                          [formControl]="rule.dateControl"
+                        />
+                      }
+                    } @else {
+                      <neu-date-input
+                        class="neu-table__filter-overlay-control"
+                        [type]="
+                          _filterOverlayDatePrecision(column) === 'instant'
+                            ? 'datetime-local'
+                            : 'date'
+                        "
+                        [label]="_advancedFilterText().value"
+                        [formControl]="rule.dateControl"
+                      />
+                    }
+                  }
+                  @case ('boolean') {
+                    <neu-select
+                      class="neu-table__filter-overlay-control"
+                      [floatingLabel]="false"
+                      [label]="_advancedFilterText().value"
+                      [placeholder]="_advancedFilterText().all"
+                      [options]="_filterOverlayBooleanOptions()"
+                      [clearable]="true"
+                      [clearAriaLabel]="_advancedFilterText().all"
+                      [formControl]="rule.booleanControl"
+                    />
+                  }
+                }
+              </div>
             }
-            @case ('boolean') {
-              <neu-select
-                class="neu-table__filter-overlay-control"
-                [floatingLabel]="false"
-                [label]="_advancedFilterText().value"
-                [placeholder]="_advancedFilterText().all"
-                [options]="_filterOverlayBooleanOptions()"
-                [clearable]="true"
-                [clearAriaLabel]="_advancedFilterText().all"
-                [formControl]="_filterOverlayBooleanControl"
-              />
+          </div>
+          @if (_filterDraftCanAddRule()) {
+            <button
+              neu-button
+              type="button"
+              variant="secondary"
+              size="sm"
+              class="neu-table__filter-overlay-add-rule"
+              data-neu-table-filter-add-rule
+              (click)="_addFilterDraftRule()"
+            >
+              {{ _advancedFilterText().addRule }}
+            </button>
+          }
+          }
+          <div class="neu-table__filter-overlay-actions">
+            @if (!_filterDraftReadOnly()) {
+            <button
+              neu-button
+              type="button"
+              variant="ghost"
+              size="sm"
+              (click)="_clearFilterDraft()"
+            >
+              {{ _advancedFilterText().clear }}
+            </button>
             }
+            <span class="neu-table__filter-overlay-actions-spacer"></span>
+            <button
+              neu-button
+              type="button"
+              variant="secondary"
+              size="sm"
+              (click)="_closeFilterOverlay()"
+            >
+              {{ _advancedFilterText().cancel }}
+            </button>
+            @if (!_filterDraftReadOnly()) {
+              <button
+                neu-button
+                type="button"
+                size="sm"
+                [disabled]="!_filterDraftValid()"
+                (click)="_applyFilterDraft()"
+              >
+                {{ _advancedFilterText().apply }}
+              </button>
+            }
+          </div>
+        } @else {
+          @switch (_filterOverlayControlKind(column)) {
             @case ('select') {
               <neu-select
                 class="neu-table__filter-overlay-control"
@@ -377,50 +478,6 @@ export type NeuTableColumnInput<T extends object> =
               />
             }
           }
-          <div class="neu-table__filter-overlay-actions">
-            <button
-              neu-button
-              type="button"
-              variant="ghost"
-              size="sm"
-              (click)="_clearFilterDraft()"
-            >
-              {{ _advancedFilterText().clear }}
-            </button>
-            <span class="neu-table__filter-overlay-actions-spacer"></span>
-            <button
-              neu-button
-              type="button"
-              variant="secondary"
-              size="sm"
-              (click)="_closeFilterOverlay()"
-            >
-              {{ _advancedFilterText().cancel }}
-            </button>
-            <button
-              neu-button
-              type="button"
-              size="sm"
-              [disabled]="!_filterDraftValid()"
-              (click)="_applyFilterDraft()"
-            >
-              {{ _advancedFilterText().apply }}
-            </button>
-          </div>
-        }
-        @if (_filterDraftHasMultipleRules()) {
-          <div class="neu-table__filter-overlay-actions">
-            <span class="neu-table__filter-overlay-actions-spacer"></span>
-            <button
-              neu-button
-              type="button"
-              variant="secondary"
-              size="sm"
-              (click)="_closeFilterOverlay()"
-            >
-              {{ _advancedFilterText().cancel }}
-            </button>
-          </div>
         }
       </div>
     </ng-template>
@@ -783,6 +840,11 @@ export type NeuTableColumnInput<T extends object> =
                         <path d="M7 12h10" />
                         <path d="M10 19h4" />
                       </svg>
+                      @if (_filterOverlayRuleCount(col.key) > 1) {
+                        <span class="neu-table__filter-overlay-rule-count" aria-hidden="true">
+                          {{ _filterOverlayRuleCount(col.key) }}
+                        </span>
+                      }
                     </button>
                     <ng-template
                       cdkConnectedOverlay
@@ -890,110 +952,118 @@ export type NeuTableColumnInput<T extends object> =
                     [style.min-width]="columnWidth(col)"
                     [style.max-width]="columnWidth(col)"
                   >
-                    @if (col.filterConfig; as config) {
-                      @switch (config.kind) {
-                        @case ('text') {
-                          <neu-input
-                            [floatingLabel]="false"
-                            [label]="modernFilterLabel(col)"
-                            [placeholder]="filterPlaceholder()"
-                            [formControl]="typedColumnFilterControl(col)"
-                          />
-                        }
-                        @case ('number') {
-                          @if (modernFilterMode(col) === 'between') {
-                            <div class="neu-table__filter-range">
-                              <neu-number-input
-                                [nullable]="true"
-                                [label]="rangeFilterLabel(col, 'from')"
-                                [formControl]="typedRangeStartControl(col)"
-                              />
-                              <neu-number-input
-                                [nullable]="true"
-                                [label]="rangeFilterLabel(col, 'to')"
-                                [formControl]="typedRangeEndControl(col)"
-                              />
-                            </div>
-                          } @else {
-                            <neu-number-input
-                              [nullable]="true"
-                              [label]="modernFilterLabel(col)"
-                              [formControl]="typedColumnFilterControl(col)"
-                            />
-                          }
-                        }
-                        @case ('date') {
-                          @if (isDateOnlyRange(col)) {
-                            <neu-date-input
-                              type="range"
+                    @if (_hasMultipleAppliedRules(col.key)) {
+                      <span class="neu-table__filter-multiple-summary" role="status">
+                        {{ _filterOverlayActiveRuleSummary(_filterOverlayRuleCount(col.key)) }}
+                      </span>
+                    } @else if (col.filterConfig; as config) {
+                        @switch (config.kind) {
+                          @case ('text') {
+                            <neu-input
+                              [floatingLabel]="false"
                               [label]="modernFilterLabel(col)"
                               [placeholder]="filterPlaceholder()"
                               [formControl]="typedColumnFilterControl(col)"
                             />
-                          } @else if (isInstantRange(col)) {
-                            <div class="neu-table__filter-range">
-                              <neu-date-input
-                                type="datetime-local"
-                                [label]="rangeFilterLabel(col, 'from')"
-                                [formControl]="typedInstantRangeStartControl(col)"
+                          }
+                          @case ('number') {
+                            @if (modernFilterMode(col) === 'between') {
+                              <div class="neu-table__filter-range">
+                                <neu-number-input
+                                  [nullable]="true"
+                                  [label]="rangeFilterLabel(col, 'from')"
+                                  [formControl]="typedRangeStartControl(col)"
+                                />
+                                <neu-number-input
+                                  [nullable]="true"
+                                  [label]="rangeFilterLabel(col, 'to')"
+                                  [formControl]="typedRangeEndControl(col)"
+                                />
+                              </div>
+                            } @else {
+                              <neu-number-input
+                                [nullable]="true"
+                                [label]="modernFilterLabel(col)"
+                                [formControl]="typedColumnFilterControl(col)"
                               />
+                            }
+                          }
+                          @case ('date') {
+                            @if (isDateOnlyRange(col)) {
                               <neu-date-input
-                                type="datetime-local"
-                                [label]="rangeFilterLabel(col, 'to')"
-                                [formControl]="typedInstantRangeEndControl(col)"
+                                type="range"
+                                [label]="modernFilterLabel(col)"
+                                [placeholder]="filterPlaceholder()"
+                                [formControl]="typedColumnFilterControl(col)"
                               />
-                            </div>
-                          } @else {
-                            <neu-date-input
-                              [type]="dateInputType(col)"
+                            } @else if (isInstantRange(col)) {
+                              <div class="neu-table__filter-range">
+                                <neu-date-input
+                                  type="datetime-local"
+                                  [label]="rangeFilterLabel(col, 'from')"
+                                  [formControl]="typedInstantRangeStartControl(col)"
+                                />
+                                <neu-date-input
+                                  type="datetime-local"
+                                  [label]="rangeFilterLabel(col, 'to')"
+                                  [formControl]="typedInstantRangeEndControl(col)"
+                                />
+                              </div>
+                            } @else {
+                              <neu-date-input
+                                [type]="dateInputType(col)"
+                                [label]="modernFilterLabel(col)"
+                                [formControl]="typedColumnFilterControl(col)"
+                              />
+                            }
+                          }
+                          @case ('boolean') {
+                            <neu-select
+                              [floatingLabel]="false"
                               [label]="modernFilterLabel(col)"
+                              [placeholder]="allFilterOptionLabel()"
+                              [options]="typedBooleanFilterOptions()"
+                              [clearable]="true"
                               [formControl]="typedColumnFilterControl(col)"
                             />
                           }
+                          @case ('select') {
+                            <neu-select
+                              [floatingLabel]="false"
+                              [label]="modernFilterLabel(col)"
+                              [placeholder]="allFilterOptionLabel()"
+                              [options]="typedFilterOptions(col)"
+                              [optionLabel]="typedFilterOptionLabel(col)"
+                              [optionValue]="typedFilterOptionValue(col)"
+                              [optionDisabled]="typedFilterOptionDisabled(col)"
+                              [searchable]="typedFilterSearchable(col)"
+                              [virtualScroll]="typedFilterVirtualScroll(col)"
+                              [virtualScrollVisibleItems]="
+                                typedFilterVirtualScrollVisibleItems(col)
+                              "
+                              [clearable]="true"
+                              [formControl]="typedColumnFilterControl(col)"
+                            />
+                          }
+                          @case ('multiSelect') {
+                            <neu-multiselect
+                              [floatingLabel]="false"
+                              [label]="modernFilterLabel(col)"
+                              [placeholder]="allFilterOptionLabel()"
+                              [options]="typedFilterOptions(col)"
+                              [optionLabel]="typedFilterOptionLabel(col)"
+                              [optionValue]="typedFilterOptionValue(col)"
+                              [optionDisabled]="typedFilterOptionDisabled(col)"
+                              [searchable]="typedFilterSearchable(col)"
+                              [virtualScroll]="typedFilterVirtualScroll(col)"
+                              [virtualScrollVisibleItems]="
+                                typedFilterVirtualScrollVisibleItems(col)
+                              "
+                              [clearable]="true"
+                              [formControl]="typedMultiSelectFilterControl(col)"
+                            />
+                          }
                         }
-                        @case ('boolean') {
-                          <neu-select
-                            [floatingLabel]="false"
-                            [label]="modernFilterLabel(col)"
-                            [placeholder]="allFilterOptionLabel()"
-                            [options]="typedBooleanFilterOptions()"
-                            [clearable]="true"
-                            [formControl]="typedColumnFilterControl(col)"
-                          />
-                        }
-                        @case ('select') {
-                          <neu-select
-                            [floatingLabel]="false"
-                            [label]="modernFilterLabel(col)"
-                            [placeholder]="allFilterOptionLabel()"
-                            [options]="typedFilterOptions(col)"
-                            [optionLabel]="typedFilterOptionLabel(col)"
-                            [optionValue]="typedFilterOptionValue(col)"
-                            [optionDisabled]="typedFilterOptionDisabled(col)"
-                            [searchable]="typedFilterSearchable(col)"
-                            [virtualScroll]="typedFilterVirtualScroll(col)"
-                            [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(col)"
-                            [clearable]="true"
-                            [formControl]="typedColumnFilterControl(col)"
-                          />
-                        }
-                        @case ('multiSelect') {
-                          <neu-multiselect
-                            [floatingLabel]="false"
-                            [label]="modernFilterLabel(col)"
-                            [placeholder]="allFilterOptionLabel()"
-                            [options]="typedFilterOptions(col)"
-                            [optionLabel]="typedFilterOptionLabel(col)"
-                            [optionValue]="typedFilterOptionValue(col)"
-                            [optionDisabled]="typedFilterOptionDisabled(col)"
-                            [searchable]="typedFilterSearchable(col)"
-                            [virtualScroll]="typedFilterVirtualScroll(col)"
-                            [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(col)"
-                            [clearable]="true"
-                            [formControl]="typedMultiSelectFilterControl(col)"
-                          />
-                        }
-                      }
                     } @else if (col.filterable) {
                       @if (col.filterType === 'select') {
                         <neu-select
@@ -1418,17 +1488,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   protected readonly _filterDraftValue = this._advancedFilter.value;
   protected readonly _filterDraftValid = this._advancedFilter.valid;
   protected readonly _filterDraftHasMultipleRules = this._advancedFilter.hasMultipleRules;
-  protected readonly _filterOverlayModeControl = this._advancedFilter.modeControl;
-  protected readonly _filterOverlayTextControl = this._advancedFilter.textControl;
-  protected readonly _filterOverlayNumberControl = this._advancedFilter.numberControl;
-  protected readonly _filterOverlayNumberFromControl = this._advancedFilter.numberFromControl;
-  protected readonly _filterOverlayNumberToControl = this._advancedFilter.numberToControl;
-  protected readonly _filterOverlayInstantFromControl = this._advancedFilter.instantFromControl;
-  protected readonly _filterOverlayInstantToControl = this._advancedFilter.instantToControl;
-  protected readonly _filterOverlayBooleanControl = this._advancedFilter.booleanControl;
+  protected readonly _filterDraftOperator = this._advancedFilter.operator;
+  protected readonly _filterDraftRules = this._advancedFilter.rules;
+  protected readonly _filterDraftCanAddRule = this._advancedFilter.canAddRule;
+  protected readonly _filterDraftReadOnly = this._advancedFilter.readOnly;
+  protected readonly _filterOverlayOperatorControl = this._advancedFilter.operatorControl;
   protected readonly _filterOverlaySelectControl = this._advancedFilter.selectControl;
   protected readonly _filterOverlayMultiSelectControl = this._advancedFilter.multiSelectControl;
-  protected readonly _filterOverlayDateControl = this._advancedFilter.dateControl;
   protected readonly _filterOverlayPositions: ConnectedPosition[] = [
     { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 6 },
     { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
@@ -1658,7 +1724,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     { label: this.filterTrueLabel(), value: true },
     { label: this.filterFalseLabel(), value: false },
   ]);
-  protected readonly _advancedFilterText = computed<NeuTableAdvancedFilterTexts>(() => ({
+  protected readonly _advancedFilterText = computed<InternalResolvedAdvancedFilterTexts>(() => ({
     ..._NEU_TABLE_ADVANCED_FILTER_TEXTS,
     ...this.advancedFilterTexts(),
   }));
@@ -1831,11 +1897,55 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return neuTableAdvancedFilterDatePrecision(column);
   }
 
+  protected get _filterOverlayModeControl(): FormControl<unknown> {
+    return this._advancedFilter.modeControl;
+  }
+
+  protected get _filterOverlayTextControl(): FormControl<string> {
+    return this._advancedFilter.textControl;
+  }
+
+  protected get _filterOverlayNumberControl(): FormControl<number | null> {
+    return this._advancedFilter.numberControl;
+  }
+
+  protected get _filterOverlayNumberFromControl(): FormControl<number | null> {
+    return this._advancedFilter.numberFromControl;
+  }
+
+  protected get _filterOverlayNumberToControl(): FormControl<number | null> {
+    return this._advancedFilter.numberToControl;
+  }
+
+  protected get _filterOverlayInstantFromControl(): FormControl<string> {
+    return this._advancedFilter.instantFromControl;
+  }
+
+  protected get _filterOverlayInstantToControl(): FormControl<string> {
+    return this._advancedFilter.instantToControl;
+  }
+
+  protected get _filterOverlayBooleanControl(): FormControl<unknown> {
+    return this._advancedFilter.booleanControl;
+  }
+
+  protected get _filterOverlayDateControl(): FormControl<unknown> {
+    return this._advancedFilter.dateControl;
+  }
+
   protected _filterOverlayModeOptions(
     column: NeuTableColumn<T>,
   ): readonly NeuSelectOption<NeuTableFilterMatchMode>[] {
     const text = this._advancedFilterText();
     return neuTableAdvancedFilterModes(column).map((mode) => ({ label: text[mode], value: mode }));
+  }
+
+  protected _filterOverlayOperatorOptions(): readonly NeuSelectOption<InternalAppliedFilterOperator>[] {
+    const text = this._advancedFilterText();
+    return [
+      { label: text.matchAll, value: 'and' },
+      { label: text.matchAny, value: 'or' },
+    ];
   }
 
   protected _filterOverlayOptions(column: NeuTableColumn<T>): readonly unknown[] {
@@ -1858,10 +1968,23 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return `${this._filterOverlayPanelId(key)}-title`;
   }
 
+  protected _filterOverlayRuleLabelId(key: string, ruleId: string): string {
+    return `${this._filterOverlayPanelId(key)}-${ruleId}-label`;
+  }
+
+  protected _filterOverlayRuleLabel(index: number): string {
+    return this._advancedFilterText().rule.replace('{count}', String(index + 1));
+  }
+
+  protected _filterOverlayRemoveRuleLabel(index: number): string {
+    return `${this._advancedFilterText().removeRule}: ${this._filterOverlayRuleLabel(index)}`;
+  }
+
   protected _filterOverlayTriggerLabel(column: NeuTableColumn<T>): string {
     const label = this._formatAdvancedFilterText(this._advancedFilterText().openFilter, column);
-    return this._isFilterOverlayActive(column.key)
-      ? `${label}. ${this._advancedFilterText().filterActive}`
+    const count = this._filterOverlayRuleCount(column.key);
+    return count > 0
+      ? `${label}. ${this._advancedFilterText().filterActive}. ${this._filterOverlayActiveRuleSummary(count)}`
       : label;
   }
 
@@ -1878,11 +2001,25 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   protected _isFilterOverlayActive(key: string): boolean {
+    return this._filterOverlayRuleCount(key) > 0;
+  }
+
+  protected _filterOverlayRuleCount(key: string): number {
     return (
-      this._appliedFilters()[key]?.constraints.some(
+      this._appliedFilters()[key]?.constraints.filter(
         (constraint) => !isNeuTableFilterValueEmpty(constraint.value),
-      ) === true
+      ).length ?? 0
     );
+  }
+
+  protected _hasMultipleAppliedRules(key: string): boolean {
+    return this._filterOverlayRuleCount(key) > 1;
+  }
+
+  protected _filterOverlayActiveRuleSummary(count: number): string {
+    return (
+      count === 1 ? this._advancedFilterText().ruleActive : this._advancedFilterText().rulesActive
+    ).replace('{count}', String(count));
   }
 
   protected _toggleFilterOverlay(key: string, event: MouseEvent): void {
@@ -1898,7 +2035,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._escapeReturnFocus = null;
     const column = this._currentTypedColumn(key);
     if (!column || !this._isFilterOverlayEligible(column)) return;
-    this._advancedFilter.initialize(column, this._appliedFilters()[column.key]);
+    this._advancedFilter.initialize(column, this._appliedFilters()[column.key], {
+      allowMultipleRules: !this.serverSide(),
+    });
     this._openFilterKey.set(key);
   }
 
@@ -1962,21 +2101,45 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._advancedFilter.clear();
   }
 
+  protected _addFilterDraftRule(): void {
+    const id = this._advancedFilter.addRule();
+    if (id) queueMicrotask(() => this._focusFilterDraftRule(id));
+  }
+
+  protected _removeFilterDraftRule(id: string): void {
+    const rules = this._filterDraftRules();
+    const index = rules.findIndex((rule) => rule.id === id);
+    if (index < 0 || !this._advancedFilter.removeRule(id)) return;
+    const remaining = this._filterDraftRules();
+    const target = remaining[Math.min(index, remaining.length - 1)];
+    queueMicrotask(() => {
+      if (target) this._focusFilterDraftRule(target.id);
+      else {
+        this._filterOverlayPanel()
+          ?.querySelector<HTMLElement>('[data-neu-table-filter-add-rule]')
+          ?.focus();
+      }
+    });
+  }
+
   protected _applyFilterDraft(): void {
     const key = this._openFilterKey();
     const column = key ? this._currentTypedColumn(key) : null;
     const result = this._advancedFilter.buildApplyResult();
     if (!key || !column || !result || result.key !== key) return;
-    if (!result.constraint) {
-      this._writeAppliedFilter(key, { operator: 'and', constraints: [] });
-    } else {
-      this._writeAppliedFilter(key, {
-        operator: 'and',
-        constraints: [result.constraint],
-    });
-    }
+    this._writeAppliedFilter(key, result.filter);
     if (this.serverSide()) this._emitServerState({ page: 1 });
     this._closeFilterOverlay();
+  }
+
+  private _focusFilterDraftRule(id: string): void {
+    const rule = this._filterOverlayPanel()?.querySelector<HTMLElement>(
+      `[data-neu-table-filter-rule-id="${id}"]`,
+    );
+    const target = rule?.querySelector<HTMLElement>(
+      '.neu-table__filter-overlay-mode .neu-select__trigger, input, .neu-select__trigger',
+    );
+    this._focusElementIfAvailable(target ?? null);
   }
 
   private _formatAdvancedFilterText(template: string, column: NeuTableColumn<T>): string {
@@ -2910,6 +3073,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   clearColumnFilters(): void {
     this._appliedFilters.set({});
+    if (this._openFilterKey()) this._closeFilterOverlay(false);
   }
 
   // ── Actions ───────────────────────────────────────────────────────────
@@ -3641,6 +3805,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
     if (invalidatedKeys.size > 0 || modeChanges.size > 0) {
       untracked(() => {
+        const activeKey = this._openFilterKey();
+        if (activeKey && invalidatedKeys.has(activeKey)) this._closeFilterOverlay(false);
         this._appliedFilters.update((current) => {
           let next = current;
           const writable = () => {

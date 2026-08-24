@@ -29,6 +29,7 @@
 
 // ---- Advanced filter overlay ----
 .neu-table__filter-overlay-trigger {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -75,10 +76,29 @@
   }
 }
 
+.neu-table__filter-overlay-rule-count {
+  position: absolute;
+  inset-block-start: -7px;
+  inset-inline-end: -7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 16px;
+  block-size: 16px;
+  padding-inline: 4px;
+  border: 1px solid var(--neu-surface);
+  border-radius: 999px;
+  background: var(--neu-primary);
+  color: var(--neu-primary-contrast, #fff);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .neu-table__filter-overlay {
   display: flex;
   flex-direction: column;
-  inline-size: min(320px, calc(100vw - 16px));
+  inline-size: min(380px, calc(100vw - 16px));
   max-block-size: min(420px, calc(100dvh - 16px));
   overflow: auto;
   border: 1px solid var(--neu-border);
@@ -149,6 +169,63 @@
   inline-size: 100%;
 }
 
+.neu-table__filter-overlay-rules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neu-space-3);
+}
+
+.neu-table__filter-overlay-rule {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neu-space-3);
+  padding: var(--neu-space-3);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-md);
+  background: var(--neu-surface-2);
+}
+
+.neu-table__filter-overlay-rule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neu-space-2);
+}
+
+.neu-table__filter-overlay-rule-label {
+  font-size: var(--neu-text-sm);
+  font-weight: 600;
+}
+
+.neu-table__filter-overlay-remove-rule {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 28px;
+  block-size: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--neu-radius-sm);
+  background: transparent;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  font-size: var(--neu-text-lg);
+
+  &:hover {
+    background: var(--neu-surface-3);
+    color: var(--neu-text);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--neu-focus-ring);
+  }
+}
+
+.neu-table__filter-overlay-add-rule {
+  align-self: flex-start;
+}
+
 .neu-table__filter-overlay-range {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -171,6 +248,15 @@
 
 .neu-table__filter-overlay-actions-spacer {
   flex: 1 1 auto;
+}
+
+.neu-table__filter-multiple-summary {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 36px;
+  color: var(--neu-text-muted);
+  font-size: var(--neu-text-xs);
+  line-height: 1.35;
 }
 
 // ---- Toolbar ----
