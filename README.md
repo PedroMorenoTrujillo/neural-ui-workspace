@@ -324,4 +324,6 @@ All NeuralUI form components implement `ControlValueAccessor` (`NG_VALUE_ACCESSO
 
 ## License
 
-MIT © [Pedro Moreno Trujillo](https://github.com/PedroMorenoTrujillo)
+Neural UI was created and is maintained by [Pedro Moreno Trujillo](https://github.com/PedroMorenoTrujillo).
+
+Copyright © 2026 Pedro Moreno Trujillo. Released under the MIT License.

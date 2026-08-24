@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -7,6 +7,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = dirname(__dirname);
 const distPackageJsonPath = join(workspaceRoot, 'dist', 'neural-ui', 'core', 'package.json');
 const distPackageRoot = dirname(distPackageJsonPath);
+const rootLicensePath = join(workspaceRoot, 'LICENSE');
+const distLicensePath = join(distPackageRoot, 'LICENSE');
 const distNpmIgnorePath = join(distPackageRoot, '.npmignore');
 const distStylesEntryPath = join(distPackageRoot, 'styles.scss');
 const isWatchMode = process.argv.includes('--watch');
@@ -101,6 +103,14 @@ function patchDistPackageJson() {
 
   if (existsSync(distNpmIgnorePath)) {
     rmSync(distNpmIgnorePath);
+  }
+
+  if (
+    existsSync(rootLicensePath) &&
+    (!existsSync(distLicensePath) ||
+      readFileSync(distLicensePath, 'utf8') !== readFileSync(rootLicensePath, 'utf8'))
+  ) {
+    copyFileSync(rootLicensePath, distLicensePath);
   }
 }
 

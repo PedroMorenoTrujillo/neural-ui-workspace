@@ -223,4 +223,6 @@ For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or new
 
 ## License
 
-MIT © [Pedro Moreno Trujillo](https://github.com/PedroMorenoTrujillo)
+Neural UI was created and is maintained by [Pedro Moreno Trujillo](https://github.com/PedroMorenoTrujillo).
+
+Copyright © 2026 Pedro Moreno Trujillo. Released under the MIT License.
