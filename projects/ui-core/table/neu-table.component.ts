@@ -31,7 +31,6 @@ import {
   isNeuTableFilterValueEmpty,
   matchesNeuTableFilter,
   normalizeNeuTableAppliedFilterValue,
-  normalizeNeuTableDatePoint,
   resolveNeuTableFilterMatchMode,
 } from './neu-table-filter.engine';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
@@ -39,7 +38,7 @@ import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
 import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
-import { NeuDateInputComponent, NeuDateRange } from '@neural-ui/core/date-input';
+import { NeuDateInputComponent } from '@neural-ui/core/date-input';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import { NeuButtonComponent } from '@neural-ui/core/button';
@@ -69,10 +68,23 @@ import type {
   NeuTableFilterKind,
   NeuTableFilterMatchMode,
   NeuTableFilterState,
-  NeuTableNumberRangeValue,
   NeuTableServerState,
   NeuTableSortEntry,
 } from './neu-table.types';
+import {
+  NeuTableAdvancedFilterController,
+  isNeuTableDateRange,
+  neuTableAdvancedFilterControlKind,
+  neuTableAdvancedFilterDatePrecision,
+  neuTableAdvancedFilterModes,
+  neuTableDateFilterValue,
+  neuTableDateInputControlValue,
+  neuTableDateRangeControlValue,
+  neuTableDateRangeFilterValue,
+  neuTableInstantFilterValue,
+  neuTableInstantRangeControlValue,
+  neuTableNumberRangeValue,
+} from './neu-table-advanced-filter.controller';
 
 export type {
   NeuTableAction,
@@ -137,9 +149,6 @@ interface InternalResolvedAppliedColumnFilter<T> {
   operator: InternalAppliedFilterOperator;
   constraints: readonly InternalAppliedFilterConstraint[];
 }
-
-type InternalAdvancedFilterKind = 'text' | 'number' | 'date' | 'boolean';
-type InternalAdvancedFilterMatchMode = Exclude<NeuTableFilterMatchMode, 'in'>;
 
 const _NEU_TABLE_ADVANCED_FILTER_TEXTS: NeuTableAdvancedFilterTexts = {
   openFilter: 'Open filter for {column}',
@@ -1399,25 +1408,27 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   /** @internal Expands deferred E2 control kinds in tests; it never enables the surface. */
   private readonly _filterOverlayFoundationEnabled = signal(false);
+  private readonly _advancedFilter = new NeuTableAdvancedFilterController<T>(
+    () => this._focusOverlayChildTrigger('date'),
+    (key) => this._currentTypedColumn(key),
+  );
   protected readonly _openFilterKey = signal<string | null>(null);
-  protected readonly _filterDraftKind = signal<InternalAdvancedFilterKind | null>(null);
-  protected readonly _filterDraftMode = signal<NeuTableFilterMatchMode | null>(null);
-  protected readonly _filterDraftValue = signal<unknown>(null);
-  protected readonly _filterDraftValid = signal(true);
-  protected readonly _filterDraftHasMultipleRules = signal(false);
-  protected readonly _filterOverlayModeControl = new FormControl<unknown>(null);
-  protected readonly _filterOverlayTextControl = new FormControl('', { nonNullable: true });
-  protected readonly _filterOverlayNumberControl = new FormControl<number | null>(null);
-  protected readonly _filterOverlayNumberFromControl = new FormControl<number | null>(null);
-  protected readonly _filterOverlayNumberToControl = new FormControl<number | null>(null);
-  protected readonly _filterOverlayInstantFromControl = new FormControl('', { nonNullable: true });
-  protected readonly _filterOverlayInstantToControl = new FormControl('', { nonNullable: true });
-  protected readonly _filterOverlayBooleanControl = new FormControl<unknown>(null);
-  protected readonly _filterOverlaySelectControl = new FormControl<unknown>(null);
-  protected readonly _filterOverlayMultiSelectControl = new FormControl<unknown[]>([], {
-    nonNullable: true,
-  });
-  protected readonly _filterOverlayDateControl = new FormControl<unknown>(null);
+  protected readonly _filterDraftKind = this._advancedFilter.kind;
+  protected readonly _filterDraftMode = this._advancedFilter.mode;
+  protected readonly _filterDraftValue = this._advancedFilter.value;
+  protected readonly _filterDraftValid = this._advancedFilter.valid;
+  protected readonly _filterDraftHasMultipleRules = this._advancedFilter.hasMultipleRules;
+  protected readonly _filterOverlayModeControl = this._advancedFilter.modeControl;
+  protected readonly _filterOverlayTextControl = this._advancedFilter.textControl;
+  protected readonly _filterOverlayNumberControl = this._advancedFilter.numberControl;
+  protected readonly _filterOverlayNumberFromControl = this._advancedFilter.numberFromControl;
+  protected readonly _filterOverlayNumberToControl = this._advancedFilter.numberToControl;
+  protected readonly _filterOverlayInstantFromControl = this._advancedFilter.instantFromControl;
+  protected readonly _filterOverlayInstantToControl = this._advancedFilter.instantToControl;
+  protected readonly _filterOverlayBooleanControl = this._advancedFilter.booleanControl;
+  protected readonly _filterOverlaySelectControl = this._advancedFilter.selectControl;
+  protected readonly _filterOverlayMultiSelectControl = this._advancedFilter.multiSelectControl;
+  protected readonly _filterOverlayDateControl = this._advancedFilter.dateControl;
   protected readonly _filterOverlayPositions: ConnectedPosition[] = [
     { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 6 },
     { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
@@ -1707,6 +1718,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   constructor() {
     this._destroyRef.onDestroy(() => {
       this._destroyed = true;
+      this._advancedFilter.destroy();
       this._stopFilterOverlayFocusContainment();
       this._clearFilterOverlayOwnership();
       this._openFilterKey.set(null);
@@ -1716,40 +1728,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this._stopColumnResize();
       this._disposeAllFilterControls();
     });
-
-    this._filterOverlayDateControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) => {
-        this._updateDateFilterDraft(value);
-        this._focusOverlayChildTrigger('date');
-    });
-
-    this._filterOverlayModeControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) => this._onFilterDraftModeChange(value));
-    this._filterOverlayTextControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) => this._setFilterDraftValue(value, true));
-    this._filterOverlayNumberControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) => this._setFilterDraftValue(value, true));
-    this._filterOverlayNumberFromControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(() => this._updateNumberRangeFilterDraft());
-    this._filterOverlayNumberToControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(() => this._updateNumberRangeFilterDraft());
-    this._filterOverlayInstantFromControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(() => this._updateInstantRangeFilterDraft());
-    this._filterOverlayInstantToControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(() => this._updateInstantRangeFilterDraft());
-    this._filterOverlayBooleanControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) =>
-        this._setFilterDraftValue(value === true || value === false ? value : null, true),
-      );
 
     this._pageSizeControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
@@ -1846,40 +1824,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   protected _filterOverlayControlKind(column: NeuTableColumn<T>): string {
-    const kind = column.filterConfig?.kind;
-    if (
-      kind === 'text' ||
-      kind === 'number' ||
-      kind === 'date' ||
-      kind === 'boolean' ||
-      kind === 'select' ||
-      kind === 'multiSelect'
-    ) {
-      return kind;
-    }
-    if (!column.filterConfig && column.filterType === 'select') return 'select';
-    if (!column.filterConfig && column.filterType === 'date') return 'date';
-    return !column.filterConfig && column.filterable ? 'text' : 'none';
+    return neuTableAdvancedFilterControlKind(column);
   }
 
   protected _filterOverlayDatePrecision(column: NeuTableColumn<T>): 'date-only' | 'instant' {
-    return column.filterConfig?.kind === 'date'
-      ? (column.filterConfig.precision ?? 'date-only')
-      : 'date-only';
+    return neuTableAdvancedFilterDatePrecision(column);
   }
 
   protected _filterOverlayModeOptions(
     column: NeuTableColumn<T>,
   ): readonly NeuSelectOption<NeuTableFilterMatchMode>[] {
     const text = this._advancedFilterText();
-    const kind = this._filterOverlayControlKind(column);
-    const modes: readonly InternalAdvancedFilterMatchMode[] =
-      kind === 'number'
-        ? ['equals', 'notEquals', 'lt', 'lte', 'gt', 'gte', 'between']
-        : kind === 'date'
-          ? ['is', 'isNot', 'before', 'after', 'between']
-          : ['contains', 'startsWith', 'endsWith', 'equals', 'notEquals', 'notContains'];
-    return modes.map((mode) => ({ label: text[mode], value: mode }));
+    return neuTableAdvancedFilterModes(column).map((mode) => ({ label: text[mode], value: mode }));
   }
 
   protected _filterOverlayOptions(column: NeuTableColumn<T>): readonly unknown[] {
@@ -1942,7 +1898,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._escapeReturnFocus = null;
     const column = this._currentTypedColumn(key);
     if (!column || !this._isFilterOverlayEligible(column)) return;
-    this._initializeFilterDraft(column);
+    this._advancedFilter.initialize(column, this._appliedFilters()[column.key]);
     this._openFilterKey.set(key);
   }
 
@@ -1954,7 +1910,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._lastFilterWorkflowFocus = null;
     this._escapeReturnFocus = null;
     this._activeFilterTrigger = null;
-    this._discardFilterDraft();
+    this._advancedFilter.discard();
     if (trigger) this._focusElementIfAvailable(trigger);
   }
 
@@ -2003,206 +1959,24 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   protected _clearFilterDraft(): void {
-    const between = this._filterDraftMode() === 'between';
-    this._filterOverlayTextControl.setValue('', { emitEvent: false });
-    this._filterOverlayNumberControl.setValue(null, { emitEvent: false });
-    this._filterOverlayNumberFromControl.setValue(null, { emitEvent: false });
-    this._filterOverlayNumberToControl.setValue(null, { emitEvent: false });
-    this._filterOverlayDateControl.setValue(null, { emitEvent: false });
-    this._filterOverlayInstantFromControl.setValue('', { emitEvent: false });
-    this._filterOverlayInstantToControl.setValue('', { emitEvent: false });
-    this._filterOverlayBooleanControl.setValue(null, { emitEvent: false });
-    this._setFilterDraftValue(between ? { from: null, to: null } : null, true);
+    this._advancedFilter.clear();
   }
 
   protected _applyFilterDraft(): void {
     const key = this._openFilterKey();
     const column = key ? this._currentTypedColumn(key) : null;
-    if (!key || !column || this._filterDraftHasMultipleRules() || !this._filterDraftValid()) return;
-    const value = this._filterDraftValue();
-    if (isNeuTableFilterValueEmpty(value)) {
+    const result = this._advancedFilter.buildApplyResult();
+    if (!key || !column || !result || result.key !== key) return;
+    if (!result.constraint) {
       this._writeAppliedFilter(key, { operator: 'and', constraints: [] });
     } else {
-      const mode =
-        this._filterDraftKind() === 'boolean' ? undefined : (this._filterDraftMode() ?? undefined);
       this._writeAppliedFilter(key, {
         operator: 'and',
-        constraints: [{ ...(mode ? { mode } : {}), value }],
+        constraints: [result.constraint],
     });
     }
     if (this.serverSide()) this._emitServerState({ page: 1 });
     this._closeFilterOverlay();
-  }
-
-  private _initializeFilterDraft(column: NeuTableColumn<T>): void {
-    this._resetFilterDraftControls();
-    const kind = this._filterOverlayControlKind(column);
-    const productionKind =
-      kind === 'text' || kind === 'number' || kind === 'date' || kind === 'boolean' ? kind : null;
-    const applied = this._appliedFilters()[column.key];
-    const multiple = (applied?.constraints.length ?? 0) > 1;
-    const constraint = applied?.constraints.length === 1 ? applied.constraints[0] : null;
-    const mode =
-      productionKind && productionKind !== 'boolean'
-        ? (resolveNeuTableFilterMatchMode(column as NeuTableColumn<T, string>, constraint?.mode) ??
-          null)
-        : null;
-    const value = constraint?.value ?? null;
-
-    this._filterDraftKind.set(productionKind);
-    this._filterDraftMode.set(mode);
-    this._filterDraftValue.set(value);
-    this._filterDraftValid.set(true);
-    this._filterDraftHasMultipleRules.set(multiple);
-    this._filterOverlayModeControl.setValue(mode, { emitEvent: false });
-
-    if (productionKind === 'text') {
-      this._filterOverlayTextControl.setValue(typeof value === 'string' ? value : '', {
-        emitEvent: false,
-    });
-    } else if (productionKind === 'number') {
-      if (mode === 'between') {
-        const range = this._numberRangeValue(value);
-        this._filterOverlayNumberFromControl.setValue(range.from, { emitEvent: false });
-        this._filterOverlayNumberToControl.setValue(range.to, { emitEvent: false });
-      } else {
-        this._filterOverlayNumberControl.setValue(typeof value === 'number' ? value : null, {
-          emitEvent: false,
-        });
-      }
-    } else if (productionKind === 'date') {
-      const precision = this._filterOverlayDatePrecision(column);
-      if (mode === 'between' && precision === 'instant') {
-        this._filterOverlayInstantFromControl.setValue(
-          this._instantRangeControlValue(value, 'from'),
-          { emitEvent: false },
-        );
-        this._filterOverlayInstantToControl.setValue(this._instantRangeControlValue(value, 'to'), {
-          emitEvent: false,
-        });
-      } else {
-        this._filterOverlayDateControl.setValue(
-          mode === 'between'
-            ? this._dateRangeControlValue(value)
-            : this._dateInputControlValue(value, precision),
-          { emitEvent: false },
-        );
-      }
-    } else if (productionKind === 'boolean') {
-      this._filterOverlayBooleanControl.setValue(value === true || value === false ? value : null, {
-        emitEvent: false,
-    });
-    }
-  }
-
-  private _onFilterDraftModeChange(value: unknown): void {
-    const key = this._openFilterKey();
-    const column = key ? this._currentTypedColumn(key) : null;
-    if (!column || typeof value !== 'string') return;
-    const allowed = this._filterOverlayModeOptions(column).some((option) => option.value === value);
-    if (!allowed) return;
-    const previous = this._filterDraftMode();
-    this._filterDraftMode.set(value as NeuTableFilterMatchMode);
-    if ((previous === 'between') !== (value === 'between')) {
-      this._clearFilterDraft();
-    } else {
-      this._validateFilterDraft(column);
-    }
-  }
-
-  private _updateNumberRangeFilterDraft(): void {
-    const from = this._filterOverlayNumberFromControl.value;
-    const to = this._filterOverlayNumberToControl.value;
-    this._setFilterDraftValue({ from, to }, from === null || to === null || from <= to);
-  }
-
-  private _updateDateFilterDraft(value: unknown): void {
-    const key = this._openFilterKey();
-    const column = key ? this._currentTypedColumn(key) : null;
-    if (!column || this._filterDraftKind() !== 'date') return;
-    const precision = this._filterOverlayDatePrecision(column);
-    if (this._filterDraftMode() === 'between') {
-      if (precision === 'instant' || !this._isNeuDateRange(value)) return;
-      const range = {
-        from: this._dateFilterValue(value.start, 'date-only'),
-        to: this._dateFilterValue(value.end, 'date-only'),
-      };
-      this._setFilterDraftValue(range, this._isOrderedDateRange(range));
-      return;
-    }
-    const raw = typeof value === 'string' ? value : '';
-    const canonical =
-      precision === 'instant'
-        ? this._instantFilterValue(raw)
-        : (normalizeNeuTableDatePoint(raw, 'date-only')?.value ?? null);
-    this._setFilterDraftValue(canonical, !raw || canonical !== null);
-  }
-
-  private _updateInstantRangeFilterDraft(): void {
-    const rawFrom = this._filterOverlayInstantFromControl.value;
-    const rawTo = this._filterOverlayInstantToControl.value;
-    const from = this._instantFilterValue(rawFrom);
-    const to = this._instantFilterValue(rawTo);
-    this._setFilterDraftValue(
-      { from, to },
-      (!rawFrom || from !== null) &&
-        (!rawTo || to !== null) &&
-        this._isOrderedDateRange({ from, to }),
-    );
-  }
-
-  private _isOrderedDateRange(range: { from: unknown; to: unknown }): boolean {
-    if (!range.from || !range.to) return true;
-    const from = Date.parse(String(range.from));
-    const to = Date.parse(String(range.to));
-    return !Number.isNaN(from) && !Number.isNaN(to) && from <= to;
-  }
-
-  private _setFilterDraftValue(value: unknown, valid: boolean): void {
-    this._filterDraftValue.set(value);
-    this._filterDraftValid.set(valid);
-  }
-
-  private _validateFilterDraft(column: NeuTableColumn<T>): void {
-    const value = this._filterDraftValue();
-    if (isNeuTableFilterValueEmpty(value)) {
-      this._filterDraftValid.set(true);
-      return;
-    }
-    if (this._filterDraftKind() === 'text' && !column.filterConfig) {
-      this._filterDraftValid.set(typeof value === 'string');
-      return;
-    }
-    this._filterDraftValid.set(
-      buildNeuTableFilterState(
-        column as NeuTableColumn<T, string>,
-        value,
-        this._filterDraftMode() ?? undefined,
-      ) !== null,
-    );
-  }
-
-  private _discardFilterDraft(): void {
-    this._filterDraftKind.set(null);
-    this._filterDraftMode.set(null);
-    this._filterDraftValue.set(null);
-    this._filterDraftValid.set(true);
-    this._filterDraftHasMultipleRules.set(false);
-    this._resetFilterDraftControls();
-  }
-
-  private _resetFilterDraftControls(): void {
-    this._filterOverlayModeControl.setValue(null, { emitEvent: false });
-    this._filterOverlayTextControl.setValue('', { emitEvent: false });
-    this._filterOverlayNumberControl.setValue(null, { emitEvent: false });
-    this._filterOverlayNumberFromControl.setValue(null, { emitEvent: false });
-    this._filterOverlayNumberToControl.setValue(null, { emitEvent: false });
-    this._filterOverlayDateControl.setValue(null, { emitEvent: false });
-    this._filterOverlayInstantFromControl.setValue('', { emitEvent: false });
-    this._filterOverlayInstantToControl.setValue('', { emitEvent: false });
-    this._filterOverlayBooleanControl.setValue(null, { emitEvent: false });
-    this._filterOverlaySelectControl.setValue(null, { emitEvent: false });
-    this._filterOverlayMultiSelectControl.setValue([], { emitEvent: false });
   }
 
   private _formatAdvancedFilterText(template: string, column: NeuTableColumn<T>): string {
@@ -3604,14 +3378,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     let control = controls.get(col.key);
     if (!control) {
       control = new FormControl<number | null>(
-        this._numberRangeValue(this._appliedSingleFilterValue(col.key))[boundary],
+        neuTableNumberRangeValue(this._appliedSingleFilterValue(col.key))[boundary],
       );
       const subscription = control.valueChanges
         .pipe(takeUntilDestroyed(this._destroyRef))
         .subscribe((value) => {
           const currentColumn = this._currentTypedColumn(col.key);
           if (currentColumn?.filterConfig?.kind !== 'number') return;
-          const range = this._numberRangeValue(this._appliedSingleFilterValue(col.key));
+          const range = neuTableNumberRangeValue(this._appliedSingleFilterValue(col.key));
           this.setColumnFilter(col.key, { ...range, [boundary]: value });
         });
       this._trackFilterControl(control, subscription);
@@ -3629,7 +3403,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     let control = controls.get(col.key);
     if (!control) {
       control = new FormControl<string>(
-        this._instantRangeControlValue(this._appliedSingleFilterValue(col.key), boundary),
+        neuTableInstantRangeControlValue(this._appliedSingleFilterValue(col.key), boundary),
         {
           nonNullable: true,
         },
@@ -3639,8 +3413,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         .subscribe((value) => {
           const currentColumn = this._currentTypedColumn(col.key);
           if (!currentColumn || !this.isInstantRange(currentColumn)) return;
-          const range = this._dateRangeFilterValue(this._appliedSingleFilterValue(col.key));
-          this.setColumnFilter(col.key, { ...range, [boundary]: this._instantFilterValue(value) });
+          const range = neuTableDateRangeFilterValue(this._appliedSingleFilterValue(col.key));
+          this.setColumnFilter(col.key, { ...range, [boundary]: neuTableInstantFilterValue(value) });
         });
       this._trackFilterControl(control, subscription);
       controls.set(col.key, control);
@@ -3656,7 +3430,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return;
     }
     if (col.filterConfig?.kind === 'number' && this.modernFilterMode(col) === 'between') {
-      const range = this._numberRangeValue(value);
+      const range = neuTableNumberRangeValue(value);
       this._typedRangeStartControls.get(col.key)?.setValue(range.from, { emitEvent: false });
       this._typedRangeEndControls.get(col.key)?.setValue(range.to, { emitEvent: false });
       return;
@@ -3664,10 +3438,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     if (this.isInstantRange(col)) {
       this._typedInstantRangeStartControls
         .get(col.key)
-        ?.setValue(this._instantRangeControlValue(value, 'from'), { emitEvent: false });
+        ?.setValue(neuTableInstantRangeControlValue(value, 'from'), { emitEvent: false });
       this._typedInstantRangeEndControls
         .get(col.key)
-        ?.setValue(this._instantRangeControlValue(value, 'to'), { emitEvent: false });
+        ?.setValue(neuTableInstantRangeControlValue(value, 'to'), { emitEvent: false });
       return;
     }
     this._typedColumnFilterControls
@@ -3685,9 +3459,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     if (config.kind === 'multiSelect') return this._multiSelectFilterControlValue(value);
     if (config.kind === 'date') {
       if (this.isDateOnlyRange(col)) {
-        return this._dateRangeControlValue(value);
+        return neuTableDateRangeControlValue(value);
       }
-      return this._dateInputControlValue(value, config.precision ?? 'date-only');
+      return neuTableDateInputControlValue(value, config.precision ?? 'date-only');
     }
     return value;
   }
@@ -3698,12 +3472,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const precision = config.precision ?? 'date-only';
     if (this.isInstantRange(col)) return value;
     if (this.modernFilterMode(col) !== 'between') {
-      return precision === 'instant' ? this._instantFilterValue(value) : value;
+      return precision === 'instant' ? neuTableInstantFilterValue(value) : value;
     }
-    if (!this._isNeuDateRange(value)) return { from: null, to: null };
+    if (!isNeuTableDateRange(value)) return { from: null, to: null };
     return {
-      from: this._dateFilterValue(value.start, precision),
-      to: this._dateFilterValue(value.end, precision),
+      from: neuTableDateFilterValue(value.start, precision),
+      to: neuTableDateFilterValue(value.end, precision),
     };
   }
 
@@ -3711,87 +3485,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return Array.isArray(value) ? [...value] : [];
   }
 
-  private _numberRangeValue(value: unknown): NeuTableNumberRangeValue {
-    if (!this._isRecord(value)) return { from: null, to: null };
-    return {
-      from: typeof value['from'] === 'number' ? value['from'] : null,
-      to: typeof value['to'] === 'number' ? value['to'] : null,
-    };
-  }
-
-  private _dateRangeControlValue(
-    value: unknown,
-  ): NeuDateRange {
-    if (!this._isRecord(value)) return { start: null, end: null };
-    return {
-      start: this._dateOnlyControlDate(value['from']),
-      end: this._dateOnlyControlDate(value['to']),
-    };
-  }
-
-  private _dateRangeFilterValue(value: unknown): { from: unknown; to: unknown } {
-    if (!this._isRecord(value)) return { from: null, to: null };
-    return { from: value['from'] ?? null, to: value['to'] ?? null };
-  }
-
-  private _instantRangeControlValue(value: unknown, boundary: 'from' | 'to'): string {
-    return this._dateInputControlValue(this._dateRangeFilterValue(value)[boundary], 'instant');
-  }
-
-  private _dateInputControlValue(value: unknown, precision: 'date-only' | 'instant'): string {
-    if (precision === 'date-only') {
-      return normalizeNeuTableDatePoint(value, 'date-only')?.value ?? '';
-    }
-    const date = this._dateControlDate(value);
-    if (!date) return '';
-    return this._formatLocalDateTime(date);
-  }
-
-  private _dateOnlyControlDate(value: unknown): Date | null {
-    const canonicalDate = normalizeNeuTableDatePoint(value, 'date-only')?.value;
-    if (!canonicalDate) return null;
-    const [year, month, day] = canonicalDate.split('-').map(Number);
-    return new Date(year, month - 1, day);
-  }
-
-  private _dateControlDate(value: unknown): Date | null {
-    const source =
-      this._isRecord(value) && typeof value['value'] === 'string' ? value['value'] : value;
-    if (source instanceof Date) return Number.isNaN(source.getTime()) ? null : new Date(source.getTime());
-    if (typeof source !== 'string' || !source) return null;
-    const date = new Date(source);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
   private _currentTypedColumn(key: string): NeuTableColumn<T> | null {
     return this._typedColumns().find((candidate) => candidate.key === key) ?? null;
-  }
-
-  private _dateFilterValue(date: Date | null, precision: 'date-only' | 'instant'): string | null {
-    if (!date || Number.isNaN(date.getTime())) return null;
-    return precision === 'date-only' ? this._formatLocalDate(date) : date.toISOString();
-  }
-
-  private _instantFilterValue(value: unknown): string | null {
-    if (typeof value !== 'string' || !value) return null;
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date.toISOString();
-  }
-
-  private _formatLocalDate(date: Date): string {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  }
-
-  private _formatLocalDateTime(date: Date): string {
-    return `${this._formatLocalDate(date)}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-  }
-
-  private _isNeuDateRange(value: unknown): value is NeuDateRange {
-    return this._isRecord(value) && ('start' in value || 'end' in value);
-  }
-
-  private _isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null;
   }
 
   private _writeAppliedFilter(key: string, input: InternalAppliedColumnFilter): void {
