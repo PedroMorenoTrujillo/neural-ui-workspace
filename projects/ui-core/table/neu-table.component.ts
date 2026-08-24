@@ -10,6 +10,7 @@ import {
   WritableSignal,
   computed,
   contentChild,
+  contentChildren,
   effect,
   inject,
   input,
@@ -26,6 +27,10 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import type { Subscription } from 'rxjs';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
+import {
+  NeuTableFilterTemplateDirective,
+  type NeuTableFilterTemplateContext,
+} from './neu-table-filter-template.directive';
 import {
   buildNeuTableFilterState,
   isNeuTableFilterValueEmpty,
@@ -392,6 +397,53 @@ export type NeuTableColumnInput<T extends object> =
                       [formControl]="rule.booleanControl"
                     />
                   }
+                  @case ('select') {
+                    <neu-select
+                      class="neu-table__filter-overlay-control"
+                      [floatingLabel]="false"
+                      [label]="_filterOverlayControlLabel(column)"
+                      [placeholder]="allFilterOptionLabel()"
+                      [options]="_filterOverlayOptions(column)"
+                      [optionLabel]="typedFilterOptionLabel(column)"
+                      [optionValue]="typedFilterOptionValue(column)"
+                      [optionDisabled]="typedFilterOptionDisabled(column)"
+                      [searchable]="typedFilterSearchable(column)"
+                      [virtualScroll]="typedFilterVirtualScroll(column)"
+                      [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(column)"
+                      [clearable]="true"
+                      [clearAriaLabel]="_advancedFilterText().clear"
+                      [formControl]="rule.selectControl"
+                      (selectionChange)="_onFilterOverlaySingleValueCommitted(rule.id)"
+                    />
+                  }
+                  @case ('multiSelect') {
+                    <neu-multiselect
+                      class="neu-table__filter-overlay-control"
+                      [floatingLabel]="false"
+                      [label]="_filterOverlayControlLabel(column)"
+                      [placeholder]="allFilterOptionLabel()"
+                      [options]="_filterOverlayOptions(column)"
+                      [optionLabel]="typedFilterOptionLabel(column)"
+                      [optionValue]="typedFilterOptionValue(column)"
+                      [optionDisabled]="typedFilterOptionDisabled(column)"
+                      [searchable]="typedFilterSearchable(column)"
+                      [virtualScroll]="typedFilterVirtualScroll(column)"
+                      [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(column)"
+                      [clearable]="true"
+                      [clearAriaLabel]="_advancedFilterText().clear"
+                      [formControl]="rule.multiSelectControl"
+                    />
+                  }
+                  @case ('custom') {
+                    @if (_filterOverlayCustomTemplate(column); as customTemplate) {
+                      <div class="neu-table__filter-overlay-custom">
+                        <ng-container
+                          [ngTemplateOutlet]="customTemplate"
+                          [ngTemplateOutletContext]="_filterOverlayCustomContext(column)"
+                        />
+                      </div>
+                    }
+                  }
                 }
               </div>
             }
@@ -444,40 +496,6 @@ export type NeuTableColumnInput<T extends object> =
               </button>
             }
           </div>
-        } @else {
-          @switch (_filterOverlayControlKind(column)) {
-            @case ('select') {
-              <neu-select
-                class="neu-table__filter-overlay-control"
-                [floatingLabel]="false"
-                [label]="_filterOverlayControlLabel(column)"
-                [placeholder]="allFilterOptionLabel()"
-                [options]="_filterOverlayOptions(column)"
-                [optionLabel]="typedFilterOptionLabel(column)"
-                [optionValue]="typedFilterOptionValue(column)"
-                [optionDisabled]="typedFilterOptionDisabled(column)"
-                [searchable]="typedFilterSearchable(column)"
-                [clearable]="true"
-                [formControl]="_filterOverlaySelectControl"
-                (selectionChange)="_onFilterOverlaySingleValueCommitted()"
-              />
-            }
-            @case ('multiSelect') {
-              <neu-multiselect
-                class="neu-table__filter-overlay-control"
-                [floatingLabel]="false"
-                [label]="_filterOverlayControlLabel(column)"
-                [placeholder]="allFilterOptionLabel()"
-                [options]="_filterOverlayOptions(column)"
-                [optionLabel]="typedFilterOptionLabel(column)"
-                [optionValue]="typedFilterOptionValue(column)"
-                [optionDisabled]="typedFilterOptionDisabled(column)"
-                [searchable]="typedFilterSearchable(column)"
-                [clearable]="true"
-                [formControl]="_filterOverlayMultiSelectControl"
-              />
-            }
-          }
         }
       </div>
     </ng-template>
@@ -1476,8 +1494,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _pendingFilterOverlayChildTrigger: HTMLElement | null = null;
   private _destroyed = false;
 
-  /** @internal Expands deferred E2 control kinds in tests; it never enables the surface. */
-  private readonly _filterOverlayFoundationEnabled = signal(false);
   private readonly _advancedFilter = new NeuTableAdvancedFilterController<T>(
     () => this._focusOverlayChildTrigger('date'),
     (key) => this._currentTypedColumn(key),
@@ -1493,8 +1509,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   protected readonly _filterDraftCanAddRule = this._advancedFilter.canAddRule;
   protected readonly _filterDraftReadOnly = this._advancedFilter.readOnly;
   protected readonly _filterOverlayOperatorControl = this._advancedFilter.operatorControl;
-  protected readonly _filterOverlaySelectControl = this._advancedFilter.selectControl;
-  protected readonly _filterOverlayMultiSelectControl = this._advancedFilter.multiSelectControl;
   protected readonly _filterOverlayPositions: ConnectedPosition[] = [
     { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 6 },
     { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
@@ -1516,6 +1530,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   readonly expandTemplate = contentChild<NeuTableExpandDirective<T>>(NeuTableExpandDirective);
   readonly toolbarTemplate = contentChild(NeuTableToolbarDirective);
+  protected readonly filterTemplates = contentChildren<NeuTableFilterTemplateDirective<T>>(
+    NeuTableFilterTemplateDirective,
+  );
   protected readonly _toolbarTemplateRef = computed(
     () => this.toolbarExtraRef() ?? this.toolbarTemplate()?.templateRef ?? null,
   );
@@ -1821,6 +1838,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     });
 
     effect(() => {
+      this.filterTemplates();
+      this.advancedFilterMode();
+      this.serverSide();
+      const activeKey = this._openFilterKey();
+      const column = activeKey ? this._currentTypedColumn(activeKey) : null;
+      if (activeKey && (!column || !this._isFilterOverlayEligible(column))) {
+        untracked(() => this._closeFilterOverlay(false));
+      }
+    });
+
+    effect(() => {
       let legacyFilters: Record<string, unknown> | null = null;
       for (const col of this._typedColumns()) {
         if (col.filterConfig) {
@@ -1878,7 +1906,19 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   protected _isFilterOverlayEligible(column: NeuTableColumn<T>): boolean {
     if (this.advancedFilterMode() !== 'menu') return false;
     const kind = column.filterConfig?.kind;
-    if (kind === 'text' || kind === 'number' || kind === 'date' || kind === 'boolean') return true;
+    if (
+      kind === 'text' ||
+      kind === 'number' ||
+      kind === 'date' ||
+      kind === 'boolean' ||
+      kind === 'select' ||
+      kind === 'multiSelect'
+    ) {
+      return true;
+    }
+    if (kind === 'custom') {
+      return !this.serverSide() && this._filterOverlayCustomTemplate(column) !== null;
+    }
     if (
       !column.filterConfig &&
       column.filterable &&
@@ -1886,7 +1926,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     ) {
       return true;
     }
-    return this._filterOverlayFoundationEnabled() && (!!column.filterConfig || !!column.filterable);
+    return false;
   }
 
   protected _filterOverlayControlKind(column: NeuTableColumn<T>): string {
@@ -1933,6 +1973,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._advancedFilter.dateControl;
   }
 
+  protected get _filterOverlaySelectControl(): FormControl<unknown> {
+    return this._advancedFilter.selectControl;
+  }
+
+  protected get _filterOverlayMultiSelectControl(): FormControl<unknown[]> {
+    return this._advancedFilter.multiSelectControl;
+  }
+
   protected _filterOverlayModeOptions(
     column: NeuTableColumn<T>,
   ): readonly NeuSelectOption<NeuTableFilterMatchMode>[] {
@@ -1954,6 +2002,32 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return config.options ?? [];
     }
     return column.filterType === 'select' ? this._filterOpts(column) : [];
+  }
+
+  protected _filterOverlayCustomTemplate(
+    column: NeuTableColumn<T>,
+  ): TemplateRef<NeuTableFilterTemplateContext<T>> | null {
+    if (column.filterConfig?.kind !== 'custom') return null;
+    return (
+      this.filterTemplates().find((template) => template.columnKey() === column.key)?.templateRef ??
+      null
+    );
+  }
+
+  protected _filterOverlayCustomContext(
+    column: NeuTableColumn<T>,
+  ): NeuTableFilterTemplateContext<T> {
+    const context = {
+      column,
+      value: this._filterDraftValue(),
+      setValue: (value: unknown) => this._setCustomFilterDraftValue(column.key, value),
+      clear: () => this._setCustomFilterDraftValue(column.key, null),
+      active: this._isFilterOverlayActive(column.key),
+    } as Omit<NeuTableFilterTemplateContext<T>, '$implicit'> &
+      Partial<Pick<NeuTableFilterTemplateContext<T>, '$implicit'>>;
+    const complete = context as NeuTableFilterTemplateContext<T>;
+    complete.$implicit = complete;
+    return complete;
   }
 
   protected _filterOverlayTriggerId(key: string): string {
@@ -2064,6 +2138,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     );
     initialFocus?.focus();
     this._lastFilterWorkflowFocus = initialFocus ?? null;
+    if (this._filterDraftKind() === 'custom') {
+      queueMicrotask(() => this._focusCustomFilterControl());
+    }
   }
 
   protected _onFilterOverlayDetached(key: string): void {
@@ -2093,8 +2170,20 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._closeFilterOverlay();
   }
 
-  protected _onFilterOverlaySingleValueCommitted(): void {
-    this._focusOverlayChildTrigger('select');
+  protected _onFilterOverlaySingleValueCommitted(ruleId: string): void {
+    queueMicrotask(() => this._focusFilterDraftRule(ruleId, 'select'));
+  }
+
+  private _setCustomFilterDraftValue(key: string, value: unknown): void {
+    const column = this._currentTypedColumn(key);
+    if (
+      this._openFilterKey() !== key ||
+      column?.filterConfig?.kind !== 'custom' ||
+      !this._filterOverlayCustomTemplate(column)
+    ) {
+      return;
+    }
+    this._advancedFilter.setValue(value);
   }
 
   protected _clearFilterDraft(): void {
@@ -2132,14 +2221,29 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._closeFilterOverlay();
   }
 
-  private _focusFilterDraftRule(id: string): void {
+  private _focusFilterDraftRule(id: string, kind: 'default' | 'select' = 'default'): void {
     const rule = this._filterOverlayPanel()?.querySelector<HTMLElement>(
       `[data-neu-table-filter-rule-id="${id}"]`,
     );
-    const target = rule?.querySelector<HTMLElement>(
-      '.neu-table__filter-overlay-mode .neu-select__trigger, input, .neu-select__trigger',
-    );
+    const selector =
+      kind === 'select'
+        ? 'neu-select:not(.neu-table__filter-overlay-mode) .neu-select__trigger'
+        : '.neu-table__filter-overlay-mode .neu-select__trigger, input, .neu-select__trigger, .neu-multiselect__trigger';
+    const target = rule?.querySelector<HTMLElement>(selector);
     this._focusElementIfAvailable(target ?? null);
+  }
+
+  private _focusCustomFilterControl(): void {
+    const custom = this._filterOverlayPanel()?.querySelector<HTMLElement>(
+      '.neu-table__filter-overlay-custom',
+    );
+    const target = custom?.querySelector<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    if (target) {
+      this._focusElementIfAvailable(target);
+      this._lastFilterWorkflowFocus = target;
+    }
   }
 
   private _formatAdvancedFilterText(template: string, column: NeuTableColumn<T>): string {

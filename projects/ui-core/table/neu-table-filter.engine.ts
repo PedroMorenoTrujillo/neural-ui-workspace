@@ -439,9 +439,20 @@ export function normalizeNeuTableAppliedFilterValue<T>(
     }
     case 'multiSelect':
       return Array.isArray(filterValue) ? [...filterValue] : filterValue;
+    case 'custom':
+      return snapshotNeuTableCustomValue(filterValue);
     default:
       return filterValue;
   }
+}
+
+function snapshotNeuTableCustomValue(value: unknown): unknown {
+  if (Array.isArray(value)) return [...value];
+  if (value instanceof Date) return new Date(value.getTime());
+  if (isRecord(value) && ('from' in value || 'to' in value)) {
+    return snapshotNeuTableRangeValue(value);
+  }
+  return value;
 }
 
 function snapshotNeuTableDateValue(value: unknown): unknown {

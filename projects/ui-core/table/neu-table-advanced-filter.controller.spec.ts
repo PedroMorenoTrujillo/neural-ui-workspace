@@ -12,6 +12,9 @@ interface FilterRow {
   createdAt: string;
   instant: string;
   active: boolean;
+  role: unknown;
+  status: string;
+  custom: unknown;
 }
 
 const textColumn: NeuTableColumn<FilterRow> = {
@@ -38,6 +41,21 @@ const booleanColumn: NeuTableColumn<FilterRow> = {
   key: 'active',
   header: 'Active',
   filterConfig: { kind: 'boolean' },
+};
+const selectColumn: NeuTableColumn<FilterRow> = {
+  key: 'role',
+  header: 'Role',
+  filterConfig: { kind: 'select', options: [0, 'admin'] },
+};
+const multiSelectColumn: NeuTableColumn<FilterRow> = {
+  key: 'status',
+  header: 'Status',
+  filterConfig: { kind: 'multiSelect', options: ['active', 'pending'] },
+};
+const customColumn: NeuTableColumn<FilterRow> = {
+  key: 'custom',
+  header: 'Custom',
+  filterConfig: { kind: 'custom', predicate: () => true },
 };
 
 describe('NeuTableAdvancedFilterController', () => {
@@ -377,6 +395,94 @@ describe('NeuTableAdvancedFilterController', () => {
     expect(controller.rules()).toHaveLength(1);
     controller.booleanControl.setValue('invalid');
     expect(controller.value()).toBeNull();
+    controller.destroy();
+  });
+
+  it('owns independent Select controls per rule and defaults new combinations to OR', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    const objectValue = { id: 1 };
+    controller.initialize(selectColumn, { constraints: [] });
+
+    expect(controller.kind()).toBe('select');
+    expect(controller.operator()).toBe('or');
+    expect(controller.rules()[0].mode()).toBe('equals');
+    controller.rules()[0].selectControl.setValue(0);
+    controller.addRule();
+    controller.rules()[1].selectControl.setValue(objectValue);
+
+    expect(controller.rules()[0].selectControl).not.toBe(controller.rules()[1].selectControl);
+    expect(controller.buildApplyResult()?.filter).toEqual({
+      operator: 'or',
+      constraints: [
+        { mode: 'equals', value: 0 },
+        { mode: 'equals', value: objectValue },
+      ],
+    });
+    expect(controller.rules()[1].value()).toBe(objectValue);
+    controller.destroy();
+  });
+
+  it('keeps MultiSelect single-rule and snapshots the draft selection array', () => {
+    const selected = ['active'];
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(multiSelectColumn, { constraints: [{ mode: 'in', value: selected }] });
+
+    expect(controller.kind()).toBe('multiSelect');
+    expect(controller.canAddRule()).toBe(false);
+    expect(controller.addRule()).toBeNull();
+    expect(controller.multiSelectControl.value).toEqual(['active']);
+    expect(controller.multiSelectControl.value).not.toBe(selected);
+    selected[0] = 'pending';
+    expect(controller.buildApplyResult()?.filter.constraints[0]).toEqual({
+      mode: 'in',
+      value: ['active'],
+    });
+
+    const next = ['active', 'pending'];
+    controller.multiSelectControl.setValue(next);
+    next[0] = 'changed';
+    expect(controller.value()).toEqual(['active', 'pending']);
+    controller.destroy();
+  });
+
+  it('keeps custom template values draft-only with bounded snapshot semantics', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    const applied = ['active'];
+    controller.initialize(customColumn, { constraints: [{ value: applied }] });
+
+    expect(controller.kind()).toBe('custom');
+    expect(controller.canAddRule()).toBe(false);
+    expect(controller.value()).toEqual(['active']);
+    expect(controller.value()).not.toBe(applied);
+    expect(controller.setValue(new Date('2026-08-20T00:00:00.000Z'))).toBe(true);
+    expect(controller.value()).toEqual(new Date('2026-08-20T00:00:00.000Z'));
+    controller.clear();
+    expect(controller.buildApplyResult()).toEqual({
+      key: 'custom',
+      filter: { operator: 'and', constraints: [] },
+    });
+    controller.destroy();
+  });
+
+  it('shows unsupported existing MultiSelect and custom multi-rules read-only', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(multiSelectColumn, {
+      operator: 'or',
+      constraints: [
+        { mode: 'in', value: ['active'] },
+        { mode: 'in', value: ['pending'] },
+      ],
+    });
+    expect(controller.readOnly()).toBe(true);
+    expect(controller.rules()).toHaveLength(2);
+    expect(controller.buildApplyResult()).toBeNull();
+
+    controller.initialize(customColumn, {
+      operator: 'and',
+      constraints: [{ value: 'one' }, { value: 'two' }],
+    });
+    expect(controller.readOnly()).toBe(true);
+    expect(controller.rules().map((rule) => rule.value())).toEqual(['one', 'two']);
     controller.destroy();
   });
 

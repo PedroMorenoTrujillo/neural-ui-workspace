@@ -5,6 +5,7 @@ import {
   matchNeuTableNumber,
   matchNeuTableText,
   matchesNeuTableFilter,
+  normalizeNeuTableAppliedFilterValue,
   normalizeNeuTableDatePoint,
   resolveNeuTableFilterMatchMode,
 } from './neu-table-filter.engine';
@@ -385,11 +386,21 @@ describe('NeuTable filter engine', () => {
       const column: NeuTableColumn<FilterUser, string> = {
         key: 'score',
         header: 'Score',
-        filterConfig: { kind: 'select', options: [0, 1], accessor: (row) => row.score },
+        filterConfig: {
+          kind: 'select',
+          options: [0, 1, false, Number.NaN],
+          accessor: (row) => row.score,
+        },
       };
 
       expect(matchesNeuTableFilter({ score: 0 } as FilterUser, column, 0)).toBe(true);
       expect(matchesNeuTableFilter({ score: 0 } as FilterUser, column, '0')).toBe(false);
+      expect(matchesNeuTableFilter({ score: false } as unknown as FilterUser, column, false)).toBe(
+        true,
+      );
+      expect(
+        matchesNeuTableFilter({ score: Number.NaN } as FilterUser, column, Number.NaN),
+      ).toBe(true);
     });
 
     it('matches select values with Neural option identity semantics', () => {
@@ -417,5 +428,30 @@ describe('NeuTable filter engine', () => {
       expect(matchesNeuTableFilter({ option: selected }, column, [{ ...selected }])).toBe(false);
       expect(matchesNeuTableFilter({ option: selected }, column, selected)).toBe(false);
     });
+  });
+
+  it('snapshots bounded custom values without deep-cloning opaque objects', () => {
+    const column: NeuTableColumn<FilterUser, string> = {
+      key: 'name',
+      header: 'Custom',
+      filterConfig: { kind: 'custom', predicate: () => true },
+    };
+    const array = [{ id: 1 }];
+    const date = new Date('2026-08-20T00:00:00.000Z');
+    const range = { from: date, to: null, metadata: { stable: true } };
+    const opaque = { query: 'active' };
+
+    const arraySnapshot = normalizeNeuTableAppliedFilterValue(column, array) as unknown[];
+    const dateSnapshot = normalizeNeuTableAppliedFilterValue(column, date) as Date;
+    const rangeSnapshot = normalizeNeuTableAppliedFilterValue(column, range) as typeof range;
+
+    expect(arraySnapshot).not.toBe(array);
+    expect(arraySnapshot[0]).toBe(array[0]);
+    expect(dateSnapshot).not.toBe(date);
+    expect(dateSnapshot.getTime()).toBe(date.getTime());
+    expect(rangeSnapshot).not.toBe(range);
+    expect(rangeSnapshot.from).not.toBe(date);
+    expect(rangeSnapshot.metadata).toBe(range.metadata);
+    expect(normalizeNeuTableAppliedFilterValue(column, opaque)).toBe(opaque);
   });
 });

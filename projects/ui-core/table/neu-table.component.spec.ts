@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, PLATFORM_ID, type WritableSignal } from '@angular/core';
+import { Component, PLATFORM_ID, signal, type WritableSignal } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { provideRouter } from '@angular/router';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -8,6 +8,7 @@ import { lucidePencil } from '@ng-icons/lucide';
 import { NeuTableColumnInput, NeuTableComponent } from './neu-table.component';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
+import { NeuTableFilterTemplateDirective } from './neu-table-filter-template.directive';
 import {
   NeuTableAction,
   NeuTableActionEvent,
@@ -72,6 +73,73 @@ class AdvancedFilterTextsCompatibilityHostComponent {
   readonly overrides = {
     matchAll: 'All conditions',
   } satisfies Partial<NeuTableAdvancedFilterTexts>;
+}
+
+interface CustomTemplateRow {
+  id: number;
+  status: string;
+  account: { status: string };
+}
+
+@Component({
+  selector: 'neu-table-custom-filter-template-host',
+  standalone: true,
+  imports: [NeuTableComponent, NeuTableFilterTemplateDirective],
+  template: `
+    <neu-table
+      advancedFilterMode="menu"
+      [columns]="columns"
+      [data]="rows"
+      [searchable]="false"
+      [pagination]="false"
+      [serverSide]="serverSide()"
+    >
+      @if (showTemplate()) {
+        <ng-template neuTableFilterTemplate="status" let-context>
+          <input
+            class="custom-filter-input"
+            [attr.aria-label]="'Custom ' + context.column.header"
+            [value]="context.value ?? ''"
+            (input)="context.setValue($any($event.target).value)"
+          />
+          <button class="custom-filter-clear" type="button" (click)="context.clear()">
+            Clear custom draft
+          </button>
+          <span class="custom-filter-active">{{ context.active }}</span>
+        </ng-template>
+      }
+      @if (showDuplicate()) {
+        <ng-template neuTableFilterTemplate="status" let-context>
+          <button class="duplicate-custom-template" type="button" (click)="context.clear()">
+            Duplicate {{ context.column.header }}
+          </button>
+        </ng-template>
+      }
+    </neu-table>
+  `,
+})
+class CustomFilterTemplateHostComponent {
+  readonly showTemplate = signal(true);
+  readonly showDuplicate = signal(false);
+  readonly serverSide = signal(false);
+  readonly predicate = vi.fn((value: unknown, filterValue: unknown, row: CustomTemplateRow) =>
+    String(value).includes(String(filterValue)) && row.id > 0,
+  );
+  readonly columns: NeuTableColumn<CustomTemplateRow>[] = [
+    {
+      key: 'status',
+      header: 'Account status',
+      filterConfig: {
+        kind: 'custom',
+        accessor: (row) => row.account.status,
+        predicate: this.predicate,
+      },
+    },
+  ];
+  readonly rows: CustomTemplateRow[] = [
+    { id: 1, status: 'ignored', account: { status: 'active' } },
+    { id: 2, status: 'ignored', account: { status: 'pending' } },
+  ];
 }
 
 interface Person {
@@ -148,6 +216,8 @@ interface TestAdvancedFilterDraftRule {
   instantToControl: FormControl<string>;
   booleanControl: FormControl<unknown>;
   dateControl: FormControl<unknown>;
+  selectControl: FormControl<unknown>;
+  multiSelectControl: FormControl<unknown[]>;
 }
 
 interface InternalTableFilterHarness<T extends object = Record<string, unknown>> {
@@ -164,7 +234,6 @@ interface InternalTableFilterHarness<T extends object = Record<string, unknown>>
   _typedInstantRangeEndControls: Map<string, FormControl<string>>;
   _typedMultiSelectFilterControls: Map<string, FormControl<unknown[]>>;
   _filterControlSubscriptions: Map<object, unknown>;
-  _filterOverlayFoundationEnabled: WritableSignal<boolean>;
   _openFilterKey: WritableSignal<string | null>;
   _filterDraftMode: WritableSignal<NeuTableFilterMatchMode | null>;
   _filterDraftValue: WritableSignal<unknown>;
@@ -5846,7 +5915,6 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     columns: readonly NeuTableColumn<OverlayFilterRow>[] = OVERLAY_FILTER_COLUMNS,
   ): Promise<ComponentFixture<NeuTableComponent<OverlayFilterRow>>> {
     const fixture = TestBed.createComponent(NeuTableComponent<OverlayFilterRow>);
-    internalFilters(fixture.componentInstance)._filterOverlayFoundationEnabled.set(true);
     fixture.componentRef.setInput('advancedFilterMode', 'menu');
     fixture.componentRef.setInput('columns', columns);
     fixture.componentRef.setInput('data', OVERLAY_FILTER_DATA);
@@ -6338,7 +6406,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     ]);
   });
 
-  it('keeps the provisional overlay controls isolated from canonical state after interaction', async () => {
+  it('keeps production overlay controls isolated from canonical state before Apply', async () => {
     const fixture = await createOverlayTable();
     const table = fixture.componentInstance;
     const internal = internalFilters(table);
@@ -6352,7 +6420,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     expect(table.filteredData()).toEqual(OVERLAY_FILTER_DATA);
   });
 
-  it('supports legacy Select and Date hosts without introducing a new column contract', async () => {
+  it('keeps legacy Select and Date contracts unchanged without exposing advanced triggers', async () => {
     const legacyColumns = [
       {
         key: 'status',
@@ -6387,11 +6455,14 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
       }),
     ).toEqual([]);
 
-    const trigger = await openFilterOverlay(fixture, 'Legacy status');
-    trigger.click();
-    await settle(fixture);
+    expect(internal._isFilterOverlayEligible(legacyColumns[0])).toBe(false);
+    expect(internal._isFilterOverlayEligible(legacyColumns[1])).toBe(false);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        '.neu-table__filter-overlay-trigger',
+      ),
+    ).toHaveLength(0);
     expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
-    expect(document.activeElement).toBe(trigger);
   });
 
   it('ignores stale lifecycle callbacks and closes defensively for an invalid outside target', async () => {
@@ -6467,6 +6538,481 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     expect(document.activeElement).toBe(options.at(-1));
     options.at(-1)!.dispatchEvent(new KeyboardEvent('keydown', { key: 'A', bubbles: true }));
     expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+  });
+});
+
+describe('NeuTableComponent E5 advanced option and custom-template filters', () => {
+  const statusOptions: readonly StatusFilterOption[] = [
+    { id: 'active', label: 'Active' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'archived', label: 'Archived', disabled: true },
+  ];
+  const optionRows: OptionFilterUser[] = [
+    {
+      id: 1,
+      roleId: 0,
+      role: ROLE_FILTER_OPTIONS[0],
+      status: 'active',
+      account: { status: 'active' },
+    },
+    {
+      id: 2,
+      roleId: 1,
+      role: ROLE_FILTER_OPTIONS[1],
+      status: 'pending',
+      account: { status: 'pending' },
+    },
+    {
+      id: 3,
+      roleId: 2,
+      role: ROLE_FILTER_OPTIONS[2],
+      status: 'archived',
+      account: { status: 'archived' },
+    },
+  ];
+  const optionColumns: NeuTableColumn<OptionFilterUser, string>[] = [
+    {
+      key: 'roleId',
+      header: 'Role',
+      filterConfig: {
+        ...ROLE_SELECT_FILTER,
+        searchable: true,
+        virtualScroll: true,
+        virtualScrollVisibleItems: 2,
+      },
+    },
+    {
+      key: 'role',
+      header: 'Full role',
+      filterConfig: {
+        kind: 'select',
+        options: ROLE_FILTER_OPTIONS,
+        optionLabel: 'name',
+        accessor: (row) => row.role,
+      },
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      filterConfig: {
+        kind: 'multiSelect',
+        options: statusOptions,
+        optionLabel: 'label',
+        optionValue: 'id',
+        optionDisabled: 'disabled',
+        searchable: true,
+        virtualScroll: true,
+        virtualScrollVisibleItems: 2,
+        accessor: (row) => row.account.status,
+      },
+    },
+  ];
+
+  beforeEach(async () => {
+    HTMLElement.prototype.scrollTo ??= vi.fn();
+    await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
+  });
+
+  async function settle<T extends object>(fixture: ComponentFixture<NeuTableComponent<T>>): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  async function createOptionTable(
+    serverSide = false,
+  ): Promise<ComponentFixture<NeuTableComponent<OptionFilterUser>>> {
+    const fixture = TestBed.createComponent(NeuTableComponent<OptionFilterUser>);
+    fixture.componentRef.setInput('columns', optionColumns);
+    fixture.componentRef.setInput('data', optionRows);
+    fixture.componentRef.setInput('advancedFilterMode', 'menu');
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('searchable', false);
+    fixture.componentRef.setInput('pagination', false);
+    fixture.componentRef.setInput('serverSide', serverSide);
+    await settle(fixture);
+    return fixture;
+  }
+
+  async function openOptionFilter(
+    fixture: ComponentFixture<NeuTableComponent<OptionFilterUser>>,
+    header: string,
+  ): Promise<void> {
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      `.neu-table__filter-overlay-trigger[aria-label^="Open filter for ${header}"]`,
+    );
+    expect(trigger).toBeTruthy();
+    trigger!.click();
+    await settle(fixture);
+  }
+
+  function overlayAction(label: string): HTMLButtonElement {
+    return Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.neu-table__filter-overlay-actions button'),
+    ).find((button) => button.textContent?.trim() === label)!;
+  }
+
+  it('reuses the Select Option API for draft, disabled, search, zero, dynamic options and inline sync', async () => {
+    const fixture = await createOptionTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    table.setColumnFilter('roleId', 1);
+    await settle(fixture);
+    await openOptionFilter(fixture, 'Role');
+
+    const select = fixture.debugElement
+      .queryAll(By.directive(NeuSelectComponent))
+      .map((element) => element.componentInstance as NeuSelectComponent<RoleFilterOption, number>)
+      .find((component) => component.label() === 'Value: Role')!;
+    expect(select).toBeTruthy();
+    expect(select.optionLabel()).toBe(ROLE_SELECT_FILTER.optionLabel);
+    expect(select.optionValue()).toBe(ROLE_SELECT_FILTER.optionValue);
+    expect(select.optionDisabled()).toBe(ROLE_SELECT_FILTER.optionDisabled);
+    expect(select.searchable()).toBe(true);
+    expect(select.virtualScroll()).toBe(true);
+    expect(select.virtualScrollVisibleItems()).toBe(2);
+    expect(select.selectedLabel()).toBe('Admin');
+
+    fixture.componentRef.setInput('columns', [
+      {
+        ...optionColumns[0],
+        filterConfig: { ...optionColumns[0].filterConfig!, virtualScroll: false },
+      },
+      optionColumns[1],
+      optionColumns[2],
+    ]);
+    await settle(fixture);
+    expect(select.virtualScroll()).toBe(false);
+
+    document.querySelector<HTMLElement>('.neu-table__filter-overlay .neu-select__trigger')!.click();
+    await settle(fixture);
+    const disabled = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option')).find(
+      (option) => option.textContent?.includes('Archived'),
+    )!;
+    expect(disabled.getAttribute('aria-disabled')).toBe('true');
+    disabled.click();
+    await settle(fixture);
+    expect(internal._filterDraftRules()[0].selectControl.value).toBe(1);
+
+    const search = document.querySelector<HTMLInputElement>('.neu-select__search-input')!;
+    search.value = 'Guest';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    await settle(fixture);
+    const guest = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option')).find(
+      (option) => option.textContent?.includes('Guest'),
+    )!;
+    guest.click();
+    await settle(fixture);
+    expect(internal._filterDraftValue()).toBe(0);
+    expect(table.getColumnFilterValue('roleId')).toBe(1);
+    overlayAction('Cancel').click();
+    await settle(fixture);
+    expect(table.getColumnFilterValue('roleId')).toBe(1);
+
+    await openOptionFilter(fixture, 'Role');
+    internal._filterDraftRules()[0].selectControl.setValue(0);
+    overlayAction('Apply').click();
+    await settle(fixture);
+    expect(table.getColumnFilterValue('roleId')).toBe(0);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+
+    const renamed = [
+      { ...ROLE_FILTER_OPTIONS[0], name: 'Visitor' },
+      ROLE_FILTER_OPTIONS[1],
+      ROLE_FILTER_OPTIONS[2],
+    ];
+    fixture.componentRef.setInput('columns', [
+      {
+        ...optionColumns[0],
+        filterConfig: { ...ROLE_SELECT_FILTER, options: renamed, searchable: true },
+      },
+      optionColumns[1],
+      optionColumns[2],
+    ]);
+    await settle(fixture);
+    expect(table.getColumnFilterValue('roleId')).toBe(0);
+    expect(
+      (fixture.nativeElement as HTMLElement)
+        .querySelector('.neu-table__filter-row neu-select .neu-select__value')
+        ?.textContent?.trim(),
+    ).toBe('Visitor');
+  });
+
+  it('preserves full-object identity and applies multiple Select equals rules with OR', async () => {
+    const fixture = await createOptionTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    await openOptionFilter(fixture, 'Full role');
+    internal._filterDraftRules()[0].selectControl.setValue(ROLE_FILTER_OPTIONS[0]);
+    internal._addFilterDraftRule();
+    await settle(fixture);
+    internal._filterDraftRules()[1].selectControl.setValue(ROLE_FILTER_OPTIONS[1]);
+    expect(internal._filterDraftOperator()).toBe('or');
+    overlayAction('Apply').click();
+    await settle(fixture);
+
+    const applied = internal._appliedFilters()['role'];
+    expect(applied.operator).toBe('or');
+    expect(applied.constraints[0].value).toBe(ROLE_FILTER_OPTIONS[0]);
+    expect(applied.constraints[1].value).toBe(ROLE_FILTER_OPTIONS[1]);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+    expect(table.getColumnFilterValue('role')).toBe('');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.neu-table__filter-multiple-summary')
+        ?.textContent,
+    ).toContain('2 filter rules active');
+
+    table.setColumnFilter('role', { ...ROLE_FILTER_OPTIONS[0] });
+    expect(table.filteredData()).toHaveLength(0);
+  });
+
+  it('keeps MultiSelect one-rule membership atomic, disabled and snapshot-safe', async () => {
+    const fixture = await createOptionTable();
+    const table = fixture.componentInstance;
+    const internal = internalFilters(table);
+    await openOptionFilter(fixture, 'Status');
+    expect(document.querySelector('[data-neu-table-filter-add-rule]')).toBeNull();
+    const multiselect = fixture.debugElement
+      .queryAll(By.directive(NeuMultiselectComponent))
+      .map(
+        (element) =>
+          element.componentInstance as NeuMultiselectComponent<StatusFilterOption, string>,
+      )
+      .find((component) => component.label() === 'Value: Status')!;
+    expect(multiselect.virtualScroll()).toBe(true);
+    expect(multiselect.virtualScrollVisibleItems()).toBe(2);
+    fixture.componentRef.setInput('columns', [
+      optionColumns[0],
+      optionColumns[1],
+      {
+        ...optionColumns[2],
+        filterConfig: { ...optionColumns[2].filterConfig!, virtualScroll: false },
+      },
+    ]);
+    await settle(fixture);
+    expect(multiselect.virtualScroll()).toBe(false);
+    document
+      .querySelector<HTMLElement>('.neu-table__filter-overlay .neu-multiselect__trigger')!
+      .click();
+    await settle(fixture);
+    const option = (label: string) =>
+      Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option')).find(
+        (candidate) => candidate.textContent?.includes(label),
+      )!;
+    option('Active').click();
+    option('Pending').click();
+    option('Archived').click();
+    await settle(fixture);
+    const draftArray = internal._filterDraftRules()[0].multiSelectControl.value;
+    expect(draftArray).toEqual(['active', 'pending']);
+    expect(table.getColumnFilterValue('status')).toBe('');
+    overlayAction('Apply').click();
+    await settle(fixture);
+
+    const canonical = internal._appliedFilters()['status'].constraints[0].value as unknown[];
+    expect(canonical).toEqual(['active', 'pending']);
+    expect(canonical).not.toBe(draftArray);
+    draftArray[0] = 'mutated';
+    expect(canonical).toEqual(['active', 'pending']);
+    expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
+
+    fixture.componentRef.setInput('columns', [
+      optionColumns[0],
+      optionColumns[1],
+      {
+        ...optionColumns[2],
+        filterConfig: {
+          ...optionColumns[2].filterConfig!,
+          options: [statusOptions[0], statusOptions[2]],
+        },
+      },
+    ]);
+    await settle(fixture);
+    expect(table.getColumnFilterValue('status')).toEqual(['active', 'pending']);
+    expect(canonical).toEqual(['active', 'pending']);
+
+    await openOptionFilter(fixture, 'Status');
+    internal._clearFilterDraft();
+    overlayAction('Cancel').click();
+    await settle(fixture);
+    expect(table.getColumnFilterValue('status')).toEqual(['active', 'pending']);
+    await openOptionFilter(fixture, 'Status');
+    internal._clearFilterDraft();
+    overlayAction('Apply').click();
+    await settle(fixture);
+    expect(table.getColumnFilterValue('status')).toBe('');
+  });
+
+  it('serializes one Select or MultiSelect rule only when server Apply is pressed', async () => {
+    const fixture = await createOptionTable(true);
+    const internal = internalFilters(fixture.componentInstance);
+    const events: NeuTableServerState[] = [];
+    fixture.componentInstance.serverStateChange.subscribe((event) => events.push(event));
+
+    await openOptionFilter(fixture, 'Role');
+    expect(internal._filterDraftCanAddRule()).toBe(false);
+    internal._filterDraftRules()[0].selectControl.setValue(0);
+    expect(events).toEqual([]);
+    overlayAction('Apply').click();
+    await settle(fixture);
+    expect(events).toHaveLength(1);
+    expect(events[0].typedColumnFilters?.['roleId']).toEqual({
+      kind: 'select',
+      mode: 'equals',
+      value: 0,
+    });
+
+    await openOptionFilter(fixture, 'Status');
+    internal._filterDraftRules()[0].multiSelectControl.setValue(['active', 'pending']);
+    expect(events).toHaveLength(1);
+    overlayAction('Apply').click();
+    await settle(fixture);
+    expect(events).toHaveLength(2);
+    expect(events[1].typedColumnFilters?.['status']).toEqual({
+      kind: 'multiSelect',
+      mode: 'in',
+      value: ['active', 'pending'],
+    });
+  });
+
+  async function createCustomHost(): Promise<ComponentFixture<CustomFilterTemplateHostComponent>> {
+    const fixture = TestBed.createComponent(CustomFilterTemplateHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  async function openCustomFilter(
+    fixture: ComponentFixture<CustomFilterTemplateHostComponent>,
+  ): Promise<NeuTableComponent<CustomTemplateRow>> {
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent<CustomTemplateRow>;
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[aria-label^="Open filter for Account status"]',
+    )!;
+    expect(trigger).toBeTruthy();
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await Promise.resolve();
+    return table;
+  }
+
+  it('discovers the first custom template and keeps setValue draft-only through Cancel and Apply', async () => {
+    const fixture = await createCustomHost();
+    fixture.componentInstance.showDuplicate.set(true);
+    fixture.detectChanges();
+    const table = await openCustomFilter(fixture);
+    const internal = internalFilters(table);
+    const input = document.querySelector<HTMLInputElement>('.custom-filter-input')!;
+    expect(input).toBeTruthy();
+    expect(document.querySelector('.duplicate-custom-template')).toBeNull();
+    expect(document.activeElement).toBe(input);
+    expect(input.getAttribute('aria-label')).toBe('Custom Account status');
+
+    input.value = 'active';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(internal._filterDraftValue()).toBe('active');
+    expect(internal._appliedFilters()).toEqual({});
+    overlayAction('Cancel').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(internal._appliedFilters()).toEqual({});
+
+    await openCustomFilter(fixture);
+    const nextInput = document.querySelector<HTMLInputElement>('.custom-filter-input')!;
+    nextInput.value = 'active';
+    nextInput.dispatchEvent(new Event('input', { bubbles: true }));
+    overlayAction('Apply').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.filteredData().map((row) => row.id)).toEqual([1]);
+    expect(internal._localOnlyFilters()).toEqual(['status']);
+    expect(fixture.componentInstance.predicate).toHaveBeenCalledWith(
+      'active',
+      'active',
+      fixture.componentInstance.rows[0],
+    );
+
+    await openCustomFilter(fixture);
+    expect(document.querySelector('.custom-filter-active')?.textContent?.trim()).toBe('true');
+    expect((document.querySelector('.custom-filter-input') as HTMLInputElement).value).toBe(
+      'active',
+    );
+  });
+
+  it('keeps custom Clear draft-only until Apply and closes on dynamic template removal', async () => {
+    const fixture = await createCustomHost();
+    const table = await openCustomFilter(fixture);
+    let input = document.querySelector<HTMLInputElement>('.custom-filter-input')!;
+    input.value = 'pending';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    overlayAction('Apply').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toBe('pending');
+
+    await openCustomFilter(fixture);
+    input = document.querySelector<HTMLInputElement>('.custom-filter-input')!;
+    input.value = 'active';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    const escapeEvent = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(escapeEvent, 'keyCode', { configurable: true, get: () => 27 });
+    document.querySelector<HTMLElement>('.neu-table__filter-overlay')!.dispatchEvent(escapeEvent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toBe('pending');
+
+    await openCustomFilter(fixture);
+    document.querySelector<HTMLButtonElement>('.custom-filter-clear')!.click();
+    overlayAction('Cancel').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toBe('pending');
+
+    await openCustomFilter(fixture);
+    document.querySelector<HTMLButtonElement>('.custom-filter-clear')!.click();
+    overlayAction('Apply').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.getColumnFilterValue('status')).toBe('');
+
+    await openCustomFilter(fixture);
+    fixture.componentInstance.showTemplate.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector(
+        '[aria-label^="Open filter for Account status"]',
+      ),
+    ).toBeNull();
+  });
+
+  it('keeps custom advanced editing unavailable in server mode without emitting state', async () => {
+    const fixture = await createCustomHost();
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent<CustomTemplateRow>;
+    const events: NeuTableServerState[] = [];
+    table.serverStateChange.subscribe((event) => events.push(event));
+    fixture.componentInstance.serverSide.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector(
+        '[aria-label^="Open filter for Account status"]',
+      ),
+    ).toBeNull();
+    expect(events).toEqual([]);
+    expect(internalFilters(table)._localOnlyFilters()).toEqual([]);
   });
 });
 
@@ -6561,7 +7107,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     return trigger;
   }
 
-  it('opts in explicitly and exposes only E3 production filter kinds', async () => {
+  it('opts in explicitly and exposes Select with the existing production filter kinds', async () => {
     const fixture = await createAdvancedTable();
     const labels = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
@@ -6569,8 +7115,8 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       ),
     ).map((trigger) => trigger.getAttribute('aria-label'));
 
-    expect(labels).toHaveLength(5);
-    expect(labels.some((label) => label?.includes('Status'))).toBe(false);
+    expect(labels).toHaveLength(6);
+    expect(labels.some((label) => label?.includes('Status'))).toBe(true);
   });
 
   it('maps eligibility, precision, and human match-mode labels without exposing deferred kinds', async () => {

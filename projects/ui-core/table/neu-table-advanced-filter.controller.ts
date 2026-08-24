@@ -14,7 +14,14 @@ import type {
   NeuTableNumberRangeValue,
 } from './neu-table.types';
 
-export type InternalAdvancedFilterKind = 'text' | 'number' | 'date' | 'boolean';
+export type InternalAdvancedFilterKind =
+  | 'text'
+  | 'number'
+  | 'date'
+  | 'boolean'
+  | 'select'
+  | 'multiSelect'
+  | 'custom';
 export type InternalAdvancedFilterControlKind =
   | InternalAdvancedFilterKind
   | 'select'
@@ -60,6 +67,8 @@ export interface InternalAdvancedFilterDraftRule {
   readonly instantToControl: FormControl<string>;
   readonly booleanControl: FormControl<unknown>;
   readonly dateControl: FormControl<unknown>;
+  readonly selectControl: FormControl<unknown>;
+  readonly multiSelectControl: FormControl<unknown[]>;
 }
 
 interface OwnedAdvancedFilterDraftRule extends InternalAdvancedFilterDraftRule {
@@ -175,15 +184,15 @@ export class NeuTableAdvancedFilterController<T extends object> {
   );
   readonly canAddRule = computed(
     () =>
-      this.multipleRulesEnabled() && this.kind() !== null && this.kind() !== 'boolean',
+      this.multipleRulesEnabled() &&
+      (this.kind() === 'text' ||
+        this.kind() === 'number' ||
+        this.kind() === 'date' ||
+        this.kind() === 'select'),
   );
   readonly operatorControl = new FormControl<InternalAdvancedFilterOperator>('and', {
     nonNullable: true,
   });
-
-  // Deferred E2 controls stay instance-local but outside the production E4 rule model.
-  readonly selectControl = new FormControl<unknown>(null);
-  readonly multiSelectControl = new FormControl<unknown[]>([], { nonNullable: true });
 
   private readonly _idleRule = createEmptyRule('idle');
   private readonly _subscriptions = new Subscription();
@@ -237,25 +246,38 @@ export class NeuTableAdvancedFilterController<T extends object> {
     return this._ownedRules[0]?.dateControl ?? this._idleRule.dateControl;
   }
 
+  get selectControl(): FormControl<unknown> {
+    return this._ownedRules[0]?.selectControl ?? this._idleRule.selectControl;
+  }
+
+  get multiSelectControl(): FormControl<unknown[]> {
+    return this._ownedRules[0]?.multiSelectControl ?? this._idleRule.multiSelectControl;
+  }
+
   initialize(
     column: NeuTableColumn<T>,
     applied: InternalAdvancedFilterAppliedValue | undefined,
     capabilities: InternalAdvancedFilterCapabilities = {},
   ): void {
     this._disposeRules();
-    this._resetDeferredControls();
     this._column = column;
-    this.multipleRulesEnabled.set(capabilities.allowMultipleRules !== false);
     const controlKind = neuTableAdvancedFilterControlKind(column);
-    const productionKind =
-      controlKind === 'text' ||
-      controlKind === 'number' ||
-      controlKind === 'date' ||
-      controlKind === 'boolean'
-        ? controlKind
-        : null;
+    const productionKind: InternalAdvancedFilterKind | null =
+      controlKind !== 'none' ? controlKind : column.filterConfig?.kind === 'custom' ? 'custom' : null;
+    const kindAllowsMultipleRules =
+      productionKind === 'text' ||
+      productionKind === 'number' ||
+      productionKind === 'date' ||
+      productionKind === 'select';
+    this.multipleRulesEnabled.set(
+      capabilities.allowMultipleRules !== false && kindAllowsMultipleRules,
+    );
     this.kind.set(productionKind);
-    this.operator.set(applied?.operator === 'or' ? 'or' : 'and');
+    this.operator.set(
+      applied?.operator === 'or' || (!applied?.operator && productionKind === 'select')
+        ? 'or'
+        : 'and',
+    );
     this.operatorControl.setValue(this.operator(), { emitEvent: false });
 
     if (!productionKind) {
@@ -263,10 +285,7 @@ export class NeuTableAdvancedFilterController<T extends object> {
       return;
     }
 
-    const constraints =
-      productionKind === 'boolean' && this.multipleRulesEnabled()
-        ? (applied?.constraints.slice(0, 1) ?? [])
-        : (applied?.constraints ?? []);
+    const constraints = applied?.constraints ?? [];
     const sources = constraints.length > 0 ? constraints : [null];
     this._ownedRules = sources.map((constraint) => this._createRule(column, constraint));
     this.rules.set(this._ownedRules);
@@ -316,9 +335,19 @@ export class NeuTableAdvancedFilterController<T extends object> {
     this._disposeRules();
     this._ownedRules = [this._createRule(column, null)];
     this.rules.set(this._ownedRules);
-    this.operator.set('and');
-    this.operatorControl.setValue('and', { emitEvent: false });
-    this._resetDeferredControls();
+    const operator = this.kind() === 'select' ? 'or' : 'and';
+    this.operator.set(operator);
+    this.operatorControl.setValue(operator, { emitEvent: false });
+  }
+
+  setValue(value: unknown): boolean {
+    if (this.readOnly() || this._ownedRules.length !== 1) return false;
+    const column = this._currentColumn();
+    const rule = this._ownedRules[0];
+    if (!column || !rule || this.kind() !== 'custom') return false;
+    this._setRuleValue(rule, snapshotDraftValue(value), true);
+    this._validateRule(rule, column);
+    return true;
   }
 
   discard(): void {
@@ -329,7 +358,6 @@ export class NeuTableAdvancedFilterController<T extends object> {
     this.operator.set('and');
     this.operatorControl.setValue('and', { emitEvent: false });
     this.rules.set([]);
-    this._resetDeferredControls();
     resetRuleControls(this._idleRule);
   }
 
@@ -341,7 +369,10 @@ export class NeuTableAdvancedFilterController<T extends object> {
     for (const rule of this._ownedRules) {
       const value = rule.value();
       if (isNeuTableFilterValueEmpty(value)) continue;
-      const mode = this.kind() === 'boolean' ? undefined : (rule.mode() ?? undefined);
+      const mode =
+        this.kind() === 'boolean' || this.kind() === 'custom'
+          ? undefined
+          : (rule.mode() ?? undefined);
       constraints.push({ ...(mode ? { mode } : {}), value });
     }
     return {
@@ -366,7 +397,7 @@ export class NeuTableAdvancedFilterController<T extends object> {
   ): OwnedAdvancedFilterDraftRule {
     const kind = this.kind();
     const mode =
-      kind && kind !== 'boolean'
+      kind && kind !== 'boolean' && kind !== 'custom'
         ? (resolveNeuTableFilterMatchMode(column as NeuTableColumn<T, string>, constraint?.mode) ??
           null)
         : null;
@@ -424,6 +455,14 @@ export class NeuTableAdvancedFilterController<T extends object> {
       rule.booleanControl.setValue(value === true || value === false ? value : null, {
         emitEvent: false,
       });
+    } else if (kind === 'select') {
+      rule.selectControl.setValue(isNeuTableFilterValueEmpty(value) ? null : value, {
+        emitEvent: false,
+      });
+    } else if (kind === 'multiSelect') {
+      rule.multiSelectControl.setValue(Array.isArray(value) ? [...value] : [], {
+        emitEvent: false,
+      });
     }
   }
 
@@ -465,6 +504,16 @@ export class NeuTableAdvancedFilterController<T extends object> {
         this._updateDateDraft(rule, value);
         this._onDateControlCommitted();
       }),
+    );
+    rule.subscriptions.add(
+      rule.selectControl.valueChanges.subscribe((value) =>
+        this._setRuleValue(rule, value, true),
+      ),
+    );
+    rule.subscriptions.add(
+      rule.multiSelectControl.valueChanges.subscribe((value) =>
+        this._setRuleValue(rule, [...value], true),
+      ),
     );
   }
 
@@ -556,11 +605,6 @@ export class NeuTableAdvancedFilterController<T extends object> {
     this.rules.set([]);
   }
 
-  private _resetDeferredControls(): void {
-    this.selectControl.setValue(null, { emitEvent: false });
-    this.multiSelectControl.setValue([], { emitEvent: false });
-  }
-
   private _currentColumn(): NeuTableColumn<T> | null {
     const column = this._column;
     return column && this._resolveColumn ? this._resolveColumn(column.key) : column;
@@ -582,6 +626,8 @@ function createEmptyRule(id: string): InternalAdvancedFilterDraftRule {
     instantToControl: new FormControl('', { nonNullable: true }),
     booleanControl: new FormControl<unknown>(null),
     dateControl: new FormControl<unknown>(null),
+    selectControl: new FormControl<unknown>(null),
+    multiSelectControl: new FormControl<unknown[]>([], { nonNullable: true }),
   };
 }
 
@@ -602,6 +648,8 @@ function resetRuleValueControls(rule: InternalAdvancedFilterDraftRule): void {
   rule.instantFromControl.setValue('', { emitEvent: false });
   rule.instantToControl.setValue('', { emitEvent: false });
   rule.booleanControl.setValue(null, { emitEvent: false });
+  rule.selectControl.setValue(null, { emitEvent: false });
+  rule.multiSelectControl.setValue([], { emitEvent: false });
 }
 
 function snapshotDraftValue(value: unknown): unknown {
