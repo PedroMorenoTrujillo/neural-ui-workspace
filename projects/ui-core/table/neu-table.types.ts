@@ -120,6 +120,56 @@ export interface NeuTableCellEditEvent<T = Record<string, unknown>> {
   previousValue: unknown;
 }
 
+// ── Expansion / persisted state ──────────────────────────────────────────
+
+/** JSON-stable row identity accepted by automatic Table persistence. */
+export type NeuTableStateKey = string | number | boolean | null;
+
+export interface NeuTableRowExpansionEvent<T = Record<string, unknown>> {
+  row: T;
+  key: unknown;
+  /** Immutable whole-state proposal after the row action. */
+  expandedRowKeys: readonly unknown[];
+}
+
+export interface NeuTablePersistedFilterConstraint {
+  mode?: NeuTableFilterMatchMode;
+  value: unknown;
+}
+
+export interface NeuTablePersistedColumnFilter {
+  operator: 'and' | 'or';
+  constraints: readonly NeuTablePersistedFilterConstraint[];
+}
+
+export interface NeuTableStateOmissions {
+  /** Filters containing functions, symbols, cycles or other non-JSON values. */
+  filterKeys: readonly string[];
+  selectionKeyCount: number;
+  expandedRowKeyCount: number;
+}
+
+/**
+ * Immutable, row-data-free state used by save/restore events and storage.
+ * Version 1 intentionally stores selection and expansion as stable keys only.
+ */
+export interface NeuTableStateSnapshot {
+  version: 1;
+  page: number;
+  pageSize: number;
+  search: string;
+  sort: NeuTableSortEntry | null;
+  sortEntries: readonly NeuTableSortEntry[];
+  filters: Readonly<Record<string, NeuTablePersistedColumnFilter>>;
+  selectionKeys: readonly NeuTableStateKey[];
+  expandedRowKeys: readonly NeuTableStateKey[];
+  layout: NeuTableLayout;
+  /** Truthful accounting for canonical values that automatic JSON persistence omitted. */
+  omissions: NeuTableStateOmissions;
+}
+
+export type NeuTableStateStorage = 'local' | 'session';
+
 // ── Typed filtering ───────────────────────────────────────────────────────
 
 export type NeuTableFilterKind =

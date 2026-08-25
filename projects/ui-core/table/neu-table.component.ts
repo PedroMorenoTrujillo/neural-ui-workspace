@@ -53,6 +53,7 @@ import type {
   NeuOptionLabelAccessor,
   NeuOptionValueAccessor,
 } from '@neural-ui/core/option-api';
+import { resolveNeuOptionValue } from '@neural-ui/core/option-api';
 import type {
   NeuTableAction,
   NeuTableAdvancedFilterMode,
@@ -70,6 +71,7 @@ import type {
   NeuTableSelectionMode,
   NeuTableSelectionSource,
   NeuTableRowSelectionEvent,
+  NeuTableRowExpansionEvent,
   NeuTableSelectAllChangeEvent,
   NeuTableSelectAllScope,
   NeuTableDatePoint,
@@ -87,6 +89,8 @@ import type {
   NeuTableServerState,
   NeuTableSortEntry,
   NeuTableSortState,
+  NeuTableStateSnapshot,
+  NeuTableStateStorage,
   NeuTableVirtualRange,
 } from './neu-table.types';
 import {
@@ -115,6 +119,7 @@ import {
   NeuTableUrlStateAdapter,
   type InternalNeuTableUrlStateConfig,
 } from './neu-table-url-state.adapter';
+import { NeuTableStatePersistenceAdapter } from './neu-table-state-persistence.adapter';
 import { NeuTableSelectionController } from './neu-table-selection.controller';
 import { NeuTableSortController } from './neu-table-sort.controller';
 import {
@@ -145,6 +150,7 @@ export type {
   NeuTableSelectionMode,
   NeuTableSelectionSource,
   NeuTableRowSelectionEvent,
+  NeuTableRowExpansionEvent,
   NeuTableSelectAllChangeEvent,
   NeuTableSelectAllScope,
   NeuTableDatePoint,
@@ -167,6 +173,10 @@ export type {
   NeuTableServerState,
   NeuTableSortEntry,
   NeuTableSortState,
+  NeuTableStateKey,
+  NeuTableStateOmissions,
+  NeuTableStateSnapshot,
+  NeuTableStateStorage,
   NeuTableVirtualRange,
   NeuTableRow,
   NeuTableRowKey,
@@ -1619,7 +1629,9 @@ export type NeuTableColumnInput<T extends object> =
 export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
-  private readonly _state = new NeuTableStateController<unknown>();
+  private readonly _state = new NeuTableStateController<unknown>((change) =>
+    this._onCanonicalStateChange(change),
+  );
   private readonly _selectionController = new NeuTableSelectionController<T, unknown>((row) =>
     this.getRowKey(row),
   );
@@ -1629,6 +1641,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _keyboardController = new NeuTableKeyboardController<unknown>();
   protected readonly _selectionRadioName = `neu-table-selection-${_neuTableSelectionIdSeq++}`;
   private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
+  private readonly _persistenceAdapter = new NeuTableStatePersistenceAdapter();
   private readonly _platformId = inject(PLATFORM_ID);
   private readonly _document = inject(DOCUMENT);
   private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
@@ -1644,6 +1657,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _destroyed = false;
   private _initialQueryHandled = false;
   private _lastEmittedQuery: NeuTableQueryState | null = null;
+  private _statePersistenceReady = false;
+  private _restoringState = false;
+  private _restoredStateSignature: string | null = null;
 
   private readonly _advancedFilter = new NeuTableAdvancedFilterController<T>(
     () => this._focusOverlayChildTrigger('date'),
@@ -1747,6 +1763,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly expandMode: _angular_core.InputSignal<'multiple' | 'single'> = input<
     'multiple' | 'single'
   >('multiple');
+  /** Presence makes expanded row keys consumer-authoritative. */
+  readonly expandedRowKeys = input<readonly unknown[] | undefined>(undefined);
   readonly exportable = input<boolean>(false);
   readonly exportFileName = input<string>('export');
   readonly pageSizeOptions = input<number[]>([]);
@@ -1819,10 +1837,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
    */
   readonly useUrlState = input<boolean>(true);
 
+  // ── Automatic state persistence ─────────────────────────────────────
+  /** Presence enables versioned automatic persistence, matching PrimeNG's stateful opt-in. */
+  readonly stateKey = input<string | undefined>(undefined);
+  readonly stateStorage = input<NeuTableStateStorage>('session');
+
   // ── Outputs ───────────────────────────────────────────────────────────
   readonly selectionChange = output<T[]>();
   readonly rowSelect = output<NeuTableRowSelectionEvent<T>>();
   readonly rowUnselect = output<NeuTableRowSelectionEvent<T>>();
+  readonly expandedRowKeysChange = output<readonly unknown[]>();
+  readonly rowExpand = output<NeuTableRowExpansionEvent<T>>();
+  readonly rowCollapse = output<NeuTableRowExpansionEvent<T>>();
   readonly selectAllChange = output<NeuTableSelectAllChangeEvent<T>>();
   readonly rowClick = output<T>();
   readonly rowDblClick = output<T>();
@@ -1840,6 +1866,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly columnReorder = output<NeuTableColumnReorderEvent>();
   readonly layoutChange = output<NeuTableLayout>();
   readonly cellEditCommit = output<NeuTableCellEditEvent<T>>();
+  readonly stateSave = output<NeuTableStateSnapshot>();
+  readonly stateRestore = output<NeuTableStateSnapshot>();
 
   // ── Canonical consumer-relevant state ─────────────────────────────────
   private readonly _columnWidths = computed(() => this._state.layout().columnWidths);
@@ -2033,8 +2061,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           this._state.releaseControlledQuery();
           return;
         }
-        this._state.setControlledQuery(this._queryController.controlledPatch(controlled));
+        const changed = this._state.setControlledQuery(
+          this._queryController.controlledPatch(controlled),
+        );
         this._lastEmittedQuery = this._queryController.build(this._state.snapshot(), config);
+        if (changed) this._saveStateIfReady();
       });
     });
 
@@ -2060,9 +2091,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           }
           return;
         }
-        this._state.setControlledSelectionKeys(
+        const changed = this._state.setControlledSelectionKeys(
           this._selectionController.keysFromSelection(selection, mode),
         );
+        if (changed) this._saveStateIfReady();
       });
     });
 
@@ -2096,17 +2128,34 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           return;
         }
         const entries = this._normalizeSortState(controlled, multiple);
-        this._state.setControlledSort(
+        const changed = this._state.setControlledSort(
           multiple ? null : (entries[0] ?? null),
           multiple ? entries : [],
         );
+        if (changed) this._saveStateIfReady();
       });
     });
 
     effect(() => {
-      if (!this.useUrlState() || this.query() !== undefined) return;
-      const snapshot = this._urlAdapter.read(this._urlConfig());
-      untracked(() => this._state.update(snapshot, 'url'));
+      const controlled = this.expandedRowKeys();
+      const mode = this.expandMode();
+      untracked(() => {
+        if (controlled === undefined) {
+          this._state.releaseControlledExpansion();
+          if (mode === 'single' && this._state.expansionKeys().size > 1) {
+            const first = this._state.expansionKeys().values().next().value;
+            this._state.setExpansionKeys(
+              first === undefined ? new Set() : new Set([first]),
+              'input',
+            );
+          }
+          return;
+        }
+        const changed = this._state.setControlledExpansionKeys(
+          this._normalizeExpansionKeys(controlled, mode),
+        );
+        if (changed) this._saveStateIfReady();
+      });
     });
 
     effect(() => {
@@ -2192,6 +2241,29 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           },
           'input',
         );
+      });
+    });
+
+    effect(() => {
+      const key = this.stateKey()?.trim() ?? '';
+      const storageKind = this.stateStorage();
+      const urlSnapshot =
+        this.useUrlState() && this.query() === undefined
+          ? this._urlAdapter.read(this._urlConfig())
+          : null;
+      untracked(() => {
+        const signature = `${storageKind}:${key}`;
+        if (signature !== this._restoredStateSignature) {
+          this._statePersistenceReady = false;
+          this._restoredStateSignature = signature;
+          const restored = key ? this._readPersistedState(key, storageKind) : null;
+          if (restored) {
+            this._applyPersistedState(restored);
+            this.stateRestore.emit(this.currentState());
+          }
+        }
+        if (urlSnapshot) this._state.update(urlSnapshot, 'url');
+        this._statePersistenceReady = true;
       });
     });
 
@@ -3462,28 +3534,114 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   expandRow(row: T): void {
-    if (this._lazyVirtualActive()) return;
-    const key = this.getRowKey(row);
-    const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
-    set.add(key);
-    this._state.setExpansionKeys(set, 'api');
+    this._proposeRowExpansion(row, true, 'api');
   }
 
   collapseRow(row: T): void {
-    if (this._lazyVirtualActive()) return;
-    const key = this.getRowKey(row);
-    const set = new Set(this._expandedKeys());
-    set.delete(key);
-    this._state.setExpansionKeys(set, 'api');
+    this._proposeRowExpansion(row, false, 'api');
   }
 
   toggleExpand(row: T): void {
     if (this._lazyVirtualActive()) return;
     const key = this.getRowKey(row);
-    const set = this.expandMode() === 'single' ? new Set<unknown>() : new Set(this._expandedKeys());
-    if (this._expandedKeys().has(key)) set.delete(key);
-    else set.add(key);
-    this._state.setExpansionKeys(set, 'ui');
+    this._proposeRowExpansion(row, !this._expandedKeys().has(key), 'ui');
+  }
+
+  /** Immutable public projection of every T1-persisted state family. */
+  currentState(): NeuTableStateSnapshot {
+    return this._persistenceAdapter.snapshot(this._state.snapshot());
+  }
+
+  /** Saves immediately; semantic no-ops do not write or emit. */
+  saveState(): NeuTableStateSnapshot {
+    const snapshot = this.currentState();
+    const key = this.stateKey()?.trim() ?? '';
+    if (
+      key &&
+      this._persistenceAdapter.write(this._stateStorageFor(this.stateStorage()), key, snapshot)
+    ) {
+      this.stateSave.emit(snapshot);
+    }
+    return snapshot;
+  }
+
+  /** Restores the configured key and then reapplies URL precedence. */
+  restoreState(): NeuTableStateSnapshot | null {
+    const key = this.stateKey()?.trim() ?? '';
+    if (!key) return null;
+    const restored = this._readPersistedState(key, this.stateStorage());
+    if (!restored) return null;
+    this._applyPersistedState(restored);
+    if (this.useUrlState() && this.query() === undefined) {
+      this._state.update(this._urlAdapter.read(this._urlConfig()), 'url');
+    }
+    const effective = this.currentState();
+    this.stateRestore.emit(effective);
+    if (this._initialQueryHandled) this._emitQueryState(this._state.snapshot());
+    return effective;
+  }
+
+  /** Clears browser storage only; the live canonical state is intentionally unchanged. */
+  clearState(): void {
+    const key = this.stateKey()?.trim() ?? '';
+    if (key) this._persistenceAdapter.clear(this._stateStorageFor(this.stateStorage()), key);
+  }
+
+  /** Resets live state; automatic persistence records the resulting canonical snapshot. */
+  resetState(): void {
+    const previous = this._state.snapshot();
+    const changed = this._state.update(
+      {
+        page: 1,
+        pageSize: this.pageSize(),
+        search: '',
+        sort: null,
+        sortEntries: [],
+        filters: {},
+        selectionKeys: new Set(),
+        expansionKeys: new Set(),
+        layout: this._initialNormalizedLayout(),
+      },
+      'api',
+    );
+    if (!changed) return;
+    if (
+      changed.changedKeys.some((key) =>
+        ['page', 'pageSize', 'search', 'sort', 'sortEntries', 'filters'].includes(key),
+      )
+    ) {
+      this._emitQueryState(changed.current);
+    }
+    if (changed.changedKeys.includes('search')) this.searchChange.emit('');
+    if (changed.changedKeys.some((key) => key === 'sort' || key === 'sortEntries')) {
+      this.sortChange.emit(Object.freeze([]));
+    }
+    if (changed.changedKeys.includes('selectionKeys')) this.selectionChange.emit([]);
+    if (changed.changedKeys.includes('expansionKeys')) {
+      this.expandedRowKeysChange.emit(Object.freeze([]));
+    }
+    if (changed.changedKeys.includes('layout')) this._emitLayoutChange();
+    if (previous.filters !== changed.current.filters && this._openFilterKey()) {
+      this._closeFilterOverlay(false);
+    }
+  }
+
+  private _proposeRowExpansion(row: T, expanded: boolean, origin: 'ui' | 'api'): void {
+    if (this._lazyVirtualActive()) return;
+    const key = this.getRowKey(row);
+    const set =
+      expanded && this.expandMode() === 'single'
+        ? new Set<unknown>()
+        : new Set(this._expandedKeys());
+    if (expanded) set.add(key);
+    else set.delete(key);
+    const changed = this._state.setExpansionKeys(set, origin);
+    if (!changed) return;
+    const proposal = Object.freeze([...changed.current.expansionKeys]);
+    this.expandedRowKeysChange.emit(proposal);
+    const event = Object.freeze({ row, key, expandedRowKeys: proposal });
+    if (expanded) this.rowExpand.emit(event);
+    else this.rowCollapse.emit(event);
   }
 
   // ── Selección ─────────────────────────────────────────────────────────
@@ -4998,6 +5156,135 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   getColumnFilterValue(key: string): unknown {
     return this._columnFilters()[key] ?? '';
+  }
+
+  private _onCanonicalStateChange(_change: InternalNeuTableStateChange<unknown>): void {
+    this._saveStateIfReady();
+  }
+
+  private _saveStateIfReady(): void {
+    if (!this._statePersistenceReady || this._restoringState) return;
+    this.saveState();
+  }
+
+  private _stateStorageFor(kind: NeuTableStateStorage): Storage | null {
+    if (!isPlatformBrowser(this._platformId)) return null;
+    try {
+      const window = this._document.defaultView;
+      if (!window) return null;
+      return kind === 'local' ? window.localStorage : window.sessionStorage;
+    } catch {
+      return null;
+    }
+  }
+
+  private _readPersistedState(
+    key: string,
+    kind: NeuTableStateStorage,
+  ): NeuTableStateSnapshot | null {
+    return this._persistenceAdapter.read(this._stateStorageFor(kind), key);
+  }
+
+  private _applyPersistedState(snapshot: NeuTableStateSnapshot): void {
+    this._restoringState = true;
+    try {
+      this._state.update(
+        {
+          page: snapshot.page,
+          pageSize: snapshot.pageSize,
+          search: snapshot.search,
+          sort: snapshot.sort,
+          sortEntries: snapshot.sortEntries,
+          filters: this._restorePersistedFilters(snapshot),
+          selectionKeys: new Set(snapshot.selectionKeys),
+          expansionKeys: this._normalizeExpansionKeys(snapshot.expandedRowKeys, this.expandMode()),
+          layout: this._normalizePersistedLayout(snapshot.layout),
+        },
+        'persistence',
+      );
+    } finally {
+      this._restoringState = false;
+    }
+  }
+
+  private _restorePersistedFilters(
+    snapshot: NeuTableStateSnapshot,
+  ): Record<string, InternalAppliedColumnFilter> {
+    return Object.fromEntries(
+      Object.entries(snapshot.filters).map(([key, filter]) => {
+        const column = this._currentTypedColumn(key);
+        return [
+          key,
+          {
+            operator: filter.operator,
+            constraints: filter.constraints.map((constraint) => ({
+              ...(constraint.mode ? { mode: constraint.mode } : {}),
+              value: column
+                ? this._rebindPersistedFilterValue(column, constraint.value)
+                : constraint.value,
+            })),
+          },
+        ];
+      }),
+    );
+  }
+
+  private _rebindPersistedFilterValue(column: NeuTableColumn<T>, value: unknown): unknown {
+    const config = column.filterConfig;
+    if (config?.kind !== 'select' && config?.kind !== 'multiSelect') return value;
+    const optionValue = (config.optionValue ?? null) as NeuOptionValueAccessor<
+      unknown,
+      unknown
+    > | null;
+    const values = config.kind === 'multiSelect' && Array.isArray(value) ? value : [value];
+    const rebound = values.map((persisted) => {
+      const option = (config.options ?? []).find((candidate) =>
+        this._persistenceAdapter.valuesEqual(
+          resolveNeuOptionValue(candidate, optionValue),
+          persisted,
+        ),
+      );
+      return option === undefined ? persisted : resolveNeuOptionValue(option, optionValue);
+    });
+    return config.kind === 'multiSelect' ? rebound : rebound[0];
+  }
+
+  private _normalizeExpansionKeys(
+    keys: Iterable<unknown>,
+    mode: 'single' | 'multiple',
+  ): ReadonlySet<unknown> {
+    const normalized = new Set(keys);
+    if (mode === 'multiple' || normalized.size <= 1) return normalized;
+    const first = normalized.values().next().value;
+    return first === undefined ? new Set() : new Set([first]);
+  }
+
+  private _normalizePersistedLayout(layout: NeuTableLayout): NeuTableLayout {
+    const keys = this._typedColumns().map((column): string => column.key);
+    return {
+      columnOrder: [
+        ...layout.columnOrder.filter((key) => keys.includes(key)),
+        ...keys.filter((key) => !layout.columnOrder.includes(key)),
+      ],
+      hiddenColumns: layout.hiddenColumns.filter((key) => keys.includes(key)),
+      columnWidths: Object.fromEntries(
+        Object.entries(layout.columnWidths).filter(([key]) => keys.includes(key)),
+      ),
+    };
+  }
+
+  private _initialNormalizedLayout(): NeuTableLayout {
+    const keys = this._typedColumns().map((column): string => column.key);
+    const initial = this.initialLayout();
+    const initialOrder = initial?.columnOrder ?? [];
+    return {
+      columnOrder: [
+        ...initialOrder.filter((key) => keys.includes(key)),
+        ...keys.filter((key) => !initialOrder.includes(key)),
+      ],
+      hiddenColumns: (initial?.hiddenColumns ?? []).filter((key) => keys.includes(key)),
+      columnWidths: { ...(initial?.columnWidths ?? {}) },
+    };
   }
 
   private _emitQueryState(

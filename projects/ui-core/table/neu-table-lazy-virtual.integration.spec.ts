@@ -558,6 +558,33 @@ describe('NeuTable lazy virtual integration', () => {
     expect(table.selectedCount()).toBe(6);
   });
 
+  it('preserves authoritative expansion keys while sparse UI remains inert', async () => {
+    const fixture = createLazyTable();
+    fixture.componentRef.setInput('expandable', true);
+    fixture.componentRef.setInput('expandedRowKeys', [0, 'off-page']);
+    const changes: Array<readonly unknown[]> = [];
+    const requests: NeuTableLazyRequest[] = [];
+    fixture.componentInstance.expandedRowKeysChange.subscribe((event) => changes.push(event));
+    fixture.componentInstance.lazyRequest.subscribe((event) => requests.push(event));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    const firstRow = table.data()[0] as LazyRow;
+
+    expect((table as any)._expansionEnabled()).toBe(false);
+    expect((table as any)._state.expansionKeys()).toEqual(new Set([0, 'off-page']));
+    expect(table.isRowExpanded(firstRow)).toBe(true);
+    expect(fixture.nativeElement.querySelector('.neu-table__row-expand-detail')).toBeNull();
+    expect(requests).toHaveLength(1);
+
+    table.toggleExpand(firstRow);
+    table.expandRow(firstRow);
+    table.collapseRow(firstRow);
+    expect(changes).toEqual([]);
+    expect(requests).toHaveLength(1);
+    expect((table as any)._state.expansionKeys()).toEqual(new Set([0, 'off-page']));
+  });
+
   it('preserves preloaded virtual behavior when dataFirst is absent', async () => {
     const fixture = TestBed.createComponent(NeuTableComponent<LazyRow>);
     fixture.componentRef.setInput('columns', COLUMNS);

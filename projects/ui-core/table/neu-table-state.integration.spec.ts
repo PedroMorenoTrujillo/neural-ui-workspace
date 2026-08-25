@@ -56,6 +56,8 @@ const SERVER_ROWS: ServerStateRow[] = [
 
 describe('NeuTable canonical state integration', () => {
   beforeEach(async () => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
     await TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
@@ -736,5 +738,360 @@ describe('NeuTable canonical state integration', () => {
       hiddenColumns: ['id'],
       columnWidths: { name: 180 },
     });
+  });
+
+  it('proposes controlled expansion once, accepts a silent echo, and keeps unknown keys', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('expandable', true);
+    fixture.componentRef.setInput('expandedRowKeys', ['off-page']);
+    const changes: Array<readonly unknown[]> = [];
+    const expands: unknown[] = [];
+    fixture.componentInstance.expandedRowKeysChange.subscribe((event) => changes.push(event));
+    fixture.componentInstance.rowExpand.subscribe((event) => expands.push(event));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    fixture.componentInstance.expandRow(ROWS[0]);
+
+    expect(changes).toEqual([['off-page', 1]]);
+    expect(expands).toHaveLength(1);
+    expect(fixture.componentInstance.isRowExpanded(ROWS[0])).toBe(false);
+    expect((fixture.componentInstance as any)._state.expansionKeys()).toEqual(
+      new Set(['off-page']),
+    );
+
+    fixture.componentRef.setInput('expandedRowKeys', changes[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(changes).toHaveLength(1);
+    expect(expands).toHaveLength(1);
+    expect(fixture.componentInstance.isRowExpanded(ROWS[0])).toBe(true);
+
+    fixture.componentRef.setInput('expandedRowKeys', undefined);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.componentInstance.collapseRow(ROWS[0]);
+    expect(changes[1]).toEqual(['off-page']);
+  });
+
+  it('restores every persisted family before one initial server query', async () => {
+    const key = 'neu-table-t1-roundtrip';
+    const source = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
+    source.componentRef.setInput('columns', SERVER_COLUMNS);
+    source.componentRef.setInput('data', SERVER_ROWS);
+    source.componentRef.setInput('useUrlState', false);
+    source.componentRef.setInput('stateKey', key);
+    source.componentRef.setInput('stateStorage', 'local');
+    source.componentRef.setInput('pageSize', 1);
+    source.componentRef.setInput('selectionMode', 'multiple');
+    source.componentRef.setInput('expandable', true);
+    source.detectChanges();
+    await source.whenStable();
+    const sourceTable = source.componentInstance;
+
+    sourceTable.goToPage(2);
+    sourceTable.sortBy('name');
+    sourceTable.setColumnFilter('role', ROLE_ADMIN);
+    sourceTable.toggleRow(SERVER_ROWS[1], 'checkbox');
+    sourceTable.expandRow(SERVER_ROWS[2]);
+    sourceTable.applyLayout({
+      columnOrder: ['name', 'id', 'role', 'tag'],
+      hiddenColumns: ['tag'],
+      columnWidths: { name: 240 },
+    });
+    const stored = sourceTable.saveState();
+    expect(stored).toMatchObject({
+      page: 1,
+      pageSize: 1,
+      sort: { key: 'name', dir: 'asc' },
+      selectionKeys: [2],
+      expandedRowKeys: [3],
+      layout: { hiddenColumns: ['tag'], columnWidths: { name: 240 } },
+    });
+    source.destroy();
+
+    const restored = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
+    restored.componentRef.setInput('columns', SERVER_COLUMNS);
+    restored.componentRef.setInput('data', SERVER_ROWS);
+    restored.componentRef.setInput('useUrlState', false);
+    restored.componentRef.setInput('stateKey', key);
+    restored.componentRef.setInput('stateStorage', 'local');
+    restored.componentRef.setInput('serverSide', true);
+    restored.componentRef.setInput('lazyLoadOnInit', true);
+    restored.componentRef.setInput('selectionMode', 'multiple');
+    restored.componentRef.setInput('expandable', true);
+    const restores: unknown[] = [];
+    const queries: NeuTableQueryState[] = [];
+    restored.componentInstance.stateRestore.subscribe((event) => restores.push(event));
+    restored.componentInstance.queryChange.subscribe((event) => queries.push(event));
+    restored.detectChanges();
+    await restored.whenStable();
+
+    expect(restores).toHaveLength(1);
+    expect(queries).toHaveLength(1);
+    expect(queries[0]).toMatchObject({
+      page: 1,
+      pageSize: 1,
+      sort: { key: 'name', dir: 'asc' },
+    });
+    expect(restored.componentInstance.selectedRows()).toEqual([SERVER_ROWS[1]]);
+    expect(restored.componentInstance.isRowExpanded(SERVER_ROWS[2])).toBe(true);
+    expect((restored.componentInstance as any)._state.filters()['role'].constraints[0].value).toBe(
+      ROLE_ADMIN,
+    );
+    expect(restored.componentInstance.currentLayout()).toMatchObject({
+      hiddenColumns: ['tag'],
+      columnWidths: { name: 240 },
+    });
+  });
+
+  it('resolves controlled state over URL, URL over persistence, and persistence over inputs', async () => {
+    const key = 'neu-table-t1-precedence';
+    const source = TestBed.createComponent(NeuTableComponent<StateRow>);
+    source.componentRef.setInput('columns', COLUMNS);
+    source.componentRef.setInput('data', ROWS);
+    source.componentRef.setInput('useUrlState', false);
+    source.componentRef.setInput('stateKey', key);
+    source.componentRef.setInput('pageSize', 25);
+    source.detectChanges();
+    await source.whenStable();
+    source.componentInstance.onSearch({ target: { value: 'Persisted' } } as unknown as Event);
+    source.componentInstance.saveState();
+    source.destroy();
+
+    const router = TestBed.inject(Router);
+    await router.navigate([], { queryParams: { q: 'URL' } });
+    const urlWins = TestBed.createComponent(NeuTableComponent<StateRow>);
+    urlWins.componentRef.setInput('columns', COLUMNS);
+    urlWins.componentRef.setInput('data', ROWS);
+    urlWins.componentRef.setInput('stateKey', key);
+    urlWins.componentRef.setInput('pageSize', 5);
+    urlWins.detectChanges();
+    await urlWins.whenStable();
+    expect(urlWins.componentInstance.searchQuery()).toBe('URL');
+    expect((urlWins.componentInstance as any)._state.pageSize()).toBe(25);
+    urlWins.destroy();
+
+    const controlledQuery: NeuTableQueryState = {
+      page: 4,
+      pageSize: 50,
+      search: 'Controlled',
+      sort: null,
+      sortEntries: [],
+      globalFilterFields: ['id', 'name'],
+      filters: {},
+      serialization: {
+        status: 'serializable',
+        localOnlyFilters: [],
+        requiresConsumerSerializationFilters: [],
+        localOnlyGlobalFilterFields: false,
+      },
+    };
+    const controlled = TestBed.createComponent(NeuTableComponent<StateRow>);
+    controlled.componentRef.setInput('columns', COLUMNS);
+    controlled.componentRef.setInput('data', ROWS);
+    controlled.componentRef.setInput('stateKey', key);
+    controlled.componentRef.setInput('query', controlledQuery);
+    controlled.detectChanges();
+    await controlled.whenStable();
+    expect(controlled.componentInstance.currentPage()).toBe(4);
+    expect(controlled.componentInstance.searchQuery()).toBe('Controlled');
+    expect((controlled.componentInstance as any)._state.pageSize()).toBe(50);
+  });
+
+  it('separates clear from live reset and suppresses identical manual saves', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('stateKey', 'neu-table-t1-lifecycle');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const saves: unknown[] = [];
+    fixture.componentInstance.stateSave.subscribe((event) => saves.push(event));
+
+    fixture.componentInstance.onSearch({ target: { value: 'Alpha' } } as unknown as Event);
+    const afterAutomaticSave = saves.length;
+    fixture.componentInstance.saveState();
+    fixture.componentInstance.saveState();
+    expect(saves).toHaveLength(afterAutomaticSave);
+
+    fixture.componentInstance.clearState();
+    expect(fixture.componentInstance.searchQuery()).toBe('Alpha');
+    expect(window.sessionStorage.getItem('neu-table-t1-lifecycle')).toBeNull();
+
+    fixture.componentInstance.resetState();
+    expect(fixture.componentInstance.searchQuery()).toBe('');
+    expect(window.sessionStorage.getItem('neu-table-t1-lifecycle')).not.toBeNull();
+  });
+
+  it('resets every live state family and emits each affected public projection once', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('stateKey', 'neu-table-t1-full-reset');
+    fixture.componentRef.setInput('pageSize', 2);
+    fixture.componentRef.setInput('initialLayout', {
+      columnOrder: ['id', 'name'],
+      hiddenColumns: [],
+      columnWidths: { id: 80 },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+    (table as any)._state.update(
+      {
+        page: 3,
+        pageSize: 9,
+        search: 'Gamma',
+        sort: { key: 'name', dir: 'desc' },
+        sortEntries: [{ key: 'id', dir: 'asc' }],
+        filters: { name: { operator: 'and', constraints: [{ value: 'Gam' }] } },
+        selectionKeys: new Set([3]),
+        expansionKeys: new Set([3, 'off-page']),
+        layout: {
+          columnOrder: ['name', 'id'],
+          hiddenColumns: ['id'],
+          columnWidths: { name: 260 },
+        },
+      },
+      'api',
+    );
+    (table as any)._openFilterKey.set('name');
+    const queries: unknown[] = [];
+    const searches: unknown[] = [];
+    const sorts: unknown[] = [];
+    const selections: unknown[] = [];
+    const expansions: unknown[] = [];
+    const layouts: unknown[] = [];
+    table.queryChange.subscribe((value) => queries.push(value));
+    table.searchChange.subscribe((value) => searches.push(value));
+    table.sortChange.subscribe((value) => sorts.push(value));
+    table.selectionChange.subscribe((value) => selections.push(value));
+    table.expandedRowKeysChange.subscribe((value) => expansions.push(value));
+    table.layoutChange.subscribe((value) => layouts.push(value));
+
+    table.resetState();
+
+    expect(table.currentState()).toMatchObject({
+      page: 1,
+      pageSize: 2,
+      search: '',
+      sort: null,
+      sortEntries: [],
+      filters: {},
+      selectionKeys: [],
+      expandedRowKeys: [],
+      layout: {
+        columnOrder: ['id', 'name'],
+        hiddenColumns: [],
+        columnWidths: { id: 80 },
+      },
+    });
+    expect(queries).toHaveLength(1);
+    expect(searches).toEqual(['']);
+    expect(sorts).toEqual([[]]);
+    expect(selections).toEqual([[]]);
+    expect(expansions).toEqual([[]]);
+    expect(layouts).toHaveLength(1);
+    expect((table as any)._openFilterKey()).toBeNull();
+
+    queries.length = 0;
+    table.resetState();
+    expect(queries).toHaveLength(0);
+  });
+
+  it('restores multi-select option identity while retaining unknown persisted values', async () => {
+    const key = 'neu-table-t1-multi-identity';
+    const source = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
+    source.componentRef.setInput('columns', SERVER_COLUMNS);
+    source.componentRef.setInput('data', SERVER_ROWS);
+    source.componentRef.setInput('useUrlState', false);
+    source.componentRef.setInput('stateKey', key);
+    source.detectChanges();
+    await source.whenStable();
+    source.componentInstance.setColumnFilter('tag', [
+      { ...TAG_CORE },
+      { id: 'remote', label: 'Remote' },
+    ]);
+    source.componentInstance.saveState();
+    source.destroy();
+
+    const restored = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
+    restored.componentRef.setInput('columns', SERVER_COLUMNS);
+    restored.componentRef.setInput('data', SERVER_ROWS);
+    restored.componentRef.setInput('useUrlState', false);
+    restored.componentRef.setInput('stateKey', key);
+    restored.detectChanges();
+    await restored.whenStable();
+
+    const value = (restored.componentInstance as any)._state.filters()['tag'].constraints[0]
+      .value as unknown[];
+    expect(value[0]).toBe(TAG_CORE);
+    expect(value[1]).toEqual({ id: 'remote', label: 'Remote' });
+  });
+
+  it('normalizes uncontrolled expansion when single mode is entered and contains missing restores', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('expandable', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance;
+
+    expect(table.saveState()).toMatchObject({ version: 1 });
+    expect(table.restoreState()).toBeNull();
+    table.clearState();
+    fixture.componentRef.setInput('stateKey', 'neu-table-t1-missing');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.restoreState()).toBeNull();
+
+    table.expandRow(ROWS[0]);
+    table.expandRow(ROWS[0]);
+    table.expandRow(ROWS[1]);
+    fixture.componentRef.setInput('expandMode', 'single');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(table.currentState().expandedRowKeys).toEqual([1]);
+  });
+
+  it('manually restores a stored snapshot, reapplies URL precedence, and emits the effective state', async () => {
+    const key = 'neu-table-t1-manual-url-restore';
+    const source = TestBed.createComponent(NeuTableComponent<StateRow>);
+    source.componentRef.setInput('columns', COLUMNS);
+    source.componentRef.setInput('data', ROWS);
+    source.componentRef.setInput('useUrlState', false);
+    source.componentRef.setInput('stateKey', key);
+    source.detectChanges();
+    await source.whenStable();
+    source.componentInstance.onSearch({ target: { value: 'Persisted' } } as unknown as Event);
+    source.componentInstance.saveState();
+    source.destroy();
+
+    const router = TestBed.inject(Router);
+    await router.navigate([], { queryParams: { q: 'URL' } });
+    const target = TestBed.createComponent(NeuTableComponent<StateRow>);
+    target.componentRef.setInput('columns', COLUMNS);
+    target.componentRef.setInput('data', ROWS);
+    target.componentRef.setInput('stateKey', key);
+    const restores: unknown[] = [];
+    const queries: unknown[] = [];
+    target.componentInstance.stateRestore.subscribe((value) => restores.push(value));
+    target.componentInstance.queryChange.subscribe((value) => queries.push(value));
+    target.detectChanges();
+    await target.whenStable();
+    restores.length = 0;
+    queries.length = 0;
+
+    expect(target.componentInstance.restoreState()).toMatchObject({ search: 'URL' });
+    expect(restores).toHaveLength(1);
+    expect(queries).toHaveLength(1);
   });
 });

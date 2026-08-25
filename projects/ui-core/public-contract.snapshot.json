@@ -1099,6 +1099,7 @@
         "exactMatchable",
         "exactMatchLabel",
         "expandable",
+        "expandedRowKeys",
         "expandRowAriaLabel",
         "exportable",
         "exportColumns",
@@ -1166,6 +1167,8 @@
         "sortable",
         "sortDirParam",
         "sortParam",
+        "stateKey",
+        "stateStorage",
         "stickyHeader",
         "stripedRows",
         "tableAriaLabel",
@@ -1184,11 +1187,14 @@
         "actionClick",
         "cellEditCommit",
         "columnReorder",
+        "expandedRowKeysChange",
         "layoutChange",
         "lazyRequest",
         "queryChange",
         "rowClick",
+        "rowCollapse",
         "rowDblClick",
+        "rowExpand",
         "rowSelect",
         "rowUnselect",
         "searchChange",
@@ -1196,7 +1202,9 @@
         "selectionActionClick",
         "selectionChange",
         "serverStateChange",
-        "sortChange"
+        "sortChange",
+        "stateRestore",
+        "stateSave"
       ]
     },
     "textarea/neu-textarea.component.ts": {

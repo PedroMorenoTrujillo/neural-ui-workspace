@@ -208,15 +208,32 @@ describe('NeuTableStateController', () => {
     expect(events.map((event) => event.changedKeys)).toEqual([['selectionKeys'], ['page']]);
   });
 
+  it('keeps controlled expansion authoritative, echoes silently, and releases deterministically', () => {
+    const listener = vi.fn();
+    const controller = new NeuTableStateController<string>(listener);
+    controller.setControlledExpansionKeys(new Set(['off-page']));
+
+    const proposal = controller.setExpansionKeys(new Set(['off-page', 'visible']), 'ui');
+
+    expect(proposal?.committed).toBe(false);
+    expect(controller.expansionKeys()).toEqual(new Set(['off-page']));
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    controller.setControlledExpansionKeys(new Set(['off-page', 'visible']));
+    expect(controller.expansionKeys()).toEqual(new Set(['off-page', 'visible']));
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    controller.releaseControlledExpansion();
+    controller.setExpansionKeys(new Set(['visible']), 'api');
+    expect(controller.expansionKeys()).toEqual(new Set(['visible']));
+  });
+
   it('controls only sort slices while committing an atomic page reset proposal', () => {
     const controller = new NeuTableStateController();
     controller.setPage(3, 'api');
     controller.setControlledSort({ key: 'name', dir: 'asc' }, []);
 
-    const proposal = controller.update(
-      { sort: { key: 'name', dir: 'desc' }, page: 1 },
-      'ui',
-    );
+    const proposal = controller.update({ sort: { key: 'name', dir: 'desc' }, page: 1 }, 'ui');
 
     expect(proposal).toMatchObject({
       committed: false,

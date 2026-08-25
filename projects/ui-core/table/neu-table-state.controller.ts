@@ -206,6 +206,20 @@ export class NeuTableStateController<K = unknown> {
     this._controlledKeys.set(controlledKeys);
   }
 
+  /** Controls only expanded row keys while every other state slice stays independent. */
+  setControlledExpansionKeys(expansionKeys: ReadonlySet<K>): InternalNeuTableStateChange<K> | null {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.add('expansionKeys');
+    this._controlledKeys.set(controlledKeys);
+    return this._commit({ ...this.snapshot(), expansionKeys }, 'controlled');
+  }
+
+  releaseControlledExpansion(): void {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.delete('expansionKeys');
+    this._controlledKeys.set(controlledKeys);
+  }
+
   /** Controls only the single/multiple sort slices. */
   setControlledSort(
     sort: InternalNeuTableSort | null,
