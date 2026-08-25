@@ -46,3 +46,34 @@
     transform: scaleX(-1);
   }
 }
+
+.neu-ripple {
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+}
+
+.neu-ripple__ink {
+  position: absolute;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.2;
+  transform: scale(0);
+  animation: neu-ripple-expand 450ms ease-out forwards;
+}
+
+@keyframes neu-ripple-expand {
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .neu-ripple__ink {
+    display: none;
+  }
+}
