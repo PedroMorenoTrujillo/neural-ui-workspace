@@ -12,7 +12,21 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NeuSelectComponent, NeuSelectOption } from './neu-select.component';
-import { NeuSelectItemDirective, NeuSelectSelectedDirective } from './neu-select.directives';
+import {
+  NeuSelectClearIconDirective,
+  NeuSelectDropdownIconDirective,
+  NeuSelectEmptyDirective,
+  NeuSelectEmptyFilterDirective,
+  NeuSelectFilterDirective,
+  NeuSelectFilterIconDirective,
+  NeuSelectFooterDirective,
+  NeuSelectGroupDirective,
+  NeuSelectHeaderDirective,
+  NeuSelectItemDirective,
+  NeuSelectLoaderDirective,
+  NeuSelectLoadingIconDirective,
+  NeuSelectSelectedDirective,
+} from './neu-select.directives';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 
 const OPTIONS: NeuSelectOption[] = [
@@ -311,6 +325,24 @@ describe('NeuSelectComponent', () => {
     expect(trigger.getAttribute('aria-describedby')).toBe(error.id);
   });
 
+  it('keeps editable combobox ARIA on the native input and listbox programmatically focusable', async () => {
+    const { f, comp } = await setup({ editable: true, required: true, invalid: true });
+    comp.show();
+    f.detectChanges();
+    const wrapper = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const input = f.nativeElement.querySelector('.neu-select__editable-input') as HTMLInputElement;
+    const listbox = document.querySelector('.neu-select__list') as HTMLElement;
+
+    expect(wrapper.getAttribute('role')).toBeNull();
+    expect(wrapper.getAttribute('aria-expanded')).toBeNull();
+    expect(wrapper.getAttribute('aria-required')).toBeNull();
+    expect(input.getAttribute('role')).toBe('combobox');
+    expect(input.getAttribute('aria-expanded')).toBe('true');
+    expect(input.getAttribute('aria-required')).toBe('true');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(listbox.getAttribute('tabindex')).toBe('0');
+  });
+
   it('should announce filtered result counts in the live region', async () => {
     const { f, comp } = await setup({ searchable: true });
     comp.isOpen.set(true);
@@ -387,9 +419,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
 
-    const searchInput = document.querySelector(
-      '.neu-select__search-input',
-    ) as HTMLInputElement;
+    const searchInput = document.querySelector('.neu-select__search-input') as HTMLInputElement;
     searchInput.value = 'xico';
     searchInput.dispatchEvent(new Event('input', { bubbles: true }));
     f.detectChanges();
@@ -430,7 +460,7 @@ describe('NeuSelectComponent', () => {
     expect(panel).toBeTruthy();
     expect(viewport).toBeTruthy();
     expect(viewport!.style.height).toBe(comp.virtualViewportHeight());
-    expect(comp.virtualScrollItemSize()).toBe(52);
+    expect(comp.effectiveVirtualScrollItemSize()).toBe(52);
     expect(comp.filteredOptions()).toHaveLength(2);
     expect(comp.trackByOptionValue(0, { value: 'es', label: 'España' })).toBe('es');
   });
@@ -587,7 +617,7 @@ describe('NeuSelectComponent', () => {
     @Component({
       template: `
         <neu-select [options]="countries" optionLabel="name" optionValue="id">
-        <ng-template neuSelectItem let-country>
+          <ng-template neuSelectItem let-country>
             <span class="select-item-context">
               {{ $any(country).id }}-{{ $any(country).name }}
             </span>
@@ -603,10 +633,8 @@ describe('NeuSelectComponent', () => {
     const f = TestBed.createComponent(SelectItemTemplateHostComponent);
     f.detectChanges();
     const comp = f.componentInstance;
-    const selectComp = f.debugElement.query(By.css('neu-select')).componentInstance as NeuSelectComponent<
-      CountryModel,
-      number
-    >;
+    const selectComp = f.debugElement.query(By.css('neu-select'))
+      .componentInstance as NeuSelectComponent<CountryModel, number>;
     selectComp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
@@ -668,9 +696,7 @@ describe('NeuSelectComponent', () => {
       });
 
     expect(() => comp.focusOption('user:23/test value')).not.toThrow();
-    expect(
-      seenSelectors.every((selector) => !selector.includes('user:23/test value')),
-    ).toBe(true);
+    expect(seenSelectors.every((selector) => !selector.includes('user:23/test value'))).toBe(true);
 
     querySpy.mockRestore();
   });
@@ -701,9 +727,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
     expect(() => comp.focusOption('user:23/test value')).not.toThrow();
-    expect(
-      seenSelectors.every((selector) => !selector.includes('user:23/test value')),
-    ).toBe(true);
+    expect(seenSelectors.every((selector) => !selector.includes('user:23/test value'))).toBe(true);
 
     querySpy.mockRestore();
     getByIdSpy.mockRestore();
@@ -1279,9 +1303,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const checks = Array.from(
-      document.querySelectorAll('.neu-select__check'),
-    ) as SVGElement[];
+    const checks = Array.from(document.querySelectorAll('.neu-select__check')) as SVGElement[];
     expect(checks.some((check) => check.style.visibility === 'hidden')).toBe(true);
   });
 
@@ -1466,9 +1488,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
-    const searchInput: HTMLInputElement = document.querySelector(
-      '.neu-select__search-input',
-    )!;
+    const searchInput: HTMLInputElement = document.querySelector('.neu-select__search-input')!;
     // This click fires stopPropagation in the template — must not close the panel
     searchInput.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     f.detectChanges();
@@ -1529,7 +1549,10 @@ describe('NeuSelectComponent', () => {
       expect(comp.panelPosition().bottom).toBe('106px');
       expect(comp.panelPosition().left).toBe('764px');
     } finally {
-      Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: originalInnerWidth,
+      });
       Object.defineProperty(window, 'innerHeight', {
         configurable: true,
         value: originalInnerHeight,
@@ -1675,5 +1698,650 @@ describe('NeuSelectComponent', () => {
     expect((comp as any)._value()).toBe(COUNTRY_MODELS[0]);
     expect(comp.selectedLabel()).toBe('ESPAÑA');
     expect(onChange).toHaveBeenCalledWith(COUNTRY_MODELS[0]);
+  });
+
+  it('emits one CVA, legacy and detailed event for one semantic selection', async () => {
+    const { comp } = await setup();
+    const cva = vi.fn();
+    const legacy = vi.fn();
+    const detailed = vi.fn();
+    comp.registerOnChange(cva);
+    comp.selectionChange.subscribe(legacy);
+    comp.onChange.subscribe(detailed);
+
+    comp.selectOption(OPTIONS[0]);
+    comp.selectOption(OPTIONS[0]);
+
+    expect(cva).toHaveBeenCalledTimes(1);
+    expect(legacy).toHaveBeenCalledTimes(1);
+    expect(detailed).toHaveBeenCalledTimes(1);
+    expect(detailed.mock.calls[0][0]).toMatchObject({
+      value: 'es',
+      option: OPTIONS[0],
+      custom: false,
+    });
+  });
+
+  it('keeps programmatic writes silent for falsy, NaN, unknown and null values', async () => {
+    const f = TestBed.createComponent(NeuSelectComponent<number, number>);
+    f.componentRef.setInput('options', [0, 1, Number.NaN]);
+    f.detectChanges();
+    const comp = f.componentInstance;
+    const cva = vi.fn();
+    const legacy = vi.fn();
+    const detailed = vi.fn();
+    comp.registerOnChange(cva);
+    comp.selectionChange.subscribe(legacy);
+    comp.onChange.subscribe(detailed);
+
+    comp.writeValue(0);
+    expect(comp.isOptionSelected(0)).toBe(true);
+    comp.writeValue(Number.NaN);
+    expect(comp.isOptionSelected(Number.NaN)).toBe(true);
+    comp.writeValue(999);
+    comp.writeValue(null);
+
+    expect(cva).not.toHaveBeenCalled();
+    expect(legacy).not.toHaveBeenCalled();
+    expect(detailed).not.toHaveBeenCalled();
+  });
+
+  it('commits an editable custom value once and never creates a fake option', async () => {
+    const { comp } = await setup({ editable: true });
+    const cva = vi.fn();
+    const legacy = vi.fn();
+    const detailed = vi.fn();
+    comp.registerOnChange(cva);
+    comp.selectionChange.subscribe(legacy);
+    comp.onChange.subscribe(detailed);
+    const input = document.createElement('input');
+    input.value = 'Custom country';
+    comp.onEditableInput({ target: input } as unknown as Event);
+    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+
+    expect(comp._value()).toBe('Custom country');
+    expect(cva).toHaveBeenCalledTimes(1);
+    expect(legacy).toHaveBeenCalledWith(null);
+    expect(detailed.mock.calls[0][0]).toMatchObject({ custom: true, option: null });
+  });
+
+  it('resolves an editable exact label to the canonical matching option on blur', async () => {
+    const { comp } = await setup({ editable: true });
+    const cva = vi.fn();
+    comp.registerOnChange(cva);
+    comp.editableQuery.set('méxico');
+
+    comp.onEditableBlur(new FocusEvent('blur'));
+
+    expect(comp._value()).toBe('mx');
+    expect(cva).toHaveBeenCalledTimes(1);
+    expect(comp.selectedLabel()).toBe('México');
+  });
+
+  it('proposes controlled filters without mutating the canonical owner value', async () => {
+    const { comp } = await setup({
+      filter: true,
+      filterValue: 'esp',
+      filterBy: 'label',
+      filterMatchMode: 'startsWith',
+    });
+    const events: any[] = [];
+    comp.onFilter.subscribe((event: unknown) => events.push(event));
+
+    comp.setFilter('mex', new Event('input'));
+
+    expect(comp.currentFilter()).toBe('esp');
+    expect(comp.filteredOptions()).toEqual([OPTIONS[0]]);
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ filter: 'mex', visibleOptions: [OPTIONS[1]] });
+  });
+
+  it('normalizes typed groups, disables group children and keeps groups out of T events', async () => {
+    type Group = { title: string; locked?: boolean; children: NeuSelectOption[] };
+    const groups: Group[] = [
+      { title: 'Core', children: [OPTIONS[0], OPTIONS[1]] },
+      { title: 'Locked', locked: true, children: [{ value: 'cl', label: 'Chile' }] },
+    ];
+    const f = TestBed.createComponent(
+      NeuSelectComponent as unknown as new () => NeuSelectComponent<NeuSelectOption, string, Group>,
+    );
+    f.componentRef.setInput('groups', groups);
+    f.componentRef.setInput('groupConfig', {
+      labelAccessor: 'title',
+      childrenAccessor: 'children',
+      disabledAccessor: 'locked',
+    });
+    f.detectChanges();
+    const comp = f.componentInstance;
+
+    expect(comp.normalizedRows().filter((row) => row.kind === 'group')).toHaveLength(2);
+    expect(comp.filteredOptions()).toHaveLength(3);
+    const lockedIndex = comp
+      .visibleRows()
+      .findIndex((row) => row.kind === 'option' && row.option.value === 'cl');
+    comp.selectRow(null, comp.visibleRows()[lockedIndex] as any, lockedIndex);
+    expect((comp as any)._value()).toBeNull();
+    comp.selectOption(groups[0].children[1]);
+    expect((comp as any)._value()).toBe('mx');
+  });
+
+  it('emits bounded serializable lazy requests for initial, scroll and filter lifecycles', async () => {
+    const { comp } = await setup({
+      options: [],
+      lazy: true,
+      loading: true,
+      virtualScroll: true,
+      totalRecords: 500,
+      virtualScrollVisibleItems: 6,
+      virtualScrollBuffer: 2,
+      filter: true,
+    });
+    const requests: any[] = [];
+    comp.onLazyLoad.subscribe((event: unknown) => requests.push(event));
+    comp.show();
+    const list = document.createElement('div');
+    Object.defineProperty(list, 'scrollTop', { value: 400 });
+    comp.onPanelScroll({ currentTarget: list } as unknown as Event);
+    comp.setFilter('mex');
+
+    expect(requests.map((request) => request.reason)).toEqual(['initial', 'scroll', 'filter']);
+    expect(requests[0]).toMatchObject({ first: 0, end: 10, count: 10, requestId: 1 });
+    expect(JSON.parse(JSON.stringify(requests[2])).filterValue).toBe('mex');
+    expect(comp.renderedRows()).toHaveLength(10);
+  });
+
+  it('bounds virtual DOM and keeps active descendant on a real rendered eligible row', async () => {
+    const many = Array.from({ length: 200 }, (_, index) => ({
+      value: String(index),
+      label: `Option ${index}`,
+    }));
+    const { f, comp } = await setup({
+      options: many,
+      virtualScroll: true,
+      virtualScrollVisibleItems: 8,
+      virtualScrollBuffer: 2,
+    });
+    comp.show();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(document.querySelectorAll('.neu-select__option').length).toBeLessThanOrEqual(12);
+    const active = comp.activeDescendantId();
+    expect(active).toBeTruthy();
+    expect(document.getElementById(active)).toBeTruthy();
+  });
+
+  it('restores focus for Escape and blocks readonly and disabled mutations', async () => {
+    const { f, comp } = await setup();
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    trigger.focus = vi.fn();
+    const originalFrame = window.requestAnimationFrame;
+    window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
+    try {
+      comp.show();
+      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+      expect(trigger.focus).toHaveBeenCalled();
+      f.componentRef.setInput('readonly', true);
+      f.detectChanges();
+      comp.show();
+      comp.selectOption(OPTIONS[0]);
+      expect(comp.isOpen()).toBe(false);
+      expect(comp._value()).toBeNull();
+      f.componentRef.setInput('disabled', true);
+      f.componentRef.setInput('readonly', false);
+      f.detectChanges();
+      comp.selectOption(OPTIONS[0]);
+      expect(comp._value()).toBeNull();
+    } finally {
+      window.requestAnimationFrame = originalFrame;
+    }
+  });
+
+  it('exposes imperative show, hide, focus, clear and resetFilter with coherent events', async () => {
+    const { f, comp } = await setup({ filter: true, clearable: true });
+    const shows = vi.fn();
+    const hides = vi.fn();
+    const clears = vi.fn();
+    comp.onShow.subscribe(shows);
+    comp.onHide.subscribe(hides);
+    comp.onClear.subscribe(clears);
+
+    comp.show();
+    comp.show();
+    expect(shows).toHaveBeenCalledTimes(1);
+    comp.setFilter('mex');
+    comp.resetFilter();
+    expect(comp.currentFilter()).toBe('');
+    comp.hide();
+    comp.hide();
+    expect(hides).toHaveBeenCalledTimes(1);
+    comp.selectOption(OPTIONS[0]);
+    comp.clear();
+    comp.clear();
+    expect(clears).toHaveBeenCalledTimes(1);
+    expect(comp._value()).toBeNull();
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    trigger.focus = vi.fn();
+    comp.focus();
+    expect(trigger.focus).toHaveBeenCalled();
+  });
+
+  it('reconciles immutable identity replacement and forwards native form metadata', async () => {
+    const first = [
+      { id: 1, name: 'One' },
+      { id: 2, name: 'Two' },
+    ];
+    const f = TestBed.createComponent(NeuSelectComponent<any, any>);
+    f.componentRef.setInput('options', first);
+    f.componentRef.setInput('optionLabel', 'name');
+    f.componentRef.setInput('identityConfig', { identityAccessor: 'id' });
+    f.componentRef.setInput('name', 'role');
+    f.componentRef.setInput('required', true);
+    f.componentRef.setInput('inputId', 'role-select');
+    f.detectChanges();
+    const comp = f.componentInstance;
+    comp.writeValue(first[1]);
+    f.componentRef.setInput('options', [
+      { id: 1, name: 'One v2' },
+      { id: 2, name: 'Two v2' },
+    ]);
+    f.detectChanges();
+
+    expect(comp.selectedLabel()).toBe('Two v2');
+    expect(f.nativeElement.querySelector('.neu-select__trigger').id).toBe('role-select');
+    expect((f.nativeElement.querySelector('input[type="hidden"]') as HTMLInputElement).name).toBe(
+      'role',
+    );
+  });
+
+  it('covers the complete open and closed keyboard policy matrix', async () => {
+    const { f, comp } = await setup({ virtualScrollOptions: { viewportItems: 2 } });
+    const key = (value: string, init: KeyboardEventInit = {}) => {
+      const event = new KeyboardEvent('keydown', { key: value, cancelable: true, ...init });
+      comp.onTriggerKeyDown(event);
+      return event;
+    };
+
+    const alreadyHandled = key('ArrowDown') as KeyboardEvent & { __neuSelectHandled?: boolean };
+    comp.hide(false);
+    alreadyHandled.__neuSelectHandled = true;
+    comp.onTriggerKeyDown(alreadyHandled);
+    expect(comp.isOpen()).toBe(false);
+
+    key('ArrowUp');
+    expect(comp.isOpen()).toBe(true);
+    expect(comp.activeIndex()).toBe(1);
+    for (const value of ['ArrowDown', 'ArrowUp', 'Home', 'End', 'PageDown', 'PageUp']) key(value);
+    key('m');
+    key('x', { ctrlKey: true });
+    key('x', { metaKey: true });
+    key('x', { altKey: true });
+    key('Tab');
+    expect(comp.isOpen()).toBe(false);
+
+    key('Enter');
+    comp.activeIndex.set(-1);
+    key('Enter');
+    expect(comp._value()).toBeNull();
+    comp.activeIndex.set(0);
+    key(' ');
+    expect(comp._value()).toBe('es');
+
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    key('ArrowDown');
+    expect(comp.isOpen()).toBe(false);
+  });
+
+  it('covers editable input, filter keyboard and controlled reset branches', async () => {
+    const { f, comp } = await setup({ editable: true, filter: true, autofocusFilter: true });
+    comp.show();
+    f.detectChanges();
+    await f.whenStable();
+    const input = f.nativeElement.querySelector('.neu-select__editable-input') as HTMLInputElement;
+    input.value = 'Mex';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(comp.currentFilter()).toBe('Mex');
+
+    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
+    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'x', cancelable: true }));
+    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    expect(comp.isOpen()).toBe(false);
+    comp.show();
+    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+    expect(comp.isOpen()).toBe(false);
+
+    f.componentRef.setInput('filterValue', 'owner');
+    f.detectChanges();
+    comp.resetFilter(false);
+    expect(comp.currentFilter()).toBe('owner');
+    f.componentRef.setInput('readonly', true);
+    f.detectChanges();
+    input.value = 'blocked';
+    comp.onEditableInput({ target: input } as unknown as Event);
+    expect(comp.editableQuery()).not.toBe('blocked');
+  });
+
+  it('covers option mouse, key, select-on-focus and programmatic focus behavior', async () => {
+    const { f, comp } = await setup({ selectOnFocus: true, focusOnHover: true });
+    comp.show();
+    f.detectChanges();
+    const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
+    options[1].dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    expect(comp._value()).toBe('mx');
+
+    comp.show();
+    f.detectChanges();
+    const first = document.querySelector<HTMLElement>('.neu-select__option')!;
+    first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true }));
+    comp.focusOptionByIndex(new Event('focus', { cancelable: true }), OPTIONS[0], -1);
+    expect(comp.activeIndex()).toBeGreaterThanOrEqual(0);
+
+    f.componentRef.setInput('focusOnHover', false);
+    f.componentRef.setInput('readonly', true);
+    f.detectChanges();
+    comp.onOptionMouseEnter(0);
+    comp.setActiveRow(99);
+  });
+
+  it('covers overlay trigger, focus, blur, detach and transition guards', async () => {
+    const { f, comp } = await setup({ resetFilterOnHide: true, filter: true });
+    const touched = vi.fn();
+    comp.registerOnTouched(touched);
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const child = document.createElement('span');
+    const nested = new Event('keydown', { cancelable: true }) as Event & {
+      target: EventTarget | null;
+      currentTarget: EventTarget | null;
+    };
+    Object.defineProperties(nested, {
+      target: { value: child },
+      currentTarget: { value: trigger },
+    });
+    comp.onTriggerKey(nested);
+    comp.onTriggerActionKey(nested);
+
+    const direct = new Event('keydown', { cancelable: true }) as Event & {
+      target: EventTarget | null;
+      currentTarget: EventTarget | null;
+    };
+    Object.defineProperties(direct, {
+      target: { value: trigger },
+      currentTarget: { value: trigger },
+    });
+    comp.onTriggerKey(direct);
+    comp.onTriggerActionKey(direct);
+    comp.onTriggerClick(new MouseEvent('click', { cancelable: true }));
+    const prevented = new MouseEvent('click', { cancelable: true });
+    prevented.preventDefault();
+    comp.onTriggerClick(prevented);
+
+    comp.onInputFocus(new FocusEvent('focus'));
+    comp.onInputBlur(new FocusEvent('blur', { relatedTarget: trigger }));
+    comp.onInputBlur(new FocusEvent('blur'));
+    comp.show();
+    comp.setFilter('mex');
+    comp.onOverlayDetach();
+    comp.onOverlayDetach();
+    expect(touched).toHaveBeenCalled();
+  });
+
+  it('covers virtual dimensions, logical positions and public template contexts', async () => {
+    const { f, comp } = await setup({
+      virtualScroll: true,
+      virtualScrollVisibleItems: 2,
+      virtualScrollBuffer: -2,
+      totalRecords: 20,
+    });
+    comp.virtualFirst.set(1);
+    expect(comp.renderedRows().length).toBeGreaterThan(0);
+    expect(comp.virtualTopHeight()).toBeGreaterThanOrEqual(0);
+    expect(comp.virtualBottomHeight()).toBeGreaterThan(0);
+    const row = comp.visibleRows().find((candidate: any) => candidate.kind === 'option');
+    expect(comp.optionPosition(row, 0)).toBe(1);
+    expect(comp.itemTemplateContext(row, 0)).toMatchObject({ option: OPTIONS[0] });
+    expect(comp.selectedTemplateContext()).toMatchObject({ value: null, custom: false });
+
+    f.componentRef.setInput('virtualScrollItemSize', Number.NaN);
+    f.componentRef.setInput('size', 'small');
+    f.detectChanges();
+    expect(comp.effectiveVirtualScrollItemSize()).toBe(36);
+    f.componentRef.setInput('size', 'large');
+    f.detectChanges();
+    expect(comp.effectiveVirtualScrollItemSize()).toBe(52);
+    comp.panelPosition.update((position: any) => ({ ...position, maxHeight: 'not-a-number' }));
+    expect(comp.virtualViewportHeight()).toMatch(/px$/);
+
+    f.componentRef.setInput('lazy', true);
+    f.componentRef.setInput('lazyFirst', 5);
+    f.detectChanges();
+    expect(comp.logicalOptionCount()).toBe(20);
+    expect(comp.optionPosition(comp.visibleRows()[0], 0)).toBe(6);
+    expect(comp.loaderTemplateContext(7)).toMatchObject({ first: 7, end: 8, count: 1 });
+  });
+
+  it('covers descriptions, announcements, primitive and exceptional native serialization', async () => {
+    const { f, comp } = await setup();
+    f.componentRef.setInput('ariaDescribedBy', 'owned-description');
+    f.detectChanges();
+    expect(comp.describedBy()).toBe('owned-description');
+    f.componentRef.setInput('ariaDescribedBy', null);
+    f.componentRef.setInput('errorMessage', 'Required');
+    f.detectChanges();
+    expect(comp.describedBy()).toContain('-error');
+    f.componentRef.setInput('errorMessage', '');
+    f.componentRef.setInput('hint', 'Helpful');
+    f.detectChanges();
+    expect(comp.describedBy()).toContain('-hint');
+
+    comp.show();
+    expect(comp.resultsAnnouncement()).toContain('opciones');
+    f.componentRef.setInput('options', [OPTIONS[0]]);
+    f.detectChanges();
+    expect(comp.resultsAnnouncement()).toContain('1 opción');
+    f.componentRef.setInput('options', []);
+    f.detectChanges();
+    expect(comp.resultsAnnouncement()).toBe(comp.noResultsMessage());
+
+    comp.writeValue(true);
+    expect(comp.nativeValue()).toBe('true');
+    comp.writeValue(2n);
+    expect(comp.nativeValue()).toBe('2');
+    const cyclic: any = {};
+    cyclic.self = cyclic;
+    comp.writeValue(cyclic);
+    expect(comp.nativeValue()).toBe('[object Object]');
+    comp.hide(false);
+    expect(comp.resultsAnnouncement()).toBe('');
+  });
+
+  it('renders every strict structural and icon template slot', async () => {
+    @Component({
+      imports: [
+        NeuSelectComponent,
+        NeuSelectItemDirective,
+        NeuSelectSelectedDirective,
+        NeuSelectGroupDirective,
+        NeuSelectFilterDirective,
+        NeuSelectLoaderDirective,
+        NeuSelectHeaderDirective,
+        NeuSelectFooterDirective,
+        NeuSelectEmptyDirective,
+        NeuSelectEmptyFilterDirective,
+        NeuSelectDropdownIconDirective,
+        NeuSelectLoadingIconDirective,
+        NeuSelectClearIconDirective,
+        NeuSelectFilterIconDirective,
+      ],
+      template: `
+        <neu-select [options]="options" [group]="true" [filter]="true" [showClear]="true">
+          <ng-template neuSelectHeader><span class="slot-header">header</span></ng-template>
+          <ng-template neuSelectGroup let-group="group"
+            ><span class="slot-group">{{ group }}</span></ng-template
+          >
+          <ng-template [neuSelectItem]="options" let-option="option"
+            ><span class="slot-item">{{ option.label }}</span></ng-template
+          >
+          <ng-template [neuSelectSelected]="options" let-option="option"
+            ><span class="slot-selected">{{ option?.label }}</span></ng-template
+          >
+          <ng-template [neuSelectFilter]="{}" let-filter="filter"
+            ><button class="slot-filter" (click)="filter('one')">filter</button></ng-template
+          >
+          <ng-template neuSelectDropdownIcon>dropdown</ng-template>
+          <ng-template neuSelectLoadingIcon>loading</ng-template>
+          <ng-template neuSelectClearIcon>clear</ng-template>
+          <ng-template neuSelectFilterIcon>filter</ng-template>
+          <ng-template neuSelectFooter><span class="slot-footer">footer</span></ng-template>
+        </neu-select>
+        <neu-select [options]="[]" [filter]="true">
+          <ng-template neuSelectEmpty><span class="slot-empty">empty</span></ng-template>
+          <ng-template neuSelectEmptyFilter
+            ><span class="slot-empty-filter">empty-filter</span></ng-template
+          >
+          <ng-template neuSelectLoader>loader</ng-template>
+        </neu-select>
+      `,
+    })
+    class AllSlotsHost {
+      options = [
+        { value: 'one', label: 'One', group: 'A' },
+        { value: 'two', label: 'Two', group: 'B' },
+      ];
+    }
+    await TestBed.configureTestingModule({
+      imports: [AllSlotsHost],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+    const f = TestBed.createComponent(AllSlotsHost);
+    f.detectChanges();
+    const selects = f.debugElement.queryAll(By.directive(NeuSelectComponent));
+    for (const name of [
+      'itemTpl',
+      'selectedItemTpl',
+      'headerTpl',
+      'footerTpl',
+      'emptyTpl',
+      'emptyFilterTpl',
+      'groupTpl',
+      'filterTpl',
+      'loaderTpl',
+      'dropdownIconTpl',
+      'loadingIconTpl',
+      'clearIconTpl',
+      'filterIconTpl',
+    ]) {
+      selects[0].componentInstance[name]();
+    }
+    selects[0].componentInstance.writeValue('one');
+    selects[0].componentInstance.show();
+    selects[1].componentInstance.show();
+    f.detectChanges();
+    expect(document.querySelector('.slot-header')).toBeTruthy();
+    expect(document.querySelectorAll('.slot-group')).toHaveLength(2);
+    expect(document.querySelector('.slot-item')).toBeTruthy();
+    expect(f.nativeElement.querySelector('.slot-selected')).toBeTruthy();
+    expect(document.querySelector('.slot-footer')).toBeTruthy();
+    expect(document.querySelector('.slot-empty')).toBeTruthy();
+
+    selects[1].componentInstance.setFilter('missing');
+    f.detectChanges();
+    expect(document.querySelector('.slot-empty-filter')).toBeTruthy();
+  });
+
+  it('covers remaining callback, fallback and guard branches without changing semantics', async () => {
+    const { f, comp } = await setup({ editable: true, filter: true, showClear: true });
+    f.componentRef.setInput('filterFields', ['label']);
+    f.componentRef.setInput('virtualScrollItemSize', 0);
+    f.detectChanges();
+    expect(comp.effectiveFilterConfig().fields).toEqual(['label']);
+    expect(comp.effectiveVirtualScrollItemSize()).toBe(1);
+    expect(comp.previousGroup(OPTIONS[0])).toBeUndefined();
+    expect(comp.previousGroup(OPTIONS[1])).toBeUndefined();
+    expect(comp.selectedOptionId()).toBeNull();
+    expect(comp.optionGroup(OPTIONS[0])).toBeUndefined();
+    expect(comp.optionDomId({ value: 'missing', label: 'Missing' })).toContain('missing');
+
+    const input = f.nativeElement.querySelector('.neu-select__editable-input') as HTMLInputElement;
+    input.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    input.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    f.detectChanges();
+    const search = document.querySelector<HTMLInputElement>('.neu-select__search-input')!;
+    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const list = document.querySelector<HTMLElement>('.neu-select__list')!;
+    list.dispatchEvent(new Event('scroll', { bubbles: true }));
+
+    const filterContext = comp.filterTemplateContext();
+    filterContext.filter('mex');
+    filterContext.reset();
+    f.componentRef.setInput('filterValue', 'owned');
+    f.detectChanges();
+    comp.close();
+    expect(comp.currentFilter()).toBe('owned');
+
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    comp.onInputFocus(new FocusEvent('focus'));
+    comp.focus();
+    f.componentRef.setInput('disabled', false);
+    f.componentRef.setInput('editable', false);
+    f.componentRef.setInput('filterValue', null);
+    f.detectChanges();
+    comp.onPanelScroll({ currentTarget: list } as unknown as Event);
+    comp.setActiveRow(2);
+    comp.onOptionMouseEnter(2);
+
+    f.componentRef.setInput('options', []);
+    f.componentRef.setInput('autoOptionFocus', false);
+    f.componentRef.setInput('selectOnFocus', true);
+    f.detectChanges();
+    comp.show();
+    comp.onWindowResize();
+    comp.onWindowScroll();
+    comp.onOverlayPositionChange({ connectionPair: { overlayY: 'bottom' } } as any);
+    expect(comp.isPanelAbove()).toBe(true);
+    comp.hide(false);
+
+    f.componentRef.setInput('editable', true);
+    f.componentRef.setInput('urlParam', 'custom');
+    f.detectChanges();
+    comp.editableQuery.set('');
+    comp.onEditableBlur(new FocusEvent('blur'));
+    comp.editableQuery.set(null);
+    comp.onEditableBlur(new FocusEvent('blur'));
+
+    f.componentRef.setInput('lazy', true);
+    f.componentRef.setInput('virtualScroll', true);
+    f.componentRef.setInput('totalRecords', null);
+    f.componentRef.setInput('loading', true);
+    f.componentRef.setInput('lazyFirst', 4);
+    f.detectChanges();
+    comp.show();
+    comp.setFilter('same');
+    comp.setFilter('same');
+    const viewport = comp._viewport();
+    viewport?.checkViewportSize();
+    viewport?.scrollToIndex(2, 'auto');
+    expect(comp.logicalOptionCount()).toBeGreaterThanOrEqual(0);
+
+    vi.useFakeTimers();
+    try {
+      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'z', cancelable: true }));
+      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'z', cancelable: true }));
+      vi.advanceTimersByTime(501);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

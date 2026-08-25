@@ -17,6 +17,18 @@ $select-height: 48px;
     pointer-events: none;
   }
 
+  &--fluid {
+    width: 100%;
+  }
+
+  &--filled .neu-select__trigger {
+    background: var(--neu-surface-2);
+  }
+
+  &--readonly .neu-select__trigger {
+    cursor: default;
+  }
+
   &--sm {
     .neu-select__trigger {
       height: 36px;
@@ -144,6 +156,21 @@ $select-height: 48px;
   }
 }
 
+.neu-select__editable-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+
+  &::placeholder {
+    color: color-mix(in srgb, var(--neu-text) 62%, var(--neu-surface) 38%);
+  }
+}
+
 .neu-select__placeholder {
   color: color-mix(in srgb, var(--neu-text) 62%, var(--neu-surface) 38%);
   // En modo floating label, el placeholder se oculta hasta que el select está abierto
@@ -218,7 +245,7 @@ $select-height: 48px;
   border-end-end-radius: var(--neu-radius);
   box-shadow: var(--neu-shadow-lg);
   max-height: 240px;
-  overflow-y: auto;
+  overflow: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--neu-surface-3) transparent;
 
@@ -248,6 +275,49 @@ $select-height: 48px;
 
 .neu-select__viewport {
   width: 100%;
+}
+
+.neu-select__list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--neu-surface-3) transparent;
+}
+
+.neu-select__header,
+.neu-select__footer {
+  padding: var(--neu-space-2) var(--neu-space-3);
+}
+
+.neu-select__header {
+  border-bottom: 1px solid var(--neu-border);
+}
+
+.neu-select__footer {
+  border-top: 1px solid var(--neu-border);
+}
+
+.neu-select__group,
+.neu-select__loader {
+  padding: var(--neu-space-2) var(--neu-space-4);
+  color: var(--neu-text-muted);
+  font-size: var(--neu-text-xs);
+  font-weight: 600;
+}
+
+.neu-select__group--disabled {
+  color: var(--neu-text-disabled);
+}
+
+.neu-select__loader {
+  min-height: var(--neu-select-option-height, 44px);
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+}
+
+.neu-select__spacer {
+  pointer-events: none;
 }
 
 @media (max-width: 600px) {
@@ -286,6 +356,12 @@ $select-height: 48px;
   &:hover:not(.neu-select__option--disabled) {
     background: var(--neu-primary-50);
     color: var(--neu-primary);
+  }
+
+  &--active:not(.neu-select__option--disabled) {
+    background: var(--neu-primary-50);
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
   }
 
   &--selected {
@@ -385,4 +461,36 @@ $select-height: 48px;
   font-size: var(--neu-text-sm);
   color: var(--neu-text-disabled);
   font-family: var(--neu-font-sans);
+}
+
+.neu-select__native {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  .neu-select__trigger:focus-visible,
+  .neu-select--open .neu-select__trigger,
+  .neu-select__search-input:focus,
+  .neu-select__option--active {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+
+  .neu-select__option--selected {
+    color: HighlightText;
+    background: Highlight;
+  }
+
+  .neu-select__option--disabled,
+  .neu-select--disabled,
+  .neu-select__group--disabled {
+    color: GrayText;
+    opacity: 1;
+  }
+
+  .neu-select__check,
+  .neu-select__clear {
+    forced-color-adjust: auto;
+  }
 }
