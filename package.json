@@ -23,6 +23,7 @@
     "test:schematics": "node scripts/test-ui-core-schematics.mjs",
     "test:imports": "node scripts/test-ui-core-entrypoint-imports.mjs",
     "test:ssr-smoke": "node scripts/test-ui-core-ssr-smoke.mjs",
+    "test:option-api-template-types": "node scripts/test-option-api-template-types.mjs",
     "test": "ng test ui-core --watch=false",
     "test:coverage": "ng test ui-core --watch=false --coverage",
     "sandbox": "ng serve sandbox --open"
