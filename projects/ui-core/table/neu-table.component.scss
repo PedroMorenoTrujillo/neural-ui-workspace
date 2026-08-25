@@ -1410,6 +1410,106 @@
   }
 }
 
+.neu-table__th--dragging,
+.neu-table__row--dragging {
+  opacity: 0.55;
+}
+
+.neu-table__th--drop-before {
+  box-shadow: inset 3px 0 0 var(--neu-primary);
+}
+
+.neu-table__th--drop-after {
+  box-shadow: inset -3px 0 0 var(--neu-primary);
+}
+
+[dir='rtl'] .neu-table__th--drop-before {
+  box-shadow: inset -3px 0 0 var(--neu-primary);
+}
+
+[dir='rtl'] .neu-table__th--drop-after {
+  box-shadow: inset 3px 0 0 var(--neu-primary);
+}
+
+.neu-table__row--drop-before > .neu-table__td {
+  box-shadow: inset 0 3px 0 var(--neu-primary);
+}
+
+.neu-table__row--drop-after > .neu-table__td {
+  box-shadow: inset 0 -3px 0 var(--neu-primary);
+}
+
+.neu-table__row--frozen {
+  position: sticky;
+  z-index: 2;
+
+  > .neu-table__td {
+    background: var(--neu-surface);
+    box-shadow: inset 0 -1px 0 var(--neu-border);
+  }
+}
+
+.neu-table__group-row--frozen,
+.neu-table__group-footer-row--frozen {
+  position: sticky;
+  top: var(--neu-table-header-height, 44px);
+  z-index: 3;
+}
+
+.neu-table__row--context-selected > .neu-table__td {
+  background: color-mix(in srgb, var(--neu-primary) 10%, var(--neu-surface) 90%);
+  box-shadow: inset 3px 0 0 var(--neu-primary);
+}
+
+.neu-table__th--row-reorder,
+.neu-table__td--row-reorder {
+  width: 94px;
+  min-width: 94px;
+  text-align: center;
+}
+
+.neu-table__row-reorder-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.neu-table__row-reorder-drag,
+.neu-table__row-reorder-move {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface);
+  color: var(--neu-text-muted);
+}
+
+.neu-table__row-reorder-drag {
+  cursor: grab;
+  touch-action: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.neu-table__row-reorder-move {
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-table__resize-handle::after,
+  .neu-table__row--context-selected > .neu-table__td {
+    forced-color-adjust: auto;
+  }
+}
+
 .neu-table__group-row .neu-table__td--group {
   background: var(--neu-surface-2);
   color: var(--neu-text);

@@ -1076,6 +1076,13 @@
       ],
       "outputs": []
     },
+    "table/neu-table-row-reorder-handle.directive.ts": {
+      "selector": "[neuTableRowReorderHandle]",
+      "inputs": [
+        "disabled"
+      ],
+      "outputs": []
+    },
     "table/neu-table.component.ts": {
       "selector": "neu-table",
       "inputs": [
@@ -1091,7 +1098,10 @@
         "collapseRowAriaLabel",
         "columnChooser",
         "columnChooserLabel",
+        "columnResizeMode",
         "columns",
+        "contextMenu",
+        "contextMenuSelection",
         "data",
         "dataFirst",
         "density",
@@ -1122,6 +1132,7 @@
         "filterToLabel",
         "filterTrueLabel",
         "footerRow",
+        "frozenData",
         "globalFilterFields",
         "groupBy",
         "groupHeaderLabel",
@@ -1132,6 +1143,8 @@
         "lazyLoadOnInit",
         "loading",
         "metaKeySelection",
+        "moveRowDownAriaLabel",
+        "moveRowUpAriaLabel",
         "multiSort",
         "multiSortParam",
         "nextPageAriaLabel",
@@ -1147,6 +1160,7 @@
         "query",
         "removableSort",
         "reorderableColumns",
+        "reorderableRows",
         "resizableColumns",
         "resultLabelPlural",
         "resultLabelSingular",
@@ -1154,6 +1168,7 @@
         "rowClass",
         "rowGroupMode",
         "rowKey",
+        "rowReorderable",
         "rowSelectable",
         "saveInlineEditLabel",
         "searchable",
@@ -1198,6 +1213,9 @@
         "cellEditCommit",
         "cellEditInit",
         "columnReorder",
+        "columnResize",
+        "contextMenuSelect",
+        "contextMenuSelectionChange",
         "editingCellChange",
         "editingRowKeysChange",
         "editValidationError",
@@ -1215,6 +1233,7 @@
         "rowEditInit",
         "rowEditSave",
         "rowExpand",
+        "rowReorder",
         "rowSelect",
         "rowUnselect",
         "searchChange",

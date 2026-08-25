@@ -107,10 +107,50 @@ export interface NeuTableLayout {
   columnWidths: Record<string, number>;
 }
 
+export type NeuTableColumnResizeMode = 'fit' | 'expand';
+
+export interface NeuTableColumnResizeEvent {
+  readonly key: string;
+  readonly width: number;
+  readonly delta?: number;
+  readonly mode?: NeuTableColumnResizeMode;
+  readonly adjacentKey?: string;
+  readonly adjacentWidth?: number;
+  readonly layout?: Readonly<NeuTableLayout>;
+}
+
 export interface NeuTableColumnReorderEvent {
-  previousIndex: number;
-  currentIndex: number;
-  columns: string[];
+  readonly columnKey: string;
+  readonly previousIndex: number;
+  readonly currentIndex: number;
+  readonly columns: readonly string[];
+}
+
+export type NeuTableRowReorderScope = 'loaded' | 'filtered' | 'page' | 'server-window';
+
+export interface NeuTableRowReorderEvent<T = Record<string, unknown>> {
+  readonly row: T;
+  readonly key: unknown;
+  readonly previousIndex: number;
+  readonly currentIndex: number;
+  readonly previousDataIndex: number;
+  readonly currentDataIndex: number;
+  readonly scope: NeuTableRowReorderScope;
+  /** Immutable consumer proposal. NeuTable never mutates the supplied row array. */
+  readonly rows: readonly T[];
+  readonly visibleRows: readonly T[];
+}
+
+export interface NeuTableContextMenuSelectEvent<T = Record<string, unknown>> {
+  readonly originalEvent: MouseEvent | KeyboardEvent;
+  readonly row: T;
+  readonly key: unknown;
+  readonly index: number;
+}
+
+export interface NeuTableRowReorderContext {
+  readonly enabled: boolean;
+  readonly move: (direction: -1 | 1) => void;
 }
 
 export interface NeuTableCellEditEvent<T = Record<string, unknown>> {
@@ -169,6 +209,7 @@ export interface NeuTableCellEditorContext<
   readonly column: NeuTableColumn<T, K>;
   readonly value: unknown;
   readonly previousValue: unknown;
+  readonly frozen: boolean;
   readonly invalid: boolean;
   readonly error: string | null;
   readonly setValue: (value: unknown) => void;
@@ -186,6 +227,7 @@ export interface NeuTableCellViewContext<
   readonly logicalIndex: number;
   readonly column: NeuTableColumn<T, K>;
   readonly value: unknown;
+  readonly frozen: boolean;
   readonly editing: boolean;
   readonly startEdit: () => void;
 }
@@ -226,6 +268,7 @@ export interface NeuTableGroupTemplateContext<
   T extends object = NeuTableRow,
 > extends NeuTableGroup<T> {
   readonly $implicit: NeuTableGroup<T>;
+  readonly frozen: boolean;
   readonly toggle: () => void;
 }
 
@@ -233,6 +276,25 @@ export interface NeuTableStructuralContext<T extends object = NeuTableRow> {
   readonly $implicit: readonly NeuTableColumn<T>[];
   readonly columns: readonly NeuTableColumn<T>[];
   readonly colspan: number;
+  /** Leaf-column interactions for custom multi-row header templates. */
+  readonly column: NeuTableColumnHeaderInteractions;
+}
+
+/**
+ * Typed bridge that keeps custom grouped headers on Table's canonical layout
+ * lifecycle instead of requiring consumers to recreate resize/reorder policy.
+ */
+export interface NeuTableColumnHeaderInteractions {
+  readonly width: (key: string) => string | null;
+  readonly resizable: (key: string) => boolean;
+  readonly draggable: (key: string) => boolean;
+  readonly pointerDown: (key: string, event: PointerEvent) => void;
+  readonly resizeStart: (key: string, event: PointerEvent) => void;
+  readonly resetWidth: (key: string, event?: Event) => void;
+  readonly dragStart: (key: string, event: DragEvent) => void;
+  readonly dragOver: (key: string, event: DragEvent) => void;
+  readonly drop: (key: string, event: DragEvent) => void;
+  readonly dragEnd: (key: string) => void;
 }
 
 /** Wrapper-owned row semantics remain active while this template owns the row cells. */
@@ -241,6 +303,7 @@ export interface NeuTableBodyContext<T extends object = NeuTableRow> {
   readonly row: T;
   readonly rowIndex: number;
   readonly logicalIndex: number;
+  readonly frozen: boolean;
   readonly columns: readonly NeuTableColumn<T>[];
   /** Group metadata for grouped rows; null for an ungrouped body. */
   readonly group: NeuTableGroup<T> | null;
@@ -250,6 +313,7 @@ export interface NeuTableBodyContext<T extends object = NeuTableRow> {
   readonly toggleSelection: () => void;
   readonly toggleExpansion: () => void;
   readonly edit: NeuTableRowEditContext<T>;
+  readonly reorder: NeuTableRowReorderContext;
 }
 
 export interface NeuTablePaginatorTemplateContext {
@@ -769,6 +833,7 @@ export interface NeuTableColumn<
   /** Ascending/base row comparator; Table applies the active direction exactly once. */
   sortComparator?: (a: T, b: T) => number;
   resizable?: boolean;
+  reorderable?: boolean;
   type?: NeuTableCellType;
   // Badge
   badgeMap?: Record<string, NeuTableBadgeConfig>;

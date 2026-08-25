@@ -2529,6 +2529,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('resizableColumns', true);
+    f.componentRef.setInput('columnResizeMode', 'expand');
     f.detectChanges();
     await f.whenStable();
 
@@ -2540,15 +2541,16 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('resizableColumns', true);
+    f.componentRef.setInput('columnResizeMode', 'expand');
     f.detectChanges();
     await f.whenStable();
 
     const comp = f.componentInstance as any;
     const handle = f.nativeElement.querySelector('.neu-table__resize-handle') as HTMLButtonElement;
 
-    handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100 }));
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 145 }));
-    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 145 }));
+    handle.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 100 }));
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 145 }));
+    window.dispatchEvent(new MouseEvent('pointerup', { clientX: 145 }));
 
     expect(comp.columnWidth(RESIZABLE_COLUMNS[0])).toBe('165px');
   });
@@ -2558,6 +2560,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('resizableColumns', true);
+    f.componentRef.setInput('columnResizeMode', 'expand');
     f.detectChanges();
     await f.whenStable();
 
@@ -2568,8 +2571,8 @@ describe('NeuTableComponent', () => {
       stopPropagation: () => {},
       currentTarget: null,
     } as MouseEvent);
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140 }));
-    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 140 }));
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 140 }));
+    window.dispatchEvent(new MouseEvent('pointerup', { clientX: 140 }));
 
     expect(comp._frozenLeftOffsets().get('age')).toBe(160);
   });
@@ -2579,6 +2582,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', RESIZABLE_COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('resizableColumns', true);
+    f.componentRef.setInput('columnResizeMode', 'expand');
     f.detectChanges();
     await f.whenStable();
 
@@ -2596,6 +2600,7 @@ describe('NeuTableComponent', () => {
     ]);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('resizableColumns', true);
+    f.componentRef.setInput('columnResizeMode', 'expand');
     f.detectChanges();
     await f.whenStable();
 
@@ -5170,6 +5175,7 @@ describe('NeuTableComponent advanced layout features', () => {
     f.componentRef.setInput('columns', [col]);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('resizableColumns', true);
+    f.componentRef.setInput('columnResizeMode', 'expand');
     f.componentInstance.columnResize.subscribe((event) => resizeEvents.push(event));
     f.detectChanges();
     await f.whenStable();
@@ -5183,7 +5189,7 @@ describe('NeuTableComponent advanced layout features', () => {
       stopPropagation,
     } as unknown as MouseEvent);
     expect(preventDefault).toHaveBeenCalled();
-    window.dispatchEvent(new MouseEvent('mouseup'));
+    window.dispatchEvent(new MouseEvent('pointerup'));
     expect(resizeEvents).toEqual([]);
 
     f.componentInstance.startColumnResize(col, {
@@ -5192,10 +5198,12 @@ describe('NeuTableComponent advanced layout features', () => {
       preventDefault,
       stopPropagation,
     } as unknown as MouseEvent);
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 500 }));
-    window.dispatchEvent(new MouseEvent('mouseup'));
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 500 }));
+    window.dispatchEvent(new MouseEvent('pointerup'));
 
-    expect(resizeEvents).toEqual([{ key: 'name', width: 180 }]);
+    expect(resizeEvents).toEqual([
+      expect.objectContaining({ key: 'name', width: 180, delta: 20, mode: 'expand' }),
+    ]);
   });
 
   it('covers inline edit no-op commit and empty editing value state', async () => {

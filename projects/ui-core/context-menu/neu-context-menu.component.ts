@@ -130,16 +130,22 @@ export class NeuContextMenuDirective implements OnDestroy {
   private readonly _vcr = inject(ViewContainerRef);
   private _overlayRef: OverlayRef | null = null;
   private _compRef: ComponentRef<NeuContextMenuOverlayComponent> | null = null;
+  private _origin: HTMLElement | null = null;
+  private _onClose: (() => void) | null = null;
 
   @HostListener('contextmenu', ['$event'])
   onContextMenu(event: MouseEvent): void {
     event.preventDefault();
     if (this.neuContextMenuDisabled()) return;
-    this._open(event.clientX, event.clientY);
+    this.openAt(event.clientX, event.clientY, event.currentTarget as HTMLElement);
   }
 
-  private _open(x: number, y: number): void {
+  /** Opens the existing menu surface for composite controls such as NeuTable. */
+  openAt(x: number, y: number, origin?: HTMLElement | null, onClose?: () => void): void {
+    if (this.neuContextMenuDisabled()) return;
     this._close();
+    this._origin = origin ?? this._el.nativeElement;
+    this._onClose = onClose ?? null;
     this._overlayRef = this._overlay.create({
       hasBackdrop: true,
       backdropClass: 'neu-context-menu-backdrop',
@@ -158,17 +164,35 @@ export class NeuContextMenuDirective implements OnDestroy {
     this._compRef.instance._escapeFn = () => this._close();
 
     this._overlayRef.backdropClick().subscribe(() => this._close());
+    (
+      this._compRef.location.nativeElement.querySelector(
+        '[role="menuitem"]:not([disabled])',
+      ) as HTMLElement | null
+    )?.focus();
     this.menuOpened.emit();
   }
 
+  close(): void {
+    this._close();
+  }
+
   private _close(): void {
-    if (this._overlayRef?.hasAttached()) {
-      this._overlayRef.detach();
+    const wasOpen = this._overlayRef?.hasAttached() === true;
+    if (wasOpen) {
+      this._overlayRef?.detach();
       this.menuClosed.emit();
     }
     this._overlayRef?.dispose();
     this._overlayRef = null;
     this._compRef = null;
+    if (wasOpen) {
+      const origin = this._origin;
+      const onClose = this._onClose;
+      this._origin = null;
+      this._onClose = null;
+      onClose?.();
+      origin?.focus();
+    }
   }
 
   ngOnDestroy(): void {
