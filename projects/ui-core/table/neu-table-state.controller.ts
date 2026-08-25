@@ -28,7 +28,7 @@ export type InternalNeuTableStateKey =
 export type InternalAppliedFilterOperator = 'and' | 'or';
 
 export interface InternalAppliedFilterConstraint {
-  mode?: NeuTableFilterMatchMode;
+  mode?: string;
   value: unknown;
   projectionValue?: unknown;
 }

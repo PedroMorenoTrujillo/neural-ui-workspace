@@ -95,6 +95,8 @@ import type {
   NeuTableGroupSortOrder,
   NeuTableGroupTemplateContext,
   NeuTablePaginatorTemplateContext,
+  NeuTablePaginatorPosition,
+  NeuTablePageEvent,
   NeuTableRowEditContext,
   NeuTableRowEditEvent,
   NeuTableRowGroupMode,
@@ -130,6 +132,11 @@ import type {
   NeuTableStateSnapshot,
   NeuTableStateStorage,
   NeuTableVirtualRange,
+  NeuTableCsvFormulaPolicy,
+  NeuTableExportFormat,
+  NeuTableExportOptions,
+  NeuTableExportScope,
+  NeuTableExportValue,
 } from './neu-table.types';
 import {
   NeuTableAdvancedFilterController,
@@ -179,6 +186,12 @@ import {
   type InternalNeuTableColumnMetric,
   type InternalNeuTableColumnReorderResult,
 } from './neu-table-layout.controller';
+import { NeuTableFilterRegistry } from './neu-table-filter.registry';
+import { NeuTablePaginatorController } from './neu-table-paginator.controller';
+import {
+  NeuTableExportController,
+  type NeuTableExportColumn,
+} from './neu-table-export.controller';
 import { NeuTableReorderController } from './neu-table-reorder.controller';
 import { NeuTableRowReorderHandleDirective } from './neu-table-row-reorder-handle.directive';
 
@@ -283,7 +296,7 @@ type NeuTableData<T> = [T] extends [Record<string, unknown>]
 
 interface InternalFilterColumnSignature {
   kind: NeuTableFilterKind | 'legacy' | 'none';
-  mode?: NeuTableFilterMatchMode;
+  mode?: string;
   datePrecision?: 'date-only' | 'instant';
   optionValue?: unknown;
   controlKind: string;
@@ -883,6 +896,92 @@ export type NeuTableColumnInput<T extends object> =
         </div>
       }
 
+      <ng-template #tablePaginator>
+        <div class="neu-table__footer">
+          @if (paginatorLeftTemplate(); as paginatorLeft) {
+            <div class="neu-table__paginator-outlet neu-table__paginator-outlet--left">
+              <ng-container
+                [ngTemplateOutlet]="paginatorLeft.templateRef"
+                [ngTemplateOutletContext]="paginatorTemplateContext()"
+              />
+            </div>
+          }
+          @if (pageSizeOptions().length > 0) {
+            <div class="neu-table__page-size">
+              <label class="neu-table__page-size-label">{{ pageSizeLabel() }}</label>
+              <neu-select
+                class="neu-table__page-size-select"
+                [floatingLabel]="false"
+                [options]="_pageSizeOptions()"
+                [formControl]="_pageSizeControl"
+                [attr.aria-label]="pageSizeAriaLabel()"
+                size="sm"
+              />
+            </div>
+          }
+          @if (showCurrentPageReport()) {
+            <span class="neu-table__info" aria-live="polite">{{ paginationInfo() }}</span>
+          }
+          @if (totalPages() > 1) {
+            <nav class="neu-table__pagination" [attr.aria-label]="paginationAriaLabel()">
+              @if (showFirstLastPageButtons()) {
+                <button class="neu-table__page-btn" type="button"
+                  [disabled]="currentPage() === 1" (click)="goToPage(1)"
+                  [attr.aria-label]="firstPageAriaLabel()">«</button>
+              }
+              <button class="neu-table__page-btn" type="button"
+                [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)"
+                [attr.aria-label]="previousPageAriaLabel()">‹</button>
+              @if (showPageLinks()) {
+                @for (page of pageNumbers(); track page) {
+                  <button class="neu-table__page-btn"
+                    [class.neu-table__page-btn--active]="page === currentPage()"
+                    (click)="goToPage(page)"
+                    [attr.aria-current]="page === currentPage() ? 'page' : null"
+                    [attr.aria-label]="pageButtonAriaLabel(page)" type="button">{{ page }}</button>
+                }
+              }
+              <button class="neu-table__page-btn" type="button"
+                [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)"
+                [attr.aria-label]="nextPageAriaLabel()">›</button>
+              @if (showFirstLastPageButtons()) {
+                <button class="neu-table__page-btn" type="button"
+                  [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())"
+                  [attr.aria-label]="lastPageAriaLabel()">»</button>
+              }
+              @if (showJumpToPageInput()) {
+                <input class="neu-table__jump-input" type="number" min="1" [max]="totalPages()"
+                  [value]="currentPage()" [attr.aria-label]="jumpToPageAriaLabel()"
+                  (change)="goToPage(+$any($event.target).value)" />
+              }
+              @if (showJumpToPageDropdown()) {
+                <select class="neu-table__jump-select" [value]="currentPage()"
+                  [attr.aria-label]="jumpToPageAriaLabel()"
+                  (change)="goToPage(+$any($event.target).value)">
+                  @for (page of pageNumbersAll(); track page) {
+                    <option [value]="page">{{ page }}</option>
+                  }
+                </select>
+              }
+            </nav>
+          }
+          @if (paginatorRightTemplate(); as paginatorRight) {
+            <div class="neu-table__paginator-outlet neu-table__paginator-outlet--right">
+              <ng-container
+                [ngTemplateOutlet]="paginatorRight.templateRef"
+                [ngTemplateOutletContext]="paginatorTemplateContext()"
+              />
+            </div>
+          }
+        </div>
+      </ng-template>
+
+      @if (!loading() && filteredData().length > 0 && !_lazyVirtualActive() && pagination() &&
+        (alwaysShowPaginator() || totalPages() > 1) &&
+        (paginatorPosition() === 'top' || paginatorPosition() === 'both')) {
+        <ng-container [ngTemplateOutlet]="tablePaginator" />
+      }
+
       <!-- ---- Scroll container ---- -->
       <div
         #scrollContainer
@@ -1171,6 +1270,7 @@ export type NeuTableColumnInput<T extends object> =
                     [style.min-width]="columnWidth(col)"
                     [style.max-width]="columnWidth(col)"
                   >
+                    <span class="sr-only">{{ col.header }}</span>
                     @if (_hasMultipleAppliedRules(col.key)) {
                       <span class="neu-table__filter-multiple-summary" role="status">
                         {{ _filterOverlayActiveRuleSummary(_filterOverlayRuleCount(col.key)) }}
@@ -1872,93 +1972,10 @@ export type NeuTableColumnInput<T extends object> =
         </div>
       }
 
-      <!-- ---- Footer ---- -->
-      @if (!loading() && filteredData().length > 0 && !_lazyVirtualActive()) {
-        <div class="neu-table__footer">
-          @if (paginatorLeftTemplate(); as paginatorLeft) {
-            <div class="neu-table__paginator-outlet neu-table__paginator-outlet--left">
-              <ng-container
-                [ngTemplateOutlet]="paginatorLeft.templateRef"
-                [ngTemplateOutletContext]="paginatorTemplateContext()"
-              />
-            </div>
-          }
-          @if (pagination() && pageSizeOptions().length > 0) {
-            <div class="neu-table__page-size">
-              <label class="neu-table__page-size-label">{{ pageSizeLabel() }}</label>
-              <neu-select
-                class="neu-table__page-size-select"
-                [floatingLabel]="false"
-                [options]="_pageSizeOptions()"
-                [formControl]="_pageSizeControl"
-                [attr.aria-label]="pageSizeAriaLabel()"
-                size="sm"
-              />
-            </div>
-          }
-          <span class="neu-table__info">
-            {{ paginationInfo() }}
-          </span>
-          @if (totalPages() > 1) {
-            <nav class="neu-table__pagination" [attr.aria-label]="paginationAriaLabel()">
-              <button
-                class="neu-table__page-btn"
-                [disabled]="currentPage() === 1"
-                (click)="goToPage(currentPage() - 1)"
-                [attr.aria-label]="previousPageAriaLabel()"
-                type="button"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </button>
-              @for (page of pageNumbers(); track page) {
-                <button
-                  class="neu-table__page-btn"
-                  [class.neu-table__page-btn--active]="page === currentPage()"
-                  (click)="goToPage(page)"
-                  [attr.aria-current]="page === currentPage() ? 'page' : null"
-                  type="button"
-                >
-                  {{ page }}
-                </button>
-              }
-              <button
-                class="neu-table__page-btn"
-                [disabled]="currentPage() === totalPages()"
-                (click)="goToPage(currentPage() + 1)"
-                [attr.aria-label]="nextPageAriaLabel()"
-                type="button"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </button>
-            </nav>
-          }
-          @if (paginatorRightTemplate(); as paginatorRight) {
-            <div class="neu-table__paginator-outlet neu-table__paginator-outlet--right">
-              <ng-container
-                [ngTemplateOutlet]="paginatorRight.templateRef"
-                [ngTemplateOutletContext]="paginatorTemplateContext()"
-              />
-            </div>
-          }
-        </div>
+      @if (!loading() && filteredData().length > 0 && !_lazyVirtualActive() && pagination() &&
+        (alwaysShowPaginator() || totalPages() > 1) &&
+        (paginatorPosition() === 'bottom' || paginatorPosition() === 'both')) {
+        <ng-container [ngTemplateOutlet]="tablePaginator" />
       }
     </div>
   `,
@@ -1975,6 +1992,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   );
   private readonly _sortController = new NeuTableSortController<T>();
   private readonly _queryController = new NeuTableQueryController<T>();
+  private readonly _filterRegistry = inject(NeuTableFilterRegistry);
+  private readonly _paginatorController = new NeuTablePaginatorController();
+  private readonly _exportController = new NeuTableExportController();
   private readonly _lazyDataController = new NeuTableLazyDataController<NeuTableRuntimeRow<T>>();
   private readonly _keyboardController = new NeuTableKeyboardController<unknown>();
   private readonly _editingController = new NeuTableEditingController<NeuTableRuntimeRow<T>>();
@@ -2084,6 +2104,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly clearFilterLabel = input<string>('Clear filter');
   readonly previousPageAriaLabel = input<string>('Previous page');
   readonly nextPageAriaLabel = input<string>('Next page');
+  readonly firstPageAriaLabel = input<string>('First page');
+  readonly lastPageAriaLabel = input<string>('Last page');
+  readonly pageAriaLabel = input<string>('Page {page}');
+  readonly jumpToPageAriaLabel = input<string>('Jump to page');
   readonly pageSizeLabel = input<string>('Rows:');
   readonly pageSizeAriaLabel = input<string>('Rows per page');
   readonly paginationAriaLabel = input<string>('Pagination');
@@ -2100,6 +2124,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly expandRowAriaLabel = input<string>('Expand row');
   readonly collapseRowAriaLabel = input<string>('Collapse row');
   readonly filterPlaceholder = input<string>('Filter...');
+  readonly filterLocale = input<string | undefined>(undefined);
   readonly filterAriaPrefix = input<string>('Filter by');
   readonly filterFromLabel = input<string>('From');
   readonly filterToLabel = input<string>('To');
@@ -2136,6 +2161,15 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly exportable = input<boolean>(false);
   readonly exportFileName = input<string>('export');
   readonly pageSizeOptions = input<number[]>([]);
+  readonly paginatorPosition = input<NeuTablePaginatorPosition>('bottom');
+  readonly pageLinkSize = input<number>(5);
+  readonly showPageLinks = input<boolean>(true);
+  readonly showFirstLastPageButtons = input<boolean>(true);
+  readonly showCurrentPageReport = input<boolean>(true);
+  readonly currentPageReportTemplate = input<string | undefined>(undefined);
+  readonly showJumpToPageInput = input<boolean>(false);
+  readonly showJumpToPageDropdown = input<boolean>(false);
+  readonly alwaysShowPaginator = input<boolean>(true);
   readonly stickyHeader = input<boolean>(false);
   readonly virtualScroll = input<boolean>(false);
   readonly virtualScrollVisibleItems = input<number>(8);
@@ -2203,11 +2237,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   /** Logical index of data[0]. Presence opts server virtual scrolling into sparse mode. */
   readonly dataFirst = input<number | undefined>(undefined);
   readonly multiSort = input<boolean>(false);
-  readonly exportFormats = input<('csv' | 'json' | 'xlsx')[]>(['csv']);
+  readonly exportFormats = input<NeuTableExportFormat[]>(['csv']);
   readonly exportColumns = input<string[]>([]);
-  readonly exportScope: _angular_core.InputSignal<'selected' | 'filtered' | 'auto'> = input<
-    'selected' | 'filtered' | 'auto'
-  >('auto');
+  readonly exportScope = input<NeuTableExportScope>('auto');
+  readonly csvSeparator = input<string>(',');
+  readonly csvFormulaPolicy = input<NeuTableCsvFormulaPolicy>('escape');
+  readonly exportValue = input<NeuTableExportValue<T> | undefined>(undefined);
   readonly selectionActions = input<readonly NeuTableSelectionAction<T>[]>([]);
 
   // ── URL params ────────────────────────────────────────────────────────
@@ -2273,6 +2308,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly groupCollapse = output<NeuTableGroupExpansionEvent<T>>();
   readonly stateSave = output<NeuTableStateSnapshot>();
   readonly stateRestore = output<NeuTableStateSnapshot>();
+  readonly pageChange = output<NeuTablePageEvent>();
 
   // ── Canonical consumer-relevant state ─────────────────────────────────
   private readonly _columnWidths = computed(() => this._state.layout().columnWidths);
@@ -2956,7 +2992,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     column: NeuTableColumn<T>,
   ): readonly NeuSelectOption<NeuTableFilterMatchMode>[] {
     const text = this._advancedFilterText();
-    return neuTableAdvancedFilterModes(column).map((mode) => ({ label: text[mode], value: mode }));
+    return neuTableAdvancedFilterModes(column).map((mode) => ({
+      label: text[mode as keyof typeof text] ?? mode,
+      value: mode,
+    }));
   }
 
   protected _filterOverlayOperatorOptions(): readonly NeuSelectOption<InternalAppliedFilterOperator>[] {
@@ -3080,7 +3119,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._escapeReturnFocus = null;
     const column = this._currentTypedColumn(key);
     if (!column || !this._isFilterOverlayEligible(column)) return;
-    this._advancedFilter.initialize(column, this._appliedFilters()[column.key]);
+    this._advancedFilter.initialize(
+      column,
+      this._appliedFilters()[column.key] as Parameters<
+        NeuTableAdvancedFilterController<T>['initialize']
+      >[1],
+    );
     this._openFilterKey.set(key);
   }
 
@@ -3553,14 +3597,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   });
 
   readonly filteredData = computed<NeuTableRuntimeRow<T>[]>(() => {
+    this._filterRegistry.revision();
     if (this.serverSide()) return this._rows();
     const rows = this._rows();
     const globalFields = this._resolvedGlobalFilterFields();
     const activeColumnFilters = this._resolvedAppliedFilters();
-    const q = this.searchQuery().trim().toLowerCase();
+    const q = this.searchQuery().trim().toLocaleLowerCase(this.filterLocale());
     const exact = this._exactMatch();
     const matches = (text: string) =>
-      exact ? text.toLowerCase() === q : text.toLowerCase().includes(q);
+      exact
+        ? text.toLocaleLowerCase(this.filterLocale()) === q
+        : text.toLocaleLowerCase(this.filterLocale()).includes(q);
     return rows.filter((row) => {
       const passesGlobal =
         !q ||
@@ -3944,26 +3991,52 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return entries;
   });
 
-  readonly pageNumbers = computed<number[]>(() => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    let start = Math.max(1, current - 2);
-    const end = Math.min(total, start + 4);
-    start = Math.max(1, end - 4);
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  });
+  readonly _paginatorEvent = computed(() =>
+    this._paginatorController.event({
+      page: this.currentPage(),
+      pageSize: this.effectivePageSize(),
+      totalRecords:
+        this.serverSide() ? (this.totalItems() ?? 0) : this.filteredData().length,
+    }),
+  );
+
+  readonly pageNumbers = computed(() =>
+    this._paginatorController.pages(
+      {
+        page: this.currentPage(),
+        pageSize: this.effectivePageSize(),
+        totalRecords: this._paginatorEvent().totalRecords,
+      },
+      this.pageLinkSize(),
+    ),
+  );
+
+  readonly _jumpPageOptions = computed<NeuSelectOption[]>(() =>
+    Array.from({ length: this.totalPages() }, (_, index) => ({
+      label: String(index + 1),
+      value: String(index + 1),
+    })),
+  );
+  readonly pageNumbersAll = computed(() =>
+    Array.from({ length: this.totalPages() }, (_, index) => index + 1),
+  );
 
   readonly paginationInfo = computed(() => {
-    const total =
-      this.serverSide() && this.totalItems() != null
-        ? this.totalItems()!
-        : this.filteredData().length;
-    const page = Math.min(this.currentPage(), this.totalPages());
-    const size = this.effectivePageSize();
-    const from = total === 0 ? 0 : Math.min((page - 1) * size + 1, total);
-    const to = total === 0 ? 0 : Math.min(page * size, total);
-    return `${from}-${to} ${this.ofLabel()} ${total} ${
-      total === 1 ? this.resultLabelSingular() : this.resultLabelPlural()
+    const event = this._paginatorEvent();
+    const template = this.currentPageReportTemplate();
+    if (template !== undefined) {
+      return this._paginatorController.report(
+        {
+          page: event.page,
+          pageSize: event.rows,
+          totalRecords: event.totalRecords,
+        },
+        template,
+      );
+    }
+    const from = event.totalRecords === 0 ? 0 : event.first + 1;
+    return `${from}-${event.last} ${this.ofLabel()} ${event.totalRecords} ${
+      event.totalRecords === 1 ? this.resultLabelSingular() : this.resultLabelPlural()
     }`;
   });
 
@@ -4803,9 +4876,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   // ── Navegación ────────────────────────────────────────────────────────
   goToPage(page: number): void {
     if (this._lazyVirtualActive()) return;
-    const clamped = Math.max(1, Math.min(page, this.totalPages()));
+    if (!Number.isFinite(page)) return;
+    const clamped = Math.max(1, Math.min(Math.trunc(page), this.totalPages()));
     const changed = this._state.setPage(clamped, 'ui');
     if (!changed) return;
+    this._emitPageChange(changed.current.page, changed.current.pageSize);
     this._emitQueryState(changed.current);
     if (!this.serverSide() && this.query() === undefined && this.useUrlState()) {
       this._urlAdapter.writePage(this.pageParam(), clamped);
@@ -5111,10 +5186,26 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     if (!Number.isFinite(size) || size <= 0) return;
     const changed = this._state.update({ pageSize: size, page: 1 }, 'ui');
     if (!changed) return;
+    this._emitPageChange(changed.current.page, changed.current.pageSize);
     this._emitQueryState(changed.current);
     if (!this.serverSide() && this.query() === undefined && this.useUrlState()) {
       this._urlAdapter.resetPage(this.pageParam());
     }
+  }
+
+  pageButtonAriaLabel(page: number): string {
+    return this.pageAriaLabel().replace(/\{page\}/g, String(page));
+  }
+
+  private _emitPageChange(page: number, pageSize: number): void {
+    this.pageChange.emit(
+      this._paginatorController.event({
+        page,
+        pageSize,
+        totalRecords:
+          this.serverSide() ? (this.totalItems() ?? 0) : this.filteredData().length,
+      }),
+    );
   }
 
   setExactMatch(value: boolean): void {
@@ -5189,73 +5280,90 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   // ── Export ────────────────────────────────────────────────────────────
-  exportCsv(): void {
+  exportCsv(options: NeuTableExportOptions<T> = {}): void {
     if (!isPlatformBrowser(this._platformId)) return;
-    const cols = this._getExportColumns();
-    const headers = cols.map((c) => `"${c.header.replace(/"/g, '""')}"`);
-    const rows = this._getExportRows().map((row) =>
-      cols.map((col) => `"${this.getCellValue(row, col).replace(/"/g, '""')}"`),
-    );
-    const csv = [headers, ...rows].map((r) => r.join(',')).join('\r\n');
-    this._downloadBlob(
-      new Blob([csv], { type: 'text/csv;charset=utf-8;' }),
-      `${this.exportFileName()}.csv`,
-    );
-  }
-
-  exportJson(): void {
-    if (!isPlatformBrowser(this._platformId)) return;
-    const cols = this._getExportColumns();
-    const data = this._getExportRows().map((row) => {
-      const obj: Record<string, string> = {};
-      cols.forEach((col) => (obj[col.key] = this.getCellValue(row, col)));
-      return obj;
+    const cols = this._getExportProjection();
+    const csv = this._exportController.csv(this._getExportRows(options), cols, {
+      separator: options.separator ?? this.csvSeparator(),
+      formulaPolicy: this.csvFormulaPolicy(),
     });
     this._downloadBlob(
-      new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
-      `${this.exportFileName()}.json`,
+      new Blob([csv], { type: 'text/csv;charset=utf-8;' }),
+      `${options.fileName ?? this.exportFileName()}.csv`,
     );
   }
 
-  exportXlsx(): void {
+  exportJson(options: NeuTableExportOptions<T> = {}): void {
     if (!isPlatformBrowser(this._platformId)) return;
-    const cols = this._getExportColumns();
-    const rows = this._getExportRows();
-    const escape = (value: string) =>
-      value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    const table = [
-      '<table>',
-      `<tr>${cols.map((col) => `<th>${escape(col.header)}</th>`).join('')}</tr>`,
-      ...rows.map(
-        (row) =>
-          `<tr>${cols.map((col) => `<td>${escape(this.getCellValue(row, col))}</td>`).join('')}</tr>`,
-      ),
-      '</table>',
-    ].join('');
-    const html = `<!doctype html><html><head><meta charset="utf-8"></head><body>${table}</body></html>`;
     this._downloadBlob(
-      new Blob([html], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;',
+      new Blob(
+        [this._exportController.json(this._getExportRows(options), this._getExportProjection())],
+        { type: 'application/json' },
+      ),
+      `${options.fileName ?? this.exportFileName()}.json`,
+    );
+  }
+
+  exportXlsx(options: NeuTableExportOptions<T> = {}): void {
+    if (!isPlatformBrowser(this._platformId)) return;
+    const bytes = this._exportController.xlsx(
+      this._getExportRows(options),
+      this._getExportProjection(),
+    );
+    this._downloadBlob(
+      new Blob([new Uint8Array(bytes).buffer as ArrayBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       }),
-      `${this.exportFileName()}.xlsx`,
+      `${options.fileName ?? this.exportFileName()}.xlsx`,
     );
   }
 
   private _getExportColumns(): NeuTableColumn<T>[] {
     const keys = this.exportColumns();
-    const all = this._typedColumns().filter((c) => c.type !== 'actions');
+    const all = this._typedColumns().filter(
+      (column) =>
+        column.exportable !== false &&
+        (column.type !== 'actions' ||
+          (column.exportable === true && column.exportAccessor !== undefined)),
+    );
     return keys.length ? all.filter((c) => keys.includes(c.key)) : all;
   }
 
-  private _getExportRows(): T[] {
-    const scope = this.exportScope();
+  private _getExportProjection(): NeuTableExportColumn<T>[] {
+    return this._getExportColumns().map((column) => ({
+      key: column.key,
+      header: column.exportHeader ?? column.header,
+      value: (row: T, rowIndex: number) => {
+        const value = column.exportAccessor
+          ? column.exportAccessor(row)
+          : this.getRowValue(row, column.key);
+        const transform = this.exportValue();
+        return transform
+          ? transform({
+            row,
+            rowIndex,
+            column,
+            field: column.key,
+            header: column.exportHeader ?? column.header,
+            value,
+          })
+          : value;
+      },
+    }));
+  }
+
+  private _getExportRows(options: NeuTableExportOptions<T>): T[] {
+    if (options.rows) return [...options.rows];
+    const scope = options.scope ?? this.exportScope();
 
     if (scope === 'filtered') {
-      return [...this._frozenRows(), ...this.filteredData()];
+      return this._dedupeExportRows([...this._frozenRows(), ...this.filteredData()]);
+    }
+    if (scope === 'page') {
+      return this._dedupeExportRows([...this._frozenRows(), ...this.paginatedData()]);
+    }
+    if (scope === 'loaded') {
+      return this._dedupeExportRows([...this._frozenRows(), ...this._rows()]);
     }
 
     const selectedRows = this._identityRows().filter((row) =>
@@ -5263,23 +5371,35 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     );
 
     if (scope === 'selected') {
-      return selectedRows;
+      return this._dedupeExportRows(selectedRows);
     }
 
     return selectedRows.length > 0
-      ? selectedRows
-      : [...this._frozenRows(), ...this.filteredData()];
+      ? this._dedupeExportRows(selectedRows)
+      : this._dedupeExportRows([...this._frozenRows(), ...this.filteredData()]);
+  }
+
+  private _dedupeExportRows(rows: readonly T[]): T[] {
+    const seen = new Set<unknown>();
+    return rows.filter((row) => {
+      const key = this.getRowKey(row);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }
 
   private _downloadBlob(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const view = this._document.defaultView;
+    if (!view) return;
+    const url = view.URL.createObjectURL(blob);
+    const a = this._document.createElement('a');
     a.href = url;
     a.download = filename;
-    document.body.appendChild(a);
+    this._document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    this._document.body.removeChild(a);
+    view.URL.revokeObjectURL(url);
   }
 
   // ── Utilidades ────────────────────────────────────────────────────────
@@ -5771,15 +5891,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   paginatorTemplateContext(): NeuTablePaginatorTemplateContext {
-    const rows = this.effectivePageSize();
-    const totalRecords = this.serverSide() ? (this.totalItems() ?? 0) : this.filteredData().length;
+    const event = this._paginatorEvent();
     return {
-      $implicit: this.currentPage(),
-      currentPage: this.currentPage(),
-      totalPages: this.totalPages(),
-      first: Math.max(0, (this.currentPage() - 1) * rows),
-      rows,
-      totalRecords,
+      $implicit: event.page,
+      currentPage: event.page,
+      totalPages: event.pageCount,
+      first: event.first,
+      last: event.last,
+      rows: event.rows,
+      totalRecords: event.totalRecords,
+      disabled: event.pageCount <= 1,
+      goToPage: (page) => this.goToPage(page),
+      setPageSize: (pageSize) => this.onPageSizeChange(pageSize),
     };
   }
 
@@ -6306,7 +6429,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   ): boolean {
     if (filter.operator === 'or') {
       for (const constraint of filter.constraints) {
-        if (matchesNeuTableFilter(row, filter.column, constraint.value, constraint.mode)) {
+        if (
+          matchesNeuTableFilter(
+            row,
+            filter.column,
+            constraint.value,
+            constraint.mode,
+            this._filterRegistry,
+            this.filterLocale(),
+          )
+        ) {
           return true;
         }
       }
@@ -6314,7 +6446,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     }
 
     for (const constraint of filter.constraints) {
-      if (!matchesNeuTableFilter(row, filter.column, constraint.value, constraint.mode)) {
+      if (
+        !matchesNeuTableFilter(
+          row,
+          filter.column,
+          constraint.value,
+          constraint.mode,
+          this._filterRegistry,
+          this.filterLocale(),
+        )
+      ) {
         return false;
       }
     }
@@ -6337,7 +6478,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           ? normalizeNeuTableAppliedFilterValue(
               column as NeuTableColumn<T, string>,
               constraint.value,
-              mode,
+              mode as NeuTableFilterMatchMode | undefined,
             )
           : constraint.value;
         const normalizedConstraint: InternalAppliedFilterConstraint =
@@ -6375,7 +6516,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const controlsToDispose = new Set<string>();
     const modeChanges = new Map<
       string,
-      { previous: NeuTableFilterMatchMode | undefined; next: NeuTableFilterMatchMode | undefined }
+      { previous: string | undefined; next: string | undefined }
     >();
 
     for (const [key, previous] of this._filterColumnSignatures) {

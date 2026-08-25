@@ -116,7 +116,12 @@ export class NeuTableQueryController<T extends object> {
         constraint && !isNeuTableFilterValueEmpty(constraint.value)
           ? [
               {
-                ...(isFilterMatchMode(constraint.mode) ? { mode: constraint.mode } : {}),
+                ...(isFilterMatchMode(constraint.mode) ||
+                (constraint.kind === 'custom' &&
+                  typeof constraint.mode === 'string' &&
+                  constraint.mode !== 'custom')
+                  ? { mode: constraint.mode }
+                  : {}),
                 value: snapshotValue(constraint.value),
               },
             ]
@@ -237,7 +242,11 @@ export class NeuTableQueryController<T extends object> {
     const state = buildNeuTableFilterState(column as NeuTableColumn<T, string>, value, mode);
     if (!state) return null;
     if (state.kind === 'custom') {
-      return Object.freeze({ kind: 'custom', mode: 'custom', value: snapshotValue(state.value) });
+      return Object.freeze({
+        kind: 'custom',
+        mode: state.mode,
+        value: snapshotValue(state.value),
+      });
     }
     return freezeConstraint({
       ...state,
@@ -269,7 +278,14 @@ export class NeuTableQueryController<T extends object> {
       };
     }
     if (constraint.kind === 'custom') {
-      return { constraint, serializability: 'local-only' };
+      const config = column?.filterConfig;
+      return {
+        constraint,
+        serializability:
+          config?.kind === 'custom' && config.predicate === undefined
+            ? 'requires-consumer'
+            : 'local-only',
+      };
     }
     if (
       (constraint.kind === 'select' || constraint.kind === 'multiSelect') &&
@@ -334,7 +350,7 @@ function isGlobalAccessor<T extends object>(
 }
 
 function isFilterMatchMode(
-  mode: NeuTableFilterMode,
+  mode: string,
 ): mode is Exclude<NeuTableFilterMode, 'custom' | 'true' | 'false' | 'all'> {
   return mode !== 'custom' && mode !== 'true' && mode !== 'false' && mode !== 'all';
 }

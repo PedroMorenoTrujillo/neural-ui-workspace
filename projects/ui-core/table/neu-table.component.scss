@@ -1725,3 +1725,20 @@
 .neu-table__col-filter-select {
   cursor: pointer;
 }
+
+.neu-table__jump-input,
+.neu-table__jump-select {
+  width: 4.5rem;
+  min-height: 2rem;
+  padding: 0 var(--neu-space-2);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface);
+  color: var(--neu-text);
+}
+
+.neu-table__jump-input:focus-visible,
+.neu-table__jump-select:focus-visible {
+  outline: 2px solid var(--neu-primary);
+  outline-offset: 2px;
+}

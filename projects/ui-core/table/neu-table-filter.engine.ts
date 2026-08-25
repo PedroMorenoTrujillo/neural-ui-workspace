@@ -12,6 +12,7 @@ import type {
   NeuTableTextFilterMode,
 } from './neu-table.types';
 import { neuOptionValuesEqual } from '@neural-ui/core/option-api';
+import type { NeuTableFilterRegistry } from './neu-table-filter.registry';
 
 type FilterableColumn<T> = NeuTableColumn<T, string>;
 
@@ -37,12 +38,12 @@ export function isNeuTableFilterValueEmpty(value: unknown): boolean {
   return false;
 }
 
-function normalizedText(value: unknown): string {
-  return String(value ?? '').toLowerCase();
+function normalizedText(value: unknown, locale?: string): string {
+  return String(value ?? '').toLocaleLowerCase(locale);
 }
 
 function resolveTextFilterMode(
-  override: NeuTableFilterMatchMode | undefined,
+  override: string | undefined,
   configured: NeuTableTextFilterMode | undefined,
 ): NeuTableTextFilterMode {
   switch (override) {
@@ -52,14 +53,14 @@ function resolveTextFilterMode(
     case 'equals':
     case 'notEquals':
     case 'notContains':
-      return override;
+      return override as NeuTableTextFilterMode;
     default:
       return configured ?? 'contains';
   }
 }
 
 function resolveNumberFilterMode(
-  override: NeuTableFilterMatchMode | undefined,
+  override: string | undefined,
   configured: NeuTableNumberFilterMode | undefined,
 ): NeuTableNumberFilterMode {
   switch (override) {
@@ -70,14 +71,14 @@ function resolveNumberFilterMode(
     case 'gt':
     case 'gte':
     case 'between':
-      return override;
+      return override as NeuTableNumberFilterMode;
     default:
       return configured ?? 'equals';
   }
 }
 
 function resolveDateFilterMode(
-  override: NeuTableFilterMatchMode | undefined,
+  override: string | undefined,
   configured: NeuTableDateFilterMode | undefined,
 ): NeuTableDateFilterMode {
   switch (override) {
@@ -86,7 +87,7 @@ function resolveDateFilterMode(
     case 'before':
     case 'after':
     case 'between':
-      return override;
+      return override as NeuTableDateFilterMode;
     default:
       return configured ?? 'is';
   }
@@ -96,10 +97,11 @@ export function matchNeuTableText(
   value: unknown,
   filterValue: unknown,
   mode: NeuTableTextFilterMode = 'contains',
+  locale?: string,
 ): boolean {
   if (isNeuTableFilterValueEmpty(filterValue)) return true;
-  const candidate = normalizedText(value);
-  const filter = normalizedText(filterValue);
+  const candidate = normalizedText(value, locale);
+  const filter = normalizedText(filterValue, locale);
   switch (mode) {
     case 'startsWith':
       return candidate.startsWith(filter);
@@ -362,7 +364,9 @@ export function matchesNeuTableFilter<T>(
   row: T,
   column: FilterableColumn<T>,
   filterValue: unknown,
-  modeOverride?: NeuTableFilterMatchMode,
+  modeOverride?: string,
+  registry?: NeuTableFilterRegistry,
+  locale?: string,
 ): boolean {
   const config = column.filterConfig;
   if (isNeuTableFilterValueEmpty(filterValue)) return true;
@@ -387,13 +391,20 @@ export function matchesNeuTableFilter<T>(
       );
     case 'boolean':
       return matchNeuTableBoolean(value, filterValue);
-    case 'custom':
-      return config.predicate(value, filterValue, row);
+    case 'custom': {
+      if (config.predicate) return config.predicate(value, filterValue, row);
+      const mode = String(
+        modeOverride && modeOverride !== 'custom' ? modeOverride : (config.mode ?? ''),
+      ).trim();
+      const matcher = mode ? registry?.resolve<T>(mode) : null;
+      return matcher?.(value, filterValue, { row, columnKey: column.key, mode, locale }) ?? false;
+    }
     case 'text':
       return matchNeuTableText(
         value,
         filterValue,
         resolveTextFilterMode(modeOverride, config.mode),
+        locale,
       );
     case 'select':
       return neuOptionValuesEqual(value, filterValue);
@@ -477,14 +488,23 @@ function snapshotNeuTableRangeValue(value: unknown): unknown {
 export function buildNeuTableFilterState<T>(
   column: FilterableColumn<T>,
   filterValue: unknown,
-  modeOverride?: NeuTableFilterMatchMode,
+  modeOverride?: string,
 ): NeuTableFilterState | null {
   if (isNeuTableFilterValueEmpty(filterValue)) return null;
   const config = column.filterConfig;
   if (!config) return null;
 
   if (config.kind === 'custom') {
-    return { kind: 'custom', mode: 'custom', value: filterValue, localOnly: true };
+    return {
+      kind: 'custom',
+      mode: String(
+        modeOverride && modeOverride !== 'custom'
+          ? modeOverride
+          : (config.mode ?? 'custom'),
+      ),
+      value: filterValue,
+      localOnly: config.predicate !== undefined,
+    };
   }
 
   if (config.kind === 'number') {
@@ -526,15 +546,20 @@ export function buildNeuTableFilterState<T>(
 
 export function resolveNeuTableFilterMatchMode<T>(
   column: FilterableColumn<T>,
-  modeOverride?: NeuTableFilterMatchMode,
-): NeuTableFilterMatchMode | undefined {
+  modeOverride?: string,
+): string | undefined {
   const config = column.filterConfig;
   if (!config) {
     return column.filterable && (!column.filterType || column.filterType === 'text')
       ? resolveTextFilterMode(modeOverride, undefined)
       : undefined;
   }
-  if (config.kind === 'boolean' || config.kind === 'custom') return undefined;
+  if (config.kind === 'boolean') return undefined;
+  if (config.kind === 'custom') {
+    return String(
+      modeOverride && modeOverride !== 'custom' ? modeOverride : (config.mode ?? 'custom'),
+    );
+  }
   switch (config.kind) {
     case 'number':
       return resolveNumberFilterMode(modeOverride, config.mode);

@@ -321,6 +321,22 @@ export interface NeuTablePaginatorTemplateContext {
   readonly currentPage: number;
   readonly totalPages: number;
   readonly first: number;
+  readonly last: number;
+  readonly rows: number;
+  readonly totalRecords: number;
+  readonly disabled: boolean;
+  readonly goToPage: (page: number) => void;
+  readonly setPageSize: (pageSize: number) => void;
+}
+
+export type NeuTablePaginatorPosition = 'top' | 'bottom' | 'both';
+
+/** Immutable 1-based page projection; `first` remains a zero-based row offset. */
+export interface NeuTablePageEvent {
+  readonly page: number;
+  readonly pageCount: number;
+  readonly first: number;
+  readonly last: number;
   readonly rows: number;
   readonly totalRecords: number;
 }
@@ -338,7 +354,8 @@ export interface NeuTableRowExpansionEvent<T = Record<string, unknown>> {
 }
 
 export interface NeuTablePersistedFilterConstraint {
-  mode?: NeuTableFilterMatchMode;
+  /** Stable built-in or registered match-mode identifier. */
+  mode?: string;
   value: unknown;
 }
 
@@ -494,7 +511,8 @@ export type NeuTableFilterAccessor<T, V = unknown> = (row: T) => V;
 export interface NeuTableFilterServerSerializerContext {
   columnKey: string;
   kind: NeuTableFilterKind;
-  mode: NeuTableFilterMode;
+  /** Built-in or stable registered match-mode identifier. */
+  mode: string;
 }
 
 /**
@@ -593,14 +611,31 @@ export interface NeuTableMultiSelectFilterConfig<
   virtualScrollVisibleItems?: number;
 }
 
-/** Custom predicates remain local-only and intentionally use unknown values in P2.2B. */
+export interface NeuTableFilterMatcherContext<T = NeuTableRow> {
+  readonly row: T;
+  readonly columnKey: string;
+  readonly mode: string;
+  readonly locale?: string;
+}
+
+export type NeuTableFilterMatcher<T = NeuTableRow> = (
+  value: unknown,
+  filterValue: unknown,
+  context: NeuTableFilterMatcherContext<T>,
+) => boolean;
+
+/**
+ * Inline predicates remain local-only. Omitting `predicate` resolves the
+ * stable `mode` through NeuTableFilterRegistry for reusable application rules.
+ */
 export interface NeuTableCustomFilterConfig<T = NeuTableRow> extends NeuTableFilterBaseConfig<
   T,
   'custom',
-  'custom',
+  string,
   unknown
 > {
-  predicate: (value: unknown, filterValue: unknown, row: T) => boolean;
+  mode?: string;
+  predicate?: (value: unknown, filterValue: unknown, row: T) => boolean;
 }
 
 export type NeuTableFilterConfig<T = NeuTableRow> =
@@ -650,9 +685,9 @@ export interface NeuTableMultiSelectFilterState {
 
 export interface NeuTableCustomFilterState {
   kind: 'custom';
-  mode: 'custom';
+  mode: string;
   value: unknown;
-  localOnly: true;
+  localOnly: boolean;
 }
 
 export type NeuTableFilterState =
@@ -696,7 +731,7 @@ export type NeuTableQueryFilterConstraint =
   | (Readonly<NeuTableMultiSelectFilterState> & { readonly serverValue?: unknown })
   | {
       readonly kind: 'custom';
-      readonly mode: 'custom';
+      readonly mode: string;
       readonly value: unknown;
       readonly serverValue?: unknown;
     };
@@ -735,6 +770,33 @@ export interface NeuTableQueryState {
   /** Complete applied column filters, including ordered constraints and AND/OR. */
   readonly filters: Readonly<Record<string, NeuTableQueryColumnFilter>>;
   readonly serialization: NeuTableQuerySerializationStatus;
+}
+
+// ── Export ───────────────────────────────────────────────────────────────
+
+export type NeuTableExportFormat = 'csv' | 'json' | 'xlsx';
+export type NeuTableExportScope = 'auto' | 'selected' | 'filtered' | 'page' | 'loaded';
+export type NeuTableCsvFormulaPolicy = 'escape' | 'preserve';
+
+export interface NeuTableExportValueContext<T = NeuTableRow> {
+  readonly row: T;
+  readonly rowIndex: number;
+  readonly column: NeuTableColumn<T, string>;
+  readonly field: string;
+  readonly header: string;
+  readonly value: unknown;
+}
+
+export type NeuTableExportValue<T = NeuTableRow> = (
+  context: NeuTableExportValueContext<T>,
+) => unknown;
+
+/** Additive imperative overrides. Supplying `rows` is the truthful full-data path for remote tables. */
+export interface NeuTableExportOptions<T = NeuTableRow> {
+  readonly scope?: NeuTableExportScope;
+  readonly rows?: readonly T[];
+  readonly fileName?: string;
+  readonly separator?: string;
 }
 
 // ── Sparse virtual data ───────────────────────────────────────────
@@ -825,6 +887,12 @@ export interface NeuTableColumn<
   maxWidth?: number;
   align?: 'left' | 'center' | 'right';
   cell?: (row: T) => string;
+  /** Export inclusion is independent from visibility; action columns remain excluded by default. */
+  exportable?: boolean;
+  /** Export label independent from the visual header. */
+  exportHeader?: string;
+  /** Canonical export value independent from display formatting. */
+  exportAccessor?: (row: T) => unknown;
   cellTemplate?: TemplateRef<{ $implicit: T; row: T; column: NeuTableColumn<T, K> }>;
   cellClass?: string;
   sortable?: boolean;

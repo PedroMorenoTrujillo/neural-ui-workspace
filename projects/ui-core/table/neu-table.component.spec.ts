@@ -32,6 +32,7 @@ import type { NeuSelectOption } from '@neural-ui/core/select';
 import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
 import { By } from '@angular/platform-browser';
 import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
+import { NeuTableFilterRegistry } from './neu-table-filter.registry';
 
 const E3_ADVANCED_FILTER_TEXTS = {
   openFilter: 'Open filter for {column}',
@@ -3006,6 +3007,58 @@ describe('NeuTableComponent', () => {
     expect(text).not.toContain('Luis Pérez');
   });
 
+  it('applies export metadata, callback and per-call options across truthful formats', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', [
+      { key: 'hidden', header: 'Hidden', exportable: false },
+      { key: 'action-empty', header: 'Action', type: 'actions', exportable: true },
+      {
+        key: 'action-value',
+        header: 'Action value',
+        type: 'actions',
+        exportable: true,
+        exportHeader: 'Resolved action',
+        exportAccessor: (row: Record<string, unknown>) => row['name'],
+      },
+      { key: 'plain', header: 'Plain' },
+    ]);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('exportValue', (context: { value: unknown }) => `value:${context.value}`);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+    const projection = comp._getExportProjection();
+    expect(projection.map((column: { header: string }) => column.header)).toEqual([
+      'Resolved action',
+      'Plain',
+    ]);
+    expect(projection[0].value(DATA[0], 0)).toBe('value:Ana García');
+    expect(projection[1].value(DATA[0], 0)).toBe('value:undefined');
+
+    const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
+    comp.exportCsv({ rows: [DATA[0]], separator: ';', fileName: 'custom' });
+    comp.exportJson({ rows: [DATA[0]], fileName: 'custom' });
+    comp.exportXlsx({ rows: [DATA[0]], fileName: 'custom' });
+    expect(downloadSpy.mock.calls.map((call) => call[1])).toEqual([
+      'custom.csv',
+      'custom.json',
+      'custom.xlsx',
+    ]);
+  });
+
+  it('does not touch download globals when the injected document has no browser view', () => {
+    const fixture = TestBed.createComponent(NeuTableComponent);
+    const comp = fixture.componentInstance as any;
+    const documentRef = comp._document as Document;
+    const view = documentRef.defaultView;
+    Object.defineProperty(documentRef, 'defaultView', { configurable: true, value: null });
+    try {
+      expect(() => comp._downloadBlob(new Blob(['safe']), 'safe.csv')).not.toThrow();
+    } finally {
+      Object.defineProperty(documentRef, 'defaultView', { configurable: true, value: view });
+    }
+  });
+
   // ── filteredData: badge label matching ───────────────────────────────
 
   it('filteredData should match badge label when searching', async () => {
@@ -3929,7 +3982,9 @@ describe('NeuTableComponent', () => {
     const pageBtns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll(
       '.neu-table__pagination .neu-table__page-btn',
     );
-    const nextBtn = pageBtns[pageBtns.length - 1]; // Last button = next
+    const nextBtn = Array.from(pageBtns).find(
+      (button) => button.getAttribute('aria-label') === 'Next page',
+    )!;
     nextBtn.click();
     f.detectChanges();
     await f.whenStable();
@@ -8509,5 +8564,125 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(document.querySelector('.neu-table__filter-overlay-content')?.textContent).toContain(
       'Aplicar',
     );
+  });
+
+  it('renders both paginators from one state and emits one immutable complete page event', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', MANY_ROWS);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('pageSize', 5);
+    fixture.componentRef.setInput('paginatorPosition', 'both');
+    fixture.componentRef.setInput('showJumpToPageInput', true);
+    fixture.componentRef.setInput('showJumpToPageDropdown', true);
+    fixture.componentRef.setInput(
+      'currentPageReportTemplate',
+      '{first}-{last}/{totalRecords} · {currentPage}/{totalPages}',
+    );
+    const events: unknown[] = [];
+    fixture.componentInstance.pageChange.subscribe((event) => events.push(event));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelectorAll('.neu-table__footer').length).toBe(2);
+    expect(fixture.nativeElement.textContent).toContain('1-5/15 · 1/3');
+    host.querySelector<HTMLButtonElement>('[aria-label="Last page"]')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(events.length).toBe(1);
+    expect(events[0]).toEqual({ page: 3, pageCount: 3, first: 10, last: 15, rows: 5, totalRecords: 15 });
+    expect(Object.isFrozen(events[0])).toBe(true);
+    expect(fixture.componentInstance.currentPage()).toBe(3);
+  });
+
+  it('resolves stable registered custom modes and fails closed after unregister', () => {
+    const registry = TestBed.inject(NeuTableFilterRegistry);
+    const cleanup = registry.register<{ id: number; name: string }>(
+      'prefix-rule',
+      (value, filter) => String(value).startsWith(String(filter)),
+    );
+    const fixture = TestBed.createComponent(NeuTableComponent<{ id: number; name: string }>);
+    fixture.componentRef.setInput('columns', [
+      {
+        key: 'name',
+        header: 'Name',
+        filterConfig: {
+          kind: 'custom',
+          mode: 'prefix-rule',
+          accessor: (row: { id: number; name: string }) => row.name,
+        },
+      },
+    ]);
+    fixture.componentRef.setInput('data', [
+      { id: 1, name: 'Ada' },
+      { id: 2, name: 'Grace' },
+    ]);
+    fixture.componentInstance.setColumnFilter('name', 'A');
+    expect(fixture.componentInstance.filteredData().map((row) => row.name)).toEqual(['Ada']);
+    cleanup();
+    expect(fixture.componentInstance.filteredData()).toEqual([]);
+  });
+
+  it('honours paginator visibility switches for a single-page result', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', MANY_ROWS.slice(0, 1));
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('alwaysShowPaginator', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.neu-table__footer')).toBeNull();
+
+    fixture.componentRef.setInput('alwaysShowPaginator', true);
+    fixture.componentRef.setInput('showCurrentPageReport', false);
+    fixture.componentRef.setInput('showPageLinks', false);
+    fixture.componentRef.setInput('showFirstLastPageButtons', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.querySelector('.neu-table__footer')).not.toBeNull();
+    expect(host.querySelector('.neu-table__info')).toBeNull();
+    expect(host.querySelector('.neu-table__pagination')).toBeNull();
+    fixture.componentInstance.goToPage(Number.NaN);
+    expect(fixture.componentInstance.currentPage()).toBe(1);
+  });
+
+  it('reports known and unknown server totals without duplicating page-size events', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', MANY_ROWS.slice(0, 2));
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const events: Array<{ totalRecords: number }> = [];
+    fixture.componentInstance.pageChange.subscribe((event) => events.push(event));
+    fixture.componentInstance.onPageSizeChange(5);
+    fixture.componentRef.setInput('totalItems', 20);
+    fixture.detectChanges();
+    fixture.componentInstance.onPageSizeChange(6);
+    expect(events.map((event) => event.totalRecords)).toEqual([0, 20]);
+  });
+
+  it('projects explicit, selected, filtered, page and loaded export scopes without duplicates', () => {
+    const fixture = TestBed.createComponent(NeuTableComponent);
+    fixture.componentRef.setInput('columns', [
+      { key: 'name', header: 'Visual', exportHeader: 'Exported' },
+      { key: 'actions', header: 'Actions', type: 'actions' },
+    ]);
+    fixture.componentRef.setInput('data', MANY_ROWS.slice(0, 3));
+    fixture.componentRef.setInput('frozenData', [MANY_ROWS[0]]);
+    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('pageSize', 1);
+    const table = fixture.componentInstance as any;
+    expect(table._getExportRows({ rows: [MANY_ROWS[1]] })).toEqual([MANY_ROWS[1]]);
+    expect(table._getExportRows({ scope: 'loaded' }).length).toBe(3);
+    expect(table._getExportRows({ scope: 'filtered' }).length).toBe(3);
+    expect(table._getExportRows({ scope: 'page' }).length).toBe(3);
+    expect(table._getExportRows({ scope: 'selected' })).toEqual([]);
+    expect(table._getExportProjection().map((column: { header: string }) => column.header)).toEqual([
+      'Exported',
+    ]);
   });
 });

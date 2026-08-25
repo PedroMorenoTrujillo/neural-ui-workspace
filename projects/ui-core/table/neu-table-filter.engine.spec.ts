@@ -32,6 +32,7 @@ describe('NeuTable filter engine', () => {
       expect(matchNeuTableText('Neural Table', 'neural table', 'equals')).toBe(true);
       expect(matchNeuTableText('Neural Table', 'other', 'notEquals')).toBe(true);
       expect(matchNeuTableText('Neural Table', 'angular', 'notContains')).toBe(true);
+      expect(matchNeuTableText(null, 'neural', 'contains')).toBe(false);
     });
   });
 

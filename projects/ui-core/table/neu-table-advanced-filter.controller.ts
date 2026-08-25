@@ -398,8 +398,10 @@ export class NeuTableAdvancedFilterController<T extends object> {
     const kind = this.kind();
     const mode =
       kind && kind !== 'boolean' && kind !== 'custom'
-        ? (resolveNeuTableFilterMatchMode(column as NeuTableColumn<T, string>, constraint?.mode) ??
-          null)
+        ? ((resolveNeuTableFilterMatchMode(
+            column as NeuTableColumn<T, string>,
+            constraint?.mode,
+          ) as NeuTableFilterMatchMode | undefined) ?? null)
         : null;
     const value = snapshotDraftValue(constraint?.value ?? null);
     const rule: OwnedAdvancedFilterDraftRule = {
