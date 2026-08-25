@@ -1,0 +1,28 @@
+.neu-scroll-top-host { display: contents; }
+
+.neu-scroll-top {
+  position: fixed;
+  inset-block-end: var(--neu-space-6, 1.5rem);
+  inset-inline-end: var(--neu-space-6, 1.5rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border: 1px solid var(--neu-primary-solid, var(--neu-primary));
+  border-radius: var(--neu-radius-full);
+  background: var(--neu-primary-solid, var(--neu-primary));
+  color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+  box-shadow: var(--neu-shadow-lg);
+  cursor: pointer;
+  z-index: 20;
+
+  &:focus-visible { outline: 3px solid var(--neu-focus-ring-color, var(--neu-primary)); outline-offset: 3px; }
+}
+
+.neu-scroll-top-host--parent .neu-scroll-top { position: sticky; margin-inline-start: auto; inset-block-end: var(--neu-space-4, 1rem); }
+
+@media (forced-colors: active) {
+  .neu-scroll-top { border-color: ButtonText; background: ButtonFace; color: ButtonText; }
+  .neu-scroll-top:focus-visible { outline-color: Highlight; }
+}

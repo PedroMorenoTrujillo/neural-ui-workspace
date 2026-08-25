@@ -7,11 +7,13 @@
     "./alert",
     "./autocomplete",
     "./avatar",
+    "./avatar-group",
     "./badge",
     "./block-ui",
     "./bottom-sheet",
     "./breadcrumb",
     "./button",
+    "./button-group",
     "./calendar",
     "./card",
     "./cascade-select",
@@ -60,6 +62,7 @@
     "./rating",
     "./rich-text-editor",
     "./scheduler-gantt",
+    "./scroll-top",
     "./select",
     "./sidebar",
     "./skeleton",
@@ -74,6 +77,7 @@
     "./switch",
     "./table",
     "./tabs",
+    "./tag",
     "./tags",
     "./testing",
     "./textarea",
@@ -281,8 +285,18 @@
   "components": {
     "alert/neu-alert.component.ts": {
       "selector": "neu-alert",
-      "inputs": ["closable", "closeLabel", "icon", "outline", "showIcon", "title", "type"],
-      "outputs": ["closed"]
+      "inputs": [
+        "closable",
+        "closeLabel",
+        "icon",
+        "outline",
+        "showIcon",
+        "title",
+        "type"
+      ],
+      "outputs": [
+        "closed"
+      ]
     },
     "autocomplete/neu-autocomplete.component.ts": {
       "selector": "neu-autocomplete",
@@ -378,34 +392,81 @@
         "queryChange"
       ]
     },
+    "avatar-group/neu-avatar-group.component.ts": {
+      "selector": "neu-avatar-group",
+      "inputs": [
+        "ariaLabel",
+        "ariaLabelledBy"
+      ],
+      "outputs": []
+    },
     "avatar/neu-avatar.component.ts": {
       "selector": "neu-avatar",
-      "inputs": ["alt", "color", "name", "shape", "size", "src", "status"],
+      "inputs": [
+        "alt",
+        "color",
+        "name",
+        "shape",
+        "size",
+        "src",
+        "status"
+      ],
       "outputs": []
     },
     "badge/neu-badge.component.ts": {
       "selector": "neu-badge",
-      "inputs": ["dot", "outline", "pill", "size", "variant"],
+      "inputs": [
+        "dot",
+        "outline",
+        "pill",
+        "size",
+        "variant"
+      ],
       "outputs": []
     },
     "block-ui/neu-block-ui.component.ts": {
       "selector": "neu-block-ui",
-      "inputs": ["blocked", "message", "neuBlockUI", "variant"],
+      "inputs": [
+        "blocked",
+        "message",
+        "neuBlockUI",
+        "variant"
+      ],
       "outputs": []
     },
     "bottom-sheet/neu-bottom-sheet.component.ts": {
       "selector": "neu-bottom-sheet",
-      "inputs": ["ariaLabel", "backdrop", "closeLabel", "disableClose", "open", "size", "title"],
-      "outputs": ["closed"]
+      "inputs": [
+        "ariaLabel",
+        "backdrop",
+        "closeLabel",
+        "disableClose",
+        "open",
+        "size",
+        "title"
+      ],
+      "outputs": [
+        "closed"
+      ]
     },
-    "breadcrumb/neu-breadcrumb.component.ts": {
-      "selector": "neu-breadcrumb",
-      "inputs": ["items", "separator"],
+    "button-group/neu-button-group.component.ts": {
+      "selector": "neu-button-group",
+      "inputs": [
+        "ariaLabel",
+        "ariaLabelledBy",
+        "fluid",
+        "orientation"
+      ],
       "outputs": []
     },
     "card/neu-card.component.ts": {
       "selector": "neu-card",
-      "inputs": ["bordered", "flat", "hoverable", "padding"],
+      "inputs": [
+        "bordered",
+        "flat",
+        "hoverable",
+        "padding"
+      ],
       "outputs": []
     },
     "cascade-select/neu-cascade-select.component.ts": {
@@ -427,7 +488,9 @@
         "placeholder",
         "rootLabel"
       ],
-      "outputs": ["selectionChange"]
+      "outputs": [
+        "selectionChange"
+      ]
     },
     "chart/neu-chart.component.ts": {
       "selector": "neu-chart",
@@ -446,13 +509,37 @@
     },
     "checkbox/neu-checkbox.component.ts": {
       "selector": "neu-checkbox",
-      "inputs": ["ariaLabel", "checked", "disabled", "indeterminate", "label", "name"],
-      "outputs": ["checkedChange"]
+      "inputs": [
+        "ariaLabel",
+        "checked",
+        "disabled",
+        "indeterminate",
+        "label",
+        "name"
+      ],
+      "outputs": [
+        "checkedChange"
+      ]
     },
     "chip/neu-chip.component.ts": {
       "selector": "neu-chip",
-      "inputs": ["disabled", "removable", "removeAriaLabel", "selected", "size", "variant"],
-      "outputs": ["removed", "selectedChange"]
+      "inputs": [
+        "disabled",
+        "removable",
+        "removeAriaLabel",
+        "selected",
+        "size",
+        "variant",
+        "alt",
+        "icon",
+        "image",
+        "label"
+      ],
+      "outputs": [
+        "removed",
+        "selectedChange",
+        "imageError"
+      ]
     },
     "code-block/neu-code-block.component.ts": {
       "selector": "neu-code-block",
@@ -469,8 +556,12 @@
     },
     "color-picker/neu-color-picker.component.ts": {
       "selector": "neu-color-picker",
-      "inputs": ["mode"],
-      "outputs": ["colorChange"]
+      "inputs": [
+        "mode"
+      ],
+      "outputs": [
+        "colorChange"
+      ]
     },
     "confirm-dialog/neu-confirm-dialog.component.ts": {
       "selector": "neu-confirm-dialog",
@@ -479,13 +570,27 @@
     },
     "confirm-popup/neu-confirm-popup.component.ts": {
       "selector": "neu-confirm-popup",
-      "inputs": ["acceptLabel", "message", "open", "rejectLabel", "title"],
-      "outputs": ["accepted", "rejected"]
+      "inputs": [
+        "acceptLabel",
+        "message",
+        "open",
+        "rejectLabel",
+        "title"
+      ],
+      "outputs": [
+        "accepted",
+        "rejected"
+      ]
     },
     "dashboard-grid/neu-dashboard-grid.component.ts": {
       "selector": "neu-dashboard-grid",
-      "inputs": ["columns", "tiles"],
-      "outputs": ["orderChange"]
+      "inputs": [
+        "columns",
+        "tiles"
+      ],
+      "outputs": [
+        "orderChange"
+      ]
     },
     "date-input/neu-date-input.component.ts": {
       "selector": "neu-date-input",
@@ -514,11 +619,16 @@
         "type",
         "yearRange"
       ],
-      "outputs": ["rangeChange"]
+      "outputs": [
+        "rangeChange"
+      ]
     },
     "divider/neu-divider.component.ts": {
       "selector": "neu-divider",
-      "inputs": ["label", "orientation"],
+      "inputs": [
+        "label",
+        "orientation"
+      ],
       "outputs": []
     },
     "empty-state/neu-empty-state.component.ts": {
@@ -533,21 +643,46 @@
         "title",
         "tone"
       ],
-      "outputs": ["action"]
+      "outputs": [
+        "action"
+      ]
     },
     "filter-bar/neu-filter-bar.component.ts": {
       "selector": "neu-filter-bar",
-      "inputs": ["ariaLabel", "clearable", "clearLabel", "filters", "multi"],
-      "outputs": ["filterChange"]
+      "inputs": [
+        "ariaLabel",
+        "clearable",
+        "clearLabel",
+        "filters",
+        "multi"
+      ],
+      "outputs": [
+        "filterChange"
+      ]
     },
     "form-field/neu-form-field.component.ts": {
       "selector": "neu-form-field",
-      "inputs": ["attached", "error", "forId", "hint", "label", "prefix", "size", "suffix"],
+      "inputs": [
+        "attached",
+        "error",
+        "forId",
+        "hint",
+        "label",
+        "prefix",
+        "size",
+        "suffix"
+      ],
       "outputs": []
     },
     "icon/neu-icon.component.ts": {
       "selector": "neu-icon",
-      "inputs": ["ariaLabel", "decorative", "name", "size", "strokeWidth"],
+      "inputs": [
+        "ariaLabel",
+        "decorative",
+        "name",
+        "size",
+        "strokeWidth"
+      ],
       "outputs": []
     },
     "image-gallery/neu-image-gallery.component.ts": {
@@ -561,11 +696,16 @@
         "thumbnailPosition",
         "viewerEnabled"
       ],
-      "outputs": ["activeIndexChange"]
+      "outputs": [
+        "activeIndexChange"
+      ]
     },
     "image-viewer/neu-image-viewer.component.ts": {
       "selector": "neu-image-viewer-overlay",
-      "inputs": ["neuImageViewer", "neuIvIndex"],
+      "inputs": [
+        "neuImageViewer",
+        "neuIvIndex"
+      ],
       "outputs": []
     },
     "inline-editor/neu-inline-editor.component.ts": {
@@ -589,17 +729,36 @@
         "type",
         "value"
       ],
-      "outputs": ["editCancel", "editCommit", "editStart", "valueChange"]
+      "outputs": [
+        "editCancel",
+        "editCommit",
+        "editStart",
+        "valueChange"
+      ]
     },
     "input-mask/neu-input-mask.component.ts": {
       "selector": "neu-input-mask",
-      "inputs": ["disabled", "hint", "label", "mask", "placeholder"],
-      "outputs": ["valueChange"]
+      "inputs": [
+        "disabled",
+        "hint",
+        "label",
+        "mask",
+        "placeholder"
+      ],
+      "outputs": [
+        "valueChange"
+      ]
     },
     "input-otp/neu-input-otp.component.ts": {
       "selector": "neu-input-otp",
-      "inputs": ["length", "type"],
-      "outputs": ["completed", "valueChange"]
+      "inputs": [
+        "length",
+        "type"
+      ],
+      "outputs": [
+        "completed",
+        "valueChange"
+      ]
     },
     "input/neu-input.component.ts": {
       "selector": "neu-input",
@@ -631,13 +790,30 @@
     },
     "kanban/neu-kanban.component.ts": {
       "selector": "neu-kanban",
-      "inputs": ["columns", "columnWidth", "showCounts", "showWipLimit"],
-      "outputs": ["cardDrop", "columnsChange"]
+      "inputs": [
+        "columns",
+        "columnWidth",
+        "showCounts",
+        "showWipLimit"
+      ],
+      "outputs": [
+        "cardDrop",
+        "columnsChange"
+      ]
     },
     "knob/neu-knob.component.ts": {
       "selector": "neu-knob",
-      "inputs": ["label", "max", "min", "showValue", "size", "step"],
-      "outputs": ["valueChange"]
+      "inputs": [
+        "label",
+        "max",
+        "min",
+        "showValue",
+        "size",
+        "step"
+      ],
+      "outputs": [
+        "valueChange"
+      ]
     },
     "listbox/neu-listbox.component.ts": {
       "selector": "neu-listbox",
@@ -716,13 +892,37 @@
     },
     "meter-group/neu-meter-group.component.ts": {
       "selector": "neu-meter-group",
-      "inputs": ["ariaLabel", "height", "items", "rounded", "showLegend", "total"],
+      "inputs": [
+        "ariaLabel",
+        "height",
+        "items",
+        "rounded",
+        "showLegend",
+        "total",
+        "ariaLabelledBy",
+        "labelOrientation",
+        "labelPosition",
+        "max",
+        "min",
+        "orientation",
+        "value"
+      ],
       "outputs": []
     },
     "modal/neu-modal.component.ts": {
       "selector": "neu-dialog",
-      "inputs": ["disableClose", "layout", "open", "responsive", "restoreFocus", "size", "title"],
-      "outputs": ["closed"]
+      "inputs": [
+        "disableClose",
+        "layout",
+        "open",
+        "responsive",
+        "restoreFocus",
+        "size",
+        "title"
+      ],
+      "outputs": [
+        "closed"
+      ]
     },
     "multiselect/neu-multiselect.component.ts": {
       "selector": "neu-multiselect",
@@ -822,8 +1022,17 @@
     },
     "nav/neu-nav.component.ts": {
       "selector": "neu-nav",
-      "inputs": ["ariaLabel", "collapsed", "collapseLabel", "collapsible", "expandLabel", "items"],
-      "outputs": ["collapsedChange"]
+      "inputs": [
+        "ariaLabel",
+        "collapsed",
+        "collapseLabel",
+        "collapsible",
+        "expandLabel",
+        "items"
+      ],
+      "outputs": [
+        "collapsedChange"
+      ]
     },
     "notification-center/neu-notification-center.component.ts": {
       "selector": "neu-notification-center",
@@ -845,17 +1054,37 @@
         "step",
         "vertical"
       ],
-      "outputs": ["valueChange"]
+      "outputs": [
+        "valueChange"
+      ]
     },
     "pagination/neu-pagination.component.ts": {
       "selector": "neu-pagination",
-      "inputs": ["maxVisible", "page", "pageSize", "total"],
-      "outputs": ["pageChange"]
+      "inputs": [
+        "maxVisible",
+        "page",
+        "pageSize",
+        "total"
+      ],
+      "outputs": [
+        "pageChange"
+      ]
     },
     "panel/neu-panel.component.ts": {
       "selector": "neu-panel",
-      "inputs": ["collapseLabel", "collapsible", "expandLabel", "header", "legend", "maxHeight"],
-      "outputs": ["collapsedChange"]
+      "inputs": [
+        "collapseLabel",
+        "collapsible",
+        "expandLabel",
+        "header",
+        "legend",
+        "maxHeight",
+        "collapsedInput",
+        "toggleable"
+      ],
+      "outputs": [
+        "collapsedChange"
+      ]
     },
     "password/neu-password.component.ts": {
       "selector": "neu-password",
@@ -871,7 +1100,9 @@
         "showStrength",
         "toggleable"
       ],
-      "outputs": ["valueChange"]
+      "outputs": [
+        "valueChange"
+      ]
     },
     "popover/neu-popover.component.ts": {
       "selector": "neu-popover-overlay",
@@ -883,27 +1114,50 @@
         "neuPopoverText",
         "neuPopoverTrigger"
       ],
-      "outputs": ["popoverClosed", "popoverOpened"]
+      "outputs": [
+        "popoverClosed",
+        "popoverOpened"
+      ]
     },
     "progress-bar/neu-progress-bar.component.ts": {
       "selector": "neu-progress-bar",
-      "inputs": ["indeterminate", "label", "showValue", "size", "value", "variant"],
+      "inputs": [
+        "indeterminate",
+        "label",
+        "showValue",
+        "size",
+        "value",
+        "variant"
+      ],
       "outputs": []
     },
     "radio/neu-radio-group.component.ts": {
       "selector": "neu-radio-group",
-      "inputs": ["ariaLabel", "direction"],
+      "inputs": [
+        "ariaLabel",
+        "direction"
+      ],
       "outputs": []
     },
     "radio/neu-radio.component.ts": {
       "selector": "neu-radio",
-      "inputs": ["disabled", "label", "value"],
+      "inputs": [
+        "disabled",
+        "label",
+        "value"
+      ],
       "outputs": []
     },
     "rating/neu-rating.component.ts": {
       "selector": "neu-rating",
-      "inputs": ["readonly", "stars", "value"],
-      "outputs": ["valueChange"]
+      "inputs": [
+        "readonly",
+        "stars",
+        "value"
+      ],
+      "outputs": [
+        "valueChange"
+      ]
     },
     "rich-text-editor/neu-rich-text-editor.component.ts": {
       "selector": "neu-rich-text-editor",
@@ -926,7 +1180,10 @@
         "variablesAriaLabel",
         "variablesLabel"
       ],
-      "outputs": ["imageRejected", "valueChange"]
+      "outputs": [
+        "imageRejected",
+        "valueChange"
+      ]
     },
     "scheduler-gantt/neu-scheduler-gantt.component.ts": {
       "selector": "neu-scheduler-gantt",
@@ -944,7 +1201,10 @@
         "stickyLabels",
         "title"
       ],
-      "outputs": ["slotClick", "taskClick"]
+      "outputs": [
+        "slotClick",
+        "taskClick"
+      ]
     },
     "select/neu-select.component.ts": {
       "selector": "neu-select",
@@ -1043,11 +1303,19 @@
         "side",
         "urlParam"
       ],
-      "outputs": ["closeRequested", "collapsedChange"]
+      "outputs": [
+        "closeRequested",
+        "collapsedChange"
+      ]
     },
     "skeleton/neu-skeleton.component.ts": {
       "selector": "neu-skeleton",
-      "inputs": ["borderRadius", "height", "variant", "width"],
+      "inputs": [
+        "borderRadius",
+        "height",
+        "variant",
+        "width"
+      ],
       "outputs": []
     },
     "slider/neu-slider.component.ts": {
@@ -1063,7 +1331,9 @@
         "unit",
         "value"
       ],
-      "outputs": ["valueChange"]
+      "outputs": [
+        "valueChange"
+      ]
     },
     "spinner/neu-spinner.component.ts": {
       "selector": "neu-spinner",
@@ -1080,27 +1350,52 @@
     },
     "splitter/neu-splitter.component.ts": {
       "selector": "neu-splitter",
-      "inputs": ["direction", "panes"],
-      "outputs": ["sizeChange"]
+      "inputs": [
+        "direction",
+        "panes"
+      ],
+      "outputs": [
+        "sizeChange"
+      ]
     },
     "stats-card/neu-stats-card.component.ts": {
       "selector": "neu-stats-card",
-      "inputs": ["change", "icon", "label", "sparkData", "title", "trend", "value"],
+      "inputs": [
+        "change",
+        "icon",
+        "label",
+        "sparkData",
+        "title",
+        "trend",
+        "value"
+      ],
       "outputs": []
     },
     "stepper/neu-stepper.component.ts": {
       "selector": "neu-stepper",
-      "inputs": ["activeStep", "linear", "steps"],
-      "outputs": ["stepChange"]
+      "inputs": [
+        "activeStep",
+        "linear",
+        "steps"
+      ],
+      "outputs": [
+        "stepChange"
+      ]
     },
     "switch/neu-switch.component.ts": {
       "selector": "neu-switch",
-      "inputs": ["disabled", "label", "name"],
+      "inputs": [
+        "disabled",
+        "label",
+        "name"
+      ],
       "outputs": []
     },
     "table/neu-table-row-reorder-handle.directive.ts": {
       "selector": "[neuTableRowReorderHandle]",
-      "inputs": ["disabled"],
+      "inputs": [
+        "disabled"
+      ],
       "outputs": []
     },
     "table/neu-table.component.ts": {
@@ -1328,7 +1623,10 @@
         "selectedSlot",
         "stickyLabels"
       ],
-      "outputs": ["itemClick", "slotClick"]
+      "outputs": [
+        "itemClick",
+        "slotClick"
+      ]
     },
     "toast/neu-toast.component.ts": {
       "selector": "neu-toast-container",
@@ -1337,17 +1635,33 @@
     },
     "toolbar/neu-toolbar.component.ts": {
       "selector": "neu-toolbar",
-      "inputs": ["bordered", "density", "shadow", "size", "surface", "wrap"],
+      "inputs": [
+        "bordered",
+        "density",
+        "shadow",
+        "size",
+        "surface",
+        "wrap"
+      ],
       "outputs": []
     },
     "tooltip/neu-tooltip.component.ts": {
       "selector": "neu-tooltip-overlay",
-      "inputs": ["text", "tooltipId"],
+      "inputs": [
+        "text",
+        "tooltipId"
+      ],
       "outputs": []
     },
     "tooltip/neu-tooltip.directive.ts": {
       "selector": "[neuTooltip]",
-      "inputs": ["neuTooltip", "neuTooltipDisabled", "neuTooltipPosition"],
+      "inputs": [
+        "neuTooltip",
+        "neuTooltipDisabled",
+        "neuTooltipPosition",
+        "neuTooltipHideDelay",
+        "neuTooltipShowDelay"
+      ],
       "outputs": []
     },
     "tree-table/neu-tree-table.component.ts": {
@@ -1488,7 +1802,13 @@
         "showProgress",
         "size"
       ],
-      "outputs": ["cleared", "fileRemoved", "fileRetry", "filesRejected", "filesSelected"]
+      "outputs": [
+        "cleared",
+        "fileRemoved",
+        "fileRetry",
+        "filesRejected",
+        "filesSelected"
+      ]
     },
     "virtual-list/neu-virtual-list.component.ts": {
       "selector": "neu-virtual-list-row",

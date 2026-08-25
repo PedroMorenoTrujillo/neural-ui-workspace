@@ -74,7 +74,12 @@ if (packageJson) {
   }
 }
 
-const showcasePagesRoot = join(root, '..', 'neural-ui-showcase', 'projects/showcase/src/app/pages');
+const showcasePagesRoot = join(
+  root,
+  '..',
+  process.env.NEURAL_UI_SHOWCASE_PATH ?? 'neural-ui-showcase',
+  'projects/showcase/src/app/pages',
+);
 if (existsSync(showcasePagesRoot)) {
   for (const entry of entryPoints) {
     if (nonVisualEntryPoints.has(entry) || nonDemoEntryPoints.has(entry)) {

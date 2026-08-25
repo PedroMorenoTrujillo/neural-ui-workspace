@@ -1,0 +1,32 @@
+.neu-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neu-space-1, 0.25rem);
+  box-sizing: border-box;
+  min-height: 1.5rem;
+  padding-block: 0.1875rem;
+  padding-inline: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-surface-2);
+  color: var(--neu-text);
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-xs);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  &--rounded { border-radius: var(--neu-radius-full); }
+  &--success { background: var(--neu-success-bg); color: var(--neu-success-text); }
+  &--info { background: var(--neu-info-bg); color: var(--neu-info-text); }
+  &--warn { background: var(--neu-warning-bg); color: var(--neu-warning-text); }
+  &--danger { background: var(--neu-error-bg); color: var(--neu-error-text); }
+  &--secondary { color: var(--neu-text-muted); border-color: var(--neu-border); }
+  &--contrast { background: var(--neu-text); color: var(--neu-surface); }
+}
+
+.neu-tag__icon { flex: 0 0 auto; }
+
+@media (forced-colors: active) {
+  .neu-tag { border-color: CanvasText; color: CanvasText; background: Canvas; }
+}

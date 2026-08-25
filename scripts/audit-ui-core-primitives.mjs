@@ -43,6 +43,7 @@ const allowedNativeControlDirs = new Set([
   'radio',
   'rating',
   'rich-text-editor',
+  'scroll-top',
   'select',
   'sidebar',
   'split-button',

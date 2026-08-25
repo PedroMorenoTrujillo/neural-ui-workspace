@@ -3,6 +3,7 @@ import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
 import {
   lucideChevronLeft,
   lucideChevronRight,
+  lucideChevronUp,
   lucideCircleAlert,
   lucideCircleCheck,
   lucideCircleX,
@@ -59,6 +60,7 @@ export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProvide
       // Nav chevrons + collapse toggle
       lucideChevronRight,
       lucideChevronLeft,
+      lucideChevronUp,
       // Nav external link
       lucideExternalLink,
       // EmptyState default icon
