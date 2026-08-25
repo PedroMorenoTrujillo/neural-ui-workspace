@@ -1,5 +1,10 @@
 import { Component } from '@angular/core';
-import { NeuOptionFilterConfig } from '@neural-ui/core/option-api';
+import { NeuOptionFilterConfig, NeuOptionGroupConfig } from '@neural-ui/core/option-api';
+import {
+  NeuAutocompleteComponent,
+  NeuAutocompleteGroupDirective,
+  NeuAutocompleteItemDirective,
+} from '@neural-ui/core/autocomplete';
 import {
   NeuListboxComponent,
   NeuListboxFilterDirective,
@@ -19,6 +24,7 @@ import {
 } from '@neural-ui/core/multiselect';
 import {
   FilterContextFixtureDirective,
+  FixtureGroup,
   FixturePerson,
   OptionContextFixtureDirective,
 } from './shared';
@@ -40,6 +46,9 @@ import {
     NeuMultiselectFilterDirective,
     NeuMultiselectItemDirective,
     NeuMultiselectTokenDirective,
+    NeuAutocompleteComponent,
+    NeuAutocompleteGroupDirective,
+    NeuAutocompleteItemDirective,
   ],
   template: `
     <ng-template [neuOptionContextFixture]="options" let-option="option">
@@ -79,11 +88,28 @@ import {
         <button type="button" (click)="filter('Grace')">Filter multiselect</button>
       </ng-template>
     </neu-multiselect>
+    <neu-autocomplete [suggestions]="options" [optionLabel]="'profile.name'">
+      <ng-template [neuAutocompleteItem]="options" let-person="option">
+        {{ person.profile.name }}
+      </ng-template>
+    </neu-autocomplete>
+    <neu-autocomplete [groupSuggestions]="groups" [groupConfig]="groupConfig">
+      <ng-template [neuAutocompleteGroup]="groups" let-group="group">
+        {{ group.meta.name }}
+      </ng-template>
+    </neu-autocomplete>
   `,
 })
 export class ValidOptionContextFixtureComponent {
   readonly options: readonly FixturePerson[] = [{ id: 1, profile: { name: 'Ada Lovelace' } }];
   readonly filterConfig: NeuOptionFilterConfig<FixturePerson> = {
     fields: ['profile.name'],
+  };
+  readonly groups: readonly FixtureGroup[] = [
+    { meta: { name: 'Pioneers' }, choices: this.options },
+  ];
+  readonly groupConfig: NeuOptionGroupConfig<FixturePerson, FixtureGroup> = {
+    labelAccessor: 'meta.name',
+    childrenAccessor: 'choices',
   };
 }

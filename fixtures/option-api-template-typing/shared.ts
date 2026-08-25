@@ -12,6 +12,11 @@ export interface FixturePerson {
   };
 }
 
+export interface FixtureGroup {
+  meta: { name: string };
+  choices: readonly FixturePerson[];
+}
+
 @Directive({ selector: 'ng-template[neuOptionContextFixture]', standalone: true })
 export class OptionContextFixtureDirective<T> {
   readonly neuOptionContextFixture = input.required<readonly T[]>();
