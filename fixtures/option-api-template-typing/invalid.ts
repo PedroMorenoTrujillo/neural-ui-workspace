@@ -11,6 +11,12 @@ import {
   NeuSelectItemDirective,
 } from '@neural-ui/core/select';
 import {
+  NeuMultiselectComponent,
+  NeuMultiselectFilterDirective,
+  NeuMultiselectItemDirective,
+  NeuMultiselectTokenDirective,
+} from '@neural-ui/core/multiselect';
+import {
   FilterContextFixtureDirective,
   FixturePerson,
   OptionContextFixtureDirective,
@@ -28,6 +34,10 @@ import {
     NeuSelectComponent,
     NeuSelectFilterDirective,
     NeuSelectItemDirective,
+    NeuMultiselectComponent,
+    NeuMultiselectFilterDirective,
+    NeuMultiselectItemDirective,
+    NeuMultiselectTokenDirective,
   ],
   template: `
     <ng-template [neuOptionContextFixture]="options" let-option="option">
@@ -52,6 +62,17 @@ import {
         <button type="button" (click)="filter(789)">Filter select</button>
       </ng-template>
     </neu-select>
+    <neu-multiselect [options]="options" [filter]="true">
+      <ng-template [neuMultiselectItem]="options" let-person="option">
+        {{ person.profile.missing }}
+      </ng-template>
+      <ng-template [neuMultiselectToken]="options" let-remove="remove">
+        <button type="button" (click)="remove('invalid')">Remove</button>
+      </ng-template>
+      <ng-template [neuMultiselectFilter]="filterConfig" let-filter="filter">
+        <button type="button" (click)="filter(101)">Filter multiselect</button>
+      </ng-template>
+    </neu-multiselect>
   `,
 })
 export class InvalidOptionContextFixtureComponent {

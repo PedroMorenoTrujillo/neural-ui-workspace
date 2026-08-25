@@ -143,7 +143,7 @@ $panel-z: 200;
   @include text.ellipsis;
   display: block;
   max-width: 100%;
-  color: var(--neu-text-disabled);
+  color: var(--neu-text-muted);
   font-size: var(--neu-text-base);
   line-height: 1.5;
   // En modo floating label se oculta hasta que el multiselect está abierto
@@ -159,7 +159,7 @@ $panel-z: 200;
   gap: 4px;
   padding: 2px 4px 2px 8px;
   background: var(--neu-primary-soft, rgba(0, 122, 255, 0.1));
-  color: var(--neu-primary);
+  color: var(--neu-primary-dark, var(--neu-primary));
   border-radius: var(--neu-radius-sm);
   font-size: var(--neu-text-xs);
   font-weight: 500;
@@ -545,4 +545,103 @@ html[data-theme='dark'] {
   padding: 8px 10px;
   text-align: start;
   cursor: pointer;
+}
+
+.neu-multiselect--fluid {
+  width: 100%;
+}
+
+.neu-multiselect--filled .neu-multiselect__trigger {
+  background: var(--neu-surface-2);
+}
+
+.neu-multiselect--readonly .neu-multiselect__trigger {
+  cursor: default;
+}
+
+.neu-multiselect__comma-values {
+  @include text.ellipsis;
+  min-width: 0;
+  color: var(--neu-text);
+}
+
+.neu-multiselect__group {
+  padding-block: var(--neu-space-2);
+  padding-inline: var(--neu-space-3);
+  color: var(--neu-text-muted);
+  font-size: var(--neu-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--neu-surface-2);
+}
+
+.neu-multiselect__loader {
+  min-height: var(--neu-multiselect-option-height, 44px);
+  display: flex;
+  align-items: center;
+  padding-inline: var(--neu-space-3);
+  color: var(--neu-text-muted);
+}
+
+.neu-multiselect__option--active {
+  outline: 2px solid var(--neu-primary);
+  outline-offset: -2px;
+}
+
+.neu-multiselect__loading-icon,
+.neu-multiselect__filter-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-multiselect__native-input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.neu-multiselect__chip:focus-visible,
+.neu-multiselect__options:focus-visible,
+.neu-multiselect__select-all:focus-visible {
+  outline: 2px solid var(--neu-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-multiselect *,
+  .neu-multiselect *::before,
+  .neu-multiselect *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-multiselect__trigger,
+  .neu-multiselect__chip,
+  .neu-multiselect__checkbox,
+  .neu-multiselect__select-all {
+    border: 1px solid CanvasText;
+  }
+
+  .neu-multiselect__option--active,
+  .neu-multiselect__option--selected,
+  .neu-multiselect__trigger:focus-visible {
+    outline: 2px solid Highlight;
+  }
+
+  .neu-multiselect__option--disabled,
+  .neu-multiselect--disabled {
+    color: GrayText;
+  }
+
+  .neu-multiselect__checkbox--checked {
+    background: Highlight;
+    color: HighlightText;
+  }
 }

@@ -13,8 +13,24 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NeuMultiselectComponent } from './neu-multiselect.component';
 import {
+  NeuMultiselectCheckboxDirective,
+  NeuMultiselectCheckmarkDirective,
+  NeuMultiselectClearIconDirective,
+  NeuMultiselectDropdownIconDirective,
+  NeuMultiselectEmptyDirective,
+  NeuMultiselectEmptyFilterDirective,
+  NeuMultiselectFilterDirective,
+  NeuMultiselectFilterIconDirective,
+  NeuMultiselectFooterDirective,
+  NeuMultiselectGroupDirective,
+  NeuMultiselectHeaderDirective,
   NeuMultiselectItemDirective,
+  NeuMultiselectLoaderDirective,
+  NeuMultiselectLoadingIconDirective,
   NeuMultiselectSelectedDirective,
+  NeuMultiselectSelectedItemsDirective,
+  NeuMultiselectTokenDirective,
+  NeuMultiselectTokenRemoveIconDirective,
 } from './neu-multiselect.directives';
 import { NeuSelectOption } from '../select/neu-select.types';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
@@ -147,6 +163,66 @@ class TemplateHostComponent {
   options = OPTIONS;
 }
 
+@Component({
+  template: `<neu-multiselect
+    [groups]="groups()"
+    [groupConfig]="groupConfig"
+    [filter]="true"
+    [filterValue]="filterValue()"
+    [loading]="loading()"
+    [lazy]="lazy()"
+    [showToggleAll]="true"
+    [showClear]="true"
+  >
+    <ng-template neuMultiselectHeader><span class="all-header">Header</span></ng-template>
+    <ng-template neuMultiselectFooter><span class="all-footer">Footer</span></ng-template>
+    <ng-template neuMultiselectItem let-option><span class="all-item">{{ option.label }}</span></ng-template>
+    <ng-template neuMultiselectSelected let-option>{{ option?.label }}</ng-template>
+    <ng-template neuMultiselectToken let-option>{{ option?.label }}</ng-template>
+    <ng-template neuMultiselectSelectedItems let-count="count"><span class="all-selected">{{ count }}</span></ng-template>
+    <ng-template neuMultiselectGroup let-label="label"><span class="all-group">{{ label }}</span></ng-template>
+    <ng-template neuMultiselectFilter let-filter="filter"><button class="all-filter" (click)="filter('ang')">Filter</button></ng-template>
+    <ng-template neuMultiselectLoader let-index><span class="all-loader">{{ index }}</span></ng-template>
+    <ng-template neuMultiselectEmpty><span class="all-empty">Empty</span></ng-template>
+    <ng-template neuMultiselectEmptyFilter><span class="all-empty-filter">No match</span></ng-template>
+    <ng-template neuMultiselectCheckbox><span class="all-checkbox">□</span></ng-template>
+    <ng-template neuMultiselectCheckmark><span class="all-checkmark">✓</span></ng-template>
+    <ng-template neuMultiselectDropdownIcon><span class="all-dropdown">⌄</span></ng-template>
+    <ng-template neuMultiselectLoadingIcon><span class="all-loading-icon">…</span></ng-template>
+    <ng-template neuMultiselectClearIcon><span class="all-clear-icon">×</span></ng-template>
+    <ng-template neuMultiselectFilterIcon><span class="all-filter-icon">⌕</span></ng-template>
+    <ng-template neuMultiselectTokenRemoveIcon><span class="all-remove-icon">×</span></ng-template>
+  </neu-multiselect>`,
+  imports: [
+    NeuMultiselectComponent,
+    NeuMultiselectCheckboxDirective,
+    NeuMultiselectCheckmarkDirective,
+    NeuMultiselectClearIconDirective,
+    NeuMultiselectDropdownIconDirective,
+    NeuMultiselectEmptyDirective,
+    NeuMultiselectEmptyFilterDirective,
+    NeuMultiselectFilterDirective,
+    NeuMultiselectFilterIconDirective,
+    NeuMultiselectFooterDirective,
+    NeuMultiselectGroupDirective,
+    NeuMultiselectHeaderDirective,
+    NeuMultiselectItemDirective,
+    NeuMultiselectLoaderDirective,
+    NeuMultiselectLoadingIconDirective,
+    NeuMultiselectSelectedDirective,
+    NeuMultiselectSelectedItemsDirective,
+    NeuMultiselectTokenDirective,
+    NeuMultiselectTokenRemoveIconDirective,
+  ],
+})
+class AllTemplatesMultiselectHostComponent {
+  groups = signal([{ name: 'Frontend', items: OPTIONS.slice(0, 2) }]);
+  groupConfig = { labelAccessor: 'name', childrenAccessor: 'items' } as const;
+  filterValue = signal<string | null>(null);
+  loading = signal(false);
+  lazy = signal(false);
+}
+
 describe('NeuMultiselectComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -156,6 +232,7 @@ describe('NeuMultiselectComponent', () => {
         UrlSyncHostComponent,
         TemplateHostComponent,
         RawFrameworkMultiselectHostComponent,
+        AllTemplatesMultiselectHostComponent,
       ],
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
@@ -1614,7 +1691,7 @@ describe('NeuMultiselectComponent', () => {
     expect(panel).toBeTruthy();
     expect(viewport).toBeTruthy();
     expect(viewport!.style.height).toBe(comp.virtualViewportHeight());
-    expect(comp.virtualScrollItemSize()).toBe(52);
+    expect(comp.effectiveVirtualScrollItemSize()).toBe(52);
     expect(comp.filteredOptions()).toHaveLength(4);
     expect(comp.trackByOptionValue(0, { value: 'angular', label: 'Angular' })).toBe('angular');
   });
@@ -2115,5 +2192,501 @@ describe('NeuMultiselectComponent', () => {
     expect((comp as any)._values()).toEqual([FRAMEWORK_MODELS[0]]);
     expect(onChange).toHaveBeenCalledWith([FRAMEWORK_MODELS[0]]);
     expect((comp as any).labelFor(FRAMEWORK_MODELS[0])).toBe('Angular');
+  });
+
+  it('clones programmatic arrays and keeps writes silent', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const supplied = ['angular'];
+    const change = vi.fn();
+    const detail = vi.fn();
+    comp.registerOnChange(change);
+    comp.onChange.subscribe(detail);
+
+    comp.writeValue(supplied);
+    supplied.push('react');
+
+    expect(comp._values()).toEqual(['angular']);
+    expect(comp._values()).not.toBe(supplied);
+    expect(change).not.toHaveBeenCalled();
+    expect(detail).not.toHaveBeenCalled();
+  });
+
+  it('emits fresh immutable user arrays at every ownership boundary', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const cvaValues: string[][] = [];
+    const details: any[] = [];
+    comp.registerOnChange((value: string[]) => cvaValues.push(value));
+    comp.onChange.subscribe((event: unknown) => details.push(event));
+
+    comp.toggleOption(OPTIONS[0]);
+
+    expect(cvaValues[0]).toEqual(['angular']);
+    expect(cvaValues[0]).not.toBe(comp._values());
+    expect(details[0].value).toEqual(['angular']);
+    expect(details[0].value).not.toBe(cvaValues[0]);
+    cvaValues[0].push('react');
+    expect(comp._values()).toEqual(['angular']);
+  });
+
+  it('blocks every selection mutation while readonly or loading but remains focusable', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('readonly', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.writeValue(['angular']);
+    comp.toggleOption(OPTIONS[1]);
+    comp.removeOption('angular');
+    comp.clear();
+    comp.show();
+    f.detectChanges();
+
+    expect(comp._values()).toEqual(['angular']);
+    expect(comp.isOpen()).toBe(true);
+    expect(f.nativeElement.querySelector('.neu-multiselect__trigger').tabIndex).toBe(0);
+
+    f.componentRef.setInput('readonly', false);
+    f.componentRef.setInput('loading', true);
+    f.detectChanges();
+    comp.toggleOption(OPTIONS[1]);
+    expect(comp._values()).toEqual(['angular']);
+  });
+
+  it('normalizes nested groups and honors disabled groups without treating groups as options', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    const groups = [
+      { meta: { label: 'Frontend', disabled: false }, children: [OPTIONS[0], OPTIONS[1]] },
+      { meta: { label: 'Legacy', disabled: true }, children: [OPTIONS[2]] },
+    ];
+    f.componentRef.setInput('groups', groups);
+    f.componentRef.setInput('groupConfig', {
+      labelAccessor: 'meta.label',
+      childrenAccessor: 'children',
+      disabledAccessor: 'meta.disabled',
+    });
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    expect(comp.normalizedRows().map((row: any) => row.kind)).toEqual([
+      'group', 'option', 'option', 'group', 'option',
+    ]);
+    expect(comp.filteredOptions()).toEqual([OPTIONS[0], OPTIONS[1], OPTIONS[2]]);
+    comp.toggleOption(OPTIONS[2]);
+    expect(comp._values()).toEqual([]);
+  });
+
+  it('supports controlled nested-field filtering without mutating owner state', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    const models = [
+      { id: 1, profile: { name: 'Ángular' } },
+      { id: 2, profile: { name: 'React' } },
+    ];
+    f.componentRef.setInput('options', models);
+    f.componentRef.setInput('optionLabel', 'profile.name');
+    f.componentRef.setInput('filter', true);
+    f.componentRef.setInput('filterValue', 'ang');
+    f.componentRef.setInput('filterFields', ['profile.name']);
+    f.componentRef.setInput('filterLocale', 'es');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const proposals: any[] = [];
+    comp.onFilter.subscribe((event: unknown) => proposals.push(event));
+
+    expect(comp.filteredOptions()).toEqual([models[0]]);
+    comp.applyFilter('react');
+
+    expect(comp.effectiveFilterValue()).toBe('ang');
+    expect(proposals.at(-1)).toMatchObject({ filter: 'react', controlled: true });
+  });
+
+  it('emits bounded monotonic lazy requests for initial, filter and scroll windows', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('lazy', true);
+    f.componentRef.setInput('virtualScroll', true);
+    f.componentRef.setInput('virtualScrollVisibleItems', 3);
+    f.componentRef.setInput('virtualScrollBuffer', 1);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const requests: any[] = [];
+    comp.onLazyLoad.subscribe((request: unknown) => requests.push(request));
+
+    comp.show();
+    comp.applyFilter('a');
+    comp.onVirtualIndexChange(5);
+
+    expect(requests.map((request) => request.reason)).toEqual(['initial', 'filter', 'scroll']);
+    expect(requests.map((request) => request.requestId)).toEqual([1, 2, 3]);
+    expect(requests[2]).toMatchObject({ first: 4, end: 9, count: 5 });
+  });
+
+  it('keeps active descendants rendered, eligible and logically positioned', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('totalRecords', 20);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.show();
+    f.detectChanges();
+    await f.whenStable();
+
+    const activeId = comp.activeDescendantId();
+    const active = document.getElementById(activeId);
+    expect(active).toBeTruthy();
+    expect(active?.getAttribute('role')).toBe('option');
+    expect(active?.getAttribute('aria-setsize')).toBe('20');
+  });
+
+  it('supports Home, End, Page navigation and toggles only eligible active options', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('autoOptionFocus', false);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.show();
+    const keyboard = (key: string) => new KeyboardEvent('keydown', { key });
+
+    comp.onTriggerKeyDown(keyboard('End'));
+    expect(comp.activeRow().option).toBe(OPTIONS[2]);
+    comp.onTriggerKeyDown(keyboard('Home'));
+    expect(comp.activeRow().option).toBe(OPTIONS[0]);
+    comp.onTriggerKeyDown(keyboard('PageDown'));
+    expect(comp.activeRow().option).toBe(OPTIONS[2]);
+    comp.onTriggerKeyDown(keyboard('Enter'));
+    expect(comp._values()).toEqual(['vue']);
+  });
+
+  it('enforces selection limits and never duplicates values', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('selectionLimit', 1);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    comp.toggleOption(OPTIONS[0]);
+    comp.toggleOption(OPTIONS[1]);
+    expect(comp._values()).toEqual(['angular']);
+    comp.toggleOption(OPTIONS[0]);
+    expect(comp._values()).toEqual([]);
+  });
+
+  it('uses proposal/echo semantics for controlled select-all', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('selectAll', true);
+    f.componentRef.setInput('selectAllState', false);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const proposals: any[] = [];
+    comp.onSelectAllChange.subscribe((event: unknown) => proposals.push(event));
+
+    comp.toggleAllFiltered(new MouseEvent('click'));
+
+    expect(comp._values()).toEqual([]);
+    expect(proposals[0].checked).toBe(true);
+    expect(proposals[0].scope).toBe('filtered-loaded');
+    expect(proposals[0].value).toEqual(['angular', 'react', 'vue']);
+  });
+
+  it('clear is atomic, emits once, and is a no-op when already empty', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const cva = vi.fn();
+    const clear = vi.fn();
+    const detail = vi.fn();
+    comp.registerOnChange(cva);
+    comp.onClear.subscribe(clear);
+    comp.onChange.subscribe(detail);
+    comp.writeValue(['angular']);
+
+    comp.clear();
+    comp.clear();
+
+    expect(cva).toHaveBeenCalledTimes(1);
+    expect(clear).toHaveBeenCalledTimes(1);
+    expect(detail).toHaveBeenCalledTimes(1);
+    expect(comp._values()).toEqual([]);
+  });
+
+  it('emits one detailed remove event for token removal', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const removals: any[] = [];
+    comp.onRemove.subscribe((event: unknown) => removals.push(event));
+    comp.writeValue(['angular']);
+
+    comp.removeOption('angular');
+
+    expect(removals).toHaveLength(1);
+    expect(removals[0]).toMatchObject({ option: OPTIONS[0], value: 'angular', source: 'token' });
+  });
+
+  it('forwards native metadata and complete combobox accessibility state', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('inputId', 'frameworks');
+    f.componentRef.setInput('name', 'frameworks');
+    f.componentRef.setInput('autocomplete', 'organization-title');
+    f.componentRef.setInput('required', true);
+    f.componentRef.setInput('invalid', true);
+    f.componentRef.setInput('ariaLabel', 'Frameworks');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.writeValue(['angular']);
+    f.detectChanges();
+    await f.whenStable();
+
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger');
+    const native = f.nativeElement.querySelector('.neu-multiselect__native-input');
+    expect(trigger.id).toBe('frameworks');
+    expect(trigger.getAttribute('aria-required')).toBe('true');
+    expect(trigger.getAttribute('aria-invalid')).toBe('true');
+    expect(trigger.getAttribute('aria-label')).toBe('Frameworks');
+    expect(native.name).toBe('frameworks');
+    expect(native.autocomplete).toBe('organization-title');
+    expect(native.value).toBe('angular');
+  });
+
+  it('reconciles immutable option replacements with identity accessors', () => {
+    const first = { id: 1, displayName: 'Angular', maintenanceOnly: false };
+    const replacement = { ...first, displayName: 'Angular 22' };
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', [first]);
+    f.componentRef.setInput('optionLabel', 'displayName');
+    f.componentRef.setInput('identityConfig', { identityAccessor: 'id' });
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.writeValue([first]);
+    f.componentRef.setInput('options', [replacement]);
+    f.detectChanges();
+
+    expect(comp.isOptionSelected(replacement)).toBe(true);
+    expect(comp.labelFor(first)).toBe('Angular 22');
+  });
+
+  it('renders the complete strict template surface and executes every projected context callback', async () => {
+    const f = TestBed.createComponent(AllTemplatesMultiselectHostComponent);
+    f.detectChanges();
+    const debug = f.debugElement.query(By.directive(NeuMultiselectComponent));
+    const comp = debug.componentInstance as any;
+
+    const projectedTemplates = [
+      comp.itemTpl(),
+      comp.selectedItemTpl(),
+      comp.tokenTpl(),
+      comp.selectedItemsTpl(),
+      comp.groupTpl(),
+      comp.filterTpl(),
+      comp.loaderTpl(),
+      comp.headerTpl(),
+      comp.footerTpl(),
+      comp.emptyTpl(),
+      comp.emptyFilterTpl(),
+      comp.checkboxTpl(),
+      comp.checkmarkTpl(),
+      comp.dropdownIconTpl(),
+      comp.loadingIconTpl(),
+      comp.clearIconTpl(),
+      comp.filterIconTpl(),
+      comp.tokenRemoveIconTpl(),
+    ];
+    expect(projectedTemplates.every(Boolean)).toBe(true);
+
+    comp.writeValue(['angular']);
+    comp.show();
+    f.detectChanges();
+    await f.whenStable();
+    expect(document.querySelector('.all-header')).toBeTruthy();
+    expect(document.querySelector('.all-footer')).toBeTruthy();
+    expect(document.querySelector('.all-group')?.textContent).toContain('Frontend');
+    expect(document.querySelector('.all-item')?.textContent).toContain('Angular');
+    expect(document.querySelector('.all-checkbox')).toBeTruthy();
+    expect(f.nativeElement.querySelector('.all-selected')?.textContent).toContain('1');
+    expect(f.nativeElement.querySelector('.all-dropdown')).toBeTruthy();
+    expect(f.nativeElement.querySelector('.all-clear-icon')).toBeTruthy();
+
+    comp.selectedContext('angular', 0).remove();
+    comp.writeValue(['react']);
+    comp.selectedItemsContext().clear();
+    expect(comp._values()).toEqual([]);
+    comp.filterContext().filter('ang');
+    expect(comp.effectiveFilterValue()).toBe('ang');
+    comp.filterContext().reset();
+    expect(comp.effectiveFilterValue()).toBe('');
+
+    f.componentInstance.loading.set(true);
+    f.componentInstance.lazy.set(true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.all-loading-icon')).toBeTruthy();
+    expect(document.querySelector('.all-loader')).toBeTruthy();
+
+    f.componentInstance.loading.set(false);
+    f.componentInstance.lazy.set(false);
+    f.componentInstance.groups.set([]);
+    f.detectChanges();
+    await f.whenStable();
+    expect(document.querySelector('.all-empty')).toBeTruthy();
+
+    f.componentInstance.filterValue.set('missing');
+    f.detectChanges();
+    await f.whenStable();
+    expect(document.querySelector('.all-empty-filter')).toBeTruthy();
+  });
+
+  it('covers focus, overlay, token and keyboard policy branches with public interactions', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('focusOnHover', true);
+    f.componentRef.setInput('filter', true);
+    f.componentRef.setInput('filterBy', ' label, value ');
+    f.componentRef.setInput('display', 'chip');
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const focused = vi.fn();
+    const blurred = vi.fn();
+    comp.onFocus.subscribe(focused);
+    comp.onBlur.subscribe(blurred);
+
+    const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger');
+    comp.onInputFocus(new FocusEvent('focus'));
+    comp.onInputBlur(new FocusEvent('blur', { relatedTarget: trigger }));
+    comp.onInputBlur(new FocusEvent('blur'));
+    expect(focused).toHaveBeenCalledTimes(1);
+    expect(blurred).toHaveBeenCalledTimes(1);
+
+    comp.onOptionHover(1);
+    expect(comp.activeRowIndex()).toBe(1);
+    comp.onOverlayPositionChange({ connectionPair: { originY: 'top' } });
+    expect(comp.isPanelAbove()).toBe(true);
+    comp.onOverlayPositionChange({ connectionPair: { originY: 'bottom' } });
+    expect(comp.isPanelAbove()).toBe(false);
+
+    comp.writeValue(['angular']);
+    f.detectChanges();
+    const chip = f.nativeElement.querySelector('.neu-multiselect__chip');
+    chip.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    comp.onTokenKeydown('angular', new KeyboardEvent('keydown', { key: 'Backspace' }));
+    expect(comp._values()).toEqual([]);
+    comp.onTokenKeydown('react', new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(comp._values()).toEqual([]);
+
+    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(comp.isOpen()).toBe(true);
+    f.detectChanges();
+    await f.whenStable();
+    document
+      .querySelector('.neu-multiselect__search-input')
+      ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
+    document
+      .querySelector('.neu-multiselect__option')
+      ?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    trigger.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    trigger.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    expect(comp.effectiveFilterConfig().fields).toEqual(['label', 'value']);
+    expect(comp.itemContext(OPTIONS[0]).index).toBe(0);
+    expect(comp.itemContext({ value: 'solid', label: 'Solid' }).index).toBe(-1);
+    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Tab' }));
+    expect(comp.isOpen()).toBe(false);
+    comp.show();
+    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(comp.isOpen()).toBe(false);
+    comp.onVirtualIndexChange(4);
+
+    comp.show();
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(comp.isOpen()).toBe(false);
+  });
+
+  it('honors autofocus only while the trigger remains enabled', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const focus = vi.spyOn(comp, 'focusTrigger');
+    vi.spyOn(comp, '_requestFrame').mockImplementation((...args: unknown[]) =>
+      (args[0] as () => void)(),
+    );
+
+    f.componentRef.setInput('autofocus', true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(focus).toHaveBeenCalled();
+
+    focus.mockClear();
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(focus).not.toHaveBeenCalled();
+  });
+
+  it('covers additive configuration fallbacks without changing legacy selection semantics', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('ariaDescribedBy', 'owner-description');
+    f.componentRef.setInput('identityConfig', {
+      compareWith: (left: string, right: string) => left.toLowerCase() === right.toLowerCase(),
+    });
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+
+    expect(comp.describedBy()).toBe('owner-description');
+    expect(comp.optionDomId({ value: 'missing', label: 'Missing' })).toContain('option-missing');
+    comp.writeValue(['ANGULAR']);
+    expect(comp.isOptionSelected(OPTIONS[0])).toBe(true);
+
+    f.componentRef.setInput('virtualScrollItemSize', 31);
+    f.detectChanges();
+    expect(comp.effectiveVirtualScrollItemSize()).toBe(31);
+    f.componentRef.setInput('virtualScrollItemSize', 0);
+    f.componentRef.setInput('size', 'small');
+    f.detectChanges();
+    expect(comp.effectiveVirtualScrollItemSize()).toBe(36);
+    f.componentRef.setInput('size', 'large');
+    f.detectChanges();
+    expect(comp.effectiveVirtualScrollItemSize()).toBe(52);
+
+    const groups = [{ title: 'Frontend', children: OPTIONS.slice(0, 2) }];
+    f.componentRef.setInput('groups', groups);
+    f.componentRef.setInput('optionGroupLabel', 'title');
+    f.componentRef.setInput('optionGroupChildren', 'children');
+    f.detectChanges();
+    expect(comp.effectiveGroupConfig()).toMatchObject({
+      labelAccessor: 'title',
+      childrenAccessor: 'children',
+    });
+    expect(comp.filteredOptions()).toEqual(OPTIONS.slice(0, 2));
+
+    f.componentRef.setInput('groups', []);
+    f.componentRef.setInput('optionGroupChildren', null);
+    f.detectChanges();
+    expect(comp.effectiveGroupConfig()).toBeNull();
+
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('selectionLimit', 1);
+    f.detectChanges();
+    comp.writeValue([]);
+    comp.toggleAllFiltered(new MouseEvent('click'));
+    expect(comp._values()).toEqual(['angular']);
+    comp.writeValue(['angular', 'react', 'vue']);
+    comp.toggleAllFiltered(new MouseEvent('click'));
+    expect(comp._values()).toEqual([]);
+
+    f.componentRef.setInput('selectOnFocus', true);
+    f.componentRef.setInput('focusOnHover', true);
+    f.detectChanges();
+    comp.onOptionHover(1);
+    expect(comp._values()).toEqual(['react']);
   });
 });
