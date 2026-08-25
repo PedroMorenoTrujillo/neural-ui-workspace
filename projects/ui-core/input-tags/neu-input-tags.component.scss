@@ -1,0 +1,16 @@
+.neu-input-tags { position: relative; display: block; max-width: 100%; }
+.neu-input-tags__control { display: flex; min-height: 2.5rem; flex-wrap: wrap; align-items: center; gap: var(--neu-space-1, .25rem); padding: .25rem .5rem; border: 1px solid var(--neu-border, #d1d5db); border-radius: var(--neu-radius, .5rem); background: var(--neu-surface, #fff); cursor: text; transition: border-color var(--neu-transition, 200ms ease), box-shadow var(--neu-transition, 200ms ease); }
+.neu-input-tags--focus .neu-input-tags__control:focus-within { border-color: var(--neu-primary, #007aff); box-shadow: var(--neu-focus-ring, 0 0 0 3px rgb(0 122 255 / .15)); }
+.neu-input-tags--disabled .neu-input-tags__control { opacity: .6; cursor: not-allowed; background: var(--neu-surface-2, #f3f4f6); }
+.neu-input-tags__item { display: inline-flex; max-width: 100%; align-items: center; gap: .25rem; padding: .25rem .375rem .25rem .5rem; border-radius: var(--neu-radius-full, 9999px); background: var(--neu-primary-50, #eff6ff); color: var(--neu-text, #0f172a); font-size: var(--neu-text-sm, .875rem); }
+.neu-input-tags__item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.neu-input-tags__remove { display: grid; width: 1.25rem; height: 1.25rem; place-items: center; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; font: inherit; line-height: 1; }
+.neu-input-tags__remove:hover:not(:disabled), .neu-input-tags__remove:focus-visible { background: rgb(15 23 42 / .12); outline: none; }
+.neu-input-tags__input { min-width: 7rem; flex: 1 1 8rem; border: 0; outline: 0; background: transparent; color: var(--neu-text, #0f172a); font: inherit; }
+.neu-input-tags__input:disabled { cursor: not-allowed; }
+.neu-input-tags__panel { position: absolute; z-index: var(--neu-z-dropdown, 50); width: min(100%, 32rem); overflow: auto; margin-top: .25rem; border: 1px solid var(--neu-border, #d1d5db); border-radius: var(--neu-radius, .5rem); background: var(--neu-surface, #fff); box-shadow: var(--neu-shadow, 0 4px 12px rgb(15 23 42 / .08)); padding: .25rem; }
+.neu-input-tags__option { display: block; width: 100%; border: 0; border-radius: calc(var(--neu-radius, .5rem) - 2px); background: transparent; color: var(--neu-text, #0f172a); padding: .5rem .625rem; text-align: start; cursor: pointer; font: inherit; }
+.neu-input-tags__option:hover:not(:disabled), .neu-input-tags__option--active { background: var(--neu-primary-50, #eff6ff); }
+.neu-input-tags__option:focus-visible { outline: 2px solid var(--neu-primary, #007aff); outline-offset: -2px; }
+.neu-input-tags__option:disabled { opacity: .5; cursor: not-allowed; }
+@media (forced-colors: active) { .neu-input-tags__control:focus-within, .neu-input-tags__option:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; } }

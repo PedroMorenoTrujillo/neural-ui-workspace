@@ -23,6 +23,7 @@
     "./code-block",
     "./color-picker",
     "./command-palette",
+    "./compare",
     "./confirm-dialog",
     "./confirm-popup",
     "./context-menu",
@@ -41,6 +42,7 @@
     "./input",
     "./input-mask",
     "./input-otp",
+    "./input-tags",
     "./kanban",
     "./knob",
     "./listbox",
@@ -450,14 +452,6 @@
         "closed"
       ]
     },
-    "breadcrumb/neu-breadcrumb.component.ts": {
-      "selector": "neu-breadcrumb",
-      "inputs": [
-        "items",
-        "separator"
-      ],
-      "outputs": []
-    },
     "button-group/neu-button-group.component.ts": {
       "selector": "neu-button-group",
       "inputs": [
@@ -570,6 +564,26 @@
       ],
       "outputs": [
         "colorChange"
+      ]
+    },
+    "compare/neu-compare.component.ts": {
+      "selector": "neu-compare",
+      "inputs": [
+        "ariaLabel",
+        "ariaLabelledBy",
+        "defaultValue",
+        "disabled",
+        "max",
+        "min",
+        "orientation",
+        "position",
+        "slideOnHover",
+        "step",
+        "value"
+      ],
+      "outputs": [
+        "valueChange",
+        "valueChangeEnd"
       ]
     },
     "confirm-dialog/neu-confirm-dialog.component.ts": {
@@ -773,6 +787,47 @@
       ],
       "outputs": [
         "completed",
+        "valueChange"
+      ]
+    },
+    "input-tags/neu-input-tags.component.ts": {
+      "selector": "neu-input-tags",
+      "inputs": [
+        "addOnBlur",
+        "addOnPaste",
+        "addOnTab",
+        "allowDuplicate",
+        "ariaDescribedBy",
+        "ariaLabel",
+        "ariaLabelledBy",
+        "completeOnFocus",
+        "delay",
+        "delimiter",
+        "disabled",
+        "inputId",
+        "max",
+        "minQueryLength",
+        "name",
+        "optionDisabled",
+        "optionLabel",
+        "optionValue",
+        "placeholder",
+        "readonly",
+        "removeLabel",
+        "scrollHeight",
+        "suggestions",
+        "tabindex",
+        "typeahead"
+      ],
+      "outputs": [
+        "add",
+        "blur",
+        "completeMethod",
+        "focus",
+        "hide",
+        "remove",
+        "select",
+        "show",
         "valueChange"
       ]
     },

@@ -6,6 +6,7 @@ const uiCore = join(root, 'projects/ui-core');
 
 const allowedNativeControlDirs = new Set([
   'autocomplete',
+  'input-tags',
   'accordion',
   'alert',
   'bottom-sheet',
@@ -24,6 +25,7 @@ const allowedNativeControlDirs = new Set([
   'empty-state',
   'filter-bar',
   'image-gallery',
+  'compare',
   'image-viewer',
   'input',
   'input-mask',
