@@ -71,6 +71,24 @@ export class NeuTableLazyDataController<T> {
     return Object.freeze(slots);
   }
 
+  requestRange(
+    range: NeuTableVirtualRange,
+    totalItems: number,
+    step: number | undefined,
+  ): NeuTableVirtualRange {
+    const normalizedStep = Number.isFinite(step) && step! > 0 ? Math.floor(step!) : 0;
+    if (normalizedStep === 0) return range;
+    const total = this.total(totalItems);
+    const first = Math.min(total, Math.floor(range.visibleFirst / normalizedStep) * normalizedStep);
+    const end = Math.min(total, first + normalizedStep);
+    return Object.freeze({
+      first,
+      end,
+      visibleFirst: range.visibleFirst,
+      visibleEnd: range.visibleEnd,
+    });
+  }
+
   request(
     query: NeuTableQueryState,
     range: NeuTableVirtualRange,

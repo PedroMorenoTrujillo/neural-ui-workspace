@@ -22,6 +22,19 @@ export type NeuTableColumnKey<T> = [keyof T] extends [never] ? string : Extract<
 
 export type NeuTableRowKey<T> = NeuTableColumnKey<T>;
 
+/** Computed canonical identity used by selection, editing, expansion and virtual rows. */
+export type NeuTableRowIdentity<T> = NeuTableRowKey<T> | ((row: T) => unknown);
+
+/** Prime-compatible render tracking callback. Canonical state still uses rowIdentity/rowKey. */
+export type NeuTableRowTrackBy<T> = (index: number, row: T) => unknown;
+
+/** `key` preserves Neural's stable-key default; the other policies mirror Prime equality. */
+export type NeuTableSelectionComparison = 'key' | 'equals' | 'deepEquals';
+
+export type NeuTableGroupBy<T> = string | ((row: T, index: number) => unknown);
+
+export type NeuTableFilterOn = 'input' | 'enter';
+
 // ── Badge ─────────────────────────────────────────────────────────────────
 export type NeuTableBadgeVariant =
   | 'primary'
@@ -146,6 +159,13 @@ export interface NeuTableContextMenuSelectEvent<T = Record<string, unknown>> {
   readonly row: T;
   readonly key: unknown;
   readonly index: number;
+}
+
+export interface NeuTableVirtualScrollEvent {
+  readonly originalEvent: Event;
+  readonly scrollTop: number;
+  readonly scrollLeft: number;
+  readonly range: NeuTableVirtualRange;
 }
 
 export interface NeuTableRowReorderContext {
@@ -926,6 +946,8 @@ export interface NeuTableColumn<
   editable?: boolean;
   editor?: 'text' | 'number' | 'select' | 'date';
   editOptions?: string[];
+  /** Descendant focused after this column enters edit mode. Invalid selectors fall back safely. */
+  editorFocusSelector?: string;
   // Frozen
   frozen?: 'left' | 'right';
   // Header template

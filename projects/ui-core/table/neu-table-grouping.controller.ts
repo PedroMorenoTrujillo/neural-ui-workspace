@@ -16,9 +16,13 @@ export interface InternalNeuTableRowspan {
 
 /** Pure group ordering, partition and rowspan resolver. */
 export class NeuTableGroupingController<T extends object> {
-  order(rows: readonly T[], value: (row: T) => unknown, order: NeuTableGroupSortOrder): T[] {
+  order(
+    rows: readonly T[],
+    value: (row: T, index: number) => unknown,
+    order: NeuTableGroupSortOrder,
+  ): T[] {
     return rows
-      .map((row, index) => ({ row, index, value: value(row) }))
+      .map((row, index) => ({ row, index, value: value(row, index) }))
       .sort((left, right) => {
         const compared = compareGroupValue(left.value, right.value) * order;
         return compared || left.index - right.index;
@@ -28,12 +32,12 @@ export class NeuTableGroupingController<T extends object> {
 
   groups(
     rows: readonly T[],
-    value: (row: T) => unknown,
+    value: (row: T, index: number) => unknown,
     expandedKeys: ReadonlySet<unknown>,
   ): InternalNeuTableGroup<T>[] {
     const groups: InternalNeuTableGroup<T>[] = [];
     rows.forEach((row, rowIndex) => {
-      const key = value(row);
+      const key = value(row, rowIndex);
       const previous = groups[groups.length - 1];
       if (previous && Object.is(previous.key, key)) {
         const nextRows = [...previous.rows, row];

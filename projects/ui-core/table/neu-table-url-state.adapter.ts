@@ -48,22 +48,27 @@ export class NeuTableUrlStateAdapter {
   writeSortEntries(
     config: InternalNeuTableUrlStateConfig,
     entries: readonly NeuTableSortEntry[],
+    resetPage = true,
   ): void {
     this._urlState.patchParams({
       [config.multiSortParam]:
         entries.length > 0 ? entries.map((entry) => `${entry.key}:${entry.dir}`).join(',') : null,
       [config.sortParam]: null,
       [config.sortDirParam]: null,
-      [config.pageParam]: '1',
+      ...(resetPage ? { [config.pageParam]: '1' } : {}),
     });
   }
 
-  writeSort(config: InternalNeuTableUrlStateConfig, sort: InternalNeuTableSort | null): void {
+  writeSort(
+    config: InternalNeuTableUrlStateConfig,
+    sort: InternalNeuTableSort | null,
+    resetPage = true,
+  ): void {
     this._urlState.patchParams({
       [config.sortParam]: sort?.key ?? null,
       [config.sortDirParam]: sort?.dir ?? null,
       [config.multiSortParam]: null,
-      [config.pageParam]: '1',
+      ...(resetPage ? { [config.pageParam]: '1' } : {}),
     });
   }
 

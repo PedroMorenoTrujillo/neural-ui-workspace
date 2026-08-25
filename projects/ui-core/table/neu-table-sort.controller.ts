@@ -10,26 +10,34 @@ export class NeuTableSortController<T extends object> {
   next(
     current: readonly NeuTableSortEntry[],
     key: string,
-    options: { multiple: boolean; additive: boolean; removable: boolean },
+    options: {
+      multiple: boolean;
+      additive: boolean;
+      removable: boolean;
+      defaultOrder?: 1 | -1;
+    },
   ): NeuTableSortEntry[] {
+    const initialDirection: 'asc' | 'desc' = options.defaultOrder === -1 ? 'desc' : 'asc';
     if (!options.multiple) {
       const active = current[0];
-      if (active?.key !== key) return [{ key, dir: 'asc' }];
-      if (active.dir === 'asc') return [{ key, dir: 'desc' }];
-      return options.removable ? [] : [{ key, dir: 'asc' }];
+      if (active?.key !== key) return [{ key, dir: initialDirection }];
+      if (active.dir === initialDirection) {
+        return [{ key, dir: initialDirection === 'asc' ? 'desc' : 'asc' }];
+      }
+      return options.removable ? [] : [{ key, dir: initialDirection }];
     }
 
     const entries = options.additive ? current.map((entry) => ({ ...entry })) : [];
     const active = current.find((entry) => entry.key === key);
     const index = entries.findIndex((entry) => entry.key === key);
     if (!active) {
-      entries.push({ key, dir: 'asc' });
-    } else if (active.dir === 'asc') {
-      const next = { key, dir: 'desc' as const };
+      entries.push({ key, dir: initialDirection });
+    } else if (active.dir === initialDirection) {
+      const next = { key, dir: initialDirection === 'asc' ? ('desc' as const) : ('asc' as const) };
       if (index >= 0) entries[index] = next;
       else entries.push(next);
     } else if (!options.removable) {
-      const next = { key, dir: 'asc' as const };
+      const next: NeuTableSortEntry = { key, dir: initialDirection };
       if (index >= 0) entries[index] = next;
       else entries.push(next);
     } else if (index >= 0) {

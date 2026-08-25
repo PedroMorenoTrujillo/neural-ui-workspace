@@ -6,6 +6,12 @@
 @use '../styles/breakpoints' as *;
 @use '../styles/text-overflow' as text;
 
+.neu-table__host--flex {
+  display: flex;
+  min-block-size: 0;
+  block-size: 100%;
+}
+
 // ---- Contenedor principal / Main container ----
 .neu-table-container {
   background: var(--neu-surface);
@@ -25,6 +31,14 @@
       background: color-mix(in srgb, var(--neu-surface-2) 70%, transparent);
     }
   }
+}
+
+.neu-table-container--flex-scroll {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  block-size: 100%;
 }
 
 // ---- Advanced filter overlay ----
@@ -456,6 +470,15 @@
   overflow-y: auto;
 }
 
+.neu-table__scroll-container--vertical {
+  overflow-y: auto;
+}
+
+.neu-table__scroll-container--flex {
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
 // ---- Tabla / Table ----
 .neu-table {
   width: 100%;
@@ -484,6 +507,18 @@
       top: var(--neu-table-header-height, 44px);
       z-index: 1;
       background: var(--neu-surface-2);
+    }
+
+    // Sticky thead keeps arbitrary grouped/multi-row headers together. Child
+    // cells may still be horizontally sticky for frozen columns.
+    .neu-table__head {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 4;
+    }
+
+    .neu-table__head .neu-table__th {
+      top: auto;
     }
   }
 
@@ -1452,8 +1487,12 @@
 .neu-table__group-row--frozen,
 .neu-table__group-footer-row--frozen {
   position: sticky;
-  top: var(--neu-table-header-height, 44px);
   z-index: 3;
+}
+
+.neu-table__row-expand-detail--frozen {
+  position: sticky;
+  z-index: 2;
 }
 
 .neu-table__row--context-selected > .neu-table__td {

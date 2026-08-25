@@ -92,4 +92,22 @@ describe('NeuTableUrlStateAdapter', () => {
     expect(service.patchParams).toHaveBeenNthCalledWith(4, { q: null, page: '1' });
     expect(service.patchParams).toHaveBeenNthCalledWith(5, { page: '1' });
   });
+
+  it('preserves the page parameter when sort page reset is disabled', () => {
+    const { adapter, service } = createAdapter();
+
+    adapter.writeSort(CONFIG, { key: 'name', dir: 'desc' }, false);
+    adapter.writeSortEntries(CONFIG, [{ key: 'name', dir: 'asc' }], false);
+
+    expect(service.patchParams).toHaveBeenNthCalledWith(1, {
+      sort: 'name',
+      sortDir: 'desc',
+      msort: null,
+    });
+    expect(service.patchParams).toHaveBeenNthCalledWith(2, {
+      msort: 'name:asc',
+      sort: null,
+      sortDir: null,
+    });
+  });
 });
