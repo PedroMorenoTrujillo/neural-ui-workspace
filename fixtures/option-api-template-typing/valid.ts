@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
 import { NeuOptionFilterConfig } from '@neural-ui/core/option-api';
 import {
+  NeuListboxComponent,
+  NeuListboxFilterDirective,
+  NeuListboxItemDirective,
+} from '@neural-ui/core/listbox';
+import {
   FilterContextFixtureDirective,
   FixturePerson,
   OptionContextFixtureDirective,
@@ -9,7 +14,13 @@ import {
 @Component({
   selector: 'neu-option-valid-fixture',
   standalone: true,
-  imports: [OptionContextFixtureDirective, FilterContextFixtureDirective],
+  imports: [
+    OptionContextFixtureDirective,
+    FilterContextFixtureDirective,
+    NeuListboxComponent,
+    NeuListboxFilterDirective,
+    NeuListboxItemDirective,
+  ],
   template: `
     <ng-template [neuOptionContextFixture]="options" let-option="option">
       {{ option.profile.name }}
@@ -17,6 +28,14 @@ import {
     <ng-template [neuFilterContextFixture]="filterConfig" let-filter="filter">
       <button type="button" (click)="filter('Ada')">Filter</button>
     </ng-template>
+    <neu-listbox [options]="options" [optionLabel]="'profile.name'" [filter]="true">
+      <ng-template [neuListboxItem]="options" let-person="option" let-selected="selected">
+        {{ person.profile.name }} {{ selected }}
+      </ng-template>
+      <ng-template [neuListboxFilter]="filterConfig" let-filter="filter">
+        <button type="button" (click)="filter('Grace')">Filter listbox</button>
+      </ng-template>
+    </neu-listbox>
   `,
 })
 export class ValidOptionContextFixtureComponent {
