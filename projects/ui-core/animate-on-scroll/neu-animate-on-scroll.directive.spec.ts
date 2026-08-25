@@ -85,4 +85,24 @@ describe('NeuAnimateOnScrollDirective', () => {
     expect(IntersectionObserverMock.instances).toHaveLength(0);
     expect(fixture.nativeElement.querySelector('section').textContent).toContain('Content remains present');
   });
+
+  it('falls back to the enter state when IntersectionObserver is unavailable', () => {
+    fixture.destroy();
+    globalThis.IntersectionObserver = undefined as unknown as typeof IntersectionObserver;
+    fixture = TestBed.createComponent(AnimateHost);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('section').classList).toContain('enter-animation');
+  });
+
+  it('does nothing when disabled and clears animation classes after animationend', () => {
+    fixture.componentInstance.enabled.set(false);
+    fixture.detectChanges();
+    expect(IntersectionObserverMock.instances.at(-1)?.disconnect).toHaveBeenCalled();
+    fixture.componentInstance.enabled.set(true);
+    fixture.detectChanges();
+    IntersectionObserverMock.instances.at(-1)?.trigger(true);
+    const section = fixture.nativeElement.querySelector('section');
+    section.dispatchEvent(new Event('animationend'));
+    expect(section.classList).not.toContain('enter-animation');
+  });
 });

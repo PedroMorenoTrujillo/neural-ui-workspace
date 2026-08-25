@@ -31,7 +31,7 @@ describe('NeuRippleDirective', () => {
   afterEach(() => window.matchMedia = originalMatchMedia);
 
   it('creates a pointer-origin ripple with bounded cleanup', () => {
-    directive.onPointerDown({ clientX: 30, clientY: 30 } as PointerEvent);
+    button.dispatchEvent(new MouseEvent('pointerdown', { clientX: 30, clientY: 30 }));
     const ink = button.querySelector('.neu-ripple__ink') as HTMLElement;
     expect(ink).toBeTruthy();
     expect(ink.style.left).not.toBe('');
@@ -72,5 +72,11 @@ describe('NeuRippleDirective', () => {
     directive = fixture.debugElement.children[0].injector.get(NeuRippleDirective);
     directive.onPointerDown({ clientX: 0, clientY: 0 } as PointerEvent);
     expect(fixture.nativeElement.querySelector('.neu-ripple__ink')).toBeNull();
+  });
+
+  it('does not add feedback to a natively disabled host', () => {
+    button.disabled = true;
+    directive.onPointerDown({ clientX: 30, clientY: 30 } as PointerEvent);
+    expect(button.querySelector('.neu-ripple__ink')).toBeNull();
   });
 });

@@ -60,8 +60,9 @@ for (const entry of entryPoints) {
 
   if (!nonVisualEntryPoints.has(entry)) {
     const componentFiles = files(dir, '.component.ts');
-    if (componentFiles.length === 0) {
-      violations.push(`${rel}: missing standalone component file`);
+    const directiveFiles = files(dir, '.directive.ts');
+    if (componentFiles.length === 0 && directiveFiles.length === 0) {
+      violations.push(`${rel}: missing standalone component or directive file`);
     }
   }
 }

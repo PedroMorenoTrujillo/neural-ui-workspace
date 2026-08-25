@@ -80,4 +80,36 @@ describe('NeuKeyFilterDirective', () => {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     expect(input.value).toBe('safe');
   });
+
+  it('preserves native deletion, disabled controls and an unset filter', () => {
+    input.value = 'abc';
+    expect(beforeInput('', 'deleteContentBackward').defaultPrevented).toBe(false);
+    input.disabled = true;
+    expect(beforeInput('1').defaultPrevented).toBe(false);
+    input.disabled = false;
+    fixture.componentInstance.pattern.set(/.*/);
+    fixture.detectChanges();
+    expect(beforeInput('1').defaultPrevented).toBe(false);
+  });
+
+  it('validates selected-value replacement and invokes form validator callbacks', () => {
+    const changed = vi.fn();
+    directive.registerOnValidatorChange(changed);
+    fixture.componentInstance.pattern.set('alphanum');
+    fixture.detectChanges();
+    input.value = 'ab';
+    input.setSelectionRange(0, 2);
+    expect(beforeInput('9').defaultPrevented).toBe(false);
+    expect(changed).toHaveBeenCalled();
+  });
+
+  it('accepts a valid committed composition and reports valid validation-only values', () => {
+    input.value = 'a';
+    input.dispatchEvent(new CompositionEvent('compositionstart'));
+    input.value = 'ab';
+    input.dispatchEvent(new CompositionEvent('compositionend'));
+    fixture.componentInstance.validateOnly.set(true);
+    fixture.detectChanges();
+    expect(directive.validate({ value: 'abc' } as never)).toBeNull();
+  });
 });
