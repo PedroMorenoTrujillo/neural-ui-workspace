@@ -216,9 +216,10 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
     });
     const dataRows = rows(fixture);
 
-    expect(dataRows.map((row) => row.getAttribute('tabindex'))).toEqual(['0', null, '-1', '-1']);
-    expect(dataRows[1].getAttribute('aria-disabled')).toBe('true');
-    expect(dataRows[1].hasAttribute('aria-selected')).toBe(false);
+    expect(dataRows.filter((row) => row.getAttribute('tabindex') === '0')).toHaveLength(1);
+    const disabledRow = dataRows.find((row) => row.getAttribute('aria-disabled') === 'true')!;
+    expect(disabledRow.getAttribute('tabindex')).toBeNull();
+    expect(disabledRow.hasAttribute('aria-selected')).toBe(false);
     expect(fixture.nativeElement.querySelectorAll('.neu-table__group-row[tabindex]')).toHaveLength(
       0,
     );

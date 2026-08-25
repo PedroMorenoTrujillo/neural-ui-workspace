@@ -1421,6 +1421,51 @@
   font-weight: 500;
 }
 
+.neu-table__caption {
+  padding: var(--neu-space-3, 0.75rem);
+  color: var(--neu-color-text-secondary, #475569);
+  text-align: start;
+}
+
+.neu-table__group-row--sticky {
+  position: sticky;
+  top: var(--neu-table-sticky-offset, 0);
+  z-index: 2;
+}
+
+.neu-table__group-toggle {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  margin-inline-end: var(--neu-space-2, 0.5rem);
+  border: 0;
+  border-radius: var(--neu-radius-sm, 0.25rem);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.neu-table__td--group-footer {
+  font-weight: 600;
+  background: var(--neu-color-surface-subtle, #f8fafc);
+}
+
+.neu-table__edit-error {
+  display: block;
+  margin-block-start: var(--neu-space-1, 0.25rem);
+  color: var(--neu-color-danger, #b91c1c);
+  font-size: 0.75rem;
+}
+
+.neu-table__summary {
+  padding: var(--neu-space-3, 0.75rem);
+  border-block-start: 1px solid var(--neu-color-border, #e2e8f0);
+}
+
+.neu-table__paginator-outlet {
+  display: inline-flex;
+  align-items: center;
+}
+
 .neu-table__edit-control {
   width: 100%;
   min-width: 96px;

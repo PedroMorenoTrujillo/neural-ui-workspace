@@ -20,6 +20,9 @@ export type InternalNeuTableStateKey =
   | 'filters'
   | 'selectionKeys'
   | 'expansionKeys'
+  | 'editingKeys'
+  | 'editingCell'
+  | 'groupExpansionKeys'
   | 'layout';
 
 export type InternalAppliedFilterOperator = 'and' | 'or';
@@ -49,6 +52,9 @@ export interface InternalNeuTableState<K = unknown> {
   filters: Readonly<Record<string, InternalAppliedColumnFilter>>;
   selectionKeys: ReadonlySet<K>;
   expansionKeys: ReadonlySet<K>;
+  editingKeys: ReadonlySet<K>;
+  editingCell: Readonly<{ rowKey: K; columnKey: string }> | null;
+  groupExpansionKeys: ReadonlySet<K>;
   layout: NeuTableLayout;
 }
 
@@ -89,6 +95,9 @@ export class NeuTableStateController<K = unknown> {
       filters: {},
       selectionKeys: new Set<K>(),
       expansionKeys: new Set<K>(),
+      editingKeys: new Set<K>(),
+      editingCell: null,
+      groupExpansionKeys: new Set<K>(),
       layout: _DEFAULT_LAYOUT,
     }),
   );
@@ -98,6 +107,9 @@ export class NeuTableStateController<K = unknown> {
   private readonly _filtersState = computed(() => this._state().filters);
   private readonly _selectionKeysState = computed(() => this._state().selectionKeys);
   private readonly _expansionKeysState = computed(() => this._state().expansionKeys);
+  private readonly _editingKeysState = computed(() => this._state().editingKeys);
+  private readonly _editingCellState = computed(() => this._state().editingCell);
+  private readonly _groupExpansionKeysState = computed(() => this._state().groupExpansionKeys);
   private readonly _layoutState = computed(() => this._state().layout);
 
   readonly controlled = computed(() => this._controlledKeys().size > 0);
@@ -112,6 +124,14 @@ export class NeuTableStateController<K = unknown> {
   readonly filters = computed(() => cloneFilters(this._filtersState()));
   readonly selectionKeys = computed<ReadonlySet<K>>(() => new Set(this._selectionKeysState()));
   readonly expansionKeys = computed<ReadonlySet<K>>(() => new Set(this._expansionKeysState()));
+  readonly editingKeys = computed<ReadonlySet<K>>(() => new Set(this._editingKeysState()));
+  readonly editingCell = computed(() => {
+    const cell = this._editingCellState();
+    return cell ? { ...cell } : null;
+  });
+  readonly groupExpansionKeys = computed<ReadonlySet<K>>(
+    () => new Set(this._groupExpansionKeysState()),
+  );
   readonly layout = computed(() => cloneLayout(this._layoutState()));
 
   constructor(private readonly _onChange?: InternalNeuTableStateChangeListener<K>) {}
@@ -159,6 +179,9 @@ export class NeuTableStateController<K = unknown> {
         'filters',
         'selectionKeys',
         'expansionKeys',
+        'editingKeys',
+        'editingCell',
+        'groupExpansionKeys',
         'layout',
       ]),
     );
@@ -217,6 +240,49 @@ export class NeuTableStateController<K = unknown> {
   releaseControlledExpansion(): void {
     const controlledKeys = new Set(this._controlledKeys());
     controlledKeys.delete('expansionKeys');
+    this._controlledKeys.set(controlledKeys);
+  }
+
+  setControlledEditingKeys(editingKeys: ReadonlySet<K>): InternalNeuTableStateChange<K> | null {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.add('editingKeys');
+    this._controlledKeys.set(controlledKeys);
+    return this._commit({ ...this.snapshot(), editingKeys }, 'controlled');
+  }
+
+  releaseControlledEditing(): void {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.delete('editingKeys');
+    this._controlledKeys.set(controlledKeys);
+  }
+
+  setControlledEditingCell(
+    editingCell: Readonly<{ rowKey: K; columnKey: string }> | null,
+  ): InternalNeuTableStateChange<K> | null {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.add('editingCell');
+    this._controlledKeys.set(controlledKeys);
+    return this._commit({ ...this.snapshot(), editingCell }, 'controlled');
+  }
+
+  releaseControlledEditingCell(): void {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.delete('editingCell');
+    this._controlledKeys.set(controlledKeys);
+  }
+
+  setControlledGroupExpansionKeys(
+    groupExpansionKeys: ReadonlySet<K>,
+  ): InternalNeuTableStateChange<K> | null {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.add('groupExpansionKeys');
+    this._controlledKeys.set(controlledKeys);
+    return this._commit({ ...this.snapshot(), groupExpansionKeys }, 'controlled');
+  }
+
+  releaseControlledGroupExpansion(): void {
+    const controlledKeys = new Set(this._controlledKeys());
+    controlledKeys.delete('groupExpansionKeys');
     this._controlledKeys.set(controlledKeys);
   }
 
@@ -327,6 +393,27 @@ export class NeuTableStateController<K = unknown> {
     return this.update({ expansionKeys }, origin);
   }
 
+  setEditingKeys(
+    editingKeys: ReadonlySet<K>,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ editingKeys }, origin);
+  }
+
+  setEditingCell(
+    editingCell: Readonly<{ rowKey: K; columnKey: string }> | null,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ editingCell }, origin);
+  }
+
+  setGroupExpansionKeys(
+    groupExpansionKeys: ReadonlySet<K>,
+    origin: InternalNeuTableStateOrigin,
+  ): InternalNeuTableStateChange<K> | null {
+    return this.update({ groupExpansionKeys }, origin);
+  }
+
   setLayout(
     layout: NeuTableLayout,
     origin: InternalNeuTableStateOrigin,
@@ -385,6 +472,15 @@ function normalizeUpdate<K>(
     expansionKeys: owns('expansionKeys')
       ? new Set(patch.expansionKeys ?? [])
       : previous.expansionKeys,
+    editingKeys: owns('editingKeys') ? new Set(patch.editingKeys ?? []) : previous.editingKeys,
+    editingCell: owns('editingCell')
+      ? patch.editingCell
+        ? { rowKey: patch.editingCell.rowKey, columnKey: String(patch.editingCell.columnKey) }
+        : null
+      : previous.editingCell,
+    groupExpansionKeys: owns('groupExpansionKeys')
+      ? new Set(patch.groupExpansionKeys ?? [])
+      : previous.groupExpansionKeys,
     layout: owns('layout') ? cloneLayout(patch.layout ?? _DEFAULT_LAYOUT) : previous.layout,
   };
 }
@@ -404,6 +500,9 @@ function normalizeState<K>(state: InternalNeuTableState<K>): InternalNeuTableSta
     filters: cloneFilters(state.filters),
     selectionKeys: new Set(state.selectionKeys),
     expansionKeys: new Set(state.expansionKeys),
+    editingKeys: new Set(state.editingKeys),
+    editingCell: state.editingCell ? { ...state.editingCell } : null,
+    groupExpansionKeys: new Set(state.groupExpansionKeys),
     layout: cloneLayout(state.layout),
   };
 }
@@ -422,6 +521,9 @@ function cloneState<K>(state: InternalNeuTableState<K>): InternalNeuTableState<K
     filters: cloneFilters(state.filters),
     selectionKeys: new Set(state.selectionKeys),
     expansionKeys: new Set(state.expansionKeys),
+    editingKeys: new Set(state.editingKeys),
+    editingCell: state.editingCell ? { ...state.editingCell } : null,
+    groupExpansionKeys: new Set(state.groupExpansionKeys),
     layout: cloneLayout(state.layout),
   };
 }
@@ -493,6 +595,11 @@ function stateChangedKeys<K>(
   if (!filtersEqual(previous.filters, current.filters)) changed.push('filters');
   if (!setEqual(previous.selectionKeys, current.selectionKeys)) changed.push('selectionKeys');
   if (!setEqual(previous.expansionKeys, current.expansionKeys)) changed.push('expansionKeys');
+  if (!setEqual(previous.editingKeys, current.editingKeys)) changed.push('editingKeys');
+  if (!semanticEqual(previous.editingCell, current.editingCell)) changed.push('editingCell');
+  if (!setEqual(previous.groupExpansionKeys, current.groupExpansionKeys)) {
+    changed.push('groupExpansionKeys');
+  }
   if (!semanticEqual(previous.layout, current.layout)) changed.push('layout');
   return changed;
 }

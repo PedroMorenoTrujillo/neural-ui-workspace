@@ -38,6 +38,7 @@ export class NeuTableStatePersistenceAdapter {
     );
     const selectionKeys = [...state.selectionKeys].filter(isStateKey);
     const expandedRowKeys = [...state.expansionKeys].filter(isStateKey);
+    const expandedGroupKeys = [...state.groupExpansionKeys].filter(isStateKey);
     return deepFreeze({
       version: _VERSION,
       page: state.page,
@@ -48,6 +49,7 @@ export class NeuTableStatePersistenceAdapter {
       filters,
       selectionKeys,
       expandedRowKeys,
+      ...(expandedGroupKeys.length > 0 ? { expandedGroupKeys } : {}),
       layout: {
         columnOrder: [...state.layout.columnOrder],
         hiddenColumns: [...state.layout.hiddenColumns],
@@ -59,6 +61,9 @@ export class NeuTableStatePersistenceAdapter {
         filterKeys: omittedFilterKeys,
         selectionKeyCount: state.selectionKeys.size - selectionKeys.length,
         expandedRowKeyCount: state.expansionKeys.size - expandedRowKeys.length,
+        ...(state.groupExpansionKeys.size > 0
+          ? { expandedGroupKeyCount: state.groupExpansionKeys.size - expandedGroupKeys.length }
+          : {}),
       },
     });
   }
@@ -217,11 +222,19 @@ function normalizeSnapshot(value: unknown): NeuTableStateSnapshot | null {
     filters,
     selectionKeys: value['selectionKeys'].filter(isStateKey),
     expandedRowKeys: value['expandedRowKeys'].filter(isStateKey),
+    ...(Array.isArray(value['expandedGroupKeys'])
+      ? { expandedGroupKeys: value['expandedGroupKeys'].filter(isStateKey) }
+      : {}),
     layout: { columnOrder, hiddenColumns, columnWidths },
     omissions: {
       filterKeys,
       selectionKeyCount: nonNegativeInteger(value['omissions']['selectionKeyCount']),
       expandedRowKeyCount: nonNegativeInteger(value['omissions']['expandedRowKeyCount']),
+      ...(Object.prototype.hasOwnProperty.call(value['omissions'], 'expandedGroupKeyCount')
+        ? {
+            expandedGroupKeyCount: nonNegativeInteger(value['omissions']['expandedGroupKeyCount']),
+          }
+        : {}),
     },
   });
 }

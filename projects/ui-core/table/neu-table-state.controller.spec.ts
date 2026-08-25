@@ -6,6 +6,26 @@ import {
 } from './neu-table-state.controller';
 
 describe('NeuTableStateController', () => {
+  it('keeps controlled edit and group keys authoritative with silent echoes', () => {
+    const changes: InternalNeuTableStateChange<number>[] = [];
+    const controller = new NeuTableStateController<number>((change) => changes.push(change));
+    controller.setControlledEditingKeys(new Set([1]));
+    controller.setControlledEditingCell({ rowKey: 1, columnKey: 'name' });
+    controller.setControlledGroupExpansionKeys(new Set([7]));
+
+    const rowProposal = controller.setEditingKeys(new Set([1, 2]), 'ui')!;
+    const cellProposal = controller.setEditingCell(null, 'ui')!;
+    const groupProposal = controller.setGroupExpansionKeys(new Set([7, 8]), 'ui')!;
+    expect(rowProposal.committed).toBe(false);
+    expect(cellProposal.committed).toBe(false);
+    expect(groupProposal.committed).toBe(false);
+    expect(controller.editingKeys()).toEqual(new Set([1]));
+    expect(controller.editingCell()).toEqual({ rowKey: 1, columnKey: 'name' });
+    expect(controller.groupExpansionKeys()).toEqual(new Set([7]));
+
+    expect(controller.setControlledEditingKeys(new Set([1, 2]))?.committed).toBe(true);
+    expect(controller.setControlledEditingKeys(new Set([1, 2]))).toBeNull();
+  });
   it('starts with the normalized uncontrolled default state', () => {
     const controller = new NeuTableStateController<number>();
 
@@ -19,6 +39,9 @@ describe('NeuTableStateController', () => {
       filters: {},
       selectionKeys: new Set(),
       expansionKeys: new Set(),
+      editingKeys: new Set(),
+      editingCell: null,
+      groupExpansionKeys: new Set(),
       layout: { columnOrder: [], hiddenColumns: [], columnWidths: {} },
     });
   });
@@ -551,6 +574,9 @@ describe('NeuTableStateController', () => {
       },
       selectionKeys: new Set([1]),
       expansionKeys: new Set([2]),
+      editingKeys: new Set(),
+      editingCell: null,
+      groupExpansionKeys: new Set(),
       layout: {
         columnOrder: ['name'],
         hiddenColumns: ['age'],

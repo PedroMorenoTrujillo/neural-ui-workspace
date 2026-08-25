@@ -28,6 +28,20 @@ import type { Subscription } from 'rxjs';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
 import {
+  NeuTableBodyDirective,
+  NeuTableCaptionDirective,
+  NeuTableCellEditorDirective,
+  NeuTableCellViewDirective,
+  NeuTableFooterGroupDirective,
+  NeuTableGroupFooterDirective,
+  NeuTableGroupHeaderDirective,
+  NeuTableHeaderGroupDirective,
+  NeuTableLoadingBodyDirective,
+  NeuTablePaginatorLeftDirective,
+  NeuTablePaginatorRightDirective,
+  NeuTableSummaryDirective,
+} from './neu-table-templates.directive';
+import {
   NeuTableFilterTemplateDirective,
   type NeuTableFilterTemplateContext,
 } from './neu-table-filter-template.directive';
@@ -60,9 +74,26 @@ import type {
   NeuTableAdvancedFilterTexts,
   NeuTableActionEvent,
   NeuTableCellEditEvent,
+  NeuTableCellEditLifecycleEvent,
+  NeuTableCellEditorContext,
+  NeuTableCellViewContext,
   NeuTableColumn,
   NeuTableColumnReorderEvent,
   NeuTableLayout,
+  NeuTableBodyContext,
+  NeuTableEditMode,
+  NeuTableEditValidationEvent,
+  NeuTableEditValidationResult,
+  NeuTableEditingCellState,
+  NeuTableGroup,
+  NeuTableGroupExpansionEvent,
+  NeuTableGroupSortOrder,
+  NeuTableGroupTemplateContext,
+  NeuTablePaginatorTemplateContext,
+  NeuTableRowEditContext,
+  NeuTableRowEditEvent,
+  NeuTableRowGroupMode,
+  NeuTableStructuralContext,
   NeuTableRow,
   NeuTableRowKey,
   NeuTableSelectionAction,
@@ -131,6 +162,11 @@ import {
   NeuTableLazyDataController,
   type NeuTableVirtualSlot,
 } from './neu-table-lazy-data.controller';
+import { NeuTableEditingController } from './neu-table-editing.controller';
+import {
+  NeuTableGroupingController,
+  type InternalNeuTableGroup,
+} from './neu-table-grouping.controller';
 
 export type {
   NeuTableAction,
@@ -140,10 +176,27 @@ export type {
   NeuTableBadgeConfig,
   NeuTableBadgeVariant,
   NeuTableCellEditEvent,
+  NeuTableCellEditLifecycleEvent,
+  NeuTableCellEditorContext,
+  NeuTableCellViewContext,
   NeuTableCellType,
   NeuTableColumn,
   NeuTableColumnReorderEvent,
   NeuTableLayout,
+  NeuTableBodyContext,
+  NeuTableEditMode,
+  NeuTableEditValidationEvent,
+  NeuTableEditValidationResult,
+  NeuTableEditingCellState,
+  NeuTableGroup,
+  NeuTableGroupExpansionEvent,
+  NeuTableGroupSortOrder,
+  NeuTableGroupTemplateContext,
+  NeuTablePaginatorTemplateContext,
+  NeuTableRowEditContext,
+  NeuTableRowEditEvent,
+  NeuTableRowGroupMode,
+  NeuTableStructuralContext,
   NeuTableSelectionAction,
   NeuTableSelectionActionEvent,
   NeuTableSelection,
@@ -185,7 +238,14 @@ export type {
 type NeuTableRuntimeRow<T extends object> = T & Record<string, unknown>;
 
 type NeuTablePageEntry<T extends object> =
-  | { kind: 'group'; key: string; label: string; count: number }
+  | {
+      kind: 'group';
+      key: string;
+      label: string;
+      count: number;
+      group: InternalNeuTableGroup<T>;
+    }
+  | { kind: 'group-footer'; key: string; group: InternalNeuTableGroup<T> }
   | { kind: 'placeholder'; key: string; logicalIndex: number }
   | {
       kind: 'row';
@@ -813,7 +873,21 @@ export type NeuTableColumnInput<T extends object> =
         (scroll)="onTableScroll($event)"
       >
         <table class="neu-table" [attr.aria-rowcount]="_logicalTotalItems()">
+          @if (captionTemplate(); as caption) {
+            <caption class="neu-table__caption">
+              <ng-container
+                [ngTemplateOutlet]="caption.templateRef"
+                [ngTemplateOutletContext]="structuralContext()"
+              />
+            </caption>
+          }
           <thead class="neu-table__head">
+            @if (headerGroupTemplate(); as headerGroup) {
+              <ng-container
+                [ngTemplateOutlet]="headerGroup.templateRef"
+                [ngTemplateOutletContext]="structuralContext()"
+              />
+            } @else {
             <tr>
               <!-- Checkbox de selección global -->
               @if (_expansionEnabled()) {
@@ -902,7 +976,9 @@ export type NeuTableColumnInput<T extends object> =
                       #filterOverlayOrigin="cdkOverlayOrigin"
                       type="button"
                       class="neu-table__filter-overlay-trigger"
-                      [class.neu-table__filter-overlay-trigger--open]="_openFilterKey() === col.key"
+                        [class.neu-table__filter-overlay-trigger--open]="
+                          _openFilterKey() === col.key
+                        "
                       [class.neu-table__filter-overlay-trigger--active]="
                         _isFilterOverlayActive(col.key)
                       "
@@ -913,7 +989,9 @@ export type NeuTableColumnInput<T extends object> =
                       [attr.aria-label]="_filterOverlayTriggerLabel(col)"
                       [attr.aria-pressed]="_isFilterOverlayActive(col.key)"
                       [attr.title]="
-                        _isFilterOverlayActive(col.key) ? _advancedFilterText().filterActive : null
+                          _isFilterOverlayActive(col.key)
+                            ? _advancedFilterText().filterActive
+                            : null
                       "
                       (click)="_toggleFilterOverlay(col.key, $event)"
                     >
@@ -1131,7 +1209,9 @@ export type NeuTableColumnInput<T extends object> =
                             [optionDisabled]="typedFilterOptionDisabled(col)"
                             [searchable]="typedFilterSearchable(col)"
                             [virtualScroll]="typedFilterVirtualScroll(col)"
-                            [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(col)"
+                              [virtualScrollVisibleItems]="
+                                typedFilterVirtualScrollVisibleItems(col)
+                              "
                             [clearable]="true"
                             [formControl]="typedColumnFilterControl(col)"
                           />
@@ -1147,7 +1227,9 @@ export type NeuTableColumnInput<T extends object> =
                             [optionDisabled]="typedFilterOptionDisabled(col)"
                             [searchable]="typedFilterSearchable(col)"
                             [virtualScroll]="typedFilterVirtualScroll(col)"
-                            [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(col)"
+                              [virtualScrollVisibleItems]="
+                                typedFilterVirtualScrollVisibleItems(col)
+                              "
                             [clearable]="true"
                             [formControl]="typedMultiSelectFilterControl(col)"
                           />
@@ -1180,10 +1262,17 @@ export type NeuTableColumnInput<T extends object> =
                 }
               </tr>
             }
+            }
           </thead>
 
           <tbody class="neu-table__body">
             @if (loading() && !_lazyVirtualActive()) {
+              @if (loadingBodyTemplate(); as loadingBody) {
+                <ng-container
+                  [ngTemplateOutlet]="loadingBody.templateRef"
+                  [ngTemplateOutletContext]="structuralContext()"
+                />
+              } @else {
               <tr class="neu-table__row--loading">
                 <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--center">
                   <div class="neu-table__skeleton-rows">
@@ -1197,6 +1286,7 @@ export type NeuTableColumnInput<T extends object> =
                   </div>
                 </td>
               </tr>
+              }
             } @else if (_tableEmpty()) {
               <tr>
                 <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--empty">
@@ -1282,10 +1372,45 @@ export type NeuTableColumnInput<T extends object> =
                     }
                   </tr>
                 } @else if (entry.kind === 'group') {
-                  <tr class="neu-table__group-row">
+                  <tr
+                    class="neu-table__group-row"
+                    [class.neu-table__group-row--sticky]="stickyHeader()"
+                  >
                     <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--group">
-                      {{ groupHeaderLabel() }} {{ entry.label }}
-                      <span class="neu-table__group-count">({{ entry.count }})</span>
+                      @if (expandableRowGroups() && !_virtualScrollActive()) {
+                        <button
+                          type="button"
+                          class="neu-table__group-toggle"
+                          [attr.aria-expanded]="entry.group.expanded"
+                          [attr.aria-label]="groupExpansionAriaLabel(entry.group)"
+                          (click)="toggleGroup(entry.group)"
+                        >
+                          {{ entry.group.expanded ? '−' : '+' }}
+                        </button>
+                      }
+                      @if (groupHeaderTemplate(); as groupHeader) {
+                        <ng-container
+                          [ngTemplateOutlet]="groupHeader.templateRef"
+                          [ngTemplateOutletContext]="groupTemplateContext(entry.group)"
+                        />
+                      } @else {
+                        {{ groupHeaderLabel() }} {{ entry.group.label }}
+                        <span class="neu-table__group-count">({{ entry.group.count }})</span>
+                      }
+                    </td>
+                  </tr>
+                } @else if (entry.kind === 'group-footer') {
+                  <tr class="neu-table__group-footer-row">
+                    <td
+                      [attr.colspan]="totalColspan()"
+                      class="neu-table__td neu-table__td--group-footer"
+                    >
+                      @if (groupFooterTemplate(); as groupFooter) {
+                        <ng-container
+                          [ngTemplateOutlet]="groupFooter.templateRef"
+                          [ngTemplateOutletContext]="groupTemplateContext(entry.group)"
+                        />
+                      }
                     </td>
                   </tr>
                 } @else {
@@ -1316,6 +1441,14 @@ export type NeuTableColumnInput<T extends object> =
                     (focus)="onRowFocus(row, $event)"
                     (keydown)="onRowKeydown(row, $event)"
                   >
+                    @if (bodyTemplate(); as body) {
+                      <ng-container
+                        [ngTemplateOutlet]="body.templateRef"
+                        [ngTemplateOutletContext]="
+                          bodyContext(row, entry.rowIndex, entry.logicalIndex)
+                        "
+                      />
+                    } @else {
                     @if (_expansionEnabled()) {
                       <td
                         class="neu-table__td neu-table__td--expand-col"
@@ -1378,6 +1511,10 @@ export type NeuTableColumnInput<T extends object> =
                       </td>
                     }
                     @for (col of visibleColumns(); track col.key) {
+                        @if (
+                          !isRowspanGroupCell(entry.rowIndex, col.key) ||
+                          !hideGroupRowspanCell(entry.rowIndex)
+                        ) {
                       <td
                         class="neu-table__td"
                         [class]="col.cellClass ?? ''"
@@ -1398,9 +1535,29 @@ export type NeuTableColumnInput<T extends object> =
                         [style.min-width]="columnWidth(col)"
                         [style.max-width]="columnWidth(col)"
                         [style.text-align]="col.align ?? 'left'"
+                            [attr.tabindex]="inlineEdit() && col.editable ? -1 : null"
+                            [attr.rowspan]="
+                              isRowspanGroupCell(entry.rowIndex, col.key)
+                                ? groupRowspan(entry.rowIndex)
+                                : null
+                            "
+                            [attr.data-neu-table-edit-row]="entry.rowIndex"
+                            [attr.data-neu-table-edit-column]="col.key"
+                            [attr.aria-invalid]="
+                              isEditingCell(row, col) && cellEditingInvalid() ? true : null
+                            "
                         (dblclick)="startCellEdit(row, col, $event)"
+                            (keydown)="onEditableCellKeydown(row, col, $event)"
                       >
                         @if (isEditingCell(row, col)) {
+                              @if (cellEditorTemplate(col.key); as editorTemplate) {
+                                <ng-container
+                                  [ngTemplateOutlet]="editorTemplate"
+                                  [ngTemplateOutletContext]="
+                                    cellEditorContext(row, col, entry.rowIndex, entry.logicalIndex)
+                                  "
+                                />
+                              } @else {
                           <neu-inline-editor
                             class="neu-table__edit-control"
                             [type]="inlineEditorType(col)"
@@ -1413,12 +1570,29 @@ export type NeuTableColumnInput<T extends object> =
                             [cancelLabel]="cancelInlineEditLabel()"
                             (valueChange)="setEditingValue($event)"
                             (editCommit)="commitCellEdit(row, col)"
-                            (editCancel)="cancelCellEdit()"
+                                  (editCancel)="cancelCellEdit(undefined, row, col)"
+                                />
+                              }
+                              @if (cellEditingError(); as editError) {
+                                <span class="neu-table__edit-error" role="alert">{{
+                                  editError
+                                }}</span>
+                              }
+                            } @else if (cellViewTemplate(col.key); as viewTemplate) {
+                              <ng-container
+                                [ngTemplateOutlet]="viewTemplate"
+                                [ngTemplateOutletContext]="
+                                  cellViewContext(row, col, entry.rowIndex, entry.logicalIndex)
+                                "
                           />
                         } @else if (col.cellTemplate) {
                           <ng-container
                             [ngTemplateOutlet]="col.cellTemplate"
-                            [ngTemplateOutletContext]="{ $implicit: row, row: row, column: col }"
+                                [ngTemplateOutletContext]="{
+                                  $implicit: row,
+                                  row: row,
+                                  column: col,
+                                }"
                           />
                         } @else if (col.type === 'badge') {
                           @let badgeVal = getCellValue(row, col);
@@ -1448,7 +1622,9 @@ export type NeuTableColumnInput<T extends object> =
                                     <button
                                       class="neu-table__action-btn neu-table__action-btn--danger"
                                       type="button"
-                                      (click)="handleAction(row, action); $event.stopPropagation()"
+                                          (click)="
+                                            handleAction(row, action); $event.stopPropagation()
+                                          "
                                     >
                                       Sí
                                     </button>
@@ -1468,7 +1644,9 @@ export type NeuTableColumnInput<T extends object> =
                                     type="button"
                                     [disabled]="action.disabled ? action.disabled(row) : false"
                                     [title]="action.label"
-                                    (click)="handleAction(row, action); $event.stopPropagation()"
+                                        (click)="
+                                          handleAction(row, action); $event.stopPropagation()
+                                        "
                                   >
                                     @if (action.icon.startsWith('lucide')) {
                                       <neu-icon
@@ -1492,6 +1670,8 @@ export type NeuTableColumnInput<T extends object> =
                           {{ getCellValue(row, col) }}
                         }
                       </td>
+                    }
+                      }
                     }
                   </tr>
                   @if (_expansionEnabled() && isRowExpanded(row)) {
@@ -1521,7 +1701,14 @@ export type NeuTableColumnInput<T extends object> =
               }
             }
           </tbody>
-          @if (footerRow()) {
+          @if (footerGroupTemplate(); as footerGroup) {
+            <tfoot class="neu-table__foot">
+              <ng-container
+                [ngTemplateOutlet]="footerGroup.templateRef"
+                [ngTemplateOutletContext]="structuralContext()"
+              />
+            </tfoot>
+          } @else if (footerRow()) {
             <tfoot class="neu-table__foot">
               <tr class="neu-table__footer-row">
                 @if (_expansionEnabled()) {
@@ -1550,9 +1737,26 @@ export type NeuTableColumnInput<T extends object> =
         </table>
       </div>
 
+      @if (summaryTemplate(); as summary) {
+        <div class="neu-table__summary">
+          <ng-container
+            [ngTemplateOutlet]="summary.templateRef"
+            [ngTemplateOutletContext]="structuralContext()"
+          />
+        </div>
+      }
+
       <!-- ---- Footer ---- -->
       @if (!loading() && filteredData().length > 0 && !_lazyVirtualActive()) {
         <div class="neu-table__footer">
+          @if (paginatorLeftTemplate(); as paginatorLeft) {
+            <div class="neu-table__paginator-outlet neu-table__paginator-outlet--left">
+              <ng-container
+                [ngTemplateOutlet]="paginatorLeft.templateRef"
+                [ngTemplateOutletContext]="paginatorTemplateContext()"
+              />
+            </div>
+          }
           @if (pagination() && pageSizeOptions().length > 0) {
             <div class="neu-table__page-size">
               <label class="neu-table__page-size-label">{{ pageSizeLabel() }}</label>
@@ -1620,6 +1824,14 @@ export type NeuTableColumnInput<T extends object> =
               </button>
             </nav>
           }
+          @if (paginatorRightTemplate(); as paginatorRight) {
+            <div class="neu-table__paginator-outlet neu-table__paginator-outlet--right">
+              <ng-container
+                [ngTemplateOutlet]="paginatorRight.templateRef"
+                [ngTemplateOutletContext]="paginatorTemplateContext()"
+              />
+            </div>
+          }
         </div>
       }
     </div>
@@ -1639,6 +1851,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _queryController = new NeuTableQueryController<T>();
   private readonly _lazyDataController = new NeuTableLazyDataController<NeuTableRuntimeRow<T>>();
   private readonly _keyboardController = new NeuTableKeyboardController<unknown>();
+  private readonly _editingController = new NeuTableEditingController<NeuTableRuntimeRow<T>>();
+  private readonly _groupingController = new NeuTableGroupingController<NeuTableRuntimeRow<T>>();
   protected readonly _selectionRadioName = `neu-table-selection-${_neuTableSelectionIdSeq++}`;
   private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
   private readonly _persistenceAdapter = new NeuTableStatePersistenceAdapter();
@@ -1697,6 +1911,31 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   readonly expandTemplate = contentChild<NeuTableExpandDirective<T>>(NeuTableExpandDirective);
   readonly toolbarTemplate = contentChild(NeuTableToolbarDirective);
+  readonly bodyTemplate = contentChild<NeuTableBodyDirective<T>>(NeuTableBodyDirective);
+  readonly captionTemplate = contentChild<NeuTableCaptionDirective<T>>(NeuTableCaptionDirective);
+  readonly headerGroupTemplate = contentChild<NeuTableHeaderGroupDirective<T>>(
+    NeuTableHeaderGroupDirective,
+  );
+  readonly footerGroupTemplate = contentChild<NeuTableFooterGroupDirective<T>>(
+    NeuTableFooterGroupDirective,
+  );
+  readonly loadingBodyTemplate = contentChild<NeuTableLoadingBodyDirective<T>>(
+    NeuTableLoadingBodyDirective,
+  );
+  readonly summaryTemplate = contentChild<NeuTableSummaryDirective<T>>(NeuTableSummaryDirective);
+  readonly paginatorLeftTemplate = contentChild(NeuTablePaginatorLeftDirective);
+  readonly paginatorRightTemplate = contentChild(NeuTablePaginatorRightDirective);
+  readonly groupHeaderTemplate = contentChild<NeuTableGroupHeaderDirective<T>>(
+    NeuTableGroupHeaderDirective,
+  );
+  readonly groupFooterTemplate = contentChild<NeuTableGroupFooterDirective<T>>(
+    NeuTableGroupFooterDirective,
+  );
+  readonly cellViewTemplates =
+    contentChildren<NeuTableCellViewDirective<T>>(NeuTableCellViewDirective);
+  readonly cellEditorTemplates = contentChildren<NeuTableCellEditorDirective<T>>(
+    NeuTableCellEditorDirective,
+  );
   protected readonly filterTemplates = contentChildren<NeuTableFilterTemplateDirective<T>>(
     NeuTableFilterTemplateDirective,
   );
@@ -1787,7 +2026,22 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly columnChooserLabel = input<string>('Columns');
   readonly groupBy = input<string>('');
   readonly groupHeaderLabel = input<string>('Group:');
+  readonly rowGroupMode = input<NeuTableRowGroupMode>('subheader');
+  readonly groupRowsByOrder = input<NeuTableGroupSortOrder>(1);
+  readonly expandableRowGroups = input<boolean>(false);
+  readonly expandedGroupKeys = input<readonly unknown[] | undefined>(undefined);
+  readonly expandGroupAriaLabel = input<string>('Expand group');
+  readonly collapseGroupAriaLabel = input<string>('Collapse group');
   readonly inlineEdit = input<boolean>(false);
+  readonly editMode = input<NeuTableEditMode>('cell');
+  readonly editingRowKeys = input<readonly unknown[] | undefined>(undefined);
+  readonly editingCell = input<NeuTableEditingCellState | null | undefined>(undefined);
+  readonly cellEditValidator = input<
+    ((event: NeuTableCellEditLifecycleEvent<T>) => NeuTableEditValidationResult) | undefined
+  >(undefined);
+  readonly rowEditValidator = input<
+    ((event: NeuTableRowEditEvent<T>) => NeuTableEditValidationResult) | undefined
+  >(undefined);
   readonly inlineEditLabel = input<string>('Edit cell');
   readonly saveInlineEditLabel = input<string>('Save cell');
   readonly cancelInlineEditLabel = input<string>('Cancel cell edit');
@@ -1866,6 +2120,17 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly columnReorder = output<NeuTableColumnReorderEvent>();
   readonly layoutChange = output<NeuTableLayout>();
   readonly cellEditCommit = output<NeuTableCellEditEvent<T>>();
+  readonly cellEditInit = output<NeuTableCellEditLifecycleEvent<T>>();
+  readonly cellEditCancel = output<NeuTableCellEditLifecycleEvent<T>>();
+  readonly editValidationError = output<NeuTableEditValidationEvent<T>>();
+  readonly editingRowKeysChange = output<readonly unknown[]>();
+  readonly editingCellChange = output<NeuTableEditingCellState | null>();
+  readonly rowEditInit = output<NeuTableRowEditEvent<T>>();
+  readonly rowEditSave = output<NeuTableRowEditEvent<T>>();
+  readonly rowEditCancel = output<NeuTableRowEditEvent<T>>();
+  readonly expandedGroupKeysChange = output<readonly unknown[]>();
+  readonly groupExpand = output<NeuTableGroupExpansionEvent<T>>();
+  readonly groupCollapse = output<NeuTableGroupExpansionEvent<T>>();
   readonly stateSave = output<NeuTableStateSnapshot>();
   readonly stateRestore = output<NeuTableStateSnapshot>();
 
@@ -1876,12 +2141,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     () => new Set<string>(this._state.layout().hiddenColumns),
   );
   readonly columnChooserOpen = signal(false);
-  private readonly _editingCell = signal<{
-    rowKey: unknown;
-    columnKey: string;
-    value: unknown;
-    previousValue: unknown;
-  } | null>(null);
+  private readonly _editingRevision = signal(0);
   private _resizeCleanup: (() => void) | null = null;
 
   readonly currentPage = this._state.page;
@@ -2159,6 +2419,43 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     });
 
     effect(() => {
+      const controlled = this.editingRowKeys();
+      untracked(() => {
+        if (controlled === undefined) {
+          this._state.releaseControlledEditing();
+          return;
+        }
+        this._state.setControlledEditingKeys(new Set(controlled));
+        this._editingController.prune(this._state.editingKeys());
+        this._editingRevision.update((value) => value + 1);
+      });
+    });
+
+    effect(() => {
+      const controlled = this.editingCell();
+      untracked(() => {
+        if (controlled === undefined) {
+          this._state.releaseControlledEditingCell();
+          return;
+        }
+        this._state.setControlledEditingCell(controlled);
+        this._editingRevision.update((value) => value + 1);
+      });
+    });
+
+    effect(() => {
+      const controlled = this.expandedGroupKeys();
+      untracked(() => {
+        if (controlled === undefined) {
+          this._state.releaseControlledGroupExpansion();
+          return;
+        }
+        const changed = this._state.setControlledGroupExpansionKeys(new Set(controlled));
+        if (changed) this._saveStateIfReady();
+      });
+    });
+
+    effect(() => {
       const nextSize = String(this.effectivePageSize());
       if (this._pageSizeControl.value !== nextSize) {
         this._pageSizeControl.setValue(nextSize, { emitEvent: false });
@@ -2333,7 +2630,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     });
 
     effect(() => {
-      const editing = this._editingCell();
+      const editing = this._state.editingCell();
       const rows = this._rows();
       if (!editing || !this._lazyVirtualActive()) return;
       if (rows.some((row) => Object.is(this.getRowKey(row), editing.rowKey))) return;
@@ -3073,12 +3370,21 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly sortedData = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (this.serverSide()) return this.filteredData();
     const data = this.filteredData();
-    if (!this.sortable()) return [...data];
-    return this._sortController.sort(
+    const sorted = this.sortable()
+      ? (this._sortController.sort(
       data,
       this.currentSort(),
       this._typedColumns(),
-    ) as NeuTableRuntimeRow<T>[];
+        ) as NeuTableRuntimeRow<T>[])
+      : [...data];
+    const groupKey = this.groupBy();
+    return groupKey
+      ? this._groupingController.order(
+          sorted,
+          (row) => this.getRowValue(row, groupKey),
+          this.groupRowsByOrder(),
+        )
+      : sorted;
   });
 
   readonly effectivePageSize = computed(() => {
@@ -3229,6 +3535,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this.visiblePageRows().filter((row) => this.isRowSelectable(row));
   });
 
+  readonly visibleGroups = computed<InternalNeuTableGroup<NeuTableRuntimeRow<T>>[]>(() => {
+    const groupKey = this.groupBy();
+    if (!groupKey || this._lazyVirtualActive()) return [];
+    return this._groupingController.groups(
+      this.visiblePageRows(),
+      (row) => this.getRowValue(row, groupKey),
+      this._state.groupExpansionKeys(),
+    );
+  });
+
   readonly visiblePageEntries = computed<NeuTablePageEntry<T>[]>(() => {
     if (this._lazyVirtualActive()) {
       return this._virtualSlots().map((slot) =>
@@ -3263,36 +3579,46 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       }));
     }
 
-    const counts = new Map<string, number>();
-    for (const row of rows) {
-      const label = String(this.getRowValue(row, groupKey) ?? '—');
-      counts.set(label, (counts.get(label) ?? 0) + 1);
-    }
-
-    const seen = new Set<string>();
     const entries: NeuTablePageEntry<T>[] = [];
-    rows.forEach((row, rowIndex) => {
-      const label = String(this.getRowValue(row, groupKey) ?? '—');
-      if (!seen.has(label)) {
-        seen.add(label);
+    const groups = this.visibleGroups();
+    const baseIndex =
+      (this.pagination() ? (this.currentPage() - 1) * this.effectivePageSize() : 0) +
+      this._virtualStartIndex();
+    for (const group of groups) {
+      if (this.rowGroupMode() === 'subheader') {
         entries.push({
           kind: 'group',
-          key: `group:${label}:${entries.length}`,
-          label,
-          count: counts.get(label) ?? 0,
+          key: `group-header:${String(group.key)}:${group.groupIndex}`,
+          label: group.label,
+          count: group.count,
+          group,
         });
       }
+      if (
+        !this.expandableRowGroups() ||
+        group.expanded ||
+        this.rowGroupMode() === 'rowspan' ||
+        this._virtualScrollActive()
+      ) {
+        group.rows.forEach((row, offset) => {
+          const rowIndex = group.firstRowIndex + offset;
       entries.push({
         kind: 'row',
         key: this.getRowKey(row),
         row,
         rowIndex,
-        logicalIndex:
-          (this.pagination() ? (this.currentPage() - 1) * this.effectivePageSize() : 0) +
-          this._virtualStartIndex() +
-          rowIndex,
+            logicalIndex: baseIndex + rowIndex,
+          });
       });
+        if (this.rowGroupMode() === 'subheader' && this.groupFooterTemplate()) {
+          entries.push({
+            kind: 'group-footer',
+            key: `group-footer:${String(group.key)}:${group.groupIndex}`,
+            group,
     });
+        }
+      }
+    }
     return entries;
   });
 
@@ -3600,6 +3926,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         filters: {},
         selectionKeys: new Set(),
         expansionKeys: new Set(),
+        editingKeys: new Set(),
+        editingCell: null,
+        groupExpansionKeys: new Set(),
         layout: this._initialNormalizedLayout(),
       },
       'api',
@@ -3619,6 +3948,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     if (changed.changedKeys.includes('selectionKeys')) this.selectionChange.emit([]);
     if (changed.changedKeys.includes('expansionKeys')) {
       this.expandedRowKeysChange.emit(Object.freeze([]));
+    }
+    if (changed.changedKeys.includes('editingKeys'))
+      this.editingRowKeysChange.emit(Object.freeze([]));
+    if (changed.changedKeys.includes('editingCell')) this.editingCellChange.emit(null);
+    if (changed.changedKeys.includes('groupExpansionKeys')) {
+      this.expandedGroupKeysChange.emit(Object.freeze([]));
     }
     if (changed.changedKeys.includes('layout')) this._emitLayoutChange();
     if (previous.filters !== changed.current.filters && this._openFilterKey()) {
@@ -4499,7 +4834,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   isEditingCell(row: T, col: NeuTableColumnInput<T>): boolean {
     const typedColumn = this.asRuntimeColumn(col);
-    const editing = this._editingCell();
+    this._editingRevision();
+    const editing = this._state.editingCell();
     return (
       editing !== null &&
       editing.rowKey === this.getRowKey(row) &&
@@ -4508,7 +4844,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   editingValue(): unknown {
-    return this._editingCell()?.value ?? '';
+    this._editingRevision();
+    return this._editingController.cell()?.value ?? '';
+  }
+
+  cellEditingInvalid(): boolean {
+    this._editingRevision();
+    return this._editingController.cell()?.invalid ?? false;
+  }
+
+  cellEditingError(): string | null {
+    this._editingRevision();
+    return this._editingController.cell()?.error ?? null;
   }
 
   inlineEditorType(col: NeuTableColumnInput<T>): NeuInlineEditorType {
@@ -4523,28 +4870,32 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   setEditingValue(value: unknown): void {
-    this._editingCell.update((editing) => (editing ? { ...editing, value } : editing));
+    if (this._editingController.setCellValue(value)) {
+      this._editingRevision.update((revision) => revision + 1);
+    }
   }
 
   startCellEdit(row: T, col: NeuTableColumnInput<T>, event?: Event): void {
     const typedColumn = this.asRuntimeColumn(col);
-    if (!this.inlineEdit() || !typedColumn.editable) {
+    if (!this.inlineEdit() || this.editMode() !== 'cell' || !typedColumn.editable) {
       return;
     }
 
     event?.stopPropagation();
     const previousValue = this.getRowValue(row, typedColumn.key);
-    this._editingCell.set({
-      rowKey: this.getRowKey(row),
-      columnKey: typedColumn.key,
-      value: previousValue ?? '',
-      previousValue,
-    });
+    const rowKey = this.getRowKey(row);
+    this._editingController.beginCell(rowKey, typedColumn.key, previousValue);
+    this._editingRevision.update((revision) => revision + 1);
+    const changed = this._state.setEditingCell({ rowKey, columnKey: typedColumn.key }, 'ui');
+    const proposal = changed?.current.editingCell ?? this._state.editingCell();
+    this.editingCellChange.emit({ ...proposal! });
+    const lifecycle = this._cellLifecycleEvent(row, typedColumn);
+    if (lifecycle) this.cellEditInit.emit(lifecycle);
   }
 
   commitCellEdit(row: T, col: NeuTableColumnInput<T>): void {
     const typedColumn = this.asRuntimeColumn(col);
-    const editing = this._editingCell();
+    const editing = this._editingController.cell();
     if (
       !editing ||
       editing.rowKey !== this.getRowKey(row) ||
@@ -4553,7 +4904,26 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       return;
     }
 
-    this._editingCell.set(null);
+    const lifecycle = this._cellLifecycleEvent(row, typedColumn)!;
+    const validation = this.cellEditValidator()?.(lifecycle);
+    if (!this._editingController.validateCell(validation)) {
+      this._editingRevision.update((revision) => revision + 1);
+      const invalid = this._editingController.cell()!;
+      this.editValidationError.emit({
+        mode: 'cell',
+        row,
+        rowKey: lifecycle.rowKey,
+        rowIndex: lifecycle.rowIndex,
+        column: typedColumn,
+        value: invalid.value,
+        message: invalid.error!,
+      });
+      return;
+    }
+    this._editingController.finishCell();
+    this._editingRevision.update((revision) => revision + 1);
+    const changed = this._state.setEditingCell(null, 'ui');
+    this.editingCellChange.emit(changed?.current.editingCell ?? null);
     this.cellEditCommit.emit({
       row,
       column: typedColumn,
@@ -4562,10 +4932,348 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     });
   }
 
-  cancelCellEdit(event?: Event): void {
+  cancelCellEdit(event?: Event, row?: T, col?: NeuTableColumnInput<T>): void {
     event?.stopPropagation();
     event?.preventDefault();
-    this._editingCell.set(null);
+    const editing = this._editingController.cell();
+    if (!editing) return;
+    const resolvedRow =
+      row ?? this._rows().find((candidate) => this.getRowKey(candidate) === editing.rowKey);
+    const resolvedColumn = col
+      ? this.asRuntimeColumn(col)
+      : this._typedColumns().find((candidate) => candidate.key === editing.columnKey);
+    const lifecycle =
+      resolvedRow && resolvedColumn ? this._cellLifecycleEvent(resolvedRow, resolvedColumn) : null;
+    this._editingController.cancelCell();
+    this._editingRevision.update((revision) => revision + 1);
+    const changed = this._state.setEditingCell(null, 'ui');
+    this.editingCellChange.emit(changed?.current.editingCell ?? null);
+    if (lifecycle) this.cellEditCancel.emit(lifecycle);
+  }
+
+  onEditableCellKeydown(row: T, col: NeuTableColumnInput<T>, event: KeyboardEvent): void {
+    if (!this.isEditingCell(row, col)) return;
+    if (event.key === 'Escape') {
+      this.cancelCellEdit(event, row, col);
+      return;
+    }
+    if (event.key === 'Enter' && !this._isMultilineEditTarget(event.target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.commitCellEdit(row, col);
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const backwards = event.shiftKey;
+    this.commitCellEdit(row, col);
+    if (this.isEditingCell(row, col)) {
+      event.preventDefault();
+      return;
+    }
+    queueMicrotask(() => this._focusAdjacentEditableCell(row, col, backwards ? -1 : 1));
+  }
+
+  private _isMultilineEditTarget(target: EventTarget | null): boolean {
+    return (
+      target instanceof HTMLTextAreaElement ||
+      (target instanceof HTMLElement && target.isContentEditable)
+    );
+  }
+
+  private _focusAdjacentEditableCell(row: T, col: NeuTableColumnInput<T>, direction: -1 | 1): void {
+    const root = this._scrollContainer()?.nativeElement;
+    if (!root) return;
+    const cells = [...root.querySelectorAll<HTMLElement>('[data-neu-table-edit-column]')].filter(
+      (cell) => this._currentTypedColumn(cell.dataset['neuTableEditColumn'] ?? '')?.editable,
+    );
+    const rowIndex = this.visiblePageRows().indexOf(row as NeuTableRuntimeRow<T>);
+    const columnKey = this.asRuntimeColumn(col).key;
+    const current = cells.findIndex(
+      (cell) =>
+        Number(cell.dataset['neuTableEditRow']) === rowIndex &&
+        cell.dataset['neuTableEditColumn'] === columnKey,
+    );
+    const next = cells[current + direction];
+    if (!next) return;
+    next.focus();
+    const nextRow = this.visiblePageRows()[Number(next.dataset['neuTableEditRow'])];
+    const nextColumn = this._currentTypedColumn(next.dataset['neuTableEditColumn'] ?? '');
+    if (nextRow && nextColumn) this.startCellEdit(nextRow, nextColumn);
+  }
+
+  private _cellLifecycleEvent(
+    row: T,
+    column: NeuTableColumn<T>,
+  ): NeuTableCellEditLifecycleEvent<T> | null {
+    const editing = this._editingController.cell();
+    if (!editing) return null;
+    return {
+      row,
+      rowKey: editing.rowKey,
+      rowIndex: this._rows().indexOf(row as NeuTableRuntimeRow<T>),
+      column,
+      value: editing.value,
+      previousValue: editing.previousValue,
+    };
+  }
+
+  isEditingRow(row: T): boolean {
+    return this._state.editingKeys().has(this.getRowKey(row));
+  }
+
+  startRowEdit(row: NeuTableRuntimeRow<T>): void {
+    if (!this.inlineEdit() || this.editMode() !== 'row') return;
+    const rowKey = this.getRowKey(row);
+    this._editingController.beginRow(rowKey, row);
+    this._editingRevision.update((revision) => revision + 1);
+    const next = new Set(this._state.editingKeys());
+    next.add(rowKey);
+    const changed = this._state.setEditingKeys(next, 'ui');
+    const keys = Object.freeze([...(changed?.current.editingKeys ?? this._state.editingKeys())]);
+    this.editingRowKeysChange.emit(keys);
+    this.rowEditInit.emit(this._rowEditEvent(row, keys));
+  }
+
+  saveRowEdit(row: NeuTableRuntimeRow<T>): boolean {
+    const rowKey = this.getRowKey(row);
+    if (!this._state.editingKeys().has(rowKey)) return false;
+    const current = this._rowEditEvent(row, [...this._state.editingKeys()]);
+    const validation = this.rowEditValidator()?.(current);
+    if (!this._editingController.validateRow(rowKey, validation)) {
+      this._editingRevision.update((revision) => revision + 1);
+      const invalid = this._editingController.row(rowKey, row);
+      this.editValidationError.emit({
+        mode: 'row',
+        row,
+        rowKey,
+        rowIndex: current.rowIndex,
+        draft: invalid.draft,
+        message: invalid.error!,
+      });
+      return false;
+    }
+    const next = new Set(this._state.editingKeys());
+    next.delete(rowKey);
+    const changed = this._state.setEditingKeys(next, 'ui');
+    const keys = Object.freeze([...changed!.current.editingKeys]);
+    const event = this._rowEditEvent(row, keys);
+    this._editingController.finishRow(rowKey);
+    this._editingRevision.update((revision) => revision + 1);
+    this.editingRowKeysChange.emit(keys);
+    this.rowEditSave.emit(event);
+    return true;
+  }
+
+  cancelRowEdit(row: NeuTableRuntimeRow<T>): void {
+    const rowKey = this.getRowKey(row);
+    if (!this._state.editingKeys().has(rowKey)) return;
+    const draft = this._editingController.row(rowKey, row);
+    const next = new Set(this._state.editingKeys());
+    next.delete(rowKey);
+    const changed = this._state.setEditingKeys(next, 'ui');
+    const keys = Object.freeze([...changed!.current.editingKeys]);
+    this._editingController.cancelRow(rowKey);
+    this._editingRevision.update((revision) => revision + 1);
+    this.editingRowKeysChange.emit(keys);
+    this.rowEditCancel.emit({
+      row,
+      draft: draft.draft,
+      rowKey,
+      rowIndex: this._rows().indexOf(row),
+      editingRowKeys: keys,
+    });
+  }
+
+  setRowEditingValue(row: NeuTableRuntimeRow<T>, columnKey: string, value: unknown): void {
+    if (this._editingController.setRowValue(this.getRowKey(row), columnKey, value)) {
+      this._editingRevision.update((revision) => revision + 1);
+    }
+  }
+
+  private _rowEditEvent(
+    row: NeuTableRuntimeRow<T>,
+    keys: readonly unknown[],
+  ): NeuTableRowEditEvent<T> {
+    const rowKey = this.getRowKey(row);
+    return {
+      row,
+      draft: this._editingController.row(rowKey, row).draft,
+      rowKey,
+      rowIndex: this._rows().indexOf(row),
+      editingRowKeys: keys,
+    };
+  }
+
+  structuralContext(): NeuTableStructuralContext<T> {
+    const columns = Object.freeze([...this.visibleColumns()]) as readonly NeuTableColumn<T>[];
+    return { $implicit: columns, columns, colspan: this.totalColspan() };
+  }
+
+  paginatorTemplateContext(): NeuTablePaginatorTemplateContext {
+    const rows = this.effectivePageSize();
+    const totalRecords = this.serverSide() ? (this.totalItems() ?? 0) : this.filteredData().length;
+    return {
+      $implicit: this.currentPage(),
+      currentPage: this.currentPage(),
+      totalPages: this.totalPages(),
+      first: Math.max(0, (this.currentPage() - 1) * rows),
+      rows,
+      totalRecords,
+    };
+  }
+
+  bodyContext(
+    row: NeuTableRuntimeRow<T>,
+    rowIndex: number,
+    logicalIndex: number,
+  ): NeuTableBodyContext<T> {
+    const group =
+      this.visibleGroups().find(
+        (candidate) =>
+          rowIndex >= candidate.firstRowIndex &&
+          rowIndex < candidate.firstRowIndex + candidate.count,
+      ) ?? null;
+    return {
+      $implicit: row,
+      row,
+      rowIndex,
+      logicalIndex,
+      columns: Object.freeze([...this.visibleColumns()]) as readonly NeuTableColumn<T>[],
+      group,
+      selected: this.isRowSelected(row),
+      expanded: this.isRowExpanded(row),
+      editing: this.isEditingRow(row),
+      toggleSelection: () => this.toggleRow(row, 'api'),
+      toggleExpansion: () => this.toggleExpand(row),
+      edit: this.rowEditContext(row, rowIndex, logicalIndex),
+    };
+  }
+
+  rowEditContext(
+    row: NeuTableRuntimeRow<T>,
+    rowIndex: number,
+    logicalIndex: number,
+  ): NeuTableRowEditContext<T> {
+    this._editingRevision();
+    const state = this._editingController.row(this.getRowKey(row), row);
+    return {
+      $implicit: row,
+      row,
+      draft: state.draft,
+      rowIndex,
+      logicalIndex,
+      editing: this.isEditingRow(row),
+      invalid: state.invalid,
+      error: state.error,
+      setValue: (columnKey, value) => this.setRowEditingValue(row, columnKey, value),
+      init: () => this.startRowEdit(row),
+      save: () => this.saveRowEdit(row),
+      cancel: () => this.cancelRowEdit(row),
+    };
+  }
+
+  cellViewTemplate(columnKey: string): TemplateRef<NeuTableCellViewContext<T>> | null {
+    return (
+      this.cellViewTemplates().find((template) => template.columnKey() === columnKey)
+        ?.templateRef ?? null
+    );
+  }
+
+  cellEditorTemplate(columnKey: string): TemplateRef<NeuTableCellEditorContext<T>> | null {
+    return (
+      this.cellEditorTemplates().find((template) => template.columnKey() === columnKey)
+        ?.templateRef ?? null
+    );
+  }
+
+  cellViewContext(
+    row: NeuTableRuntimeRow<T>,
+    column: NeuTableColumn<T>,
+    rowIndex: number,
+    logicalIndex: number,
+  ): NeuTableCellViewContext<T> {
+    return {
+      $implicit: row,
+      row,
+      rowIndex,
+      logicalIndex,
+      column,
+      value: this.getRowValue(row, column.key),
+      editing: this.isEditingCell(row, column),
+      startEdit: () => this.startCellEdit(row, column),
+    };
+  }
+
+  cellEditorContext(
+    row: NeuTableRuntimeRow<T>,
+    column: NeuTableColumn<T>,
+    rowIndex: number,
+    logicalIndex: number,
+  ): NeuTableCellEditorContext<T> {
+    this._editingRevision();
+    const editing = this._editingController.cell();
+    return {
+      $implicit: editing?.value,
+      row,
+      rowIndex,
+      logicalIndex,
+      column,
+      value: editing?.value,
+      previousValue: editing?.previousValue,
+      invalid: editing?.invalid ?? false,
+      error: editing?.error ?? null,
+      setValue: (value) => this.setEditingValue(value),
+      save: () => {
+        this.commitCellEdit(row, column);
+        return !this.isEditingCell(row, column);
+      },
+      cancel: () => this.cancelCellEdit(undefined, row, column),
+    };
+  }
+
+  groupTemplateContext(group: InternalNeuTableGroup<T>): NeuTableGroupTemplateContext<T> {
+    const publicGroup: NeuTableGroup<T> = { ...group };
+    return {
+      ...publicGroup,
+      $implicit: publicGroup,
+      toggle: () => this.toggleGroup(group),
+    };
+  }
+
+  toggleGroup(group: InternalNeuTableGroup<T>): void {
+    if (!this.expandableRowGroups() || this._virtualScrollActive()) return;
+    const next = new Set(this._state.groupExpansionKeys());
+    const expanding = !next.has(group.key);
+    if (expanding) next.add(group.key);
+    else next.delete(group.key);
+    const changed = this._state.setGroupExpansionKeys(next, 'ui');
+    const keys = Object.freeze([...changed!.current.groupExpansionKeys]);
+    this.expandedGroupKeysChange.emit(keys);
+    const event: NeuTableGroupExpansionEvent<T> = {
+      group: { ...group, expanded: expanding },
+      expandedGroupKeys: keys,
+    };
+    if (expanding) this.groupExpand.emit(event);
+    else this.groupCollapse.emit(event);
+    this._saveStateIfReady();
+  }
+
+  groupExpansionAriaLabel(group: InternalNeuTableGroup<T>): string {
+    return `${group.expanded ? this.collapseGroupAriaLabel() : this.expandGroupAriaLabel()} ${group.label}`;
+  }
+
+  isRowspanGroupCell(rowIndex: number, columnKey: string): boolean {
+    return this.rowGroupMode() === 'rowspan' && columnKey === this.groupBy();
+  }
+
+  groupRowspan(rowIndex: number): number {
+    return this._groupingController.rowspan(this.rowGroupMode(), this.visibleGroups(), rowIndex)
+      .span;
+  }
+
+  hideGroupRowspanCell(rowIndex: number): boolean {
+    return this._groupingController.rowspan(this.rowGroupMode(), this.visibleGroups(), rowIndex)
+      .hidden;
   }
 
   getSortPriority(key: string): number {
@@ -5198,6 +5906,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           filters: this._restorePersistedFilters(snapshot),
           selectionKeys: new Set(snapshot.selectionKeys),
           expansionKeys: this._normalizeExpansionKeys(snapshot.expandedRowKeys, this.expandMode()),
+          groupExpansionKeys: new Set(snapshot.expandedGroupKeys ?? []),
           layout: this._normalizePersistedLayout(snapshot.layout),
         },
         'persistence',

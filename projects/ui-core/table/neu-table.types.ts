@@ -120,6 +120,147 @@ export interface NeuTableCellEditEvent<T = Record<string, unknown>> {
   previousValue: unknown;
 }
 
+export type NeuTableEditMode = 'cell' | 'row';
+
+export interface NeuTableEditingCellState {
+  readonly rowKey: unknown;
+  readonly columnKey: string;
+}
+
+export type NeuTableEditValidationResult =
+  | boolean
+  | string
+  | Readonly<{ valid: boolean; message?: string }>;
+
+export interface NeuTableCellEditLifecycleEvent<
+  T = Record<string, unknown>,
+> extends NeuTableCellEditEvent<T> {
+  readonly rowKey: unknown;
+  readonly rowIndex: number;
+}
+
+export interface NeuTableEditValidationEvent<T = Record<string, unknown>> {
+  readonly mode: NeuTableEditMode;
+  readonly row: T;
+  readonly rowKey: unknown;
+  readonly rowIndex: number;
+  readonly column?: NeuTableColumn<T>;
+  readonly value?: unknown;
+  readonly draft?: Readonly<T>;
+  readonly message: string;
+}
+
+export interface NeuTableRowEditEvent<T = Record<string, unknown>> {
+  readonly row: T;
+  readonly draft: Readonly<T>;
+  readonly rowKey: unknown;
+  readonly rowIndex: number;
+  readonly editingRowKeys: readonly unknown[];
+}
+
+export interface NeuTableCellEditorContext<
+  T extends object = NeuTableRow,
+  K extends string = string,
+> {
+  readonly $implicit: unknown;
+  readonly row: T;
+  readonly rowIndex: number;
+  readonly logicalIndex: number;
+  readonly column: NeuTableColumn<T, K>;
+  readonly value: unknown;
+  readonly previousValue: unknown;
+  readonly invalid: boolean;
+  readonly error: string | null;
+  readonly setValue: (value: unknown) => void;
+  readonly save: () => boolean;
+  readonly cancel: () => void;
+}
+
+export interface NeuTableCellViewContext<
+  T extends object = NeuTableRow,
+  K extends string = string,
+> {
+  readonly $implicit: T;
+  readonly row: T;
+  readonly rowIndex: number;
+  readonly logicalIndex: number;
+  readonly column: NeuTableColumn<T, K>;
+  readonly value: unknown;
+  readonly editing: boolean;
+  readonly startEdit: () => void;
+}
+
+export interface NeuTableRowEditContext<T extends object = NeuTableRow> {
+  readonly $implicit: T;
+  readonly row: T;
+  readonly draft: Readonly<T>;
+  readonly rowIndex: number;
+  readonly logicalIndex: number;
+  readonly editing: boolean;
+  readonly invalid: boolean;
+  readonly error: string | null;
+  readonly setValue: (columnKey: string, value: unknown) => void;
+  readonly init: () => void;
+  readonly save: () => boolean;
+  readonly cancel: () => void;
+}
+
+export type NeuTableRowGroupMode = 'subheader' | 'rowspan';
+export type NeuTableGroupSortOrder = 1 | -1;
+
+export interface NeuTableGroup<T extends object = NeuTableRow> {
+  readonly key: unknown;
+  readonly label: string;
+  readonly rows: readonly T[];
+  readonly count: number;
+  readonly groupIndex: number;
+  readonly expanded: boolean;
+}
+
+export interface NeuTableGroupExpansionEvent<T extends object = NeuTableRow> {
+  readonly group: NeuTableGroup<T>;
+  readonly expandedGroupKeys: readonly unknown[];
+}
+
+export interface NeuTableGroupTemplateContext<
+  T extends object = NeuTableRow,
+> extends NeuTableGroup<T> {
+  readonly $implicit: NeuTableGroup<T>;
+  readonly toggle: () => void;
+}
+
+export interface NeuTableStructuralContext<T extends object = NeuTableRow> {
+  readonly $implicit: readonly NeuTableColumn<T>[];
+  readonly columns: readonly NeuTableColumn<T>[];
+  readonly colspan: number;
+}
+
+/** Wrapper-owned row semantics remain active while this template owns the row cells. */
+export interface NeuTableBodyContext<T extends object = NeuTableRow> {
+  readonly $implicit: T;
+  readonly row: T;
+  readonly rowIndex: number;
+  readonly logicalIndex: number;
+  readonly columns: readonly NeuTableColumn<T>[];
+  /** Group metadata for grouped rows; null for an ungrouped body. */
+  readonly group: NeuTableGroup<T> | null;
+  readonly selected: boolean;
+  readonly expanded: boolean;
+  readonly editing: boolean;
+  readonly toggleSelection: () => void;
+  readonly toggleExpansion: () => void;
+  readonly edit: NeuTableRowEditContext<T>;
+}
+
+export interface NeuTablePaginatorTemplateContext {
+  readonly $implicit: number;
+  readonly currentPage: number;
+  readonly totalPages: number;
+  readonly first: number;
+  readonly rows: number;
+  readonly totalRecords: number;
+}
+
 // ── Expansion / persisted state ──────────────────────────────────────────
 
 /** JSON-stable row identity accepted by automatic Table persistence. */
@@ -147,6 +288,7 @@ export interface NeuTableStateOmissions {
   filterKeys: readonly string[];
   selectionKeyCount: number;
   expandedRowKeyCount: number;
+  expandedGroupKeyCount?: number;
 }
 
 /**
@@ -163,6 +305,8 @@ export interface NeuTableStateSnapshot {
   filters: Readonly<Record<string, NeuTablePersistedColumnFilter>>;
   selectionKeys: readonly NeuTableStateKey[];
   expandedRowKeys: readonly NeuTableStateKey[];
+  /** Separate from row expansion so group identity can never collide with row identity. */
+  expandedGroupKeys?: readonly NeuTableStateKey[];
   layout: NeuTableLayout;
   /** Truthful accounting for canonical values that automatic JSON persistence omitted. */
   omissions: NeuTableStateOmissions;

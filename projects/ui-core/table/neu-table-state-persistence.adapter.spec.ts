@@ -25,6 +25,22 @@ class MemoryStorage implements Storage {
 }
 
 describe('NeuTableStatePersistenceAdapter', () => {
+  it('persists group expansion separately and never persists transient editing state', () => {
+    const adapter = new NeuTableStatePersistenceAdapter();
+    const controller = new NeuTableStateController<unknown>();
+    controller.update(
+      {
+        editingKeys: new Set([1]),
+        editingCell: { rowKey: 1, columnKey: 'name' },
+        groupExpansionKeys: new Set(['Admin']),
+      },
+      'api',
+    );
+    const snapshot = adapter.snapshot(controller.snapshot());
+    expect(snapshot.expandedGroupKeys).toEqual(['Admin']);
+    expect(snapshot).not.toHaveProperty('editingKeys');
+    expect(snapshot).not.toHaveProperty('editingCell');
+  });
   it('round-trips the versioned row-data-free snapshot and skips semantic writes', () => {
     const controller = new NeuTableStateController<unknown>();
     controller.update(
@@ -183,14 +199,9 @@ describe('NeuTableStatePersistenceAdapter', () => {
 
     const snapshot = new NeuTableStatePersistenceAdapter().snapshot(controller.snapshot());
 
-    expect(snapshot.filters['supported'].constraints.map((constraint) => constraint.value)).toEqual([
-      null,
-      'text',
-      false,
-      3.5,
-      '2026-01-02T03:04:05.000Z',
-      { nested: ['x', { ok: true }] },
-    ]);
+    expect(snapshot.filters['supported'].constraints.map((constraint) => constraint.value)).toEqual(
+      [null, 'text', false, 3.5, '2026-01-02T03:04:05.000Z', { nested: ['x', { ok: true }] }],
+    );
     expect(snapshot.omissions.filterKeys).toEqual([
       'infinite',
       'invalidDate',
@@ -235,8 +246,7 @@ describe('NeuTableStatePersistenceAdapter', () => {
     ).toBeNull();
     expect(
       mutate(
-        (state) =>
-          (state.filters = { id: { operator: 'and', constraints: [{ mode: 'equals' }] } }),
+        (state) => (state.filters = { id: { operator: 'and', constraints: [{ mode: 'equals' }] } }),
       ),
     ).toBeNull();
     expect(mutate((state) => (state.selectionKeys = null))).toBeNull();
