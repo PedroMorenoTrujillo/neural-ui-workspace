@@ -1,0 +1,20 @@
+.neu-gallery__surface { display: grid; gap: var(--neu-space-3); max-inline-size: 100%; }
+.neu-gallery__stage { position: relative; min-block-size: 18rem; overflow: hidden; border: 1px solid var(--neu-border); border-radius: var(--neu-radius-lg); background: var(--neu-surface-2); }
+.neu-gallery__preview { display: block; inline-size: 100%; block-size: 100%; min-block-size: inherit; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.neu-gallery__image { display: block; inline-size: 100%; block-size: 100%; min-block-size: inherit; object-fit: cover; }
+.neu-gallery__image--contain { object-fit: contain; }
+.neu-gallery__nav, .neu-gallery__lightbox-nav { position: absolute; inset-block-start: 50%; translate: 0 -50%; z-index: 1; border: 1px solid var(--neu-border); border-radius: 999px; inline-size: 2.5rem; block-size: 2.5rem; background: color-mix(in srgb, var(--neu-surface) 85%, transparent); color: var(--neu-text); font-size: 1.5rem; }
+.neu-gallery__nav--prev, .neu-gallery__lightbox-nav--prev { inset-inline-start: var(--neu-space-3); }
+.neu-gallery__nav--next, .neu-gallery__lightbox-nav--next { inset-inline-end: var(--neu-space-3); }
+.neu-gallery__caption { position: absolute; inset-inline: var(--neu-space-3); inset-block-end: 0; margin: 0; padding: var(--neu-space-3); background: color-mix(in srgb, var(--neu-surface) 80%, transparent); color: var(--neu-text); }
+.neu-gallery__thumbnails { display: flex; gap: var(--neu-space-2); overflow-x: auto; padding-block-end: 2px; }
+.neu-gallery__thumbnail { flex: 0 0 4.5rem; inline-size: 4.5rem; block-size: 4.5rem; padding: 0; overflow: hidden; border: 2px solid transparent; border-radius: var(--neu-radius); background: var(--neu-surface-2); }
+.neu-gallery__thumbnail--active { border-color: var(--neu-primary); }
+.neu-gallery__thumbnail img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+.neu-gallery__backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: var(--neu-space-4); background: color-mix(in srgb, black 78%, transparent); }
+.neu-gallery__lightbox { position: relative; display: grid; inline-size: min(100%, 72rem); block-size: min(100%, 52rem); overflow: hidden; border-radius: var(--neu-radius-lg); background: var(--neu-surface); }
+.neu-gallery__toolbar { display: flex; align-items: center; gap: var(--neu-space-2); min-inline-size: 0; padding: var(--neu-space-2); overflow-x: auto; background: var(--neu-surface-2); }
+.neu-gallery__toolbar span { margin-inline-end: auto; white-space: nowrap; }
+.neu-gallery__toolbar button, .neu-gallery__download { flex: 0 0 auto; display: inline-grid; place-items: center; inline-size: 2rem; block-size: 2rem; border: 1px solid var(--neu-border); border-radius: var(--neu-radius); background: var(--neu-surface); color: var(--neu-text); text-decoration: none; }
+.neu-gallery__lightbox-image { place-self: center; max-inline-size: 100%; max-block-size: calc(100% - 3rem); object-fit: contain; transition: transform 160ms ease; }
+@media (prefers-reduced-motion: reduce) { .neu-gallery__lightbox-image { transition: none; } }
