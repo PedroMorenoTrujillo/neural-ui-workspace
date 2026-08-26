@@ -8,7 +8,10 @@ NeuralUI is an Angular design system with a coherent Neural visual language, a s
 
 - Use current Angular standalone APIs, typed inputs/outputs, `OnPush`, signals for component-owned reactive state, and explicit dependency injection.
 - Components must remain correct without Zone.js: event, async, and external-library updates explicitly update signals or Angular state.
-- SSR and hydration must produce deterministic initial markup. IDs, responsive behavior, locale/date output, browser globals, and deferred client work must be hydration-safe. The dedicated SSR foundation owns the implementation details.
+- SSR and hydration must produce deterministic initial markup. Generated IDs are request/application scoped and must never depend on randomness, the clock, or process-global mutable counters for hydrated output. The dedicated SSR foundation owns this contract.
+- The initial render is viewport-independent. Responsive behavior enhances only after hydration through the shared responsive-state foundation; server rendering must not guess from browser globals.
+- Locale, IANA time zone, and initial time are explicit or transferred application state. Date-only values preserve calendar-date semantics, while timestamps are formatted against the configured locale/time-zone contract.
+- Representative hydration certification must compare server and client structure across supported locales and time zones, including generated relationships, responsive surfaces, and temporal components.
 - State has one owner. Inputs are immutable contracts; never mutate input collections or caller objects. Emit new values for externally owned state.
 - Keep public APIs minimal and typed. New runtime APIs require a documented consumer use case and a secondary-entrypoint review.
 - Form controls implement the CVA contract, disabled state, labels/errors, and keyboard behavior consistently.
