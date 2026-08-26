@@ -37,7 +37,7 @@ const exported = new Set();
 
 if (packageJson) {
   for (const key of Object.keys(packageJson.exports ?? {})) {
-    if (key === '.' || key === './package.json' || key.startsWith('./styles')) continue;
+    if (key === '.' || key === './package.json' || key === './token-manifest.json' || key.startsWith('./styles')) continue;
     exported.add(key.replace(/^\.\//, ''));
   }
 }

@@ -8,6 +8,7 @@
     "assets": [
         "./README.md",
         "./styles.scss",
+        "./token-manifest.json",
         {
             "input": "./schematics",
             "glob": "**",

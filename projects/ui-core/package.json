@@ -44,6 +44,7 @@
     "url": "https://github.com/PedroMorenoTrujillo/neural-ui-workspace/issues"
   },
   "exports": {
+    "./token-manifest.json": "./token-manifest.json",
     "./styles": {
       "sass": "./styles.scss",
       "style": "./styles.scss",

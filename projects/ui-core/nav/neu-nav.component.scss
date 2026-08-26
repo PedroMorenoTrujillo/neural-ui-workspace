@@ -137,16 +137,6 @@ $item-radius: 8px;
     height: 100%;
     flex-shrink: 0;
     display: flex;
-    --neu-nav-toggle-size: 28px;
-    --neu-nav-toggle-offset-top: 18px;
-    --neu-nav-toggle-bg: var(--neu-surface);
-    --neu-nav-toggle-bg-hover: var(--neu-surface-2);
-    --neu-nav-toggle-border: var(--neu-border);
-    --neu-nav-toggle-color: var(--neu-text-muted);
-    --neu-nav-toggle-color-hover: var(--neu-text);
-    --neu-nav-toggle-shadow:
-      0 6px 14px color-mix(in srgb, var(--neu-text) 10%, transparent),
-      inset 0 1px 0 color-mix(in srgb, var(--neu-surface) 82%, white);
   }
 
   // ---- Botón collapse/expand — montado sobre el borde derecho / collapse/expand button mounted on right edge ----

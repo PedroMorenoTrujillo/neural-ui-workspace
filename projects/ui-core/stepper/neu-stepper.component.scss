@@ -4,10 +4,6 @@
 // ============================================================
 
 .neu-stepper {
-  --neu-stepper-indicator-size: 32px;
-  --neu-stepper-indicator-radius: calc(var(--neu-stepper-indicator-size) / 2);
-  --neu-stepper-connector-gap: 8px;
-
   display: flex;
   flex-direction: column;
   gap: var(--neu-space-6);

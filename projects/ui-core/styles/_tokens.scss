@@ -17,9 +17,18 @@
   --neu-primary-solid-hover: #005fcc;
   --neu-primary-solid-fg: #ffffff;
 
+  // Canonical semantic aliases. The older --neu-color-* names remain supported
+  // so consumer themes written against either vocabulary resolve identically.
+  --neu-color-primary: var(--neu-primary);
+  --neu-color-primary-alpha: rgb(0 122 255 / 0.1);
+  --neu-primary-200: #bfdbfe;
+  --neu-primary-contrast: var(--neu-primary-fg);
+  --neu-primary-soft: var(--neu-primary-50);
+
   --neu-secondary: #10b981;
   --neu-secondary-dark: #059669;
   --neu-secondary-fg: #ffffff;
+  --neu-color-secondary: var(--neu-secondary);
 
   --neu-accent: #5ac8fa;
 
@@ -43,6 +52,9 @@
   --neu-border: rgba(15, 23, 42, 0.08);
   --neu-border-hover: rgba(15, 23, 42, 0.16);
   --neu-border-focus: var(--neu-primary);
+  --neu-border-color: var(--neu-border);
+  --neu-border-subtle: var(--neu-border);
+  --neu-color-border: var(--neu-border);
 
   // ------------------------------------------------
   // Tipografía (Slate scale)
@@ -51,6 +63,8 @@
   --neu-text-muted: #475569; // Slate-600
   --neu-text-disabled: #64748b; // Slate-500
   --neu-text-inverse: #ffffff;
+  --neu-text-primary: var(--neu-text);
+  --neu-text-secondary: var(--neu-text-muted);
   --neu-knob-display-color: var(--neu-text);
   --neu-knob-label-color: var(--neu-text-muted);
 
@@ -72,14 +86,18 @@
   --neu-success: #15803d;
   --neu-success-bg: #d1fae5;
   --neu-success-text: #065f46;
+  --neu-color-success: var(--neu-success);
 
   --neu-warning: #f59e0b;
   --neu-warning-bg: #fef3c7;
   --neu-warning-text: #92400e;
+  --neu-color-warning: var(--neu-warning);
 
   --neu-error: #dc2626;
   --neu-error-bg: #fee2e2;
   --neu-error-text: #991b1b;
+  --neu-danger: var(--neu-error); // compatibility alias
+  --neu-color-danger: var(--neu-error);
 
   --neu-info: #007aff;
   --neu-info-bg: #eff6ff;
@@ -91,6 +109,7 @@
   --neu-radius-xs: 2px;
   --neu-radius-sm: 6px;
   --neu-radius: 8px;
+  --neu-radius-md: var(--neu-radius); // compatibility alias
   --neu-radius-lg: 12px;
   --neu-radius-xl: 16px;
   --neu-radius-2xl: 24px;
@@ -164,8 +183,14 @@
   // Focus ring — anillo de enfoque accesible
   // Modern browsers (color-mix) auto-adapt on theme change.
   // ------------------------------------------------
-  --neu-focus-ring: 0 0 0 3px rgba(0, 122, 255, 0.15);
-  --neu-focus-ring-strong: 0 0 0 3px rgba(0, 122, 255, 0.35);
+  --neu-focus-color: var(--neu-primary);
+  --neu-focus-ring-color: var(--neu-focus-color);
+  --neu-focus-ring-width: 3px;
+  --neu-focus-ring-offset: 0px;
+  --neu-focus-ring-alpha: 25%;
+  --neu-focus-ring-strong-alpha: 50%;
+  --neu-focus-ring: 0 0 0 var(--neu-focus-ring-width) rgba(0, 122, 255, 0.15);
+  --neu-focus-ring-strong: 0 0 0 var(--neu-focus-ring-width) rgba(0, 122, 255, 0.35);
 
   // ------------------------------------------------
   // Iconos (Lucide via @ng-icons)
@@ -293,6 +318,66 @@
   --neu-overlay-bg: rgba(15, 23, 42, 0.45);
   --neu-overlay-bg-soft: rgba(15, 23, 42, 0.35);
 
+  // Component defaults. Components consume these with var() and never reset
+  // them on an internal selector, keeping the normal CSS cascade available.
+  --neu-autocomplete-option-height: 40px;
+  --neu-multiselect-option-height: 44px;
+  --neu-select-option-height: 44px;
+  --neu-number-input-height: 48px;
+  --neu-number-input-width: 80px;
+  --neu-number-input-stacked-min-width: 120px;
+  --neu-on-primary: var(--neu-primary-fg);
+  --neu-otp-cell-bg: var(--neu-surface-1);
+  --neu-otp-gap: var(--neu-space-2);
+  --neu-scroll-area-thumb: var(--neu-border);
+  --neu-sidebar-collapsed-width: 60px;
+  --neu-spinner-track: var(--neu-surface-3);
+  --neu-splitter-handle-size: 4px;
+  --neu-table-header-height: 44px;
+  --neu-table-max-height: 480px;
+  --neu-table-sticky-offset: 0px;
+  --neu-color-surface-subtle: var(--neu-bg);
+  --neu-color-text-secondary: var(--neu-text-muted);
+  --neu-meter-track: var(--neu-meter-track-bg);
+
+  --neu-context-menu-border: var(--neu-border-color);
+  --neu-context-menu-color: var(--neu-text-primary);
+  --neu-context-menu-disabled-color: var(--neu-text-muted);
+  --neu-popover-color: var(--neu-text-primary);
+  --neu-popover-min-width: 200px;
+  --neu-popover-max-width: 320px;
+  --neu-popover-padding: var(--neu-space-3) var(--neu-space-4);
+
+  --neu-toolbar-bg: var(--neu-surface-1);
+  --neu-toolbar-color: var(--neu-text);
+  --neu-toolbar-primary-bg: var(--neu-primary-dark);
+  --neu-toolbar-primary-color: var(--neu-primary-fg);
+
+  // Terminal is intentionally dark in both themes; its tokens are public.
+  --neu-terminal-bg: #0f172a;
+  --neu-terminal-border: #334155;
+  --neu-terminal-text: #e2e8f0;
+  --neu-terminal-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --neu-terminal-prompt: #38bdf8;
+  --neu-terminal-muted: #94a3b8;
+  --neu-terminal-error: #fca5a5;
+
+  --neu-stepper-indicator-size: 32px;
+  --neu-stepper-indicator-radius: calc(var(--neu-stepper-indicator-size) / 2);
+  --neu-stepper-connector-gap: var(--neu-space-2);
+  --neu-organization-chart-gap-x: 2.5rem;
+  --neu-organization-chart-gap-y: 2.5rem;
+  --neu-nav-toggle-size: 28px;
+  --neu-nav-toggle-offset-top: 18px;
+  --neu-nav-toggle-bg: var(--neu-surface);
+  --neu-nav-toggle-bg-hover: var(--neu-surface-2);
+  --neu-nav-toggle-border: var(--neu-border);
+  --neu-nav-toggle-color: var(--neu-text-muted);
+  --neu-nav-toggle-color-hover: var(--neu-text);
+  --neu-nav-toggle-shadow:
+    0 6px 14px color-mix(in srgb, var(--neu-text) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--neu-surface) 82%, white);
+
   // ------------------------------------------------
   // Table — badge cell semantic colors / colores semánticos de celda badge
   // ------------------------------------------------
@@ -342,8 +427,8 @@
   // Keep nested feature queries after declarations for Sass's CSS-compatible
   // mixed-declaration ordering.
   @supports (color: color-mix(in srgb, red, blue)) {
-    --neu-focus-ring: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 25%, transparent);
-    --neu-focus-ring-strong: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 50%, transparent);
+    --neu-focus-ring: 0 0 0 var(--neu-focus-ring-width) color-mix(in srgb, var(--neu-focus-ring-color) var(--neu-focus-ring-alpha), transparent);
+    --neu-focus-ring-strong: 0 0 0 var(--neu-focus-ring-width) color-mix(in srgb, var(--neu-focus-ring-color) var(--neu-focus-ring-strong-alpha), transparent);
   }
 }
 

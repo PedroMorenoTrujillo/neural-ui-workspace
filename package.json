@@ -11,6 +11,8 @@
     "audit:cva": "node scripts/audit-ui-core-cva-contracts.mjs",
     "audit:bundle": "node scripts/audit-ui-core-bundle.mjs",
     "audit:logical-css": "node scripts/audit-ui-core-logical-css.mjs",
+    "tokens:generate": "node scripts/generate-token-manifest.mjs",
+    "audit:tokens": "node scripts/audit-token-contract.mjs",
     "snapshot:contracts": "node scripts/audit-public-contract.mjs --update",
     "audit:contracts": "node scripts/audit-public-contract.mjs",
     "docs:sync": "node scripts/sync-readme-metrics.mjs --update",

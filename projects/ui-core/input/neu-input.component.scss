@@ -37,8 +37,8 @@ $label-font-floating: 12px;
   position: relative;
   display: flex;
   align-items: center;
-  background: var(--neu-surface);
-  border: 1.5px solid var(--neu-border);
+  background: var(--neu-input-background, var(--neu-surface));
+  border: 1.5px solid var(--neu-input-border, var(--neu-border));
   border-radius: var(--neu-radius);
   height: $input-height;
   transition:
@@ -51,8 +51,8 @@ $label-font-floating: 12px;
   }
 
   &--focused {
-    border-color: var(--neu-primary);
-    box-shadow: var(--neu-focus-ring);
+    border-color: var(--neu-input-focus-border, var(--neu-primary));
+    box-shadow: var(--neu-input-focus-ring, var(--neu-focus-ring));
   }
 
   &--error {
