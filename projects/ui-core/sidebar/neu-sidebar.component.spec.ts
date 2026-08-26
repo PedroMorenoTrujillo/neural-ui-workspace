@@ -451,15 +451,24 @@ describe('NeuSidebarComponent', () => {
     f.detectChanges();
     const closeButton = f.nativeElement.querySelector('.neu-sidebar__close') as HTMLButtonElement;
     closeButton.focus();
-    const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
+    const forward = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true,
+      cancelable: true,
+    });
     const preventForward = vi.spyOn(forward, 'preventDefault');
-    f.componentInstance.onKeyDown(forward);
+    closeButton.dispatchEvent(forward);
     expect(preventForward).toHaveBeenCalled();
     expect(document.activeElement).toBe(closeButton);
 
-    const backward = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true });
+    const backward = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     const preventBackward = vi.spyOn(backward, 'preventDefault');
-    f.componentInstance.onKeyDown(backward);
+    closeButton.dispatchEvent(backward);
     expect(preventBackward).toHaveBeenCalled();
 
     const escape = new KeyboardEvent('keydown', { key: 'Escape' });
@@ -530,17 +539,20 @@ describe('NeuSidebarComponent', () => {
     f.detectChanges();
     const closeButton = f.nativeElement.querySelector('.neu-sidebar__close') as HTMLButtonElement;
     const action = f.nativeElement.querySelector('.inside-action') as HTMLButtonElement;
-    const sidebar = f.debugElement.children[0].componentInstance as NeuSidebarComponent;
-
     closeButton.focus();
-    const forward = new KeyboardEvent('keydown', { key: 'Tab' });
+    const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
     const preventForward = vi.spyOn(forward, 'preventDefault');
-    const backward = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true });
+    const backward = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     const preventBackward = vi.spyOn(backward, 'preventDefault');
 
-    sidebar.onKeyDown(forward);
+    closeButton.dispatchEvent(forward);
     action.focus();
-    sidebar.onKeyDown(backward);
+    action.dispatchEvent(backward);
 
     expect(preventForward).not.toHaveBeenCalled();
     expect(preventBackward).not.toHaveBeenCalled();

@@ -1,13 +1,16 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   ViewEncapsulation,
   effect,
+  inject,
   input,
   output,
   viewChild,
 } from '@angular/core';
+import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -29,7 +32,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
  */
 @Component({
   selector: 'neu-dialog',
-  imports: [NeuIconComponent],
+  imports: [NeuFocusTrapDirective, NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -58,6 +61,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
           [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
           role="dialog"
           tabindex="-1"
+          neuFocusTrap
           [id]="'neu-dialog-' + _uid"
           [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
           [attr.aria-modal]="true"
@@ -111,6 +115,8 @@ export class NeuDialogComponent {
   closed = output<unknown>();
 
   private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
+  private readonly document = inject(DOCUMENT);
   private previousActiveElement: HTMLElement | null = null;
 
   /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
@@ -123,7 +129,7 @@ export class NeuDialogComponent {
         return;
       }
 
-      this.previousActiveElement = document.activeElement as HTMLElement | null;
+      this.previousActiveElement = this.document.activeElement as HTMLElement | null;
       queueMicrotask(() => this.focusInitialElement());
     });
   }
@@ -139,43 +145,15 @@ export class NeuDialogComponent {
       }
       return;
     }
-
-    if (event.key !== 'Tab') return;
-
-    const panel = this.panelRef()?.nativeElement;
-    if (!panel) return;
-
-    const focusable = this.getFocusableElements(panel);
-    if (!focusable.length) {
-      event.preventDefault();
-      panel.focus();
-      return;
-    }
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const activeElement = document.activeElement as HTMLElement | null;
-
-    if (event.shiftKey) {
-      if (activeElement === first || activeElement === panel) {
-        event.preventDefault();
-        last.focus();
-      }
-      return;
-    }
-
-    if (activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
   }
 
   private focusInitialElement(): void {
     const panel = this.panelRef()?.nativeElement;
     if (!panel) return;
 
-    const [firstFocusable] = this.getFocusableElements(panel);
-    (firstFocusable ?? panel).focus();
+    if (!this.focusTrapRef()?.focusFirst()) {
+      panel.focus();
+    }
   }
 
   private restorePreviousFocus(): void {
@@ -188,13 +166,5 @@ export class NeuDialogComponent {
       this.previousActiveElement?.focus();
       this.previousActiveElement = null;
     });
-  }
-
-  private getFocusableElements(panel: HTMLElement): HTMLElement[] {
-    return Array.from(
-      panel.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-      ),
-    ).filter((element) => !element.hasAttribute('aria-hidden'));
   }
 }

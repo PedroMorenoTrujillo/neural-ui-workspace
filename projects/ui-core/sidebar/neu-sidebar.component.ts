@@ -7,9 +7,10 @@ import {
   inject,
   input,
   output,
-  ElementRef,
   HostListener,
+  viewChild,
 } from '@angular/core';
+import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { DOCUMENT } from '@angular/common';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NeuIconComponent } from '@neural-ui/core/icon';
@@ -64,7 +65,7 @@ function unlockDocumentScroll(document: Document): void {
  */
 @Component({
   selector: 'neu-sidebar',
-  imports: [NeuIconComponent],
+  imports: [NeuFocusTrapDirective, NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -81,6 +82,8 @@ function unlockDocumentScroll(document: Document): void {
     <!-- Panel lateral -->
     <aside
       class="neu-sidebar"
+      tabindex="-1"
+      [neuFocusTrap]="isOpen() && !persistent()"
       [class.neu-sidebar--open]="isOpen()"
       [class.neu-sidebar--persistent]="persistent()"
       [class.neu-sidebar--collapsed]="collapsed()"
@@ -125,7 +128,7 @@ function unlockDocumentScroll(document: Document): void {
 })
 export class NeuSidebarComponent {
   private readonly document = inject(DOCUMENT);
-  private readonly elementRef = inject(ElementRef);
+  private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
   private readonly urlState = inject(NeuUrlStateService);
   private readonly openParam = computed(() => this.urlState.getParam(this.urlParam()));
   private previousActiveElement: HTMLElement | null = null;
@@ -237,32 +240,10 @@ export class NeuSidebarComponent {
     this.collapsedChange.emit(newState);
   }
 
-  /** Obtiene los elementos focusables dentro del sidebar / Gets focusable elements inside sidebar */
-  private getFocusableElements(): HTMLElement[] {
-    const focusableSelectors = [
-      'button',
-      'a[href]',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      'textarea:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(',');
-
-    const aside = this.elementRef.nativeElement.querySelector('aside.neu-sidebar');
-    if (!aside) {
-      return [];
-    }
-
-    return Array.from(aside.querySelectorAll(focusableSelectors)) as HTMLElement[];
-  }
-
   /** Mueve el foco al primer elemento focusable / Moves focus to first focusable element */
   private focusFirstElement(): void {
     setTimeout(() => {
-      const focusable = this.getFocusableElements();
-      if (focusable.length > 0) {
-        focusable[0].focus();
-      }
+      this.focusTrapRef()?.focusFirst();
     }, 0);
   }
 
@@ -277,32 +258,6 @@ export class NeuSidebarComponent {
       event.preventDefault();
       this.close();
       return;
-    }
-
-    if (event.key !== 'Tab') {
-      return;
-    }
-
-    const focusable = this.getFocusableElements();
-    if (focusable.length === 0) {
-      return;
-    }
-
-    const activeElement = this.document.activeElement as HTMLElement;
-    const currentIndex = focusable.indexOf(activeElement);
-
-    if (event.shiftKey) {
-      // Shift+Tab — go to previous
-      if (currentIndex <= 0) {
-        event.preventDefault();
-        focusable[focusable.length - 1].focus();
-      }
-    } else {
-      // Tab — go to next
-      if (currentIndex >= focusable.length - 1) {
-        event.preventDefault();
-        focusable[0].focus();
-      }
     }
   }
 }

@@ -4,7 +4,7 @@ import { join, relative } from 'node:path';
 const root = new URL('..', import.meta.url).pathname;
 const uiCore = join(root, 'projects/ui-core');
 
-const nonVisualEntryPoints = new Set(['option-api', 'url-state', 'testing']);
+const nonVisualEntryPoints = new Set(['focus-trap', 'option-api', 'url-state', 'testing']);
 const nonDemoEntryPoints = new Set(['button', 'confirm-dialog', 'toggle-button-group', 'testing']);
 
 function dirs(path) {
@@ -25,9 +25,7 @@ function read(path) {
 }
 
 const distPackageJsonPath = join(root, 'dist/neural-ui/core/package.json');
-const packageJson = existsSync(distPackageJsonPath)
-  ? JSON.parse(read(distPackageJsonPath))
-  : null;
+const packageJson = existsSync(distPackageJsonPath) ? JSON.parse(read(distPackageJsonPath)) : null;
 const exported = new Set();
 
 if (packageJson) {

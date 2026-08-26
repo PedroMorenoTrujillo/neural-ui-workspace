@@ -32,6 +32,7 @@
     "./divider",
     "./empty-state",
     "./filter-bar",
+    "./focus-trap",
     "./form-field",
     "./icon",
     "./image-gallery",
@@ -449,6 +450,14 @@
         "closed"
       ]
     },
+    "breadcrumb/neu-breadcrumb.component.ts": {
+      "selector": "neu-breadcrumb",
+      "inputs": [
+        "items",
+        "separator"
+      ],
+      "outputs": []
+    },
     "button-group/neu-button-group.component.ts": {
       "selector": "neu-button-group",
       "inputs": [
@@ -659,6 +668,13 @@
       "outputs": [
         "filterChange"
       ]
+    },
+    "focus-trap/neu-focus-trap.directive.ts": {
+      "selector": "[neuFocusTrap]",
+      "inputs": [
+        "neuFocusTrap"
+      ],
+      "outputs": []
     },
     "form-field/neu-form-field.component.ts": {
       "selector": "neu-form-field",

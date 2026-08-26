@@ -1,19 +1,40 @@
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIcons } from '@ng-icons/core';
 import { lucidePencil } from '@ng-icons/lucide';
 import {
   NeuMenuButtonComponent,
   NeuMenuComponent,
+  NeuMenuItemDirective,
   NeuMenubarComponent,
   NeuTieredMenuComponent,
 } from './neu-menu.component';
+
+@Component({
+  imports: [NeuMenuComponent, NeuMenuButtonComponent, NeuMenuItemDirective],
+  template: `
+    <neu-menu [items]="items">
+      <ng-template neuMenuItem let-item
+        ><strong>{{ item.label }}</strong></ng-template
+      >
+    </neu-menu>
+    <neu-menu-button [items]="items">
+      <ng-template neuMenuItem let-item
+        ><em>{{ item.label }}</em></ng-template
+      >
+    </neu-menu-button>
+  `,
+})
+class CustomMenuItemHostComponent {
+  readonly items = [{ key: 'edit', label: 'Edit' }];
+}
 
 describe('NeuMenuComponent', () => {
   let fixture: ComponentFixture<NeuMenuComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NeuMenuComponent],
+      imports: [NeuMenuComponent, CustomMenuItemHostComponent],
       providers: [provideIcons({ lucidePencil })],
     }).compileComponents();
     fixture = TestBed.createComponent(NeuMenuComponent);
@@ -36,7 +57,9 @@ describe('NeuMenuComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.neu-menu__icon svg')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.neu-menu__icon')?.textContent).not.toContain('lucidePencil');
+    expect(fixture.nativeElement.querySelector('.neu-menu__icon')?.textContent).not.toContain(
+      'lucidePencil',
+    );
   });
 
   it('renders separators, shortcuts and nested menus while ignoring disabled items', () => {
@@ -51,17 +74,34 @@ describe('NeuMenuComponent', () => {
     ]);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe('Actions');
+    expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe(
+      'Actions',
+    );
     expect(fixture.nativeElement.querySelector('.neu-menu__separator')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.neu-menu__shortcut')?.textContent).toContain('Ctrl+S');
+    expect(fixture.nativeElement.querySelector('.neu-menu__shortcut')?.textContent).toContain(
+      'Ctrl+S',
+    );
     expect(fixture.nativeElement.querySelector('.neu-menu__chevron')).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain('Child');
 
-    const buttons = fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'button',
+    ) as NodeListOf<HTMLButtonElement>;
     buttons[0].click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'save' }));
     buttons[1].click();
     expect(clicked).not.toHaveBeenCalledWith(expect.objectContaining({ key: 'disabled' }));
+  });
+
+  it('renders the public projected item template context', async () => {
+    const customFixture = TestBed.createComponent(CustomMenuItemHostComponent);
+    customFixture.detectChanges();
+    await customFixture.whenStable();
+
+    expect(customFixture.nativeElement.querySelector('neu-menu strong')?.textContent).toBe('Edit');
+    (customFixture.nativeElement.querySelector('.neu-menu-button__trigger') as HTMLElement).click();
+    customFixture.detectChanges();
+    expect(document.querySelector('.neu-menu-button__panel em')?.textContent).toBe('Edit');
   });
 });
 
@@ -110,7 +150,6 @@ describe('NeuMenuButtonComponent', () => {
     (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
     expect(component.open()).toBe(false);
   });
-
 });
 
 describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
@@ -129,10 +168,15 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     const component = fixture.componentInstance;
     const clicked = vi.spyOn(component.itemClick, 'emit');
 
-    expect(fixture.nativeElement.querySelector('nav')?.getAttribute('aria-label')).toBe('Main navigation');
+    expect(fixture.nativeElement.querySelector('nav')?.getAttribute('aria-label')).toBe(
+      'Main navigation',
+    );
     (fixture.nativeElement.querySelector('.neu-menubar__item') as HTMLButtonElement).click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'help' }));
-    expect((fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)[2].disabled).toBe(true);
+    expect(
+      (fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)[2]
+        .disabled,
+    ).toBe(true);
 
     (fixture.nativeElement.querySelector('.neu-menu-button__trigger') as HTMLButtonElement).click();
     fixture.detectChanges();
@@ -149,7 +193,9 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     const component = fixture.componentInstance;
     const clicked = vi.spyOn(component.itemClick, 'emit');
 
-    expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe('Tree actions');
+    expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe(
+      'Tree actions',
+    );
     (fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)[1].click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'new' }));
   });
