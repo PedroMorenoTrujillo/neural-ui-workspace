@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, PLATFORM_ID, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NeuCarouselComponent, NeuCarouselFooterDirective, NeuCarouselHeaderDirective, NeuCarouselItemDirective } from './neu-carousel.component';
 
@@ -6,7 +6,11 @@ import { NeuCarouselComponent, NeuCarouselFooterDirective, NeuCarouselHeaderDire
 class CarouselTemplateHost { readonly items = [1, 2]; }
 
 describe('NeuCarouselComponent', () => {
+  let originalInnerWidth: number;
+
   beforeEach(async () => TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }).compileComponents());
+  beforeEach(() => { originalInnerWidth = window.innerWidth; });
+  afterEach(() => Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth }));
 
   it('pages generic items truthfully, including a final partial page', () => {
     const fixture = TestBed.createComponent(NeuCarouselComponent<string>);
@@ -64,5 +68,55 @@ describe('NeuCarouselComponent', () => {
   it('advances with autoplay and cleans its interval on destruction', async () => {
     const fixture = TestBed.createComponent(NeuCarouselComponent<number>); fixture.componentRef.setInput('items', [1, 2]); fixture.componentRef.setInput('autoplayInterval', 1); fixture.detectChanges();
     await new Promise<void>((resolve) => setTimeout(resolve, 8)); expect(fixture.componentInstance.page()).toBe(1); fixture.destroy();
+  });
+
+  it('uses the default layout above all responsive max-width breakpoints', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1500 });
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [1, 2, 3, 4, 5]); fixture.componentRef.setInput('numVisible', 4); fixture.componentRef.setInput('numScroll', 2); fixture.componentRef.setInput('responsiveOptions', [{ breakpoint: '1200px', numVisible: 3, numScroll: 1 }]); fixture.detectChanges();
+    expect(fixture.componentInstance.matchedResponsiveOption()).toBeUndefined(); expect(fixture.componentInstance.effectiveVisible()).toBe(4); expect(fixture.componentInstance.effectiveScroll()).toBe(2);
+  });
+
+  it('selects the tightest matching PrimeNG max-width option without mutating consumer options', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 560 });
+    const options = Object.freeze([{ breakpoint: '767px', numVisible: 2, numScroll: 2 }, { breakpoint: '1200px', numVisible: 3, numScroll: 3 }, { breakpoint: '575px', numVisible: 1, numScroll: 1 }]);
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [1, 2, 3, 4, 5]); fixture.componentRef.setInput('numVisible', 4); fixture.componentRef.setInput('responsiveOptions', options); fixture.detectChanges();
+    expect(fixture.componentInstance.matchedResponsiveOption()).toBe(options[2]); expect(fixture.componentInstance.effectiveVisible()).toBe(1); expect(fixture.componentInstance.effectiveScroll()).toBe(1); expect(options.map((option) => option.breakpoint)).toEqual(['767px', '1200px', '575px']);
+  });
+
+  it('reconciles page and last partial pages across responsive viewport changes', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1500 });
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]); fixture.componentRef.setInput('numVisible', 4); fixture.componentRef.setInput('numScroll', 4); fixture.componentRef.setInput('responsiveOptions', [{ breakpoint: 1200, numVisible: 3, numScroll: 2 }, { breakpoint: 767, numVisible: 1, numScroll: 1 }]); fixture.componentRef.setInput('page', null); fixture.componentRef.setInput('initialPage', 1); fixture.detectChanges();
+    expect(fixture.componentInstance.first()).toBe(4);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1000 }); window.dispatchEvent(new Event('resize')); await fixture.whenStable(); fixture.detectChanges();
+    expect(fixture.componentInstance.effectiveVisible()).toBe(3); expect(fixture.componentInstance.effectiveScroll()).toBe(2); expect(fixture.componentInstance.page()).toBe(2); expect(fixture.componentInstance.first()).toBe(4);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 700 }); window.dispatchEvent(new Event('resize')); await fixture.whenStable(); fixture.detectChanges();
+    expect(fixture.componentInstance.effectiveVisible()).toBe(1); expect(fixture.componentInstance.effectiveScroll()).toBe(1); expect(fixture.componentInstance.page()).toBe(4); expect(fixture.componentInstance.first()).toBe(4);
+    fixture.componentInstance.setPage(fixture.componentInstance.pageCount() - 1); expect(fixture.componentInstance.visibleItems()).toEqual([9]);
+  });
+
+  it('reacts to dynamic responsive option changes and preserves circular navigation', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 700 });
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [1, 2, 3, 4, 5]); fixture.componentRef.setInput('numVisible', 3); fixture.componentRef.setInput('numScroll', 3); fixture.componentRef.setInput('circular', true); fixture.componentRef.setInput('responsiveOptions', [{ breakpoint: 800, numVisible: 2, numScroll: 2 }]); fixture.detectChanges();
+    fixture.componentInstance.previous(); expect(fixture.componentInstance.page()).toBe(2);
+    fixture.componentRef.setInput('responsiveOptions', [{ breakpoint: 800, numVisible: 1, numScroll: 1 }]); await fixture.whenStable(); fixture.detectChanges();
+    expect(fixture.componentInstance.effectiveVisible()).toBe(1); expect(fixture.componentInstance.effectiveScroll()).toBe(1); expect(fixture.componentInstance.page()).toBe(4); expect(fixture.componentInstance.first()).toBe(4);
+    fixture.componentInstance.previous(); expect(fixture.componentInstance.page()).toBe(3); fixture.componentInstance.setPage(-1); expect(fixture.componentInstance.page()).toBe(fixture.componentInstance.pageCount() - 1);
+  });
+
+  it('keeps autoplay active after a responsive layout transition', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 900 });
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [1, 2, 3, 4]); fixture.componentRef.setInput('numVisible', 2); fixture.componentRef.setInput('numScroll', 2); fixture.componentRef.setInput('responsiveOptions', [{ breakpoint: 1000, numVisible: 1, numScroll: 1 }]); fixture.componentRef.setInput('autoplayInterval', 1); fixture.detectChanges();
+    await fixture.whenStable(); await new Promise<void>((resolve) => setTimeout(resolve, 8)); expect(fixture.componentInstance.effectiveVisible()).toBe(1); expect(fixture.componentInstance.page()).not.toBe(0); fixture.destroy();
+  });
+
+  it('falls back to the base layout during SSR and unregisters the browser listener on destroy', () => {
+    TestBed.resetTestingModule(); TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(), { provide: PLATFORM_ID, useValue: 'server' }] });
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>); fixture.componentRef.setInput('items', [1, 2, 3]); fixture.componentRef.setInput('numVisible', 2); fixture.componentRef.setInput('responsiveOptions', [{ breakpoint: 2000, numVisible: 1 }]); fixture.detectChanges();
+    expect(fixture.componentInstance.matchedResponsiveOption()).toBeUndefined(); expect(fixture.componentInstance.effectiveVisible()).toBe(2); fixture.destroy();
   });
 });

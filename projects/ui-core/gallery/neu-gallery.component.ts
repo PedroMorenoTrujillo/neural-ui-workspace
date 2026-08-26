@@ -56,7 +56,7 @@ export class NeuGalleryCaptionDirective {
           @if (showItemNavigators() && items().length > 1) {
             <button type="button" class="neu-gallery__nav neu-gallery__nav--prev" [disabled]="!canPrev()" [attr.aria-label]="previousLabel()" (click)="previous()">‹</button>
           }
-          <button type="button" class="neu-gallery__preview" [attr.aria-label]="previewLabel()" (click)="openPreview()">
+          <button type="button" class="neu-gallery__preview" [attr.aria-label]="previewLabel()" (click)="openPreview($event.currentTarget)">
             @if (itemTemplate) {
               <ng-container [ngTemplateOutlet]="itemTemplate.templateRef" [ngTemplateOutletContext]="itemContext()" />
             } @else {
@@ -177,15 +177,21 @@ export class NeuGalleryComponent {
   }
   previous(): void { this.setActiveIndex(this.activeIndex() - 1, true); }
   next(): void { this.setActiveIndex(this.activeIndex() + 1, true); }
-  openPreview(): void {
+  openPreview(trigger?: EventTarget | null): void {
     if (this._previewOpen()) return;
-    this._restoreFocus = document.activeElement as HTMLElement | null;
+    this._restoreFocus =
+      typeof HTMLElement !== 'undefined' && trigger instanceof HTMLElement
+        ? trigger
+        : typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
     this._previewOpen.set(true); this.previewChange.emit(true);
   }
   closePreview(): void {
     if (!this._previewOpen()) return;
+    const restoreFocus = this._restoreFocus;
+    if (restoreFocus?.isConnected) restoreFocus.focus();
     this._previewOpen.set(false); this.resetTransform(); this.previewChange.emit(false);
-    queueMicrotask(() => this._restoreFocus?.focus());
   }
   zoom(delta: number): void { const value = Math.max(1, Math.min(this.maxZoom(), this._zoom() + delta)); this._zoom.set(value); this.zoomChange.emit(value); }
   rotate(delta: number): void { const value = (this._rotation() + delta + 360) % 360; this._rotation.set(value); this.rotationChange.emit(value); }

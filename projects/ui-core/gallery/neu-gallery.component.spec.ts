@@ -41,6 +41,15 @@ describe('NeuGalleryComponent', () => {
     expect(fixture.componentInstance.isPreviewOpen()).toBe(false);
   });
 
+  it('restores the preview trigger after its dialog is removed', async () => {
+    const fixture = TestBed.createComponent(NeuGalleryComponent);
+    fixture.componentRef.setInput('items', ITEMS); fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector('.neu-gallery__preview') as HTMLButtonElement;
+    trigger.focus(); fixture.componentInstance.openPreview(); fixture.detectChanges(); fixture.componentInstance.closePreview(); fixture.detectChanges();
+    await new Promise<void>((resolve) => setTimeout(resolve));
+    expect(document.activeElement).toBe(trigger); fixture.destroy();
+  });
+
   it('supports keyboard and swipe navigation without document listeners', () => {
     const fixture = TestBed.createComponent(NeuGalleryComponent);
     fixture.componentRef.setInput('items', ITEMS); fixture.detectChanges();
