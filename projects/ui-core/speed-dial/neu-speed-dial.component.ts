@@ -325,17 +325,24 @@ export class NeuSpeedDialComponent {
 
   show(): void {
     if (this.disabled() || this.visible()) return;
-    this.visible.set(true);
-    this.onVisibleChange.emit(true);
-    this.onShow.emit();
+    this.commitVisibility(true);
   }
 
   hide(restoreFocus = false): void {
     if (!this.visible()) return;
-    this.visible.set(false);
-    this.onVisibleChange.emit(false);
-    this.onHide.emit();
+    this.commitVisibility(false);
     if (restoreFocus && isPlatformBrowser(this.platformId)) this.trigger().nativeElement.focus();
+  }
+
+  /**
+   * One user-interaction transition. The `model()` generated `visibleChange`
+   * is canonical; `onVisibleChange` is the legacy compatibility mirror.
+   */
+  private commitVisibility(visible: boolean): void {
+    this.visible.set(visible);
+    this.onVisibleChange.emit(visible);
+    if (visible) this.onShow.emit();
+    else this.onHide.emit();
   }
 
   activate(event: Event, action: NeuResolvedMenuAction<NeuSpeedDialItem>): void {

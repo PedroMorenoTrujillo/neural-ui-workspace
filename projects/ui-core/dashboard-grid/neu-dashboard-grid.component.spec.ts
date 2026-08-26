@@ -96,6 +96,12 @@ describe('NeuDashboardGridComponent', () => {
 
     expect(f.componentInstance._orderedTiles()[2].id).toBe('a');
     expect(changes.length).toBe(1);
+    expect(changes[0]).not.toBe(TILES);
+    expect(TILES.map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
+
+    const replacement = [{ id: 'server', title: 'Server layout' }];
+    f.componentRef.setInput('tiles', replacement); f.detectChanges();
+    expect(f.componentInstance._orderedTiles()).toEqual(replacement);
   });
 
   it('tiles input change should update _orderedTiles', async () => {

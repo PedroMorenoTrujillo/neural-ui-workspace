@@ -200,4 +200,18 @@ describe('NeuSpeedDialComponent', () => {
     expect(component.itemStyle(0)['--neu-speed-x']).toMatch(/px$/);
     trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   });
+
+  it('keeps programmatic model writes silent and mirrors each user transition once', () => {
+    const fixture = TestBed.createComponent(NeuSpeedDialComponent);
+    fixture.componentRef.setInput('items', [{ key: 'one', label: 'One' }]); fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const compatibility: boolean[] = []; const shows: number[] = []; const hides: number[] = [];
+    component.onVisibleChange.subscribe((value) => compatibility.push(value));
+    component.onShow.subscribe(() => shows.push(1)); component.onHide.subscribe(() => hides.push(1));
+    fixture.componentRef.setInput('visible', true); fixture.detectChanges();
+    expect(compatibility).toEqual([]);
+    component.hide(); component.show();
+    expect(compatibility).toEqual([false, true]);
+    expect(shows).toHaveLength(1); expect(hides).toHaveLength(1);
+  });
 });

@@ -4,9 +4,9 @@ import {
   DestroyRef,
   ViewEncapsulation,
   afterNextRender,
+  effect,
   inject,
   input,
-  linkedSignal,
   output,
   signal,
 } from '@angular/core';
@@ -491,9 +491,10 @@ export class NeuNavComponent {
 
   // ---- Estado interno / Internal state ----
 
-  // Sigue el input `collapsed` del padre (permite el configurador)
-  // pero puede ser sobreescrito localmente con toggleCollapse()
-  readonly isCollapsed = linkedSignal(() => this.collapsed());
+  // Proposal/echo projection: input updates are silent reconciliation; user
+  // toggles own the local transition and emit one `collapsedChange` proposal.
+  private readonly _collapsed = signal(false);
+  readonly isCollapsed = this._collapsed.asReadonly();
   private readonly openGroups = signal<Set<string>>(new Set());
 
   // ---- Flyout para modo colapsado / Flyout for collapsed mode ----
@@ -501,6 +502,9 @@ export class NeuNavComponent {
   private _flyoutTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    effect(() => {
+      this._collapsed.set(this.collapsed());
+    });
     // Abrimos el grupo activo DESPUÉS de que el padre haya pasado los inputs
     afterNextRender(() => this._openActiveGroup());
     // Limpiamos el timer del flyout al destruir el componente
@@ -512,7 +516,7 @@ export class NeuNavComponent {
   // ---- Helpers de estado / State helpers ----
 
   toggleCollapse(): void {
-    this.isCollapsed.update((v) => {
+    this._collapsed.update((v) => {
       const next = !v;
       this.collapsedChange.emit(next);
       return next;

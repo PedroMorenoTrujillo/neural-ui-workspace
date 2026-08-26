@@ -32,6 +32,16 @@ describe('NeuGalleryComponent', () => {
     expect(fixture.componentInstance.activeIndex()).toBe(0);
   });
 
+  it('preserves an uncontrolled proposal across item replacement and clamps it silently', () => {
+    const fixture = TestBed.createComponent(NeuGalleryComponent);
+    fixture.componentRef.setInput('items', ITEMS); fixture.detectChanges();
+    const emitted: number[] = []; fixture.componentInstance.activeIndexChange.subscribe((value) => emitted.push(value));
+    fixture.componentInstance.setActiveIndex(2, true);
+    fixture.componentRef.setInput('items', ITEMS.slice(0, 2)); fixture.detectChanges();
+    expect(fixture.componentInstance.activeIndex()).toBe(1);
+    expect(emitted).toEqual([2]);
+  });
+
   it('supports preview transforms and Escape close', () => {
     const fixture = TestBed.createComponent(NeuGalleryComponent);
     fixture.componentRef.setInput('items', ITEMS); fixture.detectChanges();

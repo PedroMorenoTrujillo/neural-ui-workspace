@@ -165,6 +165,18 @@ describe('NeuKanbanComponent', () => {
 
     expect(fixture.componentInstance._columns()[0].cards[1].id).toBe('card-a');
     expect(changes).toHaveLength(1);
+    expect(changes[0][0].cards[1]).toBe(COLUMNS[0].cards[0]);
+    expect(COLUMNS[0].cards.map((card) => card.id)).toEqual(['card-a', 'card-b']);
+  });
+
+  it('reconciles an optimistic board from a consumer replacement', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    fixture.componentInstance.onCardDrop({ previousContainer: { id: 'todo' }, container: { id: 'todo' }, previousIndex: 0, currentIndex: 1 } as any, 'todo');
+    const replacement = [{ id: 'todo', title: 'Server board', cards: [] }];
+    fixture.componentRef.setInput('columns', replacement); fixture.detectChanges();
+    expect(fixture.componentInstance._columns()).toEqual(replacement);
+    expect(fixture.componentInstance._columns()).not.toBe(replacement);
   });
 
   it('onCardDrop should transfer cards across columns and emit the drop event', async () => {

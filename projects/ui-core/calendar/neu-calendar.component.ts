@@ -392,12 +392,14 @@ export class NeuCalendarComponent {
   }
 
   today(): void {
-    this.selectDate(new Date());
+    this.selectDate(this.temporal.today());
   }
 
   selectDate(date: Date): void {
     const nextDate = startOfDay(date);
     this._selectedDate.set(nextDate);
+    // `selectedDateChange` is the canonical proposal. `dateSelect` is retained
+    // as the established compatibility event for this same user transition.
     this.selectedDateChange.emit(nextDate);
     this.dateSelect.emit(nextDate);
   }

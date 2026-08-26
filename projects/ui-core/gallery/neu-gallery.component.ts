@@ -12,6 +12,7 @@ import {
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -144,13 +145,36 @@ export class NeuGalleryComponent {
   private readonly _zoom = signal(1);
   private readonly _rotation = signal(0);
   private readonly _flip = signal({ x: 1, y: 1 });
+  private _hasInitializedIndex = false;
+  private _wasControlled = false;
   private _pointerStart: { x: number; y: number } | null = null;
   private _restoreFocus: HTMLElement | null = null;
 
   constructor() {
     effect(() => {
       const requested = this.activeIndexInput();
-      this._activeIndex.set(this.clamp(requested ?? this.initialIndex()));
+      this.items();
+      this.circular();
+      this.initialIndex();
+      untracked(() => {
+        if (requested != null) {
+          this._activeIndex.set(this.clamp(requested));
+          this._hasInitializedIndex = true;
+          this._wasControlled = true;
+          return;
+        }
+
+        if (!this._hasInitializedIndex || this._wasControlled) {
+          this._activeIndex.set(this.clamp(this.initialIndex()));
+          this._hasInitializedIndex = true;
+          this._wasControlled = false;
+          return;
+        }
+
+        // Replacing items must retain a valid local proposal, rather than
+        // resetting it to the initial index.
+        this._activeIndex.update((index) => this.clamp(index));
+      });
     });
     effect(() => {
       if (this._previewOpen()) queueMicrotask(() => this._preview()?.nativeElement.focus());
@@ -173,6 +197,8 @@ export class NeuGalleryComponent {
     if (next === this._activeIndex()) return;
     this._activeIndex.set(next);
     this.resetTransform();
+    // In controlled usage this is an optimistic proposal until the consumer
+    // echoes an `activeIndex` input; input reconciliation is intentionally silent.
     if (user) this.activeIndexChange.emit(next);
   }
   previous(): void { this.setActiveIndex(this.activeIndex() - 1, true); }

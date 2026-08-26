@@ -221,11 +221,9 @@ export class NeuKanbanComponent {
   private _cloneColumns(columns: NeuKanbanColumn[]): NeuKanbanColumn[] {
     return columns.map((column) => ({
       ...column,
-      cards: column.cards.map((card) => ({
-        ...card,
-        tags: card.tags ? [...card.tags] : undefined,
-        assignee: card.assignee ? { ...card.assignee } : undefined,
-      })),
+      // The component reorders only the card containers. Preserve each domain
+      // object exactly as supplied while keeping caller arrays immutable.
+      cards: [...column.cards],
     }));
   }
 }
