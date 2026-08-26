@@ -790,47 +790,6 @@
         "valueChange"
       ]
     },
-    "input-tags/neu-input-tags.component.ts": {
-      "selector": "neu-input-tags",
-      "inputs": [
-        "addOnBlur",
-        "addOnPaste",
-        "addOnTab",
-        "allowDuplicate",
-        "ariaDescribedBy",
-        "ariaLabel",
-        "ariaLabelledBy",
-        "completeOnFocus",
-        "delay",
-        "delimiter",
-        "disabled",
-        "inputId",
-        "max",
-        "minQueryLength",
-        "name",
-        "optionDisabled",
-        "optionLabel",
-        "optionValue",
-        "placeholder",
-        "readonly",
-        "removeLabel",
-        "scrollHeight",
-        "suggestions",
-        "tabindex",
-        "typeahead"
-      ],
-      "outputs": [
-        "add",
-        "blur",
-        "completeMethod",
-        "focus",
-        "hide",
-        "remove",
-        "select",
-        "show",
-        "valueChange"
-      ]
-    },
     "input/neu-input.component.ts": {
       "selector": "neu-input",
       "inputs": [

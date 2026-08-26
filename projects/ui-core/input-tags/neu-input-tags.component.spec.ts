@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
-import { NeuInputTagsComponent } from './neu-input-tags.component';
+import { NeuInputTagsComponent, NeuInputTagsFooterDirective, NeuInputTagsGroupDirective, NeuInputTagsHeaderDirective, NeuInputTagsItemDirective, NeuInputTagsOptionDirective, NeuInputTagsRemoveIconDirective } from './neu-input-tags.component';
 
 interface Skill { label: string; id: string; disabled?: boolean; }
 
@@ -20,6 +20,8 @@ describe('NeuInputTagsComponent', () => {
   });
 
   it('keeps the CVA contract and adds values only on explicit configured gestures', () => {
+    expect(component.groupedOptions()).toEqual([]);
+    expect(component.trackValue(8, undefined as unknown as Skill)).toBe(8);
     const changes: Skill[][] = [];
     component.registerOnChange((value) => changes.push(value));
     component.writeValue([{ label: 'Angular', id: 'ng' }]);
@@ -144,6 +146,7 @@ describe('NeuInputTagsComponent', () => {
     input.value = 'a'; input.dispatchEvent(new Event('input')); vi.runAllTimers(); fixture.detectChanges();
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })); fixture.detectChanges();
     const option = fixture.nativeElement.querySelector('.neu-input-tags__option') as HTMLButtonElement;
+    option.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); option.click(); fixture.detectChanges();
     Object.defineProperty(input, 'value', { value: 'blur tag', configurable: true }); input.dispatchEvent(new FocusEvent('blur'));
     input.dispatchEvent(Object.assign(new Event('paste', { bubbles: true }), { clipboardData: { getData: () => '' } }));
@@ -158,5 +161,137 @@ describe('NeuInputTagsComponent', () => {
     const input = host.nativeElement.querySelector('input') as HTMLInputElement;
     input.value = 'Signals'; input.dispatchEvent(new Event('input')); input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     expect(host.componentInstance.control.value).toEqual(['Angular', 'Signals']);
+  });
+
+  it('renders typed group and content templates without treating group rows as values', async () => {
+    interface Group { label: string; items: Skill[]; }
+    @Component({
+      imports: [NeuInputTagsComponent, NeuInputTagsItemDirective, NeuInputTagsRemoveIconDirective, NeuInputTagsOptionDirective, NeuInputTagsGroupDirective, NeuInputTagsHeaderDirective, NeuInputTagsFooterDirective],
+      template: `<neu-input-tags [typeahead]="true" [delay]="0" [group]="true" [suggestions]="groups" optionGroupLabel="label" optionGroupChildren="items" optionLabel="label"><ng-template neuInputTagsHeader>Header</ng-template><ng-template neuInputTagsGroup let-group>Group: {{ group.label }}</ng-template><ng-template neuInputTagsOption let-option let-index="index">{{ index }}: {{ option.label }}</ng-template><ng-template neuInputTagsItem let-item let-index="index" let-onRemove="onRemove">Tag {{ index }}: {{ item.label }}</ng-template><ng-template neuInputTagsRemoveIcon>Remove icon</ng-template><ng-template neuInputTagsFooter>Footer</ng-template></neu-input-tags>`,
+    })
+    class Host { readonly groups: readonly Group[] = [{ label: 'Frontend', items: [{ label: 'Angular', id: 'ng' }] }, { label: 'Blocked', items: [{ label: 'React', id: 'react', disabled: true }] }]; }
+    await TestBed.resetTestingModule().configureTestingModule({ imports: [Host] }).compileComponents();
+    const host = TestBed.createComponent(Host); host.detectChanges();
+    const input = host.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'a'; input.dispatchEvent(new Event('input'));
+    await new Promise((resolve) => setTimeout(resolve)); host.detectChanges();
+    expect(host.nativeElement.textContent).toContain('Header');
+    expect(host.nativeElement.textContent).toContain('Group: Frontend');
+    expect(host.nativeElement.textContent).toContain('0: Angular');
+    expect(host.nativeElement.textContent).toContain('Footer');
+    const inner = host.debugElement.children[0].componentInstance as NeuInputTagsComponent<Skill | Group>;
+    const option = host.nativeElement.querySelector('.neu-input-tags__option') as HTMLButtonElement;
+    option.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    option.click(); host.detectChanges();
+    expect(inner.model()).toEqual([{ label: 'Angular', id: 'ng' }]);
+    expect(host.nativeElement.textContent).toContain('Tag 0: Angular');
+  });
+
+  it('applies option-focus policies and form/native presentation to the real text input', async () => {
+    fixture.componentRef.setInput('typeahead', true);
+    fixture.componentRef.setInput('delay', 0);
+    fixture.componentRef.setInput('autoOptionFocus', true);
+    fixture.componentRef.setInput('focusOnHover', true);
+    fixture.componentRef.setInput('suggestions', [{ label: 'Angular', id: 'ng' }, { label: 'Vue', id: 'vue' }]);
+    fixture.componentRef.setInput('required', true);
+    fixture.componentRef.setInput('invalid', true);
+    fixture.componentRef.setInput('size', 'lg');
+    fixture.componentRef.setInput('variant', 'filled');
+    fixture.componentRef.setInput('fluid', true);
+    fixture.componentRef.setInput('autocomplete', 'skills');
+    fixture.componentRef.setInput('title', 'Skill tags');
+    fixture.componentRef.setInput('minlength', 2);
+    fixture.componentRef.setInput('maxlength', 10);
+    fixture.componentRef.setInput('pattern', /^[a-z]+$/i);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('completeOnFocus', true);
+    component.onFocus(new FocusEvent('focus'));
+    await Promise.resolve();
+    expect(component.activeIndex()).toBe(0);
+    component.onInput({ target: { value: 'a' } } as unknown as Event);
+    component.onOptionHover(component.availableOptions()[1]);
+    expect(component.activeIndex()).toBe(1);
+    component.onOptionHover(component.availableOptions()[0]);
+    expect(component.activeIndex()).toBe(0);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    expect(input.required).toBe(true);
+    expect(input.autocomplete).toBe('skills');
+    expect(input.title).toBe('Skill tags');
+    expect(input.maxLength).toBe(10);
+    expect(input.getAttribute('minlength')).toBe('2');
+    expect(input.pattern).toBe('^[a-z]+$');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(fixture.nativeElement.classList).toContain('neu-input-tags--invalid');
+    expect(fixture.nativeElement.classList).toContain('neu-input-tags--filled');
+    expect(fixture.nativeElement.classList).toContain('neu-input-tags--fluid');
+    expect(fixture.nativeElement.classList).toContain('neu-input-tags--size-lg');
+  });
+
+  it('integrates with template-driven forms without emitting for a programmatic write', async () => {
+    @Component({ imports: [NeuInputTagsComponent, FormsModule], template: '<neu-input-tags [(ngModel)]="skills" name="skills" />' })
+    class Host { skills: unknown[] = ['Angular']; }
+    await TestBed.resetTestingModule().configureTestingModule({ imports: [Host] }).compileComponents();
+    const host = TestBed.createComponent(Host); host.detectChanges(); await host.whenStable(); host.detectChanges();
+    const input = host.nativeElement.querySelector('input') as HTMLInputElement;
+    expect(host.componentInstance.skills).toEqual(['Angular']);
+    input.value = 'Signals'; input.dispatchEvent(new Event('input')); input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(host.componentInstance.skills).toEqual(['Angular', 'Signals']);
+  });
+
+  it('keeps group, focus and native fallbacks safe for incomplete or disabled input', async () => {
+    fixture.componentRef.setInput('group', true);
+    fixture.componentRef.setInput('optionGroupLabel', 'label');
+    fixture.componentRef.setInput('optionGroupChildren', 'items');
+    fixture.componentRef.setInput('suggestions', [{ label: 'Frontend', id: 'frontend', items: [{ label: 'Angular', id: 'ng' }] } as unknown as Skill]);
+    fixture.detectChanges();
+    expect(component.groupedOptions()).toHaveLength(1);
+    expect(component.groupedOptionIndex(component.groupedOptions()[0].group, 0)).toBe(0);
+    expect(component.trackGroup(0, component.groupedOptions()[0].group)).toBe('frontend');
+    fixture.componentRef.setInput('focusOnHover', false);
+    component.onOptionHover(component.availableOptions()[0]);
+    expect(component.activeIndex()).toBe(-1);
+    fixture.componentRef.setInput('focusOnHover', true);
+    fixture.componentRef.setInput('optionDisabled', 'disabled');
+    component.onOptionHover({ label: 'Blocked', id: 'blocked', disabled: true } as unknown as Skill);
+    expect(component.activeIndex()).toBe(-1);
+    fixture.componentRef.setInput('pattern', '[a-z]+');
+    fixture.componentRef.setInput('optionGroupChildren', null);
+    fixture.detectChanges();
+    expect(component.nativePattern()).toBe('[a-z]+');
+    expect(component.groupedOptions()[0].options).toEqual([]);
+    fixture.componentRef.setInput('typeahead', true);
+    fixture.componentRef.setInput('completeOnFocus', true);
+    component.setDisabledState(true);
+    component.onFocus(new FocusEvent('focus'));
+    await Promise.resolve();
+    expect(component.panelOpen()).toBe(false);
+  });
+
+  it('projects the remove icon through the default accessible remove button', async () => {
+    @Component({ imports: [NeuInputTagsComponent, NeuInputTagsOptionDirective, NeuInputTagsRemoveIconDirective], template: '<neu-input-tags><ng-template neuInputTagsOption let-option><span class="custom-option">{{ option }}</span></ng-template><ng-template neuInputTagsRemoveIcon><span class="custom-remove">×</span></ng-template></neu-input-tags>' })
+    class Host {}
+    await TestBed.resetTestingModule().configureTestingModule({ imports: [Host] }).compileComponents();
+    const host = TestBed.createComponent(Host); host.detectChanges();
+    const inner = host.debugElement.children[0].componentInstance as NeuInputTagsComponent<string>;
+    inner.writeValue(['Angular']); host.detectChanges();
+    expect(host.nativeElement.querySelector('.custom-remove')).not.toBeNull();
+    (host.nativeElement.querySelector('.neu-input-tags__remove') as HTMLButtonElement).click();
+    expect(inner.model()).toEqual([]);
+  });
+
+  it('renders default grouped rows while retaining keyboard navigation over options only', () => {
+    fixture.componentRef.setInput('typeahead', true);
+    fixture.componentRef.setInput('group', true);
+    fixture.componentRef.setInput('optionGroupLabel', 'label');
+    fixture.componentRef.setInput('optionGroupChildren', 'items');
+    fixture.componentRef.setInput('suggestions', [{ label: 'Frontend', items: [{ label: 'Angular', id: 'ng' }] }] as unknown as Skill[]);
+    fixture.detectChanges();
+    component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Frontend');
+    expect(fixture.nativeElement.textContent).toContain('Angular');
+    expect(component.activeIndex()).toBe(0);
   });
 });
