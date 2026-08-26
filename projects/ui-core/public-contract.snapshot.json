@@ -5,6 +5,7 @@
     ".",
     "./accordion",
     "./alert",
+    "./animate-on-scroll",
     "./autocomplete",
     "./avatar",
     "./avatar-group",
@@ -44,6 +45,7 @@
     "./input-otp",
     "./input-tags",
     "./kanban",
+    "./key-filter",
     "./knob",
     "./listbox",
     "./menu",
@@ -64,6 +66,7 @@
     "./radio",
     "./rating",
     "./rich-text-editor",
+    "./ripple",
     "./scheduler-gantt",
     "./scroll-top",
     "./select",
@@ -301,6 +304,19 @@
         "closed"
       ]
     },
+    "animate-on-scroll/neu-animate-on-scroll.directive.ts": {
+      "selector": "[neuAnimateOnScroll]",
+      "inputs": [
+        "neuAnimateOnScroll",
+        "neuAnimateOnScrollEnterClass",
+        "neuAnimateOnScrollLeaveClass",
+        "neuAnimateOnScrollOnce",
+        "neuAnimateOnScrollRoot",
+        "neuAnimateOnScrollRootMargin",
+        "neuAnimateOnScrollThreshold"
+      ],
+      "outputs": []
+    },
     "autocomplete/neu-autocomplete.component.ts": {
       "selector": "neu-autocomplete",
       "inputs": [
@@ -452,6 +468,14 @@
         "closed"
       ]
     },
+    "breadcrumb/neu-breadcrumb.component.ts": {
+      "selector": "neu-breadcrumb",
+      "inputs": [
+        "items",
+        "separator"
+      ],
+      "outputs": []
+    },
     "button-group/neu-button-group.component.ts": {
       "selector": "neu-button-group",
       "inputs": [
@@ -532,16 +556,11 @@
         "removeAriaLabel",
         "selected",
         "size",
-        "variant",
-        "alt",
-        "icon",
-        "image",
-        "label"
+        "variant"
       ],
       "outputs": [
         "removed",
-        "selectedChange",
-        "imageError"
+        "selectedChange"
       ]
     },
     "code-block/neu-code-block.component.ts": {
@@ -831,6 +850,14 @@
         "columnsChange"
       ]
     },
+    "key-filter/neu-key-filter.directive.ts": {
+      "selector": "[neuKeyFilter]",
+      "inputs": [
+        "neuKeyFilter",
+        "neuKeyFilterValidateOnly"
+      ],
+      "outputs": []
+    },
     "knob/neu-knob.component.ts": {
       "selector": "neu-knob",
       "inputs": [
@@ -928,14 +955,7 @@
         "items",
         "rounded",
         "showLegend",
-        "total",
-        "ariaLabelledBy",
-        "labelOrientation",
-        "labelPosition",
-        "max",
-        "min",
-        "orientation",
-        "value"
+        "total"
       ],
       "outputs": []
     },
@@ -1108,9 +1128,7 @@
         "expandLabel",
         "header",
         "legend",
-        "maxHeight",
-        "collapsedInput",
-        "toggleable"
+        "maxHeight"
       ],
       "outputs": [
         "collapsedChange"
@@ -1214,6 +1232,15 @@
         "imageRejected",
         "valueChange"
       ]
+    },
+    "ripple/neu-ripple.directive.ts": {
+      "selector": "[neuRipple]",
+      "inputs": [
+        "neuRipple",
+        "neuRippleDisabled",
+        "neuRippleDuration"
+      ],
+      "outputs": []
     },
     "scheduler-gantt/neu-scheduler-gantt.component.ts": {
       "selector": "neu-scheduler-gantt",
@@ -1688,9 +1715,7 @@
       "inputs": [
         "neuTooltip",
         "neuTooltipDisabled",
-        "neuTooltipPosition",
-        "neuTooltipHideDelay",
-        "neuTooltipShowDelay"
+        "neuTooltipPosition"
       ],
       "outputs": []
     },
