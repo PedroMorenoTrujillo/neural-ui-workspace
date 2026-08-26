@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { NeuFieldsetComponent, NeuPanelComponent, NeuScrollAreaComponent } from './neu-panel.component';
+import { NeuFieldsetComponent, NeuPanelComponent, NeuScrollAreaComponent, NeuScrollPosition } from './neu-panel.component';
 
 describe('NeuPanelComponent', () => {
   let fixture: ComponentFixture<NeuPanelComponent>;
@@ -49,6 +49,12 @@ describe('NeuPanelComponent', () => {
 })
 class PanelProjectionHostComponent {}
 
+@Component({
+  imports: [NeuScrollAreaComponent],
+  template: `<neu-scroll-area [enhanced]="true" maxHeight="100px" ariaLabel="Activity"><div style="height: 400px; width: 500px">Scrollable</div></neu-scroll-area>`,
+})
+class EnhancedScrollAreaHostComponent {}
+
 describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
   it('renders optional legend and projects fieldset and scroll content', async () => {
     await TestBed.configureTestingModule({ imports: [PanelProjectionHostComponent] }).compileComponents();
@@ -66,5 +72,112 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     const fixture = TestBed.createComponent(NeuFieldsetComponent);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('legend')).toBeNull();
+  });
+
+  it('keeps native scrolling as the default and only renders themed bars when enhanced', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuScrollAreaComponent, EnhancedScrollAreaHostComponent] }).compileComponents();
+    const nativeFixture = TestBed.createComponent(NeuScrollAreaComponent);
+    nativeFixture.detectChanges();
+    expect(nativeFixture.nativeElement.querySelector('.neu-scroll-area__bar')).toBeNull();
+    expect(nativeFixture.nativeElement.querySelector('.neu-scroll-area__viewport').getAttribute('tabindex')).toBe('0');
+    nativeFixture.componentRef.setInput('mask', false);
+    nativeFixture.componentRef.setInput('tabindex', 3);
+    nativeFixture.detectChanges();
+    expect(nativeFixture.nativeElement.querySelector('.neu-scroll-area__viewport').classList).not.toContain('neu-scroll-area__viewport--masked');
+    expect(nativeFixture.nativeElement.querySelector('.neu-scroll-area__viewport').getAttribute('tabindex')).toBe('3');
+
+    const enhancedFixture = TestBed.createComponent(EnhancedScrollAreaHostComponent);
+    enhancedFixture.detectChanges();
+    expect(enhancedFixture.nativeElement.querySelectorAll('[role="scrollbar"]')).toHaveLength(2);
+    expect(enhancedFixture.nativeElement.querySelector('.neu-scroll-area__viewport').getAttribute('aria-label')).toBe('Activity');
+  });
+
+  it('exposes Prime-compatible enhanced track variants without changing native scrolling', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuScrollAreaComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(NeuScrollAreaComponent);
+    fixture.componentRef.setInput('enhanced', true);
+    fixture.componentRef.setInput('variant', 'hidden');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.getAttribute('data-neu-scroll-variant')).toBe('hidden');
+    expect(fixture.nativeElement.querySelectorAll('[role="scrollbar"]')).toHaveLength(2);
+  });
+
+  it('tracks native scrolling and drives enhanced scrollbar keyboard controls', async () => {
+    await TestBed.configureTestingModule({ imports: [EnhancedScrollAreaHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(EnhancedScrollAreaHostComponent);
+    fixture.detectChanges();
+    const scrollArea = fixture.debugElement.children[0].componentInstance as NeuScrollAreaComponent;
+    const viewport = fixture.nativeElement.querySelector('.neu-scroll-area__viewport') as HTMLElement;
+    Object.defineProperties(viewport, {
+      scrollHeight: { configurable: true, value: 400 }, clientHeight: { configurable: true, value: 100 },
+      scrollWidth: { configurable: true, value: 500 }, clientWidth: { configurable: true, value: 100 },
+    });
+    const emitted = vi.spyOn(scrollArea.scrollPositionChange, 'emit');
+    viewport.scrollTop = 80;
+    viewport.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+    expect(scrollArea.position().top).toBe(80);
+    expect(emitted).toHaveBeenCalledWith(expect.objectContaining<Partial<NeuScrollPosition>>({ top: 80, scrollHeight: 400 }));
+    const bar = fixture.nativeElement.querySelector('.neu-scroll-area__bar--y') as HTMLElement;
+    bar.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(viewport.scrollTop).toBe(120);
+  });
+
+  it('supports click, all documented keyboard movement and programmatic viewport methods', async () => {
+    await TestBed.configureTestingModule({ imports: [EnhancedScrollAreaHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(EnhancedScrollAreaHostComponent);
+    fixture.detectChanges();
+    const component = fixture.debugElement.children[0].componentInstance as NeuScrollAreaComponent;
+    const viewport = fixture.nativeElement.querySelector('.neu-scroll-area__viewport') as HTMLElement;
+    Object.defineProperties(viewport, {
+      scrollHeight: { configurable: true, value: 400 }, clientHeight: { configurable: true, value: 100 },
+      scrollWidth: { configurable: true, value: 500 }, clientWidth: { configurable: true, value: 100 },
+    });
+    viewport.getBoundingClientRect = () => ({ width: 100, height: 100 } as DOMRect);
+    component.refresh();
+    const yBar = fixture.nativeElement.querySelector('.neu-scroll-area__bar--y') as HTMLElement;
+    yBar.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 100 } as DOMRect);
+    yBar.dispatchEvent(new MouseEvent('click', { clientY: 50, bubbles: true }));
+    const xBar = fixture.nativeElement.querySelector('.neu-scroll-area__bar--x') as HTMLElement;
+    xBar.getBoundingClientRect = () => ({ top: 0, left: 0, width: 100, height: 10 } as DOMRect);
+    xBar.dispatchEvent(new MouseEvent('click', { clientX: 50, bubbles: true }));
+    component.scrollTo({ top: 20, left: 25 });
+    expect(viewport.scrollTop).toBe(20);
+    expect(viewport.scrollLeft).toBe(25);
+    const preventDefault = vi.fn();
+    for (const key of ['ArrowUp', 'PageDown', 'PageUp', 'Home', 'End']) {
+      component.onBarKey({ key, preventDefault } as unknown as KeyboardEvent, 'y');
+    }
+    for (const key of ['ArrowLeft', 'ArrowRight', 'PageDown', 'PageUp', 'Home', 'End']) {
+      component.onBarKey({ key, preventDefault } as unknown as KeyboardEvent, 'x');
+    }
+    component.onBarKey({ key: 'a', preventDefault } as unknown as KeyboardEvent, 'x');
+    component.focus();
+    expect(document.activeElement).toBe(viewport);
+    expect(preventDefault).toHaveBeenCalled();
+  });
+
+  it('uses browser scrolling APIs and cleans up its ResizeObserver', async () => {
+    const observer = { observe: vi.fn(), disconnect: vi.fn() };
+    const previous = window.ResizeObserver;
+    class TestResizeObserver {
+      observe = observer.observe;
+      disconnect = observer.disconnect;
+      constructor(_callback: ResizeObserverCallback) {}
+    }
+    Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: TestResizeObserver });
+    await TestBed.configureTestingModule({ imports: [EnhancedScrollAreaHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(EnhancedScrollAreaHostComponent);
+    fixture.detectChanges();
+    const component = fixture.debugElement.children[0].componentInstance as NeuScrollAreaComponent;
+    const viewport = fixture.nativeElement.querySelector('.neu-scroll-area__viewport') as HTMLElement;
+    const scrollTo = vi.fn();
+    Object.defineProperty(viewport, 'scrollTo', { configurable: true, value: scrollTo });
+    component.scrollTo({ top: 12 });
+    expect(scrollTo).toHaveBeenCalledWith({ top: 12 });
+    expect(observer.observe).toHaveBeenCalledWith(viewport);
+    fixture.destroy();
+    expect(observer.disconnect).toHaveBeenCalled();
+    Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: previous });
   });
 });

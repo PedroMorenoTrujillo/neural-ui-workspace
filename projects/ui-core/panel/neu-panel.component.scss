@@ -48,8 +48,14 @@
 }
 
 .neu-scroll-area__viewport {
+  box-sizing: border-box;
   overflow: auto;
   padding: 1rem;
+  scrollbar-color: var(--neu-scroll-area-thumb, var(--neu-border, #9ca3af)) transparent;
+  scrollbar-width: thin;
+}
+
+.neu-scroll-area__viewport--masked {
   background:
     linear-gradient(var(--neu-surface, #fff) 30%, transparent),
     linear-gradient(transparent, var(--neu-surface, #fff) 70%) bottom,
@@ -58,4 +64,91 @@
   background-repeat: no-repeat;
   background-size: 100% 24px, 100% 24px, 100% 8px, 100% 8px;
   background-attachment: local, local, scroll, scroll;
+}
+
+.neu-scroll-area {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.neu-scroll-area__viewport:focus-visible,
+.neu-scroll-area__bar:focus-visible {
+  outline: 2px solid var(--neu-primary, #2563eb);
+  outline-offset: 2px;
+}
+
+.neu-scroll-area__viewport--enhanced {
+  /* Keep native bars as a reliable fallback; overlay tracks add a themeable affordance. */
+  padding-inline-end: calc(1rem + 10px);
+  padding-block-end: calc(1rem + 10px);
+}
+
+.neu-scroll-area__bar {
+  position: absolute;
+  z-index: 1;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--neu-border, #d1d5db) 55%, transparent);
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.neu-scroll-area__bar--y {
+  inset-block: 0.625rem 1.5rem;
+  inset-inline-end: 0.375rem;
+  width: 0.5rem;
+}
+
+.neu-scroll-area__bar--x {
+  inset-inline: 0.625rem 1.5rem;
+  inset-block-end: 0.375rem;
+  height: 0.5rem;
+}
+
+.neu-scroll-area__bar--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.neu-scroll-area[data-neu-scroll-variant='hidden'] .neu-scroll-area__bar {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.neu-scroll-area[data-neu-scroll-variant='hover'] .neu-scroll-area__bar {
+  opacity: 0;
+}
+
+.neu-scroll-area[data-neu-scroll-variant='hover']:hover .neu-scroll-area__bar,
+.neu-scroll-area[data-neu-scroll-variant='hover']:focus-within .neu-scroll-area__bar {
+  opacity: 1;
+}
+
+.neu-scroll-area__thumb {
+  display: block;
+  min-height: 0.75rem;
+  min-width: 0.75rem;
+  border-radius: inherit;
+  background: var(--neu-scroll-area-thumb, var(--neu-primary, #2563eb));
+  transition: transform 80ms linear;
+}
+
+.neu-scroll-area__bar--y .neu-scroll-area__thumb {
+  width: 100%;
+}
+
+.neu-scroll-area__bar--x .neu-scroll-area__thumb {
+  height: 100%;
+}
+
+@media (forced-colors: active) {
+  .neu-scroll-area__bar {
+    background: Canvas;
+    border: 1px solid CanvasText;
+  }
+
+  .neu-scroll-area__thumb {
+    background: Highlight;
+  }
 }

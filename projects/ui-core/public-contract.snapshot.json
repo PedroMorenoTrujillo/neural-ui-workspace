@@ -89,6 +89,7 @@
     "./tabs",
     "./tag",
     "./tags",
+    "./terminal",
     "./testing",
     "./textarea",
     "./timeline",
@@ -1127,15 +1128,23 @@
     "panel/neu-panel.component.ts": {
       "selector": "neu-panel",
       "inputs": [
+        "ariaLabel",
         "collapseLabel",
         "collapsible",
+        "enhanced",
         "expandLabel",
         "header",
         "legend",
-        "maxHeight"
+        "mask",
+        "maxHeight",
+        "maxWidth",
+        "step",
+        "tabindex",
+        "variant"
       ],
       "outputs": [
-        "collapsedChange"
+        "collapsedChange",
+        "scrollPositionChange"
       ]
     },
     "password/neu-password.component.ts": {
@@ -1653,6 +1662,22 @@
         "stateRestore",
         "stateSave",
         "virtualScrollEvent"
+      ]
+    },
+    "terminal/neu-terminal.component.ts": {
+      "selector": "neu-terminal",
+      "inputs": [
+        "ariaLabel",
+        "disabled",
+        "inputAriaLabel",
+        "output",
+        "prompt",
+        "readonly",
+        "response",
+        "welcomeMessage"
+      ],
+      "outputs": [
+        "commandSubmit"
       ]
     },
     "textarea/neu-textarea.component.ts": {
