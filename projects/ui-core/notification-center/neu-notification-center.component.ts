@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
+import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/foundation';
 
 export type NeuNotificationType = 'info' | 'success' | 'warning' | 'error';
 
@@ -37,8 +38,6 @@ const DEFAULT_ICONS: Record<NeuNotificationType, string> = {
   error: '❌',
 };
 
-let _idSeq = 0;
-
 /**
  * NeuralUI NotificationService
  *
@@ -49,6 +48,8 @@ let _idSeq = 0;
  */
 @Injectable({ providedIn: 'root' })
 export class NeuNotificationService {
+  private readonly ids = inject(NeuIdGenerator);
+  private readonly temporal = inject(NeuInitialTemporalState);
   readonly notifications = signal<NeuNotification[]>([]);
 
   readonly unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
@@ -57,7 +58,7 @@ export class NeuNotificationService {
 
   /** Agrega una notificación / Adds a notification */
   push(opts: Partial<NeuNotificationOptions> & Pick<NeuNotificationOptions, 'message'>): string {
-    const id = `neu-notif-${++_idSeq}`;
+    const id = this.ids.getId('neu-notif-');
     const n: NeuNotification = {
       id,
       type: opts.type ?? 'info',
@@ -65,7 +66,7 @@ export class NeuNotificationService {
       message: opts.message,
       icon: opts.icon ?? DEFAULT_ICONS[opts.type ?? 'info'],
       duration: opts.duration ?? 5000,
-      timestamp: new Date(),
+      timestamp: this.temporal.currentNow(),
       read: false,
     };
     this.notifications.update((list) => [n, ...list]);
@@ -104,8 +105,6 @@ export class NeuNotificationService {
     this.timers.delete(id);
   }
 }
-
-let _panelSeq = 0;
 
 /**
  * NeuralUI NotificationCenter Component
@@ -222,8 +221,9 @@ let _panelSeq = 0;
 export class NeuNotificationCenterComponent {
   readonly _svc = inject(NeuNotificationService);
   private readonly overlay = inject(Overlay);
+  private readonly temporal = inject(NeuInitialTemporalState);
   readonly _isOpen = signal(false);
-  readonly _panelId = `neu-nc-panel-${++_panelSeq}`;
+  readonly _panelId = inject(NeuIdGenerator).getId('neu-nc-panel-');
   readonly _viewportMargin = 16;
   readonly overlayPositions: ConnectedPosition[] = [
     {
@@ -260,7 +260,7 @@ export class NeuNotificationCenterComponent {
   }
 
   _relativeTime(date: Date): string {
-    const diff = Date.now() - date.getTime();
+    const diff = this.temporal.currentNow().getTime() - date.getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'Ahora';
     if (mins < 60) return `Hace ${mins} min`;

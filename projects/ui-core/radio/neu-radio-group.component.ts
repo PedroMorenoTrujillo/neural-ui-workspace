@@ -4,10 +4,12 @@ import {
   InjectionToken,
   ViewEncapsulation,
   forwardRef,
+  inject,
   input,
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 /** Token para que neu-radio encuentre a su grupo padre / Token for neu-radio to find its parent group */
 export const NEU_RADIO_GROUP = new InjectionToken<NeuRadioGroupComponent>('NEU_RADIO_GROUP');
@@ -23,8 +25,6 @@ export const NEU_RADIO_GROUP = new InjectionToken<NeuRadioGroupComponent>('NEU_R
  *     <neu-radio value="b" label="Opción B" />
  *   </neu-radio-group>
  */
-let _neuRadioGroupIdSeq = 0;
-
 @Component({
   selector: 'neu-radio-group',
   encapsulation: ViewEncapsulation.None,
@@ -55,7 +55,7 @@ export class NeuRadioGroupComponent implements ControlValueAccessor {
   readonly ariaLabel = input<string>('');
 
   /** Nombre HTML compartido por todos los neu-radio hijos — garantiza la exclusión mutua nativa / HTML name shared by all child neu-radio — guarantees native mutual exclusion */
-  readonly _name = `neu-radio-group-${++_neuRadioGroupIdSeq}`;
+  readonly _name = inject(NeuIdGenerator).getId('neu-radio-group-');
 
   readonly _value = signal<unknown>(null);
   readonly _isDisabled = signal(false);

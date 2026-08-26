@@ -6,6 +6,7 @@ import {
   ViewEncapsulation,
   computed,
   forwardRef,
+  inject,
   input,
   output,
   signal,
@@ -13,6 +14,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import {
   escapeRichTextAttribute,
   escapeRichTextHtml,
@@ -79,8 +81,6 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
   imageAltFallback: 'Image',
   pastedImageAlt: 'Pasted image',
 };
-
-let _neuRichTextEditorIdSeq = 0;
 
 @Component({
   selector: 'neu-rich-text-editor',
@@ -316,7 +316,7 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
   readonly maxPastedImageBytes = input<number>(1_500_000);
   readonly showPreview = input<boolean>(false);
   readonly previewLabel = input<string>('Preview');
-  readonly editorId = input<string>(`neu-rich-text-editor-${++_neuRichTextEditorIdSeq}`);
+  readonly editorId = input<string>(inject(NeuIdGenerator).getId('neu-rich-text-editor-'));
 
   readonly valueChange = output<string>();
   readonly imageRejected = output<NeuRichTextImageRejectedEvent>();

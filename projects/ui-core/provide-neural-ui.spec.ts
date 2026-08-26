@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideNeuralUI } from './provide-neural-ui';
 import { NgIconsToken, provideNgIconsConfig } from '@ng-icons/core';
+import { NEURAL_LOCALE, NEURAL_NOW, NEURAL_TIME_ZONE } from '@neural-ui/core/foundation';
 
 describe('provideNeuralUI', () => {
   it('should return EnvironmentProviders without error', () => {
@@ -28,5 +29,16 @@ describe('provideNeuralUI', () => {
     });
     const icons = TestBed.inject(NgIconsToken, null, { optional: true });
     expect(icons).toBeTruthy();
+  });
+
+  it('registers deterministic locale, timezone, and clock overrides', () => {
+    const fixedNow = () => new Date('2026-08-26T12:00:00.000Z');
+    TestBed.configureTestingModule({
+      providers: [provideNeuralUI({ locale: 'fr-FR', timeZone: 'Europe/Paris', now: fixedNow })],
+    });
+
+    expect(TestBed.inject(NEURAL_LOCALE)).toBe('fr-FR');
+    expect(TestBed.inject(NEURAL_TIME_ZONE)).toBe('Europe/Paris');
+    expect(TestBed.inject(NEURAL_NOW)).toBe(fixedNow);
   });
 });

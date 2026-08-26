@@ -11,8 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-
-let _seq = 0;
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 /**
  * NeuralUI Knob Component
@@ -122,7 +121,7 @@ export class NeuKnobComponent implements ControlValueAccessor {
   /** Emitido en cada cambio / Emitted on each change */
   readonly valueChange = output<number>();
 
-  readonly _id = `neu-knob-${++_seq}`;
+  readonly _id = inject(NeuIdGenerator).getId('neu-knob-');
   readonly _cvaDisabled = signal(false);
   readonly _value = signal(0);
 

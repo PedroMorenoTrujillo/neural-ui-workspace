@@ -32,6 +32,7 @@ import {
   resolveNeuMenuAction,
 } from '@neural-ui/core/menu-foundation';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export type NeuSpeedDialDirection =
   | 'up'
@@ -71,8 +72,6 @@ export class NeuSpeedDialItemDirective {
 export class NeuSpeedDialTriggerDirective {
   constructor(readonly templateRef: TemplateRef<NeuSpeedDialTriggerTemplateContext>) {}
 }
-
-let speedDialSequence = 0;
 
 @Component({
   selector: 'neu-speed-dial',
@@ -243,7 +242,7 @@ export class NeuSpeedDialComponent {
   protected readonly itemTemplate = contentChild(NeuSpeedDialItemDirective);
   protected readonly triggerTemplate = contentChild(NeuSpeedDialTriggerDirective);
   private readonly controller = new NeuRovingMenuController({ orientation: 'both' });
-  private readonly generatedId = `neu-speed-dial-${++speedDialSequence}`;
+  private readonly generatedId = inject(NeuIdGenerator).getId('neu-speed-dial-');
 
   readonly id = input<string>();
   readonly items = input<NeuSpeedDialItem[]>([]);

@@ -7,8 +7,7 @@ import {
   input,
 } from '@angular/core';
 import { NEU_RADIO_GROUP } from './neu-radio-group.component';
-
-let _neuRadioIdSeq = 0;
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 /**
  * NeuralUI Radio Component
@@ -57,7 +56,7 @@ export class NeuRadioComponent {
 
   readonly group = inject(NEU_RADIO_GROUP);
 
-  readonly _id = `neu-radio-${_neuRadioIdSeq++}`;
+  readonly _id = inject(NeuIdGenerator).getId('neu-radio-');
   /** Toma el nombre del grupo padre — así todos los radios del grupo comparten el mismo `name` nativo / Takes the parent group name — so all radios in the group share the same native `name` */
   readonly _groupName = this.group._name;
 

@@ -4,13 +4,13 @@ import {
   ViewEncapsulation,
   computed,
   forwardRef,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-
-let _neuCheckboxIdSeq = 0;
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 /**
  * NeuralUI Checkbox Component
@@ -91,7 +91,7 @@ export class NeuCheckboxComponent implements ControlValueAccessor {
 
   readonly checkedChange = output<boolean>();
 
-  readonly _id = `neu-checkbox-${_neuCheckboxIdSeq++}`;
+  readonly _id = inject(NeuIdGenerator).getId('neu-checkbox-');
 
   protected readonly _checked = signal(false);
   /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState / Internal disabled state — combines the `disabled` input with CVA setDisabledState */

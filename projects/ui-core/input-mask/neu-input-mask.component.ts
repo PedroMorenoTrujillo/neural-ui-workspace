@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, forwardRef, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, forwardRef, inject, input, output, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 @Component({
   selector: 'neu-input-mask',
@@ -34,7 +35,7 @@ export class NeuInputMaskComponent implements ControlValueAccessor {
   readonly hint = input('');
   readonly disabled = input(false);
   readonly valueChange = output<string>();
-  readonly inputId = `neu-input-mask-${Math.random().toString(36).slice(2)}`;
+  readonly inputId = inject(NeuIdGenerator).getId('neu-input-mask-');
   readonly value = signal('');
   readonly cvaDisabled = signal(false);
   private onChange: (value: string) => void = () => {};

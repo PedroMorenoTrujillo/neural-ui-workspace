@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type NeuDialogLayout = 'auto' | 'viewport';
@@ -120,7 +121,7 @@ export class NeuDialogComponent {
   private previousActiveElement: HTMLElement | null = null;
 
   /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
-  readonly _uid = Math.random().toString(36).slice(2, 7);
+  readonly _uid = inject(NeuIdGenerator).getId('dialog-');
 
   constructor() {
     effect(() => {

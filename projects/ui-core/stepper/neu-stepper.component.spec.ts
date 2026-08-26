@@ -227,27 +227,30 @@ describe('NeuStepperComponent', () => {
   });
 
   it('should react to matchMedia changes and unregister the listener on destroy', () => {
-    const originalMatchMedia = window.matchMedia;
+    const originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
     const addEventListener = vi.fn();
     const removeEventListener = vi.fn();
     let changeHandler: ((event: MediaQueryListEvent) => void) | undefined;
 
-    window.matchMedia = vi.fn().mockImplementation(() => ({
-      matches: true,
-      media: '(max-width: 767px)',
-      onchange: null,
-      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
-        addEventListener();
-        changeHandler = listener;
-      },
-      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
-        removeEventListener();
-        expect(listener).toBe(changeHandler);
-      },
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }));
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: vi.fn().mockImplementation(() => ({
+        matches: true,
+        media: '(max-width: 767px)',
+        onchange: null,
+        addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+          addEventListener();
+          changeHandler = listener;
+        },
+        removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+          removeEventListener();
+          expect(listener).toBe(changeHandler);
+        },
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
 
     try {
       const f = TestBed.createComponent(NeuStepperComponent);
@@ -263,7 +266,8 @@ describe('NeuStepperComponent', () => {
       f.destroy();
       expect(removeEventListener).toHaveBeenCalledTimes(1);
     } finally {
-      window.matchMedia = originalMatchMedia;
+      if (originalMatchMedia) Object.defineProperty(window, 'matchMedia', originalMatchMedia);
+      else Reflect.deleteProperty(window, 'matchMedia');
     }
   });
 

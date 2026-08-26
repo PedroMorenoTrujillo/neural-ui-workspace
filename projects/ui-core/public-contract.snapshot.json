@@ -39,6 +39,7 @@
     "./filter-bar",
     "./focus-trap",
     "./form-field",
+    "./foundation",
     "./gallery",
     "./icon",
     "./image-gallery",

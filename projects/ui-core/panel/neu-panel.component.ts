@@ -14,6 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export interface NeuScrollPosition {
   top: number;
@@ -150,7 +151,7 @@ export class NeuScrollAreaComponent implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private resizeObserver?: ResizeObserver;
   readonly viewport = viewChild.required<ElementRef<HTMLDivElement>>('viewport');
-  readonly viewportId = `neu-scroll-area-${Math.random().toString(36).slice(2, 10)}`;
+  readonly viewportId = inject(NeuIdGenerator).getId('neu-scroll-area-');
   readonly maxHeight = input('240px');
   readonly maxWidth = input<string | null>(null);
   /** Enables decorative, accessible scrollbar tracks. Native scrolling stays active. */

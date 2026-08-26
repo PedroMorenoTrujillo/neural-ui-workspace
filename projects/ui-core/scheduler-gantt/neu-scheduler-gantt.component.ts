@@ -3,9 +3,11 @@ import {
   Component,
   ViewEncapsulation,
   computed,
+  inject,
   input,
   output,
 } from '@angular/core';
+import { NEURAL_LOCALE, NeuInitialTemporalState } from '@neural-ui/core/foundation';
 import {
   NeuTimelineGridComponent,
   type NeuTimelineGridColumn,
@@ -88,6 +90,8 @@ export interface NeuSchedulerGanttSelectedSlot {
   styleUrl: './neu-scheduler-gantt.component.scss',
 })
 export class NeuSchedulerGanttComponent {
+  private readonly temporal = inject(NeuInitialTemporalState);
+  private readonly defaultLocale = inject(NEURAL_LOCALE);
   readonly rows = input<NeuSchedulerGanttRow[]>([]);
   readonly startDate = input<string | Date | null>(null);
   readonly endDate = input<string | Date | null>(null);
@@ -100,6 +104,7 @@ export class NeuSchedulerGanttComponent {
   readonly showSummary = input(true);
   readonly selectedTaskId = input<string | null>(null);
   readonly selectedSlot = input<NeuSchedulerGanttSelectedSlot | null>(null);
+  readonly resolvedLocale = computed(() => this.locale() || this.defaultLocale);
 
   readonly taskClick = output<NeuSchedulerGanttTaskClick>();
   readonly slotClick = output<NeuSchedulerGanttSlotClick>();
@@ -108,7 +113,7 @@ export class NeuSchedulerGanttComponent {
     const explicitStart = normalizeDate(this.startDate());
     const explicitEnd = normalizeDate(this.endDate());
     const inferred = inferBounds(this.rows());
-    const rawStart = explicitStart ?? inferred.start ?? normalizeDate(new Date())!;
+    const rawStart = explicitStart ?? inferred.start ?? normalizeDate(this.temporal.now())!;
     const rawEnd = explicitEnd ?? inferred.end ?? rawStart;
     const min = rawStart.getTime() <= rawEnd.getTime() ? rawStart : rawEnd;
     const max = rawStart.getTime() <= rawEnd.getTime() ? rawEnd : rawStart;
@@ -124,7 +129,7 @@ export class NeuSchedulerGanttComponent {
   });
 
   readonly gridColumns = computed<NeuTimelineGridColumn[]>(() =>
-    buildColumns(this._bounds().start, this._bounds().end, this.scale(), this.locale()),
+    buildColumns(this._bounds().start, this._bounds().end, this.scale(), this.resolvedLocale()),
   );
 
   readonly gridRows = computed<NeuTimelineGridRow[]>(() => {
@@ -147,7 +152,7 @@ export class NeuSchedulerGanttComponent {
 
   readonly rangeLabel = computed(() => {
     const bounds = this._bounds();
-    return `${formatRangeDate(bounds.start, this.locale())} - ${formatRangeDate(bounds.end, this.locale())}`;
+    return `${formatRangeDate(bounds.start, this.resolvedLocale())} - ${formatRangeDate(bounds.end, this.resolvedLocale())}`;
   });
 
   readonly gridSelectedSlot = computed<NeuTimelineGridSlotSelection | null>(() => {

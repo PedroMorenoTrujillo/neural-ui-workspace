@@ -7,6 +7,7 @@ import {
   computed,
   contentChild,
   forwardRef,
+  inject,
   input,
   output,
   signal,
@@ -26,6 +27,7 @@ import {
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
 } from '@neural-ui/core/option-api';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export interface NeuTreeSelectNode {
   value: string;
@@ -211,7 +213,7 @@ export class NeuTreeSelectComponent<
   readonly selectionChange = output<T[]>();
   readonly nodeExpand = output<T>();
 
-  readonly triggerId = `neu-tree-select-${Math.random().toString(36).slice(2)}`;
+  readonly triggerId = inject(NeuIdGenerator).getId('neu-tree-select-');
   readonly open = signal(false);
   readonly query = signal('');
   readonly values = signal<V[]>([]);

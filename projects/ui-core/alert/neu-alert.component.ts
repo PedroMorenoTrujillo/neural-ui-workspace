@@ -3,12 +3,14 @@ import {
   Component,
   ViewEncapsulation,
   computed,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export type NeuAlertType = 'info' | 'success' | 'warning' | 'error';
 
@@ -19,8 +21,6 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertType, string> = {
   warning: 'lucideAlertTriangle',
   error: 'lucideXCircle',
 };
-
-let _seq = 0;
 
 /**
  * NeuralUI Alert Component
@@ -103,7 +103,7 @@ export class NeuAlertComponent {
   /** Emitido cuando se descarta la alerta / Emitted when the alert is dismissed */
   readonly closed = output<void>();
 
-  readonly _id = `neu-alert-${++_seq}`;
+  readonly _id = inject(NeuIdGenerator).getId('neu-alert-');
   readonly _dismissed = signal(false);
 
   readonly _defaultIconName = computed(() => DEFAULT_ICON_NAMES[this.type()]);

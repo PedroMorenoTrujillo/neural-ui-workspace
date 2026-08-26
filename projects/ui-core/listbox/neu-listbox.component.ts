@@ -17,6 +17,7 @@ import {
   untracked,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import {
   NeuOptionDisabledAccessor,
   NeuOptionFilterConfig,
@@ -67,8 +68,6 @@ import {
   NeuListboxOptionEvent,
   NeuListboxSelectAllEvent,
 } from './neu-listbox.types';
-
-let neuListboxIdSequence = 0;
 
 @Component({
   selector: 'neu-listbox',
@@ -301,7 +300,7 @@ export class NeuListboxComponent<
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
-  private readonly generatedId = `neu-listbox-${++neuListboxIdSequence}`;
+  private readonly generatedId = inject(NeuIdGenerator).getId('neu-listbox-');
   private readonly lazySequencer = new InternalNeuOptionLazyRequestSequencer();
   private readonly lastLazyRequest = signal<NeuOptionLazyRequest | null>(null);
   private typeahead = '';

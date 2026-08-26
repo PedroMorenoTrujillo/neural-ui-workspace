@@ -3,9 +3,11 @@ import {
   Component,
   ViewEncapsulation,
   computed,
+  inject,
   input,
   output,
 } from '@angular/core';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 /**
  * NeuralUI Slider Component
@@ -69,8 +71,7 @@ import {
   styleUrl: './neu-slider.component.scss',
 })
 export class NeuSliderComponent {
-  private static _idCounter = 0;
-  protected readonly sliderId = `neu-slider-${++NeuSliderComponent._idCounter}`;
+  protected readonly sliderId = inject(NeuIdGenerator).getId('neu-slider-');
 
   /** Valor actual / Current value */
   value = input<number>(0);

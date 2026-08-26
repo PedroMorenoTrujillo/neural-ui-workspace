@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.types';
 
 /**
@@ -14,6 +15,7 @@ import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.typ
  */
 @Injectable({ providedIn: 'root' })
 export class NeuToastService {
+  private readonly ids = inject(NeuIdGenerator);
   /** Lista reactiva de toasts activos / Reactive list of active toasts */
   readonly toasts = signal<NeuToastItem[]>([]);
 
@@ -27,7 +29,7 @@ export class NeuToastService {
   }
 
   show(options: NeuToastOptions): string {
-    const id = `neu-toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = this.ids.getId('neu-toast-');
     const duration = options.duration ?? 4000;
 
     const item: NeuToastItem = {

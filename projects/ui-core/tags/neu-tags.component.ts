@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, computed, contentChild, forwardRef, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, computed, contentChild, forwardRef, inject, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 export interface NeuTagSuggestion { label: string; value: string; data?: unknown; }
 @Directive({ selector: 'ng-template[neuTagItem]' })
 export class NeuTagItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: string; remove: () => void }>) {} }
@@ -55,7 +56,7 @@ export class NeuTagsComponent implements ControlValueAccessor {
   readonly separators = input<string[]>(['Enter', ',']);
   readonly removeLabel = input('Remove');
   readonly valueChange = output<string[]>();
-  readonly inputId = `neu-tags-${Math.random().toString(36).slice(2)}`;
+  readonly inputId = inject(NeuIdGenerator).getId('neu-tags-');
   readonly value = signal<string[]>([]);
   readonly draft = signal('');
   readonly cvaDisabled = signal(false);

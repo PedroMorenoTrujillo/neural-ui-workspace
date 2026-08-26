@@ -2,8 +2,8 @@
 .neu-compare__item { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
 .neu-compare__item > * { width: 100%; height: 100%; }
 .neu-compare__handle { position: absolute; z-index: 2; top: 50%; width: 2.5rem; height: 2.5rem; transform: translate(-50%, -50%); border: 2px solid var(--neu-primary-fg, #fff); border-radius: 50%; background: var(--neu-primary, #007aff); color: var(--neu-primary-fg, #fff); box-shadow: var(--neu-shadow, 0 4px 12px rgb(15 23 42 / .08)); cursor: ew-resize; }
-.neu-compare__handle::before { position: absolute; top: 50%; left: 50%; width: .875rem; height: .875rem; transform: translate(-50%, -50%); content: '↔'; text-align: center; line-height: .8; }
-.neu-compare--vertical .neu-compare__handle { left: 50%; cursor: ns-resize; }
+.neu-compare__handle::before { position: absolute; top: 50%; inset-inline-start: 50%; width: .875rem; height: .875rem; transform: translate(-50%, -50%); content: '↔'; text-align: center; line-height: .8; }
+.neu-compare--vertical .neu-compare__handle { inset-inline-start: 50%; cursor: ns-resize; }
 .neu-compare--vertical .neu-compare__handle::before { content: '↕'; }
 .neu-compare__indicator { position: absolute; z-index: 3; inset: 0; }
 .neu-compare__input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; }

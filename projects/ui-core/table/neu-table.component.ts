@@ -64,6 +64,7 @@ import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuInlineEditorComponent, NeuInlineEditorType } from '@neural-ui/core/inline-editor';
 import { NeuContextMenuDirective } from '@neural-ui/core/context-menu';
+import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/foundation';
 import type { NeuSelectOption } from '@neural-ui/core/select';
 import type {
   NeuOptionDisabledAccessor,
@@ -370,9 +371,6 @@ const _NEU_TABLE_ADVANCED_FILTER_TEXTS: InternalResolvedAdvancedFilterTexts = {
   before: 'Before',
   after: 'After',
 };
-
-let _neuTableFilterOverlayIdSeq = 0;
-let _neuTableSelectionIdSeq = 0;
 
 const _NEU_TABLE_FILTER_SESSION_OPENED = 'neu-table-filter-session-opened';
 const _NEU_TABLE_FILTER_CHILD_TRIGGER =
@@ -2084,6 +2082,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _sortController = new NeuTableSortController<T>();
   private readonly _queryController = new NeuTableQueryController<T>();
   private readonly _filterRegistry = inject(NeuTableFilterRegistry);
+  private readonly _temporal = inject(NeuInitialTemporalState);
   private readonly _filterScheduler = new NeuTableFilterScheduler<InternalAppliedColumnFilter>(
     (pending) => this._applyScheduledFilters(pending),
   );
@@ -2097,7 +2096,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _keyboardController = new NeuTableKeyboardController<unknown>();
   private readonly _editingController = new NeuTableEditingController<NeuTableRuntimeRow<T>>();
   private readonly _groupingController = new NeuTableGroupingController<NeuTableRuntimeRow<T>>();
-  protected readonly _selectionRadioName = `neu-table-selection-${_neuTableSelectionIdSeq++}`;
+  protected readonly _selectionRadioName = inject(NeuIdGenerator).getId('neu-table-selection-');
   private readonly _urlAdapter = new NeuTableUrlStateAdapter(this._urlState);
   private readonly _persistenceAdapter = new NeuTableStatePersistenceAdapter();
   private readonly _platformId = inject(PLATFORM_ID);
@@ -2106,7 +2105,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _injector = inject(Injector);
   private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private _virtualScrollTimer: ReturnType<typeof setTimeout> | null = null;
-  private readonly _filterOverlayUid = _neuTableFilterOverlayIdSeq++;
+  private readonly _filterOverlayUid = inject(NeuIdGenerator).getId('neu-table-filter-overlay-');
   private _activeFilterTrigger: HTMLElement | null = null;
   private _lastFilterWorkflowFocus: HTMLElement | null = null;
   private _escapeReturnFocus: HTMLElement | null = null;
@@ -2118,6 +2117,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _initialQueryHandled = false;
   private _lastEmittedQuery: NeuTableQueryState | null = null;
   private _statePersistenceReady = false;
+  private readonly _browserEnhancementsReady = signal(false);
   private _restoringState = false;
   private _restoredStateSignature: string | null = null;
   private _pendingEditorFocus = false;
@@ -2655,6 +2655,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _pendingViewportBinding = false;
 
   constructor() {
+    afterNextRender(() => this._browserEnhancementsReady.set(true));
     this._destroyRef.onDestroy(() => {
       this._destroyed = true;
       this._advancedFilter.destroy();
@@ -2923,6 +2924,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     });
 
     effect(() => {
+      if (!this._browserEnhancementsReady()) return;
       const key = this.stateKey()?.trim() ?? '';
       const storageKind = this.stateStorage();
       const urlSnapshot =
@@ -3088,9 +3090,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     effect(() => {
       const serverSide = this.serverSide();
       const lazyLoadOnInit = this.lazyLoadOnInit();
+      const browserEnhancementsReady = this._browserEnhancementsReady();
       const state = this._state.snapshot();
       this._queryConfig();
       untracked(() => {
+        if (isPlatformBrowser(this._platformId) && !browserEnhancementsReady) return;
         if (this._initialQueryHandled) return;
         this._initialQueryHandled = true;
         if (serverSide && lazyLoadOnInit) this._emitQueryState(state, true);
@@ -5964,7 +5968,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           ? String(val)
           : d.toLocaleDateString(
               locale,
-              typedColumn.dateFormat ?? { day: '2-digit', month: '2-digit', year: 'numeric' },
+              {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                timeZone: this._temporal.timeZone(),
+                ...typedColumn.dateFormat,
+              },
             );
       }
       case 'number':

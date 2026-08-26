@@ -7,6 +7,7 @@ import {
   computed,
   effect,
   forwardRef,
+  inject,
   input,
   output,
   signal,
@@ -16,6 +17,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuProgressBarComponent } from '@neural-ui/core/progress-bar';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import type {
   NeuUploaderError,
   NeuUploaderFileItem,
@@ -29,8 +31,6 @@ export type {
   NeuUploaderFileStatus,
   NeuUploaderSize,
 } from './neu-uploader.types';
-
-let _neuUploaderIdSeq = 0;
 
 @Component({
   selector: 'neu-uploader',
@@ -286,7 +286,7 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   readonly filesRejected = output<NeuUploaderError[]>();
   readonly cleared = output<void>();
 
-  readonly inputId = input<string>(`neu-uploader-${++_neuUploaderIdSeq}`);
+  readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-uploader-'));
 
   protected readonly isDragOver = signal(false);
   protected readonly internalErrors = signal<NeuUploaderError[]>([]);

@@ -13,6 +13,7 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NEURAL_LOCALE, NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/foundation';
 
 // ── Exported types ───────────────────────────────────────────────────────────
 
@@ -28,8 +29,6 @@ export interface NeuDatePreset {
 }
 
 // ── Private helpers ──────────────────────────────────────────────────────────
-
-let _neuDateInputIdSeq = 0;
 
 interface CalendarDay {
   date: Date;
@@ -556,6 +555,9 @@ function cloneDate(d: Date): Date {
 export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   private readonly doc = inject(DOCUMENT);
   private readonly overlay = inject(Overlay);
+  private readonly defaultLocale = inject(NEURAL_LOCALE);
+  private readonly temporal = inject(NeuInitialTemporalState);
+  private readonly _today = this.temporal.today();
   private _langObserver?: MutationObserver;
 
   /** Tipo del campo / Field type */
@@ -612,7 +614,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   readonly rangeChange = output<NeuDateRange>();
 
   // ── Estado interno / Internal state ──────────────────────────────
-  protected readonly _id = `neu-date-input-${++_neuDateInputIdSeq}`;
+  protected readonly _id = inject(NeuIdGenerator).getId('neu-date-input-');
   readonly isOpen = signal(false);
   readonly _viewportMargin = 16;
   readonly singleOverlayPositions: ConnectedPosition[] = [
@@ -687,8 +689,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
 
   // ── State — single ────────────────────────────────────────────────
   protected readonly _value = signal<string>('');
-  protected readonly _viewYear = signal(new Date().getFullYear());
-  protected readonly _viewMonth = signal(new Date().getMonth());
+  protected readonly _viewYear = signal(this._today.getFullYear());
+  protected readonly _viewMonth = signal(this._today.getMonth());
   protected readonly _selYear = signal<number | null>(null);
   protected readonly _selMonth = signal<number | null>(null);
   protected readonly _selDay = signal<number | null>(null);
@@ -697,9 +699,8 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   protected readonly _selectedDates = signal<string[]>([]);
 
   // ── State — range ─────────────────────────────────────────────────
-  private readonly _today = new Date();
   private readonly _documentLang = signal(
-    this.#normalizedLocale(this.doc.documentElement.lang) || 'es',
+    this.#normalizedLocale(this.doc.documentElement.lang) || this.defaultLocale,
   );
   private readonly _pickStart = signal<Date | null>(null);
   private readonly _pickEnd = signal<Date | null>(null);
@@ -722,7 +723,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     );
   });
   readonly _resolvedLocale = computed(
-    () => this.#normalizedLocale(this.locale()) || this._documentLang() || 'es',
+    () => this.#normalizedLocale(this.locale()) || this._documentLang() || this.defaultLocale,
   );
   readonly _texts = computed(() => {
     const spanish = this._resolvedLocale().toLowerCase().startsWith('es');
@@ -1031,7 +1032,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   readonly calendarDays = computed((): CalendarDay[] => {
     const year = this._viewYear();
     const month = this._viewMonth();
-    const today = new Date();
+    const today = this._today;
     const firstDay = new Date(year, month, 1);
     const startDow = this.#weekOffset(firstDay);
     const days: CalendarDay[] = [];

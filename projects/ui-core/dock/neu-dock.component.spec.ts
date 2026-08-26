@@ -145,17 +145,8 @@ describe('NeuDockComponent', () => {
     expect(blur).toHaveBeenCalledTimes(2);
     expect(addEventListener).toHaveBeenCalled();
 
-    const addListener = vi.fn();
-    const removeListener = vi.fn();
-    Object.defineProperty(window, 'matchMedia', {
-      configurable: true,
-      value: vi.fn(() => ({ matches: false, addListener, removeListener })),
-    });
-    (fixture.componentInstance as any).bindMedia('700px');
-
     fixture.destroy();
     expect(removeEventListener).toHaveBeenCalled();
-    expect(removeListener).toHaveBeenCalled();
     if (original) Object.defineProperty(window, 'matchMedia', original);
     else Reflect.deleteProperty(window, 'matchMedia');
   });

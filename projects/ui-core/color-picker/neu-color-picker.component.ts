@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export type NeuColorMode = 'hex' | 'rgb' | 'hsl';
 
@@ -120,8 +121,6 @@ function hslToHex(h: number, s: number, l: number): string {
   };
   return `#${f(0)}${f(8)}${f(4)}`;
 }
-
-let _seq = 0;
 
 /**
  * NeuralUI ColorPicker
@@ -255,7 +254,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   readonly colorChange = output<string>();
 
   // ── Internal state ───────────────────────────────────────────────
-  readonly _id = `neu-cp-${++_seq}`;
+  readonly _id = inject(NeuIdGenerator).getId('neu-cp-');
   readonly _modes: NeuColorMode[] = ['hex', 'rgb', 'hsl'];
   readonly _swatches: string[] = [
     '#ef4444',

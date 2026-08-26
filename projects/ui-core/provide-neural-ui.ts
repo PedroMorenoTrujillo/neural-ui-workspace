@@ -1,4 +1,5 @@
-import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
+import { EnvironmentProviders, Provider, makeEnvironmentProviders } from '@angular/core';
+import { NEURAL_LOCALE, NEURAL_NOW, NEURAL_TIME_ZONE, NeuNow } from '@neural-ui/core/foundation';
 import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
 import {
   lucideChevronLeft,
@@ -23,6 +24,12 @@ export interface NeuralUIConfig {
   iconSize?: string;
   /** Grosor de trazo de los iconos. Por defecto: '2' / Icon stroke width. Default: '2' */
   iconStrokeWidth?: string;
+  /** Locale determinista por defecto. Si se omite, usa LOCALE_ID. / Deterministic default locale. Falls back to LOCALE_ID. */
+  locale?: string;
+  /** Zona horaria IANA opcional para superficies con formato horario. / Optional IANA timezone for time formatting surfaces. */
+  timeZone?: string;
+  /** Reloj inicial inyectable para SSR, pruebas y aplicaciones deterministas. / Injectable initial clock for SSR and tests. */
+  now?: NeuNow;
 }
 
 /**
@@ -45,6 +52,12 @@ export interface NeuralUIConfig {
  */
 export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProviders {
   const { iconSize = '1.25rem', iconStrokeWidth = '2' } = config;
+  const deterministicProviders: Provider[] = [];
+  if (config.locale)
+    deterministicProviders.push({ provide: NEURAL_LOCALE, useValue: config.locale });
+  if (config.timeZone)
+    deterministicProviders.push({ provide: NEURAL_TIME_ZONE, useValue: config.timeZone });
+  if (config.now) deterministicProviders.push({ provide: NEURAL_NOW, useValue: config.now });
 
   return makeEnvironmentProviders([
     provideIcons({
@@ -73,5 +86,6 @@ export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProvide
       lucideUpload,
     }),
     provideNgIconsConfig({ size: iconSize, strokeWidth: iconStrokeWidth }),
+    ...deterministicProviders,
   ]);
 }

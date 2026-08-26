@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, TemplateRef, ViewEncapsulation, afterNextRender, computed, contentChild, forwardRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export type NeuInputTagsOptionAccessor<T> = string | ((option: T) => unknown);
 export interface NeuInputTagsItemTemplateContext<T> { $implicit: T; index: number; onRemove: (event: Event, index: number) => void; }
@@ -23,8 +24,6 @@ export class NeuInputTagsGroupDirective<T> { constructor(readonly templateRef: T
 export class NeuInputTagsHeaderDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
 @Directive({ selector: 'ng-template[neuInputTagsFooter]' })
 export class NeuInputTagsFooterDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
-
-let inputTagsSequence = 0;
 
 /**
  * A multi-value form control with optional asynchronous typeahead suggestions.
@@ -163,7 +162,7 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
   readonly panelOpen = signal(false);
   readonly activeIndex = signal(-1);
   readonly cvaDisabled = signal(false);
-  readonly inputIdInternal = `neu-input-tags-${++inputTagsSequence}`;
+  readonly inputIdInternal = inject(NeuIdGenerator).getId('neu-input-tags-');
   readonly panelId = `${this.inputIdInternal}-panel`;
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
   readonly effectiveInputId = computed(() => this.inputId() || this.inputIdInternal);

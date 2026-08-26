@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewEncapsulation, afterNextRender, computed, forwardRef, input, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewEncapsulation, afterNextRender, computed, forwardRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 @Component({
   selector: 'neu-password',
@@ -84,7 +85,7 @@ export class NeuPasswordComponent implements ControlValueAccessor {
   readonly showLabel = input('Show');
   readonly hideLabel = input('Hide');
   readonly valueChange = output<string>();
-  readonly inputId = `neu-password-${Math.random().toString(36).slice(2)}`;
+  readonly inputId = inject(NeuIdGenerator).getId('neu-password-');
   readonly value = signal('');
   readonly visible = signal(false);
   readonly focused = signal(false);

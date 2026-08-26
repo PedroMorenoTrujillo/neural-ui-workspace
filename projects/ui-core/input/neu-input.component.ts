@@ -6,15 +6,14 @@ import {
   afterNextRender,
   computed,
   forwardRef,
+  inject,
   input,
   signal,
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-
-/** Contador global para IDs estables — seguro en SSR, predecible en hidratación / Global counter for stable IDs — SSR-safe, predictable on hydration */
-let _neuInputIdSeq = 0;
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'search';
 
@@ -188,8 +187,8 @@ export class NeuInputComponent implements ControlValueAccessor {
   /** Posición del icono cuando se usa `icon` / Icon position when using `icon` */
   iconPosition = input<'left' | 'right'>('left');
 
-  /** ID accesible para el input — generado con contador estable (seguro en SSR) / Accessible ID for the input — generated with stable counter (SSR-safe) */
-  inputId = input<string>(`neu-input-${++_neuInputIdSeq}`);
+  /** ID accesible para el input — generado por aplicación (seguro en SSR) / Application-scoped accessible ID (SSR-safe) */
+  inputId = input<string>(inject(NeuIdGenerator).getId('neu-input-'));
 
   /** Nombre del campo para formularios nativos / Field name for native forms */
   name = input<string>('');

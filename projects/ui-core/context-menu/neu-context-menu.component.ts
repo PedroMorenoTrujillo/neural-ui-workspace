@@ -38,8 +38,6 @@ export interface NeuContextMenuItem {
 @Directive({ selector: 'ng-template[neuContextMenuItem]' })
 export class NeuContextMenuItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuContextMenuItem }>) {} }
 
-let _seq = 0;
-
 /**
  * NeuralUI ContextMenu Overlay Component (internal)
  */

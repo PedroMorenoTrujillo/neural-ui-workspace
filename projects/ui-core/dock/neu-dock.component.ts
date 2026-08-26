@@ -1,11 +1,9 @@
-import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   Directive,
   ElementRef,
-  PLATFORM_ID,
   TemplateRef,
   ViewEncapsulation,
   booleanAttribute,
@@ -31,6 +29,7 @@ import {
   resolveNeuMenuAction,
 } from '@neural-ui/core/menu-foundation';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
+import { NeuResponsiveState } from '@neural-ui/core/foundation';
 
 export type NeuDockPosition = 'top' | 'right' | 'bottom' | 'left';
 
@@ -189,14 +188,12 @@ export class NeuDockItemDirective {
 })
 export class NeuDockComponent {
   protected readonly Math = Math;
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly responsive = inject(NeuResponsiveState);
   private readonly actions = viewChildren<ElementRef<HTMLElement>>('dockAction');
   private readonly itemTemplate = contentChild(NeuDockItemDirective);
   private readonly defaultTemplate =
     viewChild.required<TemplateRef<NeuDockItemTemplateContext>>('defaultItem');
   private readonly controller = new NeuRovingMenuController({ orientation: 'horizontal' });
-  private mediaCleanup: (() => void) | null = null;
 
   readonly items = input<NeuDockItem[]>([]);
   readonly position = input<NeuDockPosition>('bottom');
@@ -210,8 +207,8 @@ export class NeuDockComponent {
   readonly itemFocus = output<FocusEvent>();
   readonly itemBlur = output<FocusEvent>();
 
-  readonly mobile = signal(false);
-  readonly coarsePointer = signal(false);
+  readonly mobile = this.responsive.observe(computed(() => `(max-width: ${this.breakpoint()})`));
+  readonly coarsePointer = this.responsive.observe('(pointer: coarse)');
   readonly hoveredIndex = signal(-1);
   readonly activeIndex = signal(-1);
   readonly orientation = computed(() =>
@@ -239,8 +236,6 @@ export class NeuDockComponent {
         ),
       );
     });
-    effect(() => this.bindMedia(this.breakpoint()));
-    this.destroyRef.onDestroy(() => this.mediaCleanup?.());
   }
 
   itemTemplateRef(): TemplateRef<NeuDockItemTemplateContext> {
@@ -276,35 +271,5 @@ export class NeuDockComponent {
     const target = this.actions()[result.activeIndex]?.nativeElement;
     if (result.activate) target?.click();
     else target?.focus();
-  }
-
-  private bindMedia(breakpoint: string): void {
-    this.mediaCleanup?.();
-    this.mediaCleanup = null;
-    if (!isPlatformBrowser(this.platformId) || typeof window.matchMedia !== 'function') return;
-    const compact = window.matchMedia(`(max-width: ${breakpoint})`);
-    const coarse = window.matchMedia('(pointer: coarse)');
-    const update = () => {
-      this.mobile.set(compact.matches);
-      this.coarsePointer.set(coarse.matches);
-    };
-    const listen = (query: MediaQueryList): (() => void) => {
-      if (typeof query.addEventListener === 'function') {
-        query.addEventListener('change', update);
-        return () => query.removeEventListener('change', update);
-      }
-      if (typeof query.addListener === 'function') {
-        query.addListener(update);
-        return () => query.removeListener(update);
-      }
-      return () => undefined;
-    };
-    const removeCompact = listen(compact);
-    const removeCoarse = listen(coarse);
-    update();
-    this.mediaCleanup = () => {
-      removeCompact();
-      removeCoarse();
-    };
   }
 }

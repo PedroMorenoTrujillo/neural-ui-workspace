@@ -269,18 +269,21 @@ describe('NeuMegaMenuComponent', () => {
       },
       0,
     );
-    component.bindMedia('700px');
     expect(addListener).toHaveBeenCalled();
     media.matches = false;
     component.mobileActive.set(true);
-    component.bindMedia('710px');
+    fixture.componentRef.setInput('breakpoint', '710px');
+    fixture.detectChanges();
+    await fixture.whenStable();
     const addEventListener = vi.fn();
     const removeEventListener = vi.fn();
     Object.defineProperty(window, 'matchMedia', {
       configurable: true,
       value: vi.fn(() => ({ matches: false, addEventListener, removeEventListener })),
     });
-    component.bindMedia('720px');
+    fixture.componentRef.setInput('breakpoint', '720px');
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.destroy();
     expect(removeListener).toHaveBeenCalled();
     expect(removeEventListener).toHaveBeenCalled();

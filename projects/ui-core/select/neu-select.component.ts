@@ -16,6 +16,7 @@ import {
   untracked,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   ConnectedOverlayPositionChange,
@@ -86,8 +87,6 @@ import {
 } from './neu-select.directives';
 
 export type { NeuSelectOption } from './neu-select.types';
-
-let _neuSelectIdSeq = 0;
 
 /**
  * NeuralUI Select Component
@@ -544,7 +543,7 @@ export class NeuSelectComponent<
     });
   }
   /** @internal — ID \u00fanico para asociar label con trigger */
-  readonly _triggerId = `neu-select-trigger-${_neuSelectIdSeq++}`;
+  readonly _triggerId = inject(NeuIdGenerator).getId('neu-select-trigger-');
   readonly _panelId = `${this._triggerId}-panel`;
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
   readonly itemTpl = contentChild(NeuSelectItemDirective<T>);

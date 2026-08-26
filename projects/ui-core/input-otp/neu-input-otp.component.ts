@@ -12,8 +12,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-
-let _seq = 0;
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 /**
  * NeuralUI InputOTP Component
@@ -70,7 +69,7 @@ export class NeuInputOTPComponent implements ControlValueAccessor {
   /** Emitido en cada cambio parcial / Emitted on each partial change */
   readonly valueChange = output<string>();
 
-  readonly _id = `neu-input-otp-${++_seq}`;
+  readonly _id = inject(NeuIdGenerator).getId('neu-input-otp-');
   readonly _cvaDisabled = signal(false);
   readonly _digits = signal<string[]>([]);
 

@@ -20,6 +20,7 @@ import {
   OverlayModule,
 } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import {
   NeuOptionAccessor,
   NeuOptionDisabledAccessor,
@@ -59,8 +60,6 @@ export interface NeuCascadeSelectNode<V = string> {
   children?: readonly NeuCascadeSelectNode<V>[];
   data?: unknown;
 }
-
-let neuCascadeSelectIdSequence = 0;
 
 interface SelectionPath<T> {
   ancestors: T[];
@@ -286,7 +285,7 @@ export class NeuCascadeSelectComponent<T = NeuCascadeSelectNode, V = NeuOptionVa
 
   readonly selectionChange = output<T | null>();
 
-  readonly triggerId = `neu-cascade-select-${neuCascadeSelectIdSequence++}`;
+  readonly triggerId = inject(NeuIdGenerator).getId('neu-cascade-select-');
   readonly panelId = `${this.triggerId}-panel`;
   readonly open = signal(false);
   readonly value = signal<V | null>(null);

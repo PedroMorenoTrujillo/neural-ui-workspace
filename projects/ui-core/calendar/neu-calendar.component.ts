@@ -7,11 +7,13 @@ import {
   computed,
   contentChild,
   effect,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { NEURAL_LOCALE, NeuInitialTemporalState } from '@neural-ui/core/foundation';
 
 export type NeuCalendarView = 'month' | 'week';
 export type NeuCalendarEventVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
@@ -103,10 +105,6 @@ const ES_CALENDAR_LABELS: NeuCalendarLabels = {
   eventCount: (count) => `${count} evento${count === 1 ? '' : 's'}`,
   moreEvents: (count) => `+${count} mas`,
 };
-
-function defaultCalendarLocale(): string {
-  return typeof navigator !== 'undefined' && navigator.language ? navigator.language : 'en-US';
-}
 
 function defaultCalendarLabels(locale: string): NeuCalendarLabels {
   return locale.toLowerCase().startsWith('es') ? ES_CALENDAR_LABELS : EN_CALENDAR_LABELS;
@@ -287,11 +285,13 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
   styleUrl: './neu-calendar.component.scss',
 })
 export class NeuCalendarComponent {
+  private readonly temporal = inject(NeuInitialTemporalState);
+  private readonly defaultLocale = inject(NEURAL_LOCALE);
   readonly eventTpl = contentChild(NeuCalendarEventDirective);
   readonly events = input<NeuCalendarEvent[]>([]);
   readonly view = input<NeuCalendarView>('month');
-  readonly selectedDate = input<Date | string>(new Date());
-  readonly locale = input<string>(defaultCalendarLocale());
+  readonly selectedDate = input<Date | string>(this.temporal.today());
+  readonly locale = input<string>(this.defaultLocale);
   readonly maxVisibleEvents = input<number>(3);
   readonly showHeader = input<boolean>(true);
   readonly labels = input<NeuCalendarLabelOverrides>({});
@@ -302,7 +302,7 @@ export class NeuCalendarComponent {
   readonly dateSelect = output<Date>();
   readonly eventClick = output<NeuCalendarEvent>();
 
-  private readonly _selectedDate = signal(startOfDay(new Date()));
+  private readonly _selectedDate = signal(this.temporal.today());
 
   readonly resolvedLabels = computed<NeuCalendarLabels>(() => ({
     ...defaultCalendarLabels(this.locale()),
@@ -313,8 +313,8 @@ export class NeuCalendarComponent {
     this.events()
       .map((event) => ({
         ...event,
-        start: this.coerceDate(event.start),
-        end: event.end ? this.coerceDate(event.end) : undefined,
+        start: this.coerceEventDate(event.start),
+        end: event.end ? this.coerceEventDate(event.end) : undefined,
       }))
       .sort((a, b) => a.start.getTime() - b.start.getTime()),
   );
@@ -416,6 +416,7 @@ export class NeuCalendarComponent {
     return new Intl.DateTimeFormat(this.locale(), {
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: this.temporal.timeZone(),
     }).format(event.start);
   }
 
@@ -467,13 +468,15 @@ export class NeuCalendarComponent {
 
   private buildDayCell(date: Date, inCurrentMonth: boolean): CalendarDayCell {
     const normalizedDate = startOfDay(date);
-    const today = startOfDay(new Date());
+    const today = this.temporal.today();
     return {
       date: normalizedDate,
       inCurrentMonth,
       isToday: sameDay(normalizedDate, today),
       isSelected: sameDay(normalizedDate, this._selectedDate()),
-      events: this.normalizedEvents().filter((event) => sameDay(event.start, normalizedDate)),
+      events: this.normalizedEvents().filter(
+        (event) => this.eventDateKey(event.start) === this.localDateKey(normalizedDate),
+      ),
     };
   }
 
@@ -487,7 +490,38 @@ export class NeuCalendarComponent {
   }
 
   private coerceDate(value: Date | string): Date {
-    const candidate = value instanceof Date ? value : new Date(value);
-    return Number.isNaN(candidate.getTime()) ? startOfDay(new Date()) : startOfDay(candidate);
+    const dateOnly = typeof value === 'string' ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) : null;
+    const candidate =
+      value instanceof Date
+        ? value
+        : dateOnly
+          ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+          : new Date(value);
+    return Number.isNaN(candidate.getTime()) ? this.temporal.today() : startOfDay(candidate);
+  }
+
+  private coerceEventDate(value: Date | string): Date {
+    const candidate = value instanceof Date ? new Date(value.getTime()) : new Date(value);
+    return Number.isNaN(candidate.getTime()) ? this.temporal.now() : candidate;
+  }
+
+  private eventDateKey(date: Date): string {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: this.temporal.timeZone(),
+    }).formatToParts(date);
+    const value = (type: 'year' | 'month' | 'day') =>
+      parts.find((part) => part.type === type)?.value ?? '';
+    return `${value('year')}-${value('month')}-${value('day')}`;
+  }
+
+  private localDateKey(date: Date): string {
+    return [
+      String(date.getFullYear()).padStart(4, '0'),
+      String(date.getMonth() + 1).padStart(2, '0'),
+      String(date.getDate()).padStart(2, '0'),
+    ].join('-');
   }
 }

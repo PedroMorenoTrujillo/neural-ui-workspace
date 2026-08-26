@@ -25,6 +25,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import {
   NeuOptionAccessor,
   NeuOptionDisabledAccessor,
@@ -370,6 +371,7 @@ export class NeuAutocompleteComponent<
 >
   implements ControlValueAccessor, OnDestroy
 {
+  private readonly generatedId = inject(NeuIdGenerator).getId('neu-autocomplete-');
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
@@ -620,7 +622,7 @@ export class NeuAutocompleteComponent<
         .replace(/[^a-zA-Z0-9_-]+/g, '-')
         .replace(/^-+|-+$/g, '')
         .toLowerCase() || 'field';
-    return `neu-autocomplete-${slug}`;
+    return `${this.generatedId}-${slug}`;
   });
   readonly ownerId = computed(() => this.id() || this.inputId() || this.fallbackId());
   readonly inputElementId = computed(

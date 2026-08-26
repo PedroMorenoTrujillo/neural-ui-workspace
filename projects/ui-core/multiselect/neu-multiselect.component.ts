@@ -18,6 +18,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   ConnectedOverlayPositionChange,
@@ -97,8 +98,6 @@ import {
 } from './neu-multiselect.directives';
 
 export type { NeuSelectOption } from '@neural-ui/core/select';
-
-let _neuMultiselectIdSeq = 0;
 
 function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
   return (
@@ -577,7 +576,7 @@ export class NeuMultiselectComponent<
   }
 
   /** @internal */
-  readonly _triggerId = `neu-multiselect-trigger-${_neuMultiselectIdSeq++}`;
+  readonly _triggerId = inject(NeuIdGenerator).getId('neu-multiselect-trigger-');
   readonly _panelId = `${this._triggerId}-panel`;
 
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */

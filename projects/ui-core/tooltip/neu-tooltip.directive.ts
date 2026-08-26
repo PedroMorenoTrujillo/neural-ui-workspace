@@ -12,6 +12,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { NeuTooltipOverlayComponent } from './neu-tooltip.component';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export type NeuTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
@@ -42,7 +43,7 @@ export class NeuTooltipDirective implements OnDestroy {
   private readonly _elementRef = inject(ElementRef<HTMLElement>);
   private readonly _injector = inject(Injector);
 
-  readonly _tooltipId = `neu-tooltip-${Math.random().toString(36).slice(2, 7)}`;
+  readonly _tooltipId = inject(NeuIdGenerator).getId('neu-tooltip-');
 
   /** Elementos HTML nativamente focusables que no necesitan tabindex extra / Natively focusable HTML elements that don't need extra tabindex */
   private readonly _NATIVE_FOCUSABLE = /^(a|button|input|select|textarea|details|summary)$/i;

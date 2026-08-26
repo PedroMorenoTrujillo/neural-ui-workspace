@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ContentChild, DestroyRef, Directive, PLATFORM_ID, TemplateRef, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, DestroyRef, Directive, PLATFORM_ID, TemplateRef, afterNextRender, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 
 export interface NeuCarouselResponsiveOption { breakpoint: string | number; numVisible: number; numScroll?: number; }
@@ -41,11 +41,13 @@ export class NeuCarouselComponent<T = unknown> {
   readonly pageChange = output<NeuCarouselPageEvent>(); @ContentChild(NeuCarouselItemDirective) readonly itemTemplate?: NeuCarouselItemDirective<T>; @ContentChild(NeuCarouselHeaderDirective) readonly headerTemplate?: NeuCarouselHeaderDirective; @ContentChild(NeuCarouselFooterDirective) readonly footerTemplate?: NeuCarouselFooterDirective; private readonly _page = signal(0);
   constructor() {
     if (this._isBrowser) {
-      const view = this._document.defaultView;
-      this._viewportWidth.set(view?.innerWidth ?? null);
-      const onResize = () => this._viewportWidth.set(view?.innerWidth ?? null);
-      view?.addEventListener('resize', onResize, { passive: true });
-      this._destroyRef.onDestroy(() => view?.removeEventListener('resize', onResize));
+      afterNextRender(() => {
+        const view = this._document.defaultView;
+        this._viewportWidth.set(view?.innerWidth ?? null);
+        const onResize = () => this._viewportWidth.set(view?.innerWidth ?? null);
+        view?.addEventListener('resize', onResize, { passive: true });
+        this._destroyRef.onDestroy(() => view?.removeEventListener('resize', onResize));
+      });
     }
     effect(() => {
       const controlledPage = this.pageInput(); const initialPage = this.initialPage(); const effectiveScroll = this.effectiveScroll(); this.effectiveVisible(); this.items(); this.circular();

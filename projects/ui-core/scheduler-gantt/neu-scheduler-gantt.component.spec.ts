@@ -3,6 +3,7 @@ import {
   NeuSchedulerGanttComponent,
   type NeuSchedulerGanttRow,
 } from './neu-scheduler-gantt.component';
+import { NEURAL_NOW } from '@neural-ui/core/foundation';
 
 const ROWS: NeuSchedulerGanttRow[] = [
   {
@@ -242,17 +243,12 @@ describe('NeuSchedulerGanttComponent', () => {
   });
 
   it('uses a deterministic fallback range when no rows or explicit dates exist', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(Date.UTC(2026, 6, 12, 10)));
-    try {
-      const fixture = TestBed.createComponent(NeuSchedulerGanttComponent);
-      fixture.detectChanges();
+    TestBed.overrideProvider(NEURAL_NOW, { useValue: () => new Date(2026, 6, 12, 10) });
+    const fixture = TestBed.createComponent(NeuSchedulerGanttComponent);
+    fixture.detectChanges();
 
-      expect(fixture.componentInstance.gridColumns()[0].id).toBe('2026-07-12');
-      expect(fixture.componentInstance.rangeLabel()).toContain('2026');
-    } finally {
-      vi.useRealTimers();
-    }
+    expect(fixture.componentInstance.gridColumns()[0].id).toBe('2026-07-12');
+    expect(fixture.componentInstance.rangeLabel()).toContain('2026');
   });
 
   it('combines task meta with clamped progress', () => {

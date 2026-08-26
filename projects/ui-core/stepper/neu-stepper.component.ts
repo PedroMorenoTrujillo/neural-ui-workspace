@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   ViewEncapsulation,
   inject,
   input,
@@ -9,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
+import { NeuResponsiveState } from '@neural-ui/core/foundation';
 
 export interface NeuStepperStep {
   /** Etiqueta del paso / Step label */
@@ -103,7 +103,7 @@ export interface NeuStepperStep {
   styleUrl: './neu-stepper.component.scss',
 })
 export class NeuStepperComponent {
-  private readonly _destroyRef = inject(DestroyRef);
+  private readonly responsive = inject(NeuResponsiveState);
 
   /** Pasos del wizard / Wizard steps */
   steps = input<NeuStepperStep[]>([]);
@@ -119,7 +119,7 @@ export class NeuStepperComponent {
 
   /** Set de pasos completados / Set of completed steps */
   private readonly _completed = signal<Set<number>>(new Set());
-  readonly isCompact = signal(typeof window !== 'undefined' ? window.innerWidth <= 767 : false);
+  readonly isCompact = this.responsive.observe('(max-width: 767px)');
 
   readonly isCompleted = (i: number) =>
     this._completed().has(i) || (this.steps()[i]?.completed ?? false) || i < this.activeStep();
@@ -128,21 +128,6 @@ export class NeuStepperComponent {
     step.description ? `${step.label} - ${step.description}` : step.label;
 
   readonly stepAriaLabel = (step: NeuStepperStep) => this.stepTooltip(step);
-
-  constructor() {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia('(max-width: 767px)');
-    const updateCompact = (event?: MediaQueryListEvent) => {
-      this.isCompact.set(event?.matches ?? mediaQuery.matches);
-    };
-
-    updateCompact();
-    mediaQuery.addEventListener('change', updateCompact);
-    this._destroyRef.onDestroy(() => mediaQuery.removeEventListener('change', updateCompact));
-  }
 
   goTo(i: number): void {
     const step = this.steps()[i];

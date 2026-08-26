@@ -4,13 +4,13 @@ import {
   ViewEncapsulation,
   computed,
   forwardRef,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-
-let _seq = 0;
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 /**
  * NeuralUI NumberInput Component
@@ -188,7 +188,7 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   /** Emitido en cada cambio numérico / Emitted on each numeric change */
   readonly valueChange = output<number>();
 
-  readonly _id = `neu-number-input-${++_seq}`;
+  readonly _id = inject(NeuIdGenerator).getId('neu-number-input-');
   readonly _cvaDisabled = signal(false);
   readonly _value = signal<number | null>(0);
   readonly _focused = signal(false);

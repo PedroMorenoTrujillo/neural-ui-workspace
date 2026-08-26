@@ -1,11 +1,9 @@
-import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   Directive,
   ElementRef,
-  PLATFORM_ID,
   TemplateRef,
   ViewEncapsulation,
   booleanAttribute,
@@ -23,6 +21,7 @@ import {
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
 import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuIdGenerator, NeuResponsiveState } from '@neural-ui/core/foundation';
 import {
   NeuMenuActionLike,
   NeuResolvedMenuAction,
@@ -73,8 +72,6 @@ interface ProcessedMegaItem {
 interface ProcessedMegaRoot extends ProcessedMegaItem {
   columns: ProcessedMegaItem[][];
 }
-
-let megaMenuSequence = 0;
 
 @Component({
   selector: 'neu-mega-menu',
@@ -325,8 +322,7 @@ let megaMenuSequence = 0;
 })
 export class NeuMegaMenuComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly responsive = inject(NeuResponsiveState);
   private readonly rootActions = viewChildren<ElementRef<HTMLElement>>('rootAction');
   private readonly menuButton = viewChild<ElementRef<HTMLButtonElement>>('menuButton');
   private readonly defaultTemplate =
@@ -336,8 +332,7 @@ export class NeuMegaMenuComponent {
   protected readonly endTemplate = contentChild(NeuMegaMenuEndDirective);
   private readonly rootController = new NeuRovingMenuController({ orientation: 'horizontal' });
   private readonly childController = new NeuRovingMenuController({ orientation: 'vertical' });
-  private mediaCleanup: (() => void) | null = null;
-  private readonly generatedId = `neu-mega-menu-${++megaMenuSequence}`;
+  private readonly generatedId = inject(NeuIdGenerator).getId('neu-mega-menu-');
 
   readonly id = input<string>();
   readonly items = input<NeuMegaMenuItem[]>([]);
@@ -355,7 +350,7 @@ export class NeuMegaMenuComponent {
   readonly activeItemChange = output<NeuMegaMenuItem | null>();
   readonly mobileActiveChange = output<boolean>();
 
-  readonly mobile = signal(false);
+  readonly mobile = this.responsive.observe(computed(() => `(max-width: ${this.breakpoint()})`));
   readonly mobileActive = signal(false);
   readonly activeRootKey = signal<string | null>(null);
   readonly focusedRootIndex = signal(-1);
@@ -389,8 +384,6 @@ export class NeuMegaMenuComponent {
       )
         this.close(false);
     });
-    effect(() => this.bindMedia(this.breakpoint()));
-    this.destroyRef.onDestroy(() => this.mediaCleanup?.());
   }
 
   protected itemTemplateRef(): TemplateRef<NeuMegaMenuItemTemplateContext> {
@@ -504,7 +497,7 @@ export class NeuMegaMenuComponent {
     const wasOpen = this.activeRootKey() != null;
     this.activeRootKey.set(null);
     if (wasOpen) this.activeItemChange.emit(null);
-    if (restoreFocus && isPlatformBrowser(this.platformId)) {
+    if (restoreFocus) {
       (this.rootActions()[rootIndex]?.nativeElement ?? this.menuButton()?.nativeElement)?.focus();
     }
   }
@@ -568,27 +561,5 @@ export class NeuMegaMenuComponent {
         `#${this.panelId(rootIndex)} [data-neu-mega-child]`,
       ),
     );
-  }
-
-  private bindMedia(breakpoint: string): void {
-    this.mediaCleanup?.();
-    this.mediaCleanup = null;
-    if (!isPlatformBrowser(this.platformId) || typeof window.matchMedia !== 'function') return;
-    const query = window.matchMedia(`(max-width: ${breakpoint})`);
-    const update = () => {
-      this.mobile.set(query.matches);
-      if (!query.matches && this.mobileActive()) {
-        this.mobileActive.set(false);
-        this.mobileActiveChange.emit(false);
-      }
-    };
-    if (typeof query.addEventListener === 'function') query.addEventListener('change', update);
-    else if (typeof query.addListener === 'function') query.addListener(update);
-    update();
-    this.mediaCleanup = () => {
-      if (typeof query.removeEventListener === 'function')
-        query.removeEventListener('change', update);
-      else if (typeof query.removeListener === 'function') query.removeListener(update);
-    };
   }
 }
