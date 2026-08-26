@@ -141,6 +141,7 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     const xBar = fixture.nativeElement.querySelector('.neu-scroll-area__bar--x') as HTMLElement;
     xBar.getBoundingClientRect = () => ({ top: 0, left: 0, width: 100, height: 10 } as DOMRect);
     xBar.dispatchEvent(new MouseEvent('click', { clientX: 50, bubbles: true }));
+    Object.defineProperty(viewport, 'scrollTo', { configurable: true, value: undefined });
     component.scrollTo({ top: 20, left: 25 });
     expect(viewport.scrollTop).toBe(20);
     expect(viewport.scrollLeft).toBe(25);
