@@ -33,15 +33,21 @@ describe('NeuSpeedDialComponent', () => {
   it('opens and closes with two-way visibility and mask', () => {
     const fixture = TestBed.createComponent(SpeedDialHost);
     fixture.detectChanges();
+    const menu = fixture.nativeElement.querySelector(
+      '.neu-speed-dial__list',
+    ) as HTMLElement;
+    expect(menu.hasAttribute('inert')).toBe(true);
     (fixture.nativeElement.querySelector('.neu-speed-dial__trigger') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(fixture.componentInstance.open).toBe(true);
+    expect(menu.hasAttribute('inert')).toBe(false);
     expect(fixture.nativeElement.querySelector('.neu-speed-dial__mask')).toBeTruthy();
     (fixture.nativeElement.querySelector('.neu-speed-dial__mask') as HTMLElement).dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true }),
     );
     fixture.detectChanges();
     expect(fixture.componentInstance.open).toBe(false);
+    expect(menu.hasAttribute('inert')).toBe(true);
   });
 
   it('runs actions, emits item click and restores trigger focus', () => {

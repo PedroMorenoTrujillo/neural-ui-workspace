@@ -111,6 +111,7 @@ export class NeuSpeedDialTriggerDirective {
         [id]="listId()"
         [attr.aria-label]="ariaLabel()"
         [attr.aria-hidden]="!visible()"
+        [attr.inert]="!visible() ? '' : null"
       >
         @for (action of resolvedItems(); track action.key; let index = $index) {
           <li

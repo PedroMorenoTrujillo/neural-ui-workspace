@@ -3,7 +3,6 @@ import {
   Component,
   ContentChild,
   Directive,
-  ElementRef,
   TemplateRef,
   computed,
   contentChild,
@@ -13,9 +12,9 @@ import {
   output,
   signal,
   untracked,
-  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 
 export interface NeuGalleryItem {
   src: string;
@@ -47,36 +46,93 @@ export class NeuGalleryCaptionDirective {
 /** An image gallery with typed content templates, preview controls, and touch/keyboard navigation. */
 @Component({
   selector: 'neu-gallery',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, NeuFocusTrapDirective, NeuModalFocusDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-gallery', '[class.neu-gallery--fullscreen]': 'isPreviewOpen()' },
   template: `
     @if (items().length) {
-      <section class="neu-gallery__surface" [attr.aria-label]="ariaLabel()" (keydown)="onKeydown($event)">
-        <div class="neu-gallery__stage" (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)">
+      <section
+        class="neu-gallery__surface"
+        [attr.aria-label]="ariaLabel()"
+        (keydown)="onKeydown($event)"
+      >
+        <div
+          class="neu-gallery__stage"
+          (pointerdown)="onPointerDown($event)"
+          (pointerup)="onPointerUp($event)"
+        >
           @if (showItemNavigators() && items().length > 1) {
-            <button type="button" class="neu-gallery__nav neu-gallery__nav--prev" [disabled]="!canPrev()" [attr.aria-label]="previousLabel()" (click)="previous()">‹</button>
+            <button
+              type="button"
+              class="neu-gallery__nav neu-gallery__nav--prev"
+              [disabled]="!canPrev()"
+              [attr.aria-label]="previousLabel()"
+              (click)="previous()"
+            >
+              ‹
+            </button>
           }
-          <button type="button" class="neu-gallery__preview" [attr.aria-label]="previewLabel()" (click)="openPreview($event.currentTarget)">
+          <button
+            type="button"
+            class="neu-gallery__preview"
+            [attr.aria-label]="previewLabel()"
+            (click)="openPreview($event.currentTarget)"
+          >
             @if (itemTemplate) {
-              <ng-container [ngTemplateOutlet]="itemTemplate.templateRef" [ngTemplateOutletContext]="itemContext()" />
+              <ng-container
+                [ngTemplateOutlet]="itemTemplate.templateRef"
+                [ngTemplateOutletContext]="itemContext()"
+              />
             } @else {
-              <img class="neu-gallery__image" [src]="activeItem().src" [alt]="activeItem().alt" [attr.loading]="imageLoading()" [class.neu-gallery__image--contain]="objectFit() === 'contain'" (error)="onImageError()" />
+              <img
+                class="neu-gallery__image"
+                [src]="activeItem().src"
+                [alt]="activeItem().alt"
+                [attr.loading]="imageLoading()"
+                [class.neu-gallery__image--contain]="objectFit() === 'contain'"
+                (error)="onImageError()"
+              />
             }
           </button>
           @if (showItemNavigators() && items().length > 1) {
-            <button type="button" class="neu-gallery__nav neu-gallery__nav--next" [disabled]="!canNext()" [attr.aria-label]="nextLabel()" (click)="next()">›</button>
+            <button
+              type="button"
+              class="neu-gallery__nav neu-gallery__nav--next"
+              [disabled]="!canNext()"
+              [attr.aria-label]="nextLabel()"
+              (click)="next()"
+            >
+              ›
+            </button>
           }
           @if (captionTemplate) {
-            <div class="neu-gallery__caption"><ng-container [ngTemplateOutlet]="captionTemplate.templateRef" [ngTemplateOutletContext]="captionContext()" /></div>
+            <div class="neu-gallery__caption">
+              <ng-container
+                [ngTemplateOutlet]="captionTemplate.templateRef"
+                [ngTemplateOutletContext]="captionContext()"
+              />
+            </div>
           } @else if (activeItem().caption) {
             <p class="neu-gallery__caption">{{ activeItem().caption }}</p>
           }
         </div>
         @if (showThumbnails() && items().length > 1) {
-          <div class="neu-gallery__thumbnails" [class.neu-gallery__thumbnails--start]="thumbnailPosition() === 'start'" role="tablist" [attr.aria-label]="thumbnailLabel()">
+          <div
+            class="neu-gallery__thumbnails"
+            [class.neu-gallery__thumbnails--start]="thumbnailPosition() === 'start'"
+            role="tablist"
+            [attr.aria-label]="thumbnailLabel()"
+          >
             @for (item of items(); track item.src; let index = $index) {
-              <button type="button" class="neu-gallery__thumbnail" role="tab" [attr.aria-selected]="index === activeIndex()" [attr.aria-label]="item.alt" [class.neu-gallery__thumbnail--active]="index === activeIndex()" (click)="setActiveIndex(index, true)">
+              <button
+                type="button"
+                class="neu-gallery__thumbnail"
+                role="tab"
+                [attr.aria-selected]="index === activeIndex()"
+                [attr.aria-label]="item.alt"
+                [class.neu-gallery__thumbnail--active]="index === activeIndex()"
+                (click)="setActiveIndex(index, true)"
+              >
                 <img [src]="item.src" [alt]="item.alt" loading="lazy" />
               </button>
             }
@@ -86,24 +142,83 @@ export class NeuGalleryCaptionDirective {
     }
 
     @if (isPreviewOpen()) {
-      <div #preview class="neu-gallery__backdrop" role="dialog" aria-modal="true" [attr.aria-label]="previewLabel()" tabindex="-1" (keydown)="onPreviewKeydown($event)" (click)="closePreview()">
-        <div class="neu-gallery__lightbox" (click)="$event.stopPropagation()" (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)">
+      <div
+        class="neu-gallery__backdrop"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="previewLabel()"
+        neuFocusTrap
+        neuModalFocus
+        (neuModalFocusEscape)="closePreview()"
+        (keydown)="onPreviewKeydown($event)"
+        (click)="closePreview()"
+      >
+        <div
+          class="neu-gallery__lightbox"
+          (click)="$event.stopPropagation()"
+          (pointerdown)="onPointerDown($event)"
+          (pointerup)="onPointerUp($event)"
+        >
           <div class="neu-gallery__toolbar" role="toolbar" [attr.aria-label]="toolbarLabel()">
             <span>{{ activeIndex() + 1 }} / {{ items().length }}</span>
-            <button type="button" (click)="zoom(-0.25)" [disabled]="zoomLevel() <= 1" aria-label="Zoom out">−</button>
-            <button type="button" (click)="zoom(0.25)" [disabled]="zoomLevel() >= maxZoom()" aria-label="Zoom in">+</button>
+            <button
+              type="button"
+              (click)="zoom(-0.25)"
+              [disabled]="zoomLevel() <= 1"
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <button
+              type="button"
+              (click)="zoom(0.25)"
+              [disabled]="zoomLevel() >= maxZoom()"
+              aria-label="Zoom in"
+            >
+              +
+            </button>
             <button type="button" (click)="rotate(-90)" aria-label="Rotate left">↶</button>
             <button type="button" (click)="rotate(90)" aria-label="Rotate right">↷</button>
             <button type="button" (click)="flip('x')" aria-label="Flip horizontally">↔</button>
             <button type="button" (click)="flip('y')" aria-label="Flip vertically">↕</button>
             <button type="button" (click)="resetTransform()" aria-label="Reset image">⟳</button>
-            <a class="neu-gallery__download" [href]="activeItem().src" [attr.download]="downloadName()" [attr.aria-label]="downloadLabel()">⇩</a>
-            <button type="button" (click)="closePreview()" [attr.aria-label]="closeLabel()">×</button>
+            <a
+              class="neu-gallery__download"
+              [href]="activeItem().src"
+              [attr.download]="downloadName()"
+              [attr.aria-label]="downloadLabel()"
+              >⇩</a
+            >
+            <button type="button" (click)="closePreview()" [attr.aria-label]="closeLabel()">
+              ×
+            </button>
           </div>
-          <img class="neu-gallery__lightbox-image" [src]="activeItem().src" [alt]="activeItem().alt" [style.transform]="transform()" draggable="false" />
+          <img
+            class="neu-gallery__lightbox-image"
+            [src]="activeItem().src"
+            [alt]="activeItem().alt"
+            [style.transform]="transform()"
+            draggable="false"
+          />
           @if (items().length > 1) {
-            <button type="button" class="neu-gallery__lightbox-nav neu-gallery__lightbox-nav--prev" [disabled]="!canPrev()" (click)="previous()" [attr.aria-label]="previousLabel()">‹</button>
-            <button type="button" class="neu-gallery__lightbox-nav neu-gallery__lightbox-nav--next" [disabled]="!canNext()" (click)="next()" [attr.aria-label]="nextLabel()">›</button>
+            <button
+              type="button"
+              class="neu-gallery__lightbox-nav neu-gallery__lightbox-nav--prev"
+              [disabled]="!canPrev()"
+              (click)="previous()"
+              [attr.aria-label]="previousLabel()"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              class="neu-gallery__lightbox-nav neu-gallery__lightbox-nav--next"
+              [disabled]="!canNext()"
+              (click)="next()"
+              [attr.aria-label]="nextLabel()"
+            >
+              ›
+            </button>
           }
         </div>
       </div>
@@ -139,7 +254,6 @@ export class NeuGalleryComponent {
 
   @ContentChild(NeuGalleryItemDirective) readonly itemTemplate?: NeuGalleryItemDirective;
   @ContentChild(NeuGalleryCaptionDirective) readonly captionTemplate?: NeuGalleryCaptionDirective;
-  private readonly _preview = viewChild<ElementRef<HTMLElement>>('preview');
   private readonly _activeIndex = signal(0);
   private readonly _previewOpen = signal(false);
   private readonly _zoom = signal(1);
@@ -148,7 +262,6 @@ export class NeuGalleryComponent {
   private _hasInitializedIndex = false;
   private _wasControlled = false;
   private _pointerStart: { x: number; y: number } | null = null;
-  private _restoreFocus: HTMLElement | null = null;
 
   constructor() {
     effect(() => {
@@ -176,21 +289,32 @@ export class NeuGalleryComponent {
         this._activeIndex.update((index) => this.clamp(index));
       });
     });
-    effect(() => {
-      if (this._previewOpen()) queueMicrotask(() => this._preview()?.nativeElement.focus());
-    });
   }
 
   readonly activeIndex = computed(() => this.clamp(this._activeIndex()));
   readonly activeItem = computed(() => this.items()[this.activeIndex()] ?? { src: '', alt: '' });
   readonly isPreviewOpen = this._previewOpen.asReadonly();
   readonly zoomLevel = this._zoom.asReadonly();
-  readonly transform = computed(() => `scale(${this._zoom()}) rotate(${this._rotation()}deg) scale(${this._flip().x}, ${this._flip().y})`);
+  readonly transform = computed(
+    () =>
+      `scale(${this._zoom()}) rotate(${this._rotation()}deg) scale(${this._flip().x}, ${this._flip().y})`,
+  );
   readonly canPrev = computed(() => this.circular() || this.activeIndex() > 0);
-  readonly canNext = computed(() => this.circular() || this.activeIndex() < this.items().length - 1);
-  readonly itemContext = computed<NeuGalleryItemContext>(() => ({ $implicit: this.activeItem(), index: this.activeIndex(), active: true }));
-  readonly captionContext = computed<NeuGalleryCaptionContext>(() => ({ $implicit: this.activeItem(), index: this.activeIndex() }));
-  readonly downloadName = computed(() => this.activeItem().src.split('/').pop()?.split('?')[0] || 'image');
+  readonly canNext = computed(
+    () => this.circular() || this.activeIndex() < this.items().length - 1,
+  );
+  readonly itemContext = computed<NeuGalleryItemContext>(() => ({
+    $implicit: this.activeItem(),
+    index: this.activeIndex(),
+    active: true,
+  }));
+  readonly captionContext = computed<NeuGalleryCaptionContext>(() => ({
+    $implicit: this.activeItem(),
+    index: this.activeIndex(),
+  }));
+  readonly downloadName = computed(
+    () => this.activeItem().src.split('/').pop()?.split('?')[0] || 'image',
+  );
 
   setActiveIndex(index: number, user = false): void {
     const next = this.clamp(index);
@@ -201,32 +325,82 @@ export class NeuGalleryComponent {
     // echoes an `activeIndex` input; input reconciliation is intentionally silent.
     if (user) this.activeIndexChange.emit(next);
   }
-  previous(): void { this.setActiveIndex(this.activeIndex() - 1, true); }
-  next(): void { this.setActiveIndex(this.activeIndex() + 1, true); }
+  previous(): void {
+    this.setActiveIndex(this.activeIndex() - 1, true);
+  }
+  next(): void {
+    this.setActiveIndex(this.activeIndex() + 1, true);
+  }
   openPreview(trigger?: EventTarget | null): void {
     if (this._previewOpen()) return;
-    this._restoreFocus =
-      typeof HTMLElement !== 'undefined' && trigger instanceof HTMLElement
-        ? trigger
-        : typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
-          ? document.activeElement
-          : null;
-    this._previewOpen.set(true); this.previewChange.emit(true);
+    const opener = trigger as (EventTarget & { focus?: (options?: FocusOptions) => void }) | null;
+    opener?.focus?.({ preventScroll: true });
+    this._previewOpen.set(true);
+    this.previewChange.emit(true);
   }
   closePreview(): void {
     if (!this._previewOpen()) return;
-    const restoreFocus = this._restoreFocus;
-    if (restoreFocus?.isConnected) restoreFocus.focus();
-    this._previewOpen.set(false); this.resetTransform(); this.previewChange.emit(false);
+    this._previewOpen.set(false);
+    this.resetTransform();
+    this.previewChange.emit(false);
   }
-  zoom(delta: number): void { const value = Math.max(1, Math.min(this.maxZoom(), this._zoom() + delta)); this._zoom.set(value); this.zoomChange.emit(value); }
-  rotate(delta: number): void { const value = (this._rotation() + delta + 360) % 360; this._rotation.set(value); this.rotationChange.emit(value); }
-  flip(axis: 'x' | 'y'): void { const value = { ...this._flip(), [axis]: this._flip()[axis] * -1 }; this._flip.set(value); this.flipChange.emit(value); }
-  resetTransform(): void { this._zoom.set(1); this._rotation.set(0); this._flip.set({ x: 1, y: 1 }); }
-  onKeydown(event: KeyboardEvent): void { if (event.key === 'ArrowLeft') { event.preventDefault(); this.previous(); } if (event.key === 'ArrowRight') { event.preventDefault(); this.next(); } if (event.key === 'Home') { event.preventDefault(); this.setActiveIndex(0, true); } if (event.key === 'End') { event.preventDefault(); this.setActiveIndex(this.items().length - 1, true); } }
-  onPreviewKeydown(event: KeyboardEvent): void { if (event.key === 'Escape') { event.preventDefault(); this.closePreview(); } else { this.onKeydown(event); } }
-  onPointerDown(event: PointerEvent): void { this._pointerStart = { x: event.clientX, y: event.clientY }; }
-  onPointerUp(event: PointerEvent): void { if (!this._pointerStart) return; const distance = event.clientX - this._pointerStart.x; this._pointerStart = null; if (Math.abs(distance) > 36) distance > 0 ? this.previous() : this.next(); }
-  onImageError(): void { this.imageError.emit({ item: this.activeItem(), index: this.activeIndex() }); }
-  private clamp(index: number): number { const last = this.items().length - 1; if (last < 0) return 0; if (this.circular()) return ((Math.trunc(index) % (last + 1)) + last + 1) % (last + 1); return Math.max(0, Math.min(last, Math.trunc(index))); }
+  zoom(delta: number): void {
+    const value = Math.max(1, Math.min(this.maxZoom(), this._zoom() + delta));
+    this._zoom.set(value);
+    this.zoomChange.emit(value);
+  }
+  rotate(delta: number): void {
+    const value = (this._rotation() + delta + 360) % 360;
+    this._rotation.set(value);
+    this.rotationChange.emit(value);
+  }
+  flip(axis: 'x' | 'y'): void {
+    const value = { ...this._flip(), [axis]: this._flip()[axis] * -1 };
+    this._flip.set(value);
+    this.flipChange.emit(value);
+  }
+  resetTransform(): void {
+    this._zoom.set(1);
+    this._rotation.set(0);
+    this._flip.set({ x: 1, y: 1 });
+  }
+  onKeydown(event: KeyboardEvent): void {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.previous();
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.next();
+    }
+    if (event.key === 'Home') {
+      event.preventDefault();
+      this.setActiveIndex(0, true);
+    }
+    if (event.key === 'End') {
+      event.preventDefault();
+      this.setActiveIndex(this.items().length - 1, true);
+    }
+  }
+  onPreviewKeydown(event: KeyboardEvent): void {
+    this.onKeydown(event);
+  }
+  onPointerDown(event: PointerEvent): void {
+    this._pointerStart = { x: event.clientX, y: event.clientY };
+  }
+  onPointerUp(event: PointerEvent): void {
+    if (!this._pointerStart) return;
+    const distance = event.clientX - this._pointerStart.x;
+    this._pointerStart = null;
+    if (Math.abs(distance) > 36) distance > 0 ? this.previous() : this.next();
+  }
+  onImageError(): void {
+    this.imageError.emit({ item: this.activeItem(), index: this.activeIndex() });
+  }
+  private clamp(index: number): number {
+    const last = this.items().length - 1;
+    if (last < 0) return 0;
+    if (this.circular()) return ((Math.trunc(index) % (last + 1)) + last + 1) % (last + 1);
+    return Math.max(0, Math.min(last, Math.trunc(index)));
+  }
 }
