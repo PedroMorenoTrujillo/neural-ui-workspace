@@ -19,6 +19,15 @@ export interface NeuMenuItem {
   key: string;
   label: string;
   icon?: string;
+  badge?: string | number;
+  active?: boolean;
+  command?: (event: { originalEvent: Event; item: NeuMenuItem }) => void;
+  routerLink?: string | unknown[];
+  url?: string;
+  target?: string;
+  rel?: string;
+  tooltip?: string;
+  visible?: boolean;
   shortcut?: string;
   disabled?: boolean;
   separator?: boolean;
@@ -55,7 +64,10 @@ export class NeuMenuItemDirective {
             (click)="activate(item)"
           >
             @if (itemTemplateRef()) {
-              <ng-container [ngTemplateOutlet]="itemTemplateRef()" [ngTemplateOutletContext]="{ $implicit: item }" />
+              <ng-container
+                [ngTemplateOutlet]="itemTemplateRef()"
+                [ngTemplateOutletContext]="{ $implicit: item }"
+              />
             } @else if (item.icon) {
               <neu-icon class="neu-menu__icon" [name]="item.icon" size="1rem" aria-hidden="true" />
             }
@@ -69,7 +81,12 @@ export class NeuMenuItemDirective {
           </button>
           @if (item.children?.length) {
             <div class="neu-menu__child">
-              <neu-menu [items]="item.children ?? []" [ariaLabel]="item.label" [itemTemplate]="itemTemplateRef()" (itemClick)="itemClick.emit($event)" />
+              <neu-menu
+                [items]="item.children ?? []"
+                [ariaLabel]="item.label"
+                [itemTemplate]="itemTemplateRef()"
+                (itemClick)="itemClick.emit($event)"
+              />
             </div>
           }
         }
@@ -81,7 +98,9 @@ export class NeuMenuItemDirective {
 export class NeuMenuComponent {
   readonly itemTpl = contentChild(NeuMenuItemDirective);
   readonly itemTemplate = input<TemplateRef<{ $implicit: NeuMenuItem }> | null>(null);
-  readonly itemTemplateRef = computed(() => this.itemTemplate() ?? this.itemTpl()?.templateRef ?? null);
+  readonly itemTemplateRef = computed(
+    () => this.itemTemplate() ?? this.itemTpl()?.templateRef ?? null,
+  );
   readonly items = input<NeuMenuItem[]>([]);
   readonly ariaLabel = input('Menu');
   readonly itemClick = output<NeuMenuItem>();
@@ -123,7 +142,12 @@ export class NeuMenuComponent {
       (backdropClick)="close()"
       (detach)="close()"
     >
-      <neu-menu class="neu-menu-button__panel" [items]="items()" [itemTemplate]="itemTpl()?.templateRef ?? null" (itemClick)="onItemClick($event)" />
+      <neu-menu
+        class="neu-menu-button__panel"
+        [items]="items()"
+        [itemTemplate]="itemTpl()?.templateRef ?? null"
+        (itemClick)="onItemClick($event)"
+      />
     </ng-template>
   `,
   styleUrl: './neu-menu.component.scss',
@@ -164,11 +188,23 @@ export class NeuMenuButtonComponent {
     <nav class="neu-menubar__list" [attr.aria-label]="ariaLabel()">
       @for (item of items(); track item.key) {
         @if (item.children?.length) {
-          <neu-menu-button [items]="item.children ?? []" [label]="item.label" (itemClick)="itemClick.emit($event)">
+          <neu-menu-button
+            [items]="item.children ?? []"
+            [label]="item.label"
+            (itemClick)="itemClick.emit($event)"
+          >
             {{ item.label }}
           </neu-menu-button>
         } @else {
-          <button neu-button type="button" class="neu-menubar__item" variant="ghost" size="sm" [disabled]="!!item.disabled" (click)="itemClick.emit(item)">
+          <button
+            neu-button
+            type="button"
+            class="neu-menubar__item"
+            variant="ghost"
+            size="sm"
+            [disabled]="!!item.disabled"
+            (click)="itemClick.emit(item)"
+          >
             {{ item.label }}
           </button>
         }
@@ -189,7 +225,11 @@ export class NeuMenubarComponent {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-tiered-menu' },
-  template: `<neu-menu [items]="items()" [ariaLabel]="ariaLabel()" (itemClick)="itemClick.emit($event)" />`,
+  template: `<neu-menu
+    [items]="items()"
+    [ariaLabel]="ariaLabel()"
+    (itemClick)="itemClick.emit($event)"
+  />`,
   styleUrl: './neu-menu.component.scss',
 })
 export class NeuTieredMenuComponent {

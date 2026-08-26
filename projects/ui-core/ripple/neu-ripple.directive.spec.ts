@@ -15,20 +15,35 @@ describe('NeuRippleDirective', () => {
   let fixture: ComponentFixture<RippleHost>;
   let button: HTMLButtonElement;
   let directive: NeuRippleDirective;
-  let originalMatchMedia: typeof window.matchMedia;
+  let originalMatchMedia: PropertyDescriptor | undefined;
+  let matchMedia: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    originalMatchMedia = window.matchMedia;
-    window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+    originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
+    matchMedia = vi.fn().mockReturnValue({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as MediaQueryList);
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: matchMedia,
+    });
     await TestBed.configureTestingModule({ imports: [RippleHost] }).compileComponents();
     fixture = TestBed.createComponent(RippleHost);
     fixture.detectChanges();
     button = fixture.nativeElement.querySelector('button');
-    Object.defineProperty(button, 'getBoundingClientRect', { value: () => ({ left: 10, top: 20, width: 100, height: 40 }) });
+    Object.defineProperty(button, 'getBoundingClientRect', {
+      value: () => ({ left: 10, top: 20, width: 100, height: 40 }),
+    });
     directive = fixture.debugElement.children[0].injector.get(NeuRippleDirective);
   });
 
-  afterEach(() => window.matchMedia = originalMatchMedia);
+  afterEach(() => {
+    if (originalMatchMedia) Object.defineProperty(window, 'matchMedia', originalMatchMedia);
+    else Reflect.deleteProperty(window, 'matchMedia');
+  });
 
   it('creates a pointer-origin ripple with bounded cleanup', () => {
     button.dispatchEvent(new MouseEvent('pointerdown', { clientX: 30, clientY: 30 }));
@@ -43,7 +58,9 @@ describe('NeuRippleDirective', () => {
     directive.onPointerDown({ clientX: 30, clientY: 30 } as PointerEvent);
     directive.onPointerDown({ clientX: 40, clientY: 35 } as PointerEvent);
     expect(button.querySelectorAll('.neu-ripple__ink')).toHaveLength(2);
-    button.querySelectorAll('.neu-ripple__ink').forEach((ink) => ink.dispatchEvent(new Event('animationend')));
+    button
+      .querySelectorAll('.neu-ripple__ink')
+      .forEach((ink) => ink.dispatchEvent(new Event('animationend')));
     expect(button.querySelectorAll('.neu-ripple__ink')).toHaveLength(0);
   });
 
@@ -66,7 +83,11 @@ describe('NeuRippleDirective', () => {
 
   it('does not animate when reduced motion is requested', () => {
     fixture.destroy();
-    window.matchMedia = vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+    matchMedia.mockReturnValue({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as MediaQueryList);
     fixture = TestBed.createComponent(RippleHost);
     fixture.detectChanges();
     directive = fixture.debugElement.children[0].injector.get(NeuRippleDirective);

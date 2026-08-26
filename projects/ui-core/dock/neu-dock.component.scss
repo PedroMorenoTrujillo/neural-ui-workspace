@@ -1,0 +1,140 @@
+.neu-dock {
+  display: block;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+}
+
+.neu-dock__container {
+  max-inline-size: 100%;
+  padding: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--neu-border, #cbd5e1) 85%, transparent);
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, var(--neu-surface, #fff) 88%, transparent);
+  box-shadow: var(--neu-shadow-lg, 0 18px 40px rgb(15 23 42 / 18%));
+  backdrop-filter: blur(16px);
+  overflow: auto hidden;
+  scrollbar-width: thin;
+}
+
+.neu-dock__list {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  min-inline-size: min-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.neu-dock--left .neu-dock__list,
+.neu-dock--right .neu-dock__list {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.neu-dock__item {
+  display: block;
+  transform-origin: center bottom;
+}
+.neu-dock--top .neu-dock__item {
+  transform-origin: center top;
+}
+.neu-dock--left .neu-dock__item {
+  transform-origin: left center;
+}
+.neu-dock--right .neu-dock__item {
+  transform-origin: right center;
+}
+
+.neu-dock__action {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 0.15rem;
+  min-inline-size: 3.25rem;
+  min-block-size: 3.25rem;
+  padding: 0.45rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: var(--neu-text, #0f172a);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.neu-dock__action:hover,
+.neu-dock__action:focus-visible,
+.neu-dock__action--active,
+.neu-dock__action--router-active {
+  background: var(--neu-primary-soft, #e0e7ff);
+  color: var(--neu-text, #0f172a);
+  outline: none;
+}
+
+.neu-dock__action:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--neu-primary, #4f46e5) 30%, transparent);
+}
+.neu-dock__action--disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.neu-dock__label {
+  max-inline-size: 5.5rem;
+  overflow: hidden;
+  font-size: 0.6875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.neu-dock__fallback {
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: 0.5rem;
+  background: var(--neu-surface-2, #f1f5f9);
+  font-weight: 700;
+}
+.neu-dock__badge {
+  position: absolute;
+  inset-block-start: 0.1rem;
+  inset-inline-end: 0.1rem;
+}
+
+.neu-dock--magnify .neu-dock__item--hovered .neu-dock__action {
+  transform: scale(1.28) translateY(-0.18rem);
+}
+.neu-dock--magnify .neu-dock__item--neighbor .neu-dock__action {
+  transform: scale(1.08);
+}
+.neu-dock--left.neu-dock--magnify .neu-dock__item--hovered .neu-dock__action {
+  transform: scale(1.2) translateX(0.18rem);
+}
+.neu-dock--right.neu-dock--magnify .neu-dock__item--hovered .neu-dock__action {
+  transform: scale(1.2) translateX(-0.18rem);
+}
+
+.neu-dock--mobile .neu-dock__label {
+  display: none;
+}
+.neu-dock--mobile .neu-dock__action {
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .neu-dock__action {
+    transition: none;
+  }
+  .neu-dock--magnify .neu-dock__item .neu-dock__action {
+    transform: none;
+  }
+}
+
+[dir='rtl'] .neu-dock__list {
+  direction: rtl;
+}

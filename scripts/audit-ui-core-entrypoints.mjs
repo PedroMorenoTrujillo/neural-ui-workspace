@@ -4,7 +4,13 @@ import { join, relative } from 'node:path';
 const root = new URL('..', import.meta.url).pathname;
 const uiCore = join(root, 'projects/ui-core');
 
-const nonVisualEntryPoints = new Set(['focus-trap', 'option-api', 'url-state', 'testing']);
+const nonVisualEntryPoints = new Set([
+  'focus-trap',
+  'menu-foundation',
+  'option-api',
+  'url-state',
+  'testing',
+]);
 const nonDemoEntryPoints = new Set(['button', 'confirm-dialog', 'toggle-button-group', 'testing']);
 
 function dirs(path) {
