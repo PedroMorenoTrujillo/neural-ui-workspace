@@ -78,3 +78,21 @@
 .neu-context-menu-backdrop {
   background: transparent;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-context-menu,
+  .neu-context-menu__item {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-context-menu {
+    border-color: CanvasText;
+  }
+
+  .neu-context-menu__item:focus-visible {
+    outline-color: Highlight;
+  }
+}

@@ -327,9 +327,7 @@ describe('NeuSplitButtonComponent', () => {
     fixture.componentInstance.isOpen.set(true);
     fixture.detectChanges();
 
-    const dropdown = document.querySelector(
-      '.neu-split-button__dropdown',
-    ) as HTMLDivElement;
+    const dropdown = document.querySelector('.neu-split-button__dropdown') as HTMLDivElement;
     dropdown.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     fixture.detectChanges();
 
@@ -353,5 +351,36 @@ describe('NeuSplitButtonComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.isOpen()).toBe(false);
+  });
+
+  it('opens with ArrowDown, skips disabled actions, and restores the trigger on Escape', async () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-split-button__chevron',
+    ) as HTMLButtonElement;
+    trigger.focus();
+    trigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const actions = Array.from(
+      document.querySelectorAll('.neu-split-button__dropdown-item'),
+    ) as HTMLButtonElement[];
+    expect(document.activeElement).toBe(actions[0]);
+    actions[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(actions[1]);
+    actions[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(document.activeElement).toBe(trigger);
   });
 });

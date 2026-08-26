@@ -56,6 +56,10 @@
   &--close {
     font-size: 0.875rem;
   }
+
+  &:focus-visible {
+    box-shadow: var(--neu-focus-ring);
+  }
 }
 
 /* ── Stage (image container) ──────────────────────────────────── */
@@ -130,4 +134,20 @@
 /* ── Trigger ──────────────────────────────────────────────────── */
 .neu-iv-trigger {
   display: inline-block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-iv__btn,
+  .neu-iv__img,
+  .neu-iv__arrow {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-iv__btn:focus-visible,
+  .neu-iv__arrow:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }

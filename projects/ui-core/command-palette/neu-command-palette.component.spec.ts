@@ -375,4 +375,35 @@ describe('NeuCommandPaletteComponent', () => {
     expect(executed).toBe(true);
     expect(svc.isOpen()).toBe(false);
   });
+
+  it('skips disabled commands and exposes stable combobox relationships', async () => {
+    const f = TestBed.createComponent(NeuCommandPaletteComponent);
+    f.detectChanges();
+    const svc = TestBed.inject(NeuCommandPaletteService);
+    let disabledExecuted = false;
+    svc.register(
+      {
+        id: 'disabled',
+        label: 'Disabled',
+        disabled: true,
+        action: () => (disabledExecuted = true),
+      },
+      { id: 'enabled', label: 'Enabled', action: () => {} },
+    );
+    svc.open();
+    f.detectChanges();
+    await f.whenStable();
+    const input = f.nativeElement.querySelector('.neu-cmd__input') as HTMLInputElement;
+    const options = Array.from(
+      f.nativeElement.querySelectorAll('[role="option"]'),
+    ) as HTMLElement[];
+    expect(document.activeElement).toBe(input);
+    expect(input.getAttribute('aria-controls')).toBe(f.componentInstance.listId);
+    expect(f.componentInstance._activeIndex()).toBe(1);
+    expect(input.getAttribute('aria-activedescendant')).toBe(options[1].id);
+    options[0].click();
+    svc.execute('disabled');
+    expect(disabledExecuted).toBe(false);
+    expect(svc.isOpen()).toBe(true);
+  });
 });

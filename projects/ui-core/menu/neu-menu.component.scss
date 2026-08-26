@@ -90,3 +90,12 @@ html[data-theme='dark'] {
     color: #ffffff;
   }
 }
+
+@media (forced-colors: active) {
+  .neu-menu__item:focus-visible,
+  .neu-menubar__item:focus-visible,
+  .neu-menu-button__trigger:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}

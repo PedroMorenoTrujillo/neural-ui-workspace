@@ -8,12 +8,15 @@ import {
   ViewEncapsulation,
   computed,
   contentChild,
+  effect,
   inject,
   input,
   output,
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 export interface NeuCommand {
   id: string;
@@ -24,11 +27,15 @@ export interface NeuCommand {
   icon?: string;
   /** Shortcut display (e.g. '⌘K') */
   shortcut?: string;
+  /** Prevents focus eligibility and execution while retaining the command in results. */
+  disabled?: boolean;
   /** Handler invocado al seleccionar / Handler called on select */
   action: () => void;
 }
 @Directive({ selector: 'ng-template[neuCommandPaletteItem]' })
-export class NeuCommandPaletteItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuCommand; index: number }>) {} }
+export class NeuCommandPaletteItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuCommand; index: number }>) {}
+}
 
 /**
  * NeuralUI CommandPaletteService
@@ -78,6 +85,7 @@ export class NeuCommandPaletteService {
 
   execute(id: string): void {
     const cmd = this._commands().find((c) => c.id === id);
+    if (cmd?.disabled) return;
     cmd?.action();
     this.close();
   }
@@ -94,7 +102,7 @@ export class NeuCommandPaletteService {
  */
 @Component({
   selector: 'neu-command-palette',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -106,7 +114,16 @@ export class NeuCommandPaletteService {
       <div class="neu-cp-backdrop" aria-hidden="true" (click)="_svc.close()"></div>
 
       <!-- Dialog -->
-      <div class="neu-cmd" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+      <div
+        class="neu-cmd"
+        neuFocusTrap
+        neuModalFocus
+        neuModalFocusInitial=".neu-cmd__input"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Paleta de comandos"
+        (neuModalFocusEscape)="_svc.close()"
+      >
         <div class="neu-cmd__search-wrap">
           <span class="neu-cmd__search-icon" aria-hidden="true">🔍</span>
           <input
@@ -117,7 +134,8 @@ export class NeuCommandPaletteService {
             role="combobox"
             aria-expanded="true"
             aria-autocomplete="list"
-            aria-controls="neu-cmd-list"
+            [attr.aria-controls]="listId"
+            [attr.aria-activedescendant]="activeOptionId()"
             [value]="_svc.query()"
             (input)="_svc.query.set($any($event.target).value)"
             (keydown)="_onInputKey($event)"
@@ -126,7 +144,7 @@ export class NeuCommandPaletteService {
           <kbd class="neu-cmd__esc-hint">ESC</kbd>
         </div>
 
-        <ul id="neu-cmd-list" class="neu-cmd__list" role="listbox" aria-label="Comandos">
+        <ul [id]="listId" class="neu-cmd__list" role="listbox" aria-label="Comandos">
           @if (!_svc.filteredCommands().length) {
             <li class="neu-cmd__empty" role="option" aria-selected="false">
               Sin resultados para "{{ _svc.query() }}"
@@ -137,12 +155,19 @@ export class NeuCommandPaletteService {
               class="neu-cmd__item"
               role="option"
               [class.neu-cmd__item--active]="_activeIndex() === i"
-              [id]="'neu-cmd-opt-' + i"
+              [class.neu-cmd__item--disabled]="cmd.disabled"
+              [id]="optionId(i)"
               [attr.aria-selected]="_activeIndex() === i"
-              (click)="_svc.execute(cmd.id)"
-              (mouseenter)="_activeIndex.set(i)"
+              [attr.aria-disabled]="cmd.disabled ? 'true' : null"
+              (click)="execute(cmd)"
+              (mouseenter)="setActive(i)"
             >
-              @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: cmd, index: i }" /> } @else if (cmd.icon) {
+              @if (itemTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{ $implicit: cmd, index: i }"
+                />
+              } @else if (cmd.icon) {
                 <span class="neu-cmd__item-icon" aria-hidden="true">{{ cmd.icon }}</span>
               }
               <span class="neu-cmd__item-label">{{ cmd.label }}</span>
@@ -170,6 +195,32 @@ export class NeuCommandPaletteComponent {
   readonly itemTpl = contentChild(NeuCommandPaletteItemDirective);
   readonly _svc = inject(NeuCommandPaletteService);
   readonly _activeIndex = signal(0);
+  readonly listId = inject(NeuIdGenerator).getId('neu-command-list-');
+
+  constructor() {
+    effect(() => {
+      const commands = this._svc.filteredCommands();
+      const current = this._activeIndex();
+      if (commands[current] && !commands[current].disabled) return;
+      this._activeIndex.set(this.firstEligibleIndex(commands));
+    });
+  }
+
+  optionId(index: number): string {
+    return `${this.listId}-option-${index}`;
+  }
+
+  activeOptionId(): string | null {
+    return this._activeIndex() >= 0 ? this.optionId(this._activeIndex()) : null;
+  }
+
+  setActive(index: number): void {
+    if (!this._svc.filteredCommands()[index]?.disabled) this._activeIndex.set(index);
+  }
+
+  execute(command: NeuCommand): void {
+    if (!command.disabled) this._svc.execute(command.id);
+  }
 
   _onDocKey(e: KeyboardEvent): void {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -179,15 +230,22 @@ export class NeuCommandPaletteComponent {
   }
 
   _onInputKey(e: KeyboardEvent): void {
-    const total = this._svc.filteredCommands().length;
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        this._activeIndex.update((i) => Math.min(i + 1, total - 1));
+        this.moveActive(1);
         break;
       case 'ArrowUp':
         e.preventDefault();
-        this._activeIndex.update((i) => Math.max(i - 1, 0));
+        this.moveActive(-1);
+        break;
+      case 'Home':
+        e.preventDefault();
+        this._activeIndex.set(this.firstEligibleIndex(this._svc.filteredCommands()));
+        break;
+      case 'End':
+        e.preventDefault();
+        this._activeIndex.set(this.lastEligibleIndex(this._svc.filteredCommands()));
         break;
       case 'Enter': {
         const cmd = this._svc.filteredCommands()[this._activeIndex()];
@@ -198,5 +256,34 @@ export class NeuCommandPaletteComponent {
         this._svc.close();
         break;
     }
+  }
+
+  private moveActive(delta: 1 | -1): void {
+    const commands = this._svc.filteredCommands();
+    if (!commands.length) {
+      this._activeIndex.set(-1);
+      return;
+    }
+    let index = this._activeIndex();
+    if (index < 0) index = this.firstEligibleIndex(commands);
+    for (let attempts = 0; attempts < commands.length; attempts += 1) {
+      index = (index + delta + commands.length) % commands.length;
+      if (!commands[index]?.disabled) {
+        this._activeIndex.set(index);
+        return;
+      }
+    }
+    this._activeIndex.set(-1);
+  }
+
+  private firstEligibleIndex(commands: readonly NeuCommand[]): number {
+    return commands.findIndex((command) => !command.disabled);
+  }
+
+  private lastEligibleIndex(commands: readonly NeuCommand[]): number {
+    for (let index = commands.length - 1; index >= 0; index -= 1) {
+      if (!commands[index]?.disabled) return index;
+    }
+    return -1;
   }
 }

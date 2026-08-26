@@ -63,6 +63,14 @@
   position: relative;
 }
 
+.neu-tree__node:focus-visible {
+  outline: none;
+
+  > .neu-tree__row {
+    box-shadow: var(--neu-focus-ring);
+  }
+}
+
 .neu-tree__row {
   display: flex;
   align-items: flex-start;
@@ -184,6 +192,27 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-tree__search-input,
+  .neu-tree__row,
+  .neu-tree__toggle,
+  .neu-tree__toggle svg {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-tree__node:focus-visible > .neu-tree__row,
+  .neu-tree__row--selected {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .neu-tree__row--disabled {
+    color: GrayText;
+  }
 }
 
 .neu-tree__description {

@@ -21,16 +21,47 @@
   padding: 0 0.75rem;
 }
 
+.neu-tree-select__trigger-wrap {
+  position: relative;
+  display: flex;
+}
+
 .neu-tree-select__trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-width: 14rem;
+  flex: 1;
 
   > span {
     @include text.ellipsis;
     flex: 1;
   }
+}
+
+.neu-tree-select__clear {
+  position: absolute;
+  inset-inline-end: 0.5rem;
+  inset-block-start: 50%;
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  translate: 0 -50%;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--neu-text-muted, #6b7280);
+  cursor: pointer;
+}
+
+.neu-tree-select__clear:focus-visible {
+  outline: none;
+  box-shadow: var(--neu-focus-ring);
+}
+
+.neu-tree-select__trigger-wrap:has(.neu-tree-select__clear) .neu-tree-select__trigger {
+  padding-inline-end: 2.75rem;
 }
 
 .neu-tree-select__placeholder,
@@ -70,9 +101,35 @@
   background: color-mix(in srgb, var(--neu-primary, #2563eb) 14%, transparent);
 }
 
+.neu-tree-select__trigger:focus-visible,
+.neu-tree-select__search:focus-visible,
+.neu-tree-select__node:focus-visible {
+  outline: none;
+  box-shadow: var(--neu-focus-ring);
+}
+
 .neu-tree-select__twisty {
   display: inline-flex;
   width: 1rem;
   justify-content: center;
   margin-inline-end: 0.25rem;
+}
+
+@media (forced-colors: active) {
+  .neu-tree-select__node--selected {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .neu-tree-select__clear {
+    color: ButtonText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-tree-select__trigger,
+  .neu-tree-select__clear,
+  .neu-tree-select__node {
+    transition: none;
+  }
 }

@@ -105,6 +105,7 @@
     "./toolbar",
     "./tooltip",
     "./tree",
+    "./tree-foundation",
     "./tree-select",
     "./tree-table",
     "./uploader",
@@ -543,6 +544,7 @@
         "backdrop",
         "closeLabel",
         "disableClose",
+        "initialFocus",
         "open",
         "size",
         "title"
@@ -813,6 +815,17 @@
         "neuFocusTrap"
       ],
       "outputs": []
+    },
+    "focus-trap/neu-modal-focus.directive.ts": {
+      "selector": "[neuModalFocus]",
+      "inputs": [
+        "neuModalFocus",
+        "neuModalFocusInitial",
+        "neuModalFocusRestore"
+      ],
+      "outputs": [
+        "neuModalFocusEscape"
+      ]
     },
     "form-field/neu-form-field.component.ts": {
       "selector": "neu-form-field",
@@ -1312,6 +1325,7 @@
     "rating/neu-rating.component.ts": {
       "selector": "neu-rating",
       "inputs": [
+        "disabled",
         "readonly",
         "stars",
         "value"

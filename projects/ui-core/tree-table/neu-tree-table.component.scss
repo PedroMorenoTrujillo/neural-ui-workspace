@@ -46,6 +46,11 @@
   transform: rotate(90deg);
 }
 
+.neu-tree-table__toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--neu-focus-ring);
+}
+
 .neu-tree-table__toggle--placeholder {
   cursor: default;
 }
@@ -87,4 +92,18 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-tree-table__toggle,
+  .neu-tree-table__toggle svg {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-tree-table__toggle:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }

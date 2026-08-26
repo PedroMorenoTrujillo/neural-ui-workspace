@@ -115,6 +115,11 @@
   &:hover {
     background: var(--neu-primary-50);
   }
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .neu-cmd__item-icon {
@@ -142,6 +147,23 @@
   border: 1px solid var(--neu-border);
   border-radius: 4px;
   color: var(--neu-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-cmd__item {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-cmd {
+    border: 1px solid CanvasText;
+  }
+
+  .neu-cmd__item--active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
 }
 
 /* ── Footer ───────────────────────────────────────────────────── */

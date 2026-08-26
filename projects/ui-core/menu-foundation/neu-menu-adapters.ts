@@ -1,26 +1,27 @@
-import type { NeuContextMenuItem } from '@neural-ui/core/context-menu';
-import type { NeuMenuItem } from '@neural-ui/core/menu';
-import type { NeuSplitButtonAction } from '@neural-ui/core/split-button';
-import { resolveNeuMenuAction, type NeuResolvedMenuAction } from './neu-menu-action';
+import {
+  resolveNeuMenuAction,
+  type NeuMenuActionLike,
+  type NeuResolvedMenuAction,
+} from './neu-menu-action';
 
-export function adaptNeuMenuItems(
-  items: readonly NeuMenuItem[],
-): NeuResolvedMenuAction<NeuMenuItem>[] {
+export function adaptNeuMenuItems<T extends NeuMenuActionLike<T>>(
+  items: readonly T[],
+): NeuResolvedMenuAction<T>[] {
   return items.map((item, index) => resolveNeuMenuAction(item, index));
 }
 
-export function adaptNeuContextMenuItems(
-  items: readonly NeuContextMenuItem[],
-): NeuResolvedMenuAction<NeuContextMenuItem>[] {
+export function adaptNeuContextMenuItems<
+  T extends { key: string; label: string; disabled?: boolean; separator?: boolean },
+>(items: readonly T[]): NeuResolvedMenuAction<T>[] {
   return items.map((item, index) => {
     const resolved = resolveNeuMenuAction({ ...item, command: undefined }, index);
-    return { ...resolved, original: item } as unknown as NeuResolvedMenuAction<NeuContextMenuItem>;
+    return { ...resolved, original: item } as unknown as NeuResolvedMenuAction<T>;
   });
 }
 
-export function adaptNeuSplitButtonActions(
-  items: readonly NeuSplitButtonAction[],
-): NeuResolvedMenuAction<NeuSplitButtonAction>[] {
+export function adaptNeuSplitButtonActions<
+  T extends { id: string; label: string; disabled?: boolean; divider?: boolean },
+>(items: readonly T[]): NeuResolvedMenuAction<T>[] {
   return items.map((item, index) => {
     const resolved = resolveNeuMenuAction(
       { ...item, key: item.id, separator: item.divider, command: undefined },
@@ -29,6 +30,6 @@ export function adaptNeuSplitButtonActions(
     return {
       ...resolved,
       original: item,
-    } as unknown as NeuResolvedMenuAction<NeuSplitButtonAction>;
+    } as unknown as NeuResolvedMenuAction<T>;
   });
 }

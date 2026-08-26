@@ -198,7 +198,10 @@ export interface NeuTreeTableCellEditEvent<
             type="button"
             [class.neu-tree-table__toggle--open]="row.__treeExpanded"
             [attr.aria-label]="treeToggleAriaLabel(row)"
+            [attr.aria-expanded]="row.__treeExpanded"
+            [disabled]="row.__treeDisabled"
             (click)="toggleNode(row.__treeNode, $event)"
+            (keydown)="onTreeToggleKeydown(row, $event)"
           >
             <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="m7 5 6 5-6 5" />
@@ -442,7 +445,22 @@ export class NeuTreeTableComponent {
   }
 
   treeToggleAriaLabel(row: NeuTreeTableRow): string {
-    return row.__treeExpanded ? this.collapseLabel() : this.expandLabel();
+    return `${row.__treeExpanded ? this.collapseLabel() : this.expandLabel()}: ${row.label}`;
+  }
+
+  onTreeToggleKeydown(row: NeuTreeTableRow, event: KeyboardEvent): void {
+    const direction = (
+      event.currentTarget as HTMLElement
+    ).ownerDocument.defaultView?.getComputedStyle(event.currentTarget as HTMLElement).direction;
+    const expandKey = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+    const collapseKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+    if (
+      (event.key === expandKey && !row.__treeExpanded) ||
+      (event.key === collapseKey && row.__treeExpanded)
+    ) {
+      event.preventDefault();
+      this.toggleNode(row.__treeNode, event);
+    }
   }
 
   private flattenNodes(

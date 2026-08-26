@@ -59,3 +59,9 @@
 .neu-bottom-sheet__body {
   padding: 1rem;
 }
+
+@media (forced-colors: active) {
+  .neu-bottom-sheet {
+    border: 1px solid CanvasText;
+  }
+}

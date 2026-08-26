@@ -11,10 +11,17 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
+import {
+  CdkConnectedOverlay,
+  ConnectedPosition,
+  Overlay,
+  OverlayModule,
+} from '@angular/cdk/overlay';
 import { NeuButtonVariant, NeuButtonSize } from '@neural-ui/core/button';
+import { NeuRovingMenuController } from '@neural-ui/core/menu-foundation';
 
 export interface NeuSplitButtonAction {
   /** Identificador único de la acción / Unique action identifier */
@@ -29,7 +36,9 @@ export interface NeuSplitButtonAction {
   divider?: boolean;
 }
 @Directive({ selector: 'ng-template[neuSplitButtonItem]' })
-export class NeuSplitButtonItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuSplitButtonAction }>) {} }
+export class NeuSplitButtonItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuSplitButtonAction }>) {}
+}
 
 /**
  * NeuralUI SplitButton Component
@@ -92,6 +101,7 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
       <button
         cdkOverlayOrigin
         #splitButtonOrigin="cdkOverlayOrigin"
+        #menuTrigger
         class="neu-split-button__chevron"
         [class]="chevronClasses()"
         type="button"
@@ -100,6 +110,7 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
         [attr.aria-expanded]="isOpen()"
         [attr.aria-label]="moreActionsAriaLabel()"
         (click)="toggleDropdown($event)"
+        (keydown)="onTriggerKeydown($event)"
       >
         <svg
           viewBox="0 0 24 24"
@@ -127,6 +138,8 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
         (backdropClick)="closeDropdown()"
         (detach)="closeDropdown()"
+        (attach)="onOverlayAttach()"
+        (overlayKeydown)="onOverlayKeydown($event)"
       >
         <div
           class="neu-split-button__dropdown"
@@ -134,7 +147,7 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
           [attr.aria-label]="actionsAriaLabel()"
           (click)="$event.stopPropagation()"
         >
-          @for (action of actions(); track action.id) {
+          @for (action of actions(); track action.id; let index = $index) {
             @if (action.divider) {
               <div class="neu-split-button__dropdown-sep" role="separator" aria-hidden="true"></div>
             }
@@ -145,9 +158,20 @@ export class NeuSplitButtonItemDirective { constructor(readonly templateRef: Tem
               role="menuitem"
               [disabled]="action.disabled || null"
               [attr.aria-disabled]="action.disabled ? 'true' : null"
+              [tabIndex]="tabIndexFor(index)"
+              [attr.data-neu-split-menu-index]="index"
+              (focus)="setActiveIndex(index)"
+              (keydown)="onActionKeydown(action, index, $event)"
               (click)="onActionClick(action)"
             >
-              @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: action }" /> } @else { {{ action.label }} }
+              @if (itemTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{ $implicit: action }"
+                />
+              } @else {
+                {{ action.label }}
+              }
             </button>
           }
         </div>
@@ -160,6 +184,10 @@ export class NeuSplitButtonComponent {
   readonly itemTpl = contentChild(NeuSplitButtonItemDirective);
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly overlay = inject(Overlay);
+  private readonly trigger = viewChild('menuTrigger', { read: ElementRef<HTMLButtonElement> });
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+  private readonly menuController = new NeuRovingMenuController({ orientation: 'vertical' });
+  private focusLastOnAttach = false;
   readonly _viewportMargin = 16;
   readonly overlayPositions: ConnectedPosition[] = [
     {
@@ -231,11 +259,61 @@ export class NeuSplitButtonComponent {
 
   toggleDropdown(event: MouseEvent): void {
     event.stopPropagation();
-    this.isOpen.update((v) => !v);
+    if (this.isOpen()) {
+      this.closeDropdown();
+    } else {
+      this.openDropdown(false);
+    }
   }
 
   closeDropdown(): void {
+    if (!this.isOpen()) return;
     this.isOpen.set(false);
+    queueMicrotask(() => this.trigger()?.nativeElement.focus({ preventScroll: true }));
+  }
+
+  onTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    event.preventDefault();
+    this.openDropdown(event.key === 'ArrowUp');
+  }
+
+  onOverlayAttach(): void {
+    queueMicrotask(() => {
+      this.reconcileActions();
+      if (this.focusLastOnAttach) this.menuController.setActiveIndex(this.lastEligibleIndex());
+      this.focusActiveAction();
+      this.focusLastOnAttach = false;
+    });
+  }
+
+  onOverlayKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeDropdown();
+    }
+  }
+
+  tabIndexFor(index: number): 0 | -1 {
+    this.reconcileActions();
+    return this.menuController.tabIndexFor(index);
+  }
+
+  setActiveIndex(index: number): void {
+    this.reconcileActions();
+    this.menuController.setActiveIndex(index);
+  }
+
+  onActionKeydown(action: NeuSplitButtonAction, index: number, event: KeyboardEvent): void {
+    this.reconcileActions();
+    this.menuController.setActiveIndex(index);
+    const result = this.menuController.handleKey(event);
+    if (!result.handled) return;
+    if (result.activate) {
+      this.onActionClick(action);
+      return;
+    }
+    this.focusActiveAction();
   }
 
   onDocumentClick(event: MouseEvent): void {
@@ -255,5 +333,36 @@ export class NeuSplitButtonComponent {
     if (action.disabled) return;
     this.closeDropdown();
     this.actionClick.emit(action);
+  }
+
+  private openDropdown(focusLast: boolean): void {
+    if (this.isDisabled() || this.isOpen()) return;
+    this.focusLastOnAttach = focusLast;
+    this.isOpen.set(true);
+  }
+
+  private reconcileActions(): void {
+    this.menuController.setItems(
+      this.actions().map((action) => ({
+        key: action.id,
+        label: action.label,
+        disabled: action.disabled,
+      })),
+    );
+  }
+
+  private lastEligibleIndex(): number {
+    for (let index = this.actions().length - 1; index >= 0; index -= 1) {
+      if (!this.actions()[index]?.disabled) return index;
+    }
+    return -1;
+  }
+
+  private focusActiveAction(): void {
+    this.connectedOverlay()
+      ?.overlayRef.overlayElement.querySelector<HTMLElement>(
+        `[data-neu-split-menu-index="${this.menuController.index}"]`,
+      )
+      ?.focus({ preventScroll: true });
   }
 }

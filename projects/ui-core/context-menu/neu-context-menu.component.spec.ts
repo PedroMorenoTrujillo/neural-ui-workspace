@@ -54,6 +54,34 @@ describe('NeuContextMenuDirective', () => {
     expect(opened.length).toBe(1);
   });
 
+  it('opens from Shift+F10 and restores the keyboard origin on Escape', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const origin = f.nativeElement.querySelector('div') as HTMLElement;
+    expect(origin.tabIndex).toBe(0);
+    expect(origin.getAttribute('aria-haspopup')).toBe('menu');
+    origin.focus();
+    origin.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'F10',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    f.detectChanges();
+    await f.whenStable();
+    const item = document.body.querySelector('[role="menuitem"]') as HTMLButtonElement;
+    expect(item).toBeTruthy();
+    item.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    f.detectChanges();
+    expect(document.body.querySelector('.neu-context-menu')).toBeNull();
+    expect(document.activeElement).toBe(origin);
+  });
+
   it('should emit menuItemClick when an item is selected', async () => {
     const f = TestBed.createComponent(TestHostComponent);
     f.detectChanges();
@@ -310,5 +338,29 @@ describe('NeuContextMenuOverlayComponent', () => {
 
     f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(escaped).toBe(true);
+  });
+
+  it('uses one roving tab stop and skips disabled items with arrows and typeahead', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set([
+      ITEMS[0],
+      { key: 'disabled', label: 'Disabled', disabled: true },
+      ITEMS[2],
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+    const buttons = Array.from(
+      f.nativeElement.querySelectorAll('[role="menuitem"]'),
+    ) as HTMLButtonElement[];
+    expect(buttons.map((button) => button.tabIndex)).toEqual([0, -1, -1]);
+    buttons[0].focus();
+    buttons[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons[2]);
+    buttons[2].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'c', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons[0]);
   });
 });

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  ElementRef,
   TemplateRef,
   ViewEncapsulation,
   computed,
@@ -11,9 +12,10 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { OverlayModule } from '@angular/cdk/overlay';
+import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   NeuOptionAccessor,
@@ -28,6 +30,10 @@ import {
   resolveNeuOptionValue,
 } from '@neural-ui/core/option-api';
 import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import {
+  NeuTreeNavigationController,
+  NeuTreeNavigationItem,
+} from '@neural-ui/core/tree-foundation';
 
 export interface NeuTreeSelectNode {
   value: string;
@@ -49,6 +55,7 @@ interface FlatNode<T, V> {
   disabled: boolean;
   hasChildren: boolean;
   lazy: boolean;
+  parentTrackBy?: string;
 }
 
 export interface NeuTreeSelectNodeTemplateContext<T = NeuTreeSelectNode> {
@@ -95,30 +102,45 @@ export class NeuTreeSelectEmptyDirective {
     @if (label()) {
       <label class="neu-tree-select__label" [for]="triggerId">{{ label() }}</label>
     }
-    <button
-      cdkOverlayOrigin
-      #origin="cdkOverlayOrigin"
-      type="button"
-      class="neu-tree-select__trigger"
-      [id]="triggerId"
-      [disabled]="isDisabled()"
-      [attr.aria-expanded]="open()"
-      (click)="toggle()"
-    >
-      <span [class.neu-tree-select__placeholder]="!selectedLabel()"
-        >@if (selectedTpl() && selectedNode()) {
-          <ng-container
-            [ngTemplateOutlet]="selectedTpl()!.templateRef"
-            [ngTemplateOutletContext]="{ $implicit: selectedNode() }"
-          />
-        } @else {
-          {{ selectedLabel() || placeholder() }}
-        }</span
+    <div class="neu-tree-select__trigger-wrap">
+      <button
+        cdkOverlayOrigin
+        #origin="cdkOverlayOrigin"
+        #trigger
+        type="button"
+        class="neu-tree-select__trigger"
+        [id]="triggerId"
+        [disabled]="isDisabled()"
+        aria-haspopup="tree"
+        [attr.aria-controls]="panelId"
+        [attr.aria-expanded]="open()"
+        [attr.aria-readonly]="readonly() ? 'true' : null"
+        (click)="toggle()"
+        (keydown)="onTriggerKeydown($event)"
       >
+        <span [class.neu-tree-select__placeholder]="!selectedLabel()">
+          @if (selectedTpl() && selectedNode()) {
+            <ng-container
+              [ngTemplateOutlet]="selectedTpl()!.templateRef"
+              [ngTemplateOutletContext]="{ $implicit: selectedNode() }"
+            />
+          } @else {
+            {{ selectedLabel() || placeholder() }}
+          }
+        </span>
+      </button>
       @if (clearable() && values().length) {
-        <span class="neu-tree-select__clear" aria-hidden="true" (click)="clear($event)">×</span>
+        <button
+          class="neu-tree-select__clear"
+          type="button"
+          [attr.aria-label]="clearLabel()"
+          [disabled]="isDisabled() || readonly()"
+          (click)="clear($event)"
+        >
+          ×
+        </button>
       }
-    </button>
+    </div>
     <ng-template
       cdkConnectedOverlay
       [cdkConnectedOverlayOrigin]="origin"
@@ -127,9 +149,19 @@ export class NeuTreeSelectEmptyDirective {
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       (backdropClick)="close()"
       (detach)="close()"
+      (attach)="onOverlayAttach()"
+      (overlayKeydown)="onOverlayKeydown($event)"
     >
-      <div class="neu-tree-select__panel" role="tree" [attr.aria-label]="label() || placeholder()">
-        @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" /> }
+      <div
+        class="neu-tree-select__panel"
+        [id]="panelId"
+        role="tree"
+        [attr.aria-label]="label() || placeholder()"
+        [attr.aria-multiselectable]="multiple() ? 'true' : null"
+      >
+        @if (headerTpl()) {
+          <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
+        }
         @if (searchable()) {
           <input
             class="neu-tree-select__search"
@@ -137,21 +169,33 @@ export class NeuTreeSelectEmptyDirective {
             [placeholder]="searchPlaceholder()"
             [value]="query()"
             (input)="query.set($any($event.target).value)"
+            (keydown)="onSearchKeydown($event)"
           />
         }
-        @for (item of visibleNodes(); track item.trackBy) {
+        @for (item of visibleNodes(); track item.trackBy; let index = $index) {
           <button
             type="button"
             role="treeitem"
             class="neu-tree-select__node"
             [class.neu-tree-select__node--selected]="isSelected(item.value)"
             [disabled]="item.disabled"
-            [style.padding-left.rem]="0.75 + item.level * 1"
+            [tabIndex]="treeTabIndex(index)"
+            [style.padding-inline-start.rem]="0.75 + item.level * 1"
+            [attr.data-neu-tree-select-index]="index"
+            [attr.aria-level]="item.level + 1"
+            [attr.aria-expanded]="item.hasChildren || item.lazy ? expanded().has(item.value) : null"
             [attr.aria-selected]="isSelected(item.value)"
+            [attr.aria-disabled]="item.disabled ? 'true' : null"
+            (focus)="setActiveIndex(index)"
+            (keydown)="onNodeKeydown(item, index, $event)"
             (click)="selectNode(item.node)"
           >
             @if (item.hasChildren || item.lazy) {
-              <span class="neu-tree-select__twisty" (click)="toggleExpanded(item.node, $event)">
+              <span
+                class="neu-tree-select__twisty"
+                aria-hidden="true"
+                (click)="toggleExpanded(item.node, $event)"
+              >
                 {{ expanded().has(item.value) ? '−' : '+' }}
               </span>
             }
@@ -165,13 +209,21 @@ export class NeuTreeSelectEmptyDirective {
                   toggle: toggleExpandedFromTemplate.bind(this, item.node),
                 }"
               />
-            } @else { {{ item.label }} }
+            } @else {
+              {{ item.label }}
+            }
           </button>
         }
         @if (!visibleNodes().length) {
-          @if (emptyTpl()) { <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" /> } @else { <div class="neu-tree-select__empty">{{ emptyLabel() }}</div> }
+          @if (emptyTpl()) {
+            <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
+          } @else {
+            <div class="neu-tree-select__empty">{{ emptyLabel() }}</div>
+          }
         }
-        @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
+        @if (footerTpl()) {
+          <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+        }
       </div>
     </ng-template>
   `,
@@ -209,16 +261,24 @@ export class NeuTreeSelectComponent<
   readonly multiple = input(false);
   readonly clearable = input(false);
   readonly disabled = input(false);
+  readonly readonly = input(false);
+  readonly clearLabel = input('Clear selection');
 
   readonly selectionChange = output<T[]>();
   readonly nodeExpand = output<T>();
 
   readonly triggerId = inject(NeuIdGenerator).getId('neu-tree-select-');
+  readonly panelId = inject(NeuIdGenerator).getId('neu-tree-select-panel-');
   readonly open = signal(false);
   readonly query = signal('');
   readonly values = signal<V[]>([]);
   readonly expanded = signal(new Set<V>());
   readonly cvaDisabled = signal(false);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly trigger = viewChild('trigger', { read: ElementRef<HTMLButtonElement> });
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+  private readonly navigation = new NeuTreeNavigationController();
+  private focusLastOnAttach = false;
 
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
   readonly selectedNodes = computed(() => this.selectedNodesFromValues(this.values()));
@@ -262,16 +322,19 @@ export class NeuTreeSelectComponent<
 
   toggle(): void {
     if (!this.isDisabled()) {
-      this.open.set(!this.open());
+      this.open() ? this.close() : this.openPanel(false);
     }
   }
 
   close(): void {
+    if (!this.open()) return;
     this.open.set(false);
+    queueMicrotask(() => this.trigger()?.nativeElement.focus({ preventScroll: true }));
   }
 
   clear(event: Event): void {
     event.stopPropagation();
+    if (this.isDisabled() || this.readonly()) return;
     this.commit([]);
   }
 
@@ -280,7 +343,7 @@ export class NeuTreeSelectComponent<
   }
 
   selectNode(node: T): void {
-    if (this.isOptionDisabled(node) || this.isDisabled()) {
+    if (this.isOptionDisabled(node) || this.isDisabled() || this.readonly()) {
       return;
     }
 
@@ -317,6 +380,73 @@ export class NeuTreeSelectComponent<
 
   toggleExpandedFromTemplate(node: T): void {
     this.toggleExpanded(node, new Event('toggle'));
+  }
+
+  onTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    event.preventDefault();
+    this.openPanel(event.key === 'ArrowUp');
+  }
+
+  onOverlayAttach(): void {
+    queueMicrotask(() => {
+      this.reconcileNavigation();
+      const overlay = this.connectedOverlay()?.overlayRef.overlayElement;
+      if (this.searchable()) {
+        overlay?.querySelector<HTMLInputElement>('.neu-tree-select__search')?.focus({
+          preventScroll: true,
+        });
+        this.focusLastOnAttach = false;
+        return;
+      }
+      if (this.focusLastOnAttach) this.navigation.setActiveIndex(this.lastEligibleIndex());
+      this.focusActiveNode();
+      this.focusLastOnAttach = false;
+    });
+  }
+
+  onOverlayKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.close();
+    }
+  }
+
+  onSearchKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    event.preventDefault();
+    this.reconcileNavigation();
+    if (event.key === 'ArrowUp') this.navigation.setActiveIndex(this.lastEligibleIndex());
+    else this.navigation.setActiveIndex(this.firstEligibleIndex());
+    this.focusActiveNode();
+  }
+
+  treeTabIndex(index: number): 0 | -1 {
+    this.reconcileNavigation();
+    return this.navigation.tabIndexFor(index);
+  }
+
+  setActiveIndex(index: number): void {
+    this.reconcileNavigation();
+    this.navigation.setActiveIndex(index);
+  }
+
+  onNodeKeydown(item: FlatNode<T, V>, index: number, event: KeyboardEvent): void {
+    this.reconcileNavigation();
+    this.navigation.setActiveIndex(index);
+    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction;
+    this.navigation.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });
+    const result = this.navigation.handleKey(event);
+    if (!result.handled) return;
+    if (result.action === 'expand' || result.action === 'collapse') {
+      this.toggleExpanded(item.node, event);
+      return;
+    }
+    if (result.action === 'activate') {
+      this.selectNode(item.node);
+      return;
+    }
+    this.focusActiveNode();
   }
 
   optionLabelOf(option: T): string {
@@ -360,7 +490,12 @@ export class NeuTreeSelectComponent<
       .map((item) => item.node);
   }
 
-  private flatten(nodes: readonly T[], level = 0, path = ''): FlatNode<T, V>[] {
+  private flatten(
+    nodes: readonly T[],
+    level = 0,
+    path = '',
+    parentTrackBy?: string,
+  ): FlatNode<T, V>[] {
     return nodes.flatMap((node, index) => {
       const children = this.childrenOf(node);
       const value = this.optionValueOf(node);
@@ -373,13 +508,27 @@ export class NeuTreeSelectComponent<
         disabled: this.isOptionDisabled(node),
         hasChildren: children.length > 0,
         lazy: this.isLazyNode(node),
+        parentTrackBy,
       });
 
-      return [item, ...this.flatten(children, level + 1, path ? `${path}.${index}` : String(index))];
+      return [
+        item,
+        ...this.flatten(
+          children,
+          level + 1,
+          path ? `${path}.${index}` : String(index),
+          item.trackBy,
+        ),
+      ];
     });
   }
 
-  private flattenVisible(nodes: readonly T[], level = 0, path = ''): FlatNode<T, V>[] {
+  private flattenVisible(
+    nodes: readonly T[],
+    level = 0,
+    path = '',
+    parentTrackBy?: string,
+  ): FlatNode<T, V>[] {
     return nodes.flatMap((node, index) => {
       const children = this.childrenOf(node);
       const value = this.optionValueOf(node);
@@ -392,15 +541,63 @@ export class NeuTreeSelectComponent<
         disabled: this.isOptionDisabled(node),
         hasChildren: children.length > 0,
         lazy: this.isLazyNode(node),
+        parentTrackBy,
       });
 
       return this.expanded().has(value)
-        ? [item, ...this.flattenVisible(children, level + 1, path ? `${path}.${index}` : String(index))]
+        ? [
+            item,
+            ...this.flattenVisible(
+              children,
+              level + 1,
+              path ? `${path}.${index}` : String(index),
+              item.trackBy,
+            ),
+          ]
         : [item];
     });
   }
 
   private createFlatNode(data: FlatNode<T, V>): FlatNode<T, V> {
     return data;
+  }
+
+  private openPanel(focusLast: boolean): void {
+    if (this.isDisabled() || this.open()) return;
+    this.focusLastOnAttach = focusLast;
+    this.open.set(true);
+  }
+
+  private reconcileNavigation(): void {
+    this.navigation.setItems(
+      this.visibleNodes().map<NeuTreeNavigationItem>((item) => ({
+        key: item.trackBy,
+        label: item.label,
+        level: item.level + 1,
+        parentKey: item.parentTrackBy,
+        disabled: item.disabled,
+        hasChildren: item.hasChildren || item.lazy,
+        expanded: this.expanded().has(item.value),
+      })),
+    );
+  }
+
+  private lastEligibleIndex(): number {
+    for (let index = this.visibleNodes().length - 1; index >= 0; index -= 1) {
+      if (!this.visibleNodes()[index]?.disabled) return index;
+    }
+    return -1;
+  }
+
+  private firstEligibleIndex(): number {
+    return this.visibleNodes().findIndex((item) => !item.disabled);
+  }
+
+  private focusActiveNode(): void {
+    this.connectedOverlay()
+      ?.overlayRef.overlayElement.querySelector<HTMLElement>(
+        `[data-neu-tree-select-index="${this.navigation.index}"]`,
+      )
+      ?.focus({ preventScroll: true });
   }
 }

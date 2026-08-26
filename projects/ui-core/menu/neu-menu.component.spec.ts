@@ -103,6 +103,33 @@ describe('NeuMenuComponent', () => {
     customFixture.detectChanges();
     expect(document.querySelector('.neu-menu-button__panel em')?.textContent).toBe('Edit');
   });
+
+  it('uses one roving tab stop and supports arrows, Home, End and typeahead', () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'alpha', label: 'Alpha' },
+      { key: 'disabled', label: 'Disabled', disabled: true },
+      { key: 'charlie', label: 'Charlie' },
+    ]);
+    fixture.detectChanges();
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll(':scope > .neu-menu__list > button'),
+    ) as HTMLButtonElement[];
+    expect(buttons.map((button) => button.tabIndex)).toEqual([0, -1, -1]);
+
+    buttons[0].focus();
+    buttons[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons[2]);
+    buttons[2].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons[0]);
+    buttons[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'c', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons[2]);
+  });
 });
 
 describe('NeuMenuButtonComponent', () => {
@@ -150,6 +177,25 @@ describe('NeuMenuButtonComponent', () => {
     (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
     expect(component.open()).toBe(false);
   });
+
+  it('opens with ArrowDown, focuses the menu, and restores focus with Escape', async () => {
+    const trigger = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    trigger.focus();
+    trigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const item = document.querySelector('.neu-menu-button__panel [role="menuitem"]');
+    expect(document.activeElement).toBe(item);
+    item?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.open()).toBe(false);
+    expect(document.activeElement).toBe(trigger);
+  });
 });
 
 describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
@@ -171,6 +217,7 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     expect(fixture.nativeElement.querySelector('nav')?.getAttribute('aria-label')).toBe(
       'Main navigation',
     );
+    expect(fixture.nativeElement.querySelector('nav')?.getAttribute('role')).toBe('menubar');
     (fixture.nativeElement.querySelector('.neu-menubar__item') as HTMLButtonElement).click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'help' }));
     expect(
@@ -182,6 +229,24 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     fixture.detectChanges();
     (document.querySelector('.neu-menu-button__panel button') as HTMLButtonElement).click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'new' }));
+  });
+
+  it('keeps one menubar tab stop and mirrors horizontal arrows in RTL', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuMenubarComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(NeuMenubarComponent);
+    fixture.componentRef.setInput('items', items);
+    fixture.nativeElement.setAttribute('dir', 'rtl');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('nav > button, nav > neu-menu-button > button'),
+    ) as HTMLButtonElement[];
+    expect(buttons.filter((button) => button.tabIndex === 0)).toHaveLength(1);
+    buttons[0].focus();
+    buttons[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons[1]);
   });
 
   it('forwards the tiered menu label and item clicks', async () => {

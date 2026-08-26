@@ -97,15 +97,28 @@ describe('NeuTreeSelectComponent', () => {
     const stop = vi.spyOn(event, 'stopPropagation');
     expect(component.expanded().has('admin')).toBe(false);
 
-    expect(component.visibleNodes().map((item) => item.node.value)).toEqual(['admin', 'lazy', 'disabled']);
+    expect(component.visibleNodes().map((item) => item.node.value)).toEqual([
+      'admin',
+      'lazy',
+      'disabled',
+    ]);
     component.toggleExpanded(nodes[0], event);
     expect(stop).toHaveBeenCalled();
-    expect(component.visibleNodes().map((item) => item.node.value)).toEqual(['admin', 'editor', 'lazy', 'disabled']);
+    expect(component.visibleNodes().map((item) => item.node.value)).toEqual([
+      'admin',
+      'editor',
+      'lazy',
+      'disabled',
+    ]);
     expect(component.expanded().has('admin')).toBe(true);
 
     component.toggleExpanded(nodes[0], new Event('click'));
     expect(component.expanded().has('admin')).toBe(false);
-    expect(component.visibleNodes().map((item) => item.node.value)).toEqual(['admin', 'lazy', 'disabled']);
+    expect(component.visibleNodes().map((item) => item.node.value)).toEqual([
+      'admin',
+      'lazy',
+      'disabled',
+    ]);
 
     component.toggleExpanded(nodes[1], new Event('click'));
     expect(expanded).toEqual([nodes[1]]);
@@ -124,7 +137,9 @@ describe('NeuTreeSelectComponent', () => {
     component.writeValue('admin');
     fixture.detectChanges();
 
-    const trigger = fixture.nativeElement.querySelector('.neu-tree-select__trigger') as HTMLButtonElement;
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-tree-select__trigger',
+    ) as HTMLButtonElement;
     trigger.click();
     fixture.detectChanges();
     expect(component.open()).toBe(true);
@@ -153,12 +168,16 @@ describe('NeuTreeSelectComponent', () => {
 
     component.query.set('');
     fixture.detectChanges();
-    const twisties = Array.from(document.querySelectorAll('.neu-tree-select__twisty')) as HTMLElement[];
+    const twisties = Array.from(
+      document.querySelectorAll('.neu-tree-select__twisty'),
+    ) as HTMLElement[];
     twisties[1].click();
     fixture.detectChanges();
     expect(expanded).toEqual([nodes[1]]);
 
-    const nodeButtons = Array.from(document.querySelectorAll('.neu-tree-select__node')) as HTMLButtonElement[];
+    const nodeButtons = Array.from(
+      document.querySelectorAll('.neu-tree-select__node'),
+    ) as HTMLButtonElement[];
     nodeButtons[0].click();
     fixture.detectChanges();
     expect(component.values()).toEqual(['admin']);
@@ -187,7 +206,9 @@ describe('NeuTreeSelectComponent', () => {
       readonly control = new FormControl<string | null>('admin');
     }
 
-    await TestBed.resetTestingModule().configureTestingModule({ imports: [FormHostComponent] }).compileComponents();
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ imports: [FormHostComponent] })
+      .compileComponents();
     const formFixture = TestBed.createComponent(FormHostComponent);
     formFixture.detectChanges();
     expect(formFixture.nativeElement.textContent).toContain('Admin');
@@ -226,7 +247,9 @@ describe('NeuTreeSelectComponent', () => {
       children?: Department[];
     }
 
-    const departments: Department[] = [{ id: 1, name: 'Root', children: [{ id: 2, name: 'Child' }] }];
+    const departments: Department[] = [
+      { id: 1, name: 'Root', children: [{ id: 2, name: 'Child' }] },
+    ];
     const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
       NeuTreeSelectComponent<Department, number>
     >;
@@ -310,7 +333,9 @@ describe('NeuTreeSelectComponent', () => {
       descendants?: Department[];
     }
 
-    const departments: Department[] = [{ id: 1, name: 'Root', descendants: [{ id: 2, name: 'Child' }] }];
+    const departments: Department[] = [
+      { id: 1, name: 'Root', descendants: [{ id: 2, name: 'Child' }] },
+    ];
     const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
       NeuTreeSelectComponent<Department, Department>
     >;
@@ -394,7 +419,9 @@ describe('NeuTreeSelectComponent', () => {
       descendants?: Department[];
     }
 
-    const departments: Department[] = [{ id: 1, name: 'Root', descendants: [{ id: 2, name: 'Child' }] }];
+    const departments: Department[] = [
+      { id: 1, name: 'Root', descendants: [{ id: 2, name: 'Child' }] },
+    ];
     const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
       NeuTreeSelectComponent<Department, Department>
     >;
@@ -419,5 +446,84 @@ describe('NeuTreeSelectComponent', () => {
     component.toggleExpanded(root, new Event('click'));
     expect(component.expanded().has(root)).toBe(false);
     expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Root']);
+  });
+
+  it('uses a native clear button outside the trigger and respects readonly state', () => {
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('clearable', true);
+    fixture.componentRef.setInput('readonly', true);
+    component.writeValue('admin');
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-tree-select__trigger',
+    ) as HTMLButtonElement;
+    const clear = fixture.nativeElement.querySelector(
+      '.neu-tree-select__clear',
+    ) as HTMLButtonElement;
+    expect(trigger.contains(clear)).toBe(false);
+    expect(clear.getAttribute('aria-label')).toBe('Clear selection');
+    expect(clear.disabled).toBe(true);
+    component.selectNode(nodes[1]);
+    expect(component.values()).toEqual(['admin']);
+  });
+
+  it('provides deterministic trigger/panel relationships and tree roving navigation', async () => {
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('searchable', false);
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-tree-select__trigger',
+    ) as HTMLButtonElement;
+    trigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = document.querySelector('.neu-tree-select__panel') as HTMLElement;
+    const items = () =>
+      Array.from(panel.querySelectorAll('[role="treeitem"]')) as HTMLButtonElement[];
+    expect(trigger.getAttribute('aria-controls')).toBe(panel.id);
+    expect(items().filter((item) => item.tabIndex === 0)).toHaveLength(1);
+    expect(document.activeElement).toBe(items()[0]);
+    expect(items()[0].getAttribute('aria-level')).toBe('1');
+
+    items()[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(items().map((item) => item.textContent?.trim())).toContain('Editor');
+    items()[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement?.textContent).toContain('Editor');
+    (document.activeElement as HTMLElement).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.open()).toBe(false);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('hands ArrowDown and ArrowUp from search to the first and last eligible treeitems', async () => {
+    const component = fixture.componentInstance;
+    component.toggle();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = document.querySelector('.neu-tree-select__panel') as HTMLElement;
+    const search = panel.querySelector('.neu-tree-select__search') as HTMLInputElement;
+    const items = Array.from(
+      panel.querySelectorAll<HTMLButtonElement>('[role="treeitem"]'),
+    );
+
+    search.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(items[0]);
+    search.focus();
+    search.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(items[1]);
   });
 });

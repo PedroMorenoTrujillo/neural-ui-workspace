@@ -40,12 +40,28 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--neu-primary);
-    outline-offset: 2px;
+    box-shadow: var(--neu-focus-ring);
   }
 
   &:disabled {
     cursor: default;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-rating__star {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-rating__star--filled {
+    color: Highlight;
+  }
+
+  .neu-rating__star:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
   }
 }
 

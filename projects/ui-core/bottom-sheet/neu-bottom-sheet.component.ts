@@ -1,11 +1,19 @@
-import { ChangeDetectionStrategy, Component, HostListener, ViewEncapsulation, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  ViewEncapsulation,
+  input,
+  output,
+} from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 
 export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
 
 @Component({
   selector: 'neu-bottom-sheet',
-  imports: [NeuButtonComponent],
+  imports: [NeuButtonComponent, NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -15,17 +23,15 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
   template: `
     @if (open()) {
       @if (backdrop()) {
-        <button
-          class="neu-bottom-sheet__backdrop"
-          type="button"
-          [attr.aria-label]="closeLabel()"
-          [disabled]="disableClose()"
-          (click)="requestClose()"
-        ></button>
+        <div class="neu-bottom-sheet__backdrop" aria-hidden="true" (click)="requestClose()"></div>
       }
       <section
         class="neu-bottom-sheet"
+        neuFocusTrap
+        neuModalFocus
         [class.neu-bottom-sheet--full]="size() === 'full'"
+        [neuModalFocusInitial]="initialFocus()"
+        (neuModalFocusEscape)="requestClose()"
         role="dialog"
         aria-modal="true"
         [attr.aria-label]="ariaLabel() || title()"
@@ -62,6 +68,7 @@ export class NeuBottomSheetComponent {
   readonly backdrop = input(true);
   readonly disableClose = input(false);
   readonly size = input<NeuBottomSheetSize>('md');
+  readonly initialFocus = input('first');
   readonly closed = output<void>();
 
   requestClose(): void {
@@ -71,9 +78,7 @@ export class NeuBottomSheetComponent {
   }
 
   @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.open()) {
-      this.requestClose();
-    }
+  onDocumentEscape(): void {
+    if (this.open()) this.requestClose();
   }
 }

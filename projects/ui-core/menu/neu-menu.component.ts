@@ -2,18 +2,23 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  ElementRef,
   TemplateRef,
   ViewEncapsulation,
+  afterRenderEffect,
   computed,
   contentChild,
+  inject,
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { OverlayModule } from '@angular/cdk/overlay';
+import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuRovingMenuController } from '@neural-ui/core/menu-foundation';
 
 export interface NeuMenuItem {
   key: string;
@@ -49,10 +54,10 @@ export class NeuMenuItemDirective {
   host: { class: 'neu-menu' },
   template: `
     <div class="neu-menu__list" role="menu" [attr.aria-label]="ariaLabel()">
-      @for (item of items(); track item.key) {
-        @if (item.separator) {
+      @for (item of items(); track item.key; let index = $index) {
+        @if (item.visible !== false && item.separator) {
           <div class="neu-menu__separator" role="separator"></div>
-        } @else {
+        } @else if (item.visible !== false) {
           <button
             neu-button
             type="button"
@@ -61,7 +66,13 @@ export class NeuMenuItemDirective {
             variant="ghost"
             size="sm"
             [disabled]="!!item.disabled"
-            (click)="activate(item)"
+            [tabIndex]="tabIndexFor(index)"
+            [attr.data-neu-menu-index]="index"
+            [attr.aria-haspopup]="item.children?.length ? 'menu' : null"
+            [attr.aria-expanded]="item.children?.length ? 'true' : null"
+            (focus)="setActiveIndex(index)"
+            (keydown)="onItemKeydown(item, index, $event)"
+            (click)="activate(item, $event)"
           >
             @if (itemTemplateRef()) {
               <ng-container
@@ -105,10 +116,79 @@ export class NeuMenuComponent {
   readonly ariaLabel = input('Menu');
   readonly itemClick = output<NeuMenuItem>();
 
-  activate(item: NeuMenuItem): void {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly controller = new NeuRovingMenuController({ orientation: 'vertical' });
+
+  tabIndexFor(index: number): 0 | -1 {
+    this.reconcileItems();
+    return this.controller.tabIndexFor(index);
+  }
+
+  setActiveIndex(index: number): void {
+    this.reconcileItems();
+    this.controller.setActiveIndex(index);
+  }
+
+  onItemKeydown(item: NeuMenuItem, index: number, event: KeyboardEvent): void {
+    this.reconcileItems();
+    this.controller.setActiveIndex(index);
+
+    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction;
+    const openKey = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+    const closeKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+    if (event.key === openKey && item.children?.length) {
+      event.preventDefault();
+      const child = (
+        event.currentTarget as HTMLElement
+      ).nextElementSibling?.querySelector<HTMLElement>('[role="menuitem"]:not([disabled])');
+      child?.focus();
+      return;
+    }
+    if (event.key === closeKey) {
+      const parent = (event.currentTarget as HTMLElement).closest('.neu-menu__child')
+        ?.previousElementSibling as HTMLElement | null;
+      if (parent) {
+        event.preventDefault();
+        parent.focus();
+        return;
+      }
+    }
+
+    this.controller.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });
+    const result = this.controller.handleKey(event);
+    if (!result.handled) return;
+    if (result.activate) {
+      this.activate(item, event);
+      return;
+    }
+    this.focusActiveItem();
+  }
+
+  activate(item: NeuMenuItem, originalEvent?: Event): void {
     if (!item.disabled) {
+      item.command?.({ originalEvent: originalEvent ?? new Event('menuitemactivate'), item });
       this.itemClick.emit(item);
     }
+  }
+
+  private reconcileItems(): void {
+    this.controller.setItems(
+      this.items().map((item) => ({
+        key: item.key,
+        label: item.label,
+        disabled: item.disabled,
+        hidden: item.visible === false,
+        separator: item.separator,
+      })),
+    );
+  }
+
+  private focusActiveItem(): void {
+    this.host
+      .querySelector<HTMLElement>(
+        `:scope > .neu-menu__list > [data-neu-menu-index="${this.controller.index}"]`,
+      )
+      ?.focus();
   }
 }
 
@@ -123,6 +203,7 @@ export class NeuMenuComponent {
       neu-button
       cdkOverlayOrigin
       #origin="cdkOverlayOrigin"
+      #trigger
       type="button"
       class="neu-menu-button__trigger"
       variant="ghost"
@@ -130,6 +211,7 @@ export class NeuMenuComponent {
       [attr.aria-expanded]="open()"
       aria-haspopup="menu"
       (click)="toggle()"
+      (keydown)="onTriggerKeydown($event)"
     >
       <ng-content>{{ label() }}</ng-content>
     </button>
@@ -141,6 +223,8 @@ export class NeuMenuComponent {
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       (backdropClick)="close()"
       (detach)="close()"
+      (attach)="onOverlayAttach()"
+      (overlayKeydown)="onOverlayKeydown($event)"
     >
       <neu-menu
         class="neu-menu-button__panel"
@@ -159,22 +243,61 @@ export class NeuMenuButtonComponent {
   readonly itemClick = output<NeuMenuItem>();
   readonly openChange = output<boolean>();
   readonly open = signal(false);
+  private readonly trigger = viewChild('trigger', { read: ElementRef<HTMLButtonElement> });
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+  private focusLastOnAttach = false;
 
   toggle(): void {
-    this.open.set(!this.open());
-    this.openChange.emit(this.open());
+    if (this.open()) {
+      this.close();
+    } else {
+      this.openMenu(false);
+    }
   }
 
   close(): void {
     if (this.open()) {
       this.open.set(false);
       this.openChange.emit(false);
+      queueMicrotask(() => this.trigger()?.nativeElement.focus({ preventScroll: true }));
+    }
+  }
+
+  onTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    event.preventDefault();
+    this.openMenu(event.key === 'ArrowUp');
+  }
+
+  onOverlayAttach(): void {
+    queueMicrotask(() => {
+      const items = Array.from(
+        this.connectedOverlay()?.overlayRef.overlayElement.querySelectorAll<HTMLElement>(
+          '[role="menuitem"]:not([disabled])',
+        ) ?? [],
+      );
+      (this.focusLastOnAttach ? items.at(-1) : items[0])?.focus({ preventScroll: true });
+      this.focusLastOnAttach = false;
+    });
+  }
+
+  onOverlayKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.close();
     }
   }
 
   onItemClick(item: NeuMenuItem): void {
     this.itemClick.emit(item);
     this.close();
+  }
+
+  private openMenu(focusLast: boolean): void {
+    if (this.open()) return;
+    this.focusLastOnAttach = focusLast;
+    this.open.set(true);
+    this.openChange.emit(true);
   }
 }
 
@@ -185,10 +308,19 @@ export class NeuMenuButtonComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-menubar' },
   template: `
-    <nav class="neu-menubar__list" [attr.aria-label]="ariaLabel()">
-      @for (item of items(); track item.key) {
+    <nav
+      class="neu-menubar__list"
+      role="menubar"
+      aria-orientation="horizontal"
+      [attr.aria-label]="ariaLabel()"
+      (keydown)="onKeydown($event)"
+      (focusin)="onFocusin($event)"
+    >
+      @for (item of items(); track item.key; let index = $index) {
         @if (item.children?.length) {
           <neu-menu-button
+            role="none"
+            [attr.data-neu-menubar-index]="index"
             [items]="item.children ?? []"
             [label]="item.label"
             (itemClick)="itemClick.emit($event)"
@@ -202,6 +334,8 @@ export class NeuMenuButtonComponent {
             class="neu-menubar__item"
             variant="ghost"
             size="sm"
+            role="menuitem"
+            [attr.data-neu-menubar-index]="index"
             [disabled]="!!item.disabled"
             (click)="itemClick.emit(item)"
           >
@@ -217,6 +351,73 @@ export class NeuMenubarComponent {
   readonly items = input<NeuMenuItem[]>([]);
   readonly ariaLabel = input('Menu bar');
   readonly itemClick = output<NeuMenuItem>();
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly controller = new NeuRovingMenuController({ orientation: 'horizontal' });
+
+  constructor() {
+    afterRenderEffect(() => {
+      this.items();
+      this.reconcile();
+    });
+  }
+
+  onFocusin(event: FocusEvent): void {
+    this.reconcile();
+    const target = (event.target as HTMLElement).closest<HTMLElement>('[data-neu-menubar-index]');
+    const index = Number(target?.dataset['neuMenubarIndex']);
+    if (Number.isInteger(index)) this.controller.setActiveIndex(index);
+    this.applyTabIndexes();
+  }
+
+  onKeydown(event: KeyboardEvent): void {
+    const itemElement = (event.target as HTMLElement).closest<HTMLElement>(
+      '[data-neu-menubar-index]',
+    );
+    const index = Number(itemElement?.dataset['neuMenubarIndex']);
+    if (!Number.isInteger(index)) return;
+    this.reconcile();
+    this.controller.setActiveIndex(index);
+    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction;
+    this.controller.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });
+    const result = this.controller.handleKey(event);
+    if (!result.handled) return;
+    if (result.activate) {
+      (event.target as HTMLElement).click();
+      return;
+    }
+    this.applyTabIndexes();
+    this.itemElements()[result.activeIndex]?.focus();
+  }
+
+  private reconcile(): void {
+    this.controller.setItems(
+      this.items().map((item) => ({
+        key: item.key,
+        label: item.label,
+        disabled: item.disabled,
+        hidden: item.visible === false,
+        separator: item.separator,
+      })),
+    );
+    this.applyTabIndexes();
+  }
+
+  private itemElements(): HTMLElement[] {
+    return Array.from(
+      this.host.querySelectorAll<HTMLElement>(
+        ':scope > .neu-menubar__list > button, :scope > .neu-menubar__list > neu-menu-button > button',
+      ),
+    );
+  }
+
+  private applyTabIndexes(): void {
+    for (const element of this.itemElements()) {
+      const owner = element.matches('[data-neu-menubar-index]') ? element : element.parentElement;
+      const index = Number(owner?.dataset['neuMenubarIndex']);
+      element.tabIndex = this.controller.tabIndexFor(index);
+      element.setAttribute('role', 'menuitem');
+    }
+  }
 }
 
 @Component({

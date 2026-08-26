@@ -199,7 +199,7 @@ describe('NeuTreeTableComponent', () => {
     const row = fixture.componentInstance.flatRows()[0] as NeuTreeTableRow<RepoMeta>;
     expect(fixture.componentInstance.treeIndent(row)).toBe(0);
     expect(fixture.componentInstance.isTreeRowDisabled(row)).toBe(false);
-    expect(fixture.componentInstance.treeToggleAriaLabel(row)).toBe('Collapse');
+    expect(fixture.componentInstance.treeToggleAriaLabel(row)).toBe('Collapse: Workspace');
   });
 
   it('ignores toggle requests for disabled or leaf nodes', () => {
@@ -333,7 +333,9 @@ describe('NeuTreeTableComponent', () => {
       events.push(`action:${event.action.key}:${event.node.id}`),
     );
     fixture.componentInstance.selectionActionClick.subscribe((event) =>
-      events.push(`selection-action:${event.action.key}:${event.nodes.map((node) => node.id).join(',')}`),
+      events.push(
+        `selection-action:${event.action.key}:${event.nodes.map((node) => node.id).join(',')}`,
+      ),
     );
     fixture.componentInstance.cellEditCommit.subscribe((event) =>
       events.push(`edit:${event.column.key}:${event.node.id}:${event.value}`),
@@ -418,6 +420,28 @@ describe('NeuTreeTableComponent', () => {
     );
     (fixture.nativeElement.querySelector('.neu-table__expand-btn') as HTMLButtonElement).click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.tree-detail')?.textContent).toContain('Workspace / 0');
+    expect(fixture.nativeElement.querySelector('.tree-detail')?.textContent).toContain(
+      'Workspace / 0',
+    );
+  });
+
+  it('keeps native table semantics and exposes truthful hierarchy state on toggle controls', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.detectChanges();
+    const table = fixture.nativeElement.querySelector('table') as HTMLTableElement;
+    const toggle = fixture.nativeElement.querySelector(
+      '.neu-tree-table__toggle',
+    ) as HTMLButtonElement;
+    expect(table.getAttribute('role')).toBeNull();
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle.getAttribute('aria-label')).toBe('Collapse row: Workspace');
+
+    toggle.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 });

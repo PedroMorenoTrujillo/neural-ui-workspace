@@ -5,7 +5,9 @@ describe('NeuBottomSheetComponent', () => {
   let fixture: ComponentFixture<NeuBottomSheetComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [NeuBottomSheetComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [NeuBottomSheetComponent],
+    }).compileComponents();
     fixture = TestBed.createComponent(NeuBottomSheetComponent);
   });
 
@@ -59,9 +61,15 @@ describe('NeuBottomSheetComponent', () => {
     const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
     expect(dialog.getAttribute('aria-label')).toBe('Action sheet');
     expect(dialog.classList).toContain('neu-bottom-sheet--full');
-    expect(fixture.nativeElement.querySelector('.neu-bottom-sheet__backdrop')?.getAttribute('aria-label')).toBe('Dismiss');
+    expect(
+      fixture.nativeElement
+        .querySelector('.neu-bottom-sheet__backdrop')
+        ?.getAttribute('aria-hidden'),
+    ).toBe('true');
 
-    (fixture.nativeElement.querySelector('.neu-bottom-sheet__backdrop') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector('.neu-bottom-sheet__backdrop') as HTMLButtonElement
+    ).click();
     (fixture.nativeElement.querySelector('.neu-bottom-sheet__close') as HTMLButtonElement).click();
     expect(closed).toHaveBeenCalledTimes(2);
   });
@@ -71,11 +79,31 @@ describe('NeuBottomSheetComponent', () => {
     fixture.componentRef.setInput('title', 'Fallback title');
     fixture.componentRef.setInput('backdrop', false);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[role="dialog"]')?.getAttribute('aria-label')).toBe('Fallback title');
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')?.getAttribute('aria-label')).toBe(
+      'Fallback title',
+    );
     expect(fixture.nativeElement.querySelector('.neu-bottom-sheet__backdrop')).toBeNull();
 
     fixture.componentRef.setInput('title', '');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.neu-bottom-sheet__header')).toBeNull();
+  });
+
+  it('moves focus into the modal surface and restores the opening control on destroy', async () => {
+    const origin = document.createElement('button');
+    document.body.append(origin);
+    origin.focus();
+    fixture.componentRef.setInput('title', 'Actions');
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(
+      fixture.nativeElement.querySelector('.neu-bottom-sheet__close'),
+    );
+
+    fixture.componentRef.setInput('open', false);
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(origin);
+    origin.remove();
   });
 });

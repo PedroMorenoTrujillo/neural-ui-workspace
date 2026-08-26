@@ -9,6 +9,7 @@ const nonVisualEntryPoints = new Set([
   'foundation',
   'menu-foundation',
   'option-api',
+  'tree-foundation',
   'url-state',
   'testing',
 ]);

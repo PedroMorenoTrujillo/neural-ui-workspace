@@ -449,6 +449,25 @@ describe('NeuImageViewerDirective', () => {
     dir.close();
   });
 
+  it('opens from Enter, focuses the modal toolbar, and restores the trigger on close', async () => {
+    const f = TestBed.createComponent(HostForDirective);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuImageViewerDirective) as any;
+    const img = f.nativeElement.querySelector('img') as HTMLImageElement;
+    expect(img.getAttribute('role')).toBe('button');
+    expect(img.tabIndex).toBe(0);
+    img.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    await f.whenStable();
+    expect(document.activeElement).toBe(
+      document.body.querySelector('.neu-iv__btn:not([disabled])'),
+    );
+    dir.close();
+    expect(document.activeElement).toBe(img);
+  });
+
   it('unknown keyboard keys should leave overlay state unchanged', () => {
     const { f } = setupOverlay(mkData({ initialIndex: 1 }));
     const before = {
@@ -486,7 +505,9 @@ describe('NeuImageViewerDirective', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    f.nativeElement.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }),
+    );
     f.detectChanges();
     expect(f.componentInstance._index()).toBe(2);
 

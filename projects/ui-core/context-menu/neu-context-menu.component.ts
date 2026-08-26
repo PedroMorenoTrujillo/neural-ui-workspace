@@ -10,6 +10,7 @@ import {
   TemplateRef,
   ViewContainerRef,
   ViewEncapsulation,
+  afterRenderEffect,
   computed,
   contentChild,
   inject,
@@ -20,6 +21,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
+import { NeuRovingMenuController } from '@neural-ui/core/menu-foundation';
 
 export interface NeuContextMenuItem {
   /** Key para identificar la acción / Key to identify the action */
@@ -36,7 +38,9 @@ export interface NeuContextMenuItem {
   variant?: 'default' | 'danger';
 }
 @Directive({ selector: 'ng-template[neuContextMenuItem]' })
-export class NeuContextMenuItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuContextMenuItem }>) {} }
+export class NeuContextMenuItemDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuContextMenuItem }>) {}
+}
 
 /**
  * NeuralUI ContextMenu Overlay Component (internal)
@@ -50,10 +54,10 @@ export class NeuContextMenuItemDirective { constructor(readonly templateRef: Tem
     class: 'neu-context-menu',
     role: 'menu',
     tabindex: '-1',
-    '(keydown.escape)': '_onEscape()',
+    '(keydown)': '_onKeydown($event)',
   },
   template: `
-    @for (item of _items(); track item.key) {
+    @for (item of _items(); track item.key; let index = $index) {
       @if (item.separator && !$first) {
         <hr class="neu-context-menu__separator" role="separator" />
       }
@@ -65,9 +69,18 @@ export class NeuContextMenuItemDirective { constructor(readonly templateRef: Tem
         [class.neu-context-menu__item--disabled]="item.disabled"
         [disabled]="item.disabled ?? false"
         [attr.aria-disabled]="item.disabled ?? false"
+        [tabIndex]="_tabIndexFor(index)"
+        [attr.data-neu-context-menu-index]="index"
+        (focus)="_setActiveIndex(index)"
+        (keydown)="_onKeydown($event)"
         (click)="select(item)"
       >
-        @if (itemTemplate) { <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }" /> } @else if (item.icon) {
+        @if (itemTemplate) {
+          <ng-container
+            [ngTemplateOutlet]="itemTemplate"
+            [ngTemplateOutletContext]="{ $implicit: item }"
+          />
+        } @else if (item.icon) {
           <span class="neu-context-menu__icon" aria-hidden="true">{{ item.icon }}</span>
         }
         {{ item.label }}
@@ -81,6 +94,20 @@ export class NeuContextMenuOverlayComponent {
   itemTemplate: TemplateRef<{ $implicit: NeuContextMenuItem }> | null = null;
   _selectFn: ((item: NeuContextMenuItem) => void) | null = null;
   _escapeFn: (() => void) | null = null;
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly controller = new NeuRovingMenuController({ orientation: 'vertical' });
+  private initialFocusRequested = false;
+
+  constructor() {
+    afterRenderEffect(() => {
+      this._items();
+      this.reconcile();
+      if (this.initialFocusRequested) {
+        this.initialFocusRequested = false;
+        this.focusActive();
+      }
+    });
+  }
 
   select(item: NeuContextMenuItem): void {
     if (!item.disabled) this._selectFn?.(item);
@@ -88,6 +115,60 @@ export class NeuContextMenuOverlayComponent {
 
   _onEscape(): void {
     this._escapeFn?.();
+  }
+
+  _requestInitialFocus(): void {
+    this.initialFocusRequested = true;
+  }
+
+  _tabIndexFor(index: number): 0 | -1 {
+    this.reconcile();
+    return this.controller.tabIndexFor(index);
+  }
+
+  _setActiveIndex(index: number): void {
+    this.reconcile();
+    this.controller.setActiveIndex(index);
+  }
+
+  _onKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this._onEscape();
+      return;
+    }
+    const target = (event.target as HTMLElement).closest<HTMLElement>(
+      '[data-neu-context-menu-index]',
+    );
+    const index = Number(target?.dataset['neuContextMenuIndex']);
+    if (!Number.isInteger(index)) return;
+    this.reconcile();
+    this.controller.setActiveIndex(index);
+    const result = this.controller.handleKey(event);
+    if (!result.handled) return;
+    event.stopPropagation();
+    if (result.activate) {
+      this.select(this._items()[index]);
+      return;
+    }
+    this.focusActive();
+  }
+
+  private reconcile(): void {
+    this.controller.setItems(
+      this._items().map((item) => ({
+        key: item.key,
+        label: item.label,
+        disabled: item.disabled,
+      })),
+    );
+  }
+
+  private focusActive(): void {
+    this.host
+      .querySelector<HTMLElement>(`[data-neu-context-menu-index="${this.controller.index}"]`)
+      ?.focus({ preventScroll: true });
   }
 }
 
@@ -104,6 +185,10 @@ export class NeuContextMenuOverlayComponent {
 @Directive({
   selector: '[neuContextMenu]',
   exportAs: 'neuContextMenu',
+  host: {
+    tabindex: '0',
+    'aria-haspopup': 'menu',
+  },
 })
 export class NeuContextMenuDirective implements OnDestroy {
   readonly itemTpl = contentChild(NeuContextMenuItemDirective);
@@ -138,6 +223,15 @@ export class NeuContextMenuDirective implements OnDestroy {
     this.openAt(event.clientX, event.clientY, event.currentTarget as HTMLElement);
   }
 
+  @HostListener('keydown', ['$event'])
+  onHostKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return;
+    event.preventDefault();
+    const origin = event.currentTarget as HTMLElement;
+    const rect = origin.getBoundingClientRect();
+    this.openAt(rect.left + 8, rect.top + 8, origin);
+  }
+
   /** Opens the existing menu surface for composite controls such as NeuTable. */
   openAt(x: number, y: number, origin?: HTMLElement | null, onClose?: () => void): void {
     if (this.neuContextMenuDisabled()) return;
@@ -160,13 +254,9 @@ export class NeuContextMenuDirective implements OnDestroy {
       this._close();
     };
     this._compRef.instance._escapeFn = () => this._close();
+    this._compRef.instance._requestInitialFocus();
 
     this._overlayRef.backdropClick().subscribe(() => this._close());
-    (
-      this._compRef.location.nativeElement.querySelector(
-        '[role="menuitem"]:not([disabled])',
-      ) as HTMLElement | null
-    )?.focus();
     this.menuOpened.emit();
   }
 

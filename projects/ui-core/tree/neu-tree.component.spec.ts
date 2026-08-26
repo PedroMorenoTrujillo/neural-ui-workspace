@@ -256,7 +256,9 @@ describe('NeuTreeComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('NEW');
-    const input = fixture.nativeElement.querySelector('.neu-tree__search-input') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector(
+      '.neu-tree__search-input',
+    ) as HTMLInputElement;
     input.value = 'leaf';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -276,7 +278,9 @@ describe('NeuTreeComponent', () => {
     fixture.componentRef.setInput('searchable', true);
     fixture.detectChanges();
 
-    const input = fixture.nativeElement.querySelector('.neu-tree__search-input') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector(
+      '.neu-tree__search-input',
+    ) as HTMLInputElement;
     input.value = 'root';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -308,7 +312,9 @@ describe('NeuTreeComponent', () => {
     fixture.componentRef.setInput('selectable', true);
     fixture.componentRef.setInput('selectionMode', 'multiple');
     const emitted: string[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((nodes) => emitted.push(nodes.map((node) => node.id)));
+    fixture.componentInstance.selectionChange.subscribe((nodes) =>
+      emitted.push(nodes.map((node) => node.id)),
+    );
     fixture.detectChanges();
 
     fixture.componentInstance.activateNode(NODES[0]);
@@ -350,5 +356,53 @@ describe('NeuTreeComponent', () => {
     fixture.componentInstance.activateNode(NODES[1]);
 
     expect(clicks).toBe(0);
+  });
+
+  it('owns one tree tab stop and supports hierarchy, linear navigation, Home and End', () => {
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.detectChanges();
+    const items = () =>
+      Array.from(fixture.nativeElement.querySelectorAll('[role="treeitem"]')) as HTMLElement[];
+    expect(items().filter((item) => item.tabIndex === 0)).toHaveLength(1);
+    expect(items().at(-1)?.getAttribute('aria-disabled')).toBe('true');
+
+    items()[0].focus();
+    items()[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(items()[1]);
+    items()[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(items().some((item) => item.textContent?.includes('Admin portal'))).toBe(true);
+    items()[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement?.textContent).toContain('Admin portal');
+    (document.activeElement as HTMLElement).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(items()[0]);
+    items()[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement?.textContent).toContain('Design system');
+  });
+
+  it('removes nested selection controls from sequential Tab order', async () => {
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('selectable', true);
+    fixture.componentRef.setInput('selectionMode', 'multiple');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const nested = Array.from(
+      fixture.nativeElement.querySelectorAll(
+        '.neu-tree__toggle, .neu-tree__content, .neu-tree__checkbox input',
+      ),
+    ) as HTMLElement[];
+    expect(nested.every((element) => element.tabIndex === -1)).toBe(true);
   });
 });

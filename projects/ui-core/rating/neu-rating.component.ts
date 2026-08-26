@@ -1,12 +1,15 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   ViewEncapsulation,
   computed,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 
 /**
  * NeuralUI Rating Component
@@ -27,7 +30,10 @@ import {
     <div
       class="neu-rating"
       [class.neu-rating--readonly]="readonly()"
-      [attr.role]="readonly() ? null : 'radiogroup'"
+      [class.neu-rating--disabled]="disabled()"
+      [attr.role]="isInteractive() ? 'radiogroup' : 'img'"
+      [attr.aria-disabled]="isInteractive() && disabled() ? 'true' : null"
+      [attr.aria-readonly]="isInteractive() && readonly() ? 'true' : null"
       [attr.aria-label]="'Valoración: ' + value() + ' de ' + stars() + ' estrellas'"
     >
       @for (i of starsArray(); track i) {
@@ -38,19 +44,21 @@ import {
             !isInteger(hovered() ?? value()) && i === Math.ceil(hovered() ?? value())
           "
           type="button"
-          [disabled]="readonly()"
+          [disabled]="!isInteractive()"
+          [tabIndex]="tabIndexFor(i)"
+          [attr.data-neu-rating-value]="i"
           [attr.aria-label]="i + ' star' + (i > 1 ? 's' : '')"
-          [attr.aria-checked]="i === value()"
-          [attr.role]="'radio'"
+          [attr.aria-checked]="isInteractive() ? i === value() : null"
+          [attr.role]="isInteractive() ? 'radio' : null"
           (mouseenter)="onHover(i)"
           (mouseleave)="onLeave()"
-          (click)="select(i)"
-          (keydown.left)="select(value() - 1)"
-          (keydown.right)="select(value() + 1)"
+          (focus)="focusedValue.set(i)"
+          (click)="select(i, true)"
+          (keydown)="onKeydown(i, $event)"
         >
           <svg class="neu-rating__icon" viewBox="0 0 24 24" aria-hidden="true">
             <defs>
-              <linearGradient [id]="'half-' + i" x1="0" x2="1" y1="0" y2="0">
+              <linearGradient [id]="gradientId(i)" x1="0" x2="1" y1="0" y2="0">
                 <stop offset="50%" stop-color="currentColor" />
                 <stop offset="50%" stop-color="transparent" />
               </linearGradient>
@@ -82,24 +90,65 @@ export class NeuRatingComponent {
   /** Modo solo lectura / Read-only mode */
   readonly = input<boolean>(false);
 
+  /** Fully disables selection while retaining read-only value semantics. */
+  disabled = input<boolean>(false);
+
   /** Emite el nuevo valor al seleccionar / Emits the new value on selection */
   valueChange = output<number>();
 
   protected readonly hovered = signal<number | null>(null);
+  protected readonly focusedValue = signal<number | null>(null);
   readonly starsArray = computed(() => Array.from({ length: this.stars() }, (_, i) => i + 1));
+  readonly isInteractive = computed(() => !this.readonly() && !this.disabled());
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly gradientPrefix = inject(NeuIdGenerator).getId('neu-rating-gradient-');
 
   onHover(i: number): void {
-    if (!this.readonly()) this.hovered.set(i);
+    if (this.isInteractive()) this.hovered.set(i);
   }
 
   onLeave(): void {
     this.hovered.set(null);
   }
 
-  select(i: number): void {
-    if (this.readonly()) return;
+  select(i: number, focus = false): void {
+    if (!this.isInteractive()) return;
     const clamped = Math.min(this.stars(), Math.max(1, i));
+    this.focusedValue.set(clamped);
     this.valueChange.emit(clamped);
+    if (focus) this.focusStar(clamped);
+  }
+
+  tabIndexFor(i: number): 0 | -1 {
+    if (!this.isInteractive()) return -1;
+    const focused = this.focusedValue();
+    const owner =
+      focused != null
+        ? focused
+        : Number.isInteger(this.value()) && this.value() >= 1 && this.value() <= this.stars()
+          ? this.value()
+          : 1;
+    return i === owner ? 0 : -1;
+  }
+
+  onKeydown(i: number, event: KeyboardEvent): void {
+    if (!this.isInteractive()) return;
+    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction;
+    const nextKey = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+    const previousKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+    let next: number | null = null;
+    if (event.key === nextKey || event.key === 'ArrowDown') next = Math.min(this.stars(), i + 1);
+    if (event.key === previousKey || event.key === 'ArrowUp') next = Math.max(1, i - 1);
+    if (event.key === 'Home') next = 1;
+    if (event.key === 'End') next = this.stars();
+    if (event.key === ' ' || event.key === 'Enter') next = i;
+    if (next == null) return;
+    event.preventDefault();
+    this.select(next, true);
+  }
+
+  gradientId(i: number): string {
+    return `${this.gradientPrefix}${i}`;
   }
 
   isInteger(n: number): boolean {
@@ -109,7 +158,15 @@ export class NeuRatingComponent {
   getFill(i: number): string {
     const val = this.hovered() ?? this.value();
     if (i <= Math.floor(val)) return 'currentColor';
-    if (!Number.isInteger(val) && i === Math.ceil(val)) return `url(#half-${i})`;
+    if (!Number.isInteger(val) && i === Math.ceil(val)) return `url(#${this.gradientId(i)})`;
     return 'transparent';
+  }
+
+  private focusStar(value: number): void {
+    queueMicrotask(() =>
+      this.host
+        .querySelector<HTMLButtonElement>(`[data-neu-rating-value="${value}"]`)
+        ?.focus({ preventScroll: true }),
+    );
   }
 }

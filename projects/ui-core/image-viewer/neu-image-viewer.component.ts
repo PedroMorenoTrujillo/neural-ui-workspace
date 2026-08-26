@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
   HostListener,
@@ -15,6 +16,7 @@ import {
 } from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
+import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 
 export interface NeuImageViewerItem {
   src: string;
@@ -39,7 +41,8 @@ interface _NeuIvData {
  */
 @Component({
   selector: 'neu-image-viewer-overlay',
-  imports: [],
+  imports: [NeuFocusTrapDirective, NeuModalFocusDirective],
+  hostDirectives: [NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -127,6 +130,20 @@ export class NeuImageViewerOverlayComponent {
 
   private _dragging = false;
   private _dragStart = { x: 0, y: 0, px: 0, py: 0 };
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly modalFocus = inject(NeuModalFocusDirective, { self: true });
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private removeDragListeners: (() => void) | null = null;
+
+  constructor() {
+    const escapeSubscription = this.modalFocus.neuModalFocusEscape.subscribe(() =>
+      this._data.close(),
+    );
+    this.destroyRef.onDestroy(() => {
+      escapeSubscription.unsubscribe();
+      this.cleanupDragListeners();
+    });
+  }
 
   readonly _current = computed(() => this._data.items[this._index()]);
 
@@ -168,13 +185,20 @@ export class NeuImageViewerOverlayComponent {
       this._panX.set(this._dragStart.px + ev.clientX - this._dragStart.x);
       this._panY.set(this._dragStart.py + ev.clientY - this._dragStart.y);
     };
+    const view = (e.currentTarget instanceof HTMLElement ? e.currentTarget : this.host)
+      .ownerDocument.defaultView;
+    if (!view) return;
     const onUp = () => {
       this._dragging = false;
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      this.cleanupDragListeners();
     };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    view.addEventListener('mousemove', onMove);
+    view.addEventListener('mouseup', onUp);
+    this.removeDragListeners = () => {
+      view.removeEventListener('mousemove', onMove);
+      view.removeEventListener('mouseup', onUp);
+      this.removeDragListeners = null;
+    };
   }
 
   _onBackdropClick(_e: MouseEvent): void {
@@ -190,7 +214,7 @@ export class NeuImageViewerOverlayComponent {
         this._navigate(1);
         break;
       case 'Escape':
-        this._data.close();
+        if (!e.defaultPrevented) this._data.close();
         break;
       case '+':
         this._zoom(0.25);
@@ -199,6 +223,11 @@ export class NeuImageViewerOverlayComponent {
         this._zoom(-0.25);
         break;
     }
+  }
+
+  private cleanupDragListeners(): void {
+    this.removeDragListeners?.();
+    this._dragging = false;
   }
 }
 
@@ -219,7 +248,11 @@ export class NeuImageViewerOverlayComponent {
   host: {
     class: 'neu-iv-trigger',
     style: 'cursor:pointer',
+    role: 'button',
+    tabindex: '0',
     '(click)': 'open()',
+    '(keydown.enter)': 'openFromKeyboard($event)',
+    '(keydown.space)': 'openFromKeyboard($event)',
   },
 })
 export class NeuImageViewerDirective implements OnDestroy {
@@ -230,10 +263,13 @@ export class NeuImageViewerDirective implements OnDestroy {
 
   private readonly _overlay = inject(Overlay);
   private readonly _injector = inject(Injector);
+  private readonly _element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private _overlayRef: OverlayRef | null = null;
 
   open(): void {
     if (this._overlayRef) return;
+
+    this._element.focus({ preventScroll: true });
 
     const items = this._normalizeItems();
     const overlayRef = this._overlay.create({
@@ -256,12 +292,11 @@ export class NeuImageViewerDirective implements OnDestroy {
     const portal = new ComponentPortal(NeuImageViewerOverlayComponent, null, injector);
     overlayRef.attach(portal);
     this._overlayRef = overlayRef;
+  }
 
-    // Focus overlay for keyboard events
-    setTimeout(() => {
-      const el = overlayRef.overlayElement?.querySelector<HTMLElement>('.neu-iv');
-      el?.focus();
-    }, 50);
+  openFromKeyboard(event: Event): void {
+    event.preventDefault();
+    this.open();
   }
 
   close(): void {

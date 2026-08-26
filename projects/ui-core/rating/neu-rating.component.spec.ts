@@ -47,10 +47,11 @@ describe('NeuRatingComponent', () => {
     expect(root.getAttribute('aria-label')).toContain('2 de 5');
   });
 
-  it('should remove radiogroup role when readonly=true', () => {
+  it('should expose read-only image semantics when readonly=true', () => {
     const { f } = mk({ readonly: true, value: 4, stars: 5 });
     const root = f.nativeElement.querySelector('.neu-rating');
-    expect(root.hasAttribute('role')).toBe(false);
+    expect(root.getAttribute('role')).toBe('img');
+    expect(root.getAttribute('aria-readonly')).toBeNull();
   });
 
   it('buttons should be disabled when readonly=true', () => {
@@ -154,9 +155,9 @@ describe('NeuRatingComponent', () => {
     expect(comp.getFill(3)).toBe('currentColor');
   });
 
-  it('getFill returns url(#half-N) for half star', () => {
+  it('getFill returns a deterministic instance-scoped gradient for a half star', () => {
     const { comp } = mk({ value: 2.5 });
-    expect(comp.getFill(3)).toBe('url(#half-3)');
+    expect(comp.getFill(3)).toBe(`url(#${comp.gradientId(3)})`);
   });
 
   it('getFill returns transparent for unfilled star', () => {
@@ -280,7 +281,7 @@ describe('NeuRatingComponent', () => {
     const { comp } = mk({ value: 1, stars: 5 });
     comp.hovered.set(2.5);
 
-    expect(comp.getFill(3)).toBe('url(#half-3)');
+    expect(comp.getFill(3)).toBe(`url(#${comp.gradientId(3)})`);
   });
 
   it('getFill should prefer hovered value over selected value for transparent stars', () => {
@@ -290,29 +291,73 @@ describe('NeuRatingComponent', () => {
     expect(comp.getFill(3)).toBe('transparent');
   });
 
-  it('triggerEventHandler keydown.right should execute the template right-arrow binding', () => {
+  it('ArrowRight moves roving focus and selection to the next radio', () => {
     const { f, comp } = mk({ value: 2, stars: 5 });
     const emitted: number[] = [];
     comp.valueChange.subscribe((v: number) => emitted.push(v));
 
-    const firstStar = f.debugElement.queryAll(By.css('.neu-rating__star'))[0];
-    firstStar.triggerEventHandler('keydown.right', {
+    const secondStar = f.debugElement.queryAll(By.css('.neu-rating__star'))[1];
+    secondStar.triggerEventHandler('keydown', {
+      key: 'ArrowRight',
       preventDefault: () => {},
     } as KeyboardEvent);
 
     expect(emitted).toContain(3);
   });
 
-  it('triggerEventHandler keydown.left should execute the template left-arrow binding', () => {
+  it('ArrowLeft moves roving focus and selection to the previous radio', () => {
     const { f, comp } = mk({ value: 3, stars: 5 });
     const emitted: number[] = [];
     comp.valueChange.subscribe((v: number) => emitted.push(v));
 
-    const firstStar = f.debugElement.queryAll(By.css('.neu-rating__star'))[0];
-    firstStar.triggerEventHandler('keydown.left', {
+    const thirdStar = f.debugElement.queryAll(By.css('.neu-rating__star'))[2];
+    thirdStar.triggerEventHandler('keydown', {
+      key: 'ArrowLeft',
       preventDefault: () => {},
     } as KeyboardEvent);
 
     expect(emitted).toContain(2);
+  });
+
+  it('keeps one radio in the Tab order and supports Home and End', async () => {
+    const { f, comp } = mk({ value: 3, stars: 5 });
+    const emitted: number[] = [];
+    comp.valueChange.subscribe((value: number) => emitted.push(value));
+    const buttons = Array.from(f.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    expect(buttons.map((button) => button.tabIndex)).toEqual([-1, -1, 0, -1, -1]);
+    buttons[2].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
+    );
+    await f.whenStable();
+    expect(emitted.at(-1)).toBe(5);
+    expect(document.activeElement).toBe(buttons[4]);
+    buttons[4].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
+    );
+    await f.whenStable();
+    expect(emitted.at(-1)).toBe(1);
+    expect(document.activeElement).toBe(buttons[0]);
+  });
+
+  it('mirrors horizontal arrow navigation in RTL and disables every radio coherently', () => {
+    const { f, comp } = mk({ value: 2, stars: 5 });
+    f.nativeElement.setAttribute('dir', 'rtl');
+    const emitted: number[] = [];
+    comp.valueChange.subscribe((value: number) => emitted.push(value));
+    const buttons = Array.from(f.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    buttons[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    );
+    expect(emitted.at(-1)).toBe(3);
+
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    expect(
+      (f.nativeElement.querySelector('.neu-rating') as HTMLElement).getAttribute('aria-disabled'),
+    ).toBeNull();
+    expect(
+      (f.nativeElement.querySelector('.neu-rating') as HTMLElement).getAttribute('role'),
+    ).toBe('img');
+    expect(buttons.every((button) => button.disabled && button.tabIndex === -1)).toBe(true);
   });
 });

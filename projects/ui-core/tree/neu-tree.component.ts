@@ -2,10 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  ElementRef,
   TemplateRef,
+  afterRenderEffect,
   computed,
   contentChild,
   effect,
+  inject,
   input,
   output,
   signal,
@@ -13,6 +16,10 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
+import {
+  NeuTreeNavigationController,
+  NeuTreeNavigationItem,
+} from '@neural-ui/core/tree-foundation';
 
 export interface NeuTreeNode<T = unknown> {
   id: string;
@@ -27,9 +34,17 @@ export interface NeuTreeNode<T = unknown> {
 }
 
 export type NeuTreeSelectionMode = 'single' | 'multiple';
-export interface NeuTreeNodeTemplateContext { $implicit: NeuTreeNode; level: number; selected: boolean; expanded: boolean; toggle: () => void; }
+export interface NeuTreeNodeTemplateContext {
+  $implicit: NeuTreeNode;
+  level: number;
+  selected: boolean;
+  expanded: boolean;
+  toggle: () => void;
+}
 @Directive({ selector: 'ng-template[neuTreeNode]' })
-export class NeuTreeNodeDirective { constructor(readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext>) {} }
+export class NeuTreeNodeDirective {
+  constructor(readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext>) {}
+}
 
 @Component({
   selector: 'neu-tree',
@@ -92,6 +107,10 @@ export class NeuTreeNodeDirective { constructor(readonly templateRef: TemplateRe
           [attr.aria-expanded]="hasChildren(node) ? isRenderedExpanded(node) : null"
           [attr.aria-selected]="canSelect(node) ? isSelected(node.id) : null"
           [attr.aria-disabled]="node.disabled ? 'true' : null"
+          [tabIndex]="tabIndexForNode(node)"
+          [attr.data-neu-tree-index]="navigationIndex(node.id)"
+          (focus)="setActiveNode(node.id)"
+          (keydown)="onNodeKeydown(node, $event)"
         >
           <div
             class="neu-tree__row"
@@ -103,6 +122,7 @@ export class NeuTreeNodeDirective { constructor(readonly templateRef: TemplateRe
               <button
                 class="neu-tree__toggle"
                 type="button"
+                tabindex="-1"
                 [class.neu-tree__toggle--open]="isRenderedExpanded(node)"
                 [attr.aria-label]="isRenderedExpanded(node) ? collapseLabel() : expandLabel()"
                 (click)="toggleNode(node, $event)"
@@ -132,18 +152,31 @@ export class NeuTreeNodeDirective { constructor(readonly templateRef: TemplateRe
             <button
               class="neu-tree__content"
               type="button"
+              tabindex="-1"
               [disabled]="node.disabled"
               (click)="activateNode(node)"
             >
-              @if (nodeTpl()) { <ng-container [ngTemplateOutlet]="nodeTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: node, level, selected: isSelected(node.id), expanded: isRenderedExpanded(node), toggle: toggleNode.bind(this, node) }" /> } @else { <span class="neu-tree__main">
-                <span class="neu-tree__label">{{ node.label }}</span>
-                @if (node.badge) {
-                  <span class="neu-tree__badge">{{ node.badge }}</span>
+              @if (nodeTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="nodeTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{
+                    $implicit: node,
+                    level,
+                    selected: isSelected(node.id),
+                    expanded: isRenderedExpanded(node),
+                    toggle: toggleNode.bind(this, node),
+                  }"
+                />
+              } @else {
+                <span class="neu-tree__main">
+                  <span class="neu-tree__label">{{ node.label }}</span>
+                  @if (node.badge) {
+                    <span class="neu-tree__badge">{{ node.badge }}</span>
+                  }
+                </span>
+                @if (node.description) {
+                  <span class="neu-tree__description">{{ node.description }}</span>
                 }
-              </span>
-              @if (node.description) {
-                <span class="neu-tree__description">{{ node.description }}</span>
-              }
               }
             </button>
           </div>
@@ -183,6 +216,8 @@ export class NeuTreeComponent {
 
   private readonly expandedKeys = signal<Set<string>>(new Set());
   private readonly selectedKeys = signal<Set<string>>(new Set());
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly navigation = new NeuTreeNavigationController();
 
   readonly visibleNodes = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -199,6 +234,15 @@ export class NeuTreeComponent {
       this.expandedKeys.set(nextExpanded);
       this.selectedKeys.set(new Set());
       this.searchQuery.set('');
+    });
+    afterRenderEffect(() => {
+      this.visibleNodes();
+      this.reconcileNavigation();
+      for (const checkbox of this.host.querySelectorAll<HTMLInputElement>(
+        '.neu-tree__checkbox input',
+      )) {
+        checkbox.tabIndex = -1;
+      }
     });
   }
 
@@ -276,6 +320,43 @@ export class NeuTreeComponent {
     this.updateSelection(node, checked);
   }
 
+  navigationIndex(nodeId: string): number {
+    return this.navigationItems().findIndex((item) => item.key === nodeId);
+  }
+
+  tabIndexForNode(node: NeuTreeNode): 0 | -1 {
+    this.reconcileNavigation();
+    return this.navigation.tabIndexFor(this.navigationIndex(node.id));
+  }
+
+  setActiveNode(nodeId: string): void {
+    this.reconcileNavigation();
+    this.navigation.setActiveKey(nodeId);
+  }
+
+  onNodeKeydown(node: NeuTreeNode, event: KeyboardEvent): void {
+    this.reconcileNavigation();
+    this.navigation.setActiveKey(node.id);
+    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction;
+    this.navigation.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });
+    const result = this.navigation.handleKey(event);
+    if (!result.handled) return;
+
+    if (result.action === 'expand' && !this.isRenderedExpanded(node)) {
+      this.toggleNode(node, event);
+      return;
+    }
+    if (result.action === 'collapse' && this.isRenderedExpanded(node)) {
+      this.toggleNode(node, event);
+      return;
+    }
+    if (result.action === 'activate') {
+      this.activateNode(node);
+      return;
+    }
+    this.focusActiveNode();
+  }
+
   private updateSelection(node: NeuTreeNode, checked: boolean): void {
     if (node.disabled || !this.canSelect(node)) {
       return;
@@ -344,5 +425,41 @@ export class NeuTreeComponent {
       }
     }
     return filtered;
+  }
+
+  private reconcileNavigation(): void {
+    this.navigation.setItems(this.navigationItems());
+  }
+
+  private navigationItems(): NeuTreeNavigationItem[] {
+    const flatten = (
+      nodes: readonly NeuTreeNode[],
+      level: number,
+      parentKey?: string,
+    ): NeuTreeNavigationItem[] =>
+      nodes.flatMap((node) => {
+        const expanded = this.isRenderedExpanded(node);
+        return [
+          {
+            key: node.id,
+            label: node.label,
+            level,
+            parentKey,
+            disabled: node.disabled,
+            hasChildren: this.hasChildren(node),
+            expanded,
+          },
+          ...(this.hasChildren(node) && expanded
+            ? flatten(node.children ?? [], level + 1, node.id)
+            : []),
+        ];
+      });
+    return flatten(this.visibleNodes(), 1);
+  }
+
+  private focusActiveNode(): void {
+    this.host
+      .querySelector<HTMLElement>(`[data-neu-tree-index="${this.navigation.index}"]`)
+      ?.focus({ preventScroll: true });
   }
 }
