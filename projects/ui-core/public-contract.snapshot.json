@@ -33,6 +33,7 @@
     "./date-input",
     "./divider",
     "./dock",
+    "./drag-drop",
     "./empty-state",
     "./filter-bar",
     "./focus-trap",
@@ -59,6 +60,7 @@
     "./notification-center",
     "./number-input",
     "./option-api",
+    "./organization-chart",
     "./package.json",
     "./pagination",
     "./panel",
@@ -677,6 +679,28 @@
         "orientation"
       ],
       "outputs": []
+    },
+    "drag-drop/neu-drag-drop.directive.ts": {
+      "selector": "[neuDragDropGroup]",
+      "inputs": [
+        "accept",
+        "ariaLabel",
+        "data",
+        "disabled",
+        "effect",
+        "keyboardEnabled",
+        "role",
+        "scope",
+        "tabIndex"
+      ],
+      "outputs": [
+        "dragEnd",
+        "dragEnter",
+        "dragLeave",
+        "dragMove",
+        "dragStart",
+        "drop"
+      ]
     },
     "empty-state/neu-empty-state.component.ts": {
       "selector": "neu-empty-state",
