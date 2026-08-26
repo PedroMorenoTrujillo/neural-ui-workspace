@@ -25,6 +25,13 @@ NeuralUI is an Angular design system with a coherent Neural visual language, a s
 - `!important` is exceptional: only reduced-motion/forced-colors enforcement, documented third-party overrides, or an unavoidable established contract may use it.
 - Production library code and consumer examples must contain neither `::ng-deep` nor `/deep/`.
 
+### Mobile-first layout
+
+- Base layout targets the smallest supported viewport; progressively enhanced layout uses `min-width` queries where appropriate.
+- Semantic `max-width` behavior remains valid for intrinsic limits, overlays, and content containment.
+- Touch targets remain usable at the supported compact viewports.
+- A component may own horizontal overflow when its semantics require a wider internal surface, such as a data table. Document-level horizontal overflow is never acceptable.
+
 ## CSS and theming contract
 
 The cascade is a public product contract. Consumers theme without private DOM knowledge, `::ng-deep`, or specificity contests:

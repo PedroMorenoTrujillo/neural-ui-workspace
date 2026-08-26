@@ -156,7 +156,8 @@ describe('NeuTable T3 integration', () => {
 
     expect(frozenRow).toBeTruthy();
     expect(frozenRow.querySelector('.name-view')?.getAttribute('data-frozen')).toBe('true');
-    expect(fixture.nativeElement.querySelector('table')?.getAttribute('aria-rowcount')).toBe('3');
+    expect(fixture.nativeElement.querySelector('table')?.hasAttribute('aria-rowcount')).toBe(false);
+    expect(frozenRow.hasAttribute('aria-rowindex')).toBe(false);
 
     table.toggleAll();
     expect(host.selections.at(-1)?.map((row) => row.id)).toEqual([0, 1, 2]);

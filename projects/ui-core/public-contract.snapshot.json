@@ -91,6 +91,7 @@
     "./styles/*",
     "./switch",
     "./table",
+    "./table-core",
     "./tabs",
     "./tag",
     "./tags",
@@ -1572,6 +1573,29 @@
         "disabled",
         "label",
         "name"
+      ],
+      "outputs": []
+    },
+    "table-core/neu-table-core.component.ts": {
+      "selector": "neu-table-core",
+      "inputs": [
+        "bordered",
+        "columns",
+        "data",
+        "density",
+        "emptyMessage",
+        "footerRow",
+        "loading",
+        "roundedBorders",
+        "rowClass",
+        "rowIdentity",
+        "rowKey",
+        "rowTrackBy",
+        "showRowNumbers",
+        "skeletonRows",
+        "stripedRows",
+        "tableAriaLabel",
+        "title"
       ],
       "outputs": []
     },

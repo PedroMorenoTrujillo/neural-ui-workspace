@@ -354,13 +354,19 @@ describe('NeuTable lazy virtual integration', () => {
     ] as HTMLTableRowElement[];
 
     expect(region.getAttribute('aria-busy')).toBe('true');
-    expect(table.getAttribute('aria-rowcount')).toBe('10000');
+    expect(table.getAttribute('aria-rowcount')).toBe('10001');
+    expect(table.querySelector('thead tr')?.getAttribute('aria-rowindex')).toBe('1');
     expect(placeholders).toHaveLength(4);
     expect(placeholders.every((row) => row.getAttribute('aria-hidden') === 'true')).toBe(true);
     expect(placeholders.every((row) => row.querySelector('button,input,[tabindex]') === null)).toBe(
       true,
     );
     expect(loaded.map((row) => row.getAttribute('aria-rowindex'))).toEqual(['2', '3']);
+    expect(
+      loaded.every(
+        (row) => Number(row.getAttribute('aria-rowindex')) <= Number(table.getAttribute('aria-rowcount')),
+      ),
+    ).toBe(true);
     expect(placeholders[0].querySelector('.neu-table__td--frozen-left')).not.toBeNull();
   });
 
@@ -384,6 +390,14 @@ describe('NeuTable lazy virtual integration', () => {
         .querySelector('[data-neu-table-logical-index="50"]')
         ?.getAttribute('aria-rowindex'),
     ).toBe('53');
+    expect(fixture.nativeElement.querySelector('table')?.getAttribute('aria-rowcount')).toBe(
+      '10002',
+    );
+    expect(
+      [...fixture.nativeElement.querySelectorAll('thead tr')].map((row: Element) =>
+        row.getAttribute('aria-rowindex'),
+      ),
+    ).toEqual(['1', '2']);
   });
 
   it('keeps key selection canonical across window replacement and restores projection', async () => {

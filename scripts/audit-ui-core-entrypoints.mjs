@@ -14,6 +14,7 @@ const nonVisualEntryPoints = new Set([
   'testing',
 ]);
 const nonDemoEntryPoints = new Set(['button', 'confirm-dialog', 'toggle-button-group', 'testing']);
+const demoEntryPointOverrides = new Map([['table-core', 'table-demo']]);
 
 function dirs(path) {
   return readdirSync(path)
@@ -93,7 +94,8 @@ if (existsSync(showcasePagesRoot)) {
       continue;
     }
 
-    const demoName = entry === 'modal' ? 'dialog-demo' : `${entry}-demo`;
+    const demoName =
+      demoEntryPointOverrides.get(entry) ?? (entry === 'modal' ? 'dialog-demo' : `${entry}-demo`);
     if (!existsSync(join(showcasePagesRoot, demoName))) {
       violations.push(`ui-core/${entry}: missing showcase demo page ${demoName}`);
     }

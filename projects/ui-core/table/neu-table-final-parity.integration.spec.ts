@@ -337,8 +337,22 @@ describe('NeuTable G01-G16 final parity integration', () => {
     const rows = fixture.nativeElement.querySelectorAll(
       '.neu-table__row[data-neu-table-logical-index]',
     );
-    rows[0].dispatchEvent(new MouseEvent('contextmenu', { bubbles: true }));
+    const disabledPointerEvent = new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+    });
+    rows[0].dispatchEvent(disabledPointerEvent);
     expect(openAt).not.toHaveBeenCalled();
+    expect(disabledPointerEvent.defaultPrevented).toBe(true);
+    const disabledKeyboardEvent = new KeyboardEvent('keydown', {
+      key: 'F10',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    rows[0].dispatchEvent(disabledKeyboardEvent);
+    expect(openAt).not.toHaveBeenCalled();
+    expect(disabledKeyboardEvent.defaultPrevented).toBe(true);
     rows[1].dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 2, clientY: 3 }));
     expect(openAt).toHaveBeenCalledOnce();
   });

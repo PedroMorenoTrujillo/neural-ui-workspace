@@ -211,6 +211,7 @@ import { NeuTableVirtualRetentionController } from './neu-table-virtual-retentio
 import { NeuTableExportController, type NeuTableExportColumn } from './neu-table-export.controller';
 import { NeuTableReorderController } from './neu-table-reorder.controller';
 import { NeuTableRowReorderHandleDirective } from './neu-table-row-reorder-handle.directive';
+import { NeuTableCompatibilityAdapter } from './neu-table-compatibility.adapter';
 
 export type {
   NeuTableAction,
@@ -1071,7 +1072,7 @@ export type NeuTableColumnInput<T extends object> =
                 [ngTemplateOutletContext]="structuralContext()"
               />
             } @else {
-            <tr>
+            <tr [attr.aria-rowindex]="_ariaCoordinatesActive() ? 1 : null">
               <!-- Checkbox de selección global -->
               @if (_expansionEnabled()) {
                 <th class="neu-table__th neu-table__th--expand-col" scope="col"></th>
@@ -1310,7 +1311,10 @@ export type NeuTableColumnInput<T extends object> =
             </tr>
             <!-- ── Fila de filtros de columna / Column filter row ── -->
             @if (_hasFilterableCol()) {
-              <tr class="neu-table__filter-row">
+              <tr
+                class="neu-table__filter-row"
+                [attr.aria-rowindex]="_ariaCoordinatesActive() ? 2 : null"
+              >
                 @if (_expansionEnabled()) {
                   <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
                 }
@@ -2070,6 +2074,7 @@ export type NeuTableColumnInput<T extends object> =
   styleUrl: './neu-table.component.scss',
 })
 export class NeuTableComponent<T extends object = NeuTableRow> {
+  private readonly _compatibility = new NeuTableCompatibilityAdapter();
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _state = new NeuTableStateController<unknown>((change) =>
@@ -2154,6 +2159,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly pagination = input<boolean>(true);
   readonly loading = input<boolean>(false);
   readonly title = input<string>('');
+  /** @deprecated Prefer the typed projected `neuTableToolbar` template. Retained until a future major. */
   readonly toolbarExtraRef = input<TemplateRef<unknown> | null>(null);
   readonly emptyMessage = input<string>('No results found');
   readonly skeletonRows = input<number[]>([1, 2, 3, 4, 5]);
@@ -2189,7 +2195,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     NeuTableFilterTemplateDirective,
   );
   protected readonly _toolbarTemplateRef = computed(
-    () => this.toolbarExtraRef() ?? this.toolbarTemplate()?.templateRef ?? null,
+    () =>
+      this._compatibility.toolbarTemplate(
+        this.toolbarExtraRef(),
+        this.toolbarTemplate()?.templateRef ?? null,
+      ),
   );
 
   // ── Inputs de funcionalidad ──────────────────────────────────────────
@@ -2249,6 +2259,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly globalFilterFields = input<readonly NeuTableGlobalFilterField<T>[] | undefined>(
     undefined,
   );
+  /** @deprecated Prefer `selectionMode="multiple"`. Retained until a future major. */
   readonly selectable = input<boolean>(false);
   /** Typed selection supersedes legacy selectable=true, which remains multiple mode. */
   readonly selectionMode = input<NeuTableSelectionMode>('none');
@@ -2404,6 +2415,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly rowDblClick = output<T>();
   readonly actionClick = output<NeuTableActionEvent<T>>();
   readonly selectionActionClick = output<NeuTableSelectionActionEvent<T>>();
+  /** @deprecated Prefer the canonical aggregate `queryChange`. Retained until a future major. */
   readonly serverStateChange = output<NeuTableServerState>();
   /** One immutable canonical proposal per semantic query action. */
   readonly queryChange = output<NeuTableQueryState>();
@@ -4315,12 +4327,30 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return cols;
   });
 
-  readonly _ariaRowCount = computed(() => this._logicalTotalItems() + this._frozenRows().length);
+  protected readonly _ariaHeaderRowCount = computed(() => (this._hasFilterableCol() ? 2 : 1));
 
-  protected bodyAriaRowIndex(entry: Extract<NeuTablePageEntry<T>, { kind: 'row' }>): number {
-    const headerRows = this._hasFilterableCol() ? 2 : 1;
+  /**
+   * Native tables already expose complete row coordinates. Explicit ARIA is
+   * reserved for the incomplete virtual DOM where logical rows are absent.
+   * Custom grouped headers opt out because their row count is consumer-owned.
+   */
+  protected readonly _ariaCoordinatesActive = computed(
+    () =>
+      (this._virtualScrollActive() || this._lazyVirtualActive()) && !this.headerGroupTemplate(),
+  );
+
+  readonly _ariaRowCount = computed<number | null>(() =>
+    this._ariaCoordinatesActive()
+      ? this._ariaHeaderRowCount() + this._frozenRows().length + this._logicalTotalItems()
+      : null,
+  );
+
+  protected bodyAriaRowIndex(
+    entry: Extract<NeuTablePageEntry<T>, { kind: 'row' }>,
+  ): number | null {
+    if (!this._ariaCoordinatesActive()) return null;
     return (
-      headerRows +
+      this._ariaHeaderRowCount() +
       1 +
       (entry.frozen ? entry.logicalIndex : this._frozenRows().length + entry.logicalIndex)
     );
@@ -4896,8 +4926,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _selectionConfirmPending = signal<string | null>(null);
 
   private readonly effectiveSelectionMode = computed<NeuTableSelectionMode>(() => {
-    const mode = this.selectionMode();
-    return mode !== 'none' ? mode : this.selectable() ? 'multiple' : 'none';
+    return this._compatibility.selectionMode(this.selectionMode(), this.selectable());
   });
   protected readonly selectionEnabled = computed(() => this.effectiveSelectionMode() !== 'none');
   protected readonly multipleSelection = computed(
@@ -5257,11 +5286,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   protected onRowContextMenu(row: T, index: number, event: MouseEvent): void {
     const menu = this.contextMenu();
-    if (
-      !menu ||
-      this.contextMenuRowDisabled()?.(row, index) === true ||
-      this._eventOriginatesFromInteractiveDescendant(event)
-    ) {
+    if (!menu || this._eventOriginatesFromInteractiveDescendant(event)) return;
+    if (this.contextMenuRowDisabled()?.(row, index) === true) {
+      event.preventDefault();
+      event.stopPropagation();
       return;
     }
     event.preventDefault();
@@ -5283,7 +5311,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _openRowContextMenuFromKeyboard(row: T, event: KeyboardEvent): void {
     const menu = this.contextMenu();
     const logicalIndex = this._logicalRowIndex(row);
-    if (!menu || this.contextMenuRowDisabled()?.(row, logicalIndex) === true) return;
+    if (!menu) return;
+    if (this.contextMenuRowDisabled()?.(row, logicalIndex) === true) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     const origin = event.currentTarget as HTMLElement;
     const rect = origin.getBoundingClientRect();
     event.preventDefault();
