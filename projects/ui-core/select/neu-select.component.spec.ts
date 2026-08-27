@@ -747,6 +747,7 @@ describe('NeuSelectComponent', () => {
     comp.isOpen.set(true);
     comp.onWindowResize();
     comp.onWindowScroll();
+    await new Promise((resolve) => setTimeout(resolve, 20));
     expect(syncSpy).toHaveBeenCalledTimes(2);
   });
 

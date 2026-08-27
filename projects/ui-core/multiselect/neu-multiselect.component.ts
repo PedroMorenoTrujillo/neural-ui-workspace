@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ContentChild,
+  DestroyRef,
   ElementRef,
   PLATFORM_ID,
   Signal,
@@ -49,19 +50,25 @@ import {
   ɵInternalNeuOptionLazyRequestSequencer as InternalNeuOptionLazyRequestSequencer,
   ɵInternalNeuOptionNormalizedRow as InternalNeuOptionNormalizedRow,
   ɵInternalNeuOptionRow as InternalNeuOptionRow,
+  ɵINTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS as INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS,
+  ɵInternalNeuConnectedOverlayCloseIntent as InternalNeuConnectedOverlayCloseIntent,
+  ɵInternalNeuConnectedOverlayCloseReason as InternalNeuConnectedOverlayCloseReason,
+  ɵInternalNeuConnectedOverlaySession as InternalNeuConnectedOverlaySession,
+  ɵInternalNeuOptionActiveRowController as InternalNeuOptionActiveRowController,
+  ɵInternalNeuOptionActiveRowResult as InternalNeuOptionActiveRowResult,
+  ɵInternalNeuOptionTypeaheadController as InternalNeuOptionTypeaheadController,
+  ɵconstrainNeuConnectedOverlayGeometry as constrainNeuConnectedOverlayGeometry,
   ɵcreateNeuOptionLazyRequest as createNeuOptionLazyRequest,
   ɵcreateNeuOptionLoadingRows as createNeuOptionLoadingRows,
+  ɵderiveNeuOptionActiveDescendant as deriveNeuOptionActiveDescendant,
+  ɵderiveNeuOptionAnnouncementData as deriveNeuOptionAnnouncementData,
+  ɵderiveNeuOptionAriaPosition as deriveNeuOptionAriaPosition,
   ɵderiveNeuOptionRowId as deriveNeuOptionRowId,
   ɵfilterNeuOptionRows as filterNeuOptionRows,
-  ɵfindNeuOptionBoundaryRow as findNeuOptionBoundaryRow,
-  ɵfindNeuOptionTypeaheadRow as findNeuOptionTypeaheadRow,
-  ɵmoveNeuOptionActiveRow as moveNeuOptionActiveRow,
   ɵnormalizeNeuLegacyOptionGroups as normalizeNeuLegacyOptionGroups,
   ɵnormalizeNeuOptionGroups as normalizeNeuOptionGroups,
   ɵnormalizeNeuOptionLazyWindow as normalizeNeuOptionLazyWindow,
   ɵnormalizeNeuOptionRows as normalizeNeuOptionRows,
-  ɵpageNeuOptionActiveRow as pageNeuOptionActiveRow,
-  ɵreconcileNeuOptionActiveRow as reconcileNeuOptionActiveRow,
 } from '@neural-ui/core/option-api';
 import { NeuSelectOption } from '@neural-ui/core/select';
 import {
@@ -209,12 +216,24 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
             </span>
           } @else {
             @for (val of _visibleChips(); track val) {
-              <span class="neu-multiselect__chip" tabindex="0" (keydown)="onTokenKeydown(val, $event)">
+              <span
+                class="neu-multiselect__chip"
+                tabindex="0"
+                (keydown)="onTokenKeydown(val, $event)"
+              >
                 @if (tokenTpl(); as selectedTpl) {
-                  <ng-container [ngTemplateOutlet]="selectedTpl.templateRef" [ngTemplateOutletContext]="selectedContext(val, $index)" />
+                  <ng-container
+                    [ngTemplateOutlet]="selectedTpl.templateRef"
+                    [ngTemplateOutletContext]="selectedContext(val, $index)"
+                  />
                 } @else if (selectedItemTpl(); as selectedTpl) {
-                  <ng-container [ngTemplateOutlet]="selectedTpl.templateRef" [ngTemplateOutletContext]="selectedContext(val, $index)" />
-                } @else { {{ labelFor(val) }} }
+                  <ng-container
+                    [ngTemplateOutlet]="selectedTpl.templateRef"
+                    [ngTemplateOutletContext]="selectedContext(val, $index)"
+                  />
+                } @else {
+                  {{ labelFor(val) }}
+                }
                 @if (!readonly() && !isDisabledFinal() && !loading()) {
                   <button
                     class="neu-multiselect__chip-remove"
@@ -223,9 +242,23 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
                     (click)="removeValue(val, $event)"
                   >
                     @if (tokenRemoveIconTpl(); as removeIcon) {
-                      <ng-container [ngTemplateOutlet]="removeIcon.templateRef" [ngTemplateOutletContext]="{ open: isOpen(), disabled: isDisabledFinal(), readonly: readonly() }" />
+                      <ng-container
+                        [ngTemplateOutlet]="removeIcon.templateRef"
+                        [ngTemplateOutletContext]="{
+                          open: isOpen(),
+                          disabled: isDisabledFinal(),
+                          readonly: readonly(),
+                        }"
+                      />
                     } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
@@ -243,7 +276,13 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
         </span>
 
         <!-- Clear button -->
-        @if ((clearable() || showClear()) && _values().length > 0 && !isDisabledFinal() && !readonly() && !loading()) {
+        @if (
+          (clearable() || showClear()) &&
+          _values().length > 0 &&
+          !isDisabledFinal() &&
+          !readonly() &&
+          !loading()
+        ) {
           <button
             class="neu-multiselect__clear"
             type="button"
@@ -251,9 +290,23 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
             (click)="clearAll($event)"
           >
             @if (clearIconTpl(); as clearIcon) {
-              <ng-container [ngTemplateOutlet]="clearIcon.templateRef" [ngTemplateOutletContext]="{ open: isOpen(), disabled: isDisabledFinal(), readonly: readonly() }" />
+              <ng-container
+                [ngTemplateOutlet]="clearIcon.templateRef"
+                [ngTemplateOutletContext]="{
+                  open: isOpen(),
+                  disabled: isDisabledFinal(),
+                  readonly: readonly(),
+                }"
+              />
             } @else {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -263,11 +316,30 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
 
         <!-- Chevron -->
         @if (loading() && loadingIconTpl(); as loadingIcon) {
-          <span class="neu-multiselect__loading-icon"><ng-container [ngTemplateOutlet]="loadingIcon.templateRef" /></span>
+          <span class="neu-multiselect__loading-icon"
+            ><ng-container [ngTemplateOutlet]="loadingIcon.templateRef"
+          /></span>
         } @else if (dropdownIconTpl(); as dropdownIcon) {
-          <span class="neu-multiselect__chevron"><ng-container [ngTemplateOutlet]="dropdownIcon.templateRef" [ngTemplateOutletContext]="{ open: isOpen(), disabled: isDisabledFinal(), readonly: readonly() }" /></span>
+          <span class="neu-multiselect__chevron"
+            ><ng-container
+              [ngTemplateOutlet]="dropdownIcon.templateRef"
+              [ngTemplateOutletContext]="{
+                open: isOpen(),
+                disabled: isDisabledFinal(),
+                readonly: readonly(),
+              }"
+          /></span>
         } @else {
-          <svg class="neu-multiselect__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg
+            class="neu-multiselect__chevron"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <polyline points="6 9 12 15 18 9" />
           </svg>
         }
@@ -295,6 +367,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
           [id]="_panelId + '-overlay'"
           [style.width]="panelPosition().width"
           [style.max-height]="panelPosition().maxHeight"
+          (keydown)="onPanelKeyDown($event)"
         >
           @if (headerTpl(); as header) {
             <ng-container [ngTemplateOutlet]="header.templateRef" />
@@ -303,10 +376,15 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
           @if (effectiveFilterEnabled()) {
             <div class="neu-multiselect__search">
               @if (filterTpl(); as filterTemplate) {
-                <ng-container [ngTemplateOutlet]="filterTemplate.templateRef" [ngTemplateOutletContext]="filterContext()" />
+                <ng-container
+                  [ngTemplateOutlet]="filterTemplate.templateRef"
+                  [ngTemplateOutletContext]="filterContext()"
+                />
               } @else {
                 @if (filterIconTpl(); as filterIcon) {
-                  <span class="neu-multiselect__filter-icon"><ng-container [ngTemplateOutlet]="filterIcon.templateRef" /></span>
+                  <span class="neu-multiselect__filter-icon"
+                    ><ng-container [ngTemplateOutlet]="filterIcon.templateRef"
+                  /></span>
                 }
                 <input
                   class="neu-multiselect__search-input"
@@ -330,7 +408,9 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
               [disabled]="isDisabledFinal() || readonly() || loading()"
               (click)="toggleAllFiltered($event)"
             >
-              {{ (selectAllState() ?? allFilteredSelected()) ? unselectAllLabel() : selectAllLabel() }}
+              {{
+                (selectAllState() ?? allFilteredSelected()) ? unselectAllLabel() : selectAllLabel()
+              }}
             </button>
           }
 
@@ -351,7 +431,10 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
               @if (row.kind === 'group') {
                 <div class="neu-multiselect__group" role="presentation" [id]="optionRowId(row)">
                   @if (groupTpl(); as groupTemplate) {
-                    <ng-container [ngTemplateOutlet]="groupTemplate.templateRef" [ngTemplateOutletContext]="groupContext($any(row))" />
+                    <ng-container
+                      [ngTemplateOutlet]="groupTemplate.templateRef"
+                      [ngTemplateOutletContext]="groupContext($any(row))"
+                    />
                   } @else {
                     {{ row.label }}
                   }
@@ -359,7 +442,10 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
               } @else if (row.kind === 'loading') {
                 <div class="neu-multiselect__loader" role="status" [id]="optionRowId(row)">
                   @if (loaderTpl(); as loaderTemplate) {
-                    <ng-container [ngTemplateOutlet]="loaderTemplate.templateRef" [ngTemplateOutletContext]="loaderContext($any(row))" />
+                    <ng-container
+                      [ngTemplateOutlet]="loaderTemplate.templateRef"
+                      [ngTemplateOutletContext]="loaderContext($any(row))"
+                    />
                   } @else {
                     {{ loadingLabel() }}
                   }
@@ -367,14 +453,16 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
               } @else {
                 <div
                   class="neu-multiselect__option"
-                  [class.neu-multiselect__option--selected]="highlightOnSelect() && isOptionSelected(row.option)"
+                  [class.neu-multiselect__option--selected]="
+                    highlightOnSelect() && isOptionSelected(row.option)
+                  "
                   [class.neu-multiselect__option--active]="activeRow() === row"
                   [class.neu-multiselect__option--disabled]="row.disabled"
                   role="option"
                   [id]="optionRowId(row)"
                   [attr.aria-selected]="isOptionSelected(row.option)"
                   [attr.aria-disabled]="row.disabled ? 'true' : null"
-                  [attr.aria-posinset]="row.logicalIndex + 1"
+                  [attr.aria-posinset]="optionAriaPosition(row)"
                   [attr.aria-setsize]="logicalTotal()"
                   [attr.tabindex]="row.disabled ? null : '-1'"
                   (click)="toggleOption(row.option, $event)"
@@ -389,17 +477,43 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
                     [class.neu-multiselect__checkbox--checked]="isOptionSelected(row.option)"
                   >
                     @if (checkboxTpl(); as checkboxTemplate) {
-                      <ng-container [ngTemplateOutlet]="checkboxTemplate.templateRef" [ngTemplateOutletContext]="{ open: isOpen(), disabled: row.disabled, readonly: readonly() }" />
+                      <ng-container
+                        [ngTemplateOutlet]="checkboxTemplate.templateRef"
+                        [ngTemplateOutletContext]="{
+                          open: isOpen(),
+                          disabled: row.disabled,
+                          readonly: readonly(),
+                        }"
+                      />
                     } @else if (checkmark() && checkmarkTpl(); as checkmarkTemplate) {
-                      <ng-container [ngTemplateOutlet]="checkmarkTemplate.templateRef" [ngTemplateOutletContext]="{ open: isOpen(), disabled: row.disabled, readonly: readonly() }" />
+                      <ng-container
+                        [ngTemplateOutlet]="checkmarkTemplate.templateRef"
+                        [ngTemplateOutletContext]="{
+                          open: isOpen(),
+                          disabled: row.disabled,
+                          readonly: readonly(),
+                        }"
+                      />
                     } @else {
-                      <svg class="neu-multiselect__checkbox-check" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <svg
+                        class="neu-multiselect__checkbox-check"
+                        viewBox="0 0 12 10"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
                         <polyline points="1 5 4.5 9 11 1" />
                       </svg>
                     }
                   </span>
                   @if (itemTpl(); as itemTemplate) {
-                    <ng-container [ngTemplateOutlet]="itemTemplate.templateRef" [ngTemplateOutletContext]="optionRowContext(row)" />
+                    <ng-container
+                      [ngTemplateOutlet]="itemTemplate.templateRef"
+                      [ngTemplateOutletContext]="optionRowContext(row)"
+                    />
                   } @else {
                     {{ optionLabelOf(row.option) }}
                   }
@@ -438,7 +552,13 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
               } @else if (!effectiveFilterValue() && emptyTpl(); as emptyTemplate) {
                 <ng-container [ngTemplateOutlet]="emptyTemplate.templateRef" />
               } @else {
-                <div class="neu-multiselect__empty">{{ effectiveFilterValue() ? emptyFilterMessage() || noResultsMessage() : emptyMessage() }}</div>
+                <div class="neu-multiselect__empty">
+                  {{
+                    effectiveFilterValue()
+                      ? emptyFilterMessage() || noResultsMessage()
+                      : emptyMessage()
+                  }}
+                </div>
               }
             }
           </div>
@@ -446,9 +566,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
           <!-- Footer: resumen + limpiar + toggle modo -->
           @if (_values().length > 0) {
             <div class="neu-multiselect__footer">
-              <span class="neu-multiselect__footer-count"
-                >{{ selectedItemsLabelText() }}</span
-              >
+              <span class="neu-multiselect__footer-count">{{ selectedItemsLabelText() }}</span>
               <div class="neu-multiselect__footer-actions">
                 <button
                   class="neu-multiselect__footer-mode"
@@ -470,7 +588,9 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
               </div>
             </div>
           }
-          @if (footerTpl()) { <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" /> }
+          @if (footerTpl()) {
+            <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+          }
         </div>
       </ng-template>
 
@@ -505,12 +625,11 @@ export class NeuMultiselectComponent<
   V = NeuOptionValue<T>,
   G = unknown,
   I = unknown,
->
-  implements ControlValueAccessor
-{
+> implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _document = inject(DOCUMENT);
   private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _destroyRef = inject(DestroyRef);
   private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
   readonly _viewportMargin = 16;
@@ -528,6 +647,14 @@ export class NeuMultiselectComponent<
   }
 
   constructor() {
+    this._destroyRef.onDestroy(() => {
+      this.pendingOverlayFrameActions = [];
+      this.cancelAutofocusFrame();
+      this.cancelFocusRestorationFrame();
+      this.activeRowController.dispose();
+      this.typeaheadController.dispose();
+      this.overlaySession.dispose();
+    });
     effect(() => {
       const param = this.urlParam();
       if (!param) return;
@@ -549,12 +676,21 @@ export class NeuMultiselectComponent<
     });
     effect(() => {
       const rows = this.filteredRows();
-      const open = this.isOpen();
-      if (!open) return;
-      const current = untracked(() => this.activeRow());
-      const logicalIndex = current?.kind === 'option' ? current.logicalIndex : null;
-      const next = reconcileNeuOptionActiveRow(rows, logicalIndex);
-      untracked(() => this.activeRowIndex.set(next));
+      untracked(() => {
+        this.adoptActiveSignal();
+        this.typeaheadController.setRows(rows);
+        this.applyActiveRow(this.activeRowController.setRows(rows));
+      });
+    });
+    effect(() => {
+      const locale = this.filterLocale();
+      if (locale === this.typeaheadLocale) return;
+      untracked(() => {
+        this.typeaheadController.dispose();
+        this.typeaheadLocale = locale;
+        this.typeaheadController = this.createTypeaheadController();
+        this.typeaheadController.setRows(this.filteredRows());
+      });
     });
     effect(() => {
       if (this.isDisabledFinal() && this.isOpen()) {
@@ -570,7 +706,7 @@ export class NeuMultiselectComponent<
     });
     effect(() => {
       if (this.autofocus() && !this.isDisabledFinal()) {
-        untracked(() => this._requestFrame(() => this.focusTrigger()));
+        untracked(() => this.requestAutofocusFrame());
       }
     });
   }
@@ -752,39 +888,29 @@ export class NeuMultiselectComponent<
   readonly _chipMode = signal<'chips' | 'count'>('count');
   private readonly lazySequencer = new InternalNeuOptionLazyRequestSequencer();
   private lastLazyRequestKey = '';
-  private typeaheadQuery = '';
-  private typeaheadTimestamp = 0;
-  private restoreFocusOnClose = true;
-  readonly overlayPositions: ConnectedPosition[] = [
-    {
-      originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetY: 6,
+  private readonly activeRowController = new InternalNeuOptionActiveRowController<T, G | string>(
+    [],
+    { requestScrollOnChange: true },
+  );
+  private typeaheadLocale = this.filterLocale();
+  private typeaheadController = this.createTypeaheadController();
+  private pendingOverlayFrameActions: Array<() => void> = [];
+  private autofocusFrameId: number | null = null;
+  private focusRestorationFrameId: number | null = null;
+  private readonly overlaySession = new InternalNeuConnectedOverlaySession<HTMLElement>({
+    frameScheduler: {
+      request: (callback) => this._document.defaultView?.requestAnimationFrame(callback) ?? -1,
+      cancel: (frameId) => this._document.defaultView?.cancelAnimationFrame(frameId),
     },
-    {
-      originX: 'start',
-      originY: 'top',
-      overlayX: 'start',
-      overlayY: 'bottom',
-      offsetY: -6,
-    },
-    {
-      originX: 'end',
-      originY: 'bottom',
-      overlayX: 'end',
-      overlayY: 'top',
-      offsetY: 6,
-    },
-    {
-      originX: 'end',
-      originY: 'top',
-      overlayX: 'end',
-      overlayY: 'bottom',
-      offsetY: -6,
-    },
-  ];
+    isOriginConnected: (origin) => origin.isConnected,
+    onRefresh: () => this.runOverlayFrame(),
+  });
+  readonly overlayPositions: ConnectedPosition[] = INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS.map(
+    (position) => ({
+      ...position,
+      offsetY: position.originY === 'bottom' ? 6 : -6,
+    }),
+  );
   readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
   readonly panelPosition = signal<{
     position: string | null;
@@ -870,11 +996,7 @@ export class NeuMultiselectComponent<
         this.lazyFirst(),
       );
     }
-    return normalizeNeuOptionRows(
-      this.options(),
-      this.optionDisabled(),
-      this.lazyFirst(),
-    );
+    return normalizeNeuOptionRows(this.options(), this.optionDisabled(), this.lazyFirst());
   });
 
   readonly filteredRows = computed(() =>
@@ -905,7 +1027,9 @@ export class NeuMultiselectComponent<
   readonly filteredOptions = computed(() => this.optionRows().map((row) => row.option));
 
   readonly allFilteredSelected = computed(() => {
-    const enabled = this.optionRows().filter((row) => !row.disabled).map((row) => row.option);
+    const enabled = this.optionRows()
+      .filter((row) => !row.disabled)
+      .map((row) => row.option);
     return enabled.length > 0 && enabled.every((option) => this.isOptionSelected(option));
   });
 
@@ -914,7 +1038,11 @@ export class NeuMultiselectComponent<
       return '';
     }
 
-    const total = this.filteredOptions().length;
+    const total = deriveNeuOptionAnnouncementData(
+      this.filteredRows(),
+      this.activeRowIndex(),
+      (option) => this.optionLabelOf(option),
+    ).resultCount;
     if (!total) {
       return this.noResultsMessage();
     }
@@ -963,18 +1091,15 @@ export class NeuMultiselectComponent<
   });
 
   readonly trackByOptionValue = (_index: number, option: T) => this.optionValueOf(option);
-  readonly trackByRow = (
-    _index: number,
-    row: InternalNeuOptionNormalizedRow<T, G | string>,
-  ) => this.optionRowId(row);
+  readonly trackByRow = (_index: number, row: InternalNeuOptionNormalizedRow<T, G | string>) =>
+    this.optionRowId(row);
   readonly logicalTotal = computed(() =>
     Math.max(this.totalRecords() ?? this.optionRows().length, this.optionRows().length),
   );
   readonly activeRow = computed(() => this.filteredRows()[this.activeRowIndex()] ?? null);
   readonly activeDescendantId = computed(() => {
-    const row = this.activeRow();
-    return row?.kind === 'option' && !row.disabled && this.isOpen()
-      ? deriveNeuOptionRowId(this._panelId, row)
+    return this.isOpen()
+      ? deriveNeuOptionActiveDescendant(this._panelId, this.filteredRows(), this.activeRowIndex())
       : null;
   });
 
@@ -1107,13 +1232,15 @@ export class NeuMultiselectComponent<
     reason: NeuMultiselectOverlayEvent['reason'] = 'programmatic',
   ): void {
     if (this.isDisabledFinal() || this.isOpen()) return;
+    this.cancelFocusRestorationFrame();
+    if (!this.overlaySession.open(this.effectiveTriggerElement())) return;
     this.syncPanelPosition();
-    this.restoreFocusOnClose = true;
     this.isOpen.set(true);
-    this.activeRowIndex.set(findNeuOptionBoundaryRow(this.filteredRows(), 'first'));
+    this.activeRowController.setRows(this.filteredRows());
+    this.applyActiveRow(this.activeRowController.first());
     this.onPanelShow.emit({ originalEvent: event, reason });
     this.requestLazy('initial', this.lazyFirst(), this.lazyFirst() + this.effectiveVisibleItems());
-    this._requestFrame(() => {
+    this.requestOverlayFrame(() => {
       if (this.effectiveFilterEnabled() && this.autofocusFilter()) {
         this.elementRef.nativeElement
           .querySelector<HTMLInputElement>('.neu-multiselect__search-input')
@@ -1130,17 +1257,28 @@ export class NeuMultiselectComponent<
     restoreFocus = true,
   ): void {
     if (!this.isOpen()) return;
+    this.adoptOverlaySignal();
+    const intent = this.overlaySession.close(this.overlayCloseReason(reason), restoreFocus);
+    this.finishHide(intent, event, reason);
+  }
+
+  private finishHide(
+    intent: InternalNeuConnectedOverlayCloseIntent<HTMLElement>,
+    event: Event | null,
+    reason: NeuMultiselectOverlayEvent['reason'],
+  ): void {
+    if (!intent.closed) return;
+    this.pendingOverlayFrameActions = [];
     this.isOpen.set(false);
-    this.activeRowIndex.set(-1);
+    this.applyActiveRow(this.activeRowController.clear());
+    this.typeaheadController.reset();
     if (this.resetFilterOnHide() || this.filterValue() == null) {
       this.resetFilter(this.resetFilterOnHide(), event);
     }
     this.resetPanelPosition();
     this.onPanelHide.emit({ originalEvent: event, reason });
     this._onTouched();
-    if (restoreFocus && this.restoreFocusOnClose) {
-      this._requestFrame(() => this.focusTrigger());
-    }
+    this.requestFocusRestoration(intent.focusRestoration);
   }
 
   /** Abre el panel y mueve el foco al primer item / Opens the panel and moves focus to the first item */
@@ -1172,12 +1310,14 @@ export class NeuMultiselectComponent<
   /** Navega entre opciones con flechas / Navigates between options with arrows */
   focusOptionByIndex(event: Event, current: T, dir: 1 | -1): void {
     event.preventDefault();
-    const opts = this.filteredOptions().filter((option) => !this.isOptionDisabled(option));
-    const idx = opts.indexOf(current);
-    const next = opts[(idx + dir + opts.length) % opts.length];
-    if (next) {
-      this.focusOption(next);
-    }
+    const rowIndex = this.filteredRows().findIndex(
+      (row) => row.kind === 'option' && row.option === current,
+    );
+    if (rowIndex !== -1) this.activeRowController.activate(rowIndex);
+    const result =
+      dir === 1 ? this.activeRowController.next(true) : this.activeRowController.previous(true);
+    this.applyActiveRow(result);
+    if (result.row) this.focusOption(result.row.option);
   }
 
   close(event: Event | null = null): void {
@@ -1220,7 +1360,9 @@ export class NeuMultiselectComponent<
   protected toggleAllFiltered(event: MouseEvent): void {
     event.stopPropagation();
     if (!this.canMutate()) return;
-    const enabled = this.optionRows().filter((row) => !row.disabled).map((row) => row.option);
+    const enabled = this.optionRows()
+      .filter((row) => !row.disabled)
+      .map((row) => row.option);
     let next = [...this._values()];
     if (this.allFilteredSelected()) {
       const enabledValues = enabled.map((option) => this.optionValueOf(option));
@@ -1256,7 +1398,8 @@ export class NeuMultiselectComponent<
       filter: value,
       controlled: this.filterValue() != null,
     });
-    this.activeRowIndex.set(findNeuOptionBoundaryRow(this.filteredRows(), 'first'));
+    this.activeRowController.setRows(this.filteredRows());
+    this.applyActiveRow(this.activeRowController.first());
     this.requestLazy('filter', this.lazyFirst(), this.lazyFirst() + this.effectiveVisibleItems());
   }
 
@@ -1277,13 +1420,11 @@ export class NeuMultiselectComponent<
     if (event.defaultPrevented) return;
     if (event.target !== event.currentTarget || this.isDisabledFinal()) return;
     if (event.key === 'Escape' && this.isOpen()) {
-      event.preventDefault();
-      this.hide(event, 'escape');
+      this.handleOverlayKey(event, 'escape');
       return;
     }
     if (event.key === 'Tab' && this.isOpen()) {
-      this.restoreFocusOnClose = false;
-      this.hide(event, 'tab', false);
+      this.handleOverlayKey(event, 'tab');
       return;
     }
     if (!this.isOpen() && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
@@ -1304,33 +1445,19 @@ export class NeuMultiselectComponent<
         break;
       case 'Home':
         event.preventDefault();
-        this.setActiveRow(findNeuOptionBoundaryRow(this.filteredRows(), 'first'));
+        this.setActiveRow(this.activeRowController.first());
         break;
       case 'End':
         event.preventDefault();
-        this.setActiveRow(findNeuOptionBoundaryRow(this.filteredRows(), 'last'));
+        this.setActiveRow(this.activeRowController.last());
         break;
       case 'PageDown':
         event.preventDefault();
-        this.setActiveRow(
-          pageNeuOptionActiveRow(
-            this.filteredRows(),
-            this.activeRowIndex(),
-            1,
-            this.effectiveVisibleItems(),
-          ),
-        );
+        this.setActiveRow(this.activeRowController.page(1, this.effectiveVisibleItems()));
         break;
       case 'PageUp':
         event.preventDefault();
-        this.setActiveRow(
-          pageNeuOptionActiveRow(
-            this.filteredRows(),
-            this.activeRowIndex(),
-            -1,
-            this.effectiveVisibleItems(),
-          ),
-        );
+        this.setActiveRow(this.activeRowController.page(-1, this.effectiveVisibleItems()));
         break;
       case 'Enter':
       case ' ':
@@ -1342,8 +1469,13 @@ export class NeuMultiselectComponent<
     }
   }
 
+  protected onPanelKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') this.handleOverlayKey(event, 'escape');
+    else if (event.key === 'Tab') this.handleOverlayKey(event, 'tab');
+  }
+
   onOptionHover(rowIndex: number): void {
-    if (this.focusOnHover()) this.setActiveRow(rowIndex, false);
+    if (this.focusOnHover()) this.setActiveRow(this.activeRowController.activate(rowIndex), false);
   }
 
   onInputFocus(event: FocusEvent): void {
@@ -1392,6 +1524,16 @@ export class NeuMultiselectComponent<
 
   optionRowId(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
     return deriveNeuOptionRowId(this._panelId, row);
+  }
+
+  protected optionAriaPosition(row: InternalNeuOptionRow<T>): number {
+    const rowIndex = this.filteredRows().indexOf(row);
+    return (
+      deriveNeuOptionAriaPosition(this.filteredRows(), rowIndex, {
+        logicalOffset: this.lazyFirst(),
+        totalSize: this.logicalTotal(),
+      })?.posInSet ?? row.logicalIndex + 1
+    );
   }
 
   optionRowContext(row: InternalNeuOptionRow<T>) {
@@ -1485,11 +1627,7 @@ export class NeuMultiselectComponent<
     return !this.isDisabledFinal() && !this.readonly() && !this.loading();
   }
 
-  private removeSelectionValue(
-    value: V,
-    event: Event | null,
-    source: 'option' | 'token',
-  ): void {
+  private removeSelectionValue(value: V, event: Event | null, source: 'option' | 'token'): void {
     if (!this.canMutate() || !this.isSelected(value)) return;
     const option = this.optionFor(value);
     const next = this._values().filter((current) => !this.valuesEqual(current, value));
@@ -1524,14 +1662,18 @@ export class NeuMultiselectComponent<
 
   private moveActive(event: Event, direction: -1 | 1): void {
     event.preventDefault();
+    this.adoptActiveSignal();
     this.setActiveRow(
-      moveNeuOptionActiveRow(this.filteredRows(), this.activeRowIndex(), direction, true),
+      direction === 1
+        ? this.activeRowController.next(true)
+        : this.activeRowController.previous(true),
     );
   }
 
-  private setActiveRow(index: number, focus = true): void {
+  private setActiveRow(result: InternalNeuOptionActiveRowResult<T, number>, focus = true): void {
+    const index = result.rowIndex;
     if (index < 0) return;
-    this.activeRowIndex.set(index);
+    this.applyActiveRow(result);
     const row = this.filteredRows()[index];
     if (row?.kind === 'option' && this.selectOnFocus() && !this.isOptionSelected(row.option)) {
       this.toggleOption(row.option);
@@ -1546,22 +1688,15 @@ export class NeuMultiselectComponent<
 
   private handleTypeahead(event: KeyboardEvent): void {
     if (event.ctrlKey || event.metaKey || event.altKey || event.key.length !== 1) return;
-    const now = Date.now();
-    this.typeaheadQuery = now - this.typeaheadTimestamp > 700
-      ? event.key
-      : `${this.typeaheadQuery}${event.key}`;
-    this.typeaheadTimestamp = now;
-    const index = findNeuOptionTypeaheadRow(
-      this.filteredRows(),
-      this.typeaheadQuery,
-      this.activeRowIndex(),
-      this.optionLabel(),
-      this.filterLocale(),
-    );
+    this.adoptActiveSignal();
+    const index = this.typeaheadController.type(
+      event.key,
+      this.activeRowController.activeRowIndex,
+    ).rowIndex;
     if (index >= 0) {
       event.preventDefault();
       if (!this.isOpen()) this.show(event, 'keyboard');
-      this.setActiveRow(index);
+      this.setActiveRow(this.activeRowController.activate(index));
     }
   }
 
@@ -1570,11 +1705,7 @@ export class NeuMultiselectComponent<
     if (row?.kind === 'option') this.focusOption(row.option);
   }
 
-  private requestLazy(
-    reason: NeuOptionLazyRequest['reason'],
-    first: number,
-    end: number,
-  ): void {
+  private requestLazy(reason: NeuOptionLazyRequest['reason'], first: number, end: number): void {
     if (!this.lazy()) return;
     const window = normalizeNeuOptionLazyWindow(first, end);
     const key = `${reason}:${window.first}:${window.end}:${this.effectiveFilterValue()}`;
@@ -1597,82 +1728,78 @@ export class NeuMultiselectComponent<
   }
 
   onDocumentClick(event: MouseEvent): void {
+    this.adoptOverlaySignal();
     const target = event.target as Element | null;
     const isInsideHost = this.elementRef.nativeElement.contains(target);
     const isInsidePanel = !!target?.closest('.neu-multiselect__panel');
-    if (!isInsideHost && !isInsidePanel) {
-      this.hide(event, 'outside');
-    }
+    const intent = this.overlaySession.handleOutsideInteraction(isInsideHost, isInsidePanel);
+    if (intent) this.finishHide(intent, event, 'outside');
   }
 
   onWindowResize(): void {
-    if (this.isOpen()) {
-      this.syncPanelPosition();
-    }
+    if (this.adoptOverlaySignal()) this.syncPanelPosition();
+    else this.overlaySession.refreshOnResize();
   }
 
   onWindowScroll(): void {
-    if (this.isOpen()) {
-      this.syncPanelPosition();
-    }
+    if (this.adoptOverlaySignal()) this.syncPanelPosition();
+    else this.overlaySession.refreshOnScroll();
   }
 
-  private syncPanelPosition(): void {
+  private syncPanelPosition(scheduleViewportCheck = true): void {
     if (!isPlatformBrowser(this._platformId)) return;
+    const view = this._document.defaultView;
+    if (!view) return;
     const trigger = this.elementRef.nativeElement.querySelector<HTMLElement>(
       '.neu-multiselect__trigger',
     );
     if (!trigger) return;
 
     const triggerRect = trigger.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const viewportWidth = view.innerWidth;
+    const viewportHeight = view.innerHeight;
     const gap = 6;
-    const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
-    const availableBelow = Math.max(
-      0,
-      viewportHeight - this._viewportMargin - triggerRect.bottom - gap,
+    const geometry = constrainNeuConnectedOverlayGeometry(
+      triggerRect,
+      { width: viewportWidth, height: viewportHeight },
+      { viewportMargin: this._viewportMargin, gap },
     );
-    const availableAbove = Math.max(0, triggerRect.top - this._viewportMargin - gap);
-    const maxHeight = Math.max(180, Math.max(availableBelow, availableAbove));
+    const maxHeight = Math.max(180, Math.max(geometry.availableBelow, geometry.availableAbove));
 
     this.panelPosition.set({
       position: null,
       top: null,
       left: null,
-      width: `${width}px`,
+      width: `${geometry.width}px`,
       maxHeight: `${maxHeight}px`,
     });
 
-    if (this.virtualScroll()) {
-      this._requestFrame(() => this._viewport()?.checkViewportSize());
+    if (scheduleViewportCheck && this.virtualScroll()) {
+      this.requestOverlayFrame(() => this._viewport()?.checkViewportSize());
     }
   }
 
   private focusFirstOption(): void {
-    const index = findNeuOptionBoundaryRow(this.filteredRows(), 'first');
-    if (index >= 0) this.setActiveRow(index);
+    const result = this.activeRowController.first();
+    if (result.rowIndex >= 0) this.setActiveRow(result);
   }
 
   private focusOption(optionOrValue: T | V): void {
     const option = this.allOptions().find(
       (candidate) =>
-        candidate === optionOrValue ||
-        this.optionMatchesValue(candidate, optionOrValue as V),
+        candidate === optionOrValue || this.optionMatchesValue(candidate, optionOrValue as V),
     );
-    const optionId = option
-      ? this.optionDomId(option)
-      : `${this._panelId}-option-missing`;
+    const optionId = option ? this.optionDomId(option) : `${this._panelId}-option-missing`;
     if (this.virtualScroll()) {
       const optionIndex = option === undefined ? -1 : this.filteredOptions().indexOf(option);
       if (optionIndex >= 0) {
         this._viewport()?.scrollToIndex(optionIndex, 'auto');
         this._viewport()?.checkViewportSize();
       }
-      this._requestFrame(() => {
-        const optionElement = this.elementRef.nativeElement.querySelector<HTMLElement>(
-          `#${optionId}`,
-        ) ?? this._document.getElementById(optionId);
+      this.requestOverlayFrame(() => {
+        const optionElement =
+          this.elementRef.nativeElement.querySelector<HTMLElement>(`#${optionId}`) ??
+          this._document.getElementById(optionId);
         optionElement?.focus();
       });
       return;
@@ -1699,14 +1826,110 @@ export class NeuMultiselectComponent<
       return;
     }
 
-    this._requestFrame(() => {
+    this.requestOverlayFrame(() => {
       this._viewport()?.checkViewportSize();
     });
   }
 
-  private _requestFrame(callback: FrameRequestCallback): void {
-    if (isPlatformBrowser(this._platformId)) {
-      requestAnimationFrame(callback);
+  private adoptActiveSignal(): void {
+    const signalIndex = this.activeRowIndex();
+    if (signalIndex === this.activeRowController.activeRowIndex) return;
+    if (signalIndex === -1) this.activeRowController.clear();
+    else this.activeRowController.activate(signalIndex);
+  }
+
+  private applyActiveRow(result: InternalNeuOptionActiveRowResult<T, number>): void {
+    this.activeRowIndex.set(result.rowIndex);
+  }
+
+  private createTypeaheadController(): InternalNeuOptionTypeaheadController<T, G | string> {
+    return new InternalNeuOptionTypeaheadController<T, G | string>([], {
+      labelAccessor: (option) => this.optionLabelOf(option),
+      locale: this.typeaheadLocale,
+    });
+  }
+
+  private requestOverlayFrame(action: () => void): void {
+    if (!isPlatformBrowser(this._platformId)) return;
+    if (!this.overlaySession.isOpen) {
+      action();
+      return;
     }
+    this.pendingOverlayFrameActions.push(action);
+    this.overlaySession.requestRefresh('content');
+  }
+
+  private runOverlayFrame(): void {
+    if (!this.overlaySession.isOpen) {
+      this.pendingOverlayFrameActions = [];
+      return;
+    }
+    this.syncPanelPosition(false);
+    const actions = this.pendingOverlayFrameActions;
+    this.pendingOverlayFrameActions = [];
+    for (const action of actions) action();
+  }
+
+  private effectiveTriggerElement(): HTMLElement | null {
+    return this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-multiselect__trigger');
+  }
+
+  /** Compatibility bridge for tests/consumers that wrote the exposed signal directly. */
+  private adoptOverlaySignal(): boolean {
+    if (!this.isOpen() || this.overlaySession.isOpen) return false;
+    return this.overlaySession.open(this.effectiveTriggerElement());
+  }
+
+  private overlayCloseReason(
+    reason: NeuMultiselectOverlayEvent['reason'],
+  ): InternalNeuConnectedOverlayCloseReason {
+    if (reason === 'escape' || reason === 'tab' || reason === 'outside' || reason === 'disabled') {
+      return reason;
+    }
+    return 'programmatic';
+  }
+
+  private handleOverlayKey(event: KeyboardEvent, reason: 'escape' | 'tab'): void {
+    const keyIntent = this.overlaySession.handleKey(event.key);
+    if (!keyIntent.handled || !keyIntent.close) return;
+    if (keyIntent.preventDefault) event.preventDefault();
+    this.finishHide(keyIntent.close, event, reason);
+  }
+
+  private requestAutofocusFrame(): void {
+    this.cancelAutofocusFrame();
+    if (!isPlatformBrowser(this._platformId)) return;
+    const view = this._document.defaultView;
+    if (!view) return;
+    this.autofocusFrameId = view.requestAnimationFrame(() => {
+      this.autofocusFrameId = null;
+      if (!this.isDisabledFinal()) this.focusTrigger();
+    });
+  }
+
+  private cancelAutofocusFrame(): void {
+    if (this.autofocusFrameId == null) return;
+    this._document.defaultView?.cancelAnimationFrame(this.autofocusFrameId);
+    this.autofocusFrameId = null;
+  }
+
+  private requestFocusRestoration(origin: HTMLElement | null): void {
+    this.cancelFocusRestorationFrame();
+    if (!origin || !isPlatformBrowser(this._platformId)) return;
+    const view = this._document.defaultView;
+    if (!view) return;
+    let completedSynchronously = false;
+    const frameId = view.requestAnimationFrame(() => {
+      completedSynchronously = true;
+      this.focusRestorationFrameId = null;
+      if (origin.isConnected) origin.focus();
+    });
+    this.focusRestorationFrameId = completedSynchronously ? null : frameId;
+  }
+
+  private cancelFocusRestorationFrame(): void {
+    if (this.focusRestorationFrameId == null) return;
+    this._document.defaultView?.cancelAnimationFrame(this.focusRestorationFrameId);
+    this.focusRestorationFrameId = null;
   }
 }

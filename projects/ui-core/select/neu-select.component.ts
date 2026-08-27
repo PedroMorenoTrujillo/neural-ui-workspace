@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   PLATFORM_ID,
   Signal,
@@ -47,19 +48,25 @@ import {
   ɵInternalNeuOptionLazyRequestSequencer as InternalNeuOptionLazyRequestSequencer,
   ɵInternalNeuOptionNormalizedRow as InternalNeuOptionNormalizedRow,
   ɵInternalNeuOptionRow as InternalNeuOptionRow,
+  ɵINTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS as INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS,
+  ɵInternalNeuConnectedOverlayCloseIntent as InternalNeuConnectedOverlayCloseIntent,
+  ɵInternalNeuConnectedOverlayCloseReason as InternalNeuConnectedOverlayCloseReason,
+  ɵInternalNeuConnectedOverlaySession as InternalNeuConnectedOverlaySession,
+  ɵInternalNeuOptionActiveRowController as InternalNeuOptionActiveRowController,
+  ɵInternalNeuOptionActiveRowResult as InternalNeuOptionActiveRowResult,
+  ɵInternalNeuOptionTypeaheadController as InternalNeuOptionTypeaheadController,
+  ɵconstrainNeuConnectedOverlayGeometry as constrainNeuConnectedOverlayGeometry,
   ɵcreateNeuOptionLazyRequest as createNeuOptionLazyRequest,
   ɵcreateNeuOptionLoadingRows as createNeuOptionLoadingRows,
+  ɵderiveNeuOptionActiveDescendant as deriveNeuOptionActiveDescendant,
+  ɵderiveNeuOptionAnnouncementData as deriveNeuOptionAnnouncementData,
+  ɵderiveNeuOptionAriaPosition as deriveNeuOptionAriaPosition,
   ɵderiveNeuOptionRowId as deriveNeuOptionRowId,
   ɵfilterNeuOptionRows as filterNeuOptionRows,
-  ɵfindNeuOptionBoundaryRow as findNeuOptionBoundaryRow,
-  ɵfindNeuOptionTypeaheadRow as findNeuOptionTypeaheadRow,
-  ɵmoveNeuOptionActiveRow as moveNeuOptionActiveRow,
   ɵnormalizeNeuLegacyOptionGroups as normalizeNeuLegacyOptionGroups,
   ɵnormalizeNeuOptionGroups as normalizeNeuOptionGroups,
   ɵnormalizeNeuOptionLazyWindow as normalizeNeuOptionLazyWindow,
   ɵnormalizeNeuOptionRows as normalizeNeuOptionRows,
-  ɵpageNeuOptionActiveRow as pageNeuOptionActiveRow,
-  ɵreconcileNeuOptionActiveRow as reconcileNeuOptionActiveRow,
 } from '@neural-ui/core/option-api';
 import {
   NeuSelectChangeEvent,
@@ -486,6 +493,7 @@ export class NeuSelectComponent<
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _document = inject(DOCUMENT);
   private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _destroyRef = inject(DestroyRef);
   private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
   readonly _viewportMargin = 0;
@@ -516,6 +524,13 @@ export class NeuSelectComponent<
   }
 
   constructor() {
+    this._destroyRef.onDestroy(() => {
+      this.pendingOverlayFrameActions = [];
+      this.cancelFocusRestorationFrame();
+      this.activeRowController.dispose();
+      this.typeaheadController.dispose();
+      this.overlaySession.dispose();
+    });
     effect(() => {
       const param = this.urlParam();
       if (!param) return;
@@ -535,11 +550,26 @@ export class NeuSelectComponent<
     });
     effect(() => {
       const rows = this.visibleRows();
-      const current = untracked(() => this.activeIndex());
-      if (current === -1) return;
-      const row = rows[current];
-      const logical = row?.kind === 'option' ? row.logicalIndex : null;
-      untracked(() => this.activeIndex.set(reconcileNeuOptionActiveRow(rows, logical)));
+      untracked(() => {
+        this.adoptActiveSignal();
+        this.typeaheadController.setRows(rows);
+        this.applyActiveRow(this.activeRowController.setRows(rows));
+      });
+    });
+    effect(() => {
+      const locale = this.filterLocale();
+      if (locale === this.typeaheadLocale) return;
+      untracked(() => {
+        this.typeaheadController.dispose();
+        this.typeaheadLocale = locale;
+        this.typeaheadController = this.createTypeaheadController();
+        this.typeaheadController.setRows(this.visibleRows());
+      });
+    });
+    effect(() => {
+      if (this.isDisabledFinal() && untracked(() => this.isOpen())) {
+        untracked(() => this.hide(false, null, 'programmatic'));
+      }
     });
   }
   /** @internal — ID \u00fanico para asociar label con trigger */
@@ -709,38 +739,28 @@ export class NeuSelectComponent<
   private readonly lazySequencer = new InternalNeuOptionLazyRequestSequencer();
   private readonly lastLazyRequest = signal<NeuOptionLazyRequest | null>(null);
   private customValue = false;
-  private typeahead = '';
-  private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
-  readonly overlayPositions: ConnectedPosition[] = [
-    {
-      originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetY: 6,
+  private readonly activeRowController = new InternalNeuOptionActiveRowController<T, G | string>(
+    [],
+    { requestScrollOnChange: true },
+  );
+  private typeaheadLocale = this.filterLocale();
+  private typeaheadController = this.createTypeaheadController();
+  private pendingOverlayFrameActions: Array<() => void> = [];
+  private focusRestorationFrameId: number | null = null;
+  private readonly overlaySession = new InternalNeuConnectedOverlaySession<HTMLElement>({
+    frameScheduler: {
+      request: (callback) => this._document.defaultView?.requestAnimationFrame(callback) ?? -1,
+      cancel: (frameId) => this._document.defaultView?.cancelAnimationFrame(frameId),
     },
-    {
-      originX: 'start',
-      originY: 'top',
-      overlayX: 'start',
-      overlayY: 'bottom',
-      offsetY: -6,
-    },
-    {
-      originX: 'end',
-      originY: 'bottom',
-      overlayX: 'end',
-      overlayY: 'top',
-      offsetY: 6,
-    },
-    {
-      originX: 'end',
-      originY: 'top',
-      overlayX: 'end',
-      overlayY: 'bottom',
-      offsetY: -6,
-    },
-  ];
+    isOriginConnected: (origin) => origin.isConnected,
+    onRefresh: () => this.runOverlayFrame(),
+  });
+  readonly overlayPositions: ConnectedPosition[] = INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS.map(
+    (position) => ({
+      ...position,
+      offsetY: position.originY === 'bottom' ? 6 : -6,
+    }),
+  );
   readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
   readonly panelPosition = signal<{
     position: string | null;
@@ -841,9 +861,13 @@ export class NeuSelectComponent<
   );
   readonly activeDescendantId = computed(() => {
     if (!this.isOpen()) return null;
-    const row = this.visibleRows()[this.activeIndex()];
+    const id = deriveNeuOptionActiveDescendant(
+      this.ownerId(),
+      this.visibleRows(),
+      this.activeIndex(),
+    );
     const rendered = this.renderedRows().some((entry) => entry.rowIndex === this.activeIndex());
-    return row?.kind === 'option' && !row.disabled && rendered ? this.rowId(row) : null;
+    return rendered ? id : null;
   });
 
   previousGroup(option: T): string | undefined {
@@ -873,7 +897,11 @@ export class NeuSelectComponent<
       return '';
     }
 
-    const total = this.filteredOptions().length;
+    const total = deriveNeuOptionAnnouncementData(
+      this.visibleRows(),
+      this.activeIndex(),
+      (option) => this.optionLabelOf(option),
+    ).resultCount;
     if (!total) {
       return this.noResultsMessage();
     }
@@ -968,13 +996,16 @@ export class NeuSelectComponent<
     reason: NeuSelectOverlayEvent['reason'] = 'programmatic',
   ): void {
     if (this.isOpen() || this.isDisabledFinal() || this.readonly()) return;
+    this.cancelFocusRestorationFrame();
+    const origin = this.effectiveTriggerElement();
+    if (!this.overlaySession.open(origin)) return;
     this.syncPanelPosition();
     this.isOpen.set(true);
     this.initializeActiveRow();
     this.ensureActiveRendered(this.activeIndex());
     this.onShow.emit({ originalEvent, reason });
     if (this.lazy()) this.emitLazyRequest('initial', this.virtualFirst());
-    this._requestFrame(() => {
+    this.requestOverlayFrame(() => {
       if (this.autofocusFilter() && this.filterEnabled()) {
         this.elementRef.nativeElement
           .querySelector<HTMLInputElement>('.neu-select__search-input')
@@ -993,19 +1024,32 @@ export class NeuSelectComponent<
     reason: NeuSelectOverlayEvent['reason'] = 'programmatic',
   ): void {
     if (!this.isOpen()) return;
+    this.adoptOverlaySignal();
+    const intent = this.overlaySession.close(this.overlayCloseReason(reason), restoreFocus);
+    this.finishHide(intent, originalEvent, reason);
+  }
+
+  private finishHide(
+    intent: InternalNeuConnectedOverlayCloseIntent<HTMLElement>,
+    originalEvent: Event | null,
+    reason: NeuSelectOverlayEvent['reason'],
+  ): void {
+    if (!intent.closed) return;
+    this.pendingOverlayFrameActions = [];
     this.isOpen.set(false);
     if (this.resetFilterOnHide()) this.resetFilter(false);
     else if (this.filterValue() === null) this.searchQuery.set('');
-    this.activeIndex.set(-1);
+    this.applyActiveRow(this.activeRowController.clear());
     this.resetPanelPosition();
-    this.clearTypeahead();
+    this.typeaheadController.reset();
     this._onTouched();
     this.onHide.emit({ originalEvent, reason });
-    if (restoreFocus) this._requestFrame(() => this.focusTrigger());
+    this.requestFocusRestoration(intent.focusRestoration);
   }
 
   onOverlayDetach(): void {
-    if (this.isOpen()) this.hide(false, null, 'outside');
+    if (!this.isOpen()) return;
+    this.finishHide(this.overlaySession.close('outside', false), null, 'outside');
   }
 
   onTriggerClick(event: MouseEvent): void {
@@ -1055,32 +1099,35 @@ export class NeuSelectComponent<
       if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {
         event.preventDefault();
         this.show(false, event, 'keyboard');
-        if (event.key === 'ArrowUp') this.activeIndex.set(findNeuOptionBoundaryRow(rows, 'last'));
+        if (event.key === 'ArrowUp') this.applyActiveRow(this.activeRowController.last(), true);
       }
       return;
     }
-    let next = this.activeIndex();
+    this.adoptActiveSignal();
+    let next = this.activeRowController.activeRowIndex;
     switch (event.key) {
       case 'ArrowDown':
       case 'ArrowUp':
-        next = moveNeuOptionActiveRow(rows, next, event.key === 'ArrowDown' ? 1 : -1);
-        this.moveActive(event, next);
+        this.moveActive(
+          event,
+          event.key === 'ArrowDown'
+            ? this.activeRowController.next()
+            : this.activeRowController.previous(),
+        );
         return;
       case 'Home':
       case 'End':
         if (this.editable() && event.target instanceof HTMLInputElement) return;
         this.moveActive(
           event,
-          findNeuOptionBoundaryRow(rows, event.key === 'Home' ? 'first' : 'last'),
+          event.key === 'Home' ? this.activeRowController.first() : this.activeRowController.last(),
         );
         return;
       case 'PageDown':
       case 'PageUp':
         this.moveActive(
           event,
-          pageNeuOptionActiveRow(
-            rows,
-            next,
+          this.activeRowController.page(
             event.key === 'PageDown' ? 1 : -1,
             this.virtualScrollOptions()?.viewportItems ?? this.virtualScrollVisibleItems(),
           ),
@@ -1097,11 +1144,10 @@ export class NeuSelectComponent<
         } else if (this.editable()) this.commitCustomValue(event);
         return;
       case 'Escape':
-        event.preventDefault();
-        this.hide(true, event, 'escape');
+        this.handleOverlayKey(event, 'escape');
         return;
       case 'Tab':
-        this.hide(false, event, 'tab');
+        this.handleOverlayKey(event, 'tab');
         return;
     }
     if (
@@ -1111,16 +1157,10 @@ export class NeuSelectComponent<
       !event.altKey &&
       event.key.length === 1
     ) {
-      this.typeahead += event.key;
-      const match = findNeuOptionTypeaheadRow(
-        rows,
-        this.typeahead,
-        next,
-        this.optionLabel(),
-        this.filterLocale(),
-      );
-      if (match !== -1) this.moveActive(event, match);
-      this.resetTypeaheadTimer();
+      const result = this.typeaheadController.type(event.key, next);
+      if (result.rowIndex !== -1) {
+        this.moveActive(event, this.activeRowController.activate(result.rowIndex));
+      }
     }
   }
 
@@ -1137,17 +1177,18 @@ export class NeuSelectComponent<
   /** Navega entre opciones con flechas / Navigates between options with arrows */
   focusOptionByIndex(event: Event, current: T, dir: 1 | -1): void {
     event.preventDefault();
-    const opts = this.filteredOptions().filter((option) => !this.isOptionDisabled(option));
-    const idx = opts.indexOf(current);
-    const next = opts[(idx + dir + opts.length) % opts.length];
-    if (next) {
-      this.focusOption(next);
-    }
+    const rowIndex = this.visibleRows().findIndex(
+      (row) => row.kind === 'option' && row.option === current,
+    );
+    if (rowIndex !== -1) this.activeRowController.activate(rowIndex);
+    const result =
+      dir === 1 ? this.activeRowController.next(true) : this.activeRowController.previous(true);
+    this.applyActiveRow(result, true);
+    if (result.row) this.focusOption(result.row.option);
   }
 
   setActiveRow(rowIndex: number): void {
-    const row = this.visibleRows()[rowIndex];
-    if (row?.kind === 'option' && !row.disabled) this.activeIndex.set(rowIndex);
+    this.applyActiveRow(this.activeRowController.activate(rowIndex));
   }
 
   onOptionMouseEnter(rowIndex: number): void {
@@ -1165,7 +1206,7 @@ export class NeuSelectComponent<
     closePanel = true,
   ): void {
     if (this.isDisabledFinal() || this.readonly() || this.loading() || row.disabled) return;
-    this.activeIndex.set(rowIndex);
+    this.applyActiveRow(this.activeRowController.activate(rowIndex));
     const value = this.optionValueOf(row.option);
     this.commitValue(value, row.option, originalEvent, false);
     const param = this.urlParam();
@@ -1180,9 +1221,12 @@ export class NeuSelectComponent<
       return;
     }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      this.activeRowController.activate(rowIndex);
       this.moveActive(
         event,
-        moveNeuOptionActiveRow(this.visibleRows(), rowIndex, event.key === 'ArrowDown' ? 1 : -1),
+        event.key === 'ArrowDown'
+          ? this.activeRowController.next()
+          : this.activeRowController.previous(),
       );
     }
   }
@@ -1194,7 +1238,7 @@ export class NeuSelectComponent<
   setFilter(value: string, originalEvent: Event | null = null, emit = true): void {
     if (this.filterValue() === null) this.searchQuery.set(value);
     this.virtualFirst.set(0);
-    this.activeIndex.set(-1);
+    this.applyActiveRow(this.activeRowController.clear());
     const visibleOptions = this.previewFilteredOptions(value);
     if (emit)
       this.onFilter.emit({
@@ -1212,19 +1256,21 @@ export class NeuSelectComponent<
   }
 
   onFilterKeyDown(event: KeyboardEvent): void {
-    if (event.key === 'Escape' || event.key === 'Enter') {
+    if (event.key === 'Escape') {
+      this.handleOverlayKey(event, 'escape');
+      return;
+    }
+    if (event.key === 'Enter') {
       event.preventDefault();
-      this.hide(true, event, event.key === 'Escape' ? 'escape' : 'keyboard');
+      this.hide(true, event, 'keyboard');
       return;
     }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       this.moveActive(
         event,
-        moveNeuOptionActiveRow(
-          this.visibleRows(),
-          this.activeIndex(),
-          event.key === 'ArrowDown' ? 1 : -1,
-        ),
+        event.key === 'ArrowDown'
+          ? this.activeRowController.next()
+          : this.activeRowController.previous(),
       );
     }
   }
@@ -1235,7 +1281,7 @@ export class NeuSelectComponent<
     this.editableQuery.set(value);
     if (this.filterEnabled()) this.setFilter(value, event);
     if (!this.isOpen()) this.show(false, event, 'keyboard');
-    this.activeIndex.set(-1);
+    this.applyActiveRow(this.activeRowController.clear());
   }
 
   onEditableBlur(event: FocusEvent): void {
@@ -1265,11 +1311,12 @@ export class NeuSelectComponent<
   }
 
   optionPosition(row: InternalNeuOptionRow<T>, rowIndex: number): number {
-    return this.lazy()
-      ? row.logicalIndex + 1
-      : this.visibleRows()
-          .slice(0, rowIndex + 1)
-          .filter((candidate) => candidate.kind === 'option').length;
+    return (
+      deriveNeuOptionAriaPosition(this.visibleRows(), rowIndex, {
+        logicalOffset: this.lazy() ? this.lazyFirst() : 0,
+        totalSize: this.logicalOptionCount(),
+      })?.posInSet ?? row.logicalIndex + 1
+    );
   }
 
   readonly virtualTopHeight = computed(() => {
@@ -1423,27 +1470,25 @@ export class NeuSelectComponent<
   }
 
   onDocumentClick(event: MouseEvent): void {
+    this.adoptOverlaySignal();
     const target = event.target as Element | null;
     const isInsideHost = this.elementRef.nativeElement.contains(target);
     const isInsidePanel = !!target?.closest('.neu-select__panel');
-    if (!isInsideHost && !isInsidePanel) {
-      this.close();
-    }
+    const intent = this.overlaySession.handleOutsideInteraction(isInsideHost, isInsidePanel);
+    if (intent) this.finishHide(intent, event, 'outside');
   }
 
   onWindowResize(): void {
-    if (this.isOpen()) {
-      this.syncPanelPosition();
-    }
+    if (this.adoptOverlaySignal()) this.syncPanelPosition();
+    else this.overlaySession.refreshOnResize();
   }
 
   onWindowScroll(): void {
-    if (this.isOpen()) {
-      this.syncPanelPosition();
-    }
+    if (this.adoptOverlaySignal()) this.syncPanelPosition();
+    else this.overlaySession.refreshOnScroll();
   }
 
-  private syncPanelPosition(): void {
+  private syncPanelPosition(scheduleViewportCheck = true): void {
     if (!isPlatformBrowser(this._platformId)) return;
     const view = this._document.defaultView;
     if (!view) return;
@@ -1454,27 +1499,27 @@ export class NeuSelectComponent<
     const viewportWidth = view.innerWidth;
     const viewportHeight = view.innerHeight;
     const gap = 6;
-    const width = Math.min(triggerRect.width, viewportWidth - this._viewportMargin * 2);
-    const availableBelow = Math.max(
-      0,
-      viewportHeight - this._viewportMargin - triggerRect.bottom - gap,
+    const geometry = constrainNeuConnectedOverlayGeometry(
+      triggerRect,
+      { width: viewportWidth, height: viewportHeight },
+      { viewportMargin: this._viewportMargin, gap },
     );
-    const availableAbove = Math.max(0, triggerRect.top - this._viewportMargin - gap);
-    const openAbove = availableAbove > availableBelow && availableAbove >= 140;
-    const maxHeight = Math.max(140, openAbove ? availableAbove : availableBelow);
+    const openAbove =
+      geometry.availableAbove > geometry.availableBelow && geometry.availableAbove >= 140;
+    const maxHeight = Math.max(140, openAbove ? geometry.availableAbove : geometry.availableBelow);
 
     this.panelPosition.set({
       position: 'fixed',
       top: openAbove ? 'auto' : `${triggerRect.bottom + gap}px`,
       bottom: openAbove ? `${viewportHeight - triggerRect.top + gap}px` : 'auto',
-      left: `${Math.min(Math.max(triggerRect.left, this._viewportMargin), viewportWidth - width - this._viewportMargin)}px`,
-      width: `${width}px`,
+      left: `${geometry.left}px`,
+      width: `${geometry.width}px`,
       maxHeight: `${maxHeight}px`,
     });
     this.isPanelAbove.set(openAbove);
 
-    if (this.virtualScroll()) {
-      this._requestFrame(() => this._viewport()?.checkViewportSize());
+    if (scheduleViewportCheck && this.virtualScroll()) {
+      this.requestOverlayFrame(() => this._viewport()?.checkViewportSize());
     }
   }
 
@@ -1504,7 +1549,7 @@ export class NeuSelectComponent<
         this._viewport()?.scrollToIndex(optionIndex, 'auto');
         this._viewport()?.checkViewportSize();
       }
-      this._requestFrame(() => {
+      this.requestOverlayFrame(() => {
         const optionElement =
           this.elementRef.nativeElement.querySelector<HTMLElement>(`#${optionId}`) ??
           this._document.getElementById(optionId);
@@ -1642,25 +1687,33 @@ export class NeuSelectComponent<
 
   private initializeActiveRow(): void {
     const rows = this.visibleRows();
+    this.typeaheadController.setRows(rows);
+    this.activeRowController.setRows(rows);
     const selected = rows.findIndex(
       (row) => row.kind === 'option' && this.isOptionSelected(row.option),
     );
-    const next = this.autoOptionFocus()
-      ? selected !== -1
-        ? selected
-        : findNeuOptionBoundaryRow(rows, 'first')
-      : selected;
-    this.activeIndex.set(next);
+    const result =
+      selected !== -1
+        ? this.activeRowController.activate(selected)
+        : this.autoOptionFocus()
+          ? this.activeRowController.first()
+          : this.activeRowController.clear();
+    this.applyActiveRow(result);
+    const next = result.rowIndex;
     if (this.selectOnFocus() && next !== -1 && selected === -1) {
       const row = rows[next];
       if (row?.kind === 'option') this.selectRow(null, row, next, false);
     }
   }
 
-  private moveActive(event: KeyboardEvent, next: number): void {
+  private moveActive(
+    event: KeyboardEvent,
+    result: InternalNeuOptionActiveRowResult<T, number>,
+  ): void {
     event.preventDefault();
+    const next = result.rowIndex;
     if (next === -1) return;
-    this.activeIndex.set(next);
+    this.applyActiveRow(result, true);
     this.ensureActiveRendered(next);
     if (this.selectOnFocus() && !this.readonly()) {
       const row = this.visibleRows()[next];
@@ -1714,20 +1767,96 @@ export class NeuSelectComponent<
     this.onLazyLoad.emit(request);
   }
 
-  private resetTypeaheadTimer(): void {
-    if (this.typeaheadTimer) clearTimeout(this.typeaheadTimer);
-    this.typeaheadTimer = setTimeout(() => this.clearTypeahead(), 500);
+  private adoptActiveSignal(): void {
+    const signalIndex = this.activeIndex();
+    if (signalIndex === this.activeRowController.activeRowIndex) return;
+    if (signalIndex === -1) this.activeRowController.clear();
+    else this.activeRowController.activate(signalIndex);
   }
 
-  private clearTypeahead(): void {
-    this.typeahead = '';
-    if (this.typeaheadTimer) clearTimeout(this.typeaheadTimer);
-    this.typeaheadTimer = null;
+  private createTypeaheadController(): InternalNeuOptionTypeaheadController<T, G | string> {
+    return new InternalNeuOptionTypeaheadController<T, G | string>([], {
+      labelAccessor: (option) => this.optionLabelOf(option),
+      locale: this.typeaheadLocale,
+    });
   }
 
-  private _requestFrame(callback: FrameRequestCallback): void {
-    if (isPlatformBrowser(this._platformId)) {
-      requestAnimationFrame(callback);
+  private applyActiveRow(
+    result: InternalNeuOptionActiveRowResult<T, number>,
+    scroll = false,
+  ): void {
+    this.activeIndex.set(result.rowIndex);
+    if (scroll && result.scrollRequest) this.ensureActiveRendered(result.scrollRequest.rowIndex);
+  }
+
+  private requestOverlayFrame(action: () => void): void {
+    if (!isPlatformBrowser(this._platformId)) return;
+    if (!this.overlaySession.isOpen) {
+      action();
+      return;
     }
+    this.pendingOverlayFrameActions.push(action);
+    this.overlaySession.requestRefresh('content');
+  }
+
+  private runOverlayFrame(): void {
+    if (!this.overlaySession.isOpen) {
+      this.pendingOverlayFrameActions = [];
+      return;
+    }
+    this.syncPanelPositionWithoutFrame();
+    const actions = this.pendingOverlayFrameActions;
+    this.pendingOverlayFrameActions = [];
+    for (const action of actions) action();
+  }
+
+  private syncPanelPositionWithoutFrame(): void {
+    this.syncPanelPosition(false);
+  }
+
+  private effectiveTriggerElement(): HTMLElement | null {
+    const selector = this.editable() ? '.neu-select__editable-input' : '.neu-select__trigger';
+    return this.elementRef.nativeElement.querySelector<HTMLElement>(selector);
+  }
+
+  /** Compatibility bridge for tests/consumers that wrote the exposed signal directly. */
+  private adoptOverlaySignal(): boolean {
+    if (!this.isOpen() || this.overlaySession.isOpen) return false;
+    return this.overlaySession.open(this.effectiveTriggerElement());
+  }
+
+  private overlayCloseReason(
+    reason: NeuSelectOverlayEvent['reason'],
+  ): InternalNeuConnectedOverlayCloseReason {
+    if (reason === 'escape' || reason === 'tab' || reason === 'outside') return reason;
+    if (reason === 'selection' || reason === 'clear') return 'selection';
+    return 'programmatic';
+  }
+
+  private handleOverlayKey(event: KeyboardEvent, reason: 'escape' | 'tab'): void {
+    const keyIntent = this.overlaySession.handleKey(event.key);
+    if (!keyIntent.handled || !keyIntent.close) return;
+    if (keyIntent.preventDefault) event.preventDefault();
+    this.finishHide(keyIntent.close, event, reason);
+  }
+
+  private requestFocusRestoration(origin: HTMLElement | null): void {
+    this.cancelFocusRestorationFrame();
+    if (!origin || !isPlatformBrowser(this._platformId)) return;
+    const view = this._document.defaultView;
+    if (!view) return;
+    let completedSynchronously = false;
+    const frameId = view.requestAnimationFrame(() => {
+      completedSynchronously = true;
+      this.focusRestorationFrameId = null;
+      if (origin.isConnected) origin.focus();
+    });
+    this.focusRestorationFrameId = completedSynchronously ? null : frameId;
+  }
+
+  private cancelFocusRestorationFrame(): void {
+    if (this.focusRestorationFrameId == null) return;
+    this._document.defaultView?.cancelAnimationFrame(this.focusRestorationFrameId);
+    this.focusRestorationFrameId = null;
   }
 }

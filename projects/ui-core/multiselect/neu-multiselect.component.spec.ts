@@ -176,15 +176,27 @@ class TemplateHostComponent {
   >
     <ng-template neuMultiselectHeader><span class="all-header">Header</span></ng-template>
     <ng-template neuMultiselectFooter><span class="all-footer">Footer</span></ng-template>
-    <ng-template neuMultiselectItem let-option><span class="all-item">{{ option.label }}</span></ng-template>
+    <ng-template neuMultiselectItem let-option
+      ><span class="all-item">{{ option.label }}</span></ng-template
+    >
     <ng-template neuMultiselectSelected let-option>{{ option?.label }}</ng-template>
     <ng-template neuMultiselectToken let-option>{{ option?.label }}</ng-template>
-    <ng-template neuMultiselectSelectedItems let-count="count"><span class="all-selected">{{ count }}</span></ng-template>
-    <ng-template neuMultiselectGroup let-label="label"><span class="all-group">{{ label }}</span></ng-template>
-    <ng-template neuMultiselectFilter let-filter="filter"><button class="all-filter" (click)="filter('ang')">Filter</button></ng-template>
-    <ng-template neuMultiselectLoader let-index><span class="all-loader">{{ index }}</span></ng-template>
+    <ng-template neuMultiselectSelectedItems let-count="count"
+      ><span class="all-selected">{{ count }}</span></ng-template
+    >
+    <ng-template neuMultiselectGroup let-label="label"
+      ><span class="all-group">{{ label }}</span></ng-template
+    >
+    <ng-template neuMultiselectFilter let-filter="filter"
+      ><button class="all-filter" (click)="filter('ang')">Filter</button></ng-template
+    >
+    <ng-template neuMultiselectLoader let-index
+      ><span class="all-loader">{{ index }}</span></ng-template
+    >
     <ng-template neuMultiselectEmpty><span class="all-empty">Empty</span></ng-template>
-    <ng-template neuMultiselectEmptyFilter><span class="all-empty-filter">No match</span></ng-template>
+    <ng-template neuMultiselectEmptyFilter
+      ><span class="all-empty-filter">No match</span></ng-template
+    >
     <ng-template neuMultiselectCheckbox><span class="all-checkbox">□</span></ng-template>
     <ng-template neuMultiselectCheckmark><span class="all-checkmark">✓</span></ng-template>
     <ng-template neuMultiselectDropdownIcon><span class="all-dropdown">⌄</span></ng-template>
@@ -501,9 +513,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const button = document.querySelector(
-      '.neu-multiselect__footer-mode',
-    ) as HTMLButtonElement;
+    const button = document.querySelector('.neu-multiselect__footer-mode') as HTMLButtonElement;
     button.click();
     f.detectChanges();
 
@@ -522,9 +532,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const button = document.querySelector(
-      '.neu-multiselect__footer-clear',
-    ) as HTMLButtonElement;
+    const button = document.querySelector('.neu-multiselect__footer-clear') as HTMLButtonElement;
     expect(button.textContent?.trim()).toBe('Borrar');
     button.click();
     f.detectChanges();
@@ -1070,9 +1078,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(document.querySelector('.custom-option')?.textContent).toContain(
-      'custom-Angular',
-    );
+    expect(document.querySelector('.custom-option')?.textContent).toContain('custom-Angular');
   });
 
   // ── toggle() disabled guard ───────────────────────────────────────────────
@@ -1645,9 +1651,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const input = document.querySelector(
-      '.neu-multiselect__search-input',
-    ) as HTMLInputElement;
+    const input = document.querySelector('.neu-multiselect__search-input') as HTMLInputElement;
     input.value = 'rea';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     f.detectChanges();
@@ -1828,10 +1832,10 @@ describe('NeuMultiselectComponent', () => {
       });
     const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
 
-    expect(() => comp.focusOption({ value: 'user:23/test value', label: 'Special User' })).not.toThrow();
-    expect(
-      seenSelectors.every((selector) => !selector.includes('user:23/test value')),
-    ).toBe(true);
+    expect(() =>
+      comp.focusOption({ value: 'user:23/test value', label: 'Special User' }),
+    ).not.toThrow();
+    expect(seenSelectors.every((selector) => !selector.includes('user:23/test value'))).toBe(true);
 
     querySpy.mockRestore();
     getByIdSpy.mockRestore();
@@ -1864,9 +1868,7 @@ describe('NeuMultiselectComponent', () => {
     expect(() =>
       comp.focusOption({ value: 'user:23/test value', label: 'Special User' }),
     ).not.toThrow();
-    expect(seenSelectors.every((selector) => !selector.includes('user:23/test value'))).toBe(
-      true,
-    );
+    expect(seenSelectors.every((selector) => !selector.includes('user:23/test value'))).toBe(true);
 
     querySpy.mockRestore();
     getByIdSpy.mockRestore();
@@ -1894,17 +1896,15 @@ describe('NeuMultiselectComponent', () => {
     const f = TestBed.createComponent(MultiselectItemContextHost);
     f.detectChanges();
 
-    const comp = f.debugElement.query(By.css('neu-multiselect')).componentInstance as NeuMultiselectComponent<
-      FrameworkModel,
-      number
-    >;
+    const comp = f.debugElement.query(By.css('neu-multiselect'))
+      .componentInstance as NeuMultiselectComponent<FrameworkModel, number>;
     comp.isOpen.set(true);
     f.detectChanges();
     await f.whenStable();
 
-    const renderedItems = Array.from(document.querySelectorAll('.item-context') as NodeListOf<HTMLElement>).map(
-      (item) => item.textContent?.trim(),
-    );
+    const renderedItems = Array.from(
+      document.querySelectorAll('.item-context') as NodeListOf<HTMLElement>,
+    ).map((item) => item.textContent?.trim());
     expect(renderedItems).toContain('1:Angular');
     expect(renderedItems).toContain('2:React');
   });
@@ -1945,7 +1945,7 @@ describe('NeuMultiselectComponent', () => {
     expect(f.nativeElement.textContent).toContain('3:Backbone');
   });
 
-  it('onWindowResize and onWindowScroll should sync panel position only when open', () => {
+  it('onWindowResize and onWindowScroll should sync panel position only when open', async () => {
     const f = TestBed.createComponent(NeuMultiselectComponent);
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
@@ -1959,6 +1959,7 @@ describe('NeuMultiselectComponent', () => {
     comp.isOpen.set(true);
     comp.onWindowResize();
     comp.onWindowScroll();
+    await new Promise((resolve) => setTimeout(resolve, 20));
     expect(syncSpy).toHaveBeenCalledTimes(2);
   });
 
@@ -2274,7 +2275,11 @@ describe('NeuMultiselectComponent', () => {
     const comp = f.componentInstance as any;
 
     expect(comp.normalizedRows().map((row: any) => row.kind)).toEqual([
-      'group', 'option', 'option', 'group', 'option',
+      'group',
+      'option',
+      'option',
+      'group',
+      'option',
     ]);
     expect(comp.filteredOptions()).toEqual([OPTIONS[0], OPTIONS[1], OPTIONS[2]]);
     comp.toggleOption(OPTIONS[2]);
@@ -2599,6 +2604,12 @@ describe('NeuMultiselectComponent', () => {
     comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Tab' }));
     expect(comp.isOpen()).toBe(false);
     comp.show();
+    f.detectChanges();
+    document
+      .querySelector('.neu-multiselect__option')
+      ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(comp.isOpen()).toBe(false);
+    comp.show();
     comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(comp.isOpen()).toBe(false);
     comp.onVirtualIndexChange(4);
@@ -2615,9 +2626,9 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     const focus = vi.spyOn(comp, 'focusTrigger');
-    vi.spyOn(comp, '_requestFrame').mockImplementation((...args: unknown[]) =>
-      (args[0] as () => void)(),
-    );
+    vi.spyOn(comp, 'requestAutofocusFrame').mockImplementation(() => {
+      if (!comp.isDisabledFinal()) comp.focusTrigger();
+    });
 
     f.componentRef.setInput('autofocus', true);
     f.detectChanges();
