@@ -119,6 +119,7 @@ describe('NeuColorPickerComponent', () => {
     expect(changes).not.toHaveBeenCalled();
     expect(events).toEqual([]);
 
+    f.componentInstance._activeMode.set('rgb');
     f.componentInstance.writeValue(null);
     expect(f.componentInstance._hexValue()).toBe('');
     expect(f.componentInstance._textValue()).toBe('');

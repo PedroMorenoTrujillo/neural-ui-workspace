@@ -348,6 +348,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
 
   readonly _textValue = computed(() => {
     const hex = this._hexValue();
+    if (!hex) return '';
     const rgb = hexToRgb(hex);
     if (!rgb) return hex;
     switch (this._activeMode()) {
