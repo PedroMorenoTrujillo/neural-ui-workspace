@@ -665,7 +665,15 @@
     "color-picker/neu-color-picker.component.ts": {
       "selector": "neu-color-picker",
       "inputs": [
-        "mode"
+        "ariaDescribedBy",
+        "ariaLabel",
+        "ariaLabelledBy",
+        "disabled",
+        "inputId",
+        "invalid",
+        "mode",
+        "readonly",
+        "required"
       ],
       "outputs": [
         "colorChange"
@@ -835,6 +843,7 @@
         "error",
         "forId",
         "hint",
+        "id",
         "label",
         "prefix",
         "size",

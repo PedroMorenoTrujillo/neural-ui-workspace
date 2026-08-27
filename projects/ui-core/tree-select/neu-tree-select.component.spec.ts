@@ -77,6 +77,27 @@ describe('NeuTreeSelectComponent', () => {
     expect(component.isSelected('admin')).toBe(false);
   });
 
+  it('owns multiple programmatic selections and emits a fresh selection proposal', () => {
+    const component = fixture.componentInstance;
+    const incoming = ['admin'];
+    const cvaValues: string[][] = [];
+    fixture.componentRef.setInput('multiple', true);
+    fixture.detectChanges();
+    component.registerOnChange((value) => cvaValues.push(value as string[]));
+
+    component.writeValue(incoming);
+    expect(component.values()).toEqual(incoming);
+    expect(component.values()).not.toBe(incoming);
+
+    incoming.push('lazy');
+    expect(component.values()).toEqual(['admin']);
+
+    component.selectNode(nodes[1]);
+    expect(incoming).toEqual(['admin', 'lazy']);
+    expect(cvaValues[0]).toEqual(['admin', 'lazy']);
+    expect(cvaValues[0]).not.toBe(component.values());
+  });
+
   it('does not commit disabled nodes and emits selected node objects', () => {
     const component = fixture.componentInstance;
     const selected: NeuTreeSelectNode[][] = [];

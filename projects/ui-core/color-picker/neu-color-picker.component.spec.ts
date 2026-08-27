@@ -1,6 +1,7 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { vi } from 'vitest';
 import { NeuColorPickerComponent } from './neu-color-picker.component';
 
 @Component({
@@ -106,9 +107,43 @@ describe('NeuColorPickerComponent', () => {
     expect(f.componentInstance._sv().v).toBe(100);
   });
 
-  it('writeValue with null should not throw', () => {
+  it('applies programmatic values and resets silently', () => {
     const f = setup();
-    expect(() => f.componentInstance.writeValue(null)).not.toThrow();
+    const changes = vi.fn();
+    const events: string[] = [];
+    f.componentInstance.registerOnChange(changes);
+    f.componentInstance.colorChange.subscribe((value) => events.push(value));
+
+    f.componentInstance.writeValue('#ff0000');
+    expect(f.componentInstance._hexValue()).toBe('#ff0000');
+    expect(changes).not.toHaveBeenCalled();
+    expect(events).toEqual([]);
+
+    f.componentInstance.writeValue(null);
+    expect(f.componentInstance._hexValue()).toBe('');
+    expect(f.componentInstance._textValue()).toBe('');
+    expect(changes).not.toHaveBeenCalled();
+    expect(events).toEqual([]);
+
+    f.componentInstance.writeValue('#22c55e');
+    f.componentInstance.writeValue('');
+    expect(f.componentInstance._hexValue()).toBe('');
+    expect(changes).not.toHaveBeenCalled();
+    expect(events).toEqual([]);
+  });
+
+  it('commits each user change exactly once', () => {
+    const f = setup();
+    const changes = vi.fn();
+    const events: string[] = [];
+    f.componentInstance.registerOnChange(changes);
+    f.componentInstance.colorChange.subscribe((value) => events.push(value));
+
+    f.componentInstance._onTextChange('#22c55e');
+
+    expect(changes).toHaveBeenCalledTimes(1);
+    expect(events).toHaveLength(1);
+    expect(events[0]).toBe(changes.mock.calls[0][0]);
   });
 
   it('_textValue in hex mode returns hex string', () => {
@@ -121,6 +156,39 @@ describe('NeuColorPickerComponent', () => {
     const f = setup();
     f.componentInstance.setDisabledState(true);
     expect(f.componentInstance._cvaDisabled()).toBe(true);
+  });
+
+  it('composes direct and CVA disabled state, while readonly prevents mutation', () => {
+    const f = setup();
+    const component = f.componentInstance;
+    const original = component._hexValue();
+
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    component._pickSwatch('#ef4444');
+    expect(component._isDisabled()).toBe(true);
+    expect(component._hexValue()).toBe(original);
+
+    f.componentRef.setInput('disabled', false);
+    component.setDisabledState(true);
+    expect(component._isDisabled()).toBe(true);
+
+    component.setDisabledState(false);
+    f.componentRef.setInput('readonly', true);
+    f.detectChanges();
+    component._onTextChange('#ef4444');
+    expect(component._hexValue()).toBe(original);
+  });
+
+  it('marks the control touched on blur, never during programmatic writes', () => {
+    const f = setup();
+    const touched = vi.fn();
+    f.componentInstance.registerOnTouched(touched);
+
+    f.componentInstance.writeValue('#ef4444');
+    expect(touched).not.toHaveBeenCalled();
+    f.componentInstance.onBlur();
+    expect(touched).toHaveBeenCalledTimes(1);
   });
 
   it('_onTextChange with valid hex should update color', () => {

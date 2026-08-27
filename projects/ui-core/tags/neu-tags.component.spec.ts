@@ -51,6 +51,28 @@ describe('NeuTagsComponent', () => {
     expect(emitted).toHaveBeenLastCalledWith(['Signals']);
   });
 
+  it('owns a snapshot of programmatic collections and emits fresh user proposals', () => {
+    const component = fixture.componentInstance;
+    const incoming = ['Angular'];
+    const cvaValues: string[][] = [];
+    const publicValues: string[][] = [];
+    component.registerOnChange((value) => cvaValues.push(value));
+    component.valueChange.subscribe((value) => publicValues.push(value));
+
+    component.writeValue(incoming);
+    expect(component.value()).toEqual(incoming);
+    expect(component.value()).not.toBe(incoming);
+
+    incoming.push('External');
+    expect(component.value()).toEqual(['Angular']);
+
+    component.add('Signals');
+    expect(incoming).toEqual(['Angular', 'External']);
+    expect(cvaValues[0]).toEqual(['Angular', 'Signals']);
+    expect(cvaValues[0]).not.toBe(component.value());
+    expect(publicValues[0]).not.toBe(component.value());
+  });
+
   it('filters suggestions and handles separators, blank drafts and Backspace', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('suggestions', ['Angular', 'Signals', 'RxJS']);

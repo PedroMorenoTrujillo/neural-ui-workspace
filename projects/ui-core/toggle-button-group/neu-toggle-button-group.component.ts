@@ -175,10 +175,11 @@ export class NeuToggleButtonGroupComponent<T = unknown, V = NeuToggleValueNotPro
       next = this.isSelected(value) ? null : value;
     }
 
-    this._value.set(next);
-    this._onChange(next);
+    const committed = Array.isArray(next) ? [...next] : next;
+    this._value.set(committed);
+    this._onChange(Array.isArray(committed) ? [...committed] : committed);
     this._onTouched();
-    this.neuChange.emit(next);
+    this.neuChange.emit(Array.isArray(committed) ? [...committed] : committed);
   }
 
   onBlur(): void {
@@ -194,7 +195,7 @@ export class NeuToggleButtonGroupComponent<T = unknown, V = NeuToggleValueNotPro
     if (val === null || val === undefined) {
       this._value.set(this.multiple() ? ([] as NeuToggleValue<T, V>[]) : null);
     } else {
-      this._value.set(val);
+      this._value.set(Array.isArray(val) ? [...val] : val);
     }
   }
 

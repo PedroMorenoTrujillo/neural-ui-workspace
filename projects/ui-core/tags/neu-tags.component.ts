@@ -67,8 +67,8 @@ export class NeuTagsComponent implements ControlValueAccessor {
   private onChange: (value: string[]) => void = () => {};
   private onTouched: () => void = () => {};
 
-  writeValue(value: string[] | null): void {
-    this.value.set(value ?? []);
+  writeValue(value: readonly string[] | null): void {
+    this.value.set(value ? [...value] : []);
   }
   registerOnChange(fn: (value: string[]) => void): void {
     this.onChange = fn;
@@ -105,8 +105,9 @@ export class NeuTagsComponent implements ControlValueAccessor {
     this.commit(this.value().filter((item) => item !== tag));
   }
   private commit(value: string[]): void {
-    this.value.set(value);
-    this.onChange(value);
-    this.valueChange.emit(value);
+    const ownedValue = [...value];
+    this.value.set(ownedValue);
+    this.onChange([...ownedValue]);
+    this.valueChange.emit([...ownedValue]);
   }
 }

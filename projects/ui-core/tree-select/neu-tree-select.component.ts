@@ -305,7 +305,7 @@ export class NeuTreeSelectComponent<
       return;
     }
 
-    this.values.set(Array.isArray(value) ? value : [value]);
+    this.values.set(Array.isArray(value) ? [...value] : [value]);
   }
 
   registerOnChange(fn: (value: V | V[] | null) => void): void {
@@ -477,10 +477,11 @@ export class NeuTreeSelectComponent<
   }
 
   private commit(values: V[]): void {
-    this.values.set(values);
+    const ownedValues = [...values];
+    this.values.set(ownedValues);
     this.onTouched();
-    this.onChange(this.multiple() ? values : (values[0] ?? null));
-    this.selectionChange.emit(this.selectedNodesFromValues(values));
+    this.onChange(this.multiple() ? [...ownedValues] : (ownedValues[0] ?? null));
+    this.selectionChange.emit(this.selectedNodesFromValues(ownedValues));
   }
 
   private selectedNodesFromValues(values: readonly V[]): T[] {

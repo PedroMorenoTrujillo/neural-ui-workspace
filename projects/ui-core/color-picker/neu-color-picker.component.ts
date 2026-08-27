@@ -145,7 +145,7 @@ function hslToHex(h: number, s: number, l: number): string {
   host: {
     class: 'neu-cp',
     '[class.neu-cp--open]': '_isOpen()',
-    '[class.neu-cp--disabled]': '_cvaDisabled()',
+    '[class.neu-cp--disabled]': '_isDisabled()',
   },
   template: `
     <!-- Swatch trigger -->
@@ -154,10 +154,17 @@ function hslToHex(h: number, s: number, l: number): string {
       #colorPickerOrigin="cdkOverlayOrigin"
       type="button"
       class="neu-cp__trigger"
+      [id]="triggerId()"
       [attr.aria-expanded]="_isOpen()"
-      [attr.aria-label]="'Color: ' + _hexValue()"
-      [disabled]="_cvaDisabled()"
+      [attr.aria-label]="ariaLabel() || ('Color: ' + (_hexValue() || 'not set'))"
+      [attr.aria-labelledby]="ariaLabelledBy() || null"
+      [attr.aria-describedby]="ariaDescribedBy() || null"
+      [attr.aria-required]="required() ? 'true' : null"
+      [attr.aria-invalid]="invalid() ? 'true' : null"
+      [attr.aria-readonly]="readonly() ? 'true' : null"
+      [disabled]="_isDisabled()"
       (click)="_toggle()"
+      (blur)="onBlur()"
     >
       <span class="neu-cp__swatch" [style.background]="_hexValue()"></span>
       <span class="neu-cp__hex-label">{{ _hexValue() }}</span>
@@ -199,6 +206,7 @@ function hslToHex(h: number, s: number, l: number): string {
           min="0"
           max="360"
           [value]="_hue()"
+          [disabled]="_isDisabled() || readonly()"
           (input)="_onHueChange(+$any($event.target).value)"
           [attr.aria-label]="'Tono ' + _hue() + '°'"
         />
@@ -211,6 +219,7 @@ function hslToHex(h: number, s: number, l: number): string {
               class="neu-cp__sw"
               [style.background]="sw"
               [attr.aria-label]="'Color ' + sw"
+              [disabled]="_isDisabled() || readonly()"
               (click)="_pickSwatch(sw)"
             ></button>
           }
@@ -223,6 +232,7 @@ function hslToHex(h: number, s: number, l: number): string {
               type="button"
               class="neu-cp__mode-btn"
               [class.neu-cp__mode-btn--active]="_activeMode() === m"
+              [disabled]="_isDisabled()"
               (click)="_activeMode.set(m)"
             >
               {{ m.toUpperCase() }}
@@ -236,7 +246,10 @@ function hslToHex(h: number, s: number, l: number): string {
             class="neu-cp__text-input"
             type="text"
             [value]="_textValue()"
+            [disabled]="_isDisabled()"
+            [readonly]="readonly()"
             (input)="_onTextChange($any($event.target).value)"
+            (blur)="onBlur()"
             [attr.aria-label]="'Valor ' + _activeMode()"
           />
           <span class="neu-cp__swatch-sm" [style.background]="_hexValue()"></span>
@@ -249,6 +262,14 @@ function hslToHex(h: number, s: number, l: number): string {
 export class NeuColorPickerComponent implements ControlValueAccessor {
   // ── Inputs / Outputs ────────────────────────────────────────────
   readonly mode = input<NeuColorMode>('hex');
+  readonly disabled = input(false);
+  readonly readonly = input(false);
+  readonly inputId = input('');
+  readonly ariaLabel = input('');
+  readonly ariaLabelledBy = input('');
+  readonly ariaDescribedBy = input('');
+  readonly required = input(false);
+  readonly invalid = input(false);
 
   /** Emitido al cambiar el color / Emitted when color changes */
   readonly colorChange = output<string>();
@@ -271,9 +292,12 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
 
   readonly _isOpen = signal(false);
   readonly _cvaDisabled = signal(false);
+  readonly _hasValue = signal(true);
   readonly _hue = signal(210);
   readonly _sv = signal({ s: 80, v: 90 });
   readonly _activeMode = linkedSignal<NeuColorMode>(() => this.mode());
+  readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
+  readonly triggerId = computed(() => this.inputId() || this._id);
 
   private _dragging = false;
   private _onChange: (v: string) => void = () => {};
@@ -318,7 +342,9 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   }
 
   // ── Computed ──────────────────────────────────────────────────
-  readonly _hexValue = computed(() => hsvToHex(this._hue(), this._sv().s, this._sv().v));
+  readonly _hexValue = computed(() =>
+    this._hasValue() ? hsvToHex(this._hue(), this._sv().s, this._sv().v) : '',
+  );
 
   readonly _textValue = computed(() => {
     const hex = this._hexValue();
@@ -338,17 +364,19 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
 
   // ── Canvas interactions ───────────────────────────────────────
   _canvasDown(e: PointerEvent): void {
+    if (this._isDisabled() || this.readonly()) return;
     this._dragging = true;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     this._updateFromCanvas(e);
   }
 
   _canvasDrag(e: PointerEvent): void {
-    if (!this._dragging) return;
+    if (!this._dragging || this._isDisabled() || this.readonly()) return;
     this._updateFromCanvas(e);
   }
 
   _canvasUp(e: PointerEvent): void {
+    if (!this._dragging) return;
     this._dragging = false;
     (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
   }
@@ -358,57 +386,74 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
     const s = Math.round(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * 100);
     const v = Math.round(Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height)) * 100);
     this._sv.set({ s, v });
-    this._emit();
+    this._hasValue.set(true);
+    this._commitUserValue();
   }
 
   // ── Event handlers ────────────────────────────────────────────
   _toggle(): void {
+    if (this._isDisabled()) return;
     this._isOpen.update((v) => !v);
   }
 
   _onHueChange(v: number): void {
+    if (this._isDisabled() || this.readonly()) return;
     this._hue.set(Number(v));
-    this._emit();
+    this._hasValue.set(true);
+    this._commitUserValue();
   }
 
   _pickSwatch(hex: string): void {
-    this._applyHex(hex);
-    this._emit();
+    if (this._isDisabled() || this.readonly()) return;
+    this._applyValue(hex);
+    this._commitUserValue();
   }
 
   _onTextChange(text: string): void {
-    const t = text.trim();
-    if (t.startsWith('#')) {
-      this._applyHex(t);
-    } else if (t.startsWith('rgb')) {
-      const m = t.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-      if (m) this._applyHex(rgbToHex(+m[1], +m[2], +m[3]));
-    } else if (t.startsWith('hsl')) {
-      const m = t.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
-      if (m) this._applyHex(hslToHex(+m[1], +m[2], +m[3]));
-    }
-    this._emit();
+    if (this._isDisabled() || this.readonly()) return;
+    this._applyValue(text);
+    this._commitUserValue();
+  }
+
+  onBlur(): void {
+    this._onTouched();
   }
 
   // ── Helpers ───────────────────────────────────────────────────
-  private _applyHex(hex: string): void {
+  private _applyHex(hex: string): boolean {
     const rgb = hexToRgb(hex);
-    if (!rgb) return;
+    if (!rgb) return false;
     const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
     this._hue.set(hsv.h);
     this._sv.set({ s: hsv.s, v: hsv.v });
+    this._hasValue.set(true);
+    return true;
   }
 
-  private _emit(): void {
+  private _applyValue(value: string | null | undefined): boolean {
+    const text = value?.trim() ?? '';
+    if (!text) {
+      this._hasValue.set(false);
+      return true;
+    }
+    if (text.startsWith('#')) return this._applyHex(text);
+
+    const rgb = text.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    if (rgb) return this._applyHex(rgbToHex(+rgb[1], +rgb[2], +rgb[3]));
+
+    const hsl = text.match(/^hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)$/);
+    return hsl ? this._applyHex(hslToHex(+hsl[1], +hsl[2], +hsl[3])) : false;
+  }
+
+  private _commitUserValue(): void {
     const val = this._textValue();
     this._onChange(val);
     this.colorChange.emit(val);
   }
 
   // ── CVA ──────────────────────────────────────────────────────
-  writeValue(val: string | null): void {
-    if (!val) return;
-    this._onTextChange(val);
+  writeValue(val: string | null | undefined): void {
+    this._applyValue(val);
   }
 
   registerOnChange(fn: (v: string) => void): void {

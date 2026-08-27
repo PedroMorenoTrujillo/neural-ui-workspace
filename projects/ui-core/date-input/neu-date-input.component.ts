@@ -683,8 +683,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
   readonly hasError = computed(() => !!this.errorMessage());
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _onChange: (v: any) => void = () => {};
+  private _onChange: (v: string | string[] | NeuDateRange) => void = () => {};
   private _onTouched: () => void = () => {};
 
   // ── State — single ────────────────────────────────────────────────

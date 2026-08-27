@@ -20,17 +20,25 @@ describe('NeuFormFieldComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Work email');
   });
 
-  it('prefers error over hint', () => {
+  it('renders error and hint with deterministic relationship IDs', () => {
     fixture.componentRef.setInput('hint', 'Hint');
     fixture.componentRef.setInput('error', 'Required');
+    fixture.componentRef.setInput('id', 'email-field');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Required');
-    expect(fixture.nativeElement.textContent).not.toContain('Hint');
+    expect(fixture.nativeElement.textContent).toContain('Hint');
+    expect(fixture.nativeElement.querySelector('.neu-form-field__hint')?.id).toBe('email-field-hint');
+    expect(fixture.nativeElement.querySelector('.neu-form-field__error')?.id).toBe('email-field-error');
+    expect(fixture.componentInstance.describedBy()).toBe('email-field-hint email-field-error');
+    expect(fixture.componentInstance.mergeDescribedBy('help external help')).toBe(
+      'help external email-field-hint email-field-error',
+    );
   });
 
   it('renders prefix, suffix, association and computed size/error classes', () => {
     fixture.componentRef.setInput('label', 'Amount');
     fixture.componentRef.setInput('forId', 'amount-input');
+    fixture.componentRef.setInput('id', 'amount-field');
     fixture.componentRef.setInput('prefix', '$');
     fixture.componentRef.setInput('suffix', 'USD');
     fixture.componentRef.setInput('size', 'lg');
@@ -41,6 +49,7 @@ describe('NeuFormFieldComponent', () => {
     expect(host.classList).toContain('neu-form-field--lg');
     expect(host.classList).toContain('neu-form-field--error');
     expect(host.querySelector('label')?.getAttribute('for')).toBe('amount-input');
+    expect(host.querySelector('label')?.id).toBe('amount-field-label');
     expect(host.querySelector('.neu-form-field__prefix')?.textContent).toBe('$');
     expect(host.querySelector('.neu-form-field__suffix')?.textContent).toBe('USD');
     expect(host.querySelector('[role="alert"]')?.textContent).toContain('Invalid');

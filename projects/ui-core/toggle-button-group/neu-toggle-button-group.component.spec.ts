@@ -112,6 +112,28 @@ describe('NeuToggleButtonGroupComponent', () => {
     expect(comp._value()).toEqual(['week']);
   });
 
+  it('owns a snapshot of multiple programmatic values and emits fresh proposals', () => {
+    const { comp } = mk({ multiple: true });
+    const incoming = ['day'];
+    const cvaValues: string[][] = [];
+    const publicValues: string[][] = [];
+    comp.registerOnChange((value) => cvaValues.push(value as string[]));
+    comp.neuChange.subscribe((value) => publicValues.push(value as string[]));
+
+    comp.writeValue(incoming);
+    expect(comp._value()).toEqual(incoming);
+    expect(comp._value()).not.toBe(incoming);
+
+    incoming.push('week');
+    expect(comp._value()).toEqual(['day']);
+
+    comp.toggle(OPTIONS[1]);
+    expect(incoming).toEqual(['day', 'week']);
+    expect(cvaValues[0]).toEqual(['day', 'week']);
+    expect(cvaValues[0]).not.toBe(comp._value());
+    expect(publicValues[0]).not.toBe(comp._value());
+  });
+
   it('isSelected returns true for selected value in single mode', () => {
     const { comp } = mk();
     comp.writeValue('day');
