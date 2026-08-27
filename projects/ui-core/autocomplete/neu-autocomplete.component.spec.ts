@@ -736,6 +736,45 @@ describe('NeuAutocompleteComponent', () => {
     expect(f.componentInstance._activeIndex()).toBe(-1);
   });
 
+  it('cancels retained overlay and active-row frames on close and destroy', () => {
+    const f = setup();
+    const callbacks = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    const request = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      const frameId = ++nextFrame;
+      callbacks.set(frameId, callback);
+      return frameId;
+    });
+    const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((frameId) => {
+      callbacks.delete(frameId);
+    });
+    const detachedScroll = vi.fn();
+    const query = vi
+      .spyOn(f.nativeElement, 'querySelector')
+      .mockReturnValue({ scrollIntoView: detachedScroll } as unknown as HTMLElement);
+
+    f.componentInstance.onQueryChange('a');
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    const closeCallbacks = [...callbacks.values()];
+    f.componentInstance.hide();
+    closeCallbacks.forEach((callback) => callback(0));
+
+    expect(request).toHaveBeenCalled();
+    expect(cancel).toHaveBeenCalled();
+    expect(detachedScroll).not.toHaveBeenCalled();
+
+    f.componentInstance.onQueryChange('a');
+    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    const destroyCallbacks = [...callbacks.values()];
+    f.destroy();
+    destroyCallbacks.forEach((callback) => callback(0));
+
+    expect(detachedScroll).not.toHaveBeenCalled();
+    query.mockRestore();
+    request.mockRestore();
+    cancel.mockRestore();
+  });
+
   it('resolves the CVA provider through Reactive Forms with a projected item template', async () => {
     @Component({
       imports: [NeuAutocompleteComponent, NeuAutocompleteItemDirective, ReactiveFormsModule],

@@ -3,6 +3,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   PLATFORM_ID,
   ViewEncapsulation,
@@ -33,22 +34,21 @@ import {
   resolveNeuOptionDisabled,
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
+  ɵInternalNeuOptionActiveRowController as InternalNeuOptionActiveRowController,
   ɵInternalNeuOptionLazyRequestSequencer as InternalNeuOptionLazyRequestSequencer,
   ɵInternalNeuOptionNormalizedRow as InternalNeuOptionNormalizedRow,
   ɵInternalNeuOptionRow as InternalNeuOptionRow,
+  ɵInternalNeuOptionTypeaheadController as InternalNeuOptionTypeaheadController,
   ɵcreateNeuOptionLoadingRows as createNeuOptionLoadingRows,
   ɵcreateNeuOptionLazyRequest as createNeuOptionLazyRequest,
+  ɵderiveNeuOptionActiveDescendant as deriveNeuOptionActiveDescendant,
+  ɵderiveNeuOptionAriaPosition as deriveNeuOptionAriaPosition,
   ɵderiveNeuOptionRowId as deriveNeuOptionRowId,
   ɵfilterNeuOptionRows as filterNeuOptionRows,
-  ɵfindNeuOptionBoundaryRow as findNeuOptionBoundaryRow,
-  ɵfindNeuOptionTypeaheadRow as findNeuOptionTypeaheadRow,
-  ɵmoveNeuOptionActiveRow as moveNeuOptionActiveRow,
   ɵnormalizeNeuLegacyOptionGroups as normalizeNeuLegacyOptionGroups,
   ɵnormalizeNeuOptionGroups as normalizeNeuOptionGroups,
   ɵnormalizeNeuOptionLazyWindow as normalizeNeuOptionLazyWindow,
   ɵnormalizeNeuOptionRows as normalizeNeuOptionRows,
-  ɵpageNeuOptionActiveRow as pageNeuOptionActiveRow,
-  ɵreconcileNeuOptionActiveRow as reconcileNeuOptionActiveRow,
 } from '@neural-ui/core/option-api';
 import {
   NeuListboxEmptyDirective,
@@ -300,11 +300,20 @@ export class NeuListboxComponent<
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly generatedId = inject(NeuIdGenerator).getId('neu-listbox-');
   private readonly lazySequencer = new InternalNeuOptionLazyRequestSequencer();
   private readonly lastLazyRequest = signal<NeuOptionLazyRequest | null>(null);
-  private typeahead = '';
-  private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly activeRowController = new InternalNeuOptionActiveRowController<T, G | string, T>(
+    [],
+    {
+      rowKey: (row) => row.option,
+      keysEqual: (left, right) => neuOptionsEqual(left, right, this.identityPolicy()),
+      requestScrollOnChange: true,
+    },
+  );
+  private typeaheadController: InternalNeuOptionTypeaheadController<T, G | string> | null = null;
+  private typeaheadLocale: string | undefined;
   private rangeAnchorLogicalIndex: number | null = null;
   private touchInteraction = false;
 
@@ -481,9 +490,11 @@ export class NeuListboxComponent<
   );
   readonly activeDescendantId = computed(() => {
     if (!this.focused()) return null;
-    const row = this.visibleRows()[this.activeIndex()];
-    const rendered = this.renderedRows().some((entry) => entry.rowIndex === this.activeIndex());
-    return row?.kind === 'option' && !row.disabled && rendered ? this.rowId(row) : null;
+    const rowIndex = this.activeIndex();
+    const rendered = this.renderedRows().some((entry) => entry.rowIndex === rowIndex);
+    return rendered
+      ? deriveNeuOptionActiveDescendant(this.baseId(), this.visibleRows(), rowIndex)
+      : null;
   });
   readonly selectedNativeValues = computed(() =>
     this.values().map((value, index) => ({ key: index, value: this.nativeValue(value) })),
@@ -493,16 +504,18 @@ export class NeuListboxComponent<
   private onTouched: () => void = () => {};
 
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.activeRowController.dispose();
+      this.typeaheadController?.dispose();
+      this.typeaheadController = null;
+    });
     effect(() => {
       const rows = this.visibleRows();
-      const current = untracked(() => this.activeIndex());
-      if (current === -1) return;
-      const logical = untracked(() => {
-        const active = rows[current];
-        return active?.kind === 'option' ? active.logicalIndex : null;
+      const locale = this.filterLocale();
+      untracked(() => {
+        this.applyActiveResult(this.activeRowController.setRows(rows));
+        this.ensureTypeaheadController(rows, locale).setRows(rows);
       });
-      const next = reconcileNeuOptionActiveRow(rows, logical);
-      untracked(() => this.activeIndex.set(next));
     });
   }
 
@@ -546,8 +559,8 @@ export class NeuListboxComponent<
     return `${this.baseId()}-group-${groupIndex}`;
   }
   setActiveRow(rowIndex: number): void {
-    const row = this.visibleRows()[rowIndex];
-    if (row?.kind === 'option' && !row.disabled) this.activeIndex.set(rowIndex);
+    this.activeRowController.setRows(this.visibleRows());
+    this.applyActiveResult(this.activeRowController.activate(rowIndex));
   }
   onOptionMouseEnter(rowIndex: number): void {
     if (this.focused() && this.focusOnHover()) this.setActiveRow(rowIndex);
@@ -613,7 +626,7 @@ export class NeuListboxComponent<
     else next = selected ? [] : [value];
     this.rangeAnchorLogicalIndex = row.logicalIndex;
     this.touchInteraction = false;
-    this.activeIndex.set(rowIndex);
+    this.setActiveRow(rowIndex);
     this.commitSelection(next, originalEvent, row.option, !selected);
   }
 
@@ -629,18 +642,24 @@ export class NeuListboxComponent<
   onListFocus(event: FocusEvent): void {
     if (this.isDisabled()) return;
     this.focused.set(true);
+    this.prepareActiveRowController();
     const selected = this.visibleRows().findIndex(
       (row) => row.kind === 'option' && this.isOptionSelected(row.option),
     );
-    const next =
+    const requested =
       this.activeIndex() !== -1
         ? this.activeIndex()
         : this.autoOptionFocus()
           ? selected !== -1
             ? selected
-            : findNeuOptionBoundaryRow(this.visibleRows(), 'first')
+            : this.activeRowController.first().rowIndex
           : selected;
-    this.activeIndex.set(next);
+    const result =
+      requested === -1
+        ? this.activeRowController.clear()
+        : this.activeRowController.activate(requested);
+    this.applyActiveResult(result);
+    const next = result.rowIndex;
     this.ensureActiveRendered(next);
     this.scrollActiveIntoView();
     this.listFocus.emit(event);
@@ -656,7 +675,7 @@ export class NeuListboxComponent<
     if (related && this.host.nativeElement.contains(related)) return;
     this.focused.set(false);
     this.rangeAnchorLogicalIndex = null;
-    this.clearTypeahead();
+    this.typeaheadController?.reset();
     this.onTouched();
     this.listBlur.emit(event);
   }
@@ -666,10 +685,14 @@ export class NeuListboxComponent<
     const rows = this.visibleRows();
     const meta = event.metaKey || event.ctrlKey;
     let next = this.activeIndex();
+    this.prepareActiveRowController();
     switch (event.key) {
       case 'ArrowDown':
       case 'ArrowUp':
-        next = moveNeuOptionActiveRow(rows, next, event.key === 'ArrowDown' ? 1 : -1);
+        next =
+          event.key === 'ArrowDown'
+            ? this.activeRowController.next().rowIndex
+            : this.activeRowController.previous().rowIndex;
         if (this.multiple() && event.shiftKey) {
           this.captureRangeAnchor();
           this.selectRange(event, next);
@@ -677,7 +700,10 @@ export class NeuListboxComponent<
         return;
       case 'Home':
       case 'End':
-        next = findNeuOptionBoundaryRow(rows, event.key === 'Home' ? 'first' : 'last');
+        next =
+          event.key === 'Home'
+            ? this.activeRowController.first().rowIndex
+            : this.activeRowController.last().rowIndex;
         if (this.multiple() && event.shiftKey && meta) {
           this.captureRangeAnchor();
           this.selectRange(event, next);
@@ -685,12 +711,10 @@ export class NeuListboxComponent<
         return;
       case 'PageDown':
       case 'PageUp':
-        next = pageNeuOptionActiveRow(
-          rows,
-          next,
+        next = this.activeRowController.page(
           event.key === 'PageDown' ? 1 : -1,
           this.virtualScrollViewportItems(),
-        );
+        ).rowIndex;
         this.moveActive(event, next);
         return;
       case 'Enter':
@@ -712,16 +736,11 @@ export class NeuListboxComponent<
         break;
     }
     if (!meta && event.key.length === 1 && !event.altKey) {
-      this.typeahead += event.key;
-      const match = findNeuOptionTypeaheadRow(
-        rows,
-        this.typeahead,
+      const match = this.ensureTypeaheadController(rows, this.filterLocale()).type(
+        event.key,
         next,
-        this.optionLabel(),
-        this.filterLocale(),
-      );
+      ).rowIndex;
       if (match !== -1) this.moveActive(event, match);
-      this.resetTypeaheadTimer();
     }
   }
 
@@ -734,13 +753,12 @@ export class NeuListboxComponent<
       event.preventDefault();
       return;
     }
+    this.prepareActiveRowController();
     this.moveActive(
       event,
-      moveNeuOptionActiveRow(
-        this.visibleRows(),
-        this.activeIndex(),
-        event.key === 'ArrowDown' ? 1 : -1,
-      ),
+      event.key === 'ArrowDown'
+        ? this.activeRowController.next().rowIndex
+        : this.activeRowController.previous().rowIndex,
     );
   }
   onFilterInput(event: Event): void {
@@ -749,7 +767,9 @@ export class NeuListboxComponent<
   setFilter(value: string, originalEvent: Event | null = null): void {
     if (this.filterValue() === null) this.query.set(value);
     this.virtualFirst.set(0);
+    this.activeRowController.clear();
     this.activeIndex.set(-1);
+    this.typeaheadController?.reset();
     const emitted: NeuListboxFilterEvent<T> = {
       originalEvent,
       filter: value,
@@ -832,11 +852,12 @@ export class NeuListboxComponent<
   }
 
   optionPosition(row: InternalNeuOptionRow<T>, rowIndex: number): number {
-    return this.lazy()
-      ? row.logicalIndex + 1
-      : this.visibleRows()
-          .slice(0, rowIndex + 1)
-          .filter((candidate) => candidate.kind === 'option').length;
+    return (
+      deriveNeuOptionAriaPosition(this.visibleRows(), rowIndex, {
+        logicalOffset: this.lazy() ? this.lazyFirst() : 0,
+        totalSize: this.logicalOptionCount(),
+      })?.posInSet ?? row.logicalIndex + 1
+    );
   }
   itemTemplateContext(row: InternalNeuOptionRow<T>, rowIndex: number) {
     return {
@@ -883,7 +904,7 @@ export class NeuListboxComponent<
   private moveActive(event: KeyboardEvent, next: number): void {
     event.preventDefault();
     if (next === -1) return;
-    this.activeIndex.set(next);
+    this.setActiveRow(next);
     this.ensureActiveRendered(next);
     if (this.selectOnFocus() && !this.multiple()) {
       const row = this.visibleRows()[next];
@@ -907,7 +928,7 @@ export class NeuListboxComponent<
       .flatMap((row) =>
         row.kind === 'option' && !row.disabled ? [this.optionValueOf(row.option)] : [],
       );
-    this.activeIndex.set(endRowIndex);
+    this.setActiveRow(endRowIndex);
     this.commitSelection(values, event, end.option, true);
   }
   private captureRangeAnchor(): void {
@@ -1048,13 +1069,36 @@ export class NeuListboxComponent<
       return String(value);
     }
   }
-  private resetTypeaheadTimer(): void {
-    if (this.typeaheadTimer) clearTimeout(this.typeaheadTimer);
-    this.typeaheadTimer = setTimeout(() => this.clearTypeahead(), 500);
+  private prepareActiveRowController(): void {
+    const rows = this.visibleRows();
+    this.activeRowController.setRows(rows);
+    const rowIndex = this.activeIndex();
+    const row = rows[rowIndex];
+    this.applyActiveResult(
+      row?.kind === 'option' && !row.disabled
+        ? this.activeRowController.activate(rowIndex)
+        : this.activeRowController.clear(),
+    );
   }
-  private clearTypeahead(): void {
-    this.typeahead = '';
-    if (this.typeaheadTimer) clearTimeout(this.typeaheadTimer);
-    this.typeaheadTimer = null;
+
+  private applyActiveResult(
+    result: ReturnType<InternalNeuOptionActiveRowController<T, G | string, T>['activate']>,
+  ): void {
+    this.activeIndex.set(result.rowIndex);
+  }
+
+  private ensureTypeaheadController(
+    rows: readonly InternalNeuOptionNormalizedRow<T, G | string>[],
+    locale: string | undefined,
+  ): InternalNeuOptionTypeaheadController<T, G | string> {
+    if (!this.typeaheadController || locale !== this.typeaheadLocale) {
+      this.typeaheadController?.dispose();
+      this.typeaheadLocale = locale;
+      this.typeaheadController = new InternalNeuOptionTypeaheadController(rows, {
+        labelAccessor: (option) => this.optionLabelOf(option),
+        locale,
+      });
+    }
+    return this.typeaheadController;
   }
 }

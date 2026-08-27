@@ -388,6 +388,43 @@ describe('NeuListboxComponent', () => {
     expect(component.activeIndex()).toBe(1);
   });
 
+  it('reconciles the ephemeral active row by option identity after immutable reorder', () => {
+    const component = fixture.componentInstance;
+    component.setActiveRow(1);
+    const reordered = [
+      { ...options[1], label: 'Beta replacement' },
+      { ...options[0], label: 'Alpha replacement' },
+      { ...options[2] },
+    ];
+
+    fixture.componentRef.setInput('options', reordered);
+    fixture.detectChanges();
+
+    expect(component.activeIndex()).toBe(0);
+    expect((component.visibleRows()[0] as any).option).toBe(reordered[0]);
+  });
+
+  it('disposes the shared typeahead buffer timer with the component', () => {
+    vi.useFakeTimers();
+    try {
+      const component = fixture.componentInstance;
+      const timersBefore = vi.getTimerCount();
+      component.onKeyDown(new KeyboardEvent('keydown', { key: 'b' }));
+      const controller = (component as any).typeaheadController;
+      expect(controller.buffer).toBe('b');
+      expect(vi.getTimerCount()).toBeGreaterThan(timersBefore);
+
+      fixture.destroy();
+
+      expect(controller.isDestroyed).toBe(true);
+      expect(controller.buffer).toBe('');
+      vi.runOnlyPendingTimers();
+      expect(controller.buffer).toBe('');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('supports shift range selection and Ctrl+A over visible eligible options', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('multiple', true);
