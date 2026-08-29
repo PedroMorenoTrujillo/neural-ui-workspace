@@ -5,7 +5,11 @@ import {
   NeuOptionGroupTemplateContext,
   NeuOptionLoaderTemplateContext,
 } from '@neural-ui/core/option-api';
-import { NeuListboxItemContext, NeuListboxOption } from './neu-listbox.types';
+import {
+  NeuListboxIndicatorContext,
+  NeuListboxItemContext,
+  NeuListboxOption,
+} from './neu-listbox.types';
 
 @Directive({ selector: 'ng-template[neuListboxItem]' })
 export class NeuListboxItemDirective<T = NeuListboxOption> {
@@ -16,6 +20,19 @@ export class NeuListboxItemDirective<T = NeuListboxOption> {
     _directive: NeuListboxItemDirective<T>,
     context: unknown,
   ): context is NeuListboxItemContext<T> {
+    return true;
+  }
+}
+
+@Directive({ selector: 'ng-template[neuListboxIndicator]' })
+export class NeuListboxIndicatorDirective<T = NeuListboxOption, V = unknown> {
+  /** Bind the listbox collection to obtain strict template inference. */
+  readonly neuListboxIndicator = input<readonly T[] | ''>('');
+  constructor(readonly templateRef: TemplateRef<NeuListboxIndicatorContext<T, V>>) {}
+  static ngTemplateContextGuard<T, V>(
+    _directive: NeuListboxIndicatorDirective<T, V>,
+    context: unknown,
+  ): context is NeuListboxIndicatorContext<T, V> {
     return true;
   }
 }

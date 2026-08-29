@@ -6,15 +6,9 @@ import {
   NeuOptionTemplateContext,
 } from '@neural-ui/core/option-api';
 
-export type NeuMultiselectSize = 'sm' | 'md' | 'lg' | 'small' | 'medium' | 'large';
+export type NeuMultiselectSize = 'sm' | 'md' | 'lg';
 export type NeuMultiselectVariant = 'outlined' | 'filled';
 export type NeuMultiselectDisplay = 'comma' | 'chip' | 'count';
-
-export interface NeuMultiselectVirtualScrollOptions {
-  readonly itemSize?: number;
-  readonly visibleItems?: number;
-  readonly buffer?: number;
-}
 
 export interface NeuMultiselectItemContext<T, V>
   extends NeuOptionTemplateContext<T> {

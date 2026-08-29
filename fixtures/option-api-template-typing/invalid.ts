@@ -14,6 +14,7 @@ import {
   NeuSelectComponent,
   NeuSelectFilterDirective,
   NeuSelectItemDirective,
+  NeuSelectSelectedDirective,
 } from '@neural-ui/core/select';
 import {
   NeuMultiselectComponent,
@@ -40,6 +41,7 @@ import {
     NeuSelectComponent,
     NeuSelectFilterDirective,
     NeuSelectItemDirective,
+    NeuSelectSelectedDirective,
     NeuMultiselectComponent,
     NeuMultiselectFilterDirective,
     NeuMultiselectItemDirective,
@@ -55,7 +57,7 @@ import {
     <ng-template [neuFilterContextFixture]="filterConfig" let-filter="filter">
       <button type="button" (click)="filter(123)">Filter</button>
     </ng-template>
-    <neu-listbox [options]="options" [filter]="true">
+    <neu-listbox [options]="options" [searchable]="true">
       <ng-template [neuListboxItem]="options" let-person="option">
         {{ person.profile.missing }}
       </ng-template>
@@ -63,7 +65,7 @@ import {
         <button type="button" (click)="filter(456)">Filter listbox</button>
       </ng-template>
     </neu-listbox>
-    <neu-select [options]="options" [filter]="true">
+    <neu-select [options]="options" [searchable]="true">
       <ng-template [neuSelectItem]="options" let-person="option">
         {{ person.profile.missing }}
       </ng-template>
@@ -71,7 +73,12 @@ import {
         <button type="button" (click)="filter(789)">Filter select</button>
       </ng-template>
     </neu-select>
-    <neu-multiselect [options]="options" [filter]="true">
+    <neu-select [options]="options" [multiple]="true">
+      <ng-template [neuSelectSelected]="options" let-selected="options">
+        {{ selected[0]?.profile?.missing }}
+      </ng-template>
+    </neu-select>
+    <neu-multiselect [options]="options" [searchable]="true">
       <ng-template [neuMultiselectItem]="options" let-person="option">
         {{ person.profile.missing }}
       </ng-template>

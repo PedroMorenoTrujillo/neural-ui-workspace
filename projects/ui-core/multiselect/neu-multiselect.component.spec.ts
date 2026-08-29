@@ -167,12 +167,12 @@ class TemplateHostComponent {
   template: `<neu-multiselect
     [groups]="groups()"
     [groupConfig]="groupConfig"
-    [filter]="true"
+    [searchable]="true"
     [filterValue]="filterValue()"
     [loading]="loading()"
     [lazy]="lazy()"
-    [showToggleAll]="true"
-    [showClear]="true"
+
+    [clearable]="true"
   >
     <ng-template neuMultiselectHeader><span class="all-header">Header</span></ng-template>
     <ng-template neuMultiselectFooter><span class="all-footer">Footer</span></ng-template>
@@ -353,7 +353,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('searchable', true);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     comp.searchQuery.set('ang');
     f.detectChanges();
     await f.whenStable();
@@ -509,7 +509,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     comp._values.set(['angular']);
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -528,7 +528,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     comp._values.set(['angular', 'react']);
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -636,7 +636,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('input.neu-multiselect__search-input')).toBeTruthy();
@@ -648,7 +648,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('searchable', true);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     comp.searchQuery.set('ang');
     f.detectChanges();
     const filtered = comp.filteredOptions();
@@ -663,7 +663,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('noResultsMessage', 'Sin resultados');
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     comp.searchQuery.set('xyz123');
     f.detectChanges();
     expect(f.nativeElement.textContent).toContain('Sin resultados');
@@ -798,7 +798,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     const fakeEvent = { preventDefault: () => {} } as Event;
     comp.onTriggerKey(fakeEvent); // already open, no change
     expect(comp.isOpen()).toBe(true);
@@ -813,7 +813,7 @@ describe('NeuMultiselectComponent', () => {
     const comp = f.componentInstance as any;
     const onTouched = vi.fn();
     comp.registerOnTouched(onTouched);
-    comp.isOpen.set(true);
+    comp.open();
     comp.close();
     expect(comp.isOpen()).toBe(false);
     expect(onTouched).toHaveBeenCalled();
@@ -873,7 +873,6 @@ describe('NeuMultiselectComponent', () => {
     const comp = f.componentInstance as any;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
     const checkViewportSize = vi.fn();
-    comp.isOpen.set(true);
     comp._viewport = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
 
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
@@ -882,6 +881,7 @@ describe('NeuMultiselectComponent', () => {
     }) as typeof window.requestAnimationFrame;
 
     try {
+      comp.open();
       comp.toggleOption(OPTIONS[0]);
       expect(comp._values()).toEqual(['angular']);
       expect(checkViewportSize).toHaveBeenCalled();
@@ -928,7 +928,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     const fakeEvent = { preventDefault: () => {} } as Event;
     // Should not throw when navigating
@@ -943,7 +943,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     const external = document.createElement('div');
     document.body.appendChild(external);
     comp.onDocumentClick({ target: external } as unknown as MouseEvent);
@@ -956,7 +956,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     const internal = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
     comp.onDocumentClick({ target: internal } as unknown as MouseEvent);
     expect(comp.isOpen()).toBe(true);
@@ -1074,7 +1074,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.debugElement.query(By.directive(NeuMultiselectComponent))
       .componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1100,7 +1100,7 @@ describe('NeuMultiselectComponent', () => {
     const f = TestBed.createComponent(NeuMultiselectComponent);
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
-    (f.componentInstance as any).isOpen.set(true);
+    f.componentInstance.open();
     (f.componentInstance as any).searchQuery.set('ang');
     (f.componentInstance as any).toggle();
     expect((f.componentInstance as any).isOpen()).toBe(false);
@@ -1490,7 +1490,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const optionEls = document.querySelectorAll('.neu-multiselect__option');
@@ -1508,7 +1508,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const optionEls = document.querySelectorAll('.neu-multiselect__option');
@@ -1526,7 +1526,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const optionEls = document.querySelectorAll('.neu-multiselect__option');
@@ -1545,7 +1545,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const optionEls = document.querySelectorAll('.neu-multiselect__option');
@@ -1561,7 +1561,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1596,7 +1596,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     expect(comp.isOpen()).toBe(false);
 
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1612,7 +1612,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1647,7 +1647,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('searchable', true);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1686,7 +1686,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     comp.writeValue(['angular']);
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1742,7 +1742,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('virtualScroll', true);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1755,7 +1755,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('virtualScroll', true);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1788,7 +1788,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
 
     const target = document.createElement('div');
@@ -1817,7 +1817,7 @@ describe('NeuMultiselectComponent', () => {
     ]);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
 
     const seenSelectors: string[] = [];
@@ -1898,7 +1898,7 @@ describe('NeuMultiselectComponent', () => {
 
     const comp = f.debugElement.query(By.css('neu-multiselect'))
       .componentInstance as NeuMultiselectComponent<FrameworkModel, number>;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1956,7 +1956,7 @@ describe('NeuMultiselectComponent', () => {
     comp.onWindowScroll();
     expect(syncSpy).not.toHaveBeenCalled();
 
-    comp.isOpen.set(true);
+    comp.open();
     comp.onWindowResize();
     comp.onWindowScroll();
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -2161,7 +2161,7 @@ describe('NeuMultiselectComponent', () => {
     const emitted: FrameworkModel[][] = [];
     multiselect.selectionChange.subscribe((options: FrameworkModel[]) => emitted.push(options));
 
-    multiselect.isOpen.set(true);
+    multiselect.open();
     f.detectChanges();
     expect(document.querySelector('.raw-framework')?.textContent).toContain('Angular');
 
@@ -2204,7 +2204,7 @@ describe('NeuMultiselectComponent', () => {
     const change = vi.fn();
     const detail = vi.fn();
     comp.registerOnChange(change);
-    comp.onChange.subscribe(detail);
+    comp.changeDetail.subscribe(detail);
 
     comp.writeValue(supplied);
     supplied.push('react');
@@ -2223,7 +2223,7 @@ describe('NeuMultiselectComponent', () => {
     const cvaValues: string[][] = [];
     const details: any[] = [];
     comp.registerOnChange((value: string[]) => cvaValues.push(value));
-    comp.onChange.subscribe((event: unknown) => details.push(event));
+    comp.changeDetail.subscribe((event: unknown) => details.push(event));
 
     comp.toggleOption(OPTIONS[0]);
 
@@ -2245,7 +2245,7 @@ describe('NeuMultiselectComponent', () => {
     comp.toggleOption(OPTIONS[1]);
     comp.removeOption('angular');
     comp.clear();
-    comp.show();
+    comp.open();
     f.detectChanges();
 
     expect(comp._values()).toEqual(['angular']);
@@ -2294,14 +2294,13 @@ describe('NeuMultiselectComponent', () => {
     ];
     f.componentRef.setInput('options', models);
     f.componentRef.setInput('optionLabel', 'profile.name');
-    f.componentRef.setInput('filter', true);
+    f.componentRef.setInput('searchable', true);
     f.componentRef.setInput('filterValue', 'ang');
-    f.componentRef.setInput('filterFields', ['profile.name']);
-    f.componentRef.setInput('filterLocale', 'es');
+    f.componentRef.setInput('filterConfig', { fields: ['profile.name'], locale: 'es' });
     f.detectChanges();
     const comp = f.componentInstance as any;
     const proposals: any[] = [];
-    comp.onFilter.subscribe((event: unknown) => proposals.push(event));
+    comp.filter.subscribe((event: unknown) => proposals.push(event));
 
     expect(comp.filteredOptions()).toEqual([models[0]]);
     comp.applyFilter('react');
@@ -2320,9 +2319,9 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     const requests: any[] = [];
-    comp.onLazyLoad.subscribe((request: unknown) => requests.push(request));
+    comp.lazyRequest.subscribe((request: unknown) => requests.push(request));
 
-    comp.show();
+    comp.open();
     comp.applyFilter('a');
     comp.onVirtualIndexChange(5);
 
@@ -2334,10 +2333,10 @@ describe('NeuMultiselectComponent', () => {
   it('keeps active descendants rendered, eligible and logically positioned', async () => {
     const f = TestBed.createComponent(NeuMultiselectComponent);
     f.componentRef.setInput('options', OPTIONS);
-    f.componentRef.setInput('totalRecords', 20);
+    f.componentRef.setInput('totalItems', 20);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.show();
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -2354,7 +2353,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('autoOptionFocus', false);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.show();
+    comp.open();
     const keyboard = (key: string) => new KeyboardEvent('keydown', { key });
 
     comp.onTriggerKeyDown(keyboard('End'));
@@ -2389,7 +2388,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     const proposals: any[] = [];
-    comp.onSelectAllChange.subscribe((event: unknown) => proposals.push(event));
+    comp.selectAllChangeDetail.subscribe((event: unknown) => proposals.push(event));
 
     comp.toggleAllFiltered(new MouseEvent('click'));
 
@@ -2408,8 +2407,8 @@ describe('NeuMultiselectComponent', () => {
     const clear = vi.fn();
     const detail = vi.fn();
     comp.registerOnChange(cva);
-    comp.onClear.subscribe(clear);
-    comp.onChange.subscribe(detail);
+    comp.cleared.subscribe(clear);
+    comp.changeDetail.subscribe(detail);
     comp.writeValue(['angular']);
 
     comp.clear();
@@ -2427,7 +2426,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     const removals: any[] = [];
-    comp.onRemove.subscribe((event: unknown) => removals.push(event));
+    comp.remove.subscribe((event: unknown) => removals.push(event));
     comp.writeValue(['angular']);
 
     comp.removeOption('angular');
@@ -2508,7 +2507,7 @@ describe('NeuMultiselectComponent', () => {
     expect(projectedTemplates.every(Boolean)).toBe(true);
 
     comp.writeValue(['angular']);
-    comp.show();
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.all-header')).toBeTruthy();
@@ -2553,15 +2552,15 @@ describe('NeuMultiselectComponent', () => {
     const f = TestBed.createComponent(NeuMultiselectComponent);
     f.componentRef.setInput('options', OPTIONS);
     f.componentRef.setInput('focusOnHover', true);
-    f.componentRef.setInput('filter', true);
-    f.componentRef.setInput('filterBy', ' label, value ');
+    f.componentRef.setInput('searchable', true);
+    f.componentRef.setInput('filterConfig', { fields: ['label', 'value'] });
     f.componentRef.setInput('display', 'chip');
     f.detectChanges();
     const comp = f.componentInstance as any;
     const focused = vi.fn();
     const blurred = vi.fn();
-    comp.onFocus.subscribe(focused);
-    comp.onBlur.subscribe(blurred);
+    comp.focusEvent.subscribe(focused);
+    comp.blurEvent.subscribe(blurred);
 
     const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger');
     comp.onInputFocus(new FocusEvent('focus'));
@@ -2603,18 +2602,18 @@ describe('NeuMultiselectComponent', () => {
     expect(comp.itemContext({ value: 'solid', label: 'Solid' }).index).toBe(-1);
     comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Tab' }));
     expect(comp.isOpen()).toBe(false);
-    comp.show();
+    comp.open();
     f.detectChanges();
     document
       .querySelector('.neu-multiselect__option')
       ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     expect(comp.isOpen()).toBe(false);
-    comp.show();
+    comp.open();
     comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(comp.isOpen()).toBe(false);
     comp.onVirtualIndexChange(4);
 
-    comp.show();
+    comp.open();
     f.componentRef.setInput('disabled', true);
     f.detectChanges();
     await f.whenStable();
@@ -2661,28 +2660,30 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     expect(comp.effectiveVirtualScrollItemSize()).toBe(31);
     f.componentRef.setInput('virtualScrollItemSize', 0);
-    f.componentRef.setInput('size', 'small');
+    f.componentRef.setInput('size', 'sm');
     f.detectChanges();
     expect(comp.effectiveVirtualScrollItemSize()).toBe(36);
-    f.componentRef.setInput('size', 'large');
+    f.componentRef.setInput('size', 'lg');
     f.detectChanges();
     expect(comp.effectiveVirtualScrollItemSize()).toBe(52);
 
     const groups = [{ title: 'Frontend', children: OPTIONS.slice(0, 2) }];
     f.componentRef.setInput('groups', groups);
-    f.componentRef.setInput('optionGroupLabel', 'title');
-    f.componentRef.setInput('optionGroupChildren', 'children');
+    f.componentRef.setInput('groupConfig', {
+      labelAccessor: 'title',
+      childrenAccessor: 'children',
+    });
     f.detectChanges();
-    expect(comp.effectiveGroupConfig()).toMatchObject({
+    expect(comp.groupConfig()).toMatchObject({
       labelAccessor: 'title',
       childrenAccessor: 'children',
     });
     expect(comp.filteredOptions()).toEqual(OPTIONS.slice(0, 2));
 
     f.componentRef.setInput('groups', []);
-    f.componentRef.setInput('optionGroupChildren', null);
+    f.componentRef.setInput('groupConfig', null);
     f.detectChanges();
-    expect(comp.effectiveGroupConfig()).toBeNull();
+    expect(comp.groupConfig()).toBeNull();
 
     f.componentRef.setInput('options', OPTIONS);
     f.componentRef.setInput('selectionLimit', 1);
@@ -2699,5 +2700,156 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     comp.onOptionHover(1);
     expect(comp._values()).toEqual(['react']);
+  });
+
+  describe('controlled open owner', () => {
+    it('keeps uncontrolled open/close ergonomic and emits one state change per committed action', () => {
+      const f = TestBed.createComponent(NeuMultiselectComponent);
+      f.componentRef.setInput('options', OPTIONS);
+      f.detectChanges();
+      const comp = f.componentInstance;
+      const states: boolean[] = [];
+      const opened: string[] = [];
+      const closed: string[] = [];
+      comp.openChange.subscribe((value) => states.push(value));
+      comp.opened.subscribe((event) => opened.push(event.reason));
+      comp.closed.subscribe((event) => closed.push(event.reason));
+
+      comp.open();
+      comp.open();
+      comp.close();
+      comp.close();
+
+      expect(states).toEqual([true, false]);
+      expect(opened).toEqual(['programmatic']);
+      expect(closed).toEqual(['programmatic']);
+      expect(comp.isOpen()).toBe(false);
+    });
+
+    it('treats user actions as proposals and commits only after a controlled owner echo', () => {
+      const f = TestBed.createComponent(NeuMultiselectComponent);
+      f.componentRef.setInput('options', OPTIONS);
+      f.componentRef.setInput('open', false);
+      f.detectChanges();
+      const comp = f.componentInstance;
+      const states: boolean[] = [];
+      const opened: string[] = [];
+      const closed: string[] = [];
+      comp.openChange.subscribe((value) => states.push(value));
+      comp.opened.subscribe((event) => opened.push(event.reason));
+      comp.closed.subscribe((event) => closed.push(event.reason));
+
+      const triggerEvent = new MouseEvent('click');
+      comp.open(triggerEvent, 'trigger');
+      expect(comp.isOpen()).toBe(false);
+      expect(states).toEqual([true]);
+      expect(opened).toEqual([]);
+
+      f.componentRef.setInput('open', true);
+      f.detectChanges();
+      expect(comp.isOpen()).toBe(true);
+      expect(states).toEqual([true]);
+      expect(opened).toEqual(['trigger']);
+
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      comp.close(escapeEvent, 'escape');
+      expect(comp.isOpen()).toBe(true);
+      expect(states).toEqual([true, false]);
+      expect(closed).toEqual([]);
+
+      f.componentRef.setInput('open', false);
+      f.detectChanges();
+      expect(comp.isOpen()).toBe(false);
+      expect(states).toEqual([true, false]);
+      expect(closed).toEqual(['escape']);
+    });
+
+    it('keeps programmatic owner writes silent while lifecycle reflects actual transitions', () => {
+      const f = TestBed.createComponent(NeuMultiselectComponent);
+      f.componentRef.setInput('options', OPTIONS);
+      f.componentRef.setInput('open', false);
+      f.detectChanges();
+      const comp = f.componentInstance;
+      const states: boolean[] = [];
+      const lifecycle: string[] = [];
+      comp.openChange.subscribe((value) => states.push(value));
+      comp.opened.subscribe((event) => lifecycle.push(`open:${event.reason}`));
+      comp.closed.subscribe((event) => lifecycle.push(`close:${event.reason}`));
+
+      f.componentRef.setInput('open', true);
+      f.detectChanges();
+      f.componentRef.setInput('open', false);
+      f.detectChanges();
+
+      expect(states).toEqual([]);
+      expect(lifecycle).toEqual(['open:programmatic', 'close:programmatic']);
+    });
+
+    it('routes outside and Escape closure through the owner and restores trigger focus after echo', () => {
+      const originalRequestAnimationFrame = window.requestAnimationFrame;
+      window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+        callback(0);
+        return 1;
+      }) as typeof window.requestAnimationFrame;
+      const f = TestBed.createComponent(NeuMultiselectComponent);
+      f.componentRef.setInput('options', OPTIONS);
+      f.componentRef.setInput('open', true);
+      f.detectChanges();
+      const comp = f.componentInstance;
+      const trigger = f.nativeElement.querySelector('.neu-multiselect__trigger') as HTMLElement;
+      const focus = vi.spyOn(trigger, 'focus');
+      const states: boolean[] = [];
+      comp.openChange.subscribe((value) => states.push(value));
+
+      const external = document.createElement('div');
+      document.body.appendChild(external);
+      comp.onDocumentClick({ target: external } as unknown as MouseEvent);
+      expect(states).toEqual([false]);
+      expect(comp.isOpen()).toBe(true);
+      f.componentRef.setInput('open', false);
+      f.detectChanges();
+      expect(comp.isOpen()).toBe(false);
+
+      f.componentRef.setInput('open', true);
+      f.detectChanges();
+      const escape = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+      f.nativeElement.dispatchEvent(escape);
+      expect(states).toEqual([false, false]);
+      f.componentRef.setInput('open', false);
+      f.detectChanges();
+
+      expect(focus).toHaveBeenCalled();
+      document.body.removeChild(external);
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+    });
+
+    it('does not open while disabled and lets a controlled owner arbitrate disabled closure', () => {
+      const f = TestBed.createComponent(NeuMultiselectComponent);
+      f.componentRef.setInput('options', OPTIONS);
+      f.componentRef.setInput('open', false);
+      f.componentRef.setInput('disabled', true);
+      f.detectChanges();
+      const comp = f.componentInstance;
+      const states: boolean[] = [];
+      comp.openChange.subscribe((value) => states.push(value));
+
+      comp.open();
+      expect(comp.isOpen()).toBe(false);
+      expect(states).toEqual([]);
+
+      f.componentRef.setInput('disabled', false);
+      f.componentRef.setInput('open', true);
+      f.detectChanges();
+      expect(comp.isOpen()).toBe(true);
+
+      f.componentRef.setInput('disabled', true);
+      f.detectChanges();
+      expect(states).toEqual([false]);
+      expect(comp.isOpen()).toBe(true);
+
+      f.componentRef.setInput('open', false);
+      f.detectChanges();
+      expect(comp.isOpen()).toBe(false);
+    });
   });
 });

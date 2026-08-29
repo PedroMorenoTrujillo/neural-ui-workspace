@@ -39,14 +39,14 @@ Relevant capability gaps: **0**.
 | Single pointer/keyboard selection or deselection |                                 1 |                 1 |                 1 | pointer also emits `optionClick` once                           |       0 |
 | Multiple add/remove or meta selection            |                                 1 |                 1 |                 1 | pointer also emits `optionClick` once                           |       0 |
 | Range selection                                  |                                 1 |                 1 |                 1 | pointer range also emits `optionClick` once                     |       0 |
-| Uncontrolled select-all                          |                                 1 |                 1 |                 1 | `selectAllChange` 1                                             |       0 |
-| Controlled select-all                            |                                 0 |                 0 |                 0 | `selectAllChange` 1; owner echo is silent                       |       0 |
-| Filter/filter reset                              |                                 0 |                 0 |                 0 | `filterChange` 1; lazy mode also emits one deduplicated request |       0 |
+| Uncontrolled select-all                          |                                 1 |                 1 |                 1 | `selectAllChangeDetail` 1                                       |       0 |
+| Controlled select-all                            |                                 0 |                 0 |                 0 | `selectAllChangeDetail` 1; owner echo is silent                 |       0 |
+| Filter/filter reset                              |                                 0 |                 0 |                 0 | `filter` 1; lazy mode also emits one deduplicated request       |       0 |
 | Drop                                             |                                 0 |                 0 |                 0 | `drop` 1 immutable proposal                                     |       0 |
 | Programmatic write/reset                         |                                 0 |                 0 |                 0 | none                                                            |       0 |
 | Readonly/disabled interaction                    |                                 0 |                 0 |                 0 | none                                                            |       0 |
-| Focus                                            | 0, unless `selectOnFocus` selects | follows selection | follows selection | `listFocus` 1                                                   |       0 |
-| Meaningful control exit                          |                                 0 |                 0 |                 0 | `listBlur` 1                                                    |       1 |
+| Focus                                            | 0, unless `selectOnFocus` selects | follows selection | follows selection | `focusEvent` 1                                                  |       0 |
+| Meaningful control exit                          |                                 0 |                 0 |                 0 | `blurEvent` 1                                                   |       1 |
 
 `optionDoubleClick` is observational and never performs a second selection. Internal filter/list focus movement does not mark the CVA touched.
 

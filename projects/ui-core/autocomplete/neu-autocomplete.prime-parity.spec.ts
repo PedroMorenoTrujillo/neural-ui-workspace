@@ -52,7 +52,7 @@ function setupCityAutocomplete() {
   fixture.componentRef.setInput('optionLabel', 'profile.name');
   fixture.componentRef.setInput('optionValue', 'id');
   fixture.componentRef.setInput('optionDisabled', 'disabled');
-  fixture.componentRef.setInput('dataKey', 'id');
+  fixture.componentRef.setInput('identityConfig', { identityAccessor: 'id' });
   fixture.componentRef.setInput('delay', 20);
   fixture.detectChanges();
   return fixture;
@@ -107,7 +107,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
   it('enforces empty, below-minimum, exact-minimum, above-minimum and dynamic minimum states', () => {
     vi.useFakeTimers();
     const fixture = setupCityAutocomplete();
-    fixture.componentRef.setInput('minQueryLength', 3);
+    fixture.componentRef.setInput('minLength', 3);
     const complete = vi.fn();
     fixture.componentInstance.completeMethod.subscribe(complete);
 
@@ -122,7 +122,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     vi.advanceTimersByTime(20);
     expect(complete.mock.calls.map(([event]) => event.query)).toEqual(['abc', 'abcd']);
 
-    fixture.componentRef.setInput('minQueryLength', 5);
+    fixture.componentRef.setInput('minLength', 5);
     fixture.componentInstance.onQueryChange('abcd');
     vi.advanceTimersByTime(20);
     expect(complete).toHaveBeenCalledTimes(2);
@@ -169,7 +169,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const complete = vi.fn();
     const dropdown = vi.fn();
     fixture.componentInstance.completeMethod.subscribe(complete);
-    fixture.componentInstance.onDropdownClick.subscribe(dropdown);
+    fixture.componentInstance.dropdownClick.subscribe(dropdown);
     const event = new MouseEvent('click');
 
     fixture.componentInstance.handleDropdownClick(event);
@@ -216,7 +216,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const values: unknown[] = [];
     const clear = vi.fn();
     fixture.componentInstance.registerOnChange((value) => values.push(value));
-    fixture.componentInstance.onClear.subscribe(clear);
+    fixture.componentInstance.cleared.subscribe(clear);
     fixture.componentInstance.selectOption(CITIES[0], new MouseEvent('mousedown'));
     fixture.componentInstance.onQueryChange('invalid');
     expect(values).toEqual([0, null]);
@@ -248,7 +248,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const values = vi.fn();
     const selected = vi.fn();
     fixture.componentInstance.registerOnChange(values);
-    fixture.componentInstance.onSelect.subscribe(selected);
+    fixture.componentInstance.select.subscribe(selected);
 
     fixture.componentInstance.writeValue(1);
     expect(fixture.componentInstance._query()).toBe('Barcelona');
@@ -267,7 +267,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const clear = vi.fn();
     const query = vi.fn();
     fixture.componentInstance.registerOnChange(values);
-    fixture.componentInstance.onClear.subscribe(clear);
+    fixture.componentInstance.cleared.subscribe(clear);
     fixture.componentInstance.queryChange.subscribe(query);
     fixture.componentInstance.selectOption(CITIES[1]);
     values.mockClear();
@@ -371,10 +371,10 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentRef.setInput('lazy', true);
     fixture.componentRef.setInput('virtualScroll', true);
     fixture.componentRef.setInput('virtualScrollVisibleItems', 4);
-    fixture.componentRef.setInput('lazyFirst', 20);
-    fixture.componentRef.setInput('totalRecords', 1000);
+    fixture.componentRef.setInput('dataFirst', 20);
+    fixture.componentRef.setInput('totalItems', 1000);
     const lazy: Array<{ first: number; end: number; requestId: number; query: string }> = [];
-    fixture.componentInstance.onLazyLoad.subscribe((event) => lazy.push(event));
+    fixture.componentInstance.lazyRequest.subscribe((event) => lazy.push(event));
 
     fixture.componentInstance.onQueryChange('bar');
     vi.advanceTimersByTime(20);
@@ -416,7 +416,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
 
     expect(input.getAttribute('aria-activedescendant')).toBe(selected?.id);
     expect(selected?.getAttribute('aria-selected')).toBe('true');
-    fixture.componentInstance.hide();
+    fixture.componentInstance.close();
     fixture.detectChanges();
     expect(input.getAttribute('aria-activedescendant')).toBeNull();
   });
@@ -441,7 +441,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
   it('supports boundary, page, Enter, Escape and Tab keyboard behavior without duplicate selection', () => {
     const fixture = setupCityAutocomplete();
     const selected = vi.fn();
-    fixture.componentInstance.onSelect.subscribe(selected);
+    fixture.componentInstance.select.subscribe(selected);
     fixture.componentInstance.openAll();
     fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'PageDown' }));
@@ -463,12 +463,12 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const fixture = setupCityAutocomplete();
     const show = vi.fn();
     const hide = vi.fn();
-    fixture.componentInstance.onShow.subscribe(show);
-    fixture.componentInstance.onHide.subscribe(hide);
-    fixture.componentInstance.show();
-    fixture.componentInstance.show();
-    fixture.componentInstance.hide();
-    fixture.componentInstance.hide();
+    fixture.componentInstance.opened.subscribe(show);
+    fixture.componentInstance.closed.subscribe(hide);
+    fixture.componentInstance.open();
+    fixture.componentInstance.open();
+    fixture.componentInstance.close();
+    fixture.componentInstance.close();
     expect(show).toHaveBeenCalledOnce();
     expect(hide).toHaveBeenCalledOnce();
   });
@@ -539,12 +539,12 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const fixture = setupCityAutocomplete();
     const down = vi.fn();
     const up = vi.fn();
-    fixture.componentInstance.onInputKeydown.subscribe(down);
-    fixture.componentInstance.onKeyUp.subscribe(up);
+    fixture.componentInstance.inputKeydown.subscribe(down);
+    fixture.componentInstance.keyUp.subscribe(up);
     const keydown = new KeyboardEvent('keydown', { key: 'Shift' });
     const keyup = new KeyboardEvent('keyup', { key: 'Shift' });
     fixture.componentInstance.onKeyDown(keydown);
-    fixture.componentInstance.onKeyUp.emit(keyup);
+    fixture.componentInstance.keyUp.emit(keyup);
     expect(down).toHaveBeenCalledWith(keydown);
     expect(up).toHaveBeenCalledWith(keyup);
   });
@@ -569,7 +569,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
           [groupConfig]="config"
           [dropdown]="true"
           [loading]="true"
-          [showClear]="true"
+          [clearable]="true"
         >
           <ng-template [neuAutocompleteItem]="cities" let-city="option"
             >Item {{ city.profile.name }}</ng-template
@@ -705,7 +705,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     autocomplete.close();
     autocomplete._closePanel();
     autocomplete.focus();
-    autocomplete.hide(null, 'programmatic', true);
+    autocomplete.close(null, 'programmatic', true);
   });
 
   it('covers fallback accessors, announcements, sizing and lazy geometry branches', () => {
@@ -735,7 +735,6 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     expect(component.allOptions()).toEqual([]);
 
     fixture.componentRef.setInput('groups', []);
-    fixture.componentRef.setInput('group', true);
     fixture.componentRef.setInput('options', [
       { ...CITIES[0], group: 'Legacy' },
     ] as unknown as City[]);
@@ -743,13 +742,12 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     expect(component.normalizedRows().some((row) => row.kind === 'group')).toBe(true);
 
     fixture.componentRef.setInput('groups', GROUPS);
-    fixture.componentRef.setInput('group', false);
     fixture.componentRef.setInput('groupConfig', GROUP_CONFIG);
-    fixture.componentRef.setInput('clientFilter', false);
+    fixture.componentRef.setInput('filterConfig', { strategy: 'server' });
     fixture.detectChanges();
     expect(component.visibleRows().length).toBeGreaterThan(0);
 
-    component.show();
+    component.open();
     fixture.componentRef.setInput('searchMessage', '{0} available');
     expect(component.resultsAnnouncement()).toContain('available');
     fixture.componentRef.setInput('searchMessage', null);
@@ -759,16 +757,16 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     expect(component.resultsAnnouncement()).toBe('1 resultado disponible');
 
     fixture.componentRef.setInput('virtualScrollItemSize', Number.NaN);
-    fixture.componentRef.setInput('size', 'small');
+    fixture.componentRef.setInput('size', 'sm');
     expect(component.effectiveVirtualScrollItemSize()).toBe(36);
-    fixture.componentRef.setInput('size', 'large');
+    fixture.componentRef.setInput('size', 'lg');
     expect(component.effectiveVirtualScrollItemSize()).toBe(52);
     fixture.componentRef.setInput('virtualScrollItemSize', 0);
     expect(component.effectiveVirtualScrollItemSize()).toBe(1);
     fixture.componentRef.setInput('virtualScroll', true);
     fixture.componentRef.setInput('lazy', true);
-    fixture.componentRef.setInput('lazyFirst', 3);
-    fixture.componentRef.setInput('totalRecords', null);
+    fixture.componentRef.setInput('dataFirst', 3);
+    fixture.componentRef.setInput('totalItems', null);
     expect(component.logicalOptionCount()).toBe(component.visibleOptionCount());
     expect(component.virtualTopHeight()).toBe(3);
     expect(component.virtualBottomHeight()).toBe(0);
@@ -776,7 +774,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentRef.setInput('optionValue', () => null as unknown as number);
     fixture.componentRef.setInput('optionLabel', () => '');
     expect(component.trackByOption(7, CITIES[0])).toBe(7);
-    component.hide();
+    component.close();
     expect(component.resultsAnnouncement()).toBe('');
   });
 
@@ -795,7 +793,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     expect(component._query()).toBe('ab');
     fixture.componentRef.setInput('readonly', false);
 
-    component.hide();
+    component.close();
     component.onQueryChange('');
     component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));

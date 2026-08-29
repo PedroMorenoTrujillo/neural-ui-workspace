@@ -454,11 +454,11 @@ describe('NeuListboxComponent', () => {
 
   it('keeps controlled filter value immutable until the owner echoes it', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('filter', true);
+    fixture.componentRef.setInput('searchable', true);
     fixture.componentRef.setInput('filterValue', 'alpha');
     fixture.detectChanges();
     const emitted: string[] = [];
-    component.filterChange.subscribe((event) => emitted.push(event.filter));
+    component.filter.subscribe((event) => emitted.push(event.filter));
     component.setFilter('beta');
     expect(emitted).toEqual(['beta']);
     expect(component.currentFilter()).toBe('alpha');
@@ -476,10 +476,9 @@ describe('NeuListboxComponent', () => {
     typed.componentRef.setInput('options', users);
     typed.componentRef.setInput('optionLabel', 'name');
     typed.componentRef.setInput('optionValue', 'id');
-    typed.componentRef.setInput('filter', true);
-    typed.componentRef.setInput('filterFields', ['city']);
-    typed.componentRef.setInput('filterMatchMode', 'startsWith');
-    typed.componentRef.setInput('emptyFilterMessage', 'Nothing in this city');
+    typed.componentRef.setInput('searchable', true);
+    typed.componentRef.setInput('filterConfig', { fields: ['city'], matchMode: 'startsWith' });
+    typed.componentRef.setInput('noResultsMessage', 'Nothing in this city');
     typed.detectChanges();
     typed.componentInstance.setFilter('ber');
     typed.detectChanges();
@@ -564,10 +563,10 @@ describe('NeuListboxComponent', () => {
     fixture.componentRef.setInput('virtualScroll', true);
     fixture.componentRef.setInput('lazy', true);
     fixture.componentRef.setInput('loading', true);
-    fixture.componentRef.setInput('totalRecords', 1000);
+    fixture.componentRef.setInput('totalItems', 1000);
     fixture.detectChanges();
     const requests: any[] = [];
-    component.lazyLoad.subscribe((request) => requests.push(request));
+    component.lazyRequest.subscribe((request) => requests.push(request));
     component.onListFocus(new FocusEvent('focus'));
     const list = fixture.nativeElement.querySelector('[role="listbox"]') as HTMLElement;
     Object.defineProperty(list, 'scrollTop', { value: 400, configurable: true });
@@ -585,7 +584,7 @@ describe('NeuListboxComponent', () => {
     fixture.componentRef.setInput('selectAll', false);
     fixture.detectChanges();
     const events: any[] = [];
-    component.selectAllChange.subscribe((event) => events.push(event));
+    component.selectAllChangeDetail.subscribe((event) => events.push(event));
     component.toggleAll(new MouseEvent('click'));
     expect(component.values()).toEqual([]);
     expect(events[0]).toMatchObject({
@@ -616,7 +615,7 @@ describe('NeuListboxComponent', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('readonly', true);
     fixture.detectChanges();
-    const changes = vi.spyOn(component.change, 'emit');
+    const changes = vi.spyOn(component.changeDetail, 'emit');
     const legacy = vi.spyOn(component.selectionChange, 'emit');
     component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
     expect(component.activeIndex()).toBe(0);
@@ -632,7 +631,7 @@ describe('NeuListboxComponent', () => {
     >;
     typed.componentRef.setInput('options', [0, 1, Number.NaN]);
     typed.detectChanges();
-    const changes = vi.spyOn(typed.componentInstance.change, 'emit');
+    const changes = vi.spyOn(typed.componentInstance.changeDetail, 'emit');
     const legacy = vi.spyOn(typed.componentInstance.selectionChange, 'emit');
     typed.componentInstance.writeValue(0);
     expect(typed.componentInstance.isSelected(0)).toBe(true);
@@ -653,7 +652,7 @@ describe('NeuListboxComponent', () => {
     const detailed: unknown[] = [];
     component.registerOnChange((value) => cva.push(value));
     component.selectionChange.subscribe((value) => legacy.push(value));
-    component.change.subscribe((value) => detailed.push(value));
+    component.changeDetail.subscribe((value) => detailed.push(value));
     component.toggleOption(options[0], new MouseEvent('click'));
     expect(cva).toHaveLength(1);
     expect(legacy).toHaveLength(1);
@@ -700,11 +699,11 @@ describe('NeuListboxComponent', () => {
         <neu-listbox
           [groups]="groups"
           [groupConfig]="groupConfig"
-          [filter]="true"
+          [searchable]="true"
           [filterValue]="filterValue"
           [lazy]="lazy"
           [loading]="loading"
-          [totalRecords]="20"
+          [totalItems]="20"
           [virtualScroll]="lazy"
           [virtualScrollViewportItems]="2"
           [virtualScrollBuffer]="0"
@@ -849,8 +848,8 @@ describe('NeuListboxComponent', () => {
     fixture.componentRef.setInput('virtualScroll', true);
     fixture.componentRef.setInput('virtualScrollItemSize', Number.NaN);
     fixture.componentRef.setInput('lazy', true);
-    fixture.componentRef.setInput('lazyFirst', 5);
-    fixture.componentRef.setInput('totalRecords', null);
+    fixture.componentRef.setInput('dataFirst', 5);
+    fixture.componentRef.setInput('totalItems', null);
     fixture.detectChanges();
     const lazyRow = component.visibleRows()[0] as any;
     expect(component.optionPosition(lazyRow, 0)).toBe(6);
@@ -926,7 +925,6 @@ describe('NeuListboxComponent', () => {
     component.toggleAll(new MouseEvent('click'));
     fixture.detectChanges();
 
-    fixture.componentRef.setInput('group', true);
     fixture.componentRef.setInput('options', [
       { label: 'One', value: '1', group: 'First' },
       { label: 'Two', value: '2', group: 'First' },
@@ -938,14 +936,14 @@ describe('NeuListboxComponent', () => {
     component.setActiveRow(3);
 
     fixture.componentRef.setInput('options', []);
-    fixture.componentRef.setInput('emptyMessage', 'Explicit empty');
+    fixture.componentRef.setInput('emptyLabel', 'Explicit empty');
     fixture.componentRef.setInput('virtualScroll', true);
     fixture.detectChanges();
     expect(component.renderedRows()).toEqual([]);
     expect(component.virtualTopHeight()).toBe(0);
     expect(component.virtualBottomHeight()).toBe(0);
     expect(fixture.nativeElement.textContent).toContain('Explicit empty');
-    fixture.componentRef.setInput('emptyMessage', null);
+    fixture.componentRef.setInput('emptyLabel', 'No options found');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No options found');
     component.focused.set(true);

@@ -22,21 +22,29 @@ export interface NeuSelectGroup<T = NeuSelectOption> {
   disabled?: boolean;
 }
 
-export type NeuSelectSize = 'sm' | 'md' | 'lg' | 'small' | 'large';
+export type NeuSelectSize = 'sm' | 'md' | 'lg';
 export type NeuSelectVariant = 'outlined' | 'filled';
 
-export interface NeuSelectVirtualScrollOptions {
-  readonly itemSize?: number;
-  readonly viewportItems?: number;
-  readonly buffer?: number;
-}
+export type NeuSelectModelValue<V, M extends boolean = false> = [M] extends [true]
+  ? readonly V[]
+  : V | null;
 
-export interface NeuSelectChangeEvent<T, V> {
+interface NeuSelectChangeEventBase<T> {
   readonly originalEvent: Event | null;
-  readonly value: V | null;
   readonly option: T | null;
+  readonly selectedOptions: readonly T[];
   readonly custom: boolean;
 }
+
+export type NeuSelectChangeEvent<T, V, M extends boolean = boolean> = M extends true
+  ? NeuSelectChangeEventBase<T> & {
+      readonly value: readonly V[];
+      readonly multiple: true;
+    }
+  : NeuSelectChangeEventBase<T> & {
+      readonly value: V | null;
+      readonly multiple: false;
+    };
 
 export interface NeuSelectFilterEvent<T> {
   readonly originalEvent: Event | null;
@@ -65,6 +73,9 @@ export interface NeuSelectSelectedContext<T, V = unknown> {
   readonly $implicit: T | null;
   readonly option: T | null;
   readonly value: V | null;
+  readonly options: readonly T[];
+  readonly values: readonly V[];
+  readonly multiple: boolean;
   readonly custom: boolean;
 }
 

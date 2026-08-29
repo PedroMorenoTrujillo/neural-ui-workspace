@@ -11,6 +11,7 @@
     "audit:cva": "node scripts/audit-ui-core-cva-contracts.mjs",
     "audit:bundle": "node scripts/audit-ui-core-bundle.mjs",
     "audit:table-architecture": "node scripts/audit-table-architecture.mjs",
+    "audit:h5b3-option-family": "node scripts/generate-h5b3-option-family-audit.mjs",
     "audit:logical-css": "node scripts/audit-ui-core-logical-css.mjs",
     "tokens:generate": "node scripts/generate-token-manifest.mjs",
     "audit:tokens": "node scripts/audit-token-contract.mjs",

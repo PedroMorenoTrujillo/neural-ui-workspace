@@ -30,7 +30,7 @@ Sources: the exact published `primeng` packages `19.1.4`, `20.4.0`, `21.1.9`, an
 | Focus policies | PARITY | Auto option, hover, select-on-focus, filter autofocus and host autofocus are independent. |
 | Active descendant | SUPERSET | O1 stable IDs point only to eligible rendered options after filter/window replacement. |
 | Templates | SUPERSET | Eighteen typed item/group/selected/set/token/filter/loader/empty/icon/checkbox slots. |
-| Events | SUPERSET | Prime lifecycle names plus legacy `selectionChange`; typed atomic change/remove/select-all/lazy payloads. |
+| Events | SUPERSET | Canonical Neural lifecycle/detail names plus historical `selectionChange`; typed atomic change/remove/select-all/lazy payloads. |
 | Native/form metadata | PARITY | ID, name, autocomplete, tabindex, required/invalid, ARIA, fluid, variant and size. |
 | Accessibility | SUPERSET | Combobox/listbox multiselect semantics, accessible tokens/removal, logical positions and focus restoration. |
 | SSR, zoneless, RTL and forced colors | PARITY | Deterministic IDs, guarded browser access, signal state, logical CSS and high-contrast styling. |
@@ -50,7 +50,7 @@ Current relevant gaps: **0**.
 | Groups/filter/virtual/lazy | MultiSelect | MultiSelect | MultiSelect | Both surfaces, richer deprecated component | Flat/filter/CDK virtual only | O1 grouped, controlled filter, bounded lazy/virtual | CURRENT FLOOR |
 | Chips, count and selection limit | MultiSelect | MultiSelect | MultiSelect | Deprecated MultiSelect | Chips/count runtime switch | Preserved and extended | HISTORICAL-MIGRATION-USEFUL |
 | Select-all and detailed remove events | MultiSelect | MultiSelect | MultiSelect | Deprecated MultiSelect | Basic loaded select-all | Typed truthful scope and atomic events | HISTORICAL-MIGRATION-USEFUL |
-| Controlled overlay visibility | Input only | Input only | Input only | Two-way output added | Not present | Not added | OBSOLETE/N/A |
+| Controlled overlay visibility | Input only | Input only | Input only | Two-way output added | Not present | Canonical `open` + `openChange` owner/proposal/echo | CURRENT FLOOR |
 | Prime portal/z-index/motion/pass-through | Prime-specific | Prime-specific | Prime-specific | Prime-specific | CDK overlay | CDK overlay | OBSOLETE/N/A |
 | Typed strict templates | Untyped `any` | Untyped `any` | Untyped `any` | Untyped `any` | Five weakly inferred slots | Eighteen strict contexts | HISTORICAL-MIGRATION-USEFUL |
 
@@ -80,15 +80,15 @@ Removed useful Neural capabilities: **0**. Regressions: **0**.
 
 ## Event atomicity
 
-| Interaction | CVA | `selectionChange` | `onChange` | Dedicated event | touched |
+| Interaction | CVA | `selectionChange` | `changeDetail` | Dedicated event | touched |
 | --- | ---: | ---: | ---: | --- | ---: |
 | Pointer/keyboard add | 1 | 1 | 1 | none | 0 |
-| Pointer/keyboard option remove | 1 | 1 | 1 | `onRemove` 1 | 0 |
-| Token pointer/keyboard remove | 1 | 1 | 1 | `onRemove` 1 | 0 |
-| Uncontrolled select-all | 1 | 1 | 1 | `onSelectAllChange` 1 | 0 |
-| Controlled select-all proposal | 0 | 0 | 0 | `onSelectAllChange` 1 | 0 |
-| Clear | 1 | 1 | 1 | `onClear` 1 | 0 |
-| Filter edit/reset | 0 | 0 | 0 | `onFilter` 1; optional deduplicated lazy request | 0 |
+| Pointer/keyboard option remove | 1 | 1 | 1 | `remove` 1 | 0 |
+| Token pointer/keyboard remove | 1 | 1 | 1 | `remove` 1 | 0 |
+| Uncontrolled select-all | 1 | 1 | 1 | `selectAllChangeDetail` 1 | 0 |
+| Controlled select-all proposal | 0 | 0 | 0 | `selectAllChangeDetail` 1 | 0 |
+| Clear | 1 | 1 | 1 | `cleared` 1 | 0 |
+| Filter edit/reset | 0 | 0 | 0 | `filter` 1; optional deduplicated lazy request | 0 |
 | Programmatic write/reset | 0 | 0 | 0 | none | 0 |
 | Show/hide | 0 | 0 | 0 | one panel lifecycle event per transition | hide: 1 |
 | Readonly/disabled/loading mutation attempt | 0 | 0 | 0 | none | 0 |

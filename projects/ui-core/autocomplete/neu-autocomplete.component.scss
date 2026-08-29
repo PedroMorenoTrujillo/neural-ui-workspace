@@ -261,7 +261,7 @@
 
   &--active {
     background: var(--neu-primary-50, rgb(14 165 233 / 0.12));
-    color: var(--neu-primary, #0ea5e9);
+    color: var(--neu-primary-dark, var(--neu-primary, #005fcc));
     font-weight: 500;
   }
 

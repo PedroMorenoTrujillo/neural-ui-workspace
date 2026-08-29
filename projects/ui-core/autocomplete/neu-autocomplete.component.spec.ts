@@ -756,7 +756,7 @@ describe('NeuAutocompleteComponent', () => {
     f.componentInstance.onQueryChange('a');
     f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     const closeCallbacks = [...callbacks.values()];
-    f.componentInstance.hide();
+    f.componentInstance.close();
     closeCallbacks.forEach((callback) => callback(0));
 
     expect(request).toHaveBeenCalled();

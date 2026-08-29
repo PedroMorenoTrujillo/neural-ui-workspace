@@ -30,10 +30,8 @@ import {
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
-  NeuOptionAccessor,
   NeuOptionDisabledAccessor,
   NeuOptionFilterConfig,
-  NeuOptionFilterMatchMode,
   NeuOptionGroupConfig,
   NeuOptionIdentityConfig,
   NeuOptionLazyRequest,
@@ -44,6 +42,7 @@ import {
   neuOptionValuesEqual,
   neuOptionsEqual,
   resolveNeuOptionDisabled,
+  resolveNeuOptionGroup,
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
   serializeNeuOptionValue,
@@ -81,7 +80,6 @@ import {
   NeuMultiselectSelectAllChangeEvent,
   NeuMultiselectSize,
   NeuMultiselectVariant,
-  NeuMultiselectVirtualScrollOptions,
 } from './neu-multiselect.types';
 import {
   NeuMultiselectCheckboxDirective,
@@ -136,7 +134,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
     },
   ],
   host: {
-    '(keydown.escape)': 'close()',
+    '(keydown.escape)': 'close($event, "escape")',
     '(window:resize)': 'onWindowResize()',
   },
   template: `
@@ -157,8 +155,8 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
       [class.neu-multiselect--open-above]="isPanelAbove()"
       [class.neu-multiselect--has-value]="_values().length > 0"
       [class.neu-multiselect--no-float]="!floatingLabel()"
-      [class.neu-multiselect--sm]="size() === 'sm' || size() === 'small'"
-      [class.neu-multiselect--lg]="size() === 'lg' || size() === 'large'"
+      [class.neu-multiselect--sm]="size() === 'sm'"
+      [class.neu-multiselect--lg]="size() === 'lg'"
       [style.--neu-multiselect-option-height]="effectiveVirtualScrollItemSize() + 'px'"
     >
       <!-- Trigger -->
@@ -277,7 +275,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
 
         <!-- Clear button -->
         @if (
-          (clearable() || showClear()) &&
+          clearable() &&
           _values().length > 0 &&
           !isDisabledFinal() &&
           !readonly() &&
@@ -357,8 +355,8 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
         [cdkConnectedOverlayWidth]="panelPosition().width ?? ''"
         [cdkConnectedOverlayPush]="true"
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-        (backdropClick)="hide($event, 'outside')"
-        (detach)="hide(null, 'outside')"
+        (backdropClick)="close($event, 'outside')"
+        (detach)="close(null, 'outside')"
         (positionChange)="onOverlayPositionChange($event)"
       >
         <div
@@ -399,7 +397,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
               }
             </div>
           }
-          @if (selectAll() || showToggleAll()) {
+          @if (selectAll()) {
             <button
               type="button"
               class="neu-multiselect__select-all"
@@ -555,7 +553,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
                 <div class="neu-multiselect__empty">
                   {{
                     effectiveFilterValue()
-                      ? emptyFilterMessage() || noResultsMessage()
+                      ? noResultsMessage()
                       : emptyMessage()
                   }}
                 </div>
@@ -683,7 +681,7 @@ export class NeuMultiselectComponent<
       });
     });
     effect(() => {
-      const locale = this.filterLocale();
+      const locale = this.filterConfig().locale;
       if (locale === this.typeaheadLocale) return;
       untracked(() => {
         this.typeaheadController.dispose();
@@ -693,14 +691,19 @@ export class NeuMultiselectComponent<
       });
     });
     effect(() => {
+      const ownedOpen = this.openState();
+      if (ownedOpen === null) return;
+      untracked(() => this.reconcileOwnedOpen(ownedOpen));
+    });
+    effect(() => {
       if (this.isDisabledFinal() && this.isOpen()) {
-        untracked(() => this.hide(null, 'disabled', false));
+        untracked(() => this.close(null, 'disabled', false));
       }
     });
     effect(() => {
       if (!this.lazy() || !this.isOpen()) return;
       const filterValue = this.effectiveFilterValue();
-      const first = this.lazyFirst();
+      const first = this.dataFirst();
       const visible = this.effectiveVisibleItems();
       untracked(() => this.requestLazy(filterValue ? 'filter' : 'initial', first, first + visible));
     });
@@ -741,10 +744,7 @@ export class NeuMultiselectComponent<
   /** Opciones del dropdown / Dropdown options */
   options = input<readonly T[]>([]);
   groups = input<readonly G[]>([]);
-  group = input<boolean>(false);
   groupConfig = input<NeuOptionGroupConfig<T, G> | null>(null);
-  optionGroupLabel = input<NeuOptionAccessor<G, unknown> | null>(null);
-  optionGroupChildren = input<NeuOptionAccessor<G, readonly T[]> | null>(null);
   identityConfig = input<NeuOptionIdentityConfig<T, V, I>>({});
 
   /** Property or function used to obtain the visible option label. */
@@ -794,13 +794,8 @@ export class NeuMultiselectComponent<
 
   /** Activa input de búsqueda/filtro en el panel / Activates the search/filter input in the panel */
   searchable = input<boolean>(false);
-  filter = input<boolean>(false);
   filterValue = input<string | null>(null);
   filterConfig = input<Readonly<NeuOptionFilterConfig<T>>>({});
-  filterBy = input<string | null>(null);
-  filterFields = input<readonly NeuOptionAccessor<T, unknown>[]>([]);
-  filterMatchMode = input<NeuOptionFilterMatchMode>('contains');
-  filterLocale = input<string | undefined>(undefined);
   resetFilterOnHide = input<boolean>(false);
   autofocusFilter = input<boolean>(false);
 
@@ -810,7 +805,6 @@ export class NeuMultiselectComponent<
   loading = input<boolean>(false);
   loadingLabel = input<string>('Loading...');
   selectAll = input<boolean>(false);
-  showToggleAll = input<boolean>(false);
   selectAllState = input<boolean | null>(null);
   selectAllLabel = input<string>('Select all');
   unselectAllLabel = input<string>('Unselect all');
@@ -828,26 +822,23 @@ export class NeuMultiselectComponent<
   /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
   noResultsMessage = input<string>('Sin resultados');
   emptyMessage = input<string>('No options available');
-  emptyFilterMessage = input<string>('No results found');
 
   /** Texto del botón de limpiar todas las selecciones / Button text to clear all selections */
   clearAllLabel = input<string>('Limpiar todo');
 
   /** Muestra un botón × en el trigger para limpiar la selección de una vez / Shows a × button in the trigger to clear the selection at once */
   clearable = input<boolean>(false);
-  showClear = input<boolean>(false);
 
   /** Habilita scroll virtual para listas largas / Enables virtual scrolling for large option lists */
   virtualScroll = input<boolean>(false);
   virtualScrollItemSize = input<number>(0);
-  virtualScrollOptions = input<NeuMultiselectVirtualScrollOptions>({});
   virtualScrollBuffer = input<number>(2);
 
   /** Número de opciones visibles en el viewport virtual / Number of visible options in the virtual viewport */
   virtualScrollVisibleItems = input<number>(8);
   lazy = input<boolean>(false);
-  lazyFirst = input<number>(0);
-  totalRecords = input<number | null>(null);
+  dataFirst = input<number>(0);
+  totalItems = input<number | null>(null);
   scrollHeight = input<string>('14rem');
 
   /** Aria-label del botón clear que aparece en el trigger / Aria-label for the clear button shown in the trigger */
@@ -862,26 +853,32 @@ export class NeuMultiselectComponent<
    */
   urlParam = input<string | null>(null);
 
+  /** Controlled overlay owner. Null keeps the component in ergonomic uncontrolled mode. */
+  readonly openState = input<boolean | null>(null, { alias: 'open' });
+
   /**
    * Emite los modelos originales seleccionados y [] al limpiar.
    * Con NeuSelectOption mantiene el contrato legacy, incluido el campo data.
-   */
+  */
   readonly selectionChange = output<T[]>();
-  readonly onChange = output<NeuMultiselectChangeEvent<T, V>>();
-  readonly onFilter = output<NeuMultiselectFilterEvent>();
-  readonly onFocus = output<FocusEvent>();
-  readonly onBlur = output<FocusEvent>();
-  readonly onClick = output<MouseEvent>();
-  readonly onClear = output<Event>();
-  readonly onPanelShow = output<NeuMultiselectOverlayEvent>();
-  readonly onPanelHide = output<NeuMultiselectOverlayEvent>();
-  readonly onLazyLoad = output<NeuMultiselectLazyLoadEvent>();
-  readonly onRemove = output<NeuMultiselectRemoveEvent<T, V>>();
-  readonly onSelectAllChange = output<NeuMultiselectSelectAllChangeEvent<T, V>>();
+  readonly changeDetail = output<NeuMultiselectChangeEvent<T, V>>();
+  readonly filter = output<NeuMultiselectFilterEvent>();
+  readonly focusEvent = output<FocusEvent>();
+  readonly blurEvent = output<FocusEvent>();
+  readonly triggerClick = output<MouseEvent>();
+  readonly cleared = output<Event>();
+  readonly opened = output<NeuMultiselectOverlayEvent>();
+  readonly closed = output<NeuMultiselectOverlayEvent>();
+  readonly lazyRequest = output<NeuMultiselectLazyLoadEvent>();
+  readonly remove = output<NeuMultiselectRemoveEvent<T, V>>();
+  readonly selectAllChangeDetail = output<NeuMultiselectSelectAllChangeEvent<T, V>>();
+  readonly openChange = output<boolean>();
 
   // --- Estado interno ---
   protected readonly _values = signal<V[]>([]);
-  readonly isOpen = signal(false);
+  private readonly _isOpen = signal(false);
+  /** Read-only runtime observation; `[open]` remains the only consumer state owner. */
+  readonly isOpen = this._isOpen.asReadonly();
   readonly searchQuery = signal('');
   readonly activeRowIndex = signal(-1);
   readonly isPanelAbove = signal(false);
@@ -892,11 +889,17 @@ export class NeuMultiselectComponent<
     [],
     { requestScrollOnChange: true },
   );
-  private typeaheadLocale = this.filterLocale();
+  private typeaheadLocale = this.filterConfig().locale;
   private typeaheadController = this.createTypeaheadController();
   private pendingOverlayFrameActions: Array<() => void> = [];
   private autofocusFrameId: number | null = null;
   private focusRestorationFrameId: number | null = null;
+  private pendingControlledTransition: {
+    readonly open: boolean;
+    readonly event: Event | null;
+    readonly reason: NeuMultiselectOverlayEvent['reason'];
+    readonly restoreFocus: boolean;
+  } | null = null;
   private readonly overlaySession = new InternalNeuConnectedOverlaySession<HTMLElement>({
     frameScheduler: {
       request: (callback) => this._document.defaultView?.requestAnimationFrame(callback) ?? -1,
@@ -948,55 +951,29 @@ export class NeuMultiselectComponent<
     return null;
   });
 
-  readonly effectiveFilterEnabled = computed(() => this.filter() || this.searchable());
+  readonly effectiveFilterEnabled = computed(() => this.searchable());
   readonly effectiveFilterValue = computed(() => this.filterValue() ?? this.searchQuery());
-  readonly effectiveFilterConfig = computed<Readonly<NeuOptionFilterConfig<T>>>(() => {
-    const configured = this.filterConfig();
-    const commaFields = this.filterBy()
-      ?.split(',')
-      .map((field) => field.trim())
-      .filter(Boolean) as NeuOptionAccessor<T, unknown>[] | undefined;
-    const fields = this.filterFields().length
-      ? this.filterFields()
-      : commaFields?.length
-        ? commaFields
-        : configured.fields;
-    return {
-      ...configured,
-      ...(fields?.length ? { fields } : {}),
-      matchMode: configured.matchMode ?? this.filterMatchMode(),
-      locale: configured.locale ?? this.filterLocale(),
-      strategy: configured.strategy ?? (this.lazy() ? 'server' : 'client'),
-    };
-  });
-
-  readonly effectiveGroupConfig = computed<NeuOptionGroupConfig<T, G> | null>(() => {
-    if (this.groupConfig()) return this.groupConfig();
-    if (this.optionGroupLabel() != null && this.optionGroupChildren() != null) {
-      return {
-        labelAccessor: this.optionGroupLabel()!,
-        childrenAccessor: this.optionGroupChildren()!,
-      };
-    }
-    return null;
-  });
+  readonly effectiveFilterConfig = computed<Readonly<NeuOptionFilterConfig<T>>>(() => ({
+    ...this.filterConfig(),
+    strategy: this.filterConfig().strategy ?? (this.lazy() ? 'server' : 'client'),
+  }));
 
   readonly normalizedRows = computed<InternalNeuOptionNormalizedRow<T, G | string>[]>(() => {
-    const config = this.effectiveGroupConfig();
+    const config = this.groupConfig();
     if (config && this.groups().length) {
       return normalizeNeuOptionGroups(this.groups(), config, {
         optionDisabledAccessor: this.optionDisabled(),
-        logicalOffset: this.lazyFirst(),
+        logicalOffset: this.dataFirst(),
       });
     }
-    if (this.group()) {
+    if (this.options().some((option) => resolveNeuOptionGroup(option) !== undefined)) {
       return normalizeNeuLegacyOptionGroups(
         this.options(),
         this.optionDisabled(),
-        this.lazyFirst(),
+        this.dataFirst(),
       );
     }
-    return normalizeNeuOptionRows(this.options(), this.optionDisabled(), this.lazyFirst());
+    return normalizeNeuOptionRows(this.options(), this.optionDisabled(), this.dataFirst());
   });
 
   readonly filteredRows = computed(() =>
@@ -1010,7 +987,7 @@ export class NeuMultiselectComponent<
 
   readonly renderedRows = computed<InternalNeuOptionNormalizedRow<T, G | string>[]>(() => {
     if (this.loading() && this.lazy() && this.loaderTpl()) {
-      const first = this.lazyFirst();
+      const first = this.dataFirst();
       const count = Math.max(1, this.effectiveVisibleItems() + this.virtualScrollBuffer() * 2);
       return createNeuOptionLoadingRows(first, first + count);
     }
@@ -1051,23 +1028,19 @@ export class NeuMultiselectComponent<
   });
 
   readonly effectiveVirtualScrollItemSize = computed(() => {
-    const explicit = this.virtualScrollItemSize() || this.virtualScrollOptions().itemSize;
+    const explicit = this.virtualScrollItemSize();
     if (explicit && explicit > 0) return explicit;
     switch (this.size()) {
       case 'sm':
-      case 'small':
         return 36;
       case 'lg':
-      case 'large':
         return 52;
       default:
         return 44;
     }
   });
 
-  readonly effectiveVisibleItems = computed(() =>
-    Math.max(1, this.virtualScrollOptions().visibleItems ?? this.virtualScrollVisibleItems()),
-  );
+  readonly effectiveVisibleItems = computed(() => Math.max(1, this.virtualScrollVisibleItems()));
 
   readonly virtualViewportHeight = computed(() => {
     const desiredHeight = this.effectiveVisibleItems() * this.effectiveVirtualScrollItemSize();
@@ -1094,7 +1067,7 @@ export class NeuMultiselectComponent<
   readonly trackByRow = (_index: number, row: InternalNeuOptionNormalizedRow<T, G | string>) =>
     this.optionRowId(row);
   readonly logicalTotal = computed(() =>
-    Math.max(this.totalRecords() ?? this.optionRows().length, this.optionRows().length),
+    Math.max(this.totalItems() ?? this.optionRows().length, this.optionRows().length),
   );
   readonly activeRow = computed(() => this.filteredRows()[this.activeRowIndex()] ?? null);
   readonly activeDescendantId = computed(() => {
@@ -1223,23 +1196,31 @@ export class NeuMultiselectComponent<
   }
 
   toggle(event: Event | null = null): void {
-    if (this.isOpen()) this.hide(event, 'trigger');
-    else this.show(event, 'trigger');
+    if (this.isOpen()) this.close(event, 'trigger');
+    else this.open(event, 'trigger');
   }
 
-  show(
+  /** Canonical imperative open API; controlled mode emits a proposal and waits for owner echo. */
+  open(
     event: Event | null = null,
     reason: NeuMultiselectOverlayEvent['reason'] = 'programmatic',
   ): void {
     if (this.isDisabledFinal() || this.isOpen()) return;
+    if (this.proposeControlledOpen(true, event, reason, true)) return;
+    this.commitOpen(event, reason);
+    this.openChange.emit(true);
+  }
+
+  private commitOpen(event: Event | null, reason: NeuMultiselectOverlayEvent['reason']): void {
+    if (this.isDisabledFinal() || this._isOpen()) return;
     this.cancelFocusRestorationFrame();
     if (!this.overlaySession.open(this.effectiveTriggerElement())) return;
     this.syncPanelPosition();
-    this.isOpen.set(true);
+    this._isOpen.set(true);
     this.activeRowController.setRows(this.filteredRows());
     this.applyActiveRow(this.activeRowController.first());
-    this.onPanelShow.emit({ originalEvent: event, reason });
-    this.requestLazy('initial', this.lazyFirst(), this.lazyFirst() + this.effectiveVisibleItems());
+    this.opened.emit({ originalEvent: event, reason });
+    this.requestLazy('initial', this.dataFirst(), this.dataFirst() + this.effectiveVisibleItems());
     this.requestOverlayFrame(() => {
       if (this.effectiveFilterEnabled() && this.autofocusFilter()) {
         this.elementRef.nativeElement
@@ -1251,12 +1232,23 @@ export class NeuMultiselectComponent<
     });
   }
 
-  hide(
+  close(
     event: Event | null = null,
     reason: NeuMultiselectOverlayEvent['reason'] = 'programmatic',
     restoreFocus = true,
   ): void {
     if (!this.isOpen()) return;
+    if (this.proposeControlledOpen(false, event, reason, restoreFocus)) return;
+    this.commitClose(event, reason, restoreFocus);
+    this.openChange.emit(false);
+  }
+
+  private commitClose(
+    event: Event | null,
+    reason: NeuMultiselectOverlayEvent['reason'],
+    restoreFocus: boolean,
+  ): void {
+    if (!this._isOpen()) return;
     this.adoptOverlaySignal();
     const intent = this.overlaySession.close(this.overlayCloseReason(reason), restoreFocus);
     this.finishHide(intent, event, reason);
@@ -1269,14 +1261,14 @@ export class NeuMultiselectComponent<
   ): void {
     if (!intent.closed) return;
     this.pendingOverlayFrameActions = [];
-    this.isOpen.set(false);
+    this._isOpen.set(false);
     this.applyActiveRow(this.activeRowController.clear());
     this.typeaheadController.reset();
     if (this.resetFilterOnHide() || this.filterValue() == null) {
       this.resetFilter(this.resetFilterOnHide(), event);
     }
     this.resetPanelPosition();
-    this.onPanelHide.emit({ originalEvent: event, reason });
+    this.closed.emit({ originalEvent: event, reason });
     this._onTouched();
     this.requestFocusRestoration(intent.focusRestoration);
   }
@@ -1288,7 +1280,7 @@ export class NeuMultiselectComponent<
     }
     event.preventDefault();
     if (!this.isOpen()) {
-      this.show(event, 'keyboard');
+      this.open(event, 'keyboard');
     } else {
       const key = (event as KeyboardEvent).key;
       this.moveActive(event, key === 'ArrowUp' ? -1 : 1);
@@ -1300,7 +1292,7 @@ export class NeuMultiselectComponent<
       return;
     }
     event.preventDefault();
-    this.toggle();
+    this.toggle(event);
   }
 
   focusTrigger(): void {
@@ -1320,10 +1312,6 @@ export class NeuMultiselectComponent<
     if (result.row) this.focusOption(result.row.option);
   }
 
-  close(event: Event | null = null): void {
-    this.hide(event, 'escape');
-  }
-
   protected toggleOption(option: T, event: Event | null = null): void {
     if (!this.canMutate() || this.isOptionDisabled(option)) return;
     const value = this.optionValueOf(option);
@@ -1337,7 +1325,7 @@ export class NeuMultiselectComponent<
       : [...current, value];
     this.commitSelection(next, event, option, !selected, selected);
     if (selected) {
-      this.onRemove.emit({ originalEvent: event, option, value, source: 'option' });
+      this.remove.emit({ originalEvent: event, option, value, source: 'option' });
     }
   }
 
@@ -1354,7 +1342,7 @@ export class NeuMultiselectComponent<
   clear(event: Event = new Event('clear')): void {
     if (!this.canMutate() || this._values().length === 0) return;
     this.commitSelection([], event, null, false, true);
-    this.onClear.emit(event);
+    this.cleared.emit(event);
   }
 
   protected toggleAllFiltered(event: MouseEvent): void {
@@ -1382,7 +1370,7 @@ export class NeuMultiselectComponent<
     if (this.selectAllState() == null) {
       this.commitSelection(next, event, null, checked, !checked);
     }
-    this.onSelectAllChange.emit({
+    this.selectAllChangeDetail.emit({
       originalEvent: event,
       checked,
       value: [...next],
@@ -1393,26 +1381,26 @@ export class NeuMultiselectComponent<
 
   applyFilter(value: string, event: Event | null = null): void {
     if (this.filterValue() == null) this.searchQuery.set(value);
-    this.onFilter.emit({
+    this.filter.emit({
       originalEvent: event,
       filter: value,
       controlled: this.filterValue() != null,
     });
     this.activeRowController.setRows(this.filteredRows());
     this.applyActiveRow(this.activeRowController.first());
-    this.requestLazy('filter', this.lazyFirst(), this.lazyFirst() + this.effectiveVisibleItems());
+    this.requestLazy('filter', this.dataFirst(), this.dataFirst() + this.effectiveVisibleItems());
   }
 
   resetFilter(emit = true, event: Event | null = null): void {
     const hadValue = this.effectiveFilterValue() !== '';
     if (this.filterValue() == null) this.searchQuery.set('');
     if (emit && hadValue) {
-      this.onFilter.emit({
+      this.filter.emit({
         originalEvent: event,
         filter: '',
         controlled: this.filterValue() != null,
       });
-      this.requestLazy('reset', this.lazyFirst(), this.lazyFirst() + this.effectiveVisibleItems());
+      this.requestLazy('reset', this.dataFirst(), this.dataFirst() + this.effectiveVisibleItems());
     }
   }
 
@@ -1429,7 +1417,7 @@ export class NeuMultiselectComponent<
     }
     if (!this.isOpen() && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
       event.preventDefault();
-      this.show(event, 'keyboard');
+      this.open(event, 'keyboard');
       return;
     }
     if (!this.isOpen()) {
@@ -1479,18 +1467,18 @@ export class NeuMultiselectComponent<
   }
 
   onInputFocus(event: FocusEvent): void {
-    if (!this.isDisabledFinal()) this.onFocus.emit(event);
+    if (!this.isDisabledFinal()) this.focusEvent.emit(event);
   }
 
   onInputBlur(event: FocusEvent): void {
     const related = event.relatedTarget as Node | null;
     if (related && this.elementRef.nativeElement.contains(related)) return;
-    this.onBlur.emit(event);
+    this.blurEvent.emit(event);
     this._onTouched();
   }
 
   onTriggerClick(event: MouseEvent): void {
-    this.onClick.emit(event);
+    this.triggerClick.emit(event);
     this.toggle(event);
   }
 
@@ -1530,7 +1518,7 @@ export class NeuMultiselectComponent<
     const rowIndex = this.filteredRows().indexOf(row);
     return (
       deriveNeuOptionAriaPosition(this.filteredRows(), rowIndex, {
-        logicalOffset: this.lazyFirst(),
+        logicalOffset: this.dataFirst(),
         totalSize: this.logicalTotal(),
       })?.posInSet ?? row.logicalIndex + 1
     );
@@ -1602,7 +1590,7 @@ export class NeuMultiselectComponent<
   }
 
   loaderContext(row: Extract<InternalNeuOptionNormalizedRow<T, G | string>, { kind: 'loading' }>) {
-    const first = this.lazyFirst();
+    const first = this.dataFirst();
     const count = Math.max(1, this.effectiveVisibleItems() + this.virtualScrollBuffer() * 2);
     return {
       $implicit: row.logicalIndex,
@@ -1632,7 +1620,7 @@ export class NeuMultiselectComponent<
     const option = this.optionFor(value);
     const next = this._values().filter((current) => !this.valuesEqual(current, value));
     this.commitSelection(next, event, option, false, true);
-    this.onRemove.emit({ originalEvent: event, option, value, source });
+    this.remove.emit({ originalEvent: event, option, value, source });
   }
 
   private commitSelection(
@@ -1648,7 +1636,7 @@ export class NeuMultiselectComponent<
     this._values.set([...next]);
     this._onChange([...next]);
     this.selectionChange.emit([...selected]);
-    this.onChange.emit({
+    this.changeDetail.emit({
       originalEvent: event,
       value: [...next],
       selectedOptions: [...selected],
@@ -1695,7 +1683,7 @@ export class NeuMultiselectComponent<
     ).rowIndex;
     if (index >= 0) {
       event.preventDefault();
-      if (!this.isOpen()) this.show(event, 'keyboard');
+      if (!this.isOpen()) this.open(event, 'keyboard');
       this.setActiveRow(this.activeRowController.activate(index));
     }
   }
@@ -1719,7 +1707,7 @@ export class NeuMultiselectComponent<
       this.lazySequencer.next(),
       this.optionLabel(),
     );
-    this.onLazyLoad.emit(request);
+    this.lazyRequest.emit(request);
   }
 
   protected toggleChipMode(event: MouseEvent): void {
@@ -1728,12 +1716,10 @@ export class NeuMultiselectComponent<
   }
 
   onDocumentClick(event: MouseEvent): void {
-    this.adoptOverlaySignal();
     const target = event.target as Element | null;
     const isInsideHost = this.elementRef.nativeElement.contains(target);
     const isInsidePanel = !!target?.closest('.neu-multiselect__panel');
-    const intent = this.overlaySession.handleOutsideInteraction(isInsideHost, isInsidePanel);
-    if (intent) this.finishHide(intent, event, 'outside');
+    if (!isInsideHost && !isInsidePanel) this.close(event, 'outside');
   }
 
   onWindowResize(): void {
@@ -1880,6 +1866,34 @@ export class NeuMultiselectComponent<
     return this.overlaySession.open(this.effectiveTriggerElement());
   }
 
+  private proposeControlledOpen(
+    open: boolean,
+    event: Event | null,
+    reason: NeuMultiselectOverlayEvent['reason'],
+    restoreFocus: boolean,
+  ): boolean {
+    const owner = this.openState();
+    if (owner === null) return false;
+    this.pendingControlledTransition = { open, event, reason, restoreFocus };
+    if (owner !== open) this.openChange.emit(open);
+    return true;
+  }
+
+  private reconcileOwnedOpen(open: boolean): void {
+    const pending =
+      this.pendingControlledTransition?.open === open ? this.pendingControlledTransition : null;
+    if (pending) this.pendingControlledTransition = null;
+    if (open) {
+      this.commitOpen(pending?.event ?? null, pending?.reason ?? 'programmatic');
+      return;
+    }
+    this.commitClose(
+      pending?.event ?? null,
+      pending?.reason ?? 'programmatic',
+      pending?.restoreFocus ?? true,
+    );
+  }
+
   private overlayCloseReason(
     reason: NeuMultiselectOverlayEvent['reason'],
   ): InternalNeuConnectedOverlayCloseReason {
@@ -1890,10 +1904,9 @@ export class NeuMultiselectComponent<
   }
 
   private handleOverlayKey(event: KeyboardEvent, reason: 'escape' | 'tab'): void {
-    const keyIntent = this.overlaySession.handleKey(event.key);
-    if (!keyIntent.handled || !keyIntent.close) return;
-    if (keyIntent.preventDefault) event.preventDefault();
-    this.finishHide(keyIntent.close, event, reason);
+    if (!this.isOpen() || (event.key !== 'Escape' && event.key !== 'Tab')) return;
+    event.preventDefault();
+    this.close(event, reason);
   }
 
   private requestAutofocusFrame(): void {

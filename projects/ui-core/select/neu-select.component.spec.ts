@@ -12,6 +12,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NeuSelectComponent, NeuSelectOption } from './neu-select.component';
+import { NeuSelectChangeEvent } from './neu-select.types';
 import {
   NeuSelectClearIconDirective,
   NeuSelectDropdownIconDirective,
@@ -120,6 +121,152 @@ describe('NeuSelectComponent', () => {
     expect(f.componentInstance.options()).toEqual([]);
   });
 
+  describe('Prime-compatible multiple mode', () => {
+    it('preserves scalar single-mode value and closes after selection', async () => {
+      const { f, comp } = await setup({ multiple: false });
+      comp.open();
+      comp.selectOption(OPTIONS[0]);
+      f.detectChanges();
+
+      expect(comp._value()).toBe('es');
+      expect(comp.isOpen()).toBe(false);
+      expect(comp.selectedLabel()).toBe('España');
+    });
+
+    it('uses an array value, toggles pointer selections and keeps the panel open', async () => {
+      const { f, comp } = await setup({ multiple: true });
+      const cvaValues: string[][] = [];
+      const optionSets: NeuSelectOption[][] = [];
+      const details: Array<{ value: readonly string[]; option: NeuSelectOption | null }> = [];
+      const legacy = vi.fn();
+      comp.registerOnChange((value: string[]) => cvaValues.push([...value]));
+      comp.selectionChange.subscribe(legacy);
+      comp.changeDetail.subscribe((event: NeuSelectChangeEvent<NeuSelectOption, string>) => {
+        if (!event.multiple) throw new Error('Expected a multiple-mode change');
+        optionSets.push([...comp.selectedOptions()]);
+        details.push(event);
+      });
+
+      comp.open();
+      comp.selectOption(OPTIONS[0]);
+      comp.selectOption(OPTIONS[1]);
+      comp.selectOption(OPTIONS[0]);
+      f.detectChanges();
+
+      expect(comp._value()).toEqual(['mx']);
+      expect(comp.selectedLabel()).toBe('México');
+      expect(comp.isOpen()).toBe(true);
+      expect(cvaValues).toEqual([['es'], ['es', 'mx'], ['mx']]);
+      expect(optionSets.map((options) => options.map((option) => option.value))).toEqual([
+        ['es'],
+        ['es', 'mx'],
+        ['mx'],
+      ]);
+      expect(details.map((event) => event.option?.value)).toEqual(['es', 'mx', 'es']);
+      expect(legacy).not.toHaveBeenCalled();
+    });
+
+    it('keeps programmatic array writes silent and clears atomically to an empty array', async () => {
+      const { f, comp } = await setup({ multiple: true, clearable: true });
+      const cvaValues: string[][] = [];
+      const optionSets: NeuSelectOption[][] = [];
+      const detailValues: string[][] = [];
+      const clears: Event[] = [];
+      comp.registerOnChange((value: string[]) => cvaValues.push([...value]));
+      comp.changeDetail.subscribe((event: NeuSelectChangeEvent<NeuSelectOption, string>) => {
+        if (!event.multiple) throw new Error('Expected a multiple-mode change');
+        optionSets.push([...event.selectedOptions]);
+        detailValues.push([...event.value]);
+      });
+      comp.cleared.subscribe((event: Event) => clears.push(event));
+
+      comp.writeValue(['es', 'mx']);
+      f.detectChanges();
+      expect(comp._value()).toEqual(['es', 'mx']);
+      expect(cvaValues).toEqual([]);
+      expect(optionSets).toEqual([]);
+      expect(detailValues).toEqual([]);
+
+      comp.clear(new Event('clear'));
+      f.detectChanges();
+      expect(comp._value()).toEqual([]);
+      expect(cvaValues).toEqual([[]]);
+      expect(optionSets).toEqual([[]]);
+      expect(detailValues).toEqual([[]]);
+      expect(clears).toHaveLength(1);
+    });
+
+    it('blocks disabled options and exposes the selected set to the existing selected template', async () => {
+      const { comp } = await setup({ multiple: true });
+      comp.selectOption(OPTIONS[2]);
+      comp.selectOption(OPTIONS[0]);
+      comp.selectOption(OPTIONS[1]);
+
+      expect(comp._value()).toEqual(['es', 'mx']);
+      expect(comp.selectedTemplateContext()).toMatchObject({
+        option: OPTIONS[0],
+        value: 'es',
+        options: [OPTIONS[0], OPTIONS[1]],
+        values: ['es', 'mx'],
+        multiple: true,
+      });
+    });
+
+    it('toggles with Enter, retains filtering, and exposes multiselect ARIA on trigger and list', async () => {
+      const { f, comp } = await setup({ multiple: true, searchable: true });
+      comp.open();
+      f.detectChanges();
+      const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+      const list = document.querySelector<HTMLElement>('.neu-select__list')!;
+      const options = document.querySelectorAll<HTMLElement>('.neu-select__option');
+
+      options[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      f.detectChanges();
+      expect(comp._value()).toEqual(['es']);
+      expect(comp.isOpen()).toBe(true);
+      expect(trigger.getAttribute('aria-multiselectable')).toBeNull();
+      expect(list.getAttribute('aria-multiselectable')).toBe('true');
+      expect(options[0].getAttribute('aria-selected')).toBe('true');
+
+      comp.setFilter('méx');
+      expect(comp.filteredOptions()).toEqual([OPTIONS[1]]);
+    });
+
+    it('retains identity, groups, virtual windows and lazy requests in multiple mode', async () => {
+      const groups = [
+        { name: 'Enabled', items: COUNTRY_MODELS.slice(0, 2) },
+        { name: 'Archived', items: COUNTRY_MODELS.slice(2) },
+      ];
+      const { comp } = await setup({
+        multiple: true,
+        options: [],
+        groups,
+        groupConfig: { labelAccessor: 'name', childrenAccessor: 'items' },
+        optionLabel: 'name',
+        optionValue: 'id',
+        optionDisabled: 'archived',
+        identityConfig: { identityAccessor: 'id' },
+        virtualScroll: true,
+        lazy: true,
+        totalItems: 100,
+      });
+      const lazyRequests: Array<{ first: number; count: number }> = [];
+      comp.lazyRequest.subscribe((event: { first: number; count: number }) =>
+        lazyRequests.push(event),
+      );
+
+      comp.open();
+      comp.selectOption(COUNTRY_MODELS[0]);
+      comp.selectOption({ ...COUNTRY_MODELS[1] });
+      comp.selectOption(COUNTRY_MODELS[2]);
+
+      expect(comp._value()).toEqual([34, 52]);
+      expect(comp.selectedOptions().map((option: CountryModel) => option.id)).toEqual([34, 52]);
+      expect(comp.logicalOptionCount()).toBe(100);
+      expect(lazyRequests.length).toBeGreaterThan(0);
+    });
+  });
+
   // ── Rendering ─────────────────────────────────────────────────────────────
 
   it('should render label', async () => {
@@ -181,7 +328,7 @@ describe('NeuSelectComponent', () => {
 
   it('should display all non-disabled options when open', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     const text = document.body.textContent ?? '';
     expect(text).toContain('España');
@@ -191,7 +338,7 @@ describe('NeuSelectComponent', () => {
 
   it('should close panel on Escape (close() call)', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     comp.close();
     f.detectChanges();
@@ -200,7 +347,7 @@ describe('NeuSelectComponent', () => {
 
   it('should close panel on outside click', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     const outsideNode = document.createElement('div');
     comp.onDocumentClick({ target: outsideNode } as unknown as MouseEvent);
@@ -210,7 +357,7 @@ describe('NeuSelectComponent', () => {
 
   it('should NOT close panel on inside click', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     const insideNode = document.querySelector('.neu-select__panel') as HTMLElement;
     comp.onDocumentClick({ target: insideNode } as unknown as MouseEvent);
@@ -222,7 +369,7 @@ describe('NeuSelectComponent', () => {
 
   it('should update value when option is selected', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     comp.selectOption(OPTIONS[0]);
     f.detectChanges();
@@ -327,7 +474,7 @@ describe('NeuSelectComponent', () => {
 
   it('keeps editable combobox ARIA on the native input and listbox programmatically focusable', async () => {
     const { f, comp } = await setup({ editable: true, required: true, invalid: true });
-    comp.show();
+    comp.open();
     f.detectChanges();
     const wrapper = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
     const input = f.nativeElement.querySelector('.neu-select__editable-input') as HTMLInputElement;
@@ -345,7 +492,7 @@ describe('NeuSelectComponent', () => {
 
   it('should announce filtered result counts in the live region', async () => {
     const { f, comp } = await setup({ searchable: true });
-    comp.isOpen.set(true);
+    comp.open();
     comp.searchQuery.set('xico');
     f.detectChanges();
 
@@ -387,7 +534,7 @@ describe('NeuSelectComponent', () => {
 
   it('should show search input when searchable=true and panel open', async () => {
     const { f, comp } = await setup({ searchable: true });
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     expect(document.querySelector('.neu-select__search-input')).toBeTruthy();
   });
@@ -407,7 +554,7 @@ describe('NeuSelectComponent', () => {
 
   it('should show noResultsMessage when no options match', async () => {
     const { f, comp } = await setup({ searchable: true, noResultsMessage: 'Sin resultados' });
-    comp.isOpen.set(true);
+    comp.open();
     comp.searchQuery.set('zzz');
     f.detectChanges();
     expect(document.querySelector('.neu-select__empty')).toBeTruthy();
@@ -416,7 +563,7 @@ describe('NeuSelectComponent', () => {
 
   it('typing in the search input should update searchQuery from the template', async () => {
     const { f, comp } = await setup({ searchable: true });
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
 
     const searchInput = document.querySelector('.neu-select__search-input') as HTMLInputElement;
@@ -451,7 +598,7 @@ describe('NeuSelectComponent', () => {
       ],
     });
     comp.writeValue('es');
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -585,7 +732,7 @@ describe('NeuSelectComponent', () => {
 
   it('focusOptionByIndex should focus the next enabled option when it exists', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
 
     const target = document.createElement('div');
@@ -635,7 +782,7 @@ describe('NeuSelectComponent', () => {
     const comp = f.componentInstance;
     const selectComp = f.debugElement.query(By.css('neu-select'))
       .componentInstance as NeuSelectComponent<CountryModel, number>;
-    selectComp.isOpen.set(true);
+    selectComp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -681,7 +828,7 @@ describe('NeuSelectComponent', () => {
       ],
       optionValue: null,
     });
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
 
     const seenSelectors: string[] = [];
@@ -724,7 +871,7 @@ describe('NeuSelectComponent', () => {
     const checkViewportSize = vi.fn();
     comp._viewport = () => ({ scrollToIndex, checkViewportSize });
 
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     expect(() => comp.focusOption('user:23/test value')).not.toThrow();
     expect(seenSelectors.every((selector) => !selector.includes('user:23/test value'))).toBe(true);
@@ -744,7 +891,7 @@ describe('NeuSelectComponent', () => {
     comp.onWindowScroll();
     expect(syncSpy).not.toHaveBeenCalled();
 
-    comp.isOpen.set(true);
+    comp.open();
     comp.onWindowResize();
     comp.onWindowScroll();
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -1136,7 +1283,7 @@ describe('NeuSelectComponent', () => {
     // Si el panel ya está abierto, onTriggerKey no debe cerrarlo
     // If the panel is already open, onTriggerKey must not close it
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     comp.onTriggerKey({ preventDefault: vi.fn() } as unknown as Event);
     expect(comp.isOpen()).toBe(true);
@@ -1222,7 +1369,7 @@ describe('NeuSelectComponent', () => {
     ];
     const f = TestBed.createComponent(NeuSelectComponent);
     f.componentRef.setInput('options', disabledOptions);
-    (f.componentInstance as any).isOpen.set(true);
+    f.componentInstance.open();
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -1287,7 +1434,7 @@ describe('NeuSelectComponent', () => {
 
   it('DOM click on option should call selectOption through the template listener', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1300,7 +1447,7 @@ describe('NeuSelectComponent', () => {
 
   it('unselected option checkmarks should render with hidden visibility', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1343,7 +1490,7 @@ describe('NeuSelectComponent', () => {
 
   it('virtualScroll should expose the viewport viewChild when the panel is open', async () => {
     const { f, comp } = await setup({ virtualScroll: true });
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1356,7 +1503,7 @@ describe('NeuSelectComponent', () => {
     f.componentRef.setInput('virtualScroll', true);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1408,7 +1555,7 @@ describe('NeuSelectComponent', () => {
 
   it('option template handlers should cover click and key bindings via DebugElement', async () => {
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1425,7 +1572,7 @@ describe('NeuSelectComponent', () => {
     // El evento DOM keydown Enter en una opción debe llamar selectOption
     // DOM keydown Enter on an option element must call selectOption
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const optionEls = document.querySelectorAll('.neu-select__option');
@@ -1441,7 +1588,7 @@ describe('NeuSelectComponent', () => {
     // El evento DOM keydown Space en una opción debe llamar selectOption
     // DOM keydown Space on an option element must call selectOption
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const optionEls = document.querySelectorAll('.neu-select__option');
@@ -1456,7 +1603,7 @@ describe('NeuSelectComponent', () => {
     // El evento DOM keydown ArrowDown en una opción debe llamar focusOptionByIndex(1)
     // DOM keydown ArrowDown on an option element must call focusOptionByIndex(1)
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const optionEls = document.querySelectorAll('.neu-select__option');
@@ -1471,7 +1618,7 @@ describe('NeuSelectComponent', () => {
     // El evento DOM keydown ArrowUp en una opción debe llamar focusOptionByIndex(-1)
     // DOM keydown ArrowUp on an option element must call focusOptionByIndex(-1)
     const { f, comp } = await setup();
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const optionEls = document.querySelectorAll('.neu-select__option');
@@ -1486,7 +1633,7 @@ describe('NeuSelectComponent', () => {
     // El clic en el input de búsqueda debe llamar stopPropagation (cubre el listener DOM)
     // Click on search input must call stopPropagation (covers DOM listener)
     const { f, comp } = await setup({ searchable: true });
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const searchInput: HTMLInputElement = document.querySelector('.neu-select__search-input')!;
@@ -1498,7 +1645,7 @@ describe('NeuSelectComponent', () => {
 
   it('renders loading state inside the overlay panel', async () => {
     const { f, comp } = await setup({ loading: true, loadingLabel: 'Loading countries' });
-    comp.isOpen.set(true);
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1669,7 +1816,7 @@ describe('NeuSelectComponent', () => {
       if (option) emitted.push(option);
     });
 
-    select.isOpen.set(true);
+    select.open();
     f.detectChanges();
     expect(document.querySelector('.raw-country')?.textContent).toContain('España');
     select.selectOption(COUNTRY_MODELS[1]);
@@ -1708,7 +1855,7 @@ describe('NeuSelectComponent', () => {
     const detailed = vi.fn();
     comp.registerOnChange(cva);
     comp.selectionChange.subscribe(legacy);
-    comp.onChange.subscribe(detailed);
+    comp.changeDetail.subscribe(detailed);
 
     comp.selectOption(OPTIONS[0]);
     comp.selectOption(OPTIONS[0]);
@@ -1733,7 +1880,7 @@ describe('NeuSelectComponent', () => {
     const detailed = vi.fn();
     comp.registerOnChange(cva);
     comp.selectionChange.subscribe(legacy);
-    comp.onChange.subscribe(detailed);
+    comp.changeDetail.subscribe(detailed);
 
     comp.writeValue(0);
     expect(comp.isOptionSelected(0)).toBe(true);
@@ -1754,7 +1901,7 @@ describe('NeuSelectComponent', () => {
     const detailed = vi.fn();
     comp.registerOnChange(cva);
     comp.selectionChange.subscribe(legacy);
-    comp.onChange.subscribe(detailed);
+    comp.changeDetail.subscribe(detailed);
     const input = document.createElement('input');
     input.value = 'Custom country';
     comp.onEditableInput({ target: input } as unknown as Event);
@@ -1781,13 +1928,12 @@ describe('NeuSelectComponent', () => {
 
   it('proposes controlled filters without mutating the canonical owner value', async () => {
     const { comp } = await setup({
-      filter: true,
+      searchable: true,
       filterValue: 'esp',
-      filterBy: 'label',
-      filterMatchMode: 'startsWith',
+      filterConfig: { fields: ['label'], matchMode: 'startsWith' },
     });
     const events: any[] = [];
-    comp.onFilter.subscribe((event: unknown) => events.push(event));
+    comp.filter.subscribe((event: unknown) => events.push(event));
 
     comp.setFilter('mex', new Event('input'));
 
@@ -1832,14 +1978,14 @@ describe('NeuSelectComponent', () => {
       lazy: true,
       loading: true,
       virtualScroll: true,
-      totalRecords: 500,
+      totalItems: 500,
       virtualScrollVisibleItems: 6,
       virtualScrollBuffer: 2,
-      filter: true,
+      searchable: true,
     });
     const requests: any[] = [];
-    comp.onLazyLoad.subscribe((event: unknown) => requests.push(event));
-    comp.show();
+    comp.lazyRequest.subscribe((event: unknown) => requests.push(event));
+    comp.open();
     const list = document.createElement('div');
     Object.defineProperty(list, 'scrollTop', { value: 400 });
     comp.onPanelScroll({ currentTarget: list } as unknown as Event);
@@ -1862,7 +2008,7 @@ describe('NeuSelectComponent', () => {
       virtualScrollVisibleItems: 8,
       virtualScrollBuffer: 2,
     });
-    comp.show();
+    comp.open();
     f.detectChanges();
     await f.whenStable();
 
@@ -1882,12 +2028,12 @@ describe('NeuSelectComponent', () => {
       return 1;
     }) as typeof window.requestAnimationFrame;
     try {
-      comp.show();
+      comp.open();
       comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
       expect(trigger.focus).toHaveBeenCalled();
       f.componentRef.setInput('readonly', true);
       f.detectChanges();
-      comp.show();
+      comp.open();
       comp.selectOption(OPTIONS[0]);
       expect(comp.isOpen()).toBe(false);
       expect(comp._value()).toBeNull();
@@ -1901,23 +2047,23 @@ describe('NeuSelectComponent', () => {
     }
   });
 
-  it('exposes imperative show, hide, focus, clear and resetFilter with coherent events', async () => {
-    const { f, comp } = await setup({ filter: true, clearable: true });
+  it('exposes imperative open, close, focus, clear and resetFilter with coherent events', async () => {
+    const { f, comp } = await setup({ searchable: true, clearable: true });
     const shows = vi.fn();
     const hides = vi.fn();
     const clears = vi.fn();
-    comp.onShow.subscribe(shows);
-    comp.onHide.subscribe(hides);
-    comp.onClear.subscribe(clears);
+    comp.opened.subscribe(shows);
+    comp.closed.subscribe(hides);
+    comp.cleared.subscribe(clears);
 
-    comp.show();
-    comp.show();
+    comp.open();
+    comp.open();
     expect(shows).toHaveBeenCalledTimes(1);
     comp.setFilter('mex');
     comp.resetFilter();
     expect(comp.currentFilter()).toBe('');
-    comp.hide();
-    comp.hide();
+    comp.close();
+    comp.close();
     expect(hides).toHaveBeenCalledTimes(1);
     comp.selectOption(OPTIONS[0]);
     comp.clear();
@@ -1959,7 +2105,7 @@ describe('NeuSelectComponent', () => {
   });
 
   it('covers the complete open and closed keyboard policy matrix', async () => {
-    const { f, comp } = await setup({ virtualScrollOptions: { viewportItems: 2 } });
+    const { f, comp } = await setup({ virtualScrollVisibleItems: 2 });
     const key = (value: string, init: KeyboardEventInit = {}) => {
       const event = new KeyboardEvent('keydown', { key: value, cancelable: true, ...init });
       comp.onTriggerKeyDown(event);
@@ -1967,7 +2113,7 @@ describe('NeuSelectComponent', () => {
     };
 
     const alreadyHandled = key('ArrowDown') as KeyboardEvent & { __neuSelectHandled?: boolean };
-    comp.hide(false);
+    comp.close(false);
     alreadyHandled.__neuSelectHandled = true;
     comp.onTriggerKeyDown(alreadyHandled);
     expect(comp.isOpen()).toBe(false);
@@ -1998,8 +2144,8 @@ describe('NeuSelectComponent', () => {
   });
 
   it('covers editable input, filter keyboard and controlled reset branches', async () => {
-    const { f, comp } = await setup({ editable: true, filter: true, autofocusFilter: true });
-    comp.show();
+    const { f, comp } = await setup({ editable: true, searchable: true, autofocusFilter: true });
+    comp.open();
     f.detectChanges();
     await f.whenStable();
     const input = f.nativeElement.querySelector('.neu-select__editable-input') as HTMLInputElement;
@@ -2014,7 +2160,7 @@ describe('NeuSelectComponent', () => {
     comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'x', cancelable: true }));
     comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
     expect(comp.isOpen()).toBe(false);
-    comp.show();
+    comp.open();
     comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
     expect(comp.isOpen()).toBe(false);
 
@@ -2031,13 +2177,13 @@ describe('NeuSelectComponent', () => {
 
   it('covers option mouse, key, select-on-focus and programmatic focus behavior', async () => {
     const { f, comp } = await setup({ selectOnFocus: true, focusOnHover: true });
-    comp.show();
+    comp.open();
     f.detectChanges();
     const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
     options[1].dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     expect(comp._value()).toBe('mx');
 
-    comp.show();
+    comp.open();
     f.detectChanges();
     const first = document.querySelector<HTMLElement>('.neu-select__option')!;
     first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
@@ -2055,7 +2201,7 @@ describe('NeuSelectComponent', () => {
   });
 
   it('covers overlay trigger, focus, blur, detach and transition guards', async () => {
-    const { f, comp } = await setup({ resetFilterOnHide: true, filter: true });
+    const { f, comp } = await setup({ resetFilterOnHide: true, searchable: true });
     const touched = vi.fn();
     comp.registerOnTouched(touched);
     const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
@@ -2089,7 +2235,7 @@ describe('NeuSelectComponent', () => {
     comp.onInputFocus(new FocusEvent('focus'));
     comp.onInputBlur(new FocusEvent('blur', { relatedTarget: trigger }));
     comp.onInputBlur(new FocusEvent('blur'));
-    comp.show();
+    comp.open();
     comp.setFilter('mex');
     comp.onOverlayDetach();
     comp.onOverlayDetach();
@@ -2101,7 +2247,7 @@ describe('NeuSelectComponent', () => {
       virtualScroll: true,
       virtualScrollVisibleItems: 2,
       virtualScrollBuffer: -2,
-      totalRecords: 20,
+      totalItems: 20,
     });
     comp.virtualFirst.set(1);
     expect(comp.renderedRows().length).toBeGreaterThan(0);
@@ -2113,17 +2259,17 @@ describe('NeuSelectComponent', () => {
     expect(comp.selectedTemplateContext()).toMatchObject({ value: null, custom: false });
 
     f.componentRef.setInput('virtualScrollItemSize', Number.NaN);
-    f.componentRef.setInput('size', 'small');
+    f.componentRef.setInput('size', 'sm');
     f.detectChanges();
     expect(comp.effectiveVirtualScrollItemSize()).toBe(36);
-    f.componentRef.setInput('size', 'large');
+    f.componentRef.setInput('size', 'lg');
     f.detectChanges();
     expect(comp.effectiveVirtualScrollItemSize()).toBe(52);
     comp.panelPosition.update((position: any) => ({ ...position, maxHeight: 'not-a-number' }));
     expect(comp.virtualViewportHeight()).toMatch(/px$/);
 
     f.componentRef.setInput('lazy', true);
-    f.componentRef.setInput('lazyFirst', 5);
+    f.componentRef.setInput('dataFirst', 5);
     f.detectChanges();
     expect(comp.logicalOptionCount()).toBe(20);
     expect(comp.optionPosition(comp.visibleRows()[0], 0)).toBe(6);
@@ -2144,7 +2290,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     expect(comp.describedBy()).toContain('-hint');
 
-    comp.show();
+    comp.open();
     expect(comp.resultsAnnouncement()).toContain('opciones');
     f.componentRef.setInput('options', [OPTIONS[0]]);
     f.detectChanges();
@@ -2161,7 +2307,7 @@ describe('NeuSelectComponent', () => {
     cyclic.self = cyclic;
     comp.writeValue(cyclic);
     expect(comp.nativeValue()).toBe('[object Object]');
-    comp.hide(false);
+    comp.close(false);
     expect(comp.resultsAnnouncement()).toBe('');
   });
 
@@ -2184,7 +2330,7 @@ describe('NeuSelectComponent', () => {
         NeuSelectFilterIconDirective,
       ],
       template: `
-        <neu-select [options]="options" [group]="true" [filter]="true" [showClear]="true">
+        <neu-select [options]="options"  [searchable]="true" [clearable]="true">
           <ng-template neuSelectHeader><span class="slot-header">header</span></ng-template>
           <ng-template neuSelectGroup let-group="group"
             ><span class="slot-group">{{ group }}</span></ng-template
@@ -2204,7 +2350,7 @@ describe('NeuSelectComponent', () => {
           <ng-template neuSelectFilterIcon>filter</ng-template>
           <ng-template neuSelectFooter><span class="slot-footer">footer</span></ng-template>
         </neu-select>
-        <neu-select [options]="[]" [filter]="true">
+        <neu-select [options]="[]" [searchable]="true">
           <ng-template neuSelectEmpty><span class="slot-empty">empty</span></ng-template>
           <ng-template neuSelectEmptyFilter
             ><span class="slot-empty-filter">empty-filter</span></ng-template
@@ -2244,8 +2390,8 @@ describe('NeuSelectComponent', () => {
       selects[0].componentInstance[name]();
     }
     selects[0].componentInstance.writeValue('one');
-    selects[0].componentInstance.show();
-    selects[1].componentInstance.show();
+    selects[0].componentInstance.open();
+    selects[1].componentInstance.open();
     f.detectChanges();
     expect(document.querySelector('.slot-header')).toBeTruthy();
     expect(document.querySelectorAll('.slot-group')).toHaveLength(2);
@@ -2260,8 +2406,8 @@ describe('NeuSelectComponent', () => {
   });
 
   it('covers remaining callback, fallback and guard branches without changing semantics', async () => {
-    const { f, comp } = await setup({ editable: true, filter: true, showClear: true });
-    f.componentRef.setInput('filterFields', ['label']);
+    const { f, comp } = await setup({ editable: true, searchable: true, clearable: true });
+    f.componentRef.setInput('filterConfig', { fields: ['label'] });
     f.componentRef.setInput('virtualScrollItemSize', 0);
     f.detectChanges();
     expect(comp.effectiveFilterConfig().fields).toEqual(['label']);
@@ -2307,12 +2453,12 @@ describe('NeuSelectComponent', () => {
     f.componentRef.setInput('autoOptionFocus', false);
     f.componentRef.setInput('selectOnFocus', true);
     f.detectChanges();
-    comp.show();
+    comp.open();
     comp.onWindowResize();
     comp.onWindowScroll();
     comp.onOverlayPositionChange({ connectionPair: { overlayY: 'bottom' } } as any);
     expect(comp.isPanelAbove()).toBe(true);
-    comp.hide(false);
+    comp.close(false);
 
     f.componentRef.setInput('editable', true);
     f.componentRef.setInput('urlParam', 'custom');
@@ -2324,11 +2470,11 @@ describe('NeuSelectComponent', () => {
 
     f.componentRef.setInput('lazy', true);
     f.componentRef.setInput('virtualScroll', true);
-    f.componentRef.setInput('totalRecords', null);
+    f.componentRef.setInput('totalItems', null);
     f.componentRef.setInput('loading', true);
-    f.componentRef.setInput('lazyFirst', 4);
+    f.componentRef.setInput('dataFirst', 4);
     f.detectChanges();
-    comp.show();
+    comp.open();
     comp.setFilter('same');
     comp.setFilter('same');
     const viewport = comp._viewport();

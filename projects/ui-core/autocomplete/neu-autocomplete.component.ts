@@ -58,7 +58,6 @@ import {
   ɵnormalizeNeuLegacyOptionGroups as normalizeNeuLegacyOptionGroups,
   ɵnormalizeNeuOptionGroups as normalizeNeuOptionGroups,
   ɵnormalizeNeuOptionLazyWindow as normalizeNeuOptionLazyWindow,
-  ɵnormalizeNeuOptionRows as normalizeNeuOptionRows,
 } from '@neural-ui/core/option-api';
 import {
   NeuAutocompleteClearIconDirective,
@@ -87,7 +86,6 @@ import {
   NeuAutocompleteSize,
   NeuAutocompleteValue,
   NeuAutocompleteVariant,
-  NeuAutocompleteVirtualScrollOptions,
 } from './neu-autocomplete.types';
 
 export type { NeuAutocompleteOption } from './neu-autocomplete.types';
@@ -125,8 +123,8 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
     '[class.neu-autocomplete--floating]': 'floatingLabel()',
     '[class.neu-autocomplete--focused]': '_focused()',
     '[class.neu-autocomplete--has-value]': '!!_query()',
-    '[class.neu-autocomplete--sm]': 'size() === "sm" || size() === "small"',
-    '[class.neu-autocomplete--lg]': 'size() === "lg" || size() === "large"',
+    '[class.neu-autocomplete--sm]': 'size() === "sm"',
+    '[class.neu-autocomplete--lg]': 'size() === "lg"',
     '[class.neu-autocomplete--filled]': 'variant() === "filled"',
     '[class.neu-autocomplete--fluid]': 'fluid()',
     '[style.--neu-autocomplete-option-height]': 'effectiveVirtualScrollItemSize() + "px"',
@@ -177,7 +175,7 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
         (focus)="_onFocus($event)"
         (blur)="_onBlur($event)"
         (keydown)="onKeyDown($event)"
-        (keyup)="onKeyUp.emit($event)"
+        (keyup)="keyUp.emit($event)"
       />
       @if (floatingLabel() && label()) {
         <label class="neu-autocomplete__floating-label" [for]="inputElementId()">{{
@@ -193,7 +191,7 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
           }
         </span>
       }
-      @if (_query() && showClear() && !isDisabledFinal() && !readonly()) {
+      @if (_query() && clearable() && !isDisabledFinal() && !readonly()) {
         <button
           type="button"
           class="neu-autocomplete__clear"
@@ -244,8 +242,8 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
       [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="viewportMargin"
-      (overlayOutsideClick)="hide($event, 'outside')"
-      (detach)="hide(null, 'outside')"
+      (overlayOutsideClick)="close($event, 'outside')"
+      (detach)="close(null, 'outside')"
       (positionChange)="onPositionChange($event)"
     >
       <div
@@ -337,7 +335,7 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
               @if (emptyTpl()) {
                 <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
               } @else {
-                {{ emptyMessage() || emptyLabel() }}
+                {{ emptyLabel() }}
               }
             </div>
           }
@@ -403,29 +401,18 @@ export class NeuAutocompleteComponent<
   readonly groups = input<readonly G[]>([]);
   readonly groupSuggestions = input<readonly G[] | null>(null);
   readonly groupConfig = input<NeuOptionGroupConfig<T, G> | null>(null);
-  readonly group = input(false);
-  readonly optionGroupLabel = input<NeuOptionAccessor<G, unknown>>(
-    'label' as NeuOptionAccessor<G, unknown>,
-  );
-  readonly optionGroupChildren = input<NeuOptionAccessor<G, readonly T[]>>(
-    'items' as NeuOptionAccessor<G, readonly T[]>,
-  );
-  readonly optionGroupDisabled = input<NeuOptionAccessor<G, boolean> | null>(null);
   readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
   readonly optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
   readonly optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
   readonly identityConfig = input<Readonly<NeuOptionIdentityConfig<T, V, I>>>({});
-  readonly dataKey = input<NeuOptionAccessor<T, I> | null>(null);
 
-  readonly minQueryLength = input<number | null>(null);
   readonly minLength = input<number>(0);
   readonly delay = input(300);
   readonly completeOnFocus = input(false);
   readonly dropdown = input(false);
   readonly dropdownMode = input<NeuAutocompleteDropdownMode>('blank');
   readonly forceSelection = input(false);
-  readonly clientFilter = input(true);
-  readonly searchLocale = input<string | undefined>(undefined);
+  readonly filterConfig = input<Readonly<NeuOptionFilterConfig<T>>>({});
 
   readonly autoHighlight = input(false);
   readonly autoOptionFocus = input(false);
@@ -457,7 +444,6 @@ export class NeuAutocompleteComponent<
   readonly hint = input('');
   readonly errorMessage = input('');
   readonly emptyLabel = input('Sin resultados');
-  readonly emptyMessage = input<string | null>(null);
   readonly showEmptyMessage = input(true);
   readonly loadingLabel = input('Loading...');
   readonly searchMessage = input<string | null>(null);
@@ -466,7 +452,7 @@ export class NeuAutocompleteComponent<
   readonly dropdownAriaLabel = input('Show suggestions');
   readonly clearAriaLabel = input('Clear value');
   readonly listAriaLabel = input('Suggestions');
-  readonly showClear = input(true);
+  readonly clearable = input(true);
   readonly floatingLabel = input(false);
   readonly size = input<NeuAutocompleteSize>('md');
   readonly variant = input<NeuAutocompleteVariant>('outlined');
@@ -476,23 +462,22 @@ export class NeuAutocompleteComponent<
   readonly virtualScroll = input(false);
   readonly virtualScrollVisibleItems = input(8);
   readonly virtualScrollItemSize = input<number | null>(null);
-  readonly virtualScrollOptions = input<NeuAutocompleteVirtualScrollOptions | null>(null);
   readonly virtualScrollBuffer = input(3);
   readonly lazy = input(false);
-  readonly lazyFirst = input(0);
-  readonly totalRecords = input<number | null>(null);
+  readonly dataFirst = input(0);
+  readonly totalItems = input<number | null>(null);
 
   readonly completeMethod = output<NeuAutocompleteCompleteEvent>();
-  readonly onSelect = output<NeuAutocompleteSelectEvent<T, V>>();
-  readonly onFocus = output<FocusEvent>();
-  readonly onBlur = output<FocusEvent>();
-  readonly onDropdownClick = output<NeuAutocompleteDropdownClickEvent>();
-  readonly onClear = output<NeuAutocompleteClearEvent<V>>();
-  readonly onInputKeydown = output<KeyboardEvent>();
-  readonly onKeyUp = output<KeyboardEvent>();
-  readonly onShow = output<NeuAutocompleteOverlayEvent>();
-  readonly onHide = output<NeuAutocompleteOverlayEvent>();
-  readonly onLazyLoad = output<NeuAutocompleteLazyLoadEvent>();
+  readonly select = output<NeuAutocompleteSelectEvent<T, V>>();
+  readonly focusEvent = output<FocusEvent>();
+  readonly blurEvent = output<FocusEvent>();
+  readonly dropdownClick = output<NeuAutocompleteDropdownClickEvent>();
+  readonly cleared = output<NeuAutocompleteClearEvent<V>>();
+  readonly inputKeydown = output<KeyboardEvent>();
+  readonly keyUp = output<KeyboardEvent>();
+  readonly opened = output<NeuAutocompleteOverlayEvent>();
+  readonly closed = output<NeuAutocompleteOverlayEvent>();
+  readonly lazyRequest = output<NeuAutocompleteLazyLoadEvent>();
   readonly optionSelected = output<T | null>();
   readonly queryChange = output<string>();
 
@@ -540,7 +525,7 @@ export class NeuAutocompleteComponent<
 
   readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
   readonly effectiveMinQueryLength = computed(() =>
-    Math.max(0, this.minQueryLength() ?? Math.max(1, this.minLength())),
+    Math.max(0, Math.max(1, this.minLength())),
   );
   readonly consumerOwnedSuggestions = computed(
     () => this.suggestions() !== null || this.groupSuggestions() !== null,
@@ -550,9 +535,8 @@ export class NeuAutocompleteComponent<
   readonly effectiveGroupConfig = computed<NeuOptionGroupConfig<T, G>>(
     () =>
       this.groupConfig() ?? {
-        labelAccessor: this.optionGroupLabel(),
-        childrenAccessor: this.optionGroupChildren(),
-        disabledAccessor: this.optionGroupDisabled(),
+        labelAccessor: 'label' as NeuOptionAccessor<G, unknown>,
+        childrenAccessor: 'items' as NeuOptionAccessor<G, readonly T[]>,
       },
   );
   readonly allOptions = computed<readonly T[]>(() => {
@@ -574,10 +558,11 @@ export class NeuAutocompleteComponent<
   });
   readonly effectiveFilterConfig = computed<Readonly<NeuOptionFilterConfig<T>>>(() => ({
     matchMode: 'contains',
-    locale: this.searchLocale(),
+    strategy: this.consumerOwnedSuggestions() ? 'server' : 'client',
+    ...this.filterConfig(),
   }));
   readonly normalizedRows = computed<InternalNeuOptionNormalizedRow<T, G | string>[]>(() => {
-    const offset = this.lazy() ? this.lazyFirst() : 0;
+    const offset = this.lazy() ? this.dataFirst() : 0;
     if (this.loading()) {
       return createNeuOptionLoadingRows(
         offset,
@@ -590,12 +575,10 @@ export class NeuAutocompleteComponent<
         logicalOffset: offset,
       });
     }
-    if (this.group())
-      return normalizeNeuLegacyOptionGroups(this.sourceOptions(), this.optionDisabled(), offset);
-    return normalizeNeuOptionRows(this.sourceOptions(), this.optionDisabled(), offset);
+    return normalizeNeuLegacyOptionGroups(this.sourceOptions(), this.optionDisabled(), offset);
   });
   readonly visibleRows = computed<InternalNeuOptionNormalizedRow<T, G | string>[]>(() => {
-    if (this.consumerOwnedSuggestions() || !this.clientFilter()) return this.normalizedRows();
+    if (this.effectiveFilterConfig().strategy === 'server') return this.normalizedRows();
     if (!this.filterQuery() && !this.allowEmptyQuery()) return [];
     return filterNeuOptionRows(
       this.normalizedRows(),
@@ -614,7 +597,7 @@ export class NeuAutocompleteComponent<
     if (!this.virtualScroll() || this.lazy())
       return rows.map((row, rowIndex) => ({ row, rowIndex }));
     const first = Math.min(this.virtualFirst(), Math.max(0, rows.length - 1));
-    const buffer = Math.max(0, this.virtualScrollOptions()?.buffer ?? this.virtualScrollBuffer());
+    const buffer = Math.max(0, this.virtualScrollBuffer());
     const start = Math.max(0, first - buffer);
     const count = this.virtualWindowSize() + buffer * 2;
     return rows
@@ -622,7 +605,7 @@ export class NeuAutocompleteComponent<
       .map((row, offset) => ({ row, rowIndex: start + offset }));
   });
   readonly logicalOptionCount = computed(() =>
-    this.lazy() ? (this.totalRecords() ?? this.visibleOptionCount()) : this.visibleOptionCount(),
+    this.lazy() ? (this.totalItems() ?? this.visibleOptionCount()) : this.visibleOptionCount(),
   );
   private readonly announcementData = computed(() =>
     deriveNeuOptionAnnouncementData(this.visibleRows(), this._activeIndex(), this.optionLabel(), {
@@ -667,20 +650,18 @@ export class NeuAutocompleteComponent<
     if (!this._isOpen()) return '';
     const metadata = this.announcementData();
     const total = metadata.resultCount;
-    if (metadata.empty) return this.emptyMessage() || this.emptyLabel();
+    if (metadata.empty) return this.emptyLabel();
     if (metadata.loading && !total) return this.loadingLabel();
     if (this.searchMessage()) return this.searchMessage()!.replaceAll('{0}', String(total));
     return total === 1 ? '1 resultado disponible' : `${total} resultados disponibles`;
   });
   readonly effectiveVirtualScrollItemSize = computed(() => {
-    const explicit = this.virtualScrollItemSize() ?? this.virtualScrollOptions()?.itemSize;
+    const explicit = this.virtualScrollItemSize();
     if (explicit != null && Number.isFinite(explicit)) return Math.max(1, explicit);
     switch (this.size()) {
       case 'sm':
-      case 'small':
         return 36;
       case 'lg':
-      case 'large':
         return 52;
       default:
         return 40;
@@ -691,7 +672,7 @@ export class NeuAutocompleteComponent<
   );
   readonly virtualTopHeight = computed(() => {
     if (!this.virtualScroll()) return 0;
-    if (this.lazy()) return Math.max(0, this.lazyFirst()) * this.effectiveVirtualScrollItemSize();
+    if (this.lazy()) return Math.max(0, this.dataFirst()) * this.effectiveVirtualScrollItemSize();
     return (this.renderedRows()[0]?.rowIndex ?? 0) * this.effectiveVirtualScrollItemSize();
   });
   readonly virtualBottomHeight = computed(() => {
@@ -699,7 +680,7 @@ export class NeuAutocompleteComponent<
     if (this.lazy()) {
       const remaining = Math.max(
         0,
-        this.logicalOptionCount() - this.lazyFirst() - this.visibleOptionCount(),
+        this.logicalOptionCount() - this.dataFirst() - this.visibleOptionCount(),
       );
       return remaining * this.effectiveVirtualScrollItemSize();
     }
@@ -749,13 +730,13 @@ export class NeuAutocompleteComponent<
       if (untracked(() => this.requestPending()) && this.consumerOwnedSuggestions()) {
         untracked(() => {
           this.requestPending.set(false);
-          this.show(null, 'completion');
+          this.open(null, 'completion');
           this.applyInitialFocus(this.autoHighlight());
         });
       }
     });
     effect(() => {
-      if (this.isDisabledFinal()) untracked(() => this.hide(null, 'programmatic'));
+      if (this.isDisabledFinal()) untracked(() => this.close(null, 'programmatic'));
     });
   }
 
@@ -795,18 +776,18 @@ export class NeuAutocompleteComponent<
 
     if (!query) {
       this.cancelCompletion();
-      this.hide(originalEvent, 'clear');
+      this.close(originalEvent, 'clear');
       if (previousText || previousValue !== null) {
-        this.onClear.emit({ originalEvent, previousValue, previousText, reason: 'input' });
+        this.cleared.emit({ originalEvent, previousValue, previousText, reason: 'input' });
       }
       return;
     }
     if (query.length < this.effectiveMinQueryLength()) {
       this.cancelCompletion();
-      this.hide(originalEvent, 'completion');
+      this.close(originalEvent, 'completion');
       return;
     }
-    if (!this.consumerOwnedSuggestions()) this.show(originalEvent, 'completion');
+    if (!this.consumerOwnedSuggestions()) this.open(originalEvent, 'completion');
     this.scheduleCompletion(originalEvent, query, 'input', true);
   }
 
@@ -814,14 +795,14 @@ export class NeuAutocompleteComponent<
     if (this.isDisabledFinal()) return;
     this._focused.set(true);
     this.focusSessionTouched = false;
-    this.onFocus.emit(event);
+    this.focusEvent.emit(event);
     if (this.completeOnFocus()) {
       this.filterQuery.set(this._query());
       this.scheduleCompletion(event, this._query(), 'focus', false);
       return;
     }
     if (this._query().length >= this.effectiveMinQueryLength() && this.visibleOptionCount()) {
-      this.show(event, 'focus');
+      this.open(event, 'focus');
     }
   }
 
@@ -834,15 +815,15 @@ export class NeuAutocompleteComponent<
       this.focusSessionTouched = true;
       this.onTouched();
     }
-    this.hide(event, 'tab');
-    this.onBlur.emit(event);
+    this.close(event, 'tab');
+    this.blurEvent.emit(event);
   }
 
   handleDropdownClick(event: MouseEvent): void {
     if (this.isDisabledFinal() || this.loading()) return;
     if (this._isOpen()) {
-      this.hide(event, 'dropdown', true);
-      this.onDropdownClick.emit({
+      this.close(event, 'dropdown', true);
+      this.dropdownClick.emit({
         originalEvent: event,
         query: this._query(),
         mode: this.dropdownMode(),
@@ -854,7 +835,7 @@ export class NeuAutocompleteComponent<
     this.filterQuery.set(query);
     this.allowEmptyQuery.set(query === '');
     this.scheduleCompletion(event, query, 'dropdown', false);
-    this.onDropdownClick.emit({ originalEvent: event, query, mode: this.dropdownMode() });
+    this.dropdownClick.emit({ originalEvent: event, query, mode: this.dropdownMode() });
   }
 
   openAll(event: Event | null = null): void {
@@ -868,20 +849,20 @@ export class NeuAutocompleteComponent<
       event.preventDefault();
       return;
     }
-    this.onInputKeydown.emit(event);
+    this.inputKeydown.emit(event);
     switch (event.key) {
       case 'ArrowDown':
         if (!this._isOpen() && this.visibleOptionCount() === 0) return;
         event.preventDefault();
-        if (!this._isOpen()) this.show(event, 'keyboard');
+        if (!this._isOpen()) this.open(event, 'keyboard');
         this.moveActive(1, event);
         break;
       case 'ArrowUp':
         if (!this._isOpen() && this.visibleOptionCount() === 0) return;
         event.preventDefault();
-        if (event.altKey) this.hide(event, 'keyboard', this._focused());
+        if (event.altKey) this.close(event, 'keyboard', this._focused());
         else {
-          if (!this._isOpen()) this.show(event, 'keyboard');
+          if (!this._isOpen()) this.open(event, 'keyboard');
           this.moveActive(-1, event);
         }
         break;
@@ -984,9 +965,9 @@ export class NeuAutocompleteComponent<
     this.customTextValue.set(null);
     this.canonicalValue.set(value);
     if (changed) this.onChange(value);
-    this.onSelect.emit({ originalEvent, option, value });
+    this.select.emit({ originalEvent, option, value });
     this.optionSelected.emit(option);
-    if (close) this.hide(originalEvent, 'selection', this._focused());
+    if (close) this.close(originalEvent, 'selection', this._focused());
   }
 
   clear(
@@ -1007,26 +988,26 @@ export class NeuAutocompleteComponent<
     this.setActiveIndex(-1);
     if (previousValue !== null) this.onChange(null);
     if (previousText) this.queryChange.emit('');
-    this.onClear.emit({ originalEvent, previousValue, previousText, reason });
-    this.hide(originalEvent, 'clear');
+    this.cleared.emit({ originalEvent, previousValue, previousText, reason });
+    this.close(originalEvent, 'clear');
   }
 
-  show(originalEvent: Event | null = null, reason: OverlayReason = 'programmatic'): void {
+  open(originalEvent: Event | null = null, reason: OverlayReason = 'programmatic'): void {
     if (this.isDisabledFinal()) return;
     this.syncOverlayWidth();
     if (!this._isOpen()) {
       this.overlaySession.open(this.inputEl()?.nativeElement ?? null);
       this._isOpen.set(this.overlaySession.isOpen);
-      this.onShow.emit({ originalEvent, reason });
+      this.opened.emit({ originalEvent, reason });
       this.overlaySession.requestRefresh('open');
     }
     this.applyInitialFocus(false);
     if (this.lazy() && (reason === 'programmatic' || reason === 'keyboard')) {
-      this.emitLazyRequest('initial', this.lazyFirst());
+      this.emitLazyRequest('initial', this.dataFirst());
     }
   }
 
-  hide(
+  close(
     originalEvent: Event | null = null,
     reason: OverlayReason = 'programmatic',
     restoreFocus = false,
@@ -1039,11 +1020,7 @@ export class NeuAutocompleteComponent<
   }
 
   _closePanel(): void {
-    this.hide(null, 'programmatic');
-  }
-
-  close(): void {
-    this.hide(null, 'programmatic');
+    this.close(null, 'programmatic');
   }
 
   focus(): void {
@@ -1064,7 +1041,7 @@ export class NeuAutocompleteComponent<
       this.matchedOption.set(null);
       this.customTextValue.set(null);
       this.canonicalValue.set(null);
-      this.hide(null, 'programmatic');
+      this.close(null, 'programmatic');
       return;
     }
     const match = this.findOptionForValue(value as V);
@@ -1075,7 +1052,7 @@ export class NeuAutocompleteComponent<
     this._query.set(text);
     this.filterQuery.set(text);
     this.allowEmptyQuery.set(false);
-    this.hide(null, 'programmatic');
+    this.close(null, 'programmatic');
   }
 
   registerOnChange(fn: (value: NeuAutocompleteValue<V> | null) => void): void {
@@ -1110,7 +1087,7 @@ export class NeuAutocompleteComponent<
   optionsEqual(left: T, right: T): boolean {
     return neuOptionsEqual(left, right, {
       ...this.identityConfig(),
-      identityAccessor: this.identityConfig().identityAccessor ?? this.dataKey(),
+      identityAccessor: this.identityConfig().identityAccessor,
       valueAccessor: this.optionValue(),
     });
   }
@@ -1159,8 +1136,8 @@ export class NeuAutocompleteComponent<
 
   loaderTemplateContext(logicalIndex: number): NeuAutocompleteLoaderContext {
     const window = normalizeNeuOptionLazyWindow(
-      this.lazyFirst(),
-      this.lazyFirst() + this.virtualWindowSize(),
+      this.dataFirst(),
+      this.dataFirst() + this.virtualWindowSize(),
     );
     return { $implicit: logicalIndex, logicalIndex, ...window };
   }
@@ -1261,7 +1238,7 @@ export class NeuAutocompleteComponent<
     this.setActiveIndex(-1);
     if (intent.closed) {
       this._isOpen.set(false);
-      this.onHide.emit({ originalEvent, reason });
+      this.closed.emit({ originalEvent, reason });
     }
     const origin = this.overlaySession.consumeFocusRestorationIntent();
     if (restoreFocus && origin && !this.isDisabledFinal()) origin.focus();
@@ -1326,10 +1303,10 @@ export class NeuAutocompleteComponent<
       });
       if (!this.consumerOwnedSuggestions()) {
         this.requestPending.set(false);
-        this.show(originalEvent, source === 'dropdown' ? 'dropdown' : 'completion');
+        this.open(originalEvent, source === 'dropdown' ? 'dropdown' : 'completion');
         this.applyInitialFocus(this.autoHighlight());
       }
-      if (this.lazy()) this.emitLazyRequest('filter', this.lazyFirst());
+      if (this.lazy()) this.emitLazyRequest('filter', this.dataFirst());
     };
     const timeout = delayed ? Math.max(0, this.delay()) : 0;
     if (timeout === 0) emit();
@@ -1351,7 +1328,7 @@ export class NeuAutocompleteComponent<
     const match = this.allOptions().find(
       (option) =>
         !this.isOptionDisabled(option) &&
-        this.optionLabelOf(option).localeCompare(query, this.searchLocale(), {
+        this.optionLabelOf(option).localeCompare(query, this.effectiveFilterConfig().locale, {
           sensitivity: 'accent',
         }) === 0,
     );
@@ -1449,7 +1426,7 @@ export class NeuAutocompleteComponent<
   private virtualWindowSize(): number {
     return Math.max(
       1,
-      this.virtualScrollOptions()?.viewportItems ?? this.virtualScrollVisibleItems(),
+      this.virtualScrollVisibleItems(),
     );
   }
 
@@ -1470,7 +1447,7 @@ export class NeuAutocompleteComponent<
     });
     if (signature === this.lastLazySignature) return;
     this.lastLazySignature = signature;
-    this.onLazyLoad.emit({ ...request, query: this._query() });
+    this.lazyRequest.emit({ ...request, query: this._query() });
   }
 
   private findOptionForValue(value: V): T | undefined {

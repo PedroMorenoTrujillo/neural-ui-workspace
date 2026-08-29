@@ -13,15 +13,9 @@ export interface NeuAutocompleteOption<V = unknown> {
 
 export type NeuAutocompleteValue<V> = V | string;
 export type NeuAutocompleteDropdownMode = 'blank' | 'current';
-export type NeuAutocompleteSize = 'sm' | 'md' | 'lg' | 'small' | 'large';
+export type NeuAutocompleteSize = 'sm' | 'md' | 'lg';
 export type NeuAutocompleteVariant = 'outlined' | 'filled';
 export type NeuAutocompleteCompletionSource = 'input' | 'focus' | 'dropdown' | 'programmatic';
-
-export interface NeuAutocompleteVirtualScrollOptions {
-  readonly itemSize?: number;
-  readonly viewportItems?: number;
-  readonly buffer?: number;
-}
 
 export interface NeuAutocompleteCompleteEvent {
   readonly originalEvent: Event | null;

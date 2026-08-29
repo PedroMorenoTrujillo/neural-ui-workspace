@@ -22,7 +22,6 @@ import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import {
   NeuOptionDisabledAccessor,
   NeuOptionFilterConfig,
-  NeuOptionFilterMatchMode,
   NeuOptionGroupConfig,
   NeuOptionIdentityConfig,
   NeuOptionLabelAccessor,
@@ -48,7 +47,6 @@ import {
   ɵnormalizeNeuLegacyOptionGroups as normalizeNeuLegacyOptionGroups,
   ɵnormalizeNeuOptionGroups as normalizeNeuOptionGroups,
   ɵnormalizeNeuOptionLazyWindow as normalizeNeuOptionLazyWindow,
-  ɵnormalizeNeuOptionRows as normalizeNeuOptionRows,
 } from '@neural-ui/core/option-api';
 import {
   NeuListboxEmptyDirective,
@@ -57,6 +55,7 @@ import {
   NeuListboxFooterDirective,
   NeuListboxGroupDirective,
   NeuListboxHeaderDirective,
+  NeuListboxIndicatorDirective,
   NeuListboxItemDirective,
   NeuListboxLoaderDirective,
 } from './neu-listbox.directives';
@@ -219,12 +218,19 @@ import {
             (dblclick)="onOptionDoubleClick($event, entry.row)"
           >
             @if (checkbox() || checkmark()) {
-              <span
-                class="neu-listbox__indicator"
-                [class.neu-listbox__indicator--checkbox]="checkbox()"
-                aria-hidden="true"
-                >{{ isOptionSelected(entry.row.option) ? '✓' : '' }}</span
-              >
+              @if (indicatorTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="indicatorTpl()!.templateRef"
+                  [ngTemplateOutletContext]="indicatorTemplateContext(entry.row)"
+                />
+              } @else {
+                <span
+                  class="neu-listbox__indicator"
+                  [class.neu-listbox__indicator--checkbox]="checkbox()"
+                  aria-hidden="true"
+                  >{{ isOptionSelected(entry.row.option) ? '✓' : '' }}</span
+                >
+              }
             }
             <span class="neu-listbox__option-content">
               @if (itemTpl()) {
@@ -245,13 +251,13 @@ import {
             @if (emptyFilterTpl()) {
               <ng-container [ngTemplateOutlet]="emptyFilterTpl()!.templateRef" />
             } @else {
-              {{ emptyFilterMessage() ?? emptyLabel() }}
+              {{ noResultsMessage() }}
             }
           } @else {
             @if (emptyTpl()) {
               <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
             } @else {
-              {{ emptyMessage() ?? emptyLabel() }}
+              {{ emptyLabel() }}
             }
           }
         </div>
@@ -321,7 +327,6 @@ export class NeuListboxComponent<
   readonly options = input<readonly T[]>([]);
   readonly groups = input<readonly G[]>([]);
   readonly groupConfig = input<NeuOptionGroupConfig<T, G> | null>(null);
-  readonly group = input(false);
   readonly label = input('');
   readonly ariaLabel = input('Options');
   readonly ariaLabelledBy = input<string | null>(null);
@@ -329,18 +334,12 @@ export class NeuListboxComponent<
   readonly ariaFilterLabel = input('Filter options');
   readonly hint = input('');
   readonly emptyLabel = input('No options found');
-  readonly emptyMessage = input<string | null>(null);
-  readonly emptyFilterMessage = input<string | null>(null);
+  readonly noResultsMessage = input('No results found');
   readonly multiple = input(false);
   readonly searchable = input(false);
-  readonly filter = input(false);
   readonly searchPlaceholder = input('Search...');
-  readonly filterPlaceHolder = input<string | null>(null);
   readonly filterValue = input<string | null>(null);
   readonly filterConfig = input<Readonly<NeuOptionFilterConfig<T>>>({});
-  readonly filterFields = input<Readonly<NeuOptionFilterConfig<T>['fields']> | null>(null);
-  readonly filterMatchMode = input<NeuOptionFilterMatchMode>('contains');
-  readonly filterLocale = input<string | undefined>(undefined);
   readonly disabled = input(false);
   readonly readonly = input(false);
   readonly required = input(false);
@@ -368,8 +367,8 @@ export class NeuListboxComponent<
   readonly virtualScrollBuffer = input(3);
   readonly lazy = input(false);
   readonly loading = input(false);
-  readonly totalRecords = input<number | null>(null);
-  readonly lazyFirst = input(0);
+  readonly totalItems = input<number | null>(null);
+  readonly dataFirst = input(0);
   readonly dragdrop = input(false);
   readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
   readonly optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
@@ -377,17 +376,18 @@ export class NeuListboxComponent<
   readonly identityConfig = input<Readonly<NeuOptionIdentityConfig<T, V, I>>>({});
 
   readonly selectionChange = output<T[]>();
-  readonly change = output<NeuListboxChangeEvent<T, V>>();
+  readonly changeDetail = output<NeuListboxChangeEvent<T, V>>();
   readonly optionClick = output<NeuListboxOptionEvent<T, V>>();
   readonly optionDoubleClick = output<NeuListboxOptionEvent<T, V>>();
-  readonly filterChange = output<NeuListboxFilterEvent<T>>();
-  readonly listFocus = output<FocusEvent>();
-  readonly listBlur = output<FocusEvent>();
-  readonly selectAllChange = output<NeuListboxSelectAllEvent<T, V>>();
-  readonly lazyLoad = output<NeuOptionLazyRequest>();
+  readonly filter = output<NeuListboxFilterEvent<T>>();
+  readonly focusEvent = output<FocusEvent>();
+  readonly blurEvent = output<FocusEvent>();
+  readonly selectAllChangeDetail = output<NeuListboxSelectAllEvent<T, V>>();
+  readonly lazyRequest = output<NeuOptionLazyRequest>();
   readonly drop = output<NeuListboxDropEvent<T>>();
 
   readonly itemTpl = contentChild(NeuListboxItemDirective<T>);
+  readonly indicatorTpl = contentChild(NeuListboxIndicatorDirective<T, V>);
   readonly groupTpl = contentChild(NeuListboxGroupDirective<G>);
   readonly filterTpl = contentChild(NeuListboxFilterDirective<T>);
   readonly loaderTpl = contentChild(NeuListboxLoaderDirective);
@@ -408,17 +408,14 @@ export class NeuListboxComponent<
   readonly labelId = computed(() => `${this.baseId()}-label`);
   readonly hintId = computed(() => `${this.baseId()}-hint`);
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
-  readonly filterEnabled = computed(() => this.searchable() || this.filter());
-  readonly filterPlaceholder = computed(() => this.filterPlaceHolder() ?? this.searchPlaceholder());
+  readonly filterEnabled = computed(() => this.searchable());
+  readonly filterPlaceholder = computed(() => this.searchPlaceholder());
   readonly currentFilter = computed(() => this.filterValue() ?? this.query());
-  readonly effectiveFilterConfig = computed<Readonly<NeuOptionFilterConfig<T>>>(() => ({
-    ...this.filterConfig(),
-    ...(this.filterFields() ? { fields: this.filterFields()! } : {}),
-    matchMode: this.filterConfig().matchMode ?? this.filterMatchMode(),
-    locale: this.filterConfig().locale ?? this.filterLocale(),
-  }));
+  readonly effectiveFilterConfig = computed<Readonly<NeuOptionFilterConfig<T>>>(() =>
+    this.filterConfig(),
+  );
   readonly normalizedRows = computed<InternalNeuOptionNormalizedRow<T, G | string>[]>(() => {
-    const offset = this.lazy() ? this.lazyFirst() : 0;
+    const offset = this.lazy() ? this.dataFirst() : 0;
     if (
       this.lazy() &&
       this.loading() &&
@@ -437,9 +434,7 @@ export class NeuListboxComponent<
         logicalOffset: offset,
       });
     }
-    if (this.group())
-      return normalizeNeuLegacyOptionGroups(this.options(), this.optionDisabled(), offset);
-    return normalizeNeuOptionRows(this.options(), this.optionDisabled(), offset);
+    return normalizeNeuLegacyOptionGroups(this.options(), this.optionDisabled(), offset);
   });
   readonly visibleRows = computed(() =>
     filterNeuOptionRows(
@@ -457,7 +452,7 @@ export class NeuListboxComponent<
     () => this.visibleRows().filter((row) => row.kind === 'option').length,
   );
   readonly logicalOptionCount = computed(() =>
-    this.lazy() ? (this.totalRecords() ?? this.visibleOptionCount()) : this.visibleOptionCount(),
+    this.lazy() ? (this.totalItems() ?? this.visibleOptionCount()) : this.visibleOptionCount(),
   );
   readonly renderedRows = computed(() => {
     const rows = this.visibleRows();
@@ -474,14 +469,14 @@ export class NeuListboxComponent<
   readonly virtualTopHeight = computed(() => {
     if (!this.virtualScroll()) return 0;
     const first = this.renderedRows()[0]?.rowIndex ?? 0;
-    return (this.lazy() ? this.lazyFirst() : first) * this.safeItemSize();
+    return (this.lazy() ? this.dataFirst() : first) * this.safeItemSize();
   });
   readonly virtualBottomHeight = computed(() => {
     if (!this.virtualScroll()) return 0;
-    const total = this.totalRecords() ?? this.visibleRows().length;
+    const total = this.totalItems() ?? this.visibleRows().length;
     const rendered = this.renderedRows();
     const last = this.lazy()
-      ? this.lazyFirst() + rendered.length
+      ? this.dataFirst() + rendered.length
       : (rendered.at(-1)?.rowIndex ?? -1) + 1;
     return Math.max(0, total - last) * this.safeItemSize();
   });
@@ -511,7 +506,7 @@ export class NeuListboxComponent<
     });
     effect(() => {
       const rows = this.visibleRows();
-      const locale = this.filterLocale();
+      const locale = this.filterConfig().locale;
       untracked(() => {
         this.applyActiveResult(this.activeRowController.setRows(rows));
         this.ensureTypeaheadController(rows, locale).setRows(rows);
@@ -662,7 +657,7 @@ export class NeuListboxComponent<
     const next = result.rowIndex;
     this.ensureActiveRendered(next);
     this.scrollActiveIntoView();
-    this.listFocus.emit(event);
+    this.focusEvent.emit(event);
     if (this.selectOnFocus() && !this.multiple() && next !== -1 && selected === -1) {
       const row = this.visibleRows()[next];
       if (row?.kind === 'option') this.selectOption(event, row, next);
@@ -677,7 +672,7 @@ export class NeuListboxComponent<
     this.rangeAnchorLogicalIndex = null;
     this.typeaheadController?.reset();
     this.onTouched();
-    this.listBlur.emit(event);
+    this.blurEvent.emit(event);
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -736,7 +731,7 @@ export class NeuListboxComponent<
         break;
     }
     if (!meta && event.key.length === 1 && !event.altKey) {
-      const match = this.ensureTypeaheadController(rows, this.filterLocale()).type(
+      const match = this.ensureTypeaheadController(rows, this.filterConfig().locale).type(
         event.key,
         next,
       ).rowIndex;
@@ -776,7 +771,7 @@ export class NeuListboxComponent<
       visibleOptions: this.previewFilteredOptions(value),
       config: this.effectiveFilterConfig(),
     };
-    this.filterChange.emit(emitted);
+    this.filter.emit(emitted);
     this.liveMessage.set(`${emitted.visibleOptions.length} options available`);
     if (this.lazy()) this.emitLazyRequest(value ? 'filter' : 'reset', 0, value);
   }
@@ -790,7 +785,7 @@ export class NeuListboxComponent<
     const options = this.eligibleVisibleRows().map((row) => row.option);
     const value = checked ? options.map((option) => this.optionValueOf(option)) : [];
     if (this.selectAll() === null) this.commitSelection(value, event, null, checked);
-    this.selectAllChange.emit({
+    this.selectAllChangeDetail.emit({
       originalEvent: event,
       checked,
       scope: 'visible-eligible',
@@ -854,7 +849,7 @@ export class NeuListboxComponent<
   optionPosition(row: InternalNeuOptionRow<T>, rowIndex: number): number {
     return (
       deriveNeuOptionAriaPosition(this.visibleRows(), rowIndex, {
-        logicalOffset: this.lazy() ? this.lazyFirst() : 0,
+        logicalOffset: this.lazy() ? this.dataFirst() : 0,
         totalSize: this.logicalOptionCount(),
       })?.posInSet ?? row.logicalIndex + 1
     );
@@ -868,6 +863,17 @@ export class NeuListboxComponent<
       selected: this.isOptionSelected(row.option),
       disabled: row.disabled,
       active: this.activeIndex() === rowIndex,
+    };
+  }
+  indicatorTemplateContext(row: InternalNeuOptionRow<T>) {
+    const selected = this.isOptionSelected(row.option);
+    return {
+      $implicit: selected,
+      selected,
+      option: row.option,
+      value: this.optionValueOf(row.option),
+      checkbox: this.checkbox(),
+      checkmark: this.checkmark(),
     };
   }
   groupTemplateContext(
@@ -956,7 +962,7 @@ export class NeuListboxComponent<
     this.onChange(model);
     const selectedOptions = this.selectedOptions(immutable);
     this.selectionChange.emit(selectedOptions);
-    this.change.emit({ originalEvent, option, value: model, selectedOptions, selected });
+    this.changeDetail.emit({ originalEvent, option, value: model, selectedOptions, selected });
     this.liveMessage.set(
       this.multiple()
         ? `${immutable.length} options selected`
@@ -1011,7 +1017,7 @@ export class NeuListboxComponent<
   ): void {
     const count =
       Math.max(1, this.virtualScrollViewportItems()) + Math.max(0, this.virtualScrollBuffer()) * 2;
-    const total = this.totalRecords();
+    const total = this.totalItems();
     const request = createNeuOptionLazyRequest(
       normalizeNeuOptionLazyWindow(
         first,
@@ -1032,7 +1038,7 @@ export class NeuListboxComponent<
     )
       return;
     this.lastLazyRequest.set(request);
-    this.lazyLoad.emit(request);
+    this.lazyRequest.emit(request);
   }
   private scrollActiveIntoView(): void {
     if (!isPlatformBrowser(this.platformId)) return;

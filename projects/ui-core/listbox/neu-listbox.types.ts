@@ -46,3 +46,12 @@ export interface NeuListboxDropEvent<T> {
 }
 
 export type NeuListboxItemContext<T> = NeuOptionTemplateContext<T>;
+
+export interface NeuListboxIndicatorContext<T, V> {
+  readonly $implicit: boolean;
+  readonly selected: boolean;
+  readonly option: T;
+  readonly value: V;
+  readonly checkbox: boolean;
+  readonly checkmark: boolean;
+}

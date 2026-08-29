@@ -24,14 +24,14 @@ Sources: the exact published `primeng` packages `19.1.4`, `20.4.0`, `21.1.9`, an
 | Canonical CVA value    | `canonicalValue`                 | `V`, custom string, or null; editing a selected option cannot leave a stale `V`. |
 | Suggestions            | `suggestions`/`groupSuggestions` | Consumer-owned in Prime mode; legacy `options` retains local filtering.          |
 | Active option          | `_activeIndex` + logical index   | Eligible option row only; never group/loading/disabled/unrendered.               |
-| Overlay visibility     | `_isOpen`                        | One lifecycle transition per actual show/hide.                                   |
+| Overlay visibility     | `_isOpen`                        | One lifecycle transition per actual open/close.                                  |
 
 ## Current PrimeNG 22.1 capability closure
 
 | Prime capability                             | Result   | Neural contract/evidence                                                                                                                        |
 | -------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Consumer-owned suggestions                   | PARITY   | `suggestions` and `groupSuggestions` are replaced by the consumer; networking and cancellation stay outside the component.                      |
-| Completion, delay and minimum query length   | PARITY   | Typed `completeMethod`, latest-wins cancellable scheduling, `minQueryLength`, legacy `minLength`, and no below-floor request.                   |
+| Completion, delay and minimum query length   | PARITY   | Typed `completeMethod`, latest-wins cancellable scheduling, canonical `minLength`, and no below-floor request.                                 |
 | Complete-on-focus and dropdown blank/current | PARITY   | Immediate focus/dropdown request, one dropdown lifecycle, correct blank/current query and focus restoration.                                    |
 | Custom text                                  | PARITY   | Non-force text is the public `V \| string` value; empty text normalizes to null without manufacturing `T`.                                      |
 | Force selection                              | PARITY   | Case-insensitive exact labels resolve atomically; invalid text clears text/model/selection without stale form state.                            |
@@ -55,16 +55,16 @@ Sources: the exact published `primeng` packages `19.1.4`, `20.4.0`, `21.1.9`, an
 | Active/selected accessibility                | SUPERSET | Active descendant names an eligible rendered option only; `aria-selected` names the canonical selection independently.                          |
 | Search/empty/selection live copy             | PARITY   | Configurable messages and polite atomic result announcements.                                                                                   |
 | Templates                                    | SUPERSET | Strict item/group/loader contexts plus empty/header/footer/loading/clear/dropdown slots; invalid option/group properties fail `ngc`.            |
-| Events                                       | PARITY   | Complete/select/focus/blur/dropdown/clear/keydown/keyup/show/hide/lazy plus preserved `optionSelected` and `queryChange`.                       |
+| Events                                       | PARITY   | Complete/select/focus/blur/dropdown/clear/keydown/keyup/open/close/lazy plus preserved `optionSelected` and `queryChange`.                       |
 | SSR/hydration                                | PARITY   | Stable metadata-derived or explicit IDs, no random/global sequence, guarded browser access and timer cleanup.                                   |
 | Zoneless                                     | PARITY   | Signal state and deterministic timers require no Zone dependency.                                                                               |
 | RTL                                          | PARITY   | Logical inline layout, direction-neutral overlay positions and virtual list.                                                                    |
 | Forced colors                                | PARITY   | Native high-contrast borders, focus, active, selected and disabled distinctions.                                                                |
 | Reduced motion                               | PARITY   | Overlay/spinner/input transitions are removed under the user preference.                                                                        |
-| Size, variant and fluid                      | PARITY   | Small/medium/large, outlined/filled and full-width Neural results.                                                                              |
+| Size, variant and fluid                      | PARITY   | `sm`/`md`/`lg`, outlined/filled and full-width Neural results.                                                                                  |
 | Legacy Neural local options                  | SUPERSET | Existing local case-insensitive filtering remains available without weakening consumer-owned Prime mode.                                        |
 | Legacy floating label/hint/error             | SUPERSET | All useful Neural presentation and semantic feedback remains.                                                                                   |
-| Public control methods                       | SUPERSET | `show`, `hide`, `close`, `focus`, `clear`, `reset`, `openAll`, and preserved direct option selection.                                           |
+| Public control methods                       | SUPERSET | `open`, `close`, `focus`, `clear`, `reset`, `openAll`, and preserved direct option selection.                                                   |
 | Multiple/token entry                         | N/A      | Deprecated in Prime 22 and owned by InputTags; not added to single-value NeuAutocomplete.                                                       |
 | Prime append/z-index/overlay/motion objects  | N/A      | CDK owns the useful portal, collision, scrolling and lifecycle result without Prime internals.                                                  |
 | Prime style/pass-through plumbing            | N/A      | Neural tokens, host states and structural templates provide the useful result.                                                                  |
@@ -76,7 +76,7 @@ Counts: **PARITY 25 · SUPERSET 10 · GAP 0 · N/A 4**.
 
 | Capability                | Prime 19.1                      | Prime 20.4                                          | Prime 21.1                                  | Prime 22.1                                        | Neural before     | Neural after                                             | Classification                              |
 | ------------------------- | ------------------------------- | --------------------------------------------------- | ------------------------------------------- | ------------------------------------------------- | ----------------- | -------------------------------------------------------- | ------------------------------------------- |
-| Minimum query API         | `minLength`                     | `minQueryLength` added; `minLength` deprecated      | Both shipped                                | `minLength` removed                               | `minLength` only  | Current name plus migration alias                        | CURRENT FLOOR / HISTORICAL-MIGRATION-USEFUL |
+| Minimum query API         | `minLength`                     | `minQueryLength` added; `minLength` deprecated      | Both shipped                                | `minLength` removed                               | `minLength` only  | Canonical historical `minLength`                         | CURRENT FLOOR / NEURAL-NATIVE                |
 | Token/chips additions     | Multiple only                   | `addOnTab`, `addOnBlur`, `separator`, `onAdd` added | Retained                                    | Deprecated for InputTags                          | Absent            | Still absent                                             | OBSOLETE/N/A                                |
 | Multiple/token owner      | AutoComplete                    | AutoComplete                                        | AutoComplete                                | Deprecated; InputTags introduced                  | Single value      | Single value                                             | OBSOLETE/N/A                                |
 | Native/form inputs        | Component-owned inputs          | Expanded base/input conventions                     | Retained                                    | Signal-based BaseInput/BaseEditableHolder surface | Minimal           | Forwarded current useful metadata                        | CURRENT FLOOR                               |
@@ -111,7 +111,7 @@ Complete preserved catalog-expansion ledger: **Tag, SpeedDial, ButtonGroup, Scro
 | Disabled options                       | EXTENDED  | Groups/loading/readonly/direct+CVA disabled also protected.             |
 | CVA option selection                   | EXTENDED  | Explicit canonical value, custom string and silent programmatic writes. |
 | Query output                           | PRESERVED | `queryChange` remains and is atomic with clear/input.                   |
-| Option selection output                | PRESERVED | `optionSelected` remains alongside typed Prime `onSelect`.              |
+| Option selection output                | PRESERVED | `optionSelected` remains alongside typed detail output `select`.        |
 | Clear button                           | EXTENDED  | Accessible, optional, readonly/disabled aware and no-op safe.           |
 | Dropdown trigger                       | EXTENDED  | Blank/current completion contract and lifecycle event.                  |
 | Force selection                        | EXTENDED  | Exact match/invalid normalization is atomic and stale-selection safe.   |
@@ -127,7 +127,7 @@ Removed useful Neural capabilities: **0**. Regressions: **0**.
 
 ## Event atomicity
 
-| Interaction                           |                                      CVA |               `queryChange` | `optionSelected` / `onSelect` | complete/dropdown/clear/overlay              |   touched |
+| Interaction                           |                                      CVA |               `queryChange` | `optionSelected` / `select` | complete/dropdown/clear/overlay              |   touched |
 | ------------------------------------- | ---------------------------------------: | --------------------------: | ----------------------------: | -------------------------------------------- | --------: |
 | Typed custom query                    |          1 when canonical string changes |                           1 |                             0 | delayed latest-wins complete 1               |         0 |
 | Typed force-selection query           |           stale option clears with CVA 1 |                           1 |                             0 | delayed complete 1                           |         0 |
@@ -136,7 +136,7 @@ Removed useful Neural capabilities: **0**. Regressions: **0**.
 | Clear button                          |             1 if canonical value changed |           1 if text changed |                             0 | clear 1; hide at most 1                      |         0 |
 | Already-empty clear                   |                                        0 |                           0 |                             0 | 0                                            |         0 |
 | Dropdown request                      |                                        0 |                           0 |                             0 | complete 1, dropdown 1, show at most 1       |         0 |
-| Show/hide repeat                      |                                        0 |                           0 |                             0 | only real transition emits                   |         0 |
+| Open/close repeat                     |                                        0 |                           0 |                             0 | only real transition emits                   |         0 |
 | Programmatic write/reset              |                                        0 |                           0 |                             0 | 0                                            |         0 |
 | Readonly/disabled mutation attempt    |                                        0 |                           0 |                             0 | 0                                            |         0 |
 | Focus/blur                            |                                        0 |                           0 |                             0 | focus/blur 1 each; optional focus complete 1 |    blur 1 |

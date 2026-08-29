@@ -57,7 +57,7 @@ import {
     <ng-template [neuFilterContextFixture]="filterConfig" let-filter="filter">
       <button type="button" (click)="filter('Ada')">Filter</button>
     </ng-template>
-    <neu-listbox [options]="options" [optionLabel]="'profile.name'" [filter]="true">
+    <neu-listbox [options]="options" [optionLabel]="'profile.name'" [searchable]="true">
       <ng-template [neuListboxItem]="options" let-person="option" let-selected="selected">
         {{ person.profile.name }} {{ selected }}
       </ng-template>
@@ -65,7 +65,7 @@ import {
         <button type="button" (click)="filter('Grace')">Filter listbox</button>
       </ng-template>
     </neu-listbox>
-    <neu-select [options]="options" [optionLabel]="'profile.name'" [filter]="true">
+    <neu-select [options]="options" [optionLabel]="'profile.name'" [searchable]="true">
       <ng-template [neuSelectItem]="options" let-person="option" let-active="active">
         {{ person.profile.name }} {{ active }}
       </ng-template>
@@ -76,7 +76,12 @@ import {
         <button type="button" (click)="filter('Ada')">Filter select</button>
       </ng-template>
     </neu-select>
-    <neu-multiselect [options]="options" [optionLabel]="'profile.name'" [filter]="true">
+    <neu-select [options]="options" [optionLabel]="'profile.name'" [multiple]="true">
+      <ng-template [neuSelectSelected]="options" let-selected="options" let-values="values">
+        {{ selected[0]?.profile?.name }} {{ values.length }}
+      </ng-template>
+    </neu-select>
+    <neu-multiselect [options]="options" [optionLabel]="'profile.name'" [searchable]="true">
       <ng-template [neuMultiselectItem]="options" let-person="option" let-selected="selected">
         {{ person.profile.name }} {{ selected }}
       </ng-template>
