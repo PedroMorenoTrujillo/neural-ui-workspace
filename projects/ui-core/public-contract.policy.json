@@ -92,9 +92,7 @@
     "./speed-dial#NeuSpeedDialComponent.onHide": "closed (planned H5 canonical event)",
     "./table#NeuTableComponent.serverStateChange": "queryChange",
     "./table#NeuTableComponent.virtualScrollEvent": "virtualRangeChange (pending H5 semantic verification)",
-    "./table#NeuTableServerState": "NeuTableQueryState",
-    "./tree-table#NeuTreeTableComponent.serverStateChange": "queryChange (planned H5 canonical alias)",
-    "./tree-table#NeuTreeTableComponent.toolbarExtraRef": "neuTableToolbar (planned H5 projection)"
+    "./table#NeuTableServerState": "NeuTableQueryState"
   },
   "frameworkMembers": [
     "registerOnChange",
@@ -103,7 +101,7 @@
     "writeValue",
     "ngTemplateContextGuard"
   ],
-  "closedImperativeDeclarations": ["NeuTableComponent"],
+  "closedImperativeDeclarations": ["NeuTableComponent", "NeuTreeTableComponent"],
   "publicImperativeMembers": {
     "NeuAutocompleteComponent": ["clear", "close", "focus", "openAll", "reset"],
     "NeuContextMenuDirective": ["close", "openAt"],
@@ -148,6 +146,16 @@
     ],
     "NeuTooltipDirective": ["hide", "show"],
     "NeuTreeComponent": ["activateNode", "toggleNode"],
-    "NeuTreeTableComponent": ["toggleNode"]
+    "NeuTreeTableComponent": [
+      "cancelRowEdit",
+      "reset",
+      "resetScrollTop",
+      "saveRowEdit",
+      "scrollTo",
+      "scrollToNode",
+      "scrollToVirtualIndex",
+      "startRowEdit",
+      "toggleNode"
+    ]
   }
 }

@@ -1,13 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuTableColumn, NeuTableExpandDirective } from '@neural-ui/core/table';
+import {
+  NeuTableCaptionDirective,
+  NeuTableColumn,
+  NeuTableExpandDirective,
+} from '@neural-ui/core/table';
 import { By } from '@angular/platform-browser';
 import { NeuTableComponent } from '@neural-ui/core/table';
+import type { NeuTableQueryState } from '@neural-ui/core/table';
 import {
   NeuTreeTableComponent,
   NeuTreeTableNode,
   NeuTreeTableRow,
+  NeuTreeTableRowEditEvent,
 } from './neu-tree-table.component';
+import {
+  NeuTreeTableBodySectionDirective,
+  NeuTreeTableManagedRowDirective,
+  NeuTreeTableNodeDirective,
+} from './neu-tree-table-templates.directive';
 
 interface RepoMeta extends Record<string, unknown> {
   owner: string;
@@ -37,11 +48,33 @@ const COLUMNS: NeuTableColumn<NeuTreeTableRow<RepoMeta>>[] = [
   { key: 'status', header: 'Status' },
 ];
 
+function query(
+  search = '',
+  filters: NeuTableQueryState['filters'] = {},
+  sortEntries: NeuTableQueryState['sortEntries'] = [],
+): NeuTableQueryState {
+  return {
+    page: 1,
+    pageSize: 10,
+    search,
+    sort: sortEntries.length === 1 ? sortEntries[0] : null,
+    sortEntries,
+    globalFilterFields: [],
+    filters,
+    serialization: {
+      status: 'serializable',
+      localOnlyFilters: [],
+      requiresConsumerSerializationFilters: [],
+      localOnlyGlobalFilterFields: false,
+    },
+  };
+}
+
 @Component({
   standalone: true,
   imports: [NeuTreeTableComponent, NeuTableExpandDirective],
   template: `
-    <neu-tree-table [nodes]="nodes" [columns]="columns" [expandable]="true">
+    <neu-tree-table [nodes]="nodes" [columns]="columns" expandMode="multiple">
       <ng-template neuTableExpand let-node let-row="row">
         <span class="tree-detail">{{ node.label }} / {{ row.__treeLevel }}</span>
       </ng-template>
@@ -51,6 +84,126 @@ const COLUMNS: NeuTableColumn<NeuTreeTableRow<RepoMeta>>[] = [
 class TreeTableExpandHostComponent {
   nodes = NODES;
   columns = COLUMNS;
+}
+
+@Component({
+  standalone: true,
+  imports: [
+    NeuTreeTableComponent,
+    NeuTreeTableNodeDirective,
+    NeuTableCaptionDirective,
+  ],
+  template: `
+    <neu-tree-table [nodes]="nodes" [columns]="columns">
+      <ng-template neuTableCaption>Repository hierarchy</ng-template>
+      <ng-template neuTreeTableNode let-node let-level="level">
+        <strong class="custom-node">{{ node.label }} level {{ level }}</strong>
+      </ng-template>
+    </neu-tree-table>
+  `,
+})
+class TreeTableCompositionHostComponent {
+  nodes = NODES;
+  columns = COLUMNS;
+}
+
+@Component({
+  standalone: true,
+  imports: [NeuTreeTableComponent],
+  template: `
+    <ng-template #customCell let-row>
+      <span class="consumer-tree-cell">custom {{ row.label }}</span>
+    </ng-template>
+    <neu-tree-table [nodes]="nodes" [columns]="columns(customCell)" />
+  `,
+})
+class TreeTableConsumerCellHostComponent {
+  nodes = NODES;
+  columns(template: TemplateRef<unknown>): NeuTableColumn<Record<string, unknown>>[] {
+    return [
+      { key: 'label', header: 'Node', cellTemplate: template as never },
+      { key: 'owner', header: 'Owner' },
+    ];
+  }
+}
+
+@Component({
+  standalone: true,
+  imports: [
+    NeuTreeTableComponent,
+    NeuTreeTableBodySectionDirective,
+    NeuTreeTableManagedRowDirective,
+  ],
+  template: `
+    <neu-tree-table [nodes]="nodes" [columns]="columns" selectionMode="multiple">
+      <ng-template neuTreeTableBodySection let-entries let-colspan="colspan">
+        @for (entry of entries; track entry.key) {
+          @if (entry.kind === 'node') {
+            <tr [neuTreeTableManagedRow]="entry" class="advanced-node-row">
+              <td [attr.colspan]="colspan">{{ entry.node.label }} / {{ entry.level }}</td>
+            </tr>
+            <tr class="advanced-detail-row" aria-hidden="true">
+              <td [attr.colspan]="colspan">detail {{ entry.node.id }}</td>
+            </tr>
+          } @else if (entry.kind === 'empty') {
+            <tr><td [attr.colspan]="entry.colspan">{{ entry.message }}</td></tr>
+          }
+        }
+      </ng-template>
+    </neu-tree-table>
+  `,
+})
+class TreeTableBodySectionHostComponent {
+  nodes = NODES;
+  columns = COLUMNS;
+}
+
+@Component({
+  standalone: true,
+  imports: [NeuTreeTableComponent, NeuTreeTableNodeDirective],
+  template: `
+    <neu-tree-table
+      [nodes]="nodes"
+      [columns]="columns"
+      [query]="queryState"
+      [sort]="sortState"
+      filterMode="strict"
+      selectionMode="checkbox"
+      [selection]="selection"
+      [expandedKeys]="expandedKeys"
+      editMode="row"
+      [editingRowKeys]="editingRowKeys"
+      [pagination]="true"
+      [pageSize]="10"
+      [serverSide]="true"
+      [totalItems]="42"
+      [labels]="labels"
+      [exportOptions]="exportOptions"
+      [virtualScroll]="true"
+      [virtualizationOptions]="virtualizationOptions"
+      [urlStateOptions]="urlStateOptions"
+    >
+      <ng-template neuTreeTableNode let-node let-level="level" let-partial="partial">
+        <span class="strict-final-node">{{ node.label }} / {{ level }} / {{ partial }}</span>
+      </ng-template>
+    </neu-tree-table>
+  `,
+})
+class TreeTableFinalApiHostComponent {
+  readonly nodes = NODES;
+  readonly columns = COLUMNS;
+  readonly queryState = query();
+  readonly sortState = [{ key: 'label', dir: 'asc' as const }];
+  readonly selection = [NODES[0]];
+  readonly expandedKeys = ['workspace'];
+  readonly editingRowKeys = ['workspace'];
+  readonly labels = {
+    searchPlaceholder: 'Search hierarchy',
+    expandNodeAriaLabel: 'Expand node',
+  };
+  readonly exportOptions = { enabled: true, formats: ['csv' as const] };
+  readonly virtualizationOptions = { visibleItems: 8, overscan: 2 };
+  readonly urlStateOptions = { enabled: true, pageParam: 'treePage' };
 }
 
 describe('NeuTreeTableComponent', () => {
@@ -92,7 +245,7 @@ describe('NeuTreeTableComponent', () => {
     const fixture = TestBed.createComponent(NeuTreeTableComponent);
     fixture.componentRef.setInput('nodes', NODES);
     fixture.componentRef.setInput('columns', COLUMNS);
-    fixture.componentRef.setInput('selectable', true);
+    fixture.componentRef.setInput('selectionMode', 'multiple');
 
     const emitted: string[][] = [];
     fixture.componentInstance.selectionChange.subscribe((nodes) => {
@@ -192,8 +345,10 @@ describe('NeuTreeTableComponent', () => {
     const fixture = TestBed.createComponent(NeuTreeTableComponent);
     fixture.componentRef.setInput('nodes', NODES);
     fixture.componentRef.setInput('columns', COLUMNS);
-    fixture.componentRef.setInput('expandLabel', 'Expand');
-    fixture.componentRef.setInput('collapseLabel', 'Collapse');
+    fixture.componentRef.setInput('labels', {
+      expandNodeAriaLabel: 'Expand',
+      collapseNodeAriaLabel: 'Collapse',
+    });
     fixture.detectChanges();
 
     const row = fixture.componentInstance.flatRows()[0] as NeuTreeTableRow<RepoMeta>;
@@ -216,7 +371,7 @@ describe('NeuTreeTableComponent', () => {
     ]);
     fixture.componentRef.setInput('columns', COLUMNS);
     let expansionCount = 0;
-    fixture.componentInstance.expansionChange.subscribe(() => expansionCount++);
+    fixture.componentInstance.expandedKeysChange.subscribe(() => expansionCount++);
     fixture.detectChanges();
 
     fixture.componentInstance.toggleNode({
@@ -257,7 +412,7 @@ describe('NeuTreeTableComponent', () => {
     ]);
     fixture.componentRef.setInput('columns', COLUMNS);
     const expansionStates: string[][] = [];
-    fixture.componentInstance.expansionChange.subscribe((ids) => expansionStates.push(ids));
+    fixture.componentInstance.expandedKeysChange.subscribe((ids) => expansionStates.push([...ids]));
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Admin');
@@ -281,17 +436,21 @@ describe('NeuTreeTableComponent', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.componentRef.setInput('pageSize', 20);
     fixture.componentRef.setInput('exactMatchable', true);
-    fixture.componentRef.setInput('exportable', true);
-    fixture.componentRef.setInput('exportFormats', ['csv', 'json']);
+    fixture.componentRef.setInput('exportOptions', {
+      enabled: true,
+      formats: ['csv', 'json'],
+    });
     fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 12);
+    fixture.componentRef.setInput('virtualizationOptions', { visibleItems: 12 });
     fixture.componentRef.setInput('resizableColumns', true);
     fixture.componentRef.setInput('reorderableColumns', true);
     fixture.componentRef.setInput('columnChooser', true);
-    fixture.componentRef.setInput('inlineEdit', true);
-    fixture.componentRef.setInput('inlineEditLabel', 'Edit tree cell');
-    fixture.componentRef.setInput('saveInlineEditLabel', 'Save tree cell');
-    fixture.componentRef.setInput('cancelInlineEditLabel', 'Cancel tree cell edit');
+    fixture.componentRef.setInput('editMode', 'cell');
+    fixture.componentRef.setInput('labels', {
+      inlineEditLabel: 'Edit tree cell',
+      saveInlineEditLabel: 'Save tree cell',
+      cancelInlineEditLabel: 'Cancel tree cell edit',
+    });
     fixture.componentRef.setInput('multiSort', true);
     fixture.componentRef.setInput('serverSide', true);
     fixture.componentRef.setInput('totalItems', 42);
@@ -366,7 +525,7 @@ describe('NeuTreeTableComponent', () => {
     ]);
   });
 
-  it('forwards table state, search, layout and row events without changing their contract', () => {
+  it('forwards search, layout and row events without changing their contract', () => {
     const fixture = TestBed.createComponent(NeuTreeTableComponent);
     fixture.componentRef.setInput('nodes', NODES);
     fixture.componentRef.setInput('columns', COLUMNS);
@@ -374,7 +533,6 @@ describe('NeuTreeTableComponent', () => {
     const received: unknown[] = [];
     fixture.componentInstance.nodeClick.subscribe((node) => received.push(`click:${node.id}`));
     fixture.componentInstance.searchChange.subscribe((value) => received.push(`search:${value}`));
-    fixture.componentInstance.serverStateChange.subscribe((value) => received.push(value));
     fixture.componentInstance.columnResize.subscribe((value) => received.push(value));
     fixture.componentInstance.columnReorder.subscribe((value) => received.push(value));
     fixture.componentInstance.layoutChange.subscribe((value) => received.push(value));
@@ -382,18 +540,16 @@ describe('NeuTreeTableComponent', () => {
 
     const table = fixture.debugElement.query(By.directive(NeuTableComponent))
       .componentInstance as NeuTableComponent;
-    const state = { page: 2, pageSize: 20, search: 'core', sort: null, multiSort: [] } as any;
     const resize = { key: 'label', width: 320 };
     const reorder = { previousIndex: 0, currentIndex: 1, columns: [] } as any;
     const layout = { columns: [], pageSize: 20 } as any;
     table.rowClick.emit(row);
     table.searchChange.emit('core');
-    table.serverStateChange.emit(state);
     table.columnResize.emit(resize);
     table.columnReorder.emit(reorder);
     table.layoutChange.emit(layout);
 
-    expect(received).toEqual(['click:workspace', 'search:core', state, resize, reorder, layout]);
+    expect(received).toEqual(['click:workspace', 'search:core', resize, reorder, layout]);
   });
 
   it('forwards projected expand templates to the inner table with node and row context', () => {
@@ -434,7 +590,7 @@ describe('NeuTreeTableComponent', () => {
     const toggle = fixture.nativeElement.querySelector(
       '.neu-tree-table__toggle',
     ) as HTMLButtonElement;
-    expect(table.getAttribute('role')).toBeNull();
+    expect(table.getAttribute('role')).toBe('treegrid');
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
     expect(toggle.getAttribute('aria-label')).toBe('Collapse row: Workspace');
 
@@ -443,5 +599,208 @@ describe('NeuTreeTableComponent', () => {
     );
     fixture.detectChanges();
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('sorts siblings recursively without breaking parent-child adjacency', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', [
+      {
+        id: 'b', label: 'B', expanded: true, children: [
+          { id: 'b2', label: 'B2' },
+          { id: 'b1', label: 'B1' },
+        ],
+      },
+      { id: 'a', label: 'A', expanded: true, children: [{ id: 'a1', label: 'A1' }] },
+    ]);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('sort', [{ key: 'label', dir: 'asc' }]);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.flatRows().map((row) => row['id'])).toEqual([
+      'a', 'a1', 'b', 'b1', 'b2',
+    ]);
+  });
+
+  it('finds loaded descendants of collapsed branches in lenient mode', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', [
+      { id: 'root', label: 'Root', children: [{ id: 'needle', label: 'Needle' }] },
+      { id: 'other', label: 'Other' },
+    ]);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('query', query('needle'));
+    fixture.componentRef.setInput('filterMode', 'lenient');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.flatRows().map((row) => row['id'])).toEqual(['root', 'needle']);
+    expect(fixture.nativeElement.textContent).toContain('Needle');
+  });
+
+  it('retains a matching parent subtree in lenient mode and prunes it in strict mode', () => {
+    const nodes: NeuTreeTableNode[] = [{
+      id: 'root', label: 'Match', children: [
+        { id: 'matching-child', label: 'Match child' },
+        { id: 'other-child', label: 'Other child' },
+      ],
+    }];
+    const lenient = TestBed.createComponent(NeuTreeTableComponent);
+    lenient.componentRef.setInput('nodes', nodes);
+    lenient.componentRef.setInput('columns', COLUMNS);
+    lenient.componentRef.setInput('query', query('match'));
+    lenient.detectChanges();
+    expect(lenient.componentInstance.flatRows().map((row) => row['id'])).toEqual([
+      'root', 'matching-child', 'other-child',
+    ]);
+
+    const strict = TestBed.createComponent(NeuTreeTableComponent);
+    strict.componentRef.setInput('nodes', nodes);
+    strict.componentRef.setInput('columns', COLUMNS);
+    strict.componentRef.setInput('query', query('match'));
+    strict.componentRef.setInput('filterMode', 'strict');
+    strict.detectChanges();
+    expect(strict.componentInstance.flatRows().map((row) => row['id'])).toEqual([
+      'root', 'matching-child',
+    ]);
+  });
+
+  it('keeps controlled selection authoritative while emitting one proposal', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('selectionMode', 'single');
+    fixture.componentRef.setInput('selection', null);
+    const proposals: string[][] = [];
+    fixture.componentInstance.selectionChange.subscribe((nodes) => proposals.push(nodes.map((node) => node.id)));
+    fixture.detectChanges();
+
+    fixture.componentInstance.onTableSelectionChange([fixture.componentInstance.flatRows()[0]]);
+    fixture.detectChanges();
+
+    expect(proposals).toEqual([['workspace']]);
+    expect(fixture.componentInstance.selectedRows()).toEqual([]);
+  });
+
+  it('propagates checkbox selection through loaded descendants and renders partial ancestors', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', [{
+      id: 'root', label: 'Root', expanded: true, children: [
+        { id: 'one', label: 'One' },
+        { id: 'two', label: 'Two' },
+      ],
+    }]);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('selectionMode', 'checkbox');
+    const proposals: string[][] = [];
+    fixture.componentInstance.selectionChange.subscribe((nodes) => proposals.push(nodes.map((node) => node.id)));
+    fixture.detectChanges();
+
+    const rows = fixture.componentInstance.flatRows() as NeuTreeTableRow[];
+    fixture.componentInstance.onTableSelectionChange([rows[1]]);
+    fixture.detectChanges();
+    expect(proposals.at(-1)).toEqual(['one']);
+    const rootCheckbox = fixture.nativeElement.querySelector(
+      'tr[data-neu-tree-node-id="root"] input[type="checkbox"]',
+    ) as HTMLInputElement;
+    expect(rootCheckbox.indeterminate).toBe(true);
+    expect(rootCheckbox.getAttribute('aria-checked')).toBe('mixed');
+
+    fixture.componentInstance.onTableSelectionChange([rows[0], rows[1], rows[2]]);
+    expect(proposals.at(-1)).toEqual(['root', 'one', 'two']);
+  });
+
+  it('exposes truthful row hierarchy aria and moves between parent and child with arrows', async () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector(
+      'tr[data-neu-tree-node-id="workspace"]',
+    ) as HTMLTableRowElement;
+    const child = fixture.nativeElement.querySelector(
+      'tr[data-neu-tree-node-id="ui-core"]',
+    ) as HTMLTableRowElement;
+    expect(root.getAttribute('aria-level')).toBe('1');
+    expect(root.getAttribute('aria-expanded')).toBe('true');
+    expect(child.getAttribute('aria-level')).toBe('2');
+
+    root.focus();
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    await Promise.resolve();
+    expect(document.activeElement).toBe(child);
+    child.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(root);
+  });
+
+  it('does not hijack arrow keys from interactive descendants', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.detectChanges();
+    const toggle = fixture.nativeElement.querySelector('.neu-tree-table__toggle') as HTMLButtonElement;
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+    toggle.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('maps row editing to immutable consumer data keyed by node identity', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    const saves: NeuTreeTableRowEditEvent<RepoMeta>[] = [];
+    fixture.componentInstance.rowEditSave.subscribe((event) => saves.push(event as NeuTreeTableRowEditEvent<RepoMeta>));
+    fixture.detectChanges();
+    const row = fixture.componentInstance.flatRows()[0];
+    fixture.componentInstance.onTableRowEdit('save', {
+      row,
+      draft: { ...row, owner: 'DX' },
+      rowKey: 'workspace',
+      rowIndex: 0,
+      editingRowKeys: [],
+    });
+    expect(saves[0].node).toBe(NODES[0]);
+    expect(saves[0].draft).toEqual({ owner: 'DX', status: 'active' });
+    expect(saves[0].draft).not.toHaveProperty('__treeNode');
+    expect(NODES[0].data?.owner).toBe('Platform');
+  });
+
+  it('relays structural composition and keeps Neural-owned node semantics', () => {
+    const fixture = TestBed.createComponent(TreeTableCompositionHostComponent);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('caption')?.textContent).toContain(
+      'Repository hierarchy',
+    );
+    expect(fixture.nativeElement.querySelector('.custom-node')?.textContent).toContain(
+      'Workspace level 0',
+    );
+    expect(fixture.nativeElement.querySelector('tr[data-neu-tree-node-id="workspace"]')).toBeTruthy();
+  });
+
+  it('composes a consumer tree-column template inside indentation and toggler chrome', () => {
+    const fixture = TestBed.createComponent(TreeTableConsumerCellHostComponent);
+    fixture.detectChanges();
+    const cell = fixture.nativeElement.querySelector('.neu-tree-table__cell');
+    expect(cell.querySelector('.neu-tree-table__toggle')).toBeTruthy();
+    expect(cell.querySelector('.consumer-tree-cell')?.textContent).toContain('custom Workspace');
+  });
+
+  it('strictly composes managed primary node rows plus non-semantic sibling rows', () => {
+    const fixture = TestBed.createComponent(TreeTableBodySectionHostComponent);
+    fixture.detectChanges();
+    const primary = fixture.nativeElement.querySelector('.advanced-node-row') as HTMLTableRowElement;
+    const detail = fixture.nativeElement.querySelector('.advanced-detail-row') as HTMLTableRowElement;
+    expect(primary.getAttribute('role')).toBe('row');
+    expect(primary.getAttribute('aria-level')).toBe('1');
+    expect(primary.tabIndex).toBe(0);
+    expect(detail.hasAttribute('data-neu-tree-node-id')).toBe(false);
+  });
+
+  it('strictly compiles a representative consumer using only the final canonical API', () => {
+    const fixture = TestBed.createComponent(TreeTableFinalApiHostComponent);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.strict-final-node')?.textContent).toContain(
+      'Workspace / 0',
+    );
   });
 });

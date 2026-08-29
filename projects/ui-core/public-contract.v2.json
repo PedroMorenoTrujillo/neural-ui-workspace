@@ -1420,11 +1420,29 @@
       "types": "./types/neural-ui-core-tree-table.d.ts",
       "exports": [
         "./tree-table#NeuTreeTableActionEvent",
+        "./tree-table#NeuTreeTableBodyContext",
+        "./tree-table#NeuTreeTableBodyDataEntry",
+        "./tree-table#NeuTreeTableBodyDirective",
+        "./tree-table#NeuTreeTableBodyRenderEntry",
+        "./tree-table#NeuTreeTableBodySectionContext",
+        "./tree-table#NeuTreeTableBodySectionDirective",
         "./tree-table#NeuTreeTableCellEditEvent",
         "./tree-table#NeuTreeTableComponent",
+        "./tree-table#NeuTreeTableFilterMode",
+        "./tree-table#NeuTreeTableLabels",
+        "./tree-table#NeuTreeTableLazyRequest",
+        "./tree-table#NeuTreeTableManagedRowDirective",
         "./tree-table#NeuTreeTableNode",
+        "./tree-table#NeuTreeTableNodeContext",
+        "./tree-table#NeuTreeTableNodeDirective",
         "./tree-table#NeuTreeTableRow",
-        "./tree-table#NeuTreeTableSelectionActionEvent"
+        "./tree-table#NeuTreeTableRowEditEvent",
+        "./tree-table#NeuTreeTableRowEditValidator",
+        "./tree-table#NeuTreeTableScrollOptions",
+        "./tree-table#NeuTreeTableSelection",
+        "./tree-table#NeuTreeTableSelectionActionEvent",
+        "./tree-table#NeuTreeTableSelectionEvent",
+        "./tree-table#NeuTreeTableSelectionMode"
       ]
     },
     {
@@ -49450,6 +49468,267 @@
       ]
     },
     {
+      "id": "./tree-table#NeuTreeTableBodyContext",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableBodyContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableBodyContext<T extends Record<string, unknown> = Record<string, unknown>> extends Omit<NeuTreeTableNodeContext<T>, 'column' | 'toggle'> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableBodyContext.property:columns",
+          "name": "columns",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly columns: readonly NeuTableColumn<Record<string, unknown>>[];"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyContext.property:edit",
+          "name": "edit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly edit: {\n    readonly editing: boolean;\n    readonly draft: Readonly<T>;\n    readonly setValue: (key: string, value: unknown) => void;\n    readonly init: () => void;\n    readonly save: () => boolean;\n    readonly cancel: () => void;\n};"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyContext.property:frozen",
+          "name": "frozen",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly frozen: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyContext.property:logicalIndex",
+          "name": "logicalIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly logicalIndex: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyContext.property:rowIndex",
+          "name": "rowIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rowIndex: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyContext.property:toggleExpansion",
+          "name": "toggleExpansion",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly toggleExpansion: () => void;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableBodyDataEntry",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableBodyDataEntry",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableBodyDataEntry<T extends Record<string, unknown> = Record<string, unknown>> extends NeuTreeTableBodyContext<T> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableBodyDataEntry.property:focus",
+          "name": "focus",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly focus: () => void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyDataEntry.property:focusFirstChild",
+          "name": "focusFirstChild",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly focusFirstChild: () => void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyDataEntry.property:focusNext",
+          "name": "focusNext",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly focusNext: () => void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyDataEntry.property:focusParent",
+          "name": "focusParent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly focusParent: () => void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyDataEntry.property:focusPrevious",
+          "name": "focusPrevious",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly focusPrevious: () => void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyDataEntry.property:key",
+          "name": "key",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly key: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyDataEntry.property:kind",
+          "name": "kind",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly kind: 'node';"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableBodyDirective",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableBodyDirective",
+      "kind": "directive",
+      "status": "SUPPORTED",
+      "selector": "ng-template[neuTreeTableBody]",
+      "signature": "declare class NeuTreeTableBodyDirective extends NeuTreeTableTemplateDirective<NeuTreeTableBodyContext> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableBodyDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuTreeTableBodyDirective, context: unknown): context is NeuTreeTableBodyContext;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyDirective.property:ɵdir",
+          "name": "ɵdir",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTreeTableBodyDirective, \"ng-template[neuTreeTableBody]\", never, {}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodyDirective.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeTableBodyDirective, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableBodyRenderEntry",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableBodyRenderEntry",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTreeTableBodyRenderEntry<T extends Record<string, unknown> = Record<string, unknown>> = NeuTreeTableBodyDataEntry<T> | Exclude<NeuTableBodyRenderEntry<Record<string, unknown>>, {\n    kind: 'data';\n}>;",
+      "members": []
+    },
+    {
+      "id": "./tree-table#NeuTreeTableBodySectionContext",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableBodySectionContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableBodySectionContext<T extends Record<string, unknown> = Record<string, unknown>> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: readonly NeuTreeTableBodyRenderEntry<T>[];"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionContext.property:colspan",
+          "name": "colspan",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly colspan: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionContext.property:columns",
+          "name": "columns",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly columns: readonly NeuTableColumn<Record<string, unknown>>[];"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionContext.property:entries",
+          "name": "entries",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly entries: readonly NeuTreeTableBodyRenderEntry<T>[];"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionContext.property:siblingRowsSupported",
+          "name": "siblingRowsSupported",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly siblingRowsSupported: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionContext.property:virtualized",
+          "name": "virtualized",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly virtualized: boolean;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableBodySectionDirective",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableBodySectionDirective",
+      "kind": "directive",
+      "status": "SUPPORTED",
+      "selector": "ng-template[neuTreeTableBodySection]",
+      "signature": "declare class NeuTreeTableBodySectionDirective extends NeuTreeTableTemplateDirective<NeuTreeTableBodySectionContext> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuTreeTableBodySectionDirective, context: unknown): context is NeuTreeTableBodySectionContext;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionDirective.property:ɵdir",
+          "name": "ɵdir",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTreeTableBodySectionDirective, \"ng-template[neuTreeTableBodySection]\", never, {}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableBodySectionDirective.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeTableBodySectionDirective, never>;"
+        }
+      ]
+    },
+    {
       "id": "./tree-table#NeuTreeTableCellEditEvent",
       "entrypoint": "./tree-table",
       "name": "NeuTreeTableCellEditEvent",
@@ -49509,16 +49788,6 @@
       "signature": "declare class NeuTreeTableComponent {\n}",
       "members": [
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:allFilterOptionLabel",
-          "name": "allFilterOptionLabel",
-          "kind": "input",
-          "publicName": "allFilterOptionLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly allFilterOptionLabel: _angular_core.InputSignal<string>;"
-        },
-        {
           "id": "./tree-table#NeuTreeTableComponent.input:bordered",
           "name": "bordered",
           "kind": "input",
@@ -49529,56 +49798,6 @@
           "signature": "readonly bordered: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:cancelInlineEditLabel",
-          "name": "cancelInlineEditLabel",
-          "kind": "input",
-          "publicName": "cancelInlineEditLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly cancelInlineEditLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:clearFilterLabel",
-          "name": "clearFilterLabel",
-          "kind": "input",
-          "publicName": "clearFilterLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly clearFilterLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:clearSearchAriaLabel",
-          "name": "clearSearchAriaLabel",
-          "kind": "input",
-          "publicName": "clearSearchAriaLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly clearSearchAriaLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:clearSelectionLabel",
-          "name": "clearSelectionLabel",
-          "kind": "input",
-          "publicName": "clearSelectionLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly clearSelectionLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:collapseLabel",
-          "name": "collapseLabel",
-          "kind": "input",
-          "publicName": "collapseLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly collapseLabel: _angular_core.InputSignal<string>;"
-        },
-        {
           "id": "./tree-table#NeuTreeTableComponent.input:columnChooser",
           "name": "columnChooser",
           "kind": "input",
@@ -49587,16 +49806,6 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly columnChooser: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:columnChooserLabel",
-          "name": "columnChooserLabel",
-          "kind": "input",
-          "publicName": "columnChooserLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly columnChooserLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:columns",
@@ -49619,24 +49828,24 @@
           "signature": "readonly density: _angular_core.InputSignal<\"compact\" | \"normal\" | \"relaxed\">;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:emptyMessage",
-          "name": "emptyMessage",
+          "id": "./tree-table#NeuTreeTableComponent.input:editingRowKeys",
+          "name": "editingRowKeys",
           "kind": "input",
-          "publicName": "emptyMessage",
+          "publicName": "editingRowKeys",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly emptyMessage: _angular_core.InputSignal<string>;"
+          "signature": "readonly editingRowKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:emptyStateTemplate",
-          "name": "emptyStateTemplate",
+          "id": "./tree-table#NeuTreeTableComponent.input:editMode",
+          "name": "editMode",
           "kind": "input",
-          "publicName": "emptyStateTemplate",
+          "publicName": "editMode",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly emptyStateTemplate: _angular_core.InputSignal<TemplateRef<void> | undefined>;"
+          "signature": "readonly editMode: _angular_core.InputSignal<NeuTableEditMode>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:exactMatchable",
@@ -49649,34 +49858,14 @@
           "signature": "readonly exactMatchable: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:exactMatchLabel",
-          "name": "exactMatchLabel",
+          "id": "./tree-table#NeuTreeTableComponent.input:expandedKeys",
+          "name": "expandedKeys",
           "kind": "input",
-          "publicName": "exactMatchLabel",
+          "publicName": "expandedKeys",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly exactMatchLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:expandable",
-          "name": "expandable",
-          "kind": "input",
-          "publicName": "expandable",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly expandable: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:expandLabel",
-          "name": "expandLabel",
-          "kind": "input",
-          "publicName": "expandLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly expandLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:expandMode",
@@ -49686,117 +49875,27 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly expandMode: _angular_core.InputSignal<\"multiple\" | \"single\">;"
+          "signature": "readonly expandMode: _angular_core.InputSignal<NeuTableExpandMode>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:expandRowAriaLabel",
-          "name": "expandRowAriaLabel",
+          "id": "./tree-table#NeuTreeTableComponent.input:exportOptions",
+          "name": "exportOptions",
           "kind": "input",
-          "publicName": "expandRowAriaLabel",
+          "publicName": "exportOptions",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly expandRowAriaLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly exportOptions: _angular_core.InputSignal<NeuTableExportConfig<Record<string, unknown>>>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:exportable",
-          "name": "exportable",
+          "id": "./tree-table#NeuTreeTableComponent.input:filterMode",
+          "name": "filterMode",
           "kind": "input",
-          "publicName": "exportable",
+          "publicName": "filterMode",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly exportable: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:exportColumns",
-          "name": "exportColumns",
-          "kind": "input",
-          "publicName": "exportColumns",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly exportColumns: _angular_core.InputSignal<string[]>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:exportCsvTitle",
-          "name": "exportCsvTitle",
-          "kind": "input",
-          "publicName": "exportCsvTitle",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly exportCsvTitle: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:exportFileName",
-          "name": "exportFileName",
-          "kind": "input",
-          "publicName": "exportFileName",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly exportFileName: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:exportFormats",
-          "name": "exportFormats",
-          "kind": "input",
-          "publicName": "exportFormats",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly exportFormats: _angular_core.InputSignal<(\"csv\" | \"json\" | \"xlsx\")[]>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:exportJsonTitle",
-          "name": "exportJsonTitle",
-          "kind": "input",
-          "publicName": "exportJsonTitle",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly exportJsonTitle: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:exportScope",
-          "name": "exportScope",
-          "kind": "input",
-          "publicName": "exportScope",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly exportScope: _angular_core.InputSignal<\"selected\" | \"filtered\" | \"auto\">;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:exportXlsxTitle",
-          "name": "exportXlsxTitle",
-          "kind": "input",
-          "publicName": "exportXlsxTitle",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly exportXlsxTitle: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:filterAriaPrefix",
-          "name": "filterAriaPrefix",
-          "kind": "input",
-          "publicName": "filterAriaPrefix",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly filterAriaPrefix: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:filterPlaceholder",
-          "name": "filterPlaceholder",
-          "kind": "input",
-          "publicName": "filterPlaceholder",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly filterPlaceholder: _angular_core.InputSignal<string>;"
+          "signature": "readonly filterMode: _angular_core.InputSignal<NeuTreeTableFilterMode>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:footerRow",
@@ -49819,16 +49918,6 @@
           "signature": "readonly groupBy: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:groupHeaderLabel",
-          "name": "groupHeaderLabel",
-          "kind": "input",
-          "publicName": "groupHeaderLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly groupHeaderLabel: _angular_core.InputSignal<string>;"
-        },
-        {
           "id": "./tree-table#NeuTreeTableComponent.input:indentSize",
           "name": "indentSize",
           "kind": "input",
@@ -49849,24 +49938,14 @@
           "signature": "readonly initialLayout: _angular_core.InputSignal<NeuTableLayout | null>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:inlineEdit",
-          "name": "inlineEdit",
+          "id": "./tree-table#NeuTreeTableComponent.input:labels",
+          "name": "labels",
           "kind": "input",
-          "publicName": "inlineEdit",
+          "publicName": "labels",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly inlineEdit: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:inlineEditLabel",
-          "name": "inlineEditLabel",
-          "kind": "input",
-          "publicName": "inlineEditLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly inlineEditLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly labels: _angular_core.InputSignal<NeuTreeTableLabels>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:loading",
@@ -49879,6 +49958,16 @@
           "signature": "readonly loading: _angular_core.InputSignal<boolean>;"
         },
         {
+          "id": "./tree-table#NeuTreeTableComponent.input:metaKeySelection",
+          "name": "metaKeySelection",
+          "kind": "input",
+          "publicName": "metaKeySelection",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly metaKeySelection: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./tree-table#NeuTreeTableComponent.input:multiSort",
           "name": "multiSort",
           "kind": "input",
@@ -49887,26 +49976,6 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly multiSort: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:multiSortParam",
-          "name": "multiSortParam",
-          "kind": "input",
-          "publicName": "multiSortParam",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly multiSortParam: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:nextPageAriaLabel",
-          "name": "nextPageAriaLabel",
-          "kind": "input",
-          "publicName": "nextPageAriaLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly nextPageAriaLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:nodes",
@@ -49919,26 +49988,6 @@
           "signature": "readonly nodes: _angular_core.InputSignal<NeuTreeTableNode<Record<string, unknown>>[]>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:ofLabel",
-          "name": "ofLabel",
-          "kind": "input",
-          "publicName": "ofLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly ofLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:pageParam",
-          "name": "pageParam",
-          "kind": "input",
-          "publicName": "pageParam",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly pageParam: _angular_core.InputSignal<string>;"
-        },
-        {
           "id": "./tree-table#NeuTreeTableComponent.input:pageSize",
           "name": "pageSize",
           "kind": "input",
@@ -49947,26 +49996,6 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly pageSize: _angular_core.InputSignal<number>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:pageSizeAriaLabel",
-          "name": "pageSizeAriaLabel",
-          "kind": "input",
-          "publicName": "pageSizeAriaLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly pageSizeAriaLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:pageSizeLabel",
-          "name": "pageSizeLabel",
-          "kind": "input",
-          "publicName": "pageSizeLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly pageSizeLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:pageSizeOptions",
@@ -49989,24 +50018,14 @@
           "signature": "readonly pagination: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:paginationAriaLabel",
-          "name": "paginationAriaLabel",
+          "id": "./tree-table#NeuTreeTableComponent.input:query",
+          "name": "query",
           "kind": "input",
-          "publicName": "paginationAriaLabel",
+          "publicName": "query",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly paginationAriaLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:previousPageAriaLabel",
-          "name": "previousPageAriaLabel",
-          "kind": "input",
-          "publicName": "previousPageAriaLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly previousPageAriaLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly query: _angular_core.InputSignal<NeuTableQueryState | undefined>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:reorderableColumns",
@@ -50029,26 +50048,6 @@
           "signature": "readonly resizableColumns: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:resultLabelPlural",
-          "name": "resultLabelPlural",
-          "kind": "input",
-          "publicName": "resultLabelPlural",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly resultLabelPlural: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:resultLabelSingular",
-          "name": "resultLabelSingular",
-          "kind": "input",
-          "publicName": "resultLabelSingular",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly resultLabelSingular: _angular_core.InputSignal<string>;"
-        },
-        {
           "id": "./tree-table#NeuTreeTableComponent.input:roundedBorders",
           "name": "roundedBorders",
           "kind": "input",
@@ -50069,24 +50068,14 @@
           "signature": "readonly rowClass: _angular_core.InputSignal<((row: Record<string, unknown>) => string) | undefined>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:rowKey",
-          "name": "rowKey",
+          "id": "./tree-table#NeuTreeTableComponent.input:rowEditValidator",
+          "name": "rowEditValidator",
           "kind": "input",
-          "publicName": "rowKey",
+          "publicName": "rowEditValidator",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly rowKey: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:saveInlineEditLabel",
-          "name": "saveInlineEditLabel",
-          "kind": "input",
-          "publicName": "saveInlineEditLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly saveInlineEditLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly rowEditValidator: _angular_core.InputSignal<NeuTreeTableRowEditValidator | undefined>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:searchable",
@@ -50099,54 +50088,14 @@
           "signature": "readonly searchable: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:searchAriaLabel",
-          "name": "searchAriaLabel",
+          "id": "./tree-table#NeuTreeTableComponent.input:selection",
+          "name": "selection",
           "kind": "input",
-          "publicName": "searchAriaLabel",
+          "publicName": "selection",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly searchAriaLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:searchParam",
-          "name": "searchParam",
-          "kind": "input",
-          "publicName": "searchParam",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly searchParam: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:searchPlaceholder",
-          "name": "searchPlaceholder",
-          "kind": "input",
-          "publicName": "searchPlaceholder",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly searchPlaceholder: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:selectable",
-          "name": "selectable",
-          "kind": "input",
-          "publicName": "selectable",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly selectable: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:selectAllAriaLabel",
-          "name": "selectAllAriaLabel",
-          "kind": "input",
-          "publicName": "selectAllAriaLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly selectAllAriaLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly selection: _angular_core.InputSignal<NeuTreeTableSelection | undefined>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:selectionActions",
@@ -50159,24 +50108,14 @@
           "signature": "readonly selectionActions: _angular_core.InputSignal<NeuTableSelectionAction<Record<string, unknown>>[]>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:selectionSummaryLabel",
-          "name": "selectionSummaryLabel",
+          "id": "./tree-table#NeuTreeTableComponent.input:selectionMode",
+          "name": "selectionMode",
           "kind": "input",
-          "publicName": "selectionSummaryLabel",
+          "publicName": "selectionMode",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly selectionSummaryLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:selectRowAriaLabel",
-          "name": "selectRowAriaLabel",
-          "kind": "input",
-          "publicName": "selectRowAriaLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly selectRowAriaLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly selectionMode: _angular_core.InputSignal<NeuTreeTableSelectionMode>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:serverSide",
@@ -50199,14 +50138,14 @@
           "signature": "readonly showRowNumbers: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:skeletonRows",
-          "name": "skeletonRows",
+          "id": "./tree-table#NeuTreeTableComponent.input:sort",
+          "name": "sort",
           "kind": "input",
-          "publicName": "skeletonRows",
+          "publicName": "sort",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly skeletonRows: _angular_core.InputSignal<number[]>;"
+          "signature": "readonly sort: _angular_core.InputSignal<NeuTableSortState | undefined>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:sortable",
@@ -50217,26 +50156,6 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly sortable: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:sortDirParam",
-          "name": "sortDirParam",
-          "kind": "input",
-          "publicName": "sortDirParam",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly sortDirParam: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree-table#NeuTreeTableComponent.input:sortParam",
-          "name": "sortParam",
-          "kind": "input",
-          "publicName": "sortParam",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly sortParam: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:stickyHeader",
@@ -50279,17 +50198,6 @@
           "signature": "readonly title: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:toolbarExtraRef",
-          "name": "toolbarExtraRef",
-          "kind": "input",
-          "publicName": "toolbarExtraRef",
-          "required": false,
-          "static": false,
-          "status": "COMPATIBILITY",
-          "canonicalReplacement": "neuTableToolbar (planned H5 projection)",
-          "signature": "readonly toolbarExtraRef: _angular_core.InputSignal<TemplateRef<unknown> | null>;"
-        },
-        {
           "id": "./tree-table#NeuTreeTableComponent.input:totalItems",
           "name": "totalItems",
           "kind": "input",
@@ -50310,14 +50218,24 @@
           "signature": "readonly treeColumnKey: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:useUrlState",
-          "name": "useUrlState",
+          "id": "./tree-table#NeuTreeTableComponent.input:urlStateOptions",
+          "name": "urlStateOptions",
           "kind": "input",
-          "publicName": "useUrlState",
+          "publicName": "urlStateOptions",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly useUrlState: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly urlStateOptions: _angular_core.InputSignal<NeuTableUrlStateOptions>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.input:virtualizationOptions",
+          "name": "virtualizationOptions",
+          "kind": "input",
+          "publicName": "virtualizationOptions",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly virtualizationOptions: _angular_core.InputSignal<NeuTableVirtualizationOptions>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.input:virtualScroll",
@@ -50330,29 +50248,27 @@
           "signature": "readonly virtualScroll: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.input:virtualScrollVisibleItems",
-          "name": "virtualScrollVisibleItems",
-          "kind": "input",
-          "publicName": "virtualScrollVisibleItems",
-          "required": false,
+          "id": "./tree-table#NeuTreeTableComponent.method:cancelRowEdit",
+          "name": "cancelRowEdit",
+          "kind": "method",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly virtualScrollVisibleItems: _angular_core.InputSignal<number>;"
+          "signature": "cancelRowEdit(nodeId: string): boolean;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.method:expandTemplateContext",
           "name": "expandTemplateContext",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
-          "signature": "expandTemplateContext(row: Record<string, unknown>): {\n    $implicit: NeuTreeTableNode;\n    node: NeuTreeTableNode;\n    row: NeuTreeTableRow;\n};"
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "expandTemplateContext(row: Record<string, unknown>): {\n    $implicit: NeuTreeTableNode;\n    node: NeuTreeTableNode;\n    data: Record<string, unknown> | undefined;\n    row: NeuTreeTableRow;\n    level: number;\n    leaf: boolean;\n    expanded: boolean;\n    selected: boolean;\n    editing: boolean;\n    columns: readonly NeuTableColumn<Record<string, unknown>>[];\n    toggle: () => void;\n    toggleSelection: () => void;\n};"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.method:expandTemplateRef",
           "name": "expandTemplateRef",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "expandTemplateRef(directive: NeuTableExpandDirective): TemplateRef<unknown>;"
         },
         {
@@ -50360,15 +50276,23 @@
           "name": "isTreeRowDisabled",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "isTreeRowDisabled(row: NeuTreeTableRow): boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:onHostKeydown",
+          "name": "onHostKeydown",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onHostKeydown(event: KeyboardEvent): void;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.method:onTableActionClick",
           "name": "onTableActionClick",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "onTableActionClick(event: {\n    action: NeuTableAction<Record<string, unknown>>;\n    row: Record<string, unknown>;\n}): void;"
         },
         {
@@ -50376,15 +50300,47 @@
           "name": "onTableCellEditCommit",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "onTableCellEditCommit(event: NeuTableCellEditEvent<Record<string, unknown>>): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:onTableCellEditLifecycle",
+          "name": "onTableCellEditLifecycle",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onTableCellEditLifecycle(phase: 'init' | 'cancel', event: NeuTableCellEditLifecycleEvent<Record<string, unknown>>): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:onTableEditValidationError",
+          "name": "onTableEditValidationError",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onTableEditValidationError(event: NeuTableEditValidationEvent<Record<string, unknown>>): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:onTableLazyRequest",
+          "name": "onTableLazyRequest",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onTableLazyRequest(request: NeuTableLazyRequest): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:onTableQueryChange",
+          "name": "onTableQueryChange",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onTableQueryChange(query: NeuTableQueryState): void;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.method:onTableRowClick",
           "name": "onTableRowClick",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "onTableRowClick(row: Record<string, unknown>): void;"
         },
         {
@@ -50392,15 +50348,39 @@
           "name": "onTableRowDblClick",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "onTableRowDblClick(row: Record<string, unknown>): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:onTableRowEdit",
+          "name": "onTableRowEdit",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onTableRowEdit(phase: 'init' | 'save' | 'cancel', event: NeuTableRowEditEvent<Record<string, unknown>>): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:onTableRowSelect",
+          "name": "onTableRowSelect",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onTableRowSelect(event: NeuTableRowSelectionEvent<Record<string, unknown>>): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:onTableRowUnselect",
+          "name": "onTableRowUnselect",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onTableRowUnselect(event: NeuTableRowSelectionEvent<Record<string, unknown>>): void;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.method:onTableSelectionActionClick",
           "name": "onTableSelectionActionClick",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "onTableSelectionActionClick(event: {\n    action: NeuTableSelectionAction<Record<string, unknown>>;\n    rows: Record<string, unknown>[];\n}): void;"
         },
         {
@@ -50408,7 +50388,7 @@
           "name": "onTableSelectionChange",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "onTableSelectionChange(rows: Record<string, unknown>[]): void;"
         },
         {
@@ -50416,8 +50396,64 @@
           "name": "onTreeToggleKeydown",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "onTreeToggleKeydown(row: NeuTreeTableRow, event: KeyboardEvent): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:reset",
+          "name": "reset",
+          "kind": "method",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "reset(): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:resetScrollTop",
+          "name": "resetScrollTop",
+          "kind": "method",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "resetScrollTop(behavior?: ScrollBehavior): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:saveRowEdit",
+          "name": "saveRowEdit",
+          "kind": "method",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "saveRowEdit(nodeId: string): boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:scrollTo",
+          "name": "scrollTo",
+          "kind": "method",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "scrollTo(options: NeuTreeTableScrollOptions): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:scrollToNode",
+          "name": "scrollToNode",
+          "kind": "method",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "scrollToNode(nodeId: string, behavior?: ScrollBehavior): boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:scrollToVirtualIndex",
+          "name": "scrollToVirtualIndex",
+          "kind": "method",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "scrollToVirtualIndex(index: number, behavior?: ScrollBehavior): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:startRowEdit",
+          "name": "startRowEdit",
+          "kind": "method",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "startRowEdit(nodeId: string): boolean;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.method:toggleNode",
@@ -50428,19 +50464,43 @@
           "signature": "toggleNode(node: NeuTreeTableNode, event?: Event): void;"
         },
         {
+          "id": "./tree-table#NeuTreeTableComponent.method:treeBodyContext",
+          "name": "treeBodyContext",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "treeBodyContext(row: Record<string, unknown>, rowIndex: number, logicalIndex: number, frozen: boolean, columns: readonly NeuTableColumn<Record<string, unknown>>[], edit: NeuTableRowEditContext<Record<string, unknown>>): NeuTreeTableBodyContext;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:treeBodySectionContext",
+          "name": "treeBodySectionContext",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "treeBodySectionContext(entries: readonly NeuTableBodyRenderEntry<Record<string, unknown>>[], columns: readonly NeuTableColumn<Record<string, unknown>>[], colspan: number, virtualized: boolean, siblingRowsSupported: boolean): NeuTreeTableBodySectionContext;"
+        },
+        {
           "id": "./tree-table#NeuTreeTableComponent.method:treeIndent",
           "name": "treeIndent",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "treeIndent(row: NeuTreeTableRow): number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.method:treeNodeContext",
+          "name": "treeNodeContext",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "treeNodeContext(row: NeuTreeTableRow, column: NeuTableColumn<Record<string, unknown>>): NeuTreeTableNodeContext;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.method:treeToggleAriaLabel",
           "name": "treeToggleAriaLabel",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
+          "status": "INTERNAL/UNSUPPORTED",
           "signature": "treeToggleAriaLabel(row: NeuTreeTableRow): string;"
         },
         {
@@ -50454,6 +50514,16 @@
           "signature": "readonly actionClick: _angular_core.OutputEmitterRef<NeuTreeTableActionEvent<Record<string, unknown>>>;"
         },
         {
+          "id": "./tree-table#NeuTreeTableComponent.output:cellEditCancel",
+          "name": "cellEditCancel",
+          "kind": "output",
+          "publicName": "cellEditCancel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly cellEditCancel: _angular_core.OutputEmitterRef<NeuTreeTableCellEditEvent<Record<string, unknown>>>;"
+        },
+        {
           "id": "./tree-table#NeuTreeTableComponent.output:cellEditCommit",
           "name": "cellEditCommit",
           "kind": "output",
@@ -50462,6 +50532,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly cellEditCommit: _angular_core.OutputEmitterRef<NeuTreeTableCellEditEvent<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:cellEditInit",
+          "name": "cellEditInit",
+          "kind": "output",
+          "publicName": "cellEditInit",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly cellEditInit: _angular_core.OutputEmitterRef<NeuTreeTableCellEditEvent<Record<string, unknown>>>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.output:columnReorder",
@@ -50484,14 +50564,34 @@
           "signature": "readonly columnResize: _angular_core.OutputEmitterRef<{\n    key: string;\n    width: number;\n}>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.output:expansionChange",
-          "name": "expansionChange",
+          "id": "./tree-table#NeuTreeTableComponent.output:editingRowKeysChange",
+          "name": "editingRowKeysChange",
           "kind": "output",
-          "publicName": "expansionChange",
+          "publicName": "editingRowKeysChange",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly expansionChange: _angular_core.OutputEmitterRef<string[]>;"
+          "signature": "readonly editingRowKeysChange: _angular_core.OutputEmitterRef<readonly string[]>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:editValidationError",
+          "name": "editValidationError",
+          "kind": "output",
+          "publicName": "editValidationError",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly editValidationError: _angular_core.OutputEmitterRef<NeuTableEditValidationEvent<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:expandedKeysChange",
+          "name": "expandedKeysChange",
+          "kind": "output",
+          "publicName": "expandedKeysChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<readonly string[]>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.output:layoutChange",
@@ -50502,6 +50602,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly layoutChange: _angular_core.OutputEmitterRef<NeuTableLayout>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:lazyRequest",
+          "name": "lazyRequest",
+          "kind": "output",
+          "publicName": "lazyRequest",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly lazyRequest: _angular_core.OutputEmitterRef<NeuTreeTableLazyRequest<Record<string, unknown>>>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.output:nodeClick",
@@ -50522,6 +50632,66 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly nodeDblClick: _angular_core.OutputEmitterRef<NeuTreeTableNode<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:nodeSelect",
+          "name": "nodeSelect",
+          "kind": "output",
+          "publicName": "nodeSelect",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly nodeSelect: _angular_core.OutputEmitterRef<NeuTreeTableSelectionEvent<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:nodeUnselect",
+          "name": "nodeUnselect",
+          "kind": "output",
+          "publicName": "nodeUnselect",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly nodeUnselect: _angular_core.OutputEmitterRef<NeuTreeTableSelectionEvent<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:queryChange",
+          "name": "queryChange",
+          "kind": "output",
+          "publicName": "queryChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly queryChange: _angular_core.OutputEmitterRef<NeuTableQueryState>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:rowEditCancel",
+          "name": "rowEditCancel",
+          "kind": "output",
+          "publicName": "rowEditCancel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rowEditCancel: _angular_core.OutputEmitterRef<NeuTreeTableRowEditEvent<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:rowEditInit",
+          "name": "rowEditInit",
+          "kind": "output",
+          "publicName": "rowEditInit",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rowEditInit: _angular_core.OutputEmitterRef<NeuTreeTableRowEditEvent<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:rowEditSave",
+          "name": "rowEditSave",
+          "kind": "output",
+          "publicName": "rowEditSave",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rowEditSave: _angular_core.OutputEmitterRef<NeuTreeTableRowEditEvent<Record<string, unknown>>>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.output:searchChange",
@@ -50554,15 +50724,94 @@
           "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<NeuTreeTableNode<Record<string, unknown>>[]>;"
         },
         {
-          "id": "./tree-table#NeuTreeTableComponent.output:serverStateChange",
-          "name": "serverStateChange",
+          "id": "./tree-table#NeuTreeTableComponent.output:sortChange",
+          "name": "sortChange",
           "kind": "output",
-          "publicName": "serverStateChange",
+          "publicName": "sortChange",
           "required": false,
           "static": false,
-          "status": "COMPATIBILITY",
-          "canonicalReplacement": "queryChange (planned H5 canonical alias)",
-          "signature": "readonly serverStateChange: _angular_core.OutputEmitterRef<NeuTableServerState>;"
+          "status": "SUPPORTED",
+          "signature": "readonly sortChange: _angular_core.OutputEmitterRef<NeuTableSortState>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:asNodeKey",
+          "name": "asNodeKey",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly asNodeKey: (key: unknown) => string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:captionTemplate",
+          "name": "captionTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly captionTemplate: _angular_core.Signal<NeuTableCaptionDirective<object> | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:cellEditorTemplates",
+          "name": "cellEditorTemplates",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly cellEditorTemplates: _angular_core.Signal<readonly NeuTableCellEditorDirective<object>[]>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:cellViewTemplates",
+          "name": "cellViewTemplates",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly cellViewTemplates: _angular_core.Signal<readonly NeuTableCellViewDirective<object>[]>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:consumerTreeCellTemplate",
+          "name": "consumerTreeCellTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly consumerTreeCellTemplate: _angular_core.Signal<TemplateRef<{\n    $implicit: Record<string, unknown>;\n    row: Record<string, unknown>;\n    column: NeuTableColumn<Record<string, unknown>, string>;\n}> | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:effectiveEditMode",
+          "name": "effectiveEditMode",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly effectiveEditMode: _angular_core.Signal<NeuTableEditMode>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:effectiveQuery",
+          "name": "effectiveQuery",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly effectiveQuery: _angular_core.Signal<NeuTableQueryState>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:effectiveSort",
+          "name": "effectiveSort",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly effectiveSort: _angular_core.Signal<NeuTableSortState>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:effectiveTotalItems",
+          "name": "effectiveTotalItems",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly effectiveTotalItems: _angular_core.Signal<number>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:emptyTemplate",
+          "name": "emptyTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly emptyTemplate: _angular_core.Signal<NeuTableEmptyDirective<object> | undefined>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.property:expandTemplate",
@@ -50581,12 +50830,60 @@
           "signature": "readonly flatRows: _angular_core.Signal<Record<string, unknown>[]>;"
         },
         {
+          "id": "./tree-table#NeuTreeTableComponent.property:footerGroupTemplate",
+          "name": "footerGroupTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly footerGroupTemplate: _angular_core.Signal<NeuTableFooterGroupDirective<object> | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:groupFooterTemplate",
+          "name": "groupFooterTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly groupFooterTemplate: _angular_core.Signal<NeuTableGroupFooterDirective<any> | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:groupHeaderTemplate",
+          "name": "groupHeaderTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly groupHeaderTemplate: _angular_core.Signal<NeuTableGroupHeaderDirective<any> | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:headerGroupTemplate",
+          "name": "headerGroupTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly headerGroupTemplate: _angular_core.Signal<NeuTableHeaderGroupDirective<object> | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:isRowSelectable",
+          "name": "isRowSelectable",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly isRowSelectable: (row: Record<string, unknown>) => boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:loadingBodyTemplate",
+          "name": "loadingBodyTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly loadingBodyTemplate: _angular_core.Signal<NeuTableLoadingBodyDirective<object> | undefined>;"
+        },
+        {
           "id": "./tree-table#NeuTreeTableComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeTableComponent, \"neu-tree-table\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"toolbarExtraRef\": {\n        \"alias\": \"toolbarExtraRef\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"treeColumnKey\": {\n        \"alias\": \"treeColumnKey\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowKey\": {\n        \"alias\": \"rowKey\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tableAriaLabel\": {\n        \"alias\": \"tableAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exactMatchLabel\": {\n        \"alias\": \"exactMatchLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchAriaLabel\": {\n        \"alias\": \"searchAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearSearchAriaLabel\": {\n        \"alias\": \"clearSearchAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearFilterLabel\": {\n        \"alias\": \"clearFilterLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousPageAriaLabel\": {\n        \"alias\": \"previousPageAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextPageAriaLabel\": {\n        \"alias\": \"nextPageAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSizeLabel\": {\n        \"alias\": \"pageSizeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSizeAriaLabel\": {\n        \"alias\": \"pageSizeAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"paginationAriaLabel\": {\n        \"alias\": \"paginationAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportCsvTitle\": {\n        \"alias\": \"exportCsvTitle\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportJsonTitle\": {\n        \"alias\": \"exportJsonTitle\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportXlsxTitle\": {\n        \"alias\": \"exportXlsxTitle\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearSelectionLabel\": {\n        \"alias\": \"clearSelectionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionSummaryLabel\": {\n        \"alias\": \"selectionSummaryLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectAllAriaLabel\": {\n        \"alias\": \"selectAllAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectRowAriaLabel\": {\n        \"alias\": \"selectRowAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandRowAriaLabel\": {\n        \"alias\": \"expandRowAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterPlaceholder\": {\n        \"alias\": \"filterPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterAriaPrefix\": {\n        \"alias\": \"filterAriaPrefix\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"allFilterOptionLabel\": {\n        \"alias\": \"allFilterOptionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ofLabel\": {\n        \"alias\": \"ofLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resultLabelSingular\": {\n        \"alias\": \"resultLabelSingular\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resultLabelPlural\": {\n        \"alias\": \"resultLabelPlural\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyMessage\": {\n        \"alias\": \"emptyMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandLabel\": {\n        \"alias\": \"expandLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapseLabel\": {\n        \"alias\": \"collapseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indentSize\": {\n        \"alias\": \"indentSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"skeletonRows\": {\n        \"alias\": \"skeletonRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exactMatchable\": {\n        \"alias\": \"exactMatchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pagination\": {\n        \"alias\": \"pagination\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectable\": {\n        \"alias\": \"selectable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionActions\": {\n        \"alias\": \"selectionActions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stickyHeader\": {\n        \"alias\": \"stickyHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stripedRows\": {\n        \"alias\": \"stripedRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"bordered\": {\n        \"alias\": \"bordered\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"roundedBorders\": {\n        \"alias\": \"roundedBorders\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortable\": {\n        \"alias\": \"sortable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiSort\": {\n        \"alias\": \"multiSort\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandable\": {\n        \"alias\": \"expandable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandMode\": {\n        \"alias\": \"expandMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportable\": {\n        \"alias\": \"exportable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportFileName\": {\n        \"alias\": \"exportFileName\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportFormats\": {\n        \"alias\": \"exportFormats\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportColumns\": {\n        \"alias\": \"exportColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportScope\": {\n        \"alias\": \"exportScope\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualScroll\": {\n        \"alias\": \"virtualScroll\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualScrollVisibleItems\": {\n        \"alias\": \"virtualScrollVisibleItems\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizableColumns\": {\n        \"alias\": \"resizableColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"reorderableColumns\": {\n        \"alias\": \"reorderableColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnChooser\": {\n        \"alias\": \"columnChooser\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnChooserLabel\": {\n        \"alias\": \"columnChooserLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"groupBy\": {\n        \"alias\": \"groupBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"groupHeaderLabel\": {\n        \"alias\": \"groupHeaderLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inlineEdit\": {\n        \"alias\": \"inlineEdit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inlineEditLabel\": {\n        \"alias\": \"inlineEditLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"saveInlineEditLabel\": {\n        \"alias\": \"saveInlineEditLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"cancelInlineEditLabel\": {\n        \"alias\": \"cancelInlineEditLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialLayout\": {\n        \"alias\": \"initialLayout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showRowNumbers\": {\n        \"alias\": \"showRowNumbers\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"useUrlState\": {\n        \"alias\": \"useUrlState\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"density\": {\n        \"alias\": \"density\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSizeOptions\": {\n        \"alias\": \"pageSizeOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowClass\": {\n        \"alias\": \"rowClass\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"footerRow\": {\n        \"alias\": \"footerRow\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyStateTemplate\": {\n        \"alias\": \"emptyStateTemplate\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"serverSide\": {\n        \"alias\": \"serverSide\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"totalItems\": {\n        \"alias\": \"totalItems\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageParam\": {\n        \"alias\": \"pageParam\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchParam\": {\n        \"alias\": \"searchParam\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortParam\": {\n        \"alias\": \"sortParam\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortDirParam\": {\n        \"alias\": \"sortDirParam\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiSortParam\": {\n        \"alias\": \"multiSortParam\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n    \"nodeClick\": \"nodeClick\";\n    \"nodeDblClick\": \"nodeDblClick\";\n    \"expansionChange\": \"expansionChange\";\n    \"actionClick\": \"actionClick\";\n    \"selectionActionClick\": \"selectionActionClick\";\n    \"serverStateChange\": \"serverStateChange\";\n    \"searchChange\": \"searchChange\";\n    \"columnResize\": \"columnResize\";\n    \"columnReorder\": \"columnReorder\";\n    \"layoutChange\": \"layoutChange\";\n    \"cellEditCommit\": \"cellEditCommit\";\n}, [\n    \"expandTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeTableComponent, \"neu-tree-table\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"treeColumnKey\": {\n        \"alias\": \"treeColumnKey\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tableAriaLabel\": {\n        \"alias\": \"tableAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indentSize\": {\n        \"alias\": \"indentSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exactMatchable\": {\n        \"alias\": \"exactMatchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pagination\": {\n        \"alias\": \"pagination\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionActions\": {\n        \"alias\": \"selectionActions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stickyHeader\": {\n        \"alias\": \"stickyHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stripedRows\": {\n        \"alias\": \"stripedRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"bordered\": {\n        \"alias\": \"bordered\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"roundedBorders\": {\n        \"alias\": \"roundedBorders\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortable\": {\n        \"alias\": \"sortable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiSort\": {\n        \"alias\": \"multiSort\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandMode\": {\n        \"alias\": \"expandMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportOptions\": {\n        \"alias\": \"exportOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualScroll\": {\n        \"alias\": \"virtualScroll\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualizationOptions\": {\n        \"alias\": \"virtualizationOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizableColumns\": {\n        \"alias\": \"resizableColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"reorderableColumns\": {\n        \"alias\": \"reorderableColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnChooser\": {\n        \"alias\": \"columnChooser\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"groupBy\": {\n        \"alias\": \"groupBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialLayout\": {\n        \"alias\": \"initialLayout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showRowNumbers\": {\n        \"alias\": \"showRowNumbers\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"density\": {\n        \"alias\": \"density\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSizeOptions\": {\n        \"alias\": \"pageSizeOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowClass\": {\n        \"alias\": \"rowClass\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"footerRow\": {\n        \"alias\": \"footerRow\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"serverSide\": {\n        \"alias\": \"serverSide\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"totalItems\": {\n        \"alias\": \"totalItems\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"urlStateOptions\": {\n        \"alias\": \"urlStateOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"query\": {\n        \"alias\": \"query\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sort\": {\n        \"alias\": \"sort\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterMode\": {\n        \"alias\": \"filterMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionMode\": {\n        \"alias\": \"selectionMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selection\": {\n        \"alias\": \"selection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"metaKeySelection\": {\n        \"alias\": \"metaKeySelection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editMode\": {\n        \"alias\": \"editMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editingRowKeys\": {\n        \"alias\": \"editingRowKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowEditValidator\": {\n        \"alias\": \"rowEditValidator\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n    \"nodeClick\": \"nodeClick\";\n    \"nodeDblClick\": \"nodeDblClick\";\n    \"actionClick\": \"actionClick\";\n    \"selectionActionClick\": \"selectionActionClick\";\n    \"searchChange\": \"searchChange\";\n    \"columnResize\": \"columnResize\";\n    \"columnReorder\": \"columnReorder\";\n    \"layoutChange\": \"layoutChange\";\n    \"cellEditCommit\": \"cellEditCommit\";\n    \"queryChange\": \"queryChange\";\n    \"sortChange\": \"sortChange\";\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"nodeSelect\": \"nodeSelect\";\n    \"nodeUnselect\": \"nodeUnselect\";\n    \"lazyRequest\": \"lazyRequest\";\n    \"cellEditInit\": \"cellEditInit\";\n    \"cellEditCancel\": \"cellEditCancel\";\n    \"editValidationError\": \"editValidationError\";\n    \"editingRowKeysChange\": \"editingRowKeysChange\";\n    \"rowEditInit\": \"rowEditInit\";\n    \"rowEditSave\": \"rowEditSave\";\n    \"rowEditCancel\": \"rowEditCancel\";\n}, [\n    \"expandTemplate\",\n    \"toolbarTemplate\",\n    \"captionTemplate\",\n    \"headerGroupTemplate\",\n    \"footerGroupTemplate\",\n    \"groupHeaderTemplate\",\n    \"groupFooterTemplate\",\n    \"loadingBodyTemplate\",\n    \"emptyTemplate\",\n    \"summaryTemplate\",\n    \"paginatorLeftTemplate\",\n    \"paginatorRightTemplate\",\n    \"cellViewTemplates\",\n    \"cellEditorTemplates\",\n    \"treeNodeTemplate\",\n    \"treeBodyTemplate\",\n    \"treeBodySectionTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.property:ɵfac",
@@ -50597,12 +50894,366 @@
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeTableComponent, never>;"
         },
         {
+          "id": "./tree-table#NeuTreeTableComponent.property:paginatorLeftTemplate",
+          "name": "paginatorLeftTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly paginatorLeftTemplate: _angular_core.Signal<NeuTablePaginatorLeftDirective | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:paginatorRightTemplate",
+          "name": "paginatorRightTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly paginatorRightTemplate: _angular_core.Signal<NeuTablePaginatorRightDirective | undefined>;"
+        },
+        {
           "id": "./tree-table#NeuTreeTableComponent.property:resolvedColumns",
           "name": "resolvedColumns",
           "kind": "property",
           "static": false,
           "status": "REVIEW",
           "signature": "readonly resolvedColumns: _angular_core.Signal<NeuTableColumn<Record<string, unknown>, string>[]>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:selectedRows",
+          "name": "selectedRows",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly selectedRows: _angular_core.Signal<Record<string, unknown>[]>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:summaryTemplate",
+          "name": "summaryTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly summaryTemplate: _angular_core.Signal<NeuTableSummaryDirective<object> | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:tableRowEditValidator",
+          "name": "tableRowEditValidator",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly tableRowEditValidator: (event: NeuTableRowEditEvent<Record<string, unknown>>) => _neural_ui_core_table.NeuTableEditValidationResult;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:tableSelectable",
+          "name": "tableSelectable",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly tableSelectable: _angular_core.Signal<false | \"single\" | \"multiple\">;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:tableSelectionMode",
+          "name": "tableSelectionMode",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly tableSelectionMode: _angular_core.Signal<\"none\" | \"single\" | \"multiple\">;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:toolbarTemplate",
+          "name": "toolbarTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly toolbarTemplate: _angular_core.Signal<NeuTableToolbarDirective | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:treeBodySectionTemplate",
+          "name": "treeBodySectionTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly treeBodySectionTemplate: _angular_core.Signal<NeuTreeTableBodySectionDirective | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:treeBodyTemplate",
+          "name": "treeBodyTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly treeBodyTemplate: _angular_core.Signal<NeuTreeTableBodyDirective | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.property:treeNodeTemplate",
+          "name": "treeNodeTemplate",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly treeNodeTemplate: _angular_core.Signal<NeuTreeTableNodeDirective | undefined>;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableFilterMode",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableFilterMode",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTreeTableFilterMode = 'lenient' | 'strict';",
+      "members": []
+    },
+    {
+      "id": "./tree-table#NeuTreeTableLabels",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableLabels",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableLabels extends NeuTableLabels {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableLabels.property:allFilterOptionLabel",
+          "name": "allFilterOptionLabel",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "allFilterOptionLabel?: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLabels.property:clearFilterLabel",
+          "name": "clearFilterLabel",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "clearFilterLabel?: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLabels.property:collapseNodeAriaLabel",
+          "name": "collapseNodeAriaLabel",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "collapseNodeAriaLabel?: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLabels.property:emptyMessage",
+          "name": "emptyMessage",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "emptyMessage?: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLabels.property:exactMatchLabel",
+          "name": "exactMatchLabel",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "exactMatchLabel?: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLabels.property:expandNodeAriaLabel",
+          "name": "expandNodeAriaLabel",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "expandNodeAriaLabel?: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLabels.property:filterAriaPrefix",
+          "name": "filterAriaPrefix",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "filterAriaPrefix?: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLabels.property:filterPlaceholder",
+          "name": "filterPlaceholder",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "filterPlaceholder?: string;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableLazyRequest",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableLazyRequest",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableLazyRequest<T extends Record<string, unknown> = Record<string, unknown>> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableLazyRequest.property:first",
+          "name": "first",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly first?: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLazyRequest.property:last",
+          "name": "last",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly last?: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLazyRequest.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node?: NeuTreeTableNode<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLazyRequest.property:query",
+          "name": "query",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly query: NeuTableQueryState;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableLazyRequest.property:reason",
+          "name": "reason",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly reason: 'node-expand' | 'query' | 'virtual';"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableManagedRowDirective",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableManagedRowDirective",
+      "kind": "directive",
+      "status": "SUPPORTED",
+      "selector": "tr[neuTreeTableManagedRow]",
+      "signature": "declare class NeuTreeTableManagedRowDirective {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.accessor:ariaDisabled",
+          "name": "ariaDisabled",
+          "kind": "accessor",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "get ariaDisabled(): boolean | null;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.accessor:expanded",
+          "name": "expanded",
+          "kind": "accessor",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "get expanded(): boolean | null;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.accessor:level",
+          "name": "level",
+          "kind": "accessor",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "get level(): number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.accessor:nodeId",
+          "name": "nodeId",
+          "kind": "accessor",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "get nodeId(): string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.accessor:posInSet",
+          "name": "posInSet",
+          "kind": "accessor",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "get posInSet(): number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.accessor:selected",
+          "name": "selected",
+          "kind": "accessor",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "get selected(): boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.accessor:setSize",
+          "name": "setSize",
+          "kind": "accessor",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "get setSize(): number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.accessor:tabIndex",
+          "name": "tabIndex",
+          "kind": "accessor",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "get tabIndex(): number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.input:context",
+          "name": "context",
+          "kind": "input",
+          "publicName": "neuTreeTableManagedRow",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly context: _angular_core.InputSignal<NeuTreeTableBodyDataEntry<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.method:onClick",
+          "name": "onClick",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "onClick(event: MouseEvent): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.method:onFocus",
+          "name": "onFocus",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "onFocus(): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.method:onKeydown",
+          "name": "onKeydown",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "onKeydown(event: KeyboardEvent): void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.property:ɵdir",
+          "name": "ɵdir",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTreeTableManagedRowDirective, \"tr[neuTreeTableManagedRow]\", never, {\n    \"context\": {\n        \"alias\": \"neuTreeTableManagedRow\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeTableManagedRowDirective, never>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableManagedRowDirective.property:role",
+          "name": "role",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly role = \"row\";"
         }
       ]
     },
@@ -50677,6 +51328,179 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "label: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNode.property:leaf",
+          "name": "leaf",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "leaf?: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNode.property:loading",
+          "name": "loading",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "loading?: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNode.property:selectable",
+          "name": "selectable",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "selectable?: boolean;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableNodeContext",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableNodeContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableNodeContext<T extends Record<string, unknown> = Record<string, unknown>> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuTreeTableNode<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:column",
+          "name": "column",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly column: NeuTableColumn<Record<string, unknown>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:data",
+          "name": "data",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly data: T | undefined;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:editing",
+          "name": "editing",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly editing: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:expanded",
+          "name": "expanded",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expanded: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:leaf",
+          "name": "leaf",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly leaf: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:level",
+          "name": "level",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly level: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node: NeuTreeTableNode<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:partial",
+          "name": "partial",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly partial: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:row",
+          "name": "row",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly row: NeuTreeTableRow<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:selected",
+          "name": "selected",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selected: boolean;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:toggle",
+          "name": "toggle",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly toggle: () => void;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeContext.property:toggleSelection",
+          "name": "toggleSelection",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly toggleSelection: () => void;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableNodeDirective",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableNodeDirective",
+      "kind": "directive",
+      "status": "SUPPORTED",
+      "selector": "ng-template[neuTreeTableNode]",
+      "signature": "declare class NeuTreeTableNodeDirective extends NeuTreeTableTemplateDirective<NeuTreeTableNodeContext> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableNodeDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuTreeTableNodeDirective, context: unknown): context is NeuTreeTableNodeContext;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeDirective.property:ɵdir",
+          "name": "ɵdir",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTreeTableNodeDirective, \"ng-template[neuTreeTableNode]\", never, {}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableNodeDirective.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeTableNodeDirective, never>;"
         }
       ]
     },
@@ -50737,6 +51561,22 @@
           "signature": "__treeParentId?: string;"
         },
         {
+          "id": "./tree-table#NeuTreeTableRow.property:__treePosInSet",
+          "name": "__treePosInSet",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "__treePosInSet: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableRow.property:__treeSetSize",
+          "name": "__treeSetSize",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "__treeSetSize: number;"
+        },
+        {
           "id": "./tree-table#NeuTreeTableRow.property:badge",
           "name": "badge",
           "kind": "property",
@@ -50771,6 +51611,108 @@
       ]
     },
     {
+      "id": "./tree-table#NeuTreeTableRowEditEvent",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableRowEditEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableRowEditEvent<T extends Record<string, unknown> = Record<string, unknown>> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableRowEditEvent.property:draft",
+          "name": "draft",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly draft: Readonly<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableRowEditEvent.property:editingNodeKeys",
+          "name": "editingNodeKeys",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly editingNodeKeys: readonly string[];"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableRowEditEvent.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node: NeuTreeTableNode<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableRowEditEvent.property:row",
+          "name": "row",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly row: NeuTreeTableRow<T>;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRowEditValidator",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableRowEditValidator",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTreeTableRowEditValidator<T extends Record<string, unknown> = Record<string, unknown>> = (event: NeuTreeTableRowEditEvent<T>) => NeuTableEditValidationResult;",
+      "members": []
+    },
+    {
+      "id": "./tree-table#NeuTreeTableScrollOptions",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableScrollOptions",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableScrollOptions {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableScrollOptions.property:behavior",
+          "name": "behavior",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly behavior?: ScrollBehavior;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableScrollOptions.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index?: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableScrollOptions.property:nodeId",
+          "name": "nodeId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly nodeId?: string;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableScrollOptions.property:offset",
+          "name": "offset",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly offset?: number;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableSelection",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableSelection",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTreeTableSelection<T extends Record<string, unknown> = Record<string, unknown>> = NeuTreeTableNode<T> | readonly NeuTreeTableNode<T>[] | null;",
+      "members": []
+    },
+    {
       "id": "./tree-table#NeuTreeTableSelectionActionEvent",
       "entrypoint": "./tree-table",
       "name": "NeuTreeTableSelectionActionEvent",
@@ -50803,6 +51745,57 @@
           "signature": "rows: NeuTreeTableRow<T>[];"
         }
       ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableSelectionEvent",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableSelectionEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableSelectionEvent<T extends Record<string, unknown> = Record<string, unknown>> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableSelectionEvent.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node: NeuTreeTableNode<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableSelectionEvent.property:row",
+          "name": "row",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly row: NeuTreeTableRow<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableSelectionEvent.property:selection",
+          "name": "selection",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selection: readonly NeuTreeTableNode<T>[];"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableSelectionEvent.property:source",
+          "name": "source",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly source: NeuTableRowSelectionEvent<Record<string, unknown>>['source'];"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableSelectionMode",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableSelectionMode",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTreeTableSelectionMode = 'none' | 'single' | 'multiple' | 'checkbox';",
+      "members": []
     },
     {
       "id": "./tree#NeuTreeComponent",
@@ -67773,18 +68766,6 @@
       "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<T[]>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:allFilterOptionLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "allFilterOptionLabel",
-      "publicName": "allFilterOptionLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly allFilterOptionLabel: _angular_core.InputSignal<string>;"
-    },
-    {
       "id": "./tree-table#NeuTreeTableComponent.input:bordered",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -67797,66 +68778,6 @@
       "signature": "readonly bordered: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:cancelInlineEditLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "cancelInlineEditLabel",
-      "publicName": "cancelInlineEditLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly cancelInlineEditLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:clearFilterLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "clearFilterLabel",
-      "publicName": "clearFilterLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly clearFilterLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:clearSearchAriaLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "clearSearchAriaLabel",
-      "publicName": "clearSearchAriaLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly clearSearchAriaLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:clearSelectionLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "clearSelectionLabel",
-      "publicName": "clearSelectionLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly clearSelectionLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:collapseLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "collapseLabel",
-      "publicName": "collapseLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly collapseLabel: _angular_core.InputSignal<string>;"
-    },
-    {
       "id": "./tree-table#NeuTreeTableComponent.input:columnChooser",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -67867,18 +68788,6 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly columnChooser: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:columnChooserLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "columnChooserLabel",
-      "publicName": "columnChooserLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly columnChooserLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:columns",
@@ -67905,28 +68814,28 @@
       "signature": "readonly density: _angular_core.InputSignal<\"compact\" | \"normal\" | \"relaxed\">;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:emptyMessage",
+      "id": "./tree-table#NeuTreeTableComponent.input:editingRowKeys",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "emptyMessage",
-      "publicName": "emptyMessage",
+      "propertyName": "editingRowKeys",
+      "publicName": "editingRowKeys",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly emptyMessage: _angular_core.InputSignal<string>;"
+      "signature": "readonly editingRowKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:emptyStateTemplate",
+      "id": "./tree-table#NeuTreeTableComponent.input:editMode",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "emptyStateTemplate",
-      "publicName": "emptyStateTemplate",
+      "propertyName": "editMode",
+      "publicName": "editMode",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly emptyStateTemplate: _angular_core.InputSignal<TemplateRef<void> | undefined>;"
+      "signature": "readonly editMode: _angular_core.InputSignal<NeuTableEditMode>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:exactMatchable",
@@ -67941,40 +68850,16 @@
       "signature": "readonly exactMatchable: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:exactMatchLabel",
+      "id": "./tree-table#NeuTreeTableComponent.input:expandedKeys",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "exactMatchLabel",
-      "publicName": "exactMatchLabel",
+      "propertyName": "expandedKeys",
+      "publicName": "expandedKeys",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly exactMatchLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:expandable",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "expandable",
-      "publicName": "expandable",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly expandable: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:expandLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "expandLabel",
-      "publicName": "expandLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly expandLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:expandMode",
@@ -67986,139 +68871,31 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly expandMode: _angular_core.InputSignal<\"multiple\" | \"single\">;"
+      "signature": "readonly expandMode: _angular_core.InputSignal<NeuTableExpandMode>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:expandRowAriaLabel",
+      "id": "./tree-table#NeuTreeTableComponent.input:exportOptions",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "expandRowAriaLabel",
-      "publicName": "expandRowAriaLabel",
+      "propertyName": "exportOptions",
+      "publicName": "exportOptions",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly expandRowAriaLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly exportOptions: _angular_core.InputSignal<NeuTableExportConfig<Record<string, unknown>>>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:exportable",
+      "id": "./tree-table#NeuTreeTableComponent.input:filterMode",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "exportable",
-      "publicName": "exportable",
+      "propertyName": "filterMode",
+      "publicName": "filterMode",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly exportable: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:exportColumns",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "exportColumns",
-      "publicName": "exportColumns",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly exportColumns: _angular_core.InputSignal<string[]>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:exportCsvTitle",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "exportCsvTitle",
-      "publicName": "exportCsvTitle",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly exportCsvTitle: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:exportFileName",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "exportFileName",
-      "publicName": "exportFileName",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly exportFileName: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:exportFormats",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "exportFormats",
-      "publicName": "exportFormats",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly exportFormats: _angular_core.InputSignal<(\"csv\" | \"json\" | \"xlsx\")[]>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:exportJsonTitle",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "exportJsonTitle",
-      "publicName": "exportJsonTitle",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly exportJsonTitle: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:exportScope",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "exportScope",
-      "publicName": "exportScope",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly exportScope: _angular_core.InputSignal<\"selected\" | \"filtered\" | \"auto\">;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:exportXlsxTitle",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "exportXlsxTitle",
-      "publicName": "exportXlsxTitle",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly exportXlsxTitle: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:filterAriaPrefix",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "filterAriaPrefix",
-      "publicName": "filterAriaPrefix",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly filterAriaPrefix: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:filterPlaceholder",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "filterPlaceholder",
-      "publicName": "filterPlaceholder",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly filterPlaceholder: _angular_core.InputSignal<string>;"
+      "signature": "readonly filterMode: _angular_core.InputSignal<NeuTreeTableFilterMode>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:footerRow",
@@ -68145,18 +68922,6 @@
       "signature": "readonly groupBy: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:groupHeaderLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "groupHeaderLabel",
-      "publicName": "groupHeaderLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly groupHeaderLabel: _angular_core.InputSignal<string>;"
-    },
-    {
       "id": "./tree-table#NeuTreeTableComponent.input:indentSize",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -68181,28 +68946,16 @@
       "signature": "readonly initialLayout: _angular_core.InputSignal<NeuTableLayout | null>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:inlineEdit",
+      "id": "./tree-table#NeuTreeTableComponent.input:labels",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "inlineEdit",
-      "publicName": "inlineEdit",
+      "propertyName": "labels",
+      "publicName": "labels",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly inlineEdit: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:inlineEditLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "inlineEditLabel",
-      "publicName": "inlineEditLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly inlineEditLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly labels: _angular_core.InputSignal<NeuTreeTableLabels>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:loading",
@@ -68217,6 +68970,18 @@
       "signature": "readonly loading: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./tree-table#NeuTreeTableComponent.input:metaKeySelection",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "metaKeySelection",
+      "publicName": "metaKeySelection",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly metaKeySelection: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./tree-table#NeuTreeTableComponent.input:multiSort",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -68227,30 +68992,6 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly multiSort: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:multiSortParam",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "multiSortParam",
-      "publicName": "multiSortParam",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly multiSortParam: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:nextPageAriaLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "nextPageAriaLabel",
-      "publicName": "nextPageAriaLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly nextPageAriaLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:nodes",
@@ -68265,30 +69006,6 @@
       "signature": "readonly nodes: _angular_core.InputSignal<NeuTreeTableNode<Record<string, unknown>>[]>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:ofLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "ofLabel",
-      "publicName": "ofLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly ofLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:pageParam",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "pageParam",
-      "publicName": "pageParam",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly pageParam: _angular_core.InputSignal<string>;"
-    },
-    {
       "id": "./tree-table#NeuTreeTableComponent.input:pageSize",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -68299,30 +69016,6 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly pageSize: _angular_core.InputSignal<number>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:pageSizeAriaLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "pageSizeAriaLabel",
-      "publicName": "pageSizeAriaLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly pageSizeAriaLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:pageSizeLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "pageSizeLabel",
-      "publicName": "pageSizeLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly pageSizeLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:pageSizeOptions",
@@ -68349,28 +69042,16 @@
       "signature": "readonly pagination: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:paginationAriaLabel",
+      "id": "./tree-table#NeuTreeTableComponent.input:query",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "paginationAriaLabel",
-      "publicName": "paginationAriaLabel",
+      "propertyName": "query",
+      "publicName": "query",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly paginationAriaLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:previousPageAriaLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "previousPageAriaLabel",
-      "publicName": "previousPageAriaLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly previousPageAriaLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly query: _angular_core.InputSignal<NeuTableQueryState | undefined>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:reorderableColumns",
@@ -68397,30 +69078,6 @@
       "signature": "readonly resizableColumns: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:resultLabelPlural",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "resultLabelPlural",
-      "publicName": "resultLabelPlural",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly resultLabelPlural: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:resultLabelSingular",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "resultLabelSingular",
-      "publicName": "resultLabelSingular",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly resultLabelSingular: _angular_core.InputSignal<string>;"
-    },
-    {
       "id": "./tree-table#NeuTreeTableComponent.input:roundedBorders",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -68445,28 +69102,16 @@
       "signature": "readonly rowClass: _angular_core.InputSignal<((row: Record<string, unknown>) => string) | undefined>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:rowKey",
+      "id": "./tree-table#NeuTreeTableComponent.input:rowEditValidator",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "rowKey",
-      "publicName": "rowKey",
+      "propertyName": "rowEditValidator",
+      "publicName": "rowEditValidator",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly rowKey: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:saveInlineEditLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "saveInlineEditLabel",
-      "publicName": "saveInlineEditLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly saveInlineEditLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly rowEditValidator: _angular_core.InputSignal<NeuTreeTableRowEditValidator | undefined>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:searchable",
@@ -68481,64 +69126,16 @@
       "signature": "readonly searchable: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:searchAriaLabel",
+      "id": "./tree-table#NeuTreeTableComponent.input:selection",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "searchAriaLabel",
-      "publicName": "searchAriaLabel",
+      "propertyName": "selection",
+      "publicName": "selection",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly searchAriaLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:searchParam",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "searchParam",
-      "publicName": "searchParam",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly searchParam: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:searchPlaceholder",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "searchPlaceholder",
-      "publicName": "searchPlaceholder",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly searchPlaceholder: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:selectable",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "selectable",
-      "publicName": "selectable",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly selectable: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:selectAllAriaLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "selectAllAriaLabel",
-      "publicName": "selectAllAriaLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly selectAllAriaLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly selection: _angular_core.InputSignal<NeuTreeTableSelection | undefined>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:selectionActions",
@@ -68553,28 +69150,16 @@
       "signature": "readonly selectionActions: _angular_core.InputSignal<NeuTableSelectionAction<Record<string, unknown>>[]>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:selectionSummaryLabel",
+      "id": "./tree-table#NeuTreeTableComponent.input:selectionMode",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "selectionSummaryLabel",
-      "publicName": "selectionSummaryLabel",
+      "propertyName": "selectionMode",
+      "publicName": "selectionMode",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly selectionSummaryLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:selectRowAriaLabel",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "selectRowAriaLabel",
-      "publicName": "selectRowAriaLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly selectRowAriaLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly selectionMode: _angular_core.InputSignal<NeuTreeTableSelectionMode>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:serverSide",
@@ -68601,16 +69186,16 @@
       "signature": "readonly showRowNumbers: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:skeletonRows",
+      "id": "./tree-table#NeuTreeTableComponent.input:sort",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "skeletonRows",
-      "publicName": "skeletonRows",
+      "propertyName": "sort",
+      "publicName": "sort",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly skeletonRows: _angular_core.InputSignal<number[]>;"
+      "signature": "readonly sort: _angular_core.InputSignal<NeuTableSortState | undefined>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:sortable",
@@ -68623,30 +69208,6 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly sortable: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:sortDirParam",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "sortDirParam",
-      "publicName": "sortDirParam",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly sortDirParam: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:sortParam",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "sortParam",
-      "publicName": "sortParam",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly sortParam: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:stickyHeader",
@@ -68697,19 +69258,6 @@
       "signature": "readonly title: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:toolbarExtraRef",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "toolbarExtraRef",
-      "publicName": "toolbarExtraRef",
-      "kind": "input",
-      "required": false,
-      "status": "COMPATIBILITY",
-      "canonicalReplacement": "neuTableToolbar (planned H5 projection)",
-      "signature": "readonly toolbarExtraRef: _angular_core.InputSignal<TemplateRef<unknown> | null>;"
-    },
-    {
       "id": "./tree-table#NeuTreeTableComponent.input:totalItems",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -68734,16 +69282,28 @@
       "signature": "readonly treeColumnKey: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:useUrlState",
+      "id": "./tree-table#NeuTreeTableComponent.input:urlStateOptions",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "useUrlState",
-      "publicName": "useUrlState",
+      "propertyName": "urlStateOptions",
+      "publicName": "urlStateOptions",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly useUrlState: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly urlStateOptions: _angular_core.InputSignal<NeuTableUrlStateOptions>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:virtualizationOptions",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "virtualizationOptions",
+      "publicName": "virtualizationOptions",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly virtualizationOptions: _angular_core.InputSignal<NeuTableVirtualizationOptions>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.input:virtualScroll",
@@ -68758,18 +69318,6 @@
       "signature": "readonly virtualScroll: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:virtualScrollVisibleItems",
-      "entrypoint": "./tree-table",
-      "declaration": "NeuTreeTableComponent",
-      "selector": "neu-tree-table",
-      "propertyName": "virtualScrollVisibleItems",
-      "publicName": "virtualScrollVisibleItems",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly virtualScrollVisibleItems: _angular_core.InputSignal<number>;"
-    },
-    {
       "id": "./tree-table#NeuTreeTableComponent.output:actionClick",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -68782,6 +69330,18 @@
       "signature": "readonly actionClick: _angular_core.OutputEmitterRef<NeuTreeTableActionEvent<Record<string, unknown>>>;"
     },
     {
+      "id": "./tree-table#NeuTreeTableComponent.output:cellEditCancel",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "cellEditCancel",
+      "publicName": "cellEditCancel",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly cellEditCancel: _angular_core.OutputEmitterRef<NeuTreeTableCellEditEvent<Record<string, unknown>>>;"
+    },
+    {
       "id": "./tree-table#NeuTreeTableComponent.output:cellEditCommit",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -68792,6 +69352,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly cellEditCommit: _angular_core.OutputEmitterRef<NeuTreeTableCellEditEvent<Record<string, unknown>>>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:cellEditInit",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "cellEditInit",
+      "publicName": "cellEditInit",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly cellEditInit: _angular_core.OutputEmitterRef<NeuTreeTableCellEditEvent<Record<string, unknown>>>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.output:columnReorder",
@@ -68818,16 +69390,40 @@
       "signature": "readonly columnResize: _angular_core.OutputEmitterRef<{\n    key: string;\n    width: number;\n}>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:expansionChange",
+      "id": "./tree-table#NeuTreeTableComponent.output:editingRowKeysChange",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "expansionChange",
-      "publicName": "expansionChange",
+      "propertyName": "editingRowKeysChange",
+      "publicName": "editingRowKeysChange",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly expansionChange: _angular_core.OutputEmitterRef<string[]>;"
+      "signature": "readonly editingRowKeysChange: _angular_core.OutputEmitterRef<readonly string[]>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:editValidationError",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "editValidationError",
+      "publicName": "editValidationError",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly editValidationError: _angular_core.OutputEmitterRef<NeuTableEditValidationEvent<Record<string, unknown>>>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:expandedKeysChange",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "expandedKeysChange",
+      "publicName": "expandedKeysChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<readonly string[]>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.output:layoutChange",
@@ -68840,6 +69436,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly layoutChange: _angular_core.OutputEmitterRef<NeuTableLayout>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:lazyRequest",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "lazyRequest",
+      "publicName": "lazyRequest",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly lazyRequest: _angular_core.OutputEmitterRef<NeuTreeTableLazyRequest<Record<string, unknown>>>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.output:nodeClick",
@@ -68864,6 +69472,78 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly nodeDblClick: _angular_core.OutputEmitterRef<NeuTreeTableNode<Record<string, unknown>>>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:nodeSelect",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "nodeSelect",
+      "publicName": "nodeSelect",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly nodeSelect: _angular_core.OutputEmitterRef<NeuTreeTableSelectionEvent<Record<string, unknown>>>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:nodeUnselect",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "nodeUnselect",
+      "publicName": "nodeUnselect",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly nodeUnselect: _angular_core.OutputEmitterRef<NeuTreeTableSelectionEvent<Record<string, unknown>>>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:queryChange",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "queryChange",
+      "publicName": "queryChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly queryChange: _angular_core.OutputEmitterRef<NeuTableQueryState>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:rowEditCancel",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "rowEditCancel",
+      "publicName": "rowEditCancel",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly rowEditCancel: _angular_core.OutputEmitterRef<NeuTreeTableRowEditEvent<Record<string, unknown>>>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:rowEditInit",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "rowEditInit",
+      "publicName": "rowEditInit",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly rowEditInit: _angular_core.OutputEmitterRef<NeuTreeTableRowEditEvent<Record<string, unknown>>>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:rowEditSave",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "rowEditSave",
+      "publicName": "rowEditSave",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly rowEditSave: _angular_core.OutputEmitterRef<NeuTreeTableRowEditEvent<Record<string, unknown>>>;"
     },
     {
       "id": "./tree-table#NeuTreeTableComponent.output:searchChange",
@@ -68902,17 +69582,28 @@
       "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<NeuTreeTableNode<Record<string, unknown>>[]>;"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:serverStateChange",
+      "id": "./tree-table#NeuTreeTableComponent.output:sortChange",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
       "selector": "neu-tree-table",
-      "propertyName": "serverStateChange",
-      "publicName": "serverStateChange",
+      "propertyName": "sortChange",
+      "publicName": "sortChange",
       "kind": "output",
       "required": false,
-      "status": "COMPATIBILITY",
-      "canonicalReplacement": "queryChange (planned H5 canonical alias)",
-      "signature": "readonly serverStateChange: _angular_core.OutputEmitterRef<NeuTableServerState>;"
+      "status": "SUPPORTED",
+      "signature": "readonly sortChange: _angular_core.OutputEmitterRef<NeuTableSortState>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableManagedRowDirective.input:context",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableManagedRowDirective",
+      "selector": "tr[neuTreeTableManagedRow]",
+      "propertyName": "context",
+      "publicName": "neuTreeTableManagedRow",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly context: _angular_core.InputSignal<NeuTreeTableBodyDataEntry<Record<string, unknown>>>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:ariaLabel",
@@ -69945,32 +70636,32 @@
   ],
   "summary": {
     "entrypoints": 106,
-    "exportedDeclarations": 810,
+    "exportedDeclarations": 828,
     "declarationKinds": {
       "class": 14,
       "component": 107,
-      "directive": 137,
+      "directive": 141,
       "function": 50,
-      "interface": 260,
+      "interface": 269,
       "reexport": 55,
       "service": 11,
       "token": 7,
-      "type": 167,
+      "type": 172,
       "variable": 2
     },
-    "publicSymbols": 5790,
+    "publicSymbols": 5914,
     "statuses": {
-      "SUPPORTED": 3317,
-      "COMPATIBILITY": 75,
+      "SUPPORTED": 3380,
+      "COMPATIBILITY": 73,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 1118,
-      "REVIEW": 1278
+      "INTERNAL/UNSUPPORTED": 1154,
+      "REVIEW": 1305
     },
     "bindings": {
-      "input": 1215,
-      "output": 219,
+      "input": 1179,
+      "output": 230,
       "model": 3,
-      "total": 1437
+      "total": 1412
     },
     "designTokens": 258
   }
