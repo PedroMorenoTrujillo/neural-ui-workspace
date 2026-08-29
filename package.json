@@ -16,6 +16,7 @@
     "audit:tokens": "node scripts/audit-token-contract.mjs",
     "snapshot:contracts": "node scripts/audit-public-contract.mjs --update",
     "audit:contracts": "node scripts/audit-public-contract.mjs",
+    "test:contracts": "node --test scripts/public-contract.spec.mjs",
     "docs:sync": "node scripts/sync-readme-metrics.mjs --update",
     "audit:docs": "node scripts/sync-readme-metrics.mjs",
     "audit:package": "node scripts/audit-published-package.mjs",

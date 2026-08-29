@@ -1,0 +1,9 @@
+{
+  "name": "@neural-ui/contract-fixture",
+  "exports": {
+    ".": {
+      "types": "./synthetic.d.ts",
+      "default": "./synthetic.js"
+    }
+  }
+}
