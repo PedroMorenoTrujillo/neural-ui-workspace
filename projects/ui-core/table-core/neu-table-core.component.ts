@@ -20,7 +20,7 @@ import type {
   NeuTableCoreColumn,
   NeuTableCoreEmptyContext,
   NeuTableCoreRow,
-  NeuTableCoreRowIdentity,
+  NeuTableCoreRowKey,
   NeuTableCoreRowTrackBy,
   NeuTableCoreStructuralContext,
 } from './neu-table-core.types';
@@ -65,7 +65,11 @@ type NeuTableCoreData<T extends object> = [T] extends [Record<string, unknown>]
               />
             </caption>
           } @else if (title()) {
-            <caption class="neu-table-core__caption">{{ title() }}</caption>
+            <caption class="neu-table-core__caption">
+              {{
+                title()
+              }}
+            </caption>
           }
 
           <thead class="neu-table-core__head">
@@ -77,9 +81,7 @@ type NeuTableCoreData<T extends object> = [T] extends [Record<string, unknown>]
             } @else {
               <tr>
                 @if (showRowNumbers()) {
-                  <th class="neu-table-core__th neu-table-core__th--row-number" scope="col">
-                    #
-                  </th>
+                  <th class="neu-table-core__th neu-table-core__th--row-number" scope="col">#</th>
                 }
                 @for (column of columns(); track column.key) {
                   <th
@@ -220,8 +222,7 @@ export class NeuTableCoreComponent<T extends object = NeuTableCoreRow> {
   readonly title = input('');
   readonly emptyMessage = input('No results');
   readonly tableAriaLabel = input('Data table');
-  readonly rowKey = input<Extract<keyof T, string> | string>('id');
-  readonly rowIdentity = input<NeuTableCoreRowIdentity<T> | undefined>(undefined);
+  readonly rowKey = input<NeuTableCoreRowKey<T>>('id' as NeuTableCoreRowKey<T>);
   readonly rowTrackBy = input<NeuTableCoreRowTrackBy<T> | undefined>(undefined);
   readonly skeletonRows = input(5);
   readonly bordered = input(true);
@@ -232,18 +233,23 @@ export class NeuTableCoreComponent<T extends object = NeuTableCoreRow> {
   readonly rowClass = input<(row: T, rowIndex: number) => string>(() => '');
   readonly footerRow = input<Readonly<Record<string, unknown>> | null>(null);
 
-  protected readonly captionTemplate =
-    contentChild<NeuTableCoreCaptionDirective<T>>(NeuTableCoreCaptionDirective);
-  protected readonly headerTemplate =
-    contentChild<NeuTableCoreHeaderDirective<T>>(NeuTableCoreHeaderDirective);
+  protected readonly captionTemplate = contentChild<NeuTableCoreCaptionDirective<T>>(
+    NeuTableCoreCaptionDirective,
+  );
+  protected readonly headerTemplate = contentChild<NeuTableCoreHeaderDirective<T>>(
+    NeuTableCoreHeaderDirective,
+  );
   protected readonly bodyTemplate =
     contentChild<NeuTableCoreBodyDirective<T>>(NeuTableCoreBodyDirective);
-  protected readonly loadingTemplate =
-    contentChild<NeuTableCoreLoadingDirective<T>>(NeuTableCoreLoadingDirective);
-  protected readonly emptyTemplate =
-    contentChild<NeuTableCoreEmptyDirective<T>>(NeuTableCoreEmptyDirective);
-  protected readonly summaryTemplate =
-    contentChild<NeuTableCoreSummaryDirective<T>>(NeuTableCoreSummaryDirective);
+  protected readonly loadingTemplate = contentChild<NeuTableCoreLoadingDirective<T>>(
+    NeuTableCoreLoadingDirective,
+  );
+  protected readonly emptyTemplate = contentChild<NeuTableCoreEmptyDirective<T>>(
+    NeuTableCoreEmptyDirective,
+  );
+  protected readonly summaryTemplate = contentChild<NeuTableCoreSummaryDirective<T>>(
+    NeuTableCoreSummaryDirective,
+  );
 
   protected skeletonIndexes(): readonly number[] {
     const count = Math.max(1, Math.trunc(this.skeletonRows()));
@@ -262,19 +268,13 @@ export class NeuTableCoreComponent<T extends object = NeuTableCoreRow> {
     const typed = this.typedRow(row);
     const trackBy = this.rowTrackBy();
     if (trackBy) return trackBy(index, typed);
-    const identity = this.rowIdentity();
+    const identity = this.rowKey();
     if (typeof identity === 'function') return identity(typed);
-    const key = identity ?? this.rowKey();
-    return (typed as Record<string, unknown>)[key as string] ?? typed;
+    return (typed as Record<string, unknown>)[identity as string] ?? typed;
   }
 
-  protected cellValue<K extends string>(
-    row: T,
-    column: NeuTableCoreColumn<T, K>,
-  ): unknown {
-    return column.value
-      ? column.value(row)
-      : (row as Record<string, unknown>)[column.key];
+  protected cellValue<K extends string>(row: T, column: NeuTableCoreColumn<T, K>): unknown {
+    return column.value ? column.value(row) : (row as Record<string, unknown>)[column.key];
   }
 
   protected structuralContext(): NeuTableCoreStructuralContext<T> {

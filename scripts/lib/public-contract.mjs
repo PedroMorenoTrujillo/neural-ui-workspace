@@ -357,6 +357,10 @@ function isPublicImperative(policy, declaration, member) {
   return policy.publicImperativeMembers?.[declaration]?.includes(member) ?? false;
 }
 
+function hasClosedImperativeSurface(policy, declaration) {
+  return policy.closedImperativeDeclarations?.includes(declaration) ?? false;
+}
+
 function classify({
   policy,
   entrypoint,
@@ -380,6 +384,13 @@ function classify({
     return 'INTERNAL/UNSUPPORTED';
   }
   if (isPublicImperative(policy, declaration, member)) return 'SUPPORTED';
+  if (
+    node &&
+    (ts.isMethodDeclaration(node) || ts.isMethodSignature(node)) &&
+    hasClosedImperativeSurface(policy, declaration)
+  ) {
+    return 'INTERNAL/UNSUPPORTED';
+  }
   return 'REVIEW';
 }
 
@@ -711,6 +722,11 @@ export function validatePolicy(policy, contract) {
   const membersByDeclaration = new Map(
     contract.items.map((item) => [item.name, new Set(item.members.map((member) => member.name))]),
   );
+  for (const declaration of policy.closedImperativeDeclarations ?? []) {
+    if (!membersByDeclaration.has(declaration)) {
+      violations.push(`unused closed imperative declaration: ${declaration}`);
+    }
+  }
   for (const [declaration, members] of Object.entries(policy.publicImperativeMembers ?? {})) {
     for (const member of members) {
       if (!membersByDeclaration.get(declaration)?.has(member)) {

@@ -14,10 +14,11 @@ import {
 const workspaceRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const fixtureRoot = join(workspaceRoot, 'fixtures/public-contract');
 const policy = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   overrides: {},
   compatibility: {},
   frameworkMembers: [],
+  closedImperativeDeclarations: ['SyntheticCompoundComponent'],
   publicImperativeMembers: {
     SyntheticCompoundComponent: ['publicMethod'],
   },
@@ -70,6 +71,7 @@ test('public properties and methods are classified independently from deprecated
   const byName = Object.fromEntries(component.members.map((member) => [member.name, member]));
   assert.equal(byName.publicProperty.status, 'REVIEW');
   assert.equal(byName.publicMethod.status, 'SUPPORTED');
+  assert.equal(byName.templateMechanic.status, 'INTERNAL/UNSUPPORTED');
   assert.equal(byName.legacyMethod.status, 'DEPRECATED');
   assert.equal(byName.internalMechanic.status, 'INTERNAL/UNSUPPORTED');
   assert.equal(

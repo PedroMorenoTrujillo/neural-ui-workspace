@@ -72,7 +72,10 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.componentRef.setInput('data', ROWS);
     fixture.componentRef.setInput('sortable', true);
     fixture.componentRef.setInput('serverSide', options.server ?? false);
-    fixture.componentRef.setInput('useUrlState', options.url ?? false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: options.url ?? false,
+    });
     fixture.componentRef.setInput('multiSort', options.multi ?? false);
     fixture.componentRef.setInput('pageSize', 1);
     fixture.detectChanges();
@@ -303,8 +306,8 @@ describe('NeuTable sorting and global-filter migration parity', () => {
 
   it('does not mutate selection or expansion or emit their events while sorting/filtering', async () => {
     const fixture = createTable();
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    fixture.componentRef.setInput('expandable', true);
+    fixture.componentRef.setInput('selectable', 'multiple');
+    fixture.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     fixture.detectChanges();
     await fixture.whenStable();
     const selections = vi.fn();

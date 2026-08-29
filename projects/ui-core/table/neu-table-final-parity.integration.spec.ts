@@ -33,7 +33,7 @@ const COLUMNS: NeuTableColumn<Row, string>[] = [
       [data]="rows"
       [pagination]="false"
       [searchable]="false"
-      [inlineEdit]="true"
+      editMode="cell"
       rowKey="meta.id"
     >
       <ng-template neuTableCellEditor="name" let-value>
@@ -68,7 +68,10 @@ describe('NeuTable G01-G16 final parity integration', () => {
     fixture.componentRef.setInput('data', rows);
     fixture.componentRef.setInput('pagination', false);
     fixture.componentRef.setInput('searchable', false);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.detectChanges();
     return fixture;
   }
@@ -76,8 +79,8 @@ describe('NeuTable G01-G16 final parity integration', () => {
   it('keeps nested/computed identity coherent across immutable selection and expansion', async () => {
     const fixture = createTable();
     fixture.componentRef.setInput('rowKey', 'meta.id');
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    fixture.componentRef.setInput('expandable', true);
+    fixture.componentRef.setInput('selectable', 'multiple');
+    fixture.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     fixture.detectChanges();
     const table = fixture.componentInstance;
     table.selectRow(ROWS[0]);
@@ -88,7 +91,7 @@ describe('NeuTable G01-G16 final parity integration', () => {
     expect(table.isRowSelected(replacement[0])).toBe(true);
     expect(table.isRowExpanded(replacement[0])).toBe(true);
 
-    fixture.componentRef.setInput('rowIdentity', (row: Row) => `row:${row.meta.id}`);
+    fixture.componentRef.setInput('rowKey', (row: Row) => `row:${row.meta.id}`);
     fixture.detectChanges();
     table.clearSelection();
     table.selectRow(replacement[1]);
@@ -102,7 +105,7 @@ describe('NeuTable G01-G16 final parity integration', () => {
 
   it('supports equals and deepEquals selection without changing canonical row identity', () => {
     const equals = createTable();
-    equals.componentRef.setInput('selectionMode', 'multiple');
+    equals.componentRef.setInput('selectable', 'multiple');
     equals.componentRef.setInput('compareSelectionBy', 'equals');
     equals.detectChanges();
     equals.componentInstance.selectRow(ROWS[0]);
@@ -110,7 +113,7 @@ describe('NeuTable G01-G16 final parity integration', () => {
     expect(equals.componentInstance.isRowSelected({ ...ROWS[0] })).toBe(false);
 
     const deep = createTable();
-    deep.componentRef.setInput('selectionMode', 'multiple');
+    deep.componentRef.setInput('selectable', 'multiple');
     deep.componentRef.setInput('rowKey', 'missing');
     deep.componentRef.setInput('compareSelectionBy', 'deepEquals');
     deep.detectChanges();
@@ -126,20 +129,20 @@ describe('NeuTable G01-G16 final parity integration', () => {
   it('keeps deep selection coherent for explicit path/function identity and safe key fallbacks', () => {
     const fixture = createTable();
     const table = fixture.componentInstance;
-    fixture.componentRef.setInput('selectionMode', 'multiple');
+    fixture.componentRef.setInput('selectable', 'multiple');
     fixture.componentRef.setInput('compareSelectionBy', 'deepEquals');
-    fixture.componentRef.setInput('rowIdentity', 'meta.id');
+    fixture.componentRef.setInput('rowKey', 'meta.id');
     fixture.detectChanges();
     table.selectRow(ROWS[0]);
     expect(table.isRowSelected({ ...ROWS[0], meta: { ...ROWS[0].meta } })).toBe(true);
 
-    fixture.componentRef.setInput('rowIdentity', (row: Row) => ({ id: row.meta.id }));
+    fixture.componentRef.setInput('rowKey', (row: Row) => ({ id: row.meta.id }));
     fixture.detectChanges();
     table.clearSelection();
     table.selectRow(ROWS[1]);
     expect(table.isRowSelected({ ...ROWS[1], meta: { ...ROWS[1].meta } })).toBe(true);
 
-    fixture.componentRef.setInput('rowIdentity', undefined);
+    fixture.componentRef.setInput('rowKey', undefined);
     fixture.componentRef.setInput('rowKey', 'missing');
     fixture.detectChanges();
     expect(table.getRowKey(ROWS[0])).toContain('"name":"Ada"');
@@ -170,7 +173,12 @@ describe('NeuTable G01-G16 final parity integration', () => {
     expect(
       (
         table as unknown as {
-          bodyContext(row: Row, rowIndex: number, logicalIndex: number, frozen: boolean): {
+          bodyContext(
+            row: Row,
+            rowIndex: number,
+            logicalIndex: number,
+            frozen: boolean,
+          ): {
             group: unknown;
           };
         }
@@ -217,7 +225,10 @@ describe('NeuTable G01-G16 final parity integration', () => {
     vi.useFakeTimers();
     const fixture = createTable();
     fixture.componentRef.setInput('searchable', true);
-    fixture.componentRef.setInput('filterDelay', 25);
+    fixture.componentRef.setInput('filterOptions', {
+      ...fixture.componentInstance.filterOptions(),
+      delay: 25,
+    });
     fixture.detectChanges();
     const table = fixture.componentInstance;
     table.onSearch({ target: { value: 'A' } } as unknown as Event);
@@ -230,7 +241,10 @@ describe('NeuTable G01-G16 final parity integration', () => {
     table.columnFilterControl('name').setValue('Grace');
     vi.advanceTimersByTime(25);
     expect(table.filteredData()).toHaveLength(1);
-    fixture.componentRef.setInput('filterOn', 'enter');
+    fixture.componentRef.setInput('filterOptions', {
+      ...fixture.componentInstance.filterOptions(),
+      on: 'enter',
+    });
     fixture.detectChanges();
     table.columnFilterControl('name').setValue('Linus');
     vi.advanceTimersByTime(25);
@@ -310,7 +324,10 @@ describe('NeuTable G01-G16 final parity integration', () => {
     const fixture = createTable();
     fixture.componentRef.setInput('scrollHeight', 'flex');
     fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 1);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      visibleItems: 1,
+    });
     const openAt = vi.fn();
     fixture.componentRef.setInput('contextMenu', { openAt } as never);
     fixture.componentRef.setInput('contextMenuRowDisabled', (row: Row) => row.meta.id === 1);
@@ -361,9 +378,11 @@ describe('NeuTable G01-G16 final parity integration', () => {
     const fixture = createTable();
     fixture.componentRef.setInput('scrollHeight', '18rem');
     fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('virtualScrollAutoSize', true);
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 2);
-    fixture.componentRef.setInput('virtualScrollItemSize', 40);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      autoSize: true,
+      visibleItems: 2,
+      itemSize: 40,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
@@ -426,7 +445,10 @@ describe('NeuTable G01-G16 final parity integration', () => {
     expect(events).toHaveLength(0);
 
     fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 1);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      visibleItems: 1,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     table.scrollToIndex(1);
@@ -493,7 +515,10 @@ describe('NeuTable G01-G16 final parity integration', () => {
   it('accepts Enter only for inline text/number policies and ignores repeat/non-Enter keys', () => {
     const fixture = createTable();
     const table = fixture.componentInstance;
-    fixture.componentRef.setInput('filterOn', 'enter');
+    fixture.componentRef.setInput('filterOptions', {
+      ...fixture.componentInstance.filterOptions(),
+      on: 'enter',
+    });
     fixture.detectChanges();
     const commit = (
       table as unknown as {
@@ -556,7 +581,9 @@ describe('NeuTable G01-G16 final parity integration', () => {
     fixture.componentRef.setInput('columns', [COLUMNS[0], numberColumn]);
     fixture.detectChanges();
     const rangeControls = table as unknown as {
-      typedRangeStartControl(column: NeuTableColumn<Row, string>): { setValue(value: number): void };
+      typedRangeStartControl(column: NeuTableColumn<Row, string>): {
+        setValue(value: number): void;
+      };
       typedRangeEndControl(column: NeuTableColumn<Row, string>): { setValue(value: number): void };
     };
     rangeControls.typedRangeStartControl(numberColumn).setValue(1);
@@ -564,7 +591,10 @@ describe('NeuTable G01-G16 final parity integration', () => {
     commit(numberColumn, enter());
     expect(table.filteredData()).toEqual(ROWS.slice(0, 2));
 
-    fixture.componentRef.setInput('filterOn', 'input');
+    fixture.componentRef.setInput('filterOptions', {
+      ...fixture.componentInstance.filterOptions(),
+      on: 'input',
+    });
     fixture.detectChanges();
     const beforeIgnoredEnter = table.filteredData();
     commit(COLUMNS[0], enter());
@@ -577,16 +607,21 @@ describe('NeuTable G01-G16 final parity integration', () => {
     fixture.componentRef.setInput('data', ROWS.slice(0, 1));
     fixture.componentRef.setInput('pagination', false);
     fixture.componentRef.setInput('searchable', false);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('serverSide', true);
     fixture.componentRef.setInput('dataFirst', 0);
     fixture.componentRef.setInput('totalItems', 10_000);
     fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 2);
-    fixture.componentRef.setInput('virtualScrollItemSize', 40);
-    fixture.componentRef.setInput('virtualScrollOverscan', 1);
-    fixture.componentRef.setInput('virtualScrollAppendOnly', true);
-    fixture.componentRef.setInput('virtualScrollStep', 20);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      visibleItems: 2,
+      itemSize: 40,
+      overscan: 1,
+      appendOnly: true,
+      step: 20,
+    });
     fixture.componentRef.setInput('lazyLoadOnInit', true);
     const requests: NeuTableLazyRequest[] = [];
     fixture.componentInstance.lazyRequest.subscribe((event) => requests.push(event));
@@ -601,7 +636,10 @@ describe('NeuTable G01-G16 final parity integration', () => {
       '.neu-table__row, .neu-table__row--placeholder',
     );
     expect(retainedRows.length).toBeLessThan(20);
-    fixture.componentRef.setInput('virtualScrollAppendOnly', false);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      appendOnly: false,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     expect(

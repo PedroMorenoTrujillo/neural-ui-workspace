@@ -71,7 +71,10 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('pageSize', 1);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -96,7 +99,10 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
@@ -232,7 +238,10 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('serverSide', true);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -323,7 +332,10 @@ describe('NeuTable canonical state integration', () => {
     await fixture.whenStable();
     expect(writers.every((writer) => writer.mock.calls.length === 0)).toBe(true);
 
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     table.onSearch({ target: { value: 'Beta' } } as unknown as Event);
@@ -344,7 +356,10 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
     fixture.componentRef.setInput('columns', SERVER_COLUMNS);
     fixture.componentRef.setInput('data', SERVER_ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('serverSide', true);
     fixture.componentRef.setInput('totalItems', 3);
     fixture.componentRef.setInput('pageSize', 1);
@@ -398,7 +413,10 @@ describe('NeuTable canonical state integration', () => {
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
     fixture.componentRef.setInput('serverSide', true);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('multiSort', true);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -476,7 +494,10 @@ describe('NeuTable canonical state integration', () => {
       fixture.componentRef.setInput('data', ROWS);
       fixture.componentRef.setInput('serverSide', true);
       fixture.componentRef.setInput('lazyLoadOnInit', true);
-      fixture.componentRef.setInput('useUrlState', useUrlState);
+      fixture.componentRef.setInput('urlStateOptions', {
+        ...fixture.componentInstance.urlStateOptions(),
+        enabled: useUrlState,
+      });
       if (query) fixture.componentRef.setInput('query', query);
       const queries: NeuTableQueryState[] = [];
       const legacy: NeuTableServerState[] = [];
@@ -512,7 +533,10 @@ describe('NeuTable canonical state integration', () => {
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
     fixture.componentRef.setInput('serverSide', true);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     const queries: NeuTableQueryState[] = [];
     const legacy: NeuTableServerState[] = [];
     fixture.componentInstance.queryChange.subscribe((event) => queries.push(event));
@@ -527,7 +551,10 @@ describe('NeuTable canonical state integration', () => {
     const clientFixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     clientFixture.componentRef.setInput('columns', COLUMNS);
     clientFixture.componentRef.setInput('data', ROWS);
-    clientFixture.componentRef.setInput('useUrlState', false);
+    clientFixture.componentRef.setInput('urlStateOptions', {
+      ...clientFixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     clientFixture.componentRef.setInput('lazyLoadOnInit', true);
     const clientQueries: NeuTableQueryState[] = [];
     clientFixture.componentInstance.queryChange.subscribe((event) => clientQueries.push(event));
@@ -543,7 +570,10 @@ describe('NeuTable canonical state integration', () => {
     const serverFixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     serverFixture.componentRef.setInput('columns', COLUMNS);
     serverFixture.componentRef.setInput('data', ROWS);
-    serverFixture.componentRef.setInput('useUrlState', false);
+    serverFixture.componentRef.setInput('urlStateOptions', {
+      ...serverFixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     serverFixture.componentRef.setInput('serverSide', true);
     const serverQueries: NeuTableQueryState[] = [];
     serverFixture.componentInstance.queryChange.subscribe((event) => serverQueries.push(event));
@@ -559,7 +589,10 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     const queries: NeuTableQueryState[] = [];
@@ -666,7 +699,10 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
     fixture.componentRef.setInput('columns', SERVER_COLUMNS);
     fixture.componentRef.setInput('data', SERVER_ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('serverSide', true);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -744,8 +780,11 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
-    fixture.componentRef.setInput('expandable', true);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
+    fixture.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     fixture.componentRef.setInput('expandedRowKeys', ['off-page']);
     const changes: Array<readonly unknown[]> = [];
     const expands: unknown[] = [];
@@ -782,12 +821,15 @@ describe('NeuTable canonical state integration', () => {
     const source = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
     source.componentRef.setInput('columns', SERVER_COLUMNS);
     source.componentRef.setInput('data', SERVER_ROWS);
-    source.componentRef.setInput('useUrlState', false);
+    source.componentRef.setInput('urlStateOptions', {
+      ...source.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     source.componentRef.setInput('stateKey', key);
     source.componentRef.setInput('stateStorage', 'local');
     source.componentRef.setInput('pageSize', 1);
-    source.componentRef.setInput('selectionMode', 'multiple');
-    source.componentRef.setInput('expandable', true);
+    source.componentRef.setInput('selectable', 'multiple');
+    source.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     source.detectChanges();
     await source.whenStable();
     const sourceTable = source.componentInstance;
@@ -816,13 +858,16 @@ describe('NeuTable canonical state integration', () => {
     const restored = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
     restored.componentRef.setInput('columns', SERVER_COLUMNS);
     restored.componentRef.setInput('data', SERVER_ROWS);
-    restored.componentRef.setInput('useUrlState', false);
+    restored.componentRef.setInput('urlStateOptions', {
+      ...restored.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     restored.componentRef.setInput('stateKey', key);
     restored.componentRef.setInput('stateStorage', 'local');
     restored.componentRef.setInput('serverSide', true);
     restored.componentRef.setInput('lazyLoadOnInit', true);
-    restored.componentRef.setInput('selectionMode', 'multiple');
-    restored.componentRef.setInput('expandable', true);
+    restored.componentRef.setInput('selectable', 'multiple');
+    restored.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     const restores: unknown[] = [];
     const queries: NeuTableQueryState[] = [];
     restored.componentInstance.stateRestore.subscribe((event) => restores.push(event));
@@ -853,7 +898,10 @@ describe('NeuTable canonical state integration', () => {
     const source = TestBed.createComponent(NeuTableComponent<StateRow>);
     source.componentRef.setInput('columns', COLUMNS);
     source.componentRef.setInput('data', ROWS);
-    source.componentRef.setInput('useUrlState', false);
+    source.componentRef.setInput('urlStateOptions', {
+      ...source.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     source.componentRef.setInput('stateKey', key);
     source.componentRef.setInput('pageSize', 25);
     source.detectChanges();
@@ -906,7 +954,10 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('stateKey', 'neu-table-t1-lifecycle');
     fixture.detectChanges();
     await fixture.whenStable();
@@ -932,7 +983,10 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('stateKey', 'neu-table-t1-full-reset');
     fixture.componentRef.setInput('pageSize', 2);
     fixture.componentRef.setInput('initialLayout', {
@@ -1010,7 +1064,10 @@ describe('NeuTable canonical state integration', () => {
     const source = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
     source.componentRef.setInput('columns', SERVER_COLUMNS);
     source.componentRef.setInput('data', SERVER_ROWS);
-    source.componentRef.setInput('useUrlState', false);
+    source.componentRef.setInput('urlStateOptions', {
+      ...source.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     source.componentRef.setInput('stateKey', key);
     source.detectChanges();
     await source.whenStable();
@@ -1024,7 +1081,10 @@ describe('NeuTable canonical state integration', () => {
     const restored = TestBed.createComponent(NeuTableComponent<ServerStateRow>);
     restored.componentRef.setInput('columns', SERVER_COLUMNS);
     restored.componentRef.setInput('data', SERVER_ROWS);
-    restored.componentRef.setInput('useUrlState', false);
+    restored.componentRef.setInput('urlStateOptions', {
+      ...restored.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     restored.componentRef.setInput('stateKey', key);
     restored.detectChanges();
     await restored.whenStable();
@@ -1039,8 +1099,11 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
-    fixture.componentRef.setInput('expandable', true);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
+    fixture.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
@@ -1067,7 +1130,10 @@ describe('NeuTable canonical state integration', () => {
     const source = TestBed.createComponent(NeuTableComponent<StateRow>);
     source.componentRef.setInput('columns', COLUMNS);
     source.componentRef.setInput('data', ROWS);
-    source.componentRef.setInput('useUrlState', false);
+    source.componentRef.setInput('urlStateOptions', {
+      ...source.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     source.componentRef.setInput('stateKey', key);
     source.detectChanges();
     await source.whenStable();

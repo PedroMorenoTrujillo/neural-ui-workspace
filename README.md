@@ -37,8 +37,8 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 <!-- neural-ui-metrics:start -->
 - **Version:** 1.12.1
 - **Entry points:** 105
-- **Automated tests:** 2958
-- **Coverage:** 95.92% statements · 94.14% branches · 94.74% functions · 97.61% lines
+- **Automated tests:** 2963
+- **Coverage:** 95.92% statements · 94.19% branches · 94.88% functions · 97.59% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
@@ -142,6 +142,10 @@ Use `[rowSelectable]="(row, index) => boolean"` to disable row, checkbox and rad
 `rowSelect` and `rowUnselect` emit typed row deltas. `selectAllChange` is one aggregate header event, while the backward-compatible `selectionChange` remains one whole-selection event per action. A single-row replacement deterministically emits `selectionChange`, then `rowUnselect(previous)`, then `rowSelect(next)`; echoing a controlled value emits nothing. Each public event receives its own shallow array copies, and the shallow-frozen `selectedRows()` projection preserves each `T` identity.
 
 Canonical count can exceed resolved rows when selected server records are not loaded. The bar then reports `resolved/canonical selected` (for example `0/1 selected`) and hides row-dependent bulk actions at zero resolved rows; clearing selection remains available and unknown keys are never deleted or represented by fabricated rows. `rowKey` values should be unique. If current data contains duplicates, every row with that key renders selected, while the first current-data occurrence wins the resolved projection. Sorting, filtering, pagination, virtual-window recycling and immutable data replacement never change canonical selected keys. Full roving-focus, keyboard range selection and Shift-range selection remain part of the dedicated keyboard phase.
+
+### Table body composition
+
+`neuTableBody` keeps Neural ownership of the primary row and gives the consumer its cells. `neuTableBodySection` is the advanced full-section escape hatch: it renders directly under `<tbody>` and can emit one managed primary row plus any number of sibling rows. Use `[neuTableManagedRow]="entry"` on the primary `<tr>` to preserve selection, keyboard focus, ARIA, context-menu and reorder behavior. If both body templates are present, the section template wins. `[neuTableBodySectionOf]="rows"` optionally anchors exact strict-template row typing. Variable-height sibling rows are intentionally restricted to non-virtual mode; virtual contexts expose `siblingRowsSupported=false`.
 
 ```html
 <neu-table

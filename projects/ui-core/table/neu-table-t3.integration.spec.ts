@@ -54,10 +54,9 @@ const COLUMNS: readonly NeuTableColumn<Row>[] = Object.freeze([
       [frozenData]="frozenRows"
       [pagination]="false"
       [searchable]="false"
-      [selectionMode]="'multiple'"
-      [expandable]="true"
-      [inlineEdit]="true"
-      [editMode]="'row'"
+      selectable="multiple"
+      expandMode="multiple"
+      editMode="row"
       [resizableColumns]="true"
       [columnResizeMode]="'expand'"
       [reorderableColumns]="true"
@@ -76,14 +75,14 @@ const COLUMNS: readonly NeuTableColumn<Row>[] = Object.freeze([
       (contextMenuSelectionChange)="contextSelections.push($event)"
       (contextMenuSelect)="contextEvents.push($event)"
     >
-      <ng-template
-        neuTableHeaderGroup
-        let-columns="columns"
-        let-column="column"
-      >
-        <tr><th [attr.colspan]="columns.length + 3">People</th></tr>
+      <ng-template neuTableHeaderGroup let-columns="columns" let-column="column">
         <tr>
-          <th></th><th></th><th></th>
+          <th [attr.colspan]="columns.length + 3">People</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th></th>
+          <th></th>
           @for (col of columns; track col.key) {
             <th
               class="custom-leaf"
@@ -136,7 +135,9 @@ class T3Host {
 }
 
 describe('NeuTable T3 integration', () => {
-  afterEach(() => document.querySelectorAll('.cdk-overlay-container').forEach((node) => node.remove()));
+  afterEach(() =>
+    document.querySelectorAll('.cdk-overlay-container').forEach((node) => node.remove()),
+  );
 
   async function create() {
     await TestBed.configureTestingModule({
@@ -151,7 +152,8 @@ describe('NeuTable T3 integration', () => {
   it('composes frozen rows with templates, selection, expansion and row editing', async () => {
     const fixture = await create();
     const host = fixture.componentInstance;
-    const table = fixture.debugElement.query(By.directive(NeuTableComponent<Row>)).componentInstance as NeuTableComponent<Row>;
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent<Row>))
+      .componentInstance as NeuTableComponent<Row>;
     const frozenRow = fixture.nativeElement.querySelector('[data-neu-table-frozen="true"]');
 
     expect(frozenRow).toBeTruthy();
@@ -183,7 +185,9 @@ describe('NeuTable T3 integration', () => {
     fixture.detectChanges();
 
     expect(host.resizes).toHaveLength(1);
-    expect(host.resizes[0]).toEqual(expect.objectContaining({ key: 'name', delta: 25, mode: 'expand' }));
+    expect(host.resizes[0]).toEqual(
+      expect.objectContaining({ key: 'name', delta: 25, mode: 'expand' }),
+    );
 
     leaves[1].dispatchEvent(new Event('dragstart', { bubbles: true, cancelable: true }));
     leaves[0].dispatchEvent(new Event('drop', { bubbles: true, cancelable: true }));
@@ -201,8 +205,8 @@ describe('NeuTable T3 integration', () => {
   it('emits immutable row-order proposals and leaves consumer data untouched', async () => {
     const fixture = await create();
     const host = fixture.componentInstance;
-    const down = [...fixture.nativeElement.querySelectorAll('button')].find((button: HTMLButtonElement) =>
-      button.getAttribute('aria-label')?.includes('down'),
+    const down = [...fixture.nativeElement.querySelectorAll('button')].find(
+      (button: HTMLButtonElement) => button.getAttribute('aria-label')?.includes('down'),
     ) as HTMLButtonElement;
 
     down.click();
@@ -222,7 +226,9 @@ describe('NeuTable T3 integration', () => {
     const regularRow = fixture.nativeElement.querySelectorAll('.neu-table__row')[1] as HTMLElement;
     const ordinarySelectionCount = host.selections.length;
 
-    regularRow.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 20, clientY: 30 }));
+    regularRow.dispatchEvent(
+      new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 20, clientY: 30 }),
+    );
     await fixture.whenStable();
 
     expect(host.contextSelections.at(-1)?.id).toBe(1);
@@ -230,13 +236,17 @@ describe('NeuTable T3 integration', () => {
     expect(host.selections).toHaveLength(ordinarySelectionCount);
     expect(document.querySelector('[role="menuitem"]')).toBeTruthy();
 
-    const menu = fixture.debugElement.query(By.directive(NeuContextMenuDirective)).injector.get(NeuContextMenuDirective);
+    const menu = fixture.debugElement
+      .query(By.directive(NeuContextMenuDirective))
+      .injector.get(NeuContextMenuDirective);
     menu.close();
     expect(host.contextSelections.at(-1)).toBeNull();
     expect(document.activeElement).toBe(regularRow);
 
     const stopPropagation = vi.spyOn(Event.prototype, 'stopPropagation');
-    regularRow.dispatchEvent(new KeyboardEvent('keydown', { key: 'F10', shiftKey: true, bubbles: true, cancelable: true }));
+    regularRow.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'F10', shiftKey: true, bubbles: true, cancelable: true }),
+    );
     expect(host.contextEvents.at(-1)?.originalEvent).toBeInstanceOf(KeyboardEvent);
     expect(stopPropagation).toHaveBeenCalled();
     stopPropagation.mockRestore();
@@ -426,7 +436,9 @@ describe('NeuTable T3 integration', () => {
     fixture.componentInstance.expandedGroups.set(['Core']);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.frozenPageEntries().some((entry: any) => entry.kind === 'group-footer')).toBe(true);
+    expect(table.frozenPageEntries().some((entry: any) => entry.kind === 'group-footer')).toBe(
+      true,
+    );
     fixture.componentInstance.expandedGroups.set([]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -445,14 +457,11 @@ describe('NeuTable T3 integration', () => {
     hostFixture.destroy();
     const fixture = TestBed.createComponent(NeuTableComponent);
     fixture.componentRef.setInput('columns', COLUMNS);
-    fixture.componentRef.setInput('data', [
-      ...ROWS,
-      { id: 3, name: 'Disabled', team: 'Archive' },
-    ]);
+    fixture.componentRef.setInput('data', [...ROWS, { id: 3, name: 'Disabled', team: 'Archive' }]);
     fixture.componentRef.setInput('pagination', false);
     fixture.componentRef.setInput('searchable', false);
     fixture.componentRef.setInput('reorderableRows', true);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
+    fixture.componentRef.setInput('selectable', 'multiple');
     fixture.componentRef.setInput('rowSelectable', (row: any) => row.id !== 3);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -473,7 +482,7 @@ describe('NeuTable T3 integration', () => {
     table.selectRow(ROWS[1]);
     table.clearSelection();
     table.clearSelection();
-    fixture.componentRef.setInput('selectionMode', 'single');
+    fixture.componentRef.setInput('selectable', 'single');
     fixture.detectChanges();
     table.toggleAll();
     table.selectRow(ROWS[0]);

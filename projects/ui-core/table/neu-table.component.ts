@@ -20,7 +20,6 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import type * as _angular_core from '@angular/core';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -31,6 +30,7 @@ import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
 import {
   NeuTableBodyDirective,
+  NeuTableBodySectionDirective,
   NeuTableCaptionDirective,
   NeuTableCellEditorDirective,
   NeuTableCellViewDirective,
@@ -38,6 +38,8 @@ import {
   NeuTableGroupFooterDirective,
   NeuTableGroupHeaderDirective,
   NeuTableHeaderGroupDirective,
+  NeuTableEmptyDirective,
+  NeuTableLazyPlaceholderDirective,
   NeuTableLoadingBodyDirective,
   NeuTablePaginatorLeftDirective,
   NeuTablePaginatorRightDirective,
@@ -90,6 +92,7 @@ import type {
   NeuTableLayout,
   NeuTableBodyContext,
   NeuTableEditMode,
+  NeuTableExpandMode,
   NeuTableEditValidationEvent,
   NeuTableEditValidationResult,
   NeuTableEditingCellState,
@@ -108,7 +111,6 @@ import type {
   NeuTableRowReorderScope,
   NeuTableStructuralContext,
   NeuTableRow,
-  NeuTableRowIdentity,
   NeuTableRowKey,
   NeuTableRowTrackBy,
   NeuTableSelectionAction,
@@ -116,6 +118,7 @@ import type {
   NeuTableSelection,
   NeuTableSelectionComparison,
   NeuTableSelectionMode,
+  NeuTableSelectable,
   NeuTableSelectionSource,
   NeuTableRowSelectionEvent,
   NeuTableRowExpansionEvent,
@@ -125,6 +128,7 @@ import type {
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
   NeuTableFilterOn,
+  NeuTableFilterOptions,
   NeuTableGlobalFilterAccessor,
   NeuTableGlobalFilterField,
   NeuTableFilterKind,
@@ -143,9 +147,17 @@ import type {
   NeuTableVirtualScrollEvent,
   NeuTableCsvFormulaPolicy,
   NeuTableExportFormat,
+  NeuTableExportConfig,
   NeuTableExportOptions,
   NeuTableExportScope,
   NeuTableExportValue,
+  NeuTableLabels,
+  NeuTablePaginatorOptions,
+  NeuTableUrlStateOptions,
+  NeuTableVirtualizationOptions,
+  NeuTableBodyDataRenderEntry,
+  NeuTableBodyRenderEntry,
+  NeuTableBodySectionContext,
 } from './neu-table.types';
 import {
   NeuTableAdvancedFilterController,
@@ -211,7 +223,10 @@ import { NeuTableVirtualRetentionController } from './neu-table-virtual-retentio
 import { NeuTableExportController, type NeuTableExportColumn } from './neu-table-export.controller';
 import { NeuTableReorderController } from './neu-table-reorder.controller';
 import { NeuTableRowReorderHandleDirective } from './neu-table-row-reorder-handle.directive';
-import { NeuTableCompatibilityAdapter } from './neu-table-compatibility.adapter';
+import {
+  NeuTableManagedRowCoordinator,
+  type NeuTableManagedRowAdapter,
+} from './neu-table-managed-row.directive';
 
 export type {
   NeuTableAction,
@@ -233,6 +248,7 @@ export type {
   NeuTableLayout,
   NeuTableBodyContext,
   NeuTableEditMode,
+  NeuTableExpandMode,
   NeuTableEditValidationEvent,
   NeuTableEditValidationResult,
   NeuTableEditingCellState,
@@ -251,6 +267,7 @@ export type {
   NeuTableSelectionActionEvent,
   NeuTableSelection,
   NeuTableSelectionMode,
+  NeuTableSelectable,
   NeuTableSelectionSource,
   NeuTableRowSelectionEvent,
   NeuTableRowExpansionEvent,
@@ -259,6 +276,7 @@ export type {
   NeuTableDatePoint,
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
+  NeuTableFilterOptions,
   NeuTableGlobalFilterAccessor,
   NeuTableGlobalFilterField,
   NeuTableFilterKind,
@@ -267,6 +285,7 @@ export type {
   NeuTableLazyPlaceholderContext,
   NeuTableLazyRequest,
   NeuTableLazyRequestReason,
+  NeuTableLabels,
   NeuTableQueryColumnFilter,
   NeuTableQueryFilterConstraint,
   NeuTableQuerySerializability,
@@ -280,6 +299,10 @@ export type {
   NeuTableStateOmissions,
   NeuTableStateSnapshot,
   NeuTableStateStorage,
+  NeuTablePaginatorOptions,
+  NeuTableUrlStateOptions,
+  NeuTableVirtualizationOptions,
+  NeuTableExportConfig,
   NeuTableVirtualRange,
   NeuTableRow,
   NeuTableRowKey,
@@ -371,6 +394,79 @@ const _NEU_TABLE_ADVANCED_FILTER_TEXTS: InternalResolvedAdvancedFilterTexts = {
   isNot: 'Is not',
   before: 'Before',
   after: 'After',
+  exactMatch: 'Exact match',
+  placeholder: 'Filter...',
+  ariaPrefix: 'Filter by',
+};
+
+const _NEU_TABLE_LABELS: Required<NeuTableLabels> = {
+  searchPlaceholder: 'Search...',
+  searchAriaLabel: 'Search table',
+  clearSearchAriaLabel: 'Clear search',
+  previousPageAriaLabel: 'Previous page',
+  nextPageAriaLabel: 'Next page',
+  firstPageAriaLabel: 'First page',
+  lastPageAriaLabel: 'Last page',
+  pageAriaLabel: 'Page {page}',
+  jumpToPageAriaLabel: 'Jump to page',
+  pageSizeLabel: 'Rows:',
+  pageSizeAriaLabel: 'Rows per page',
+  paginationAriaLabel: 'Pagination',
+  clearSelectionLabel: 'Clear selection',
+  selectionSummaryLabel: 'selected',
+  selectAllAriaLabel: '',
+  selectRowAriaLabel: 'Select row',
+  unselectRowAriaLabel: 'Unselect row',
+  expandRowAriaLabel: 'Expand row',
+  collapseRowAriaLabel: 'Collapse row',
+  moveRowUpAriaLabel: 'Move row up',
+  moveRowDownAriaLabel: 'Move row down',
+  columnChooserLabel: 'Columns',
+  groupHeaderLabel: 'Group:',
+  expandGroupAriaLabel: 'Expand group',
+  collapseGroupAriaLabel: 'Collapse group',
+  inlineEditLabel: 'Edit cell',
+  saveInlineEditLabel: 'Save cell',
+  cancelInlineEditLabel: 'Cancel cell edit',
+  ofLabel: 'of',
+  resultLabelSingular: 'result',
+  resultLabelPlural: 'results',
+};
+
+const _NEU_TABLE_FILTER_OPTIONS: Required<NeuTableFilterOptions> = {
+  delay: 0,
+  on: 'input',
+  locale: '',
+};
+
+const _NEU_TABLE_PAGINATOR_OPTIONS: Required<NeuTablePaginatorOptions> = {
+  pageLinkSize: 5,
+  showPageLinks: true,
+  showFirstLastPageButtons: true,
+  showCurrentPageReport: true,
+  currentPageReportTemplate: '',
+  showJumpToPageInput: false,
+  showJumpToPageDropdown: false,
+  alwaysShow: true,
+};
+
+const _NEU_TABLE_VIRTUALIZATION_OPTIONS: Required<NeuTableVirtualizationOptions> = {
+  visibleItems: 8,
+  itemSize: 0,
+  overscan: 3,
+  delay: 0,
+  appendOnly: false,
+  autoSize: false,
+  step: 0,
+};
+
+const _NEU_TABLE_URL_STATE_OPTIONS: Required<NeuTableUrlStateOptions> = {
+  enabled: true,
+  pageParam: 'page',
+  searchParam: 'q',
+  sortParam: 'sort',
+  sortDirectionParam: 'sortDir',
+  multiSortParam: 'msort',
 };
 
 const _NEU_TABLE_FILTER_SESSION_OPENED = 'neu-table-filter-session-opened';
@@ -408,6 +504,7 @@ export type NeuTableColumnInput<T extends object> =
  */
 @Component({
   selector: 'neu-table',
+  providers: [NeuTableManagedRowCoordinator],
   imports: [
     NgTemplateOutlet,
     ReactiveFormsModule,
@@ -1072,789 +1169,841 @@ export type NeuTableColumnInput<T extends object> =
                 [ngTemplateOutletContext]="structuralContext()"
               />
             } @else {
-            <tr [attr.aria-rowindex]="_ariaCoordinatesActive() ? 1 : null">
-              <!-- Checkbox de selección global -->
-              @if (_expansionEnabled()) {
-                <th class="neu-table__th neu-table__th--expand-col" scope="col"></th>
-              }
-              @if (selectionEnabled()) {
-                <th class="neu-table__th neu-table__th--check" scope="col">
-                  @if (multipleSelection()) {
-                    <neu-checkbox
-                      class="neu-table__checkbox"
-                      [checked]="headerSelectionState().checked"
-                      [indeterminate]="headerSelectionState().indeterminate"
-                      [disabled]="headerSelectionState().disabled"
-                      [ariaLabel]="resolvedSelectAllAriaLabel()"
-                      (checkedChange)="toggleAll()"
-                    />
-                  }
-                </th>
-              }
-              @if (showRowNumbers()) {
-                <th class="neu-table__th neu-table__th--rn" scope="col">#</th>
-              }
-              @if (reorderableRows()) {
-                <th class="neu-table__th neu-table__th--row-reorder" scope="col">
-                  <span class="sr-only">Row order</span>
-                </th>
-              }
-              @for (col of visibleColumns(); track col.key) {
-                <th
-                  class="neu-table__th"
-                  [class.neu-table__th--sortable]="sortable() && col.sortable !== false"
-                  [class.neu-table__th--sorted-asc]="
-                    !multiSort() && sortKey() === col.key && sortDir() === 'asc'
-                  "
-                  [class.neu-table__th--sorted-desc]="
-                    !multiSort() && sortKey() === col.key && sortDir() === 'desc'
-                  "
-                  [class]="col.cellClass ?? ''"
-                  [class.neu-table__th--frozen-left]="col.frozen === 'left'"
-                  [class.neu-table__th--frozen-right]="col.frozen === 'right'"
-                  [class.neu-table__th--frozen-left-boundary]="isLastFrozenLeftColumn(col.key)"
-                  [class.neu-table__th--frozen-right-boundary]="isFirstFrozenRightColumn(col.key)"
-                  [class.neu-table__th--dragging]="_draggedColumnKey() === col.key"
-                  [class.neu-table__th--drop-before]="
-                    _columnDropTarget()?.key === col.key &&
-                    _columnDropTarget()?.placement === 'before'
-                  "
-                  [class.neu-table__th--drop-after]="
-                    _columnDropTarget()?.key === col.key &&
-                    _columnDropTarget()?.placement === 'after'
-                  "
-                  [style.left]="
-                    col.frozen === 'left' ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px' : null
-                  "
-                  [style.width]="columnWidth(col)"
-                  [style.min-width]="columnWidth(col)"
-                  [style.max-width]="columnWidth(col)"
-                  [style.text-align]="col.align ?? 'left'"
-                  scope="col"
-                  [attr.tabindex]="sortable() && col.sortable !== false ? 0 : null"
-                  [attr.aria-sort]="
-                    sortable() && col.sortable !== false ? sortAriaValue(col.key) : null
-                  "
-                  [attr.data-neu-table-column-key]="col.key"
-                  [attr.draggable]="isColumnDraggable(col) ? 'true' : null"
-                  (pointerdown)="onColumnPointerDown(col, $event)"
-                  (dragstart)="onColumnDragStart(col, $event)"
-                  (dragover)="onColumnDragOver(col, $event)"
-                  (drop)="onColumnDrop(col, $event)"
-                  (dragend)="onColumnDragEnd(col)"
-                  (click)="onSortableHeaderClick(col.key, $event)"
-                  (keydown)="onSortableHeaderKeydown(col.key, $event)"
-                >
-                  @if (reorderableColumns()) {
-                    <span class="neu-table__reorder-controls" (click)="$event.stopPropagation()">
-                      <button
-                        type="button"
-                        class="neu-table__reorder-btn"
-                        [disabled]="!canMoveColumn(col.key, -1)"
-                        [attr.aria-label]="'Move ' + col.header + ' left'"
-                        (click)="moveColumn(col.key, -1)"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        type="button"
-                        class="neu-table__reorder-btn"
-                        [disabled]="!canMoveColumn(col.key, 1)"
-                        [attr.aria-label]="'Move ' + col.header + ' right'"
-                        (click)="moveColumn(col.key, 1)"
-                      >
-                        ›
-                      </button>
-                    </span>
-                  }
-                  @if (col.headerTemplate) {
-                    <ng-container
-                      [ngTemplateOutlet]="col.headerTemplate"
-                      [ngTemplateOutletContext]="{ $implicit: col }"
-                    />
-                  } @else {
-                    {{ col.header }}
-                  }
-                  @if (_isFilterOverlayEligible(col)) {
-                    <button
-                      cdkOverlayOrigin
-                      #filterOverlayOrigin="cdkOverlayOrigin"
-                      type="button"
-                      class="neu-table__filter-overlay-trigger"
-                        [class.neu-table__filter-overlay-trigger--open]="
-                          _openFilterKey() === col.key
-                        "
-                      [class.neu-table__filter-overlay-trigger--active]="
-                        _isFilterOverlayActive(col.key)
-                      "
-                      [id]="_filterOverlayTriggerId(col.key)"
-                      aria-haspopup="dialog"
-                      [attr.aria-expanded]="_openFilterKey() === col.key ? 'true' : 'false'"
-                      [attr.aria-controls]="_filterOverlayPanelId(col.key)"
-                      [attr.aria-label]="_filterOverlayTriggerLabel(col)"
-                      [attr.aria-pressed]="_isFilterOverlayActive(col.key)"
-                      [attr.title]="
-                          _isFilterOverlayActive(col.key)
-                            ? _advancedFilterText().filterActive
-                            : null
-                      "
-                      (click)="_toggleFilterOverlay(col.key, $event)"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M4 5h16" />
-                        <path d="M7 12h10" />
-                        <path d="M10 19h4" />
-                      </svg>
-                      @if (_filterOverlayRuleCount(col.key) > 1) {
-                        <span class="neu-table__filter-overlay-rule-count" aria-hidden="true">
-                          {{ _filterOverlayRuleCount(col.key) }}
-                        </span>
-                      }
-                    </button>
-                    <ng-template
-                      cdkConnectedOverlay
-                      [cdkConnectedOverlayOrigin]="filterOverlayOrigin"
-                      [cdkConnectedOverlayOpen]="_openFilterKey() === col.key"
-                      [cdkConnectedOverlayPositions]="_filterOverlayPositions"
-                      [cdkConnectedOverlayHasBackdrop]="false"
-                      [cdkConnectedOverlayPush]="true"
-                      [cdkConnectedOverlayFlexibleDimensions]="true"
-                      [cdkConnectedOverlayViewportMargin]="8"
-                      (attach)="_onFilterOverlayAttached(col.key)"
-                      (detach)="_onFilterOverlayDetached(col.key)"
-                      (overlayOutsideClick)="_onFilterOverlayOutsideClick(col.key, $event)"
-                    >
-                      <section
-                        class="neu-table__filter-overlay"
-                        role="dialog"
-                        tabindex="-1"
-                        aria-modal="false"
-                        [id]="_filterOverlayPanelId(col.key)"
-                        [attr.aria-labelledby]="_filterOverlayTitleId(col.key)"
-                      >
-                        <header class="neu-table__filter-overlay-header">
-                          <h2
-                            class="neu-table__filter-overlay-title"
-                            [id]="_filterOverlayTitleId(col.key)"
-                          >
-                            {{ _filterOverlayTitle(col) }}
-                          </h2>
-                          <button
-                            type="button"
-                            class="neu-table__filter-overlay-close"
-                            data-neu-table-filter-initial-focus
-                            [attr.aria-label]="_filterOverlayCloseLabel(col)"
-                            (click)="_closeFilterOverlay()"
-                          >
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              aria-hidden="true"
-                            >
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
-                        </header>
-                        <ng-container
-                          [ngTemplateOutlet]="filterOverlayContent"
-                          [ngTemplateOutletContext]="{ $implicit: col }"
-                        />
-                      </section>
-                    </ng-template>
-                  }
-                  @if (sortable() && col.sortable !== false) {
-                    @if (sortPriorityDescription(col.key); as description) {
-                      <span class="sr-only">{{ description }}</span>
-                    }
-                    <span class="neu-table__sort-icon" aria-hidden="true">
-                      @if (multiSort()) {
-                        @let pri = getSortPriority(col.key);
-                        @if (pri >= 0) {
-                          <span class="neu-table__sort-priority">{{ pri + 1 }}</span>
-                          {{ _sortEntries()[pri]?.dir === 'asc' ? '↑' : '↓' }}
-                        } @else {
-                          ↕
-                        }
-                      } @else {
-                        @if (sortKey() === col.key) {
-                          {{ sortDir() === 'asc' ? '↑' : '↓' }}
-                        } @else {
-                          ↕
-                        }
-                      }
-                    </span>
-                  }
-                  @if (isColumnResizable(col)) {
-                    <button
-                      class="neu-table__resize-handle"
-                      type="button"
-                      tabindex="-1"
-                      [attr.aria-label]="'Resize ' + col.header"
-                      (dblclick)="resetColumnWidth(col.key, $event)"
-                      (pointerdown)="startColumnResize(col, $event)"
-                    ></button>
-                  }
-                </th>
-              }
-            </tr>
-            <!-- ── Fila de filtros de columna / Column filter row ── -->
-            @if (_hasFilterableCol()) {
-              <tr
-                class="neu-table__filter-row"
-                [attr.aria-rowindex]="_ariaCoordinatesActive() ? 2 : null"
-              >
+              <tr [attr.aria-rowindex]="_ariaCoordinatesActive() ? 1 : null">
+                <!-- Checkbox de selección global -->
                 @if (_expansionEnabled()) {
-                  <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
+                  <th class="neu-table__th neu-table__th--expand-col" scope="col"></th>
                 }
                 @if (selectionEnabled()) {
-                  <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
+                  <th class="neu-table__th neu-table__th--check" scope="col">
+                    @if (multipleSelection()) {
+                      <neu-checkbox
+                        class="neu-table__checkbox"
+                        [checked]="headerSelectionState().checked"
+                        [indeterminate]="headerSelectionState().indeterminate"
+                        [disabled]="headerSelectionState().disabled"
+                        [ariaLabel]="resolvedSelectAllAriaLabel()"
+                        (checkedChange)="toggleAll()"
+                      />
+                    }
+                  </th>
                 }
                 @if (showRowNumbers()) {
-                  <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
+                  <th class="neu-table__th neu-table__th--rn" scope="col">#</th>
                 }
                 @if (reorderableRows()) {
-                  <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
+                  <th class="neu-table__th neu-table__th--row-reorder" scope="col">
+                    <span class="sr-only">Row order</span>
+                  </th>
                 }
                 @for (col of visibleColumns(); track col.key) {
                   <th
-                    class="neu-table__th neu-table__th--filter"
-                    scope="col"
+                    class="neu-table__th"
+                    [class.neu-table__th--sortable]="sortable() && col.sortable !== false"
+                    [class.neu-table__th--sorted-asc]="
+                      !multiSort() && sortKey() === col.key && sortDir() === 'asc'
+                    "
+                    [class.neu-table__th--sorted-desc]="
+                      !multiSort() && sortKey() === col.key && sortDir() === 'desc'
+                    "
+                    [class]="col.cellClass ?? ''"
+                    [class.neu-table__th--frozen-left]="col.frozen === 'left'"
+                    [class.neu-table__th--frozen-right]="col.frozen === 'right'"
+                    [class.neu-table__th--frozen-left-boundary]="isLastFrozenLeftColumn(col.key)"
+                    [class.neu-table__th--frozen-right-boundary]="isFirstFrozenRightColumn(col.key)"
+                    [class.neu-table__th--dragging]="_draggedColumnKey() === col.key"
+                    [class.neu-table__th--drop-before]="
+                      _columnDropTarget()?.key === col.key &&
+                      _columnDropTarget()?.placement === 'before'
+                    "
+                    [class.neu-table__th--drop-after]="
+                      _columnDropTarget()?.key === col.key &&
+                      _columnDropTarget()?.placement === 'after'
+                    "
+                    [style.left]="
+                      col.frozen === 'left' ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px' : null
+                    "
                     [style.width]="columnWidth(col)"
                     [style.min-width]="columnWidth(col)"
                     [style.max-width]="columnWidth(col)"
+                    [style.text-align]="col.align ?? 'left'"
+                    scope="col"
+                    [attr.tabindex]="sortable() && col.sortable !== false ? 0 : null"
+                    [attr.aria-sort]="
+                      sortable() && col.sortable !== false ? sortAriaValue(col.key) : null
+                    "
+                    [attr.data-neu-table-column-key]="col.key"
+                    [attr.draggable]="isColumnDraggable(col) ? 'true' : null"
+                    (pointerdown)="onColumnPointerDown(col, $event)"
+                    (dragstart)="onColumnDragStart(col, $event)"
+                    (dragover)="onColumnDragOver(col, $event)"
+                    (drop)="onColumnDrop(col, $event)"
+                    (dragend)="onColumnDragEnd(col)"
+                    (click)="onSortableHeaderClick(col.key, $event)"
+                    (keydown)="onSortableHeaderKeydown(col.key, $event)"
                   >
-                    <span class="sr-only">{{ col.header }}</span>
-                    @if (_hasMultipleAppliedRules(col.key)) {
-                      <span class="neu-table__filter-multiple-summary" role="status">
-                        {{ _filterOverlayActiveRuleSummary(_filterOverlayRuleCount(col.key)) }}
+                    @if (reorderableColumns()) {
+                      <span class="neu-table__reorder-controls" (click)="$event.stopPropagation()">
+                        <button
+                          type="button"
+                          class="neu-table__reorder-btn"
+                          [disabled]="!canMoveColumn(col.key, -1)"
+                          [attr.aria-label]="'Move ' + col.header + ' left'"
+                          (click)="moveColumn(col.key, -1)"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          type="button"
+                          class="neu-table__reorder-btn"
+                          [disabled]="!canMoveColumn(col.key, 1)"
+                          [attr.aria-label]="'Move ' + col.header + ' right'"
+                          (click)="moveColumn(col.key, 1)"
+                        >
+                          ›
+                        </button>
                       </span>
-                    } @else if (col.filterConfig; as config) {
-                      @switch (config.kind) {
-                        @case ('text') {
-                          <neu-input
-                            [floatingLabel]="false"
-                            [label]="modernFilterLabel(col)"
-                            [placeholder]="filterPlaceholder()"
-                            [formControl]="typedColumnFilterControl(col)"
-                              (keydown)="commitInlineFilterOnEnter(col, $event)"
-                          />
+                    }
+                    @if (col.headerTemplate) {
+                      <ng-container
+                        [ngTemplateOutlet]="col.headerTemplate"
+                        [ngTemplateOutletContext]="{ $implicit: col }"
+                      />
+                    } @else {
+                      {{ col.header }}
+                    }
+                    @if (_isFilterOverlayEligible(col)) {
+                      <button
+                        cdkOverlayOrigin
+                        #filterOverlayOrigin="cdkOverlayOrigin"
+                        type="button"
+                        class="neu-table__filter-overlay-trigger"
+                        [class.neu-table__filter-overlay-trigger--open]="
+                          _openFilterKey() === col.key
+                        "
+                        [class.neu-table__filter-overlay-trigger--active]="
+                          _isFilterOverlayActive(col.key)
+                        "
+                        [id]="_filterOverlayTriggerId(col.key)"
+                        aria-haspopup="dialog"
+                        [attr.aria-expanded]="_openFilterKey() === col.key ? 'true' : 'false'"
+                        [attr.aria-controls]="_filterOverlayPanelId(col.key)"
+                        [attr.aria-label]="_filterOverlayTriggerLabel(col)"
+                        [attr.aria-pressed]="_isFilterOverlayActive(col.key)"
+                        [attr.title]="
+                          _isFilterOverlayActive(col.key)
+                            ? _advancedFilterText().filterActive
+                            : null
+                        "
+                        (click)="_toggleFilterOverlay(col.key, $event)"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M4 5h16" />
+                          <path d="M7 12h10" />
+                          <path d="M10 19h4" />
+                        </svg>
+                        @if (_filterOverlayRuleCount(col.key) > 1) {
+                          <span class="neu-table__filter-overlay-rule-count" aria-hidden="true">
+                            {{ _filterOverlayRuleCount(col.key) }}
+                          </span>
                         }
-                        @case ('number') {
-                          @if (modernFilterMode(col) === 'between') {
-                            <div class="neu-table__filter-range">
-                              <neu-number-input
-                                [nullable]="true"
-                                [label]="rangeFilterLabel(col, 'from')"
-                                [formControl]="typedRangeStartControl(col)"
-                                  (keydown)="commitInlineFilterOnEnter(col, $event)"
-                              />
-                              <neu-number-input
-                                [nullable]="true"
-                                [label]="rangeFilterLabel(col, 'to')"
-                                [formControl]="typedRangeEndControl(col)"
-                                  (keydown)="commitInlineFilterOnEnter(col, $event)"
-                              />
-                            </div>
+                      </button>
+                      <ng-template
+                        cdkConnectedOverlay
+                        [cdkConnectedOverlayOrigin]="filterOverlayOrigin"
+                        [cdkConnectedOverlayOpen]="_openFilterKey() === col.key"
+                        [cdkConnectedOverlayPositions]="_filterOverlayPositions"
+                        [cdkConnectedOverlayHasBackdrop]="false"
+                        [cdkConnectedOverlayPush]="true"
+                        [cdkConnectedOverlayFlexibleDimensions]="true"
+                        [cdkConnectedOverlayViewportMargin]="8"
+                        (attach)="_onFilterOverlayAttached(col.key)"
+                        (detach)="_onFilterOverlayDetached(col.key)"
+                        (overlayOutsideClick)="_onFilterOverlayOutsideClick(col.key, $event)"
+                      >
+                        <section
+                          class="neu-table__filter-overlay"
+                          role="dialog"
+                          tabindex="-1"
+                          aria-modal="false"
+                          [id]="_filterOverlayPanelId(col.key)"
+                          [attr.aria-labelledby]="_filterOverlayTitleId(col.key)"
+                        >
+                          <header class="neu-table__filter-overlay-header">
+                            <h2
+                              class="neu-table__filter-overlay-title"
+                              [id]="_filterOverlayTitleId(col.key)"
+                            >
+                              {{ _filterOverlayTitle(col) }}
+                            </h2>
+                            <button
+                              type="button"
+                              class="neu-table__filter-overlay-close"
+                              data-neu-table-filter-initial-focus
+                              [attr.aria-label]="_filterOverlayCloseLabel(col)"
+                              (click)="_closeFilterOverlay()"
+                            >
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                aria-hidden="true"
+                              >
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                            </button>
+                          </header>
+                          <ng-container
+                            [ngTemplateOutlet]="filterOverlayContent"
+                            [ngTemplateOutletContext]="{ $implicit: col }"
+                          />
+                        </section>
+                      </ng-template>
+                    }
+                    @if (sortable() && col.sortable !== false) {
+                      @if (sortPriorityDescription(col.key); as description) {
+                        <span class="sr-only">{{ description }}</span>
+                      }
+                      <span class="neu-table__sort-icon" aria-hidden="true">
+                        @if (multiSort()) {
+                          @let pri = getSortPriority(col.key);
+                          @if (pri >= 0) {
+                            <span class="neu-table__sort-priority">{{ pri + 1 }}</span>
+                            {{ _sortEntries()[pri]?.dir === 'asc' ? '↑' : '↓' }}
                           } @else {
-                            <neu-number-input
-                              [nullable]="true"
-                              [label]="modernFilterLabel(col)"
-                              [formControl]="typedColumnFilterControl(col)"
-                                (keydown)="commitInlineFilterOnEnter(col, $event)"
-                            />
+                            ↕
+                          }
+                        } @else {
+                          @if (sortKey() === col.key) {
+                            {{ sortDir() === 'asc' ? '↑' : '↓' }}
+                          } @else {
+                            ↕
                           }
                         }
-                        @case ('date') {
-                          @if (isDateOnlyRange(col)) {
-                            <neu-date-input
-                              type="range"
-                              [label]="modernFilterLabel(col)"
-                              [placeholder]="filterPlaceholder()"
-                              [formControl]="typedColumnFilterControl(col)"
-                            />
-                          } @else if (isInstantRange(col)) {
-                            <div class="neu-table__filter-range">
-                              <neu-date-input
-                                type="datetime-local"
-                                [label]="rangeFilterLabel(col, 'from')"
-                                [formControl]="typedInstantRangeStartControl(col)"
-                              />
-                              <neu-date-input
-                                type="datetime-local"
-                                [label]="rangeFilterLabel(col, 'to')"
-                                [formControl]="typedInstantRangeEndControl(col)"
-                              />
-                            </div>
-                          } @else {
-                            <neu-date-input
-                              [type]="dateInputType(col)"
-                              [label]="modernFilterLabel(col)"
-                              [formControl]="typedColumnFilterControl(col)"
-                            />
-                          }
-                        }
-                        @case ('boolean') {
-                          <neu-select
-                            [floatingLabel]="false"
-                            [label]="modernFilterLabel(col)"
-                            [placeholder]="allFilterOptionLabel()"
-                            [options]="typedBooleanFilterOptions()"
-                            [clearable]="true"
-                            [formControl]="typedColumnFilterControl(col)"
-                          />
-                        }
-                        @case ('select') {
-                          <neu-select
-                            [floatingLabel]="false"
-                            [label]="modernFilterLabel(col)"
-                            [placeholder]="allFilterOptionLabel()"
-                            [options]="typedFilterOptions(col)"
-                            [optionLabel]="typedFilterOptionLabel(col)"
-                            [optionValue]="typedFilterOptionValue(col)"
-                            [optionDisabled]="typedFilterOptionDisabled(col)"
-                            [searchable]="typedFilterSearchable(col)"
-                            [virtualScroll]="typedFilterVirtualScroll(col)"
-                              [virtualScrollVisibleItems]="
-                                typedFilterVirtualScrollVisibleItems(col)
-                              "
-                            [clearable]="true"
-                            [formControl]="typedColumnFilterControl(col)"
-                          />
-                        }
-                        @case ('multiSelect') {
-                          <neu-multiselect
-                            [floatingLabel]="false"
-                            [label]="modernFilterLabel(col)"
-                            [placeholder]="allFilterOptionLabel()"
-                            [options]="typedFilterOptions(col)"
-                            [optionLabel]="typedFilterOptionLabel(col)"
-                            [optionValue]="typedFilterOptionValue(col)"
-                            [optionDisabled]="typedFilterOptionDisabled(col)"
-                            [searchable]="typedFilterSearchable(col)"
-                            [virtualScroll]="typedFilterVirtualScroll(col)"
-                              [virtualScrollVisibleItems]="
-                                typedFilterVirtualScrollVisibleItems(col)
-                              "
-                            [clearable]="true"
-                            [formControl]="typedMultiSelectFilterControl(col)"
-                          />
-                        }
-                      }
-                    } @else if (col.filterable) {
-                      @if (col.filterType === 'select') {
-                        <neu-select
-                          [floatingLabel]="false"
-                          [options]="_filterOpts(col)"
-                          [formControl]="columnFilterControl(col.key)"
-                          [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                        />
-                      } @else if (col.filterType === 'date') {
-                        <neu-date-input
-                          [formControl]="columnFilterControl(col.key)"
-                          [placeholder]="filterPlaceholder()"
-                          [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                        />
-                      } @else {
-                        <neu-input
-                          [floatingLabel]="false"
-                          [placeholder]="filterPlaceholder()"
-                          [formControl]="columnFilterControl(col.key)"
-                          [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                            (keydown)="commitInlineFilterOnEnter(col, $event)"
-                        />
-                      }
+                      </span>
+                    }
+                    @if (isColumnResizable(col)) {
+                      <button
+                        class="neu-table__resize-handle"
+                        type="button"
+                        tabindex="-1"
+                        [attr.aria-label]="'Resize ' + col.header"
+                        (dblclick)="resetColumnWidth(col.key, $event)"
+                        (pointerdown)="startColumnResize(col, $event)"
+                      ></button>
                     }
                   </th>
                 }
               </tr>
-            }
+              <!-- ── Fila de filtros de columna / Column filter row ── -->
+              @if (_hasFilterableCol()) {
+                <tr
+                  class="neu-table__filter-row"
+                  [attr.aria-rowindex]="_ariaCoordinatesActive() ? 2 : null"
+                >
+                  @if (_expansionEnabled()) {
+                    <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
+                  }
+                  @if (selectionEnabled()) {
+                    <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
+                  }
+                  @if (showRowNumbers()) {
+                    <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
+                  }
+                  @if (reorderableRows()) {
+                    <th class="neu-table__th neu-table__th--filter-placeholder" scope="col"></th>
+                  }
+                  @for (col of visibleColumns(); track col.key) {
+                    <th
+                      class="neu-table__th neu-table__th--filter"
+                      scope="col"
+                      [style.width]="columnWidth(col)"
+                      [style.min-width]="columnWidth(col)"
+                      [style.max-width]="columnWidth(col)"
+                    >
+                      <span class="sr-only">{{ col.header }}</span>
+                      @if (_hasMultipleAppliedRules(col.key)) {
+                        <span class="neu-table__filter-multiple-summary" role="status">
+                          {{ _filterOverlayActiveRuleSummary(_filterOverlayRuleCount(col.key)) }}
+                        </span>
+                      } @else if (col.filterConfig; as config) {
+                        @switch (config.kind) {
+                          @case ('text') {
+                            <neu-input
+                              [floatingLabel]="false"
+                              [label]="modernFilterLabel(col)"
+                              [placeholder]="filterPlaceholder()"
+                              [formControl]="typedColumnFilterControl(col)"
+                              (keydown)="commitInlineFilterOnEnter(col, $event)"
+                            />
+                          }
+                          @case ('number') {
+                            @if (modernFilterMode(col) === 'between') {
+                              <div class="neu-table__filter-range">
+                                <neu-number-input
+                                  [nullable]="true"
+                                  [label]="rangeFilterLabel(col, 'from')"
+                                  [formControl]="typedRangeStartControl(col)"
+                                  (keydown)="commitInlineFilterOnEnter(col, $event)"
+                                />
+                                <neu-number-input
+                                  [nullable]="true"
+                                  [label]="rangeFilterLabel(col, 'to')"
+                                  [formControl]="typedRangeEndControl(col)"
+                                  (keydown)="commitInlineFilterOnEnter(col, $event)"
+                                />
+                              </div>
+                            } @else {
+                              <neu-number-input
+                                [nullable]="true"
+                                [label]="modernFilterLabel(col)"
+                                [formControl]="typedColumnFilterControl(col)"
+                                (keydown)="commitInlineFilterOnEnter(col, $event)"
+                              />
+                            }
+                          }
+                          @case ('date') {
+                            @if (isDateOnlyRange(col)) {
+                              <neu-date-input
+                                type="range"
+                                [label]="modernFilterLabel(col)"
+                                [placeholder]="filterPlaceholder()"
+                                [formControl]="typedColumnFilterControl(col)"
+                              />
+                            } @else if (isInstantRange(col)) {
+                              <div class="neu-table__filter-range">
+                                <neu-date-input
+                                  type="datetime-local"
+                                  [label]="rangeFilterLabel(col, 'from')"
+                                  [formControl]="typedInstantRangeStartControl(col)"
+                                />
+                                <neu-date-input
+                                  type="datetime-local"
+                                  [label]="rangeFilterLabel(col, 'to')"
+                                  [formControl]="typedInstantRangeEndControl(col)"
+                                />
+                              </div>
+                            } @else {
+                              <neu-date-input
+                                [type]="dateInputType(col)"
+                                [label]="modernFilterLabel(col)"
+                                [formControl]="typedColumnFilterControl(col)"
+                              />
+                            }
+                          }
+                          @case ('boolean') {
+                            <neu-select
+                              [floatingLabel]="false"
+                              [label]="modernFilterLabel(col)"
+                              [placeholder]="allFilterOptionLabel()"
+                              [options]="typedBooleanFilterOptions()"
+                              [clearable]="true"
+                              [formControl]="typedColumnFilterControl(col)"
+                            />
+                          }
+                          @case ('select') {
+                            <neu-select
+                              [floatingLabel]="false"
+                              [label]="modernFilterLabel(col)"
+                              [placeholder]="allFilterOptionLabel()"
+                              [options]="typedFilterOptions(col)"
+                              [optionLabel]="typedFilterOptionLabel(col)"
+                              [optionValue]="typedFilterOptionValue(col)"
+                              [optionDisabled]="typedFilterOptionDisabled(col)"
+                              [searchable]="typedFilterSearchable(col)"
+                              [virtualScroll]="typedFilterVirtualScroll(col)"
+                              [virtualScrollVisibleItems]="
+                                typedFilterVirtualScrollVisibleItems(col)
+                              "
+                              [clearable]="true"
+                              [formControl]="typedColumnFilterControl(col)"
+                            />
+                          }
+                          @case ('multiSelect') {
+                            <neu-multiselect
+                              [floatingLabel]="false"
+                              [label]="modernFilterLabel(col)"
+                              [placeholder]="allFilterOptionLabel()"
+                              [options]="typedFilterOptions(col)"
+                              [optionLabel]="typedFilterOptionLabel(col)"
+                              [optionValue]="typedFilterOptionValue(col)"
+                              [optionDisabled]="typedFilterOptionDisabled(col)"
+                              [searchable]="typedFilterSearchable(col)"
+                              [virtualScroll]="typedFilterVirtualScroll(col)"
+                              [virtualScrollVisibleItems]="
+                                typedFilterVirtualScrollVisibleItems(col)
+                              "
+                              [clearable]="true"
+                              [formControl]="typedMultiSelectFilterControl(col)"
+                            />
+                          }
+                        }
+                      } @else if (col.filterable) {
+                        @if (col.filterType === 'select') {
+                          <neu-select
+                            [floatingLabel]="false"
+                            [options]="_filterOpts(col)"
+                            [formControl]="columnFilterControl(col.key)"
+                            [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
+                          />
+                        } @else if (col.filterType === 'date') {
+                          <neu-date-input
+                            [formControl]="columnFilterControl(col.key)"
+                            [placeholder]="filterPlaceholder()"
+                            [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
+                          />
+                        } @else {
+                          <neu-input
+                            [floatingLabel]="false"
+                            [placeholder]="filterPlaceholder()"
+                            [formControl]="columnFilterControl(col.key)"
+                            [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
+                            (keydown)="commitInlineFilterOnEnter(col, $event)"
+                          />
+                        }
+                      }
+                    </th>
+                  }
+                </tr>
+              }
             }
           </thead>
 
           <tbody class="neu-table__body">
-            @if (loading() && !_lazyVirtualActive()) {
-              @if (loadingBodyTemplate(); as loadingBody) {
-                <ng-container
-                  [ngTemplateOutlet]="loadingBody.templateRef"
-                  [ngTemplateOutletContext]="structuralContext()"
-                />
-              } @else {
-              <tr class="neu-table__row--loading">
-                <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--center">
-                  <div class="neu-table__skeleton-rows">
-                    @for (_ of skeletonRows(); track $index) {
-                      <div class="neu-table__skeleton-row">
-                        @for (__ of visibleColumns(); track $index) {
-                          <div class="neu-table__skeleton-cell"></div>
+            @if (bodySectionTemplate(); as bodySection) {
+              <ng-container
+                [ngTemplateOutlet]="bodySection.templateRef"
+                [ngTemplateOutletContext]="bodySectionContext()"
+              />
+            } @else {
+              @if (loading() && !_lazyVirtualActive()) {
+                @if (loadingBodyTemplate(); as loadingBody) {
+                  <ng-container
+                    [ngTemplateOutlet]="loadingBody.templateRef"
+                    [ngTemplateOutletContext]="structuralContext()"
+                  />
+                } @else {
+                  <tr class="neu-table__row--loading">
+                    <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--center">
+                      <div class="neu-table__skeleton-rows">
+                        @for (_ of skeletonRows(); track $index) {
+                          <div class="neu-table__skeleton-row">
+                            @for (__ of visibleColumns(); track $index) {
+                              <div class="neu-table__skeleton-cell"></div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              } @else if (_tableEmpty()) {
+                <tr>
+                  <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--empty">
+                    @if (emptyTemplate(); as empty) {
+                      <ng-container
+                        [ngTemplateOutlet]="empty.templateRef"
+                        [ngTemplateOutletContext]="emptyContext()"
+                      />
+                    } @else {
+                      <div class="neu-table__empty">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <circle cx="11" cy="11" r="8" />
+                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <p>{{ emptyMessage() }}</p>
+                        @if (searchQuery()) {
+                          <button
+                            class="neu-table__clear-filter"
+                            type="button"
+                            (click)="clearSearch()"
+                          >
+                            {{ clearFilterLabel() }}
+                          </button>
                         }
                       </div>
                     }
-                  </div>
-                </td>
-              </tr>
-              }
-            } @else if (_tableEmpty()) {
-              <tr>
-                <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--empty">
-                  @if (emptyStateTemplate()) {
-                    <ng-container [ngTemplateOutlet]="emptyStateTemplate()!" />
-                  } @else {
-                    <div class="neu-table__empty">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <circle cx="11" cy="11" r="8" />
-                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                      </svg>
-                      <p>{{ emptyMessage() }}</p>
-                      @if (searchQuery()) {
-                        <button
-                          class="neu-table__clear-filter"
-                          type="button"
-                          (click)="clearSearch()"
-                        >
-                          {{ clearFilterLabel() }}
-                        </button>
-                      }
-                    </div>
-                  }
-                </td>
-              </tr>
-            } @else {
-              @for (
-                entry of renderedPageEntries();
-                track entryTrackingKey(entry, entryIdx);
-                let entryIdx = $index
-              ) {
-                @if (entry.kind === 'spacer') {
-                  <tr class="neu-table__spacer-row" aria-hidden="true">
-                    <td
-                      [attr.colspan]="totalColspan()"
-                      class="neu-table__spacer-cell"
-                      [style.height.px]="entry.height"
-                    ></td>
-                  </tr>
-                } @else if (entry.kind === 'placeholder') {
-                  <tr
-                    class="neu-table__row neu-table__row--placeholder"
-                    aria-hidden="true"
-                    inert
-                    [style.height.px]="_virtualItemSize()"
-                    [attr.data-neu-table-placeholder-index]="entry.logicalIndex"
-                  >
-                    @if (lazyPlaceholderTemplate(); as placeholderTemplate) {
-                      <ng-container
-                        [ngTemplateOutlet]="placeholderTemplate"
-                        [ngTemplateOutletContext]="lazyPlaceholderContext(entry.logicalIndex)"
-                      />
-                    } @else {
-                      @if (_expansionEnabled()) {
-                        <td class="neu-table__td neu-table__td--expand-col"></td>
-                      }
-                      @if (selectionEnabled()) {
-                        <td class="neu-table__td neu-table__th--check"></td>
-                      }
-                      @if (showRowNumbers()) {
-                        <td class="neu-table__td neu-table__td--rn">
-                          <span class="neu-table__lazy-skeleton"></span>
-                        </td>
-                      }
-                      @if (reorderableRows()) {
-                        <td class="neu-table__td neu-table__td--row-reorder"></td>
-                      }
-                      @for (col of visibleColumns(); track col.key) {
-                        <td
-                          class="neu-table__td neu-table__td--placeholder"
-                          [class.neu-table__td--frozen-left]="col.frozen === 'left'"
-                          [class.neu-table__td--frozen-right]="col.frozen === 'right'"
-                          [style.left]="
-                            col.frozen === 'left'
-                              ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
-                              : null
-                          "
-                          [style.width]="columnWidth(col)"
-                          [style.min-width]="columnWidth(col)"
-                          [style.max-width]="columnWidth(col)"
-                        >
-                          <span class="neu-table__lazy-skeleton"></span>
-                        </td>
-                      }
-                    }
-                  </tr>
-                } @else if (entry.kind === 'group') {
-                  <tr
-                    class="neu-table__group-row"
-                    [class.neu-table__group-row--sticky]="stickyHeader()"
-                    [class.neu-table__group-row--frozen]="entry.frozen"
-                    [attr.data-neu-table-frozen-stack]="entry.frozen ? entryIdx + ':group' : null"
-                    [style.top.px]="entry.frozen ? frozenRowTop(entryIdx + ':group') : null"
-                  >
-                    <td [attr.colspan]="totalColspan()" class="neu-table__td neu-table__td--group">
-                      @if (expandableRowGroups() && !_virtualScrollActive()) {
-                        <button
-                          type="button"
-                          class="neu-table__group-toggle"
-                          [attr.aria-expanded]="entry.group.expanded"
-                          [attr.aria-label]="groupExpansionAriaLabel(entry.group)"
-                          (click)="toggleGroup(entry.group)"
-                        >
-                          {{ entry.group.expanded ? '−' : '+' }}
-                        </button>
-                      }
-                      @if (groupHeaderTemplate(); as groupHeader) {
+                  </td>
+                </tr>
+              } @else {
+                @for (
+                  entry of renderedPageEntries();
+                  track entryTrackingKey(entry, entryIdx);
+                  let entryIdx = $index
+                ) {
+                  @if (entry.kind === 'spacer') {
+                    <tr class="neu-table__spacer-row" aria-hidden="true">
+                      <td
+                        [attr.colspan]="totalColspan()"
+                        class="neu-table__spacer-cell"
+                        [style.height.px]="entry.height"
+                      ></td>
+                    </tr>
+                  } @else if (entry.kind === 'placeholder') {
+                    <tr
+                      class="neu-table__row neu-table__row--placeholder"
+                      aria-hidden="true"
+                      inert
+                      [style.height.px]="_virtualItemSize()"
+                      [attr.data-neu-table-placeholder-index]="entry.logicalIndex"
+                    >
+                      @if (lazyPlaceholderTemplate(); as placeholderTemplate) {
                         <ng-container
-                          [ngTemplateOutlet]="groupHeader.templateRef"
+                          [ngTemplateOutlet]="placeholderTemplate.templateRef"
+                          [ngTemplateOutletContext]="lazyPlaceholderContext(entry.logicalIndex)"
+                        />
+                      } @else {
+                        @if (_expansionEnabled()) {
+                          <td class="neu-table__td neu-table__td--expand-col"></td>
+                        }
+                        @if (selectionEnabled()) {
+                          <td class="neu-table__td neu-table__th--check"></td>
+                        }
+                        @if (showRowNumbers()) {
+                          <td class="neu-table__td neu-table__td--rn">
+                            <span class="neu-table__lazy-skeleton"></span>
+                          </td>
+                        }
+                        @if (reorderableRows()) {
+                          <td class="neu-table__td neu-table__td--row-reorder"></td>
+                        }
+                        @for (col of visibleColumns(); track col.key) {
+                          <td
+                            class="neu-table__td neu-table__td--placeholder"
+                            [class.neu-table__td--frozen-left]="col.frozen === 'left'"
+                            [class.neu-table__td--frozen-right]="col.frozen === 'right'"
+                            [style.left]="
+                              col.frozen === 'left'
+                                ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
+                                : null
+                            "
+                            [style.width]="columnWidth(col)"
+                            [style.min-width]="columnWidth(col)"
+                            [style.max-width]="columnWidth(col)"
+                          >
+                            <span class="neu-table__lazy-skeleton"></span>
+                          </td>
+                        }
+                      }
+                    </tr>
+                  } @else if (entry.kind === 'group') {
+                    <tr
+                      class="neu-table__group-row"
+                      [class.neu-table__group-row--sticky]="stickyHeader()"
+                      [class.neu-table__group-row--frozen]="entry.frozen"
+                      [attr.data-neu-table-frozen-stack]="entry.frozen ? entryIdx + ':group' : null"
+                      [style.top.px]="entry.frozen ? frozenRowTop(entryIdx + ':group') : null"
+                    >
+                      <td
+                        [attr.colspan]="totalColspan()"
+                        class="neu-table__td neu-table__td--group"
+                      >
+                        @if (expandableRowGroups() && !_virtualScrollActive()) {
+                          <button
+                            type="button"
+                            class="neu-table__group-toggle"
+                            [attr.aria-expanded]="entry.group.expanded"
+                            [attr.aria-label]="groupExpansionAriaLabel(entry.group)"
+                            (click)="toggleGroup(entry.group)"
+                          >
+                            {{ entry.group.expanded ? '−' : '+' }}
+                          </button>
+                        }
+                        @if (groupHeaderTemplate(); as groupHeader) {
+                          <ng-container
+                            [ngTemplateOutlet]="groupHeader.templateRef"
+                            [ngTemplateOutletContext]="
+                              groupTemplateContext(entry.group, entry.frozen)
+                            "
+                          />
+                        } @else {
+                          {{ groupHeaderLabel() }} {{ entry.group.label }}
+                          <span class="neu-table__group-count">({{ entry.group.count }})</span>
+                        }
+                      </td>
+                    </tr>
+                  } @else if (entry.kind === 'group-footer') {
+                    <tr
+                      class="neu-table__group-footer-row"
+                      [class.neu-table__group-footer-row--frozen]="entry.frozen"
+                      [attr.data-neu-table-frozen-stack]="
+                        entry.frozen ? entryIdx + ':footer' : null
+                      "
+                      [style.top.px]="entry.frozen ? frozenRowTop(entryIdx + ':footer') : null"
+                    >
+                      <td
+                        [attr.colspan]="totalColspan()"
+                        class="neu-table__td neu-table__td--group-footer"
+                      >
+                        @if (groupFooterTemplate(); as groupFooter) {
+                          <ng-container
+                            [ngTemplateOutlet]="groupFooter.templateRef"
+                            [ngTemplateOutletContext]="
+                              groupTemplateContext(entry.group, entry.frozen)
+                            "
+                          />
+                        }
+                      </td>
+                    </tr>
+                  } @else {
+                    @let row = entry.row;
+                    <tr
+                      class="neu-table__row"
+                      [style.height.px]="
+                        _virtualScrollActive() && !entry.frozen ? _virtualItemSize() : null
+                      "
+                      [attr.data-neu-table-frozen-stack]="entry.frozen ? entryIdx + ':row' : null"
+                      [style.top.px]="entry.frozen ? frozenRowTop(entryIdx + ':row') : null"
+                      [class]="getRowClass(row)"
+                      [class.neu-table__row--selected]="isRowSelected(row)"
+                      [class.neu-table__row--frozen]="entry.frozen"
+                      [class.neu-table__row--context-selected]="isContextMenuRow(row)"
+                      [class.neu-table__row--dragging]="_draggedRowKey() === getRowKey(row)"
+                      [class.neu-table__row--drop-before]="
+                        _rowDropTarget()?.key === getRowKey(row) &&
+                        _rowDropTarget()?.placement === 'before'
+                      "
+                      [class.neu-table__row--drop-after]="
+                        _rowDropTarget()?.key === getRowKey(row) &&
+                        _rowDropTarget()?.placement === 'after'
+                      "
+                      [class.neu-table__row--disabled]="!isRowSelectable(row)"
+                      [class.neu-table__row--clickable]="
+                        selectionEnabled() && selectOnRowClick() && isRowSelectable(row)
+                      "
+                      [attr.tabindex]="rowTabIndex(row)"
+                      [attr.data-neu-table-navigable]="isNavigableRow(row) ? 'true' : null"
+                      [attr.aria-selected]="
+                        selectionEnabled() && isRowSelectable(row) ? isRowSelected(row) : null
+                      "
+                      [attr.aria-disabled]="
+                        selectionEnabled() && !isRowSelectable(row) ? true : null
+                      "
+                      [attr.aria-rowindex]="bodyAriaRowIndex(entry)"
+                      [attr.data-neu-table-logical-index]="entry.logicalIndex"
+                      [attr.data-neu-table-frozen]="entry.frozen ? 'true' : null"
+                      [attr.draggable]="isRowDragArmed(row, entry.frozen) ? 'true' : null"
+                      (pointerdown)="onRowPointerDown(row, entry.frozen, $event)"
+                      (dragstart)="onRowDragStart(row, entry.frozen, $event)"
+                      (dragover)="onRowDragOver(row, entry.frozen, $event)"
+                      (drop)="onRowDrop(row, entry.frozen, $event)"
+                      (dragend)="onRowDragEnd($event)"
+                      (contextmenu)="onRowContextMenu(row, entry.logicalIndex, $event)"
+                      (click)="onRowClick(row, $event)"
+                      (dblclick)="rowDblClick.emit(row)"
+                      (focus)="onRowFocus(row, $event)"
+                      (keydown)="onRowKeydown(row, $event)"
+                    >
+                      @if (bodyTemplate(); as body) {
+                        <ng-container
+                          [ngTemplateOutlet]="body.templateRef"
                           [ngTemplateOutletContext]="
-                            groupTemplateContext(entry.group, entry.frozen)
+                            bodyContext(row, entry.rowIndex, entry.logicalIndex, entry.frozen)
                           "
                         />
                       } @else {
-                        {{ groupHeaderLabel() }} {{ entry.group.label }}
-                        <span class="neu-table__group-count">({{ entry.group.count }})</span>
-                      }
-                    </td>
-                  </tr>
-                } @else if (entry.kind === 'group-footer') {
-                  <tr
-                    class="neu-table__group-footer-row"
-                    [class.neu-table__group-footer-row--frozen]="entry.frozen"
-                    [attr.data-neu-table-frozen-stack]="entry.frozen ? entryIdx + ':footer' : null"
-                    [style.top.px]="entry.frozen ? frozenRowTop(entryIdx + ':footer') : null"
-                  >
-                    <td
-                      [attr.colspan]="totalColspan()"
-                      class="neu-table__td neu-table__td--group-footer"
-                    >
-                      @if (groupFooterTemplate(); as groupFooter) {
-                        <ng-container
-                          [ngTemplateOutlet]="groupFooter.templateRef"
-                          [ngTemplateOutletContext]="
-                            groupTemplateContext(entry.group, entry.frozen)
-                          "
-                        />
-                      }
-                    </td>
-                  </tr>
-                } @else {
-                  @let row = entry.row;
-                  <tr
-                    class="neu-table__row"
-                    [style.height.px]="
-                      _virtualScrollActive() && !entry.frozen ? _virtualItemSize() : null
-                    "
-                    [attr.data-neu-table-frozen-stack]="entry.frozen ? entryIdx + ':row' : null"
-                    [style.top.px]="entry.frozen ? frozenRowTop(entryIdx + ':row') : null"
-                    [class]="getRowClass(row)"
-                    [class.neu-table__row--selected]="isRowSelected(row)"
-                    [class.neu-table__row--frozen]="entry.frozen"
-                    [class.neu-table__row--context-selected]="isContextMenuRow(row)"
-                    [class.neu-table__row--dragging]="_draggedRowKey() === getRowKey(row)"
-                    [class.neu-table__row--drop-before]="
-                      _rowDropTarget()?.key === getRowKey(row) &&
-                      _rowDropTarget()?.placement === 'before'
-                    "
-                    [class.neu-table__row--drop-after]="
-                      _rowDropTarget()?.key === getRowKey(row) &&
-                      _rowDropTarget()?.placement === 'after'
-                    "
-                    [class.neu-table__row--disabled]="!isRowSelectable(row)"
-                    [class.neu-table__row--clickable]="
-                      selectionEnabled() && selectOnRowClick() && isRowSelectable(row)
-                    "
-                    [attr.tabindex]="rowTabIndex(row)"
-                    [attr.data-neu-table-navigable]="isNavigableRow(row) ? 'true' : null"
-                    [attr.aria-selected]="
-                      selectionEnabled() && isRowSelectable(row) ? isRowSelected(row) : null
-                    "
-                    [attr.aria-disabled]="selectionEnabled() && !isRowSelectable(row) ? true : null"
-                    [attr.aria-rowindex]="bodyAriaRowIndex(entry)"
-                    [attr.data-neu-table-logical-index]="entry.logicalIndex"
-                    [attr.data-neu-table-frozen]="entry.frozen ? 'true' : null"
-                    [attr.draggable]="isRowDragArmed(row, entry.frozen) ? 'true' : null"
-                    (pointerdown)="onRowPointerDown(row, entry.frozen, $event)"
-                    (dragstart)="onRowDragStart(row, entry.frozen, $event)"
-                    (dragover)="onRowDragOver(row, entry.frozen, $event)"
-                    (drop)="onRowDrop(row, entry.frozen, $event)"
-                    (dragend)="onRowDragEnd($event)"
-                    (contextmenu)="onRowContextMenu(row, entry.logicalIndex, $event)"
-                    (click)="onRowClick(row, $event)"
-                    (dblclick)="rowDblClick.emit(row)"
-                    (focus)="onRowFocus(row, $event)"
-                    (keydown)="onRowKeydown(row, $event)"
-                  >
-                    @if (bodyTemplate(); as body) {
-                      <ng-container
-                        [ngTemplateOutlet]="body.templateRef"
-                        [ngTemplateOutletContext]="
-                          bodyContext(row, entry.rowIndex, entry.logicalIndex, entry.frozen)
-                        "
-                      />
-                    } @else {
-                    @if (_expansionEnabled()) {
-                      <td
-                        class="neu-table__td neu-table__td--expand-col"
-                        (click)="$event.stopPropagation()"
-                      >
-                        @if (_rowExpansionEnabled(entry.frozen)) {
-                          <button
-                          class="neu-table__expand-btn"
-                          type="button"
-                          (click)="toggleExpand(row)"
-                          [class.neu-table__expand-btn--open]="isRowExpanded(row)"
-                          [attr.aria-expanded]="isRowExpanded(row)"
-                          [attr.aria-label]="rowExpansionAriaLabel(row)"
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+                        @if (_expansionEnabled()) {
+                          <td
+                            class="neu-table__td neu-table__td--expand-col"
+                            (click)="$event.stopPropagation()"
                           >
-                            <polyline points="9 18 15 12 9 6" />
-                          </svg>
-                          </button>
+                            @if (_rowExpansionEnabled(entry.frozen)) {
+                              <button
+                                class="neu-table__expand-btn"
+                                type="button"
+                                (click)="toggleExpand(row)"
+                                [class.neu-table__expand-btn--open]="isRowExpanded(row)"
+                                [attr.aria-expanded]="isRowExpanded(row)"
+                                [attr.aria-label]="rowExpansionAriaLabel(row)"
+                              >
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                >
+                                  <polyline points="9 18 15 12 9 6" />
+                                </svg>
+                              </button>
+                            }
+                          </td>
                         }
-                      </td>
-                    }
-                    @if (selectionEnabled()) {
-                      <td
-                        class="neu-table__td neu-table__th--check"
-                        (click)="$event.stopPropagation()"
-                      >
-                        @if (multipleSelection()) {
-                          <neu-checkbox
-                            class="neu-table__checkbox"
-                            [checked]="isRowSelected(row)"
-                            [disabled]="!isRowSelectable(row)"
-                            [ariaLabel]="rowSelectionAriaLabel(row)"
-                            (checkedChange)="toggleRow(row, 'checkbox')"
-                          />
-                        } @else {
-                          <input
-                            class="neu-table__radio"
-                            type="radio"
-                            [name]="_selectionRadioName"
-                            [checked]="isRowSelected(row)"
-                            [disabled]="!isRowSelectable(row)"
-                            [attr.aria-label]="rowSelectionAriaLabel(row)"
-                            (change)="toggleRow(row, 'radio')"
-                          />
+                        @if (selectionEnabled()) {
+                          <td
+                            class="neu-table__td neu-table__th--check"
+                            (click)="$event.stopPropagation()"
+                          >
+                            @if (multipleSelection()) {
+                              <neu-checkbox
+                                class="neu-table__checkbox"
+                                [checked]="isRowSelected(row)"
+                                [disabled]="!isRowSelectable(row)"
+                                [ariaLabel]="rowSelectionAriaLabel(row)"
+                                (checkedChange)="toggleRow(row, 'checkbox')"
+                              />
+                            } @else {
+                              <input
+                                class="neu-table__radio"
+                                type="radio"
+                                [name]="_selectionRadioName"
+                                [checked]="isRowSelected(row)"
+                                [disabled]="!isRowSelectable(row)"
+                                [attr.aria-label]="rowSelectionAriaLabel(row)"
+                                (change)="toggleRow(row, 'radio')"
+                              />
+                            }
+                          </td>
                         }
-                      </td>
-                    }
-                    @if (showRowNumbers()) {
-                      <td class="neu-table__td neu-table__td--rn">
-                        {{
-                          visibleRowNumber(
-                            _lazyVirtualActive() ? entry.logicalIndex : entry.rowIndex
-                          )
-                        }}
-                      </td>
-                    }
-                    @if (reorderableRows()) {
-                      <td
-                        class="neu-table__td neu-table__td--row-reorder"
-                        (click)="$event.stopPropagation()"
-                      >
-                        @if (canReorderRow(row, entry.frozen)) {
-                          <span class="neu-table__row-reorder-controls">
-                            <button
-                              neuTableRowReorderHandle
-                              type="button"
-                              class="neu-table__row-reorder-drag"
-                              [attr.aria-label]="'Drag row ' + (entry.logicalIndex + 1)"
-                              title="Drag row"
-                            >
-                              ⋮⋮
-                            </button>
-                            <button
-                              type="button"
-                              class="neu-table__row-reorder-move"
-                              [disabled]="!canMoveRow(row, -1)"
-                              [attr.aria-label]="moveRowUpAriaLabel()"
-                              (click)="moveRow(row, -1)"
-                            >
-                              ↑
-                            </button>
-                            <button
-                              type="button"
-                              class="neu-table__row-reorder-move"
-                              [disabled]="!canMoveRow(row, 1)"
-                              [attr.aria-label]="moveRowDownAriaLabel()"
-                              (click)="moveRow(row, 1)"
-                            >
-                              ↓
-                            </button>
-                          </span>
+                        @if (showRowNumbers()) {
+                          <td class="neu-table__td neu-table__td--rn">
+                            {{
+                              visibleRowNumber(
+                                _lazyVirtualActive() ? entry.logicalIndex : entry.rowIndex
+                              )
+                            }}
+                          </td>
                         }
-                      </td>
-                    }
-                    @for (col of visibleColumns(); track col.key) {
-                        @if (
-                          !isRowspanGroupCell(entry.rowIndex, col.key) ||
-                          !hideGroupRowspanCell(entry.rowIndex, entry.frozen)
-                        ) {
-                      <td
-                        class="neu-table__td"
-                        [class]="col.cellClass ?? ''"
-                        [class.neu-table__td--frozen-left]="col.frozen === 'left'"
-                        [class.neu-table__td--frozen-right]="col.frozen === 'right'"
-                        [class.neu-table__td--frozen-left-boundary]="
-                          isLastFrozenLeftColumn(col.key)
-                        "
-                        [class.neu-table__td--frozen-right-boundary]="
-                          isFirstFrozenRightColumn(col.key)
-                        "
-                        [style.left]="
-                          col.frozen === 'left'
-                            ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
-                            : null
-                        "
-                        [style.width]="columnWidth(col)"
-                        [style.min-width]="columnWidth(col)"
-                        [style.max-width]="columnWidth(col)"
-                        [style.text-align]="col.align ?? 'left'"
-                            [attr.tabindex]="inlineEdit() && col.editable ? -1 : null"
-                            [attr.rowspan]="
-                              isRowspanGroupCell(entry.rowIndex, col.key)
-                                ? groupRowspan(entry.rowIndex, entry.frozen)
-                                : null
-                            "
-                            [attr.data-neu-table-edit-row]="entry.rowIndex"
-                            [attr.data-neu-table-edit-frozen]="entry.frozen ? 'true' : 'false'"
-                            [attr.data-neu-table-edit-column]="col.key"
-                            [attr.data-neu-table-editing]="isEditingCell(row, col) ? 'true' : null"
-                            [attr.aria-invalid]="
-                              isEditingCell(row, col) && cellEditingInvalid() ? true : null
-                            "
-                        (dblclick)="startCellEdit(row, col, $event)"
-                            (keydown)="onEditableCellKeydown(row, col, $event)"
-                      >
-                        @if (isEditingCell(row, col)) {
-                              @if (cellEditorTemplate(col.key); as editorTemplate) {
+                        @if (reorderableRows()) {
+                          <td
+                            class="neu-table__td neu-table__td--row-reorder"
+                            (click)="$event.stopPropagation()"
+                          >
+                            @if (canReorderRow(row, entry.frozen)) {
+                              <span class="neu-table__row-reorder-controls">
+                                <button
+                                  neuTableRowReorderHandle
+                                  type="button"
+                                  class="neu-table__row-reorder-drag"
+                                  [attr.aria-label]="'Drag row ' + (entry.logicalIndex + 1)"
+                                  title="Drag row"
+                                >
+                                  ⋮⋮
+                                </button>
+                                <button
+                                  type="button"
+                                  class="neu-table__row-reorder-move"
+                                  [disabled]="!canMoveRow(row, -1)"
+                                  [attr.aria-label]="moveRowUpAriaLabel()"
+                                  (click)="moveRow(row, -1)"
+                                >
+                                  ↑
+                                </button>
+                                <button
+                                  type="button"
+                                  class="neu-table__row-reorder-move"
+                                  [disabled]="!canMoveRow(row, 1)"
+                                  [attr.aria-label]="moveRowDownAriaLabel()"
+                                  (click)="moveRow(row, 1)"
+                                >
+                                  ↓
+                                </button>
+                              </span>
+                            }
+                          </td>
+                        }
+                        @for (col of visibleColumns(); track col.key) {
+                          @if (
+                            !isRowspanGroupCell(entry.rowIndex, col.key) ||
+                            !hideGroupRowspanCell(entry.rowIndex, entry.frozen)
+                          ) {
+                            <td
+                              class="neu-table__td"
+                              [class]="col.cellClass ?? ''"
+                              [class.neu-table__td--frozen-left]="col.frozen === 'left'"
+                              [class.neu-table__td--frozen-right]="col.frozen === 'right'"
+                              [class.neu-table__td--frozen-left-boundary]="
+                                isLastFrozenLeftColumn(col.key)
+                              "
+                              [class.neu-table__td--frozen-right-boundary]="
+                                isFirstFrozenRightColumn(col.key)
+                              "
+                              [style.left]="
+                                col.frozen === 'left'
+                                  ? (_frozenLeftOffsets().get(col.key) ?? 0) + 'px'
+                                  : null
+                              "
+                              [style.width]="columnWidth(col)"
+                              [style.min-width]="columnWidth(col)"
+                              [style.max-width]="columnWidth(col)"
+                              [style.text-align]="col.align ?? 'left'"
+                              [attr.tabindex]="editMode() === 'cell' && col.editable ? -1 : null"
+                              [attr.rowspan]="
+                                isRowspanGroupCell(entry.rowIndex, col.key)
+                                  ? groupRowspan(entry.rowIndex, entry.frozen)
+                                  : null
+                              "
+                              [attr.data-neu-table-edit-row]="entry.rowIndex"
+                              [attr.data-neu-table-edit-frozen]="entry.frozen ? 'true' : 'false'"
+                              [attr.data-neu-table-edit-column]="col.key"
+                              [attr.data-neu-table-editing]="
+                                isEditingCell(row, col) ? 'true' : null
+                              "
+                              [attr.aria-invalid]="
+                                isEditingCell(row, col) && cellEditingInvalid() ? true : null
+                              "
+                              (dblclick)="startCellEdit(row, col, $event)"
+                              (keydown)="onEditableCellKeydown(row, col, $event)"
+                            >
+                              @if (isEditingCell(row, col)) {
+                                @if (cellEditorTemplate(col.key); as editorTemplate) {
+                                  <ng-container
+                                    [ngTemplateOutlet]="editorTemplate"
+                                    [ngTemplateOutletContext]="
+                                      cellEditorContext(
+                                        row,
+                                        col,
+                                        entry.rowIndex,
+                                        entry.logicalIndex,
+                                        entry.frozen
+                                      )
+                                    "
+                                  />
+                                } @else {
+                                  <neu-inline-editor
+                                    class="neu-table__edit-control"
+                                    [type]="inlineEditorType(col)"
+                                    [value]="$any(editingValue())"
+                                    [options]="inlineEditorOptions(col)"
+                                    [startInEdit]="true"
+                                    [saveOnBlur]="true"
+                                    [editLabel]="inlineEditLabel()"
+                                    [saveLabel]="saveInlineEditLabel()"
+                                    [cancelLabel]="cancelInlineEditLabel()"
+                                    (valueChange)="setEditingValue($event)"
+                                    (editCommit)="commitCellEdit(row, col)"
+                                    (editCancel)="cancelCellEdit(undefined, row, col)"
+                                  />
+                                }
+                                @if (cellEditingError(); as editError) {
+                                  <span class="neu-table__edit-error" role="alert">{{
+                                    editError
+                                  }}</span>
+                                }
+                              } @else if (cellViewTemplate(col.key); as viewTemplate) {
                                 <ng-container
-                                  [ngTemplateOutlet]="editorTemplate"
+                                  [ngTemplateOutlet]="viewTemplate"
                                   [ngTemplateOutletContext]="
-                                    cellEditorContext(
+                                    cellViewContext(
                                       row,
                                       col,
                                       entry.rowIndex,
@@ -1863,149 +2012,120 @@ export type NeuTableColumnInput<T extends object> =
                                     )
                                   "
                                 />
-                              } @else {
-                          <neu-inline-editor
-                            class="neu-table__edit-control"
-                            [type]="inlineEditorType(col)"
-                            [value]="$any(editingValue())"
-                            [options]="inlineEditorOptions(col)"
-                            [startInEdit]="true"
-                            [saveOnBlur]="true"
-                            [editLabel]="inlineEditLabel()"
-                            [saveLabel]="saveInlineEditLabel()"
-                            [cancelLabel]="cancelInlineEditLabel()"
-                            (valueChange)="setEditingValue($event)"
-                            (editCommit)="commitCellEdit(row, col)"
-                                  (editCancel)="cancelCellEdit(undefined, row, col)"
+                              } @else if (col.cellTemplate) {
+                                <ng-container
+                                  [ngTemplateOutlet]="col.cellTemplate"
+                                  [ngTemplateOutletContext]="{
+                                    $implicit: row,
+                                    row: row,
+                                    column: col,
+                                  }"
                                 />
-                              }
-                              @if (cellEditingError(); as editError) {
-                                <span class="neu-table__edit-error" role="alert">{{
-                                  editError
-                                }}</span>
-                              }
-                            } @else if (cellViewTemplate(col.key); as viewTemplate) {
-                              <ng-container
-                                [ngTemplateOutlet]="viewTemplate"
-                                [ngTemplateOutletContext]="
-                                  cellViewContext(
-                                    row,
-                                    col,
-                                    entry.rowIndex,
-                                    entry.logicalIndex,
-                                    entry.frozen
-                                  )
-                                "
-                          />
-                        } @else if (col.cellTemplate) {
-                          <ng-container
-                            [ngTemplateOutlet]="col.cellTemplate"
-                                [ngTemplateOutletContext]="{
-                                  $implicit: row,
-                                  row: row,
-                                  column: col,
-                                }"
-                          />
-                        } @else if (col.type === 'badge') {
-                          @let badgeVal = getCellValue(row, col);
-                          @let badgeCfg = col.badgeMap?.[badgeVal];
-                          <span
-                            class="neu-table__cell-badge neu-table__cell-badge--{{
-                              badgeCfg?.variant ?? 'default'
-                            }}"
-                          >
-                            {{ badgeCfg?.label ?? badgeVal }}
-                          </span>
-                        } @else if (col.type === 'link') {
-                          <a
-                            class="neu-table__cell-link"
-                            [href]="col.linkHref ? col.linkHref(row) : '#'"
-                            [target]="col.linkTarget ?? '_self'"
-                            (click)="$event.stopPropagation()"
-                            >{{ getCellValue(row, col) }}</a
-                          >
-                        } @else if (col.type === 'actions') {
-                          <div class="neu-table__actions">
-                            @for (action of col.actions ?? []; track action.key) {
-                              @if (action.show === undefined || action.show(row)) {
-                                @if (isConfirmPending(row, action)) {
-                                  <span class="neu-table__action-confirm">
-                                    <span>{{ action.confirm }}</span>
-                                    <button
-                                      class="neu-table__action-btn neu-table__action-btn--danger"
-                                      type="button"
+                              } @else if (col.type === 'badge') {
+                                @let badgeVal = getCellValue(row, col);
+                                @let badgeCfg = col.badgeMap?.[badgeVal];
+                                <span
+                                  class="neu-table__cell-badge neu-table__cell-badge--{{
+                                    badgeCfg?.variant ?? 'default'
+                                  }}"
+                                >
+                                  {{ badgeCfg?.label ?? badgeVal }}
+                                </span>
+                              } @else if (col.type === 'link') {
+                                <a
+                                  class="neu-table__cell-link"
+                                  [href]="col.linkHref ? col.linkHref(row) : '#'"
+                                  [target]="col.linkTarget ?? '_self'"
+                                  (click)="$event.stopPropagation()"
+                                  >{{ getCellValue(row, col) }}</a
+                                >
+                              } @else if (col.type === 'actions') {
+                                <div class="neu-table__actions">
+                                  @for (action of col.actions ?? []; track action.key) {
+                                    @if (action.show === undefined || action.show(row)) {
+                                      @if (isConfirmPending(row, action)) {
+                                        <span class="neu-table__action-confirm">
+                                          <span>{{ action.confirm }}</span>
+                                          <button
+                                            class="neu-table__action-btn neu-table__action-btn--danger"
+                                            type="button"
+                                            (click)="
+                                              handleAction(row, action); $event.stopPropagation()
+                                            "
+                                          >
+                                            Sí
+                                          </button>
+                                          <button
+                                            class="neu-table__action-btn"
+                                            type="button"
+                                            (click)="cancelConfirm(); $event.stopPropagation()"
+                                          >
+                                            No
+                                          </button>
+                                        </span>
+                                      } @else {
+                                        <button
+                                          class="neu-table__action-btn neu-table__action-btn--{{
+                                            action.variant ?? 'ghost'
+                                          }}"
+                                          type="button"
+                                          [disabled]="
+                                            action.disabled ? action.disabled(row) : false
+                                          "
+                                          [title]="action.label"
                                           (click)="
                                             handleAction(row, action); $event.stopPropagation()
                                           "
-                                    >
-                                      Sí
-                                    </button>
-                                    <button
-                                      class="neu-table__action-btn"
-                                      type="button"
-                                      (click)="cancelConfirm(); $event.stopPropagation()"
-                                    >
-                                      No
-                                    </button>
-                                  </span>
-                                } @else {
-                                  <button
-                                    class="neu-table__action-btn neu-table__action-btn--{{
-                                      action.variant ?? 'ghost'
-                                    }}"
-                                    type="button"
-                                    [disabled]="action.disabled ? action.disabled(row) : false"
-                                    [title]="action.label"
-                                        (click)="
-                                          handleAction(row, action); $event.stopPropagation()
-                                        "
-                                  >
-                                    @if (action.icon.startsWith('lucide')) {
-                                      <neu-icon
-                                        class="neu-table__action-icon"
-                                        [name]="action.icon"
-                                        size="1rem"
-                                        aria-hidden="true"
-                                      />
-                                    } @else {
-                                      <span class="neu-table__action-icon" aria-hidden="true">{{
-                                        action.icon
-                                      }}</span>
+                                        >
+                                          @if (action.icon.startsWith('lucide')) {
+                                            <neu-icon
+                                              class="neu-table__action-icon"
+                                              [name]="action.icon"
+                                              size="1rem"
+                                              aria-hidden="true"
+                                            />
+                                          } @else {
+                                            <span
+                                              class="neu-table__action-icon"
+                                              aria-hidden="true"
+                                              >{{ action.icon }}</span
+                                            >
+                                          }
+                                          <span class="sr-only">{{ action.label }}</span>
+                                        </button>
+                                      }
                                     }
-                                    <span class="sr-only">{{ action.label }}</span>
-                                  </button>
-                                }
+                                  }
+                                </div>
+                              } @else {
+                                {{ getCellValue(row, col) }}
                               }
+                            </td>
+                          }
+                        }
+                      }
+                    </tr>
+                    @if (_rowExpansionEnabled(entry.frozen) && isRowExpanded(row)) {
+                      <tr
+                        class="neu-table__row-expand-detail"
+                        [class.neu-table__row-expand-detail--frozen]="entry.frozen"
+                        [attr.data-neu-table-frozen-stack]="
+                          entry.frozen ? entryIdx + ':detail' : null
+                        "
+                        [style.top.px]="entry.frozen ? frozenRowTop(entryIdx + ':detail') : null"
+                      >
+                        <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
+                          <div class="neu-table__expand-content">
+                            @if (expandTemplate(); as tpl) {
+                              <ng-container
+                                [ngTemplateOutlet]="tpl.templateRef"
+                                [ngTemplateOutletContext]="{ $implicit: row }"
+                              />
                             }
                           </div>
-                        } @else {
-                          {{ getCellValue(row, col) }}
-                        }
-                      </td>
+                        </td>
+                      </tr>
                     }
-                      }
-                    }
-                  </tr>
-                  @if (_rowExpansionEnabled(entry.frozen) && isRowExpanded(row)) {
-                    <tr
-                      class="neu-table__row-expand-detail"
-                      [class.neu-table__row-expand-detail--frozen]="entry.frozen"
-                      [attr.data-neu-table-frozen-stack]="
-                        entry.frozen ? entryIdx + ':detail' : null
-                      "
-                      [style.top.px]="entry.frozen ? frozenRowTop(entryIdx + ':detail') : null"
-                    >
-                      <td [attr.colspan]="totalColspan()" class="neu-table__td--expand-panel">
-                        <div class="neu-table__expand-content">
-                          @if (expandTemplate(); as tpl) {
-                            <ng-container
-                              [ngTemplateOutlet]="tpl.templateRef"
-                              [ngTemplateOutletContext]="{ $implicit: row }"
-                            />
-                          }
-                        </div>
-                      </td>
-                    </tr>
                   }
                 }
               }
@@ -2074,7 +2194,6 @@ export type NeuTableColumnInput<T extends object> =
   styleUrl: './neu-table.component.scss',
 })
 export class NeuTableComponent<T extends object = NeuTableRow> {
-  private readonly _compatibility = new NeuTableCompatibilityAdapter();
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _urlState = inject(NeuUrlStateService);
   private readonly _state = new NeuTableStateController<unknown>((change) =>
@@ -2108,6 +2227,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _document = inject(DOCUMENT);
   private readonly _elementRef = inject(ElementRef<HTMLElement>);
   private readonly _injector = inject(Injector);
+  private readonly _managedRowCoordinator = inject(NeuTableManagedRowCoordinator);
   private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private _virtualScrollTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly _filterOverlayUid = inject(NeuIdGenerator).getId('neu-table-filter-overlay-');
@@ -2159,14 +2279,15 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly pagination = input<boolean>(true);
   readonly loading = input<boolean>(false);
   readonly title = input<string>('');
-  /** @deprecated Prefer the typed projected `neuTableToolbar` template. Retained until a future major. */
-  readonly toolbarExtraRef = input<TemplateRef<unknown> | null>(null);
   readonly emptyMessage = input<string>('No results found');
-  readonly skeletonRows = input<number[]>([1, 2, 3, 4, 5]);
+  protected readonly skeletonRows = computed(() => [1, 2, 3, 4, 5] as const);
 
   readonly expandTemplate = contentChild<NeuTableExpandDirective<T>>(NeuTableExpandDirective);
   readonly toolbarTemplate = contentChild(NeuTableToolbarDirective);
   readonly bodyTemplate = contentChild<NeuTableBodyDirective<T>>(NeuTableBodyDirective);
+  readonly bodySectionTemplate = contentChild<NeuTableBodySectionDirective<T>>(
+    NeuTableBodySectionDirective,
+  );
   readonly captionTemplate = contentChild<NeuTableCaptionDirective<T>>(NeuTableCaptionDirective);
   readonly headerGroupTemplate = contentChild<NeuTableHeaderGroupDirective<T>>(
     NeuTableHeaderGroupDirective,
@@ -2176,6 +2297,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   );
   readonly loadingBodyTemplate = contentChild<NeuTableLoadingBodyDirective<T>>(
     NeuTableLoadingBodyDirective,
+  );
+  readonly emptyTemplate = contentChild<NeuTableEmptyDirective<T>>(NeuTableEmptyDirective);
+  readonly lazyPlaceholderTemplate = contentChild<NeuTableLazyPlaceholderDirective<T>>(
+    NeuTableLazyPlaceholderDirective,
   );
   readonly summaryTemplate = contentChild<NeuTableSummaryDirective<T>>(NeuTableSummaryDirective);
   readonly paginatorLeftTemplate = contentChild(NeuTablePaginatorLeftDirective);
@@ -2195,59 +2320,146 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     NeuTableFilterTemplateDirective,
   );
   protected readonly _toolbarTemplateRef = computed(
-    () =>
-      this._compatibility.toolbarTemplate(
-        this.toolbarExtraRef(),
-        this.toolbarTemplate()?.templateRef ?? null,
-      ),
+    () => this.toolbarTemplate()?.templateRef ?? null,
   );
 
   // ── Inputs de funcionalidad ──────────────────────────────────────────
   readonly searchable = input<boolean>(true);
-  /** Debounce for global and inline row filters. Menu Apply remains immediate. */
-  readonly filterDelay = input<number>(0);
-  /** Text/number inline filters can apply on each input or only on Enter. */
-  readonly filterOn = input<NeuTableFilterOn>('input');
   readonly advancedFilterMode = input<NeuTableAdvancedFilterMode>('off');
   readonly advancedFilterTexts = input<Partial<NeuTableAdvancedFilterTexts>>({});
-  readonly searchPlaceholder = input<string>('Search...');
+  readonly labels = input<NeuTableLabels>({});
+  readonly filterOptions = input<NeuTableFilterOptions>({});
+  readonly paginatorOptions = input<NeuTablePaginatorOptions>({});
+  readonly exportOptions = input<NeuTableExportConfig<T>>({});
+  readonly virtualizationOptions = input<NeuTableVirtualizationOptions>({});
+  readonly urlStateOptions = input<NeuTableUrlStateOptions>({});
   readonly exactMatchable = input<boolean>(false);
-  readonly exactMatchLabel = input<string>('Exact match');
-  readonly searchAriaLabel = input<string>('Search table');
-  readonly clearSearchAriaLabel = input<string>('Clear search');
-  readonly clearFilterLabel = input<string>('Clear filter');
-  readonly previousPageAriaLabel = input<string>('Previous page');
-  readonly nextPageAriaLabel = input<string>('Next page');
-  readonly firstPageAriaLabel = input<string>('First page');
-  readonly lastPageAriaLabel = input<string>('Last page');
-  readonly pageAriaLabel = input<string>('Page {page}');
-  readonly jumpToPageAriaLabel = input<string>('Jump to page');
-  readonly pageSizeLabel = input<string>('Rows:');
-  readonly pageSizeAriaLabel = input<string>('Rows per page');
-  readonly paginationAriaLabel = input<string>('Pagination');
-  readonly exportCsvTitle = input<string>('Export CSV');
-  readonly exportJsonTitle = input<string>('Export JSON');
-  readonly exportXlsxTitle = input<string>('Export XLSX');
-  readonly clearSelectionLabel = input<string>('Clear selection');
-  readonly selectionSummaryLabel = input<string>('selected');
   readonly tableAriaLabel = input<string>('Data table');
-  /** Optional override; when omitted the accessible label follows selectAllScope. */
-  readonly selectAllAriaLabel = input<string | undefined>(undefined);
-  readonly selectRowAriaLabel = input<string>('Select row');
-  readonly unselectRowAriaLabel = input<string>('Unselect row');
-  readonly expandRowAriaLabel = input<string>('Expand row');
-  readonly collapseRowAriaLabel = input<string>('Collapse row');
-  readonly filterPlaceholder = input<string>('Filter...');
-  readonly filterLocale = input<string | undefined>(undefined);
-  readonly filterAriaPrefix = input<string>('Filter by');
-  readonly filterFromLabel = input<string>('From');
-  readonly filterToLabel = input<string>('To');
-  readonly filterTrueLabel = input<string>('Yes');
-  readonly filterFalseLabel = input<string>('No');
-  readonly allFilterOptionLabel = input<string>('All');
-  readonly ofLabel = input<string>('of');
-  readonly resultLabelSingular = input<string>('result');
-  readonly resultLabelPlural = input<string>('results');
+
+  private readonly _labels = computed<Required<NeuTableLabels>>(() => ({
+    ..._NEU_TABLE_LABELS,
+    ...this.labels(),
+  }));
+  private readonly _filterOptions = computed<Required<NeuTableFilterOptions>>(() => ({
+    ..._NEU_TABLE_FILTER_OPTIONS,
+    ...this.filterOptions(),
+  }));
+  private readonly _paginatorOptions = computed<Required<NeuTablePaginatorOptions>>(() => ({
+    ..._NEU_TABLE_PAGINATOR_OPTIONS,
+    ...this.paginatorOptions(),
+  }));
+  private readonly _virtualizationOptions = computed<Required<NeuTableVirtualizationOptions>>(
+    () => ({ ..._NEU_TABLE_VIRTUALIZATION_OPTIONS, ...this.virtualizationOptions() }),
+  );
+  private readonly _urlStateOptions = computed<Required<NeuTableUrlStateOptions>>(() => ({
+    ..._NEU_TABLE_URL_STATE_OPTIONS,
+    ...this.urlStateOptions(),
+  }));
+
+  protected readonly filterDelay = computed(() => this._filterOptions().delay);
+  protected readonly filterOn = computed(() => this._filterOptions().on);
+  protected readonly filterLocale = computed(() => this._filterOptions().locale || undefined);
+  protected readonly searchPlaceholder = computed(() => this._labels().searchPlaceholder);
+  protected readonly searchAriaLabel = computed(() => this._labels().searchAriaLabel);
+  protected readonly clearSearchAriaLabel = computed(() => this._labels().clearSearchAriaLabel);
+  protected readonly previousPageAriaLabel = computed(() => this._labels().previousPageAriaLabel);
+  protected readonly nextPageAriaLabel = computed(() => this._labels().nextPageAriaLabel);
+  protected readonly firstPageAriaLabel = computed(() => this._labels().firstPageAriaLabel);
+  protected readonly lastPageAriaLabel = computed(() => this._labels().lastPageAriaLabel);
+  protected readonly pageAriaLabel = computed(() => this._labels().pageAriaLabel);
+  protected readonly jumpToPageAriaLabel = computed(() => this._labels().jumpToPageAriaLabel);
+  protected readonly pageSizeLabel = computed(() => this._labels().pageSizeLabel);
+  protected readonly pageSizeAriaLabel = computed(() => this._labels().pageSizeAriaLabel);
+  protected readonly paginationAriaLabel = computed(() => this._labels().paginationAriaLabel);
+  protected readonly clearSelectionLabel = computed(() => this._labels().clearSelectionLabel);
+  protected readonly selectionSummaryLabel = computed(() => this._labels().selectionSummaryLabel);
+  protected readonly selectAllAriaLabel = computed(
+    () => this._labels().selectAllAriaLabel || undefined,
+  );
+  protected readonly selectRowAriaLabel = computed(() => this._labels().selectRowAriaLabel);
+  protected readonly unselectRowAriaLabel = computed(() => this._labels().unselectRowAriaLabel);
+  protected readonly expandRowAriaLabel = computed(() => this._labels().expandRowAriaLabel);
+  protected readonly collapseRowAriaLabel = computed(() => this._labels().collapseRowAriaLabel);
+  protected readonly moveRowUpAriaLabel = computed(() => this._labels().moveRowUpAriaLabel);
+  protected readonly moveRowDownAriaLabel = computed(() => this._labels().moveRowDownAriaLabel);
+  protected readonly columnChooserLabel = computed(() => this._labels().columnChooserLabel);
+  protected readonly groupHeaderLabel = computed(() => this._labels().groupHeaderLabel);
+  protected readonly expandGroupAriaLabel = computed(() => this._labels().expandGroupAriaLabel);
+  protected readonly collapseGroupAriaLabel = computed(() => this._labels().collapseGroupAriaLabel);
+  protected readonly inlineEditLabel = computed(() => this._labels().inlineEditLabel);
+  protected readonly saveInlineEditLabel = computed(() => this._labels().saveInlineEditLabel);
+  protected readonly cancelInlineEditLabel = computed(() => this._labels().cancelInlineEditLabel);
+  protected readonly ofLabel = computed(() => this._labels().ofLabel);
+  protected readonly resultLabelSingular = computed(() => this._labels().resultLabelSingular);
+  protected readonly resultLabelPlural = computed(() => this._labels().resultLabelPlural);
+
+  protected readonly pageLinkSize = computed(() => this._paginatorOptions().pageLinkSize);
+  protected readonly showPageLinks = computed(() => this._paginatorOptions().showPageLinks);
+  protected readonly showFirstLastPageButtons = computed(
+    () => this._paginatorOptions().showFirstLastPageButtons,
+  );
+  protected readonly showCurrentPageReport = computed(
+    () => this._paginatorOptions().showCurrentPageReport,
+  );
+  protected readonly currentPageReportTemplate = computed(
+    () => this._paginatorOptions().currentPageReportTemplate || undefined,
+  );
+  protected readonly showJumpToPageInput = computed(
+    () => this._paginatorOptions().showJumpToPageInput,
+  );
+  protected readonly showJumpToPageDropdown = computed(
+    () => this._paginatorOptions().showJumpToPageDropdown,
+  );
+  protected readonly alwaysShowPaginator = computed(() => this._paginatorOptions().alwaysShow);
+
+  protected readonly virtualScrollVisibleItems = computed(
+    () => this._virtualizationOptions().visibleItems,
+  );
+  protected readonly virtualScrollItemSize = computed(
+    () => this._virtualizationOptions().itemSize || undefined,
+  );
+  protected readonly virtualScrollOverscan = computed(() => this._virtualizationOptions().overscan);
+  protected readonly virtualScrollDelay = computed(() => this._virtualizationOptions().delay);
+  protected readonly virtualScrollAppendOnly = computed(
+    () => this._virtualizationOptions().appendOnly,
+  );
+  protected readonly virtualScrollAutoSize = computed(() => this._virtualizationOptions().autoSize);
+  protected readonly virtualScrollStep = computed(
+    () => this._virtualizationOptions().step || undefined,
+  );
+
+  protected readonly exportable = computed(() => this.exportOptions().enabled ?? false);
+  protected readonly exportFileName = computed(() => this.exportOptions().fileName ?? 'export');
+  protected readonly exportFormats = computed<readonly NeuTableExportFormat[]>(
+    () => this.exportOptions().formats ?? ['csv'],
+  );
+  protected readonly exportColumns = computed<readonly string[]>(
+    () => this.exportOptions().columns ?? [],
+  );
+  protected readonly exportScope = computed<NeuTableExportScope>(
+    () => this.exportOptions().scope ?? 'auto',
+  );
+  protected readonly csvSeparator = computed(() => this.exportOptions().csvSeparator ?? ',');
+  protected readonly csvFormulaPolicy = computed<NeuTableCsvFormulaPolicy>(
+    () => this.exportOptions().csvFormulaPolicy ?? 'escape',
+  );
+  protected readonly exportValue = computed<NeuTableExportValue<T> | undefined>(
+    () => this.exportOptions().value,
+  );
+  protected readonly exportCsvTitle = computed(() => this.exportOptions().csvTitle ?? 'Export CSV');
+  protected readonly exportJsonTitle = computed(
+    () => this.exportOptions().jsonTitle ?? 'Export JSON',
+  );
+  protected readonly exportXlsxTitle = computed(
+    () => this.exportOptions().xlsxTitle ?? 'Export XLSX',
+  );
+
+  protected readonly useUrlState = computed(() => this._urlStateOptions().enabled);
+  protected readonly pageParam = computed(() => this._urlStateOptions().pageParam);
+  protected readonly searchParam = computed(() => this._urlStateOptions().searchParam);
+  protected readonly sortParam = computed(() => this._urlStateOptions().sortParam);
+  protected readonly sortDirParam = computed(() => this._urlStateOptions().sortDirectionParam);
+  protected readonly multiSortParam = computed(() => this._urlStateOptions().multiSortParam);
   readonly sortable = input<boolean>(false);
   readonly defaultSortOrder = input<1 | -1>(1);
   readonly resetPageOnSort = input<boolean>(true);
@@ -2259,10 +2471,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly globalFilterFields = input<readonly NeuTableGlobalFilterField<T>[] | undefined>(
     undefined,
   );
-  /** @deprecated Prefer `selectionMode="multiple"`. Retained until a future major. */
-  readonly selectable = input<boolean>(false);
-  /** Typed selection supersedes legacy selectable=true, which remains multiple mode. */
-  readonly selectionMode = input<NeuTableSelectionMode>('none');
+  /** Historical Neural owner. `true` preserves the original multiple-selection behavior. */
+  readonly selectable = input<NeuTableSelectable>(false);
   readonly compareSelectionBy = input<NeuTableSelectionComparison>('key');
   /** Presence of this input makes only the canonical selection slice controlled. */
   readonly selection = input<NeuTableSelection<T> | undefined>(undefined);
@@ -2270,54 +2480,20 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly selectAllScope = input<NeuTableSelectAllScope>('filtered');
   readonly selectOnRowClick = input<boolean>(true);
   readonly metaKeySelection = input<boolean>(false);
-  readonly expandable = input<boolean>(false);
-  readonly expandMode: _angular_core.InputSignal<'multiple' | 'single'> = input<
-    'multiple' | 'single'
-  >('multiple');
+  readonly expandMode = input<NeuTableExpandMode>('none');
   /** Presence makes expanded row keys consumer-authoritative. */
   readonly expandedRowKeys = input<readonly unknown[] | undefined>(undefined);
-  readonly exportable = input<boolean>(false);
-  readonly exportFileName = input<string>('export');
   readonly pageSizeOptions = input<number[]>([]);
   readonly paginatorPosition = input<NeuTablePaginatorPosition>('bottom');
-  readonly pageLinkSize = input<number>(5);
-  readonly showPageLinks = input<boolean>(true);
-  readonly showFirstLastPageButtons = input<boolean>(true);
-  readonly showCurrentPageReport = input<boolean>(true);
-  readonly currentPageReportTemplate = input<string | undefined>(undefined);
-  readonly showJumpToPageInput = input<boolean>(false);
-  readonly showJumpToPageDropdown = input<boolean>(false);
-  readonly alwaysShowPaginator = input<boolean>(true);
   readonly stickyHeader = input<boolean>(false);
   /** Fixed CSS max-height or `flex` for parent-driven vertical scrolling. */
   readonly scrollHeight = input<string | undefined>(undefined);
   readonly virtualScroll = input<boolean>(false);
-  readonly virtualScrollVisibleItems = input<number>(8);
-  /** Fixed virtual row height in pixels; density height is the fallback. */
-  readonly virtualScrollItemSize = input<number | undefined>(undefined);
-  /** Additional logical rows rendered/requested before and after the viewport. */
-  readonly virtualScrollOverscan = input<number>(3);
-  /** Debounce applied to virtual range rendering and lazy requests. */
-  readonly virtualScrollDelay = input<number>(0);
-  /** Retain every visited virtual interval instead of replacing the active window. */
-  readonly virtualScrollAppendOnly = input<boolean>(false);
-  /** Observe available viewport size and derive visible rows automatically. */
-  readonly virtualScrollAutoSize = input<boolean>(false);
-  /** Coalescing delay for container/header/frozen-row resize work. */
-  readonly virtualScrollResizeDelay = input<number>(10);
-  /** Optional lazy request size independent from visible rows and overscan. */
-  readonly virtualScrollStep = input<number | undefined>(undefined);
-  /** Presentation-only cells for unloaded sparse rows; no fake T is exposed. */
-  readonly lazyPlaceholderTemplate = input<
-    TemplateRef<NeuTableLazyPlaceholderContext<T>> | undefined
-  >(undefined);
   readonly resizableColumns = input<boolean>(false);
   readonly columnResizeMode = input<NeuTableColumnResizeMode>('fit');
   readonly reorderableColumns = input<boolean>(false);
   readonly reorderableRows = input<boolean>(false);
   readonly rowReorderable = input<((row: T, index: number) => boolean) | undefined>(undefined);
-  readonly moveRowUpAriaLabel = input<string>('Move row up');
-  readonly moveRowDownAriaLabel = input<string>('Move row down');
   readonly contextMenu = input<NeuContextMenuDirective | null>(null);
   readonly contextMenuRowDisabled = input<((row: T, index: number) => boolean) | undefined>(
     undefined,
@@ -2325,17 +2501,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   /** Presence makes the transient context-menu row selection consumer-authoritative. */
   readonly contextMenuSelection = input<T | null | undefined>(undefined);
   readonly columnChooser = input<boolean>(false);
-  readonly columnChooserLabel = input<string>('Columns');
   readonly groupBy = input<NeuTableGroupBy<T> | ''>('');
-  readonly groupHeaderLabel = input<string>('Group:');
   readonly rowGroupMode = input<NeuTableRowGroupMode>('subheader');
   readonly groupRowsByOrder = input<NeuTableGroupSortOrder>(1);
   readonly expandableRowGroups = input<boolean>(false);
   readonly expandedGroupKeys = input<readonly unknown[] | undefined>(undefined);
-  readonly expandGroupAriaLabel = input<string>('Expand group');
-  readonly collapseGroupAriaLabel = input<string>('Collapse group');
-  readonly inlineEdit = input<boolean>(false);
-  readonly editMode = input<NeuTableEditMode>('cell');
+  readonly editMode = input<NeuTableEditMode>('none');
   readonly editingRowKeys = input<readonly unknown[] | undefined>(undefined);
   readonly editingCell = input<NeuTableEditingCellState | null | undefined>(undefined);
   readonly cellEditValidator = input<
@@ -2344,13 +2515,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly rowEditValidator = input<
     ((event: NeuTableRowEditEvent<T>) => NeuTableEditValidationResult) | undefined
   >(undefined);
-  readonly inlineEditLabel = input<string>('Edit cell');
-  readonly saveInlineEditLabel = input<string>('Save cell');
-  readonly cancelInlineEditLabel = input<string>('Cancel cell edit');
   readonly initialLayout = input<NeuTableLayout | null>(null);
   readonly rowKey = input<NeuTableRowKey<T>>('id' as NeuTableRowKey<T>);
-  /** Computed canonical identity takes precedence over rowKey when supplied. */
-  readonly rowIdentity = input<NeuTableRowIdentity<T> | undefined>(undefined);
   /** Render-only tracking hook equivalent to Prime's rowTrackBy callback. */
   readonly rowTrackBy = input<NeuTableRowTrackBy<T> | undefined>(undefined);
   readonly bordered = input<boolean>(true);
@@ -2362,7 +2528,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly showRowNumbers = input<boolean>(false);
   readonly rowClass = input<((row: T) => string) | undefined>(undefined);
   readonly footerRow = input<Record<string, string | number> | undefined>(undefined);
-  readonly emptyStateTemplate = input<TemplateRef<void> | undefined>(undefined);
   readonly serverSide = input<boolean>(false);
   /** Presence makes every server/query slice consumer-authoritative. */
   readonly query = input<NeuTableQueryState | undefined>(undefined);
@@ -2372,31 +2537,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   /** Logical index of data[0]. Presence opts server virtual scrolling into sparse mode. */
   readonly dataFirst = input<number | undefined>(undefined);
   readonly multiSort = input<boolean>(false);
-  readonly exportFormats = input<NeuTableExportFormat[]>(['csv']);
-  readonly exportColumns = input<string[]>([]);
-  readonly exportScope = input<NeuTableExportScope>('auto');
-  readonly csvSeparator = input<string>(',');
-  readonly csvFormulaPolicy = input<NeuTableCsvFormulaPolicy>('escape');
-  readonly exportValue = input<NeuTableExportValue<T> | undefined>(undefined);
   readonly selectionActions = input<readonly NeuTableSelectionAction<T>[]>([]);
-
-  // ── URL params ────────────────────────────────────────────────────────
-  readonly pageParam = input<string>('page');
-  readonly searchParam = input<string>('q');
-  readonly sortParam = input<string>('sort');
-  readonly sortDirParam = input<string>('sortDir');
-  /** Param used to persist multi-sort state in the URL / Param para persistir multisort en la URL */
-  readonly multiSortParam = input<string>('msort');
-  /**
-   * Activa o desactiva la sincronización de estado con los queryParams de la URL.
-   * Cuando es false, la paginación, búsqueda y ordenación se gestionan con
-   * señales internas sin tocar la URL del navegador.
-   *
-   * Enables or disables URL query-param synchronization.
-   * When false, pagination, search and sort are managed with internal signals
-   * and the browser URL is never modified.
-   */
-  readonly useUrlState = input<boolean>(true);
 
   // ── Automatic state persistence ─────────────────────────────────────
   /** Presence enables versioned automatic persistence, matching PrimeNG's stateful opt-in. */
@@ -2558,6 +2699,15 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     ..._NEU_TABLE_ADVANCED_FILTER_TEXTS,
     ...this.advancedFilterTexts(),
   }));
+  protected readonly exactMatchLabel = computed(() => this._advancedFilterText().exactMatch);
+  protected readonly clearFilterLabel = computed(() => this._advancedFilterText().clear);
+  protected readonly filterPlaceholder = computed(() => this._advancedFilterText().placeholder);
+  protected readonly filterAriaPrefix = computed(() => this._advancedFilterText().ariaPrefix);
+  protected readonly filterFromLabel = computed(() => this._advancedFilterText().from);
+  protected readonly filterToLabel = computed(() => this._advancedFilterText().to);
+  protected readonly filterTrueLabel = computed(() => this._advancedFilterText().yes);
+  protected readonly filterFalseLabel = computed(() => this._advancedFilterText().no);
+  protected readonly allFilterOptionLabel = computed(() => this._advancedFilterText().all);
   protected readonly _filterOverlayBooleanOptions = computed<NeuSelectOption<boolean>[]>(() => [
     { label: this._advancedFilterText().yes, value: true },
     { label: this._advancedFilterText().no, value: false },
@@ -2667,6 +2817,20 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _pendingViewportBinding = false;
 
   constructor() {
+    const managedRowAdapter: NeuTableManagedRowAdapter<T> = {
+      state: (entry) => this._managedRowState(entry),
+      pointerDown: (entry, event) => this.onRowPointerDown(entry.row, entry.frozen, event),
+      dragStart: (entry, event) => this.onRowDragStart(entry.row, entry.frozen, event),
+      dragOver: (entry, event) => this.onRowDragOver(entry.row, entry.frozen, event),
+      drop: (entry, event) => this.onRowDrop(entry.row, entry.frozen, event),
+      dragEnd: (event) => this.onRowDragEnd(event),
+      contextMenu: (entry, event) => this.onRowContextMenu(entry.row, entry.logicalIndex, event),
+      click: (entry, event) => this.onRowClick(entry.row, event),
+      doubleClick: (entry) => this.rowDblClick.emit(entry.row),
+      focus: (entry, event) => this.onRowFocus(entry.row, event),
+      keydown: (entry, event) => this.onRowKeydown(entry.row, event),
+    };
+    this._managedRowCoordinator.connect(managedRowAdapter);
     afterNextRender(() => this._browserEnhancementsReady.set(true));
     this._destroyRef.onDestroy(() => {
       this._destroyed = true;
@@ -2681,6 +2845,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this._cancelPendingVirtualScroll();
       this._filterScheduler.cancel();
       this._viewportController.disconnect();
+      this._managedRowCoordinator.disconnect();
       this._disposeAllFilterControls();
     });
 
@@ -2713,7 +2878,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     effect(() => {
       const selection = this.selection();
       const mode = this.effectiveSelectionMode();
-      this.rowIdentity();
       this.rowKey();
       this.compareSelectionBy();
       this.rowKey();
@@ -2980,7 +3144,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     effect(() => {
       this.scrollHeight();
       this.virtualScrollAutoSize();
-      this.virtualScrollResizeDelay();
       this.stickyHeader();
       this.renderedPageEntries();
       this.headerGroupTemplate();
@@ -3834,9 +3997,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const data = this.filteredData();
     const sorted = this.sortable()
       ? (this._sortController.sort(
-      data,
-      this.currentSort(),
-      this._typedColumns(),
+          data,
+          this.currentSort(),
+          this._typedColumns(),
         ) as NeuTableRuntimeRow<T>[])
       : [...data];
     const groupKey = this.groupBy();
@@ -4014,11 +4177,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   );
 
   readonly _expansionEnabled = computed(
-    () => this.expandable() && (!this._lazyVirtualActive() || this._frozenRows().length > 0),
+    () =>
+      this.expandMode() !== 'none' && (!this._lazyVirtualActive() || this._frozenRows().length > 0),
   );
 
   protected _rowExpansionEnabled(frozen: boolean): boolean {
-    return this.expandable() && (frozen || !this._lazyVirtualActive());
+    return this.expandMode() !== 'none' && (frozen || !this._lazyVirtualActive());
   }
 
   private readonly _navigableRows = computed<NeuTableRuntimeRow<T>[]>(() => {
@@ -4109,22 +4273,25 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       ) {
         group.rows.forEach((row, offset) => {
           const rowIndex = group.firstRowIndex + offset;
-      entries.push({
-        kind: 'row',
-        key: this.getRowKey(row),
-        row,
-        rowIndex,
+          entries.push({
+            kind: 'row',
+            key: this.getRowKey(row),
+            row,
+            rowIndex,
             logicalIndex: baseIndex + rowIndex,
             frozen: false,
           });
-      });
-        if (this.rowGroupMode() === 'subheader' && this.groupFooterTemplate()) {
+        });
+        if (
+          this.rowGroupMode() === 'subheader' &&
+          (this.groupFooterTemplate() || this.bodySectionTemplate())
+        ) {
           entries.push({
             kind: 'group-footer',
             key: `group-footer:${String(group.key)}:${group.groupIndex}`,
             group,
             frozen: false,
-    });
+          });
         }
       }
     }
@@ -4169,7 +4336,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
             frozen: true,
           });
         });
-        if (this.rowGroupMode() === 'subheader' && this.groupFooterTemplate()) {
+        if (
+          this.rowGroupMode() === 'subheader' &&
+          (this.groupFooterTemplate() || this.bodySectionTemplate())
+        ) {
           entries.push({
             kind: 'group-footer',
             key: `frozen-group-footer:${String(group.key)}:${group.groupIndex}`,
@@ -4335,8 +4505,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
    * Custom grouped headers opt out because their row count is consumer-owned.
    */
   protected readonly _ariaCoordinatesActive = computed(
-    () =>
-      (this._virtualScrollActive() || this._lazyVirtualActive()) && !this.headerGroupTemplate(),
+    () => (this._virtualScrollActive() || this._lazyVirtualActive()) && !this.headerGroupTemplate(),
   );
 
   readonly _ariaRowCount = computed<number | null>(() =>
@@ -4345,9 +4514,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       : null,
   );
 
-  protected bodyAriaRowIndex(
-    entry: Extract<NeuTablePageEntry<T>, { kind: 'row' }>,
-  ): number | null {
+  protected bodyAriaRowIndex(entry: Extract<NeuTablePageEntry<T>, { kind: 'row' }>): number | null {
     if (!this._ariaCoordinatesActive()) return null;
     return (
       this._ariaHeaderRowCount() +
@@ -4926,7 +5093,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _selectionConfirmPending = signal<string | null>(null);
 
   private readonly effectiveSelectionMode = computed<NeuTableSelectionMode>(() => {
-    return this._compatibility.selectionMode(this.selectionMode(), this.selectable());
+    const selectable = this.selectable();
+    if (selectable === false) return 'none';
+    return selectable === true ? 'multiple' : selectable;
   });
   protected readonly selectionEnabled = computed(() => this.effectiveSelectionMode() !== 'none');
   protected readonly multipleSelection = computed(
@@ -5213,11 +5382,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       if (multiple) {
         this._urlAdapter.writeSortEntries(this._urlConfig(), snapshot, this.resetPageOnSort());
       } else {
-        this._urlAdapter.writeSort(
-          this._urlConfig(),
-          snapshot[0] ?? null,
-          this.resetPageOnSort(),
-        );
+        this._urlAdapter.writeSort(this._urlConfig(), snapshot[0] ?? null, this.resetPageOnSort());
       }
     }
   }
@@ -5652,13 +5817,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         const transform = this.exportValue();
         return transform
           ? transform({
-            row,
-            rowIndex,
-            column,
-            field: column.key,
-            header: column.exportHeader ?? column.header,
-            value,
-          })
+              row,
+              rowIndex,
+              column,
+              field: column.key,
+              header: column.exportHeader ?? column.header,
+              value,
+            })
           : value;
       },
     }));
@@ -5792,11 +5957,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   getRowKey(row: T): unknown {
-    const identity = this.rowIdentity();
+    const identity = this.rowKey();
     const resolved =
-      typeof identity === 'function'
-        ? identity(row)
-        : this.getRowValue(row, String(identity ?? this.rowKey()));
+      typeof identity === 'function' ? identity(row) : this.getRowValue(row, String(identity));
     if (resolved !== undefined) return resolved;
     try {
       return JSON.stringify(row);
@@ -5809,11 +5972,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const comparison = this.compareSelectionBy();
     if (comparison === 'equals') return this._referenceIdentity.key(row);
     if (comparison === 'deepEquals') {
-      const identity = this.rowIdentity();
+      const identity = this.rowKey();
       const resolved =
-        typeof identity === 'function'
-          ? identity(row)
-          : this.getRowValue(row, String(identity ?? this.rowKey()));
+        typeof identity === 'function' ? identity(row) : this.getRowValue(row, String(identity));
       return neuTableDeepSelectionToken(resolved === undefined ? row : resolved);
     }
     return this.getRowKey(row);
@@ -5921,7 +6082,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         this._viewportController.observe(
           view,
           [container, ...(header ? [header] : []), ...frozen],
-          this.virtualScrollResizeDelay(),
+          10,
           () => this._measureViewportGeometry(container, header, frozen),
         );
       },
@@ -5965,6 +6126,50 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     };
   }
 
+  private _managedRowState(entry: NeuTableBodyDataRenderEntry<T>) {
+    const row = entry.row;
+    const selectable = this.isRowSelectable(row);
+    const selected = this.isRowSelected(row);
+    const key = this.getRowKey(row);
+    const renderedIndex = this.renderedPageEntries().findIndex(
+      (candidate) =>
+        candidate.kind === 'row' &&
+        candidate.frozen === entry.frozen &&
+        candidate.logicalIndex === entry.logicalIndex &&
+        Object.is(this.getRowKey(candidate.row), key),
+    );
+    const frozenStackKey = entry.frozen ? `${Math.max(0, renderedIndex)}:row` : null;
+    return {
+      rowClass: this.getRowClass(row),
+      selected,
+      frozen: entry.frozen,
+      contextSelected: this.isContextMenuRow(row),
+      dragging: Object.is(this._draggedRowKey(), key),
+      dropPlacement: Object.is(this._rowDropTarget()?.key, key)
+        ? (this._rowDropTarget()?.placement ?? null)
+        : null,
+      disabled: !selectable,
+      clickable: this.selectionEnabled() && this.selectOnRowClick() && selectable,
+      tabIndex: this.rowTabIndex(row),
+      navigable: this.isNavigableRow(row),
+      ariaSelected: this.selectionEnabled() && selectable ? selected : null,
+      ariaDisabled: this.selectionEnabled() && !selectable ? true : null,
+      ariaRowIndex: this.bodyAriaRowIndex({
+        kind: 'row',
+        key: entry.key,
+        row: row as NeuTableRuntimeRow<T>,
+        rowIndex: entry.rowIndex,
+        logicalIndex: entry.logicalIndex,
+        frozen: entry.frozen,
+      }),
+      logicalIndex: entry.logicalIndex,
+      frozenStackKey,
+      top: frozenStackKey ? this.frozenRowTop(frozenStackKey) : null,
+      height: this._virtualScrollActive() && !entry.frozen ? this._virtualItemSize() : null,
+      draggable: this.isRowDragArmed(row, entry.frozen) ? true : null,
+    } as const;
+  }
+
   getRowClass(row: T): string {
     return this.rowClass()?.(row) ?? '';
   }
@@ -5999,16 +6204,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
         const d = val instanceof Date ? val : new Date(String(val));
         return isNaN(d.getTime())
           ? String(val)
-          : d.toLocaleDateString(
-              locale,
-              {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                timeZone: this._temporal.timeZone(),
-                ...typedColumn.dateFormat,
-              },
-            );
+          : d.toLocaleDateString(locale, {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              timeZone: this._temporal.timeZone(),
+              ...typedColumn.dateFormat,
+            });
       }
       case 'number':
         return new Intl.NumberFormat(locale, typedColumn.numberFormat).format(Number(val));
@@ -6068,7 +6270,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   startCellEdit(row: T, col: NeuTableColumnInput<T>, event?: Event): void {
     const typedColumn = this.asRuntimeColumn(col);
-    if (!this.inlineEdit() || this.editMode() !== 'cell' || !typedColumn.editable) {
+    if (this.editMode() !== 'cell' || !typedColumn.editable) {
       return;
     }
 
@@ -6302,7 +6504,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   startRowEdit(row: NeuTableRuntimeRow<T>): void {
-    if (!this.inlineEdit() || this.editMode() !== 'row') return;
+    if (this.editMode() !== 'row') return;
     const rowKey = this.getRowKey(row);
     this._editingController.beginRow(rowKey, row);
     this._editingRevision.update((revision) => revision + 1);
@@ -6394,6 +6596,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     };
   }
 
+  protected emptyContext() {
+    return Object.freeze({ ...this.structuralContext(), message: this.emptyMessage() });
+  }
+
   paginatorTemplateContext(): NeuTablePaginatorTemplateContext {
     const event = this._paginatorEvent();
     return {
@@ -6408,6 +6614,106 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       goToPage: (page) => this.goToPage(page),
       setPageSize: (pageSize) => this.onPageSizeChange(pageSize),
     };
+  }
+
+  protected readonly bodySectionContext = computed<NeuTableBodySectionContext<T>>(() => {
+    const columns = Object.freeze([...this.visibleColumns()]) as readonly NeuTableColumn<T>[];
+    const colspan = this.totalColspan();
+    let entries: readonly NeuTableBodyRenderEntry<T>[];
+
+    if (this.loading() && !this._lazyVirtualActive()) {
+      entries = Object.freeze([
+        { kind: 'loading', key: 'loading', columns, colspan } satisfies NeuTableBodyRenderEntry<T>,
+      ]);
+    } else if (this._tableEmpty()) {
+      entries = Object.freeze([
+        {
+          kind: 'empty',
+          key: 'empty',
+          message: this.emptyMessage(),
+          columns,
+          colspan,
+        } satisfies NeuTableBodyRenderEntry<T>,
+      ]);
+    } else {
+      entries = Object.freeze(
+        this.renderedPageEntries().map((entry): NeuTableBodyRenderEntry<T> => {
+          if (entry.kind === 'row') {
+            const context = this.bodyContext(
+              entry.row,
+              entry.rowIndex,
+              entry.logicalIndex,
+              entry.frozen,
+            );
+            const dataEntry: NeuTableBodyDataRenderEntry<T> = {
+              kind: 'data',
+              key: entry.key,
+              row: context.row,
+              rowIndex: context.rowIndex,
+              logicalIndex: context.logicalIndex,
+              frozen: context.frozen,
+              columns: context.columns,
+              group: context.group ? this._publicGroup(context.group) : null,
+              selected: context.selected,
+              expanded: context.expanded,
+              editing: context.editing,
+              toggleSelection: context.toggleSelection,
+              toggleExpansion: context.toggleExpansion,
+              edit: context.edit,
+              reorder: context.reorder,
+            };
+            return Object.freeze(dataEntry);
+          }
+          if (entry.kind === 'group' || entry.kind === 'group-footer') {
+            return Object.freeze({
+              kind: entry.kind === 'group' ? 'group-header' : 'group-footer',
+              key: entry.key,
+              group: this._publicGroup(entry.group),
+              frozen: entry.frozen,
+              toggle: () => this.toggleGroup(entry.group),
+            });
+          }
+          if (entry.kind === 'placeholder') {
+            return Object.freeze({
+              kind: 'placeholder',
+              key: entry.key,
+              logicalIndex: entry.logicalIndex,
+              columns,
+              colspan,
+              frozen: false,
+            });
+          }
+          return Object.freeze({
+            kind: 'spacer',
+            key: entry.key,
+            height: entry.height,
+            position: entry.position,
+            colspan,
+          });
+        }),
+      );
+    }
+
+    const virtualized = this._virtualScrollActive() || this._lazyVirtualActive();
+    return Object.freeze({
+      $implicit: entries,
+      entries,
+      columns,
+      colspan,
+      virtualized,
+      siblingRowsSupported: !virtualized,
+    });
+  });
+
+  private _publicGroup(group: NeuTableGroup<T>): NeuTableGroup<T> {
+    return Object.freeze({
+      key: group.key,
+      label: group.label,
+      rows: Object.freeze([...group.rows]),
+      count: group.count,
+      groupIndex: group.groupIndex,
+      expanded: group.expanded,
+    });
   }
 
   bodyContext(
@@ -7372,8 +7678,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   private _normalizeExpansionKeys(
     keys: Iterable<unknown>,
-    mode: 'single' | 'multiple',
+    mode: NeuTableExpandMode,
   ): ReadonlySet<unknown> {
+    if (mode === 'none') return new Set();
     const normalized = new Set(keys);
     if (mode === 'multiple' || normalized.size <= 1) return normalized;
     const first = normalized.values().next().value;

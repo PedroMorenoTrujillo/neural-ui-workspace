@@ -49,7 +49,10 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
     fixture.componentRef.setInput('pagination', false);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -193,7 +196,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
     expect(server).toHaveLength(1);
     expect(server[0].sort).toEqual({ key: 'name', dir: 'asc' });
 
-    const urlFixture = await createTable({ sortable: true, useUrlState: true });
+    const urlFixture = await createTable({ sortable: true, urlStateOptions: { enabled: true } });
     const router = TestBed.inject(Router);
     const urlEvents = vi.fn();
     urlFixture.componentInstance.sortChange.subscribe(urlEvents);
@@ -210,7 +213,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('uses one roving row tab stop and skips disabled and generated group rows', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: (row: Row) => row.disabled !== true,
       groupBy: 'name',
     });
@@ -229,10 +232,10 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
     const plain = await createTable();
     expect(rows(plain).every((row) => !row.hasAttribute('tabindex'))).toBe(true);
 
-    const empty = await createTable({ selectionMode: 'multiple', data: [] });
+    const empty = await createTable({ selectable: 'multiple', data: [] });
     expect(rows(empty)).toHaveLength(0);
 
-    const selected = await createTable({ selectionMode: 'multiple', selection: [ROWS[2]] });
+    const selected = await createTable({ selectable: 'multiple', selection: [ROWS[2]] });
     expect(rows(selected).map((row) => row.getAttribute('tabindex'))).toEqual([
       '-1',
       '-1',
@@ -243,7 +246,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('navigates Up/Down/Home/End within rendered selectable rows', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: (row: Row) => row.disabled !== true,
     });
     const dataRows = rows(fixture);
@@ -263,7 +266,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
   });
 
   it('replaces single selection with Space/Enter and keeps radio/ARIA state synchronized', async () => {
-    const fixture = await createTable({ selectionMode: 'single' });
+    const fixture = await createTable({ selectable: 'single' });
     const dataRows = rows(fixture);
     const changes: Row[][] = [];
     const order: string[] = [];
@@ -293,7 +296,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('toggles multiple selection and extends, contracts and reverses an atomic range', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: (row: Row) => row.disabled !== true,
     });
     const dataRows = rows(fixture);
@@ -323,7 +326,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('selects from the last anchor to the focused row with Shift+Space', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: (row: Row) => row.disabled !== true,
     });
     const dataRows = rows(fixture);
@@ -338,7 +341,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('applies Shift+click ranges in the current sorted order and excludes disabled rows', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: (row: Row) => row.disabled !== true,
       sortable: true,
     });
@@ -389,7 +392,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
       { id: 12, name: 'Match A' },
       { id: 13, name: 'Match B' },
     ];
-    const fixture = await createTable({ data, selectionMode: 'multiple', sortable: true });
+    const fixture = await createTable({ data, selectable: 'multiple', sortable: true });
     keydown(fixture, rows(fixture)[0], ' ');
     fixture.componentInstance.onSearch({ target: { value: 'Match' } } as unknown as Event);
     fixture.componentInstance.sortBy('name');
@@ -414,7 +417,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('maps Ctrl+A and Meta+A to the configured select-all event contract', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: (row: Row) => row.disabled !== true,
       selectAllScope: 'filtered',
     });
@@ -441,7 +444,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('selects only loaded selectable rows for a partial server result', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       serverSide: true,
       totalItems: 500,
       rowSelectable: (row: Row) => row.disabled !== true,
@@ -454,7 +457,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('limits keyboard select-all and ranges to the current loaded page', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       pagination: true,
       pageSize: 2,
       selectAllScope: 'page',
@@ -482,7 +485,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('keeps controlled keyboard proposals authoritative until echo without replay', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       selection: [],
       rowSelectable: (row: Row) => row.disabled !== true,
     });
@@ -515,7 +518,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('keeps controlled keyboard range proposal-only and makes consumer echo silent', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       selection: [ROWS[0]],
       rowSelectable: (row: Row) => row.disabled !== true,
     });
@@ -540,7 +543,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
   });
 
   it('keeps controlled Shift+click range proposal-only and makes consumer echo silent', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple', selection: [] });
+    const fixture = await createTable({ selectable: 'multiple', selection: [] });
     const changes: Row[][] = [];
     fixture.componentInstance.selectionChange.subscribe((event) => changes.push(event));
     const dataRows = rows(fixture);
@@ -563,8 +566,8 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('does not steal row keys from expansion and checkbox descendants', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
-      expandable: true,
+      selectable: 'multiple',
+      expandMode: 'multiple',
     });
     const dataRows = rows(fixture);
     const expand = dataRows[0].querySelector('.neu-table__expand-btn') as HTMLButtonElement;
@@ -580,7 +583,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
   });
 
   it('leaves navigation, activation and Ctrl+A native for interactive row descendants', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple' });
+    const fixture = await createTable({ selectable: 'multiple' });
     const first = rows(fixture)[0];
     const host = first.querySelector('td:last-child') as HTMLTableCellElement;
     const descendants = [
@@ -612,12 +615,12 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
   });
 
   it('does not handle row shortcuts for single mode or a disabled row', async () => {
-    const single = await createTable({ selectionMode: 'single' });
+    const single = await createTable({ selectable: 'single' });
     expect(keydown(single, rows(single)[0], 'a', { ctrlKey: true }).defaultPrevented).toBe(false);
     expect(selectedIds(single)).toEqual([]);
 
     const disabled = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: (row: Row) => row.disabled !== true,
     });
     const disabledRow = rows(disabled)[1];
@@ -627,7 +630,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
   });
 
   it('announces selection and expansion actions truthfully', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple', expandable: true });
+    const fixture = await createTable({ selectable: 'multiple', expandMode: 'multiple' });
     const first = rows(fixture)[0];
     const checkbox = first.querySelector('input[type="checkbox"]') as HTMLInputElement;
     const expand = first.querySelector('.neu-table__expand-btn') as HTMLButtonElement;
@@ -644,7 +647,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
   });
 
   it('preserves logical focus by row key after sort/replacement and normalizes after filtering', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple', sortable: true });
+    const fixture = await createTable({ selectable: 'multiple', sortable: true });
     let dataRows = rows(fixture);
     dataRows[2].focus();
     fixture.componentInstance.sortBy('name');
@@ -679,7 +682,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
 
   it('normalizes one deterministic tab stop after first, middle and last focused-row removal', async () => {
     for (const removedId of [0, 2, 3]) {
-      const fixture = await createTable({ selectionMode: 'multiple' });
+      const fixture = await createTable({ selectable: 'multiple' });
       const focused = rows(fixture).find((row) => row.textContent?.includes(ROWS[removedId].name));
       focused?.focus();
       fixture.componentRef.setInput(
@@ -700,9 +703,9 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
     const virtualRows = Array.from({ length: 20 }, (_, id) => ({ id, name: `Row ${id}` }));
     const fixture = await createTable({
       data: virtualRows,
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       virtualScroll: true,
-      virtualScrollVisibleItems: 3,
+      virtualizationOptions: { visibleItems: 3 },
     });
     const rendered = rows(fixture);
     expect(rendered.length).toBeLessThan(virtualRows.length);

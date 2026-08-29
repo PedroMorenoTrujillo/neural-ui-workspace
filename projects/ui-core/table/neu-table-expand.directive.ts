@@ -6,7 +6,7 @@ import type { NeuTableRow } from './neu-table.types';
  *
  * Uso:
  * ```html
- * <neu-table [expandable]="true" [columns]="cols" [data]="rows">
+ * <neu-table expandMode="multiple" [columns]="cols" [data]="rows">
  *   <ng-template neuTableExpand let-row>
  *     <div>{{ row.details }}</div>
  *   </ng-template>

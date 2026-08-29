@@ -12,10 +12,9 @@ const commands = [
   ['npm', ['run', 'audit:logical-css']],
   ['npm', ['run', 'audit:contracts']],
   ['npm', ['run', 'audit:docs']],
+  ['npm', ['run', 'test:table-body-section-template-types']],
   ['npm', ['run', 'test:schematics']],
-  ...(process.env['NEURAL_UI_FULL_MATRIX'] === '1'
-    ? [['npm', ['run', 'test:compat:matrix']]]
-    : []),
+  ...(process.env['NEURAL_UI_FULL_MATRIX'] === '1' ? [['npm', ['run', 'test:compat:matrix']]] : []),
   ['npm', ['run', 'test:imports']],
   ['npm', ['run', 'test:ssr-smoke']],
   ['npm', ['run', 'verify:package']],

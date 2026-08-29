@@ -14,7 +14,7 @@ import {
 import type {
   NeuTableCoreColumn,
   NeuTableCoreCellContext,
-  NeuTableCoreRowIdentity,
+  NeuTableCoreRowKey,
   NeuTableCoreRowTrackBy,
 } from './neu-table-core.types';
 
@@ -42,8 +42,7 @@ const COLUMNS: readonly NeuTableCoreColumn<Row>[] = [
       [data]="rows()"
       [loading]="loading()"
       [skeletonRows]="skeletonRows()"
-      [rowKey]="rowKey()"
-      [rowIdentity]="rowIdentity()"
+      [rowKey]="rowIdentity() ?? rowKey()"
       [rowTrackBy]="rowTrackBy()"
       tableAriaLabel="Invoices"
       [showRowNumbers]="true"
@@ -71,7 +70,7 @@ class HostComponent {
   readonly customBody = signal(false);
   readonly loading = signal(false);
   readonly skeletonRows = signal(3);
-  readonly rowIdentity = signal<NeuTableCoreRowIdentity<Row> | undefined>(undefined);
+  readonly rowIdentity = signal<NeuTableCoreRowKey<Row> | undefined>(undefined);
   readonly rowTrackBy = signal<NeuTableCoreRowTrackBy<Row> | undefined>(undefined);
   readonly rowKey = signal<string>('id');
 }
@@ -97,10 +96,14 @@ class HostComponent {
         <span class="custom-caption">{{ rows.length }} invoices</span>
       </ng-template>
       <ng-template neuTableCoreHeader let-columns="columns">
-        <tr class="custom-header"><th [attr.colspan]="columns.length">Ledger</th></tr>
+        <tr class="custom-header">
+          <th [attr.colspan]="columns.length">Ledger</th>
+        </tr>
       </ng-template>
       <ng-template neuTableCoreLoading let-columns="columns">
-        <tr class="custom-loading"><td [attr.colspan]="columns.length">Fetching</td></tr>
+        <tr class="custom-loading">
+          <td [attr.colspan]="columns.length">Fetching</td>
+        </tr>
       </ng-template>
     </neu-table-core>
   `,
@@ -292,7 +295,9 @@ describe('NeuTableCoreComponent', () => {
     expect(fixture.nativeElement.querySelector('.custom-column-cell')?.textContent).toContain(
       'Ada=10',
     );
-    expect(fixture.nativeElement.querySelector('tfoot .neu-table-core__td--row-number')).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('tfoot .neu-table-core__td--row-number'),
+    ).not.toBeNull();
     expect(
       fixture.nativeElement
         .querySelector('neu-table-core')
@@ -313,9 +318,7 @@ describe('NeuTableCoreComponent', () => {
     expect(table.typedRow(row)).toBe(row);
     expect(table.rowTrackingKey(0, row)).toBe(1);
 
-    fixture.componentInstance.rowTrackBy.set(
-      (index: number, value: Row) => `${index}:${value.id}`,
-    );
+    fixture.componentInstance.rowTrackBy.set((index: number, value: Row) => `${index}:${value.id}`);
     fixture.detectChanges();
     expect(table.rowTrackingKey(2, row)).toBe('2:1');
     fixture.componentInstance.rowTrackBy.set(undefined);

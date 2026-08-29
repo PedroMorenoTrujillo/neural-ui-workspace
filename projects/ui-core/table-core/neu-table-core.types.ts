@@ -6,9 +6,7 @@ export type NeuTableCoreColumnKey<T> = [keyof T] extends [never]
   ? string
   : Extract<keyof T, string>;
 
-export type NeuTableCoreRowIdentity<T> =
-  | NeuTableCoreColumnKey<T>
-  | ((row: T) => unknown);
+export type NeuTableCoreRowKey<T> = string | ((row: T) => unknown);
 
 export type NeuTableCoreRowTrackBy<T> = (index: number, row: T) => unknown;
 
@@ -35,9 +33,7 @@ export interface NeuTableCoreStructuralContext<T extends object = NeuTableCoreRo
   readonly rows: readonly T[];
 }
 
-export interface NeuTableCoreBodyContext<
-  T extends object = NeuTableCoreRow,
-> {
+export interface NeuTableCoreBodyContext<T extends object = NeuTableCoreRow> {
   readonly $implicit: T;
   readonly row: T;
   readonly rowIndex: number;
@@ -56,7 +52,8 @@ export interface NeuTableCoreCellContext<
   readonly column: NeuTableCoreColumn<T, K>;
 }
 
-export interface NeuTableCoreEmptyContext<T extends object = NeuTableCoreRow>
-  extends NeuTableCoreStructuralContext<T> {
+export interface NeuTableCoreEmptyContext<
+  T extends object = NeuTableCoreRow,
+> extends NeuTableCoreStructuralContext<T> {
   readonly message: string;
 }

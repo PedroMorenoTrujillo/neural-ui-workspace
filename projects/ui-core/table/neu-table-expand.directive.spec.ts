@@ -19,7 +19,7 @@ const DATA: Row[] = [
 
 @Component({
   template: `
-    <neu-table [columns]="columns" [data]="data" [expandable]="true">
+    <neu-table [columns]="columns" [data]="data" expandMode="multiple">
       <ng-template neuTableExpand let-row>
         <div class="expand-content">{{ row['details'] }}</div>
       </ng-template>

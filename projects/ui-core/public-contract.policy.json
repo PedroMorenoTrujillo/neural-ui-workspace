@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "description": "Classification metadata for the declaration-derived Neural UI public contract. This file changes support status only; it does not alter runtime behavior.",
   "overrides": {
     "./compare#NEU_COMPARE_INSTANCE": "INTERNAL/UNSUPPORTED",
@@ -90,10 +90,7 @@
     "./speed-dial#NeuSpeedDialComponent.onVisibleChange": "openChange (planned H5 canonical event)",
     "./speed-dial#NeuSpeedDialComponent.onShow": "opened (planned H5 canonical event)",
     "./speed-dial#NeuSpeedDialComponent.onHide": "closed (planned H5 canonical event)",
-    "./table#NeuTableComponent.rowIdentity": "rowKey",
-    "./table#NeuTableComponent.selectable": "selectionMode",
     "./table#NeuTableComponent.serverStateChange": "queryChange",
-    "./table#NeuTableComponent.toolbarExtraRef": "neuTableToolbar",
     "./table#NeuTableComponent.virtualScrollEvent": "virtualRangeChange (pending H5 semantic verification)",
     "./table#NeuTableServerState": "NeuTableQueryState",
     "./tree-table#NeuTreeTableComponent.serverStateChange": "queryChange (planned H5 canonical alias)",
@@ -106,6 +103,7 @@
     "writeValue",
     "ngTemplateContextGuard"
   ],
+  "closedImperativeDeclarations": ["NeuTableComponent"],
   "publicImperativeMembers": {
     "NeuAutocompleteComponent": ["clear", "close", "focus", "openAll", "reset"],
     "NeuContextMenuDirective": ["close", "openAt"],

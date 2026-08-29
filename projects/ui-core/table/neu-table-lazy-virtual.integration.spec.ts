@@ -5,6 +5,7 @@ import { provideIcons } from '@ng-icons/core';
 import { lucidePencil } from '@ng-icons/lucide';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NeuTableComponent } from './neu-table.component';
+import { NeuTableLazyPlaceholderDirective } from './neu-table-templates.directive';
 import type { NeuTableColumn, NeuTableLazyRequest } from './neu-table.types';
 
 interface LazyRow {
@@ -26,7 +27,7 @@ function makeRows(first: number, count: number): LazyRow[] {
 
 @Component({
   standalone: true,
-  imports: [NeuTableComponent],
+  imports: [NeuTableComponent, NeuTableLazyPlaceholderDirective],
   template: `
     <neu-table
       [columns]="columns"
@@ -35,13 +36,12 @@ function makeRows(first: number, count: number): LazyRow[] {
       [totalItems]="20"
       [serverSide]="true"
       [virtualScroll]="true"
-      [virtualScrollVisibleItems]="3"
-      [virtualScrollItemSize]="40"
-      [lazyPlaceholderTemplate]="placeholder"
-    />
-    <ng-template #placeholder let-logicalIndex let-colspan="colspan">
-      <td class="custom-lazy-placeholder" [attr.colspan]="colspan">Loading {{ logicalIndex }}</td>
-    </ng-template>
+      [virtualizationOptions]="{ visibleItems: 3, itemSize: 40 }"
+    >
+      <ng-template neuTableLazyPlaceholder let-logicalIndex let-colspan="colspan">
+        <td class="custom-lazy-placeholder" [attr.colspan]="colspan">Loading {{ logicalIndex }}</td>
+      </ng-template>
+    </neu-table>
   `,
 })
 class LazyPlaceholderHost {
@@ -70,9 +70,11 @@ describe('NeuTable lazy virtual integration', () => {
     fixture.componentRef.setInput('lazyLoadOnInit', true);
     fixture.componentRef.setInput('pagination', true);
     fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 3);
-    fixture.componentRef.setInput('virtualScrollItemSize', 40);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('virtualizationOptions', { visibleItems: 3, itemSize: 40 });
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     return fixture;
   }
 
@@ -125,7 +127,10 @@ describe('NeuTable lazy virtual integration', () => {
 
   it('supports configurable overscan and emits once when viewport sizing changes', async () => {
     const fixture = createLazyTable();
-    fixture.componentRef.setInput('virtualScrollOverscan', 5);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      overscan: 5,
+    });
     const requests: NeuTableLazyRequest[] = [];
     fixture.componentInstance.lazyRequest.subscribe((event) => requests.push(event));
     fixture.detectChanges();
@@ -139,7 +144,10 @@ describe('NeuTable lazy virtual integration', () => {
       visibleEnd: 3,
     });
 
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 4);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      visibleItems: 4,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -149,12 +157,18 @@ describe('NeuTable lazy virtual integration', () => {
       range: { first: 0, end: 9, visibleFirst: 0, visibleEnd: 4 },
     });
 
-    fixture.componentRef.setInput('virtualScrollItemSize', 50);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      itemSize: 50,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     expect(requests.at(-1)?.reason).toBe('viewport-change');
 
-    fixture.componentRef.setInput('virtualScrollOverscan', -4);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      overscan: -4,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     expect((fixture.componentInstance as any)._virtualOverscan()).toBe(0);
@@ -163,8 +177,11 @@ describe('NeuTable lazy virtual integration', () => {
       range: { first: 0, end: 4 },
     });
 
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 0);
-    fixture.componentRef.setInput('virtualScrollOverscan', 0);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      visibleItems: 0,
+      overscan: 0,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     expect((fixture.componentInstance as any)._virtualOverscan()).toBe(0);
@@ -178,7 +195,10 @@ describe('NeuTable lazy virtual integration', () => {
     fixture.componentInstance.lazyRequest.subscribe((event) => requests.push(event));
     fixture.detectChanges();
     await fixture.whenStable();
-    fixture.componentRef.setInput('virtualScrollDelay', 25);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      delay: 25,
+    });
     fixture.detectChanges();
 
     vi.useFakeTimers();
@@ -209,7 +229,10 @@ describe('NeuTable lazy virtual integration', () => {
     fixture.componentInstance.lazyRequest.subscribe((event) => requests.push(event));
     fixture.detectChanges();
     await fixture.whenStable();
-    fixture.componentRef.setInput('virtualScrollDelay', 10.9);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      delay: 10.9,
+    });
     fixture.detectChanges();
 
     vi.useFakeTimers();
@@ -364,7 +387,8 @@ describe('NeuTable lazy virtual integration', () => {
     expect(loaded.map((row) => row.getAttribute('aria-rowindex'))).toEqual(['2', '3']);
     expect(
       loaded.every(
-        (row) => Number(row.getAttribute('aria-rowindex')) <= Number(table.getAttribute('aria-rowcount')),
+        (row) =>
+          Number(row.getAttribute('aria-rowindex')) <= Number(table.getAttribute('aria-rowcount')),
       ),
     ).toBe(true);
     expect(placeholders[0].querySelector('.neu-table__td--frozen-left')).not.toBeNull();
@@ -402,7 +426,7 @@ describe('NeuTable lazy virtual integration', () => {
 
   it('keeps key selection canonical across window replacement and restores projection', async () => {
     const fixture = createLazyTable();
-    fixture.componentRef.setInput('selectionMode', 'multiple');
+    fixture.componentRef.setInput('selectable', 'multiple');
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
@@ -438,7 +462,7 @@ describe('NeuTable lazy virtual integration', () => {
     const fixture = createLazyTable(makeRows(500, 6));
     const selectable = vi.fn((_row: LazyRow, index: number) => index === 501);
     fixture.componentRef.setInput('dataFirst', 500);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
+    fixture.componentRef.setInput('selectable', 'multiple');
     fixture.componentRef.setInput('rowSelectable', selectable);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -541,9 +565,9 @@ describe('NeuTable lazy virtual integration', () => {
       COLUMNS[0],
       editableColumn,
     ] satisfies NeuTableColumn<LazyRow>[]);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    fixture.componentRef.setInput('expandable', true);
-    fixture.componentRef.setInput('inlineEdit', true);
+    fixture.componentRef.setInput('selectable', 'multiple');
+    fixture.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
+    fixture.componentRef.setInput('editMode', true ? 'cell' : 'none');
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
@@ -574,7 +598,7 @@ describe('NeuTable lazy virtual integration', () => {
 
   it('preserves authoritative expansion keys while sparse UI remains inert', async () => {
     const fixture = createLazyTable();
-    fixture.componentRef.setInput('expandable', true);
+    fixture.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     fixture.componentRef.setInput('expandedRowKeys', [0, 'off-page']);
     const changes: Array<readonly unknown[]> = [];
     const requests: NeuTableLazyRequest[] = [];
@@ -606,7 +630,10 @@ describe('NeuTable lazy virtual integration', () => {
     fixture.componentRef.setInput('serverSide', true);
     fixture.componentRef.setInput('totalItems', 100_000);
     fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('virtualScrollVisibleItems', 3);
+    fixture.componentRef.setInput('virtualizationOptions', {
+      ...fixture.componentInstance.virtualizationOptions(),
+      visibleItems: 3,
+    });
     const requests: NeuTableLazyRequest[] = [];
     fixture.componentInstance.lazyRequest.subscribe((event) => requests.push(event));
     fixture.detectChanges();

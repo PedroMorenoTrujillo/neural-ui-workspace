@@ -19,6 +19,9 @@ import {
   NeuTableColumnReorderEvent,
   NeuTableComponent,
   NeuTableExpandDirective,
+  NeuTableEmptyDirective,
+  NeuTableLoadingBodyDirective,
+  NeuTableToolbarDirective,
   NeuTableLayout,
   NeuTableSelectionAction,
   NeuTableServerState,
@@ -79,7 +82,14 @@ export interface NeuTreeTableCellEditEvent<
 @Component({
   selector: 'neu-tree-table',
   standalone: true,
-  imports: [NgTemplateOutlet, NeuTableComponent, NeuTableExpandDirective],
+  imports: [
+    NgTemplateOutlet,
+    NeuTableComponent,
+    NeuTableExpandDirective,
+    NeuTableEmptyDirective,
+    NeuTableLoadingBodyDirective,
+    NeuTableToolbarDirective,
+  ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -88,37 +98,13 @@ export interface NeuTreeTableCellEditEvent<
       [columns]="resolvedColumns()"
       [data]="flatRows()"
       [title]="title()"
-      [toolbarExtraRef]="toolbarExtraRef()"
       [rowKey]="rowKey()"
       [tableAriaLabel]="tableAriaLabel()"
       [searchable]="searchable()"
-      [searchPlaceholder]="searchPlaceholder()"
       [exactMatchable]="exactMatchable()"
-      [exactMatchLabel]="exactMatchLabel()"
-      [searchAriaLabel]="searchAriaLabel()"
-      [clearSearchAriaLabel]="clearSearchAriaLabel()"
-      [clearFilterLabel]="clearFilterLabel()"
-      [previousPageAriaLabel]="previousPageAriaLabel()"
-      [nextPageAriaLabel]="nextPageAriaLabel()"
-      [pageSizeLabel]="pageSizeLabel()"
-      [pageSizeAriaLabel]="pageSizeAriaLabel()"
-      [paginationAriaLabel]="paginationAriaLabel()"
-      [exportCsvTitle]="exportCsvTitle()"
-      [exportJsonTitle]="exportJsonTitle()"
-      [exportXlsxTitle]="exportXlsxTitle()"
-      [clearSelectionLabel]="clearSelectionLabel()"
-      [selectionSummaryLabel]="selectionSummaryLabel()"
-      [selectAllAriaLabel]="selectAllAriaLabel()"
-      [selectRowAriaLabel]="selectRowAriaLabel()"
-      [expandRowAriaLabel]="expandRowAriaLabel()"
-      [filterPlaceholder]="filterPlaceholder()"
-      [filterAriaPrefix]="filterAriaPrefix()"
-      [allFilterOptionLabel]="allFilterOptionLabel()"
-      [ofLabel]="ofLabel()"
-      [resultLabelSingular]="resultLabelSingular()"
-      [resultLabelPlural]="resultLabelPlural()"
+      [labels]="tableLabels()"
+      [advancedFilterTexts]="tableFilterTexts()"
       [loading]="loading()"
-      [skeletonRows]="skeletonRows()"
       [pagination]="pagination()"
       [pageSize]="pageSize()"
       [pageSizeOptions]="pageSizeOptions()"
@@ -130,39 +116,23 @@ export interface NeuTreeTableCellEditEvent<
       [roundedBorders]="roundedBorders()"
       [sortable]="sortable()"
       [multiSort]="multiSort()"
-      [expandable]="expandable()"
-      [expandMode]="expandMode()"
-      [exportable]="exportable()"
-      [exportFileName]="exportFileName()"
-      [exportFormats]="exportFormats()"
-      [exportColumns]="exportColumns()"
-      [exportScope]="exportScope()"
+      [expandMode]="expandable() ? expandMode() : 'none'"
+      [exportOptions]="tableExportOptions()"
       [virtualScroll]="virtualScroll()"
-      [virtualScrollVisibleItems]="virtualScrollVisibleItems()"
+      [virtualizationOptions]="{ visibleItems: virtualScrollVisibleItems() }"
       [resizableColumns]="resizableColumns()"
       [reorderableColumns]="reorderableColumns()"
       [columnChooser]="columnChooser()"
-      [columnChooserLabel]="columnChooserLabel()"
       [groupBy]="groupBy()"
-      [groupHeaderLabel]="groupHeaderLabel()"
-      [inlineEdit]="inlineEdit()"
-      [inlineEditLabel]="inlineEditLabel()"
-      [saveInlineEditLabel]="saveInlineEditLabel()"
-      [cancelInlineEditLabel]="cancelInlineEditLabel()"
+      [editMode]="inlineEdit() ? 'cell' : 'none'"
       [initialLayout]="initialLayout()"
       [showRowNumbers]="showRowNumbers()"
       [density]="density()"
       [rowClass]="rowClass()"
       [footerRow]="footerRow()"
-      [emptyStateTemplate]="emptyStateTemplate()"
       [serverSide]="serverSide()"
       [totalItems]="totalItems()"
-      [pageParam]="pageParam()"
-      [searchParam]="searchParam()"
-      [sortParam]="sortParam()"
-      [sortDirParam]="sortDirParam()"
-      [multiSortParam]="multiSortParam()"
-      [useUrlState]="useUrlState()"
+      [urlStateOptions]="tableUrlStateOptions()"
       [emptyMessage]="emptyMessage()"
       (selectionChange)="onTableSelectionChange($event)"
       (rowClick)="onTableRowClick($event)"
@@ -176,6 +146,31 @@ export interface NeuTreeTableCellEditEvent<
       (layoutChange)="layoutChange.emit($event)"
       (cellEditCommit)="onTableCellEditCommit($event)"
     >
+      @if (toolbarExtraRef(); as toolbar) {
+        <ng-template neuTableToolbar>
+          <ng-container [ngTemplateOutlet]="toolbar" />
+        </ng-template>
+      }
+      @if (emptyStateTemplate(); as empty) {
+        <ng-template neuTableEmpty>
+          <ng-container [ngTemplateOutlet]="empty" />
+        </ng-template>
+      }
+      <ng-template neuTableLoadingBody let-columns="columns" let-colspan="colspan">
+        <tr class="neu-table__row--loading" aria-hidden="true">
+          <td [attr.colspan]="colspan" class="neu-table__td neu-table__td--center">
+            <div class="neu-table__skeleton-rows">
+              @for (_ of skeletonRows(); track $index) {
+                <div class="neu-table__skeleton-row">
+                  @for (__ of columns; track $index) {
+                    <div class="neu-table__skeleton-cell"></div>
+                  }
+                </div>
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
       @if (expandTemplate(); as tpl) {
         <ng-template neuTableExpand let-row>
           <ng-container
@@ -312,6 +307,58 @@ export class NeuTreeTableComponent {
   readonly sortParam = input('sort');
   readonly sortDirParam = input('sortDir');
   readonly multiSortParam = input('msort');
+
+  protected readonly tableLabels = computed(() => ({
+    searchPlaceholder: this.searchPlaceholder(),
+    searchAriaLabel: this.searchAriaLabel(),
+    clearSearchAriaLabel: this.clearSearchAriaLabel(),
+    previousPageAriaLabel: this.previousPageAriaLabel(),
+    nextPageAriaLabel: this.nextPageAriaLabel(),
+    pageSizeLabel: this.pageSizeLabel(),
+    pageSizeAriaLabel: this.pageSizeAriaLabel(),
+    paginationAriaLabel: this.paginationAriaLabel(),
+    clearSelectionLabel: this.clearSelectionLabel(),
+    selectionSummaryLabel: this.selectionSummaryLabel(),
+    selectAllAriaLabel: this.selectAllAriaLabel(),
+    selectRowAriaLabel: this.selectRowAriaLabel(),
+    expandRowAriaLabel: this.expandRowAriaLabel(),
+    columnChooserLabel: this.columnChooserLabel(),
+    groupHeaderLabel: this.groupHeaderLabel(),
+    inlineEditLabel: this.inlineEditLabel(),
+    saveInlineEditLabel: this.saveInlineEditLabel(),
+    cancelInlineEditLabel: this.cancelInlineEditLabel(),
+    ofLabel: this.ofLabel(),
+    resultLabelSingular: this.resultLabelSingular(),
+    resultLabelPlural: this.resultLabelPlural(),
+  }));
+
+  protected readonly tableFilterTexts = computed(() => ({
+    exactMatch: this.exactMatchLabel(),
+    clear: this.clearFilterLabel(),
+    placeholder: this.filterPlaceholder(),
+    ariaPrefix: this.filterAriaPrefix(),
+    all: this.allFilterOptionLabel(),
+  }));
+
+  protected readonly tableExportOptions = computed(() => ({
+    enabled: this.exportable(),
+    fileName: this.exportFileName(),
+    formats: this.exportFormats(),
+    columns: this.exportColumns(),
+    scope: this.exportScope(),
+    csvTitle: this.exportCsvTitle(),
+    jsonTitle: this.exportJsonTitle(),
+    xlsxTitle: this.exportXlsxTitle(),
+  }));
+
+  protected readonly tableUrlStateOptions = computed(() => ({
+    enabled: this.useUrlState(),
+    pageParam: this.pageParam(),
+    searchParam: this.searchParam(),
+    sortParam: this.sortParam(),
+    sortDirectionParam: this.sortDirParam(),
+    multiSortParam: this.multiSortParam(),
+  }));
 
   readonly selectionChange = output<NeuTreeTableNode[]>();
   readonly nodeClick = output<NeuTreeTableNode>();

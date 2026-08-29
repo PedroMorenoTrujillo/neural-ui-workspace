@@ -8,6 +8,7 @@ import { lucidePencil } from '@ng-icons/lucide';
 import { NeuTableColumnInput, NeuTableComponent } from './neu-table.component';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
+import { NeuTableEmptyDirective } from './neu-table-templates.directive';
 import { NeuTableFilterTemplateDirective } from './neu-table-filter-template.directive';
 import {
   NeuTableAction,
@@ -436,7 +437,10 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<SelectionRow>);
     fixture.componentRef.setInput('columns', columns);
     fixture.componentRef.setInput('data', rows);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -444,7 +448,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   }
 
   it('renders native radio selection and atomically replaces a single selected key', async () => {
-    const fixture = await createTable({ selectionMode: 'single' });
+    const fixture = await createTable({ selectable: 'single' });
     const table = fixture.componentInstance;
     const changes: SelectionRow[][] = [];
     const selected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
@@ -467,7 +471,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('supports controlled preselection, proposal authority and echo without double emission', async () => {
-    const fixture = await createTable({ selectionMode: 'single', selection: rows[0] });
+    const fixture = await createTable({ selectable: 'single', selection: rows[0] });
     const table = fixture.componentInstance;
     const changes: SelectionRow[][] = [];
     table.selectionChange.subscribe((event) => changes.push(event));
@@ -488,7 +492,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('emits single replacement in selectionChange, previous unselect, next select order without echo replay', async () => {
-    const fixture = await createTable({ selectionMode: 'single', selection: rows[0] });
+    const fixture = await createTable({ selectable: 'single', selection: rows[0] });
     const table = fixture.componentInstance;
     const order: string[] = [];
     let proposal: SelectionRow | null = null;
@@ -509,7 +513,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('does not replay aggregate or row delta events when controlled multiple selection is echoed', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple', selection: [] });
+    const fixture = await createTable({ selectable: 'multiple', selection: [] });
     const table = fixture.componentInstance;
     const changes: SelectionRow[][] = [];
     const selected: NeuTableRowSelectionEvent<SelectionRow>[] = [];
@@ -541,7 +545,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('resolves controlled selection to immutable replacement rows by key', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple', selection: [rows[0], rows[2]] });
+    const fixture = await createTable({ selectable: 'multiple', selection: [rows[0], rows[2]] });
     const replacements = rows.map((row) => ({ ...row, name: `New ${row.name}` }));
 
     fixture.componentRef.setInput('data', replacements);
@@ -554,7 +558,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('resolves controlled single selection to a new immutable row instance without events', async () => {
-    const fixture = await createTable({ selectionMode: 'single', selection: rows[0] });
+    const fixture = await createTable({ selectable: 'single', selection: rows[0] });
     const table = fixture.componentInstance;
     const replacements = rows.map((row) => ({ ...row, name: `Fresh ${row.name}` }));
     const changes: SelectionRow[][] = [];
@@ -577,12 +581,12 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('derives filtered and page select-all labels while preserving a custom override', async () => {
-    const filtered = await createTable({ selectionMode: 'multiple' });
-    const page = await createTable({ selectionMode: 'multiple', selectAllScope: 'page' });
+    const filtered = await createTable({ selectable: 'multiple' });
+    const page = await createTable({ selectable: 'multiple', selectAllScope: 'page' });
     const custom = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       selectAllScope: 'page',
-      selectAllAriaLabel: 'Choose the visible people',
+      labels: { selectAllAriaLabel: 'Choose the visible people' },
     });
     const headerLabel = (fixture: Awaited<ReturnType<typeof createTable>>) =>
       (
@@ -596,7 +600,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
 
   it('excludes disabled rows from row, checkbox and header interactions', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: (row: SelectionRow) => row.disabled !== true,
     });
     const table = fixture.componentInstance;
@@ -620,7 +624,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
 
   it('renders disabled radio semantics without removing controlled disabled preselection', async () => {
     const fixture = await createTable({
-      selectionMode: 'single',
+      selectable: 'single',
       selection: rows[1],
       rowSelectable: (row: SelectionRow) => row.disabled !== true,
     });
@@ -637,7 +641,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
 
   it('disables the header when the scope contains zero selectable rows', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       rowSelectable: () => false,
     });
 
@@ -654,7 +658,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
 
   it('page select-all preserves off-page keys and emits one aggregate event per action', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       selectAllScope: 'page',
       pageSize: 2,
       rowSelectable: (row: SelectionRow) => row.disabled !== true,
@@ -687,7 +691,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('derives indeterminate state from only the configured filtered scope', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple' });
+    const fixture = await createTable({ selectable: 'multiple' });
     const table = fixture.componentInstance;
     table.toggleRow(rows[0], 'checkbox');
 
@@ -706,7 +710,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
 
   it('keeps unknown server-page keys canonical without emitting server state for selection', async () => {
     const fixture = await createTable({
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       serverSide: true,
       data: rows.slice(0, 2),
       selectionActions: [{ key: 'archive', label: 'Archive', icon: 'archive', handler: vi.fn() }],
@@ -744,11 +748,11 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     );
     const fixture = await createTable({
       data: virtualRows,
-      selectionMode: 'multiple',
+      selectable: 'multiple',
       sortable: true,
       pagination: false,
       virtualScroll: true,
-      virtualScrollVisibleItems: 3,
+      virtualizationOptions: { visibleItems: 3 },
     });
     const table = fixture.componentInstance;
     table.toggleRow(virtualRows[15], 'checkbox');
@@ -763,7 +767,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('clear emits one whole-selection change without row event storms', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple' });
+    const fixture = await createTable({ selectable: 'multiple' });
     const table = fixture.componentInstance;
     table.toggleAll();
     const changes: SelectionRow[][] = [];
@@ -781,7 +785,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('uses first-row projection deterministically for duplicate keys and restores removed keys', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple' });
+    const fixture = await createTable({ selectable: 'multiple' });
     const table = fixture.componentInstance;
     table.toggleRow(rows[0], 'checkbox');
 
@@ -802,7 +806,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('supports Prime-style meta-key row replacement without changing checkbox additivity', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple', metaKeySelection: true });
+    const fixture = await createTable({ selectable: 'multiple', metaKeySelection: true });
     const table = fixture.componentInstance;
     table.toggleRow(rows[0], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);
     table.toggleRow(rows[2], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);
@@ -819,7 +823,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('isolates row event arrays and freezes selectedRows projections without cloning T rows', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple' });
+    const fixture = await createTable({ selectable: 'multiple' });
     const table = fixture.componentInstance;
     let rowEvent: NeuTableRowSelectionEvent<SelectionRow> | undefined;
     table.selectionChange.subscribe((selection) => selection.push(rows[1]));
@@ -841,7 +845,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   });
 
   it('isolates select-all event arrays from canonical state and later aggregate events', async () => {
-    const fixture = await createTable({ selectionMode: 'multiple' });
+    const fixture = await createTable({ selectable: 'multiple' });
     const table = fixture.componentInstance;
     const aggregate: NeuTableSelectAllChangeEvent<SelectionRow>[] = [];
     table.selectionChange.subscribe((selection) => selection.splice(0));
@@ -1242,7 +1246,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      enabled: true,
+    });
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('button.neu-table__export-btn')).toBeTruthy();
@@ -1252,8 +1259,14 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportable', true);
-    f.componentRef.setInput('exportFileName', 'test-export');
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      enabled: true,
+    });
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      fileName: 'test-export',
+    });
     f.detectChanges();
     await f.whenStable();
     // Create a mock for URL.createObjectURL
@@ -1299,7 +1312,7 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -1315,7 +1328,7 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     f.componentRef.setInput('expandMode', 'single');
     f.detectChanges();
     await f.whenStable();
@@ -1333,7 +1346,7 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     f.detectChanges();
     await f.whenStable();
 
@@ -1427,7 +1440,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('selectable', true);
-    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     f.componentRef.setInput('showRowNumbers', true);
     f.detectChanges();
     await f.whenStable();
@@ -2435,7 +2448,10 @@ describe('NeuTableComponent', () => {
     const events: any[] = [];
     f.componentInstance.serverStateChange.subscribe((e: any) => events.push(e));
     // Trigger search via URL state param update
-    (f.componentInstance as any)._urlState.setParam(f.componentInstance.searchParam(), 'John');
+    (f.componentInstance as any)._urlState.setParam(
+      f.componentInstance.urlStateOptions().searchParam ?? 'q',
+      'John',
+    );
     expect(events.length).toBeGreaterThanOrEqual(0);
   });
 
@@ -2904,8 +2920,14 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportable', true);
-    f.componentRef.setInput('exportFormats', ['csv', 'json']);
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      enabled: true,
+    });
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      formats: ['csv', 'json'],
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -2925,8 +2947,14 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportable', true);
-    f.componentRef.setInput('exportColumns', ['name']);
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      enabled: true,
+    });
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      columns: ['name'],
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -2943,7 +2971,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      enabled: true,
+    });
     f.componentRef.setInput('selectable', true);
     f.detectChanges();
     await f.whenStable();
@@ -2965,10 +2996,16 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportable', true);
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      enabled: true,
+    });
     f.componentRef.setInput('selectable', true);
-    f.componentRef.setInput('exportScope', 'selected');
-    f.componentRef.setInput('exportFormats', ['json']);
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      scope: 'selected',
+      formats: ['json'],
+    });
     f.detectChanges();
     await f.whenStable();
 
@@ -2988,8 +3025,14 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportable', true);
-    f.componentRef.setInput('exportScope', 'filtered');
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      enabled: true,
+    });
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      scope: 'filtered',
+    });
     f.detectChanges();
     await f.whenStable();
 
@@ -3023,7 +3066,10 @@ describe('NeuTableComponent', () => {
       { key: 'plain', header: 'Plain' },
     ]);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportValue', (context: { value: unknown }) => `value:${context.value}`);
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      value: (context: { value: unknown }) => `value:${context.value}`,
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -3246,7 +3292,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('selectable', true);
-    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     f.componentRef.setInput('showRowNumbers', true);
     f.detectChanges();
     await f.whenStable();
@@ -3338,7 +3384,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
     await f.whenStable();
@@ -3351,7 +3400,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
     expect((f.componentInstance as any).searchQuery()).toBe('');
@@ -3363,7 +3415,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('sortable', true);
     f.detectChanges();
     await f.whenStable();
@@ -3378,7 +3433,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('sortable', true);
     f.detectChanges();
     await f.whenStable();
@@ -3401,7 +3459,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('sortable', true);
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
@@ -3423,7 +3484,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
     await f.whenStable();
@@ -3440,7 +3504,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
     await f.whenStable();
@@ -3463,7 +3530,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
     await f.whenStable();
@@ -3486,7 +3556,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSizeOptions', [5, 10]);
     f.componentRef.setInput('pageSize', 10);
     f.detectChanges();
@@ -3509,7 +3582,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('multiSort', true);
     f.componentRef.setInput('sortable', true);
     f.detectChanges();
@@ -3531,7 +3607,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('multiSort', true);
     f.componentRef.setInput('sortable', true);
     f.detectChanges();
@@ -3552,7 +3631,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('multiSort', true);
     f.componentRef.setInput('sortable', true);
     f.detectChanges();
@@ -3573,7 +3655,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('sortable', true);
     f.detectChanges();
     await f.whenStable();
@@ -3829,7 +3914,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', filterableCols);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('selectable', true);
-    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     f.componentRef.setInput('showRowNumbers', true);
     f.detectChanges();
     await f.whenStable();
@@ -3847,7 +3932,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -3864,7 +3952,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -3886,7 +3977,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -3904,7 +3998,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -3928,7 +4025,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
     await f.whenStable();
@@ -3951,7 +4051,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
     await f.whenStable();
@@ -3973,7 +4076,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
     await f.whenStable();
@@ -3999,7 +4105,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSizeOptions', [5, 10]);
     f.componentRef.setInput('pageSize', 10);
     f.detectChanges();
@@ -4014,7 +4123,10 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSizeOptions', [5, 10]);
     f.componentRef.setInput('pageSize', 10);
     f.detectChanges();
@@ -4041,7 +4153,10 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('sortable', true);
     f.componentRef.setInput('multiSort', true);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -4063,7 +4178,10 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('sortable', true);
     f.componentRef.setInput('multiSort', true);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -4124,7 +4242,7 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     f.detectChanges();
     await f.whenStable();
     const expandBtn = f.nativeElement.querySelector('.neu-table__expand-btn');
@@ -4145,7 +4263,10 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('sortable', true);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
     const headers = f.nativeElement.querySelectorAll('.neu-table__th--sortable');
@@ -4255,8 +4376,14 @@ describe('NeuTableComponent', () => {
       f.componentRef.setInput('columns', filterableColumns);
       f.componentRef.setInput('data', MANY_ROWS);
       f.componentRef.setInput('virtualScroll', true);
-      f.componentRef.setInput('virtualScrollVisibleItems', 5);
-      f.componentRef.setInput('useUrlState', false);
+      f.componentRef.setInput('virtualizationOptions', {
+        ...f.componentInstance.virtualizationOptions(),
+        visibleItems: 5,
+      });
+      f.componentRef.setInput('urlStateOptions', {
+        ...f.componentInstance.urlStateOptions(),
+        enabled: false,
+      });
       f.componentRef.setInput('pagination', false);
       f.detectChanges();
       await f.whenStable();
@@ -4318,8 +4445,14 @@ describe('NeuTableComponent', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('exportable', true);
-    f.componentRef.setInput('exportFormats', ['csv', 'json', 'xlsx']);
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      enabled: true,
+    });
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      formats: ['csv', 'json', 'xlsx'],
+    });
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
@@ -4487,7 +4620,7 @@ describe('NeuTableComponent', () => {
           <neu-table
             [columns]="[{ key: 'name', header: 'Nombre', headerTemplate: header }]"
             [data]="data"
-            [expandable]="true"
+            expandMode="multiple"
           >
             <ng-template neuTableExpand let-row>
               <div class="custom-expand">expand-{{ row.name }}</div>
@@ -4572,15 +4705,16 @@ describe('NeuTableComponent', () => {
     expect(f.nativeElement.querySelector('.custom-pdf-action')?.textContent).toContain('PDF');
   });
 
-  it('emptyStateTemplate branch should render a custom empty template', async () => {
+  it('neuTableEmpty should render a custom empty template', async () => {
     @Component({
       template: `
-        <ng-template #empty>
-          <div class="custom-empty">vacío</div>
-        </ng-template>
-        <neu-table [columns]="columns" [data]="data" [emptyStateTemplate]="empty" />
+        <neu-table [columns]="columns" [data]="data">
+          <ng-template neuTableEmpty>
+            <div class="custom-empty">vacío</div>
+          </ng-template>
+        </neu-table>
       `,
-      imports: [NeuTableComponent],
+      imports: [NeuTableComponent, NeuTableEmptyDirective],
     })
     class EmptyTemplateHostComponent {
       columns = COLUMNS;
@@ -4692,7 +4826,7 @@ describe('NeuTableComponent generic data API', () => {
 
     fixture.componentRef.setInput('columns', [editableColumn]);
     fixture.componentRef.setInput('data', READONLY_TYPED_USERS);
-    fixture.componentRef.setInput('inlineEdit', true);
+    fixture.componentRef.setInput('editMode', true ? 'cell' : 'none');
     table.cellEditCommit.subscribe((event) => emitted.push(event));
     fixture.detectChanges();
     await fixture.whenStable();
@@ -4829,7 +4963,7 @@ describe('NeuTableComponent advanced layout features', () => {
     const spy = vi.fn();
     f.componentRef.setInput('columns', [{ key: 'name', header: 'Nombre', editable: true }]);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('inlineEdit', true);
+    f.componentRef.setInput('editMode', true ? 'cell' : 'none');
     f.componentInstance.cellEditCommit.subscribe(spy);
     f.detectChanges();
     await f.whenStable();
@@ -4856,7 +4990,7 @@ describe('NeuTableComponent advanced layout features', () => {
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('columnChooser', true);
     f.componentRef.setInput('resizableColumns', true);
-    f.componentRef.setInput('inlineEdit', true);
+    f.componentRef.setInput('editMode', true ? 'cell' : 'none');
     f.componentInstance.cellEditCommit.subscribe(commits);
     f.detectChanges();
     await f.whenStable();
@@ -4927,7 +5061,10 @@ describe('NeuTableComponent advanced layout features', () => {
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
     f.componentRef.setInput('virtualScroll', true);
-    f.componentRef.setInput('virtualScrollVisibleItems', 3);
+    f.componentRef.setInput('virtualizationOptions', {
+      ...f.componentInstance.virtualizationOptions(),
+      visibleItems: 3,
+    });
     f.detectChanges();
     await f.whenStable();
     const container = f.nativeElement.querySelector('.neu-table__scroll-container') as HTMLElement;
@@ -4941,7 +5078,10 @@ describe('NeuTableComponent advanced layout features', () => {
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
     f.componentRef.setInput('virtualScroll', true);
-    f.componentRef.setInput('virtualScrollVisibleItems', 2);
+    f.componentRef.setInput('virtualizationOptions', {
+      ...f.componentInstance.virtualizationOptions(),
+      visibleItems: 2,
+    });
     f.componentRef.setInput('pagination', false);
     f.componentRef.setInput('density', 'relaxed');
     f.detectChanges();
@@ -5010,7 +5150,7 @@ describe('NeuTableComponent advanced layout features', () => {
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('footerRow', { name: 'Totals', age: 84 });
     f.componentRef.setInput('selectable', true);
-    f.componentRef.setInput('expandable', true);
+    f.componentRef.setInput('expandMode', true ? 'multiple' : 'none');
     f.componentRef.setInput('showRowNumbers', true);
     f.detectChanges();
     await f.whenStable();
@@ -5034,7 +5174,7 @@ describe('NeuTableComponent advanced layout features', () => {
     const row = { id: 10, name: null };
     f.componentRef.setInput('columns', [editableColumn]);
     f.componentRef.setInput('data', [row]);
-    f.componentRef.setInput('inlineEdit', false);
+    f.componentRef.setInput('editMode', false ? 'cell' : 'none');
     f.detectChanges();
     await f.whenStable();
 
@@ -5047,7 +5187,7 @@ describe('NeuTableComponent advanced layout features', () => {
       { label: 'Luis', value: 'Luis' },
     ]);
 
-    f.componentRef.setInput('inlineEdit', true);
+    f.componentRef.setInput('editMode', true ? 'cell' : 'none');
     f.detectChanges();
     await f.whenStable();
     const stopPropagation = vi.fn();
@@ -5113,7 +5253,10 @@ describe('NeuTableComponent advanced layout features', () => {
     ]);
     f.componentRef.setInput('sortable', true);
     f.componentRef.setInput('multiSort', true);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.detectChanges();
     await f.whenStable();
 
@@ -5127,7 +5270,10 @@ describe('NeuTableComponent advanced layout features', () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', MANY_ROWS);
-    f.componentRef.setInput('useUrlState', false);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     f.componentRef.setInput('pageSize', 5);
     f.detectChanges();
     await f.whenStable();
@@ -5267,7 +5413,7 @@ describe('NeuTableComponent advanced layout features', () => {
     const commits: unknown[] = [];
     f.componentRef.setInput('columns', [col]);
     f.componentRef.setInput('data', DATA);
-    f.componentRef.setInput('inlineEdit', true);
+    f.componentRef.setInput('editMode', true ? 'cell' : 'none');
     f.componentInstance.cellEditCommit.subscribe((event) => commits.push(event));
     f.detectChanges();
     await f.whenStable();
@@ -5400,7 +5546,10 @@ describe('NeuTableComponent advanced layout features', () => {
     expect(states.length).toBeGreaterThanOrEqual(6);
 
     f.componentRef.setInput('serverSide', false);
-    f.componentRef.setInput('useUrlState', true);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: true,
+    });
     f.detectChanges();
     await f.whenStable();
     comp.sortBy('age', { shiftKey: true } as MouseEvent);
@@ -5408,7 +5557,7 @@ describe('NeuTableComponent advanced layout features', () => {
     comp.onSearch({ target: { value: 'Luis' } } as unknown as Event);
     comp.clearSearch();
 
-    expect(comp.useUrlState()).toBe(true);
+    expect(comp.urlStateOptions().enabled ?? true).toBe(true);
   });
 
   it('covers grouped virtual and selection edge cases', async () => {
@@ -5417,7 +5566,10 @@ describe('NeuTableComponent advanced layout features', () => {
     f.componentRef.setInput('data', MANY_ROWS);
     f.componentRef.setInput('groupBy', 'city');
     f.componentRef.setInput('virtualScroll', true);
-    f.componentRef.setInput('virtualScrollVisibleItems', 3);
+    f.componentRef.setInput('virtualizationOptions', {
+      ...f.componentInstance.virtualizationOptions(),
+      visibleItems: 3,
+    });
     f.componentRef.setInput('density', 'relaxed');
     f.componentRef.setInput('expandMode', 'single');
     f.componentRef.setInput('selectable', true);
@@ -5473,14 +5625,23 @@ describe('NeuTableComponent advanced layout features', () => {
       { id: 1, name: 'A&B <test>', amount: 12.5, date: 'invalid-date' },
       { id: 2, name: 'Chosen', amount: 20, date: new Date('2026-01-02T00:00:00Z') },
     ]);
-    f.componentRef.setInput('exportFileName', 'people');
+    f.componentRef.setInput('exportOptions', {
+      ...f.componentInstance.exportOptions(),
+      fileName: 'people',
+    });
     f.detectChanges();
     await f.whenStable();
 
     try {
-      f.componentRef.setInput('exportScope', 'filtered');
+      f.componentRef.setInput('exportOptions', {
+        ...f.componentInstance.exportOptions(),
+        scope: 'filtered',
+      });
       f.componentInstance.exportCsv();
-      f.componentRef.setInput('exportScope', 'selected');
+      f.componentRef.setInput('exportOptions', {
+        ...f.componentInstance.exportOptions(),
+        scope: 'selected',
+      });
       f.componentInstance.toggleRow({
         id: 2,
         name: 'Chosen',
@@ -5488,7 +5649,10 @@ describe('NeuTableComponent advanced layout features', () => {
         date: new Date('2026-01-02T00:00:00Z'),
       });
       f.componentInstance.exportJson();
-      f.componentRef.setInput('exportScope', 'auto');
+      f.componentRef.setInput('exportOptions', {
+        ...f.componentInstance.exportOptions(),
+        scope: 'auto',
+      });
       f.componentInstance.exportXlsx();
     } finally {
       URL.createObjectURL = originalCreateObjectURL;
@@ -5812,7 +5976,10 @@ describe('NeuTableComponent advanced layout features', () => {
       { id: 1, name: 'Alpha', status: 'active', price: 9 },
       { id: 2, name: 'Beta', status: 'paused', price: 12 },
     ]);
-    f.componentRef.setInput('useUrlState', true);
+    f.componentRef.setInput('urlStateOptions', {
+      ...f.componentInstance.urlStateOptions(),
+      enabled: true,
+    });
     f.componentRef.setInput('multiSort', true);
     f.detectChanges();
     await f.whenStable();
@@ -6572,7 +6739,10 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     fixture.componentRef.setInput('advancedFilterMode', 'menu');
     fixture.componentRef.setInput('columns', columns);
     fixture.componentRef.setInput('data', OVERLAY_FILTER_DATA);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     await settle(fixture);
     return fixture;
   }
@@ -6611,7 +6781,10 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<OverlayFilterRow>);
     fixture.componentRef.setInput('columns', OVERLAY_FILTER_COLUMNS);
     fixture.componentRef.setInput('data', OVERLAY_FILTER_DATA);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     await settle(fixture);
 
     expect(
@@ -7280,7 +7453,10 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     fixture.componentRef.setInput('columns', optionColumns);
     fixture.componentRef.setInput('data', optionRows);
     fixture.componentRef.setInput('advancedFilterMode', 'menu');
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('searchable', false);
     fixture.componentRef.setInput('pagination', false);
     fixture.componentRef.setInput('serverSide', serverSide);
@@ -7745,7 +7921,10 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<AdvancedFilterRow>);
     fixture.componentRef.setInput('columns', ADVANCED_FILTER_COLUMNS);
     fixture.componentRef.setInput('data', ADVANCED_FILTER_DATA);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('advancedFilterMode', 'menu');
     for (const [key, value] of Object.entries(inputs)) fixture.componentRef.setInput(key, value);
     await settle(fixture);
@@ -8570,15 +8749,17 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     const fixture = TestBed.createComponent(NeuTableComponent);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', MANY_ROWS);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('pageSize', 5);
     fixture.componentRef.setInput('paginatorPosition', 'both');
-    fixture.componentRef.setInput('showJumpToPageInput', true);
-    fixture.componentRef.setInput('showJumpToPageDropdown', true);
-    fixture.componentRef.setInput(
-      'currentPageReportTemplate',
-      '{first}-{last}/{totalRecords} · {currentPage}/{totalPages}',
-    );
+    fixture.componentRef.setInput('paginatorOptions', {
+      showJumpToPageInput: true,
+      showJumpToPageDropdown: true,
+      currentPageReportTemplate: '{first}-{last}/{totalRecords} · {currentPage}/{totalPages}',
+    });
     const events: unknown[] = [];
     fixture.componentInstance.pageChange.subscribe((event) => events.push(event));
     fixture.detectChanges();
@@ -8591,7 +8772,14 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(events.length).toBe(1);
-    expect(events[0]).toEqual({ page: 3, pageCount: 3, first: 10, last: 15, rows: 5, totalRecords: 15 });
+    expect(events[0]).toEqual({
+      page: 3,
+      pageCount: 3,
+      first: 10,
+      last: 15,
+      rows: 5,
+      totalRecords: 15,
+    });
     expect(Object.isFrozen(events[0])).toBe(true);
     expect(fixture.componentInstance.currentPage()).toBe(3);
   });
@@ -8628,17 +8816,26 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     const fixture = TestBed.createComponent(NeuTableComponent);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', MANY_ROWS.slice(0, 1));
-    fixture.componentRef.setInput('useUrlState', false);
-    fixture.componentRef.setInput('alwaysShowPaginator', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
+    fixture.componentRef.setInput('paginatorOptions', {
+      ...fixture.componentInstance.paginatorOptions(),
+      alwaysShow: false,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     const host = fixture.nativeElement as HTMLElement;
     expect(host.querySelector('.neu-table__footer')).toBeNull();
 
-    fixture.componentRef.setInput('alwaysShowPaginator', true);
-    fixture.componentRef.setInput('showCurrentPageReport', false);
-    fixture.componentRef.setInput('showPageLinks', false);
-    fixture.componentRef.setInput('showFirstLastPageButtons', false);
+    fixture.componentRef.setInput('paginatorOptions', {
+      ...fixture.componentInstance.paginatorOptions(),
+      alwaysShow: true,
+      showCurrentPageReport: false,
+      showPageLinks: false,
+      showFirstLastPageButtons: false,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     expect(host.querySelector('.neu-table__footer')).not.toBeNull();
@@ -8653,7 +8850,10 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', MANY_ROWS.slice(0, 2));
     fixture.componentRef.setInput('serverSide', true);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     const events: Array<{ totalRecords: number }> = [];
@@ -8673,7 +8873,10 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     ]);
     fixture.componentRef.setInput('data', MANY_ROWS.slice(0, 3));
     fixture.componentRef.setInput('frozenData', [MANY_ROWS[0]]);
-    fixture.componentRef.setInput('useUrlState', false);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
     fixture.componentRef.setInput('pageSize', 1);
     const table = fixture.componentInstance as any;
     expect(table._getExportRows({ rows: [MANY_ROWS[1]] })).toEqual([MANY_ROWS[1]]);
@@ -8681,8 +8884,8 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(table._getExportRows({ scope: 'filtered' }).length).toBe(3);
     expect(table._getExportRows({ scope: 'page' }).length).toBe(3);
     expect(table._getExportRows({ scope: 'selected' })).toEqual([]);
-    expect(table._getExportProjection().map((column: { header: string }) => column.header)).toEqual([
-      'Exported',
-    ]);
+    expect(table._getExportProjection().map((column: { header: string }) => column.header)).toEqual(
+      ['Exported'],
+    );
   });
 });

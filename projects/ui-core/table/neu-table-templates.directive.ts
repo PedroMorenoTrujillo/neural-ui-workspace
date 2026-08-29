@@ -1,10 +1,13 @@
 import { Directive, TemplateRef, inject, input } from '@angular/core';
 import type {
   NeuTableBodyContext,
+  NeuTableBodySectionContext,
   NeuTableCellEditorContext,
   NeuTableCellViewContext,
+  NeuTableEmptyContext,
   NeuTableGroupTemplateContext,
   NeuTablePaginatorTemplateContext,
+  NeuTableLazyPlaceholderContext,
   NeuTableRow,
   NeuTableStructuralContext,
 } from './neu-table.types';
@@ -21,6 +24,23 @@ export class NeuTableBodyDirective<
     _directive: NeuTableBodyDirective<T>,
     context: unknown,
   ): context is NeuTableBodyContext<T> {
+    return true;
+  }
+}
+
+@Directive({ selector: 'ng-template[neuTableBodySection]' })
+export class NeuTableBodySectionDirective<
+  T extends object = NeuTableRow,
+> extends NeuTableTemplateDirective<NeuTableBodySectionContext<T>> {
+  /** Optional compile-time source that lets Angular infer the consumer's exact row type. */
+  readonly typeSource = input<readonly T[] | undefined>(undefined, {
+    alias: 'neuTableBodySectionOf',
+  });
+
+  static ngTemplateContextGuard<T extends object>(
+    _directive: NeuTableBodySectionDirective<T>,
+    context: unknown,
+  ): context is NeuTableBodySectionContext<T> {
     return true;
   }
 }
@@ -69,6 +89,30 @@ export class NeuTableLoadingBodyDirective<
     _directive: NeuTableLoadingBodyDirective<T>,
     context: unknown,
   ): context is NeuTableStructuralContext<T> {
+    return true;
+  }
+}
+
+@Directive({ selector: 'ng-template[neuTableEmpty]' })
+export class NeuTableEmptyDirective<
+  T extends object = NeuTableRow,
+> extends NeuTableTemplateDirective<NeuTableEmptyContext<T>> {
+  static ngTemplateContextGuard<T extends object>(
+    _directive: NeuTableEmptyDirective<T>,
+    context: unknown,
+  ): context is NeuTableEmptyContext<T> {
+    return true;
+  }
+}
+
+@Directive({ selector: 'ng-template[neuTableLazyPlaceholder]' })
+export class NeuTableLazyPlaceholderDirective<
+  T extends object = NeuTableRow,
+> extends NeuTableTemplateDirective<NeuTableLazyPlaceholderContext<T>> {
+  static ngTemplateContextGuard<T extends object>(
+    _directive: NeuTableLazyPlaceholderDirective<T>,
+    context: unknown,
+  ): context is NeuTableLazyPlaceholderContext<T> {
     return true;
   }
 }

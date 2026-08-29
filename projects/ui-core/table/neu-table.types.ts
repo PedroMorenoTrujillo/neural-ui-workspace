@@ -20,12 +20,10 @@ export type NeuTableRow = Record<string, unknown>;
  */
 export type NeuTableColumnKey<T> = [keyof T] extends [never] ? string : Extract<keyof T, string>;
 
-export type NeuTableRowKey<T> = NeuTableColumnKey<T>;
+/** Canonical identity used by selection, editing, expansion and virtual rows. */
+export type NeuTableRowKey<T> = NeuTableColumnKey<T> | string | ((row: T) => unknown);
 
-/** Computed canonical identity used by selection, editing, expansion and virtual rows. */
-export type NeuTableRowIdentity<T> = NeuTableRowKey<T> | ((row: T) => unknown);
-
-/** Prime-compatible render tracking callback. Canonical state still uses rowIdentity/rowKey. */
+/** Prime-compatible render tracking callback. Canonical state still uses rowKey. */
 export type NeuTableRowTrackBy<T> = (index: number, row: T) => unknown;
 
 /** `key` preserves Neural's stable-key default; the other policies mirror Prime equality. */
@@ -84,6 +82,9 @@ export interface NeuTableSelectionActionEvent<T = Record<string, unknown>> {
 
 // ── Selection ───────────────────────────────────────────────────────────
 export type NeuTableSelectionMode = 'none' | 'single' | 'multiple';
+
+/** Historical enablement name, widened to express the complete selection mode. */
+export type NeuTableSelectable = boolean | Exclude<NeuTableSelectionMode, 'none'>;
 
 /** Rows affected by the header checkbox. Server mode always means loaded rows. */
 export type NeuTableSelectAllScope = 'page' | 'filtered';
@@ -180,7 +181,9 @@ export interface NeuTableCellEditEvent<T = Record<string, unknown>> {
   previousValue: unknown;
 }
 
-export type NeuTableEditMode = 'cell' | 'row';
+export type NeuTableEditMode = 'none' | 'cell' | 'row';
+
+export type NeuTableExpandMode = 'none' | 'multiple' | 'single';
 
 export interface NeuTableEditingCellState {
   readonly rowKey: unknown;
@@ -336,6 +339,85 @@ export interface NeuTableBodyContext<T extends object = NeuTableRow> {
   readonly reorder: NeuTableRowReorderContext;
 }
 
+/** A real data record rendered by the full body-section escape hatch. */
+export interface NeuTableBodyDataRenderEntry<T extends object = NeuTableRow> extends Omit<
+  NeuTableBodyContext<T>,
+  '$implicit'
+> {
+  readonly kind: 'data';
+  /** Stable identity suitable for Angular `@for (...; track entry.key)`. */
+  readonly key: unknown;
+}
+
+/** A group boundary that never fabricates a row value. */
+export interface NeuTableBodyGroupRenderEntry<T extends object = NeuTableRow> {
+  readonly kind: 'group-header' | 'group-footer';
+  readonly key: string;
+  readonly group: NeuTableGroup<T>;
+  readonly frozen: boolean;
+  readonly toggle: () => void;
+}
+
+/** The canonical empty state for a consumer-owned body section. */
+export interface NeuTableBodyEmptyRenderEntry<T extends object = NeuTableRow> {
+  readonly kind: 'empty';
+  readonly key: 'empty';
+  readonly message: string;
+  readonly columns: readonly NeuTableColumn<T>[];
+  readonly colspan: number;
+}
+
+/** The canonical non-sparse loading state; no fake row value is exposed. */
+export interface NeuTableBodyLoadingRenderEntry<T extends object = NeuTableRow> {
+  readonly kind: 'loading';
+  readonly key: 'loading';
+  readonly columns: readonly NeuTableColumn<T>[];
+  readonly colspan: number;
+}
+
+/** A truthful sparse-window placeholder with no `T`. */
+export interface NeuTableBodyPlaceholderRenderEntry<T extends object = NeuTableRow> extends Omit<
+  NeuTableLazyPlaceholderContext<T>,
+  '$implicit'
+> {
+  readonly kind: 'placeholder';
+  readonly key: string;
+  readonly frozen: false;
+}
+
+/** Virtual-space compensation required by fixed-size and append-only rendering. */
+export interface NeuTableBodySpacerRenderEntry {
+  readonly kind: 'spacer';
+  readonly key: string;
+  readonly height: number;
+  readonly position: 'top' | 'bottom' | 'retained';
+  readonly colspan: number;
+}
+
+/**
+ * Stable public body render model. Only `data` entries contain `T`; all other
+ * variants remain truthful under strict discriminated-union narrowing.
+ */
+export type NeuTableBodyRenderEntry<T extends object = NeuTableRow> =
+  | NeuTableBodyDataRenderEntry<T>
+  | NeuTableBodyGroupRenderEntry<T>
+  | NeuTableBodyEmptyRenderEntry<T>
+  | NeuTableBodyLoadingRenderEntry<T>
+  | NeuTableBodyPlaceholderRenderEntry<T>
+  | NeuTableBodySpacerRenderEntry;
+
+/** Context for the opt-in full `<tbody>` composition escape hatch. */
+export interface NeuTableBodySectionContext<T extends object = NeuTableRow> {
+  readonly $implicit: readonly NeuTableBodyRenderEntry<T>[];
+  readonly entries: readonly NeuTableBodyRenderEntry<T>[];
+  readonly columns: readonly NeuTableColumn<T>[];
+  readonly colspan: number;
+  /** True when each data/placeholder entry remains one fixed virtualization unit. */
+  readonly virtualized: boolean;
+  /** Extra sibling rows are unrestricted only when virtualization is inactive. */
+  readonly siblingRowsSupported: boolean;
+}
+
 export interface NeuTablePaginatorTemplateContext {
   readonly $implicit: number;
   readonly currentPage: number;
@@ -350,6 +432,79 @@ export interface NeuTablePaginatorTemplateContext {
 }
 
 export type NeuTablePaginatorPosition = 'top' | 'bottom' | 'both';
+
+/** Per-instance copy overrides. Omitted members use Neural's locale defaults. */
+export interface NeuTableLabels {
+  searchPlaceholder?: string;
+  searchAriaLabel?: string;
+  clearSearchAriaLabel?: string;
+  previousPageAriaLabel?: string;
+  nextPageAriaLabel?: string;
+  firstPageAriaLabel?: string;
+  lastPageAriaLabel?: string;
+  pageAriaLabel?: string;
+  jumpToPageAriaLabel?: string;
+  pageSizeLabel?: string;
+  pageSizeAriaLabel?: string;
+  paginationAriaLabel?: string;
+  clearSelectionLabel?: string;
+  selectionSummaryLabel?: string;
+  selectAllAriaLabel?: string;
+  selectRowAriaLabel?: string;
+  unselectRowAriaLabel?: string;
+  expandRowAriaLabel?: string;
+  collapseRowAriaLabel?: string;
+  moveRowUpAriaLabel?: string;
+  moveRowDownAriaLabel?: string;
+  columnChooserLabel?: string;
+  groupHeaderLabel?: string;
+  expandGroupAriaLabel?: string;
+  collapseGroupAriaLabel?: string;
+  inlineEditLabel?: string;
+  saveInlineEditLabel?: string;
+  cancelInlineEditLabel?: string;
+  ofLabel?: string;
+  resultLabelSingular?: string;
+  resultLabelPlural?: string;
+}
+
+export interface NeuTableFilterOptions {
+  /** Debounce for global and inline filters. Menu Apply remains immediate. */
+  delay?: number;
+  /** Text and number filters can apply on input or Enter. */
+  on?: NeuTableFilterOn;
+  locale?: string;
+}
+
+export interface NeuTablePaginatorOptions {
+  pageLinkSize?: number;
+  showPageLinks?: boolean;
+  showFirstLastPageButtons?: boolean;
+  showCurrentPageReport?: boolean;
+  currentPageReportTemplate?: string;
+  showJumpToPageInput?: boolean;
+  showJumpToPageDropdown?: boolean;
+  alwaysShow?: boolean;
+}
+
+export interface NeuTableVirtualizationOptions {
+  visibleItems?: number;
+  itemSize?: number;
+  overscan?: number;
+  delay?: number;
+  appendOnly?: boolean;
+  autoSize?: boolean;
+  step?: number;
+}
+
+export interface NeuTableUrlStateOptions {
+  enabled?: boolean;
+  pageParam?: string;
+  searchParam?: string;
+  sortParam?: string;
+  sortDirectionParam?: string;
+  multiSortParam?: string;
+}
 
 /** Immutable 1-based page projection; `first` remains a zero-based row offset. */
 export interface NeuTablePageEvent {
@@ -467,6 +622,10 @@ export interface NeuTableAdvancedFilterTexts {
   isNot: string;
   before: string;
   after: string;
+  /** Copy shared by the compact inline/global filter surface. */
+  exactMatch?: string;
+  placeholder?: string;
+  ariaPrefix?: string;
 }
 
 export type NeuTableTextFilterMode =
@@ -811,6 +970,21 @@ export type NeuTableExportValue<T = NeuTableRow> = (
   context: NeuTableExportValueContext<T>,
 ) => unknown;
 
+/** Stable Table-wide export policy. Imperative calls may still override one operation. */
+export interface NeuTableExportConfig<T = NeuTableRow> {
+  enabled?: boolean;
+  fileName?: string;
+  formats?: readonly NeuTableExportFormat[];
+  columns?: readonly string[];
+  scope?: NeuTableExportScope;
+  csvSeparator?: string;
+  csvFormulaPolicy?: NeuTableCsvFormulaPolicy;
+  value?: NeuTableExportValue<T>;
+  csvTitle?: string;
+  jsonTitle?: string;
+  xlsxTitle?: string;
+}
+
 /** Additive imperative overrides. Supplying `rows` is the truthful full-data path for remote tables. */
 export interface NeuTableExportOptions<T = NeuTableRow> {
   readonly scope?: NeuTableExportScope;
@@ -839,6 +1013,12 @@ export interface NeuTableLazyPlaceholderContext<T extends object = NeuTableRow> 
   readonly logicalIndex: number;
   readonly columns: readonly NeuTableColumn<T>[];
   readonly colspan: number;
+}
+
+export interface NeuTableEmptyContext<
+  T extends object = NeuTableRow,
+> extends NeuTableStructuralContext<T> {
+  readonly message: string;
 }
 
 export type NeuTableLazyRequestReason =

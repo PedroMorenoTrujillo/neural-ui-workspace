@@ -2,78 +2,67 @@
 
 ## Status and scope
 
-This document is the H3 source of truth for Neural Table. It classifies the public compatibility surface shipped at the H2 baseline, records state ownership, and defines the additive architecture used by H3.
+This document is the H5-B1 source of truth for the public `NeuTableComponent` facade. H5-B1 redesigns the consumer API without removing Table behavior: related scalar configuration is grouped, presentation templates become declarative, and implementation methods are no longer represented as supported consumer API.
 
 Baseline revisions:
 
-- Workspace: `a8ba70885c371d2a12ffef4711426a647ffdac9e`
-- Showcase: `37882e57770fa648134846d8f30e8e1af8e0e9ca`
-- Root: `055e7bfd8b074c2ee00726e22b88b57376498236`
+- Workspace: `09d157bb`
+- Showcase: `7e7d39c`
+- Root: `550edd4`
 
-The existing `NeuTableComponent` and `<neu-table>` selector are the batteries-included compatibility facade. H3 does not remove, rename, or narrow any existing input, output, method, type, or template selector. `NeuTableCoreComponent` is an additive canonical renderer for consumers that need only semantic rows, columns, headers, cells, loading/empty states, typed templates, row identity, and contained layout.
+The batteries-included `<neu-table>` remains the default consumer component. `NeuTableCoreComponent` remains the additive lightweight renderer for consumers that only need semantic rows, columns, headers, cells, loading/empty states, typed templates, identity, and contained layout.
 
 ## Architectural boundaries
 
-| Boundary | Owns | Must not own |
-| --- | --- | --- |
-| Core renderer | immutable rows/columns, header/body/cell projection, native table semantics, row identity/tracking, loading/empty states, minimal contained layout | Forms, Router, CDK, filtering, selection, editing, export, persistence, URL state, virtualization |
-| Query UI | search, sorting, pagination, basic/advanced filters, query proposals | canonical consumer-owned query state |
-| Interaction and authoring | selection, expansion, grouping, editing, layout, resize/reorder, context interaction | URL/storage/export and server transport |
-| Large data and adapters | virtual/lazy ranges, retention, viewport coordination, persistence, URL serialization, export | core rendering semantics |
-| Compatibility facade | legacy input normalization, feature configuration, transition routing, established event order and imperative API | a second canonical state copy |
+| Boundary                  | Owns                                                                                                                                               | Must not own                                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Core renderer             | immutable rows/columns, header/body/cell projection, native table semantics, row identity/tracking, loading/empty states, minimal contained layout | Forms, Router, CDK, filtering, selection, editing, export, persistence, URL state, virtualization |
+| Query UI                  | search, sorting, pagination, basic/advanced filters, query proposals                                                                               | canonical consumer-owned query state                                                              |
+| Interaction and authoring | selection, expansion, grouping, editing, layout, resize/reorder, context interaction                                                               | URL/storage/export and server transport                                                           |
+| Large data and adapters   | virtual/lazy ranges, retention, viewport coordination, persistence, URL serialization, export                                                      | core rendering semantics                                                                          |
+| Public facade             | focused consumer configuration, transition routing, established event order and supported imperative API                                           | a second canonical state copy or template implementation helpers                                  |
 
-These are semantic boundaries, not a request for one package per feature. The only new public compilation boundary in H3 is the lightweight core entrypoint because it has direct consumer value and measurable isolation. The batteries-included facade remains the ergonomic default for established consumers.
+These are semantic boundaries, not a request for one package per feature. The batteries-included facade remains the ergonomic default; the core entrypoint remains an independently measurable compilation boundary.
 
-## Compatibility API inventory
+## Public API inventory
 
-The exact H2/H3 compatibility surface is **155 inputs, 38 outputs, 96 TypeScript-exposed methods, and 16 template selectors**. The counts below are frozen for H3.
+The H5-B1.1 facade is frozen at **77 inputs, 38 outputs, 96 TypeScript-visible methods, and 20 composition selectors**. Only **32 methods** are classified as supported consumer API; the other 64 remain callable for Angular template implementation but are explicitly `INTERNAL/UNSUPPORTED` in the declaration contract.
 
 ### Inputs
 
-Classification totals:
+Six cohesive configuration objects replace scalar clusters:
 
-| Classification | Count |
-| --- | ---: |
-| CANONICAL | 17 |
-| OPTIONAL-FEATURE | 135 |
-| ALIAS | 2 |
-| COMPATIBILITY | 1 |
-| **Total** | **155** |
+| Input                   | Responsibility                                              |
+| ----------------------- | ----------------------------------------------------------- |
+| `labels`                | visible copy and accessibility labels                       |
+| `filterOptions`         | filter debounce, commit mode, and locale                    |
+| `paginatorOptions`      | advanced paginator presentation                             |
+| `exportOptions`         | export enablement, format, scope, naming, and value policy  |
+| `virtualizationOptions` | viewport size, overscan, delay, retention, and request step |
+| `urlStateOptions`       | URL synchronization and parameter names                     |
 
-Domain ledger:
+The remaining 71 inputs are direct because they represent primary data/state, a distinct capability switch, or an established integration boundary:
 
-- **CORE / CANONICAL (8):** `columns`, `data`, `loading`, `title`, `emptyMessage`, `tableAriaLabel`, `rowKey`, `rowIdentity`.
-- **STYLE / CANONICAL (9):** `skeletonRows`, `bordered`, `roundedBorders`, `stripedRows`, `density`, `showRowNumbers`, `rowClass`, `footerRow`, `emptyStateTemplate`.
-- **SELECTION / ALIAS (1):** `selectable` normalizes to `selectionMode="multiple"` when no explicit mode is supplied.
-- **CORE TEMPLATE / ALIAS (1):** `toolbarExtraRef` normalizes to the projected `neuTableToolbar` contract.
-- **CORE / COMPATIBILITY (1):** `rowTrackBy` remains a render-tracking hook distinct from semantic `rowIdentity`.
-- **DATA / OPTIONAL-FEATURE (1):** `frozenData`.
-- **FILTER / OPTIONAL-FEATURE (20):** `searchable`, `filterDelay`, `filterOn`, `advancedFilterMode`, `advancedFilterTexts`, `searchPlaceholder`, `exactMatchable`, `exactMatchLabel`, `searchAriaLabel`, `clearSearchAriaLabel`, `clearFilterLabel`, `filterPlaceholder`, `filterLocale`, `filterAriaPrefix`, `filterFromLabel`, `filterToLabel`, `filterTrueLabel`, `filterFalseLabel`, `allFilterOptionLabel`, `globalFilterFields`.
-- **PAGE / OPTIONAL-FEATURE (24):** `pageSize`, `pagination`, `previousPageAriaLabel`, `nextPageAriaLabel`, `firstPageAriaLabel`, `lastPageAriaLabel`, `pageAriaLabel`, `jumpToPageAriaLabel`, `pageSizeLabel`, `pageSizeAriaLabel`, `paginationAriaLabel`, `ofLabel`, `resultLabelSingular`, `resultLabelPlural`, `pageSizeOptions`, `paginatorPosition`, `pageLinkSize`, `showPageLinks`, `showFirstLastPageButtons`, `showCurrentPageReport`, `currentPageReportTemplate`, `showJumpToPageInput`, `showJumpToPageDropdown`, `alwaysShowPaginator`.
-- **SORT / OPTIONAL-FEATURE (6):** `sortable`, `defaultSortOrder`, `resetPageOnSort`, `removableSort`, `sort`, `multiSort`.
-- **SELECTION / OPTIONAL-FEATURE (13):** `selectionMode`, `compareSelectionBy`, `selection`, `rowSelectable`, `selectAllScope`, `selectOnRowClick`, `metaKeySelection`, `clearSelectionLabel`, `selectionSummaryLabel`, `selectAllAriaLabel`, `selectRowAriaLabel`, `unselectRowAriaLabel`, `selectionActions`.
-- **OTHER—EXPANSION / OPTIONAL-FEATURE (5):** `expandable`, `expandMode`, `expandedRowKeys`, `expandRowAriaLabel`, `collapseRowAriaLabel`.
-- **EXPORT / OPTIONAL-FEATURE (11):** `exportable`, `exportFileName`, `exportCsvTitle`, `exportJsonTitle`, `exportXlsxTitle`, `exportFormats`, `exportColumns`, `exportScope`, `csvSeparator`, `csvFormulaPolicy`, `exportValue`.
-- **VIRTUAL / OPTIONAL-FEATURE (16):** `stickyHeader`, `scrollHeight`, `virtualScroll`, `virtualScrollVisibleItems`, `virtualScrollItemSize`, `virtualScrollOverscan`, `virtualScrollDelay`, `virtualScrollAppendOnly`, `virtualScrollAutoSize`, `virtualScrollResizeDelay`, `virtualScrollStep`, `serverSide`, `query`, `lazyLoadOnInit`, `totalItems`, `dataFirst`.
-- **CORE TEMPLATE / OPTIONAL-FEATURE (1):** `lazyPlaceholderTemplate`.
-- **LAYOUT / OPTIONAL-FEATURE (6):** `resizableColumns`, `columnResizeMode`, `reorderableColumns`, `columnChooser`, `columnChooserLabel`, `initialLayout`.
-- **REORDER / OPTIONAL-FEATURE (4):** `reorderableRows`, `rowReorderable`, `moveRowUpAriaLabel`, `moveRowDownAriaLabel`.
-- **CONTEXT / OPTIONAL-FEATURE (3):** `contextMenu`, `contextMenuRowDisabled`, `contextMenuSelection`.
-- **OTHER—GROUPING / OPTIONAL-FEATURE (8):** `groupBy`, `groupHeaderLabel`, `rowGroupMode`, `groupRowsByOrder`, `expandableRowGroups`, `expandedGroupKeys`, `expandGroupAriaLabel`, `collapseGroupAriaLabel`.
-- **EDIT / OPTIONAL-FEATURE (9):** `inlineEdit`, `editMode`, `editingRowKeys`, `editingCell`, `cellEditValidator`, `rowEditValidator`, `inlineEditLabel`, `saveInlineEditLabel`, `cancelInlineEditLabel`.
-- **URL / OPTIONAL-FEATURE (6):** `pageParam`, `searchParam`, `sortParam`, `sortDirParam`, `multiSortParam`, `useUrlState`.
-- **PERSISTENCE / OPTIONAL-FEATURE (2):** `stateKey`, `stateStorage`.
+- **Core/data (9):** `columns`, `data`, `frozenData`, `loading`, `title`, `emptyMessage`, `tableAriaLabel`, `rowKey`, `rowTrackBy`.
+- **Query/filter/page/sort (15):** `pageSize`, `pagination`, `searchable`, `advancedFilterMode`, `advancedFilterTexts`, `exactMatchable`, `sortable`, `defaultSortOrder`, `resetPageOnSort`, `removableSort`, `sort`, `globalFilterFields`, `pageSizeOptions`, `paginatorPosition`, `multiSort`.
+- **Interaction (10):** `selectable`, `compareSelectionBy`, `selection`, `rowSelectable`, `selectAllScope`, `selectOnRowClick`, `metaKeySelection`, `expandMode`, `expandedRowKeys`, `selectionActions`.
+- **Viewport/server (8):** `stickyHeader`, `scrollHeight`, `virtualScroll`, `serverSide`, `query`, `lazyLoadOnInit`, `totalItems`, `dataFirst`.
+- **Layout/reorder/context (10):** `resizableColumns`, `columnResizeMode`, `reorderableColumns`, `reorderableRows`, `rowReorderable`, `contextMenu`, `contextMenuRowDisabled`, `contextMenuSelection`, `columnChooser`, `initialLayout`.
+- **Grouping/editing (10):** `groupBy`, `rowGroupMode`, `groupRowsByOrder`, `expandableRowGroups`, `expandedGroupKeys`, `editMode`, `editingRowKeys`, `editingCell`, `cellEditValidator`, `rowEditValidator`.
+- **Visual/persistence (9):** `bordered`, `roundedBorders`, `stripedRows`, `density`, `showRowNumbers`, `rowClass`, `footerRow`, `stateKey`, `stateStorage`.
+
+`rowKey` now accepts either a field/path string or a function and is the sole semantic identity input. `selectable` accepts `false`, `true`, `'single'`, or `'multiple'`. `expandMode="none"` and `editMode="none"` own capability enablement, so separate `expandable` and `inlineEdit` switches are unnecessary. Skeleton row count and virtual resize coalescing are implementation details.
 
 ### Outputs
 
 Classification totals:
 
-| Classification | Count |
-| --- | ---: |
-| CANONICAL | 3 |
-| OPTIONAL-FEATURE | 34 |
-| COMPATIBILITY | 1 |
-| **Total** | **38** |
+| Classification   |  Count |
+| ---------------- | -----: |
+| CANONICAL        |      3 |
+| OPTIONAL-FEATURE |     34 |
+| COMPATIBILITY    |      1 |
+| **Total**        | **38** |
 
 Domain ledger:
 
@@ -94,95 +83,66 @@ Aggregate and lifecycle outputs are distinct contracts. `selectionChange` remain
 
 ### Exposed methods
 
-Method support classification totals:
+The declaration contract uses a closed allowlist. These 32 methods are supported:
 
-| Support classification | Architecture classification | Count |
-| --- | --- | ---: |
-| SUPPORTED-CONSUMER (documented) | OPTIONAL-FEATURE | 8 |
-| ESTABLISHED-CONSUMER CANDIDATE (undocumented but callable) | OPTIONAL-FEATURE | 38 |
-| TEMPLATE/ORCHESTRATION LEAK | INTERNAL-IMPLEMENTATION + MAJOR-VERSION-ONLY CLEANUP | 50 |
-| **Total** |  | **96** |
+`applyLayout`, `cancelCellEdit`, `cancelRowEdit`, `clearColumnFilters`, `clearSearch`, `clearSelection`, `clearState`, `collapseRow`, `commitCellEdit`, `currentLayout`, `currentState`, `expandRow`, `exportCsv`, `exportJson`, `exportXlsx`, `goToPage`, `resetState`, `resetVirtualScroll`, `restoreState`, `saveRowEdit`, `saveState`, `scrollToIndex`, `scrollToOffset`, `selectRow`, `setColumnFilter`, `setExactMatch`, `sortBy`, `startCellEdit`, `startRowEdit`, `toggleAll`, `toggleExpand`, and `unselectRow`.
 
-The 8 documented supported methods are `scrollToIndex`, `scrollToOffset`, `resetVirtualScroll`, `currentState`, `saveState`, `restoreState`, `clearState`, and `resetState`.
-
-The 38 established-consumer candidates are `toggleColumnChooser`, `isColumnVisible`, `toggleColumnVisibility`, `canMoveColumn`, `moveColumn`, `applyLayout`, `currentLayout`, `resetColumnWidth`, `canMoveRow`, `moveRow`, `isRowExpanded`, `expandRow`, `collapseRow`, `toggleExpand`, `isRowSelected`, `isRowSelectable`, `toggleRow`, `selectRow`, `unselectRow`, `toggleAll`, `clearSelection`, `goToPage`, `sortBy`, `clearSearch`, `setExactMatch`, `setColumnFilter`, `clearColumnFilters`, `exportCsv`, `exportJson`, `exportXlsx`, `startCellEdit`, `commitCellEdit`, `cancelCellEdit`, `isEditingRow`, `startRowEdit`, `saveRowEdit`, `cancelRowEdit`, and `toggleGroup`.
-
-The 50 internal implementation leaks are `_filterOpts`, `isLastFrozenLeftColumn`, `isFirstFrozenRightColumn`, `isFirstVisibleColumn`, `isLastVisibleColumn`, `isColumnDraggable`, `isColumnResizable`, `columnWidth`, `startColumnResize`, `canReorderRow`, `onRowClick`, `onSearch`, `onPageSizeChange`, `pageButtonAriaLabel`, `isConfirmPending`, `handleAction`, `cancelConfirm`, `isSelectionConfirmPending`, `handleSelectionAction`, `cancelSelectionConfirm`, `onTableScroll`, `getRowKey`, `visibleRowNumber`, `getRowClass`, `getCellValue`, `isEditingCell`, `editingValue`, `cellEditingInvalid`, `cellEditingError`, `inlineEditorType`, `inlineEditorOptions`, `setEditingValue`, `onEditableCellKeydown`, `setRowEditingValue`, `structuralContext`, `paginatorTemplateContext`, `bodyContext`, `rowEditContext`, `cellViewTemplate`, `cellEditorTemplate`, `cellViewContext`, `cellEditorContext`, `groupTemplateContext`, `groupExpansionAriaLabel`, `isRowspanGroupCell`, `groupRowspan`, `hideGroupRowspanCell`, `getSortPriority`, `columnFilterControl`, and `getColumnFilterValue`.
-
-H3 does not change visibility for any of these methods. Angular-template methods remain template-visible, and all TypeScript-callable members remain source compatible. A later major may restrict only the 50 implementation leaks after `@internal` release metadata and consumer migration evidence exist.
+All other public TypeScript methods on `NeuTableComponent` are emitted as `INTERNAL/UNSUPPORTED`. They stay class-visible only because the Angular template currently calls them; visibility does not make them consumer contract. Contract tests fail if a new method is accidentally classified as supported.
 
 ### Template selectors
 
-Classification totals:
+There are 20 selectors: 18 existing selectors plus the H5-B1.1 body-section template and managed-row directive.
 
-| Classification | Count |
-| --- | ---: |
-| CANONICAL | 8 |
-| OPTIONAL-FEATURE | 8 |
-| **Total** | **16** |
-
-- **CORE / CANONICAL (8):** `neuTableBody`, `neuTableCaption`, `neuTableHeaderGroup`, `neuTableFooterGroup`, `neuTableLoadingBody`, `neuTableSummary`, `neuTableCellView`, `neuTableToolbar`.
+- **CORE / CANONICAL (11):** `neuTableBody`, `neuTableBodySection`, `neuTableCaption`, `neuTableHeaderGroup`, `neuTableFooterGroup`, `neuTableLoadingBody`, `neuTableSummary`, `neuTableCellView`, `neuTableToolbar`, `neuTableEmpty`, `neuTableLazyPlaceholder`.
 - **PAGE / OPTIONAL-FEATURE (2):** `neuTablePaginatorLeft`, `neuTablePaginatorRight`.
 - **OTHER—GROUPING / OPTIONAL-FEATURE (2):** `neuTableGroupHeader`, `neuTableGroupFooter`.
 - **EDIT / OPTIONAL-FEATURE (1):** `neuTableCellEditor`.
 - **FILTER / OPTIONAL-FEATURE (1):** `neuTableFilterTemplate`.
 - **OTHER—EXPANSION / OPTIONAL-FEATURE (1):** `neuTableExpand`.
-- **REORDER / OPTIONAL-FEATURE (1):** `[neuTableRowReorderHandle]`.
+- **ROW BEHAVIOR / OPTIONAL-FEATURE (2):** `tr[neuTableManagedRow]`, `[neuTableRowReorderHandle]`.
 
-## Compatibility normalization and deprecation ledger
+### Full body-section composition
 
-Compatibility flows in one direction:
+`neuTableBody` remains the controlled path: Neural owns the primary `<tr>` and the consumer owns its cells. `neuTableBodySection` is the opt-in structural path and is inserted directly inside `<tbody>`. When both are projected, `neuTableBodySection` wins deterministically and the normal body, loading, empty, group, placeholder, and expansion renderers do not render a second copy.
 
-`legacy or alias input → compatibility adapter → canonical state/config → feature implementation → canonical output → compatibility mirror`
+The body-section context exposes a stable discriminated `entries` union. Only `kind: 'data'` contains `row: T`. Group, empty, loading, placeholder, and spacer entries never fabricate `T`. Use the optional `[neuTableBodySectionOf]="rows"` compile-time anchor when strict templates should infer the exact consumer row type.
 
-| Surface | Canonical replacement | Why retained | Earliest removal |
-| --- | --- | --- | --- |
-| `selectable` | `selectionMode="multiple"` | shipped boolean alias used by existing templates | future major |
-| `toolbarExtraRef` | projected `neuTableToolbar` template | shipped direct `TemplateRef` input | future major |
-| `serverStateChange` / `NeuTableServerState` | `queryChange` / `NeuTableQueryState` | established server integration payload | future major |
-| column `filterable`, `filterType`, `filterOptions` | typed `filterConfig` | established simple-filter column syntax | future major |
-| legacy query `columnFilters` / `typedColumnFilters` projections | canonical filter constraints | server payload compatibility | future major |
-| unparameterized `NeuTableColumn` | `NeuTableColumn<T>` | source compatibility for pre-generic consumers | future major, only with migration evidence |
-| 50 template/orchestration methods | no consumer replacement; implementation moves behind controllers | TypeScript visibility is already observable | future major after `@internal` release period |
+Apply `[neuTableManagedRow]="entry"` to the consumer-owned primary `<tr>`. The component-scoped directive delegates selection, controlled-selection proposals, roving focus, keyboard selection/range behavior, ARIA coordinates, context menu, row click/double-click, drag/drop reorder, frozen positioning, and canonical row state to the owning Table. Consumer classes, attributes, directives, and ARIA coexist on that row. Additional sibling rows are deliberately unmanaged and remain the consumer's accessibility and interaction responsibility.
 
-Migration examples:
+Body-section entries already reflect Neural's canonical filtered, sorted, grouped, paged, frozen, and sparse-visible pipeline; consumer rows never become a second data pipeline and never change record counts.
 
-```html
-<!-- compatibility -->
-<neu-table [selectable]="true" />
+Unrestricted sibling rows are supported only when `siblingRowsSupported` is `true`. In fixed-size, lazy-sparse, and append-only virtual modes it is `false`: consumers may customize the single managed virtualization unit and must render placeholder/spacer entries, but must not add variable-height sibling rows because those rows are not virtualization records and would invalidate range math. The context exposes `virtualized` and this policy explicitly.
 
-<!-- canonical -->
-<neu-table selectionMode="multiple" />
-```
+Compared with PrimeNG, the normal Neural body keeps stronger default ownership, while the advanced body section has equivalent complete-row/multiple-row freedom. The managed-row directive adds canonical behavior that Prime consumers otherwise reconstruct with table directives and bindings.
 
-```html
-<!-- compatibility -->
-<neu-table [toolbarExtraRef]="actions" />
+## Normalization and deliberate deferrals
 
-<!-- canonical -->
-<neu-table>
-  <ng-template neuTableToolbar>...</ng-template>
-</neu-table>
-```
+Normalization flows one way:
 
-`rowTrackBy` is not a deprecation candidate: render tracking and semantic row identity are related but distinct. Aggregate outputs are not deprecated merely because granular lifecycle outputs also exist.
+`focused public input → normalized internal config/state → feature implementation → canonical output`
+
+Direct `TemplateRef` inputs for toolbar, empty state, and lazy placeholders were replaced by `neuTableToolbar`, `neuTableEmpty`, and `neuTableLazyPlaceholder`. `rowIdentity` was folded into the widened `rowKey`; selection, expansion, and edit enablement were folded into their historical mode owners.
+
+`contextMenu` and `contextMenuRowDisabled` remain direct. The current context menu is an imperative directive/overlay relationship, and moving it to projection without a clear owner could alter controlled context-selection behavior. This is an explicit H5-B1 deferral, not accidental facade growth.
+
+`serverStateChange` remains the compatibility projection of canonical `queryChange`. `rowTrackBy` remains distinct from semantic `rowKey`: one owns render tracking, the other owns state identity.
 
 ## State ownership
 
-| State family | Ownership | Canonical owner |
-| --- | --- | --- |
-| columns, data, frozen data | CONTROLLED | consumer; renderer uses immutable projections |
-| page, page size, search, filter constraints | CONTROLLED with `query`, otherwise INTERNAL | table state controller |
-| sort entries | CONTROLLED with `query`/`sort`, otherwise INTERNAL | table state controller |
-| selection keys | CONTROLLED with `selection`, otherwise INTERNAL | table state controller; selected rows are DERIVED |
-| row/group expansion keys | CONTROLLED when inputs are supplied, otherwise INTERNAL | table state controller |
-| row/cell editing identity | CONTROLLED when inputs are supplied, otherwise INTERNAL | table state controller; drafts are EPHEMERAL in editing controller |
-| column layout | initial controlled seed, then INTERNAL | table state controller |
-| filter overlay drafts and controls | EPHEMERAL | filter UI/controller |
-| virtual range, retention, request IDs, scroll position | EPHEMERAL/DERIVED | virtual/lazy controllers |
-| keyboard focus and range anchors | EPHEMERAL | keyboard controller |
-| context selection | CONTROLLED when supplied, otherwise EPHEMERAL | interaction boundary |
-| persistence and URL | EXTERNAL SYNC | adapters; never canonical owners |
+| State family                                           | Ownership                                               | Canonical owner                                                    |
+| ------------------------------------------------------ | ------------------------------------------------------- | ------------------------------------------------------------------ |
+| columns, data, frozen data                             | CONTROLLED                                              | consumer; renderer uses immutable projections                      |
+| page, page size, search, filter constraints            | CONTROLLED with `query`, otherwise INTERNAL             | table state controller                                             |
+| sort entries                                           | CONTROLLED with `query`/`sort`, otherwise INTERNAL      | table state controller                                             |
+| selection keys                                         | CONTROLLED with `selection`, otherwise INTERNAL         | table state controller; selected rows are DERIVED                  |
+| row/group expansion keys                               | CONTROLLED when inputs are supplied, otherwise INTERNAL | table state controller                                             |
+| row/cell editing identity                              | CONTROLLED when inputs are supplied, otherwise INTERNAL | table state controller; drafts are EPHEMERAL in editing controller |
+| column layout                                          | initial controlled seed, then INTERNAL                  | table state controller                                             |
+| filter overlay drafts and controls                     | EPHEMERAL                                               | filter UI/controller                                               |
+| virtual range, retention, request IDs, scroll position | EPHEMERAL/DERIVED                                       | virtual/lazy controllers                                           |
+| keyboard focus and range anchors                       | EPHEMERAL                                               | keyboard controller                                                |
+| context selection                                      | CONTROLLED when supplied, otherwise EPHEMERAL           | interaction boundary                                               |
+| persistence and URL                                    | EXTERNAL SYNC                                           | adapters; never canonical owners                                   |
 
 Controlled transitions emit fresh proposal containers and wait for consumer echo. Consumer rows, columns, filters, sort, selection, layout, and server state are never mutated; domain object identity is preserved.
 
@@ -192,7 +152,7 @@ Controlled transitions emit fresh proposal containers and wait for consumer echo
 
 `@neural-ui/core/table` remains batteries included and retains the full existing feature graph. This distinction must be stated in bundle reports: core cost is not the existing `<neu-table>` cost.
 
-The core renderer and compatibility facade resolve styling through the same existing `--neu-table-*`, semantic, and foundation token contract. H3 adds no theme system and no `::ng-deep` selector.
+The core renderer and public facade resolve styling through the same existing `--neu-table-*`, semantic, and foundation token contract. H5-B1 adds no theme system and no `::ng-deep` selector.
 
 ## Virtual ARIA contract
 
@@ -214,8 +174,8 @@ All reports distinguish:
 
 - empty application;
 - lightweight `NeuTableCoreComponent`;
-- existing batteries-included `NeuTableComponent` compatibility facade;
+- batteries-included `NeuTableComponent` public facade;
 - TreeTable;
 - dashboard fixture.
 
-Each scenario records raw, gzip `-9`, and Brotli `q11` increments. The ≤140 KiB gzip target is evaluated honestly. A core-only win is never reported as a reduction in the compatibility facade.
+Each scenario records raw, gzip `-9`, and Brotli `q11` increments. The ≤140 KiB gzip target is evaluated honestly. A core-only win is never reported as a reduction in the batteries-included facade.

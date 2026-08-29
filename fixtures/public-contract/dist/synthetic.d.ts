@@ -18,6 +18,7 @@ export declare class SyntheticCompoundComponent {
   /** @deprecated Use publicMethod instead. */
   legacyMethod(): void;
   publicMethod(value: SyntheticValue): string;
+  templateMechanic(): void;
   /** @internal */
   internalMechanic(): void;
   static ɵfac: i0.ɵɵFactoryDeclaration<SyntheticCompoundComponent, never>;
