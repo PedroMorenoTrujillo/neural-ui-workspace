@@ -93,7 +93,7 @@ describe('NeuSchedulerGanttComponent', () => {
     const emitted: Array<{ rowId: string; taskId: string }> = [];
 
     fixture.componentInstance.taskClick.subscribe((event) => {
-      emitted.push({ rowId: event.rowId, taskId: event.task.id });
+      emitted.push({ rowId: event['rowId'], taskId: event.task.id });
     });
 
     fixture.detectChanges();
@@ -110,7 +110,7 @@ describe('NeuSchedulerGanttComponent', () => {
     const emitted: string[] = [];
 
     fixture.componentInstance.slotClick.subscribe((event) => {
-      emitted.push(`${event.rowId}:${event.date}:${event.scale}`);
+      emitted.push(`${event['rowId']}:${event.date}:${event.scale}`);
     });
 
     fixture.detectChanges();

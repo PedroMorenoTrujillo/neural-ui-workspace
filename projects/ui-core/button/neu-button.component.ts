@@ -94,7 +94,7 @@ export class NeuButtonComponent {
   neuClick = output<MouseEvent>();
 
   /** @internal — reenvía el click nativo al output Angular / forwards the native click to the Angular output */
-  _onHostClick(event: MouseEvent): void {
+  protected _onHostClick(event: MouseEvent): void {
     if (!this.isDisabled()) {
       this.neuClick.emit(event);
     }

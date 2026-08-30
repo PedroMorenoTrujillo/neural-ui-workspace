@@ -110,7 +110,7 @@ describe('NeuAlertComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect((f.componentInstance as any)._dismissed()).toBe(true);
+    expect((f.componentInstance as any)['_dismissed']()).toBe(true);
   });
 
   it('should apply outline class', async () => {

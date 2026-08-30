@@ -21,7 +21,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
-import { NeuRovingMenuController } from '@neural-ui/core/menu-foundation';
+import { NeuRovingMenuController } from '@neural-ui/core/internal';
 
 export interface NeuContextMenuItem {
   /** Key para identificar la acción / Key to identify the action */

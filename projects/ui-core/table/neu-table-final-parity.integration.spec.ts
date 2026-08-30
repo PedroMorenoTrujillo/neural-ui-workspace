@@ -88,14 +88,14 @@ describe('NeuTable G01-G16 final parity integration', () => {
     const replacement = ROWS.map((row) => ({ ...row, meta: { ...row.meta } }));
     fixture.componentRef.setInput('data', replacement);
     fixture.detectChanges();
-    expect(table.isRowSelected(replacement[0])).toBe(true);
-    expect(table.isRowExpanded(replacement[0])).toBe(true);
+    expect(table['isRowSelected'](replacement[0])).toBe(true);
+    expect(table['isRowExpanded'](replacement[0])).toBe(true);
 
     fixture.componentRef.setInput('rowKey', (row: Row) => `row:${row.meta.id}`);
     fixture.detectChanges();
     table.clearSelection();
     table.selectRow(replacement[1]);
-    expect(table.isRowSelected(replacement[1])).toBe(true);
+    expect(table['isRowSelected'](replacement[1])).toBe(true);
 
     const tracked = vi.fn((index: number, row: Row) => `${index}:${row.meta.id}`);
     fixture.componentRef.setInput('rowTrackBy', tracked);
@@ -109,8 +109,8 @@ describe('NeuTable G01-G16 final parity integration', () => {
     equals.componentRef.setInput('compareSelectionBy', 'equals');
     equals.detectChanges();
     equals.componentInstance.selectRow(ROWS[0]);
-    expect(equals.componentInstance.isRowSelected(ROWS[0])).toBe(true);
-    expect(equals.componentInstance.isRowSelected({ ...ROWS[0] })).toBe(false);
+    expect(equals.componentInstance['isRowSelected'](ROWS[0])).toBe(true);
+    expect(equals.componentInstance['isRowSelected']({ ...ROWS[0] })).toBe(false);
 
     const deep = createTable();
     deep.componentRef.setInput('selectable', 'multiple');
@@ -118,11 +118,11 @@ describe('NeuTable G01-G16 final parity integration', () => {
     deep.componentRef.setInput('compareSelectionBy', 'deepEquals');
     deep.detectChanges();
     deep.componentInstance.selectRow(ROWS[0]);
-    expect(deep.componentInstance.isRowSelected(JSON.parse(JSON.stringify(ROWS[0])) as Row)).toBe(
+    expect(deep.componentInstance['isRowSelected'](JSON.parse(JSON.stringify(ROWS[0])) as Row)).toBe(
       true,
     );
-    expect(deep.componentInstance.getRowKey(ROWS[0])).toBe(
-      deep.componentInstance.getRowKey({ ...ROWS[0] }),
+    expect(deep.componentInstance['getRowKey'](ROWS[0])).toBe(
+      deep.componentInstance['getRowKey']({ ...ROWS[0] }),
     );
   });
 
@@ -134,24 +134,24 @@ describe('NeuTable G01-G16 final parity integration', () => {
     fixture.componentRef.setInput('rowKey', 'meta.id');
     fixture.detectChanges();
     table.selectRow(ROWS[0]);
-    expect(table.isRowSelected({ ...ROWS[0], meta: { ...ROWS[0].meta } })).toBe(true);
+    expect(table['isRowSelected']({ ...ROWS[0], meta: { ...ROWS[0].meta } })).toBe(true);
 
     fixture.componentRef.setInput('rowKey', (row: Row) => ({ id: row.meta.id }));
     fixture.detectChanges();
     table.clearSelection();
     table.selectRow(ROWS[1]);
-    expect(table.isRowSelected({ ...ROWS[1], meta: { ...ROWS[1].meta } })).toBe(true);
+    expect(table['isRowSelected']({ ...ROWS[1], meta: { ...ROWS[1].meta } })).toBe(true);
 
     fixture.componentRef.setInput('rowKey', undefined);
     fixture.componentRef.setInput('rowKey', 'missing');
     fixture.detectChanges();
-    expect(table.getRowKey(ROWS[0])).toContain('"name":"Ada"');
+    expect(table['getRowKey'](ROWS[0])).toContain('"name":"Ada"');
     const cyclic = { meta: { id: 4, team: { code: 'C' } }, name: 'Cycle', score: 4 } as Row & {
       self?: unknown;
     };
     cyclic.self = cyclic;
-    expect(typeof table.getRowKey(cyclic)).toBe('symbol');
-    expect(table.getRowKey(cyclic)).toBe(table.getRowKey(cyclic));
+    expect(typeof table['getRowKey'](cyclic)).toBe('symbol');
+    expect(table['getRowKey'](cyclic)).toBe(table['getRowKey'](cyclic));
 
     const globalValues = (
       table as unknown as {
@@ -182,7 +182,7 @@ describe('NeuTable G01-G16 final parity integration', () => {
             group: unknown;
           };
         }
-      ).bodyContext(ROWS[0], 0, 0, true).group,
+      )['bodyContext'](ROWS[0], 0, 0, true).group,
     ).toBeNull();
   });
 
@@ -231,14 +231,14 @@ describe('NeuTable G01-G16 final parity integration', () => {
     });
     fixture.detectChanges();
     const table = fixture.componentInstance;
-    table.onSearch({ target: { value: 'A' } } as unknown as Event);
-    table.onSearch({ target: { value: 'Ada' } } as unknown as Event);
+    table['onSearch']({ target: { value: 'A' } } as unknown as Event);
+    table['onSearch']({ target: { value: 'Ada' } } as unknown as Event);
     expect(table.searchQuery()).toBe('');
     vi.advanceTimersByTime(25);
     expect(table.searchQuery()).toBe('Ada');
 
     table.clearSearch();
-    table.columnFilterControl('name').setValue('Grace');
+    table['columnFilterControl']('name').setValue('Grace');
     vi.advanceTimersByTime(25);
     expect(table.filteredData()).toHaveLength(1);
     fixture.componentRef.setInput('filterOptions', {
@@ -246,7 +246,7 @@ describe('NeuTable G01-G16 final parity integration', () => {
       on: 'enter',
     });
     fixture.detectChanges();
-    table.columnFilterControl('name').setValue('Linus');
+    table['columnFilterControl']('name').setValue('Linus');
     vi.advanceTimersByTime(25);
     expect(table.filteredData()[0].name).toBe('Grace');
     const inline = fixture.nativeElement.querySelector(
@@ -386,9 +386,9 @@ describe('NeuTable G01-G16 final parity integration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
-    expect(table._scrollContainerMaxHeight()).toBe('18rem');
-    expect(table._virtualItemSize()).toBe(40);
-    expect(table._virtualVisibleItems()).toBe(2);
+    expect(table['_scrollContainerMaxHeight']()).toBe('18rem');
+    expect(table['_virtualItemSize']()).toBe(40);
+    expect(table['_virtualVisibleItems']()).toBe(2);
 
     const container = fixture.nativeElement.querySelector(
       '.neu-table__scroll-container',
@@ -407,8 +407,8 @@ describe('NeuTable G01-G16 final parity integration', () => {
         ): void;
       }
     )._measureViewportGeometry(container, header, []);
-    expect(table._virtualVisibleItems()).toBe(4);
-    expect(table._virtualHeaderHeight()).toBe(60);
+    expect(table['_virtualVisibleItems']()).toBe(4);
+    expect(table['_virtualHeaderHeight']()).toBe(60);
 
     const ignored = document.createElement('tr');
     const firstFrozen = document.createElement('tr');
@@ -441,7 +441,7 @@ describe('NeuTable G01-G16 final parity integration', () => {
     const events: unknown[] = [];
     table.virtualScrollEvent.subscribe((event) => events.push(event));
     const target = { scrollTop: 24, scrollLeft: 3 } as HTMLElement;
-    table.onTableScroll({ target } as unknown as Event);
+    table['onTableScroll']({ target } as unknown as Event);
     expect(events).toHaveLength(0);
 
     fixture.componentRef.setInput('virtualScroll', true);
@@ -453,7 +453,7 @@ describe('NeuTable G01-G16 final parity integration', () => {
     await fixture.whenStable();
     table.scrollToIndex(1);
     expect(events).toHaveLength(0);
-    table.onTableScroll({ target } as unknown as Event);
+    table['onTableScroll']({ target } as unknown as Event);
     expect(events).toHaveLength(1);
     expect(events[0]).toMatchObject({ scrollTop: 24, scrollLeft: 3 });
   });
@@ -537,7 +537,7 @@ describe('NeuTable G01-G16 final parity integration', () => {
     expect(isEnterDriven({ ...COLUMNS[0], filterType: 'select' })).toBe(false);
     expect(isEnterDriven({ ...COLUMNS[0], filterable: false })).toBe(false);
 
-    table.columnFilterControl('name').setValue('Ada');
+    table['columnFilterControl']('name').setValue('Ada');
     commit(COLUMNS[0], enter('Escape'));
     commit(COLUMNS[0], enter('Enter', true));
     expect(table.filteredData()).toHaveLength(ROWS.length);

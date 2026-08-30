@@ -1,4 +1,4 @@
-import { NeuOptionAccessor, resolveNeuOptionLabel } from './neu-option-api';
+import { NeuOptionAccessor, resolveNeuOptionLabel } from '@neural-ui/core/option-api';
 import {
   InternalNeuOptionNormalizedRow,
   InternalNeuOptionRow,
@@ -9,7 +9,7 @@ import {
   moveNeuOptionActiveRow,
   pageNeuOptionActiveRow,
   reconcileNeuOptionActiveRow,
-} from './neu-option-foundation.internal';
+} from './neu-option-foundation';
 
 export interface InternalNeuOptionScrollRequest {
   readonly rowIndex: number;

@@ -12,7 +12,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 /**
  * NeuralUI InputOTP Component
@@ -69,14 +69,14 @@ export class NeuInputOTPComponent implements ControlValueAccessor {
   /** Emitido en cada cambio parcial / Emitted on each partial change */
   readonly valueChange = output<string>();
 
-  readonly _id = inject(NeuIdGenerator).getId('neu-input-otp-');
-  readonly _cvaDisabled = signal(false);
-  readonly _digits = signal<string[]>([]);
+  protected readonly _id = inject(NeuIdGenerator).getId('neu-input-otp-');
+  protected readonly _cvaDisabled = signal(false);
+  private readonly _digits = signal<string[]>([]);
 
-  readonly _cells = computed(() => Array.from({ length: this.length() }));
+  protected readonly _cells = computed(() => Array.from({ length: this.length() }));
 
   /** Array de dígitos con padding de vacíos — nunca undefined / Digits array padded with empty strings — never undefined */
-  readonly _paddedDigits = computed(() =>
+  protected readonly _paddedDigits = computed(() =>
     Array.from({ length: this.length() }, (_, i) => this._digits()[i] ?? ''),
   );
 

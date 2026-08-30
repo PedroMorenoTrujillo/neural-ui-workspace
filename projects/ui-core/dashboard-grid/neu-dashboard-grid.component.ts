@@ -102,8 +102,8 @@ export class NeuDashboardGridComponent {
   /** Emitido cuando el orden cambia / Emitted when order changes */
   readonly orderChange = output<NeuDashboardTileConfig[]>();
 
-  readonly _orderedTiles = signal<NeuDashboardTileConfig[]>([]);
-  readonly _tileSlots = viewChildren<ElementRef<HTMLElement>>('tileSlot');
+  protected readonly _orderedTiles = signal<NeuDashboardTileConfig[]>([]);
+  private readonly _tileSlots = viewChildren<ElementRef<HTMLElement>>('tileSlot');
 
   constructor() {
     effect(() => {
@@ -120,7 +120,7 @@ export class NeuDashboardGridComponent {
     });
   }
 
-  _onDrop(event: CdkDragDrop<NeuDashboardTileConfig[]>): void {
+  protected _onDrop(event: CdkDragDrop<NeuDashboardTileConfig[]>): void {
     const tiles = [...this._orderedTiles()];
     moveItemInArray(tiles, event.previousIndex, event.currentIndex);
     this._orderedTiles.set(tiles);

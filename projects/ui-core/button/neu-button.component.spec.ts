@@ -115,7 +115,7 @@ describe('NeuButtonComponent', () => {
     fixture.detectChanges();
     const events: MouseEvent[] = [];
     fixture.componentInstance.neuClick.subscribe((e) => events.push(e));
-    fixture.componentInstance._onHostClick(new MouseEvent('click'));
+    fixture.componentInstance['_onHostClick'](new MouseEvent('click'));
     expect(events.length).toBe(1);
   });
 
@@ -125,7 +125,7 @@ describe('NeuButtonComponent', () => {
     fixture.detectChanges();
     const events: MouseEvent[] = [];
     fixture.componentInstance.neuClick.subscribe((e) => events.push(e));
-    fixture.componentInstance._onHostClick(new MouseEvent('click'));
+    fixture.componentInstance['_onHostClick'](new MouseEvent('click'));
     expect(events.length).toBe(0);
   });
 

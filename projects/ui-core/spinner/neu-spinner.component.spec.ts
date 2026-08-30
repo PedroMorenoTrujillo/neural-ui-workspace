@@ -98,7 +98,7 @@ describe('NeuSpinnerComponent', () => {
     df.detectChanges();
     await df.whenStable();
     // _severityColor should return a non-empty CSS custom property string
-    expect((df.componentInstance as any)._severityColor()).toBeTruthy();
+    expect((df.componentInstance as any)['_severityColor']()).toBeTruthy();
   });
 
   it('severity=danger should compute the danger color class', async () => {
@@ -106,7 +106,7 @@ describe('NeuSpinnerComponent', () => {
     df.componentRef.setInput('severity', 'danger');
     df.detectChanges();
     await df.whenStable();
-    expect((df.componentInstance as any)._severityColor()).toBeTruthy();
+    expect((df.componentInstance as any)['_severityColor']()).toBeTruthy();
   });
 
   it('severity=warning should compute the warning color class', async () => {
@@ -114,7 +114,7 @@ describe('NeuSpinnerComponent', () => {
     df.componentRef.setInput('severity', 'warning');
     df.detectChanges();
     await df.whenStable();
-    expect((df.componentInstance as any)._severityColor()).toBeTruthy();
+    expect((df.componentInstance as any)['_severityColor']()).toBeTruthy();
   });
 
   it('strokeWidth input is applied to svg elements', async () => {

@@ -130,21 +130,21 @@ describe('NeuCascadeSelectComponent', () => {
     fixture.componentRef.setInput('optionLabel', null);
     fixture.componentRef.setInput('optionValue', null);
     fixture.detectChanges();
-    expect(component.optionLabelOf(component.currentNodes()[0])).toBe('Zero');
-    expect(component.optionValueOf(component.currentNodes()[0])).toBe(0);
+    expect(component['optionLabelOf'](component.currentNodes()[0])).toBe('Zero');
+    expect(component['optionValueOf'](component.currentNodes()[0])).toBe(0);
   });
 
   it('supports key and function accessors, including custom children', () => {
     const component = fixture.componentInstance as unknown as NeuCascadeSelectComponent<Department, string>;
-    expect(component.optionLabelOf(hierarchy[0])).toBe('Europe');
+    expect(component['optionLabelOf'](hierarchy[0])).toBe('Europe');
     fixture.componentRef.setInput('optionLabel', (node: Department) => node.name.toUpperCase());
     fixture.componentRef.setInput('optionValue', (node: Department): string => `dep-${node.id}`);
     fixture.componentRef.setInput('optionDisabled', (node: Department) => node.blocked === true);
     fixture.componentRef.setInput('optionChildren', (node: Department) => node.children ?? []);
     fixture.detectChanges();
-    expect(component.optionLabelOf(hierarchy[0])).toBe('EUROPE');
-    expect(component.optionValueOf(hierarchy[0])).toBe('dep-1');
-    expect(component.isOptionDisabled(hierarchy[1])).toBe(true);
+    expect(component['optionLabelOf'](hierarchy[0])).toBe('EUROPE');
+    expect(component['optionValueOf'](hierarchy[0])).toBe('dep-1');
+    expect(component['isOptionDisabled'](hierarchy[1])).toBe(true);
     expect(component.hasChildren(hierarchy[0])).toBe(true);
   });
 
@@ -223,7 +223,7 @@ describe('NeuCascadeSelectComponent', () => {
     ] satisfies Department[]);
     fixture.detectChanges();
     expect(component.selectedNode()?.name).toBe('Malaga');
-    expect(component.isOptionSelected({ id: 3, name: 'Malaga' })).toBe(true);
+    expect(component['isOptionSelected']({ id: 3, name: 'Malaga' })).toBe(true);
   });
 
   it('navigates through two and three levels and replaces descendants when the parent changes', () => {

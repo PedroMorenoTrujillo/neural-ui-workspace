@@ -166,7 +166,7 @@ export class NeuKanbanComponent {
   readonly columnsChange = output<NeuKanbanColumn[]>();
   readonly cardDrop = output<NeuKanbanCardDropEvent>();
 
-  readonly _columns = signal<NeuKanbanColumn[]>([]);
+  protected readonly _columns = signal<NeuKanbanColumn[]>([]);
   readonly connectedDropLists = computed(() => this._columns().map((column) => column.id));
 
   constructor() {

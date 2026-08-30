@@ -57,7 +57,7 @@ export class NeuFocusTrapDirective {
   }
 
   /** @internal */
-  onFocusin(event: FocusEvent): void {
+  protected onFocusin(event: FocusEvent): void {
     if (!(event.target instanceof HTMLElement) || !this.host.contains(event.target)) return;
 
     this.lastFocusedInside = event.target;
@@ -65,7 +65,7 @@ export class NeuFocusTrapDirective {
   }
 
   /** @internal */
-  onKeydown(event: KeyboardEvent): void {
+  protected onKeydown(event: KeyboardEvent): void {
     if (
       !this.neuFocusTrap() ||
       event.defaultPrevented ||

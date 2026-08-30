@@ -64,6 +64,7 @@ import {
   NeuTreeTableNodeDirective,
 } from './neu-tree-table-templates.directive';
 import type {
+  InternalNeuTreeTableRow,
   NeuTreeTableActionEvent,
   NeuTreeTableBodyContext,
   NeuTreeTableBodyDataEntry,
@@ -88,6 +89,7 @@ import type {
 export type {
   NeuTreeTableActionEvent,
   NeuTreeTableBodyContext,
+  NeuTreeTableBodyDataEntry,
   NeuTreeTableBodyRenderEntry,
   NeuTreeTableBodySectionContext,
   NeuTreeTableCellEditEvent,
@@ -644,29 +646,29 @@ export class NeuTreeTableComponent {
     }
   }
 
-  onTableSelectionChange(rows: Record<string, unknown>[]): void {
+  protected onTableSelectionChange(rows: Record<string, unknown>[]): void {
     const proposed = this.selectionProposal(rows);
     if (this.selection() === undefined) this.internalSelectionKeys.set(new Set(proposed.map((node) => node.id)));
     this.selectionChange.emit([...proposed]);
   }
 
-  onTableRowSelect(event: NeuTableRowSelectionEvent<Record<string, unknown>>): void {
+  protected onTableRowSelect(event: NeuTableRowSelectionEvent<Record<string, unknown>>): void {
     this.emitSelectionDetail('select', event);
   }
 
-  onTableRowUnselect(event: NeuTableRowSelectionEvent<Record<string, unknown>>): void {
+  protected onTableRowUnselect(event: NeuTableRowSelectionEvent<Record<string, unknown>>): void {
     this.emitSelectionDetail('unselect', event);
   }
 
-  onTableRowClick(row: Record<string, unknown>): void {
+  protected onTableRowClick(row: Record<string, unknown>): void {
     this.nodeClick.emit(this.asFlatRow(row).__treeNode);
   }
 
-  onTableRowDblClick(row: Record<string, unknown>): void {
+  protected onTableRowDblClick(row: Record<string, unknown>): void {
     this.nodeDblClick.emit(this.asFlatRow(row).__treeNode);
   }
 
-  onTableActionClick(event: {
+  protected onTableActionClick(event: {
     action: NeuTableAction<Record<string, unknown>>;
     row: Record<string, unknown>;
   }): void {
@@ -674,7 +676,7 @@ export class NeuTreeTableComponent {
     this.actionClick.emit({ action: event.action, node: row.__treeNode, row });
   }
 
-  onTableSelectionActionClick(event: {
+  protected onTableSelectionActionClick(event: {
     action: NeuTableSelectionAction<Record<string, unknown>>;
     rows: Record<string, unknown>[];
   }): void {
@@ -686,7 +688,7 @@ export class NeuTreeTableComponent {
     });
   }
 
-  onTableCellEditCommit(event: NeuTableCellEditEvent<Record<string, unknown>>): void {
+  protected onTableCellEditCommit(event: NeuTableCellEditEvent<Record<string, unknown>>): void {
     const row = this.asFlatRow(event.row);
     this.cellEditCommit.emit({
       node: row.__treeNode,
@@ -697,7 +699,7 @@ export class NeuTreeTableComponent {
     });
   }
 
-  onTableCellEditLifecycle(
+  protected onTableCellEditLifecycle(
     phase: 'init' | 'cancel',
     event: NeuTableCellEditLifecycleEvent<Record<string, unknown>>,
   ): void {
@@ -712,11 +714,11 @@ export class NeuTreeTableComponent {
     (phase === 'init' ? this.cellEditInit : this.cellEditCancel).emit(mapped);
   }
 
-  onTableEditValidationError(event: NeuTableEditValidationEvent<Record<string, unknown>>): void {
+  protected onTableEditValidationError(event: NeuTableEditValidationEvent<Record<string, unknown>>): void {
     this.editValidationError.emit(event);
   }
 
-  onTableRowEdit(
+  protected onTableRowEdit(
     phase: 'init' | 'save' | 'cancel',
     event: NeuTableRowEditEvent<Record<string, unknown>>,
   ): void {
@@ -736,13 +738,13 @@ export class NeuTreeTableComponent {
     return !treeRow.__treeDisabled && treeRow.__treeNode.selectable !== false;
   };
 
-  onTableQueryChange(query: NeuTableQueryState): void {
+  protected onTableQueryChange(query: NeuTableQueryState): void {
     if (this.query() === undefined) this.internalQuery.set(query);
     this.queryChange.emit(query);
     if (this.serverSide()) this.lazyRequest.emit({ reason: 'query', query });
   }
 
-  onTableLazyRequest(request: NeuTableLazyRequest): void {
+  protected onTableLazyRequest(request: NeuTableLazyRequest): void {
     this.lazyRequest.emit({
       reason: 'virtual',
       query: request.query,
@@ -751,7 +753,7 @@ export class NeuTreeTableComponent {
     });
   }
 
-  expandTemplateContext(row: Record<string, unknown>): {
+  protected expandTemplateContext(row: Record<string, unknown>): {
     $implicit: NeuTreeTableNode;
     node: NeuTreeTableNode;
     data: Record<string, unknown> | undefined;
@@ -783,24 +785,24 @@ export class NeuTreeTableComponent {
     };
   }
 
-  expandTemplateRef(directive: NeuTableExpandDirective): TemplateRef<unknown> {
+  protected expandTemplateRef(directive: NeuTableExpandDirective): TemplateRef<unknown> {
     return directive.templateRef as TemplateRef<unknown>;
   }
 
-  treeIndent(row: NeuTreeTableRow): number {
+  protected treeIndent(row: InternalNeuTreeTableRow): number {
     return row.__treeLevel * this.indentSize();
   }
 
-  isTreeRowDisabled(row: NeuTreeTableRow): boolean {
+  protected isTreeRowDisabled(row: InternalNeuTreeTableRow): boolean {
     return row.__treeDisabled;
   }
 
-  treeToggleAriaLabel(row: NeuTreeTableRow): string {
+  protected treeToggleAriaLabel(row: InternalNeuTreeTableRow): string {
     const labels = this.resolvedLabels();
     return `${row.__treeExpanded ? labels.collapseNodeAriaLabel : labels.expandNodeAriaLabel}: ${row.label}`;
   }
 
-  onTreeToggleKeydown(row: NeuTreeTableRow, event: KeyboardEvent): void {
+  protected onTreeToggleKeydown(row: InternalNeuTreeTableRow, event: KeyboardEvent): void {
     const direction = (
       event.currentTarget as HTMLElement
     ).ownerDocument.defaultView?.getComputedStyle(event.currentTarget as HTMLElement).direction;
@@ -815,8 +817,8 @@ export class NeuTreeTableComponent {
     }
   }
 
-  treeNodeContext(
-    row: NeuTreeTableRow,
+  protected treeNodeContext(
+    row: InternalNeuTreeTableRow,
     column: NeuTableColumn<Record<string, unknown>>,
   ): NeuTreeTableNodeContext {
     const node = row.__treeNode;
@@ -837,7 +839,7 @@ export class NeuTreeTableComponent {
     };
   }
 
-  treeBodyContext(
+  protected treeBodyContext(
     row: Record<string, unknown>,
     rowIndex: number,
     logicalIndex: number,
@@ -875,7 +877,7 @@ export class NeuTreeTableComponent {
     };
   }
 
-  treeBodySectionContext(
+  protected treeBodySectionContext(
     entries: readonly NeuTableBodyRenderEntry<Record<string, unknown>>[],
     columns: readonly NeuTableColumn<Record<string, unknown>>[],
     colspan: number,
@@ -914,7 +916,7 @@ export class NeuTreeTableComponent {
     };
   }
 
-  onHostKeydown(event: KeyboardEvent): void {
+  protected onHostKeydown(event: KeyboardEvent): void {
     if (event.defaultPrevented) return;
     const rowElement = event.target instanceof HTMLElement
       ? event.target.closest<HTMLTableRowElement>('tr[data-neu-tree-node-id]')
@@ -1021,8 +1023,10 @@ export class NeuTreeTableComponent {
     return rows;
   }
 
-  private indexAllRows(nodes: readonly NeuTreeTableNode[]): Map<string, NeuTreeTableRow> {
-    const rows = new Map<string, NeuTreeTableRow>();
+  private indexAllRows(
+    nodes: readonly NeuTreeTableNode[],
+  ): Map<string, InternalNeuTreeTableRow> {
+    const rows = new Map<string, InternalNeuTreeTableRow>();
     const visit = (siblings: readonly NeuTreeTableNode[], level: number, parentId?: string) => {
       siblings.forEach((node, index) => {
         rows.set(node.id, {
@@ -1255,7 +1259,7 @@ export class NeuTreeTableComponent {
     return expanded;
   }
 
-  private asFlatRow(row: Record<string, unknown>): NeuTreeTableRow {
-    return row as NeuTreeTableRow;
+  private asFlatRow(row: Record<string, unknown>): InternalNeuTreeTableRow {
+    return row as InternalNeuTreeTableRow;
   }
 }

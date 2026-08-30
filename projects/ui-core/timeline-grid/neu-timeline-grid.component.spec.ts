@@ -81,7 +81,7 @@ describe('NeuTimelineGridComponent', () => {
     fixture.componentRef.setInput('rows', ROWS);
     const emitted: string[] = [];
     fixture.componentInstance.slotClick.subscribe((slot) =>
-      emitted.push(`${slot.rowId}:${slot.columnId}`),
+      emitted.push(`${slot['rowId']}:${slot.columnId}`),
     );
     fixture.detectChanges();
 

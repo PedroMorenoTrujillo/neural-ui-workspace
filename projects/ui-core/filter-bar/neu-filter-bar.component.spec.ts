@@ -62,7 +62,7 @@ describe('NeuFilterBarComponent', () => {
 
     comp.toggle(CHIPS[0]);
     comp.toggle(CHIPS[1]);
-    expect(comp._chips().filter((c: NeuFilterChip) => c.active).length).toBe(2);
+    expect(comp['_chips']().filter((c: NeuFilterChip) => c.active).length).toBe(2);
   });
 
   it('multi=false deactivates other chips on toggle', async () => {
@@ -75,8 +75,8 @@ describe('NeuFilterBarComponent', () => {
 
     comp.toggle(CHIPS[0]);
     comp.toggle(CHIPS[1]);
-    expect(comp._chips().filter((c: NeuFilterChip) => c.active).length).toBe(1);
-    expect(comp._chips().find((c: NeuFilterChip) => c.active)?.key).toBe('active');
+    expect(comp['_chips']().filter((c: NeuFilterChip) => c.active).length).toBe(1);
+    expect(comp['_chips']().find((c: NeuFilterChip) => c.active)?.key).toBe('active');
   });
 
   it('should show clear button when a chip is active and clearable=true', async () => {
@@ -115,7 +115,7 @@ describe('NeuFilterBarComponent', () => {
     f.componentInstance.filterChange.subscribe((e: unknown[]) => emitted.push(e));
     comp.clearAll();
 
-    expect(comp._hasActive()).toBe(false);
+    expect(comp['_hasActive']()).toBe(false);
     expect(emitted[emitted.length - 1]).toEqual([]);
   });
 
@@ -127,7 +127,7 @@ describe('NeuFilterBarComponent', () => {
     const comp = f.componentInstance as any;
 
     comp.setActive(['active', 'inactive']);
-    expect(comp._chips().filter((c: NeuFilterChip) => c.active).length).toBe(2);
+    expect(comp['_chips']().filter((c: NeuFilterChip) => c.active).length).toBe(2);
   });
 
   it('should apply neu-filter-bar class', async () => {
@@ -143,10 +143,10 @@ describe('NeuFilterBarComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    comp.toggle(comp._chips()[0]);
-    expect(comp._chips()[0].active).toBe(true);
-    comp.toggle(comp._chips()[0]);
-    expect(comp._chips()[0].active).toBe(false);
+    comp.toggle(comp['_chips']()[0]);
+    expect(comp['_chips']()[0].active).toBe(true);
+    comp.toggle(comp['_chips']()[0]);
+    expect(comp['_chips']()[0].active).toBe(false);
   });
 
   it('clearAll deactivates all chips', async () => {
@@ -159,7 +159,7 @@ describe('NeuFilterBarComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
     comp.clearAll();
-    const allInactive = comp._chips().every((c: any) => !c.active);
+    const allInactive = comp['_chips']().every((c: any) => !c.active);
     expect(allInactive).toBe(true);
   });
 
@@ -171,7 +171,7 @@ describe('NeuFilterBarComponent', () => {
     const events: any[] = [];
     f.componentInstance.filterChange.subscribe((e: any) => events.push(e));
     const comp = f.componentInstance as any;
-    comp.toggle(comp._chips()[0]);
+    comp.toggle(comp['_chips']()[0]);
     expect(events.length).toBe(1);
   });
 
@@ -207,6 +207,6 @@ describe('NeuFilterBarComponent', () => {
     await f.whenStable();
 
     expect(events.at(-1)).toEqual([]);
-    expect(f.componentInstance._hasActive()).toBe(false);
+    expect(f.componentInstance['_hasActive']()).toBe(false);
   });
 });

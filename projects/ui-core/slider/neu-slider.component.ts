@@ -7,7 +7,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 /**
  * NeuralUI Slider Component

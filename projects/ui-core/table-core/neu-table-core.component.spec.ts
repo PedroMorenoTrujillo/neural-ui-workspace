@@ -338,8 +338,8 @@ describe('NeuTableCoreComponent', () => {
 
     expect(table.cellValue(row, { key: 'amount', header: 'Amount' })).toBe(10);
     expect(table.cellValue(row, { key: 'amount', header: 'Amount', value: () => null })).toBeNull();
-    expect(Object.isFrozen(table.structuralContext())).toBe(true);
-    expect(Object.isFrozen(table.bodyContext(row, 0))).toBe(true);
+    expect(Object.isFrozen(table['structuralContext']())).toBe(true);
+    expect(Object.isFrozen(table['bodyContext'](row, 0))).toBe(true);
     expect(Object.isFrozen(table.cellContext(row, 0, COLUMNS[0], row.name))).toBe(true);
     expect(table.emptyContext().message).toBe('No results');
   });

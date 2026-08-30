@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, computed, contentChild, forwardRef, inject, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 export interface NeuTagSuggestion { label: string; value: string; data?: unknown; }
 @Directive({ selector: 'ng-template[neuTagItem]' })
 export class NeuTagItemDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: string; remove: () => void }>) {} }

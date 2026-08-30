@@ -18,7 +18,7 @@ import {
   untracked,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuOptionDisabledAccessor,
   NeuOptionFilterConfig,
@@ -33,21 +33,23 @@ import {
   resolveNeuOptionDisabled,
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
-  ɵInternalNeuOptionActiveRowController as InternalNeuOptionActiveRowController,
-  ɵInternalNeuOptionLazyRequestSequencer as InternalNeuOptionLazyRequestSequencer,
-  ɵInternalNeuOptionNormalizedRow as InternalNeuOptionNormalizedRow,
-  ɵInternalNeuOptionRow as InternalNeuOptionRow,
-  ɵInternalNeuOptionTypeaheadController as InternalNeuOptionTypeaheadController,
-  ɵcreateNeuOptionLoadingRows as createNeuOptionLoadingRows,
-  ɵcreateNeuOptionLazyRequest as createNeuOptionLazyRequest,
-  ɵderiveNeuOptionActiveDescendant as deriveNeuOptionActiveDescendant,
-  ɵderiveNeuOptionAriaPosition as deriveNeuOptionAriaPosition,
-  ɵderiveNeuOptionRowId as deriveNeuOptionRowId,
-  ɵfilterNeuOptionRows as filterNeuOptionRows,
-  ɵnormalizeNeuLegacyOptionGroups as normalizeNeuLegacyOptionGroups,
-  ɵnormalizeNeuOptionGroups as normalizeNeuOptionGroups,
-  ɵnormalizeNeuOptionLazyWindow as normalizeNeuOptionLazyWindow,
 } from '@neural-ui/core/option-api';
+import {
+  InternalNeuOptionActiveRowController,
+  InternalNeuOptionLazyRequestSequencer,
+  type InternalNeuOptionNormalizedRow,
+  type InternalNeuOptionRow,
+  InternalNeuOptionTypeaheadController,
+  createNeuOptionLoadingRows,
+  createNeuOptionLazyRequest,
+  deriveNeuOptionActiveDescendant,
+  deriveNeuOptionAriaPosition,
+  deriveNeuOptionRowId,
+  filterNeuOptionRows,
+  normalizeNeuLegacyOptionGroups,
+  normalizeNeuOptionGroups,
+  normalizeNeuOptionLazyWindow,
+} from '@neural-ui/core/internal';
 import {
   NeuListboxEmptyDirective,
   NeuListboxEmptyFilterDirective,
@@ -526,45 +528,45 @@ export class NeuListboxComponent<
   setDisabledState(isDisabled: boolean): void {
     this.cvaDisabled.set(isDisabled);
   }
-  optionLabelOf(option: T): string {
+  protected optionLabelOf(option: T): string {
     return resolveNeuOptionLabel(option, this.optionLabel());
   }
-  optionValueOf(option: T): V {
+  private optionValueOf(option: T): V {
     return resolveNeuOptionValue<T, V>(option, this.optionValue());
   }
-  isOptionDisabled(option: T): boolean {
+  private isOptionDisabled(option: T): boolean {
     return resolveNeuOptionDisabled(option, this.optionDisabled());
   }
-  isSelected(value: V): boolean {
+  private isSelected(value: V): boolean {
     return this.values().some((selected) => this.valuesEqual(selected, value));
   }
-  isOptionSelected(option: T): boolean {
+  protected isOptionSelected(option: T): boolean {
     return this.values().some((selected) => this.optionMatchesValue(option, selected));
   }
-  trackByOption(_index: number, option: T): unknown {
+  private trackByOption(_index: number, option: T): unknown {
     return this.optionValueOf(option);
   }
-  trackRow(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
+  protected trackRow(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
     return this.rowId(row);
   }
-  rowId(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
+  protected rowId(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
     return deriveNeuOptionRowId(this.baseId(), row);
   }
-  groupId(groupIndex: number): string {
+  protected groupId(groupIndex: number): string {
     return `${this.baseId()}-group-${groupIndex}`;
   }
-  setActiveRow(rowIndex: number): void {
+  protected setActiveRow(rowIndex: number): void {
     this.activeRowController.setRows(this.visibleRows());
     this.applyActiveResult(this.activeRowController.activate(rowIndex));
   }
-  onOptionMouseEnter(rowIndex: number): void {
+  protected onOptionMouseEnter(rowIndex: number): void {
     if (this.focused() && this.focusOnHover()) this.setActiveRow(rowIndex);
   }
-  markTouchInteraction(): void {
+  protected markTouchInteraction(): void {
     this.touchInteraction = true;
   }
 
-  toggleOption(option: T, originalEvent: Event | null = null): void {
+  private toggleOption(option: T, originalEvent: Event | null = null): void {
     const rowIndex = this.visibleRows().findIndex(
       (row) => row.kind === 'option' && neuOptionsEqual(row.option, option, this.identityPolicy()),
     );
@@ -586,7 +588,7 @@ export class NeuListboxComponent<
     );
   }
 
-  selectOption(
+  protected selectOption(
     originalEvent: Event | null,
     row: InternalNeuOptionRow<T>,
     rowIndex: number,
@@ -625,7 +627,7 @@ export class NeuListboxComponent<
     this.commitSelection(next, originalEvent, row.option, !selected);
   }
 
-  onOptionDoubleClick(event: MouseEvent, row: InternalNeuOptionRow<T>): void {
+  protected onOptionDoubleClick(event: MouseEvent, row: InternalNeuOptionRow<T>): void {
     if (!this.isDisabled() && !this.readonly() && !row.disabled)
       this.optionDoubleClick.emit({
         originalEvent: event,
@@ -634,7 +636,7 @@ export class NeuListboxComponent<
       });
   }
 
-  onListFocus(event: FocusEvent): void {
+  protected onListFocus(event: FocusEvent): void {
     if (this.isDisabled()) return;
     this.focused.set(true);
     this.prepareActiveRowController();
@@ -665,7 +667,7 @@ export class NeuListboxComponent<
     if (this.lazy()) this.emitLazyRequest('initial', this.virtualFirst());
   }
 
-  onListBlur(event: FocusEvent): void {
+  protected onListBlur(event: FocusEvent): void {
     const related = event.relatedTarget as Node | null;
     if (related && this.host.nativeElement.contains(related)) return;
     this.focused.set(false);
@@ -675,7 +677,7 @@ export class NeuListboxComponent<
     this.blurEvent.emit(event);
   }
 
-  onKeyDown(event: KeyboardEvent): void {
+  protected onKeyDown(event: KeyboardEvent): void {
     if (this.isDisabled()) return;
     const rows = this.visibleRows();
     const meta = event.metaKey || event.ctrlKey;
@@ -739,7 +741,7 @@ export class NeuListboxComponent<
     }
   }
 
-  onFilterKeyDown(event: KeyboardEvent): void {
+  protected onFilterKeyDown(event: KeyboardEvent): void {
     if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Enter') return;
     if (event.key === 'Enter') {
       const row = this.visibleRows()[this.activeIndex()];
@@ -756,7 +758,7 @@ export class NeuListboxComponent<
         : this.activeRowController.previous().rowIndex,
     );
   }
-  onFilterInput(event: Event): void {
+  protected onFilterInput(event: Event): void {
     this.setFilter((event.target as HTMLInputElement).value, event);
   }
   setFilter(value: string, originalEvent: Event | null = null): void {
@@ -793,12 +795,12 @@ export class NeuListboxComponent<
       value,
     });
   }
-  allSelected(): boolean {
+  protected allSelected(): boolean {
     if (this.selectAll() !== null) return this.selectAll()!;
     const rows = this.eligibleVisibleRows();
     return rows.length > 0 && rows.every((row) => this.isOptionSelected(row.option));
   }
-  onScroll(event: Event): void {
+  protected onScroll(event: Event): void {
     if (!this.virtualScroll()) return;
     const first = Math.max(
       0,
@@ -807,12 +809,12 @@ export class NeuListboxComponent<
     this.virtualFirst.set(first);
     if (this.lazy()) this.emitLazyRequest('scroll', first);
   }
-  canDrag(row: InternalNeuOptionRow<T>): boolean {
+  protected canDrag(row: InternalNeuOptionRow<T>): boolean {
     return (
       this.dragdrop() && !this.lazy() && !this.isDisabled() && !this.readonly() && !row.disabled
     );
   }
-  onDropRow(
+  protected onDropRow(
     event: CdkDragDrop<{ row: InternalNeuOptionNormalizedRow<T, G | string>; rowIndex: number }[]>,
   ): void {
     if (!this.dragdrop() || this.lazy() || this.isDisabled() || this.readonly()) return;
@@ -846,7 +848,7 @@ export class NeuListboxComponent<
     });
   }
 
-  optionPosition(row: InternalNeuOptionRow<T>, rowIndex: number): number {
+  protected optionPosition(row: InternalNeuOptionRow<T>, rowIndex: number): number {
     return (
       deriveNeuOptionAriaPosition(this.visibleRows(), rowIndex, {
         logicalOffset: this.lazy() ? this.dataFirst() : 0,
@@ -854,7 +856,7 @@ export class NeuListboxComponent<
       })?.posInSet ?? row.logicalIndex + 1
     );
   }
-  itemTemplateContext(row: InternalNeuOptionRow<T>, rowIndex: number) {
+  protected itemTemplateContext(row: InternalNeuOptionRow<T>, rowIndex: number) {
     return {
       $implicit: row.option,
       option: row.option,
@@ -865,7 +867,7 @@ export class NeuListboxComponent<
       active: this.activeIndex() === rowIndex,
     };
   }
-  indicatorTemplateContext(row: InternalNeuOptionRow<T>) {
+  protected indicatorTemplateContext(row: InternalNeuOptionRow<T>) {
     const selected = this.isOptionSelected(row.option);
     return {
       $implicit: selected,
@@ -876,7 +878,7 @@ export class NeuListboxComponent<
       checkmark: this.checkmark(),
     };
   }
-  groupTemplateContext(
+  protected groupTemplateContext(
     row: Extract<InternalNeuOptionNormalizedRow<T, G | string>, { kind: 'group' }>,
   ) {
     return {
@@ -887,7 +889,7 @@ export class NeuListboxComponent<
       disabled: row.disabled,
     };
   }
-  filterTemplateContext() {
+  protected filterTemplateContext() {
     return {
       $implicit: this.currentFilter(),
       value: this.currentFilter(),
@@ -896,7 +898,7 @@ export class NeuListboxComponent<
       reset: () => this.resetFilter(),
     };
   }
-  loaderTemplateContext(logicalIndex: number) {
+  protected loaderTemplateContext(logicalIndex: number) {
     const request = this.lastLazyRequest();
     return {
       $implicit: logicalIndex,

@@ -193,17 +193,17 @@ describe('NeuChipComponent', () => {
     df.componentRef.setInput('selected', true);
     df.detectChanges();
 
-    expect((df.componentInstance as any)._hostRole()).toBe('button');
-    expect((df.componentInstance as any)._hostAriaPressed()).toBe(true);
-    expect((df.componentInstance as any)._hostTabindex()).toBe(0);
+    expect((df.componentInstance as any)['_hostRole']()).toBe('button');
+    expect((df.componentInstance as any)['_hostAriaPressed']()).toBe(true);
+    expect((df.componentInstance as any)['_hostTabindex']()).toBe(0);
 
     df.componentRef.setInput('removable', true);
     df.componentRef.setInput('disabled', true);
     df.detectChanges();
 
-    expect((df.componentInstance as any)._hostRole()).toBe('group');
-    expect((df.componentInstance as any)._hostAriaPressed()).toBeNull();
-    expect((df.componentInstance as any)._hostTabindex()).toBeNull();
+    expect((df.componentInstance as any)['_hostRole']()).toBe('group');
+    expect((df.componentInstance as any)['_hostAriaPressed']()).toBeNull();
+    expect((df.componentInstance as any)['_hostTabindex']()).toBeNull();
   });
 
   it('keydown.enter on the host should trigger the toggle host listener', () => {

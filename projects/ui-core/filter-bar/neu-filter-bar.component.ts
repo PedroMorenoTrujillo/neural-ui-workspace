@@ -10,7 +10,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export interface NeuFilterChip {
   /** Identificador único del filtro / Unique filter identifier */
@@ -81,10 +81,10 @@ export class NeuFilterBarComponent {
   /** Emitido con los chips activos al cambiar / Emitted with active chips on change */
   readonly filterChange = output<NeuFilterChip[]>();
 
-  readonly _id = inject(NeuIdGenerator).getId('neu-filter-bar-');
-  readonly _chips = signal<NeuFilterChip[]>([]);
+  private readonly _id = inject(NeuIdGenerator).getId('neu-filter-bar-');
+  protected readonly _chips = signal<NeuFilterChip[]>([]);
 
-  readonly _hasActive = computed(() => this._chips().some((c) => c.active));
+  protected readonly _hasActive = computed(() => this._chips().some((c) => c.active));
 
   readonly hostClasses = computed(() => ({
     'neu-filter-bar': true,

@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.types';
 
 /**

@@ -120,7 +120,7 @@ describe('NeuCommandPaletteComponent', () => {
   it('_onDocKey Ctrl+K should open palette', () => {
     const f = setup();
     const svc = TestBed.inject(NeuCommandPaletteService);
-    f.componentInstance._onDocKey(
+    f.componentInstance['_onDocKey'](
       Object.assign(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }), {
         preventDefault: () => {},
       }) as any,
@@ -132,7 +132,7 @@ describe('NeuCommandPaletteComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuCommandPaletteService);
     svc.open();
-    f.componentInstance._onInputKey(new KeyboardEvent('keydown', { key: 'Escape' }));
+    f.componentInstance['_onInputKey'](new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(svc.isOpen()).toBe(false);
   });
 
@@ -140,25 +140,25 @@ describe('NeuCommandPaletteComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuCommandPaletteService);
     svc.register(...CMDS);
-    f.componentInstance._onInputKey(
+    f.componentInstance['_onInputKey'](
       Object.assign(new KeyboardEvent('keydown', { key: 'ArrowDown' }), {
         preventDefault: () => {},
       }) as any,
     );
-    expect(f.componentInstance._activeIndex()).toBe(1);
+    expect(f.componentInstance['_activeIndex']()).toBe(1);
   });
 
   it('_onInputKey ArrowUp should decrease _activeIndex', () => {
     const f = setup();
     const svc = TestBed.inject(NeuCommandPaletteService);
     svc.register(...CMDS);
-    f.componentInstance._activeIndex.set(2);
-    f.componentInstance._onInputKey(
+    f.componentInstance['_activeIndex'].set(2);
+    f.componentInstance['_onInputKey'](
       Object.assign(new KeyboardEvent('keydown', { key: 'ArrowUp' }), {
         preventDefault: () => {},
       }) as any,
     );
-    expect(f.componentInstance._activeIndex()).toBe(1);
+    expect(f.componentInstance['_activeIndex']()).toBe(1);
   });
 
   it('Enter key on active item should execute command and close', () => {
@@ -168,8 +168,8 @@ describe('NeuCommandPaletteComponent', () => {
     let executed = false;
     svc.register({ id: 'exec-cmd', label: 'Ejecutar', action: () => (executed = true) });
     svc.open();
-    f.componentInstance._activeIndex.set(0);
-    f.componentInstance._onInputKey({
+    f.componentInstance['_activeIndex'].set(0);
+    f.componentInstance['_onInputKey']({
       key: 'Enter',
       preventDefault: () => {},
     } as unknown as KeyboardEvent);
@@ -182,7 +182,7 @@ describe('NeuCommandPaletteComponent', () => {
     f.detectChanges();
     const svc = TestBed.inject(NeuCommandPaletteService);
     svc.open();
-    f.componentInstance._onInputKey({
+    f.componentInstance['_onInputKey']({
       key: 'Escape',
       preventDefault: () => {},
     } as unknown as KeyboardEvent);
@@ -195,7 +195,7 @@ describe('NeuCommandPaletteComponent', () => {
     const svc = TestBed.inject(NeuCommandPaletteService);
     svc.open();
     expect(svc.isOpen()).toBe(true);
-    f.componentInstance._onDocKey(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+    f.componentInstance['_onDocKey'](new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
     expect(svc.isOpen()).toBe(false);
   });
 
@@ -204,7 +204,7 @@ describe('NeuCommandPaletteComponent', () => {
     f.detectChanges();
     const svc = TestBed.inject(NeuCommandPaletteService);
     expect(svc.isOpen()).toBe(false);
-    f.componentInstance._onDocKey(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
+    f.componentInstance['_onDocKey'](new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
     expect(svc.isOpen()).toBe(true);
   });
 
@@ -212,7 +212,7 @@ describe('NeuCommandPaletteComponent', () => {
     const f = TestBed.createComponent(NeuCommandPaletteComponent);
     f.detectChanges();
     const svc = TestBed.inject(NeuCommandPaletteService);
-    f.componentInstance._onDocKey(new KeyboardEvent('keydown', { key: 'p', ctrlKey: true }));
+    f.componentInstance['_onDocKey'](new KeyboardEvent('keydown', { key: 'p', ctrlKey: true }));
     expect(svc.isOpen()).toBe(false);
   });
 
@@ -318,7 +318,7 @@ describe('NeuCommandPaletteComponent', () => {
     const svc = TestBed.inject(NeuCommandPaletteService);
     svc.open();
     svc.query.set('missing-command');
-    f.componentInstance._onInputKey({ key: 'Enter', preventDefault: () => {} } as KeyboardEvent);
+    f.componentInstance['_onInputKey']({ key: 'Enter', preventDefault: () => {} } as KeyboardEvent);
     expect(svc.isOpen()).toBe(true);
   });
 
@@ -335,7 +335,7 @@ describe('NeuCommandPaletteComponent', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     f.detectChanges();
 
-    expect(f.componentInstance._activeIndex()).toBe(1);
+    expect(f.componentInstance['_activeIndex']()).toBe(1);
   });
 
   it('mouseenter on a rendered item should update the active index through the template listener', async () => {
@@ -351,7 +351,7 @@ describe('NeuCommandPaletteComponent', () => {
     items[1].dispatchEvent(new Event('mouseenter', { bubbles: true }));
     f.detectChanges();
 
-    expect(f.componentInstance._activeIndex()).toBe(1);
+    expect(f.componentInstance['_activeIndex']()).toBe(1);
   });
 
   it('keydown Enter on the input should execute the active item through the template listener', async () => {
@@ -364,7 +364,7 @@ describe('NeuCommandPaletteComponent', () => {
       { id: 'b', label: 'Dos', action: () => (executed = true) },
     );
     svc.open();
-    f.componentInstance._activeIndex.set(1);
+    f.componentInstance['_activeIndex'].set(1);
     f.detectChanges();
     await f.whenStable();
 
@@ -399,7 +399,7 @@ describe('NeuCommandPaletteComponent', () => {
     ) as HTMLElement[];
     expect(document.activeElement).toBe(input);
     expect(input.getAttribute('aria-controls')).toBe(f.componentInstance.listId);
-    expect(f.componentInstance._activeIndex()).toBe(1);
+    expect(f.componentInstance['_activeIndex']()).toBe(1);
     expect(input.getAttribute('aria-activedescendant')).toBe(options[1].id);
     options[0].click();
     svc.execute('disabled');

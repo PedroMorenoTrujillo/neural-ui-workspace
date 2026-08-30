@@ -37,7 +37,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('items', ITEMS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._usedSum()).toBe(100);
+    expect(comp['_usedSum']()).toBe(100);
   });
 
   it('_effectiveTotal should use provided total when >0', async () => {
@@ -46,7 +46,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('total', 200);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._effectiveTotal()).toBe(200);
+    expect(comp['_effectiveTotal']()).toBe(200);
   });
 
   it('_effectiveTotal should fallback to usedSum when total=0', async () => {
@@ -55,7 +55,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('total', 0);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._effectiveTotal()).toBe(100);
+    expect(comp['_effectiveTotal']()).toBe(100);
   });
 
   it('_segments should compute correct percentages summing to 100', async () => {
@@ -63,7 +63,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('items', ITEMS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    const sum = comp._segments().reduce((s: number, seg: any) => s + seg.pct, 0);
+    const sum = comp['_segments']().reduce((s: number, seg: any) => s + seg.pct, 0);
     expect(Math.round(sum)).toBe(100);
   });
 
@@ -73,7 +73,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('total', 100);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._segments()[0].pct).toBe(100);
+    expect(comp['_segments']()[0].pct).toBe(100);
   });
 
   it('should render legend when showLegend=true', async () => {
@@ -110,6 +110,6 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('total', 0);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._effectiveTotal()).toBe(1);
+    expect(comp['_effectiveTotal']()).toBe(1);
   });
 });

@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export interface NeuScrollPosition {
   top: number;

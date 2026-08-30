@@ -20,7 +20,7 @@ import {
   OverlayModule,
 } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuOptionAccessor,
   NeuOptionDisabledAccessor,

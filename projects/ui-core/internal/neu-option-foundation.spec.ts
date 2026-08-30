@@ -17,7 +17,7 @@ import {
   normalizeNeuOptionRows,
   pageNeuOptionActiveRow,
   reconcileNeuOptionActiveRow,
-} from './neu-option-foundation.internal';
+} from './neu-option-foundation';
 
 interface Person {
   id: number;

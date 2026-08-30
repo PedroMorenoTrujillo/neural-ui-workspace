@@ -68,7 +68,7 @@ describe('NeuPopoverDirective', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.open();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
     dir.close();
   });
 
@@ -79,7 +79,7 @@ describe('NeuPopoverDirective', () => {
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.open();
     dir.close();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('toggle() should open then close', async () => {
@@ -88,9 +88,9 @@ describe('NeuPopoverDirective', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.toggle();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
     dir.toggle();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('should emit popoverOpened and popoverClosed', async () => {
@@ -115,7 +115,7 @@ describe('NeuPopoverDirective', () => {
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     (dir as any).neuPopoverDisabled = () => true;
     dir.open();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('should set aria-expanded attribute', async () => {
@@ -180,11 +180,11 @@ describe('NeuPopoverDirective', () => {
     const button = f.nativeElement.querySelector('button') as HTMLButtonElement;
     button.click();
     f.detectChanges();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
 
     button.click();
     f.detectChanges();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('backdrop click should close the popover for click trigger', async () => {
@@ -201,7 +201,7 @@ describe('NeuPopoverDirective', () => {
     backdrop.click();
     f.detectChanges();
 
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('focus and blur DOM events should open and close the popover for focus trigger', async () => {
@@ -214,11 +214,11 @@ describe('NeuPopoverDirective', () => {
     const button = f.nativeElement.querySelector('button') as HTMLButtonElement;
     button.dispatchEvent(new Event('focus'));
     f.detectChanges();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
 
     button.dispatchEvent(new Event('blur'));
     f.detectChanges();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 });
 
@@ -252,7 +252,7 @@ describe('NeuPopoverOverlayComponent', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.onMouseEnter();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
     dir.onMouseLeave();
   });
 
@@ -263,9 +263,9 @@ describe('NeuPopoverOverlayComponent', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.onMouseEnter();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
     dir.onMouseLeave();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('focus trigger: focus should open the popover', async () => {
@@ -275,7 +275,7 @@ describe('NeuPopoverOverlayComponent', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.onFocus();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
   });
 
   it('focus trigger: blur should close the popover', async () => {
@@ -286,7 +286,7 @@ describe('NeuPopoverOverlayComponent', () => {
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.onFocus();
     dir.onBlur();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('click trigger: mouseenter should NOT open the popover', async () => {
@@ -295,7 +295,7 @@ describe('NeuPopoverOverlayComponent', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.onMouseEnter();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('hover trigger: host click should NOT open the popover', async () => {
@@ -305,7 +305,7 @@ describe('NeuPopoverOverlayComponent', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.onHostClick();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('click trigger: mouseleave and focus/blur should be ignored', async () => {
@@ -319,7 +319,7 @@ describe('NeuPopoverOverlayComponent', () => {
     dir.onFocus();
     dir.onBlur();
 
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('popoverOpened is emitted on open()', async () => {
@@ -364,9 +364,9 @@ describe('NeuPopoverOverlayComponent', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.onHostClick();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
     dir.onHostClick();
-    expect(dir._isOpen()).toBe(false);
+    expect(dir['_isOpen']()).toBe(false);
   });
 
   it('open() when already open should be idempotent', async () => {
@@ -377,9 +377,9 @@ describe('NeuPopoverOverlayComponent', () => {
     await f.whenStable();
     const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
     dir.open();
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
     dir.open(); // second call should not change state or throw
-    expect(dir._isOpen()).toBe(true);
+    expect(dir['_isOpen']()).toBe(true);
     dir.close();
   });
 

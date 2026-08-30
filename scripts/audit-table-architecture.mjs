@@ -8,7 +8,8 @@ const sourceFile = ts.createSourceFile(tableSourcePath, tableSource, ts.ScriptTa
 
 let inputs = 0;
 let outputs = 0;
-let methods = 0;
+let supportedMethods = 0;
+let totalMethods = 0;
 const inputNames = new Set();
 
 function hasModifier(node, kind) {
@@ -35,12 +36,14 @@ for (const statement of sourceFile.statements) {
       }
       if (factory === 'output') outputs += 1;
     }
-    if (
-      ts.isMethodDeclaration(member) &&
-      !hasModifier(member, ts.SyntaxKind.PrivateKeyword) &&
-      !hasModifier(member, ts.SyntaxKind.ProtectedKeyword)
-    ) {
-      methods += 1;
+    if (ts.isMethodDeclaration(member)) {
+      totalMethods += 1;
+      if (
+        !hasModifier(member, ts.SyntaxKind.PrivateKeyword) &&
+        !hasModifier(member, ts.SyntaxKind.ProtectedKeyword)
+      ) {
+        supportedMethods += 1;
+      }
     }
   }
 }
@@ -53,8 +56,8 @@ const selectors = readdirSync('projects/ui-core/table')
   ])
   .map((match) => match[1]);
 
-const expected = { inputs: 77, outputs: 38, methods: 96, selectors: 20 };
-const actual = { inputs, outputs, methods, selectors: selectors.length };
+const expected = { inputs: 77, outputs: 38, supportedMethods: 32, totalMethods: 292, selectors: 20 };
+const actual = { inputs, outputs, supportedMethods, totalMethods, selectors: selectors.length };
 const violations = Object.entries(expected)
   .filter(([key, value]) => actual[key] !== value)
   .map(([key, value]) => `public facade ${key}: expected ${value}, found ${actual[key]}`);
@@ -145,5 +148,5 @@ if (violations.length > 0) {
 }
 
 console.log(
-  `Table architecture audit passed (facade ${inputs}/${outputs}/${methods}/${selectors.length}; core ${coreFesm.length}B raw, ${gzip}B gzip, ${brotli}B Brotli; imports ${[...new Set(runtimeImports)].join(', ')}).`,
+  `Table architecture audit passed (facade ${inputs}/${outputs}/${supportedMethods} supported methods/${selectors.length}; ${totalMethods} total methods; core ${coreFesm.length}B raw, ${gzip}B gzip, ${brotli}B Brotli; imports ${[...new Set(runtimeImports)].join(', ')}).`,
 );

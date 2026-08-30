@@ -368,8 +368,8 @@ describe('NeuMultiselectComponent', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
     const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
-    ms.toggleOption(OPTIONS[0]);
-    ms.toggleOption(OPTIONS[1]);
+    ms['toggleOption'](OPTIONS[0]);
+    ms['toggleOption'](OPTIONS[1]);
     f.detectChanges();
     expect((f.componentInstance.ctrl.value as string[]).length).toBe(2);
   });
@@ -378,10 +378,10 @@ describe('NeuMultiselectComponent', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
     const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
-    ms.toggleOption(OPTIONS[0]);
-    ms.toggleOption(OPTIONS[1]);
+    ms['toggleOption'](OPTIONS[0]);
+    ms['toggleOption'](OPTIONS[1]);
     f.detectChanges();
-    ms.toggleOption(OPTIONS[0]); // deselect Angular
+    ms['toggleOption'](OPTIONS[0]); // deselect Angular
     f.detectChanges();
     expect((f.componentInstance.ctrl.value as string[]).includes('angular')).toBe(false);
     expect((f.componentInstance.ctrl.value as string[]).includes('react')).toBe(true);
@@ -391,7 +391,7 @@ describe('NeuMultiselectComponent', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
     const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
-    ms.toggleOption(OPTIONS[3]); // Svelte is disabled
+    ms['toggleOption'](OPTIONS[3]); // Svelte is disabled
     f.detectChanges();
     expect((f.componentInstance.ctrl.value as string[]).includes('svelte')).toBe(false);
   });
@@ -411,13 +411,13 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
     // Select Angular + React + Vue
-    ms.toggleOption(OPTIONS[0]);
-    ms.toggleOption(OPTIONS[1]);
-    ms.toggleOption(OPTIONS[2]);
+    ms['toggleOption'](OPTIONS[0]);
+    ms['toggleOption'](OPTIONS[1]);
+    ms['toggleOption'](OPTIONS[2]);
     f.detectChanges();
     expect((f.componentInstance.ctrl.value as string[]).length).toBe(3);
     // Deselect one
-    ms.toggleOption(OPTIONS[1]);
+    ms['toggleOption'](OPTIONS[1]);
     f.detectChanges();
     expect((f.componentInstance.ctrl.value as string[]).length).toBe(2);
     expect((f.componentInstance.ctrl.value as string[]).includes('react')).toBe(false);
@@ -469,12 +469,12 @@ describe('NeuMultiselectComponent', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
     const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
-    expect(ms._chipMode()).toBe('count');
+    expect(ms['_chipMode']()).toBe('count');
     const fakeEvent = { stopPropagation: () => {} } as MouseEvent;
     ms.toggleChipMode(fakeEvent);
-    expect(ms._chipMode()).toBe('chips');
+    expect(ms['_chipMode']()).toBe('chips');
     ms.toggleChipMode(fakeEvent);
-    expect(ms._chipMode()).toBe('count');
+    expect(ms['_chipMode']()).toBe('count');
   });
 
   it('should show chips mode when _chipMode is chips and values selected', async () => {
@@ -517,7 +517,7 @@ describe('NeuMultiselectComponent', () => {
     button.click();
     f.detectChanges();
 
-    expect(comp._chipMode()).toBe('chips');
+    expect(comp['_chipMode']()).toBe('chips');
     expect(button.getAttribute('aria-label')).toBe('Mostrar contador');
   });
 
@@ -563,7 +563,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     comp._values.set(['angular', 'react']);
-    comp._chipMode.set('chips');
+    comp['_chipMode'].set('chips');
     f.detectChanges();
     await f.whenStable();
 
@@ -605,7 +605,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('clearable', true);
     f.detectChanges();
     (f.componentInstance as any)._values.set(['angular']);
-    (f.componentInstance as any)._chipMode.set('chips');
+    (f.componentInstance as any)['_chipMode'].set('chips');
     f.detectChanges();
     await f.whenStable();
 
@@ -838,7 +838,7 @@ describe('NeuMultiselectComponent', () => {
     });
 
     const checkViewportSize = vi.fn();
-    comp._viewport = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
+    comp['_viewport'] = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
 
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
@@ -873,7 +873,7 @@ describe('NeuMultiselectComponent', () => {
     const comp = f.componentInstance as any;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
     const checkViewportSize = vi.fn();
-    comp._viewport = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
+    comp['_viewport'] = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
 
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
@@ -882,7 +882,7 @@ describe('NeuMultiselectComponent', () => {
 
     try {
       comp.open();
-      comp.toggleOption(OPTIONS[0]);
+      comp['toggleOption'](OPTIONS[0]);
       expect(comp._values()).toEqual(['angular']);
       expect(checkViewportSize).toHaveBeenCalled();
     } finally {
@@ -902,7 +902,7 @@ describe('NeuMultiselectComponent', () => {
     const focus = vi.fn();
     const scrollToIndex = vi.fn();
     const checkViewportSize = vi.fn();
-    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+    comp['_viewport'] = () => ({ scrollToIndex, checkViewportSize });
 
     const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue({ focus } as any);
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
@@ -1005,7 +1005,7 @@ describe('NeuMultiselectComponent', () => {
     const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
     const emitted: NeuSelectOption[][] = [];
     ms.selectionChange.subscribe((v: NeuSelectOption[]) => emitted.push(v));
-    ms.toggleOption(OPTIONS[0]);
+    ms['toggleOption'](OPTIONS[0]);
     expect(emitted).toHaveLength(1);
     expect(emitted[0][0]).toEqual(OPTIONS[0]);
   });
@@ -1048,7 +1048,7 @@ describe('NeuMultiselectComponent', () => {
     const ms = f.debugElement.query(By.directive(NeuMultiselectComponent)).componentInstance as any;
     const emitted: NeuSelectOption[][] = [];
     ms.selectionChange.subscribe((v: NeuSelectOption[]) => emitted.push(v));
-    ms.toggleOption(optsWithData[0]);
+    ms['toggleOption'](optsWithData[0]);
     expect(emitted[0][0].data).toEqual({ id: 1, tier: 'A' });
   });
 
@@ -1131,7 +1131,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.componentRef.setInput('urlParam', 'techs');
     f.detectChanges();
-    (f.componentInstance as any).toggleOption(OPTIONS[0]);
+    (f.componentInstance as any)['toggleOption'](OPTIONS[0]);
     expect(mockSetParam).toHaveBeenCalledWith('techs', 'angular');
   });
 
@@ -1195,7 +1195,7 @@ describe('NeuMultiselectComponent', () => {
     expect(values).toEqual([]);
     expect(mockSetParam).not.toHaveBeenCalled();
 
-    comp.toggleOption(FRAMEWORK_MODELS[0]);
+    comp['toggleOption'](FRAMEWORK_MODELS[0]);
     expect(mockSetParam).toHaveBeenCalledWith('techs', null);
   });
 
@@ -1223,7 +1223,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
 
     const comp = f.componentInstance as any;
-    comp.toggleOption(FRAMEWORK_MODELS[0]);
+    comp['toggleOption'](FRAMEWORK_MODELS[0]);
 
     expect(mockSetParam).toHaveBeenCalledWith('techs', null);
     expect(mockSetParam).not.toHaveBeenCalledWith('techs', '[object Object]');
@@ -1278,7 +1278,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     (f.componentInstance as any)._values.set(['angular']);
 
-    (f.componentInstance as any).toggleOption(OPTIONS[0]);
+    (f.componentInstance as any)['toggleOption'](OPTIONS[0]);
 
     expect(mockSetParam).toHaveBeenCalledWith('techs', null);
   });
@@ -1369,11 +1369,11 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     (f.componentInstance as any)._values.set(['angular']);
     const comp = f.componentInstance as any;
-    expect(comp._chipMode()).toBe('count');
+    expect(comp['_chipMode']()).toBe('count');
     comp.toggleChipMode({ stopPropagation: vi.fn() } as unknown as MouseEvent);
-    expect(comp._chipMode()).toBe('chips');
+    expect(comp['_chipMode']()).toBe('chips');
     comp.toggleChipMode({ stopPropagation: vi.fn() } as unknown as MouseEvent);
-    expect(comp._chipMode()).toBe('count');
+    expect(comp['_chipMode']()).toBe('count');
   });
 
   it('chipMode=chips should render chip labels in the trigger', async () => {
@@ -1381,7 +1381,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
     (f.componentInstance as any)._values.set(['angular', 'react']);
-    (f.componentInstance as any)._chipMode.set('chips');
+    (f.componentInstance as any)['_chipMode'].set('chips');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.textContent).toContain('Angular');
@@ -1420,7 +1420,7 @@ describe('NeuMultiselectComponent', () => {
       { label: 'Disabled', value: 'disabled', disabled: true },
     ]);
     f.detectChanges();
-    (f.componentInstance as any).toggleOption({
+    (f.componentInstance as any)['toggleOption']({
       label: 'Disabled',
       value: 'disabled',
       disabled: true,
@@ -1477,8 +1477,8 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     comp._values.set(['angular', 'react']);
-    expect(comp.isSelected('angular')).toBe(true);
-    expect(comp.isSelected('vue')).toBe(false);
+    expect(comp['isSelected']('angular')).toBe(true);
+    expect(comp['isSelected']('vue')).toBe(false);
   });
 
   // ── Keyboard DOM dispatch on option elements ──────────────────────────────
@@ -1746,7 +1746,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(comp._viewport()).toBeTruthy();
+    expect(comp['_viewport']()).toBeTruthy();
   });
 
   it('virtual option handlers should execute when virtual rows are rendered with a fake viewport', async () => {
@@ -1760,7 +1760,7 @@ describe('NeuMultiselectComponent', () => {
     await f.whenStable();
 
     expect(document.querySelector('.neu-multiselect__viewport')).toBeTruthy();
-    comp.toggleOption(OPTIONS[0]);
+    comp['toggleOption'](OPTIONS[0]);
     f.detectChanges();
 
     expect(comp._values()).toContain('angular');
@@ -1863,7 +1863,7 @@ describe('NeuMultiselectComponent', () => {
     const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
     const scrollToIndex = vi.fn();
     const checkViewportSize = vi.fn();
-    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+    comp['_viewport'] = () => ({ scrollToIndex, checkViewportSize });
 
     expect(() =>
       comp.focusOption({ value: 'user:23/test value', label: 'Special User' }),
@@ -1932,7 +1932,7 @@ describe('NeuMultiselectComponent', () => {
     const f = TestBed.createComponent(MultiselectSelectedContextHost);
     f.detectChanges();
     const comp = f.debugElement.query(By.css('neu-multiselect')).componentInstance as any;
-    comp._chipMode.set('chips');
+    comp['_chipMode'].set('chips');
     comp._values.set([1, 3]);
     f.detectChanges();
 
@@ -1952,12 +1952,12 @@ describe('NeuMultiselectComponent', () => {
     const comp = f.componentInstance as any;
     const syncSpy = vi.spyOn(comp, 'syncPanelPosition');
 
-    comp.onWindowResize();
+    comp['onWindowResize']();
     comp.onWindowScroll();
     expect(syncSpy).not.toHaveBeenCalled();
 
     comp.open();
-    comp.onWindowResize();
+    comp['onWindowResize']();
     comp.onWindowScroll();
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(syncSpy).toHaveBeenCalledTimes(2);
@@ -2125,7 +2125,7 @@ describe('NeuMultiselectComponent', () => {
     const checkViewportSize = vi.fn();
     const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
     const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
-    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+    comp['_viewport'] = () => ({ scrollToIndex, checkViewportSize });
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
       return 1;
@@ -2148,7 +2148,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
 
-    expect(comp._viewport()).toBeUndefined();
+    expect(comp['_viewport']()).toBeUndefined();
     expect(comp.itemTpl()).toBeUndefined();
   });
 
@@ -2165,14 +2165,14 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     expect(document.querySelector('.raw-framework')?.textContent).toContain('Angular');
 
-    multiselect.toggleOption(FRAMEWORK_MODELS[0]);
-    multiselect.toggleOption(FRAMEWORK_MODELS[1]);
+    multiselect['toggleOption'](FRAMEWORK_MODELS[0]);
+    multiselect['toggleOption'](FRAMEWORK_MODELS[1]);
     f.detectChanges();
 
     expect(f.componentInstance.ctrl.value).toEqual([1, 2]);
     expect(emitted.at(-1)).toEqual([FRAMEWORK_MODELS[0], FRAMEWORK_MODELS[1]]);
 
-    multiselect.toggleOption(FRAMEWORK_MODELS[2]);
+    multiselect['toggleOption'](FRAMEWORK_MODELS[2]);
     expect(f.componentInstance.ctrl.value).toEqual([1, 2]);
   });
 
@@ -2188,7 +2188,7 @@ describe('NeuMultiselectComponent', () => {
     const onChange = vi.fn();
     comp.registerOnChange(onChange);
 
-    (comp as any).toggleOption(FRAMEWORK_MODELS[0]);
+    (comp as any)['toggleOption'](FRAMEWORK_MODELS[0]);
 
     expect((comp as any)._values()).toEqual([FRAMEWORK_MODELS[0]]);
     expect(onChange).toHaveBeenCalledWith([FRAMEWORK_MODELS[0]]);
@@ -2225,7 +2225,7 @@ describe('NeuMultiselectComponent', () => {
     comp.registerOnChange((value: string[]) => cvaValues.push(value));
     comp.changeDetail.subscribe((event: unknown) => details.push(event));
 
-    comp.toggleOption(OPTIONS[0]);
+    comp['toggleOption'](OPTIONS[0]);
 
     expect(cvaValues[0]).toEqual(['angular']);
     expect(cvaValues[0]).not.toBe(comp._values());
@@ -2242,7 +2242,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     comp.writeValue(['angular']);
-    comp.toggleOption(OPTIONS[1]);
+    comp['toggleOption'](OPTIONS[1]);
     comp.removeOption('angular');
     comp.clear();
     comp.open();
@@ -2255,7 +2255,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('readonly', false);
     f.componentRef.setInput('loading', true);
     f.detectChanges();
-    comp.toggleOption(OPTIONS[1]);
+    comp['toggleOption'](OPTIONS[1]);
     expect(comp._values()).toEqual(['angular']);
   });
 
@@ -2282,7 +2282,7 @@ describe('NeuMultiselectComponent', () => {
       'option',
     ]);
     expect(comp.filteredOptions()).toEqual([OPTIONS[0], OPTIONS[1], OPTIONS[2]]);
-    comp.toggleOption(OPTIONS[2]);
+    comp['toggleOption'](OPTIONS[2]);
     expect(comp._values()).toEqual([]);
   });
 
@@ -2373,10 +2373,10 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
 
-    comp.toggleOption(OPTIONS[0]);
-    comp.toggleOption(OPTIONS[1]);
+    comp['toggleOption'](OPTIONS[0]);
+    comp['toggleOption'](OPTIONS[1]);
     expect(comp._values()).toEqual(['angular']);
-    comp.toggleOption(OPTIONS[0]);
+    comp['toggleOption'](OPTIONS[0]);
     expect(comp._values()).toEqual([]);
   });
 
@@ -2474,7 +2474,7 @@ describe('NeuMultiselectComponent', () => {
     f.componentRef.setInput('options', [replacement]);
     f.detectChanges();
 
-    expect(comp.isOptionSelected(replacement)).toBe(true);
+    expect(comp['isOptionSelected'](replacement)).toBe(true);
     expect(comp.labelFor(first)).toBe('Angular 22');
   });
 
@@ -2654,7 +2654,7 @@ describe('NeuMultiselectComponent', () => {
     expect(comp.describedBy()).toBe('owner-description');
     expect(comp.optionDomId({ value: 'missing', label: 'Missing' })).toContain('option-missing');
     comp.writeValue(['ANGULAR']);
-    expect(comp.isOptionSelected(OPTIONS[0])).toBe(true);
+    expect(comp['isOptionSelected'](OPTIONS[0])).toBe(true);
 
     f.componentRef.setInput('virtualScrollItemSize', 31);
     f.detectChanges();

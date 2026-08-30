@@ -302,7 +302,7 @@ describe('NeuTable T3 integration', () => {
     const fixture = await create();
     const tableDebug = fixture.debugElement.query(By.directive(NeuTableComponent));
     const table = tableDebug.componentInstance as any;
-    const column = table.structuralContext().column;
+    const column = table['structuralContext']().column;
     const inertEvent = {
       target: null,
       currentTarget: document.createElement('th'),
@@ -368,10 +368,10 @@ describe('NeuTable T3 integration', () => {
     expect(transfer.dropEffect).toBe('move');
     table.onColumnDragEnd(COLUMNS[1]);
 
-    expect(table.canReorderRow(ROWS[0], true)).toBe(false);
-    expect(table.canMoveRow(ROWS[0], -1)).toBe(false);
-    expect(table.canMoveRow(ROWS[1], 1)).toBe(false);
-    table.moveRow(ROWS[0], -1);
+    expect(table['canReorderRow'](ROWS[0], true)).toBe(false);
+    expect(table['canMoveRow'](ROWS[0], -1)).toBe(false);
+    expect(table['canMoveRow'](ROWS[1], 1)).toBe(false);
+    table['moveRow'](ROWS[0], -1);
 
     const rowElement = document.createElement('tr');
     const plainTarget = document.createElement('span');
@@ -444,7 +444,7 @@ describe('NeuTable T3 integration', () => {
     await fixture.whenStable();
     expect(table.frozenPageEntries().some((entry: any) => entry.kind === 'group')).toBe(true);
     expect(table.frozenPageEntries().some((entry: any) => entry.kind === 'row')).toBe(false);
-    expect(table.canReorderRow(ROWS[0])).toBe(false);
+    expect(table['canReorderRow'](ROWS[0])).toBe(false);
 
     fixture.componentInstance.rowGroupMode.set('rowspan');
     fixture.detectChanges();
@@ -468,10 +468,10 @@ describe('NeuTable T3 integration', () => {
     const table = fixture.componentInstance as any;
 
     expect(table._rowReorderScope()).toBe('loaded');
-    expect(table.canReorderRow(ROWS[0])).toBe(true);
+    expect(table['canReorderRow'](ROWS[0])).toBe(true);
     fixture.componentRef.setInput('rowReorderable', () => false);
     fixture.detectChanges();
-    expect(table.canReorderRow(ROWS[0])).toBe(false);
+    expect(table['canReorderRow'](ROWS[0])).toBe(false);
     fixture.componentRef.setInput('rowReorderable', undefined);
 
     table.selectRow(ROWS[0]);
@@ -487,7 +487,7 @@ describe('NeuTable T3 integration', () => {
     table.toggleAll();
     table.selectRow(ROWS[0]);
     table.selectRow(ROWS[1]);
-    expect(table.isRowSelected(ROWS[1])).toBe(true);
+    expect(table['isRowSelected'](ROWS[1])).toBe(true);
 
     const layout = {
       columnOrder: ['team', 'missing'],
@@ -514,8 +514,8 @@ describe('NeuTable T3 integration', () => {
       value: originalCss,
     });
     const resetEvent = { preventDefault: vi.fn(), stopPropagation: vi.fn() };
-    table.resetColumnWidth('missing', resetEvent);
-    table.resetColumnWidth('name', resetEvent);
+    table['resetColumnWidth']('missing', resetEvent);
+    table['resetColumnWidth']('name', resetEvent);
     expect(resetEvent.preventDefault).toHaveBeenCalledTimes(2);
     table._commitColumnReorder({
       key: 'team',
@@ -536,7 +536,7 @@ describe('NeuTable T3 integration', () => {
     rtlHeader.style.direction = 'rtl';
     const rtlHandle = document.createElement('button');
     rtlHeader.append(rtlHandle);
-    table.startColumnResize(COLUMNS[0], {
+    table['startColumnResize'](COLUMNS[0], {
       currentTarget: rtlHandle,
       clientX: 100,
       preventDefault: vi.fn(),
@@ -549,9 +549,9 @@ describe('NeuTable T3 integration', () => {
     fixture.detectChanges();
     expect(table._rowReorderScope()).toBe('page');
     fixture.componentRef.setInput('pagination', false);
-    table.onSearch({ target: { value: 'Ada' } });
+    table['onSearch']({ target: { value: 'Ada' } });
     expect(table._rowReorderScope()).toBe('filtered');
-    table.onSearch({ target: { value: '' } });
+    table['onSearch']({ target: { value: '' } });
     fixture.componentRef.setInput('serverSide', true);
     fixture.detectChanges();
     expect(table._rowReorderScope()).toBe('server-window');
@@ -560,7 +560,7 @@ describe('NeuTable T3 integration', () => {
     fixture.componentRef.setInput('sortable', true);
     fixture.detectChanges();
     table.sortBy('name', new MouseEvent('click'));
-    expect(table.canReorderRow(ROWS[0])).toBe(false);
+    expect(table['canReorderRow'](ROWS[0])).toBe(false);
     table._proposeRowReorder(999, 1, 'before');
     table.onRowContextMenu(ROWS[0], 0, {
       target: document.createElement('tr'),

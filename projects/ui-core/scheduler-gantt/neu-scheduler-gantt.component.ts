@@ -7,7 +7,8 @@ import {
   input,
   output,
 } from '@angular/core';
-import { NEURAL_LOCALE, NeuInitialTemporalState } from '@neural-ui/core/foundation';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
+import { NeuInitialTemporalState } from '@neural-ui/core/internal';
 import {
   NeuTimelineGridComponent,
   type NeuTimelineGridColumn,
@@ -109,7 +110,7 @@ export class NeuSchedulerGanttComponent {
   readonly taskClick = output<NeuSchedulerGanttTaskClick>();
   readonly slotClick = output<NeuSchedulerGanttSlotClick>();
 
-  readonly _bounds = computed(() => {
+  private readonly _bounds = computed(() => {
     const explicitStart = normalizeDate(this.startDate());
     const explicitEnd = normalizeDate(this.endDate());
     const inferred = inferBounds(this.rows());

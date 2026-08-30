@@ -163,7 +163,7 @@ describe('NeuKanbanComponent', () => {
       'todo',
     );
 
-    expect(fixture.componentInstance._columns()[0].cards[1].id).toBe('card-a');
+    expect(fixture.componentInstance['_columns']()[0].cards[1].id).toBe('card-a');
     expect(changes).toHaveLength(1);
     expect(changes[0][0].cards[1]).toBe(COLUMNS[0].cards[0]);
     expect(COLUMNS[0].cards.map((card) => card.id)).toEqual(['card-a', 'card-b']);
@@ -175,8 +175,8 @@ describe('NeuKanbanComponent', () => {
     fixture.componentInstance.onCardDrop({ previousContainer: { id: 'todo' }, container: { id: 'todo' }, previousIndex: 0, currentIndex: 1 } as any, 'todo');
     const replacement = [{ id: 'todo', title: 'Server board', cards: [] }];
     fixture.componentRef.setInput('columns', replacement); fixture.detectChanges();
-    expect(fixture.componentInstance._columns()).toEqual(replacement);
-    expect(fixture.componentInstance._columns()).not.toBe(replacement);
+    expect(fixture.componentInstance['_columns']()).toEqual(replacement);
+    expect(fixture.componentInstance['_columns']()).not.toBe(replacement);
   });
 
   it('onCardDrop should transfer cards across columns and emit the drop event', async () => {
@@ -202,8 +202,8 @@ describe('NeuKanbanComponent', () => {
       'doing',
     );
 
-    expect(fixture.componentInstance._columns()[0].cards).toHaveLength(1);
-    expect(fixture.componentInstance._columns()[1].cards[1].id).toBe('card-a');
+    expect(fixture.componentInstance['_columns']()[0].cards).toHaveLength(1);
+    expect(fixture.componentInstance['_columns']()[1].cards[1].id).toBe('card-a');
     expect(events).toEqual([{ fromColumnId: 'todo', toColumnId: 'doing', cardId: 'card-a' }]);
   });
 
@@ -228,7 +228,7 @@ describe('NeuKanbanComponent', () => {
     const fixture = setup();
     await fixture.whenStable();
 
-    const snapshot = fixture.componentInstance._columns();
+    const snapshot = fixture.componentInstance['_columns']();
     fixture.componentInstance.onCardDrop(
       {
         previousContainer: { id: 'missing' },
@@ -239,7 +239,7 @@ describe('NeuKanbanComponent', () => {
       'doing',
     );
 
-    expect(fixture.componentInstance._columns()).toEqual(snapshot);
+    expect(fixture.componentInstance['_columns']()).toEqual(snapshot);
 
     fixture.componentInstance.onCardDrop(
       {
@@ -251,7 +251,7 @@ describe('NeuKanbanComponent', () => {
       'missing',
     );
 
-    expect(fixture.componentInstance._columns()).toEqual(snapshot);
+    expect(fixture.componentInstance['_columns']()).toEqual(snapshot);
   });
 
   it('does not emit a card drop event when no moved card is resolved', async () => {

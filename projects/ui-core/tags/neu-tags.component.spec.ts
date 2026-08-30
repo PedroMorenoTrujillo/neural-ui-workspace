@@ -82,7 +82,7 @@ describe('NeuTagsComponent', () => {
 
     const enter = new KeyboardEvent('keydown', { key: 'Enter' });
     const prevent = vi.spyOn(enter, 'preventDefault');
-    component.onKeyDown(enter);
+    component['onKeyDown'](enter);
     expect(prevent).toHaveBeenCalled();
     expect(component.value()).toEqual(['Angular', 'sign']);
 
@@ -90,10 +90,10 @@ describe('NeuTagsComponent', () => {
     component.commitDraft();
     expect(component.value()).toEqual(['Angular', 'sign']);
     component.draft.set('RxJS,');
-    component.onKeyDown(new KeyboardEvent('keydown', { key: ',' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: ',' }));
     expect(component.value()).toEqual(['Angular', 'sign', 'RxJS']);
 
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'Backspace' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'Backspace' }));
     expect(component.value()).toEqual(['Angular', 'sign']);
   });
 

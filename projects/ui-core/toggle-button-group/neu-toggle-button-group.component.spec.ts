@@ -77,7 +77,7 @@ describe('NeuToggleButtonGroupComponent', () => {
     const btns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
     btns[0].click();
     expect(emitted).toEqual(['day']);
-    expect(comp._value()).toBe('day');
+    expect(comp['_value']()).toBe('day');
   });
 
   it('clicking active option again deselects it (single mode)', () => {
@@ -100,7 +100,7 @@ describe('NeuToggleButtonGroupComponent', () => {
     const btns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
     btns[0].click();
     btns[1].click();
-    expect(comp._value()).toEqual(['day', 'week']);
+    expect(comp['_value']()).toEqual(['day', 'week']);
   });
 
   it('multiple=true deselects by clicking again', () => {
@@ -109,7 +109,7 @@ describe('NeuToggleButtonGroupComponent', () => {
     f.detectChanges();
     const btns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
     btns[0].click();
-    expect(comp._value()).toEqual(['week']);
+    expect(comp['_value']()).toEqual(['week']);
   });
 
   it('owns a snapshot of multiple programmatic values and emits fresh proposals', () => {
@@ -121,31 +121,31 @@ describe('NeuToggleButtonGroupComponent', () => {
     comp.neuChange.subscribe((value) => publicValues.push(value as string[]));
 
     comp.writeValue(incoming);
-    expect(comp._value()).toEqual(incoming);
-    expect(comp._value()).not.toBe(incoming);
+    expect(comp['_value']()).toEqual(incoming);
+    expect(comp['_value']()).not.toBe(incoming);
 
     incoming.push('week');
-    expect(comp._value()).toEqual(['day']);
+    expect(comp['_value']()).toEqual(['day']);
 
     comp.toggle(OPTIONS[1]);
     expect(incoming).toEqual(['day', 'week']);
     expect(cvaValues[0]).toEqual(['day', 'week']);
-    expect(cvaValues[0]).not.toBe(comp._value());
-    expect(publicValues[0]).not.toBe(comp._value());
+    expect(cvaValues[0]).not.toBe(comp['_value']());
+    expect(publicValues[0]).not.toBe(comp['_value']());
   });
 
   it('isSelected returns true for selected value in single mode', () => {
     const { comp } = mk();
     comp.writeValue('day');
-    expect(comp.isSelected('day')).toBe(true);
-    expect(comp.isSelected('week')).toBe(false);
+    expect(comp['isSelected']('day')).toBe(true);
+    expect(comp['isSelected']('week')).toBe(false);
   });
 
   it('isSelected returns true for values in multiple mode', () => {
     const { comp } = mk({ multiple: true });
     comp.writeValue(['day', 'month']);
-    expect(comp.isSelected('day')).toBe(true);
-    expect(comp.isSelected('week')).toBe(false);
+    expect(comp['isSelected']('day')).toBe(true);
+    expect(comp['isSelected']('week')).toBe(false);
   });
 
   // ── Disabled ──────────────────────────────────────────────────────────────
@@ -162,26 +162,26 @@ describe('NeuToggleButtonGroupComponent', () => {
     const { f, comp } = mk();
     comp.setDisabledState(true);
     f.detectChanges();
-    expect(comp._isDisabled()).toBe(true);
+    expect(comp['_isDisabled']()).toBe(true);
   });
 
   it('honors the public disabled input without requiring CVA state', () => {
     const { f, comp } = mk({ disabled: true });
     const btns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
 
-    expect(comp._isDisabled()).toBe(true);
+    expect(comp['_isDisabled']()).toBe(true);
     btns.forEach((btn) => expect(btn.disabled).toBe(true));
   });
 
   it('keeps the group disabled while either the input or CVA state is disabled', () => {
     const { f, comp } = mk({ disabled: true });
     comp.setDisabledState(false);
-    expect(comp._isDisabled()).toBe(true);
+    expect(comp['_isDisabled']()).toBe(true);
 
     f.componentRef.setInput('disabled', false);
     comp.setDisabledState(true);
     f.detectChanges();
-    expect(comp._isDisabled()).toBe(true);
+    expect(comp['_isDisabled']()).toBe(true);
   });
 
   it('toggle does nothing when the public input disables the group', () => {
@@ -206,13 +206,13 @@ describe('NeuToggleButtonGroupComponent', () => {
   it('writeValue(null) sets null in single mode', () => {
     const { comp } = mk();
     comp.writeValue(null);
-    expect(comp._value()).toBeNull();
+    expect(comp['_value']()).toBeNull();
   });
 
   it('writeValue(null) sets [] in multiple mode', () => {
     const { comp } = mk({ multiple: true });
     comp.writeValue(null);
-    expect(comp._value()).toEqual([]);
+    expect(comp['_value']()).toEqual([]);
   });
 
   it('onBlur calls onTouched', () => {
@@ -263,12 +263,12 @@ describe('NeuToggleButtonGroupComponent', () => {
     // Select 'day'
     f.componentInstance.toggle(OPTIONS[0]);
     f.detectChanges();
-    const firstValue = f.componentInstance._value();
+    const firstValue = f.componentInstance['_value']();
     // Deselect 'day' (toggle again)
     f.componentInstance.toggle(OPTIONS[0]);
     f.detectChanges();
     // After deselect, 'day' should not be in the selection
-    const afterDeselect = f.componentInstance._value() as string[];
+    const afterDeselect = f.componentInstance['_value']() as string[];
     expect(afterDeselect).not.toContain('day');
     void firstValue; // firstValue used to verify state changed
   });
@@ -291,7 +291,7 @@ describe('NeuToggleButtonGroupComponent', () => {
     component.neuChange.subscribe((value) => emitted.push(value));
 
     component.writeValue(0);
-    expect(component.isSelected(0)).toBe(true);
+    expect(component['isSelected'](0)).toBe(true);
     component.toggle(options[2]!);
     expect(emitted).toEqual([]);
     component.toggle(options[1]!);
@@ -318,8 +318,8 @@ describe('NeuToggleButtonGroupComponent', () => {
     component.registerOnChange((value) => cvaValues.push(value));
     component.neuChange.subscribe((value) => emittedValues.push(value));
 
-    const selectedValue: number = component.optionValueOf(options[0]);
-    expect(component.optionLabelOf(options[0])).toBe('Priority');
+    const selectedValue: number = component['optionValueOf'](options[0]);
+    expect(component['optionLabelOf'](options[0])).toBe('Priority');
     expect(selectedValue).toBe(7);
 
     component.writeValue(null);
@@ -327,7 +327,7 @@ describe('NeuToggleButtonGroupComponent', () => {
 
     expect(cvaValues).toEqual([selectedValue]);
     expect(emittedValues).toEqual([selectedValue]);
-    expect(component._value()).toBe(selectedValue);
+    expect(component['_value']()).toBe(selectedValue);
   });
 
   it('supports the explicit identity optionValue escape hatch for a legacy-shaped model', () => {
@@ -352,14 +352,14 @@ describe('NeuToggleButtonGroupComponent', () => {
     component.registerOnChange((value) => cvaValues.push(value));
     component.neuChange.subscribe((value) => emittedValues.push(value));
 
-    const selectedValue: LegacyShape = component.optionValueOf(options[0]);
+    const selectedValue: LegacyShape = component['optionValueOf'](options[0]);
     component.writeValue(null);
     component.toggle(options[0]);
 
     expect(selectedValue).toBe(options[0]);
     expect(cvaValues).toEqual([options[0]]);
     expect(emittedValues).toEqual([options[0]]);
-    expect(component._value()).toBe(options[0]);
+    expect(component['_value']()).toBe(options[0]);
   });
 
   it('supports function accessors, primitive options, and full-object values', () => {
@@ -374,23 +374,23 @@ describe('NeuToggleButtonGroupComponent', () => {
     domainFixture.componentRef.setInput('optionValue', (view: View) => view.key);
     domainFixture.componentRef.setInput('optionDisabled', (view: View) => view.unavailable);
     domainFixture.detectChanges();
-    expect(domainFixture.componentInstance.optionLabelOf(views[0])).toBe('GRID');
+    expect(domainFixture.componentInstance['optionLabelOf'](views[0])).toBe('GRID');
     domainFixture.componentInstance.toggle(views[1]);
-    expect(domainFixture.componentInstance._value()).toBeNull();
+    expect(domainFixture.componentInstance['_value']()).toBeNull();
 
     const primitiveFixture = TestBed.createComponent(NeuToggleButtonGroupComponent) as ComponentFixture<NeuToggleButtonGroupComponent<string, string>>;
     primitiveFixture.componentRef.setInput('options', ['read', 'write']);
     primitiveFixture.componentRef.setInput('optionLabel', (value: string) => value.toUpperCase());
     primitiveFixture.detectChanges();
     primitiveFixture.componentInstance.toggle('write');
-    expect(primitiveFixture.componentInstance._value()).toBe('write');
+    expect(primitiveFixture.componentInstance['_value']()).toBe('write');
 
     const objectFixture = TestBed.createComponent(NeuToggleButtonGroupComponent) as ComponentFixture<NeuToggleButtonGroupComponent<View>>;
     objectFixture.componentRef.setInput('options', views);
     objectFixture.componentRef.setInput('optionLabel', 'title');
     objectFixture.detectChanges();
     objectFixture.componentInstance.toggle(views[0]);
-    expect(objectFixture.componentInstance._value()).toBe(views[0]);
+    expect(objectFixture.componentInstance['_value']()).toBe(views[0]);
   });
 
   it('keeps a single selection active when options are reconstructed with the same optionValue', () => {
@@ -407,7 +407,7 @@ describe('NeuToggleButtonGroupComponent', () => {
     fixture.componentRef.setInput('options', reconstructed);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.isSelected(1)).toBe(true);
+    expect(fixture.componentInstance['isSelected'](1)).toBe(true);
     expect((fixture.nativeElement.querySelector('button') as HTMLButtonElement).getAttribute('aria-pressed')).toBe('true');
   });
 
@@ -423,7 +423,7 @@ describe('NeuToggleButtonGroupComponent', () => {
     fixture.componentRef.setInput('options', [{ id: 1, title: 'Reconstructed' }]);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.isSelected(1)).toBe(true);
+    expect(fixture.componentInstance['isSelected'](1)).toBe(true);
   });
 
   it('passes the original domain model to projected templates', async () => {

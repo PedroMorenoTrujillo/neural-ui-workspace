@@ -86,7 +86,7 @@ describe('Neural UI public harnesses', () => {
     expect(await select.getValueText()).toBe('One');
     expect(await select.getOptions()).toEqual(['One', 'Two']);
     await select.open();
-    await select.selectOption(/Two/);
+    await select['selectOption'](/Two/);
     await select.close();
 
     const date = await loader.getHarness(NeuDateInputHarness);

@@ -13,7 +13,7 @@ import {
   resolveNeuOptionGroupDisabled,
   resolveNeuOptionGroupLabel,
   resolveNeuOptionLabel,
-} from './neu-option-api';
+} from '@neural-ui/core/option-api';
 
 export interface InternalNeuOptionRow<T> {
   readonly kind: 'option';

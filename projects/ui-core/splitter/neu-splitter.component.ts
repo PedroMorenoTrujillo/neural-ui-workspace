@@ -65,7 +65,7 @@ export class NeuSplitterComponent {
   readonly sizeChange = output<number[]>();
 
   private readonly _el = inject(ElementRef<HTMLElement>);
-  readonly _sizes = signal<number[]>([]);
+  protected readonly _sizes = signal<number[]>([]);
 
   constructor() {
     effect(() => {
@@ -87,7 +87,7 @@ export class NeuSplitterComponent {
   private _dragIndex = -1;
   private _dragPos = 0;
 
-  _startDrag(e: MouseEvent, index: number): void {
+  protected _startDrag(e: MouseEvent, index: number): void {
     e.preventDefault();
     this._dragIndex = index;
     this._dragPos = this.direction() === 'horizontal' ? e.clientX : e.clientY;
@@ -102,7 +102,7 @@ export class NeuSplitterComponent {
     window.addEventListener('mouseup', onUp);
   }
 
-  _startTouchDrag(e: TouchEvent, index: number): void {
+  protected _startTouchDrag(e: TouchEvent, index: number): void {
     const t = e.touches[0];
     this._dragIndex = index;
     this._dragPos = this.direction() === 'horizontal' ? t.clientX : t.clientY;
@@ -118,7 +118,7 @@ export class NeuSplitterComponent {
     window.addEventListener('touchend', onEnd);
   }
 
-  _onHandleKey(e: KeyboardEvent, index: number): void {
+  protected _onHandleKey(e: KeyboardEvent, index: number): void {
     const step = 2;
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
       e.preventDefault();

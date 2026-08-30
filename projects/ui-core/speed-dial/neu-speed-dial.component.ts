@@ -21,7 +21,7 @@ import {
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import {
   NeuMenuActionLike,
@@ -29,7 +29,7 @@ import {
   NeuRovingMenuController,
   activateNeuMenuAction,
   resolveNeuMenuAction,
-} from '@neural-ui/core/menu-foundation';
+} from '@neural-ui/core/internal';
 import { NeuTooltipDirective, type NeuTooltipPosition } from '@neural-ui/core/tooltip';
 
 export type NeuSpeedDialDirection =

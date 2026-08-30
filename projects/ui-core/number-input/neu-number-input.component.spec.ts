@@ -49,7 +49,7 @@ describe('NeuNumberInputComponent', () => {
     const f = TestBed.createComponent(NeuNumberInputComponent);
     f.detectChanges();
     f.componentInstance.writeValue(42);
-    expect((f.componentInstance as any)._value()).toBe(42);
+    expect((f.componentInstance as any)['_value']()).toBe(42);
   });
 
   it('writeValue should clamp to min and max', async () => {
@@ -58,9 +58,9 @@ describe('NeuNumberInputComponent', () => {
     f.componentRef.setInput('max', 10);
     f.detectChanges();
     f.componentInstance.writeValue(50);
-    expect((f.componentInstance as any)._value()).toBe(10);
+    expect((f.componentInstance as any)['_value']()).toBe(10);
     f.componentInstance.writeValue(-5);
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
   });
 
   it('increment should increase value by step', async () => {
@@ -69,7 +69,7 @@ describe('NeuNumberInputComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(10);
     f.componentInstance.increment();
-    expect((f.componentInstance as any)._value()).toBe(12);
+    expect((f.componentInstance as any)['_value']()).toBe(12);
   });
 
   it('decrement should decrease value by step', async () => {
@@ -78,7 +78,7 @@ describe('NeuNumberInputComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(10);
     f.componentInstance.decrement();
-    expect((f.componentInstance as any)._value()).toBe(7);
+    expect((f.componentInstance as any)['_value']()).toBe(7);
   });
 
   it('increment should not exceed max', async () => {
@@ -87,7 +87,7 @@ describe('NeuNumberInputComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(5);
     f.componentInstance.increment();
-    expect((f.componentInstance as any)._value()).toBe(5);
+    expect((f.componentInstance as any)['_value']()).toBe(5);
   });
 
   it('decrement should not go below min', async () => {
@@ -96,7 +96,7 @@ describe('NeuNumberInputComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(0);
     f.componentInstance.decrement();
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
   });
 
   it('should emit valueChange on increment', async () => {
@@ -146,7 +146,7 @@ describe('NeuNumberInputComponent', () => {
     fakeInput.type = 'number';
     (fakeInput as any).valueAsNumber = 150;
     (f.componentInstance as any).onInputChange({ target: fakeInput } as unknown as Event);
-    expect((f.componentInstance as any)._value()).toBe(100);
+    expect((f.componentInstance as any)['_value']()).toBe(100);
   });
 
   it('onInputChange with NaN should default to 0', async () => {
@@ -157,7 +157,7 @@ describe('NeuNumberInputComponent', () => {
     const fakeInput = document.createElement('input');
     (fakeInput as HTMLInputElement).value = 'abc';
     (f.componentInstance as any).onInputChange({ target: fakeInput } as unknown as Event);
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
   });
 
   it('onBlur should call _onTouched', () => {
@@ -333,7 +333,7 @@ describe('NeuNumberInputComponent', () => {
     } else {
       f.componentInstance.decrement();
     }
-    expect((f.componentInstance as any)._value()).toBe(9);
+    expect((f.componentInstance as any)['_value']()).toBe(9);
   });
 
   it('clicking increment button in vertical layout should increase value', async () => {
@@ -351,7 +351,7 @@ describe('NeuNumberInputComponent', () => {
     } else {
       f.componentInstance.increment();
     }
-    expect((f.componentInstance as any)._value()).toBe(6);
+    expect((f.componentInstance as any)['_value']()).toBe(6);
   });
 
   // ── DOM change / blur events (template listener coverage) ─────────────────
@@ -366,7 +366,7 @@ describe('NeuNumberInputComponent', () => {
     const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
     input.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
   });
 
   it('DOM blur event on stacked input invokes onBlur via template listener', async () => {
@@ -392,7 +392,7 @@ describe('NeuNumberInputComponent', () => {
     const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
     input.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
   });
 
   it('DOM blur event on vertical input invokes onBlur via template listener', async () => {
@@ -421,10 +421,10 @@ describe('NeuNumberInputComponent', () => {
     if (incBtn) {
       incBtn.click();
       f.detectChanges();
-      expect((f.componentInstance as any)._value()).toBe(8);
+      expect((f.componentInstance as any)['_value']()).toBe(8);
     } else {
       f.componentInstance.increment();
-      expect((f.componentInstance as any)._value()).toBe(8);
+      expect((f.componentInstance as any)['_value']()).toBe(8);
     }
   });
 
@@ -438,7 +438,7 @@ describe('NeuNumberInputComponent', () => {
     const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
     input.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
   });
 
   it('DOM blur event on horizontal input invokes onBlur via template listener', async () => {
@@ -467,10 +467,10 @@ describe('NeuNumberInputComponent', () => {
     if (decBtn) {
       decBtn.click();
       f.detectChanges();
-      expect((f.componentInstance as any)._value()).toBe(9);
+      expect((f.componentInstance as any)['_value']()).toBe(9);
     } else {
       f.componentInstance.decrement();
-      expect((f.componentInstance as any)._value()).toBe(9);
+      expect((f.componentInstance as any)['_value']()).toBe(9);
     }
   });
 
@@ -486,7 +486,7 @@ describe('NeuNumberInputComponent', () => {
     decBtn.click();
     f.detectChanges();
 
-    expect((f.componentInstance as any)._value()).toBe(6);
+    expect((f.componentInstance as any)['_value']()).toBe(6);
   });
 
   it('clicking increment button in horizontal layout via DOM increases value', async () => {
@@ -501,7 +501,7 @@ describe('NeuNumberInputComponent', () => {
     incBtn.click();
     f.detectChanges();
 
-    expect((f.componentInstance as any)._value()).toBe(8);
+    expect((f.componentInstance as any)['_value']()).toBe(8);
   });
 
   it('onInputChange should parse decimal text values', () => {
@@ -514,7 +514,7 @@ describe('NeuNumberInputComponent', () => {
     fakeInput.value = '3.5';
     (f.componentInstance as any).onInputChange({ target: fakeInput } as unknown as Event);
 
-    expect((f.componentInstance as any)._value()).toBe(3.5);
+    expect((f.componentInstance as any)['_value']()).toBe(3.5);
   });
 
   it('focuses vertical and horizontal inputs through template listeners', async () => {
@@ -528,7 +528,7 @@ describe('NeuNumberInputComponent', () => {
     );
     verticalInput.dispatchEvent(new Event('focus'));
     vertical.detectChanges();
-    expect((vertical.componentInstance as any)._focused()).toBe(true);
+    expect((vertical.componentInstance as any)['_focused']()).toBe(true);
 
     const horizontal = TestBed.createComponent(NeuNumberInputComponent);
     horizontal.componentRef.setInput('stacked', false);
@@ -541,7 +541,7 @@ describe('NeuNumberInputComponent', () => {
     );
     horizontalInput.dispatchEvent(new Event('focus'));
     horizontal.detectChanges();
-    expect((horizontal.componentInstance as any)._focused()).toBe(true);
+    expect((horizontal.componentInstance as any)['_focused']()).toBe(true);
   });
 
   it('preserves the legacy default state, null handling, and numeric output contract', async () => {
@@ -551,22 +551,22 @@ describe('NeuNumberInputComponent', () => {
     await f.whenStable();
 
     const input: HTMLInputElement = f.nativeElement.querySelector('.neu-number-input__field');
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
     expect(input.value).toBe('0');
 
     f.componentInstance.writeValue(null);
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
     expect(input.value).toBe('0');
 
     f.componentInstance.writeValue(0);
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
     expect(input.value).toBe('0');
 
     f.componentInstance.writeValue(12.5);
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBe(12.5);
+    expect((f.componentInstance as any)['_value']()).toBe(12.5);
     expect(input.value).toBe('12.5');
   });
 
@@ -583,7 +583,7 @@ describe('NeuNumberInputComponent', () => {
     input.dispatchEvent(new Event('change'));
     f.detectChanges();
 
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
     expect(changes).toEqual([0]);
     expect(emitted).toEqual([0]);
   });
@@ -601,12 +601,12 @@ describe('NeuNumberInputComponent', () => {
 
     f.componentInstance.writeValue(null);
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBeNull();
+    expect((f.componentInstance as any)['_value']()).toBeNull();
     expect(input.value).toBe('');
 
     f.componentInstance.writeValue(0);
     f.detectChanges();
-    expect((f.componentInstance as any)._value()).toBe(0);
+    expect((f.componentInstance as any)['_value']()).toBe(0);
     expect(input.value).toBe('0');
 
     input.value = '';
@@ -641,11 +641,11 @@ describe('NeuNumberInputComponent', () => {
 
     f.componentInstance.writeValue(null);
     f.componentInstance.increment();
-    expect((f.componentInstance as any)._value()).toBe(2);
+    expect((f.componentInstance as any)['_value']()).toBe(2);
 
     f.componentInstance.writeValue(null);
     f.componentInstance.decrement();
-    expect((f.componentInstance as any)._value()).toBe(-2);
+    expect((f.componentInstance as any)['_value']()).toBe(-2);
   });
 
   it('keeps legacy number-only valueChange handlers valid in templates', async () => {

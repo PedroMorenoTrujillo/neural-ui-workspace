@@ -139,9 +139,9 @@ export class NeuToggleButtonGroupComponent<T = unknown, V = NeuToggleValueNotPro
   /** Emite el nuevo valor al cambiar (útil sin formControl) / Emits the new value on change (useful without formControl) */
   neuChange = output<NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null>();
 
-  readonly _value = signal<NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null>(null);
+  private readonly _value = signal<NeuToggleValue<T, V> | NeuToggleValue<T, V>[] | null>(null);
   private readonly _cvaDisabled = signal(false);
-  readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
+  protected readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
 
   readonly groupClasses = computed(() => ({
     'neu-toggle-group': true,

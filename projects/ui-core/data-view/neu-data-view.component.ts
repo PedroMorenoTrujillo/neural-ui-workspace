@@ -197,9 +197,9 @@ export class NeuDataViewComponent {
   readonly query = signal('');
   readonly page = signal(1);
   readonly sortKey = signal('');
-  readonly _sortControl = new FormControl<string | null>('');
+  protected readonly _sortControl = new FormControl<string | null>('');
 
-  readonly _selectSortOptions = computed<NeuSelectOption[]>(() =>
+  protected readonly _selectSortOptions = computed<NeuSelectOption[]>(() =>
     this.sortOptions().map((option) => ({ label: option.label, value: option.value })),
   );
 

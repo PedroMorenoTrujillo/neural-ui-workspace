@@ -92,7 +92,7 @@ export class NeuPopoverDirective implements OnDestroy {
   /** Emitido al cerrar / Emitted on close */
   readonly popoverClosed = output<void>();
 
-  readonly _isOpen = signal(false);
+  private readonly _isOpen = signal(false);
 
   private readonly _overlay = inject(Overlay);
   private readonly _el = inject(ElementRef<HTMLElement>);

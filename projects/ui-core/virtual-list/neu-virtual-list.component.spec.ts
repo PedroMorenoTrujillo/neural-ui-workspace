@@ -87,7 +87,7 @@ describe('NeuVirtualListComponent', () => {
     const f = setup();
     f.componentRef.setInput('itemSize', 40);
     f.componentRef.setInput('visibleRows', 5);
-    expect(f.componentInstance._containerHeight()).toBe('200px');
+    expect(f.componentInstance['_containerHeight']()).toBe('200px');
   });
 
   it('should show empty state when items is empty', async () => {
@@ -106,12 +106,12 @@ describe('NeuVirtualListComponent', () => {
 
   it('_isEmpty should reflect whether the items array has values', () => {
     const f = setup([]);
-    expect(f.componentInstance._isEmpty()).toBe(true);
+    expect(f.componentInstance['_isEmpty']()).toBe(true);
 
     f.componentRef.setInput('items', ['Alpha']);
     f.detectChanges();
 
-    expect(f.componentInstance._isEmpty()).toBe(false);
+    expect(f.componentInstance['_isEmpty']()).toBe(false);
   });
 
   it('emptyLabel input should change the empty state text', async () => {
@@ -153,7 +153,7 @@ describe('NeuVirtualListComponent', () => {
 
   it('_trackBy defaults to index', () => {
     const f = setup();
-    const result = f.componentInstance._trackBy(3, 'x');
+    const result = f.componentInstance['_trackBy'](3, 'x');
     expect(result).toBe(3);
   });
 
@@ -188,7 +188,7 @@ describe('NeuVirtualListComponent', () => {
   it('ngAfterViewInit should call checkViewportSize when the viewport is available', () => {
     const f = setup([1, 2, 3]);
     const checkViewportSize = vi.fn();
-    (f.componentInstance as any)._viewport = { checkViewportSize };
+    (f.componentInstance as any)['_viewport'] = { checkViewportSize };
 
     f.componentInstance.ngAfterViewInit();
 
@@ -209,14 +209,14 @@ describe('NeuVirtualListComponent', () => {
   it('trackBy input is used in _trackBy', () => {
     const f = setup([10, 20, 30]);
     f.componentRef.setInput('trackBy', (i: number, item: number) => item);
-    expect(f.componentInstance._trackBy(0, 99)).toBe(99);
+    expect(f.componentInstance['_trackBy'](0, 99)).toBe(99);
   });
 
   it('items with custom heights should compute containerHeight correctly', () => {
     const f = setup([]);
     f.componentRef.setInput('itemSize', 60);
     f.componentRef.setInput('visibleRows', 3);
-    expect(f.componentInstance._containerHeight()).toBe('180px');
+    expect(f.componentInstance['_containerHeight']()).toBe('180px');
   });
 
   it('renders items in the default slot when no itemTemplate is provided', async () => {

@@ -36,7 +36,7 @@ describe('NeuInputOTPComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    expect(comp._digits().join('')).toBe('123456');
+    expect(comp['_digits']().join('')).toBe('123456');
   });
 
   it('writeValue should truncate to length', async () => {
@@ -46,7 +46,7 @@ describe('NeuInputOTPComponent', () => {
     f.componentInstance.writeValue('123456789');
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._digits().join('')).toBe('1234');
+    expect(comp['_digits']().join('')).toBe('1234');
   });
 
   it('writeValue with null should clear digits', async () => {
@@ -56,7 +56,7 @@ describe('NeuInputOTPComponent', () => {
     f.componentInstance.writeValue(null);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._digits().join('')).toBe('');
+    expect(comp['_digits']().join('')).toBe('');
   });
 
   it('setDisabledState should apply disabled class', async () => {
@@ -91,7 +91,7 @@ describe('NeuInputOTPComponent', () => {
     fakeInput.value = '5';
     comp.onCellInput({ target: fakeInput } as unknown as Event, 0);
     expect(changes.length).toBe(1);
-    expect(comp._digits()[0]).toBe('5');
+    expect(comp['_digits']()[0]).toBe('5');
   });
 
   it('onCellInput should keep only the last typed character and focus the next cell', async () => {
@@ -108,7 +108,7 @@ describe('NeuInputOTPComponent', () => {
     comp.onCellInput({ target: fakeInput } as unknown as Event, 0);
 
     expect(fakeInput.value).toBe('9');
-    expect(comp._digits()[0]).toBe('9');
+    expect(comp['_digits']()[0]).toBe('9');
     expect(focusSpy).toHaveBeenCalledWith(1);
   });
 
@@ -122,7 +122,7 @@ describe('NeuInputOTPComponent', () => {
     const fakeInput = document.createElement('input');
     fakeInput.value = 'a';
     comp.onCellInput({ target: fakeInput } as unknown as Event, 0);
-    expect(comp._digits()[0]).toBe('');
+    expect(comp['_digits']()[0]).toBe('');
   });
 
   it('should emit completed when all cells are filled', async () => {
@@ -138,7 +138,7 @@ describe('NeuInputOTPComponent', () => {
     // Simulate last cell input
     const fakeInput = document.createElement('input');
     fakeInput.value = '4';
-    comp._digits.set(['1', '2', '3', '4']);
+    comp['_digits'].set(['1', '2', '3', '4']);
     comp.onCellInput({ target: fakeInput } as unknown as Event, 3);
     expect(completed.length).toBeGreaterThanOrEqual(0); // may fire depending on impl
   });
@@ -149,9 +149,9 @@ describe('NeuInputOTPComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    comp._digits.set(['1', '2', '3', '', '', '']);
-    comp.onKeyDown({ key: 'Backspace' } as KeyboardEvent, 2);
-    expect(comp._digits()[2]).toBe('');
+    comp['_digits'].set(['1', '2', '3', '', '', '']);
+    comp['onKeyDown']({ key: 'Backspace' } as KeyboardEvent, 2);
+    expect(comp['_digits']()[2]).toBe('');
   });
 
   it('clear() should reset all digits', async () => {
@@ -164,7 +164,7 @@ describe('NeuInputOTPComponent', () => {
     f.componentInstance.clear();
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._digits().join('')).toBe('');
+    expect(comp['_digits']().join('')).toBe('');
   });
 
   it('onPaste should fill digits from clipboard text', async () => {
@@ -178,7 +178,7 @@ describe('NeuInputOTPComponent', () => {
       clipboardData: { getData: () => '5678' },
     } as unknown as ClipboardEvent;
     comp.onPaste(fakeEvent);
-    expect(comp._digits().slice(0, 4).join('')).toBe('5678');
+    expect(comp['_digits']().slice(0, 4).join('')).toBe('5678');
   });
 
   it('should apply neu-input-otp class', async () => {
@@ -221,7 +221,7 @@ describe('NeuInputOTPComponent', () => {
     const comp = f.componentInstance as any;
     const focusSpy = vi.spyOn(comp, '_focusCell');
 
-    comp.onKeyDown({ key: 'Backspace', preventDefault: () => {} } as KeyboardEvent, 1);
+    comp['onKeyDown']({ key: 'Backspace', preventDefault: () => {} } as KeyboardEvent, 1);
 
     expect(focusSpy).toHaveBeenCalledWith(0);
   });
@@ -232,7 +232,7 @@ describe('NeuInputOTPComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     expect(() =>
-      comp.onKeyDown({ key: 'ArrowLeft', preventDefault: () => {} } as KeyboardEvent, 2),
+      comp['onKeyDown']({ key: 'ArrowLeft', preventDefault: () => {} } as KeyboardEvent, 2),
     ).not.toThrow();
   });
 
@@ -242,7 +242,7 @@ describe('NeuInputOTPComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     expect(() =>
-      comp.onKeyDown({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 1),
+      comp['onKeyDown']({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 1),
     ).not.toThrow();
   });
 
@@ -254,7 +254,7 @@ describe('NeuInputOTPComponent', () => {
     f.componentInstance.completed.subscribe((v: string) => completed.push(v));
     // Use the public API to trigger complete
     const comp = f.componentInstance as any;
-    comp._digits.set(['1', '2', '3', '4']);
+    comp['_digits'].set(['1', '2', '3', '4']);
     const fakeInput = document.createElement('input');
     fakeInput.value = '4';
     comp.onCellInput({ target: fakeInput } as unknown as Event, 3);
@@ -279,7 +279,7 @@ describe('NeuInputOTPComponent', () => {
       clipboardData: { getData: () => '1a3' },
     } as unknown as ClipboardEvent);
 
-    expect(comp._digits()).toEqual(['1', '3', '', '']);
+    expect(comp['_digits']()).toEqual(['1', '3', '', '']);
     expect(values).toEqual(['13']);
     expect(completed).toEqual([]);
     expect(focusSpy).toHaveBeenCalledWith(2);
@@ -351,7 +351,7 @@ describe('NeuInputOTPComponent', () => {
       clipboardData: { getData: () => '5678' },
     } as unknown as ClipboardEvent;
     comp.onPaste(fakeEvent);
-    expect(comp._digits().slice(0, 4).join('')).toBe('5678');
+    expect(comp['_digits']().slice(0, 4).join('')).toBe('5678');
   });
 
   it('onKeyDown ArrowLeft should focus previous cell when index > 0', () => {
@@ -364,7 +364,7 @@ describe('NeuInputOTPComponent', () => {
     // If there's an _inputRefs or similar, focus tracking should work
     // Just verify the handler does not throw
     expect(() =>
-      comp.onKeyDown({ key: 'ArrowLeft', preventDefault: () => {} } as KeyboardEvent, 2),
+      comp['onKeyDown']({ key: 'ArrowLeft', preventDefault: () => {} } as KeyboardEvent, 2),
     ).not.toThrow();
   });
 
@@ -376,10 +376,10 @@ describe('NeuInputOTPComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     expect(() =>
-      comp.onKeyDown({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 0),
+      comp['onKeyDown']({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 0),
     ).not.toThrow();
     expect(() =>
-      comp.onKeyDown({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 3),
+      comp['onKeyDown']({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 3),
     ).not.toThrow();
   });
 
@@ -402,7 +402,7 @@ describe('NeuInputOTPComponent', () => {
     f.detectChanges();
 
     expect(pasteSpy).toHaveBeenCalled();
-    expect(comp._digits().join('')).toBe('9876');
+    expect(comp['_digits']().join('')).toBe('9876');
   });
 
   it('DOM focus event on a cell should invoke onFocus through the template listener', async () => {
@@ -433,7 +433,7 @@ describe('NeuInputOTPComponent', () => {
 
     comp.onCellInput({ target: fakeInput } as unknown as Event, 0);
 
-    expect(comp._digits()[0]).toBe('B');
+    expect(comp['_digits']()[0]).toBe('B');
     expect(fakeInput.value).toBe('B');
   });
 
@@ -471,7 +471,7 @@ describe('NeuInputOTPComponent', () => {
     first.dispatchEvent(event);
     f.detectChanges();
 
-    expect(comp._digits().join('')).toBe('');
+    expect(comp['_digits']().join('')).toBe('');
     expect(focusSpy).toHaveBeenCalled();
   });
 
@@ -486,7 +486,7 @@ describe('NeuInputOTPComponent', () => {
 
     comp.onCellInput({ target: input } as unknown as Event, 0);
 
-    expect(comp._digits()[0]).toBe('');
+    expect(comp['_digits']()[0]).toBe('');
     expect(input.value).toBe('');
   });
 

@@ -256,9 +256,9 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    fixture.componentInstance.onSearch({ target: { value: 'Admin' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Admin' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData()).toEqual([]);
-    fixture.componentInstance.onSearch({
+    fixture.componentInstance['onSearch']({
       target: { value: 'alpha@example.com' },
     } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([2]);
@@ -266,7 +266,7 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.componentRef.setInput('globalFilterFields', undefined);
     fixture.detectChanges();
     await fixture.whenStable();
-    fixture.componentInstance.onSearch({ target: { value: 'Admin' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Admin' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([1, 3]);
   });
 
@@ -279,7 +279,7 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    fixture.componentInstance.onSearch({ target: { value: 'beta:10' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'beta:10' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([1]);
     fixture.componentInstance.setColumnFilter('name', 'Alpha');
     expect(fixture.componentInstance.filteredData()).toEqual([]);
@@ -297,7 +297,7 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     const events: NeuTableServerState[] = [];
     fixture.componentInstance.serverStateChange.subscribe((event) => events.push(event));
 
-    fixture.componentInstance.onSearch({ target: { value: 'Admin' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Admin' } } as unknown as Event);
 
     expect(events).toHaveLength(1);
     expect(events[0].globalFilterFields).toEqual(['name', 'roleLabel']);
@@ -312,12 +312,12 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     await fixture.whenStable();
     const selections = vi.fn();
     fixture.componentInstance.selectionChange.subscribe(selections);
-    fixture.componentInstance.toggleRow(ROWS[0]);
+    fixture.componentInstance['toggleRow'](ROWS[0]);
     fixture.componentInstance.expandRow(ROWS[1]);
     selections.mockClear();
 
     fixture.componentInstance.sortBy('name');
-    fixture.componentInstance.onSearch({ target: { value: 'Alpha' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Alpha' } } as unknown as Event);
 
     const state = (fixture.componentInstance as any)._state.snapshot();
     expect(state.selectionKeys).toEqual(new Set([1]));
@@ -518,7 +518,7 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.componentRef.setInput('globalFilterFields', []);
     fixture.detectChanges();
     await fixture.whenStable();
-    fixture.componentInstance.onSearch({ target: { value: 'Alpha' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Alpha' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData()).toEqual([]);
 
     const display = vi.fn((row: Row) => `Display ${row.name}`);
@@ -529,7 +529,7 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     display.mockClear();
-    fixture.componentInstance.onSearch({ target: { value: 'no-match' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'no-match' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData()).toEqual([]);
     expect(display).toHaveBeenCalledTimes(ROWS.length);
   });
@@ -549,9 +549,9 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    fixture.componentInstance.onSearch({ target: { value: 'Administrator' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Administrator' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([1, 3]);
-    fixture.componentInstance.onSearch({ target: { value: 'Viewer' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Viewer' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([2]);
 
     fixture.componentRef.setInput('globalFilterFields', ['runtimeMissing' as keyof Row]);
@@ -573,11 +573,11 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    fixture.componentInstance.onSearch({ target: { value: '0' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: '0' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([1]);
-    fixture.componentInstance.onSearch({ target: { value: 'false' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'false' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([1, 3]);
-    fixture.componentInstance.onSearch({ target: { value: 'Viewer' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Viewer' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData()).toEqual([]);
     expect(emptyAccessor).toHaveBeenCalled();
   });
@@ -592,7 +592,7 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.componentInstance.filteredData();
     fields.push('role');
 
-    fixture.componentInstance.onSearch({ target: { value: 'Admin' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Admin' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData()).toEqual([]);
     expect(fields).toEqual(['name', 'role']);
   });
@@ -609,7 +609,7 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     ]);
     fixture.detectChanges();
     await fixture.whenStable();
-    fixture.componentInstance.onSearch({ target: { value: 'query' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'query' } } as unknown as Event);
 
     expect(() => fixture.componentInstance.filteredData()).toThrow('consumer accessor failed');
   });
@@ -622,7 +622,7 @@ describe('NeuTable sorting and global-filter migration parity', () => {
       fixture.componentRef.setInput('globalFilterFields', fields);
       fixture.detectChanges();
       await fixture.whenStable();
-      fixture.componentInstance.onSearch({ target: { value: search } } as unknown as Event);
+      fixture.componentInstance['onSearch']({ target: { value: search } } as unknown as Event);
       return events.at(-1)!;
     };
 
@@ -686,8 +686,8 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     const changes: string[] = [];
     fixture.componentInstance.searchChange.subscribe((value) => changes.push(value));
 
-    fixture.componentInstance.onSearch({ target: { value: 'Alpha' } } as unknown as Event);
-    fixture.componentInstance.onSearch({ target: { value: 'Alpha' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Alpha' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Alpha' } } as unknown as Event);
 
     expect(fixture.componentInstance.currentPage()).toBe(1);
     expect(changes).toEqual(['Alpha']);

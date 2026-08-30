@@ -109,10 +109,10 @@ describe('NeuTable lazy virtual integration', () => {
     await fixture.whenStable();
     const table = fixture.componentInstance;
 
-    table.onTableScroll({ target: { scrollTop: 20 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 20 } } as unknown as Event);
     expect(requests).toHaveLength(1);
 
-    table.onTableScroll({ target: { scrollTop: 44 + 5000 * 40 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 44 + 5000 * 40 } } as unknown as Event);
     fixture.detectChanges();
     await fixture.whenStable();
     expect(requests).toHaveLength(2);
@@ -171,7 +171,7 @@ describe('NeuTable lazy virtual integration', () => {
     });
     fixture.detectChanges();
     await fixture.whenStable();
-    expect((fixture.componentInstance as any)._virtualOverscan()).toBe(0);
+    expect((fixture.componentInstance as any)['_virtualOverscan']()).toBe(0);
     expect(requests.at(-1)).toMatchObject({
       reason: 'viewport-change',
       range: { first: 0, end: 4 },
@@ -184,7 +184,7 @@ describe('NeuTable lazy virtual integration', () => {
     });
     fixture.detectChanges();
     await fixture.whenStable();
-    expect((fixture.componentInstance as any)._virtualOverscan()).toBe(0);
+    expect((fixture.componentInstance as any)['_virtualOverscan']()).toBe(0);
     fixture.componentInstance.scrollToIndex(3);
     fixture.componentInstance.scrollToOffset(100);
   });
@@ -203,11 +203,11 @@ describe('NeuTable lazy virtual integration', () => {
 
     vi.useFakeTimers();
     try {
-      fixture.componentInstance.onTableScroll({
+      fixture.componentInstance['onTableScroll']({
         target: { scrollTop: 44 + 100 * 40 },
       } as unknown as Event);
       expect(requests).toHaveLength(1);
-      expect((fixture.componentInstance as any)._virtualRange().visibleFirst).toBe(0);
+      expect((fixture.componentInstance as any)['_virtualRange']().visibleFirst).toBe(0);
 
       vi.advanceTimersByTime(24);
       expect(requests).toHaveLength(1);
@@ -237,17 +237,17 @@ describe('NeuTable lazy virtual integration', () => {
 
     vi.useFakeTimers();
     try {
-      fixture.componentInstance.onTableScroll({
+      fixture.componentInstance['onTableScroll']({
         target: { scrollTop: 44 + 100 * 40 },
       } as unknown as Event);
-      fixture.componentInstance.onTableScroll({
+      fixture.componentInstance['onTableScroll']({
         target: { scrollTop: 44 + 101 * 40 },
       } as unknown as Event);
       vi.advanceTimersByTime(10);
       expect(requests).toHaveLength(2);
       expect(requests[1].range.visibleFirst).toBe(101);
 
-      fixture.componentInstance.onTableScroll({
+      fixture.componentInstance['onTableScroll']({
         target: { scrollTop: 44 + 200 * 40 },
       } as unknown as Event);
       fixture.destroy();
@@ -273,7 +273,7 @@ describe('NeuTable lazy virtual integration', () => {
       range: { first: 4997, end: 5006, visibleFirst: 5000, visibleEnd: 5003 },
     });
 
-    table.onTableScroll({ target: { scrollTop: 44 + 5000 * 40 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 44 + 5000 * 40 } } as unknown as Event);
     expect(requests).toHaveLength(2);
 
     table.scrollToOffset(10 * 40);
@@ -403,7 +403,7 @@ describe('NeuTable lazy virtual integration', () => {
     ] satisfies NeuTableColumn<LazyRow>[]);
     fixture.detectChanges();
     await fixture.whenStable();
-    fixture.componentInstance.onTableScroll({
+    fixture.componentInstance['onTableScroll']({
       target: { scrollTop: 96 + 50 * 40 },
     } as unknown as Event);
     fixture.detectChanges();
@@ -433,10 +433,10 @@ describe('NeuTable lazy virtual integration', () => {
     const selectionChanges: LazyRow[][] = [];
     table.selectionChange.subscribe((event) => selectionChanges.push(event));
 
-    table.toggleRow(table.data()[1] as LazyRow, 'checkbox');
+    table['toggleRow'](table.data()[1] as LazyRow, 'checkbox');
     expect((table as any)._state.selectionKeys()).toEqual(new Set([1]));
 
-    table.onTableScroll({ target: { scrollTop: 44 + 100 * 40 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 44 + 100 * 40 } } as unknown as Event);
     fixture.componentRef.setInput('dataFirst', 97);
     fixture.componentRef.setInput('data', makeRows(97, 9));
     fixture.detectChanges();
@@ -444,7 +444,7 @@ describe('NeuTable lazy virtual integration', () => {
     expect(table.selectedCount()).toBe(1);
     expect(table.selectedRows()).toEqual([]);
 
-    table.onTableScroll({ target: { scrollTop: 0 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 0 } } as unknown as Event);
     fixture.componentRef.setInput('dataFirst', 0);
     fixture.componentRef.setInput('data', makeRows(0, 6));
     fixture.detectChanges();
@@ -469,11 +469,11 @@ describe('NeuTable lazy virtual integration', () => {
     const selected: number[] = [];
     fixture.componentInstance.rowSelect.subscribe((event) => selected.push(event.index));
 
-    fixture.componentInstance.toggleRow(fixture.componentInstance.data()[1] as LazyRow, 'checkbox');
+    fixture.componentInstance['toggleRow'](fixture.componentInstance.data()[1] as LazyRow, 'checkbox');
 
     expect(selectable).toHaveBeenCalledWith(expect.objectContaining({ id: 501 }), 501);
     expect(selected).toEqual([501]);
-    expect(fixture.componentInstance.visibleRowNumber(500)).toBe(501);
+    expect(fixture.componentInstance['visibleRowNumber'](500)).toBe(501);
   });
 
   it('resets query and range as one lazy request and suppresses the paginator', async () => {
@@ -484,7 +484,7 @@ describe('NeuTable lazy virtual integration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
-    table.onTableScroll({ target: { scrollTop: 44 + 100 * 40 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 44 + 100 * 40 } } as unknown as Event);
     const beforeSort = requests.length;
 
     table.sortBy('name');
@@ -509,7 +509,7 @@ describe('NeuTable lazy virtual integration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
-    table.onTableScroll({ target: { scrollTop: 44 + 9000 * 40 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 44 + 9000 * 40 } } as unknown as Event);
 
     const beforeShrink = requests.length;
     fixture.componentRef.setInput('totalItems', 20);
@@ -538,8 +538,8 @@ describe('NeuTable lazy virtual integration', () => {
 
     expect(requests).toHaveLength(1);
     expect(requests[0].range).toEqual({ first: 0, end: 0, visibleFirst: 0, visibleEnd: 0 });
-    expect((fixture.componentInstance as any)._virtualSlots()).toEqual([]);
-    expect((fixture.componentInstance as any)._virtualBottomSpacerHeight()).toBe(0);
+    expect((fixture.componentInstance as any)['_virtualSlots']()).toEqual([]);
+    expect((fixture.componentInstance as any)['_virtualBottomSpacerHeight']()).toBe(0);
     expect(fixture.nativeElement.querySelector('.neu-table__empty')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.neu-table__row--placeholder')).toBeNull();
   });
@@ -573,25 +573,25 @@ describe('NeuTable lazy virtual integration', () => {
     const table = fixture.componentInstance;
     const firstRow = table.data()[0] as LazyRow;
 
-    table.toggleRow(firstRow, 'checkbox');
+    table['toggleRow'](firstRow, 'checkbox');
     table.expandRow(firstRow);
     table.startCellEdit(firstRow, editableColumn);
     table.toggleAll();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect((table as any)._expansionEnabled()).toBe(false);
-    expect(table.isRowExpanded(firstRow)).toBe(false);
-    expect(table.isEditingCell(firstRow, editableColumn)).toBe(true);
+    expect((table as any)['_expansionEnabled']()).toBe(false);
+    expect(table['isRowExpanded'](firstRow)).toBe(false);
+    expect(table['isEditingCell'](firstRow, editableColumn)).toBe(true);
     expect(table.selectedCount()).toBe(6);
 
-    table.onTableScroll({ target: { scrollTop: 44 + 100 * 40 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 44 + 100 * 40 } } as unknown as Event);
     fixture.componentRef.setInput('dataFirst', 97);
     fixture.componentRef.setInput('data', makeRows(97, 9));
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(table.isRowExpanded(firstRow)).toBe(false);
-    expect(table.isEditingCell(firstRow, editableColumn)).toBe(false);
+    expect(table['isRowExpanded'](firstRow)).toBe(false);
+    expect(table['isEditingCell'](firstRow, editableColumn)).toBe(false);
     expect((table as any)._keyboardController.focusedKey()).toBe(97);
     expect(table.selectedCount()).toBe(6);
   });
@@ -609,9 +609,9 @@ describe('NeuTable lazy virtual integration', () => {
     const table = fixture.componentInstance;
     const firstRow = table.data()[0] as LazyRow;
 
-    expect((table as any)._expansionEnabled()).toBe(false);
+    expect((table as any)['_expansionEnabled']()).toBe(false);
     expect((table as any)._state.expansionKeys()).toEqual(new Set([0, 'off-page']));
-    expect(table.isRowExpanded(firstRow)).toBe(true);
+    expect(table['isRowExpanded'](firstRow)).toBe(true);
     expect(fixture.nativeElement.querySelector('.neu-table__row-expand-detail')).toBeNull();
     expect(requests).toHaveLength(1);
 
@@ -639,10 +639,10 @@ describe('NeuTable lazy virtual integration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect((fixture.componentInstance as any)._lazyVirtualActive()).toBe(false);
-    expect((fixture.componentInstance as any)._logicalTotalItems()).toBe(20);
-    expect((fixture.componentInstance as any)._virtualRange()).toMatchObject({ first: 0, end: 6 });
-    expect((fixture.componentInstance as any)._virtualSlots()).toEqual([]);
+    expect((fixture.componentInstance as any)['_lazyVirtualActive']()).toBe(false);
+    expect((fixture.componentInstance as any)['_logicalTotalItems']()).toBe(20);
+    expect((fixture.componentInstance as any)['_virtualRange']()).toMatchObject({ first: 0, end: 6 });
+    expect((fixture.componentInstance as any)['_virtualSlots']()).toEqual([]);
     (fixture.componentInstance as any)._emitLazyRequest('scroll');
     expect(requests).toEqual([]);
     expect(fixture.nativeElement.querySelector('.neu-table__row--placeholder')).toBeNull();

@@ -61,16 +61,16 @@ describe('NeuTableSelectionController', () => {
   });
 
   it('applies single replacement and selected-row toggle semantics', () => {
-    expect(controller.toggleRow(new Set([0]), rows[1], 'single')).toEqual(new Set(['one']));
-    expect(controller.toggleRow(new Set([0]), rows[0], 'single')).toEqual(new Set());
-    expect(controller.toggleRow(new Set([0]), rows[0], 'single', false)).toEqual(new Set([0]));
+    expect(controller['toggleRow'](new Set([0]), rows[1], 'single')).toEqual(new Set(['one']));
+    expect(controller['toggleRow'](new Set([0]), rows[0], 'single')).toEqual(new Set());
+    expect(controller['toggleRow'](new Set([0]), rows[0], 'single', false)).toEqual(new Set([0]));
   });
 
   it('handles none and every multiple toggle branch, including replacement', () => {
-    expect(controller.toggleRow(new Set([0]), rows[1], 'none')).toEqual(new Set([0]));
-    expect(controller.toggleRow(new Set([0]), rows[1], 'multiple')).toEqual(new Set([0, 'one']));
-    expect(controller.toggleRow(new Set([0, 'one']), rows[1], 'multiple')).toEqual(new Set([0]));
-    expect(controller.toggleRow(new Set([0, 'one']), rows[2], 'multiple', true, true)).toEqual(
+    expect(controller['toggleRow'](new Set([0]), rows[1], 'none')).toEqual(new Set([0]));
+    expect(controller['toggleRow'](new Set([0]), rows[1], 'multiple')).toEqual(new Set([0, 'one']));
+    expect(controller['toggleRow'](new Set([0, 'one']), rows[1], 'multiple')).toEqual(new Set([0]));
+    expect(controller['toggleRow'](new Set([0, 'one']), rows[2], 'multiple', true, true)).toEqual(
       new Set([2]),
     );
   });

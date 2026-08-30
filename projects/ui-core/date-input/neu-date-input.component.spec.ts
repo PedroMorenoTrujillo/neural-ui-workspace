@@ -71,8 +71,8 @@ describe('NeuDateInputComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    expect(comp._weekDayLabels()[0]).toBe('Mon');
-    expect(comp._rangePlaceholderText()).toBe('Select dates');
+    expect(comp['_weekDayLabels']()[0]).toBe('Mon');
+    expect(comp['_rangePlaceholderText']()).toBe('Select dates');
   });
 
   it('supports Sunday as first day while preserving Monday by default', async () => {
@@ -223,7 +223,7 @@ describe('NeuDateInputComponent', () => {
     const comp = f.componentInstance as any;
     comp.writeValue('2024-01-01');
     comp.writeValue(null);
-    expect(comp._value()).toBe('');
+    expect(comp['_value']()).toBe('');
   });
 
   it('prevMonth should navigate to previous month', async () => {
@@ -276,7 +276,7 @@ describe('NeuDateInputComponent', () => {
     comp.toggle();
     const day = { date: new Date(2024, 5, 15), inMonth: true, isToday: false, isSelected: false };
     comp.selectDay(day);
-    expect(comp._value()).toBe('2024-06-15');
+    expect(comp['_value']()).toBe('2024-06-15');
     expect(comp.isOpen()).toBe(false);
   });
 
@@ -287,7 +287,7 @@ describe('NeuDateInputComponent', () => {
     const comp = f.componentInstance as any;
     const day = { date: new Date(2024, 5, 1), inMonth: false, isToday: false, isSelected: false };
     comp.selectDay(day);
-    expect(comp._value()).toBe('');
+    expect(comp['_value']()).toBe('');
   });
 
   it('clear() should reset value and close panel', () => {
@@ -298,7 +298,7 @@ describe('NeuDateInputComponent', () => {
     comp.writeValue('2024-06-15');
     comp.toggle();
     comp.clear();
-    expect(comp._value()).toBe('');
+    expect(comp['_value']()).toBe('');
     expect(comp.isOpen()).toBe(false);
   });
 
@@ -309,7 +309,7 @@ describe('NeuDateInputComponent', () => {
     const comp = f.componentInstance as any;
     comp.toggle();
     comp.today();
-    expect(comp._value()).not.toBe('');
+    expect(comp['_value']()).not.toBe('');
     expect(comp.isOpen()).toBe(false);
   });
 
@@ -412,7 +412,7 @@ describe('NeuDateInputComponent', () => {
     const comp = f.componentInstance as any;
     comp.writeValue('08:05');
     comp.changeHour(1);
-    expect(comp._value()).toBe('09:05');
+    expect(comp['_value']()).toBe('09:05');
   });
 
   it('onHourWheel with deltaY > 0 should increment hour', () => {
@@ -504,7 +504,7 @@ describe('NeuDateInputComponent', () => {
     const comp = f.componentInstance as any;
     comp.writeValue('2024-06-15T14:30');
     comp.changeHour(1);
-    expect(comp._value()).toContain('T15:30');
+    expect(comp['_value']()).toContain('T15:30');
   });
 
   it('displayValue for datetime-local shows both date and time', () => {
@@ -630,10 +630,10 @@ describe('NeuDateInputComponent', () => {
     f.detectChanges();
     const d1 = new Date(2025, 3, 5);
     const d2 = new Date(2025, 3, 10);
-    (f.componentInstance as any)._selectDay(d1);
+    (f.componentInstance as any)['_selectDay'](d1);
     expect((f.componentInstance as any)._pickStart()).toEqual(d1);
     expect((f.componentInstance as any)._pickEnd()).toBeNull();
-    (f.componentInstance as any)._selectDay(d2);
+    (f.componentInstance as any)['_selectDay'](d2);
     expect((f.componentInstance as any)._pickEnd()).toEqual(d2);
   });
 
@@ -641,9 +641,9 @@ describe('NeuDateInputComponent', () => {
     const f = TestBed.createComponent(NeuDateInputComponent);
     f.componentRef.setInput('type', 'range');
     f.detectChanges();
-    (f.componentInstance as any)._selectDay(new Date(2025, 3, 5));
-    (f.componentInstance as any)._selectDay(new Date(2025, 3, 10));
-    (f.componentInstance as any)._selectDay(new Date(2025, 3, 15));
+    (f.componentInstance as any)['_selectDay'](new Date(2025, 3, 5));
+    (f.componentInstance as any)['_selectDay'](new Date(2025, 3, 10));
+    (f.componentInstance as any)['_selectDay'](new Date(2025, 3, 15));
     expect((f.componentInstance as any)._pickStart()).toEqual(new Date(2025, 3, 15));
     expect((f.componentInstance as any)._pickEnd()).toBeNull();
   });
@@ -654,7 +654,7 @@ describe('NeuDateInputComponent', () => {
     f.detectChanges();
     (f.componentInstance as any)._pickStart.set(new Date(2025, 3, 5));
     (f.componentInstance as any)._pickEnd.set(null);
-    (f.componentInstance as any)._hoverDay(new Date(2025, 3, 15));
+    (f.componentInstance as any)['_hoverDay'](new Date(2025, 3, 15));
     expect((f.componentInstance as any)._hoverDate()).toBeTruthy();
   });
 
@@ -667,7 +667,7 @@ describe('NeuDateInputComponent', () => {
     (f.componentInstance as any)._pickEnd.set(new Date(2025, 3, 30));
     const ranges: any[] = [];
     (f.componentInstance as any).rangeChange.subscribe((v: any) => ranges.push(v));
-    (f.componentInstance as any)._applyRange();
+    (f.componentInstance as any)['_applyRange']();
     expect(ranges.length).toBe(1);
     expect(f.componentInstance.isOpen()).toBe(false);
   });
@@ -681,9 +681,9 @@ describe('NeuDateInputComponent', () => {
     const ranges: NeuDateRange[] = [];
     comp.rangeChange.subscribe((value: NeuDateRange) => ranges.push(value));
 
-    comp._selectDay(from);
-    expect(comp._canApply()).toBe(true);
-    comp._applyRange();
+    comp['_selectDay'](from);
+    expect(comp['_canApply']()).toBe(true);
+    comp['_applyRange']();
 
     expect(ranges).toEqual([{ start: from, end: null }]);
   });
@@ -695,11 +695,11 @@ describe('NeuDateInputComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
 
-    expect(comp._canApply()).toBe(false);
+    expect(comp['_canApply']()).toBe(false);
     comp._pickStart.set(new Date('invalid'));
-    expect(comp._canApply()).toBe(false);
+    expect(comp['_canApply']()).toBe(false);
     comp._pickStart.set(new Date(2025, 3, 1));
-    expect(comp._canApply()).toBe(false);
+    expect(comp['_canApply']()).toBe(false);
   });
 
   it('_clearRange resets start/end and emits rangeChange', () => {
@@ -710,7 +710,7 @@ describe('NeuDateInputComponent', () => {
     (f.componentInstance as any)._pickEnd.set(new Date(2025, 3, 30));
     const ranges: any[] = [];
     (f.componentInstance as any).rangeChange.subscribe((v: any) => ranges.push(v));
-    (f.componentInstance as any)._clearRange();
+    (f.componentInstance as any)['_clearRange']();
     expect((f.componentInstance as any)._pickStart()).toBeNull();
     expect((f.componentInstance as any)._pickEnd()).toBeNull();
     expect(ranges.length).toBe(1);
@@ -722,11 +722,11 @@ describe('NeuDateInputComponent', () => {
     f.componentRef.setInput('type', 'range');
     f.detectChanges();
     const comp = f.componentInstance as any;
-    const initialMonth = comp._rightCursor().getMonth();
-    comp._nextRight();
-    expect(comp._rightCursor().getMonth()).toBe((initialMonth + 1) % 12);
-    comp._prevRight();
-    expect(comp._rightCursor().getMonth()).toBe(initialMonth);
+    const initialMonth = comp['_rightCursor']().getMonth();
+    comp['_nextRight']();
+    expect(comp['_rightCursor']().getMonth()).toBe((initialMonth + 1) % 12);
+    comp['_prevRight']();
+    expect(comp['_rightCursor']().getMonth()).toBe(initialMonth);
   });
 
   it('_prevLeft navigates the left calendar back one month in range mode', () => {
@@ -736,10 +736,10 @@ describe('NeuDateInputComponent', () => {
     f.componentRef.setInput('type', 'range');
     f.detectChanges();
     const comp = f.componentInstance as any;
-    const initialMonth = comp._leftCursor().getMonth();
-    comp._prevLeft();
+    const initialMonth = comp['_leftCursor']().getMonth();
+    comp['_prevLeft']();
     const expected = initialMonth === 0 ? 11 : initialMonth - 1;
-    expect(comp._leftCursor().getMonth()).toBe(expected);
+    expect(comp['_leftCursor']().getMonth()).toBe(expected);
   });
 
   it('_nextLeft navigates the left calendar forward one month in range mode', () => {
@@ -749,9 +749,9 @@ describe('NeuDateInputComponent', () => {
     f.componentRef.setInput('type', 'range');
     f.detectChanges();
     const comp = f.componentInstance as any;
-    const initialMonth = comp._leftCursor().getMonth();
-    comp._nextLeft();
-    expect(comp._leftCursor().getMonth()).toBe((initialMonth + 1) % 12);
+    const initialMonth = comp['_leftCursor']().getMonth();
+    comp['_nextLeft']();
+    expect(comp['_leftCursor']().getMonth()).toBe((initialMonth + 1) % 12);
   });
 
   // ── Range label + DOM interactions ─────────────────────────────────────────
@@ -777,8 +777,8 @@ describe('NeuDateInputComponent', () => {
     const comp = f.componentInstance as any;
     const later = new Date(2025, 3, 15);
     const earlier = new Date(2025, 3, 5);
-    comp._selectDay(later); // sets start = Apr 15
-    comp._selectDay(earlier); // earlier < later → triggers swap branch
+    comp['_selectDay'](later); // sets start = Apr 15
+    comp['_selectDay'](earlier); // earlier < later → triggers swap branch
     expect(comp._pickStart()).toEqual(earlier);
     expect(comp._pickEnd()).toEqual(later);
   });
@@ -807,7 +807,7 @@ describe('NeuDateInputComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const leftMonthBefore = comp._leftCursor().getMonth();
+    const leftMonthBefore = comp['_leftCursor']().getMonth();
     // Use aria-label selectors to find specific nav buttons
     const prevBtns = f.nativeElement.querySelectorAll('button[aria-label="Mes anterior"]');
     const nextBtns = f.nativeElement.querySelectorAll('button[aria-label="Mes siguiente"]');
@@ -816,7 +816,7 @@ describe('NeuDateInputComponent', () => {
       prevBtns[0].click();
       f.detectChanges();
       const expected = leftMonthBefore === 0 ? 11 : leftMonthBefore - 1;
-      expect(comp._leftCursor().getMonth()).toBe(expected);
+      expect(comp['_leftCursor']().getMonth()).toBe(expected);
     }
     // Click left next (first occurrence)
     if (nextBtns[0]) {
@@ -1017,7 +1017,7 @@ describe('NeuDateInputComponent', () => {
     f.componentRef.setInput('placeholder', 'Selecciona un rango');
     f.detectChanges();
 
-    expect((f.componentInstance as any)._rangeDisplayValue()).toBe('Selecciona un rango');
+    expect((f.componentInstance as any)['_rangeDisplayValue']()).toBe('Selecciona un rango');
   });
 
   it('displayValue should return the raw value when type=date receives an invalid date string', () => {
@@ -1051,7 +1051,7 @@ describe('NeuDateInputComponent', () => {
     const date = new Date(2025, 3, 5);
 
     expect(comp._fmtDate(date)).toBe(
-      date.toLocaleDateString(comp._resolvedLocale(), {
+      date.toLocaleDateString(comp['_resolvedLocale'](), {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -1202,7 +1202,7 @@ describe('NeuDateInputComponent advanced date selection', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
 
-    comp._applyPreset({
+    comp['_applyPreset']({
       label: 'This week',
       range: { start: new Date(2026, 0, 1), end: new Date(2026, 0, 7) },
     });
@@ -1247,7 +1247,7 @@ describe('NeuDateInputComponent advanced date selection', () => {
     const component = f.componentInstance as any;
     expect(component.isDateDisabled(new Date(2026, 0, 4))).toBe(true);
     expect(component.isDateDisabled(new Date(2026, 0, 5))).toBe(false);
-    component._selectDay(new Date(2026, 0, 4));
+    component['_selectDay'](new Date(2026, 0, 4));
     expect(component._pickStart()).toBeNull();
     f.componentRef.setInput('disabledDates', ['not-a-date', new Date(2026, 0, 5)]);
     f.detectChanges();
@@ -1261,13 +1261,13 @@ describe('NeuDateInputComponent advanced date selection', () => {
     const component = f.componentInstance as any;
     const touched = vi.fn();
     component.registerOnTouched(touched);
-    component._applyPreset({
+    component['_applyPreset']({
       label: 'Today', range: () => ({ start: new Date(2026, 2, 1), end: null }),
     });
     expect(component._pickStart()).toEqual(new Date(2026, 2, 1));
     component.setViewMonth('invalid');
     component.setViewYear('invalid');
-    component._applyRange();
+    component['_applyRange']();
     expect(touched).toHaveBeenCalledTimes(1);
   });
 
@@ -1295,12 +1295,12 @@ describe('NeuDateInputComponent advanced date selection', () => {
     document.documentElement.lang = 'en';
     document.documentElement.setAttribute('lang', 'en');
     await new Promise((resolve) => setTimeout(resolve));
-    expect(component._rangePlaceholderText()).toBe('Select dates');
+    expect(component['_rangePlaceholderText']()).toBe('Select dates');
 
     document.documentElement.lang = '';
     document.documentElement.setAttribute('lang', '');
     await new Promise((resolve) => setTimeout(resolve));
-    expect(component._rangePlaceholderText()).toBe('Seleccionar fechas');
+    expect(component['_rangePlaceholderText']()).toBe('Seleccionar fechas');
   });
 
   it('renders the floating label branch for the single trigger', async () => {
@@ -1339,9 +1339,9 @@ describe('NeuDateInputComponent advanced date selection', () => {
     const rangeComp = range.componentInstance as any;
     rangeComp._pickStart.set(new Date(2026, 0, 10));
     rangeComp._pickEnd.set(null);
-    expect(rangeComp._rangeDisplayValue()).toContain('2026');
+    expect(rangeComp['_rangeDisplayValue']()).toContain('2026');
 
-    rangeComp._applyPreset({
+    rangeComp['_applyPreset']({
       label: 'End only',
       range: { start: null, end: new Date(2026, 0, 12) },
     });

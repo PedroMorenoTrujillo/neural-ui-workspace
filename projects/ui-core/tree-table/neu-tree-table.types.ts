@@ -46,6 +46,12 @@ export interface NeuTreeTableRow<
   label: string;
   description?: string;
   badge?: string;
+}
+
+/** @internal Runtime hierarchy bookkeeping; intentionally absent from the consumer barrel. */
+export interface InternalNeuTreeTableRow<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> extends NeuTreeTableRow<T> {
   __treeLevel: number;
   __treeHasChildren: boolean;
   __treeExpanded: boolean;

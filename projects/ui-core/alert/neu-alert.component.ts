@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuAlertType = 'info' | 'success' | 'warning' | 'error';
 
@@ -103,10 +103,10 @@ export class NeuAlertComponent {
   /** Emitido cuando se descarta la alerta / Emitted when the alert is dismissed */
   readonly closed = output<void>();
 
-  readonly _id = inject(NeuIdGenerator).getId('neu-alert-');
-  readonly _dismissed = signal(false);
+  private readonly _id = inject(NeuIdGenerator).getId('neu-alert-');
+  protected readonly _dismissed = signal(false);
 
-  readonly _defaultIconName = computed(() => DEFAULT_ICON_NAMES[this.type()]);
+  protected readonly _defaultIconName = computed(() => DEFAULT_ICON_NAMES[this.type()]);
 
   readonly liveRegion = computed(() => (this.type() === 'error' ? 'assertive' : 'polite'));
 

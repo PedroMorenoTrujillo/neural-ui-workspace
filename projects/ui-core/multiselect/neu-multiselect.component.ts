@@ -19,7 +19,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   ConnectedOverlayPositionChange,
@@ -46,29 +46,31 @@ import {
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
   serializeNeuOptionValue,
-  ɵInternalNeuOptionLazyRequestSequencer as InternalNeuOptionLazyRequestSequencer,
-  ɵInternalNeuOptionNormalizedRow as InternalNeuOptionNormalizedRow,
-  ɵInternalNeuOptionRow as InternalNeuOptionRow,
-  ɵINTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS as INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS,
-  ɵInternalNeuConnectedOverlayCloseIntent as InternalNeuConnectedOverlayCloseIntent,
-  ɵInternalNeuConnectedOverlayCloseReason as InternalNeuConnectedOverlayCloseReason,
-  ɵInternalNeuConnectedOverlaySession as InternalNeuConnectedOverlaySession,
-  ɵInternalNeuOptionActiveRowController as InternalNeuOptionActiveRowController,
-  ɵInternalNeuOptionActiveRowResult as InternalNeuOptionActiveRowResult,
-  ɵInternalNeuOptionTypeaheadController as InternalNeuOptionTypeaheadController,
-  ɵconstrainNeuConnectedOverlayGeometry as constrainNeuConnectedOverlayGeometry,
-  ɵcreateNeuOptionLazyRequest as createNeuOptionLazyRequest,
-  ɵcreateNeuOptionLoadingRows as createNeuOptionLoadingRows,
-  ɵderiveNeuOptionActiveDescendant as deriveNeuOptionActiveDescendant,
-  ɵderiveNeuOptionAnnouncementData as deriveNeuOptionAnnouncementData,
-  ɵderiveNeuOptionAriaPosition as deriveNeuOptionAriaPosition,
-  ɵderiveNeuOptionRowId as deriveNeuOptionRowId,
-  ɵfilterNeuOptionRows as filterNeuOptionRows,
-  ɵnormalizeNeuLegacyOptionGroups as normalizeNeuLegacyOptionGroups,
-  ɵnormalizeNeuOptionGroups as normalizeNeuOptionGroups,
-  ɵnormalizeNeuOptionLazyWindow as normalizeNeuOptionLazyWindow,
-  ɵnormalizeNeuOptionRows as normalizeNeuOptionRows,
 } from '@neural-ui/core/option-api';
+import {
+  InternalNeuOptionLazyRequestSequencer,
+  type InternalNeuOptionNormalizedRow,
+  type InternalNeuOptionRow,
+  INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS,
+  type InternalNeuConnectedOverlayCloseIntent,
+  type InternalNeuConnectedOverlayCloseReason,
+  InternalNeuConnectedOverlaySession,
+  InternalNeuOptionActiveRowController,
+  type InternalNeuOptionActiveRowResult,
+  InternalNeuOptionTypeaheadController,
+  constrainNeuConnectedOverlayGeometry,
+  createNeuOptionLazyRequest,
+  createNeuOptionLoadingRows,
+  deriveNeuOptionActiveDescendant,
+  deriveNeuOptionAnnouncementData,
+  deriveNeuOptionAriaPosition,
+  deriveNeuOptionRowId,
+  filterNeuOptionRows,
+  normalizeNeuLegacyOptionGroups,
+  normalizeNeuOptionGroups,
+  normalizeNeuOptionLazyWindow,
+  normalizeNeuOptionRows,
+} from '@neural-ui/core/internal';
 import { NeuSelectOption } from '@neural-ui/core/select';
 import {
   NeuMultiselectChangeEvent,
@@ -630,7 +632,7 @@ export class NeuMultiselectComponent<
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
-  readonly _viewportMargin = 16;
+  protected readonly _viewportMargin = 16;
   private readonly _panelMaxHeight = 280;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
   private readonly _viewport = viewChild(CdkVirtualScrollViewport);
@@ -715,8 +717,8 @@ export class NeuMultiselectComponent<
   }
 
   /** @internal */
-  readonly _triggerId = inject(NeuIdGenerator).getId('neu-multiselect-trigger-');
-  readonly _panelId = `${this._triggerId}-panel`;
+  private readonly _triggerId = inject(NeuIdGenerator).getId('neu-multiselect-trigger-');
+  protected readonly _panelId = `${this._triggerId}-panel`;
 
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
   readonly itemTpl = contentChild(NeuMultiselectItemDirective<T>);
@@ -882,7 +884,7 @@ export class NeuMultiselectComponent<
   readonly searchQuery = signal('');
   readonly activeRowIndex = signal(-1);
   readonly isPanelAbove = signal(false);
-  readonly _chipMode = signal<'chips' | 'count'>('count');
+  protected readonly _chipMode = signal<'chips' | 'count'>('count');
   private readonly lazySequencer = new InternalNeuOptionLazyRequestSequencer();
   private lastLazyRequestKey = '';
   private readonly activeRowController = new InternalNeuOptionActiveRowController<T, G | string>(
@@ -934,7 +936,7 @@ export class NeuMultiselectComponent<
     if (this.display() !== 'count') return this.display();
     return this._chipMode() === 'chips' ? 'chip' : 'count';
   });
-  readonly _visibleChips = computed(() =>
+  protected readonly _visibleChips = computed(() =>
     this._values().slice(0, Math.max(0, this.maxSelectedLabels())),
   );
 

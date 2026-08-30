@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export interface NeuCommand {
   id: string;
@@ -193,8 +193,8 @@ export class NeuCommandPaletteService {
 })
 export class NeuCommandPaletteComponent {
   readonly itemTpl = contentChild(NeuCommandPaletteItemDirective);
-  readonly _svc = inject(NeuCommandPaletteService);
-  readonly _activeIndex = signal(0);
+  protected readonly _svc = inject(NeuCommandPaletteService);
+  protected readonly _activeIndex = signal(0);
   readonly listId = inject(NeuIdGenerator).getId('neu-command-list-');
 
   constructor() {
@@ -222,14 +222,14 @@ export class NeuCommandPaletteComponent {
     if (!command.disabled) this._svc.execute(command.id);
   }
 
-  _onDocKey(e: KeyboardEvent): void {
+  protected _onDocKey(e: KeyboardEvent): void {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       this._svc.isOpen() ? this._svc.close() : this._svc.open();
     }
   }
 
-  _onInputKey(e: KeyboardEvent): void {
+  protected _onInputKey(e: KeyboardEvent): void {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();

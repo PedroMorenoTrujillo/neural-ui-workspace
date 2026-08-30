@@ -21,7 +21,7 @@ import {
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-import { NeuIdGenerator, NeuResponsiveState } from '@neural-ui/core/foundation';
+import { NeuIdGenerator, NeuResponsiveState } from '@neural-ui/core/internal';
 import {
   NeuMenuActionLike,
   NeuResolvedMenuAction,
@@ -29,7 +29,7 @@ import {
   NeuTextDirection,
   activateNeuMenuAction,
   resolveNeuMenuAction,
-} from '@neural-ui/core/menu-foundation';
+} from '@neural-ui/core/internal';
 
 export type NeuMegaMenuOrientation = 'horizontal' | 'vertical';
 

@@ -15,10 +15,12 @@ import {
   NEURAL_LOCALE,
   NEURAL_NOW,
   NEURAL_TIME_ZONE,
+} from './neu-hydration-foundation';
+import {
   NeuIdGenerator,
   NeuInitialTemporalState,
   NeuResponsiveState,
-} from './neu-hydration-foundation';
+} from '@neural-ui/core/internal';
 
 @Component({ template: '' })
 class ResponsiveHost {

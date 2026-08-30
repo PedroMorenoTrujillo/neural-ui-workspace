@@ -282,7 +282,7 @@ describe('NeuFocusTrapDirective', () => {
 
   it('removes its host and removed-focus listeners on destroy', async () => {
     const { fixture, directive, trap, query } = await createHost();
-    const spy = vi.spyOn(directive, 'onKeydown');
+    const spy = vi.spyOn(directive as any, 'onKeydown');
     fixture.componentInstance.showDynamic.set(true);
     fixture.detectChanges();
     await fixture.whenStable();

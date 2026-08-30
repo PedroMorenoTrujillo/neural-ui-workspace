@@ -315,29 +315,29 @@ describe('NeuTable full body-section composition', () => {
     const table = fixture.debugElement.query(By.directive(NeuTableComponent))
       .componentInstance as NeuTableComponent<Row>;
 
-    const paginator = table.paginatorTemplateContext();
+    const paginator = table['paginatorTemplateContext']();
     paginator.goToPage(1);
     paginator.setPageSize(2);
 
-    const body = table.bodyContext(ROWS[0], 0, 0);
+    const body = table['bodyContext'](ROWS[0], 0, 0);
     body.toggleSelection();
     body.toggleExpansion();
     body.reorder.move(1);
 
     body.edit.init();
-    const editing = table.rowEditContext(ROWS[0], 0, 0);
+    const editing = table['rowEditContext'](ROWS[0], 0, 0);
     editing.setValue('name', 'Ada Updated');
     editing.save();
-    table.rowEditContext(ROWS[1], 1, 1).init();
-    table.rowEditContext(ROWS[1], 1, 1).cancel();
+    table['rowEditContext'](ROWS[1], 1, 1).init();
+    table['rowEditContext'](ROWS[1], 1, 1).cancel();
 
     const column = COLUMNS[0];
-    table.cellViewContext(ROWS[0], column, 0, 0).startEdit();
-    const cellEditor = table.cellEditorContext(ROWS[0], column, 0, 0);
+    table['cellViewContext'](ROWS[0], column, 0, 0).startEdit();
+    const cellEditor = table['cellEditorContext'](ROWS[0], column, 0, 0);
     cellEditor.setValue('Ada Cell');
     expect(cellEditor.save()).toBe(true);
-    table.cellViewContext(ROWS[0], column, 0, 0).startEdit();
-    table.cellEditorContext(ROWS[0], column, 0, 0).cancel();
+    table['cellViewContext'](ROWS[0], column, 0, 0).startEdit();
+    table['cellEditorContext'](ROWS[0], column, 0, 0).cancel();
 
     fixture.componentInstance.groupBy.set('team');
     fixture.detectChanges();
@@ -398,7 +398,7 @@ describe('NeuTable full body-section composition', () => {
     fixture.componentInstance.pagination.set(true);
     fixture.detectChanges();
 
-    expect(table.paginatorTemplateContext().totalRecords).toBe(3);
+    expect(table['paginatorTemplateContext']().totalRecords).toBe(3);
     expect(fixture.nativeElement.querySelectorAll('.consumer-primary')).toHaveLength(2);
     expect(fixture.nativeElement.querySelectorAll('.consumer-detail')).toHaveLength(2);
 
@@ -420,7 +420,7 @@ describe('NeuTable full body-section composition', () => {
     expect(fixture.nativeElement.querySelector('.consumer-primary')?.textContent).toContain(
       'Linus',
     );
-    expect(table.paginatorTemplateContext().totalRecords).toBe(1);
+    expect(table['paginatorTemplateContext']().totalRecords).toBe(1);
   });
 
   it('structurally owns loading, empty, group, expansion and frozen states', async () => {

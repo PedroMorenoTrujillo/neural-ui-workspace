@@ -81,7 +81,7 @@ describe('NeuTable canonical state integration', () => {
     const table = fixture.componentInstance;
 
     table.goToPage(2);
-    table.onSearch({ target: { value: 'Beta' } } as unknown as Event);
+    table['onSearch']({ target: { value: 'Beta' } } as unknown as Event);
     table.sortBy('name');
     table.setColumnFilter('name', 'Bet');
 
@@ -107,7 +107,7 @@ describe('NeuTable canonical state integration', () => {
     await fixture.whenStable();
     const table = fixture.componentInstance;
 
-    table.toggleRow(ROWS[0]);
+    table['toggleRow'](ROWS[0]);
     table.expandRow(ROWS[1]);
     table.applyLayout({
       columnOrder: ['name', 'id'],
@@ -283,7 +283,7 @@ describe('NeuTable canonical state integration', () => {
       vi.clearAllMocks();
     };
 
-    table.onSearch({ target: { value: 'Alpha' } } as unknown as Event);
+    table['onSearch']({ target: { value: 'Alpha' } } as unknown as Event);
     await expectSingleWrite(writeSearch);
 
     table.clearSearch();
@@ -321,7 +321,7 @@ describe('NeuTable canonical state integration', () => {
       vi.spyOn(adapter, 'resetPage'),
     ];
 
-    table.toggleRow(ROWS[0]);
+    table['toggleRow'](ROWS[0]);
     table.expandRow(ROWS[0]);
     table.applyLayout({
       columnOrder: ['name', 'id'],
@@ -338,11 +338,11 @@ describe('NeuTable canonical state integration', () => {
     });
     fixture.detectChanges();
     await fixture.whenStable();
-    table.onSearch({ target: { value: 'Beta' } } as unknown as Event);
+    table['onSearch']({ target: { value: 'Beta' } } as unknown as Event);
     table.clearSearch();
     table.goToPage(2);
     table.sortBy('name');
-    table.onPageSizeChange(2);
+    table['onPageSizeChange'](2);
     fixture.componentRef.setInput('multiSort', true);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -377,8 +377,8 @@ describe('NeuTable canonical state integration', () => {
     };
 
     expectOne(() => table.goToPage(2), { page: 2 });
-    expectOne(() => table.onPageSizeChange(2), { page: 1, pageSize: 2 });
-    expectOne(() => table.onSearch({ target: { value: 'Beta' } } as unknown as Event), {
+    expectOne(() => table['onPageSizeChange'](2), { page: 1, pageSize: 2 });
+    expectOne(() => table['onSearch']({ target: { value: 'Beta' } } as unknown as Event), {
       page: 1,
       search: 'Beta',
     });
@@ -600,7 +600,7 @@ describe('NeuTable canonical state integration', () => {
     fixture.componentInstance.queryChange.subscribe((event) => queries.push(event));
     fixture.componentInstance.serverStateChange.subscribe((event) => legacy.push(event));
 
-    fixture.componentInstance.onSearch({ target: { value: 'Beta' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Beta' } } as unknown as Event);
 
     expect(queries).toHaveLength(1);
     expect(queries[0].search).toBe('Beta');
@@ -670,7 +670,7 @@ describe('NeuTable canonical state integration', () => {
     expect(queries).toHaveLength(1);
     expect(legacy).toHaveLength(1);
 
-    table.onPageSizeChange(2);
+    table['onPageSizeChange'](2);
     expect(queries).toHaveLength(2);
     expect(queries[1]).toMatchObject({ page: 1, pageSize: 2 });
     expect(table.currentPage()).toBe(2);
@@ -797,7 +797,7 @@ describe('NeuTable canonical state integration', () => {
 
     expect(changes).toEqual([['off-page', 1]]);
     expect(expands).toHaveLength(1);
-    expect(fixture.componentInstance.isRowExpanded(ROWS[0])).toBe(false);
+    expect(fixture.componentInstance['isRowExpanded'](ROWS[0])).toBe(false);
     expect((fixture.componentInstance as any)._state.expansionKeys()).toEqual(
       new Set(['off-page']),
     );
@@ -807,7 +807,7 @@ describe('NeuTable canonical state integration', () => {
     await fixture.whenStable();
     expect(changes).toHaveLength(1);
     expect(expands).toHaveLength(1);
-    expect(fixture.componentInstance.isRowExpanded(ROWS[0])).toBe(true);
+    expect(fixture.componentInstance['isRowExpanded'](ROWS[0])).toBe(true);
 
     fixture.componentRef.setInput('expandedRowKeys', undefined);
     fixture.detectChanges();
@@ -837,7 +837,7 @@ describe('NeuTable canonical state integration', () => {
     sourceTable.goToPage(2);
     sourceTable.sortBy('name');
     sourceTable.setColumnFilter('role', ROLE_ADMIN);
-    sourceTable.toggleRow(SERVER_ROWS[1], 'checkbox');
+    sourceTable['toggleRow'](SERVER_ROWS[1], 'checkbox');
     sourceTable.expandRow(SERVER_ROWS[2]);
     sourceTable.applyLayout({
       columnOrder: ['name', 'id', 'role', 'tag'],
@@ -883,7 +883,7 @@ describe('NeuTable canonical state integration', () => {
       sort: { key: 'name', dir: 'asc' },
     });
     expect(restored.componentInstance.selectedRows()).toEqual([SERVER_ROWS[1]]);
-    expect(restored.componentInstance.isRowExpanded(SERVER_ROWS[2])).toBe(true);
+    expect(restored.componentInstance['isRowExpanded'](SERVER_ROWS[2])).toBe(true);
     expect((restored.componentInstance as any)._state.filters()['role'].constraints[0].value).toBe(
       ROLE_ADMIN,
     );
@@ -906,7 +906,7 @@ describe('NeuTable canonical state integration', () => {
     source.componentRef.setInput('pageSize', 25);
     source.detectChanges();
     await source.whenStable();
-    source.componentInstance.onSearch({ target: { value: 'Persisted' } } as unknown as Event);
+    source.componentInstance['onSearch']({ target: { value: 'Persisted' } } as unknown as Event);
     source.componentInstance.saveState();
     source.destroy();
 
@@ -964,7 +964,7 @@ describe('NeuTable canonical state integration', () => {
     const saves: unknown[] = [];
     fixture.componentInstance.stateSave.subscribe((event) => saves.push(event));
 
-    fixture.componentInstance.onSearch({ target: { value: 'Alpha' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Alpha' } } as unknown as Event);
     const afterAutomaticSave = saves.length;
     fixture.componentInstance.saveState();
     fixture.componentInstance.saveState();
@@ -1137,7 +1137,7 @@ describe('NeuTable canonical state integration', () => {
     source.componentRef.setInput('stateKey', key);
     source.detectChanges();
     await source.whenStable();
-    source.componentInstance.onSearch({ target: { value: 'Persisted' } } as unknown as Event);
+    source.componentInstance['onSearch']({ target: { value: 'Persisted' } } as unknown as Event);
     source.componentInstance.saveState();
     source.destroy();
 

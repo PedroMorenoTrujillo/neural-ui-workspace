@@ -29,11 +29,11 @@ import {
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
 } from '@neural-ui/core/option-api';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuTreeNavigationController,
   NeuTreeNavigationItem,
-} from '@neural-ui/core/tree-foundation';
+} from '@neural-ui/core/internal';
 
 export interface NeuTreeSelectNode {
   value: string;

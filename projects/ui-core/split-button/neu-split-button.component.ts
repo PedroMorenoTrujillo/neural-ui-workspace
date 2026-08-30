@@ -21,7 +21,7 @@ import {
   OverlayModule,
 } from '@angular/cdk/overlay';
 import { NeuButtonVariant, NeuButtonSize } from '@neural-ui/core/button';
-import { NeuRovingMenuController } from '@neural-ui/core/menu-foundation';
+import { NeuRovingMenuController } from '@neural-ui/core/internal';
 
 export interface NeuSplitButtonAction {
   /** Identificador único de la acción / Unique action identifier */
@@ -188,7 +188,7 @@ export class NeuSplitButtonComponent {
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
   private readonly menuController = new NeuRovingMenuController({ orientation: 'vertical' });
   private focusLastOnAttach = false;
-  readonly _viewportMargin = 16;
+  protected readonly _viewportMargin = 16;
   readonly overlayPositions: ConnectedPosition[] = [
     {
       originX: 'end',

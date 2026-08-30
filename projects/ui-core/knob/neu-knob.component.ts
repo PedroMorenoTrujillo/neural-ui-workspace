@@ -11,7 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 /**
  * NeuralUI Knob Component
@@ -121,23 +121,23 @@ export class NeuKnobComponent implements ControlValueAccessor {
   /** Emitido en cada cambio / Emitted on each change */
   readonly valueChange = output<number>();
 
-  readonly _id = inject(NeuIdGenerator).getId('neu-knob-');
-  readonly _cvaDisabled = signal(false);
-  readonly _value = signal(0);
+  protected readonly _id = inject(NeuIdGenerator).getId('neu-knob-');
+  protected readonly _cvaDisabled = signal(false);
+  protected readonly _value = signal(0);
 
-  readonly _strokeWidth = computed(() => Math.max(4, this.size() * 0.1));
-  readonly _radius = computed(() => (this.size() - this._strokeWidth()) / 2 - 2);
-  readonly _circumference = computed(() => 2 * Math.PI * this._radius());
+  protected readonly _strokeWidth = computed(() => Math.max(4, this.size() * 0.1));
+  protected readonly _radius = computed(() => (this.size() - this._strokeWidth()) / 2 - 2);
+  private readonly _circumference = computed(() => 2 * Math.PI * this._radius());
   /** Arc spans 260° (from -40° to 220°) */
-  readonly _arcLength = computed(() => (260 / 360) * this._circumference());
+  private readonly _arcLength = computed(() => (260 / 360) * this._circumference());
 
-  readonly _normalizedValue = computed(() => {
+  private readonly _normalizedValue = computed(() => {
     const range = this.max() - this.min();
     return range === 0 ? 0 : (this._value() - this.min()) / range;
   });
 
-  readonly _arcDashArray = computed(() => `${this._arcLength()} ${this._circumference()}`);
-  readonly _arcDashOffset = computed(() => this._arcLength() * (1 - this._normalizedValue()));
+  protected readonly _arcDashArray = computed(() => `${this._arcLength()} ${this._circumference()}`);
+  protected readonly _arcDashOffset = computed(() => this._arcLength() * (1 - this._normalizedValue()));
 
   // Indicator position on the track (relative to SVG center)
   // El arco empieza en rotate(-220°) desde el Este del SVG.
@@ -147,9 +147,9 @@ export class NeuKnobComponent implements ControlValueAccessor {
   // (arco de 7:40 → 1:20 pasando por 12:00 en la mitad)
   // Arc starts at rotate(-220°) from East; indicator natural position is North (12 o'clock).
   // Correct clockwise rotation formula: θ = 230 + normalizedValue × 260.
-  readonly _indicatorAngle = computed(() => this._normalizedValue() * 260 + 230);
-  readonly _indicatorX = computed(() => this.size() / 2);
-  readonly _indicatorY = computed(() => this.size() / 2 - this._radius());
+  protected readonly _indicatorAngle = computed(() => this._normalizedValue() * 260 + 230);
+  protected readonly _indicatorX = computed(() => this.size() / 2);
+  protected readonly _indicatorY = computed(() => this.size() / 2 - this._radius());
 
   private _dragStartAngle = 0;
   private _dragStartValue = 0;

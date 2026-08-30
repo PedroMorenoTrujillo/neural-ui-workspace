@@ -13,7 +13,8 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { NEURAL_LOCALE, NeuInitialTemporalState } from '@neural-ui/core/foundation';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
+import { NeuInitialTemporalState } from '@neural-ui/core/internal';
 
 export type NeuCalendarView = 'month' | 'week';
 export type NeuCalendarEventVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';

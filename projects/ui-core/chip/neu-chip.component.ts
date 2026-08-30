@@ -97,15 +97,15 @@ export class NeuChipComponent {
   }));
 
   /** Rol ARIA del host: 'button' cuando seleccionable, 'group' cuando también eliminable / Host ARIA role: 'button' when selectable, 'group' when removable */
-  readonly _hostRole = computed(() => (this.removable() ? 'group' : 'button'));
+  protected readonly _hostRole = computed(() => (this.removable() ? 'group' : 'button'));
 
   /** aria-pressed solo cuando actúa como botón toggle / aria-pressed only when acting as toggle button */
-  readonly _hostAriaPressed = computed<boolean | null>(() =>
+  protected readonly _hostAriaPressed = computed<boolean | null>(() =>
     this.removable() ? null : this.selected(),
   );
 
   /** tabindex nulo en el host grupo para no saturar el orden de foco / null tabindex on group host to not saturate focus order */
-  readonly _hostTabindex = computed<number | null>(() => {
+  protected readonly _hostTabindex = computed<number | null>(() => {
     if (this.removable()) return null;
     return this.disabled() ? -1 : 0;
   });

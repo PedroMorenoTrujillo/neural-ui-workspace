@@ -7,9 +7,8 @@ const uiCore = join(root, 'projects/ui-core');
 const nonVisualEntryPoints = new Set([
   'focus-trap',
   'foundation',
-  'menu-foundation',
+  'internal',
   'option-api',
-  'tree-foundation',
   'url-state',
   'testing',
 ]);

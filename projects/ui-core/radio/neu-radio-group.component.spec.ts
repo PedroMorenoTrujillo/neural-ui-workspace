@@ -52,28 +52,28 @@ describe('NeuRadioGroupComponent', () => {
     const f = TestBed.createComponent(NeuRadioGroupComponent);
     f.detectChanges();
     f.componentInstance.writeValue('option-b');
-    expect(f.componentInstance._value()).toBe('option-b');
+    expect(f.componentInstance['_value']()).toBe('option-b');
   });
 
   it('writeValue(null) should set _value to null', () => {
     const f = TestBed.createComponent(NeuRadioGroupComponent);
     f.detectChanges();
     f.componentInstance.writeValue(null);
-    expect(f.componentInstance._value()).toBeNull();
+    expect(f.componentInstance['_value']()).toBeNull();
   });
 
   it('writeValue(undefined) should set _value to null', () => {
     const f = TestBed.createComponent(NeuRadioGroupComponent);
     f.detectChanges();
     f.componentInstance.writeValue(undefined as unknown as null);
-    expect(f.componentInstance._value()).toBeNull();
+    expect(f.componentInstance['_value']()).toBeNull();
   });
 
   it('select() should update _value signal', () => {
     const f = TestBed.createComponent(NeuRadioGroupComponent);
     f.detectChanges();
     f.componentInstance.select('option-a');
-    expect(f.componentInstance._value()).toBe('option-a');
+    expect(f.componentInstance['_value']()).toBe('option-a');
   });
 
   it('select() should call onChange callback', () => {
@@ -100,7 +100,7 @@ describe('NeuRadioGroupComponent', () => {
     const f = TestBed.createComponent(NeuRadioGroupComponent);
     f.detectChanges();
     f.componentInstance.setDisabledState(true);
-    expect(f.componentInstance._isDisabled()).toBe(true);
+    expect(f.componentInstance['_isDisabled']()).toBe(true);
   });
 
   it('setDisabledState(true) should set aria-disabled="true" on host', () => {
@@ -116,7 +116,7 @@ describe('NeuRadioGroupComponent', () => {
     f.detectChanges();
     f.componentInstance.setDisabledState(true);
     f.componentInstance.setDisabledState(false);
-    expect(f.componentInstance._isDisabled()).toBe(false);
+    expect(f.componentInstance['_isDisabled']()).toBe(false);
   });
 
   it('should provide NEU_RADIO_GROUP token with itself', () => {
@@ -139,7 +139,7 @@ describe('NeuRadioGroupComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const group = f.debugElement.children[0].injector.get(NeuRadioGroupComponent);
-    expect(group._value()).toBe('a');
+    expect(group['_value']()).toBe('a');
   });
 
   it('ReactiveFormsModule: programmatic setValue should update _value', async () => {
@@ -156,6 +156,6 @@ describe('NeuRadioGroupComponent', () => {
     await f.whenStable();
     const group = f.debugElement.children[0].injector.get(NeuRadioGroupComponent);
     f.componentInstance.ctrl.setValue('b');
-    expect(group._value()).toBe('b');
+    expect(group['_value']()).toBe('b');
   });
 });

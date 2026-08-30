@@ -83,13 +83,13 @@ describe('NeuTextareaComponent', () => {
   it('writeValue should update _value', () => {
     const { comp } = mk({ label: 'Test' });
     comp.writeValue('Hola mundo');
-    expect(comp._value()).toBe('Hola mundo');
+    expect(comp['_value']()).toBe('Hola mundo');
   });
 
   it('writeValue with null should set empty string', () => {
     const { comp } = mk({ label: 'Test' });
     comp.writeValue(null);
-    expect(comp._value()).toBe('');
+    expect(comp['_value']()).toBe('');
   });
 
   it('should call onChange when typing', () => {
@@ -115,9 +115,9 @@ describe('NeuTextareaComponent', () => {
     const { f, comp } = mk({ label: 'Test' });
     const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
     el.dispatchEvent(new Event('focus'));
-    expect(comp._focused()).toBe(true);
+    expect(comp['_focused']()).toBe(true);
     el.dispatchEvent(new Event('blur'));
-    expect(comp._focused()).toBe(false);
+    expect(comp['_focused']()).toBe(false);
   });
 
   // ── hasValue / hasError computed ──────────────────────────────────────────
@@ -137,17 +137,17 @@ describe('NeuTextareaComponent', () => {
 
   it('_resizeStyle should be "none" when autoResize=true', () => {
     const { comp } = mk({ autoResize: true, label: 'Test' });
-    expect(comp._resizeStyle()).toBe('none');
+    expect(comp['_resizeStyle']()).toBe('none');
   });
 
   it('_resizeStyle should be "vertical" when resizable=true', () => {
     const { comp } = mk({ resizable: true, label: 'Test' });
-    expect(comp._resizeStyle()).toBe('vertical');
+    expect(comp['_resizeStyle']()).toBe('vertical');
   });
 
   it('_resizeStyle should be "none" when resizable=false', () => {
     const { comp } = mk({ resizable: false, label: 'Test' });
-    expect(comp._resizeStyle()).toBe('none');
+    expect(comp['_resizeStyle']()).toBe('none');
   });
 
   // ── readonly / required / maxlength ───────────────────────────────────────
@@ -264,7 +264,7 @@ describe('NeuTextareaComponent', () => {
     f.componentRef.setInput('autoResize', false);
     f.componentRef.setInput('resizable', true);
     f.detectChanges();
-    expect((f.componentInstance as any)._resizeStyle()).toBe('vertical');
+    expect((f.componentInstance as any)['_resizeStyle']()).toBe('vertical');
   });
 
   it('onInput with autoResize=true should resize the textarea', async () => {
@@ -278,7 +278,7 @@ describe('NeuTextareaComponent', () => {
     if (textarea) {
       const fakeEvent = { target: textarea } as unknown as Event;
       Object.defineProperty(textarea, 'scrollHeight', { value: 120, configurable: true });
-      (f.componentInstance as any).onInput(fakeEvent);
+      (f.componentInstance as any)['onInput'](fakeEvent);
       // Verify the handler ran without throwing
       expect(textarea).toBeTruthy();
     }
@@ -293,7 +293,7 @@ describe('NeuTextareaComponent', () => {
 
     expect(() => textarea.dispatchEvent(new Event('input', { bubbles: true }))).not.toThrow();
     expect(() => textarea.dispatchEvent(new Event('blur'))).not.toThrow();
-    expect((f.componentInstance as any)._value()).toBe('draft');
+    expect((f.componentInstance as any)['_value']()).toBe('draft');
   });
 
   it('constructor auto-resize effect is safe before a textarea ref is available', () => {

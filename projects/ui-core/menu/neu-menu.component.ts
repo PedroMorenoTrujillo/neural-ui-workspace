@@ -18,7 +18,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-import { NeuRovingMenuController } from '@neural-ui/core/menu-foundation';
+import { NeuRovingMenuController } from '@neural-ui/core/internal';
 
 export interface NeuMenuItem {
   key: string;

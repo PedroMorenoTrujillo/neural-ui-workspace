@@ -240,7 +240,7 @@ describe('NeuInlineEditorComponent', () => {
     expect(component.displayValue()).toBe('Empty');
 
     component.numberControl.setValue(Number.NaN);
-    expect((component as any)._value()).toBeNull();
+    expect((component as any)['_value']()).toBeNull();
     component.commit();
     expect(component.displayValue()).toBe('0');
   });

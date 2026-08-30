@@ -8,7 +8,7 @@ This document is the H4-A implementation contract for the shared mechanisms used
 - Showcase: `be9a33ae6bdf8d281f548d3d259b0b3931b5ad8e`
 - Root: `b3eba71342b5601c4bc77a1ef5f4aff81ff903f8`
 
-The foundations are internal support exported only through `ɵ`-prefixed symbols from `@neural-ui/core/option-api`. No new secondary entrypoint or supported consumer-facing controller API is introduced.
+The foundations remain unsupported implementation support. H5-C2 moves the 22 sibling-used declarations out of `@neural-ui/core/option-api` and into the package's undocumented `@neural-ui/core/internal` APF boundary, without changing the supported Option contract. Applications, documentation, fixtures, schematics, and generated code must not import that internal path.
 
 ## Dependency direction
 
@@ -57,4 +57,4 @@ The foundations never own selection or CVA values; chips or select-all; completi
 - H4-C AutoComplete: active row, overlay session, A11y derivation; never shared typeahead.
 - H4-C Listbox: active row, typeahead, A11y derivation; never overlay session.
 
-The shared files in `projects/ui-core/option-api/**` and this document are frozen after H4-A. Parallel migration batches consume them through `@neural-ui/core/option-api` and must not edit them concurrently.
+The supported declarations in `projects/ui-core/option-api/**` remain frozen. Sibling component entrypoints consume the shared implementations through `@neural-ui/core/internal`; this is a build-time package boundary, not consumer API.

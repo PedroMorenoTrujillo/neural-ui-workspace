@@ -25,7 +25,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuOptionAccessor,
   NeuOptionDisabledAccessor,
@@ -41,24 +41,26 @@ import {
   resolveNeuOptionDisabled,
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
-  ɵINTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS as INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS,
-  ɵInternalNeuConnectedOverlayCloseIntent as InternalNeuConnectedOverlayCloseIntent,
-  ɵInternalNeuConnectedOverlayCloseReason as InternalNeuConnectedOverlayCloseReason,
-  ɵInternalNeuConnectedOverlaySession as InternalNeuConnectedOverlaySession,
-  ɵInternalNeuOptionLazyRequestSequencer as InternalNeuOptionLazyRequestSequencer,
-  ɵInternalNeuOptionNormalizedRow as InternalNeuOptionNormalizedRow,
-  ɵInternalNeuOptionRow as InternalNeuOptionRow,
-  ɵInternalNeuOptionActiveRowController as InternalNeuOptionActiveRowController,
-  ɵcreateNeuOptionLazyRequest as createNeuOptionLazyRequest,
-  ɵcreateNeuOptionLoadingRows as createNeuOptionLoadingRows,
-  ɵderiveNeuOptionActiveDescendant as deriveNeuOptionActiveDescendant,
-  ɵderiveNeuOptionAnnouncementData as deriveNeuOptionAnnouncementData,
-  ɵderiveNeuOptionRowId as deriveNeuOptionRowId,
-  ɵfilterNeuOptionRows as filterNeuOptionRows,
-  ɵnormalizeNeuLegacyOptionGroups as normalizeNeuLegacyOptionGroups,
-  ɵnormalizeNeuOptionGroups as normalizeNeuOptionGroups,
-  ɵnormalizeNeuOptionLazyWindow as normalizeNeuOptionLazyWindow,
 } from '@neural-ui/core/option-api';
+import {
+  INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS,
+  type InternalNeuConnectedOverlayCloseIntent,
+  type InternalNeuConnectedOverlayCloseReason,
+  InternalNeuConnectedOverlaySession,
+  InternalNeuOptionLazyRequestSequencer,
+  type InternalNeuOptionNormalizedRow,
+  type InternalNeuOptionRow,
+  InternalNeuOptionActiveRowController,
+  createNeuOptionLazyRequest,
+  createNeuOptionLoadingRows,
+  deriveNeuOptionActiveDescendant,
+  deriveNeuOptionAnnouncementData,
+  deriveNeuOptionRowId,
+  filterNeuOptionRows,
+  normalizeNeuLegacyOptionGroups,
+  normalizeNeuOptionGroups,
+  normalizeNeuOptionLazyWindow,
+} from '@neural-ui/core/internal';
 import {
   NeuAutocompleteClearIconDirective,
   NeuAutocompleteDropdownIconDirective,
@@ -491,15 +493,15 @@ export class NeuAutocompleteComponent<
   readonly clearIconTpl = contentChild(NeuAutocompleteClearIconDirective);
   readonly dropdownIconTpl = contentChild(NeuAutocompleteDropdownIconDirective);
 
-  readonly _query = signal('');
+  protected readonly _query = signal('');
   readonly displayText = computed(() => this._query());
   readonly matchedOption = signal<T | null>(null);
   readonly customTextValue = signal<string | null>(null);
   readonly canonicalValue = signal<NeuAutocompleteValue<V> | null>(null);
-  readonly _isOpen = signal(false);
-  readonly _activeIndex = signal(-1);
-  readonly _focused = signal(false);
-  readonly _cvaDisabled = signal(false);
+  protected readonly _isOpen = signal(false);
+  protected readonly _activeIndex = signal(-1);
+  protected readonly _focused = signal(false);
+  private readonly _cvaDisabled = signal(false);
   readonly overlayWidth = signal<number | null>(null);
   readonly panelAbove = signal(false);
   readonly virtualFirst = signal(0);
@@ -588,7 +590,7 @@ export class NeuAutocompleteComponent<
       { includeLoadingRows: true },
     );
   });
-  readonly _filtered = computed(() =>
+  private readonly _filtered = computed(() =>
     this.visibleRows().flatMap((row) => (row.kind === 'option' ? [row.option] : [])),
   );
   readonly visibleOptionCount = computed(() => this._filtered().length);
@@ -620,7 +622,7 @@ export class NeuAutocompleteComponent<
       ? deriveNeuOptionActiveDescendant(this.ownerId(), this.visibleRows(), index)
       : null;
   });
-  readonly _activeId = this.activeDescendantId;
+  private readonly _activeId = this.activeDescendantId;
 
   readonly fallbackId = computed(() => {
     const stableSeed = this.name() || this.label() || this.placeholder() || 'field';
@@ -637,8 +639,8 @@ export class NeuAutocompleteComponent<
     () => this.inputId() || this.id() || `${this.fallbackId()}-input`,
   );
   readonly listId = computed(() => `${this.ownerId()}-list`);
-  readonly _id = this.inputElementId;
-  readonly _listId = this.listId;
+  private readonly _id = this.inputElementId;
+  private readonly _listId = this.listId;
   readonly hasError = computed(() => this.invalid() || !!this.errorMessage());
   readonly describedBy = computed(() => {
     if (this.ariaDescribedBy()) return this.ariaDescribedBy();
@@ -696,7 +698,7 @@ export class NeuAutocompleteComponent<
     if (value !== null && value !== undefined) return value;
     return this.optionLabelOf(option) || index;
   };
-  readonly _viewport = () => {
+  private readonly _viewport = () => {
     const list = this.findListElement();
     if (!list) return undefined;
     return {
@@ -748,7 +750,7 @@ export class NeuAutocompleteComponent<
     this.overlaySession.dispose();
   }
 
-  onInput(event: Event): void {
+  protected onInput(event: Event): void {
     if (this.isDisabledFinal() || this.readonly()) return;
     const target = event.target as HTMLInputElement;
     const text = this.maxlength() == null ? target.value : target.value.slice(0, this.maxlength()!);
@@ -756,7 +758,7 @@ export class NeuAutocompleteComponent<
     this.onQueryChange(text, event);
   }
 
-  onQueryChange(query: string, originalEvent: Event | null = null): void {
+  private onQueryChange(query: string, originalEvent: Event | null = null): void {
     if (this.isDisabledFinal() || this.readonly()) return;
     const previousText = this._query();
     const previousValue = this.canonicalValue();
@@ -791,7 +793,7 @@ export class NeuAutocompleteComponent<
     this.scheduleCompletion(originalEvent, query, 'input', true);
   }
 
-  _onFocus(event: FocusEvent = new FocusEvent('focus')): void {
+  protected _onFocus(event: FocusEvent = new FocusEvent('focus')): void {
     if (this.isDisabledFinal()) return;
     this._focused.set(true);
     this.focusSessionTouched = false;
@@ -806,7 +808,7 @@ export class NeuAutocompleteComponent<
     }
   }
 
-  _onBlur(event: FocusEvent = new FocusEvent('blur')): void {
+  protected _onBlur(event: FocusEvent = new FocusEvent('blur')): void {
     const next = event.relatedTarget as Node | null;
     if (next && (this.elementRef.nativeElement.contains(next) || this.isInsidePanel(next))) return;
     this._focused.set(false);
@@ -819,7 +821,7 @@ export class NeuAutocompleteComponent<
     this.blurEvent.emit(event);
   }
 
-  handleDropdownClick(event: MouseEvent): void {
+  protected handleDropdownClick(event: MouseEvent): void {
     if (this.isDisabledFinal() || this.loading()) return;
     if (this._isOpen()) {
       this.close(event, 'dropdown', true);
@@ -844,7 +846,7 @@ export class NeuAutocompleteComponent<
     this.scheduleCompletion(event, '', 'dropdown', false);
   }
 
-  onKeyDown(event: KeyboardEvent): void {
+  protected onKeyDown(event: KeyboardEvent): void {
     if (this.isDisabledFinal()) {
       event.preventDefault();
       return;
@@ -930,13 +932,13 @@ export class NeuAutocompleteComponent<
     }
   }
 
-  onOptionPointerDown(event: MouseEvent, row: InternalNeuOptionRow<T>, rowIndex: number): void {
+  protected onOptionPointerDown(event: MouseEvent, row: InternalNeuOptionRow<T>, rowIndex: number): void {
     event.preventDefault();
     this.setActiveIndex(rowIndex);
     this.selectRow(event, row);
   }
 
-  onOptionMouseEnter(event: MouseEvent, rowIndex: number): void {
+  protected onOptionMouseEnter(event: MouseEvent, rowIndex: number): void {
     if (this.focusOnHover()) {
       this.activeRowController.setRows(this.visibleRows());
       this.setActiveFromKeyboard(this.activeRowController.activate(rowIndex), event);
@@ -1019,7 +1021,7 @@ export class NeuAutocompleteComponent<
     this.finishOverlayClose(intent, originalEvent, reason, restoreFocus);
   }
 
-  _closePanel(): void {
+  private _closePanel(): void {
     this.close(null, 'programmatic');
   }
 
@@ -1067,24 +1069,24 @@ export class NeuAutocompleteComponent<
     this._cvaDisabled.set(disabled);
   }
 
-  optionLabelOf(option: T): string {
+  protected optionLabelOf(option: T): string {
     return resolveNeuOptionLabel(option, this.optionLabel());
   }
 
-  optionValueOf(option: T): V {
+  private optionValueOf(option: T): V {
     return resolveNeuOptionValue<T, V>(option, this.optionValue());
   }
 
-  isOptionDisabled(option: T): boolean {
+  private isOptionDisabled(option: T): boolean {
     return resolveNeuOptionDisabled(option, this.optionDisabled());
   }
 
-  isOptionSelected(option: T): boolean {
+  protected isOptionSelected(option: T): boolean {
     const selected = this.matchedOption();
     return selected !== null && this.optionsEqual(selected, option);
   }
 
-  optionsEqual(left: T, right: T): boolean {
+  private optionsEqual(left: T, right: T): boolean {
     return neuOptionsEqual(left, right, {
       ...this.identityConfig(),
       identityAccessor: this.identityConfig().identityAccessor,
@@ -1092,20 +1094,20 @@ export class NeuAutocompleteComponent<
     });
   }
 
-  rowId(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
+  protected rowId(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
     return deriveNeuOptionRowId(this.ownerId(), row);
   }
 
-  _optionId(index: number): string {
+  private _optionId(index: number): string {
     const row = this.visibleRows()[index];
     return row ? this.rowId(row) : `${this.ownerId()}-option-${index}`;
   }
 
-  trackRow(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
+  protected trackRow(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
     return this.rowId(row);
   }
 
-  itemTemplateContext(
+  protected itemTemplateContext(
     row: InternalNeuOptionRow<T>,
     rowIndex: number,
   ): NeuAutocompleteItemContext<T, V> {
@@ -1122,7 +1124,7 @@ export class NeuAutocompleteComponent<
     };
   }
 
-  groupTemplateContext(
+  protected groupTemplateContext(
     row: Extract<InternalNeuOptionNormalizedRow<T, G | string>, { kind: 'group' }>,
   ): NeuAutocompleteGroupContext<G | string> {
     return {
@@ -1134,7 +1136,7 @@ export class NeuAutocompleteComponent<
     };
   }
 
-  loaderTemplateContext(logicalIndex: number): NeuAutocompleteLoaderContext {
+  protected loaderTemplateContext(logicalIndex: number): NeuAutocompleteLoaderContext {
     const window = normalizeNeuOptionLazyWindow(
       this.dataFirst(),
       this.dataFirst() + this.virtualWindowSize(),
@@ -1142,11 +1144,11 @@ export class NeuAutocompleteComponent<
     return { $implicit: logicalIndex, logicalIndex, ...window };
   }
 
-  iconTemplateContext(active: boolean): NeuAutocompleteIconContext {
+  protected iconTemplateContext(active: boolean): NeuAutocompleteIconContext {
     return { $implicit: active, active };
   }
 
-  onPanelScroll(event: Event): void {
+  protected onPanelScroll(event: Event): void {
     if (!this.virtualScroll()) return;
     const target = event.target as HTMLElement;
     const first = Math.max(0, Math.floor(target.scrollTop / this.effectiveVirtualScrollItemSize()));
@@ -1154,12 +1156,12 @@ export class NeuAutocompleteComponent<
     if (this.lazy()) this.emitLazyRequest('scroll', first);
   }
 
-  onPositionChange(event: ConnectedOverlayPositionChange): void {
+  protected onPositionChange(event: ConnectedOverlayPositionChange): void {
     this.panelAbove.set(event.connectionPair.originY === 'top');
   }
 
   @HostListener('document:mousedown', ['$event'])
-  onDocClick(event: MouseEvent): void {
+  protected onDocClick(event: MouseEvent): void {
     const target = event.target as Node | null;
     if (!target) return;
     this.prepareOverlaySession();
@@ -1171,12 +1173,12 @@ export class NeuAutocompleteComponent<
   }
 
   @HostListener('window:resize')
-  onWindowResize(): void {
+  protected onWindowResize(): void {
     this.overlaySession.refreshOnResize();
   }
 
   /** @internal compatibility bridge retained for existing Neural tests/adapters. */
-  _scrollActiveOptionIntoView(): void {
+  private _scrollActiveOptionIntoView(): void {
     const index = this._activeIndex();
     if (index < 0) return;
     if (this.virtualScroll()) {
@@ -1194,12 +1196,12 @@ export class NeuAutocompleteComponent<
   }
 
   /** @internal compatibility bridge retained for existing Neural tests/adapters. */
-  _syncOverlayWidth(): void {
+  private _syncOverlayWidth(): void {
     this.syncOverlayWidth();
   }
 
   /** @internal compatibility bridge retained for existing Neural tests/adapters. */
-  _moveActiveIndex(step: 1 | -1): void {
+  private _moveActiveIndex(step: 1 | -1): void {
     this.prepareActiveRowController();
     this.applyActiveResult(
       step === 1 ? this.activeRowController.next() : this.activeRowController.previous(),

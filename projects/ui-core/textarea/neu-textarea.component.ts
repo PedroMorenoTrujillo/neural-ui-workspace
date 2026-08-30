@@ -12,7 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 /**
  * NeuralUI Textarea Component
@@ -96,16 +96,16 @@ export class NeuTextareaComponent implements ControlValueAccessor {
   readonly name = input<string>('');
   readonly maxlength = input<number | null>(null);
 
-  readonly _id = inject(NeuIdGenerator).getId('neu-textarea-');
+  protected readonly _id = inject(NeuIdGenerator).getId('neu-textarea-');
 
   protected readonly _value = signal('');
   protected readonly _focused = signal(false);
   protected readonly _isDisabled = signal(false);
 
-  readonly _isDisabledState = computed(() => this.disabled() || this._isDisabled());
+  protected readonly _isDisabledState = computed(() => this.disabled() || this._isDisabled());
   readonly hasValue = computed(() => this._value().length > 0);
   readonly hasError = computed(() => !!this.errorMessage());
-  readonly _resizeStyle = computed(() => {
+  protected readonly _resizeStyle = computed(() => {
     if (this.autoResize()) return 'none';
     return this.resizable() ? 'vertical' : 'none';
   });

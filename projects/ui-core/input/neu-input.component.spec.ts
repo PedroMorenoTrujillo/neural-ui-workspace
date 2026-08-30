@@ -100,13 +100,13 @@ describe('NeuInputComponent', () => {
   it('writeValue should update _value', () => {
     const { comp } = mk({ label: 'Test' });
     comp.writeValue('hello');
-    expect(comp._value()).toBe('hello');
+    expect(comp['_value']()).toBe('hello');
   });
 
   it('writeValue with null should set empty string', () => {
     const { comp } = mk({ label: 'Test' });
     comp.writeValue(null);
-    expect(comp._value()).toBe('');
+    expect(comp['_value']()).toBe('');
   });
 
   it('should call onChange when typing', () => {
@@ -127,10 +127,10 @@ describe('NeuInputComponent', () => {
     const input: HTMLInputElement = f.nativeElement.querySelector('input');
     input.dispatchEvent(new Event('focus'));
     f.detectChanges();
-    expect(comp._focused()).toBe(true);
+    expect(comp['_focused']()).toBe(true);
     input.dispatchEvent(new Event('blur'));
     f.detectChanges();
-    expect(comp._focused()).toBe(false);
+    expect(comp['_focused']()).toBe(false);
     expect(onTouched).toHaveBeenCalled();
   });
 
@@ -392,6 +392,6 @@ describe('NeuInputComponent', () => {
 
     expect(() => input.dispatchEvent(new Event('input', { bubbles: true }))).not.toThrow();
     expect(() => input.dispatchEvent(new Event('blur'))).not.toThrow();
-    expect((f.componentInstance as any)._value()).toBe('unregistered');
+    expect((f.componentInstance as any)['_value']()).toBe('unregistered');
   });
 });

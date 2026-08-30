@@ -152,10 +152,10 @@ describe('NeuNotificationCenterComponent', () => {
 
   it('_toggle should open panel', async () => {
     const f = setup();
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(true);
+    expect(f.componentInstance['_isOpen']()).toBe(true);
     expect(document.querySelector('.neu-nc__panel')).toBeTruthy();
   });
 
@@ -164,18 +164,18 @@ describe('NeuNotificationCenterComponent', () => {
     (f.nativeElement.querySelector('.neu-nc__bell') as HTMLButtonElement).click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(true);
+    expect(f.componentInstance['_isOpen']()).toBe(true);
     (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(false);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('_toggle again should close panel', async () => {
     const f = setup();
-    f.componentInstance._toggle();
-    f.componentInstance._toggle();
-    expect(f.componentInstance._isOpen()).toBe(false);
+    f.componentInstance['_toggle']();
+    f.componentInstance['_toggle']();
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('_toggle should mark notifications as read after opening delay', () => {
@@ -186,7 +186,7 @@ describe('NeuNotificationCenterComponent', () => {
     svc.push({ message: 'Unread', duration: 0 });
     expect(svc.notifications()[0].read).toBe(false);
 
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     vi.advanceTimersByTime(500);
 
     expect(svc.notifications()[0].read).toBe(true);
@@ -195,33 +195,33 @@ describe('NeuNotificationCenterComponent', () => {
 
   it('_relativeTime should return "Ahora" for recent dates', () => {
     const f = setup();
-    const result = f.componentInstance._relativeTime(new Date());
+    const result = f.componentInstance['_relativeTime'](new Date());
     expect(result).toBe('Ahora');
   });
 
   it('_relativeTime should return minutes for > 1 min ago', () => {
     const f = setup();
     const past = new Date(Date.now() - 5 * 60000);
-    expect(f.componentInstance._relativeTime(past)).toContain('5 min');
+    expect(f.componentInstance['_relativeTime'](past)).toContain('5 min');
   });
 
   it('_relativeTime should return hours for > 60 min ago', () => {
     const f = setup();
     const past = new Date(Date.now() - 2 * 60 * 60000);
-    expect(f.componentInstance._relativeTime(past)).toContain('2h');
+    expect(f.componentInstance['_relativeTime'](past)).toContain('2h');
   });
 
   it('_relativeTime should return days for > 24h ago', () => {
     const f = setup();
     const past = new Date(Date.now() - 3 * 24 * 60 * 60000);
-    expect(f.componentInstance._relativeTime(past)).toContain('3d');
+    expect(f.componentInstance['_relativeTime'](past)).toContain('3d');
   });
 
   it('should render notification items when panel is open with notifications', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ type: 'success', title: 'Título', message: 'Cuerpo', duration: 0 });
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__item')).toBeTruthy();
@@ -232,7 +232,7 @@ describe('NeuNotificationCenterComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ type: 'info', title: 'Mi título', message: 'msg', duration: 0 });
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.body.textContent).toContain('Mi título');
@@ -242,7 +242,7 @@ describe('NeuNotificationCenterComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ type: 'info', message: 'Solo mensaje', duration: 0 });
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__item-title')).toBeNull();
@@ -252,7 +252,7 @@ describe('NeuNotificationCenterComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ type: 'warning', message: 'Alerta', duration: 0 });
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__item--unread')).toBeTruthy();
@@ -262,7 +262,7 @@ describe('NeuNotificationCenterComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ type: 'error', message: 'Error!', duration: 0 });
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     const closeBtn = document.querySelector('.neu-nc__item-close') as HTMLButtonElement;
@@ -276,7 +276,7 @@ describe('NeuNotificationCenterComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ type: 'error', message: 'Error!', duration: 0 });
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     const closeBtn = document.querySelector('.neu-nc__item-close') as HTMLButtonElement;
@@ -287,7 +287,7 @@ describe('NeuNotificationCenterComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ type: 'info', message: 'A', duration: 0 });
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     const readAllBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find(
@@ -304,7 +304,7 @@ describe('NeuNotificationCenterComponent', () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ type: 'info', message: 'A', duration: 0 });
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     const clearBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find(
@@ -328,7 +328,7 @@ describe('NeuNotificationCenterComponent', () => {
 
   it('should show empty state in panel when no notifications', async () => {
     const f = setup();
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__empty')).toBeTruthy();

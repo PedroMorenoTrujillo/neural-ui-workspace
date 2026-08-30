@@ -125,10 +125,10 @@ describe('NeuSelectComponent', () => {
     it('preserves scalar single-mode value and closes after selection', async () => {
       const { f, comp } = await setup({ multiple: false });
       comp.open();
-      comp.selectOption(OPTIONS[0]);
+      comp['selectOption'](OPTIONS[0]);
       f.detectChanges();
 
-      expect(comp._value()).toBe('es');
+      expect(comp['_value']()).toBe('es');
       expect(comp.isOpen()).toBe(false);
       expect(comp.selectedLabel()).toBe('España');
     });
@@ -148,12 +148,12 @@ describe('NeuSelectComponent', () => {
       });
 
       comp.open();
-      comp.selectOption(OPTIONS[0]);
-      comp.selectOption(OPTIONS[1]);
-      comp.selectOption(OPTIONS[0]);
+      comp['selectOption'](OPTIONS[0]);
+      comp['selectOption'](OPTIONS[1]);
+      comp['selectOption'](OPTIONS[0]);
       f.detectChanges();
 
-      expect(comp._value()).toEqual(['mx']);
+      expect(comp['_value']()).toEqual(['mx']);
       expect(comp.selectedLabel()).toBe('México');
       expect(comp.isOpen()).toBe(true);
       expect(cvaValues).toEqual([['es'], ['es', 'mx'], ['mx']]);
@@ -182,14 +182,14 @@ describe('NeuSelectComponent', () => {
 
       comp.writeValue(['es', 'mx']);
       f.detectChanges();
-      expect(comp._value()).toEqual(['es', 'mx']);
+      expect(comp['_value']()).toEqual(['es', 'mx']);
       expect(cvaValues).toEqual([]);
       expect(optionSets).toEqual([]);
       expect(detailValues).toEqual([]);
 
       comp.clear(new Event('clear'));
       f.detectChanges();
-      expect(comp._value()).toEqual([]);
+      expect(comp['_value']()).toEqual([]);
       expect(cvaValues).toEqual([[]]);
       expect(optionSets).toEqual([[]]);
       expect(detailValues).toEqual([[]]);
@@ -198,11 +198,11 @@ describe('NeuSelectComponent', () => {
 
     it('blocks disabled options and exposes the selected set to the existing selected template', async () => {
       const { comp } = await setup({ multiple: true });
-      comp.selectOption(OPTIONS[2]);
-      comp.selectOption(OPTIONS[0]);
-      comp.selectOption(OPTIONS[1]);
+      comp['selectOption'](OPTIONS[2]);
+      comp['selectOption'](OPTIONS[0]);
+      comp['selectOption'](OPTIONS[1]);
 
-      expect(comp._value()).toEqual(['es', 'mx']);
+      expect(comp['_value']()).toEqual(['es', 'mx']);
       expect(comp.selectedTemplateContext()).toMatchObject({
         option: OPTIONS[0],
         value: 'es',
@@ -222,7 +222,7 @@ describe('NeuSelectComponent', () => {
 
       options[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       f.detectChanges();
-      expect(comp._value()).toEqual(['es']);
+      expect(comp['_value']()).toEqual(['es']);
       expect(comp.isOpen()).toBe(true);
       expect(trigger.getAttribute('aria-multiselectable')).toBeNull();
       expect(list.getAttribute('aria-multiselectable')).toBe('true');
@@ -256,11 +256,11 @@ describe('NeuSelectComponent', () => {
       );
 
       comp.open();
-      comp.selectOption(COUNTRY_MODELS[0]);
-      comp.selectOption({ ...COUNTRY_MODELS[1] });
-      comp.selectOption(COUNTRY_MODELS[2]);
+      comp['selectOption'](COUNTRY_MODELS[0]);
+      comp['selectOption']({ ...COUNTRY_MODELS[1] });
+      comp['selectOption'](COUNTRY_MODELS[2]);
 
-      expect(comp._value()).toEqual([34, 52]);
+      expect(comp['_value']()).toEqual([34, 52]);
       expect(comp.selectedOptions().map((option: CountryModel) => option.id)).toEqual([34, 52]);
       expect(comp.logicalOptionCount()).toBe(100);
       expect(lazyRequests.length).toBeGreaterThan(0);
@@ -371,16 +371,16 @@ describe('NeuSelectComponent', () => {
     const { f, comp } = await setup();
     comp.open();
     f.detectChanges();
-    comp.selectOption(OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
     f.detectChanges();
-    expect(comp._value()).toBe('es');
+    expect(comp['_value']()).toBe('es');
     expect(comp.selectedLabel()).toBe('España');
   });
 
   it('should not select disabled option', async () => {
     const { comp } = await setup();
-    comp.selectOption(OPTIONS[2]); // Argentina is disabled
-    expect(comp._value()).toBeNull();
+    comp['selectOption'](OPTIONS[2]); // Argentina is disabled
+    expect(comp['_value']()).toBeNull();
   });
 
   it('should show selected label in trigger', async () => {
@@ -403,20 +403,20 @@ describe('NeuSelectComponent', () => {
   it('should reflect writeValue', async () => {
     const { comp } = await setup();
     comp.writeValue('es');
-    expect(comp._value()).toBe('es');
+    expect(comp['_value']()).toBe('es');
   });
 
   it('should treat null writeValue as null', async () => {
     const { comp } = await setup();
     comp.writeValue(null);
-    expect(comp._value()).toBeNull();
+    expect(comp['_value']()).toBeNull();
   });
 
   it('should call onChange when option selected', async () => {
     const { comp } = await setup();
     const onChange = vi.fn();
     comp.registerOnChange(onChange);
-    comp.selectOption(OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
     expect(onChange).toHaveBeenCalledWith('es');
   });
 
@@ -526,7 +526,7 @@ describe('NeuSelectComponent', () => {
     const onChange = vi.fn();
     comp.registerOnChange(onChange);
     comp.clearValue({ stopPropagation: () => {} } as unknown as MouseEvent);
-    expect(comp._value()).toBeNull();
+    expect(comp['_value']()).toBeNull();
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
@@ -869,7 +869,7 @@ describe('NeuSelectComponent', () => {
     const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
     const scrollToIndex = vi.fn();
     const checkViewportSize = vi.fn();
-    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+    comp['_viewport'] = () => ({ scrollToIndex, checkViewportSize });
 
     comp.open();
     f.detectChanges();
@@ -887,12 +887,12 @@ describe('NeuSelectComponent', () => {
       'syncPanelPosition',
     );
 
-    comp.onWindowResize();
+    comp['onWindowResize']();
     comp.onWindowScroll();
     expect(syncSpy).not.toHaveBeenCalled();
 
     comp.open();
-    comp.onWindowResize();
+    comp['onWindowResize']();
     comp.onWindowScroll();
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(syncSpy).toHaveBeenCalledTimes(2);
@@ -1005,7 +1005,7 @@ describe('NeuSelectComponent', () => {
     });
 
     const checkViewportSize = vi.fn();
-    comp._viewport = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
+    comp['_viewport'] = () => ({ checkViewportSize, scrollToIndex: vi.fn() });
 
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
@@ -1037,7 +1037,7 @@ describe('NeuSelectComponent', () => {
     const focus = vi.fn();
     const scrollToIndex = vi.fn();
     const checkViewportSize = vi.fn();
-    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+    comp['_viewport'] = () => ({ scrollToIndex, checkViewportSize });
 
     const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue({ focus } as any);
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
@@ -1077,7 +1077,7 @@ describe('NeuSelectComponent', () => {
     const { comp } = await setup();
     const emitted: (NeuSelectOption | null)[] = [];
     comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
-    comp.selectOption(OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
     expect(emitted).toHaveLength(1);
     expect(emitted[0]).toEqual(OPTIONS[0]);
   });
@@ -1096,7 +1096,7 @@ describe('NeuSelectComponent', () => {
     const { comp } = await setup();
     const emitted: (NeuSelectOption | null)[] = [];
     comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
-    comp.selectOption(OPTIONS[2]); // disabled
+    comp['selectOption'](OPTIONS[2]); // disabled
     expect(emitted).toHaveLength(0);
   });
 
@@ -1108,7 +1108,7 @@ describe('NeuSelectComponent', () => {
     const { comp } = await setup({ options: optsWithData });
     const emitted: (NeuSelectOption | null)[] = [];
     comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
-    comp.selectOption(optsWithData[0]);
+    comp['selectOption'](optsWithData[0]);
     expect(emitted[0]?.data).toEqual({ id: 1, iso: 'ES' });
   });
 
@@ -1160,7 +1160,7 @@ describe('NeuSelectComponent', () => {
     // Al seleccionar una opción con urlParam activo, setParam debe llamarse con el valor
     // When urlParam is active, selecting an option must call setParam with the value
     const { comp, mockSetParam } = await setupWithMockUrlState('country');
-    comp.selectOption(OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
     expect(mockSetParam).toHaveBeenCalledWith('country', 'es');
   });
 
@@ -1178,7 +1178,7 @@ describe('NeuSelectComponent', () => {
     // Las opciones deshabilitadas no deben actualizar la URL
     // Disabled options must not update the URL
     const { comp, mockSetParam } = await setupWithMockUrlState('country');
-    comp.selectOption(OPTIONS[2]); // Argentina — disabled
+    comp['selectOption'](OPTIONS[2]); // Argentina — disabled
     expect(mockSetParam).not.toHaveBeenCalled();
   });
 
@@ -1208,8 +1208,8 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect((f.componentInstance as any)._value()).toBe(52);
-    expect(typeof (f.componentInstance as any)._value()).toBe('number');
+    expect((f.componentInstance as any)['_value']()).toBe(52);
+    expect(typeof (f.componentInstance as any)['_value']()).toBe('number');
   });
 
   it('urlParam: object option values should not serialize to [object Object] and should not restore', async () => {
@@ -1238,12 +1238,12 @@ describe('NeuSelectComponent', () => {
     await f.whenStable();
 
     const comp = f.componentInstance as any;
-    expect(comp._value()).toBeNull();
+    expect(comp['_value']()).toBeNull();
     expect(mockSetParam).not.toHaveBeenCalled();
 
     f.componentRef.setInput('optionValue', null);
     f.componentRef.setInput('optionLabel', 'name');
-    comp.selectOption(COUNTRY_MODELS[0]);
+    comp['selectOption'](COUNTRY_MODELS[0]);
     expect(mockSetParam).toHaveBeenCalledWith('country', null);
   });
 
@@ -1271,7 +1271,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
 
     const comp = f.componentInstance as any;
-    comp.selectOption(COUNTRY_MODELS[0]);
+    comp['selectOption'](COUNTRY_MODELS[0]);
 
     expect(mockSetParam).toHaveBeenCalledWith('country', null);
     expect(mockSetParam).not.toHaveBeenCalledWith('country', '[object Object]');
@@ -1373,9 +1373,9 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const before = comp._value();
-    comp.selectOption(disabledOptions[1]);
-    expect(comp._value()).toBe(before);
+    const before = comp['_value']();
+    comp['selectOption'](disabledOptions[1]);
+    expect(comp['_value']()).toBe(before);
   });
 
   // ── floatingLabel=true renders label span inside trigger ──────────────────
@@ -1428,7 +1428,7 @@ describe('NeuSelectComponent', () => {
     if (clearBtn) {
       clearBtn.click();
       f.detectChanges();
-      expect(comp._value()).toBeNull();
+      expect(comp['_value']()).toBeNull();
     }
   });
 
@@ -1442,7 +1442,7 @@ describe('NeuSelectComponent', () => {
     (optionEls[1] as HTMLElement).click();
     f.detectChanges();
 
-    expect(comp._value()).toBe('mx');
+    expect(comp['_value']()).toBe('mx');
   });
 
   it('unselected option checkmarks should render with hidden visibility', async () => {
@@ -1459,7 +1459,7 @@ describe('NeuSelectComponent', () => {
     const { comp } = await setup();
     comp.writeValue('desconocido');
 
-    expect(comp._selectedOption()).toBeNull();
+    expect(comp['_selectedOption']()).toBeNull();
   });
 
   it('virtualViewportHeight should use parsed maxHeight and the no-search offset branch', async () => {
@@ -1494,7 +1494,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(comp._viewport()).toBeTruthy();
+    expect(comp['_viewport']()).toBeTruthy();
   });
 
   it('virtual select should keep selection behavior available through its public API', async () => {
@@ -1508,9 +1508,9 @@ describe('NeuSelectComponent', () => {
     await f.whenStable();
 
     expect(document.querySelector('.neu-select__viewport')).toBeTruthy();
-    comp.selectOption(OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
     f.detectChanges();
-    expect(comp._value()).toBe('es');
+    expect(comp['_value']()).toBe('es');
   });
 
   it('closes an open panel through Escape and the CDK backdrop', async () => {
@@ -1560,10 +1560,10 @@ describe('NeuSelectComponent', () => {
     await f.whenStable();
 
     expect(document.querySelectorAll('.neu-select__option').length).toBeGreaterThan(0);
-    comp.selectOption(OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
     f.detectChanges();
 
-    expect(comp._value()).toBe(OPTIONS[0].value);
+    expect(comp['_value']()).toBe(OPTIONS[0].value);
   });
 
   // ── Keyboard DOM dispatch on option elements ──────────────────────────────
@@ -1581,7 +1581,7 @@ describe('NeuSelectComponent', () => {
       f.detectChanges();
     }
     // First non-disabled option (España) should be selected
-    expect(comp._value()).toBe('es');
+    expect(comp['_value']()).toBe('es');
   });
 
   it('keydown Space DOM event on option should call selectOption', async () => {
@@ -1596,7 +1596,7 @@ describe('NeuSelectComponent', () => {
       optionEls[1].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
       f.detectChanges();
     }
-    expect(comp._value()).toBe('mx');
+    expect(comp['_value']()).toBe('mx');
   });
 
   it('keydown ArrowDown DOM event on option should call focusOptionByIndex(1)', async () => {
@@ -1716,7 +1716,7 @@ describe('NeuSelectComponent', () => {
     const checkViewportSize = vi.fn();
     const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
     const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
-    comp._viewport = () => ({ scrollToIndex, checkViewportSize });
+    comp['_viewport'] = () => ({ scrollToIndex, checkViewportSize });
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
       return 1;
@@ -1739,7 +1739,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
 
-    expect(comp._viewport()).toBeUndefined();
+    expect(comp['_viewport']()).toBeUndefined();
     expect(comp.itemTpl()).toBeUndefined();
     expect(comp.selectedItemTpl()).toBeUndefined();
   });
@@ -1769,7 +1769,7 @@ describe('NeuSelectComponent', () => {
     mockParam.set('es');
     f.detectChanges();
     await f.whenStable();
-    expect(comp._value()).toBe('es');
+    expect(comp['_value']()).toBe('es');
   });
 
   it('URL sync effect should skip redundant updates when the selected value already matches', async () => {
@@ -1798,7 +1798,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(comp._value()).toBe('es');
+    expect(comp['_value']()).toBe('es');
     expect(onChange).not.toHaveBeenCalled();
   });
 
@@ -1819,14 +1819,14 @@ describe('NeuSelectComponent', () => {
     select.open();
     f.detectChanges();
     expect(document.querySelector('.raw-country')?.textContent).toContain('España');
-    select.selectOption(COUNTRY_MODELS[1]);
+    select['selectOption'](COUNTRY_MODELS[1]);
     f.detectChanges();
 
     expect(f.componentInstance.ctrl.value).toBe(52);
     expect(select.selectedLabel()).toBe('México');
     expect(emitted).toEqual([COUNTRY_MODELS[1]]);
 
-    select.selectOption(COUNTRY_MODELS[2]);
+    select['selectOption'](COUNTRY_MODELS[2]);
     expect(f.componentInstance.ctrl.value).toBe(52);
   });
 
@@ -1841,9 +1841,9 @@ describe('NeuSelectComponent', () => {
     const onChange = vi.fn();
     comp.registerOnChange(onChange);
 
-    comp.selectOption(COUNTRY_MODELS[0]);
+    comp['selectOption'](COUNTRY_MODELS[0]);
 
-    expect((comp as any)._value()).toBe(COUNTRY_MODELS[0]);
+    expect((comp as any)['_value']()).toBe(COUNTRY_MODELS[0]);
     expect(comp.selectedLabel()).toBe('ESPAÑA');
     expect(onChange).toHaveBeenCalledWith(COUNTRY_MODELS[0]);
   });
@@ -1857,8 +1857,8 @@ describe('NeuSelectComponent', () => {
     comp.selectionChange.subscribe(legacy);
     comp.changeDetail.subscribe(detailed);
 
-    comp.selectOption(OPTIONS[0]);
-    comp.selectOption(OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
 
     expect(cva).toHaveBeenCalledTimes(1);
     expect(legacy).toHaveBeenCalledTimes(1);
@@ -1883,9 +1883,9 @@ describe('NeuSelectComponent', () => {
     comp.changeDetail.subscribe(detailed);
 
     comp.writeValue(0);
-    expect(comp.isOptionSelected(0)).toBe(true);
+    expect(comp['isOptionSelected'](0)).toBe(true);
     comp.writeValue(Number.NaN);
-    expect(comp.isOptionSelected(Number.NaN)).toBe(true);
+    expect(comp['isOptionSelected'](Number.NaN)).toBe(true);
     comp.writeValue(999);
     comp.writeValue(null);
 
@@ -1907,7 +1907,7 @@ describe('NeuSelectComponent', () => {
     comp.onEditableInput({ target: input } as unknown as Event);
     comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
 
-    expect(comp._value()).toBe('Custom country');
+    expect(comp['_value']()).toBe('Custom country');
     expect(cva).toHaveBeenCalledTimes(1);
     expect(legacy).toHaveBeenCalledWith(null);
     expect(detailed.mock.calls[0][0]).toMatchObject({ custom: true, option: null });
@@ -1921,7 +1921,7 @@ describe('NeuSelectComponent', () => {
 
     comp.onEditableBlur(new FocusEvent('blur'));
 
-    expect(comp._value()).toBe('mx');
+    expect(comp['_value']()).toBe('mx');
     expect(cva).toHaveBeenCalledTimes(1);
     expect(comp.selectedLabel()).toBe('México');
   });
@@ -1967,9 +1967,9 @@ describe('NeuSelectComponent', () => {
       .visibleRows()
       .findIndex((row) => row.kind === 'option' && row.option.value === 'cl');
     comp.selectRow(null, comp.visibleRows()[lockedIndex] as any, lockedIndex);
-    expect((comp as any)._value()).toBeNull();
-    comp.selectOption(groups[0].children[1]);
-    expect((comp as any)._value()).toBe('mx');
+    expect((comp as any)['_value']()).toBeNull();
+    comp['selectOption'](groups[0].children[1]);
+    expect((comp as any)['_value']()).toBe('mx');
   });
 
   it('emits bounded serializable lazy requests for initial, scroll and filter lifecycles', async () => {
@@ -1988,7 +1988,7 @@ describe('NeuSelectComponent', () => {
     comp.open();
     const list = document.createElement('div');
     Object.defineProperty(list, 'scrollTop', { value: 400 });
-    comp.onPanelScroll({ currentTarget: list } as unknown as Event);
+    comp['onPanelScroll']({ currentTarget: list } as unknown as Event);
     comp.setFilter('mex');
 
     expect(requests.map((request) => request.reason)).toEqual(['initial', 'scroll', 'filter']);
@@ -2034,14 +2034,14 @@ describe('NeuSelectComponent', () => {
       f.componentRef.setInput('readonly', true);
       f.detectChanges();
       comp.open();
-      comp.selectOption(OPTIONS[0]);
+      comp['selectOption'](OPTIONS[0]);
       expect(comp.isOpen()).toBe(false);
-      expect(comp._value()).toBeNull();
+      expect(comp['_value']()).toBeNull();
       f.componentRef.setInput('disabled', true);
       f.componentRef.setInput('readonly', false);
       f.detectChanges();
-      comp.selectOption(OPTIONS[0]);
-      expect(comp._value()).toBeNull();
+      comp['selectOption'](OPTIONS[0]);
+      expect(comp['_value']()).toBeNull();
     } finally {
       window.requestAnimationFrame = originalFrame;
     }
@@ -2065,11 +2065,11 @@ describe('NeuSelectComponent', () => {
     comp.close();
     comp.close();
     expect(hides).toHaveBeenCalledTimes(1);
-    comp.selectOption(OPTIONS[0]);
+    comp['selectOption'](OPTIONS[0]);
     comp.clear();
     comp.clear();
     expect(clears).toHaveBeenCalledTimes(1);
-    expect(comp._value()).toBeNull();
+    expect(comp['_value']()).toBeNull();
     const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
     trigger.focus = vi.fn();
     comp.focus();
@@ -2132,10 +2132,10 @@ describe('NeuSelectComponent', () => {
     key('Enter');
     comp.activeIndex.set(-1);
     key('Enter');
-    expect(comp._value()).toBeNull();
+    expect(comp['_value']()).toBeNull();
     comp.activeIndex.set(0);
     key(' ');
-    expect(comp._value()).toBe('es');
+    expect(comp['_value']()).toBe('es');
 
     f.componentRef.setInput('disabled', true);
     f.detectChanges();
@@ -2155,13 +2155,13 @@ describe('NeuSelectComponent', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     expect(comp.currentFilter()).toBe('Mex');
 
-    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
-    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
-    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'x', cancelable: true }));
-    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
+    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'x', cancelable: true }));
+    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
     expect(comp.isOpen()).toBe(false);
     comp.open();
-    comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
     expect(comp.isOpen()).toBe(false);
 
     f.componentRef.setInput('filterValue', 'owner');
@@ -2181,7 +2181,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
     options[1].dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-    expect(comp._value()).toBe('mx');
+    expect(comp['_value']()).toBe('mx');
 
     comp.open();
     f.detectChanges();
@@ -2196,8 +2196,8 @@ describe('NeuSelectComponent', () => {
     f.componentRef.setInput('focusOnHover', false);
     f.componentRef.setInput('readonly', true);
     f.detectChanges();
-    comp.onOptionMouseEnter(0);
-    comp.setActiveRow(99);
+    comp['onOptionMouseEnter'](0);
+    comp['setActiveRow'](99);
   });
 
   it('covers overlay trigger, focus, blur, detach and transition guards', async () => {
@@ -2254,8 +2254,8 @@ describe('NeuSelectComponent', () => {
     expect(comp.virtualTopHeight()).toBeGreaterThanOrEqual(0);
     expect(comp.virtualBottomHeight()).toBeGreaterThan(0);
     const row = comp.visibleRows().find((candidate: any) => candidate.kind === 'option');
-    expect(comp.optionPosition(row, 0)).toBe(1);
-    expect(comp.itemTemplateContext(row, 0)).toMatchObject({ option: OPTIONS[0] });
+    expect(comp['optionPosition'](row, 0)).toBe(1);
+    expect(comp['itemTemplateContext'](row, 0)).toMatchObject({ option: OPTIONS[0] });
     expect(comp.selectedTemplateContext()).toMatchObject({ value: null, custom: false });
 
     f.componentRef.setInput('virtualScrollItemSize', Number.NaN);
@@ -2272,8 +2272,8 @@ describe('NeuSelectComponent', () => {
     f.componentRef.setInput('dataFirst', 5);
     f.detectChanges();
     expect(comp.logicalOptionCount()).toBe(20);
-    expect(comp.optionPosition(comp.visibleRows()[0], 0)).toBe(6);
-    expect(comp.loaderTemplateContext(7)).toMatchObject({ first: 7, end: 8, count: 1 });
+    expect(comp['optionPosition'](comp.visibleRows()[0], 0)).toBe(6);
+    expect(comp['loaderTemplateContext'](7)).toMatchObject({ first: 7, end: 8, count: 1 });
   });
 
   it('covers descriptions, announcements, primitive and exceptional native serialization', async () => {
@@ -2429,7 +2429,7 @@ describe('NeuSelectComponent', () => {
     const list = document.querySelector<HTMLElement>('.neu-select__list')!;
     list.dispatchEvent(new Event('scroll', { bubbles: true }));
 
-    const filterContext = comp.filterTemplateContext();
+    const filterContext = comp['filterTemplateContext']();
     filterContext.filter('mex');
     filterContext.reset();
     f.componentRef.setInput('filterValue', 'owned');
@@ -2445,16 +2445,16 @@ describe('NeuSelectComponent', () => {
     f.componentRef.setInput('editable', false);
     f.componentRef.setInput('filterValue', null);
     f.detectChanges();
-    comp.onPanelScroll({ currentTarget: list } as unknown as Event);
-    comp.setActiveRow(2);
-    comp.onOptionMouseEnter(2);
+    comp['onPanelScroll']({ currentTarget: list } as unknown as Event);
+    comp['setActiveRow'](2);
+    comp['onOptionMouseEnter'](2);
 
     f.componentRef.setInput('options', []);
     f.componentRef.setInput('autoOptionFocus', false);
     f.componentRef.setInput('selectOnFocus', true);
     f.detectChanges();
     comp.open();
-    comp.onWindowResize();
+    comp['onWindowResize']();
     comp.onWindowScroll();
     comp.onOverlayPositionChange({ connectionPair: { overlayY: 'bottom' } } as any);
     expect(comp.isPanelAbove()).toBe(true);
@@ -2477,7 +2477,7 @@ describe('NeuSelectComponent', () => {
     comp.open();
     comp.setFilter('same');
     comp.setFilter('same');
-    const viewport = comp._viewport();
+    const viewport = comp['_viewport']();
     viewport?.checkViewportSize();
     viewport?.scrollToIndex(2, 'auto');
     expect(comp.logicalOptionCount()).toBeGreaterThanOrEqual(0);

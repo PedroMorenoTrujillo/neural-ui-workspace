@@ -23,7 +23,7 @@ describe('NeuKnobComponent', () => {
     f.componentRef.setInput('max', 100);
     f.detectChanges();
     f.componentInstance.writeValue(50);
-    expect((f.componentInstance as any)._value()).toBe(50);
+    expect((f.componentInstance as any)['_value']()).toBe(50);
   });
 
   it('writeValue should clamp to min/max', async () => {
@@ -32,9 +32,9 @@ describe('NeuKnobComponent', () => {
     f.componentRef.setInput('max', 90);
     f.detectChanges();
     f.componentInstance.writeValue(200);
-    expect((f.componentInstance as any)._value()).toBe(90);
+    expect((f.componentInstance as any)['_value']()).toBe(90);
     f.componentInstance.writeValue(-5);
-    expect((f.componentInstance as any)._value()).toBe(10);
+    expect((f.componentInstance as any)['_value']()).toBe(10);
   });
 
   it('writeValue with null should set to min', async () => {
@@ -43,7 +43,7 @@ describe('NeuKnobComponent', () => {
     f.componentRef.setInput('max', 100);
     f.detectChanges();
     f.componentInstance.writeValue(null as unknown as number);
-    expect((f.componentInstance as any)._value()).toBe(5);
+    expect((f.componentInstance as any)['_value']()).toBe(5);
   });
 
   it('setDisabledState should apply disabled class', async () => {
@@ -66,8 +66,8 @@ describe('NeuKnobComponent', () => {
     const comp = f.componentInstance as any;
     const changes: number[] = [];
     comp._onChange = (v: number) => changes.push(v);
-    comp.onKeyDown({ key: 'ArrowUp', preventDefault: () => {} } as KeyboardEvent);
-    expect(comp._value()).toBe(55);
+    comp['onKeyDown']({ key: 'ArrowUp', preventDefault: () => {} } as KeyboardEvent);
+    expect(comp['_value']()).toBe(55);
     expect(changes[0]).toBe(55);
   });
 
@@ -79,8 +79,8 @@ describe('NeuKnobComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(50);
     const comp = f.componentInstance as any;
-    comp.onKeyDown({ key: 'ArrowDown', preventDefault: () => {} } as KeyboardEvent);
-    expect(comp._value()).toBe(45);
+    comp['onKeyDown']({ key: 'ArrowDown', preventDefault: () => {} } as KeyboardEvent);
+    expect(comp['_value']()).toBe(45);
   });
 
   it('onKeyDown Home should set value to min', async () => {
@@ -90,8 +90,8 @@ describe('NeuKnobComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(50);
     const comp = f.componentInstance as any;
-    comp.onKeyDown({ key: 'Home', preventDefault: () => {} } as KeyboardEvent);
-    expect(comp._value()).toBe(0);
+    comp['onKeyDown']({ key: 'Home', preventDefault: () => {} } as KeyboardEvent);
+    expect(comp['_value']()).toBe(0);
   });
 
   it('onKeyDown End should set value to max', async () => {
@@ -101,8 +101,8 @@ describe('NeuKnobComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(50);
     const comp = f.componentInstance as any;
-    comp.onKeyDown({ key: 'End', preventDefault: () => {} } as KeyboardEvent);
-    expect(comp._value()).toBe(100);
+    comp['onKeyDown']({ key: 'End', preventDefault: () => {} } as KeyboardEvent);
+    expect(comp['_value']()).toBe(100);
   });
 
   it('should not respond to keyboard when disabled', async () => {
@@ -113,8 +113,8 @@ describe('NeuKnobComponent', () => {
     f.componentInstance.writeValue(50);
     f.componentInstance.setDisabledState(true);
     const comp = f.componentInstance as any;
-    comp.onKeyDown({ key: 'ArrowUp', preventDefault: () => {} } as KeyboardEvent);
-    expect(comp._value()).toBe(50); // unchanged
+    comp['onKeyDown']({ key: 'ArrowUp', preventDefault: () => {} } as KeyboardEvent);
+    expect(comp['_value']()).toBe(50); // unchanged
   });
 
   it('_normalizedValue should return 0.5 for midpoint', async () => {
@@ -123,7 +123,7 @@ describe('NeuKnobComponent', () => {
     f.componentRef.setInput('max', 100);
     f.detectChanges();
     f.componentInstance.writeValue(50);
-    expect((f.componentInstance as any)._normalizedValue()).toBe(0.5);
+    expect((f.componentInstance as any)['_normalizedValue']()).toBe(0.5);
   });
 
   it('_normalizedValue should return 0 when range=0', async () => {
@@ -131,7 +131,7 @@ describe('NeuKnobComponent', () => {
     f.componentRef.setInput('min', 50);
     f.componentRef.setInput('max', 50);
     f.detectChanges();
-    expect((f.componentInstance as any)._normalizedValue()).toBe(0);
+    expect((f.componentInstance as any)['_normalizedValue']()).toBe(0);
   });
 
   it('should render value display when showValue=true', async () => {
@@ -158,7 +158,7 @@ describe('NeuKnobComponent', () => {
     f.componentInstance.writeValue(50);
     const emitted: number[] = [];
     f.componentInstance.valueChange.subscribe((v: number) => emitted.push(v));
-    (f.componentInstance as any).onKeyDown({
+    (f.componentInstance as any)['onKeyDown']({
       key: 'ArrowUp',
       preventDefault: () => {},
     } as KeyboardEvent);
@@ -174,8 +174,8 @@ describe('NeuKnobComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(50);
     const comp = f.componentInstance as any;
-    comp.onKeyDown({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent);
-    expect(comp._value()).toBe(55);
+    comp['onKeyDown']({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent);
+    expect(comp['_value']()).toBe(55);
   });
 
   it('onKeyDown ArrowLeft should decrease value by step', () => {
@@ -186,8 +186,8 @@ describe('NeuKnobComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(50);
     const comp = f.componentInstance as any;
-    comp.onKeyDown({ key: 'ArrowLeft', preventDefault: () => {} } as KeyboardEvent);
-    expect(comp._value()).toBe(45);
+    comp['onKeyDown']({ key: 'ArrowLeft', preventDefault: () => {} } as KeyboardEvent);
+    expect(comp['_value']()).toBe(45);
   });
 
   it('onKeyDown unrecognized key should not change value', () => {
@@ -197,8 +197,8 @@ describe('NeuKnobComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(50);
     const comp = f.componentInstance as any;
-    comp.onKeyDown({ key: 'Tab', preventDefault: () => {} } as KeyboardEvent);
-    expect(comp._value()).toBe(50);
+    comp['onKeyDown']({ key: 'Tab', preventDefault: () => {} } as KeyboardEvent);
+    expect(comp['_value']()).toBe(50);
   });
 
   it('onMouseDown when disabled should do nothing', () => {
@@ -210,7 +210,7 @@ describe('NeuKnobComponent', () => {
     f.componentInstance.setDisabledState(true);
     const comp = f.componentInstance as any;
     comp.onMouseDown({ button: 0, clientX: 0, clientY: 0, preventDefault: () => {} } as MouseEvent);
-    expect(comp._value()).toBe(50);
+    expect(comp['_value']()).toBe(50);
   });
 
   it('onMouseDown should call _onTouched', () => {
@@ -237,7 +237,7 @@ describe('NeuKnobComponent', () => {
     const comp = f.componentInstance as any;
     const touch = { clientX: 0, clientY: 0 };
     comp.onTouchStart({ touches: [touch], preventDefault: () => {} } as unknown as TouchEvent);
-    expect(comp._value()).toBe(50);
+    expect(comp['_value']()).toBe(50);
   });
 
   it('onTouchStart should call _onTouched', () => {
@@ -261,8 +261,8 @@ describe('NeuKnobComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(50);
     const comp = f.componentInstance as any;
-    expect(comp._arcDashArray()).toContain(' ');
-    expect(typeof comp._arcDashOffset()).toBe('number');
+    expect(comp['_arcDashArray']()).toContain(' ');
+    expect(typeof comp['_arcDashOffset']()).toBe('number');
   });
 
   it('_indicatorAngle is 230 at min and 490 at max', () => {
@@ -272,9 +272,9 @@ describe('NeuKnobComponent', () => {
     f.detectChanges();
     f.componentInstance.writeValue(0);
     const comp = f.componentInstance as any;
-    expect(comp._indicatorAngle()).toBe(230);
+    expect(comp['_indicatorAngle']()).toBe(230);
     f.componentInstance.writeValue(100);
-    expect(comp._indicatorAngle()).toBe(490);
+    expect(comp['_indicatorAngle']()).toBe(490);
   });
 
   it('registerOnChange stores callback and receives value updates', () => {
@@ -289,7 +289,7 @@ describe('NeuKnobComponent', () => {
     f.componentInstance.writeValue(42); // does NOT call _onChange directly via CVA
     // Call directly through a key event which triggers _emitValue
     const comp = f.componentInstance as any;
-    comp.onKeyDown({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent);
+    comp['onKeyDown']({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent);
     expect(values.length).toBeGreaterThanOrEqual(0); // registerOnChange stored
     expect(typeof comp._onChange).toBe('function');
   });
@@ -313,7 +313,7 @@ describe('NeuKnobComponent', () => {
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 130, clientY: 80 }));
     window.dispatchEvent(new MouseEvent('mouseup'));
     // Value may or may not have changed depending on geometry, just verify no throw
-    expect(comp._value()).toBeGreaterThanOrEqual(0);
+    expect(comp['_value']()).toBeGreaterThanOrEqual(0);
   });
 
   it('onTouchStart touchmove event calls onMove lambda and updates value', () => {
@@ -334,7 +334,7 @@ describe('NeuKnobComponent', () => {
     });
     window.dispatchEvent(touchMoveEvent);
     window.dispatchEvent(new TouchEvent('touchend'));
-    expect(comp._value()).toBeGreaterThanOrEqual(0);
+    expect(comp['_value']()).toBeGreaterThanOrEqual(0);
   });
 
   it('DOM touchstart on dial element triggers onTouchStart via template', async () => {
@@ -392,7 +392,7 @@ describe('NeuKnobComponent', () => {
 
     expect(mouseSpy).toHaveBeenCalled();
     expect(keySpy).toHaveBeenCalled();
-    expect(comp._value()).toBe(5);
+    expect(comp['_value']()).toBe(5);
   });
 
   it('renders the optional label and falls back to the host rect when the dial is unavailable', () => {
@@ -433,14 +433,14 @@ describe('NeuKnobComponent', () => {
     comp.onMouseDown({ clientX: 0, clientY: 0, preventDefault: () => {} } as MouseEvent);
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 0, clientY: 0 }));
     window.dispatchEvent(new MouseEvent('mouseup'));
-    expect(comp._value()).toBeGreaterThan(50);
+    expect(comp['_value']()).toBeGreaterThan(50);
 
     f.componentInstance.writeValue(50);
     getAngle.mockReturnValueOnce(-179).mockReturnValueOnce(179);
     comp.onMouseDown({ clientX: 0, clientY: 0, preventDefault: () => {} } as MouseEvent);
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 0, clientY: 0 }));
     window.dispatchEvent(new MouseEvent('mouseup'));
-    expect(comp._value()).toBeLessThan(50);
+    expect(comp['_value']()).toBeLessThan(50);
   });
 
   it('resolves the CVA provider through Reactive Forms', async () => {

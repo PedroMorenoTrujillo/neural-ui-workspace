@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
-import { NeuResponsiveState } from '@neural-ui/core/foundation';
+import { NeuResponsiveState } from '@neural-ui/core/internal';
 
 export interface NeuStepperStep {
   /** Etiqueta del paso / Step label */

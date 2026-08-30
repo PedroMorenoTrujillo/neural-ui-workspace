@@ -429,7 +429,7 @@ describe('NeuCalendarComponent', () => {
     expect(
       fixture.componentInstance
         .monthDays()
-        .some((cell) => cell.isSelected && cell.date.getDate() === today.getDate()),
+        .some((cell) => cell['isSelected'] && cell.date.getDate() === today.getDate()),
     ).toBe(true);
   });
 
@@ -443,7 +443,7 @@ describe('NeuCalendarComponent', () => {
     expect(
       fixture.componentInstance
         .monthDays()
-        .some((cell) => cell.isSelected && localDayKey(cell.date) === '2026-05-18'),
+        .some((cell) => cell['isSelected'] && localDayKey(cell.date) === '2026-05-18'),
     ).toBe(true);
   });
 
@@ -457,7 +457,7 @@ describe('NeuCalendarComponent', () => {
     expect(
       fixture.componentInstance
         .monthDays()
-        .some((cell) => cell.isSelected && cell.date.getDate() === today.getDate()),
+        .some((cell) => cell['isSelected'] && cell.date.getDate() === today.getDate()),
     ).toBe(true);
   });
 

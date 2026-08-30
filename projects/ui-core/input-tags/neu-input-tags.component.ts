@@ -1,7 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, TemplateRef, ViewEncapsulation, afterNextRender, computed, contentChild, forwardRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuInputTagsOptionAccessor<T> = string | ((option: T) => unknown);
 export interface NeuInputTagsItemTemplateContext<T> { $implicit: T; index: number; onRemove: (event: Event, index: number) => void; }

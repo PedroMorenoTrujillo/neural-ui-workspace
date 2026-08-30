@@ -16,9 +16,9 @@ describe('NeuInputMaskComponent', () => {
 
   it('applies numeric masks and skips invalid characters', () => {
     const component = fixture.componentInstance;
-    component.onInput('123456');
+    component['onInput']('123456');
     expect(component.value()).toBe('(123) 456');
-    component.onInput('1a2-3');
+    component['onInput']('1a2-3');
     expect(component.value()).toBe('(12) 3');
   });
 
@@ -26,12 +26,12 @@ describe('NeuInputMaskComponent', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('mask', 'AA-**');
     fixture.detectChanges();
-    component.onInput('a1B#2');
+    component['onInput']('a1B#2');
     expect(component.value()).toBe('a-B2');
 
     fixture.componentRef.setInput('mask', '');
     fixture.detectChanges();
-    component.onInput('raw value');
+    component['onInput']('raw value');
     expect(component.value()).toBe('raw value');
   });
 
@@ -43,7 +43,7 @@ describe('NeuInputMaskComponent', () => {
     component.registerOnTouched(() => touched++);
     component.writeValue(null);
     expect(component.value()).toBe('');
-    component.onInput('123');
+    component['onInput']('123');
     expect(changes).toEqual(['(123']);
     component.onTouched();
     expect(touched).toBe(1);
@@ -60,7 +60,7 @@ describe('NeuInputMaskComponent', () => {
   it('keeps default CVA callbacks safe before registration', () => {
     const component = fixture.componentInstance;
 
-    expect(() => component.onInput('123')).not.toThrow();
+    expect(() => component['onInput']('123')).not.toThrow();
     expect(() => component.onTouched()).not.toThrow();
     expect(component.value()).toBe('(123');
   });

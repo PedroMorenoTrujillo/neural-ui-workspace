@@ -133,7 +133,7 @@ export class NeuTimelineGridComponent {
   readonly itemClick = output<NeuTimelineGridItem>();
   readonly slotClick = output<NeuTimelineGridSlotSelection>();
 
-  readonly _columnIndexMap = computed(() => {
+  private readonly _columnIndexMap = computed(() => {
     const indexMap = new Map<string, number>();
     this.columns().forEach((column, index) => indexMap.set(column.id, index + 1));
     return indexMap;

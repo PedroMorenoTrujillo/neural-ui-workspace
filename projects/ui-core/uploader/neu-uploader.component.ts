@@ -17,7 +17,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuProgressBarComponent } from '@neural-ui/core/progress-bar';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import type {
   NeuUploaderError,
   NeuUploaderFileItem,

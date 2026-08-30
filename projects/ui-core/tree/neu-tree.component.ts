@@ -19,7 +19,7 @@ import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import {
   NeuTreeNavigationController,
   NeuTreeNavigationItem,
-} from '@neural-ui/core/tree-foundation';
+} from '@neural-ui/core/internal';
 
 export interface NeuTreeNode<T = unknown> {
   id: string;

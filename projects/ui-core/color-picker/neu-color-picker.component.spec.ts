@@ -39,15 +39,15 @@ describe('NeuColorPickerComponent', () => {
 
   it('_toggle should open and close panel', () => {
     const f = setup();
-    f.componentInstance._toggle();
-    expect(f.componentInstance._isOpen()).toBe(true);
-    f.componentInstance._toggle();
-    expect(f.componentInstance._isOpen()).toBe(false);
+    f.componentInstance['_toggle']();
+    expect(f.componentInstance['_isOpen']()).toBe(true);
+    f.componentInstance['_toggle']();
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('should show panel when open', async () => {
     const f = setup();
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-cp__panel')).toBeTruthy();
@@ -59,52 +59,52 @@ describe('NeuColorPickerComponent', () => {
     trigger.click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(true);
+    expect(f.componentInstance['_isOpen']()).toBe(true);
 
     trigger.click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(false);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('_hexValue should return a hex string', () => {
     const f = setup();
-    const hex = f.componentInstance._hexValue();
+    const hex = f.componentInstance['_hexValue']();
     expect(hex).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
   it('_onHueChange should update _hue', () => {
     const f = setup();
-    f.componentInstance._onHueChange(180);
-    expect(f.componentInstance._hue()).toBe(180);
+    f.componentInstance['_onHueChange'](180);
+    expect(f.componentInstance['_hue']()).toBe(180);
   });
 
   it('_sv saturation should be settable via _sv.set', () => {
     const f = setup();
-    f.componentInstance._sv.set({ s: 75, v: f.componentInstance._sv().v });
-    expect(f.componentInstance._sv().s).toBe(75);
+    f.componentInstance['_sv'].set({ s: 75, v: f.componentInstance['_sv']().v });
+    expect(f.componentInstance['_sv']().s).toBe(75);
   });
 
   it('_sv value should be settable via _sv.set', () => {
     const f = setup();
-    f.componentInstance._sv.set({ s: f.componentInstance._sv().s, v: 40 });
-    expect(f.componentInstance._sv().v).toBe(40);
+    f.componentInstance['_sv'].set({ s: f.componentInstance['_sv']().s, v: 40 });
+    expect(f.componentInstance['_sv']().v).toBe(40);
   });
 
   it('colorChange should emit when hue changes', () => {
     const f = setup();
     const values: string[] = [];
     f.componentInstance.colorChange.subscribe((v: string) => values.push(v));
-    f.componentInstance._onHueChange(90);
+    f.componentInstance['_onHueChange'](90);
     expect(values.length).toBe(1);
   });
 
   it('writeValue with hex should update hue and sv', () => {
     const f = setup();
     f.componentInstance.writeValue('#ff0000');
-    expect(f.componentInstance._hue()).toBe(0);
-    expect(f.componentInstance._sv().s).toBe(100);
-    expect(f.componentInstance._sv().v).toBe(100);
+    expect(f.componentInstance['_hue']()).toBe(0);
+    expect(f.componentInstance['_sv']().s).toBe(100);
+    expect(f.componentInstance['_sv']().v).toBe(100);
   });
 
   it('applies programmatic values and resets silently', () => {
@@ -115,20 +115,20 @@ describe('NeuColorPickerComponent', () => {
     f.componentInstance.colorChange.subscribe((value) => events.push(value));
 
     f.componentInstance.writeValue('#ff0000');
-    expect(f.componentInstance._hexValue()).toBe('#ff0000');
+    expect(f.componentInstance['_hexValue']()).toBe('#ff0000');
     expect(changes).not.toHaveBeenCalled();
     expect(events).toEqual([]);
 
-    f.componentInstance._activeMode.set('rgb');
+    f.componentInstance['_activeMode'].set('rgb');
     f.componentInstance.writeValue(null);
-    expect(f.componentInstance._hexValue()).toBe('');
-    expect(f.componentInstance._textValue()).toBe('');
+    expect(f.componentInstance['_hexValue']()).toBe('');
+    expect(f.componentInstance['_textValue']()).toBe('');
     expect(changes).not.toHaveBeenCalled();
     expect(events).toEqual([]);
 
     f.componentInstance.writeValue('#22c55e');
     f.componentInstance.writeValue('');
-    expect(f.componentInstance._hexValue()).toBe('');
+    expect(f.componentInstance['_hexValue']()).toBe('');
     expect(changes).not.toHaveBeenCalled();
     expect(events).toEqual([]);
   });
@@ -140,7 +140,7 @@ describe('NeuColorPickerComponent', () => {
     f.componentInstance.registerOnChange(changes);
     f.componentInstance.colorChange.subscribe((value) => events.push(value));
 
-    f.componentInstance._onTextChange('#22c55e');
+    f.componentInstance['_onTextChange']('#22c55e');
 
     expect(changes).toHaveBeenCalledTimes(1);
     expect(events).toHaveLength(1);
@@ -149,36 +149,36 @@ describe('NeuColorPickerComponent', () => {
 
   it('_textValue in hex mode returns hex string', () => {
     const f = setup();
-    const tv = f.componentInstance._textValue();
+    const tv = f.componentInstance['_textValue']();
     expect(tv.startsWith('#')).toBe(true);
   });
 
   it('setDisabledState should set _cvaDisabled', () => {
     const f = setup();
     f.componentInstance.setDisabledState(true);
-    expect(f.componentInstance._cvaDisabled()).toBe(true);
+    expect(f.componentInstance['_cvaDisabled']()).toBe(true);
   });
 
   it('composes direct and CVA disabled state, while readonly prevents mutation', () => {
     const f = setup();
     const component = f.componentInstance;
-    const original = component._hexValue();
+    const original = component['_hexValue']();
 
     f.componentRef.setInput('disabled', true);
     f.detectChanges();
-    component._pickSwatch('#ef4444');
-    expect(component._isDisabled()).toBe(true);
-    expect(component._hexValue()).toBe(original);
+    component['_pickSwatch']('#ef4444');
+    expect(component['_isDisabled']()).toBe(true);
+    expect(component['_hexValue']()).toBe(original);
 
     f.componentRef.setInput('disabled', false);
     component.setDisabledState(true);
-    expect(component._isDisabled()).toBe(true);
+    expect(component['_isDisabled']()).toBe(true);
 
     component.setDisabledState(false);
     f.componentRef.setInput('readonly', true);
     f.detectChanges();
-    component._onTextChange('#ef4444');
-    expect(component._hexValue()).toBe(original);
+    component['_onTextChange']('#ef4444');
+    expect(component['_hexValue']()).toBe(original);
   });
 
   it('marks the control touched on blur, never during programmatic writes', () => {
@@ -194,43 +194,43 @@ describe('NeuColorPickerComponent', () => {
 
   it('_onTextChange with valid hex should update color', () => {
     const f = setup();
-    f.componentInstance._onTextChange('#00ff00');
-    expect(f.componentInstance._hue()).toBe(120);
+    f.componentInstance['_onTextChange']('#00ff00');
+    expect(f.componentInstance['_hue']()).toBe(120);
   });
 
   it('_onTextChange with rgb string should parse', () => {
     const f = setup();
-    f.componentInstance._onTextChange('rgb(255, 0, 0)');
-    expect(f.componentInstance._hue()).toBe(0);
+    f.componentInstance['_onTextChange']('rgb(255, 0, 0)');
+    expect(f.componentInstance['_hue']()).toBe(0);
   });
 
   it('_onTextChange with hsl string should parse (hue check)', () => {
     const f = setup();
-    f.componentInstance._onTextChange('hsl(240, 100%, 50%)');
-    expect(f.componentInstance._hue()).toBe(240);
-    expect(f.componentInstance._sv().s).toBe(100);
+    f.componentInstance['_onTextChange']('hsl(240, 100%, 50%)');
+    expect(f.componentInstance['_hue']()).toBe(240);
+    expect(f.componentInstance['_sv']().s).toBe(100);
   });
 
   it('_pickSwatch should update color and emit', () => {
     const f = setup();
     const values: string[] = [];
     f.componentInstance.colorChange.subscribe((v: string) => values.push(v));
-    f.componentInstance._pickSwatch('#ef4444');
+    f.componentInstance['_pickSwatch']('#ef4444');
     expect(values.length).toBe(1);
-    expect(f.componentInstance._hue()).toBeGreaterThanOrEqual(0);
+    expect(f.componentInstance['_hue']()).toBeGreaterThanOrEqual(0);
   });
 
   it('_activeMode can be changed to rgb and textValue returns rgb()', () => {
     const f = setup();
-    f.componentInstance._activeMode.set('rgb');
-    const tv = f.componentInstance._textValue();
+    f.componentInstance['_activeMode'].set('rgb');
+    const tv = f.componentInstance['_textValue']();
     expect(tv.startsWith('rgb(')).toBe(true);
   });
 
   it('_activeMode can be changed to hsl and textValue returns hsl()', () => {
     const f = setup();
-    f.componentInstance._activeMode.set('hsl');
-    const tv = f.componentInstance._textValue();
+    f.componentInstance['_activeMode'].set('hsl');
+    const tv = f.componentInstance['_textValue']();
     expect(tv.startsWith('hsl(')).toBe(true);
   });
 
@@ -240,9 +240,9 @@ describe('NeuColorPickerComponent', () => {
     await f.whenStable();
 
     const picker = f.debugElement.children[0].componentInstance as NeuColorPickerComponent;
-    expect(picker._hexValue()).toMatch(/^#3b82f[56]$/);
+    expect(picker['_hexValue']()).toMatch(/^#3b82f[56]$/);
 
-    picker._pickSwatch('#22c55e');
+    picker['_pickSwatch']('#22c55e');
     f.detectChanges();
     await f.whenStable();
 
@@ -252,7 +252,7 @@ describe('NeuColorPickerComponent', () => {
 
   it('clicking a mode button should update the active mode from the template', async () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
+    f.componentInstance['_isOpen'].set(true);
     f.detectChanges();
     await f.whenStable();
 
@@ -263,7 +263,7 @@ describe('NeuColorPickerComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(f.componentInstance._activeMode()).toBe('rgb');
+    expect(f.componentInstance['_activeMode']()).toBe('rgb');
     expect(document.querySelector('.neu-cp__text-input')?.getAttribute('aria-label')).toBe(
       'Valor rgb',
     );
@@ -271,10 +271,10 @@ describe('NeuColorPickerComponent', () => {
 
   it('clicking a swatch button should update the current color from the template', async () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
+    f.componentInstance['_isOpen'].set(true);
     f.detectChanges();
     await f.whenStable();
-    const previousHex = f.componentInstance._hexValue();
+    const previousHex = f.componentInstance['_hexValue']();
 
     const swatches = Array.from(
       document.querySelectorAll('.neu-cp__sw'),
@@ -283,42 +283,42 @@ describe('NeuColorPickerComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(f.componentInstance._hexValue()).not.toBe(previousHex);
-    expect(f.componentInstance._hue()).toBe(0);
+    expect(f.componentInstance['_hexValue']()).not.toBe(previousHex);
+    expect(f.componentInstance['_hue']()).toBe(0);
   });
 
   it('writeValue with grayscale and black colors should cover achromatic conversion branches', () => {
     const f = setup();
 
     f.componentInstance.writeValue('#808080');
-    expect(f.componentInstance._sv().s).toBe(0);
+    expect(f.componentInstance['_sv']().s).toBe(0);
 
     f.componentInstance.writeValue('#000000');
-    expect(f.componentInstance._sv().v).toBe(0);
+    expect(f.componentInstance['_sv']().v).toBe(0);
   });
 
   it('_onTextChange should ignore invalid rgb and hsl strings without throwing', () => {
     const f = setup();
-    const previousHex = f.componentInstance._hexValue();
+    const previousHex = f.componentInstance['_hexValue']();
 
-    expect(() => f.componentInstance._onTextChange('rgb(invalid)')).not.toThrow();
-    expect(() => f.componentInstance._onTextChange('hsl(invalid)')).not.toThrow();
-    expect(f.componentInstance._hexValue()).toBe(previousHex);
+    expect(() => f.componentInstance['_onTextChange']('rgb(invalid)')).not.toThrow();
+    expect(() => f.componentInstance['_onTextChange']('hsl(invalid)')).not.toThrow();
+    expect(f.componentInstance['_hexValue']()).toBe(previousHex);
   });
 
   it('_textValue should fall back to raw hex when hexToRgb cannot parse it', () => {
     const f = setup();
-    const originalHexValue = f.componentInstance._hexValue;
+    const originalHexValue = f.componentInstance['_hexValue'];
 
-    (f.componentInstance as any)._hexValue = () => 'invalid-hex';
-    expect(f.componentInstance._textValue()).toBe('invalid-hex');
+    (f.componentInstance as any)['_hexValue'] = () => 'invalid-hex';
+    expect(f.componentInstance['_textValue']()).toBe('invalid-hex');
 
-    (f.componentInstance as any)._hexValue = originalHexValue;
+    (f.componentInstance as any)['_hexValue'] = originalHexValue;
   });
 
   it('typing in the text input should parse the value from the template', async () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
+    f.componentInstance['_isOpen'].set(true);
     f.detectChanges();
     await f.whenStable();
 
@@ -328,12 +328,12 @@ describe('NeuColorPickerComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(f.componentInstance._hexValue()).toBe('#00ff00');
+    expect(f.componentInstance['_hexValue']()).toBe('#00ff00');
   });
 
   it('moving the hue slider should update hue from the template', async () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
+    f.componentInstance['_isOpen'].set(true);
     f.detectChanges();
     await f.whenStable();
 
@@ -343,12 +343,12 @@ describe('NeuColorPickerComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(f.componentInstance._hue()).toBe(45);
+    expect(f.componentInstance['_hue']()).toBe(45);
   });
 
   it('pointermove on the canvas should update saturation and value from the template', async () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
+    f.componentInstance['_isOpen'].set(true);
     f.detectChanges();
     await f.whenStable();
 
@@ -370,7 +370,7 @@ describe('NeuColorPickerComponent', () => {
     );
     f.detectChanges();
 
-    expect(f.componentInstance._sv()).toEqual({ s: 70, v: 80 });
+    expect(f.componentInstance['_sv']()).toEqual({ s: 70, v: 80 });
   });
 
   it('_canvasDown sets _dragging to true', () => {
@@ -388,10 +388,10 @@ describe('NeuColorPickerComponent', () => {
       currentTarget: fakeEl,
       pointerId: 1,
     } as unknown as PointerEvent;
-    comp._canvasDown(ev);
+    comp['_canvasDown'](ev);
     expect(comp._dragging).toBe(true);
     // Cleanup: release
-    comp._canvasUp({ currentTarget: fakeEl, pointerId: 1 } as unknown as PointerEvent);
+    comp['_canvasUp']({ currentTarget: fakeEl, pointerId: 1 } as unknown as PointerEvent);
   });
 
   it('_canvasDrag updates sv when dragging', () => {
@@ -403,25 +403,25 @@ describe('NeuColorPickerComponent', () => {
       value: () => ({ left: 0, top: 0, width: 200, height: 200 }),
     });
     const ev = { clientX: 50, clientY: 100, currentTarget: fakeEl } as unknown as PointerEvent;
-    comp._canvasDrag(ev);
-    expect(comp._sv().s).toBe(25); // 50/200*100
+    comp['_canvasDrag'](ev);
+    expect(comp['_sv']().s).toBe(25); // 50/200*100
   });
 
   it('_canvasDrag does nothing when not dragging', () => {
     const f = setup();
     const comp = f.componentInstance as any;
     comp._dragging = false;
-    const before = { ...comp._sv() };
+    const before = { ...comp['_sv']() };
     const fakeEl = document.createElement('div');
     Object.defineProperty(fakeEl, 'getBoundingClientRect', {
       value: () => ({ left: 0, top: 0, width: 200, height: 200 }),
     });
-    comp._canvasDrag({
+    comp['_canvasDrag']({
       clientX: 50,
       clientY: 50,
       currentTarget: fakeEl,
     } as unknown as PointerEvent);
-    expect(comp._sv()).toEqual(before);
+    expect(comp['_sv']()).toEqual(before);
   });
 
   it('_canvasDown should clamp coordinates to the canvas bounds', () => {
@@ -434,14 +434,14 @@ describe('NeuColorPickerComponent', () => {
     fakeEl.setPointerCapture = vi.fn();
     fakeEl.releasePointerCapture = vi.fn();
 
-    comp._canvasDown({
+    comp['_canvasDown']({
       clientX: 500,
       clientY: -100,
       currentTarget: fakeEl,
       pointerId: 1,
     } as unknown as PointerEvent);
 
-    expect(comp._sv()).toEqual({ s: 100, v: 100 });
+    expect(comp['_sv']()).toEqual({ s: 100, v: 100 });
   });
 
   it('_canvasUp sets _dragging to false', () => {
@@ -450,35 +450,35 @@ describe('NeuColorPickerComponent', () => {
     comp._dragging = true;
     const fakeEl = document.createElement('div');
     fakeEl.releasePointerCapture = vi.fn();
-    comp._canvasUp({ currentTarget: fakeEl, pointerId: 1 } as unknown as PointerEvent);
+    comp['_canvasUp']({ currentTarget: fakeEl, pointerId: 1 } as unknown as PointerEvent);
     expect(comp._dragging).toBe(false);
   });
 
   it('_outsideClick closes the panel', () => {
     const f = setup();
-    f.componentInstance._toggle();
-    expect(f.componentInstance._isOpen()).toBe(true);
+    f.componentInstance['_toggle']();
+    expect(f.componentInstance['_isOpen']()).toBe(true);
     const externalNode = document.createElement('div');
-    f.componentInstance._outsideClick({ target: externalNode } as unknown as MouseEvent);
-    expect(f.componentInstance._isOpen()).toBe(false);
+    f.componentInstance['_outsideClick']({ target: externalNode } as unknown as MouseEvent);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('_outsideClick should keep the panel open when the click is inside the component', () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
+    f.componentInstance['_isOpen'].set(true);
     f.detectChanges();
     const internalNode = f.nativeElement.querySelector('.neu-cp__trigger') as HTMLElement;
-    f.componentInstance._outsideClick({ target: internalNode } as unknown as MouseEvent);
-    expect(f.componentInstance._isOpen()).toBe(true);
+    f.componentInstance['_outsideClick']({ target: internalNode } as unknown as MouseEvent);
+    expect(f.componentInstance['_isOpen']()).toBe(true);
   });
 
   it('writeValue with an invalid string should keep the previous HSV state', () => {
     const f = setup();
-    const previousHue = f.componentInstance._hue();
-    const previousSv = f.componentInstance._sv();
+    const previousHue = f.componentInstance['_hue']();
+    const previousSv = f.componentInstance['_sv']();
     f.componentInstance.writeValue('not-a-valid-color');
-    expect(f.componentInstance._hue()).toBe(previousHue);
-    expect(f.componentInstance._sv()).toEqual(previousSv);
+    expect(f.componentInstance['_hue']()).toBe(previousHue);
+    expect(f.componentInstance['_sv']()).toEqual(previousSv);
   });
 
   it('mode input syncs to _activeMode', async () => {
@@ -488,14 +488,14 @@ describe('NeuColorPickerComponent', () => {
     f2.componentRef.setInput('mode', 'rgb');
     f2.detectChanges();
     await f2.whenStable();
-    expect(f2.componentInstance._activeMode()).toBe('rgb');
+    expect(f2.componentInstance['_activeMode']()).toBe('rgb');
   });
 
   it('registerOnChange is stored and called on hue change', () => {
     const f = setup();
     const values: string[] = [];
     f.componentInstance.registerOnChange((v: string) => values.push(v));
-    f.componentInstance._onHueChange(200);
+    f.componentInstance['_onHueChange'](200);
     expect(values.length).toBe(1);
   });
 
@@ -513,9 +513,9 @@ describe('NeuColorPickerComponent', () => {
     const f = setup();
     const values: string[] = [];
     f.componentInstance.registerOnChange((v: string) => values.push(v));
-    f.componentInstance._onTextChange('rgb(255, 0, 0)');
+    f.componentInstance['_onTextChange']('rgb(255, 0, 0)');
     expect(values.length).toBe(1);
-    expect(f.componentInstance._hue()).toBe(0); // red = hue 0
+    expect(f.componentInstance['_hue']()).toBe(0); // red = hue 0
   });
 
   it('_onTextChange with hsl string should parse and update color', () => {
@@ -524,31 +524,31 @@ describe('NeuColorPickerComponent', () => {
     const f = setup();
     const values: string[] = [];
     f.componentInstance.registerOnChange((v: string) => values.push(v));
-    f.componentInstance._onTextChange('hsl(120, 100%, 50%)');
+    f.componentInstance['_onTextChange']('hsl(120, 100%, 50%)');
     expect(values.length).toBe(1);
     // Green hue is around 120
-    expect(f.componentInstance._hue()).toBeCloseTo(120, -1);
+    expect(f.componentInstance['_hue']()).toBeCloseTo(120, -1);
   });
 
   it('_textValue in hsl mode should handle a green color branch', () => {
     const f = setup();
-    f.componentInstance._onTextChange('rgb(0, 255, 0)');
-    f.componentInstance._activeMode.set('hsl');
-    expect(f.componentInstance._textValue()).toContain('hsl(120');
+    f.componentInstance['_onTextChange']('rgb(0, 255, 0)');
+    f.componentInstance['_activeMode'].set('hsl');
+    expect(f.componentInstance['_textValue']()).toContain('hsl(120');
   });
 
   it('_textValue in hsl mode should handle a red color branch', () => {
     const f = setup();
-    f.componentInstance._onTextChange('rgb(255, 0, 0)');
-    f.componentInstance._activeMode.set('hsl');
-    expect(f.componentInstance._textValue()).toContain('hsl(0');
+    f.componentInstance['_onTextChange']('rgb(255, 0, 0)');
+    f.componentInstance['_activeMode'].set('hsl');
+    expect(f.componentInstance['_textValue']()).toContain('hsl(0');
   });
 
   it('_onTextChange with invalid hex should keep the current color', () => {
     const f = setup();
-    const previousHex = f.componentInstance._hexValue();
-    f.componentInstance._onTextChange('#gggggg');
-    expect(f.componentInstance._hexValue()).toBe(previousHex);
+    const previousHex = f.componentInstance['_hexValue']();
+    f.componentInstance['_onTextChange']('#gggggg');
+    expect(f.componentInstance['_hexValue']()).toBe(previousHex);
   });
 
   it('default touched callback should be callable before registration', () => {
@@ -560,12 +560,12 @@ describe('NeuColorPickerComponent', () => {
     // _onTextChange con cadena inválida no debe lanzar y aún debe emitir
     // _onTextChange with invalid string must not throw and still emit
     const f = setup();
-    expect(() => f.componentInstance._onTextChange('not-a-color')).not.toThrow();
+    expect(() => f.componentInstance['_onTextChange']('not-a-color')).not.toThrow();
   });
 
   it('document mousedown host listener closes the open panel', () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
+    f.componentInstance['_isOpen'].set(true);
     f.detectChanges();
     const outside = document.createElement('div');
     document.body.appendChild(outside);
@@ -573,7 +573,7 @@ describe('NeuColorPickerComponent', () => {
     outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     f.detectChanges();
 
-    expect(f.componentInstance._isOpen()).toBe(false);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
     outside.remove();
   });
 
@@ -587,35 +587,35 @@ describe('NeuColorPickerComponent', () => {
     (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
     f.detectChanges();
 
-    expect(f.componentInstance._isOpen()).toBe(false);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('keeps the panel open for clicks inside the overlay panel and covers blue hue conversion', () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
+    f.componentInstance['_isOpen'].set(true);
     f.detectChanges();
     const panel = document.createElement('div');
     panel.className = 'neu-cp__panel';
     document.body.appendChild(panel);
 
-    f.componentInstance._outsideClick({ target: panel } as unknown as MouseEvent);
-    f.componentInstance._onTextChange('rgb(0, 0, 255)');
-    f.componentInstance._activeMode.set('hsl');
+    f.componentInstance['_outsideClick']({ target: panel } as unknown as MouseEvent);
+    f.componentInstance['_onTextChange']('rgb(0, 0, 255)');
+    f.componentInstance['_activeMode'].set('hsl');
 
-    expect(f.componentInstance._isOpen()).toBe(true);
-    expect(f.componentInstance._textValue()).toContain('hsl(240');
+    expect(f.componentInstance['_isOpen']()).toBe(true);
+    expect(f.componentInstance['_textValue']()).toContain('hsl(240');
     panel.remove();
   });
 
   it('covers grayscale and magenta color conversion branches', () => {
     const f = setup();
 
-    f.componentInstance._onTextChange('rgb(128, 128, 128)');
-    f.componentInstance._activeMode.set('hsl');
-    expect(f.componentInstance._textValue()).toContain('hsl(0, 0%');
+    f.componentInstance['_onTextChange']('rgb(128, 128, 128)');
+    f.componentInstance['_activeMode'].set('hsl');
+    expect(f.componentInstance['_textValue']()).toContain('hsl(0, 0%');
 
-    f.componentInstance._onTextChange('rgb(255, 0, 255)');
-    f.componentInstance._activeMode.set('hsl');
-    expect(f.componentInstance._textValue()).toContain('hsl(300');
+    f.componentInstance['_onTextChange']('rgb(255, 0, 255)');
+    f.componentInstance['_activeMode'].set('hsl');
+    expect(f.componentInstance['_textValue']()).toContain('hsl(300');
   });
 });

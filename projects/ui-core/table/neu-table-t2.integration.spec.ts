@@ -216,14 +216,14 @@ describe('NeuTable T2 templates, editing and grouping', () => {
     expect(fixture.nativeElement.textContent).toContain('Right outlet');
     const table = fixture.debugElement.query(By.directive(NeuTableComponent))
       .componentInstance as NeuTableComponent<Row>;
-    expect(table.bodyContext(ROWS[0] as Row & Record<string, unknown>, 0, 0).group).toBeNull();
+    expect(table['bodyContext'](ROWS[0] as Row & Record<string, unknown>, 0, 0).group).toBeNull();
     fixture.componentInstance.serverSide.set(true);
     fixture.componentInstance.totalItems.set(42);
     await fixture.whenStable();
-    expect(table.paginatorTemplateContext().totalRecords).toBe(42);
+    expect(table['paginatorTemplateContext']().totalRecords).toBe(42);
     fixture.componentInstance.totalItems.set(undefined);
     await fixture.whenStable();
-    expect(table.paginatorTemplateContext().totalRecords).toBe(0);
+    expect(table['paginatorTemplateContext']().totalRecords).toBe(0);
     fixture.componentInstance.loading.set(true);
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).toContain('Custom loading');
@@ -277,7 +277,7 @@ describe('NeuTable T2 templates, editing and grouping', () => {
       .componentInstance as NeuTableComponent<Row>;
     table.startRowEdit(fixture.componentInstance.rows[1] as Row & Record<string, unknown>);
     table.startRowEdit(fixture.componentInstance.rows[1] as Row & Record<string, unknown>);
-    table.setRowEditingValue(
+    table['setRowEditingValue'](
       fixture.componentInstance.rows[1] as Row & Record<string, unknown>,
       'name',
       'Grace updated',
@@ -290,7 +290,7 @@ describe('NeuTable T2 templates, editing and grouping', () => {
     table.cancelRowEdit(fixture.componentInstance.rows[1] as Row & Record<string, unknown>);
     expect(fixture.componentInstance.cancel).toHaveBeenCalledTimes(1);
     table.cancelRowEdit(fixture.componentInstance.rows[1] as Row & Record<string, unknown>);
-    table.setRowEditingValue(
+    table['setRowEditingValue'](
       fixture.componentInstance.rows[1] as Row & Record<string, unknown>,
       'name',
       'ignored',
@@ -298,7 +298,7 @@ describe('NeuTable T2 templates, editing and grouping', () => {
 
     fixture.componentInstance.controlledKeys.set([3]);
     await fixture.whenStable();
-    expect(table.isEditingRow(fixture.componentInstance.rows[2])).toBe(true);
+    expect(table['isEditingRow'](fixture.componentInstance.rows[2])).toBe(true);
     fixture.componentInstance.controlledKeys.set(undefined);
     await fixture.whenStable();
   });
@@ -310,38 +310,38 @@ describe('NeuTable T2 templates, editing and grouping', () => {
     const name = COLUMNS[0];
     const team = COLUMNS[1];
 
-    expect(table.editingValue()).toBe('');
-    expect(table.cellEditingInvalid()).toBe(false);
-    expect(table.cellEditingError()).toBeNull();
+    expect(table['editingValue']()).toBe('');
+    expect(table['cellEditingInvalid']()).toBe(false);
+    expect(table['cellEditingError']()).toBeNull();
     table.commitCellEdit(ROWS[0], name);
     table.startCellEdit(ROWS[0], team);
-    expect(table.isEditingCell(ROWS[0], team)).toBe(false);
+    expect(table['isEditingCell'](ROWS[0], team)).toBe(false);
     table.startCellEdit(ROWS[0], name);
     table.startCellEdit(ROWS[0], name);
-    expect(table.cellEditingInvalid()).toBe(false);
-    expect(table.cellEditingError()).toBeNull();
+    expect(table['cellEditingInvalid']()).toBe(false);
+    expect(table['cellEditingError']()).toBeNull();
     table.commitCellEdit(ROWS[1], name);
     table.commitCellEdit(ROWS[0], team);
 
     const unrelated = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-    table.onEditableCellKeydown(ROWS[1], name, unrelated);
-    table.onEditableCellKeydown(ROWS[0], name, unrelated);
+    table['onEditableCellKeydown'](ROWS[1], name, unrelated);
+    table['onEditableCellKeydown'](ROWS[0], name, unrelated);
 
     const textarea = document.createElement('textarea');
     const multilineEnter = new KeyboardEvent('keydown', { key: 'Enter' });
     Object.defineProperty(multilineEnter, 'target', { value: textarea });
-    table.onEditableCellKeydown(ROWS[0], name, multilineEnter);
-    expect(table.isEditingCell(ROWS[0], name)).toBe(true);
+    table['onEditableCellKeydown'](ROWS[0], name, multilineEnter);
+    expect(table['isEditingCell'](ROWS[0], name)).toBe(true);
 
     const editable = document.createElement('div');
     editable.contentEditable = 'true';
     const contentEditableEnter = new KeyboardEvent('keydown', { key: 'Enter' });
     Object.defineProperty(contentEditableEnter, 'target', { value: editable });
-    table.onEditableCellKeydown(ROWS[0], name, contentEditableEnter);
-    expect(table.isEditingCell(ROWS[0], name)).toBe(true);
+    table['onEditableCellKeydown'](ROWS[0], name, contentEditableEnter);
+    expect(table['isEditingCell'](ROWS[0], name)).toBe(true);
 
-    table.onEditableCellKeydown(ROWS[0], name, new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(table.isEditingCell(ROWS[0], name)).toBe(false);
+    table['onEditableCellKeydown'](ROWS[0], name, new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(table['isEditingCell'](ROWS[0], name)).toBe(false);
     table.cancelCellEdit();
 
     const detached = { id: 99, name: 'Detached', team: 'A' };
@@ -351,46 +351,46 @@ describe('NeuTable T2 templates, editing and grouping', () => {
     table.cancelCellEdit();
 
     table.startCellEdit(ROWS[0], name);
-    table.setEditingValue('');
+    table['setEditingValue']('');
     const invalidTab = new KeyboardEvent('keydown', {
       key: 'Tab',
       shiftKey: true,
       cancelable: true,
     });
-    table.onEditableCellKeydown(ROWS[0], name, invalidTab);
+    table['onEditableCellKeydown'](ROWS[0], name, invalidTab);
     expect(invalidTab.defaultPrevented).toBe(true);
-    expect(table.cellEditingError()).toBe('Name is required');
+    expect(table['cellEditingError']()).toBe('Name is required');
 
-    table.setEditingValue('Ada updated');
+    table['setEditingValue']('Ada updated');
     fixture.componentInstance.validation.set(true);
-    table.onEditableCellKeydown(ROWS[0], name, new KeyboardEvent('keydown', { key: 'Tab' }));
+    table['onEditableCellKeydown'](ROWS[0], name, new KeyboardEvent('keydown', { key: 'Tab' }));
     await Promise.resolve();
-    expect(table.isEditingCell(ROWS[0], name)).toBe(false);
+    expect(table['isEditingCell'](ROWS[0], name)).toBe(false);
 
     table.startCellEdit(ROWS[0], name);
     fixture.componentInstance.validation.set(true);
     const inputEnter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
     Object.defineProperty(inputEnter, 'target', { value: document.createElement('input') });
-    table.onEditableCellKeydown(ROWS[0], name, inputEnter);
+    table['onEditableCellKeydown'](ROWS[0], name, inputEnter);
     expect(inputEnter.defaultPrevented).toBe(true);
 
     table.startCellEdit(ROWS[0], name);
-    table.onEditableCellKeydown(
+    table['onEditableCellKeydown'](
       ROWS[0],
       name,
       new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }),
     );
     await Promise.resolve();
-    expect(table.isEditingCell(ROWS[0], name)).toBe(false);
+    expect(table['isEditingCell'](ROWS[0], name)).toBe(false);
     const lifecycleInternals = table as unknown as {
       _cellLifecycleEvent: (row: Row, column: NeuTableColumn<Row>) => unknown;
     };
     expect(lifecycleInternals._cellLifecycleEvent(ROWS[0], name as NeuTableColumn<Row>)).toBeNull();
 
-    expect(table.cellViewTemplate('missing')).toBeNull();
-    expect(table.cellEditorTemplate('missing')).toBeNull();
+    expect(table['cellViewTemplate']('missing')).toBeNull();
+    expect(table['cellEditorTemplate']('missing')).toBeNull();
     expect(
-      table.cellEditorContext(
+      table['cellEditorContext'](
         ROWS[0] as Row & Record<string, unknown>,
         name as NeuTableColumn<Row>,
         0,
@@ -398,25 +398,25 @@ describe('NeuTable T2 templates, editing and grouping', () => {
       ),
     ).toMatchObject({ value: undefined, invalid: false, error: null });
     table.startRowEdit(ROWS[0] as Row & Record<string, unknown>);
-    const context = table.bodyContext(ROWS[0] as Row & Record<string, unknown>, 0, 0);
+    const context = table['bodyContext'](ROWS[0] as Row & Record<string, unknown>, 0, 0);
     expect(context.group?.label).toBe('A');
     expect(context.edit.save()).toBe(false);
     context.toggleSelection();
     expect(context.selected).toBe(false);
     context.toggleExpansion();
-    expect(table.structuralContext().columns).toHaveLength(2);
-    expect(table.paginatorTemplateContext().totalRecords).toBe(3);
+    expect(table['structuralContext']().columns).toHaveLength(2);
+    expect(table['paginatorTemplateContext']().totalRecords).toBe(3);
 
     const group = table.visibleGroups()[0];
-    expect(table.groupExpansionAriaLabel(group)).toContain('Collapse');
-    table.toggleGroup(group);
+    expect(table['groupExpansionAriaLabel'](group)).toContain('Collapse');
+    table['toggleGroup'](group);
     expect(fixture.componentInstance.groups).toHaveBeenLastCalledWith([]);
-    expect(table.groupExpansionAriaLabel({ ...group, expanded: false })).toContain('Expand');
+    expect(table['groupExpansionAriaLabel']({ ...group, expanded: false })).toContain('Expand');
     fixture.componentInstance.expandable.set(false);
     await fixture.whenStable();
-    table.toggleGroup(group);
-    expect(table.isRowspanGroupCell(0, 'name')).toBe(false);
-    expect(table.groupRowspan(0)).toBe(1);
-    expect(table.hideGroupRowspanCell(0)).toBe(false);
+    table['toggleGroup'](group);
+    expect(table['isRowspanGroupCell'](0, 'name')).toBe(false);
+    expect(table['groupRowspan'](0)).toBe(1);
+    expect(table['hideGroupRowspanCell'](0)).toBe(false);
   });
 });

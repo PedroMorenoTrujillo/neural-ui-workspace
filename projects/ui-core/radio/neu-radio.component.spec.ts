@@ -98,7 +98,7 @@ describe('NeuRadioComponent + NeuRadioGroupComponent', () => {
     f.componentInstance.writeValue('b');
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._value()).toBe('b');
+    expect(f.componentInstance['_value']()).toBe('b');
   });
 
   it('NeuRadioGroupComponent registerOnChange callback is called on change', async () => {

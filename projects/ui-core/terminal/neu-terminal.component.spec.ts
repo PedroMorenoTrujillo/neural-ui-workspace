@@ -69,7 +69,7 @@ describe('NeuTerminalComponent', () => {
     const component = fixture.componentInstance;
     component.focusInput();
     expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
-    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    component['onKeydown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     component.draft.set('');
     component.submit();
     fixture.componentRef.setInput('output', [{ text: 'one' }, { text: 'two', kind: 'info' }]);

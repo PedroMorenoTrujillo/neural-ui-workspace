@@ -44,23 +44,23 @@ describe('NeuSplitterComponent', () => {
   it('_sizes should initialize from panes input', async () => {
     const f = setup([{ size: 30 }, { size: 70 }]);
     await f.whenStable();
-    expect(f.componentInstance._sizes()).toEqual([30, 70]);
+    expect(f.componentInstance['_sizes']()).toEqual([30, 70]);
   });
 
   it('should leave sizes empty when panes are empty and preserve explicit zero sizes', async () => {
     const empty = setup([]);
     await empty.whenStable();
-    expect(empty.componentInstance._sizes()).toEqual([]);
+    expect(empty.componentInstance['_sizes']()).toEqual([]);
 
     const zero = setup([{ size: 0 }, { size: 100 }]);
     await zero.whenStable();
-    expect(zero.componentInstance._sizes()).toEqual([0, 100]);
+    expect(zero.componentInstance['_sizes']()).toEqual([0, 100]);
   });
 
   it('_sizes should distribute remaining evenly when sizes not set', async () => {
     const f = setup([{}, {}]);
     await f.whenStable();
-    expect(f.componentInstance._sizes()).toEqual([50, 50]);
+    expect(f.componentInstance['_sizes']()).toEqual([50, 50]);
   });
 
   it('should render handles between panes', async () => {
@@ -74,17 +74,17 @@ describe('NeuSplitterComponent', () => {
   it('ArrowRight key on handle should increase size of first pane', async () => {
     const f = setup([{ size: 50 }, { size: 50 }]);
     await f.whenStable();
-    const initial = f.componentInstance._sizes()[0];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 0);
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThan(initial);
+    const initial = f.componentInstance['_sizes']()[0];
+    f.componentInstance['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowRight' }), 0);
+    expect(f.componentInstance['_sizes']()[0]).toBeGreaterThan(initial);
   });
 
   it('ArrowLeft key on handle should decrease size of first pane', async () => {
     const f = setup([{ size: 50 }, { size: 50 }]);
     await f.whenStable();
-    const initial = f.componentInstance._sizes()[0];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
-    expect(f.componentInstance._sizes()[0]).toBeLessThan(initial);
+    const initial = f.componentInstance['_sizes']()[0];
+    f.componentInstance['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
+    expect(f.componentInstance['_sizes']()[0]).toBeLessThan(initial);
   });
 
   it('sizeChange should emit after keyboard adjustment', async () => {
@@ -92,16 +92,16 @@ describe('NeuSplitterComponent', () => {
     await f.whenStable();
     // sizeChange only emits on mouse/touch release, not keyboard
     // We test that _sizes change correctly
-    const before = f.componentInstance._sizes()[0];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowDown' }), 0);
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThan(before);
+    const before = f.componentInstance['_sizes']()[0];
+    f.componentInstance['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowDown' }), 0);
+    expect(f.componentInstance['_sizes']()[0]).toBeGreaterThan(before);
   });
 
   it('_sizes sum should remain approximately 100 after adjustment', async () => {
     const f = setup([{ size: 60 }, { size: 40 }]);
     await f.whenStable();
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 0);
-    const sum = f.componentInstance._sizes().reduce((a, b) => a + b, 0);
+    f.componentInstance['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowRight' }), 0);
+    const sum = f.componentInstance['_sizes']().reduce((a, b) => a + b, 0);
     expect(Math.round(sum)).toBe(100);
   });
 
@@ -110,7 +110,7 @@ describe('NeuSplitterComponent', () => {
     await f.whenStable();
     const emitted: number[][] = [];
     f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
-    f.componentInstance._startDrag(
+    f.componentInstance['_startDrag'](
       { preventDefault: vi.fn(), clientX: 200, clientY: 0 } as unknown as MouseEvent,
       0,
     );
@@ -125,7 +125,7 @@ describe('NeuSplitterComponent', () => {
     const emitted: number[][] = [];
     f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
     const touch = { clientX: 100, clientY: 0 };
-    f.componentInstance._startTouchDrag({ touches: [touch] } as unknown as TouchEvent, 0);
+    f.componentInstance['_startTouchDrag']({ touches: [touch] } as unknown as TouchEvent, 0);
     window.dispatchEvent(new TouchEvent('touchend'));
     expect(emitted.length).toBe(1);
   });
@@ -133,9 +133,9 @@ describe('NeuSplitterComponent', () => {
   it('ArrowUp key should increase size when direction is vertical', async () => {
     const f = setup([{ size: 50 }, { size: 50 }], 'vertical');
     await f.whenStable();
-    const initial = f.componentInstance._sizes()[0];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowUp' }), 0);
-    expect(f.componentInstance._sizes()[0]).toBeLessThan(initial);
+    const initial = f.componentInstance['_sizes']()[0];
+    f.componentInstance['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowUp' }), 0);
+    expect(f.componentInstance['_sizes']()[0]).toBeLessThan(initial);
   });
 
   it('pane with min should clamp size during drag', async () => {
@@ -146,33 +146,33 @@ describe('NeuSplitterComponent', () => {
     await f.whenStable();
     // Try to reduce pane 0 below min
     for (let i = 0; i < 20; i++) {
-      f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
+      f.componentInstance['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
     }
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThanOrEqual(0);
-    expect(f.componentInstance._sizes()[1]).toBeGreaterThanOrEqual(0);
+    expect(f.componentInstance['_sizes']()[0]).toBeGreaterThanOrEqual(0);
+    expect(f.componentInstance['_sizes']()[1]).toBeGreaterThanOrEqual(0);
   });
 
   it('non-arrow key on handle should do nothing', async () => {
     const f = setup([{ size: 50 }, { size: 50 }]);
     await f.whenStable();
-    const before = [...f.componentInstance._sizes()];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'Tab' }), 0);
-    expect(f.componentInstance._sizes()).toEqual(before);
+    const before = [...f.componentInstance['_sizes']()];
+    f.componentInstance['_onHandleKey'](new KeyboardEvent('keydown', { key: 'Tab' }), 0);
+    expect(f.componentInstance['_sizes']()).toEqual(before);
   });
 
   it('drag move returns without changing sizes when no drag is active or container has no size', async () => {
     const f = setup([{ size: 50 }, { size: 50 }]);
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const before = [...comp._sizes()];
+    const before = [...comp['_sizes']()];
 
     comp._onDragMove(10, 10);
-    expect(comp._sizes()).toEqual(before);
+    expect(comp['_sizes']()).toEqual(before);
 
     comp._dragIndex = 0;
     Object.defineProperty(f.nativeElement, 'offsetWidth', { configurable: true, value: 0 });
     comp._onDragMove(20, 20);
-    expect(comp._sizes()).toEqual(before);
+    expect(comp['_sizes']()).toEqual(before);
   });
 
   it('_sizes should handle 3 panes', async () => {
@@ -180,13 +180,13 @@ describe('NeuSplitterComponent', () => {
     await f.whenStable();
     const handles = f.nativeElement.querySelectorAll('.neu-splitter__handle');
     expect(handles.length).toBe(2);
-    expect(f.componentInstance._sizes().length).toBe(3);
+    expect(f.componentInstance['_sizes']().length).toBe(3);
   });
 
   it('_sizes with missing sizes distributes remaining evenly', async () => {
     const f = setup([{ size: 60 }, {}]);
     await f.whenStable();
-    expect(f.componentInstance._sizes()[1]).toBe(40);
+    expect(f.componentInstance['_sizes']()[1]).toBe(40);
   });
 
   it('_startDrag with vertical direction should respond to clientY movement', async () => {
@@ -196,7 +196,7 @@ describe('NeuSplitterComponent', () => {
     await f.whenStable();
     const emitted: number[][] = [];
     f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
-    f.componentInstance._startDrag(
+    f.componentInstance['_startDrag'](
       { preventDefault: vi.fn(), clientX: 0, clientY: 200 } as unknown as MouseEvent,
       0,
     );
@@ -213,7 +213,7 @@ describe('NeuSplitterComponent', () => {
     const emitted: number[][] = [];
     f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
     const touch = { clientX: 0, clientY: 100 };
-    f.componentInstance._startTouchDrag({ touches: [touch] } as unknown as TouchEvent, 0);
+    f.componentInstance['_startTouchDrag']({ touches: [touch] } as unknown as TouchEvent, 0);
     window.dispatchEvent(new TouchEvent('touchend'));
     expect(emitted.length).toBe(1);
   });
@@ -223,7 +223,7 @@ describe('NeuSplitterComponent', () => {
     // The touchmove event must call _onDragMove (covers the onMove lambda)
     const f = setup([{ size: 50 }, { size: 50 }], 'horizontal');
     await f.whenStable();
-    f.componentInstance._startTouchDrag(
+    f.componentInstance['_startTouchDrag'](
       { touches: [{ clientX: 100, clientY: 0 }] } as unknown as TouchEvent,
       0,
     );
@@ -233,8 +233,8 @@ describe('NeuSplitterComponent', () => {
     );
     window.dispatchEvent(new TouchEvent('touchend'));
     // No throw, sizes should still be valid
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThanOrEqual(0);
-    expect(f.componentInstance._sizes()[1]).toBeGreaterThanOrEqual(0);
+    expect(f.componentInstance['_sizes']()[0]).toBeGreaterThanOrEqual(0);
+    expect(f.componentInstance['_sizes']()[1]).toBeGreaterThanOrEqual(0);
   });
 
   it('_adjustPair should clamp pane sizes to 0 when dragging past boundary', async () => {
@@ -245,8 +245,8 @@ describe('NeuSplitterComponent', () => {
     const comp = f.componentInstance as any;
     // Apply a massive delta that would make newB go negative (covers clamping branch)
     comp._adjustPair(0, 200);
-    expect(comp._sizes()[0]).toBeGreaterThanOrEqual(0);
-    expect(comp._sizes()[1]).toBeGreaterThanOrEqual(0);
+    expect(comp['_sizes']()[0]).toBeGreaterThanOrEqual(0);
+    expect(comp['_sizes']()[1]).toBeGreaterThanOrEqual(0);
   });
 
   it('_adjustPair with large negative delta clamps first pane to 0', async () => {
@@ -257,8 +257,8 @@ describe('NeuSplitterComponent', () => {
     const comp = f.componentInstance as any;
     // Apply a large negative delta that would make newA go negative
     comp._adjustPair(0, -200);
-    expect(comp._sizes()[0]).toBeGreaterThanOrEqual(0);
-    expect(comp._sizes()[1]).toBeGreaterThanOrEqual(0);
+    expect(comp['_sizes']()[0]).toBeGreaterThanOrEqual(0);
+    expect(comp['_sizes']()[1]).toBeGreaterThanOrEqual(0);
   });
 
   it('keydown on the handle should trigger _onHandleKey via the template listener', async () => {
@@ -266,11 +266,11 @@ describe('NeuSplitterComponent', () => {
     await f.whenStable();
 
     const handle = f.nativeElement.querySelector('.neu-splitter__handle') as HTMLDivElement;
-    const before = f.componentInstance._sizes()[0];
+    const before = f.componentInstance['_sizes']()[0];
     handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     f.detectChanges();
 
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThan(before);
+    expect(f.componentInstance['_sizes']()[0]).toBeGreaterThan(before);
   });
 
   it('mousedown on the handle should trigger drag listeners via the template listener', async () => {

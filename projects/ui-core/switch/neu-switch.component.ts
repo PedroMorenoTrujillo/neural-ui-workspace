@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 /**
  * NeuralUI Switch Component
@@ -60,7 +60,7 @@ export class NeuSwitchComponent implements ControlValueAccessor {
   readonly name = input<string>('');
   readonly disabled = input<boolean>(false);
 
-  readonly _id = inject(NeuIdGenerator).getId('neu-switch-');
+  protected readonly _id = inject(NeuIdGenerator).getId('neu-switch-');
 
   protected readonly _checked = signal(false);
   /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState / Internal disabled state — combines the `disabled` input with CVA setDisabledState */

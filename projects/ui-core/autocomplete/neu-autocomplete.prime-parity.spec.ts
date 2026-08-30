@@ -78,9 +78,9 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const events: Array<{ query: string; requestId: number }> = [];
     fixture.componentInstance.completeMethod.subscribe((event) => events.push(event));
 
-    fixture.componentInstance.onQueryChange('a', new InputEvent('input'));
+    fixture.componentInstance['onQueryChange']('a', new InputEvent('input'));
     vi.advanceTimersByTime(10);
-    fixture.componentInstance.onQueryChange('am', new InputEvent('input'));
+    fixture.componentInstance['onQueryChange']('am', new InputEvent('input'));
     vi.advanceTimersByTime(19);
     expect(events).toEqual([]);
     vi.advanceTimersByTime(1);
@@ -88,20 +88,20 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     expect(events).toEqual([
       expect.objectContaining({ query: 'am', requestId: 1, source: 'input' }),
     ]);
-    expect(fixture.componentInstance._isOpen()).toBe(false);
+    expect(fixture.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('opens only after consumer suggestions are replaced and never filters them internally', () => {
     vi.useFakeTimers();
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('suggestions', []);
-    fixture.componentInstance.onQueryChange('zz');
+    fixture.componentInstance['onQueryChange']('zz');
     vi.advanceTimersByTime(20);
     fixture.componentRef.setInput('suggestions', [CITIES[1], CITIES[3]]);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance._filtered()).toEqual([CITIES[1], CITIES[3]]);
-    expect(fixture.componentInstance._isOpen()).toBe(true);
+    expect(fixture.componentInstance['_filtered']()).toEqual([CITIES[1], CITIES[3]]);
+    expect(fixture.componentInstance['_isOpen']()).toBe(true);
   });
 
   it('enforces empty, below-minimum, exact-minimum, above-minimum and dynamic minimum states', () => {
@@ -111,19 +111,19 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const complete = vi.fn();
     fixture.componentInstance.completeMethod.subscribe(complete);
 
-    fixture.componentInstance.onQueryChange('');
-    fixture.componentInstance.onQueryChange('ab');
+    fixture.componentInstance['onQueryChange']('');
+    fixture.componentInstance['onQueryChange']('ab');
     vi.advanceTimersByTime(50);
     expect(complete).not.toHaveBeenCalled();
 
-    fixture.componentInstance.onQueryChange('abc');
+    fixture.componentInstance['onQueryChange']('abc');
     vi.advanceTimersByTime(20);
-    fixture.componentInstance.onQueryChange('abcd');
+    fixture.componentInstance['onQueryChange']('abcd');
     vi.advanceTimersByTime(20);
     expect(complete.mock.calls.map(([event]) => event.query)).toEqual(['abc', 'abcd']);
 
     fixture.componentRef.setInput('minLength', 5);
-    fixture.componentInstance.onQueryChange('abcd');
+    fixture.componentInstance['onQueryChange']('abcd');
     vi.advanceTimersByTime(20);
     expect(complete).toHaveBeenCalledTimes(2);
   });
@@ -133,12 +133,12 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const fixture = setupCityAutocomplete();
     const complete = vi.fn();
     fixture.componentInstance.completeMethod.subscribe(complete);
-    fixture.componentInstance.onQueryChange('a');
-    fixture.componentInstance.onQueryChange('');
+    fixture.componentInstance['onQueryChange']('a');
+    fixture.componentInstance['onQueryChange']('');
     vi.advanceTimersByTime(30);
     expect(complete).not.toHaveBeenCalled();
 
-    fixture.componentInstance.onQueryChange('b');
+    fixture.componentInstance['onQueryChange']('b');
     fixture.destroy();
     vi.advanceTimersByTime(30);
     expect(complete).not.toHaveBeenCalled();
@@ -151,7 +151,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentInstance.completeMethod.subscribe(complete);
     fixture.componentInstance.writeValue('custom');
 
-    fixture.componentInstance._onFocus(new FocusEvent('focus'));
+    fixture.componentInstance['_onFocus'](new FocusEvent('focus'));
 
     expect(complete).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'custom', source: 'focus', requestId: 1 }),
@@ -172,7 +172,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentInstance.dropdownClick.subscribe(dropdown);
     const event = new MouseEvent('click');
 
-    fixture.componentInstance.handleDropdownClick(event);
+    fixture.componentInstance['handleDropdownClick'](event);
 
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledWith(expect.objectContaining({ query, source: 'dropdown' }));
@@ -187,23 +187,23 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentInstance.openAll();
     expect(complete).toHaveBeenCalledTimes(1);
 
-    fixture.componentInstance.handleDropdownClick(new MouseEvent('click'));
+    fixture.componentInstance['handleDropdownClick'](new MouseEvent('click'));
 
     expect(complete).toHaveBeenCalledTimes(1);
-    expect(fixture.componentInstance._isOpen()).toBe(false);
+    expect(fixture.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('separates typed custom text from the previous matched option and canonical value', () => {
     const fixture = setupCityAutocomplete();
     const values: unknown[] = [];
     fixture.componentInstance.registerOnChange((value) => values.push(value));
-    fixture.componentInstance.selectOption(CITIES[0], new MouseEvent('mousedown'));
+    fixture.componentInstance['selectOption'](CITIES[0], new MouseEvent('mousedown'));
     expect(fixture.componentInstance.matchedOption()).toBe(CITIES[0]);
     expect(fixture.componentInstance.canonicalValue()).toBe(0);
 
-    fixture.componentInstance.onQueryChange('Amsterdam edited');
+    fixture.componentInstance['onQueryChange']('Amsterdam edited');
 
-    expect(fixture.componentInstance._query()).toBe('Amsterdam edited');
+    expect(fixture.componentInstance['_query']()).toBe('Amsterdam edited');
     expect(fixture.componentInstance.matchedOption()).toBeNull();
     expect(fixture.componentInstance.customTextValue()).toBe('Amsterdam edited');
     expect(fixture.componentInstance.canonicalValue()).toBe('Amsterdam edited');
@@ -217,13 +217,13 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const clear = vi.fn();
     fixture.componentInstance.registerOnChange((value) => values.push(value));
     fixture.componentInstance.cleared.subscribe(clear);
-    fixture.componentInstance.selectOption(CITIES[0], new MouseEvent('mousedown'));
-    fixture.componentInstance.onQueryChange('invalid');
+    fixture.componentInstance['selectOption'](CITIES[0], new MouseEvent('mousedown'));
+    fixture.componentInstance['onQueryChange']('invalid');
     expect(values).toEqual([0, null]);
 
-    fixture.componentInstance._onBlur(new FocusEvent('blur'));
+    fixture.componentInstance['_onBlur'](new FocusEvent('blur'));
 
-    expect(fixture.componentInstance._query()).toBe('');
+    expect(fixture.componentInstance['_query']()).toBe('');
     expect(fixture.componentInstance.canonicalValue()).toBeNull();
     expect(values).toEqual([0, null]);
     expect(clear).toHaveBeenCalledOnce();
@@ -235,11 +235,11 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentRef.setInput('forceSelection', true);
     const values: unknown[] = [];
     fixture.componentInstance.registerOnChange((value) => values.push(value));
-    fixture.componentInstance.onQueryChange('amsterdam');
-    fixture.componentInstance._onBlur(new FocusEvent('blur'));
+    fixture.componentInstance['onQueryChange']('amsterdam');
+    fixture.componentInstance['_onBlur'](new FocusEvent('blur'));
 
     expect(fixture.componentInstance.matchedOption()).toBe(CITIES[0]);
-    expect(fixture.componentInstance._query()).toBe('Amsterdam');
+    expect(fixture.componentInstance['_query']()).toBe('Amsterdam');
     expect(values).toEqual([0]);
   });
 
@@ -251,12 +251,12 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentInstance.select.subscribe(selected);
 
     fixture.componentInstance.writeValue(1);
-    expect(fixture.componentInstance._query()).toBe('Barcelona');
+    expect(fixture.componentInstance['_query']()).toBe('Barcelona');
     fixture.componentInstance.writeValue('Elsewhere');
     expect(fixture.componentInstance.customTextValue()).toBe('Elsewhere');
     fixture.componentInstance.reset();
 
-    expect(fixture.componentInstance._query()).toBe('');
+    expect(fixture.componentInstance['_query']()).toBe('');
     expect(values).not.toHaveBeenCalled();
     expect(selected).not.toHaveBeenCalled();
   });
@@ -269,7 +269,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentInstance.registerOnChange(values);
     fixture.componentInstance.cleared.subscribe(clear);
     fixture.componentInstance.queryChange.subscribe(query);
-    fixture.componentInstance.selectOption(CITIES[1]);
+    fixture.componentInstance['selectOption'](CITIES[1]);
     values.mockClear();
 
     fixture.componentInstance.clear(new MouseEvent('click'), 'button');
@@ -289,10 +289,10 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const values = vi.fn();
     fixture.componentInstance.registerOnChange(values);
     fixture.componentInstance.openAll();
-    fixture.componentInstance.selectOption(CITIES[1], new MouseEvent('mousedown'));
+    fixture.componentInstance['selectOption'](CITIES[1], new MouseEvent('mousedown'));
     fixture.componentInstance.clear(new MouseEvent('click'), 'button');
 
-    expect(fixture.componentInstance._isOpen()).toBe(true);
+    expect(fixture.componentInstance['_isOpen']()).toBe(true);
     expect(fixture.componentInstance.canonicalValue()).toBe(0);
     expect(values).not.toHaveBeenCalled();
   });
@@ -304,12 +304,12 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     expect(fixture.componentInstance.isDisabledFinal()).toBe(true);
     fixture.componentRef.setInput('disabled', false);
     fixture.componentInstance.setDisabledState(true);
-    fixture.componentInstance.onQueryChange('a');
+    fixture.componentInstance['onQueryChange']('a');
     fixture.componentInstance.openAll();
 
     expect(fixture.componentInstance.isDisabledFinal()).toBe(true);
-    expect(fixture.componentInstance._query()).toBe('');
-    expect(fixture.componentInstance._isOpen()).toBe(false);
+    expect(fixture.componentInstance['_query']()).toBe('');
+    expect(fixture.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('reconciles immutable suggestion replacement by identity without changing the model', () => {
@@ -322,7 +322,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
 
     expect(fixture.componentInstance.matchedOption()).toBe(replacement[1]);
     expect(fixture.componentInstance.canonicalValue()).toBe(1);
-    expect(fixture.componentInstance._query()).toBe('Barcelona');
+    expect(fixture.componentInstance['_query']()).toBe('Barcelona');
   });
 
   it('normalizes typed nested groups without making groups selectable', () => {
@@ -333,22 +333,22 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const rows = fixture.componentInstance.visibleRows();
 
     expect(rows.filter((row) => row.kind === 'group')).toHaveLength(3);
-    expect(fixture.componentInstance._filtered()).toHaveLength(4);
+    expect(fixture.componentInstance['_filtered']()).toHaveLength(4);
     const disabledCity = rows.find((row) => row.kind === 'option' && row.option.id === 1);
     expect(disabledCity?.kind === 'option' ? disabledCity.disabled : null).toBe(true);
-    fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    expect(rows[fixture.componentInstance._activeIndex()].kind).toBe('option');
+    fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(rows[fixture.componentInstance['_activeIndex']()].kind).toBe('option');
   });
 
   it('supports nested computed option access, falsy values and NaN equality', () => {
     const fixture = setupCityAutocomplete();
-    expect(fixture.componentInstance.optionLabelOf(CITIES[0])).toBe('Amsterdam');
-    expect(fixture.componentInstance.optionValueOf(CITIES[0])).toBe(0);
+    expect(fixture.componentInstance['optionLabelOf'](CITIES[0])).toBe('Amsterdam');
+    expect(fixture.componentInstance['optionValueOf'](CITIES[0])).toBe(0);
     fixture.componentRef.setInput('options', [
       { id: Number.NaN, profile: { name: 'Not a number' } },
     ]);
     fixture.componentInstance.writeValue(Number.NaN);
-    expect(fixture.componentInstance._query()).toBe('Not a number');
+    expect(fixture.componentInstance['_query']()).toBe('Not a number');
   });
 
   it('renders bounded loader rows that are never exposed as option values', () => {
@@ -361,8 +361,8 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
 
     expect(rows).toHaveLength(3);
     expect(rows.every((row) => row.kind === 'loading')).toBe(true);
-    expect(fixture.componentInstance._filtered()).toEqual([]);
-    expect(fixture.componentInstance._activeIndex()).toBe(-1);
+    expect(fixture.componentInstance['_filtered']()).toEqual([]);
+    expect(fixture.componentInstance['_activeIndex']()).toBe(-1);
   });
 
   it('emits bounded monotonic lazy filter and scroll requests with query metadata', () => {
@@ -376,9 +376,9 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const lazy: Array<{ first: number; end: number; requestId: number; query: string }> = [];
     fixture.componentInstance.lazyRequest.subscribe((event) => lazy.push(event));
 
-    fixture.componentInstance.onQueryChange('bar');
+    fixture.componentInstance['onQueryChange']('bar');
     vi.advanceTimersByTime(20);
-    fixture.componentInstance.onPanelScroll({ target: { scrollTop: 400 } } as unknown as Event);
+    fixture.componentInstance['onPanelScroll']({ target: { scrollTop: 400 } } as unknown as Event);
 
     expect(lazy[0]).toEqual(expect.objectContaining({ first: 20, end: 24, query: 'bar' }));
     expect(lazy[1]).toEqual(expect.objectContaining({ first: 10, end: 14, query: 'bar' }));
@@ -425,17 +425,17 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('autoHighlight', true);
     fixture.componentRef.setInput('delay', 0);
-    fixture.componentInstance.onQueryChange('a');
-    expect(fixture.componentInstance._activeIndex()).toBe(0);
+    fixture.componentInstance['onQueryChange']('a');
+    expect(fixture.componentInstance['_activeIndex']()).toBe(0);
     expect(fixture.componentInstance.canonicalValue()).toBe('a');
 
     fixture.componentRef.setInput('selectOnFocus', true);
-    fixture.componentInstance.onOptionMouseEnter(new MouseEvent('mouseenter'), 1);
+    fixture.componentInstance['onOptionMouseEnter'](new MouseEvent('mouseenter'), 1);
     expect(fixture.componentInstance.canonicalValue()).toBe(1);
 
     fixture.componentRef.setInput('focusOnHover', false);
-    fixture.componentInstance.onOptionMouseEnter(new MouseEvent('mouseenter'), 3);
-    expect(fixture.componentInstance._activeIndex()).toBe(1);
+    fixture.componentInstance['onOptionMouseEnter'](new MouseEvent('mouseenter'), 3);
+    expect(fixture.componentInstance['_activeIndex']()).toBe(1);
   });
 
   it('supports boundary, page, Enter, Escape and Tab keyboard behavior without duplicate selection', () => {
@@ -443,19 +443,19 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const selected = vi.fn();
     fixture.componentInstance.select.subscribe(selected);
     fixture.componentInstance.openAll();
-    fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'PageDown' }));
-    fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
+    fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'PageDown' }));
+    fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Enter' }));
     expect(selected).toHaveBeenCalledOnce();
-    expect(fixture.componentInstance._isOpen()).toBe(false);
+    expect(fixture.componentInstance['_isOpen']()).toBe(false);
 
     fixture.componentInstance.openAll();
-    fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(fixture.componentInstance._isOpen()).toBe(false);
+    fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(fixture.componentInstance['_isOpen']()).toBe(false);
 
     fixture.componentInstance.openAll();
-    fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    fixture.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Tab' }));
+    fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Tab' }));
     expect(selected).toHaveBeenCalledTimes(2);
   });
 
@@ -525,13 +525,13 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     await host.whenStable();
     const autocomplete = host.debugElement.children[0]
       .componentInstance as NeuAutocompleteComponent;
-    expect(autocomplete._query()).toBe('One');
+    expect(autocomplete['_query']()).toBe('One');
 
     host.componentInstance.control.reset();
     host.componentInstance.control.disable();
     host.detectChanges();
     await host.whenStable();
-    expect(autocomplete._query()).toBe('');
+    expect(autocomplete['_query']()).toBe('');
     expect(autocomplete.isDisabledFinal()).toBe(true);
   });
 
@@ -543,7 +543,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentInstance.keyUp.subscribe(up);
     const keydown = new KeyboardEvent('keydown', { key: 'Shift' });
     const keyup = new KeyboardEvent('keyup', { key: 'Shift' });
-    fixture.componentInstance.onKeyDown(keydown);
+    fixture.componentInstance['onKeyDown'](keydown);
     fixture.componentInstance.keyUp.emit(keyup);
     expect(down).toHaveBeenCalledWith(keydown);
     expect(up).toHaveBeenCalledWith(keyup);
@@ -695,15 +695,15 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     const list = document.querySelector('.neu-autocomplete__list') as HTMLElement;
     list.scrollTop = 40;
     list.dispatchEvent(new Event('scroll', { bubbles: true }));
-    autocomplete._viewport()?.checkViewportSize();
-    autocomplete._viewport()?.scrollToIndex(1);
+    autocomplete['_viewport']()?.checkViewportSize();
+    autocomplete['_viewport']()?.scrollToIndex(1);
     expect(list.scrollTop).toBe(40);
 
     document.body.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
     document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     autocomplete.close();
-    autocomplete._closePanel();
+    autocomplete['_closePanel']();
     autocomplete.focus();
     autocomplete.close(null, 'programmatic', true);
   });
@@ -711,7 +711,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
   it('covers fallback accessors, announcements, sizing and lazy geometry branches', () => {
     const fixture = setupCityAutocomplete();
     const component = fixture.componentInstance;
-    expect(component._viewport()).toBeUndefined();
+    expect(component['_viewport']()).toBeUndefined();
 
     fixture.componentRef.setInput('groups', [{ meta: { label: 'Function' }, cities: CITIES }]);
     fixture.componentRef.setInput('groupConfig', {
@@ -773,7 +773,7 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
 
     fixture.componentRef.setInput('optionValue', () => null as unknown as number);
     fixture.componentRef.setInput('optionLabel', () => '');
-    expect(component.trackByOption(7, CITIES[0])).toBe(7);
+    expect(component['trackByOption'](7, CITIES[0])).toBe(7);
     component.close();
     expect(component.resultsAnnouncement()).toBe('');
   });
@@ -790,23 +790,23 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     fixture.componentRef.setInput('readonly', true);
     input.value = 'blocked';
     input.dispatchEvent(new InputEvent('input', { bubbles: true }));
-    expect(component._query()).toBe('ab');
+    expect(component['_query']()).toBe('ab');
     fixture.componentRef.setInput('readonly', false);
 
     component.close();
-    component.onQueryChange('');
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'PageDown' }));
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'PageUp' }));
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'Tab' }));
+    component['onQueryChange']('');
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'PageDown' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'PageUp' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'Enter' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'Escape' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'Tab' }));
 
     component.openAll();
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp', altKey: true }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowUp', altKey: true }));
     component.openAll();
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'PageUp' }));
+    component['onKeyDown'](new KeyboardEvent('keydown', { key: 'PageUp' }));
     input.value = 'abc';
     input.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Home', bubbles: true, shiftKey: true }),
@@ -816,25 +816,25 @@ describe('NeuAutocomplete Prime 22.1 closure', () => {
     );
 
     fixture.componentRef.setInput('loading', true);
-    component.handleDropdownClick(new MouseEvent('click'));
+    component['handleDropdownClick'](new MouseEvent('click'));
     fixture.componentRef.setInput('loading', false);
     fixture.componentRef.setInput('disabled', true);
-    component._onFocus();
+    component['_onFocus']();
     component.focus();
     fixture.componentRef.setInput('disabled', false);
 
-    component.onPanelScroll({ target: { scrollTop: 20 } } as unknown as Event);
-    component.onPositionChange({ connectionPair: { originY: 'top' } } as never);
+    component['onPanelScroll']({ target: { scrollTop: 20 } } as unknown as Event);
+    component['onPositionChange']({ connectionPair: { originY: 'top' } } as never);
     expect(component.panelAbove()).toBe(true);
-    component.onDocClick(new MouseEvent('mousedown'));
-    component.onWindowResize();
+    component['onDocClick'](new MouseEvent('mousedown'));
+    component['onWindowResize']();
 
     component.writeValue(99);
     fixture.componentRef.setInput('options', [...CITIES, { id: 99, profile: { name: 'Late' } }]);
     fixture.detectChanges();
     await fixture.whenStable();
     expect(component.matchedOption()?.id).toBe(99);
-    expect(component._optionId(999)).toContain('option-999');
+    expect(component['_optionId'](999)).toContain('option-999');
   });
 
   it('derives hydration-stable IDs from explicit metadata without a global counter', () => {

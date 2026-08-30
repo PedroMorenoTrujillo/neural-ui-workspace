@@ -87,7 +87,7 @@ export class NeuSpinnerComponent {
   /** Texto accesible cuando no se muestra label / Accessible text when label is not displayed */
   ariaLabel = input<string>('Loading...');
 
-  readonly _severityColor = computed(() => {
+  private readonly _severityColor = computed(() => {
     const map: Record<NeuSpinnerSeverity, string> = {
       primary: 'var(--neu-primary)',
       success: 'var(--neu-success)',

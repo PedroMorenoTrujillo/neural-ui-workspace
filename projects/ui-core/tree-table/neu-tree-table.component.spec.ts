@@ -291,7 +291,7 @@ describe('NeuTreeTableComponent', () => {
     fixture.componentInstance.nodeClick.subscribe((node) => emitted.push(node.id));
     fixture.detectChanges();
 
-    fixture.componentInstance.onTableRowClick(fixture.componentInstance.flatRows()[0]);
+    fixture.componentInstance['onTableRowClick'](fixture.componentInstance.flatRows()[0]);
     expect(emitted).toEqual(['workspace']);
   });
 
@@ -352,9 +352,9 @@ describe('NeuTreeTableComponent', () => {
     fixture.detectChanges();
 
     const row = fixture.componentInstance.flatRows()[0] as NeuTreeTableRow<RepoMeta>;
-    expect(fixture.componentInstance.treeIndent(row)).toBe(0);
-    expect(fixture.componentInstance.isTreeRowDisabled(row)).toBe(false);
-    expect(fixture.componentInstance.treeToggleAriaLabel(row)).toBe('Collapse: Workspace');
+    expect(fixture.componentInstance['treeIndent'](row as any)).toBe(0);
+    expect(fixture.componentInstance['isTreeRowDisabled'](row as any)).toBe(false);
+    expect(fixture.componentInstance['treeToggleAriaLabel'](row as any)).toBe('Collapse: Workspace');
   });
 
   it('ignores toggle requests for disabled or leaf nodes', () => {
@@ -566,8 +566,8 @@ describe('NeuTreeTableComponent', () => {
     const row = treeTable.flatRows()[0];
     const directive = treeTable.expandTemplate();
     expect(directive).toBeTruthy();
-    expect(treeTable.expandTemplateRef(directive!)).toBe(directive!.templateRef);
-    expect(treeTable.expandTemplateContext(row)).toEqual(
+    expect(treeTable['expandTemplateRef'](directive!)).toBe(directive!.templateRef);
+    expect(treeTable['expandTemplateContext'](row)).toEqual(
       expect.objectContaining({
         $implicit: NODES[0],
         node: NODES[0],
@@ -673,7 +673,7 @@ describe('NeuTreeTableComponent', () => {
     fixture.componentInstance.selectionChange.subscribe((nodes) => proposals.push(nodes.map((node) => node.id)));
     fixture.detectChanges();
 
-    fixture.componentInstance.onTableSelectionChange([fixture.componentInstance.flatRows()[0]]);
+    fixture.componentInstance['onTableSelectionChange']([fixture.componentInstance.flatRows()[0]]);
     fixture.detectChanges();
 
     expect(proposals).toEqual([['workspace']]);
@@ -695,7 +695,7 @@ describe('NeuTreeTableComponent', () => {
     fixture.detectChanges();
 
     const rows = fixture.componentInstance.flatRows() as NeuTreeTableRow[];
-    fixture.componentInstance.onTableSelectionChange([rows[1]]);
+    fixture.componentInstance['onTableSelectionChange']([rows[1]]);
     fixture.detectChanges();
     expect(proposals.at(-1)).toEqual(['one']);
     const rootCheckbox = fixture.nativeElement.querySelector(
@@ -704,7 +704,7 @@ describe('NeuTreeTableComponent', () => {
     expect(rootCheckbox.indeterminate).toBe(true);
     expect(rootCheckbox.getAttribute('aria-checked')).toBe('mixed');
 
-    fixture.componentInstance.onTableSelectionChange([rows[0], rows[1], rows[2]]);
+    fixture.componentInstance['onTableSelectionChange']([rows[0], rows[1], rows[2]]);
     expect(proposals.at(-1)).toEqual(['root', 'one', 'two']);
   });
 
@@ -752,7 +752,7 @@ describe('NeuTreeTableComponent', () => {
     fixture.componentInstance.rowEditSave.subscribe((event) => saves.push(event as NeuTreeTableRowEditEvent<RepoMeta>));
     fixture.detectChanges();
     const row = fixture.componentInstance.flatRows()[0];
-    fixture.componentInstance.onTableRowEdit('save', {
+    fixture.componentInstance['onTableRowEdit']('save', {
       row,
       draft: { ...row, owner: 'DX' },
       rowKey: 'workspace',

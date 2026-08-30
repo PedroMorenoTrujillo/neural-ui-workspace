@@ -9,6 +9,7 @@ import {
   input,
 } from '@angular/core';
 import type {
+  InternalNeuTreeTableRow,
   NeuTreeTableBodyContext,
   NeuTreeTableBodyDataEntry,
   NeuTreeTableBodySectionContext,
@@ -61,7 +62,10 @@ export class NeuTreeTableManagedRowDirective {
   private readonly element = inject<ElementRef<HTMLTableRowElement>>(ElementRef);
   readonly context = input.required<NeuTreeTableBodyDataEntry>({ alias: 'neuTreeTableManagedRow' });
 
-  private readonly disabled = computed(() => this.context().row.__treeDisabled);
+  private readonly row = computed(
+    () => this.context().row as InternalNeuTreeTableRow,
+  );
+  private readonly disabled = computed(() => this.row().__treeDisabled);
 
   @HostBinding('attr.role') readonly role = 'row';
   @HostBinding('attr.data-neu-tree-node-id') get nodeId(): string { return this.context().node.id; }
@@ -73,8 +77,8 @@ export class NeuTreeTableManagedRowDirective {
   @HostBinding('attr.aria-disabled') get ariaDisabled(): boolean | null {
     return this.disabled() ? true : null;
   }
-  @HostBinding('attr.aria-posinset') get posInSet(): number { return this.context().row.__treePosInSet; }
-  @HostBinding('attr.aria-setsize') get setSize(): number { return this.context().row.__treeSetSize; }
+  @HostBinding('attr.aria-posinset') get posInSet(): number { return this.row().__treePosInSet; }
+  @HostBinding('attr.aria-setsize') get setSize(): number { return this.row().__treeSetSize; }
   @HostBinding('attr.tabindex') get tabIndex(): number {
     return this.element.nativeElement.ownerDocument.activeElement === this.element.nativeElement ||
       this.context().rowIndex === 0 ? 0 : -1;

@@ -458,8 +458,8 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     table.rowUnselect.subscribe((event) => unselected.push(event));
 
     expect(fixture.nativeElement.querySelectorAll('input[type="radio"]')).toHaveLength(4);
-    table.toggleRow(rows[0], 'radio');
-    table.toggleRow(rows[2], 'radio');
+    table['toggleRow'](rows[0], 'radio');
+    table['toggleRow'](rows[2], 'radio');
 
     expect((table as any)._state.selectionKeys()).toEqual(new Set([2]));
     expect(changes).toEqual([[rows[0]], [rows[2]]]);
@@ -476,19 +476,19 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     const changes: SelectionRow[][] = [];
     table.selectionChange.subscribe((event) => changes.push(event));
 
-    expect(table.isRowSelected(rows[0])).toBe(true);
-    table.toggleRow(rows[2], 'radio');
+    expect(table['isRowSelected'](rows[0])).toBe(true);
+    table['toggleRow'](rows[2], 'radio');
 
     expect(changes).toEqual([[rows[2]]]);
-    expect(table.isRowSelected(rows[0])).toBe(true);
-    expect(table.isRowSelected(rows[2])).toBe(false);
+    expect(table['isRowSelected'](rows[0])).toBe(true);
+    expect(table['isRowSelected'](rows[2])).toBe(false);
 
     fixture.componentRef.setInput('selection', rows[2]);
     fixture.detectChanges();
     await fixture.whenStable();
 
     expect(changes).toHaveLength(1);
-    expect(table.isRowSelected(rows[2])).toBe(true);
+    expect(table['isRowSelected'](rows[2])).toBe(true);
   });
 
   it('emits single replacement in selectionChange, previous unselect, next select order without echo replay', async () => {
@@ -503,7 +503,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     table.rowUnselect.subscribe((event) => order.push(`unselect:${event.row.id}`));
     table.rowSelect.subscribe((event) => order.push(`select:${event.row.id}`));
 
-    table.toggleRow(rows[2], 'radio');
+    table['toggleRow'](rows[2], 'radio');
     expect(order).toEqual(['change:2', 'unselect:0', 'select:2']);
 
     fixture.componentRef.setInput('selection', proposal);
@@ -605,7 +605,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     });
     const table = fixture.componentInstance;
 
-    table.toggleRow(rows[1], 'row');
+    table['toggleRow'](rows[1], 'row');
     expect(table.selectedCount()).toBe(0);
     table.toggleAll();
 
@@ -634,9 +634,9 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
 
     expect(radios[1].disabled).toBe(true);
     expect(radios[1].checked).toBe(true);
-    expect(fixture.componentInstance.isRowSelected(rows[1])).toBe(true);
-    fixture.componentInstance.toggleRow(rows[1], 'radio');
-    expect(fixture.componentInstance.isRowSelected(rows[1])).toBe(true);
+    expect(fixture.componentInstance['isRowSelected'](rows[1])).toBe(true);
+    fixture.componentInstance['toggleRow'](rows[1], 'radio');
+    expect(fixture.componentInstance['isRowSelected'](rows[1])).toBe(true);
   });
 
   it('disables the header when the scope contains zero selectable rows', async () => {
@@ -693,10 +693,10 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   it('derives indeterminate state from only the configured filtered scope', async () => {
     const fixture = await createTable({ selectable: 'multiple' });
     const table = fixture.componentInstance;
-    table.toggleRow(rows[0], 'checkbox');
+    table['toggleRow'](rows[0], 'checkbox');
 
     expect((table as any).headerSelectionState().indeterminate).toBe(true);
-    table.onSearch({ target: { value: 'Zero' } } as unknown as Event);
+    table['onSearch']({ target: { value: 'Zero' } } as unknown as Event);
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -718,7 +718,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     const table = fixture.componentInstance;
     const serverEvents: NeuTableServerState[] = [];
     table.serverStateChange.subscribe((event) => serverEvents.push(event));
-    table.toggleRow(rows[0], 'checkbox');
+    table['toggleRow'](rows[0], 'checkbox');
 
     fixture.componentRef.setInput('data', rows.slice(2));
     fixture.detectChanges();
@@ -755,13 +755,13 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
       virtualizationOptions: { visibleItems: 3 },
     });
     const table = fixture.componentInstance;
-    table.toggleRow(virtualRows[15], 'checkbox');
+    table['toggleRow'](virtualRows[15], 'checkbox');
     table.sortBy('name');
-    table.onTableScroll({ target: { scrollTop: 500 } } as unknown as Event);
+    table['onTableScroll']({ target: { scrollTop: 500 } } as unknown as Event);
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(table.isRowSelected({ ...virtualRows[15] })).toBe(true);
+    expect(table['isRowSelected']({ ...virtualRows[15] })).toBe(true);
     expect(table.selectedRows()).toEqual([virtualRows[15]]);
     expect((table as any)._state.selectionKeys()).toEqual(new Set([15]));
   });
@@ -787,7 +787,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
   it('uses first-row projection deterministically for duplicate keys and restores removed keys', async () => {
     const fixture = await createTable({ selectable: 'multiple' });
     const table = fixture.componentInstance;
-    table.toggleRow(rows[0], 'checkbox');
+    table['toggleRow'](rows[0], 'checkbox');
 
     fixture.componentRef.setInput('data', rows.slice(1));
     fixture.detectChanges();
@@ -802,23 +802,23 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     await fixture.whenStable();
 
     expect(table.selectedRows()).toEqual([first]);
-    expect(table.isRowSelected(second)).toBe(true);
+    expect(table['isRowSelected'](second)).toBe(true);
   });
 
   it('supports Prime-style meta-key row replacement without changing checkbox additivity', async () => {
     const fixture = await createTable({ selectable: 'multiple', metaKeySelection: true });
     const table = fixture.componentInstance;
-    table.toggleRow(rows[0], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);
-    table.toggleRow(rows[2], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);
+    table['toggleRow'](rows[0], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);
+    table['toggleRow'](rows[2], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);
     expect((table as any)._state.selectionKeys()).toEqual(new Set([2]));
 
-    table.toggleRow(rows[3], 'row', { metaKey: true, ctrlKey: false } as MouseEvent);
-    table.toggleRow(rows[0], 'checkbox');
+    table['toggleRow'](rows[3], 'row', { metaKey: true, ctrlKey: false } as MouseEvent);
+    table['toggleRow'](rows[0], 'checkbox');
     expect((table as any)._state.selectionKeys()).toEqual(new Set([2, 3, 0]));
 
-    table.toggleRow(rows[0], 'row', { metaKey: false, ctrlKey: true } as MouseEvent);
+    table['toggleRow'](rows[0], 'row', { metaKey: false, ctrlKey: true } as MouseEvent);
     expect((table as any)._state.selectionKeys()).toEqual(new Set([2, 3]));
-    table.toggleRow(rows[0], 'row', { metaKey: false, ctrlKey: true } as MouseEvent);
+    table['toggleRow'](rows[0], 'row', { metaKey: false, ctrlKey: true } as MouseEvent);
     expect((table as any)._state.selectionKeys()).toEqual(new Set([2, 3, 0]));
   });
 
@@ -832,7 +832,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
       (event.selection as SelectionRow[]).push(rows[2]);
     });
 
-    table.toggleRow(rows[0], 'checkbox');
+    table['toggleRow'](rows[0], 'checkbox');
 
     expect(rowEvent?.selection).toEqual([rows[0], rows[2]]);
     expect((table as any)._state.selectionKeys()).toEqual(new Set([0]));
@@ -898,9 +898,9 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
 
     expect(f.nativeElement.textContent).toContain('zero@example.com');
-    expect(typedTable.getRowKey(READONLY_TYPED_USERS[0])).toBe(0);
+    expect(typedTable['getRowKey'](READONLY_TYPED_USERS[0])).toBe(0);
 
-    typedTable.onRowClick(READONLY_TYPED_USERS[0], new MouseEvent('click'));
+    typedTable['onRowClick'](READONLY_TYPED_USERS[0], new MouseEvent('click'));
     expect(emittedRows).toEqual([READONLY_TYPED_USERS[0]]);
   });
 
@@ -1015,7 +1015,7 @@ describe('NeuTableComponent', () => {
     // Simulate URL param having search query
     // We use onSearch directly
     const fakeEl = { value: 'Ana' } as HTMLInputElement;
-    comp.onSearch({ target: fakeEl } as unknown as Event);
+    comp['onSearch']({ target: fakeEl } as unknown as Event);
     f.detectChanges();
     await f.whenStable();
     // clearSearch should work without error
@@ -1060,12 +1060,12 @@ describe('NeuTableComponent', () => {
     const comp = f.componentInstance as any;
 
     expect(comp.selectedCount()).toBe(0);
-    comp.toggleRow(DATA[0]);
+    comp['toggleRow'](DATA[0]);
     f.detectChanges();
     expect(comp.selectedCount()).toBe(1);
-    expect(comp.isRowSelected(DATA[0])).toBe(true);
+    expect(comp['isRowSelected'](DATA[0])).toBe(true);
 
-    comp.toggleRow(DATA[0]);
+    comp['toggleRow'](DATA[0]);
     f.detectChanges();
     expect(comp.selectedCount()).toBe(0);
   });
@@ -1098,7 +1098,7 @@ describe('NeuTableComponent', () => {
     const comp = f.componentInstance as any;
 
     // Simular búsqueda activa que filtra solo 1 fila
-    comp.onSearch({ target: { value: 'Ana' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'Ana' } } as unknown as Event);
     f.detectChanges();
     await f.whenStable();
 
@@ -1138,7 +1138,7 @@ describe('NeuTableComponent', () => {
     const comp = f.componentInstance;
     const emitted: object[][] = [];
     comp.selectionChange.subscribe((rows: object[]) => emitted.push(rows));
-    (comp as any).toggleRow(DATA[0]);
+    (comp as any)['toggleRow'](DATA[0]);
     expect(emitted.length).toBe(1);
   });
 
@@ -1157,8 +1157,8 @@ describe('NeuTableComponent', () => {
       emitted.push(event),
     );
 
-    comp.toggleRow(DATA[0]);
-    comp.handleSelectionAction(SELECTION_ACTIONS[0]);
+    comp['toggleRow'](DATA[0]);
+    comp['handleSelectionAction'](SELECTION_ACTIONS[0]);
 
     expect(emitted).toHaveLength(1);
     expect(emitted[0]?.action.key).toBe('archive');
@@ -1177,13 +1177,13 @@ describe('NeuTableComponent', () => {
     const comp = f.componentInstance as any;
     const emitSpy = vi.spyOn(comp.selectionActionClick, 'emit');
 
-    comp.toggleRow(DATA[1]);
-    comp.handleSelectionAction(SELECTION_ACTIONS[1]);
-    expect(comp.isSelectionConfirmPending(SELECTION_ACTIONS[1])).toBe(true);
+    comp['toggleRow'](DATA[1]);
+    comp['handleSelectionAction'](SELECTION_ACTIONS[1]);
+    expect(comp['isSelectionConfirmPending'](SELECTION_ACTIONS[1])).toBe(true);
     expect(emitSpy).not.toHaveBeenCalled();
 
-    comp.handleSelectionAction(SELECTION_ACTIONS[1]);
-    expect(comp.isSelectionConfirmPending(SELECTION_ACTIONS[1])).toBe(false);
+    comp['handleSelectionAction'](SELECTION_ACTIONS[1]);
+    expect(comp['isSelectionConfirmPending'](SELECTION_ACTIONS[1])).toBe(false);
     expect(emitSpy).toHaveBeenCalledWith({ action: SELECTION_ACTIONS[1], rows: [DATA[1]] });
   });
 
@@ -1224,7 +1224,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
     const fakeEvent = { target: { value: '5' } } as unknown as Event;
-    comp.onPageSizeChange(fakeEvent);
+    comp['onPageSizeChange'](fakeEvent);
     expect(comp.effectivePageSize()).toBe(5);
   });
 
@@ -1317,11 +1317,11 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
 
-    expect(comp.isRowExpanded(DATA[0])).toBe(false);
+    expect(comp['isRowExpanded'](DATA[0])).toBe(false);
     comp.toggleExpand(DATA[0]);
-    expect(comp.isRowExpanded(DATA[0])).toBe(true);
+    expect(comp['isRowExpanded'](DATA[0])).toBe(true);
     comp.toggleExpand(DATA[0]);
-    expect(comp.isRowExpanded(DATA[0])).toBe(false);
+    expect(comp['isRowExpanded'](DATA[0])).toBe(false);
   });
 
   it('expandMode=single should keep only one expanded row at a time', async () => {
@@ -1335,11 +1335,11 @@ describe('NeuTableComponent', () => {
 
     const comp = f.componentInstance as any;
     comp.expandRow(DATA[0]);
-    expect(comp.isRowExpanded(DATA[0])).toBe(true);
+    expect(comp['isRowExpanded'](DATA[0])).toBe(true);
 
     comp.expandRow(DATA[1]);
-    expect(comp.isRowExpanded(DATA[0])).toBe(false);
-    expect(comp.isRowExpanded(DATA[1])).toBe(true);
+    expect(comp['isRowExpanded'](DATA[0])).toBe(false);
+    expect(comp['isRowExpanded'](DATA[1])).toBe(true);
   });
 
   it('collapseRow should deterministically close an expanded row', async () => {
@@ -1352,10 +1352,10 @@ describe('NeuTableComponent', () => {
 
     const comp = f.componentInstance as any;
     comp.expandRow(DATA[0]);
-    expect(comp.isRowExpanded(DATA[0])).toBe(true);
+    expect(comp['isRowExpanded'](DATA[0])).toBe(true);
 
     comp.collapseRow(DATA[0]);
-    expect(comp.isRowExpanded(DATA[0])).toBe(false);
+    expect(comp['isRowExpanded'](DATA[0])).toBe(false);
   });
 
   // ── exactMatchable ────────────────────────────────────────────────────────
@@ -1379,7 +1379,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    comp.toggleRow(DATA[0]);
+    comp['toggleRow'](DATA[0]);
     f.detectChanges();
     expect(comp.isSomeFilteredSelected()).toBe(true);
     expect(comp.isAllFilteredSelected()).toBe(false);
@@ -1394,7 +1394,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     const rowWithoutId = { name: 'Test', age: 30, city: 'X', status: 'active' };
-    const key = comp.getRowKey(rowWithoutId);
+    const key = comp['getRowKey'](rowWithoutId);
     expect(key).toBe(JSON.stringify(rowWithoutId));
   });
 
@@ -1472,7 +1472,7 @@ describe('NeuTableComponent', () => {
     const comp = f.componentInstance as any;
     const col: NeuTableColumn = { key: 'date', header: 'Fecha', type: 'date', locale: 'es-ES' };
     const row = { date: '2024-01-15' };
-    const result = comp.getCellValue(row, col);
+    const result = comp['getCellValue'](row, col);
     expect(typeof result).toBe('string');
     expect(result).toBeTruthy();
   });
@@ -1490,7 +1490,7 @@ describe('NeuTableComponent', () => {
       locale: 'es-ES',
     };
     const row = { amount: 1234.56 };
-    const result = comp.getCellValue(row, col);
+    const result = comp['getCellValue'](row, col);
     expect(result).toContain('1');
     expect(result).toContain('234');
   });
@@ -1509,7 +1509,7 @@ describe('NeuTableComponent', () => {
       locale: 'es-ES',
     };
     const row = { price: 99.99 };
-    const result = comp.getCellValue(row, col);
+    const result = comp['getCellValue'](row, col);
     expect(result).toContain('99');
   });
 
@@ -1520,7 +1520,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     const comp = f.componentInstance as any;
     const col: NeuTableColumn = { key: 'missing', header: 'X' };
-    const result = comp.getCellValue({ missing: null }, col);
+    const result = comp['getCellValue']({ missing: null }, col);
     expect(result).toBe('—');
   });
 
@@ -1536,7 +1536,7 @@ describe('NeuTableComponent', () => {
     const emitted: unknown[] = [];
     f.componentInstance.actionClick.subscribe((e: unknown) => emitted.push(e));
     const action = { key: 'edit', label: 'Editar', icon: '✏️' };
-    comp.handleAction(DATA[0], action);
+    comp['handleAction'](DATA[0], action);
     expect(emitted.length).toBe(1);
   });
 
@@ -1552,14 +1552,14 @@ describe('NeuTableComponent', () => {
     const action = { key: 'del', label: 'Borrar', icon: '🗑️', confirm: '¿Seguro?' };
 
     // First click \u2014 should set pending, not emit
-    comp.handleAction(DATA[0], action);
-    expect(comp.isConfirmPending(DATA[0], action)).toBe(true);
+    comp['handleAction'](DATA[0], action);
+    expect(comp['isConfirmPending'](DATA[0], action)).toBe(true);
     expect(emitted.length).toBe(0);
 
     // Second click \u2014 should emit
-    comp.handleAction(DATA[0], action);
+    comp['handleAction'](DATA[0], action);
     expect(emitted.length).toBe(1);
-    expect(comp.isConfirmPending(DATA[0], action)).toBe(false);
+    expect(comp['isConfirmPending'](DATA[0], action)).toBe(false);
   });
 
   it('cancelConfirm should clear pending action', async () => {
@@ -1570,10 +1570,10 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
     const action = { key: 'del', label: 'Borrar', icon: '🗑️', confirm: '¿Seguro?' };
-    comp.handleAction(DATA[0], action);
-    expect(comp.isConfirmPending(DATA[0], action)).toBe(true);
-    comp.cancelConfirm();
-    expect(comp.isConfirmPending(DATA[0], action)).toBe(false);
+    comp['handleAction'](DATA[0], action);
+    expect(comp['isConfirmPending'](DATA[0], action)).toBe(true);
+    comp['cancelConfirm']();
+    expect(comp['isConfirmPending'](DATA[0], action)).toBe(false);
   });
 
   // ── v1.3.0: column filters ────────────────────────────────────────────────
@@ -1689,7 +1689,7 @@ describe('NeuTableComponent', () => {
     textInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('name')).toBe('Luis');
+    expect(table['getColumnFilterValue']('name')).toBe('Luis');
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
 
     table.clearColumnFilters();
@@ -1706,21 +1706,21 @@ describe('NeuTableComponent', () => {
     numberInput.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('score')).toBe(50);
+    expect(table['getColumnFilterValue']('score')).toBe(50);
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
 
     table.clearColumnFilters();
     table.setColumnFilter('active', false);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('active')).toBe(false);
+    expect(table['getColumnFilterValue']('active')).toBe(false);
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
     expect(booleanSelect.querySelector('.neu-select__value')?.textContent).toContain('No');
 
     table.setColumnFilter('active', true);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('active')).toBe(true);
+    expect(table['getColumnFilterValue']('active')).toBe(true);
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
     expect(booleanSelect.querySelector('.neu-select__value')?.textContent).toContain('Yes');
 
@@ -1728,7 +1728,7 @@ describe('NeuTableComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(numberInput.value).toBe('');
-    expect(table.getColumnFilterValue('active')).toBe('');
+    expect(table['getColumnFilterValue']('active')).toBe('');
     expect(booleanSelect.querySelector('.neu-select__placeholder')?.textContent).toContain('All');
 
     const dateInput = fixture.debugElement.query(By.directive(NeuDateInputComponent))
@@ -1746,7 +1746,7 @@ describe('NeuTableComponent', () => {
     dateInput.selectDay(selectedDay!);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('createdAt')).toBe('2026-08-19');
+    expect(table['getColumnFilterValue']('createdAt')).toBe('2026-08-19');
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
   });
 
@@ -1803,7 +1803,7 @@ describe('NeuTableComponent', () => {
     instantInput.selectDay(secondDay!);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('createdAt')).toBe(secondInstant.toISOString());
+    expect(table['getColumnFilterValue']('createdAt')).toBe(secondInstant.toISOString());
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
   });
 
@@ -1899,8 +1899,8 @@ describe('NeuTableComponent', () => {
       .map((debugElement) => debugElement.componentInstance as NeuDateInputComponent)
       .find((component) => component.type() === 'range');
     expect(rangeDateInput).toBeTruthy();
-    rangeDateInput!._leftCursor.set(new Date(2026, 7, 1));
-    const rangeDay = rangeDateInput!._leftDays().find((cell) => cell.rangeStart || cell.rangeEnd);
+    rangeDateInput!['_leftCursor'].set(new Date(2026, 7, 1));
+    const rangeDay = rangeDateInput!['_leftDays']().find((cell) => cell.rangeStart || cell.rangeEnd);
     expect(rangeDay?.date.getDate()).toBe(20);
   });
 
@@ -1953,7 +1953,7 @@ describe('NeuTableComponent', () => {
       );
     expect(selectedDay).toBeTruthy();
     instantInput.selectDay(selectedDay!);
-    expect(fixture.componentInstance.getColumnFilterValue('createdAt')).toBe(
+    expect(fixture.componentInstance['getColumnFilterValue']('createdAt')).toBe(
       new Date(localValue).toISOString(),
     );
   });
@@ -2034,7 +2034,7 @@ describe('NeuTableComponent', () => {
     expect(toDay).toBeTruthy();
     fromInput.selectDay(fromDay!);
     toInput.selectDay(toDay!);
-    expect(table.getColumnFilterValue('createdAt')).toEqual({
+    expect(table['getColumnFilterValue']('createdAt')).toEqual({
       from: new Date(localFrom).toISOString(),
       to: new Date(localTo).toISOString(),
     });
@@ -2088,7 +2088,7 @@ describe('NeuTableComponent', () => {
       .map((debugElement) => debugElement.componentInstance as NeuDateInputComponent)
       .find((component) => component.type() === 'range');
     expect(rangeDateInput).toBeTruthy();
-    const fromCell = rangeDateInput!._leftDays().find((cell) => cell.rangeStart);
+    const fromCell = rangeDateInput!['_leftDays']().find((cell) => cell.rangeStart);
     expect(fromCell?.date.getFullYear()).toBe(2026);
     expect(fromCell?.date.getMonth()).toBe(7);
     expect(fromCell?.date.getDate()).toBe(20);
@@ -2097,23 +2097,23 @@ describe('NeuTableComponent', () => {
     table.setColumnFilter('createdAt', { from: null, to: '2026-08-20' });
     fixture.detectChanges();
     await fixture.whenStable();
-    const toCell = rangeDateInput!._leftDays().find((cell) => cell.rangeEnd);
+    const toCell = rangeDateInput!['_leftDays']().find((cell) => cell.rangeEnd);
     expect(toCell?.date.getDate()).toBe(20);
     expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
 
-    rangeDateInput!._selectDay(new Date(2026, 7, 1));
-    rangeDateInput!._selectDay(new Date(2026, 7, 20));
-    rangeDateInput!._applyRange();
+    rangeDateInput!['_selectDay'](new Date(2026, 7, 1));
+    rangeDateInput!['_selectDay'](new Date(2026, 7, 20));
+    rangeDateInput!['_applyRange']();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('createdAt')).toEqual({
+    expect(table['getColumnFilterValue']('createdAt')).toEqual({
       from: '2026-08-01',
       to: '2026-08-20',
     });
     expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
 
-    rangeDateInput!._clearRange();
-    expect(table.getColumnFilterValue('createdAt')).toEqual({ from: null, to: null });
+    rangeDateInput!['_clearRange']();
+    expect(table['getColumnFilterValue']('createdAt')).toEqual({ from: null, to: null });
   });
 
   it('routes typed control changes to the raw and typed server filter state', async () => {
@@ -2288,9 +2288,9 @@ describe('NeuTableComponent', () => {
     comp.sortBy('age', shiftEvent);
     await f.whenStable();
 
-    expect(comp._sortEntries().length).toBe(2);
-    expect(comp._sortEntries()[0].key).toBe('name');
-    expect(comp._sortEntries()[1].key).toBe('age');
+    expect(comp['_sortEntries']().length).toBe(2);
+    expect(comp['_sortEntries']()[0].key).toBe('name');
+    expect(comp['_sortEntries']()[1].key).toBe('age');
   });
 
   it('getSortPriority returns correct index for multiSort', async () => {
@@ -2309,9 +2309,9 @@ describe('NeuTableComponent', () => {
     comp.sortBy('name', ev);
     await f.whenStable();
 
-    expect(comp.getSortPriority('age')).toBe(0);
-    expect(comp.getSortPriority('name')).toBe(1);
-    expect(comp.getSortPriority('city')).toBe(-1);
+    expect(comp['getSortPriority']('age')).toBe(0);
+    expect(comp['getSortPriority']('name')).toBe(1);
+    expect(comp['getSortPriority']('city')).toBe(-1);
   });
 
   // ── v1.3.0: serverSide ────────────────────────────────────────────────────
@@ -2358,8 +2358,8 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    expect(comp.getRowClass(DATA[0])).toBe('row-active');
-    expect(comp.getRowClass(DATA[1])).toBe('');
+    expect(comp['getRowClass'](DATA[0])).toBe('row-active');
+    expect(comp['getRowClass'](DATA[1])).toBe('');
   });
 
   // ── v1.3.0: setExactMatch ────────────────────────────────────────────────
@@ -2398,7 +2398,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('data', DATA);
     f.componentRef.setInput('multiSort', false);
     f.detectChanges();
-    expect(f.componentInstance.getSortPriority('name')).toBe(-1);
+    expect(f.componentInstance['getSortPriority']('name')).toBe(-1);
   });
 
   it('getSortPriority returns index when multiSort is true', async () => {
@@ -2411,7 +2411,7 @@ describe('NeuTableComponent', () => {
     comp.sortBy('name');
     await f.whenStable();
     f.detectChanges();
-    expect(comp.getSortPriority('name')).toBe(0);
+    expect(comp['getSortPriority']('name')).toBe(0);
   });
 
   it('getColumnFilterValue returns empty string for unknown key', () => {
@@ -2419,7 +2419,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('columns', COLUMNS);
     f.componentRef.setInput('data', DATA);
     f.detectChanges();
-    expect(f.componentInstance.getColumnFilterValue('nonexistent')).toBe('');
+    expect(f.componentInstance['getColumnFilterValue']('nonexistent')).toBe('');
   });
 
   it('serverStateChange emits when serverSide=true and page changes', async () => {
@@ -2481,10 +2481,10 @@ describe('NeuTableComponent', () => {
     const emitted: any[] = [];
     f.componentInstance.rowClick.subscribe((r: any) => emitted.push(r));
     const comp = f.componentInstance as any;
-    comp.onRowClick(DATA[0], new MouseEvent('click'));
+    comp['onRowClick'](DATA[0], new MouseEvent('click'));
     expect(emitted.length).toBe(1);
     expect(emitted[0]).toEqual(DATA[0]);
-    expect(comp.isRowSelected(DATA[0])).toBe(true);
+    expect(comp['isRowSelected'](DATA[0])).toBe(true);
   });
 
   it('onRowClick without selectable should only emit rowClick', async () => {
@@ -2499,9 +2499,9 @@ describe('NeuTableComponent', () => {
     const emitted: any[] = [];
     f.componentInstance.rowClick.subscribe((r: any) => emitted.push(r));
     const comp = f.componentInstance as any;
-    comp.onRowClick(DATA[0], new MouseEvent('click'));
+    comp['onRowClick'](DATA[0], new MouseEvent('click'));
     expect(emitted.length).toBe(1);
-    expect(comp.isRowSelected(DATA[0])).toBe(false);
+    expect(comp['isRowSelected'](DATA[0])).toBe(false);
   });
 
   it('_filterOpts returns All plus all filterOptions for the column', () => {
@@ -2516,7 +2516,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('data', DATA);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    const opts = comp._filterOpts(colsWithFilter[3]);
+    const opts = comp['_filterOpts'](colsWithFilter[3]);
     expect(opts[0]).toEqual({ label: 'All', value: '' });
     expect(opts.length).toBe(3); // All + 2 filterOptions
     expect(opts[1].value).toBe('active');
@@ -2569,7 +2569,7 @@ describe('NeuTableComponent', () => {
     window.dispatchEvent(new MouseEvent('pointermove', { clientX: 145 }));
     window.dispatchEvent(new MouseEvent('pointerup', { clientX: 145 }));
 
-    expect(comp.columnWidth(RESIZABLE_COLUMNS[0])).toBe('165px');
+    expect(comp['columnWidth'](RESIZABLE_COLUMNS[0])).toBe('165px');
   });
 
   it('resized frozen columns should update the next frozen offset', async () => {
@@ -2582,7 +2582,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
 
     const comp = f.componentInstance as any;
-    comp.startColumnResize(RESIZABLE_COLUMNS[0], {
+    comp['startColumnResize'](RESIZABLE_COLUMNS[0], {
       clientX: 100,
       preventDefault: () => {},
       stopPropagation: () => {},
@@ -2591,7 +2591,7 @@ describe('NeuTableComponent', () => {
     window.dispatchEvent(new MouseEvent('pointermove', { clientX: 140 }));
     window.dispatchEvent(new MouseEvent('pointerup', { clientX: 140 }));
 
-    expect(comp._frozenLeftOffsets().get('age')).toBe(160);
+    expect(comp['_frozenLeftOffsets']().get('age')).toBe(160);
   });
 
   it('columnWidth should fall back to the configured width when the column has not been resized', async () => {
@@ -2605,7 +2605,7 @@ describe('NeuTableComponent', () => {
 
     const comp = f.componentInstance as any;
 
-    expect(comp.columnWidth(RESIZABLE_COLUMNS[2])).toBe('180px');
+    expect(comp['columnWidth'](RESIZABLE_COLUMNS[2])).toBe('180px');
   });
 
   it('should not render a resize handle for columns explicitly marked as non-resizable', async () => {
@@ -2640,7 +2640,7 @@ describe('NeuTableComponent', () => {
     const preventDefault = vi.fn();
     const stopPropagation = vi.fn();
 
-    comp.startColumnResize(columns[0], {
+    comp['startColumnResize'](columns[0], {
       clientX: 100,
       preventDefault,
       stopPropagation,
@@ -2649,7 +2649,7 @@ describe('NeuTableComponent', () => {
 
     expect(preventDefault).not.toHaveBeenCalled();
     expect(stopPropagation).not.toHaveBeenCalled();
-    expect(comp.columnWidth(columns[0])).toBe('120px');
+    expect(comp['columnWidth'](columns[0])).toBe('120px');
   });
 
   it('resetColumnWidth should keep the width map unchanged when the column was not resized', async () => {
@@ -2662,9 +2662,9 @@ describe('NeuTableComponent', () => {
 
     const comp = f.componentInstance as any;
 
-    comp.resetColumnWidth('name');
+    comp['resetColumnWidth']('name');
 
-    expect(comp.columnWidth(RESIZABLE_COLUMNS[0])).toBe('120px');
+    expect(comp['columnWidth'](RESIZABLE_COLUMNS[0])).toBe('120px');
     expect(comp._columnWidths()).toEqual({});
   });
 
@@ -2684,7 +2684,7 @@ describe('NeuTableComponent', () => {
     f.componentInstance.serverStateChange.subscribe((e: any) => events.push(e));
     const comp = f.componentInstance as any;
     const fakeEvent = { target: { value: 'García' } } as unknown as Event;
-    comp.onSearch(fakeEvent);
+    comp['onSearch'](fakeEvent);
     expect(events.length).toBe(1);
     expect(events[0].search).toBe('García');
     expect(events[0].page).toBe(1);
@@ -2705,7 +2705,7 @@ describe('NeuTableComponent', () => {
     f.componentInstance.searchChange.subscribe((v: string) => searchEvents.push(v));
     const comp = f.componentInstance as any;
     const fakeEvent = { target: { value: 'Madrid' } } as unknown as Event;
-    comp.onSearch(fakeEvent);
+    comp['onSearch'](fakeEvent);
     expect(events.length).toBe(0);
     expect(searchEvents).toContain('Madrid');
   });
@@ -2758,7 +2758,7 @@ describe('NeuTableComponent', () => {
     f.componentInstance.serverStateChange.subscribe((e: any) => events.push(e));
     const comp = f.componentInstance as any;
     const fakeEvent = { target: { value: '25' } } as unknown as Event;
-    comp.onPageSizeChange(fakeEvent);
+    comp['onPageSizeChange'](fakeEvent);
     expect(events.length).toBe(1);
     expect(events[0].pageSize).toBe(25);
     expect(events[0].page).toBe(1);
@@ -2775,7 +2775,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
     const fakeEvent = { target: { value: '5' } } as unknown as Event;
-    comp.onPageSizeChange(fakeEvent);
+    comp['onPageSizeChange'](fakeEvent);
     expect(comp.effectivePageSize()).toBe(5);
   });
 
@@ -2814,7 +2814,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('data', DATA);
     f.detectChanges();
     await f.whenStable();
-    const offsets = (f.componentInstance as any)._frozenLeftOffsets();
+    const offsets = (f.componentInstance as any)['_frozenLeftOffsets']();
     expect(offsets.get('id')).toBe(0);
     expect(offsets.get('name')).toBe(60);
     expect(offsets.get('age')).toBeUndefined();
@@ -2828,7 +2828,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('data', DATA);
     f.detectChanges();
     await f.whenStable();
-    const offsets = (f.componentInstance as any)._frozenLeftOffsets();
+    const offsets = (f.componentInstance as any)['_frozenLeftOffsets']();
     expect(offsets.size).toBe(0);
   });
 
@@ -2844,7 +2844,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('data', DATA);
     f.detectChanges();
     await f.whenStable();
-    const offsets = (f.componentInstance as any)._frozenLeftOffsets();
+    const offsets = (f.componentInstance as any)['_frozenLeftOffsets']();
     expect(offsets.get('id')).toBe(0);
     expect(offsets.get('name')).toBe(0); // 'auto' no aporta píxeles / 'auto' contributes no pixels
   });
@@ -2892,7 +2892,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const val = comp.getCellValue({ id: 1, date: 'not-a-date' }, dateCols[0]);
+    const val = comp['getCellValue']({ id: 1, date: 'not-a-date' }, dateCols[0]);
     expect(val).toBe('not-a-date');
   });
 
@@ -2907,7 +2907,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const val = comp.getCellValue({ id: 1, date: testDate }, dateCols[0]);
+    const val = comp['getCellValue']({ id: 1, date: testDate }, dateCols[0]);
     expect(typeof val).toBe('string');
     expect(val).toContain('2024');
   });
@@ -2980,7 +2980,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
 
     const comp = f.componentInstance as any;
-    comp.toggleRow(DATA[1]);
+    comp['toggleRow'](DATA[1]);
 
     const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
     comp.exportCsv();
@@ -3010,7 +3010,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
 
     const comp = f.componentInstance as any;
-    comp.toggleRow(DATA[2]);
+    comp['toggleRow'](DATA[2]);
 
     const downloadSpy = vi.spyOn(comp, '_downloadBlob').mockImplementation(() => {});
     comp.exportJson();
@@ -3037,7 +3037,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
 
     const comp = f.componentInstance as any;
-    comp.onSearch({ target: { value: 'Ana' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'Ana' } } as unknown as Event);
     f.detectChanges();
     await f.whenStable();
 
@@ -3173,7 +3173,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const val = comp.getCellValue({ id: 1, price: 1500 }, currencyCols[0]);
+    const val = comp['getCellValue']({ id: 1, price: 1500 }, currencyCols[0]);
     expect(val).toContain('1');
     expect(typeof val).toBe('string');
   });
@@ -3190,9 +3190,9 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
     comp.setColumnFilter('name', 'Ana');
-    expect(comp._columnFilters()['name']).toBe('Ana');
+    expect(comp['_columnFilters']()['name']).toBe('Ana');
     comp.clearColumnFilters();
-    expect(Object.keys(comp._columnFilters()).length).toBe(0);
+    expect(Object.keys(comp['_columnFilters']()).length).toBe(0);
   });
 
   // ── sortedData: multiSort comparator returns 0 ────────────────────────
@@ -3231,7 +3231,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const key = comp.getRowKey(DATA[0]);
+    const key = comp['getRowKey'](DATA[0]);
     expect(typeof key).toBe('string');
     expect(key).toBe(JSON.stringify(DATA[0]));
   });
@@ -3343,7 +3343,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const val = comp.getCellValue({ id: 1, name: null }, COLUMNS[0]);
+    const val = comp['getCellValue']({ id: 1, name: null }, COLUMNS[0]);
     expect(val).toBe('—');
   });
 
@@ -3358,7 +3358,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    expect(comp.getSortPriority('name')).toBe(-1);
+    expect(comp['getSortPriority']('name')).toBe(-1);
   });
 
   // ── getColumnFilterValue ──────────────────────────────────────────────
@@ -3372,7 +3372,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    expect(comp.getColumnFilterValue('nonexistent')).toBe('');
+    expect(comp['getColumnFilterValue']('nonexistent')).toBe('');
   });
 
   // ── useUrlState=false: rutas de estado interno ────────────────────────
@@ -3517,7 +3517,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     expect(comp.currentPage()).toBe(2);
     const fakeEvent = { target: { value: 'Ana' } } as unknown as Event;
-    comp.onSearch(fakeEvent);
+    comp['onSearch'](fakeEvent);
     f.detectChanges();
     await f.whenStable();
     expect(comp.searchQuery()).toBe('Ana');
@@ -3539,7 +3539,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
     const fakeEvent = { target: { value: 'Luis' } } as unknown as Event;
-    comp.onSearch(fakeEvent);
+    comp['onSearch'](fakeEvent);
     comp.goToPage(2);
     f.detectChanges();
     await f.whenStable();
@@ -3569,7 +3569,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const fakeEvent = { target: { value: '5' } } as unknown as Event;
-    comp.onPageSizeChange(fakeEvent);
+    comp['onPageSizeChange'](fakeEvent);
     f.detectChanges();
     await f.whenStable();
     expect(comp.effectivePageSize()).toBe(5);
@@ -3595,7 +3595,7 @@ describe('NeuTableComponent', () => {
     comp.sortBy('age', { shiftKey: true } as MouseEvent);
     f.detectChanges();
     await f.whenStable();
-    const entries = comp._sortEntries();
+    const entries = comp['_sortEntries']();
     expect(entries.length).toBe(2);
     expect(entries[0].key).toBe('name');
     expect(entries[1].key).toBe('age');
@@ -3620,7 +3620,7 @@ describe('NeuTableComponent', () => {
     comp.sortBy('name', { shiftKey: true } as MouseEvent); // toggle direction
     f.detectChanges();
     await f.whenStable();
-    const entries = comp._sortEntries();
+    const entries = comp['_sortEntries']();
     expect(entries[0].key).toBe('name');
     expect(entries[0].dir).toBe('desc');
   });
@@ -3644,7 +3644,7 @@ describe('NeuTableComponent', () => {
     comp.sortBy('city', { shiftKey: false } as MouseEvent);
     f.detectChanges();
     await f.whenStable();
-    const entries = comp._sortEntries();
+    const entries = comp['_sortEntries']();
     expect(entries.length).toBe(1);
     expect(entries[0].key).toBe('city');
   });
@@ -3813,7 +3813,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    expect(comp.getRowClass(DATA[0])).toBe('');
+    expect(comp['getRowClass'](DATA[0])).toBe('');
   });
 
   // ── filteredData: colFilter with null/empty value skipped ─────────────
@@ -3939,7 +3939,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    comp.onSearch({ target: { value: 'Ana' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'Ana' } } as unknown as Event);
     f.detectChanges();
     await f.whenStable();
     const clearBtn = f.nativeElement.querySelector('.neu-table__search-clear');
@@ -3959,7 +3959,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    comp.onSearch({ target: { value: 'Ana' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'Ana' } } as unknown as Event);
     f.detectChanges();
     await f.whenStable();
     const clearBtn = f.nativeElement.querySelector('.neu-table__search-clear');
@@ -3985,7 +3985,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
     // Search for something that produces no results
-    comp.onSearch({ target: { value: 'zzzzNONEXISTENT' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'zzzzNONEXISTENT' } } as unknown as Event);
     f.detectChanges();
     await f.whenStable();
     const clearFilterBtn = f.nativeElement.querySelector('.neu-table__clear-filter');
@@ -4005,7 +4005,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    comp.onSearch({ target: { value: 'zzzzNONEXISTENT' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'zzzzNONEXISTENT' } } as unknown as Event);
     f.detectChanges();
     await f.whenStable();
     const clearFilterBtn = f.nativeElement.querySelector('.neu-table__clear-filter');
@@ -4113,7 +4113,7 @@ describe('NeuTableComponent', () => {
     f.componentRef.setInput('pageSize', 10);
     f.detectChanges();
     await f.whenStable();
-    (f.componentInstance as any)._pageSizeControl.setValue('5');
+    (f.componentInstance as any)['_pageSizeControl'].setValue('5');
     f.detectChanges();
     await f.whenStable();
     expect((f.componentInstance as any).effectivePageSize()).toBe(5);
@@ -4139,7 +4139,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(comp._pageSizeControl.value).toBe('5');
+    expect(comp['_pageSizeControl'].value).toBe('5');
     expect(onPageSizeChangeSpy).not.toHaveBeenCalled();
   });
 
@@ -4212,7 +4212,7 @@ describe('NeuTableComponent', () => {
     checkboxes[0].dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance.isRowSelected(DATA[0] as any)).toBe(true);
+    expect(f.componentInstance['isRowSelected'](DATA[0] as any)).toBe(true);
   });
 
   it('clicking select-all checkbox via DOM selects all rows', async () => {
@@ -4391,18 +4391,18 @@ describe('NeuTableComponent', () => {
 
       expect(comp.rows()).toHaveLength(MANY_ROWS.length);
       expect(comp._scrollContainer()).toBeTruthy();
-      expect(comp._virtualRowHeight()).toBe(48);
-      expect(comp._virtualHeaderHeight()).toBe(96);
-      expect(comp._virtualScrollActive()).toBe(true);
+      expect(comp['_virtualRowHeight']()).toBe(48);
+      expect(comp['_virtualHeaderHeight']()).toBe(96);
+      expect(comp['_virtualScrollActive']()).toBe(true);
       expect(comp.virtualContainerMaxHeight()).toBe('336px');
       expect(comp.visiblePageRows().length).toBeGreaterThan(0);
 
-      comp.onTableScroll({ target: { scrollTop: 520 } } as unknown as Event);
+      comp['onTableScroll']({ target: { scrollTop: 520 } } as unknown as Event);
 
-      expect(comp._virtualStartIndex()).toBeGreaterThan(0);
-      expect(comp._virtualEndIndex()).toBeGreaterThan(comp._virtualStartIndex());
-      expect(comp._virtualTopSpacerHeight()).toBeGreaterThan(0);
-      expect(comp._virtualBottomSpacerHeight()).toBeGreaterThanOrEqual(0);
+      expect(comp['_virtualStartIndex']()).toBeGreaterThan(0);
+      expect(comp['_virtualEndIndex']()).toBeGreaterThan(comp['_virtualStartIndex']());
+      expect(comp['_virtualTopSpacerHeight']()).toBeGreaterThan(0);
+      expect(comp['_virtualBottomSpacerHeight']()).toBeGreaterThanOrEqual(0);
     } finally {
       HTMLElement.prototype.scrollTo = originalScrollTo;
     }
@@ -4417,7 +4417,7 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
 
     const comp = f.componentInstance as any;
-    comp.onTableScroll({ target: { scrollTop: 300 } } as unknown as Event);
+    comp['onTableScroll']({ target: { scrollTop: 300 } } as unknown as Event);
 
     expect(comp._virtualScrollTop()).toBe(0);
   });
@@ -4434,11 +4434,11 @@ describe('NeuTableComponent', () => {
     await f.whenStable();
 
     const comp = f.componentInstance as any;
-    const control = comp.columnFilterControl('name');
+    const control = comp['columnFilterControl']('name');
     control.setValue('Ana');
     f.detectChanges();
 
-    expect(comp.getColumnFilterValue('name')).toBe('Ana');
+    expect(comp['getColumnFilterValue']('name')).toBe('Ana');
   });
 
   it('toolbar export buttons should call every enabled exporter via DOM', async () => {
@@ -4481,7 +4481,7 @@ describe('NeuTableComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    comp.toggleRow(DATA[0]);
+    comp['toggleRow'](DATA[0]);
     f.detectChanges();
 
     const clearBtn = f.nativeElement.querySelector(
@@ -4503,7 +4503,7 @@ describe('NeuTableComponent', () => {
     f.componentInstance.selectionActionClick.subscribe((event: any) => events.push(event));
     f.detectChanges();
     await f.whenStable();
-    (f.componentInstance as any).toggleRow(DATA[0]);
+    (f.componentInstance as any)['toggleRow'](DATA[0]);
     f.detectChanges();
 
     const actions = f.nativeElement.querySelectorAll(
@@ -4760,7 +4760,7 @@ describe('NeuTableComponent generic data API', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    table.toggleRow(READONLY_TYPED_USERS[0]);
+    table['toggleRow'](READONLY_TYPED_USERS[0]);
 
     expect(emitted).toHaveLength(1);
     expect(emitted[0]).toEqual([READONLY_TYPED_USERS[0]]);
@@ -4778,12 +4778,12 @@ describe('NeuTableComponent generic data API', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(table.getRowKey(original)).toBe(0);
-    table.toggleRow(original);
+    expect(table['getRowKey'](original)).toBe(0);
+    table['toggleRow'](original);
     table.expandRow(original);
 
-    expect(table.isRowSelected(reconstructed)).toBe(true);
-    expect(table.isRowExpanded(reconstructed)).toBe(true);
+    expect(table['isRowSelected'](reconstructed)).toBe(true);
+    expect(table['isRowExpanded'](reconstructed)).toBe(true);
   });
 
   it('emits a typed action event with the original row reference', async () => {
@@ -4802,7 +4802,7 @@ describe('NeuTableComponent generic data API', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    table.handleAction(READONLY_TYPED_USERS[0], action);
+    table['handleAction'](READONLY_TYPED_USERS[0], action);
 
     expect(emitted).toHaveLength(1);
     expect(emitted[0]?.action).toBe(action);
@@ -4832,7 +4832,7 @@ describe('NeuTableComponent generic data API', () => {
     await fixture.whenStable();
 
     table.startCellEdit(READONLY_TYPED_USERS[0], editableColumn);
-    table.setEditingValue('Zero edited');
+    table['setEditingValue']('Zero edited');
     table.commitCellEdit(READONLY_TYPED_USERS[0], editableColumn);
 
     expect(emitted).toHaveLength(1);
@@ -4855,7 +4855,7 @@ describe('NeuTableComponent generic data API', () => {
     await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain('Zero <zero@example.com>');
-    expect(fixture.componentInstance.getCellValue(READONLY_TYPED_USERS[0], computedColumn)).toBe(
+    expect(fixture.componentInstance['getCellValue'](READONLY_TYPED_USERS[0], computedColumn)).toBe(
       'Zero <zero@example.com>',
     );
   });
@@ -4923,7 +4923,7 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.componentInstance.toggleColumnVisibility('age');
+    f.componentInstance['toggleColumnVisibility']('age');
     f.detectChanges();
 
     expect(f.nativeElement.textContent).not.toContain('Edad');
@@ -4939,7 +4939,7 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.componentInstance.moveColumn('age', -1);
+    f.componentInstance['moveColumn']('age', -1);
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ previousIndex: 1, currentIndex: 0 }),
@@ -4971,7 +4971,7 @@ describe('NeuTableComponent advanced layout features', () => {
     const row = DATA[0] as any;
     const col = { key: 'name', header: 'Nombre', editable: true } as any;
     f.componentInstance.startCellEdit(row, col);
-    f.componentInstance.setEditingValue('Ana Editada');
+    f.componentInstance['setEditingValue']('Ana Editada');
     f.componentInstance.commitCellEdit(row, col);
 
     expect(spy).toHaveBeenCalledWith(
@@ -5005,9 +5005,9 @@ describe('NeuTableComponent advanced layout features', () => {
     chooser.checked = false;
     chooser.dispatchEvent(new Event('change', { bubbles: true }));
     f.detectChanges();
-    expect(f.componentInstance.isColumnVisible('name')).toBe(false);
+    expect(f.componentInstance['isColumnVisible']('name')).toBe(false);
 
-    f.componentInstance.toggleColumnVisibility('name');
+    f.componentInstance['toggleColumnVisibility']('name');
     f.detectChanges();
     const resize = f.nativeElement.querySelector('.neu-table__resize-handle') as HTMLButtonElement;
     resize.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
@@ -5088,7 +5088,7 @@ describe('NeuTableComponent advanced layout features', () => {
     await f.whenStable();
 
     const comp = f.componentInstance as any;
-    expect(comp._virtualRowHeight()).toBe(64);
+    expect(comp['_virtualRowHeight']()).toBe(64);
 
     const container = f.nativeElement.querySelector('.neu-table__scroll-container') as HTMLElement;
     Object.defineProperty(container, 'scrollTop', { configurable: true, value: 300 });
@@ -5097,8 +5097,8 @@ describe('NeuTableComponent advanced layout features', () => {
     await f.whenStable();
 
     expect(f.nativeElement.querySelector('.neu-table__spacer-row')).toBeTruthy();
-    expect(comp._virtualTopSpacerHeight()).toBeGreaterThan(0);
-    expect(comp._virtualBottomSpacerHeight()).toBeGreaterThanOrEqual(0);
+    expect(comp['_virtualTopSpacerHeight']()).toBeGreaterThan(0);
+    expect(comp['_virtualBottomSpacerHeight']()).toBeGreaterThanOrEqual(0);
   });
 
   it('applies layouts with stale keys and emits layout changes for real width resets', async () => {
@@ -5117,18 +5117,18 @@ describe('NeuTableComponent advanced layout features', () => {
 
     expect(f.componentInstance.currentLayout().columnOrder).toEqual(['city', 'name', 'age']);
     expect(f.componentInstance.currentLayout().hiddenColumns).toEqual(['age']);
-    expect(f.componentInstance.columnWidth(RESIZABLE_COLUMNS[0])).toBe('222px');
+    expect(f.componentInstance['columnWidth'](RESIZABLE_COLUMNS[0])).toBe('222px');
 
     const preventDefault = vi.fn();
     const stopPropagation = vi.fn();
-    f.componentInstance.resetColumnWidth('name', {
+    f.componentInstance['resetColumnWidth']('name', {
       preventDefault,
       stopPropagation,
     } as unknown as Event);
 
     expect(preventDefault).toHaveBeenCalled();
     expect(stopPropagation).toHaveBeenCalled();
-    expect(f.componentInstance.columnWidth(RESIZABLE_COLUMNS[0])).toBe('120px');
+    expect(f.componentInstance['columnWidth'](RESIZABLE_COLUMNS[0])).toBe('120px');
     expect(layoutEvents.length).toBeGreaterThan(0);
 
     f.componentInstance.applyLayout({
@@ -5180,9 +5180,9 @@ describe('NeuTableComponent advanced layout features', () => {
 
     const comp = f.componentInstance as any;
     comp.startCellEdit(row, editableColumn, new MouseEvent('dblclick'));
-    expect(comp.isEditingCell(row, editableColumn)).toBe(false);
-    expect(comp.inlineEditorType(editableColumn)).toBe('select');
-    expect(comp.inlineEditorOptions(editableColumn)).toEqual([
+    expect(comp['isEditingCell'](row, editableColumn)).toBe(false);
+    expect(comp['inlineEditorType'](editableColumn)).toBe('select');
+    expect(comp['inlineEditorOptions'](editableColumn)).toEqual([
       { label: 'Ana', value: 'Ana' },
       { label: 'Luis', value: 'Luis' },
     ]);
@@ -5195,10 +5195,10 @@ describe('NeuTableComponent advanced layout features', () => {
       stopPropagation,
     } as unknown as Event);
     expect(stopPropagation).toHaveBeenCalled();
-    expect(comp.editingValue()).toBe('');
-    comp.setEditingValue('Ana');
+    expect(comp['editingValue']()).toBe('');
+    comp['setEditingValue']('Ana');
     comp.commitCellEdit(row, { key: 'other', header: 'Other', editable: true });
-    expect(comp.isEditingCell(row, editableColumn)).toBe(true);
+    expect(comp['isEditingCell'](row, editableColumn)).toBe(true);
 
     const preventDefault = vi.fn();
     comp.cancelCellEdit({
@@ -5206,7 +5206,7 @@ describe('NeuTableComponent advanced layout features', () => {
       preventDefault,
     } as unknown as Event);
     expect(preventDefault).toHaveBeenCalled();
-    expect(comp.isEditingCell(row, editableColumn)).toBe(false);
+    expect(comp['isEditingCell'](row, editableColumn)).toBe(false);
   });
 
   it('handles selection action visibility, disabled state and non-lucide icons in the rendered bar', async () => {
@@ -5231,7 +5231,7 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
 
-    (f.componentInstance as any).toggleRow(DATA[0]);
+    (f.componentInstance as any)['toggleRow'](DATA[0]);
     f.detectChanges();
     await f.whenStable();
 
@@ -5278,9 +5278,9 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.componentInstance.onPageSizeChange({ target: { value: 'nope' } });
+    f.componentInstance['onPageSizeChange']({ target: { value: 'nope' } });
     expect(f.componentInstance.effectivePageSize()).toBe(5);
-    f.componentInstance.onPageSizeChange(0);
+    f.componentInstance['onPageSizeChange'](0);
     expect(f.componentInstance.effectivePageSize()).toBe(5);
 
     f.componentInstance.goToPage(-10);
@@ -5322,22 +5322,22 @@ describe('NeuTableComponent advanced layout features', () => {
       'status',
       'missing',
     ]);
-    expect(comp._filterOpts(comp.columns()[1])).toEqual([
+    expect(comp['_filterOpts'](comp.columns()[1])).toEqual([
       { label: 'All', value: '' },
       { label: 'active', value: 'active' },
       { label: 'inactive', value: 'inactive' },
     ]);
     expect(comp.effectivePageSize()).toBe(2);
-    expect(comp._virtualRowHeight()).toBe(34);
-    expect(comp._virtualEndIndex()).toBe(2);
-    expect(comp._virtualTopSpacerHeight()).toBe(0);
-    expect(comp._virtualBottomSpacerHeight()).toBe(0);
+    expect(comp['_virtualRowHeight']()).toBe(34);
+    expect(comp['_virtualEndIndex']()).toBe(2);
+    expect(comp['_virtualTopSpacerHeight']()).toBe(0);
+    expect(comp['_virtualBottomSpacerHeight']()).toBe(0);
     expect(comp.visiblePageEntries().map((entry: any) => entry.kind)).toEqual(['row', 'row']);
 
     comp.setExactMatch(true);
-    comp.onSearch({ target: { value: 'Cell Ana' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'Cell Ana' } } as unknown as Event);
     expect(comp.filteredData().map((row: any) => row['id'])).toEqual([1]);
-    comp.onSearch({ target: { value: 'Activo' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'Activo' } } as unknown as Event);
     expect(comp.filteredData().map((row: any) => row['id'])).toEqual([1]);
     comp.setColumnFilter('status', 'no-match');
     expect(comp.filteredData()).toEqual([]);
@@ -5355,7 +5355,7 @@ describe('NeuTableComponent advanced layout features', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
 
-    expect(comp._virtualScrollActive()).toBe(false);
+    expect(comp['_virtualScrollActive']()).toBe(false);
     expect(comp.visiblePageEntries()[0]).toEqual(
       expect.objectContaining({ kind: 'group', label: '—', count: 1 }),
     );
@@ -5383,7 +5383,7 @@ describe('NeuTableComponent advanced layout features', () => {
     const preventDefault = vi.fn();
     const stopPropagation = vi.fn();
 
-    f.componentInstance.startColumnResize(col, {
+    f.componentInstance['startColumnResize'](col, {
       currentTarget: document.createElement('button'),
       clientX: 50,
       preventDefault,
@@ -5393,7 +5393,7 @@ describe('NeuTableComponent advanced layout features', () => {
     window.dispatchEvent(new MouseEvent('pointerup'));
     expect(resizeEvents).toEqual([]);
 
-    f.componentInstance.startColumnResize(col, {
+    f.componentInstance['startColumnResize'](col, {
       currentTarget: document.createElement('button'),
       clientX: 50,
       preventDefault,
@@ -5419,8 +5419,8 @@ describe('NeuTableComponent advanced layout features', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
 
-    expect(comp.editingValue()).toBe('');
-    comp.setEditingValue('ignored');
+    expect(comp['editingValue']()).toBe('');
+    comp['setEditingValue']('ignored');
     comp.commitCellEdit(DATA[0], col);
     expect(commits).toEqual([]);
   });
@@ -5443,9 +5443,9 @@ describe('NeuTableComponent advanced layout features', () => {
       'city',
     ]);
 
-    comp.toggleColumnVisibility('name');
-    comp.toggleColumnVisibility('age');
-    comp.toggleColumnVisibility('city');
+    comp['toggleColumnVisibility']('name');
+    comp['toggleColumnVisibility']('age');
+    comp['toggleColumnVisibility']('city');
     expect(comp.visibleColumns().length).toBe(1);
 
     const layouts: unknown[] = [];
@@ -5470,7 +5470,7 @@ describe('NeuTableComponent advanced layout features', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const control = comp.columnFilterControl('name');
+    const control = comp['columnFilterControl']('name');
     control.setValue('old');
     comp.setColumnFilter('name', 'Ana');
     f.detectChanges();
@@ -5496,7 +5496,7 @@ describe('NeuTableComponent advanced layout features', () => {
     comp.sortBy('age', { shiftKey: true } as MouseEvent);
     comp.sortBy('age', { shiftKey: true } as MouseEvent);
     comp.sortBy('city', { shiftKey: true } as MouseEvent);
-    expect(comp._sortEntries()).toEqual([
+    expect(comp['_sortEntries']()).toEqual([
       { key: 'age', dir: 'desc' },
       { key: 'city', dir: 'asc' },
     ]);
@@ -5504,7 +5504,7 @@ describe('NeuTableComponent advanced layout features', () => {
 
     comp.sortBy('name');
     comp.sortBy('name');
-    expect(comp._sortEntries()).toEqual([{ key: 'name', dir: 'desc' }]);
+    expect(comp['_sortEntries']()).toEqual([{ key: 'name', dir: 'desc' }]);
 
     f.componentRef.setInput('multiSort', false);
     f.detectChanges();
@@ -5538,9 +5538,9 @@ describe('NeuTableComponent advanced layout features', () => {
 
     comp.goToPage(3);
     comp.sortBy('name');
-    comp.onSearch({ target: { value: 'Ana' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'Ana' } } as unknown as Event);
     comp.clearSearch();
-    comp.onPageSizeChange({ target: { value: 20 } });
+    comp['onPageSizeChange']({ target: { value: 20 } });
     comp.setColumnFilter('city', 'Madrid');
 
     expect(states.length).toBeGreaterThanOrEqual(6);
@@ -5554,7 +5554,7 @@ describe('NeuTableComponent advanced layout features', () => {
     await f.whenStable();
     comp.sortBy('age', { shiftKey: true } as MouseEvent);
     comp.goToPage(2);
-    comp.onSearch({ target: { value: 'Luis' } } as unknown as Event);
+    comp['onSearch']({ target: { value: 'Luis' } } as unknown as Event);
     comp.clearSearch();
 
     expect(comp.urlStateOptions().enabled ?? true).toBe(true);
@@ -5577,17 +5577,17 @@ describe('NeuTableComponent advanced layout features', () => {
     await f.whenStable();
     const comp = f.componentInstance as any;
 
-    comp.onTableScroll({ target: { scrollTop: 260 } } as unknown as Event);
-    expect(comp._virtualScrollActive()).toBe(true);
-    expect(comp._virtualRowHeight()).toBe(64);
-    expect(comp._virtualTopSpacerHeight()).toBeGreaterThanOrEqual(0);
-    expect(comp._virtualBottomSpacerHeight()).toBeGreaterThanOrEqual(0);
+    comp['onTableScroll']({ target: { scrollTop: 260 } } as unknown as Event);
+    expect(comp['_virtualScrollActive']()).toBe(true);
+    expect(comp['_virtualRowHeight']()).toBe(64);
+    expect(comp['_virtualTopSpacerHeight']()).toBeGreaterThanOrEqual(0);
+    expect(comp['_virtualBottomSpacerHeight']()).toBeGreaterThanOrEqual(0);
     expect(comp.visiblePageEntries().some((entry: any) => entry.kind === 'group')).toBe(true);
 
     comp.expandRow(MANY_ROWS[0]);
     comp.toggleExpand(MANY_ROWS[1]);
-    expect(comp.isRowExpanded(MANY_ROWS[0])).toBe(false);
-    expect(comp.isRowExpanded(MANY_ROWS[1])).toBe(true);
+    expect(comp['isRowExpanded'](MANY_ROWS[0])).toBe(false);
+    expect(comp['isRowExpanded'](MANY_ROWS[1])).toBe(true);
 
     comp.toggleAll();
     expect(comp.isAllFilteredSelected()).toBe(true);
@@ -5642,7 +5642,7 @@ describe('NeuTableComponent advanced layout features', () => {
         ...f.componentInstance.exportOptions(),
         scope: 'selected',
       });
-      f.componentInstance.toggleRow({
+      f.componentInstance['toggleRow']({
         id: 2,
         name: 'Chosen',
         amount: 20,
@@ -5723,19 +5723,19 @@ describe('NeuTableComponent advanced layout features', () => {
           debugElement.componentInstance as NeuSelectComponent<RoleFilterOption, number>,
       );
     expect(selects).toHaveLength(2);
-    expect(selects[0].isOptionDisabled(roles[2])).toBe(true);
+    expect(selects[0]['isOptionDisabled'](roles[2])).toBe(true);
 
     table.setColumnFilter('roleId', 1);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('roleId')).toBe(1);
+    expect(table['getColumnFilterValue']('roleId')).toBe(1);
     expect(selects[0].selectedLabel()).toBe('Admin');
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
 
-    selects[0].selectOption(roles[2]);
+    selects[0]['selectOption'](roles[2]);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('roleId')).toBe(1);
+    expect(table['getColumnFilterValue']('roleId')).toBe(1);
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
 
     const nextRoles = [roles[0], { ...roles[1], name: 'Administrator' }, roles[2]];
@@ -5802,7 +5802,7 @@ describe('NeuTableComponent advanced layout features', () => {
     table.setColumnFilter('status', ['active', 'pending']);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toEqual(['active', 'pending']);
+    expect(table['getColumnFilterValue']('status')).toEqual(['active', 'pending']);
     expect(fixture.nativeElement.textContent).toContain('active');
     expect(fixture.nativeElement.textContent).toContain('pending');
     expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
@@ -5821,7 +5821,7 @@ describe('NeuTableComponent advanced layout features', () => {
     table.clearColumnFilters();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toBe('');
+    expect(table['getColumnFilterValue']('status')).toBe('');
     expect(fixture.nativeElement.textContent).toContain('All');
     expect(table.filteredData()).toHaveLength(3);
   });
@@ -5880,7 +5880,7 @@ describe('NeuTableComponent advanced layout features', () => {
       '.neu-multiselect__trigger',
     ) as HTMLElement | null;
     expect(trigger).toBeTruthy();
-    expect(multiselect.isOptionDisabled(statuses[2])).toBe(true);
+    expect(multiselect['isOptionDisabled'](statuses[2])).toBe(true);
 
     trigger?.click();
     fixture.detectChanges();
@@ -5894,7 +5894,7 @@ describe('NeuTableComponent advanced layout features', () => {
     activeOption!.click();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toEqual(['active']);
+    expect(table['getColumnFilterValue']('status')).toEqual(['active']);
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
     expect(
       fixture.nativeElement.querySelector('.neu-multiselect__count-badge')?.textContent,
@@ -5905,7 +5905,7 @@ describe('NeuTableComponent advanced layout features', () => {
     archivedOption!.click();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toEqual(['active']);
+    expect(table['getColumnFilterValue']('status')).toEqual(['active']);
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
 
     const clear = fixture.nativeElement.querySelector(
@@ -5915,7 +5915,7 @@ describe('NeuTableComponent advanced layout features', () => {
     clear!.click();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toEqual([]);
+    expect(table['getColumnFilterValue']('status')).toEqual([]);
     expect(table.filteredData()).toHaveLength(3);
   });
 
@@ -5986,20 +5986,20 @@ describe('NeuTableComponent advanced layout features', () => {
     const comp = f.componentInstance as any;
     expect(comp._scrollContainer()).toBeTruthy();
 
-    expect(comp._filterOpts(comp.columns()[0])).toEqual([{ label: 'All', value: '' }]);
-    expect(comp.columnWidth(comp.columns()[0])).toBe('auto');
+    expect(comp['_filterOpts'](comp.columns()[0])).toEqual([{ label: 'All', value: '' }]);
+    expect(comp['columnWidth'](comp.columns()[0])).toBe('auto');
     expect(comp._columnWidthPx(comp.columns()[0])).toBeNull();
     expect(comp._columnWidthPx(comp.columns()[2])).toBeNull();
-    expect(comp.columnWidth(comp.columns()[2])).toBe('wide');
-    expect(comp.getCellValue({ price: 9 }, comp.columns()[2])).toContain('€');
+    expect(comp['columnWidth'](comp.columns()[2])).toBe('wide');
+    expect(comp['getCellValue']({ price: 9 }, comp.columns()[2])).toContain('€');
 
     comp.sortBy('name', { shiftKey: true } as MouseEvent);
     comp.sortBy('name', { shiftKey: true } as MouseEvent);
     comp.sortBy('name', { shiftKey: true } as MouseEvent);
-    expect(comp._sortEntries()[0].dir).toBe('asc');
+    expect(comp['_sortEntries']()[0].dir).toBe('asc');
 
-    comp.onSearch({ target: { value: '' } } as unknown as Event);
-    comp.onPageSizeChange({ target: {} });
+    comp['onSearch']({ target: { value: '' } } as unknown as Event);
+    comp['onPageSizeChange']({ target: {} });
     expect(comp.currentPage()).toBe(1);
   });
 });
@@ -6026,9 +6026,9 @@ describe('NeuTableComponent canonical applied filter state', () => {
     table.setColumnFilter('name', 'Ana');
     table.setColumnFilter('score', 'invalid');
 
-    expect(table.getColumnFilterValue('name')).toBe('Ana');
-    expect(table.getColumnFilterValue('score')).toBe('invalid');
-    expect(table._columnFilters()).toEqual({ name: 'Ana', score: 'invalid' });
+    expect(table['getColumnFilterValue']('name')).toBe('Ana');
+    expect(table['getColumnFilterValue']('score')).toBe('invalid');
+    expect(table['_columnFilters']()).toEqual({ name: 'Ana', score: 'invalid' });
     expect(internal._appliedFilters()['name']).toEqual({
       operator: 'and',
       constraints: [{ value: 'Ana' }],
@@ -6040,17 +6040,17 @@ describe('NeuTableComponent canonical applied filter state', () => {
     expect(internal._appliedFilters()['score'].constraints[0]).not.toHaveProperty('validity');
     expect(internal._typedColumnFiltersState()).toEqual({});
     expect(table.filteredData()).toEqual([]);
-    expect(typeof table._columnFilters).toBe('function');
-    expect(typeof table._columnFilters.set).toBe('function');
-    expect(typeof table._columnFilters.update).toBe('function');
+    expect(typeof table['_columnFilters']).toBe('function');
+    expect(typeof table['_columnFilters'].set).toBe('function');
+    expect(typeof table['_columnFilters'].update).toBe('function');
 
-    const legacySignal: WritableSignal<Record<string, unknown>> = table._columnFilters;
+    const legacySignal: WritableSignal<Record<string, unknown>> = table['_columnFilters'];
     legacySignal.set({ name: 'Bea' });
     expect(internal._appliedFilters()).toEqual({
       name: { operator: 'and', constraints: [{ value: 'Bea' }] },
     });
     legacySignal.update((filters) => ({ ...filters, score: 10 }));
-    expect(table._columnFilters()).toEqual({ name: 'Bea', score: 10 });
+    expect(table['_columnFilters']()).toEqual({ name: 'Bea', score: 10 });
     expect(internal._appliedFilters()['score']).toEqual({
       operator: 'and',
       constraints: [{ mode: 'equals', value: 10 }],
@@ -6104,9 +6104,9 @@ describe('NeuTableComponent canonical applied filter state', () => {
       value: { from: '2026-08-20', to: '2026-08-20' },
       projectionValue: rangeInput,
     });
-    expect(table.getColumnFilterValue('dateOnly')).toBe(boundaryInstant);
-    expect(table.getColumnFilterValue('createdAt')).toBe(instantDate);
-    expect(table.getColumnFilterValue('dateOnlyRange')).toBe(rangeInput);
+    expect(table['getColumnFilterValue']('dateOnly')).toBe(boundaryInstant);
+    expect(table['getColumnFilterValue']('createdAt')).toBe(instantDate);
+    expect(table['getColumnFilterValue']('dateOnlyRange')).toBe(rangeInput);
 
     table.setColumnFilter('dateOnly', 'not-a-date');
     expect(internal._appliedFilters()['dateOnly'].constraints[0]).toEqual({
@@ -6199,8 +6199,8 @@ describe('NeuTableComponent canonical applied filter state', () => {
     expect(dateControl?.value).toBe(dateControlValue);
     expect(rangeStartControl?.value).toBe(rangeStartValue);
     expect(rangeEndControl?.value).toBe(rangeEndValue);
-    expect(table.getColumnFilterValue('createdAt')).toBe(original);
-    expect(table.getColumnFilterValue('dateOnlyRange')).toBe(range);
+    expect(table['getColumnFilterValue']('createdAt')).toBe(original);
+    expect(table['getColumnFilterValue']('dateOnlyRange')).toBe(range);
   });
 
   it('shallow-snapshots MultiSelect arrays while preserving option object identity', async () => {
@@ -6253,7 +6253,7 @@ describe('NeuTableComponent canonical applied filter state', () => {
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
     expect(internal._typedMultiSelectFilterControls.get('status')).toBe(control);
     expect(control?.value).toEqual([active]);
-    expect(table.getColumnFilterValue('status')).toBe(selected);
+    expect(table['getColumnFilterValue']('status')).toBe(selected);
   });
 
   it('matches internal AND/OR constraints and omits untruthful simple projections', async () => {
@@ -6294,8 +6294,8 @@ describe('NeuTableComponent canonical applied filter state', () => {
       ],
     });
     expect(table.filteredData().map((row) => row.id)).toEqual([1, 3]);
-    expect(table.getColumnFilterValue('name')).toBe('');
-    expect(table._columnFilters()).toEqual({});
+    expect(table['getColumnFilterValue']('name')).toBe('');
+    expect(table['_columnFilters']()).toEqual({});
     expect(internal._typedColumnFiltersState()).toEqual({});
 
     table.clearColumnFilters();
@@ -6333,7 +6333,7 @@ describe('NeuTableComponent canonical applied filter state', () => {
       operator: 'and',
       constraints: [{ mode: 'equals', value: 'viewer' }],
     });
-    expect(table.getColumnFilterValue('role')).toBe('viewer');
+    expect(table['getColumnFilterValue']('role')).toBe('viewer');
     expect(table.filteredData().map((row) => row.id)).toEqual([3]);
   });
 
@@ -6437,7 +6437,7 @@ describe('NeuTableComponent canonical applied filter state', () => {
 
     expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
     expect(internal._localOnlyFilters()).toEqual(['customStatus']);
-    expect(table._columnFilters()).toEqual({});
+    expect(table['_columnFilters']()).toEqual({});
     expect(internal._typedColumnFiltersState()).toEqual({});
     internal._emitServerState({});
     expect(states).toHaveLength(1);
@@ -6480,7 +6480,7 @@ describe('NeuTableComponent canonical applied filter state', () => {
     control!.setValue('three');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('name')).toBe('three');
+    expect(table['getColumnFilterValue']('name')).toBe('three');
 
     table.clearColumnFilters();
     fixture.detectChanges();
@@ -6545,7 +6545,7 @@ describe('NeuTableComponent canonical applied filter state', () => {
     ]);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('score')).toBe(10);
+    expect(table['getColumnFilterValue']('score')).toBe(10);
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
 
     fixture.componentRef.setInput('columns', [
@@ -6583,7 +6583,7 @@ describe('NeuTableComponent canonical applied filter state', () => {
     ] satisfies NeuTableColumn<DynamicRow, string>[]);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('role')).toBe('');
+    expect(table['getColumnFilterValue']('role')).toBe('');
   });
 
   it('cleans canonical state, cached controls and subscriptions across dynamic column changes', async () => {
@@ -6605,12 +6605,12 @@ describe('NeuTableComponent canonical applied filter state', () => {
     ]);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('value')).toBe('');
+    expect(table['getColumnFilterValue']('value')).toBe('');
     const numberControl = internal._typedColumnFilterControls.get('value');
     expect(numberControl).toBeTruthy();
     expect(numberControl).not.toBe(textControl);
     textControl!.setValue('orphaned');
-    expect(table.getColumnFilterValue('value')).toBe('');
+    expect(table['getColumnFilterValue']('value')).toBe('');
 
     fixture.componentRef.setInput('columns', [
       {
@@ -6632,17 +6632,17 @@ describe('NeuTableComponent canonical applied filter state', () => {
     ]);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('value')).toBe('');
+    expect(table['getColumnFilterValue']('value')).toBe('');
     expect(internal._typedColumnFilterControls.get('value')).not.toBe(dateOnlyControl);
     dateOnlyControl!.setValue('2026-08-20');
-    expect(table.getColumnFilterValue('value')).toBe('');
+    expect(table['getColumnFilterValue']('value')).toBe('');
 
     table.setColumnFilter('value', '2026-08-20T10:30:00.000Z');
     const instantControl = internal._typedColumnFilterControls.get('value');
     fixture.componentRef.setInput('columns', []);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('value')).toBe('');
+    expect(table['getColumnFilterValue']('value')).toBe('');
     expect(internal._typedColumnFilterControls.has('value')).toBe(false);
     expect(internal._appliedFilters()).toEqual({});
     instantControl!.setValue('2026-08-21T10:30');
@@ -7158,7 +7158,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     unrelated.detectChanges();
     await settle(fixture);
 
-    const unrelatedPanel = document.getElementById(unrelated.componentInstance._panelId)!;
+    const unrelatedPanel = document.getElementById(unrelated.componentInstance['_panelId'])!;
     const unrelatedPane = unrelatedPanel.closest<HTMLElement>('.cdk-overlay-pane')!;
     expect(unrelatedPanel).toBeTruthy();
     expect(internal._filterOverlaySessionPanes()).toHaveLength(2);
@@ -7178,7 +7178,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
     await settle(fixture);
     expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
-    expect(document.getElementById(unrelated.componentInstance._panelId)).toBe(unrelatedPanel);
+    expect(document.getElementById(unrelated.componentInstance['_panelId'])).toBe(unrelatedPanel);
 
     unrelated.destroy();
   });
@@ -7242,7 +7242,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     document.querySelector<HTMLElement>('.neu-select__option')!.click();
     await settle(fixture);
 
-    expect(table._columnFilters()).toEqual({});
+    expect(table['_columnFilters']()).toEqual({});
     expect(internal._appliedFilters()).toEqual({});
     expect(table.filteredData()).toEqual(OVERLAY_FILTER_DATA);
   });
@@ -7534,16 +7534,16 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     guest.click();
     await settle(fixture);
     expect(internal._filterDraftValue()).toBe(0);
-    expect(table.getColumnFilterValue('roleId')).toBe(1);
+    expect(table['getColumnFilterValue']('roleId')).toBe(1);
     overlayAction('Cancel').click();
     await settle(fixture);
-    expect(table.getColumnFilterValue('roleId')).toBe(1);
+    expect(table['getColumnFilterValue']('roleId')).toBe(1);
 
     await openOptionFilter(fixture, 'Role');
     internal._filterDraftRules()[0].selectControl.setValue(0);
     overlayAction('Apply').click();
     await settle(fixture);
-    expect(table.getColumnFilterValue('roleId')).toBe(0);
+    expect(table['getColumnFilterValue']('roleId')).toBe(0);
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
 
     const renamed = [
@@ -7560,7 +7560,7 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
       optionColumns[2],
     ]);
     await settle(fixture);
-    expect(table.getColumnFilterValue('roleId')).toBe(0);
+    expect(table['getColumnFilterValue']('roleId')).toBe(0);
     expect(
       (fixture.nativeElement as HTMLElement)
         .querySelector('.neu-table__filter-row neu-select .neu-select__value')
@@ -7586,7 +7586,7 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     expect(applied.constraints[0].value).toBe(ROLE_FILTER_OPTIONS[0]);
     expect(applied.constraints[1].value).toBe(ROLE_FILTER_OPTIONS[1]);
     expect(table.filteredData().map((row) => row.id)).toEqual([1, 2]);
-    expect(table.getColumnFilterValue('role')).toBe('');
+    expect(table['getColumnFilterValue']('role')).toBe('');
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('.neu-table__filter-multiple-summary')
         ?.textContent,
@@ -7635,7 +7635,7 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     await settle(fixture);
     const draftArray = internal._filterDraftRules()[0].multiSelectControl.value;
     expect(draftArray).toEqual(['active', 'pending']);
-    expect(table.getColumnFilterValue('status')).toBe('');
+    expect(table['getColumnFilterValue']('status')).toBe('');
     overlayAction('Apply').click();
     await settle(fixture);
 
@@ -7658,19 +7658,19 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
       },
     ]);
     await settle(fixture);
-    expect(table.getColumnFilterValue('status')).toEqual(['active', 'pending']);
+    expect(table['getColumnFilterValue']('status')).toEqual(['active', 'pending']);
     expect(canonical).toEqual(['active', 'pending']);
 
     await openOptionFilter(fixture, 'Status');
     internal._clearFilterDraft();
     overlayAction('Cancel').click();
     await settle(fixture);
-    expect(table.getColumnFilterValue('status')).toEqual(['active', 'pending']);
+    expect(table['getColumnFilterValue']('status')).toEqual(['active', 'pending']);
     await openOptionFilter(fixture, 'Status');
     internal._clearFilterDraft();
     overlayAction('Apply').click();
     await settle(fixture);
-    expect(table.getColumnFilterValue('status')).toBe('');
+    expect(table['getColumnFilterValue']('status')).toBe('');
   });
 
   it('serializes one Select or MultiSelect rule only when server Apply is pressed', async () => {
@@ -7783,7 +7783,7 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     overlayAction('Apply').click();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toBe('pending');
+    expect(table['getColumnFilterValue']('status')).toBe('pending');
 
     await openCustomFilter(fixture);
     input = document.querySelector<HTMLInputElement>('.custom-filter-input')!;
@@ -7798,21 +7798,21 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     document.querySelector<HTMLElement>('.neu-table__filter-overlay')!.dispatchEvent(escapeEvent);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toBe('pending');
+    expect(table['getColumnFilterValue']('status')).toBe('pending');
 
     await openCustomFilter(fixture);
     document.querySelector<HTMLButtonElement>('.custom-filter-clear')!.click();
     overlayAction('Cancel').click();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toBe('pending');
+    expect(table['getColumnFilterValue']('status')).toBe('pending');
 
     await openCustomFilter(fixture);
     document.querySelector<HTMLButtonElement>('.custom-filter-clear')!.click();
     overlayAction('Apply').click();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(table.getColumnFilterValue('status')).toBe('');
+    expect(table['getColumnFilterValue']('status')).toBe('');
 
     await openCustomFilter(fixture);
     fixture.componentInstance.showTemplate.set(false);
@@ -8057,7 +8057,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     internal._filterOverlayTextControl.setValue('Beta');
     document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
     await settle(fixture);
-    expect(table.getColumnFilterValue('name')).toBe('Alpha');
+    expect(table['getColumnFilterValue']('name')).toBe('Alpha');
     expect(table.filteredData().map((row) => row.name)).toEqual(['Alpha']);
 
     await open(fixture, 'Name');
@@ -8067,7 +8067,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     ).find((button) => button.textContent?.trim() === 'Cancel')!;
     cancel.click();
     await settle(fixture);
-    expect(table.getColumnFilterValue('name')).toBe('Alpha');
+    expect(table['getColumnFilterValue']('name')).toBe('Alpha');
   });
 
   it('preserves applied filters when Escape or an outside click cancels a draft', async () => {
@@ -8165,7 +8165,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     internal._filterOverlayNumberToControl.setValue(10);
     expect(internal._filterDraftValid()).toBe(false);
     internal._applyFilterDraft();
-    expect(table.getColumnFilterValue('score')).toBe(5);
+    expect(table['getColumnFilterValue']('score')).toBe(5);
 
     internal._filterOverlayNumberFromControl.setValue(5);
     internal._filterOverlayNumberToControl.setValue(15);
@@ -8339,7 +8339,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       ],
     });
     expect(table.filteredData().map((row) => row.name)).toEqual(['Alpha']);
-    expect(table.getColumnFilterValue('name')).toBe('');
+    expect(table['getColumnFilterValue']('name')).toBe('');
     expect(internal._typedColumnFiltersState()).toEqual({});
     expect(internal._filterOverlayRuleCount('name')).toBe(2);
     expect(
@@ -8715,7 +8715,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       operator: 'and',
       constraints: [{ mode: 'contains', value: 'Beta' }],
     });
-    expect(table.getColumnFilterValue('name')).toBe('Beta');
+    expect(table['getColumnFilterValue']('name')).toBe('Beta');
     expect(internal._hasMultipleAppliedRules('name')).toBe(false);
   });
 
@@ -8858,10 +8858,10 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     await fixture.whenStable();
     const events: Array<{ totalRecords: number }> = [];
     fixture.componentInstance.pageChange.subscribe((event) => events.push(event));
-    fixture.componentInstance.onPageSizeChange(5);
+    fixture.componentInstance['onPageSizeChange'](5);
     fixture.componentRef.setInput('totalItems', 20);
     fixture.detectChanges();
-    fixture.componentInstance.onPageSizeChange(6);
+    fixture.componentInstance['onPageSizeChange'](6);
     expect(events.map((event) => event.totalRecords)).toEqual([0, 20]);
   });
 

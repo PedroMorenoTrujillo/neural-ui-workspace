@@ -33,7 +33,7 @@ describe('NeuCarouselComponent', () => {
     const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
     fixture.componentRef.setInput('items', [1, 2, 3]); fixture.componentRef.setInput('circular', true); fixture.detectChanges();
     fixture.componentInstance.previous(); expect(fixture.componentInstance.page()).toBe(2);
-    fixture.componentInstance.onKeydown(new KeyboardEvent('keydown', { key: 'Home' })); expect(fixture.componentInstance.page()).toBe(0);
+    fixture.componentInstance['onKeydown'](new KeyboardEvent('keydown', { key: 'Home' })); expect(fixture.componentInstance.page()).toBe(0);
     fixture.componentInstance.onPointerDown(new PointerEvent('pointerdown', { clientX: 100, clientY: 0 })); fixture.componentInstance.onPointerUp(new PointerEvent('pointerup', { clientX: 20, clientY: 0 }));
     expect(fixture.componentInstance.page()).toBe(1);
   });
@@ -44,7 +44,7 @@ describe('NeuCarouselComponent', () => {
     const component = fixture.componentInstance;
     expect(component.pageCount()).toBe(1); expect(component.canNext()).toBe(false); expect(component.itemLabel(0)).toContain('0'); expect(component.pageLabel(0)).toContain('1');
     fixture.componentRef.setInput('items', [1, 2, 3, 4, 5]); fixture.componentRef.setInput('numVisible', 9); fixture.componentRef.setInput('numScroll', 0); fixture.componentRef.setInput('orientation', 'vertical'); fixture.detectChanges();
-    expect(component.effectiveVisible()).toBe(5); expect(component.effectiveScroll()).toBe(1); component.setPage(0, true); component.onKeydown(new KeyboardEvent('keydown', { key: 'End' })); component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp' })); component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' })); component.onKeydown(new KeyboardEvent('keydown', { key: 'Unknown' }));
+    expect(component.effectiveVisible()).toBe(5); expect(component.effectiveScroll()).toBe(1); component.setPage(0, true); component['onKeydown'](new KeyboardEvent('keydown', { key: 'End' })); component['onKeydown'](new KeyboardEvent('keydown', { key: 'ArrowUp' })); component['onKeydown'](new KeyboardEvent('keydown', { key: 'ArrowDown' })); component['onKeydown'](new KeyboardEvent('keydown', { key: 'Unknown' }));
     component.onPointerDown(new PointerEvent('pointerdown', { clientX: 0, clientY: 100 })); component.onPointerUp(new PointerEvent('pointerup', { clientX: 0, clientY: 20 })); component.onPointerUp(new PointerEvent('pointerup', { clientX: 0, clientY: 20 }));
     fixture.componentRef.setInput('circular', false); fixture.componentRef.setInput('page', 100); fixture.detectChanges(); expect(component.page()).toBe(0);
   });

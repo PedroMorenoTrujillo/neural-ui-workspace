@@ -10,14 +10,14 @@ import {
   deriveNeuOptionAnnouncementData,
   deriveNeuOptionAriaPosition,
   deriveNeuOptionResultCount,
-} from './neu-option-interaction-foundations.internal';
+} from './neu-option-interaction-foundations';
 import {
   InternalNeuOptionNormalizedRow,
   createNeuOptionLoadingRows,
   deriveNeuOptionRowId,
   normalizeNeuLegacyOptionGroups,
   normalizeNeuOptionRows,
-} from './neu-option-foundation.internal';
+} from './neu-option-foundation';
 
 interface Choice {
   readonly id: number;

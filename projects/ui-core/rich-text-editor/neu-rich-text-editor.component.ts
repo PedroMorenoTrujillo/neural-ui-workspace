@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   escapeRichTextAttribute,
   escapeRichTextHtml,

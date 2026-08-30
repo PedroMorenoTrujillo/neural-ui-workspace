@@ -74,7 +74,7 @@ describe('NeuTreeSelectComponent', () => {
 
     component.selectNode(nodes[0]);
     expect(component.values()).toEqual(['lazy']);
-    expect(component.isSelected('admin')).toBe(false);
+    expect(component['isSelected']('admin')).toBe(false);
   });
 
   it('owns multiple programmatic selections and emits a fresh selection proposal', () => {
@@ -375,7 +375,7 @@ describe('NeuTreeSelectComponent', () => {
     component.selectionChange.subscribe((selection) => emitted.push(selection));
 
     const child = departments[0]?.descendants?.[0];
-    expect(component.optionValueOf(child!)).toEqual(child);
+    expect(component['optionValueOf'](child!)).toEqual(child);
     component.selectNode(child!);
 
     expect(component.values()).toEqual([child]);
@@ -397,7 +397,7 @@ describe('NeuTreeSelectComponent', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.values()).toEqual(['editor']);
     fixture.componentInstance.selectNode('admin');
-    expect(fixture.componentInstance.isSelected('admin')).toBe(true);
+    expect(fixture.componentInstance['isSelected']('admin')).toBe(true);
   });
 
   it('supports optionValue function accessors for expanded/collapsed state', () => {

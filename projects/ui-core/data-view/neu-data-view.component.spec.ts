@@ -114,7 +114,7 @@ describe('NeuDataViewComponent', () => {
     search.dispatchEvent(new Event('input'));
     const modeButtons = fixture.nativeElement.querySelectorAll('.neu-data-view__mode') as NodeListOf<HTMLButtonElement>;
     modeButtons[1].click();
-    component._sortControl.setValue('name');
+    component['_sortControl'].setValue('name');
     fixture.detectChanges();
 
     expect(searches).toEqual(['beta']);
@@ -188,7 +188,7 @@ describe('NeuDataViewComponent', () => {
     component.setSort('meta.name');
     direct.detectChanges();
     await direct.whenStable();
-    expect(component._sortControl.value).toBe('meta.name');
+    expect(component['_sortControl'].value).toBe('meta.name');
 
     component.setQuery('nested');
     expect(component.filteredItems()).toEqual([{ meta: { name: 'Nested' } }]);
@@ -247,7 +247,7 @@ describe('NeuDataViewComponent', () => {
     expect(onlySort.nativeElement.querySelector('.neu-data-view__search')).toBeNull();
     expect(onlySort.nativeElement.querySelector('.neu-data-view__sort')).toBeTruthy();
     expect(onlySort.nativeElement.querySelector('.neu-data-view__modes')).toBeNull();
-    (onlySort.componentInstance as any)._sortControl.setValue(null);
+    (onlySort.componentInstance as any)['_sortControl'].setValue(null);
     expect(onlySort.componentInstance.sortKey()).toBe('');
 
     const onlySearch = TestBed.createComponent(NeuDataViewComponent);

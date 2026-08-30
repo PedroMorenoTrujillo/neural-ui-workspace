@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuColorMode = 'hex' | 'rgb' | 'hsl';
 
@@ -275,9 +275,9 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   readonly colorChange = output<string>();
 
   // ── Internal state ───────────────────────────────────────────────
-  readonly _id = inject(NeuIdGenerator).getId('neu-cp-');
-  readonly _modes: NeuColorMode[] = ['hex', 'rgb', 'hsl'];
-  readonly _swatches: string[] = [
+  private readonly _id = inject(NeuIdGenerator).getId('neu-cp-');
+  protected readonly _modes: NeuColorMode[] = ['hex', 'rgb', 'hsl'];
+  protected readonly _swatches: string[] = [
     '#ef4444',
     '#f97316',
     '#eab308',
@@ -290,13 +290,13 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
     '#ec4899',
   ];
 
-  readonly _isOpen = signal(false);
-  readonly _cvaDisabled = signal(false);
-  readonly _hasValue = signal(true);
-  readonly _hue = signal(210);
-  readonly _sv = signal({ s: 80, v: 90 });
-  readonly _activeMode = linkedSignal<NeuColorMode>(() => this.mode());
-  readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
+  protected readonly _isOpen = signal(false);
+  private readonly _cvaDisabled = signal(false);
+  private readonly _hasValue = signal(true);
+  protected readonly _hue = signal(210);
+  protected readonly _sv = signal({ s: 80, v: 90 });
+  protected readonly _activeMode = linkedSignal<NeuColorMode>(() => this.mode());
+  protected readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
   readonly triggerId = computed(() => this.inputId() || this._id);
 
   private _dragging = false;
@@ -305,7 +305,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
 
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _overlay = inject(Overlay);
-  readonly _viewportMargin = 16;
+  protected readonly _viewportMargin = 16;
   readonly overlayPositions: ConnectedPosition[] = [
     {
       originX: 'start',
@@ -333,7 +333,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
 
   // ── Close on outside click ─────────────────────────────────────
   @HostListener('document:mousedown', ['$event'])
-  _outsideClick(e: MouseEvent): void {
+  protected _outsideClick(e: MouseEvent): void {
     const target = e.target as Element | null;
     const isInsidePanel = !!target?.closest('.neu-cp__panel');
     if (!this._el.nativeElement.contains(e.target as Node) && !isInsidePanel) {
@@ -342,11 +342,11 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   }
 
   // ── Computed ──────────────────────────────────────────────────
-  readonly _hexValue = computed(() =>
+  protected readonly _hexValue = computed(() =>
     this._hasValue() ? hsvToHex(this._hue(), this._sv().s, this._sv().v) : '',
   );
 
-  readonly _textValue = computed(() => {
+  protected readonly _textValue = computed(() => {
     const hex = this._hexValue();
     if (!hex) return '';
     const rgb = hexToRgb(hex);
@@ -364,19 +364,19 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   });
 
   // ── Canvas interactions ───────────────────────────────────────
-  _canvasDown(e: PointerEvent): void {
+  protected _canvasDown(e: PointerEvent): void {
     if (this._isDisabled() || this.readonly()) return;
     this._dragging = true;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     this._updateFromCanvas(e);
   }
 
-  _canvasDrag(e: PointerEvent): void {
+  protected _canvasDrag(e: PointerEvent): void {
     if (!this._dragging || this._isDisabled() || this.readonly()) return;
     this._updateFromCanvas(e);
   }
 
-  _canvasUp(e: PointerEvent): void {
+  protected _canvasUp(e: PointerEvent): void {
     if (!this._dragging) return;
     this._dragging = false;
     (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
@@ -392,25 +392,25 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   }
 
   // ── Event handlers ────────────────────────────────────────────
-  _toggle(): void {
+  protected _toggle(): void {
     if (this._isDisabled()) return;
     this._isOpen.update((v) => !v);
   }
 
-  _onHueChange(v: number): void {
+  protected _onHueChange(v: number): void {
     if (this._isDisabled() || this.readonly()) return;
     this._hue.set(Number(v));
     this._hasValue.set(true);
     this._commitUserValue();
   }
 
-  _pickSwatch(hex: string): void {
+  protected _pickSwatch(hex: string): void {
     if (this._isDisabled() || this.readonly()) return;
     this._applyValue(hex);
     this._commitUserValue();
   }
 
-  _onTextChange(text: string): void {
+  protected _onTextChange(text: string): void {
     if (this._isDisabled() || this.readonly()) return;
     this._applyValue(text);
     this._commitUserValue();

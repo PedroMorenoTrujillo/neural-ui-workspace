@@ -27,9 +27,9 @@ import {
   NeuTextDirection,
   activateNeuMenuAction,
   resolveNeuMenuAction,
-} from '@neural-ui/core/menu-foundation';
+} from '@neural-ui/core/internal';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
-import { NeuResponsiveState } from '@neural-ui/core/foundation';
+import { NeuResponsiveState } from '@neural-ui/core/internal';
 
 export type NeuDockPosition = 'top' | 'right' | 'bottom' | 'left';
 

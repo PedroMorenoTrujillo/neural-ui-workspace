@@ -209,7 +209,7 @@ describe('NeuNavComponent', () => {
     ]);
     f.detectChanges();
     await f.whenStable();
-    f.componentInstance.toggleGroup('group-default-badge');
+    f.componentInstance['toggleGroup']('group-default-badge');
     f.detectChanges();
 
     const badges = Array.from(
@@ -264,7 +264,7 @@ describe('NeuNavComponent', () => {
     ]);
     f.detectChanges();
     await f.whenStable();
-    f.componentInstance.toggleGroup('group');
+    f.componentInstance['toggleGroup']('group');
     f.detectChanges();
 
     const anchors = Array.from(
@@ -394,9 +394,9 @@ describe('NeuNavComponent', () => {
     const comp = f.componentInstance;
 
     expect(comp.isGroupOpen('grp')).toBe(false);
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     expect(comp.isGroupOpen('grp')).toBe(true);
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     expect(comp.isGroupOpen('grp')).toBe(false);
   });
 
@@ -407,7 +407,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     f.detectChanges();
     await f.whenStable();
 
@@ -458,7 +458,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     f.detectChanges();
     await f.whenStable();
 
@@ -488,7 +488,7 @@ describe('NeuNavComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.componentInstance.toggleGroup('grp-badge-child');
+    f.componentInstance['toggleGroup']('grp-badge-child');
     f.detectChanges();
     await f.whenStable();
 
@@ -505,7 +505,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     f.detectChanges();
     await f.whenStable();
 
@@ -531,7 +531,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('parent');
+    comp['toggleGroup']('parent');
     f.detectChanges();
     await f.whenStable();
 
@@ -545,8 +545,8 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('parent');
-    comp.toggleGroup('subgrp');
+    comp['toggleGroup']('parent');
+    comp['toggleGroup']('subgrp');
     f.detectChanges();
     await f.whenStable();
 
@@ -560,7 +560,7 @@ describe('NeuNavComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.componentInstance.toggleGroup('parent');
+    f.componentInstance['toggleGroup']('parent');
     f.detectChanges();
     await f.whenStable();
 
@@ -583,8 +583,8 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('parent');
-    comp.toggleGroup('subgrp');
+    comp['toggleGroup']('parent');
+    comp['toggleGroup']('subgrp');
     f.detectChanges();
     await f.whenStable();
 
@@ -1095,7 +1095,7 @@ describe('NeuNavComponent', () => {
     f.componentRef.setInput('items', BADGED_GROUP);
     f.detectChanges();
     await f.whenStable();
-    f.componentInstance.toggleGroup('bg');
+    f.componentInstance['toggleGroup']('bg');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.textContent).toContain('5');
@@ -1132,8 +1132,8 @@ describe('NeuNavComponent', () => {
     f.componentRef.setInput('items', BADGED_NESTED);
     f.detectChanges();
     await f.whenStable();
-    f.componentInstance.toggleGroup('bn-parent');
-    f.componentInstance.toggleGroup('bn-sub');
+    f.componentInstance['toggleGroup']('bn-parent');
+    f.componentInstance['toggleGroup']('bn-sub');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.textContent).toContain('3');

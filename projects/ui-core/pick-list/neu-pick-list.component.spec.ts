@@ -98,7 +98,7 @@ describe('NeuPickListComponent', () => {
     component.toggleSource(0);
     component.moveToTarget();
     expect(emitted.at(-1)).toEqual([users[0]]);
-    expect(component.optionLabelOf(users[1])).toBe('Editor');
+    expect(component['optionLabelOf'](users[1])).toBe('Editor');
 
     domainFixture.componentRef.setInput('source', [users[1], users[2]]);
     domainFixture.componentRef.setInput('target', [users[0]]);
@@ -131,7 +131,7 @@ describe('NeuPickListComponent', () => {
     domainFixture.detectChanges();
     expect(component.isSourceSelected(reconstructed[0])).toBe(true);
     component.moveToTarget();
-    expect(component.optionLabelOf(reconstructed[0])).toBe('ALPHA (UPDATED)');
+    expect(component['optionLabelOf'](reconstructed[0])).toBe('ALPHA (UPDATED)');
   });
 
   it('keeps full objects for domain values and supports primitive options', () => {
@@ -148,7 +148,7 @@ describe('NeuPickListComponent', () => {
     objectFixture.componentInstance.moveToTarget();
     expect(objectTargetChange).toHaveBeenLastCalledWith([role]);
     expect(objectItemsChange).toHaveBeenLastCalledWith({ source: [], target: [role] });
-    expect(objectFixture.componentInstance.optionValueOf(role)).toBe(role);
+    expect(objectFixture.componentInstance['optionValueOf'](role)).toBe(role);
 
     const primitiveFixture = TestBed.createComponent(NeuPickListComponent) as ComponentFixture<NeuPickListComponent<string, string>>;
     primitiveFixture.componentRef.setInput('source', ['read', 'write']);
@@ -232,7 +232,7 @@ describe('NeuOrderListComponent', () => {
     fixture.detectChanges();
     const changed = vi.spyOn(fixture.componentInstance.orderChange, 'emit');
 
-    expect(fixture.componentInstance.optionLabelOf(items[0]!)).toBe('Alpha');
+    expect(fixture.componentInstance['optionLabelOf'](items[0]!)).toBe('Alpha');
     fixture.componentInstance.move(1, 1);
     expect(changed).not.toHaveBeenCalled();
     expect((fixture.nativeElement.querySelectorAll('button')[2] as HTMLButtonElement).disabled).toBe(true);

@@ -120,10 +120,10 @@ export class NeuVirtualListComponent<T = unknown> implements AfterViewInit {
   @ContentChild(TemplateRef) itemTemplate: TemplateRef<{ $implicit: T; index: number }> | null =
     null;
 
-  readonly _containerHeight = computed(() => `${this.itemSize() * this.visibleRows()}px`);
-  readonly _isEmpty = computed(() => this.items().length === 0);
+  protected readonly _containerHeight = computed(() => `${this.itemSize() * this.visibleRows()}px`);
+  protected readonly _isEmpty = computed(() => this.items().length === 0);
 
-  _trackBy = (index: number, item: T) => this.trackBy()(index, item);
+  protected _trackBy = (index: number, item: T) => this.trackBy()(index, item);
 
   protected _itemTemplateOrDefault(
     fallback: TemplateRef<{ $implicit: T; index: number }>,

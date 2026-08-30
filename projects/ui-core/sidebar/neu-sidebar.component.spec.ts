@@ -473,7 +473,7 @@ describe('NeuSidebarComponent', () => {
 
     const escape = new KeyboardEvent('keydown', { key: 'Escape' });
     const preventEscape = vi.spyOn(escape, 'preventDefault');
-    f.componentInstance.onKeyDown(escape);
+    f.componentInstance['onKeyDown'](escape);
     expect(preventEscape).toHaveBeenCalled();
     expect(_mockSetParam).toHaveBeenCalledWith('menu', null, true);
   });
@@ -483,13 +483,13 @@ describe('NeuSidebarComponent', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.componentRef.setInput('closeOnEscape', false);
     f.detectChanges();
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(_mockSetParam).not.toHaveBeenCalled();
 
     f.componentRef.setInput('persistent', true);
     f.componentRef.setInput('closeOnEscape', true);
     f.detectChanges();
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(_mockSetParam).not.toHaveBeenCalled();
   });
 
@@ -515,7 +515,7 @@ describe('NeuSidebarComponent', () => {
     const event = new KeyboardEvent('keydown', { key: 'Tab' });
     const preventDefault = vi.spyOn(event, 'preventDefault');
 
-    f.componentInstance.onKeyDown(event);
+    f.componentInstance['onKeyDown'](event);
 
     expect(preventDefault).not.toHaveBeenCalled();
   });

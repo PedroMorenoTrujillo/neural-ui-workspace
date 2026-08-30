@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'search';
 
@@ -223,8 +223,8 @@ export class NeuInputComponent implements ControlValueAccessor {
   readonly hasError = computed(() => !!this.errorMessage());
   readonly startIconPath = computed(() => '');
   readonly hasStartContent = computed(() => false);
-  readonly _hasIconLeft = computed(() => !!this.icon() && this.iconPosition() === 'left');
-  readonly _hasIconRight = computed(() => !!this.icon() && this.iconPosition() === 'right');
+  protected readonly _hasIconLeft = computed(() => !!this.icon() && this.iconPosition() === 'left');
+  protected readonly _hasIconRight = computed(() => !!this.icon() && this.iconPosition() === 'right');
 
   // --- ControlValueAccessor ---
   private _onChange: (v: string) => void = () => {};

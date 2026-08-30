@@ -5,9 +5,9 @@ import type {
   NeuTableSortState,
 } from '@neural-ui/core/table';
 import type {
+  InternalNeuTreeTableRow,
   NeuTreeTableFilterMode,
   NeuTreeTableNode,
-  NeuTreeTableRow,
 } from './neu-tree-table.types';
 
 interface NeuTreeTableProjectionOptions {
@@ -20,7 +20,7 @@ interface NeuTreeTableProjectionOptions {
 
 export interface NeuTreeTableProjectedNode<T extends Record<string, unknown>> {
   readonly node: NeuTreeTableNode<T>;
-  readonly row: NeuTreeTableRow<T>;
+  readonly row: InternalNeuTreeTableRow<T>;
   readonly children: readonly NeuTreeTableProjectedNode<T>[];
 }
 
@@ -100,7 +100,7 @@ function toRow<T extends Record<string, unknown>>(
   parentId: string | undefined,
   posInSet: number,
   setSize: number,
-): NeuTreeTableRow<T> {
+): InternalNeuTreeTableRow<T> {
   return {
     ...(node.data ?? ({} as T)),
     id: node.id,

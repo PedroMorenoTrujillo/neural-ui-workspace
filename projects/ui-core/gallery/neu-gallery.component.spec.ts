@@ -125,7 +125,7 @@ describe('NeuGalleryComponent', () => {
     const fixture = TestBed.createComponent(NeuGalleryComponent);
     fixture.componentRef.setInput('items', ITEMS);
     fixture.detectChanges();
-    fixture.componentInstance.onKeydown(new KeyboardEvent('keydown', { key: 'End' }));
+    fixture.componentInstance['onKeydown'](new KeyboardEvent('keydown', { key: 'End' }));
     expect(fixture.componentInstance.activeIndex()).toBe(2);
     fixture.componentInstance.onPointerDown(
       new PointerEvent('pointerdown', { clientX: 100, clientY: 0 }),
@@ -160,10 +160,10 @@ describe('NeuGalleryComponent', () => {
     expect(rotate).toEqual([270]);
     expect(flips[0].y).toBe(-1);
     expect(errors).toEqual([0]);
-    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-    component.onKeydown(new KeyboardEvent('keydown', { key: 'Home' }));
-    component.onKeydown(new KeyboardEvent('keydown', { key: 'Unknown' }));
+    component['onKeydown'](new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    component['onKeydown'](new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    component['onKeydown'](new KeyboardEvent('keydown', { key: 'Home' }));
+    component['onKeydown'](new KeyboardEvent('keydown', { key: 'Unknown' }));
     component.onPreviewKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(component.itemContext().active).toBe(true);
     expect(component.captionContext().index).toBe(1);

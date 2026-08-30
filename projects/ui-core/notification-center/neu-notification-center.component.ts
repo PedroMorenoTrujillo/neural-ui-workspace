@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
-import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/foundation';
+import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
 
 export type NeuNotificationType = 'info' | 'success' | 'warning' | 'error';
 
@@ -219,12 +219,12 @@ export class NeuNotificationService {
   styleUrl: './neu-notification-center.component.scss',
 })
 export class NeuNotificationCenterComponent {
-  readonly _svc = inject(NeuNotificationService);
+  protected readonly _svc = inject(NeuNotificationService);
   private readonly overlay = inject(Overlay);
   private readonly temporal = inject(NeuInitialTemporalState);
-  readonly _isOpen = signal(false);
-  readonly _panelId = inject(NeuIdGenerator).getId('neu-nc-panel-');
-  readonly _viewportMargin = 16;
+  protected readonly _isOpen = signal(false);
+  protected readonly _panelId = inject(NeuIdGenerator).getId('neu-nc-panel-');
+  protected readonly _viewportMargin = 16;
   readonly overlayPositions: ConnectedPosition[] = [
     {
       originX: 'end',
@@ -250,7 +250,7 @@ export class NeuNotificationCenterComponent {
   ];
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
-  _toggle(): void {
+  protected _toggle(): void {
     const opening = !this._isOpen();
     this._isOpen.set(opening);
     if (opening) {
@@ -259,7 +259,7 @@ export class NeuNotificationCenterComponent {
     }
   }
 
-  _relativeTime(date: Date): string {
+  protected _relativeTime(date: Date): string {
     const diff = this.temporal.currentNow().getTime() - date.getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'Ahora';

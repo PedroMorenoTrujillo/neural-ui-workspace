@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 /** Token para que neu-radio encuentre a su grupo padre / Token for neu-radio to find its parent group */
 export const NEU_RADIO_GROUP = new InjectionToken<NeuRadioGroupComponent>('NEU_RADIO_GROUP');

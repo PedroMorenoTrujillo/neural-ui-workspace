@@ -13,7 +13,8 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NEURAL_LOCALE, NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/foundation';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
+import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
 
 // ── Exported types ───────────────────────────────────────────────────────────
 
@@ -616,7 +617,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   // ── Estado interno / Internal state ──────────────────────────────
   protected readonly _id = inject(NeuIdGenerator).getId('neu-date-input-');
   readonly isOpen = signal(false);
-  readonly _viewportMargin = 16;
+  protected readonly _viewportMargin = 16;
   readonly singleOverlayPositions: ConnectedPosition[] = [
     {
       originX: 'start',
@@ -678,7 +679,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     },
   ];
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
-  readonly _isRange = computed(() => this.type() === 'range');
+  protected readonly _isRange = computed(() => this.type() === 'range');
   private readonly _cvaDisabled = signal(false);
   readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
   readonly hasError = computed(() => !!this.errorMessage());
@@ -704,15 +705,15 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   private readonly _pickStart = signal<Date | null>(null);
   private readonly _pickEnd = signal<Date | null>(null);
   private readonly _hoverDate = signal<Date | null>(null);
-  readonly _leftCursor = signal<Date>(
+  private readonly _leftCursor = signal<Date>(
     new Date(this._today.getFullYear(), this._today.getMonth(), 1),
   );
-  readonly _rightCursor = computed(() => {
+  private readonly _rightCursor = computed(() => {
     const l = this._leftCursor();
     return new Date(l.getFullYear(), l.getMonth() + 1, 1);
   });
-  readonly _hasRange = computed(() => !!this._pickStart() || !!this._pickEnd());
-  readonly _canApply = computed(() => {
+  protected readonly _hasRange = computed(() => !!this._pickStart() || !!this._pickEnd());
+  protected readonly _canApply = computed(() => {
     const start = this._pickStart();
     const end = this._pickEnd();
     if (!start && !end) return false;
@@ -721,10 +722,10 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
       (end === null || this.#isValidRangeDate(end))
     );
   });
-  readonly _resolvedLocale = computed(
+  private readonly _resolvedLocale = computed(
     () => this.#normalizedLocale(this.locale()) || this._documentLang() || this.defaultLocale,
   );
-  readonly _texts = computed(() => {
+  protected readonly _texts = computed(() => {
     const spanish = this._resolvedLocale().toLowerCase().startsWith('es');
     return spanish
       ? {
@@ -769,12 +770,12 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
         };
   });
 
-  readonly _weekDayLabels = computed(() => this.#buildWeekdayLabels('short'));
-  readonly _leftTitle = computed(() => this._monthTitle(this._leftCursor()));
-  readonly _rightTitle = computed(() => this._monthTitle(this._rightCursor()));
-  readonly _leftDays = computed(() => this._buildRangeMonth(this._leftCursor()));
-  readonly _rightDays = computed(() => this._buildRangeMonth(this._rightCursor()));
-  readonly _rangePlaceholderText = computed(
+  protected readonly _weekDayLabels = computed(() => this.#buildWeekdayLabels('short'));
+  protected readonly _leftTitle = computed(() => this._monthTitle(this._leftCursor()));
+  protected readonly _rightTitle = computed(() => this._monthTitle(this._rightCursor()));
+  protected readonly _leftDays = computed(() => this._buildRangeMonth(this._leftCursor()));
+  protected readonly _rightDays = computed(() => this._buildRangeMonth(this._rightCursor()));
+  protected readonly _rangePlaceholderText = computed(
     () => this.placeholder() || this._texts().rangePlaceholder,
   );
 
@@ -800,7 +801,7 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     );
   }
 
-  readonly _rangeDisplayValue = computed(() => {
+  protected readonly _rangeDisplayValue = computed(() => {
     const s = this._pickStart();
     const e = this._pickEnd();
     if (!s && !e) return this.placeholder();
@@ -870,20 +871,20 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   // ── Range actions ─────────────────────────────────────────────────
-  _prevLeft(): void {
+  protected _prevLeft(): void {
     this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   }
-  _nextLeft(): void {
+  protected _nextLeft(): void {
     this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
   }
-  _prevRight(): void {
+  protected _prevRight(): void {
     this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   }
-  _nextRight(): void {
+  protected _nextRight(): void {
     this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
   }
 
-  _selectDay(date: Date): void {
+  protected _selectDay(date: Date): void {
     if (this.isDateDisabled(date)) return;
     const s = this._pickStart();
     if (!s || this._pickEnd()) {
@@ -901,11 +902,11 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     }
   }
 
-  _hoverDay(date: Date): void {
+  protected _hoverDay(date: Date): void {
     if (this._pickStart() && !this._pickEnd()) this._hoverDate.set(date);
   }
 
-  _applyRange(): void {
+  protected _applyRange(): void {
     if (!this._canApply()) return;
     const range = this.#rangeValue();
     this._onChange(range);
@@ -914,13 +915,13 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     this.isOpen.set(false);
   }
 
-  _applyPreset(preset: NeuDatePreset): void {
+  protected _applyPreset(preset: NeuDatePreset): void {
     const range = typeof preset.range === 'function' ? preset.range() : preset.range;
     this._pickStart.set(range.start ? cloneDate(range.start) : null);
     this._pickEnd.set(range.end ? cloneDate(range.end) : null);
   }
 
-  _clearRange(): void {
+  protected _clearRange(): void {
     this._pickStart.set(null);
     this._pickEnd.set(null);
     this._hoverDate.set(null);

@@ -394,7 +394,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
     ];
     const fixture = await createTable({ data, selectable: 'multiple', sortable: true });
     keydown(fixture, rows(fixture)[0], ' ');
-    fixture.componentInstance.onSearch({ target: { value: 'Match' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Match' } } as unknown as Event);
     fixture.componentInstance.sortBy('name');
     fixture.detectChanges();
     await fixture.whenStable();
@@ -670,7 +670,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
     expect(tabStop.textContent).toContain('Charlie');
     expect(document.activeElement?.textContent).toContain('Charlie');
 
-    fixture.componentInstance.onSearch({ target: { value: 'Bravo' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({ target: { value: 'Bravo' } } as unknown as Event);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();

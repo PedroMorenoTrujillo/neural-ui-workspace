@@ -92,13 +92,13 @@ export class NeuMeterGroupComponent {
     'neu-meter-group--rounded': this.rounded(),
   }));
 
-  readonly _usedSum = computed(() => this.items().reduce((s, i) => s + i.value, 0));
+  protected readonly _usedSum = computed(() => this.items().reduce((s, i) => s + i.value, 0));
 
-  readonly _effectiveTotal = computed(() =>
+  protected readonly _effectiveTotal = computed(() =>
     this.total() > 0 ? this.total() : this._usedSum() || 1,
   );
 
-  readonly _segments = computed(() => {
+  protected readonly _segments = computed(() => {
     const total = this._effectiveTotal();
     return this.items().map((item) => ({
       ...item,

@@ -57,8 +57,8 @@ describe('NeuDashboardGridComponent', () => {
   it('should initialize _orderedTiles from tiles input', async () => {
     const f = setup();
     await f.whenStable();
-    expect(f.componentInstance._orderedTiles().length).toBe(3);
-    expect(f.componentInstance._orderedTiles()[0].id).toBe('a');
+    expect(f.componentInstance['_orderedTiles']().length).toBe(3);
+    expect(f.componentInstance['_orderedTiles']()[0].id).toBe('a');
   });
 
   it('should expose tile slot view children once rendered', async () => {
@@ -68,7 +68,7 @@ describe('NeuDashboardGridComponent', () => {
 
     const comp = f.debugElement.query(By.directive(NeuDashboardGridComponent))
       .componentInstance as any;
-    expect(comp._tileSlots().length).toBe(2);
+    expect(comp['_tileSlots']().length).toBe(2);
   });
 
   it('columns input should set CSS variable', async () => {
@@ -86,7 +86,7 @@ describe('NeuDashboardGridComponent', () => {
     f.componentInstance.orderChange.subscribe((v: NeuDashboardTileConfig[]) => changes.push(v));
 
     // Simulate drop: move item at index 0 to index 2
-    f.componentInstance._onDrop({
+    f.componentInstance['_onDrop']({
       previousIndex: 0,
       currentIndex: 2,
       item: { data: TILES[0] },
@@ -94,14 +94,14 @@ describe('NeuDashboardGridComponent', () => {
       previousContainer: { data: [...TILES] },
     } as any);
 
-    expect(f.componentInstance._orderedTiles()[2].id).toBe('a');
+    expect(f.componentInstance['_orderedTiles']()[2].id).toBe('a');
     expect(changes.length).toBe(1);
     expect(changes[0]).not.toBe(TILES);
     expect(TILES.map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
 
     const replacement = [{ id: 'server', title: 'Server layout' }];
     f.componentRef.setInput('tiles', replacement); f.detectChanges();
-    expect(f.componentInstance._orderedTiles()).toEqual(replacement);
+    expect(f.componentInstance['_orderedTiles']()).toEqual(replacement);
   });
 
   it('tiles input change should update _orderedTiles', async () => {
@@ -110,8 +110,8 @@ describe('NeuDashboardGridComponent', () => {
     f.componentRef.setInput('tiles', [{ id: 'x' }]);
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._orderedTiles().length).toBe(1);
-    expect(f.componentInstance._orderedTiles()[0].id).toBe('x');
+    expect(f.componentInstance['_orderedTiles']().length).toBe(1);
+    expect(f.componentInstance['_orderedTiles']()[0].id).toBe('x');
   });
 
   it('should render tile titles', async () => {
@@ -179,8 +179,8 @@ describe('NeuDashboardGridComponent', () => {
   it('should clone the tiles input into the ordered signal', async () => {
     const f = setup();
     await f.whenStable();
-    expect(f.componentInstance._orderedTiles()).not.toBe(TILES);
-    expect(f.componentInstance._orderedTiles()).toEqual(TILES);
+    expect(f.componentInstance['_orderedTiles']()).not.toBe(TILES);
+    expect(f.componentInstance['_orderedTiles']()).toEqual(TILES);
   });
 
   it('_onDrop reorders tiles and emits orderChange', () => {
@@ -191,7 +191,7 @@ describe('NeuDashboardGridComponent', () => {
     );
     // Simulate a CdkDragDrop event from index 0 to index 2
     const fakeDrop = { previousIndex: 0, currentIndex: 2 } as any;
-    f.componentInstance._onDrop(fakeDrop);
+    f.componentInstance['_onDrop'](fakeDrop);
     expect(events.length).toBe(1);
     expect(events[0][2].id).toBe('a');
     expect(events[0][0].id).toBe('b');
@@ -210,7 +210,7 @@ describe('NeuDashboardGridComponent', () => {
     f.detectChanges();
 
     expect(changes).toHaveLength(1);
-    expect(comp._orderedTiles()[2].id).toBe('a');
+    expect(comp['_orderedTiles']()[2].id).toBe('a');
   });
 
   it('orderChange emits the same tiles array when same index', () => {
@@ -220,7 +220,7 @@ describe('NeuDashboardGridComponent', () => {
       events.push(tiles),
     );
     const fakeDrop = { previousIndex: 1, currentIndex: 1 } as any;
-    f.componentInstance._onDrop(fakeDrop);
+    f.componentInstance['_onDrop'](fakeDrop);
     expect(events.length).toBe(1);
     expect(events[0][1].id).toBe('b');
   });
