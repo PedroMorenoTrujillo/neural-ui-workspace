@@ -2,6 +2,8 @@ import { EnvironmentProviders, Provider, makeEnvironmentProviders } from '@angul
 import { NEURAL_LOCALE, NEURAL_NOW, NEURAL_TIME_ZONE, NeuNow } from '@neural-ui/core/foundation';
 import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
 import {
+  lucideBold,
+  lucideCheck,
   lucideChevronLeft,
   lucideChevronRight,
   lucideChevronUp,
@@ -9,12 +11,21 @@ import {
   lucideCircleCheck,
   lucideCircleX,
   lucideExternalLink,
+  lucideEraser,
+  lucideImage,
   lucideInbox,
   lucideInfo,
+  lucideItalic,
+  lucideLink,
+  lucideList,
+  lucideListOrdered,
   lucideMinus,
+  lucidePencil,
+  lucidePlus,
   lucideTriangleAlert,
   lucideTrendingDown,
   lucideTrendingUp,
+  lucideUnderline,
   lucideUpload,
   lucideX,
 } from '@ng-icons/lucide';
@@ -84,6 +95,20 @@ export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProvide
       lucideMinus,
       // Uploader picker-only trigger
       lucideUpload,
+      // InlineEditor defaults
+      lucideCheck,
+      lucidePencil,
+      // SpeedDial default trigger
+      lucidePlus,
+      // RichTextEditor default toolbar
+      lucideBold,
+      lucideItalic,
+      lucideUnderline,
+      lucideList,
+      lucideListOrdered,
+      lucideLink,
+      lucideImage,
+      lucideEraser,
     }),
     provideNgIconsConfig({ size: iconSize, strokeWidth: iconStrokeWidth }),
     ...deterministicProviders,

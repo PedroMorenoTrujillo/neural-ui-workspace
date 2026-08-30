@@ -58,7 +58,10 @@ import {
   NeuTableVirtualizationOptions,
 } from '@neural-ui/core/table';
 import { walkNeuTreeDepthFirst } from '@neural-ui/core/internal';
-import { projectNeuTreeTable, type NeuTreeTableProjectedNode } from './neu-tree-table-hierarchy.controller';
+import {
+  projectNeuTreeTable,
+  type NeuTreeTableProjectedNode,
+} from './neu-tree-table-hierarchy.controller';
 import {
   NeuTreeTableBodyDirective,
   NeuTreeTableBodySectionDirective,
@@ -245,33 +248,84 @@ const NEU_TREE_TABLE_LABELS = {
         </ng-template>
       }
       @if (captionTemplate(); as caption) {
-        <ng-template neuTableCaption let-columns="columns" let-colspan="colspan" let-column="column">
-          <ng-container [ngTemplateOutlet]="$any(caption.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })" />
+        <ng-template
+          neuTableCaption
+          let-columns="columns"
+          let-colspan="colspan"
+          let-column="column"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(caption.templateRef)"
+            [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })"
+          />
         </ng-template>
       }
       @if (headerGroupTemplate(); as header) {
-        <ng-template neuTableHeaderGroup let-columns="columns" let-colspan="colspan" let-column="column">
-          <ng-container [ngTemplateOutlet]="$any(header.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })" />
+        <ng-template
+          neuTableHeaderGroup
+          let-columns="columns"
+          let-colspan="colspan"
+          let-column="column"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(header.templateRef)"
+            [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })"
+          />
         </ng-template>
       }
       @if (footerGroupTemplate(); as footer) {
-        <ng-template neuTableFooterGroup let-columns="columns" let-colspan="colspan" let-column="column">
-          <ng-container [ngTemplateOutlet]="$any(footer.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })" />
+        <ng-template
+          neuTableFooterGroup
+          let-columns="columns"
+          let-colspan="colspan"
+          let-column="column"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(footer.templateRef)"
+            [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })"
+          />
         </ng-template>
       }
       @if (summaryTemplate(); as summary) {
-        <ng-template neuTableSummary let-columns="columns" let-colspan="colspan" let-column="column">
-          <ng-container [ngTemplateOutlet]="$any(summary.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })" />
+        <ng-template
+          neuTableSummary
+          let-columns="columns"
+          let-colspan="colspan"
+          let-column="column"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(summary.templateRef)"
+            [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })"
+          />
         </ng-template>
       }
       @if (emptyTemplateRef(); as empty) {
-        <ng-template neuTableEmpty let-columns="columns" let-colspan="colspan" let-column="column" let-message="message">
-          <ng-container [ngTemplateOutlet]="$any(empty)" [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column, message })" />
+        <ng-template
+          neuTableEmpty
+          let-columns="columns"
+          let-colspan="colspan"
+          let-column="column"
+          let-message="message"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(empty)"
+            [ngTemplateOutletContext]="
+              $any({ $implicit: columns, columns, colspan, column, message })
+            "
+          />
         </ng-template>
       }
       @if (loadingBodyTemplate(); as loadingBody) {
-        <ng-template neuTableLoadingBody let-columns="columns" let-colspan="colspan" let-column="column">
-          <ng-container [ngTemplateOutlet]="$any(loadingBody.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })" />
+        <ng-template
+          neuTableLoadingBody
+          let-columns="columns"
+          let-colspan="colspan"
+          let-column="column"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(loadingBody.templateRef)"
+            [ngTemplateOutletContext]="$any({ $implicit: columns, columns, colspan, column })"
+          />
         </ng-template>
       } @else {
         <ng-template neuTableLoadingBody let-columns="columns" let-colspan="colspan">
@@ -291,43 +345,230 @@ const NEU_TREE_TABLE_LABELS = {
         </ng-template>
       }
       @if (paginatorLeftTemplate(); as left) {
-        <ng-template neuTablePaginatorLeft let-currentPage let-totalPages="totalPages" let-first="first" let-last="last" let-rows="rows" let-totalRecords="totalRecords" let-disabled="disabled" let-goToPage="goToPage" let-setPageSize="setPageSize">
-          <ng-container [ngTemplateOutlet]="$any(left.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: currentPage, currentPage, totalPages, first, last, rows, totalRecords, disabled, goToPage, setPageSize })" />
+        <ng-template
+          neuTablePaginatorLeft
+          let-currentPage
+          let-totalPages="totalPages"
+          let-first="first"
+          let-last="last"
+          let-rows="rows"
+          let-totalRecords="totalRecords"
+          let-disabled="disabled"
+          let-goToPage="goToPage"
+          let-setPageSize="setPageSize"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(left.templateRef)"
+            [ngTemplateOutletContext]="
+              $any({
+                $implicit: currentPage,
+                currentPage,
+                totalPages,
+                first,
+                last,
+                rows,
+                totalRecords,
+                disabled,
+                goToPage,
+                setPageSize,
+              })
+            "
+          />
         </ng-template>
       }
       @if (paginatorRightTemplate(); as right) {
-        <ng-template neuTablePaginatorRight let-currentPage let-totalPages="totalPages" let-first="first" let-last="last" let-rows="rows" let-totalRecords="totalRecords" let-disabled="disabled" let-goToPage="goToPage" let-setPageSize="setPageSize">
-          <ng-container [ngTemplateOutlet]="$any(right.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: currentPage, currentPage, totalPages, first, last, rows, totalRecords, disabled, goToPage, setPageSize })" />
+        <ng-template
+          neuTablePaginatorRight
+          let-currentPage
+          let-totalPages="totalPages"
+          let-first="first"
+          let-last="last"
+          let-rows="rows"
+          let-totalRecords="totalRecords"
+          let-disabled="disabled"
+          let-goToPage="goToPage"
+          let-setPageSize="setPageSize"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(right.templateRef)"
+            [ngTemplateOutletContext]="
+              $any({
+                $implicit: currentPage,
+                currentPage,
+                totalPages,
+                first,
+                last,
+                rows,
+                totalRecords,
+                disabled,
+                goToPage,
+                setPageSize,
+              })
+            "
+          />
         </ng-template>
       }
       @if (groupHeaderTemplate(); as groupHeader) {
-        <ng-template neuTableGroupHeader let-group let-label="label" let-rows="rows" let-count="count" let-groupIndex="groupIndex" let-expanded="expanded" let-frozen="frozen" let-toggle="toggle">
-          <ng-container [ngTemplateOutlet]="$any(groupHeader.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: group, group, label, rows, count, groupIndex, expanded, frozen, toggle })" />
+        <ng-template
+          neuTableGroupHeader
+          let-group
+          let-label="label"
+          let-rows="rows"
+          let-count="count"
+          let-groupIndex="groupIndex"
+          let-expanded="expanded"
+          let-frozen="frozen"
+          let-toggle="toggle"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(groupHeader.templateRef)"
+            [ngTemplateOutletContext]="
+              $any({
+                $implicit: group,
+                group,
+                label,
+                rows,
+                count,
+                groupIndex,
+                expanded,
+                frozen,
+                toggle,
+              })
+            "
+          />
         </ng-template>
       }
       @if (groupFooterTemplate(); as groupFooter) {
-        <ng-template neuTableGroupFooter let-group let-label="label" let-rows="rows" let-count="count" let-groupIndex="groupIndex" let-expanded="expanded" let-frozen="frozen" let-toggle="toggle">
-          <ng-container [ngTemplateOutlet]="$any(groupFooter.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: group, group, label, rows, count, groupIndex, expanded, frozen, toggle })" />
+        <ng-template
+          neuTableGroupFooter
+          let-group
+          let-label="label"
+          let-rows="rows"
+          let-count="count"
+          let-groupIndex="groupIndex"
+          let-expanded="expanded"
+          let-frozen="frozen"
+          let-toggle="toggle"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(groupFooter.templateRef)"
+            [ngTemplateOutletContext]="
+              $any({
+                $implicit: group,
+                group,
+                label,
+                rows,
+                count,
+                groupIndex,
+                expanded,
+                frozen,
+                toggle,
+              })
+            "
+          />
         </ng-template>
       }
       @if (treeBodyTemplate(); as body) {
-        <ng-template neuTableBody let-row let-rowIndex="rowIndex" let-logicalIndex="logicalIndex" let-frozen="frozen" let-columns="columns" let-edit="edit">
-          <ng-container [ngTemplateOutlet]="body.templateRef" [ngTemplateOutletContext]="treeBodyContext(row, rowIndex, logicalIndex, frozen, columns, edit)" />
+        <ng-template
+          neuTableBody
+          let-row
+          let-rowIndex="rowIndex"
+          let-logicalIndex="logicalIndex"
+          let-frozen="frozen"
+          let-columns="columns"
+          let-edit="edit"
+        >
+          <ng-container
+            [ngTemplateOutlet]="body.templateRef"
+            [ngTemplateOutletContext]="
+              treeBodyContext(row, rowIndex, logicalIndex, frozen, columns, edit)
+            "
+          />
         </ng-template>
       }
       @if (treeBodySectionTemplate(); as section) {
-        <ng-template neuTableBodySection let-entries="entries" let-columns="columns" let-colspan="colspan" let-virtualized="virtualized" let-siblingRowsSupported="siblingRowsSupported">
-          <ng-container [ngTemplateOutlet]="section.templateRef" [ngTemplateOutletContext]="treeBodySectionContext(entries, columns, colspan, virtualized, siblingRowsSupported)" />
+        <ng-template
+          neuTableBodySection
+          let-entries="entries"
+          let-columns="columns"
+          let-colspan="colspan"
+          let-virtualized="virtualized"
+          let-siblingRowsSupported="siblingRowsSupported"
+        >
+          <ng-container
+            [ngTemplateOutlet]="section.templateRef"
+            [ngTemplateOutletContext]="
+              treeBodySectionContext(entries, columns, colspan, virtualized, siblingRowsSupported)
+            "
+          />
         </ng-template>
       }
       @for (view of cellViewTemplates(); track view.columnKey()) {
-        <ng-template [neuTableCellView]="view.columnKey()" let-row let-rowIndex="rowIndex" let-logicalIndex="logicalIndex" let-column="column" let-value="value" let-frozen="frozen" let-editing="editing" let-startEdit="startEdit">
-          <ng-container [ngTemplateOutlet]="$any(view.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: row, row, rowIndex, logicalIndex, column, value, frozen, editing, startEdit })" />
+        <ng-template
+          [neuTableCellView]="view.columnKey()"
+          let-row
+          let-rowIndex="rowIndex"
+          let-logicalIndex="logicalIndex"
+          let-column="column"
+          let-value="value"
+          let-frozen="frozen"
+          let-editing="editing"
+          let-startEdit="startEdit"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(view.templateRef)"
+            [ngTemplateOutletContext]="
+              $any({
+                $implicit: row,
+                row,
+                rowIndex,
+                logicalIndex,
+                column,
+                value,
+                frozen,
+                editing,
+                startEdit,
+              })
+            "
+          />
         </ng-template>
       }
       @for (editor of cellEditorTemplates(); track editor.columnKey()) {
-        <ng-template [neuTableCellEditor]="editor.columnKey()" let-value let-row="row" let-rowIndex="rowIndex" let-logicalIndex="logicalIndex" let-column="column" let-previousValue="previousValue" let-frozen="frozen" let-invalid="invalid" let-error="error" let-setValue="setValue" let-save="save" let-cancel="cancel">
-          <ng-container [ngTemplateOutlet]="$any(editor.templateRef)" [ngTemplateOutletContext]="$any({ $implicit: value, row, rowIndex, logicalIndex, column, value, previousValue, frozen, invalid, error, setValue, save, cancel })" />
+        <ng-template
+          [neuTableCellEditor]="editor.columnKey()"
+          let-value
+          let-row="row"
+          let-rowIndex="rowIndex"
+          let-logicalIndex="logicalIndex"
+          let-column="column"
+          let-previousValue="previousValue"
+          let-frozen="frozen"
+          let-invalid="invalid"
+          let-error="error"
+          let-setValue="setValue"
+          let-save="save"
+          let-cancel="cancel"
+        >
+          <ng-container
+            [ngTemplateOutlet]="$any(editor.templateRef)"
+            [ngTemplateOutletContext]="
+              $any({
+                $implicit: value,
+                row,
+                rowIndex,
+                logicalIndex,
+                column,
+                value,
+                previousValue,
+                frozen,
+                invalid,
+                error,
+                setValue,
+                save,
+                cancel,
+              })
+            "
+          />
         </ng-template>
       }
       @if (expandTemplate(); as tpl) {
@@ -367,18 +608,26 @@ const NEU_TREE_TABLE_LABELS = {
 
         <div class="neu-tree-table__content">
           @if (treeNodeTemplate(); as nodeTemplate) {
-            <ng-container [ngTemplateOutlet]="nodeTemplate.templateRef" [ngTemplateOutletContext]="treeNodeContext(row, column)" />
-          } @else if (consumerTreeCellTemplate(); as consumerTemplate) {
-            <ng-container [ngTemplateOutlet]="consumerTemplate" [ngTemplateOutletContext]="{ $implicit: row, row, column }" />
+            <ng-container
+              [ngTemplateOutlet]="nodeTemplate.templateRef"
+              [ngTemplateOutletContext]="treeNodeContext(row, column)"
+            />
           } @else {
-            <div class="neu-tree-table__main">
-              <span class="neu-tree-table__label">{{ row.label }}</span>
-              @if (row.badge) {
-                <span class="neu-tree-table__badge">{{ row.badge }}</span>
+            @if (consumerTreeCellTemplate(); as consumerTemplate) {
+              <ng-container
+                [ngTemplateOutlet]="consumerTemplate"
+                [ngTemplateOutletContext]="{ $implicit: row, row, column }"
+              />
+            } @else {
+              <div class="neu-tree-table__main">
+                <span class="neu-tree-table__label">{{ row.label }}</span>
+                @if (row.badge) {
+                  <span class="neu-tree-table__badge">{{ row.badge }}</span>
+                }
+              </div>
+              @if (row.description) {
+                <span class="neu-tree-table__description">{{ row.description }}</span>
               }
-            </div>
-            @if (row.description) {
-              <span class="neu-tree-table__description">{{ row.description }}</span>
             }
           }
         </div>
@@ -509,9 +758,7 @@ export class NeuTreeTableComponent {
   protected readonly toolbarTemplateRef = computed(
     () => this.toolbarTemplate()?.templateRef ?? null,
   );
-  protected readonly emptyTemplateRef = computed(
-    () => this.emptyTemplate()?.templateRef ?? null,
-  );
+  protected readonly emptyTemplateRef = computed(() => this.emptyTemplate()?.templateRef ?? null);
   readonly effectiveQuery = computed(() => this.query() ?? this.internalQuery());
   readonly effectiveSort = computed<NeuTableSortState>(
     () => this.sort() ?? this.effectiveQuery().sortEntries,
@@ -519,9 +766,7 @@ export class NeuTreeTableComponent {
   protected readonly effectiveExpandedKeys = computed(
     () => new Set(this.expandedKeys() ?? this.internalExpandedKeys()),
   );
-  readonly effectiveEditMode = computed<NeuTableEditMode>(
-    () => this.editMode(),
-  );
+  readonly effectiveEditMode = computed<NeuTableEditMode>(() => this.editMode());
   readonly tableSelectionMode = computed<'none' | 'single' | 'multiple'>(() => {
     const mode = this.effectiveSelectionMode();
     return mode === 'checkbox' ? 'multiple' : mode;
@@ -555,8 +800,8 @@ export class NeuTreeTableComponent {
   readonly flatRows = computed<Record<string, unknown>[]>(() =>
     this.flattenProjection(this.pageRoots()),
   );
-  readonly effectiveTotalItems = computed(
-    () => this.serverSide() ? this.totalItems() ?? this.nodes().length : this.hierarchy().roots.length,
+  readonly effectiveTotalItems = computed(() =>
+    this.serverSide() ? (this.totalItems() ?? this.nodes().length) : this.hierarchy().roots.length,
   );
   private readonly selectedKeys = computed(() => {
     const controlled = this.selection();
@@ -617,7 +862,8 @@ export class NeuTreeTableComponent {
       if (controlled !== undefined) return;
       const valid = new Set(this.allRowsById().keys());
       const retained = new Set([...this.internalSelectionKeys()].filter((key) => valid.has(key)));
-      if (!this.sameSet(retained, this.internalSelectionKeys())) this.internalSelectionKeys.set(retained);
+      if (!this.sameSet(retained, this.internalSelectionKeys()))
+        this.internalSelectionKeys.set(retained);
     });
     afterRenderEffect(() => {
       this.flatRows();
@@ -649,7 +895,8 @@ export class NeuTreeTableComponent {
 
   protected onTableSelectionChange(rows: Record<string, unknown>[]): void {
     const proposed = this.selectionProposal(rows);
-    if (this.selection() === undefined) this.internalSelectionKeys.set(new Set(proposed.map((node) => node.id)));
+    if (this.selection() === undefined)
+      this.internalSelectionKeys.set(new Set(proposed.map((node) => node.id)));
     this.selectionChange.emit([...proposed]);
   }
 
@@ -715,7 +962,9 @@ export class NeuTreeTableComponent {
     (phase === 'init' ? this.cellEditInit : this.cellEditCancel).emit(mapped);
   }
 
-  protected onTableEditValidationError(event: NeuTableEditValidationEvent<Record<string, unknown>>): void {
+  protected onTableEditValidationError(
+    event: NeuTableEditValidationEvent<Record<string, unknown>>,
+  ): void {
     this.editValidationError.emit(event);
   }
 
@@ -729,9 +978,8 @@ export class NeuTreeTableComponent {
     else this.rowEditCancel.emit(mapped);
   }
 
-  readonly tableRowEditValidator = (
-    event: NeuTableRowEditEvent<Record<string, unknown>>,
-  ) => this.rowEditValidator()?.(this.mapRowEditEvent(event)) ?? true;
+  readonly tableRowEditValidator = (event: NeuTableRowEditEvent<Record<string, unknown>>) =>
+    this.rowEditValidator()?.(this.mapRowEditEvent(event)) ?? true;
 
   readonly asNodeKey = (key: unknown): string => String(key);
   readonly isRowSelectable = (row: Record<string, unknown>): boolean => {
@@ -919,9 +1167,10 @@ export class NeuTreeTableComponent {
 
   protected onHostKeydown(event: KeyboardEvent): void {
     if (event.defaultPrevented) return;
-    const rowElement = event.target instanceof HTMLElement
-      ? event.target.closest<HTMLTableRowElement>('tr[data-neu-tree-node-id]')
-      : null;
+    const rowElement =
+      event.target instanceof HTMLElement
+        ? event.target.closest<HTMLTableRowElement>('tr[data-neu-tree-node-id]')
+        : null;
     if (!rowElement || event.target !== rowElement) return;
     const nodeId = rowElement.dataset['neuTreeNodeId'];
     if (!nodeId) return;
@@ -1000,7 +1249,7 @@ export class NeuTreeTableComponent {
 
   saveRowEdit(nodeId: string): boolean {
     const row = this.allRowsById().get(nodeId);
-    return row ? this.table()?.saveRowEdit(row) ?? false : false;
+    return row ? (this.table()?.saveRowEdit(row) ?? false) : false;
   }
 
   cancelRowEdit(nodeId: string): boolean {
@@ -1013,20 +1262,18 @@ export class NeuTreeTableComponent {
   private flattenProjection(
     nodes: readonly NeuTreeTableProjectedNode<Record<string, unknown>>[],
   ): Record<string, unknown>[] {
-    const filtering = this.effectiveQuery().search.trim().length > 0 ||
+    const filtering =
+      this.effectiveQuery().search.trim().length > 0 ||
       Object.keys(this.effectiveQuery().filters).length > 0;
     return walkNeuTreeDepthFirst(nodes, (entry) => entry.children, {
-      shouldDescend: (entry) =>
-        this.effectiveExpandedKeys().has(entry.node.node.id) || filtering,
+      shouldDescend: (entry) => this.effectiveExpandedKeys().has(entry.node.node.id) || filtering,
     }).map((entry) => {
       const expanded = this.effectiveExpandedKeys().has(entry.node.node.id) || filtering;
       return { ...entry.node.row, __treeExpanded: expanded };
     });
   }
 
-  private indexAllRows(
-    nodes: readonly NeuTreeTableNode[],
-  ): Map<string, InternalNeuTreeTableRow> {
+  private indexAllRows(nodes: readonly NeuTreeTableNode[]): Map<string, InternalNeuTreeTableRow> {
     const rows = new Map<string, InternalNeuTreeTableRow>();
     for (const entry of walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [])) {
       const node = entry.node;
@@ -1151,7 +1398,7 @@ export class NeuTreeTableComponent {
 
   private nodesForKeys(keys: ReadonlySet<string>): readonly NeuTreeTableNode[] {
     const rows = this.allRowsById();
-    return [...rows.entries()].flatMap(([key, row]) => keys.has(key) ? [row.__treeNode] : []);
+    return [...rows.entries()].flatMap(([key, row]) => (keys.has(key) ? [row.__treeNode] : []));
   }
 
   private mapRowEditEvent(
@@ -1166,10 +1413,21 @@ export class NeuTreeTableComponent {
     };
   }
 
-  private consumerDraft(value: Readonly<Record<string, unknown>>): Readonly<Record<string, unknown>> {
-    return Object.freeze(Object.fromEntries(
-      Object.entries(value).filter(([key]) => !key.startsWith('__tree') && key !== 'id' && key !== 'label' && key !== 'description' && key !== 'badge'),
-    ));
+  private consumerDraft(
+    value: Readonly<Record<string, unknown>>,
+  ): Readonly<Record<string, unknown>> {
+    return Object.freeze(
+      Object.fromEntries(
+        Object.entries(value).filter(
+          ([key]) =>
+            !key.startsWith('__tree') &&
+            key !== 'id' &&
+            key !== 'label' &&
+            key !== 'description' &&
+            key !== 'badge',
+        ),
+      ),
+    );
   }
 
   private syncTreegridDom(): void {
@@ -1202,16 +1460,20 @@ export class NeuTreeTableComponent {
       if (checkbox) {
         const partial = this.partialKeys().has(key);
         checkbox.indeterminate = partial;
-        checkbox.setAttribute('aria-checked', partial ? 'mixed' : String(this.selectedKeys().has(key)));
+        checkbox.setAttribute(
+          'aria-checked',
+          partial ? 'mixed' : String(this.selectedKeys().has(key)),
+        );
       }
     });
   }
 
   private focusNode(nodeId: string): void {
-    const rows = [...this.host.nativeElement.querySelectorAll<HTMLTableRowElement>('[data-neu-tree-node-id]')];
-    const row = rows
-      .find((candidate) => candidate.dataset['neuTreeNodeId'] === nodeId);
-    rows.forEach((candidate) => candidate.tabIndex = candidate === row ? 0 : -1);
+    const rows = [
+      ...this.host.nativeElement.querySelectorAll<HTMLTableRowElement>('[data-neu-tree-node-id]'),
+    ];
+    const row = rows.find((candidate) => candidate.dataset['neuTreeNodeId'] === nodeId);
+    rows.forEach((candidate) => (candidate.tabIndex = candidate === row ? 0 : -1));
     row?.focus();
   }
 

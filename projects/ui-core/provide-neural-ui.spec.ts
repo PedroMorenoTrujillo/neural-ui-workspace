@@ -23,6 +23,45 @@ describe('provideNeuralUI', () => {
     expect(icons).toBeTruthy();
   });
 
+  it('registers every deterministic component-owned default icon', () => {
+    TestBed.configureTestingModule({
+      providers: [provideNeuralUI()],
+    });
+    const iconSets = TestBed.inject(NgIconsToken);
+    const icons = Object.assign({}, ...iconSets);
+
+    expect(Object.keys(icons).sort()).toEqual(
+      [
+        'lucideAlertCircle',
+        'lucideAlertTriangle',
+        'lucideBold',
+        'lucideCheck',
+        'lucideCheckCircle',
+        'lucideChevronLeft',
+        'lucideChevronRight',
+        'lucideChevronUp',
+        'lucideEraser',
+        'lucideExternalLink',
+        'lucideImage',
+        'lucideInbox',
+        'lucideInfo',
+        'lucideItalic',
+        'lucideLink',
+        'lucideList',
+        'lucideListOrdered',
+        'lucideMinus',
+        'lucidePencil',
+        'lucidePlus',
+        'lucideTrendingDown',
+        'lucideTrendingUp',
+        'lucideUnderline',
+        'lucideUpload',
+        'lucideX',
+        'lucideXCircle',
+      ].sort(),
+    );
+  });
+
   it('should register icons with custom config in TestBed', () => {
     TestBed.configureTestingModule({
       providers: [provideNeuralUI({ iconSize: '2rem' })],

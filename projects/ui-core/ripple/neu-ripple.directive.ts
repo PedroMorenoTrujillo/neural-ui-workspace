@@ -1,6 +1,5 @@
-import { isPlatformBrowser } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import {
-  DOCUMENT,
   DestroyRef,
   Directive,
   ElementRef,
@@ -65,11 +64,13 @@ export class NeuRippleDirective {
   }
 
   private canRipple(): boolean {
-    return isPlatformBrowser(this.platformId)
-      && this.neuRipple()
-      && !this.neuRippleDisabled()
-      && !this.reducedMotion
-      && !this.isHostDisabled();
+    return (
+      isPlatformBrowser(this.platformId) &&
+      this.neuRipple() &&
+      !this.neuRippleDisabled() &&
+      !this.reducedMotion &&
+      !this.isHostDisabled()
+    );
   }
 
   private isHostDisabled(): boolean {
@@ -79,12 +80,13 @@ export class NeuRippleDirective {
   }
 
   private create(x: number, y: number, bounds: DOMRect): void {
-    const diameter = Math.max(
-      Math.hypot(x, y),
-      Math.hypot(bounds.width - x, y),
-      Math.hypot(x, bounds.height - y),
-      Math.hypot(bounds.width - x, bounds.height - y),
-    ) * 2;
+    const diameter =
+      Math.max(
+        Math.hypot(x, y),
+        Math.hypot(bounds.width - x, y),
+        Math.hypot(x, bounds.height - y),
+        Math.hypot(bounds.width - x, bounds.height - y),
+      ) * 2;
     const ripple = this.document.createElement('span');
     ripple.className = 'neu-ripple__ink';
     ripple.setAttribute('aria-hidden', 'true');

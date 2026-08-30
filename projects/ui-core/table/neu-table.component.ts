@@ -1437,140 +1437,142 @@ export type NeuTableColumnInput<T extends object> =
                         <span class="neu-table__filter-multiple-summary" role="status">
                           {{ _filterOverlayActiveRuleSummary(_filterOverlayRuleCount(col.key)) }}
                         </span>
-                      } @else if (col.filterConfig; as config) {
-                        @switch (config.kind) {
-                          @case ('text') {
-                            <neu-input
-                              [floatingLabel]="false"
-                              [label]="modernFilterLabel(col)"
-                              [placeholder]="filterPlaceholder()"
-                              [formControl]="typedColumnFilterControl(col)"
-                              (keydown)="commitInlineFilterOnEnter(col, $event)"
-                            />
-                          }
-                          @case ('number') {
-                            @if (modernFilterMode(col) === 'between') {
-                              <div class="neu-table__filter-range">
-                                <neu-number-input
-                                  [nullable]="true"
-                                  [label]="rangeFilterLabel(col, 'from')"
-                                  [formControl]="typedRangeStartControl(col)"
-                                  (keydown)="commitInlineFilterOnEnter(col, $event)"
-                                />
-                                <neu-number-input
-                                  [nullable]="true"
-                                  [label]="rangeFilterLabel(col, 'to')"
-                                  [formControl]="typedRangeEndControl(col)"
-                                  (keydown)="commitInlineFilterOnEnter(col, $event)"
-                                />
-                              </div>
-                            } @else {
-                              <neu-number-input
-                                [nullable]="true"
+                      } @else {
+                        @if (col.filterConfig; as config) {
+                          @switch (config.kind) {
+                            @case ('text') {
+                              <neu-input
+                                [floatingLabel]="false"
                                 [label]="modernFilterLabel(col)"
+                                [placeholder]="filterPlaceholder()"
                                 [formControl]="typedColumnFilterControl(col)"
                                 (keydown)="commitInlineFilterOnEnter(col, $event)"
                               />
                             }
-                          }
-                          @case ('date') {
-                            @if (isDateOnlyRange(col)) {
-                              <neu-date-input
-                                type="range"
-                                [label]="modernFilterLabel(col)"
-                                [placeholder]="filterPlaceholder()"
-                                [formControl]="typedColumnFilterControl(col)"
-                              />
-                            } @else if (isInstantRange(col)) {
-                              <div class="neu-table__filter-range">
-                                <neu-date-input
-                                  type="datetime-local"
-                                  [label]="rangeFilterLabel(col, 'from')"
-                                  [formControl]="typedInstantRangeStartControl(col)"
+                            @case ('number') {
+                              @if (modernFilterMode(col) === 'between') {
+                                <div class="neu-table__filter-range">
+                                  <neu-number-input
+                                    [nullable]="true"
+                                    [label]="rangeFilterLabel(col, 'from')"
+                                    [formControl]="typedRangeStartControl(col)"
+                                    (keydown)="commitInlineFilterOnEnter(col, $event)"
+                                  />
+                                  <neu-number-input
+                                    [nullable]="true"
+                                    [label]="rangeFilterLabel(col, 'to')"
+                                    [formControl]="typedRangeEndControl(col)"
+                                    (keydown)="commitInlineFilterOnEnter(col, $event)"
+                                  />
+                                </div>
+                              } @else {
+                                <neu-number-input
+                                  [nullable]="true"
+                                  [label]="modernFilterLabel(col)"
+                                  [formControl]="typedColumnFilterControl(col)"
+                                  (keydown)="commitInlineFilterOnEnter(col, $event)"
                                 />
+                              }
+                            }
+                            @case ('date') {
+                              @if (isDateOnlyRange(col)) {
                                 <neu-date-input
-                                  type="datetime-local"
-                                  [label]="rangeFilterLabel(col, 'to')"
-                                  [formControl]="typedInstantRangeEndControl(col)"
+                                  type="range"
+                                  [label]="modernFilterLabel(col)"
+                                  [placeholder]="filterPlaceholder()"
+                                  [formControl]="typedColumnFilterControl(col)"
                                 />
-                              </div>
-                            } @else {
-                              <neu-date-input
-                                [type]="dateInputType(col)"
+                              } @else if (isInstantRange(col)) {
+                                <div class="neu-table__filter-range">
+                                  <neu-date-input
+                                    type="datetime-local"
+                                    [label]="rangeFilterLabel(col, 'from')"
+                                    [formControl]="typedInstantRangeStartControl(col)"
+                                  />
+                                  <neu-date-input
+                                    type="datetime-local"
+                                    [label]="rangeFilterLabel(col, 'to')"
+                                    [formControl]="typedInstantRangeEndControl(col)"
+                                  />
+                                </div>
+                              } @else {
+                                <neu-date-input
+                                  [type]="dateInputType(col)"
+                                  [label]="modernFilterLabel(col)"
+                                  [formControl]="typedColumnFilterControl(col)"
+                                />
+                              }
+                            }
+                            @case ('boolean') {
+                              <neu-select
+                                [floatingLabel]="false"
                                 [label]="modernFilterLabel(col)"
+                                [placeholder]="allFilterOptionLabel()"
+                                [options]="typedBooleanFilterOptions()"
+                                [clearable]="true"
                                 [formControl]="typedColumnFilterControl(col)"
                               />
                             }
+                            @case ('select') {
+                              <neu-select
+                                [floatingLabel]="false"
+                                [label]="modernFilterLabel(col)"
+                                [placeholder]="allFilterOptionLabel()"
+                                [options]="typedFilterOptions(col)"
+                                [optionLabel]="typedFilterOptionLabel(col)"
+                                [optionValue]="typedFilterOptionValue(col)"
+                                [optionDisabled]="typedFilterOptionDisabled(col)"
+                                [searchable]="typedFilterSearchable(col)"
+                                [virtualScroll]="typedFilterVirtualScroll(col)"
+                                [virtualScrollVisibleItems]="
+                                  typedFilterVirtualScrollVisibleItems(col)
+                                "
+                                [clearable]="true"
+                                [formControl]="typedColumnFilterControl(col)"
+                              />
+                            }
+                            @case ('multiSelect') {
+                              <neu-multiselect
+                                [floatingLabel]="false"
+                                [label]="modernFilterLabel(col)"
+                                [placeholder]="allFilterOptionLabel()"
+                                [options]="typedFilterOptions(col)"
+                                [optionLabel]="typedFilterOptionLabel(col)"
+                                [optionValue]="typedFilterOptionValue(col)"
+                                [optionDisabled]="typedFilterOptionDisabled(col)"
+                                [searchable]="typedFilterSearchable(col)"
+                                [virtualScroll]="typedFilterVirtualScroll(col)"
+                                [virtualScrollVisibleItems]="
+                                  typedFilterVirtualScrollVisibleItems(col)
+                                "
+                                [clearable]="true"
+                                [formControl]="typedMultiSelectFilterControl(col)"
+                              />
+                            }
                           }
-                          @case ('boolean') {
+                        } @else if (col.filterable) {
+                          @if (col.filterType === 'select') {
                             <neu-select
                               [floatingLabel]="false"
-                              [label]="modernFilterLabel(col)"
-                              [placeholder]="allFilterOptionLabel()"
-                              [options]="typedBooleanFilterOptions()"
-                              [clearable]="true"
-                              [formControl]="typedColumnFilterControl(col)"
+                              [options]="_filterOpts(col)"
+                              [formControl]="columnFilterControl(col.key)"
+                              [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
                             />
-                          }
-                          @case ('select') {
-                            <neu-select
+                          } @else if (col.filterType === 'date') {
+                            <neu-date-input
+                              [formControl]="columnFilterControl(col.key)"
+                              [placeholder]="filterPlaceholder()"
+                              [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
+                            />
+                          } @else {
+                            <neu-input
                               [floatingLabel]="false"
-                              [label]="modernFilterLabel(col)"
-                              [placeholder]="allFilterOptionLabel()"
-                              [options]="typedFilterOptions(col)"
-                              [optionLabel]="typedFilterOptionLabel(col)"
-                              [optionValue]="typedFilterOptionValue(col)"
-                              [optionDisabled]="typedFilterOptionDisabled(col)"
-                              [searchable]="typedFilterSearchable(col)"
-                              [virtualScroll]="typedFilterVirtualScroll(col)"
-                              [virtualScrollVisibleItems]="
-                                typedFilterVirtualScrollVisibleItems(col)
-                              "
-                              [clearable]="true"
-                              [formControl]="typedColumnFilterControl(col)"
+                              [placeholder]="filterPlaceholder()"
+                              [formControl]="columnFilterControl(col.key)"
+                              [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
+                              (keydown)="commitInlineFilterOnEnter(col, $event)"
                             />
                           }
-                          @case ('multiSelect') {
-                            <neu-multiselect
-                              [floatingLabel]="false"
-                              [label]="modernFilterLabel(col)"
-                              [placeholder]="allFilterOptionLabel()"
-                              [options]="typedFilterOptions(col)"
-                              [optionLabel]="typedFilterOptionLabel(col)"
-                              [optionValue]="typedFilterOptionValue(col)"
-                              [optionDisabled]="typedFilterOptionDisabled(col)"
-                              [searchable]="typedFilterSearchable(col)"
-                              [virtualScroll]="typedFilterVirtualScroll(col)"
-                              [virtualScrollVisibleItems]="
-                                typedFilterVirtualScrollVisibleItems(col)
-                              "
-                              [clearable]="true"
-                              [formControl]="typedMultiSelectFilterControl(col)"
-                            />
-                          }
-                        }
-                      } @else if (col.filterable) {
-                        @if (col.filterType === 'select') {
-                          <neu-select
-                            [floatingLabel]="false"
-                            [options]="_filterOpts(col)"
-                            [formControl]="columnFilterControl(col.key)"
-                            [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                          />
-                        } @else if (col.filterType === 'date') {
-                          <neu-date-input
-                            [formControl]="columnFilterControl(col.key)"
-                            [placeholder]="filterPlaceholder()"
-                            [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                          />
-                        } @else {
-                          <neu-input
-                            [floatingLabel]="false"
-                            [placeholder]="filterPlaceholder()"
-                            [formControl]="columnFilterControl(col.key)"
-                            [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                            (keydown)="commitInlineFilterOnEnter(col, $event)"
-                          />
                         }
                       }
                     </th>
@@ -1999,106 +2001,108 @@ export type NeuTableColumnInput<T extends object> =
                                     editError
                                   }}</span>
                                 }
-                              } @else if (cellViewTemplate(col.key); as viewTemplate) {
-                                <ng-container
-                                  [ngTemplateOutlet]="viewTemplate"
-                                  [ngTemplateOutletContext]="
-                                    cellViewContext(
-                                      row,
-                                      col,
-                                      entry.rowIndex,
-                                      entry.logicalIndex,
-                                      entry.frozen
-                                    )
-                                  "
-                                />
-                              } @else if (col.cellTemplate) {
-                                <ng-container
-                                  [ngTemplateOutlet]="col.cellTemplate"
-                                  [ngTemplateOutletContext]="{
-                                    $implicit: row,
-                                    row: row,
-                                    column: col,
-                                  }"
-                                />
-                              } @else if (col.type === 'badge') {
-                                @let badgeVal = getCellValue(row, col);
-                                @let badgeCfg = col.badgeMap?.[badgeVal];
-                                <span
-                                  class="neu-table__cell-badge neu-table__cell-badge--{{
-                                    badgeCfg?.variant ?? 'default'
-                                  }}"
-                                >
-                                  {{ badgeCfg?.label ?? badgeVal }}
-                                </span>
-                              } @else if (col.type === 'link') {
-                                <a
-                                  class="neu-table__cell-link"
-                                  [href]="col.linkHref ? col.linkHref(row) : '#'"
-                                  [target]="col.linkTarget ?? '_self'"
-                                  (click)="$event.stopPropagation()"
-                                  >{{ getCellValue(row, col) }}</a
-                                >
-                              } @else if (col.type === 'actions') {
-                                <div class="neu-table__actions">
-                                  @for (action of col.actions ?? []; track action.key) {
-                                    @if (action.show === undefined || action.show(row)) {
-                                      @if (isConfirmPending(row, action)) {
-                                        <span class="neu-table__action-confirm">
-                                          <span>{{ action.confirm }}</span>
+                              } @else {
+                                @if (cellViewTemplate(col.key); as viewTemplate) {
+                                  <ng-container
+                                    [ngTemplateOutlet]="viewTemplate"
+                                    [ngTemplateOutletContext]="
+                                      cellViewContext(
+                                        row,
+                                        col,
+                                        entry.rowIndex,
+                                        entry.logicalIndex,
+                                        entry.frozen
+                                      )
+                                    "
+                                  />
+                                } @else if (col.cellTemplate) {
+                                  <ng-container
+                                    [ngTemplateOutlet]="col.cellTemplate"
+                                    [ngTemplateOutletContext]="{
+                                      $implicit: row,
+                                      row: row,
+                                      column: col,
+                                    }"
+                                  />
+                                } @else if (col.type === 'badge') {
+                                  @let badgeVal = getCellValue(row, col);
+                                  @let badgeCfg = col.badgeMap?.[badgeVal];
+                                  <span
+                                    class="neu-table__cell-badge neu-table__cell-badge--{{
+                                      badgeCfg?.variant ?? 'default'
+                                    }}"
+                                  >
+                                    {{ badgeCfg?.label ?? badgeVal }}
+                                  </span>
+                                } @else if (col.type === 'link') {
+                                  <a
+                                    class="neu-table__cell-link"
+                                    [href]="col.linkHref ? col.linkHref(row) : '#'"
+                                    [target]="col.linkTarget ?? '_self'"
+                                    (click)="$event.stopPropagation()"
+                                    >{{ getCellValue(row, col) }}</a
+                                  >
+                                } @else if (col.type === 'actions') {
+                                  <div class="neu-table__actions">
+                                    @for (action of col.actions ?? []; track action.key) {
+                                      @if (action.show === undefined || action.show(row)) {
+                                        @if (isConfirmPending(row, action)) {
+                                          <span class="neu-table__action-confirm">
+                                            <span>{{ action.confirm }}</span>
+                                            <button
+                                              class="neu-table__action-btn neu-table__action-btn--danger"
+                                              type="button"
+                                              (click)="
+                                                handleAction(row, action); $event.stopPropagation()
+                                              "
+                                            >
+                                              Sí
+                                            </button>
+                                            <button
+                                              class="neu-table__action-btn"
+                                              type="button"
+                                              (click)="cancelConfirm(); $event.stopPropagation()"
+                                            >
+                                              No
+                                            </button>
+                                          </span>
+                                        } @else {
                                           <button
-                                            class="neu-table__action-btn neu-table__action-btn--danger"
+                                            class="neu-table__action-btn neu-table__action-btn--{{
+                                              action.variant ?? 'ghost'
+                                            }}"
                                             type="button"
+                                            [disabled]="
+                                              action.disabled ? action.disabled(row) : false
+                                            "
+                                            [title]="action.label"
                                             (click)="
                                               handleAction(row, action); $event.stopPropagation()
                                             "
                                           >
-                                            Sí
+                                            @if (action.icon.startsWith('lucide')) {
+                                              <neu-icon
+                                                class="neu-table__action-icon"
+                                                [name]="action.icon"
+                                                size="1rem"
+                                                aria-hidden="true"
+                                              />
+                                            } @else {
+                                              <span
+                                                class="neu-table__action-icon"
+                                                aria-hidden="true"
+                                                >{{ action.icon }}</span
+                                              >
+                                            }
+                                            <span class="sr-only">{{ action.label }}</span>
                                           </button>
-                                          <button
-                                            class="neu-table__action-btn"
-                                            type="button"
-                                            (click)="cancelConfirm(); $event.stopPropagation()"
-                                          >
-                                            No
-                                          </button>
-                                        </span>
-                                      } @else {
-                                        <button
-                                          class="neu-table__action-btn neu-table__action-btn--{{
-                                            action.variant ?? 'ghost'
-                                          }}"
-                                          type="button"
-                                          [disabled]="
-                                            action.disabled ? action.disabled(row) : false
-                                          "
-                                          [title]="action.label"
-                                          (click)="
-                                            handleAction(row, action); $event.stopPropagation()
-                                          "
-                                        >
-                                          @if (action.icon.startsWith('lucide')) {
-                                            <neu-icon
-                                              class="neu-table__action-icon"
-                                              [name]="action.icon"
-                                              size="1rem"
-                                              aria-hidden="true"
-                                            />
-                                          } @else {
-                                            <span
-                                              class="neu-table__action-icon"
-                                              aria-hidden="true"
-                                              >{{ action.icon }}</span
-                                            >
-                                          }
-                                          <span class="sr-only">{{ action.label }}</span>
-                                        </button>
+                                        }
                                       }
                                     }
-                                  }
-                                </div>
-                              } @else {
-                                {{ getCellValue(row, col) }}
+                                  </div>
+                                } @else {
+                                  {{ getCellValue(row, col) }}
+                                }
                               }
                             </td>
                           }
@@ -4082,7 +4086,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     Math.max(0, Math.floor(this.virtualScrollOverscan()) || 0),
   );
 
-  private readonly _virtualDelay = computed(() => Math.max(0, Math.floor(this.virtualScrollDelay()) || 0));
+  private readonly _virtualDelay = computed(() =>
+    Math.max(0, Math.floor(this.virtualScrollDelay()) || 0),
+  );
 
   private readonly _virtualHeaderHeight = computed(
     () => this._measuredHeaderHeight() || 44 + (this._hasFilterableCol() ? 52 : 0),
@@ -6780,7 +6786,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     );
   }
 
-  protected cellEditorTemplate(columnKey: string): TemplateRef<NeuTableCellEditorContext<T>> | null {
+  protected cellEditorTemplate(
+    columnKey: string,
+  ): TemplateRef<NeuTableCellEditorContext<T>> | null {
     return (
       this.cellEditorTemplates().find((template) => template.columnKey() === columnKey)
         ?.templateRef ?? null

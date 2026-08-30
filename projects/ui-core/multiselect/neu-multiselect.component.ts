@@ -196,92 +196,92 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
         <span class="neu-multiselect__chips">
           @if (_values().length === 0) {
             <span class="neu-multiselect__placeholder">{{ placeholder() }}</span>
-          } @else if (selectedItemsTpl(); as selectedSetTpl) {
-            <ng-container
-              [ngTemplateOutlet]="selectedSetTpl.templateRef"
-              [ngTemplateOutletContext]="selectedItemsContext()"
-            />
-          } @else if (!displaySelectedLabel()) {
-            <span class="neu-multiselect__placeholder">{{ placeholder() }}</span>
-          } @else if (effectiveDisplay() === 'count') {
-            <span class="neu-multiselect__count-badge">{{ selectedItemsLabelText() }}</span>
-          } @else if (effectiveDisplay() === 'comma') {
-            <span class="neu-multiselect__comma-values">
-              @for (val of _visibleChips(); track val; let last = $last) {
-                {{ labelFor(val) }}{{ last ? '' : ', ' }}
-              }
-              @if (_values().length > _visibleChips().length) {
-                +{{ _values().length - _visibleChips().length }}
-              }
-            </span>
           } @else {
-            @for (val of _visibleChips(); track val) {
-              <span
-                class="neu-multiselect__chip"
-                tabindex="0"
-                (keydown)="onTokenKeydown(val, $event)"
-              >
-                @if (tokenTpl(); as selectedTpl) {
-                  <ng-container
-                    [ngTemplateOutlet]="selectedTpl.templateRef"
-                    [ngTemplateOutletContext]="selectedContext(val, $index)"
-                  />
-                } @else if (selectedItemTpl(); as selectedTpl) {
-                  <ng-container
-                    [ngTemplateOutlet]="selectedTpl.templateRef"
-                    [ngTemplateOutletContext]="selectedContext(val, $index)"
-                  />
-                } @else {
-                  {{ labelFor(val) }}
+            @if (selectedItemsTpl(); as selectedSetTpl) {
+              <ng-container
+                [ngTemplateOutlet]="selectedSetTpl.templateRef"
+                [ngTemplateOutletContext]="selectedItemsContext()"
+              />
+            } @else if (!displaySelectedLabel()) {
+              <span class="neu-multiselect__placeholder">{{ placeholder() }}</span>
+            } @else if (effectiveDisplay() === 'count') {
+              <span class="neu-multiselect__count-badge">{{ selectedItemsLabelText() }}</span>
+            } @else if (effectiveDisplay() === 'comma') {
+              <span class="neu-multiselect__comma-values">
+                @for (val of _visibleChips(); track val; let last = $last) {
+                  {{ labelFor(val) }}{{ last ? '' : ', ' }}
                 }
-                @if (!readonly() && !isDisabledFinal() && !loading()) {
-                  <button
-                    class="neu-multiselect__chip-remove"
-                    type="button"
-                    [attr.aria-label]="'Remove ' + labelFor(val)"
-                    (click)="removeValue(val, $event)"
-                  >
-                    @if (tokenRemoveIconTpl(); as removeIcon) {
-                      <ng-container
-                        [ngTemplateOutlet]="removeIcon.templateRef"
-                        [ngTemplateOutletContext]="{
-                          open: isOpen(),
-                          disabled: isDisabledFinal(),
-                          readonly: readonly(),
-                        }"
-                      />
-                    } @else {
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        stroke-linecap="round"
-                        aria-hidden="true"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    }
-                  </button>
+                @if (_values().length > _visibleChips().length) {
+                  +{{ _values().length - _visibleChips().length }}
                 }
               </span>
-            }
-            @if (_values().length > _visibleChips().length) {
-              <span class="neu-multiselect__chip neu-multiselect__chip--overflow"
-                >+{{ _values().length - _visibleChips().length }}</span
-              >
+            } @else {
+              @for (val of _visibleChips(); track val) {
+                <span
+                  class="neu-multiselect__chip"
+                  tabindex="0"
+                  (keydown)="onTokenKeydown(val, $event)"
+                >
+                  @if (tokenTpl(); as selectedTpl) {
+                    <ng-container
+                      [ngTemplateOutlet]="selectedTpl.templateRef"
+                      [ngTemplateOutletContext]="selectedContext(val, $index)"
+                    />
+                  } @else {
+                    @if (selectedItemTpl(); as selectedTpl) {
+                      <ng-container
+                        [ngTemplateOutlet]="selectedTpl.templateRef"
+                        [ngTemplateOutletContext]="selectedContext(val, $index)"
+                      />
+                    } @else {
+                      {{ labelFor(val) }}
+                    }
+                  }
+                  @if (!readonly() && !isDisabledFinal() && !loading()) {
+                    <button
+                      class="neu-multiselect__chip-remove"
+                      type="button"
+                      [attr.aria-label]="'Remove ' + labelFor(val)"
+                      (click)="removeValue(val, $event)"
+                    >
+                      @if (tokenRemoveIconTpl(); as removeIcon) {
+                        <ng-container
+                          [ngTemplateOutlet]="removeIcon.templateRef"
+                          [ngTemplateOutletContext]="{
+                            open: isOpen(),
+                            disabled: isDisabledFinal(),
+                            readonly: readonly(),
+                          }"
+                        />
+                      } @else {
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                          stroke-linecap="round"
+                          aria-hidden="true"
+                        >
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      }
+                    </button>
+                  }
+                </span>
+              }
+              @if (_values().length > _visibleChips().length) {
+                <span class="neu-multiselect__chip neu-multiselect__chip--overflow"
+                  >+{{ _values().length - _visibleChips().length }}</span
+                >
+              }
             }
           }
         </span>
 
         <!-- Clear button -->
         @if (
-          clearable() &&
-          _values().length > 0 &&
-          !isDisabledFinal() &&
-          !readonly() &&
-          !loading()
+          clearable() && _values().length > 0 && !isDisabledFinal() && !readonly() && !loading()
         ) {
           <button
             class="neu-multiselect__clear"
@@ -319,29 +319,31 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
           <span class="neu-multiselect__loading-icon"
             ><ng-container [ngTemplateOutlet]="loadingIcon.templateRef"
           /></span>
-        } @else if (dropdownIconTpl(); as dropdownIcon) {
-          <span class="neu-multiselect__chevron"
-            ><ng-container
-              [ngTemplateOutlet]="dropdownIcon.templateRef"
-              [ngTemplateOutletContext]="{
-                open: isOpen(),
-                disabled: isDisabledFinal(),
-                readonly: readonly(),
-              }"
-          /></span>
         } @else {
-          <svg
-            class="neu-multiselect__chevron"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
+          @if (dropdownIconTpl(); as dropdownIcon) {
+            <span class="neu-multiselect__chevron"
+              ><ng-container
+                [ngTemplateOutlet]="dropdownIcon.templateRef"
+                [ngTemplateOutletContext]="{
+                  open: isOpen(),
+                  disabled: isDisabledFinal(),
+                  readonly: readonly(),
+                }"
+            /></span>
+          } @else {
+            <svg
+              class="neu-multiselect__chevron"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          }
         }
       </div>
 
@@ -485,28 +487,30 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
                           readonly: readonly(),
                         }"
                       />
-                    } @else if (checkmark() && checkmarkTpl(); as checkmarkTemplate) {
-                      <ng-container
-                        [ngTemplateOutlet]="checkmarkTemplate.templateRef"
-                        [ngTemplateOutletContext]="{
-                          open: isOpen(),
-                          disabled: row.disabled,
-                          readonly: readonly(),
-                        }"
-                      />
                     } @else {
-                      <svg
-                        class="neu-multiselect__checkbox-check"
-                        viewBox="0 0 12 10"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <polyline points="1 5 4.5 9 11 1" />
-                      </svg>
+                      @if (checkmark() && checkmarkTpl(); as checkmarkTemplate) {
+                        <ng-container
+                          [ngTemplateOutlet]="checkmarkTemplate.templateRef"
+                          [ngTemplateOutletContext]="{
+                            open: isOpen(),
+                            disabled: row.disabled,
+                            readonly: readonly(),
+                          }"
+                        />
+                      } @else {
+                        <svg
+                          class="neu-multiselect__checkbox-check"
+                          viewBox="0 0 12 10"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
+                          <polyline points="1 5 4.5 9 11 1" />
+                        </svg>
+                      }
                     }
                   </span>
                   @if (itemTpl(); as itemTemplate) {
@@ -549,16 +553,14 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
             @if (!loading() && filteredRows().length === 0) {
               @if (effectiveFilterValue() && emptyFilterTpl(); as emptyFilterTemplate) {
                 <ng-container [ngTemplateOutlet]="emptyFilterTemplate.templateRef" />
-              } @else if (!effectiveFilterValue() && emptyTpl(); as emptyTemplate) {
-                <ng-container [ngTemplateOutlet]="emptyTemplate.templateRef" />
               } @else {
-                <div class="neu-multiselect__empty">
-                  {{
-                    effectiveFilterValue()
-                      ? noResultsMessage()
-                      : emptyMessage()
-                  }}
-                </div>
+                @if (!effectiveFilterValue() && emptyTpl(); as emptyTemplate) {
+                  <ng-container [ngTemplateOutlet]="emptyTemplate.templateRef" />
+                } @else {
+                  <div class="neu-multiselect__empty">
+                    {{ effectiveFilterValue() ? noResultsMessage() : emptyMessage() }}
+                  </div>
+                }
               }
             }
           </div>
@@ -861,7 +863,7 @@ export class NeuMultiselectComponent<
   /**
    * Emite los modelos originales seleccionados y [] al limpiar.
    * Con NeuSelectOption mantiene el contrato legacy, incluido el campo data.
-  */
+   */
   readonly selectionChange = output<T[]>();
   readonly changeDetail = output<NeuMultiselectChangeEvent<T, V>>();
   readonly filter = output<NeuMultiselectFilterEvent>();
