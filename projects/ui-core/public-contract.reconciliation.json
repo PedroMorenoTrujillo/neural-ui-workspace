@@ -4,18 +4,18 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1376,
-    "bindingDelta": 209,
+    "declarationBindings": 1381,
+    "bindingDelta": 214,
     "mapped": 937,
     "aliasCorrections": 4,
     "missingOldEntries": 224,
-    "newlyDiscovered": 433,
+    "newlyDiscovered": 438,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 334,
-      "model-binding-was-not-supported": 3,
+      "declaration-or-selector-was-not-recorded": 340,
+      "model-binding-was-not-supported": 2,
       "multiline-annotated-or-compound-declaration-was-missed": 89
     }
   },
@@ -4985,7 +4985,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaDescribedBy",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaLabelledBy",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5029,10 +5037,6 @@
       "reason": "model-binding-was-not-supported"
     },
     {
-      "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeActivate",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
       "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeCollapse",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -5046,6 +5050,22 @@
     },
     {
       "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeUnselect",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartNodeDirective.input:neuOrganizationChartNode",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective.input:neuOrganizationChartSelectionIndicator",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartToggleDirective.input:neuOrganizationChartToggle",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartToggleIconDirective.input:neuOrganizationChartToggleIcon",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5193,7 +5213,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./speed-dial#NeuSpeedDialComponent.input:animation",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialComponent.input:ariaDescribedBy",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./speed-dial#NeuSpeedDialComponent.input:ariaLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialComponent.input:ariaLabelledBy",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5202,10 +5234,6 @@
     },
     {
       "id": "./speed-dial#NeuSpeedDialComponent.input:disabled",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:hideIcon",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5225,23 +5253,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./speed-dial#NeuSpeedDialComponent.input:openState",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./speed-dial#NeuSpeedDialComponent.input:radius",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:rotateAnimation",
+      "id": "./speed-dial#NeuSpeedDialComponent.input:tabindex",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:showIcon",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:textDirection",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:transitionDelay",
+      "id": "./speed-dial#NeuSpeedDialComponent.input:tooltip",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5249,27 +5273,23 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.model:visible",
-      "reason": "model-binding-was-not-supported"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:itemClick",
+      "id": "./speed-dial#NeuSpeedDialComponent.output:closed",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:onHide",
+      "id": "./speed-dial#NeuSpeedDialComponent.output:itemActivate",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:onShow",
+      "id": "./speed-dial#NeuSpeedDialComponent.output:openChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:onTriggerClick",
+      "id": "./speed-dial#NeuSpeedDialComponent.output:opened",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:onVisibleChange",
+      "id": "./speed-dial#NeuSpeedDialComponent.output:triggerClick",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

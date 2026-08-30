@@ -71,7 +71,7 @@
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition-delay: var(--neu-speed-delay);
+  transition-delay: var(--neu-speed-delay), var(--neu-speed-delay), 0s;
 }
 .neu-speed-dial__action {
   position: relative;

@@ -13,26 +13,24 @@ import {
   effect,
   inject,
   input,
-  model,
   numberAttribute,
   output,
   signal,
+  untracked,
   viewChild,
-  viewChildren,
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
+import { NeuIdGenerator } from '@neural-ui/core/foundation';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import {
   NeuMenuActionLike,
   NeuResolvedMenuAction,
   NeuRovingMenuController,
-  NeuTextDirection,
   activateNeuMenuAction,
   resolveNeuMenuAction,
 } from '@neural-ui/core/menu-foundation';
-import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
-import { NeuIdGenerator } from '@neural-ui/core/foundation';
+import { NeuTooltipDirective, type NeuTooltipPosition } from '@neural-ui/core/tooltip';
 
 export type NeuSpeedDialDirection =
   | 'up'
@@ -44,6 +42,14 @@ export type NeuSpeedDialDirection =
   | 'down-left'
   | 'down-right';
 export type NeuSpeedDialType = 'linear' | 'circle' | 'semi-circle' | 'quarter-circle';
+export type NeuSpeedDialVisibilityReason =
+  | 'trigger'
+  | 'item'
+  | 'escape'
+  | 'outside'
+  | 'mask'
+  | 'disabled'
+  | 'programmatic';
 
 export interface NeuSpeedDialItem extends NeuMenuActionLike<NeuSpeedDialItem> {
   key: string;
@@ -51,26 +57,62 @@ export interface NeuSpeedDialItem extends NeuMenuActionLike<NeuSpeedDialItem> {
   data?: unknown;
 }
 
+/** Advanced motion options; omitted fields retain the Neural defaults. */
+export interface NeuSpeedDialAnimationConfig {
+  readonly itemDelay?: number;
+  readonly rotateTrigger?: boolean;
+}
+
+/** Enables label tooltips globally; item-level `tooltip` text still takes precedence. */
+export interface NeuSpeedDialTooltipConfig {
+  readonly position?: NeuTooltipPosition;
+}
+
+export interface NeuSpeedDialVisibilityEvent {
+  readonly originalEvent: Event | null;
+  readonly reason: NeuSpeedDialVisibilityReason;
+}
+
+export interface NeuSpeedDialItemEvent {
+  readonly originalEvent: Event;
+  readonly item: NeuSpeedDialItem;
+}
+
 export interface NeuSpeedDialItemTemplateContext {
-  $implicit: NeuSpeedDialItem;
-  index: number;
-  active: boolean;
-  toggleCallback: (event: Event) => void;
+  readonly $implicit: NeuSpeedDialItem;
+  readonly index: number;
+  readonly active: boolean;
+  readonly disabled: boolean;
+  readonly open: boolean;
 }
 
 export interface NeuSpeedDialTriggerTemplateContext {
-  visible: boolean;
-  toggleCallback: (event: MouseEvent) => void;
+  readonly $implicit: boolean;
+  readonly open: boolean;
 }
 
 @Directive({ selector: 'ng-template[neuSpeedDialItem]' })
 export class NeuSpeedDialItemDirective {
   constructor(readonly templateRef: TemplateRef<NeuSpeedDialItemTemplateContext>) {}
+
+  static ngTemplateContextGuard(
+    _directive: NeuSpeedDialItemDirective,
+    context: unknown,
+  ): context is NeuSpeedDialItemTemplateContext {
+    return true;
+  }
 }
 
 @Directive({ selector: 'ng-template[neuSpeedDialTrigger]' })
 export class NeuSpeedDialTriggerDirective {
   constructor(readonly templateRef: TemplateRef<NeuSpeedDialTriggerTemplateContext>) {}
+
+  static ngTemplateContextGuard(
+    _directive: NeuSpeedDialTriggerDirective,
+    context: unknown,
+  ): context is NeuSpeedDialTriggerTemplateContext {
+    return true;
+  }
 }
 
 @Component({
@@ -87,20 +129,19 @@ export class NeuSpeedDialTriggerDirective {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-speed-dial',
-    '[class.neu-speed-dial--open]': 'visible()',
+    '[class.neu-speed-dial--open]': 'isOpen()',
     '[class.neu-speed-dial--disabled]': 'disabled()',
     '[class.neu-speed-dial--linear]': 'type() === "linear"',
     '[class.neu-speed-dial--circle]': 'type() !== "linear"',
     '[attr.data-direction]': 'direction()',
-    '[attr.dir]': 'textDirection()',
     '(document:pointerdown)': 'onDocumentPointerDown($event)',
   },
   template: `
-    @if (mask() && visible()) {
+    @if (mask() && isOpen()) {
       <div
         class="neu-speed-dial__mask"
         aria-hidden="true"
-        (pointerdown)="$event.stopPropagation(); hide(true)"
+        (pointerdown)="onMaskPointerDown($event)"
       ></div>
     }
 
@@ -109,31 +150,32 @@ export class NeuSpeedDialTriggerDirective {
         class="neu-speed-dial__list"
         role="menu"
         [id]="listId()"
-        [attr.aria-label]="ariaLabel()"
-        [attr.aria-hidden]="!visible()"
-        [attr.inert]="!visible() ? '' : null"
+        [attr.aria-hidden]="!isOpen()"
+        [attr.inert]="!isOpen() ? '' : null"
       >
         @for (action of resolvedItems(); track action.key; let index = $index) {
           <li
             class="neu-speed-dial__item"
             role="none"
-            [class.neu-speed-dial__item--visible]="visible()"
+            [class.neu-speed-dial__item--visible]="isOpen()"
             [style]="itemStyle(index)"
           >
             @if (action.kind === 'router') {
               <a
-                #speedAction
                 class="neu-speed-dial__action"
+                [attr.data-neu-speed-index]="index"
                 routerLinkActive="neu-speed-dial__action--router-active"
                 [routerLink]="action.routerLink ?? null"
                 role="menuitem"
-                [tabIndex]="visible() ? tabIndex(index) : -1"
+                [tabIndex]="isOpen() ? itemTabIndex(index) : -1"
+                [attr.aria-label]="action.label"
                 [attr.aria-disabled]="action.disabled"
                 [class.neu-speed-dial__action--active]="action.active"
                 [class.neu-speed-dial__action--disabled]="action.disabled"
-                [neuTooltip]="action.tooltip ?? action.label"
+                [neuTooltip]="tooltipText(action)"
+                [neuTooltipDisabled]="!tooltipText(action)"
                 [neuTooltipPosition]="tooltipPosition()"
-                (click)="activate($event, action)"
+                (click)="activateItem($event, action)"
                 (keydown)="onActionKeydown($event, index)"
                 (focus)="setFocused(index)"
               >
@@ -144,19 +186,21 @@ export class NeuSpeedDialTriggerDirective {
               </a>
             } @else if (action.kind === 'external') {
               <a
-                #speedAction
                 class="neu-speed-dial__action"
+                [attr.data-neu-speed-index]="index"
                 [href]="action.url"
                 [target]="action.target"
                 [rel]="action.rel"
                 role="menuitem"
-                [tabIndex]="visible() ? tabIndex(index) : -1"
+                [tabIndex]="isOpen() ? itemTabIndex(index) : -1"
+                [attr.aria-label]="action.label"
                 [attr.aria-disabled]="action.disabled"
                 [class.neu-speed-dial__action--active]="action.active"
                 [class.neu-speed-dial__action--disabled]="action.disabled"
-                [neuTooltip]="action.tooltip ?? action.label"
+                [neuTooltip]="tooltipText(action)"
+                [neuTooltipDisabled]="!tooltipText(action)"
                 [neuTooltipPosition]="tooltipPosition()"
-                (click)="activate($event, action)"
+                (click)="activateItem($event, action)"
                 (keydown)="onActionKeydown($event, index)"
                 (focus)="setFocused(index)"
               >
@@ -167,16 +211,18 @@ export class NeuSpeedDialTriggerDirective {
               </a>
             } @else {
               <button
-                #speedAction
                 class="neu-speed-dial__action"
+                [attr.data-neu-speed-index]="index"
                 type="button"
                 role="menuitem"
                 [disabled]="action.disabled"
-                [tabIndex]="visible() ? tabIndex(index) : -1"
+                [tabIndex]="isOpen() ? itemTabIndex(index) : -1"
+                [attr.aria-label]="action.label"
                 [class.neu-speed-dial__action--active]="action.active"
-                [neuTooltip]="action.tooltip ?? action.label"
+                [neuTooltip]="tooltipText(action)"
+                [neuTooltipDisabled]="!tooltipText(action)"
                 [neuTooltipPosition]="tooltipPosition()"
-                (click)="activate($event, action)"
+                (click)="activateItem($event, action)"
                 (keydown)="onActionKeydown($event, index)"
                 (focus)="setFocused(index)"
               >
@@ -195,25 +241,26 @@ export class NeuSpeedDialTriggerDirective {
         class="neu-speed-dial__trigger"
         type="button"
         [disabled]="disabled()"
-        [attr.aria-label]="ariaLabel()"
+        [tabIndex]="disabled() ? -1 : tabindex()"
+        [attr.aria-label]="ariaLabelledBy() ? null : ariaLabel()"
+        [attr.aria-labelledby]="ariaLabelledBy()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         aria-haspopup="menu"
-        [attr.aria-expanded]="visible()"
+        [attr.aria-expanded]="isOpen()"
         [attr.aria-controls]="listId()"
-        (click)="toggle($event)"
+        (click)="onTriggerClick($event)"
         (keydown)="onTriggerKeydown($event)"
       >
-        @if (triggerTemplate()) {
+        @if (triggerTemplate(); as template) {
           <ng-container
-            [ngTemplateOutlet]="triggerTemplate()!.templateRef"
+            [ngTemplateOutlet]="template.templateRef"
             [ngTemplateOutletContext]="triggerContext()"
           />
         } @else {
           <neu-icon
             class="neu-speed-dial__trigger-icon"
-            [class.neu-speed-dial__trigger-icon--rotate]="
-              rotateAnimation() && visible() && !hideIcon()
-            "
-            [name]="visible() && hideIcon() ? hideIcon()! : showIcon()"
+            [class.neu-speed-dial__trigger-icon--rotate]="rotateTrigger() && isOpen()"
+            name="lucidePlus"
             size="1.35rem"
             aria-hidden="true"
           />
@@ -236,7 +283,6 @@ export class NeuSpeedDialTriggerDirective {
 export class NeuSpeedDialComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly actions = viewChildren<ElementRef<HTMLElement>>('speedAction');
   private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
   private readonly defaultTemplate =
     viewChild.required<TemplateRef<NeuSpeedDialItemTemplateContext>>('defaultItem');
@@ -244,29 +290,40 @@ export class NeuSpeedDialComponent {
   protected readonly triggerTemplate = contentChild(NeuSpeedDialTriggerDirective);
   private readonly controller = new NeuRovingMenuController({ orientation: 'both' });
   private readonly generatedId = inject(NeuIdGenerator).getId('neu-speed-dial-');
+  private readonly _isOpen = signal(false);
+  private pendingOwnedTransition:
+    | {
+        open: boolean;
+        originalEvent: Event | null;
+        reason: NeuSpeedDialVisibilityReason;
+        restoreFocus: boolean;
+      }
+    | undefined;
 
   readonly id = input<string>();
-  readonly items = input<NeuSpeedDialItem[]>([]);
-  readonly visible = model(false);
+  readonly items = input<readonly NeuSpeedDialItem[]>([]);
+  /** Controlled state owner. Null retains ergonomic uncontrolled behavior. */
+  readonly openState = input<boolean | null>(null, { alias: 'open' });
   readonly direction = input<NeuSpeedDialDirection>('up');
   readonly type = input<NeuSpeedDialType>('linear');
-  readonly transitionDelay = input(30, { transform: numberAttribute });
   readonly radius = input(80, { transform: numberAttribute });
   readonly mask = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly hideOnClickOutside = input(true, { transform: booleanAttribute });
-  readonly showIcon = input('lucidePlus');
-  readonly hideIcon = input<string | null>(null);
-  readonly rotateAnimation = input(true, { transform: booleanAttribute });
-  readonly ariaLabel = input('Quick actions');
-  readonly textDirection = input<NeuTextDirection>('ltr');
+  readonly animation = input<Readonly<NeuSpeedDialAnimationConfig>>({});
+  readonly tooltip = input<Readonly<NeuSpeedDialTooltipConfig> | null>(null);
+  readonly ariaLabel = input<string | null>('Quick actions');
+  readonly ariaLabelledBy = input<string | null>(null);
+  readonly ariaDescribedBy = input<string | null>(null);
+  readonly tabindex = input(0, { transform: numberAttribute });
 
-  readonly onVisibleChange = output<boolean>();
-  readonly onTriggerClick = output<MouseEvent>();
-  readonly itemClick = output<NeuSpeedDialItem>();
-  readonly onShow = output<void>();
-  readonly onHide = output<void>();
+  readonly openChange = output<boolean>();
+  readonly triggerClick = output<MouseEvent>();
+  readonly itemActivate = output<NeuSpeedDialItemEvent>();
+  readonly opened = output<NeuSpeedDialVisibilityEvent>();
+  readonly closed = output<NeuSpeedDialVisibilityEvent>();
 
+  readonly isOpen = this._isOpen.asReadonly();
   readonly listId = computed(() => `${this.id() ?? this.generatedId}-list`);
   readonly focusedIndex = signal(-1);
   readonly resolvedItems = computed(() =>
@@ -274,17 +331,45 @@ export class NeuSpeedDialComponent {
       .map((item, index) => resolveNeuMenuAction(item, index))
       .filter((item) => item.visible && !item.separator),
   );
+  protected readonly itemDelay = computed(() => Math.max(0, this.animation().itemDelay ?? 30));
+  protected readonly rotateTrigger = computed(() => this.animation().rotateTrigger !== false);
 
   constructor() {
     effect(() => {
       const items = this.resolvedItems();
-      this.controller.configure({ direction: this.textDirection() });
-      this.focusedIndex.set(
-        this.controller.setItems(
-          items.map((item) => ({ key: item.key, label: item.label, disabled: item.disabled })),
-        ),
-      );
+      untracked(() => {
+        this.focusedIndex.set(
+          this.controller.setItems(
+            items.map((item) => ({ key: item.key, label: item.label, disabled: item.disabled })),
+          ),
+        );
+      });
     });
+    effect(() => {
+      const owned = this.openState();
+      if (owned === null) return;
+      untracked(() => this.reconcileOwnedState(owned));
+    });
+    effect(() => {
+      if (this.disabled() && this.isOpen()) {
+        untracked(() => this.closeWithReason(null, 'disabled'));
+      }
+    });
+  }
+
+  /** Opens the menu, or proposes open state to a controlled owner. */
+  open(): void {
+    this.openWithReason(null, 'programmatic');
+  }
+
+  /** Closes the menu, or proposes closed state to a controlled owner. */
+  close(): void {
+    this.closeWithReason(null, 'programmatic');
+  }
+
+  /** Toggles the menu through the canonical open-state owner. */
+  toggle(): void {
+    this.isOpen() ? this.close() : this.open();
   }
 
   protected itemTemplateRef(): TemplateRef<NeuSpeedDialItemTemplateContext> {
@@ -299,106 +384,116 @@ export class NeuSpeedDialComponent {
       $implicit: action.original,
       index,
       active: action.active,
-      toggleCallback: (event) => this.activate(event, action),
+      disabled: action.disabled,
+      open: this.isOpen(),
     };
   }
 
   protected triggerContext(): NeuSpeedDialTriggerTemplateContext {
-    return { visible: this.visible(), toggleCallback: (event) => this.toggle(event) };
+    return { $implicit: this.isOpen(), open: this.isOpen() };
   }
 
-  protected tabIndex(index: number): number {
+  protected itemTabIndex(index: number): number {
     return this.controller.tabIndexFor(index);
   }
 
-  protected tooltipPosition(): 'top' | 'right' | 'bottom' | 'left' {
-    if (this.direction().startsWith('down')) return 'right';
-    if (this.direction().startsWith('up')) return 'right';
-    return this.direction() === 'left' ? 'top' : 'top';
+  protected tooltipText(action: NeuResolvedMenuAction<NeuSpeedDialItem>): string {
+    return action.tooltip ?? (this.tooltip() ? action.label : '');
   }
 
-  toggle(event: MouseEvent): void {
+  protected tooltipPosition(): NeuTooltipPosition {
+    const explicit = this.tooltip()?.position;
+    if (explicit) return explicit;
+    return this.direction() === 'left' || this.direction().startsWith('up') ? 'top' : 'right';
+  }
+
+  protected onTriggerClick(event: MouseEvent): void {
     event.stopPropagation();
-    this.onTriggerClick.emit(event);
+    this.triggerClick.emit(event);
     if (this.disabled()) return;
-    this.visible() ? this.hide(false) : this.show();
+    this.isOpen()
+      ? this.closeWithReason(event, 'trigger')
+      : this.openWithReason(event, 'trigger');
   }
 
-  show(): void {
-    if (this.disabled() || this.visible()) return;
-    this.commitVisibility(true);
-  }
-
-  hide(restoreFocus = false): void {
-    if (!this.visible()) return;
-    this.commitVisibility(false);
-    if (restoreFocus && isPlatformBrowser(this.platformId)) this.trigger().nativeElement.focus();
-  }
-
-  /**
-   * One user-interaction transition. The `model()` generated `visibleChange`
-   * is canonical; `onVisibleChange` is the legacy compatibility mirror.
-   */
-  private commitVisibility(visible: boolean): void {
-    this.visible.set(visible);
-    this.onVisibleChange.emit(visible);
-    if (visible) this.onShow.emit();
-    else this.onHide.emit();
-  }
-
-  activate(event: Event, action: NeuResolvedMenuAction<NeuSpeedDialItem>): void {
+  protected activateItem(
+    event: Event,
+    action: NeuResolvedMenuAction<NeuSpeedDialItem>,
+  ): void {
     event.stopPropagation();
     if (!activateNeuMenuAction(action, event)) return;
-    this.itemClick.emit(action.original);
-    this.hide(true);
+    this.itemActivate.emit({ originalEvent: event, item: action.original });
+    this.closeWithReason(event, 'item', true);
   }
 
-  setFocused(index: number): void {
+  protected setFocused(index: number): void {
     this.controller.setActiveIndex(index);
     this.focusedIndex.set(this.controller.index);
   }
 
-  onActionKeydown(event: KeyboardEvent, index: number): void {
+  protected onActionKeydown(event: KeyboardEvent, index: number): void {
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.hide(true);
+      this.closeWithReason(event, 'escape', true);
       return;
     }
+    this.configureTextDirection();
     this.controller.setActiveIndex(index);
     const result = this.controller.handleKey(event);
     if (!result.handled) return;
     this.focusedIndex.set(result.activeIndex);
-    const target = this.actions()[result.activeIndex]?.nativeElement;
-    result.activate ? target?.click() : target?.focus();
-  }
-
-  onTriggerKeydown(event: KeyboardEvent): void {
-    if (
-      event.key === 'ArrowDown' ||
-      event.key === 'ArrowUp' ||
-      event.key === 'Enter' ||
-      event.key === ' '
-    ) {
-      event.preventDefault();
-      if (!this.visible()) this.show();
-      this.actions()[this.controller.index]?.nativeElement.focus();
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      this.hide(true);
+    const target = this.actionElement(result.activeIndex);
+    if (result.activate) {
+      target?.click();
+      return;
+    }
+    if (target) {
+      (event.currentTarget as HTMLElement).tabIndex = -1;
+      target.tabIndex = 0;
+      target.focus();
     }
   }
 
-  onDocumentPointerDown(event: PointerEvent): void {
-    if (!this.visible() || !this.hideOnClickOutside()) return;
-    if (!this.host.nativeElement.contains(event.target as Node)) this.hide(true);
+  protected onTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (!this.isOpen()) this.openWithReason(event, 'trigger');
+      const candidates = this.resolvedItems()
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => !item.disabled);
+      const boundary = event.key === 'ArrowDown' ? candidates[0] : candidates.at(-1);
+      if (!boundary) return;
+      this.setFocused(boundary.index);
+      const target = this.actionElement(boundary.index);
+      if (target) {
+        target.tabIndex = 0;
+        target.focus();
+      }
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeWithReason(event, 'escape', true);
+    }
   }
 
-  itemStyle(index: number): Record<string, string> {
-    const delay = this.visible()
-      ? index * this.transitionDelay()
-      : (this.resolvedItems().length - index - 1) * this.transitionDelay();
-    if (this.type() === 'linear')
+  protected onMaskPointerDown(event: PointerEvent): void {
+    event.stopPropagation();
+    this.closeWithReason(event, 'mask');
+  }
+
+  protected onDocumentPointerDown(event: PointerEvent): void {
+    if (!this.isOpen() || !this.hideOnClickOutside()) return;
+    if (!this.host.nativeElement.contains(event.target as Node)) {
+      this.closeWithReason(event, 'outside');
+    }
+  }
+
+  protected itemStyle(index: number): Record<string, string> {
+    const delay = this.isOpen()
+      ? index * this.itemDelay()
+      : (this.resolvedItems().length - index - 1) * this.itemDelay();
+    if (this.type() === 'linear') {
       return { '--neu-speed-delay': `${delay}ms`, '--neu-speed-index': `${index}` };
+    }
     const count = this.resolvedItems().length;
     const { start, sweep } = this.arc();
     const angle =
@@ -411,6 +506,86 @@ export class NeuSpeedDialComponent {
       '--neu-speed-y': `${y.toFixed(2)}px`,
       '--neu-speed-delay': `${delay}ms`,
     };
+  }
+
+  private openWithReason(
+    originalEvent: Event | null,
+    reason: NeuSpeedDialVisibilityReason,
+  ): void {
+    if (this.disabled() || this.isOpen()) return;
+    if (this.proposeOwnedState(true, originalEvent, reason, false)) return;
+    this.commitOpen(originalEvent, reason);
+    this.openChange.emit(true);
+  }
+
+  private closeWithReason(
+    originalEvent: Event | null,
+    reason: NeuSpeedDialVisibilityReason,
+    restoreFocus = false,
+  ): void {
+    if (!this.isOpen()) return;
+    if (this.proposeOwnedState(false, originalEvent, reason, restoreFocus)) return;
+    this.commitClose(originalEvent, reason, restoreFocus);
+    this.openChange.emit(false);
+  }
+
+  private proposeOwnedState(
+    open: boolean,
+    originalEvent: Event | null,
+    reason: NeuSpeedDialVisibilityReason,
+    restoreFocus: boolean,
+  ): boolean {
+    const owner = this.openState();
+    if (owner === null) return false;
+    this.pendingOwnedTransition = { open, originalEvent, reason, restoreFocus };
+    if (owner !== open) this.openChange.emit(open);
+    return true;
+  }
+
+  private reconcileOwnedState(open: boolean): void {
+    const pending = this.pendingOwnedTransition?.open === open ? this.pendingOwnedTransition : null;
+    if (pending) this.pendingOwnedTransition = undefined;
+    if (open) {
+      this.commitOpen(pending?.originalEvent ?? null, pending?.reason ?? 'programmatic');
+    } else {
+      this.commitClose(
+        pending?.originalEvent ?? null,
+        pending?.reason ?? 'programmatic',
+        pending?.restoreFocus ?? false,
+      );
+    }
+  }
+
+  private commitOpen(
+    originalEvent: Event | null,
+    reason: NeuSpeedDialVisibilityReason,
+  ): void {
+    if (this.disabled() || this._isOpen()) return;
+    this._isOpen.set(true);
+    this.opened.emit({ originalEvent, reason });
+  }
+
+  private commitClose(
+    originalEvent: Event | null,
+    reason: NeuSpeedDialVisibilityReason,
+    restoreFocus: boolean,
+  ): void {
+    if (!this._isOpen()) return;
+    this._isOpen.set(false);
+    this.closed.emit({ originalEvent, reason });
+    if (restoreFocus && isPlatformBrowser(this.platformId)) this.trigger().nativeElement.focus();
+  }
+
+  private configureTextDirection(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const direction = this.host.nativeElement.ownerDocument.defaultView?.getComputedStyle(
+      this.host.nativeElement,
+    ).direction;
+    this.controller.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });
+  }
+
+  private actionElement(index: number): HTMLElement | null {
+    return this.host.nativeElement.querySelector(`[data-neu-speed-index="${index}"]`);
   }
 
   private arc(): { start: number; sweep: number } {

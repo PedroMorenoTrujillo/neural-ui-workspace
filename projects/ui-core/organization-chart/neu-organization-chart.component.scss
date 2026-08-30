@@ -37,6 +37,15 @@
   flex-direction: column;
   align-items: center;
   min-inline-size: 0;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible > .neu-organization-chart__node {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
 }
 
 .neu-organization-chart__tree:not(.neu-organization-chart__tree--root) {
@@ -128,16 +137,10 @@
   color: inherit;
   padding: 0.8rem 0.9rem;
   text-align: start;
+}
+
+.neu-organization-chart__node-action--selectable {
   cursor: pointer;
-
-  &:focus-visible {
-    outline: 2px solid var(--neu-primary);
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-  }
 }
 
 .neu-organization-chart__node-copy {

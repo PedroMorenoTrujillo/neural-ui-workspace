@@ -799,8 +799,12 @@
         "./organization-chart#NeuOrganizationChartNodeDirective",
         "./organization-chart#NeuOrganizationChartNodeEvent",
         "./organization-chart#NeuOrganizationChartNodeTemplateContext",
+        "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective",
+        "./organization-chart#NeuOrganizationChartSelectionIndicatorTemplateContext",
         "./organization-chart#NeuOrganizationChartSelectionMode",
+        "./organization-chart#NeuOrganizationChartToggleDirective",
         "./organization-chart#NeuOrganizationChartToggleIconDirective",
+        "./organization-chart#NeuOrganizationChartToggleIconTemplateContext",
         "./organization-chart#NeuOrganizationChartToggleTemplateContext"
       ]
     },
@@ -991,14 +995,19 @@
       "entrypoint": "./speed-dial",
       "types": "./types/neural-ui-core-speed-dial.d.ts",
       "exports": [
+        "./speed-dial#NeuSpeedDialAnimationConfig",
         "./speed-dial#NeuSpeedDialComponent",
         "./speed-dial#NeuSpeedDialDirection",
         "./speed-dial#NeuSpeedDialItem",
         "./speed-dial#NeuSpeedDialItemDirective",
+        "./speed-dial#NeuSpeedDialItemEvent",
         "./speed-dial#NeuSpeedDialItemTemplateContext",
+        "./speed-dial#NeuSpeedDialTooltipConfig",
         "./speed-dial#NeuSpeedDialTriggerDirective",
         "./speed-dial#NeuSpeedDialTriggerTemplateContext",
-        "./speed-dial#NeuSpeedDialType"
+        "./speed-dial#NeuSpeedDialType",
+        "./speed-dial#NeuSpeedDialVisibilityEvent",
+        "./speed-dial#NeuSpeedDialVisibilityReason"
       ]
     },
     {
@@ -27054,6 +27063,16 @@
       "signature": "declare class NeuOrganizationChartComponent<T = unknown> {\n}",
       "members": [
         {
+          "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaDescribedBy",
+          "name": "ariaDescribedBy",
+          "kind": "input",
+          "publicName": "ariaDescribedBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string | null>;"
+        },
+        {
           "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaLabel",
           "name": "ariaLabel",
           "kind": "input",
@@ -27061,7 +27080,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string | null>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaLabelledBy",
+          "name": "ariaLabelledBy",
+          "kind": "input",
+          "publicName": "ariaLabelledBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartComponent.input:collapseLabel",
@@ -27148,80 +27177,16 @@
           "name": "activateNode",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
-          "signature": "activateNode(node: NeuOrganizationChartNode<T>, originalEvent: Event | null): void;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.method:canCollapse",
-          "name": "canCollapse",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "canCollapse(node: NeuOrganizationChartNode<T>): boolean;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.method:canSelect",
-          "name": "canSelect",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "canSelect(node: NeuOrganizationChartNode<T>): boolean;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.method:hasChildren",
-          "name": "hasChildren",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "hasChildren(node: NeuOrganizationChartNode<T>): boolean;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.method:isCollapsed",
-          "name": "isCollapsed",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "isCollapsed(node: NeuOrganizationChartNode<T>): boolean;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.method:isPartialSelected",
-          "name": "isPartialSelected",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "isPartialSelected(node: NeuOrganizationChartNode<T>): boolean;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.method:isSelected",
-          "name": "isSelected",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "isSelected(node: NeuOrganizationChartNode<T>): boolean;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.method:nodeTemplateContext",
-          "name": "nodeTemplateContext",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "nodeTemplateContext(node: NeuOrganizationChartNode<T>, level: number): NeuOrganizationChartNodeTemplateContext<T>;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.method:onNodeKeydown",
-          "name": "onNodeKeydown",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "onNodeKeydown(node: NeuOrganizationChartNode<T>, event: KeyboardEvent): void;"
+          "status": "SUPPORTED",
+          "signature": "activateNode(node: NeuOrganizationChartNode<T>, originalEvent?: Event | null): void;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartComponent.method:toggleNode",
           "name": "toggleNode",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
-          "signature": "toggleNode(node: NeuOrganizationChartNode<T>, originalEvent: Event | null): void;"
+          "status": "SUPPORTED",
+          "signature": "toggleNode(node: NeuOrganizationChartNode<T>, originalEvent?: Event | null): void;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartComponent.model:collapsedKeys",
@@ -27244,16 +27209,6 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly selectionKeys: _angular_core.ModelSignal<readonly string[] | undefined>;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeActivate",
-          "name": "nodeActivate",
-          "kind": "output",
-          "publicName": "nodeActivate",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly nodeActivate: _angular_core.OutputEmitterRef<NeuOrganizationChartNodeEvent<T>>;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeCollapse",
@@ -27296,36 +27251,12 @@
           "signature": "readonly nodeUnselect: _angular_core.OutputEmitterRef<NeuOrganizationChartNodeEvent<T>>;"
         },
         {
-          "id": "./organization-chart#NeuOrganizationChartComponent.property:gapX",
-          "name": "gapX",
-          "kind": "property",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "readonly gapX: _angular_core.Signal<any>;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.property:gapY",
-          "name": "gapY",
-          "kind": "property",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "readonly gapY: _angular_core.Signal<any>;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.property:nodeTemplate",
-          "name": "nodeTemplate",
-          "kind": "property",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "readonly nodeTemplate: _angular_core.Signal<NeuOrganizationChartNodeDirective<any> | undefined>;"
-        },
-        {
           "id": "./organization-chart#NeuOrganizationChartComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuOrganizationChartComponent<any>, \"neu-organization-chart\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionMode\": {\n        \"alias\": \"selectionMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectable\": {\n        \"alias\": \"selectable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapsible\": {\n        \"alias\": \"collapsible\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"gap\": {\n        \"alias\": \"gap\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandLabel\": {\n        \"alias\": \"expandLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapseLabel\": {\n        \"alias\": \"collapseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionKeys\": {\n        \"alias\": \"selectionKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapsedKeys\": {\n        \"alias\": \"collapsedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionKeys\": \"selectionKeysChange\";\n    \"collapsedKeys\": \"collapsedKeysChange\";\n    \"nodeSelect\": \"nodeSelect\";\n    \"nodeUnselect\": \"nodeUnselect\";\n    \"nodeExpand\": \"nodeExpand\";\n    \"nodeCollapse\": \"nodeCollapse\";\n    \"nodeActivate\": \"nodeActivate\";\n}, [\n    \"nodeTemplate\",\n    \"toggleTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuOrganizationChartComponent<any>, \"neu-organization-chart\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionMode\": {\n        \"alias\": \"selectionMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectable\": {\n        \"alias\": \"selectable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapsible\": {\n        \"alias\": \"collapsible\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"gap\": {\n        \"alias\": \"gap\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandLabel\": {\n        \"alias\": \"expandLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapseLabel\": {\n        \"alias\": \"collapseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionKeys\": {\n        \"alias\": \"selectionKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapsedKeys\": {\n        \"alias\": \"collapsedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionKeys\": \"selectionKeysChange\";\n    \"collapsedKeys\": \"collapsedKeysChange\";\n    \"nodeSelect\": \"nodeSelect\";\n    \"nodeUnselect\": \"nodeUnselect\";\n    \"nodeExpand\": \"nodeExpand\";\n    \"nodeCollapse\": \"nodeCollapse\";\n}, [\n    \"nodeTemplate\",\n    \"toggleIconTemplate\",\n    \"toggleTemplate\",\n    \"selectionIndicatorTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartComponent.property:ɵfac",
@@ -27334,14 +27265,6 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuOrganizationChartComponent<any>, never>;"
-        },
-        {
-          "id": "./organization-chart#NeuOrganizationChartComponent.property:toggleTemplate",
-          "name": "toggleTemplate",
-          "kind": "property",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "readonly toggleTemplate: _angular_core.Signal<NeuOrganizationChartToggleIconDirective<any> | undefined>;"
         }
       ]
     },
@@ -27371,12 +27294,28 @@
           "signature": "children?: NeuOrganizationChartNode<T>[];"
         },
         {
+          "id": "./organization-chart#NeuOrganizationChartNode.property:className",
+          "name": "className",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "className?: string;"
+        },
+        {
           "id": "./organization-chart#NeuOrganizationChartNode.property:collapsible",
           "name": "collapsible",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
           "signature": "collapsible?: boolean;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartNode.property:style",
+          "name": "style",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "style?: Readonly<Record<string, string | number | null | undefined>>;"
         }
       ]
     },
@@ -27390,12 +27329,30 @@
       "signature": "declare class NeuOrganizationChartNodeDirective<T = unknown> {\n}",
       "members": [
         {
+          "id": "./organization-chart#NeuOrganizationChartNodeDirective.input:neuOrganizationChartNode",
+          "name": "neuOrganizationChartNode",
+          "kind": "input",
+          "publicName": "neuOrganizationChartNode",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly neuOrganizationChartNode: _angular_core.InputSignal<readonly NeuOrganizationChartNode<T>[] | null>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartNodeDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard<T>(_directive: NeuOrganizationChartNodeDirective<T>, context: unknown): context is NeuOrganizationChartNodeTemplateContext<T>;"
+        },
+        {
           "id": "./organization-chart#NeuOrganizationChartNodeDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuOrganizationChartNodeDirective<any>, \"ng-template[neuOrganizationChartNode]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuOrganizationChartNodeDirective<any>, \"ng-template[neuOrganizationChartNode]\", never, {\n    \"neuOrganizationChartNode\": {\n        \"alias\": \"neuOrganizationChartNode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartNodeDirective.property:ɵfac",
@@ -27458,12 +27415,52 @@
           "signature": "readonly $implicit: NeuOrganizationChartNode<T>;"
         },
         {
+          "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:collapsed",
+          "name": "collapsed",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly collapsed: boolean;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:collapsible",
+          "name": "collapsible",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly collapsible: boolean;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:data",
+          "name": "data",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly data: T | undefined;"
+        },
+        {
           "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:expanded",
           "name": "expanded",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly expanded: boolean;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: number;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:leaf",
+          "name": "leaf",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly leaf: boolean;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:level",
@@ -27474,6 +27471,14 @@
           "signature": "readonly level: number;"
         },
         {
+          "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:parent",
+          "name": "parent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly parent: NeuOrganizationChartNode<T> | null;"
+        },
+        {
           "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:partialSelected",
           "name": "partialSelected",
           "kind": "property",
@@ -27482,12 +27487,28 @@
           "signature": "readonly partialSelected: boolean;"
         },
         {
+          "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:path",
+          "name": "path",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly path: readonly number[];"
+        },
+        {
           "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:select",
           "name": "select",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly select: () => void;"
+          "signature": "readonly select: (event?: Event) => void;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:selectable",
+          "name": "selectable",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selectable: boolean;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartNodeTemplateContext.property:selected",
@@ -27503,7 +27524,94 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly toggle: () => void;"
+          "signature": "readonly toggle: (event?: Event) => void;"
+        }
+      ]
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective",
+      "entrypoint": "./organization-chart",
+      "name": "NeuOrganizationChartSelectionIndicatorDirective",
+      "kind": "directive",
+      "status": "SUPPORTED",
+      "selector": "ng-template[neuOrganizationChartSelectionIndicator]",
+      "signature": "declare class NeuOrganizationChartSelectionIndicatorDirective<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective.input:neuOrganizationChartSelectionIndicator",
+          "name": "neuOrganizationChartSelectionIndicator",
+          "kind": "input",
+          "publicName": "neuOrganizationChartSelectionIndicator",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly neuOrganizationChartSelectionIndicator: _angular_core.InputSignal<readonly NeuOrganizationChartNode<T>[] | null>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard<T>(_directive: NeuOrganizationChartSelectionIndicatorDirective<T>, context: unknown): context is NeuOrganizationChartSelectionIndicatorTemplateContext<T>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective.property:ɵdir",
+          "name": "ɵdir",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuOrganizationChartSelectionIndicatorDirective<any>, \"ng-template[neuOrganizationChartSelectionIndicator]\", never, {\n    \"neuOrganizationChartSelectionIndicator\": {\n        \"alias\": \"neuOrganizationChartSelectionIndicator\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuOrganizationChartSelectionIndicatorDirective<any>, never>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective.property:templateRef",
+          "name": "templateRef",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly templateRef: TemplateRef<NeuOrganizationChartSelectionIndicatorTemplateContext<T>>;"
+        }
+      ]
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorTemplateContext",
+      "entrypoint": "./organization-chart",
+      "name": "NeuOrganizationChartSelectionIndicatorTemplateContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuOrganizationChartSelectionIndicatorTemplateContext<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorTemplateContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuOrganizationChartNode<T>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorTemplateContext.property:partialSelected",
+          "name": "partialSelected",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly partialSelected: boolean;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorTemplateContext.property:selected",
+          "name": "selected",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selected: boolean;"
         }
       ]
     },
@@ -27517,6 +27625,59 @@
       "members": []
     },
     {
+      "id": "./organization-chart#NeuOrganizationChartToggleDirective",
+      "entrypoint": "./organization-chart",
+      "name": "NeuOrganizationChartToggleDirective",
+      "kind": "directive",
+      "status": "SUPPORTED",
+      "selector": "ng-template[neuOrganizationChartToggle]",
+      "signature": "declare class NeuOrganizationChartToggleDirective<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleDirective.input:neuOrganizationChartToggle",
+          "name": "neuOrganizationChartToggle",
+          "kind": "input",
+          "publicName": "neuOrganizationChartToggle",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly neuOrganizationChartToggle: _angular_core.InputSignal<readonly NeuOrganizationChartNode<T>[] | null>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard<T>(_directive: NeuOrganizationChartToggleDirective<T>, context: unknown): context is NeuOrganizationChartToggleTemplateContext<T>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleDirective.property:ɵdir",
+          "name": "ɵdir",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuOrganizationChartToggleDirective<any>, \"ng-template[neuOrganizationChartToggle]\", never, {\n    \"neuOrganizationChartToggle\": {\n        \"alias\": \"neuOrganizationChartToggle\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleDirective.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuOrganizationChartToggleDirective<any>, never>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleDirective.property:templateRef",
+          "name": "templateRef",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly templateRef: TemplateRef<NeuOrganizationChartToggleTemplateContext<T>>;"
+        }
+      ]
+    },
+    {
       "id": "./organization-chart#NeuOrganizationChartToggleIconDirective",
       "entrypoint": "./organization-chart",
       "name": "NeuOrganizationChartToggleIconDirective",
@@ -27526,12 +27687,30 @@
       "signature": "declare class NeuOrganizationChartToggleIconDirective<T = unknown> {\n}",
       "members": [
         {
+          "id": "./organization-chart#NeuOrganizationChartToggleIconDirective.input:neuOrganizationChartToggleIcon",
+          "name": "neuOrganizationChartToggleIcon",
+          "kind": "input",
+          "publicName": "neuOrganizationChartToggleIcon",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly neuOrganizationChartToggleIcon: _angular_core.InputSignal<readonly NeuOrganizationChartNode<T>[] | null>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleIconDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard<T>(_directive: NeuOrganizationChartToggleIconDirective<T>, context: unknown): context is NeuOrganizationChartToggleIconTemplateContext<T>;"
+        },
+        {
           "id": "./organization-chart#NeuOrganizationChartToggleIconDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuOrganizationChartToggleIconDirective<any>, \"ng-template[neuOrganizationChartToggleIcon]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuOrganizationChartToggleIconDirective<any>, \"ng-template[neuOrganizationChartToggleIcon]\", never, {\n    \"neuOrganizationChartToggleIcon\": {\n        \"alias\": \"neuOrganizationChartToggleIcon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
         },
         {
           "id": "./organization-chart#NeuOrganizationChartToggleIconDirective.property:ɵfac",
@@ -27547,7 +27726,41 @@
           "kind": "property",
           "static": false,
           "status": "REVIEW",
-          "signature": "readonly templateRef: TemplateRef<NeuOrganizationChartToggleTemplateContext<T>>;"
+          "signature": "readonly templateRef: TemplateRef<NeuOrganizationChartToggleIconTemplateContext<T>>;"
+        }
+      ]
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartToggleIconTemplateContext",
+      "entrypoint": "./organization-chart",
+      "name": "NeuOrganizationChartToggleIconTemplateContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuOrganizationChartToggleIconTemplateContext<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleIconTemplateContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuOrganizationChartNode<T>;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleIconTemplateContext.property:collapsed",
+          "name": "collapsed",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly collapsed: boolean;"
+        },
+        {
+          "id": "./organization-chart#NeuOrganizationChartToggleIconTemplateContext.property:expanded",
+          "name": "expanded",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expanded: boolean;"
         }
       ]
     },
@@ -27557,23 +27770,23 @@
       "name": "NeuOrganizationChartToggleTemplateContext",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuOrganizationChartToggleTemplateContext<T = unknown> {\n}",
+      "signature": "interface NeuOrganizationChartToggleTemplateContext<T = unknown> extends NeuOrganizationChartToggleIconTemplateContext<T> {\n}",
       "members": [
         {
-          "id": "./organization-chart#NeuOrganizationChartToggleTemplateContext.property:$implicit",
-          "name": "$implicit",
+          "id": "./organization-chart#NeuOrganizationChartToggleTemplateContext.property:childCount",
+          "name": "childCount",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly $implicit: NeuOrganizationChartNode<T>;"
+          "signature": "readonly childCount: number;"
         },
         {
-          "id": "./organization-chart#NeuOrganizationChartToggleTemplateContext.property:expanded",
-          "name": "expanded",
+          "id": "./organization-chart#NeuOrganizationChartToggleTemplateContext.property:toggle",
+          "name": "toggle",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly expanded: boolean;"
+          "signature": "readonly toggle: (event?: Event) => void;"
         }
       ]
     },
@@ -33841,6 +34054,32 @@
       ]
     },
     {
+      "id": "./speed-dial#NeuSpeedDialAnimationConfig",
+      "entrypoint": "./speed-dial",
+      "name": "NeuSpeedDialAnimationConfig",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuSpeedDialAnimationConfig {\n}",
+      "members": [
+        {
+          "id": "./speed-dial#NeuSpeedDialAnimationConfig.property:itemDelay",
+          "name": "itemDelay",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly itemDelay?: number;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialAnimationConfig.property:rotateTrigger",
+          "name": "rotateTrigger",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rotateTrigger?: boolean;"
+        }
+      ]
+    },
+    {
       "id": "./speed-dial#NeuSpeedDialComponent",
       "entrypoint": "./speed-dial",
       "name": "NeuSpeedDialComponent",
@@ -33850,6 +34089,26 @@
       "signature": "declare class NeuSpeedDialComponent {\n}",
       "members": [
         {
+          "id": "./speed-dial#NeuSpeedDialComponent.input:animation",
+          "name": "animation",
+          "kind": "input",
+          "publicName": "animation",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly animation: _angular_core.InputSignal<Readonly<NeuSpeedDialAnimationConfig>>;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialComponent.input:ariaDescribedBy",
+          "name": "ariaDescribedBy",
+          "kind": "input",
+          "publicName": "ariaDescribedBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string | null>;"
+        },
+        {
           "id": "./speed-dial#NeuSpeedDialComponent.input:ariaLabel",
           "name": "ariaLabel",
           "kind": "input",
@@ -33857,7 +34116,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string | null>;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialComponent.input:ariaLabelledBy",
+          "name": "ariaLabelledBy",
+          "kind": "input",
+          "publicName": "ariaLabelledBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialComponent.input:direction",
@@ -33878,16 +34147,6 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.input:hideIcon",
-          "name": "hideIcon",
-          "kind": "input",
-          "publicName": "hideIcon",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly hideIcon: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialComponent.input:hideOnClickOutside",
@@ -33917,7 +34176,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly items: _angular_core.InputSignal<NeuSpeedDialItem[]>;"
+          "signature": "readonly items: _angular_core.InputSignal<readonly NeuSpeedDialItem[]>;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialComponent.input:mask",
@@ -33930,6 +34189,16 @@
           "signature": "readonly mask: _angular_core.InputSignalWithTransform<boolean, unknown>;"
         },
         {
+          "id": "./speed-dial#NeuSpeedDialComponent.input:openState",
+          "name": "openState",
+          "kind": "input",
+          "publicName": "open",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly openState: _angular_core.InputSignal<boolean | null>;"
+        },
+        {
           "id": "./speed-dial#NeuSpeedDialComponent.input:radius",
           "name": "radius",
           "kind": "input",
@@ -33940,44 +34209,24 @@
           "signature": "readonly radius: _angular_core.InputSignalWithTransform<number, unknown>;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialComponent.input:rotateAnimation",
-          "name": "rotateAnimation",
+          "id": "./speed-dial#NeuSpeedDialComponent.input:tabindex",
+          "name": "tabindex",
           "kind": "input",
-          "publicName": "rotateAnimation",
+          "publicName": "tabindex",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly rotateAnimation: _angular_core.InputSignalWithTransform<boolean, unknown>;"
+          "signature": "readonly tabindex: _angular_core.InputSignalWithTransform<number, unknown>;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialComponent.input:showIcon",
-          "name": "showIcon",
+          "id": "./speed-dial#NeuSpeedDialComponent.input:tooltip",
+          "name": "tooltip",
           "kind": "input",
-          "publicName": "showIcon",
+          "publicName": "tooltip",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly showIcon: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.input:textDirection",
-          "name": "textDirection",
-          "kind": "input",
-          "publicName": "textDirection",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly textDirection: _angular_core.InputSignal<NeuTextDirection>;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.input:transitionDelay",
-          "name": "transitionDelay",
-          "kind": "input",
-          "publicName": "transitionDelay",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly transitionDelay: _angular_core.InputSignalWithTransform<number, unknown>;"
+          "signature": "readonly tooltip: _angular_core.InputSignal<Readonly<NeuSpeedDialTooltipConfig> | null>;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialComponent.input:type",
@@ -33990,141 +34239,78 @@
           "signature": "readonly type: _angular_core.InputSignal<NeuSpeedDialType>;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialComponent.method:activate",
-          "name": "activate",
+          "id": "./speed-dial#NeuSpeedDialComponent.method:close",
+          "name": "close",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
-          "signature": "activate(event: Event, action: NeuResolvedMenuAction<NeuSpeedDialItem>): void;"
+          "status": "SUPPORTED",
+          "signature": "close(): void;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialComponent.method:hide",
-          "name": "hide",
+          "id": "./speed-dial#NeuSpeedDialComponent.method:open",
+          "name": "open",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
-          "signature": "hide(restoreFocus?: boolean): void;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.method:itemStyle",
-          "name": "itemStyle",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "itemStyle(index: number): Record<string, string>;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.method:onActionKeydown",
-          "name": "onActionKeydown",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "onActionKeydown(event: KeyboardEvent, index: number): void;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.method:onDocumentPointerDown",
-          "name": "onDocumentPointerDown",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "onDocumentPointerDown(event: PointerEvent): void;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.method:onTriggerKeydown",
-          "name": "onTriggerKeydown",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "onTriggerKeydown(event: KeyboardEvent): void;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.method:setFocused",
-          "name": "setFocused",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "setFocused(index: number): void;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.method:show",
-          "name": "show",
-          "kind": "method",
-          "static": false,
-          "status": "REVIEW",
-          "signature": "show(): void;"
+          "status": "SUPPORTED",
+          "signature": "open(): void;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialComponent.method:toggle",
           "name": "toggle",
           "kind": "method",
           "static": false,
-          "status": "REVIEW",
-          "signature": "toggle(event: MouseEvent): void;"
+          "status": "SUPPORTED",
+          "signature": "toggle(): void;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialComponent.model:visible",
-          "name": "visible",
-          "kind": "model",
-          "publicName": "visible",
-          "changePublicName": "visibleChange",
-          "required": false,
-          "static": false,
-          "status": "COMPATIBILITY",
-          "canonicalReplacement": "open/openChange (planned H5 canonical model)",
-          "signature": "readonly visible: _angular_core.ModelSignal<boolean>;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.output:itemClick",
-          "name": "itemClick",
+          "id": "./speed-dial#NeuSpeedDialComponent.output:closed",
+          "name": "closed",
           "kind": "output",
-          "publicName": "itemClick",
+          "publicName": "closed",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuSpeedDialItem>;"
+          "signature": "readonly closed: _angular_core.OutputEmitterRef<NeuSpeedDialVisibilityEvent>;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialComponent.output:onHide",
-          "name": "onHide",
+          "id": "./speed-dial#NeuSpeedDialComponent.output:itemActivate",
+          "name": "itemActivate",
           "kind": "output",
-          "publicName": "onHide",
-          "required": false,
-          "static": false,
-          "status": "COMPATIBILITY",
-          "canonicalReplacement": "closed (planned H5 canonical event)",
-          "signature": "readonly onHide: _angular_core.OutputEmitterRef<void>;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.output:onShow",
-          "name": "onShow",
-          "kind": "output",
-          "publicName": "onShow",
-          "required": false,
-          "static": false,
-          "status": "COMPATIBILITY",
-          "canonicalReplacement": "opened (planned H5 canonical event)",
-          "signature": "readonly onShow: _angular_core.OutputEmitterRef<void>;"
-        },
-        {
-          "id": "./speed-dial#NeuSpeedDialComponent.output:onTriggerClick",
-          "name": "onTriggerClick",
-          "kind": "output",
-          "publicName": "onTriggerClick",
+          "publicName": "itemActivate",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly onTriggerClick: _angular_core.OutputEmitterRef<MouseEvent>;"
+          "signature": "readonly itemActivate: _angular_core.OutputEmitterRef<NeuSpeedDialItemEvent>;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialComponent.output:onVisibleChange",
-          "name": "onVisibleChange",
+          "id": "./speed-dial#NeuSpeedDialComponent.output:openChange",
+          "name": "openChange",
           "kind": "output",
-          "publicName": "onVisibleChange",
+          "publicName": "openChange",
           "required": false,
           "static": false,
-          "status": "COMPATIBILITY",
-          "canonicalReplacement": "openChange (planned H5 canonical event)",
-          "signature": "readonly onVisibleChange: _angular_core.OutputEmitterRef<boolean>;"
+          "status": "SUPPORTED",
+          "signature": "readonly openChange: _angular_core.OutputEmitterRef<boolean>;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialComponent.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<NeuSpeedDialVisibilityEvent>;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialComponent.output:triggerClick",
+          "name": "triggerClick",
+          "kind": "output",
+          "publicName": "triggerClick",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly triggerClick: _angular_core.OutputEmitterRef<MouseEvent>;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialComponent.property:focusedIndex",
@@ -34133,6 +34319,14 @@
           "static": false,
           "status": "REVIEW",
           "signature": "readonly focusedIndex: _angular_core.WritableSignal<number>;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialComponent.property:isOpen",
+          "name": "isOpen",
+          "kind": "property",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "readonly isOpen: _angular_core.Signal<boolean>;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialComponent.property:listId",
@@ -34148,7 +34342,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSpeedDialComponent, \"neu-speed-dial\", never, {\n    \"id\": {\n        \"alias\": \"id\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"visible\": {\n        \"alias\": \"visible\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"transitionDelay\": {\n        \"alias\": \"transitionDelay\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"radius\": {\n        \"alias\": \"radius\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"mask\": {\n        \"alias\": \"mask\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hideOnClickOutside\": {\n        \"alias\": \"hideOnClickOutside\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showIcon\": {\n        \"alias\": \"showIcon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hideIcon\": {\n        \"alias\": \"hideIcon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rotateAnimation\": {\n        \"alias\": \"rotateAnimation\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"textDirection\": {\n        \"alias\": \"textDirection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"visible\": \"visibleChange\";\n    \"onVisibleChange\": \"onVisibleChange\";\n    \"onTriggerClick\": \"onTriggerClick\";\n    \"itemClick\": \"itemClick\";\n    \"onShow\": \"onShow\";\n    \"onHide\": \"onHide\";\n}, [\n    \"itemTemplate\",\n    \"triggerTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSpeedDialComponent, \"neu-speed-dial\", never, {\n    \"id\": {\n        \"alias\": \"id\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"openState\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"radius\": {\n        \"alias\": \"radius\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"mask\": {\n        \"alias\": \"mask\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hideOnClickOutside\": {\n        \"alias\": \"hideOnClickOutside\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"animation\": {\n        \"alias\": \"animation\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tooltip\": {\n        \"alias\": \"tooltip\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabindex\": {\n        \"alias\": \"tabindex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"openChange\": \"openChange\";\n    \"triggerClick\": \"triggerClick\";\n    \"itemActivate\": \"itemActivate\";\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n}, [\n    \"itemTemplate\",\n    \"triggerTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialComponent.property:ɵfac",
@@ -34221,6 +34415,14 @@
       "signature": "declare class NeuSpeedDialItemDirective {\n}",
       "members": [
         {
+          "id": "./speed-dial#NeuSpeedDialItemDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuSpeedDialItemDirective, context: unknown): context is NeuSpeedDialItemTemplateContext;"
+        },
+        {
           "id": "./speed-dial#NeuSpeedDialItemDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
@@ -34247,6 +34449,32 @@
       ]
     },
     {
+      "id": "./speed-dial#NeuSpeedDialItemEvent",
+      "entrypoint": "./speed-dial",
+      "name": "NeuSpeedDialItemEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuSpeedDialItemEvent {\n}",
+      "members": [
+        {
+          "id": "./speed-dial#NeuSpeedDialItemEvent.property:item",
+          "name": "item",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly item: NeuSpeedDialItem;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialItemEvent.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: Event;"
+        }
+      ]
+    },
+    {
       "id": "./speed-dial#NeuSpeedDialItemTemplateContext",
       "entrypoint": "./speed-dial",
       "name": "NeuSpeedDialItemTemplateContext",
@@ -34260,7 +34488,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "$implicit: NeuSpeedDialItem;"
+          "signature": "readonly $implicit: NeuSpeedDialItem;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialItemTemplateContext.property:active",
@@ -34268,7 +34496,15 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "active: boolean;"
+          "signature": "readonly active: boolean;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialItemTemplateContext.property:disabled",
+          "name": "disabled",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly disabled: boolean;"
         },
         {
           "id": "./speed-dial#NeuSpeedDialItemTemplateContext.property:index",
@@ -34276,15 +34512,33 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "index: number;"
+          "signature": "readonly index: number;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialItemTemplateContext.property:toggleCallback",
-          "name": "toggleCallback",
+          "id": "./speed-dial#NeuSpeedDialItemTemplateContext.property:open",
+          "name": "open",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "toggleCallback: (event: Event) => void;"
+          "signature": "readonly open: boolean;"
+        }
+      ]
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialTooltipConfig",
+      "entrypoint": "./speed-dial",
+      "name": "NeuSpeedDialTooltipConfig",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuSpeedDialTooltipConfig {\n}",
+      "members": [
+        {
+          "id": "./speed-dial#NeuSpeedDialTooltipConfig.property:position",
+          "name": "position",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly position?: NeuTooltipPosition;"
         }
       ]
     },
@@ -34297,6 +34551,14 @@
       "selector": "ng-template[neuSpeedDialTrigger]",
       "signature": "declare class NeuSpeedDialTriggerDirective {\n}",
       "members": [
+        {
+          "id": "./speed-dial#NeuSpeedDialTriggerDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuSpeedDialTriggerDirective, context: unknown): context is NeuSpeedDialTriggerTemplateContext;"
+        },
         {
           "id": "./speed-dial#NeuSpeedDialTriggerDirective.property:ɵdir",
           "name": "ɵdir",
@@ -34332,20 +34594,20 @@
       "signature": "interface NeuSpeedDialTriggerTemplateContext {\n}",
       "members": [
         {
-          "id": "./speed-dial#NeuSpeedDialTriggerTemplateContext.property:toggleCallback",
-          "name": "toggleCallback",
+          "id": "./speed-dial#NeuSpeedDialTriggerTemplateContext.property:$implicit",
+          "name": "$implicit",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "toggleCallback: (event: MouseEvent) => void;"
+          "signature": "readonly $implicit: boolean;"
         },
         {
-          "id": "./speed-dial#NeuSpeedDialTriggerTemplateContext.property:visible",
-          "name": "visible",
+          "id": "./speed-dial#NeuSpeedDialTriggerTemplateContext.property:open",
+          "name": "open",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "visible: boolean;"
+          "signature": "readonly open: boolean;"
         }
       ]
     },
@@ -34356,6 +34618,41 @@
       "kind": "type",
       "status": "SUPPORTED",
       "signature": "type NeuSpeedDialType = 'linear' | 'circle' | 'semi-circle' | 'quarter-circle';",
+      "members": []
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialVisibilityEvent",
+      "entrypoint": "./speed-dial",
+      "name": "NeuSpeedDialVisibilityEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuSpeedDialVisibilityEvent {\n}",
+      "members": [
+        {
+          "id": "./speed-dial#NeuSpeedDialVisibilityEvent.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: Event | null;"
+        },
+        {
+          "id": "./speed-dial#NeuSpeedDialVisibilityEvent.property:reason",
+          "name": "reason",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly reason: NeuSpeedDialVisibilityReason;"
+        }
+      ]
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialVisibilityReason",
+      "entrypoint": "./speed-dial",
+      "name": "NeuSpeedDialVisibilityReason",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuSpeedDialVisibilityReason = 'trigger' | 'item' | 'escape' | 'outside' | 'mask' | 'disabled' | 'programmatic';",
       "members": []
     },
     {
@@ -61852,6 +62149,18 @@
       "signature": "readonly valueChange: _angular_core.OutputEmitterRef<number>;"
     },
     {
+      "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaDescribedBy",
+      "entrypoint": "./organization-chart",
+      "declaration": "NeuOrganizationChartComponent",
+      "selector": "neu-organization-chart",
+      "propertyName": "ariaDescribedBy",
+      "publicName": "ariaDescribedBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string | null>;"
+    },
+    {
       "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaLabel",
       "entrypoint": "./organization-chart",
       "declaration": "NeuOrganizationChartComponent",
@@ -61861,7 +62170,19 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string | null>;"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaLabelledBy",
+      "entrypoint": "./organization-chart",
+      "declaration": "NeuOrganizationChartComponent",
+      "selector": "neu-organization-chart",
+      "propertyName": "ariaLabelledBy",
+      "publicName": "ariaLabelledBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./organization-chart#NeuOrganizationChartComponent.input:collapseLabel",
@@ -61986,18 +62307,6 @@
       "signature": "readonly selectionKeys: _angular_core.ModelSignal<readonly string[] | undefined>;"
     },
     {
-      "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeActivate",
-      "entrypoint": "./organization-chart",
-      "declaration": "NeuOrganizationChartComponent",
-      "selector": "neu-organization-chart",
-      "propertyName": "nodeActivate",
-      "publicName": "nodeActivate",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly nodeActivate: _angular_core.OutputEmitterRef<NeuOrganizationChartNodeEvent<T>>;"
-    },
-    {
       "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeCollapse",
       "entrypoint": "./organization-chart",
       "declaration": "NeuOrganizationChartComponent",
@@ -62044,6 +62353,54 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly nodeUnselect: _angular_core.OutputEmitterRef<NeuOrganizationChartNodeEvent<T>>;"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartNodeDirective.input:neuOrganizationChartNode",
+      "entrypoint": "./organization-chart",
+      "declaration": "NeuOrganizationChartNodeDirective",
+      "selector": "ng-template[neuOrganizationChartNode]",
+      "propertyName": "neuOrganizationChartNode",
+      "publicName": "neuOrganizationChartNode",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly neuOrganizationChartNode: _angular_core.InputSignal<readonly NeuOrganizationChartNode<T>[] | null>;"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective.input:neuOrganizationChartSelectionIndicator",
+      "entrypoint": "./organization-chart",
+      "declaration": "NeuOrganizationChartSelectionIndicatorDirective",
+      "selector": "ng-template[neuOrganizationChartSelectionIndicator]",
+      "propertyName": "neuOrganizationChartSelectionIndicator",
+      "publicName": "neuOrganizationChartSelectionIndicator",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly neuOrganizationChartSelectionIndicator: _angular_core.InputSignal<readonly NeuOrganizationChartNode<T>[] | null>;"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartToggleDirective.input:neuOrganizationChartToggle",
+      "entrypoint": "./organization-chart",
+      "declaration": "NeuOrganizationChartToggleDirective",
+      "selector": "ng-template[neuOrganizationChartToggle]",
+      "propertyName": "neuOrganizationChartToggle",
+      "publicName": "neuOrganizationChartToggle",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly neuOrganizationChartToggle: _angular_core.InputSignal<readonly NeuOrganizationChartNode<T>[] | null>;"
+    },
+    {
+      "id": "./organization-chart#NeuOrganizationChartToggleIconDirective.input:neuOrganizationChartToggleIcon",
+      "entrypoint": "./organization-chart",
+      "declaration": "NeuOrganizationChartToggleIconDirective",
+      "selector": "ng-template[neuOrganizationChartToggleIcon]",
+      "propertyName": "neuOrganizationChartToggleIcon",
+      "publicName": "neuOrganizationChartToggleIcon",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly neuOrganizationChartToggleIcon: _angular_core.InputSignal<readonly NeuOrganizationChartNode<T>[] | null>;"
     },
     {
       "id": "./pagination#NeuPaginationComponent.input:maxVisible",
@@ -64518,6 +64875,30 @@
       "signature": "valueChange: _angular_core.OutputEmitterRef<number>;"
     },
     {
+      "id": "./speed-dial#NeuSpeedDialComponent.input:animation",
+      "entrypoint": "./speed-dial",
+      "declaration": "NeuSpeedDialComponent",
+      "selector": "neu-speed-dial",
+      "propertyName": "animation",
+      "publicName": "animation",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly animation: _angular_core.InputSignal<Readonly<NeuSpeedDialAnimationConfig>>;"
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialComponent.input:ariaDescribedBy",
+      "entrypoint": "./speed-dial",
+      "declaration": "NeuSpeedDialComponent",
+      "selector": "neu-speed-dial",
+      "propertyName": "ariaDescribedBy",
+      "publicName": "ariaDescribedBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string | null>;"
+    },
+    {
       "id": "./speed-dial#NeuSpeedDialComponent.input:ariaLabel",
       "entrypoint": "./speed-dial",
       "declaration": "NeuSpeedDialComponent",
@@ -64527,7 +64908,19 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string | null>;"
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialComponent.input:ariaLabelledBy",
+      "entrypoint": "./speed-dial",
+      "declaration": "NeuSpeedDialComponent",
+      "selector": "neu-speed-dial",
+      "propertyName": "ariaLabelledBy",
+      "publicName": "ariaLabelledBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./speed-dial#NeuSpeedDialComponent.input:direction",
@@ -64552,18 +64945,6 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:hideIcon",
-      "entrypoint": "./speed-dial",
-      "declaration": "NeuSpeedDialComponent",
-      "selector": "neu-speed-dial",
-      "propertyName": "hideIcon",
-      "publicName": "hideIcon",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly hideIcon: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./speed-dial#NeuSpeedDialComponent.input:hideOnClickOutside",
@@ -64599,7 +64980,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly items: _angular_core.InputSignal<NeuSpeedDialItem[]>;"
+      "signature": "readonly items: _angular_core.InputSignal<readonly NeuSpeedDialItem[]>;"
     },
     {
       "id": "./speed-dial#NeuSpeedDialComponent.input:mask",
@@ -64614,6 +64995,18 @@
       "signature": "readonly mask: _angular_core.InputSignalWithTransform<boolean, unknown>;"
     },
     {
+      "id": "./speed-dial#NeuSpeedDialComponent.input:openState",
+      "entrypoint": "./speed-dial",
+      "declaration": "NeuSpeedDialComponent",
+      "selector": "neu-speed-dial",
+      "propertyName": "openState",
+      "publicName": "open",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly openState: _angular_core.InputSignal<boolean | null>;"
+    },
+    {
       "id": "./speed-dial#NeuSpeedDialComponent.input:radius",
       "entrypoint": "./speed-dial",
       "declaration": "NeuSpeedDialComponent",
@@ -64626,52 +65019,28 @@
       "signature": "readonly radius: _angular_core.InputSignalWithTransform<number, unknown>;"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:rotateAnimation",
+      "id": "./speed-dial#NeuSpeedDialComponent.input:tabindex",
       "entrypoint": "./speed-dial",
       "declaration": "NeuSpeedDialComponent",
       "selector": "neu-speed-dial",
-      "propertyName": "rotateAnimation",
-      "publicName": "rotateAnimation",
+      "propertyName": "tabindex",
+      "publicName": "tabindex",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly rotateAnimation: _angular_core.InputSignalWithTransform<boolean, unknown>;"
+      "signature": "readonly tabindex: _angular_core.InputSignalWithTransform<number, unknown>;"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:showIcon",
+      "id": "./speed-dial#NeuSpeedDialComponent.input:tooltip",
       "entrypoint": "./speed-dial",
       "declaration": "NeuSpeedDialComponent",
       "selector": "neu-speed-dial",
-      "propertyName": "showIcon",
-      "publicName": "showIcon",
+      "propertyName": "tooltip",
+      "publicName": "tooltip",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly showIcon: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:textDirection",
-      "entrypoint": "./speed-dial",
-      "declaration": "NeuSpeedDialComponent",
-      "selector": "neu-speed-dial",
-      "propertyName": "textDirection",
-      "publicName": "textDirection",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly textDirection: _angular_core.InputSignal<NeuTextDirection>;"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.input:transitionDelay",
-      "entrypoint": "./speed-dial",
-      "declaration": "NeuSpeedDialComponent",
-      "selector": "neu-speed-dial",
-      "propertyName": "transitionDelay",
-      "publicName": "transitionDelay",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly transitionDelay: _angular_core.InputSignalWithTransform<number, unknown>;"
+      "signature": "readonly tooltip: _angular_core.InputSignal<Readonly<NeuSpeedDialTooltipConfig> | null>;"
     },
     {
       "id": "./speed-dial#NeuSpeedDialComponent.input:type",
@@ -64686,81 +65055,64 @@
       "signature": "readonly type: _angular_core.InputSignal<NeuSpeedDialType>;"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.model:visible",
+      "id": "./speed-dial#NeuSpeedDialComponent.output:closed",
       "entrypoint": "./speed-dial",
       "declaration": "NeuSpeedDialComponent",
       "selector": "neu-speed-dial",
-      "propertyName": "visible",
-      "publicName": "visible",
-      "changePublicName": "visibleChange",
-      "kind": "model",
-      "required": false,
-      "status": "COMPATIBILITY",
-      "canonicalReplacement": "open/openChange (planned H5 canonical model)",
-      "signature": "readonly visible: _angular_core.ModelSignal<boolean>;"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:itemClick",
-      "entrypoint": "./speed-dial",
-      "declaration": "NeuSpeedDialComponent",
-      "selector": "neu-speed-dial",
-      "propertyName": "itemClick",
-      "publicName": "itemClick",
+      "propertyName": "closed",
+      "publicName": "closed",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuSpeedDialItem>;"
+      "signature": "readonly closed: _angular_core.OutputEmitterRef<NeuSpeedDialVisibilityEvent>;"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:onHide",
+      "id": "./speed-dial#NeuSpeedDialComponent.output:itemActivate",
       "entrypoint": "./speed-dial",
       "declaration": "NeuSpeedDialComponent",
       "selector": "neu-speed-dial",
-      "propertyName": "onHide",
-      "publicName": "onHide",
-      "kind": "output",
-      "required": false,
-      "status": "COMPATIBILITY",
-      "canonicalReplacement": "closed (planned H5 canonical event)",
-      "signature": "readonly onHide: _angular_core.OutputEmitterRef<void>;"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:onShow",
-      "entrypoint": "./speed-dial",
-      "declaration": "NeuSpeedDialComponent",
-      "selector": "neu-speed-dial",
-      "propertyName": "onShow",
-      "publicName": "onShow",
-      "kind": "output",
-      "required": false,
-      "status": "COMPATIBILITY",
-      "canonicalReplacement": "opened (planned H5 canonical event)",
-      "signature": "readonly onShow: _angular_core.OutputEmitterRef<void>;"
-    },
-    {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:onTriggerClick",
-      "entrypoint": "./speed-dial",
-      "declaration": "NeuSpeedDialComponent",
-      "selector": "neu-speed-dial",
-      "propertyName": "onTriggerClick",
-      "publicName": "onTriggerClick",
+      "propertyName": "itemActivate",
+      "publicName": "itemActivate",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly onTriggerClick: _angular_core.OutputEmitterRef<MouseEvent>;"
+      "signature": "readonly itemActivate: _angular_core.OutputEmitterRef<NeuSpeedDialItemEvent>;"
     },
     {
-      "id": "./speed-dial#NeuSpeedDialComponent.output:onVisibleChange",
+      "id": "./speed-dial#NeuSpeedDialComponent.output:openChange",
       "entrypoint": "./speed-dial",
       "declaration": "NeuSpeedDialComponent",
       "selector": "neu-speed-dial",
-      "propertyName": "onVisibleChange",
-      "publicName": "onVisibleChange",
+      "propertyName": "openChange",
+      "publicName": "openChange",
       "kind": "output",
       "required": false,
-      "status": "COMPATIBILITY",
-      "canonicalReplacement": "openChange (planned H5 canonical event)",
-      "signature": "readonly onVisibleChange: _angular_core.OutputEmitterRef<boolean>;"
+      "status": "SUPPORTED",
+      "signature": "readonly openChange: _angular_core.OutputEmitterRef<boolean>;"
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialComponent.output:opened",
+      "entrypoint": "./speed-dial",
+      "declaration": "NeuSpeedDialComponent",
+      "selector": "neu-speed-dial",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<NeuSpeedDialVisibilityEvent>;"
+    },
+    {
+      "id": "./speed-dial#NeuSpeedDialComponent.output:triggerClick",
+      "entrypoint": "./speed-dial",
+      "declaration": "NeuSpeedDialComponent",
+      "selector": "neu-speed-dial",
+      "propertyName": "triggerClick",
+      "publicName": "triggerClick",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly triggerClick: _angular_core.OutputEmitterRef<MouseEvent>;"
     },
     {
       "id": "./spinner#NeuSpinnerComponent.input:animationDuration",
@@ -69707,32 +70059,32 @@
   ],
   "summary": {
     "entrypoints": 106,
-    "exportedDeclarations": 828,
+    "exportedDeclarations": 837,
     "declarationKinds": {
       "class": 14,
       "component": 107,
-      "directive": 142,
+      "directive": 144,
       "function": 50,
-      "interface": 266,
+      "interface": 272,
       "reexport": 55,
       "service": 11,
       "token": 7,
-      "type": 174,
+      "type": 175,
       "variable": 2
     },
-    "publicSymbols": 5877,
+    "publicSymbols": 5910,
     "statuses": {
-      "SUPPORTED": 3405,
-      "COMPATIBILITY": 6,
+      "SUPPORTED": 3452,
+      "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 1208,
-      "REVIEW": 1256
+      "INTERNAL/UNSUPPORTED": 1218,
+      "REVIEW": 1236
     },
     "bindings": {
-      "input": 1142,
-      "output": 231,
-      "model": 3,
-      "total": 1376
+      "input": 1149,
+      "output": 230,
+      "model": 2,
+      "total": 1381
     },
     "designTokens": 258
   }

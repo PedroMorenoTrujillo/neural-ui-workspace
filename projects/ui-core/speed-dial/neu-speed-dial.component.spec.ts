@@ -5,17 +5,29 @@ import {
   NeuSpeedDialComponent,
   NeuSpeedDialItemDirective,
   NeuSpeedDialTriggerDirective,
+  type NeuSpeedDialVisibilityEvent,
 } from './neu-speed-dial.component';
 
 @Component({
   imports: [NeuSpeedDialComponent, NeuSpeedDialItemDirective, NeuSpeedDialTriggerDirective],
-  template: `<neu-speed-dial [items]="items" [(visible)]="open" mask
-    ><ng-template neuSpeedDialTrigger let-visible="visible"
-      ><span class="custom-trigger">{{ visible }}</span></ng-template
-    ><ng-template neuSpeedDialItem let-item
-      ><span class="custom-item">{{ item.label }}</span></ng-template
-    ></neu-speed-dial
-  >`,
+  template: `
+    <span id="dial-label">Actions</span>
+    <span id="dial-help">Choose one action</span>
+    <neu-speed-dial
+      [items]="items"
+      [(open)]="open"
+      mask
+      ariaLabelledBy="dial-label"
+      ariaDescribedBy="dial-help"
+    >
+      <ng-template neuSpeedDialTrigger let-open="open">
+        <span class="custom-trigger">{{ open }}</span>
+      </ng-template>
+      <ng-template neuSpeedDialItem let-item let-disabled="disabled" let-open="open">
+        <span class="custom-item">{{ item.label }} · {{ disabled }} · {{ open }}</span>
+      </ng-template>
+    </neu-speed-dial>
+  `,
 })
 class SpeedDialHost {
   open = false;
@@ -30,18 +42,32 @@ describe('NeuSpeedDialComponent', () => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents(),
   );
 
-  it('opens and closes with two-way visibility and mask', () => {
+  function setup() {
+    const fixture = TestBed.createComponent(NeuSpeedDialComponent);
+    fixture.componentRef.setInput('items', [{ key: 'run', label: 'Run' }]);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it('uses one controlled open owner with accessible trigger relationships and mask close', () => {
     const fixture = TestBed.createComponent(SpeedDialHost);
     fixture.detectChanges();
-    const menu = fixture.nativeElement.querySelector(
-      '.neu-speed-dial__list',
-    ) as HTMLElement;
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-speed-dial__trigger',
+    ) as HTMLButtonElement;
+    const menu = fixture.nativeElement.querySelector('.neu-speed-dial__list') as HTMLElement;
+
+    expect(trigger.getAttribute('aria-label')).toBeNull();
+    expect(trigger.getAttribute('aria-labelledby')).toBe('dial-label');
+    expect(trigger.getAttribute('aria-describedby')).toBe('dial-help');
     expect(menu.hasAttribute('inert')).toBe(true);
-    (fixture.nativeElement.querySelector('.neu-speed-dial__trigger') as HTMLButtonElement).click();
+
+    trigger.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.open).toBe(true);
     expect(menu.hasAttribute('inert')).toBe(false);
     expect(fixture.nativeElement.querySelector('.neu-speed-dial__mask')).toBeTruthy();
+
     (fixture.nativeElement.querySelector('.neu-speed-dial__mask') as HTMLElement).dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true }),
     );
@@ -50,174 +76,154 @@ describe('NeuSpeedDialComponent', () => {
     expect(menu.hasAttribute('inert')).toBe(true);
   });
 
-  it('runs actions, emits item click and restores trigger focus', () => {
+  it('keeps open, close and toggle atomic in uncontrolled mode', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const proposals: boolean[] = [];
+    const opened: NeuSpeedDialVisibilityEvent[] = [];
+    const closed: NeuSpeedDialVisibilityEvent[] = [];
+    component.openChange.subscribe((value) => proposals.push(value));
+    component.opened.subscribe((event) => opened.push(event));
+    component.closed.subscribe((event) => closed.push(event));
+
+    component.open();
+    component.open();
+    component.close();
+    component.close();
+    component.toggle();
+
+    expect(proposals).toEqual([true, false, true]);
+    expect(opened.map((event) => event.reason)).toEqual(['programmatic', 'programmatic']);
+    expect(closed.map((event) => event.reason)).toEqual(['programmatic']);
+    expect(component.isOpen()).toBe(true);
+  });
+
+  it('waits for a controlled owner echo and keeps owner writes proposal-silent', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const proposals: boolean[] = [];
+    const opened: NeuSpeedDialVisibilityEvent[] = [];
+    component.openChange.subscribe((value) => proposals.push(value));
+    component.opened.subscribe((event) => opened.push(event));
+
+    fixture.componentRef.setInput('open', false);
+    fixture.detectChanges();
+    component.open();
+    expect(proposals).toEqual([true]);
+    expect(component.isOpen()).toBe(false);
+
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+    expect(component.isOpen()).toBe(true);
+    expect(proposals).toEqual([true]);
+    expect(opened).toHaveLength(1);
+  });
+
+  it('activates one item, emits typed detail and restores trigger focus', () => {
     const command = vi.fn();
     const fixture = TestBed.createComponent(NeuSpeedDialComponent);
     fixture.componentRef.setInput('items', [{ key: 'run', label: 'Run', command }]);
-    const emitted = vi.spyOn(fixture.componentInstance.itemClick, 'emit');
+    const events: string[] = [];
+    fixture.componentInstance.itemActivate.subscribe((event) => events.push(event.item.key));
     fixture.detectChanges();
-    fixture.componentInstance.show();
+    fixture.componentInstance.open();
     fixture.detectChanges();
+
     (fixture.nativeElement.querySelector('.neu-speed-dial__action') as HTMLButtonElement).click();
+
     expect(command).toHaveBeenCalledOnce();
-    expect(emitted).toHaveBeenCalledOnce();
-    expect(fixture.componentInstance.visible()).toBe(false);
+    expect(events).toEqual(['run']);
+    expect(fixture.componentInstance.isOpen()).toBe(false);
     expect(document.activeElement).toBe(
       fixture.nativeElement.querySelector('.neu-speed-dial__trigger'),
     );
   });
 
-  it('supports keyboard open, disabled skipping, Home/End and Escape focus restoration', () => {
+  it('lets native Enter/Space click toggle once and uses arrows for boundary focus', () => {
     const fixture = TestBed.createComponent(NeuSpeedDialComponent);
     fixture.componentRef.setInput('items', [
-      { key: 'one', label: 'One' },
+      { key: 'one', label: 'One', command: () => undefined },
+      { key: 'docs', label: 'Docs', url: 'https://example.test' },
       { key: 'off', label: 'Off', disabled: true },
-      { key: 'three', label: 'Three' },
+      { key: 'three', label: 'Three', routerLink: ['/three'] },
     ]);
     fixture.detectChanges();
     const trigger = fixture.nativeElement.querySelector(
       '.neu-speed-dial__trigger',
     ) as HTMLButtonElement;
-    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    trigger.click();
+    expect(fixture.componentInstance.isOpen()).toBe(true);
+    fixture.componentInstance.close();
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
     fixture.detectChanges();
     const actions = fixture.nativeElement.querySelectorAll(
       '.neu-speed-dial__action',
-    ) as NodeListOf<HTMLButtonElement>;
+    ) as NodeListOf<HTMLElement>;
+    expect(document.activeElement).toBe(actions[3]);
+    actions[3].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     expect(document.activeElement).toBe(actions[0]);
-    actions[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
-    expect(document.activeElement).toBe(actions[2]);
-    actions[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    actions[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(actions[1]);
+    actions[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(document.activeElement).toBe(trigger);
   });
 
-  it('renders linear and circular layout styles and router/external links', () => {
+  it('renders strict controlled-composition contexts without interaction callbacks', () => {
+    const fixture = TestBed.createComponent(SpeedDialHost);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.custom-trigger').textContent).toContain('false');
+    expect(fixture.nativeElement.querySelectorAll('.custom-item')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('.custom-item').textContent).toContain(
+      'Edit · false · false',
+    );
+  });
+
+  it('supports layout variants, links, animation config and tooltip integration', () => {
     const fixture = TestBed.createComponent(NeuSpeedDialComponent);
     fixture.componentRef.setInput('type', 'quarter-circle');
     fixture.componentRef.setInput('direction', 'down-right');
+    fixture.componentRef.setInput('animation', { itemDelay: 42, rotateTrigger: false });
+    fixture.componentRef.setInput('tooltip', { position: 'left' });
     fixture.componentRef.setInput('items', [
       { key: 'route', label: 'Route', routerLink: ['/home'] },
       { key: 'docs', label: 'Docs', url: 'https://example.test' },
     ]);
     fixture.detectChanges();
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+
     expect(fixture.nativeElement.classList).toContain('neu-speed-dial--circle');
     expect(fixture.nativeElement.querySelectorAll('a')).toHaveLength(2);
+    const item = fixture.nativeElement.querySelector('.neu-speed-dial__item') as HTMLElement;
+    expect(item.style.getPropertyValue('--neu-speed-x')).toMatch(/px$/);
+    expect(item.style.getPropertyValue('--neu-speed-delay')).toBe('0ms');
     expect(
-      (
-        fixture.nativeElement.querySelector('.neu-speed-dial__item') as HTMLElement
-      ).style.getPropertyValue('--neu-speed-x'),
-    ).not.toBe('');
+      fixture.nativeElement.querySelector('.neu-speed-dial__trigger-icon').classList,
+    ).not.toContain('neu-speed-dial__trigger-icon--rotate');
   });
 
-  it('supports custom trigger and item templates', () => {
-    const fixture = TestBed.createComponent(SpeedDialHost);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.custom-trigger').textContent).toContain('false');
-    expect(fixture.nativeElement.querySelectorAll('.custom-item')).toHaveLength(2);
-  });
-
-  it('wires link listeners, callbacks, outside click and geometry variants', () => {
-    const fixture = TestBed.createComponent(NeuSpeedDialComponent);
-    fixture.componentRef.setInput('items', [
-      { key: 'route', label: 'Route', routerLink: ['/route'], disabled: true },
-      { key: 'docs', label: 'Docs', url: 'https://example.test', disabled: true },
-      { key: 'run', label: 'Run' },
-    ]);
-    fixture.detectChanges();
-    fixture.componentInstance.show();
-    fixture.detectChanges();
-    const actions = fixture.nativeElement.querySelectorAll(
-      '.neu-speed-dial__action',
-    ) as NodeListOf<HTMLElement>;
-    for (const action of [actions[0], actions[1]]) {
-      action.dispatchEvent(new FocusEvent('focus'));
-      action.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-      fixture.componentInstance.show();
-      fixture.detectChanges();
-    }
-    actions[0].dispatchEvent(
-      new MouseEvent('click', { bubbles: true, cancelable: true, button: 1 }),
-    );
-    actions[1].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-
-    const component = fixture.componentInstance as any;
-    component.itemContext(component.resolvedItems()[2], 2).toggleCallback(new Event('click'));
-    fixture.componentInstance.show();
-    fixture.detectChanges();
-    component.triggerContext().toggleCallback(new MouseEvent('click'));
-    fixture.componentInstance.show();
-    fixture.detectChanges();
-    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-    expect(fixture.componentInstance.visible()).toBe(false);
-
-    for (const type of ['circle', 'semi-circle', 'quarter-circle'] as const) {
-      fixture.componentRef.setInput('type', type);
-      for (const direction of ['down', 'left', 'right', 'up-left'] as const) {
-        fixture.componentRef.setInput('direction', direction);
-        fixture.detectChanges();
-        expect(component.itemStyle(0)['--neu-speed-x']).toMatch(/px$/);
-      }
-    }
-  });
-
-  it('handles controlled, disabled and guarded keyboard/outside-click branches', () => {
-    const fixture = TestBed.createComponent(NeuSpeedDialComponent);
-    fixture.componentRef.setInput('items', [{ key: 'one', label: 'One' }]);
-    fixture.componentRef.setInput('disabled', true);
-    fixture.detectChanges();
-    const component = fixture.componentInstance as any;
+  it('closes on outside interaction without stealing focus and closes on disable', () => {
+    const fixture = setup();
     const trigger = fixture.nativeElement.querySelector(
       '.neu-speed-dial__trigger',
     ) as HTMLButtonElement;
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    outside.focus();
+    fixture.componentInstance.open();
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(document.activeElement).toBe(outside);
 
-    component.show();
-    component.toggle(new MouseEvent('click'));
-    expect(component.visible()).toBe(false);
-    fixture.componentRef.setInput('disabled', false);
+    fixture.componentInstance.open();
+    fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
-    component.show();
-    component.show();
-    component.toggle(new MouseEvent('click'));
-    component.hide();
-    component.onActionKeydown(new KeyboardEvent('keydown', { key: 'Tab' }), 0);
-    component.show();
-    component.onActionKeydown(new KeyboardEvent('keydown', { key: 'Enter' }), 0);
-
-    for (const key of ['ArrowUp', 'Enter', ' '] as const) {
-      component.onTriggerKeydown(new KeyboardEvent('keydown', { key }));
-      component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-      component.hide(true);
-    }
-    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'Escape' }));
-    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'Tab' }));
-
-    component.onDocumentPointerDown(new PointerEvent('pointerdown'));
-    component.show();
-    fixture.componentRef.setInput('hideOnClickOutside', false);
-    fixture.detectChanges();
-    component.onDocumentPointerDown(new PointerEvent('pointerdown'));
-    fixture.componentRef.setInput('hideOnClickOutside', true);
-    fixture.detectChanges();
-    component.onDocumentPointerDown({ target: fixture.nativeElement } as PointerEvent);
-    expect(component.visible()).toBe(true);
-
-    fixture.componentRef.setInput('type', 'quarter-circle');
-    fixture.componentRef.setInput('direction', 'unknown' as any);
-    fixture.detectChanges();
-    expect(component.itemStyle(0)['--neu-speed-x']).toMatch(/px$/);
-    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-  });
-
-  it('keeps programmatic model writes silent and mirrors each user transition once', () => {
-    const fixture = TestBed.createComponent(NeuSpeedDialComponent);
-    fixture.componentRef.setInput('items', [{ key: 'one', label: 'One' }]); fixture.detectChanges();
-    const component = fixture.componentInstance;
-    const compatibility: boolean[] = []; const shows: number[] = []; const hides: number[] = [];
-    component.onVisibleChange.subscribe((value) => compatibility.push(value));
-    component.onShow.subscribe(() => shows.push(1)); component.onHide.subscribe(() => hides.push(1));
-    fixture.componentRef.setInput('visible', true); fixture.detectChanges();
-    expect(compatibility).toEqual([]);
-    component.hide(); component.show();
-    expect(compatibility).toEqual([false, true]);
-    expect(shows).toHaveLength(1); expect(hides).toHaveLength(1);
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(trigger.disabled).toBe(true);
+    outside.remove();
   });
 });

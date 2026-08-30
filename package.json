@@ -29,6 +29,7 @@
     "test:imports": "node scripts/test-ui-core-entrypoint-imports.mjs",
     "test:ssr-smoke": "node scripts/test-ui-core-ssr-smoke.mjs",
     "test:option-api-template-types": "node scripts/test-option-api-template-types.mjs",
+    "test:h5b4-template-types": "node scripts/test-h5b4-template-types.mjs",
     "test:table-body-section-template-types": "node scripts/test-table-body-section-template-types.mjs",
     "test": "ng test ui-core --watch=false",
     "test:coverage": "ng test ui-core --watch=false --coverage",

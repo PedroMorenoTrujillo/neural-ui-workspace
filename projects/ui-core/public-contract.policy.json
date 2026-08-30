@@ -19,10 +19,6 @@
     "./tree-foundation#NeuTreeNavigationController": "INTERNAL/UNSUPPORTED"
   },
   "compatibility": {
-    "./speed-dial#NeuSpeedDialComponent.visible": "open/openChange (planned H5 canonical model)",
-    "./speed-dial#NeuSpeedDialComponent.onVisibleChange": "openChange (planned H5 canonical event)",
-    "./speed-dial#NeuSpeedDialComponent.onShow": "opened (planned H5 canonical event)",
-    "./speed-dial#NeuSpeedDialComponent.onHide": "closed (planned H5 canonical event)",
     "./table#NeuTableComponent.serverStateChange": "queryChange",
     "./table#NeuTableComponent.virtualScrollEvent": "virtualRangeChange (pending H5 semantic verification)",
     "./table#NeuTableServerState": "NeuTableQueryState"
@@ -37,6 +33,8 @@
   "closedImperativeDeclarations": [
     "NeuAutocompleteComponent",
     "NeuListboxComponent",
+    "NeuOrganizationChartComponent",
+    "NeuSpeedDialComponent",
     "NeuTableComponent",
     "NeuTreeTableComponent"
   ],
@@ -54,8 +52,10 @@
     "NeuListboxComponent": ["resetFilter", "setFilter", "toggleAll"],
     "NeuMenuComponent": ["activate"],
     "NeuMultiselectComponent": ["clear", "close", "focusTrigger", "open", "resetFilter", "toggle"],
+    "NeuOrganizationChartComponent": ["activateNode", "toggleNode"],
     "NeuPopoverDirective": ["close", "open", "toggle"],
     "NeuSelectComponent": ["clear", "close", "focus", "open", "resetFilter", "selectOption", "toggle"],
+    "NeuSpeedDialComponent": ["close", "open", "toggle"],
     "NeuTableComponent": [
       "applyLayout",
       "cancelCellEdit",
