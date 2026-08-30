@@ -405,4 +405,36 @@ describe('NeuTreeComponent', () => {
     ) as HTMLElement[];
     expect(nested.every((element) => element.tabIndex === -1)).toBe(true);
   });
+
+  it('terminates self/ancestor cycles, preserves shared branches, and walks depth 5,000', () => {
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    const self: NeuTreeNode = { id: 'self', label: 'Self', expanded: true, children: [] };
+    const parent: NeuTreeNode = { id: 'parent', label: 'Parent', expanded: true, children: [] };
+    const child: NeuTreeNode = { id: 'child', label: 'Child', expanded: true, children: [] };
+    const grandchild: NeuTreeNode = {
+      id: 'grandchild',
+      label: 'Grandchild',
+      expanded: true,
+      children: [],
+    };
+    const shared: NeuTreeNode = { id: 'shared', label: 'Shared' };
+    self.children = [self, { id: 'safe', label: 'Safe sibling' }];
+    parent.children = [child, shared];
+    child.children = [grandchild];
+    grandchild.children = [parent];
+    fixture.componentRef.setInput('nodes', [
+      self,
+      parent,
+      { id: 'right', label: 'Right', expanded: true, children: [shared] },
+    ]);
+    expect(() => fixture.detectChanges()).not.toThrow();
+    expect(fixture.nativeElement.textContent).toContain('Safe sibling');
+    expect(fixture.nativeElement.textContent.match(/Shared/g)).toHaveLength(2);
+
+    let deep: NeuTreeNode = { id: 'deep-5000', label: 'Deep', expanded: true };
+    for (let level = 4999; level >= 0; level -= 1) {
+      deep = { id: `deep-${level}`, label: `Deep ${level}`, expanded: true, children: [deep] };
+    }
+    expect((fixture.componentInstance as any).collectExpandedKeys([deep]).size).toBe(5001);
+  });
 });

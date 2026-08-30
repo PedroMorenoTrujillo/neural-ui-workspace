@@ -14,6 +14,7 @@ import {
   output,
 } from '@angular/core';
 import type { NeuTreeNode } from '@neural-ui/core/tree';
+import { walkNeuTreeDepthFirst } from '@neural-ui/core/internal';
 
 export interface NeuOrganizationChartNode<T = unknown> extends Omit<NeuTreeNode<T>, 'children'> {
   children?: NeuOrganizationChartNode<T>[];
@@ -57,8 +58,9 @@ export interface NeuOrganizationChartToggleIconTemplateContext<T = unknown> {
   readonly collapsed: boolean;
 }
 
-export interface NeuOrganizationChartToggleTemplateContext<T = unknown>
-  extends NeuOrganizationChartToggleIconTemplateContext<T> {
+export interface NeuOrganizationChartToggleTemplateContext<
+  T = unknown,
+> extends NeuOrganizationChartToggleIconTemplateContext<T> {
   readonly childCount: number;
   readonly toggle: (event?: Event) => void;
 }
@@ -67,6 +69,15 @@ export interface NeuOrganizationChartSelectionIndicatorTemplateContext<T = unkno
   readonly $implicit: NeuOrganizationChartNode<T>;
   readonly selected: boolean;
   readonly partialSelected: boolean;
+}
+
+interface DeepRenderEntry<T> {
+  readonly node: NeuOrganizationChartNode<T>;
+  readonly parent: NeuOrganizationChartNode<T> | null;
+  readonly index: number;
+  readonly level: number;
+  readonly path: readonly number[];
+  readonly trackBy: string;
 }
 
 @Directive({
@@ -90,9 +101,9 @@ export class NeuOrganizationChartNodeDirective<T = unknown> {
   standalone: true,
 })
 export class NeuOrganizationChartToggleIconDirective<T = unknown> {
-  readonly neuOrganizationChartToggleIcon = input<
-    readonly NeuOrganizationChartNode<T>[] | null
-  >(null);
+  readonly neuOrganizationChartToggleIcon = input<readonly NeuOrganizationChartNode<T>[] | null>(
+    null,
+  );
   constructor(
     readonly templateRef: TemplateRef<NeuOrganizationChartToggleIconTemplateContext<T>>,
   ) {}
@@ -157,9 +168,10 @@ export class NeuOrganizationChartSelectionIndicatorDirective<T = unknown> {
       [style.--neu-organization-chart-gap-x.px]="gapX()"
       [style.--neu-organization-chart-gap-y.px]="gapY()"
     >
-      @if (nodes().length) {
+      @if (renderNodes().length) {
         <ul
           class="neu-organization-chart__tree neu-organization-chart__tree--root"
+          [class.neu-organization-chart__tree--flat]="deepSafeRender()"
           role="tree"
           [attr.aria-label]="ariaLabelledBy() ? null : ariaLabel()"
           [attr.aria-labelledby]="ariaLabelledBy()"
@@ -168,28 +180,56 @@ export class NeuOrganizationChartSelectionIndicatorDirective<T = unknown> {
             selectionMode() === 'multiple' || selectionMode() === 'checkbox' ? 'true' : null
           "
         >
-          <ng-container
-            [ngTemplateOutlet]="branches"
-            [ngTemplateOutletContext]="{
-              $implicit: nodes(),
-              level: 1,
-              parent: null,
-              path: [],
-            }"
-          />
+          @if (deepSafeRender()) {
+            @for (entry of deepRenderEntries(); track entry.trackBy) {
+              <li
+                class="neu-organization-chart__branch"
+                role="treeitem"
+                [tabIndex]="canSelect(entry.node) ? 0 : -1"
+                [attr.aria-level]="entry.level + 1"
+                [attr.aria-expanded]="hasChildren(entry.node) ? !isCollapsed(entry.node) : null"
+                [attr.aria-selected]="canSelect(entry.node) ? isSelected(entry.node) : null"
+                [attr.aria-checked]="
+                  selectionMode() === 'checkbox' && canSelect(entry.node)
+                    ? isPartialSelected(entry.node)
+                      ? 'mixed'
+                      : isSelected(entry.node)
+                    : null
+                "
+                [attr.aria-disabled]="entry.node.disabled ? 'true' : null"
+                [style.padding-inline-start.rem]="deepIndent(entry.level)"
+                (keydown)="onNodeKeydown(entry.node, $event)"
+              >
+                <ng-container
+                  [ngTemplateOutlet]="nodeCard"
+                  [ngTemplateOutletContext]="{
+                    node: entry.node,
+                    parent: entry.parent,
+                    index: entry.index,
+                    level: entry.level + 1,
+                    path: entry.path,
+                  }"
+                />
+              </li>
+            }
+          } @else {
+            <ng-container
+              [ngTemplateOutlet]="branches"
+              [ngTemplateOutletContext]="{
+                $implicit: renderNodes(),
+                level: 1,
+                parent: null,
+                path: [],
+              }"
+            />
+          }
         </ul>
       } @else {
         <div class="neu-organization-chart__empty" role="status">{{ emptyLabel() }}</div>
       }
     </div>
 
-    <ng-template
-      #branches
-      let-items
-      let-level="level"
-      let-parent="parent"
-      let-parentPath="path"
-    >
+    <ng-template #branches let-items let-level="level" let-parent="parent" let-parentPath="path">
       @for (node of items; track node.id; let index = $index) {
         <li
           class="neu-organization-chart__branch"
@@ -208,89 +248,16 @@ export class NeuOrganizationChartSelectionIndicatorDirective<T = unknown> {
           [attr.aria-disabled]="node.disabled ? 'true' : null"
           (keydown)="onNodeKeydown(node, $event)"
         >
-          <div
-            class="neu-organization-chart__node"
-            [ngClass]="node.className"
-            [style]="node.style ?? null"
-            [class.neu-organization-chart__node--selected]="isSelected(node)"
-            [class.neu-organization-chart__node--partial]="isPartialSelected(node)"
-            [class.neu-organization-chart__node--disabled]="node.disabled"
-          >
-            <div
-              class="neu-organization-chart__node-action"
-              [class.neu-organization-chart__node-action--selectable]="canSelect(node)"
-              (click)="onNodeContentClick(node, $event)"
-            >
-              @if (selectionMode() === 'checkbox' && canSelect(node)) {
-                @if (selectionIndicatorTemplate(); as template) {
-                  <ng-container
-                    [ngTemplateOutlet]="template.templateRef"
-                    [ngTemplateOutletContext]="selectionIndicatorContext(node)"
-                  />
-                } @else {
-                  <span
-                    class="neu-organization-chart__checkbox"
-                    [class.neu-organization-chart__checkbox--checked]="isSelected(node)"
-                    [class.neu-organization-chart__checkbox--partial]="isPartialSelected(node)"
-                    aria-hidden="true"
-                  >
-                    @if (isPartialSelected(node)) {
-                      <span>−</span>
-                    } @else if (isSelected(node)) {
-                      <span>✓</span>
-                    }
-                  </span>
-                }
-              }
-
-              @if (nodeTemplate(); as template) {
-                <ng-container
-                  [ngTemplateOutlet]="template.templateRef"
-                  [ngTemplateOutletContext]="
-                    nodeTemplateContext(node, parent, index, level, parentPath.concat(index))
-                  "
-                />
-              } @else {
-                <span class="neu-organization-chart__node-copy">
-                  <span class="neu-organization-chart__label">{{ node.label }}</span>
-                  @if (node.description) {
-                    <span class="neu-organization-chart__description">{{ node.description }}</span>
-                  }
-                  @if (node.badge) {
-                    <span class="neu-organization-chart__badge">{{ node.badge }}</span>
-                  }
-                </span>
-              }
-            </div>
-
-            @if (canCollapse(node)) {
-              @if (toggleTemplate(); as template) {
-                <ng-container
-                  [ngTemplateOutlet]="template.templateRef"
-                  [ngTemplateOutletContext]="toggleTemplateContext(node)"
-                />
-              } @else {
-                <button
-                  class="neu-organization-chart__toggle"
-                  type="button"
-                  [attr.aria-label]="isCollapsed(node) ? expandLabel() : collapseLabel()"
-                  [attr.aria-expanded]="!isCollapsed(node)"
-                  (click)="toggleNode(node, $event)"
-                >
-                  @if (toggleIconTemplate(); as template) {
-                    <ng-container
-                      [ngTemplateOutlet]="template.templateRef"
-                      [ngTemplateOutletContext]="toggleIconTemplateContext(node)"
-                    />
-                  } @else {
-                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path d="m5 8 5 5 5-5" />
-                    </svg>
-                  }
-                </button>
-              }
-            }
-          </div>
+          <ng-container
+            [ngTemplateOutlet]="nodeCard"
+            [ngTemplateOutletContext]="{
+              node,
+              parent,
+              index,
+              level,
+              path: parentPath.concat(index),
+            }"
+          />
 
           @if (hasChildren(node) && !isCollapsed(node)) {
             <ul class="neu-organization-chart__tree" role="group">
@@ -307,6 +274,97 @@ export class NeuOrganizationChartSelectionIndicatorDirective<T = unknown> {
           }
         </li>
       }
+    </ng-template>
+
+    <ng-template
+      #nodeCard
+      let-node="node"
+      let-parent="parent"
+      let-index="index"
+      let-level="level"
+      let-path="path"
+    >
+      <div
+        class="neu-organization-chart__node"
+        [ngClass]="node.className"
+        [style]="node.style ?? null"
+        [class.neu-organization-chart__node--selected]="isSelected(node)"
+        [class.neu-organization-chart__node--partial]="isPartialSelected(node)"
+        [class.neu-organization-chart__node--disabled]="node.disabled"
+      >
+        <div
+          class="neu-organization-chart__node-action"
+          [class.neu-organization-chart__node-action--selectable]="canSelect(node)"
+          (click)="onNodeContentClick(node, $event)"
+        >
+          @if (selectionMode() === 'checkbox' && canSelect(node)) {
+            @if (selectionIndicatorTemplate(); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template.templateRef"
+                [ngTemplateOutletContext]="selectionIndicatorContext(node)"
+              />
+            } @else {
+              <span
+                class="neu-organization-chart__checkbox"
+                [class.neu-organization-chart__checkbox--checked]="isSelected(node)"
+                [class.neu-organization-chart__checkbox--partial]="isPartialSelected(node)"
+                aria-hidden="true"
+              >
+                @if (isPartialSelected(node)) {
+                  <span>−</span>
+                } @else if (isSelected(node)) {
+                  <span>✓</span>
+                }
+              </span>
+            }
+          }
+
+          @if (nodeTemplate(); as template) {
+            <ng-container
+              [ngTemplateOutlet]="template.templateRef"
+              [ngTemplateOutletContext]="nodeTemplateContext(node, parent, index, level, path)"
+            />
+          } @else {
+            <span class="neu-organization-chart__node-copy">
+              <span class="neu-organization-chart__label">{{ node.label }}</span>
+              @if (node.description) {
+                <span class="neu-organization-chart__description">{{ node.description }}</span>
+              }
+              @if (node.badge) {
+                <span class="neu-organization-chart__badge">{{ node.badge }}</span>
+              }
+            </span>
+          }
+        </div>
+
+        @if (canCollapse(node)) {
+          @if (toggleTemplate(); as template) {
+            <ng-container
+              [ngTemplateOutlet]="template.templateRef"
+              [ngTemplateOutletContext]="toggleTemplateContext(node)"
+            />
+          } @else {
+            <button
+              class="neu-organization-chart__toggle"
+              type="button"
+              [attr.aria-label]="isCollapsed(node) ? expandLabel() : collapseLabel()"
+              [attr.aria-expanded]="!isCollapsed(node)"
+              (click)="toggleNode(node, $event)"
+            >
+              @if (toggleIconTemplate(); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template.templateRef"
+                  [ngTemplateOutletContext]="toggleIconTemplateContext(node)"
+                />
+              } @else {
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="m5 8 5 5 5-5" />
+                </svg>
+              }
+            </button>
+          }
+        }
+      </div>
     </ng-template>
   `,
   styleUrl: './neu-organization-chart.component.scss',
@@ -335,9 +393,7 @@ export class NeuOrganizationChartComponent<T = unknown> {
   readonly nodeCollapse = output<NeuOrganizationChartNodeEvent<T>>();
 
   protected readonly nodeTemplate = contentChild(NeuOrganizationChartNodeDirective<T>);
-  protected readonly toggleIconTemplate = contentChild(
-    NeuOrganizationChartToggleIconDirective<T>,
-  );
+  protected readonly toggleIconTemplate = contentChild(NeuOrganizationChartToggleIconDirective<T>);
   protected readonly toggleTemplate = contentChild(NeuOrganizationChartToggleDirective<T>);
   protected readonly selectionIndicatorTemplate = contentChild(
     NeuOrganizationChartSelectionIndicatorDirective<T>,
@@ -353,9 +409,37 @@ export class NeuOrganizationChartComponent<T = unknown> {
   });
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  protected readonly renderNodes = computed(() => this.cycleSafeProjection(this.nodes()));
+  private readonly renderTraversal = computed(() =>
+    walkNeuTreeDepthFirst(this.renderNodes(), (node) => node.children ?? []),
+  );
+  protected readonly deepSafeRender = computed(() =>
+    this.renderTraversal().some((entry) => entry.level >= 512),
+  );
+  protected readonly deepRenderEntries = computed<readonly DeepRenderEntry<T>[]>(() => {
+    if (!this.deepSafeRender()) return [];
+    const entries = walkNeuTreeDepthFirst(this.renderNodes(), (node) => node.children ?? [], {
+      shouldDescend: ({ node }) => !this.isCollapsed(node),
+    });
+    const paths = new Map<number, readonly number[]>();
+    return entries.map((entry, entryIndex) => {
+      const parentPath =
+        entry.parentEntryIndex == null ? [] : (paths.get(entry.parentEntryIndex) ?? []);
+      const path = [...parentPath, entry.index];
+      paths.set(entryIndex, path);
+      return {
+        node: entry.node,
+        parent: entry.parent,
+        index: entry.index,
+        level: entry.level,
+        path,
+        trackBy: path.join('.'),
+      };
+    });
+  });
   private readonly selectedSet = computed(() => new Set(this.selectionKeys() ?? []));
   private readonly collapsedSet = computed(
-    () => new Set(this.collapsedKeys() ?? this.defaultCollapsedKeys(this.nodes())),
+    () => new Set(this.collapsedKeys() ?? this.defaultCollapsedKeys(this.renderNodes())),
   );
 
   /** Selects or unselects one node according to the active selection mode. */
@@ -425,6 +509,10 @@ export class NeuOrganizationChartComponent<T = unknown> {
     return this.canCollapse(node) && this.collapsedSet().has(node.id);
   }
 
+  protected deepIndent(level: number): number {
+    return Math.min(level, 32) * 0.75;
+  }
+
   protected nodeTemplateContext(
     node: NeuOrganizationChartNode<T>,
     parent: NeuOrganizationChartNode<T> | null,
@@ -454,7 +542,11 @@ export class NeuOrganizationChartComponent<T = unknown> {
   protected toggleIconTemplateContext(
     node: NeuOrganizationChartNode<T>,
   ): NeuOrganizationChartToggleIconTemplateContext<T> {
-    return { $implicit: node, expanded: !this.isCollapsed(node), collapsed: this.isCollapsed(node) };
+    return {
+      $implicit: node,
+      expanded: !this.isCollapsed(node),
+      collapsed: this.isCollapsed(node),
+    };
   }
 
   protected toggleTemplateContext(
@@ -480,7 +572,8 @@ export class NeuOrganizationChartComponent<T = unknown> {
   protected onNodeContentClick(node: NeuOrganizationChartNode<T>, event: MouseEvent): void {
     const target = event.target as Element | null;
     const current = event.currentTarget as Element | null;
-    if (target && current && target !== current && this.isConsumerInteractive(target, current)) return;
+    if (target && current && target !== current && this.isConsumerInteractive(target, current))
+      return;
     this.activateNode(node, event);
   }
 
@@ -548,26 +641,53 @@ export class NeuOrganizationChartComponent<T = unknown> {
     nodes: readonly NeuOrganizationChartNode<T>[],
     selected: Set<string>,
   ): void {
-    for (const node of nodes) {
-      if (node.children?.length) this.reconcileAncestors(node.children, selected);
-      if (!this.canSelect(node) || !node.children?.length) continue;
-      const descendantIds = node.children.flatMap((child) => this.selectableSubtreeIds(child));
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? []);
+    const subtreeIds = new Map<number, string[]>();
+    for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex -= 1) {
+      const entry = entries[entryIndex];
+      const node = entry.node;
+      const descendantIds = entry.childEntryIndices.flatMap(
+        (childIndex) => subtreeIds.get(childIndex) ?? [],
+      );
       if (descendantIds.length && descendantIds.every((id) => selected.has(id))) {
-        selected.add(node.id);
-      } else selected.delete(node.id);
+        if (this.canSelect(node)) selected.add(node.id);
+      } else if (this.canSelect(node) && node.children?.length) selected.delete(node.id);
+      subtreeIds.set(entryIndex, [...(this.canSelect(node) ? [node.id] : []), ...descendantIds]);
     }
   }
 
   private selectableSubtreeIds(node: NeuOrganizationChartNode<T>): string[] {
-    const own = this.canSelect(node) ? [node.id] : [];
-    return [...own, ...(node.children?.flatMap((child) => this.selectableSubtreeIds(child)) ?? [])];
+    return walkNeuTreeDepthFirst([node], (entry) => entry.children ?? [])
+      .map((entry) => entry.node)
+      .filter((entry) => this.canSelect(entry))
+      .map((entry) => entry.id);
   }
 
   private defaultCollapsedKeys(nodes: readonly NeuOrganizationChartNode<T>[]): string[] {
-    return nodes.flatMap((node) => [
-      ...(node.expanded === false && this.canCollapse(node) ? [node.id] : []),
-      ...(node.children?.length ? this.defaultCollapsedKeys(node.children) : []),
-    ]);
+    return walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [])
+      .map((entry) => entry.node)
+      .filter((node) => node.expanded === false && this.canCollapse(node))
+      .map((node) => node.id);
+  }
+
+  private cycleSafeProjection(
+    nodes: readonly NeuOrganizationChartNode<T>[],
+  ): readonly NeuOrganizationChartNode<T>[] {
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? []);
+    const projected = new Map<number, NeuOrganizationChartNode<T>>();
+    for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex -= 1) {
+      const entry = entries[entryIndex];
+      const children = entry.childEntryIndices.map((index) => projected.get(index)!);
+      const originalChildren = entry.node.children;
+      const unchanged =
+        originalChildren == null ||
+        (originalChildren.length === children.length &&
+          originalChildren.every((child, index) => child === children[index]));
+      projected.set(entryIndex, unchanged ? entry.node : { ...entry.node, children });
+    }
+    return entries.flatMap((entry, index) =>
+      entry.parentEntryIndex == null ? [projected.get(index)!] : [],
+    );
   }
 
   private isConsumerInteractive(target: Element, boundary: Element): boolean {
@@ -579,6 +699,23 @@ export class NeuOrganizationChartComponent<T = unknown> {
 
   private firstChildItem(current: HTMLElement): HTMLElement | undefined {
     const branch = current.closest('.neu-organization-chart__branch');
+    const tree = branch?.parentElement;
+    if (tree?.classList.contains('neu-organization-chart__tree--flat')) {
+      const items = Array.from(
+        tree.querySelectorAll<HTMLElement>(
+          ':scope > .neu-organization-chart__branch[tabindex="0"]',
+        ),
+      );
+      const index = items.indexOf(current);
+      const level = Number(current.getAttribute('aria-level'));
+      for (let candidateIndex = index + 1; candidateIndex < items.length; candidateIndex += 1) {
+        const candidate = items[candidateIndex];
+        const candidateLevel = Number(candidate.getAttribute('aria-level'));
+        if (candidateLevel <= level) break;
+        return candidate;
+      }
+      return undefined;
+    }
     return (branch?.querySelector(
       ':scope > .neu-organization-chart__tree > .neu-organization-chart__branch[tabindex="0"]',
     ) ?? undefined) as HTMLElement | undefined;
@@ -586,8 +723,22 @@ export class NeuOrganizationChartComponent<T = unknown> {
 
   private parentItem(current: HTMLElement): HTMLElement | undefined {
     const branch = current.closest('.neu-organization-chart__branch');
-    return (branch?.parentElement?.closest(
-      '.neu-organization-chart__branch[tabindex="0"]',
-    ) ?? undefined) as HTMLElement | undefined;
+    const tree = branch?.parentElement;
+    if (tree?.classList.contains('neu-organization-chart__tree--flat')) {
+      const items = Array.from(
+        tree.querySelectorAll<HTMLElement>(
+          ':scope > .neu-organization-chart__branch[tabindex="0"]',
+        ),
+      );
+      const index = items.indexOf(current);
+      const level = Number(current.getAttribute('aria-level'));
+      for (let candidateIndex = index - 1; candidateIndex >= 0; candidateIndex -= 1) {
+        const candidate = items[candidateIndex];
+        if (Number(candidate.getAttribute('aria-level')) < level) return candidate;
+      }
+      return undefined;
+    }
+    return (branch?.parentElement?.closest('.neu-organization-chart__branch[tabindex="0"]') ??
+      undefined) as HTMLElement | undefined;
   }
 }

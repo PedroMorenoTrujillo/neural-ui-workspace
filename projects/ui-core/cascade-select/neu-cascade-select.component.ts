@@ -20,7 +20,7 @@ import {
   OverlayModule,
 } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NeuIdGenerator, walkNeuTreeDepthFirst } from '@neural-ui/core/internal';
 import {
   NeuOptionAccessor,
   NeuOptionDisabledAccessor,
@@ -192,7 +192,9 @@ interface SelectionPath<T> {
               ←
             </button>
           }
-          <span>{{ activePath().length ? optionLabelOf(activePath()[activePath().length - 1]) : rootLabel() }}</span>
+          <span>{{
+            activePath().length ? optionLabelOf(activePath()[activePath().length - 1]) : rootLabel()
+          }}</span>
         </div>
 
         <div
@@ -213,7 +215,9 @@ interface SelectionPath<T> {
               role="option"
               [attr.aria-selected]="isOptionSelected(node) ? 'true' : 'false'"
               [attr.aria-disabled]="isOptionDisabled(node) ? 'true' : null"
-              [attr.tabindex]="isOptionDisabled(node) ? '-1' : activeIndex() === $index ? '0' : '-1'"
+              [attr.tabindex]="
+                isOptionDisabled(node) ? '-1' : activeIndex() === $index ? '0' : '-1'
+              "
               (click)="activate(node)"
               (keydown)="onOptionKeydown($any($event), $index)"
             >
@@ -250,9 +254,10 @@ interface SelectionPath<T> {
   `,
   styleUrl: './neu-cascade-select.component.scss',
 })
-export class NeuCascadeSelectComponent<T = NeuCascadeSelectNode, V = NeuOptionValue<T>>
-  implements ControlValueAccessor
-{
+export class NeuCascadeSelectComponent<
+  T = NeuCascadeSelectNode,
+  V = NeuOptionValue<T>,
+> implements ControlValueAccessor {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
@@ -513,16 +518,23 @@ export class NeuCascadeSelectComponent<T = NeuCascadeSelectNode, V = NeuOptionVa
     return (node as Record<PropertyKey, unknown>)['children'];
   }
 
-  private findSelectionPath(nodes: readonly T[], value: V, ancestors: T[] = []): SelectionPath<T> | null {
-    for (let index = 0; index < nodes.length; index++) {
-      const node = nodes[index];
-      if (neuOptionValuesEqual(this.optionValueOf(node), value)) {
-        return { ancestors, node, index };
-      }
-      const match = this.findSelectionPath(this.childrenOf(node), value, [...ancestors, node]);
-      if (match) return match;
+  private findSelectionPath(nodes: readonly T[], value: V): SelectionPath<T> | null {
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => this.childrenOf(node));
+    const entryIndex = entries.findIndex((entry) =>
+      neuOptionValuesEqual(this.optionValueOf(entry.node), value),
+    );
+    if (entryIndex < 0) return null;
+
+    const entry = entries[entryIndex];
+    const ancestors: T[] = [];
+    let parentEntryIndex = entry.parentEntryIndex;
+    while (parentEntryIndex != null) {
+      const parent = entries[parentEntryIndex];
+      ancestors.push(parent.node);
+      parentEntryIndex = parent.parentEntryIndex;
     }
-    return null;
+    ancestors.reverse();
+    return { ancestors, node: entry.node, index: entry.index };
   }
 
   private restoreSelectionNavigation(): void {

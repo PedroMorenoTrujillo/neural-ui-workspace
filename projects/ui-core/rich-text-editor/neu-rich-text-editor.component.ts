@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewEncapsulation,
   computed,
@@ -327,6 +328,22 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
   private readonly editorRef = viewChild<ElementRef<HTMLDivElement>>('editorRef');
 
   private viewReady = false;
+  private destroyed = false;
+  private readonly activeReaders = new Set<FileReader>();
+  private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
+      for (const reader of this.activeReaders) {
+        reader.onload = null;
+        reader.onerror = null;
+        reader.onabort = null;
+        if (typeof reader.abort === 'function') reader.abort();
+      }
+      this.activeReaders.clear();
+    });
+  }
   private onChange: (value: string) => void = () => undefined;
   private onTouched: () => void = () => undefined;
 
@@ -447,8 +464,17 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
     }
 
     const reader = new FileReader();
+    const release = () => {
+      reader.onload = null;
+      reader.onerror = null;
+      reader.onabort = null;
+      this.activeReaders.delete(reader);
+    };
+    this.activeReaders.add(reader);
     reader.onload = () => {
       const src = typeof reader.result === 'string' ? reader.result : '';
+      release();
+      if (this.destroyed) return;
       this.insertHtml(
         sanitizeRichTextHtml(
           `<img src="${escapeRichTextAttribute(src)}" alt="${escapeRichTextAttribute(
@@ -457,7 +483,14 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
         ),
       );
     };
-    reader.readAsDataURL(file);
+    reader.onerror = release;
+    reader.onabort = release;
+    try {
+      reader.readAsDataURL(file);
+    } catch (error) {
+      release();
+      throw error;
+    }
   }
 
   private insertHtml(html: string): void {

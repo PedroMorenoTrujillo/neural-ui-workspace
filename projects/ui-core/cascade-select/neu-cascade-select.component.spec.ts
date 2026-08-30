@@ -410,4 +410,35 @@ describe('NeuCascadeSelectComponent', () => {
     expect(() => fixture.componentInstance.openPanel()).not.toThrow();
     expect(() => fixture.componentInstance.close()).not.toThrow();
   });
+
+  it('finds selections deterministically through cycles, shared branches, and depth 5,000', () => {
+    const component = fixture.componentInstance as any;
+    const self = leaf(20, 'Self');
+    const sibling = leaf(21, 'Sibling');
+    self.children = [self, sibling];
+    const ancestor = leaf(22, 'Ancestor');
+    const child = leaf(23, 'Child');
+    const grandchild = leaf(27, 'Grandchild');
+    ancestor.children = [child];
+    child.children = [grandchild];
+    grandchild.children = [ancestor];
+    const shared = leaf(24, 'Shared');
+    const left = { ...leaf(25, 'Left'), children: [shared] };
+    const right = { ...leaf(26, 'Right'), children: [shared] };
+
+    expect(component.findSelectionPath([self, ancestor, left, right], 21).node).toBe(sibling);
+    expect(component.findSelectionPath([self, ancestor, left, right], 27).ancestors).toEqual([
+      ancestor,
+      child,
+    ]);
+    expect(component.findSelectionPath([left, right], 24).ancestors).toEqual([left]);
+
+    let deep = leaf(5_000, '5000');
+    for (let depth = 4_999; depth >= 0; depth -= 1) {
+      deep = { ...leaf(depth, String(depth)), children: [deep] };
+    }
+    const selection = component.findSelectionPath([deep], 5_000);
+    expect(selection.node.id).toBe(5_000);
+    expect(selection.ancestors).toHaveLength(5_000);
+  });
 });

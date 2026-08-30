@@ -17,6 +17,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import {
+  walkNeuTreeDepthFirst,
   NeuTreeNavigationController,
   NeuTreeNavigationItem,
 } from '@neural-ui/core/internal';
@@ -219,13 +220,15 @@ export class NeuTreeComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly navigation = new NeuTreeNavigationController();
 
+  private readonly renderNodes = computed(() => this.cycleSafeProjection(this.nodes()));
+
   readonly visibleNodes = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
     if (!query) {
-      return this.nodes();
+      return this.renderNodes();
     }
 
-    return this.filterNodes(this.nodes(), query);
+    return this.filterNodes(this.renderNodes(), query);
   });
 
   constructor() {
@@ -380,51 +383,47 @@ export class NeuTreeComponent {
   }
 
   private collectExpandedKeys(nodes: NeuTreeNode[]): Set<string> {
-    const expanded = new Set<string>();
-    for (const node of nodes) {
-      if (node.expanded) {
-        expanded.add(node.id);
-      }
-      if (node.children?.length) {
-        for (const childId of this.collectExpandedKeys(node.children)) {
-          expanded.add(childId);
-        }
-      }
-    }
-    return expanded;
+    return new Set(
+      walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [])
+        .filter((entry) => entry.node.expanded)
+        .map((entry) => entry.node.id),
+    );
   }
 
   private collectSelectedNodes(nodes: NeuTreeNode[], selected: Set<string>): NeuTreeNode[] {
-    const result: NeuTreeNode[] = [];
-    for (const node of nodes) {
-      if (selected.has(node.id)) {
-        result.push(node);
-      }
-      if (node.children?.length) {
-        result.push(...this.collectSelectedNodes(node.children, selected));
-      }
-    }
-    return result;
+    return walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [])
+      .filter((entry) => selected.has(entry.node.id))
+      .map((entry) => entry.node);
   }
 
   private filterNodes(nodes: NeuTreeNode[], query: string): NeuTreeNode[] {
-    const filtered: NeuTreeNode[] = [];
-    for (const node of nodes) {
-      const children = node.children?.length ? this.filterNodes(node.children, query) : [];
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? []);
+    const projected = new Map<number, NeuTreeNode>();
+    for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex -= 1) {
+      const entry = entries[entryIndex];
+      const children = entry.childEntryIndices.flatMap((index) => {
+        const child = projected.get(index);
+        return child ? [child] : [];
+      });
+      const node = entry.node;
       const matches =
         node.label.toLowerCase().includes(query) ||
         node.description?.toLowerCase().includes(query) ||
         node.badge?.toLowerCase().includes(query);
 
       if (matches || children.length) {
-        filtered.push({
+        projected.set(entryIndex, {
           ...node,
           children,
           expanded: children.length ? true : node.expanded,
         });
       }
     }
-    return filtered;
+    return entries.flatMap((entry, index) => {
+      if (entry.parentEntryIndex != null) return [];
+      const node = projected.get(index);
+      return node ? [node] : [];
+    });
   }
 
   private reconcileNavigation(): void {
@@ -432,29 +431,35 @@ export class NeuTreeComponent {
   }
 
   private navigationItems(): NeuTreeNavigationItem[] {
-    const flatten = (
-      nodes: readonly NeuTreeNode[],
-      level: number,
-      parentKey?: string,
-    ): NeuTreeNavigationItem[] =>
-      nodes.flatMap((node) => {
-        const expanded = this.isRenderedExpanded(node);
-        return [
-          {
-            key: node.id,
-            label: node.label,
-            level,
-            parentKey,
-            disabled: node.disabled,
-            hasChildren: this.hasChildren(node),
-            expanded,
-          },
-          ...(this.hasChildren(node) && expanded
-            ? flatten(node.children ?? [], level + 1, node.id)
-            : []),
-        ];
-      });
-    return flatten(this.visibleNodes(), 1);
+    return walkNeuTreeDepthFirst(this.visibleNodes(), (node) => node.children ?? [], {
+      shouldDescend: (entry) => this.hasChildren(entry.node) && this.isRenderedExpanded(entry.node),
+    }).map((entry) => ({
+      key: entry.node.id,
+      label: entry.node.label,
+      level: entry.level + 1,
+      parentKey: entry.parent?.id,
+      disabled: entry.node.disabled,
+      hasChildren: this.hasChildren(entry.node),
+      expanded: this.isRenderedExpanded(entry.node),
+    }));
+  }
+
+  private cycleSafeProjection(nodes: readonly NeuTreeNode[]): NeuTreeNode[] {
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? []);
+    const projected = new Map<number, NeuTreeNode>();
+    for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex -= 1) {
+      const entry = entries[entryIndex];
+      const children = entry.childEntryIndices.map((index) => projected.get(index)!);
+      const originalChildren = entry.node.children;
+      const unchanged =
+        originalChildren == null ||
+        (originalChildren.length === children.length &&
+          originalChildren.every((child, index) => child === children[index]));
+      projected.set(entryIndex, unchanged ? entry.node : { ...entry.node, children });
+    }
+    return entries.flatMap((entry, index) =>
+      entry.parentEntryIndex == null ? [projected.get(index)!] : [],
+    );
   }
 
   private focusActiveNode(): void {

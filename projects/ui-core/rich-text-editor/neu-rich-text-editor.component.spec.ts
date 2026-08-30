@@ -394,6 +394,49 @@ describe('NeuRichTextEditorComponent', () => {
       Object.defineProperty(window, 'FileReader', { configurable: true, value: originalFileReader });
     }
   });
+
+  it('aborts every owned FileReader and blocks late paste callbacks after destroy', () => {
+    const execCommand = vi.fn(() => true);
+    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
+    const originalFileReader = window.FileReader;
+    class DeferredFileReader {
+      static instances: DeferredFileReader[] = [];
+      result: string | ArrayBuffer | null = 'data:image/png;base64,TEFURQ==';
+      onload: ((event: ProgressEvent<FileReader>) => void) | null = null;
+      onerror: ((event: ProgressEvent<FileReader>) => void) | null = null;
+      onabort: ((event: ProgressEvent<FileReader>) => void) | null = null;
+      readonly abort = vi.fn();
+      readAsDataURL(): void {}
+      constructor() {
+        DeferredFileReader.instances.push(this);
+      }
+    }
+    Object.defineProperty(window, 'FileReader', { configurable: true, value: DeferredFileReader });
+    try {
+      const { fixture, component } = createComponent();
+      const image = new File(['ok'], 'image.png', { type: 'image/png' });
+      for (let index = 0; index < 3; index += 1) {
+        component.handlePaste({
+          preventDefault: vi.fn(),
+          clipboardData: { files: [image], getData: () => '' },
+        } as unknown as ClipboardEvent);
+      }
+      const lateCallbacks = DeferredFileReader.instances.map((reader) => reader.onload);
+      expect((component as any).activeReaders.size).toBe(3);
+      fixture.destroy();
+      for (const reader of DeferredFileReader.instances) {
+        expect(reader.abort).toHaveBeenCalledOnce();
+        expect(reader.onload).toBeNull();
+        expect(reader.onerror).toBeNull();
+        expect(reader.onabort).toBeNull();
+      }
+      expect((component as any).activeReaders.size).toBe(0);
+      for (const callback of lateCallbacks) callback?.({} as ProgressEvent<FileReader>);
+      expect(execCommand).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window, 'FileReader', { configurable: true, value: originalFileReader });
+    }
+  });
 });
 
 describe('rich text html utils', () => {

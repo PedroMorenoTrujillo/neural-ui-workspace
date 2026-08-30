@@ -21,7 +21,11 @@ import {
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-import { NeuIdGenerator, NeuResponsiveState } from '@neural-ui/core/internal';
+import {
+  NeuIdGenerator,
+  NeuResponsiveState,
+  walkNeuTreeDepthFirst,
+} from '@neural-ui/core/internal';
 import {
   NeuMenuActionLike,
   NeuResolvedMenuAction,
@@ -514,17 +518,31 @@ export class NeuMegaMenuComponent {
 
   private processRoot(item: NeuMegaMenuItem, index: number): ProcessedMegaRoot {
     const rawColumns = this.toColumns(item.items);
-    const columns = rawColumns.map((column) =>
-      column.map((child, childIndex) => this.processItem(child, childIndex, 1)),
-    );
+    const columns = rawColumns.map((column) => this.processColumn(column, 1, [item]));
     return { action: resolveNeuMenuAction(item, index), index, level: 0, children: [], columns };
   }
 
-  private processItem(item: NeuMegaMenuItem, index: number, level: number): ProcessedMegaItem {
-    const children = this.toColumns(item.items)
-      .flat()
-      .map((child, childIndex) => this.processItem(child, childIndex, level + 1));
-    return { action: resolveNeuMenuAction(item, index), index, level, children };
+  private processColumn(
+    items: readonly NeuMegaMenuItem[],
+    level: number,
+    initialAncestry: readonly NeuMegaMenuItem[],
+  ): ProcessedMegaItem[] {
+    const entries = walkNeuTreeDepthFirst(items, (item) => this.toColumns(item.items).flat(), {
+      initialAncestry,
+    });
+    const processed = new Map<number, ProcessedMegaItem>();
+    for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex -= 1) {
+      const entry = entries[entryIndex];
+      processed.set(entryIndex, {
+        action: resolveNeuMenuAction(entry.node, entry.index),
+        index: entry.index,
+        level: level + entry.level,
+        children: entry.childEntryIndices.map((childIndex) => processed.get(childIndex)!),
+      });
+    }
+    return entries.flatMap((entry, entryIndex) =>
+      entry.parentEntryIndex == null ? [processed.get(entryIndex)!] : [],
+    );
   }
 
   private toColumns(items: NeuMegaMenuItem['items']): NeuMegaMenuItem[][] {
@@ -533,13 +551,9 @@ export class NeuMegaMenuComponent {
   }
 
   private flattened(root: ProcessedMegaRoot): ProcessedMegaItem[] {
-    const result: ProcessedMegaItem[] = [];
-    const visit = (item: ProcessedMegaItem) => {
-      if (item.action.visible && !item.action.separator) result.push(item);
-      item.children.forEach(visit);
-    };
-    root.columns.flat().forEach(visit);
-    return result;
+    return walkNeuTreeDepthFirst(root.columns.flat(), (item) => item.children)
+      .map((entry) => entry.node)
+      .filter((item) => item.action.visible && !item.action.separator);
   }
 
   private focusFirstChild(root: ProcessedMegaRoot, rootIndex: number): void {

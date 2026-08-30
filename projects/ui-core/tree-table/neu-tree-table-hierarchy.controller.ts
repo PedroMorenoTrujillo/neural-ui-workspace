@@ -9,6 +9,7 @@ import type {
   NeuTreeTableFilterMode,
   NeuTreeTableNode,
 } from './neu-tree-table.types';
+import { walkNeuTreeDepthFirst } from '@neural-ui/core/internal';
 
 interface NeuTreeTableProjectionOptions {
   readonly query: NeuTableQueryState;
@@ -34,64 +35,64 @@ export function projectNeuTreeTable<T extends Record<string, unknown>>(
   nodes: readonly NeuTreeTableNode<T>[],
   options: NeuTreeTableProjectionOptions,
 ): NeuTreeTableProjection<T> {
-  const projected = visit(nodes, 0, undefined, options);
+  const roots = stableSort(nodes, options.sort, options.columns);
+  const entries = walkNeuTreeDepthFirst(roots, (node) =>
+    stableSort(node.children ?? [], options.sort, options.columns),
+  );
+  const full = new Map<number, NeuTreeTableProjectedNode<T>>();
+  const filtered = new Map<number, NeuTreeTableProjectedNode<T>>();
+  const hasFilter = hasActiveFilter(options.query);
+
+  for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex -= 1) {
+    const entry = entries[entryIndex];
+    const node = entry.node;
+    const row = toRow(node, entry.level, entry.parent?.id, entry.index + 1, entry.setSize);
+    const fullChildren = finalizeSiblings(entry.childEntryIndices, full);
+    const filteredChildren = finalizeSiblings(entry.childEntryIndices, filtered);
+    full.set(entryIndex, { node, row, children: fullChildren });
+
+    const matches = matchesQuery(row, options.query, options.columns, options.exactMatch);
+    if (hasFilter && !matches && filteredChildren.length === 0) continue;
+    filtered.set(entryIndex, {
+      node,
+      row,
+      children:
+        hasFilter && matches && options.filterMode === 'lenient' ? fullChildren : filteredChildren,
+    });
+  }
+
+  const rootIndices = entries.flatMap((entry, index) =>
+    entry.parentEntryIndex == null ? [index] : [],
+  );
+  const projected = finalizeSiblings(rootIndices, filtered);
   const nodesById = new Map<string, NeuTreeTableProjectedNode<T>>();
-  const index = (entries: readonly NeuTreeTableProjectedNode<T>[]) => {
-    for (const entry of entries) {
-      nodesById.set(entry.node.id, entry);
-      index(entry.children);
+  const stack = [...projected].reverse();
+  while (stack.length) {
+    const entry = stack.pop()!;
+    nodesById.set(entry.node.id, entry);
+    for (let index = entry.children.length - 1; index >= 0; index -= 1) {
+      stack.push(entry.children[index]);
     }
-  };
-  index(projected);
+  }
   return { roots: projected, nodesById };
 }
 
-function visit<T extends Record<string, unknown>>(
-  nodes: readonly NeuTreeTableNode<T>[],
-  level: number,
-  parentId: string | undefined,
-  options: NeuTreeTableProjectionOptions,
+function finalizeSiblings<T extends Record<string, unknown>>(
+  siblingIndices: readonly number[],
+  source: ReadonlyMap<number, NeuTreeTableProjectedNode<T>>,
 ): readonly NeuTreeTableProjectedNode<T>[] {
-  const sorted = stableSort(nodes, options.sort, options.columns);
-  const projected: NeuTreeTableProjectedNode<T>[] = [];
-  const setSize = sorted.length;
-
-  sorted.forEach((node, index) => {
-    const row = toRow(node, level, parentId, index + 1, setSize);
-    const matches = matchesQuery(row, options.query, options.columns, options.exactMatch);
-    const loadedChildren = node.children ?? [];
-    const filteredChildren = visit(loadedChildren, level + 1, node.id, options);
-    const hasFilter = hasActiveFilter(options.query);
-
-    if (hasFilter && !matches && filteredChildren.length === 0) return;
-
-    const children =
-      hasFilter && matches && options.filterMode === 'lenient'
-        ? visit(
-            loadedChildren,
-            level + 1,
-            node.id,
-            withoutFilters(options),
-          )
-        : filteredChildren;
-    projected.push({ node, row, children });
+  const siblings = siblingIndices.flatMap((index) => {
+    const entry = source.get(index);
+    return entry ? [entry] : [];
   });
-  const renderedSetSize = projected.length;
-  return projected.map((entry, index) => ({
+  return siblings.map((entry, index) => ({
     ...entry,
-    row: { ...entry.row, __treePosInSet: index + 1, __treeSetSize: renderedSetSize },
-  }));
-}
-
-function withoutFilters(options: NeuTreeTableProjectionOptions): NeuTreeTableProjectionOptions {
-  return {
-    ...options,
-    query: {
-      ...options.query,
-      search: '',
-      filters: Object.freeze({}),
+    row: {
+      ...entry.row,
+      __treePosInSet: index + 1,
+      __treeSetSize: siblings.length,
     },
-  };
+  }));
 }
 
 function toRow<T extends Record<string, unknown>>(
@@ -124,7 +125,11 @@ function stableSort<T extends Record<string, unknown>>(
   columns: readonly NeuTableColumn<Record<string, unknown>>[],
 ): readonly NeuTreeTableNode<T>[] {
   if (!sort.length) return [...nodes];
-  const indexed = nodes.map((node, index) => ({ node, index, row: toRow(node, 0, undefined, 1, 1) }));
+  const indexed = nodes.map((node, index) => ({
+    node,
+    index,
+    row: toRow(node, 0, undefined, 1, 1),
+  }));
   return indexed
     .sort((left, right) => {
       for (const entry of sort) {
@@ -177,9 +182,7 @@ function matchesQuery(
 
   for (const [key, filter] of Object.entries(query.filters)) {
     const column = columns.find((candidate) => candidate.key === key);
-    const value = column?.filterConfig?.accessor
-      ? column.filterConfig.accessor(row)
-      : row[key];
+    const value = column?.filterConfig?.accessor ? column.filterConfig.accessor(row) : row[key];
     const results = filter.constraints.map((constraint) =>
       matchesConstraint(value, constraint, row, key, column),
     );
@@ -205,28 +208,42 @@ function matchesConstraint(
     const actual = normalize(value);
     const expected = normalize(constraint.value);
     switch (constraint.mode) {
-      case 'startsWith': return actual.startsWith(expected);
-      case 'endsWith': return actual.endsWith(expected);
-      case 'equals': return actual === expected;
-      case 'notEquals': return actual !== expected;
-      case 'notContains': return !actual.includes(expected);
-      default: return actual.includes(expected);
+      case 'startsWith':
+        return actual.startsWith(expected);
+      case 'endsWith':
+        return actual.endsWith(expected);
+      case 'equals':
+        return actual === expected;
+      case 'notEquals':
+        return actual !== expected;
+      case 'notContains':
+        return !actual.includes(expected);
+      default:
+        return actual.includes(expected);
     }
   }
   if (constraint.kind === 'number') {
     const actual = Number(value);
     if (constraint.mode === 'between' && typeof constraint.value === 'object' && constraint.value) {
       const range = constraint.value;
-      return (range.from == null || actual >= range.from) && (range.to == null || actual <= range.to);
+      return (
+        (range.from == null || actual >= range.from) && (range.to == null || actual <= range.to)
+      );
     }
     const expected = Number(constraint.value);
     switch (constraint.mode) {
-      case 'notEquals': return actual !== expected;
-      case 'lt': return actual < expected;
-      case 'lte': return actual <= expected;
-      case 'gt': return actual > expected;
-      case 'gte': return actual >= expected;
-      default: return actual === expected;
+      case 'notEquals':
+        return actual !== expected;
+      case 'lt':
+        return actual < expected;
+      case 'lte':
+        return actual <= expected;
+      case 'gt':
+        return actual > expected;
+      case 'gte':
+        return actual >= expected;
+      default:
+        return actual === expected;
     }
   }
   if (constraint.kind === 'boolean') {
@@ -242,8 +259,10 @@ function matchesConstraint(
     if (constraint.mode === 'between' && raw && 'from' in raw) {
       const from = dateValue(raw.from?.value);
       const to = dateValue(raw.to?.value);
-      return (from == null || (actual != null && actual >= from)) &&
-        (to == null || (actual != null && actual <= to));
+      return (
+        (from == null || (actual != null && actual >= from)) &&
+        (to == null || (actual != null && actual <= to))
+      );
     }
     const expected = raw && 'value' in raw ? dateValue(raw.value) : null;
     if (actual == null || expected == null) return false;

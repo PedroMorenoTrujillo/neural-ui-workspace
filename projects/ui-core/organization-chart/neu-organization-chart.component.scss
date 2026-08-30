@@ -30,6 +30,22 @@
   padding-block-start: 0;
 }
 
+.neu-organization-chart__tree--flat {
+  display: grid;
+  justify-content: stretch;
+  gap: 0.5rem;
+  inline-size: 100%;
+
+  > .neu-organization-chart__branch {
+    align-items: stretch;
+    inline-size: 100%;
+  }
+
+  .neu-organization-chart__node {
+    max-inline-size: none;
+  }
+}
+
 .neu-organization-chart__branch {
   position: relative;
   display: flex;

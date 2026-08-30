@@ -12,6 +12,7 @@ export * from './neu-menu-action';
 export * from './neu-menu-adapters';
 export * from './neu-roving-menu-controller';
 export * from './neu-tree-navigation-controller';
+export * from './neu-tree-traversal';
 
 export {
   InternalNeuOptionLazyRequestSequencer,

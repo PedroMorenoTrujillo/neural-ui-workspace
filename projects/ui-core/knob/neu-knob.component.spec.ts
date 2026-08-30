@@ -384,10 +384,18 @@ describe('NeuKnobComponent', () => {
     } as DOMRect);
 
     dial.dispatchEvent(
-      new MouseEvent('mousedown', { button: 0, clientX: 50, clientY: 0, bubbles: true, cancelable: true }),
+      new MouseEvent('mousedown', {
+        button: 0,
+        clientX: 50,
+        clientY: 0,
+        bubbles: true,
+        cancelable: true,
+      }),
     );
     window.dispatchEvent(new MouseEvent('mouseup'));
-    dial.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    dial.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
     f.detectChanges();
 
     expect(mouseSpy).toHaveBeenCalled();
@@ -441,6 +449,32 @@ describe('NeuKnobComponent', () => {
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 0, clientY: 0 }));
     window.dispatchEvent(new MouseEvent('mouseup'));
     expect(comp['_value']()).toBeLessThan(50);
+  });
+
+  it('owns one mouse or touch drag session and disposes it on cancellation and destroy', () => {
+    const f = TestBed.createComponent(NeuKnobComponent);
+    f.detectChanges();
+    const component = f.componentInstance as any;
+    const preventDefault = vi.fn();
+
+    component.onMouseDown({ clientX: 0, clientY: 0, preventDefault } as unknown as MouseEvent);
+    expect(component._dragSessionDisposer).toEqual(expect.any(Function));
+    component.onMouseDown({ clientX: 1, clientY: 1, preventDefault } as unknown as MouseEvent);
+    expect(component._dragSessionDisposer).toEqual(expect.any(Function));
+    window.dispatchEvent(new Event('blur'));
+    expect(component._dragSessionDisposer).toBeNull();
+
+    component.onTouchStart({
+      touches: [{ clientX: 0, clientY: 0 }],
+      preventDefault,
+    } as unknown as TouchEvent);
+    expect(component._dragSessionDisposer).toEqual(expect.any(Function));
+    window.dispatchEvent(new Event('touchcancel'));
+    expect(component._dragSessionDisposer).toBeNull();
+
+    component.onMouseDown({ clientX: 2, clientY: 2, preventDefault } as unknown as MouseEvent);
+    f.destroy();
+    expect(component._dragSessionDisposer).toBeNull();
   });
 
   it('resolves the CVA provider through Reactive Forms', async () => {

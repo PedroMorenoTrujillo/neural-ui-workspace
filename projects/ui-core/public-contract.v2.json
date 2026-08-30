@@ -523,6 +523,8 @@
         "./internal#InternalNeuOptionNormalizedRow",
         "./internal#InternalNeuOptionRow",
         "./internal#InternalNeuOptionTypeaheadController",
+        "./internal#InternalNeuTreeTraversalEntry",
+        "./internal#InternalNeuTreeTraversalOptions",
         "./internal#NeuIdGenerator",
         "./internal#NeuInitialTemporalState",
         "./internal#NeuMenuActionKind",
@@ -547,7 +549,8 @@
         "./internal#normalizeNeuOptionGroups",
         "./internal#normalizeNeuOptionLazyWindow",
         "./internal#normalizeNeuOptionRows",
-        "./internal#resolveNeuMenuAction"
+        "./internal#resolveNeuMenuAction",
+        "./internal#walkNeuTreeDepthFirst"
       ]
     },
     {
@@ -15976,6 +15979,114 @@
       ]
     },
     {
+      "id": "./internal#InternalNeuTreeTraversalEntry",
+      "entrypoint": "./internal",
+      "name": "InternalNeuTreeTraversalEntry",
+      "kind": "interface",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "interface InternalNeuTreeTraversalEntry<T> {\n}",
+      "members": [
+        {
+          "id": "./internal#InternalNeuTreeTraversalEntry.property:childEntryIndices",
+          "name": "childEntryIndices",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly childEntryIndices: number[];"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalEntry.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly index: number;"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalEntry.property:level",
+          "name": "level",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly level: number;"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalEntry.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly node: T;"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalEntry.property:parent",
+          "name": "parent",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly parent: T | null;"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalEntry.property:parentEntryIndex",
+          "name": "parentEntryIndex",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly parentEntryIndex: number | null;"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalEntry.property:path",
+          "name": "path",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly path: string;"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalEntry.property:setSize",
+          "name": "setSize",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly setSize: number;"
+        }
+      ]
+    },
+    {
+      "id": "./internal#InternalNeuTreeTraversalOptions",
+      "entrypoint": "./internal",
+      "name": "InternalNeuTreeTraversalOptions",
+      "kind": "interface",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "interface InternalNeuTreeTraversalOptions<T> {\n}",
+      "members": [
+        {
+          "id": "./internal#InternalNeuTreeTraversalOptions.property:includePath",
+          "name": "includePath",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly includePath?: boolean;"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalOptions.property:initialAncestry",
+          "name": "initialAncestry",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly initialAncestry?: readonly T[];"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalOptions.property:shouldDescend",
+          "name": "shouldDescend",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly shouldDescend?: (entry: InternalNeuTreeTraversalEntry<T>) => boolean;"
+        }
+      ]
+    },
+    {
       "id": "./internal#NeuIdGenerator",
       "entrypoint": "./internal",
       "name": "NeuIdGenerator",
@@ -16940,6 +17051,15 @@
       "kind": "function",
       "status": "INTERNAL/UNSUPPORTED",
       "signature": "declare function resolveNeuMenuAction<T extends NeuMenuActionLike<T>>(item: T, index?: number): NeuResolvedMenuAction<T>;",
+      "members": []
+    },
+    {
+      "id": "./internal#walkNeuTreeDepthFirst",
+      "entrypoint": "./internal",
+      "name": "walkNeuTreeDepthFirst",
+      "kind": "function",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "declare function walkNeuTreeDepthFirst<T>(roots: readonly T[], childrenOf: (node: T) => readonly T[], options?: InternalNeuTreeTraversalOptions<T>): InternalNeuTreeTraversalEntry<T>[];",
       "members": []
     },
     {
@@ -66133,25 +66253,25 @@
   ],
   "summary": {
     "entrypoints": 105,
-    "exportedDeclarations": 799,
+    "exportedDeclarations": 802,
     "declarationKinds": {
       "class": 14,
       "component": 102,
       "directive": 144,
-      "function": 39,
-      "interface": 256,
+      "function": 40,
+      "interface": 258,
       "reexport": 55,
       "service": 11,
       "token": 3,
       "type": 174,
       "variable": 1
     },
-    "publicSymbols": 5445,
+    "publicSymbols": 5459,
     "statuses": {
       "SUPPORTED": 3445,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 1996,
+      "INTERNAL/UNSUPPORTED": 2010,
       "REVIEW": 0
     },
     "bindings": {

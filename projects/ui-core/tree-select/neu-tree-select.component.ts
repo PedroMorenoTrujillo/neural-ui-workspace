@@ -33,6 +33,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuTreeNavigationController,
   NeuTreeNavigationItem,
+  walkNeuTreeDepthFirst,
 } from '@neural-ui/core/internal';
 
 export interface NeuTreeSelectNode {
@@ -491,71 +492,50 @@ export class NeuTreeSelectComponent<
       .map((item) => item.node);
   }
 
-  private flatten(
-    nodes: readonly T[],
-    level = 0,
-    path = '',
-    parentTrackBy?: string,
-  ): FlatNode<T, V>[] {
-    return nodes.flatMap((node, index) => {
+  private flatten(nodes: readonly T[]): FlatNode<T, V>[] {
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => this.childrenOf(node), {
+      includePath: true,
+    });
+    return entries.map((entry) => {
+      const node = entry.node;
       const children = this.childrenOf(node);
       const value = this.optionValueOf(node);
-      const item = this.createFlatNode({
+      return this.createFlatNode({
         node,
-        level,
-        trackBy: path ? `${path}.${index}` : String(index),
+        level: entry.level,
+        trackBy: entry.path,
         value,
         label: this.optionLabelOf(node),
         disabled: this.isOptionDisabled(node),
         hasChildren: children.length > 0,
         lazy: this.isLazyNode(node),
-        parentTrackBy,
+        parentTrackBy:
+          entry.parentEntryIndex == null ? undefined : entries[entry.parentEntryIndex].path,
       });
-
-      return [
-        item,
-        ...this.flatten(
-          children,
-          level + 1,
-          path ? `${path}.${index}` : String(index),
-          item.trackBy,
-        ),
-      ];
     });
   }
 
-  private flattenVisible(
-    nodes: readonly T[],
-    level = 0,
-    path = '',
-    parentTrackBy?: string,
-  ): FlatNode<T, V>[] {
-    return nodes.flatMap((node, index) => {
+  private flattenVisible(nodes: readonly T[]): FlatNode<T, V>[] {
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => this.childrenOf(node), {
+      includePath: true,
+      shouldDescend: (entry) => this.expanded().has(this.optionValueOf(entry.node)),
+    });
+    return entries.map((entry) => {
+      const node = entry.node;
       const children = this.childrenOf(node);
       const value = this.optionValueOf(node);
-      const item = this.createFlatNode({
+      return this.createFlatNode({
         node,
-        level,
-        trackBy: path ? `${path}.${index}` : String(index),
+        level: entry.level,
+        trackBy: entry.path,
         value,
         label: this.optionLabelOf(node),
         disabled: this.isOptionDisabled(node),
         hasChildren: children.length > 0,
         lazy: this.isLazyNode(node),
-        parentTrackBy,
+        parentTrackBy:
+          entry.parentEntryIndex == null ? undefined : entries[entry.parentEntryIndex].path,
       });
-
-      return this.expanded().has(value)
-        ? [
-            item,
-            ...this.flattenVisible(
-              children,
-              level + 1,
-              path ? `${path}.${index}` : String(index),
-              item.trackBy,
-            ),
-          ]
-        : [item];
     });
   }
 

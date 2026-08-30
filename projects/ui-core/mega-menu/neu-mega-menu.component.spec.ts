@@ -290,4 +290,44 @@ describe('NeuMegaMenuComponent', () => {
     if (original) Object.defineProperty(window, 'matchMedia', original);
     else Reflect.deleteProperty(window, 'matchMedia');
   });
+
+  it('normalizes cycles, shared branches, and depth 5,000 without recursive traversal', () => {
+    const fixture = TestBed.createComponent(NeuMegaMenuComponent);
+    const component = fixture.componentInstance as any;
+    const self: any = { key: 'self', label: 'Self' };
+    const sibling = { key: 'sibling', label: 'Sibling' };
+    self.items = [self, sibling];
+    const ancestor: any = { key: 'ancestor', label: 'Ancestor' };
+    const grandchild: any = { key: 'grandchild', label: 'Grandchild', items: [ancestor] };
+    const child: any = { key: 'child', label: 'Child', items: [grandchild] };
+    ancestor.items = [child];
+    const shared = { key: 'shared', label: 'Shared' };
+    const root = {
+      key: 'root',
+      label: 'Root',
+      items: [[self, ancestor, { key: 'left', label: 'Left', items: [shared] }], [shared]],
+    };
+
+    const processed = component.processRoot(root, 0);
+    expect(component.flattened(processed).map((item: any) => item.action.key)).toEqual([
+      'self',
+      'sibling',
+      'ancestor',
+      'child',
+      'grandchild',
+      'left',
+      'shared',
+      'shared',
+    ]);
+
+    let deep: any = { key: '5000', label: '5000' };
+    for (let depth = 4_999; depth >= 0; depth -= 1) {
+      deep = { key: String(depth), label: String(depth), items: [deep] };
+    }
+    const deepRoot = component.processRoot(
+      { key: 'deep-root', label: 'Deep root', items: [deep] },
+      0,
+    );
+    expect(component.flattened(deepRoot)).toHaveLength(5_001);
+  });
 });

@@ -19,6 +19,7 @@ import {
   NeuTreeTableManagedRowDirective,
   NeuTreeTableNodeDirective,
 } from './neu-tree-table-templates.directive';
+import { projectNeuTreeTable } from './neu-tree-table-hierarchy.controller';
 
 interface RepoMeta extends Record<string, unknown> {
   owner: string;
@@ -88,11 +89,7 @@ class TreeTableExpandHostComponent {
 
 @Component({
   standalone: true,
-  imports: [
-    NeuTreeTableComponent,
-    NeuTreeTableNodeDirective,
-    NeuTableCaptionDirective,
-  ],
+  imports: [NeuTreeTableComponent, NeuTreeTableNodeDirective, NeuTableCaptionDirective],
   template: `
     <neu-tree-table [nodes]="nodes" [columns]="columns">
       <ng-template neuTableCaption>Repository hierarchy</ng-template>
@@ -146,7 +143,9 @@ class TreeTableConsumerCellHostComponent {
               <td [attr.colspan]="colspan">detail {{ entry.node.id }}</td>
             </tr>
           } @else if (entry.kind === 'empty') {
-            <tr><td [attr.colspan]="entry.colspan">{{ entry.message }}</td></tr>
+            <tr>
+              <td [attr.colspan]="entry.colspan">{{ entry.message }}</td>
+            </tr>
           }
         }
       </ng-template>
@@ -354,7 +353,9 @@ describe('NeuTreeTableComponent', () => {
     const row = fixture.componentInstance.flatRows()[0] as NeuTreeTableRow<RepoMeta>;
     expect(fixture.componentInstance['treeIndent'](row as any)).toBe(0);
     expect(fixture.componentInstance['isTreeRowDisabled'](row as any)).toBe(false);
-    expect(fixture.componentInstance['treeToggleAriaLabel'](row as any)).toBe('Collapse: Workspace');
+    expect(fixture.componentInstance['treeToggleAriaLabel'](row as any)).toBe(
+      'Collapse: Workspace',
+    );
   });
 
   it('ignores toggle requests for disabled or leaf nodes', () => {
@@ -605,7 +606,10 @@ describe('NeuTreeTableComponent', () => {
     const fixture = TestBed.createComponent(NeuTreeTableComponent);
     fixture.componentRef.setInput('nodes', [
       {
-        id: 'b', label: 'B', expanded: true, children: [
+        id: 'b',
+        label: 'B',
+        expanded: true,
+        children: [
           { id: 'b2', label: 'B2' },
           { id: 'b1', label: 'B1' },
         ],
@@ -617,7 +621,11 @@ describe('NeuTreeTableComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.flatRows().map((row) => row['id'])).toEqual([
-      'a', 'a1', 'b', 'b1', 'b2',
+      'a',
+      'a1',
+      'b',
+      'b1',
+      'b2',
     ]);
   });
 
@@ -632,24 +640,33 @@ describe('NeuTreeTableComponent', () => {
     fixture.componentRef.setInput('filterMode', 'lenient');
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.flatRows().map((row) => row['id'])).toEqual(['root', 'needle']);
+    expect(fixture.componentInstance.flatRows().map((row) => row['id'])).toEqual([
+      'root',
+      'needle',
+    ]);
     expect(fixture.nativeElement.textContent).toContain('Needle');
   });
 
   it('retains a matching parent subtree in lenient mode and prunes it in strict mode', () => {
-    const nodes: NeuTreeTableNode[] = [{
-      id: 'root', label: 'Match', children: [
-        { id: 'matching-child', label: 'Match child' },
-        { id: 'other-child', label: 'Other child' },
-      ],
-    }];
+    const nodes: NeuTreeTableNode[] = [
+      {
+        id: 'root',
+        label: 'Match',
+        children: [
+          { id: 'matching-child', label: 'Match child' },
+          { id: 'other-child', label: 'Other child' },
+        ],
+      },
+    ];
     const lenient = TestBed.createComponent(NeuTreeTableComponent);
     lenient.componentRef.setInput('nodes', nodes);
     lenient.componentRef.setInput('columns', COLUMNS);
     lenient.componentRef.setInput('query', query('match'));
     lenient.detectChanges();
     expect(lenient.componentInstance.flatRows().map((row) => row['id'])).toEqual([
-      'root', 'matching-child', 'other-child',
+      'root',
+      'matching-child',
+      'other-child',
     ]);
 
     const strict = TestBed.createComponent(NeuTreeTableComponent);
@@ -659,7 +676,8 @@ describe('NeuTreeTableComponent', () => {
     strict.componentRef.setInput('filterMode', 'strict');
     strict.detectChanges();
     expect(strict.componentInstance.flatRows().map((row) => row['id'])).toEqual([
-      'root', 'matching-child',
+      'root',
+      'matching-child',
     ]);
   });
 
@@ -670,7 +688,9 @@ describe('NeuTreeTableComponent', () => {
     fixture.componentRef.setInput('selectionMode', 'single');
     fixture.componentRef.setInput('selection', null);
     const proposals: string[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((nodes) => proposals.push(nodes.map((node) => node.id)));
+    fixture.componentInstance.selectionChange.subscribe((nodes) =>
+      proposals.push(nodes.map((node) => node.id)),
+    );
     fixture.detectChanges();
 
     fixture.componentInstance['onTableSelectionChange']([fixture.componentInstance.flatRows()[0]]);
@@ -682,16 +702,23 @@ describe('NeuTreeTableComponent', () => {
 
   it('propagates checkbox selection through loaded descendants and renders partial ancestors', () => {
     const fixture = TestBed.createComponent(NeuTreeTableComponent);
-    fixture.componentRef.setInput('nodes', [{
-      id: 'root', label: 'Root', expanded: true, children: [
-        { id: 'one', label: 'One' },
-        { id: 'two', label: 'Two' },
-      ],
-    }]);
+    fixture.componentRef.setInput('nodes', [
+      {
+        id: 'root',
+        label: 'Root',
+        expanded: true,
+        children: [
+          { id: 'one', label: 'One' },
+          { id: 'two', label: 'Two' },
+        ],
+      },
+    ]);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('selectionMode', 'checkbox');
     const proposals: string[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((nodes) => proposals.push(nodes.map((node) => node.id)));
+    fixture.componentInstance.selectionChange.subscribe((nodes) =>
+      proposals.push(nodes.map((node) => node.id)),
+    );
     fixture.detectChanges();
 
     const rows = fixture.componentInstance.flatRows() as NeuTreeTableRow[];
@@ -726,10 +753,14 @@ describe('NeuTreeTableComponent', () => {
     expect(child.getAttribute('aria-level')).toBe('2');
 
     root.focus();
-    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    root.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
     await Promise.resolve();
     expect(document.activeElement).toBe(child);
-    child.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    child.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    );
     expect(document.activeElement).toBe(root);
   });
 
@@ -738,8 +769,14 @@ describe('NeuTreeTableComponent', () => {
     fixture.componentRef.setInput('nodes', NODES);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.detectChanges();
-    const toggle = fixture.nativeElement.querySelector('.neu-tree-table__toggle') as HTMLButtonElement;
-    const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+    const toggle = fixture.nativeElement.querySelector(
+      '.neu-tree-table__toggle',
+    ) as HTMLButtonElement;
+    const event = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      bubbles: true,
+      cancelable: true,
+    });
     toggle.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(false);
   });
@@ -749,7 +786,9 @@ describe('NeuTreeTableComponent', () => {
     fixture.componentRef.setInput('nodes', NODES);
     fixture.componentRef.setInput('columns', COLUMNS);
     const saves: NeuTreeTableRowEditEvent<RepoMeta>[] = [];
-    fixture.componentInstance.rowEditSave.subscribe((event) => saves.push(event as NeuTreeTableRowEditEvent<RepoMeta>));
+    fixture.componentInstance.rowEditSave.subscribe((event) =>
+      saves.push(event as NeuTreeTableRowEditEvent<RepoMeta>),
+    );
     fixture.detectChanges();
     const row = fixture.componentInstance.flatRows()[0];
     fixture.componentInstance['onTableRowEdit']('save', {
@@ -774,7 +813,9 @@ describe('NeuTreeTableComponent', () => {
     expect(fixture.nativeElement.querySelector('.custom-node')?.textContent).toContain(
       'Workspace level 0',
     );
-    expect(fixture.nativeElement.querySelector('tr[data-neu-tree-node-id="workspace"]')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('tr[data-neu-tree-node-id="workspace"]'),
+    ).toBeTruthy();
   });
 
   it('composes a consumer tree-column template inside indentation and toggler chrome', () => {
@@ -788,8 +829,12 @@ describe('NeuTreeTableComponent', () => {
   it('strictly composes managed primary node rows plus non-semantic sibling rows', () => {
     const fixture = TestBed.createComponent(TreeTableBodySectionHostComponent);
     fixture.detectChanges();
-    const primary = fixture.nativeElement.querySelector('.advanced-node-row') as HTMLTableRowElement;
-    const detail = fixture.nativeElement.querySelector('.advanced-detail-row') as HTMLTableRowElement;
+    const primary = fixture.nativeElement.querySelector(
+      '.advanced-node-row',
+    ) as HTMLTableRowElement;
+    const detail = fixture.nativeElement.querySelector(
+      '.advanced-detail-row',
+    ) as HTMLTableRowElement;
     expect(primary.getAttribute('role')).toBe('row');
     expect(primary.getAttribute('aria-level')).toBe('1');
     expect(primary.tabIndex).toBe(0);
@@ -802,5 +847,84 @@ describe('NeuTreeTableComponent', () => {
     expect(fixture.nativeElement.querySelector('.strict-final-node')?.textContent).toContain(
       'Workspace / 0',
     );
+  });
+
+  it('projects cycles, shared branches, and depth 5,000 without mutating consumer nodes', () => {
+    const self: NeuTreeTableNode<RepoMeta> = {
+      id: 'self',
+      label: 'Self',
+      data: { owner: 'A', status: 'active' },
+    };
+    const sibling: NeuTreeTableNode<RepoMeta> = {
+      id: 'sibling',
+      label: 'Sibling',
+      data: { owner: 'A', status: 'active' },
+    };
+    self.children = [self, sibling];
+    const shared: NeuTreeTableNode<RepoMeta> = {
+      id: 'shared',
+      label: 'Shared',
+      data: { owner: 'B', status: 'active' },
+    };
+    const left: NeuTreeTableNode<RepoMeta> = {
+      id: 'left',
+      label: 'Left',
+      data: { owner: 'B', status: 'active' },
+      children: [shared],
+    };
+    const right: NeuTreeTableNode<RepoMeta> = {
+      id: 'right',
+      label: 'Right',
+      data: { owner: 'C', status: 'active' },
+      children: [shared],
+    };
+    const ancestor: NeuTreeTableNode<RepoMeta> = {
+      id: 'ancestor',
+      label: 'Ancestor',
+      data: { owner: 'C', status: 'active' },
+    };
+    const child: NeuTreeTableNode<RepoMeta> = {
+      id: 'child',
+      label: 'Child',
+      data: { owner: 'C', status: 'active' },
+    };
+    const grandchild: NeuTreeTableNode<RepoMeta> = {
+      id: 'grandchild',
+      label: 'Grandchild',
+      data: { owner: 'C', status: 'active' },
+    };
+    ancestor.children = [child];
+    child.children = [grandchild];
+    grandchild.children = [ancestor];
+    const options: Parameters<typeof projectNeuTreeTable<RepoMeta>>[1] = {
+      query: query(),
+      sort: [],
+      filterMode: 'strict' as const,
+      exactMatch: false,
+      columns: COLUMNS as unknown as NeuTableColumn<Record<string, unknown>>[],
+    };
+    const projection = projectNeuTreeTable([self, left, right, ancestor], options);
+    expect(projection.roots[0].children.map((entry) => entry.node.id)).toEqual(['sibling']);
+    expect(projection.roots[1].children[0].node).toBe(shared);
+    expect(projection.roots[2].children[0].node).toBe(shared);
+    expect(projection.roots[3].children[0].children[0].node).toBe(grandchild);
+    expect(projection.roots[3].children[0].children[0].children).toHaveLength(0);
+    expect(self.children).toEqual([self, sibling]);
+
+    let deep: NeuTreeTableNode<RepoMeta> = {
+      id: '5000',
+      label: '5000',
+      data: { owner: 'D', status: 'active' },
+    };
+    for (let depth = 4_999; depth >= 0; depth -= 1) {
+      deep = {
+        id: String(depth),
+        label: String(depth),
+        data: { owner: 'D', status: 'active' },
+        children: [deep],
+      };
+    }
+    const deepProjection = projectNeuTreeTable([deep], options);
+    expect(deepProjection.nodesById.size).toBe(5_001);
   });
 });

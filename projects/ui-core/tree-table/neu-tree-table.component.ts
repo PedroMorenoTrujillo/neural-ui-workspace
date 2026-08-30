@@ -57,6 +57,7 @@ import {
   NeuTableUrlStateOptions,
   NeuTableVirtualizationOptions,
 } from '@neural-ui/core/table';
+import { walkNeuTreeDepthFirst } from '@neural-ui/core/internal';
 import { projectNeuTreeTable, type NeuTreeTableProjectedNode } from './neu-tree-table-hierarchy.controller';
 import {
   NeuTreeTableBodyDirective,
@@ -1012,42 +1013,39 @@ export class NeuTreeTableComponent {
   private flattenProjection(
     nodes: readonly NeuTreeTableProjectedNode<Record<string, unknown>>[],
   ): Record<string, unknown>[] {
-    const rows: Record<string, unknown>[] = [];
     const filtering = this.effectiveQuery().search.trim().length > 0 ||
       Object.keys(this.effectiveQuery().filters).length > 0;
-    for (const entry of nodes) {
-      const expanded = this.effectiveExpandedKeys().has(entry.node.id) || filtering;
-      rows.push({ ...entry.row, __treeExpanded: expanded });
-      if (expanded) rows.push(...this.flattenProjection(entry.children));
-    }
-    return rows;
+    return walkNeuTreeDepthFirst(nodes, (entry) => entry.children, {
+      shouldDescend: (entry) =>
+        this.effectiveExpandedKeys().has(entry.node.node.id) || filtering,
+    }).map((entry) => {
+      const expanded = this.effectiveExpandedKeys().has(entry.node.node.id) || filtering;
+      return { ...entry.node.row, __treeExpanded: expanded };
+    });
   }
 
   private indexAllRows(
     nodes: readonly NeuTreeTableNode[],
   ): Map<string, InternalNeuTreeTableRow> {
     const rows = new Map<string, InternalNeuTreeTableRow>();
-    const visit = (siblings: readonly NeuTreeTableNode[], level: number, parentId?: string) => {
-      siblings.forEach((node, index) => {
-        rows.set(node.id, {
-          ...(node.data ?? {}),
-          id: node.id,
-          label: node.label,
-          description: node.description,
-          badge: node.badge,
-          __treeLevel: level,
-          __treeHasChildren: node.leaf === false || !!node.children?.length,
-          __treeExpanded: this.effectiveExpandedKeys().has(node.id),
-          __treeDisabled: !!node.disabled,
-          __treeParentId: parentId,
-          __treePosInSet: index + 1,
-          __treeSetSize: siblings.length,
-          __treeNode: node,
-        });
-        if (node.children?.length) visit(node.children, level + 1, node.id);
+    for (const entry of walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [])) {
+      const node = entry.node;
+      rows.set(node.id, {
+        ...(node.data ?? {}),
+        id: node.id,
+        label: node.label,
+        description: node.description,
+        badge: node.badge,
+        __treeLevel: entry.level,
+        __treeHasChildren: node.leaf === false || !!node.children?.length,
+        __treeExpanded: this.effectiveExpandedKeys().has(node.id),
+        __treeDisabled: !!node.disabled,
+        __treeParentId: entry.parent?.id,
+        __treePosInSet: entry.index + 1,
+        __treeSetSize: entry.setSize,
+        __treeNode: node,
       });
-    };
-    visit(nodes, 0);
+    }
     return rows;
   }
 
@@ -1099,13 +1097,13 @@ export class NeuTreeTableComponent {
 
   private applyDescendantSelection(key: string, selected: boolean, keys: Set<string>): void {
     const row = this.allRowsById().get(key);
-    const visit = (node: NeuTreeTableNode) => {
+    if (!row) return;
+    for (const entry of walkNeuTreeDepthFirst([row.__treeNode], (node) => node.children ?? [])) {
+      const node = entry.node;
       if (!node.disabled && node.selectable !== false) {
         selected ? keys.add(node.id) : keys.delete(node.id);
       }
-      node.children?.forEach(visit);
-    };
-    if (row) visit(row.__treeNode);
+    }
   }
 
   private checkboxState(source: ReadonlySet<string>): {
@@ -1114,22 +1112,40 @@ export class NeuTreeTableComponent {
   } {
     const selected = new Set(source);
     const partial = new Set<string>();
-    const visit = (node: NeuTreeTableNode): 'full' | 'empty' | 'partial' | 'ignored' => {
-      if (node.disabled || node.selectable === false) return 'ignored';
-      const children = (node.children ?? []).map(visit).filter((state) => state !== 'ignored');
-      if (!children.length) return selected.has(node.id) ? 'full' : 'empty';
+    type State = 'full' | 'empty' | 'partial' | 'ignored';
+    const entries = walkNeuTreeDepthFirst(this.nodes(), (node) => node.children ?? [], {
+      shouldDescend: (entry) => !entry.node.disabled && entry.node.selectable !== false,
+    });
+    const states = new Map<number, State>();
+    for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex -= 1) {
+      const entry = entries[entryIndex];
+      const node = entry.node;
+      if (node.disabled || node.selectable === false) {
+        states.set(entryIndex, 'ignored');
+        continue;
+      }
+      const children = entry.childEntryIndices
+        .map((index) => states.get(index) ?? 'ignored')
+        .filter((state) => state !== 'ignored');
+      if (!children.length) {
+        states.set(entryIndex, selected.has(node.id) ? 'full' : 'empty');
+        continue;
+      }
       const all = children.every((state) => state === 'full');
       const none = children.every((state) => state === 'empty');
       if (all) {
         selected.add(node.id);
-        return 'full';
+        states.set(entryIndex, 'full');
+        continue;
       }
       selected.delete(node.id);
-      if (none) return 'empty';
+      if (none) {
+        states.set(entryIndex, 'empty');
+        continue;
+      }
       partial.add(node.id);
-      return 'partial';
-    };
-    this.nodes().forEach(visit);
+      states.set(entryIndex, 'partial');
+    }
     return { selected, partial };
   }
 
@@ -1245,18 +1261,11 @@ export class NeuTreeTableComponent {
   }
 
   private collectExpandedKeys(nodes: NeuTreeTableNode[]): Set<string> {
-    const expanded = new Set<string>();
-    for (const node of nodes) {
-      if (node.expanded) {
-        expanded.add(node.id);
-      }
-      if (node.children?.length) {
-        for (const childId of this.collectExpandedKeys(node.children)) {
-          expanded.add(childId);
-        }
-      }
-    }
-    return expanded;
+    return new Set(
+      walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [])
+        .filter((entry) => entry.node.expanded)
+        .map((entry) => entry.node.id),
+    );
   }
 
   private asFlatRow(row: Record<string, unknown>): InternalNeuTreeTableRow {

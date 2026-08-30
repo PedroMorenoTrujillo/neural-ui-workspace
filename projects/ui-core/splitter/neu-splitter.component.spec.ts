@@ -315,4 +315,27 @@ describe('NeuSplitterComponent', () => {
 
     expect(emitted.length).toBe(1);
   });
+
+  it('owns one drag session and removes mouse and touch listeners on cancellation and destroy', async () => {
+    const f = setup([{ size: 50 }, { size: 50 }]);
+    await f.whenStable();
+    const component = f.componentInstance as any;
+
+    component._startDrag({ preventDefault: vi.fn(), clientX: 10, clientY: 0 } as any, 0);
+    expect(component._dragSessionDisposer).toEqual(expect.any(Function));
+    component._startDrag({ preventDefault: vi.fn(), clientX: 20, clientY: 0 } as any, 0);
+    expect(component._dragSessionDisposer).toEqual(expect.any(Function));
+    window.dispatchEvent(new Event('blur'));
+    expect(component._dragSessionDisposer).toBeNull();
+    expect(component._dragIndex).toBe(-1);
+
+    component._startTouchDrag({ touches: [{ clientX: 10, clientY: 0 }] } as any, 0);
+    window.dispatchEvent(new Event('touchcancel'));
+    expect(component._dragSessionDisposer).toBeNull();
+
+    component._startDrag({ preventDefault: vi.fn(), clientX: 30, clientY: 0 } as any, 0);
+    f.destroy();
+    expect(component._dragSessionDisposer).toBeNull();
+    expect(component._dragIndex).toBe(-1);
+  });
 });

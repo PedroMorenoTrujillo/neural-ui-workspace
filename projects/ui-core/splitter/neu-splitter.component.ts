@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewEncapsulation,
   effect,
@@ -65,9 +66,12 @@ export class NeuSplitterComponent {
   readonly sizeChange = output<number[]>();
 
   private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly _destroyRef = inject(DestroyRef);
   protected readonly _sizes = signal<number[]>([]);
+  private _dragSessionDisposer: (() => void) | null = null;
 
   constructor() {
+    this._destroyRef.onDestroy(() => this._disposeDragSession());
     effect(() => {
       const ps = this.panes();
       untracked(() => {
@@ -89,33 +93,55 @@ export class NeuSplitterComponent {
 
   protected _startDrag(e: MouseEvent, index: number): void {
     e.preventDefault();
+    this._disposeDragSession();
     this._dragIndex = index;
     this._dragPos = this.direction() === 'horizontal' ? e.clientX : e.clientY;
+    const view = this._el.nativeElement.ownerDocument.defaultView;
+    if (!view) return;
     const onMove = (ev: MouseEvent) => this._onDragMove(ev.clientX, ev.clientY);
     const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      this._dragIndex = -1;
+      this._disposeDragSession();
       this.sizeChange.emit(this._sizes());
     };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    this._dragSessionDisposer = () => {
+      view.removeEventListener('mousemove', onMove);
+      view.removeEventListener('mouseup', onUp);
+      view.removeEventListener('blur', onUp);
+      this._dragIndex = -1;
+      this._dragSessionDisposer = null;
+    };
+    view.addEventListener('mousemove', onMove);
+    view.addEventListener('mouseup', onUp);
+    view.addEventListener('blur', onUp);
   }
 
   protected _startTouchDrag(e: TouchEvent, index: number): void {
+    this._disposeDragSession();
     const t = e.touches[0];
     this._dragIndex = index;
     this._dragPos = this.direction() === 'horizontal' ? t.clientX : t.clientY;
+    const view = this._el.nativeElement.ownerDocument.defaultView;
+    if (!view) return;
     const onMove = (ev: TouchEvent) =>
       this._onDragMove(ev.touches[0].clientX, ev.touches[0].clientY);
     const onEnd = () => {
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onEnd);
-      this._dragIndex = -1;
+      this._disposeDragSession();
       this.sizeChange.emit(this._sizes());
     };
-    window.addEventListener('touchmove', onMove, { passive: true });
-    window.addEventListener('touchend', onEnd);
+    this._dragSessionDisposer = () => {
+      view.removeEventListener('touchmove', onMove);
+      view.removeEventListener('touchend', onEnd);
+      view.removeEventListener('touchcancel', onEnd);
+      this._dragIndex = -1;
+      this._dragSessionDisposer = null;
+    };
+    view.addEventListener('touchmove', onMove, { passive: true });
+    view.addEventListener('touchend', onEnd);
+    view.addEventListener('touchcancel', onEnd);
+  }
+
+  private _disposeDragSession(): void {
+    this._dragSessionDisposer?.();
   }
 
   protected _onHandleKey(e: KeyboardEvent, index: number): void {

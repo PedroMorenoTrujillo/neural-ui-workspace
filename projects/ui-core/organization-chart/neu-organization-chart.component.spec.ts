@@ -55,7 +55,12 @@ const NODES: NeuOrganizationChartNode<Person>[] = [
       [(collapsedKeys)]="collapsedKeys"
       ariaLabel="Team hierarchy"
     >
-      <ng-template [neuOrganizationChartNode]="nodes" let-node let-level="level" let-selected="selected">
+      <ng-template
+        [neuOrganizationChartNode]="nodes"
+        let-node
+        let-level="level"
+        let-selected="selected"
+      >
         <span class="custom-card"
           >{{ node.label }} · {{ node.data?.role }} · {{ level }} · {{ selected }}</span
         >
@@ -81,11 +86,7 @@ class OrganizationChartHostComponent {
     NeuOrganizationChartToggleDirective,
   ],
   template: `
-    <neu-organization-chart
-      [nodes]="nodes"
-      selectionMode="checkbox"
-      [collapsible]="true"
-    >
+    <neu-organization-chart [nodes]="nodes" selectionMode="checkbox" [collapsible]="true">
       <ng-template
         [neuOrganizationChartNode]="nodes"
         let-node
@@ -401,5 +402,70 @@ describe('NeuOrganizationChartComponent', () => {
     expect(fixture.nativeElement.querySelector('[role="status"]')?.textContent).toContain(
       'No reporting lines',
     );
+  });
+
+  it('terminates cycles and retains shared nodes in separate branches', () => {
+    const self: NeuOrganizationChartNode<Person> = {
+      id: 'self',
+      label: 'Self',
+      data: { role: 'Self' },
+      children: [],
+    };
+    const parent: NeuOrganizationChartNode<Person> = {
+      id: 'parent',
+      label: 'Parent',
+      data: { role: 'Parent' },
+      children: [],
+    };
+    const child: NeuOrganizationChartNode<Person> = {
+      id: 'child',
+      label: 'Child',
+      data: { role: 'Child' },
+      children: [],
+    };
+    const grandchild: NeuOrganizationChartNode<Person> = {
+      id: 'grandchild',
+      label: 'Grandchild',
+      data: { role: 'Grandchild' },
+      children: [],
+    };
+    const shared: NeuOrganizationChartNode<Person> = {
+      id: 'shared',
+      label: 'Shared',
+      data: { role: 'Shared' },
+    };
+    self.children = [self, { id: 'safe', label: 'Safe', data: { role: 'Safe' } }];
+    parent.children = [child, shared];
+    child.children = [grandchild];
+    grandchild.children = [parent];
+    const fixture = setup([
+      self,
+      parent,
+      { id: 'right', label: 'Right', data: { role: 'Right' }, children: [shared] },
+    ]);
+
+    expect(fixture.nativeElement.textContent).toContain('Safe');
+    expect(fixture.nativeElement.textContent.match(/Shared/g)).toHaveLength(2);
+  });
+
+  it('renders a valid depth-1,000 chain without stack exhaustion', () => {
+    let deep: NeuOrganizationChartNode<Person> = {
+      id: 'deep-1000',
+      label: 'Deep 1000',
+      data: { role: 'Deep' },
+    };
+    for (let level = 999; level >= 0; level -= 1) {
+      deep = {
+        id: `deep-${level}`,
+        label: `Deep ${level}`,
+        data: { role: 'Deep' },
+        children: [deep],
+      };
+    }
+    const fixture = setup([deep]);
+    const items = fixture.nativeElement.querySelectorAll('[role="treeitem"]');
+    expect(items).toHaveLength(1_001);
+    expect(items[1_000].getAttribute('aria-level')).toBe('1001');
+    expect(fixture.nativeElement.querySelector('.neu-organization-chart__tree--flat')).toBeTruthy();
   });
 });

@@ -533,9 +533,7 @@ describe('NeuTreeSelectComponent', () => {
     await fixture.whenStable();
     const panel = document.querySelector('.neu-tree-select__panel') as HTMLElement;
     const search = panel.querySelector('.neu-tree-select__search') as HTMLInputElement;
-    const items = Array.from(
-      panel.querySelectorAll<HTMLButtonElement>('[role="treeitem"]'),
-    );
+    const items = Array.from(panel.querySelectorAll<HTMLButtonElement>('[role="treeitem"]'));
 
     search.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
@@ -546,5 +544,38 @@ describe('NeuTreeSelectComponent', () => {
       new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }),
     );
     expect(document.activeElement).toBe(items[1]);
+  });
+
+  it('terminates cycles, retains shared references per branch, and flattens depth 5,000', () => {
+    const self: NeuTreeSelectNode = { value: 'self', label: 'Self', children: [] };
+    const parent: NeuTreeSelectNode = { value: 'parent', label: 'Parent', children: [] };
+    const child: NeuTreeSelectNode = { value: 'child', label: 'Child', children: [] };
+    const grandchild: NeuTreeSelectNode = {
+      value: 'grandchild',
+      label: 'Grandchild',
+      children: [],
+    };
+    const shared: NeuTreeSelectNode = { value: 'shared', label: 'Shared' };
+    self.children = [self, { value: 'safe', label: 'Safe sibling' }];
+    parent.children = [child, shared];
+    child.children = [grandchild];
+    grandchild.children = [parent];
+    fixture.componentRef.setInput('nodes', [
+      self,
+      parent,
+      { value: 'right', label: 'Right', children: [shared] },
+    ]);
+    fixture.componentInstance.query.set('shared');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.visibleNodes().map((item) => item.label)).toEqual([
+      'Shared',
+      'Shared',
+    ]);
+
+    let deep: NeuTreeSelectNode = { value: 'deep-5000', label: 'Deep' };
+    for (let level = 4999; level >= 0; level -= 1) {
+      deep = { value: `deep-${level}`, label: `Deep ${level}`, children: [deep] };
+    }
+    expect((fixture.componentInstance as any).flatten([deep])).toHaveLength(5001);
   });
 });

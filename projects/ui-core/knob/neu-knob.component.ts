@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewEncapsulation,
   computed,
@@ -136,8 +137,12 @@ export class NeuKnobComponent implements ControlValueAccessor {
     return range === 0 ? 0 : (this._value() - this.min()) / range;
   });
 
-  protected readonly _arcDashArray = computed(() => `${this._arcLength()} ${this._circumference()}`);
-  protected readonly _arcDashOffset = computed(() => this._arcLength() * (1 - this._normalizedValue()));
+  protected readonly _arcDashArray = computed(
+    () => `${this._arcLength()} ${this._circumference()}`,
+  );
+  protected readonly _arcDashOffset = computed(
+    () => this._arcLength() * (1 - this._normalizedValue()),
+  );
 
   // Indicator position on the track (relative to SVG center)
   // El arco empieza en rotate(-220°) desde el Este del SVG.
@@ -155,8 +160,14 @@ export class NeuKnobComponent implements ControlValueAccessor {
   private _dragStartValue = 0;
   private _onChange: (v: number) => void = () => {};
   private _onTouched: () => void = () => {};
+  private _dragSessionDisposer: (() => void) | null = null;
 
   private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly _destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this._destroyRef.onDestroy(() => this._disposeDragSession());
+  }
 
   /** Calcula el ángulo en grados desde el centro del dial al punto (x, y).
    *  Calculates the angle in degrees from the dial center to point (x, y). */
@@ -192,32 +203,50 @@ export class NeuKnobComponent implements ControlValueAccessor {
   onMouseDown(event: MouseEvent): void {
     if (this._cvaDisabled()) return;
     event.preventDefault();
+    this._disposeDragSession();
     this._dragStartAngle = this._getAngle(event.clientX, event.clientY);
     this._dragStartValue = this._value();
+    const view = this._el.nativeElement.ownerDocument.defaultView;
+    if (!view) return;
     const onMove = (e: MouseEvent) => this._applyCircularDrag(e.clientX, e.clientY);
-    const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+    const onEnd = () => this._disposeDragSession();
+    this._dragSessionDisposer = () => {
+      view.removeEventListener('mousemove', onMove);
+      view.removeEventListener('mouseup', onEnd);
+      view.removeEventListener('blur', onEnd);
+      this._dragSessionDisposer = null;
     };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    view.addEventListener('mousemove', onMove);
+    view.addEventListener('mouseup', onEnd);
+    view.addEventListener('blur', onEnd);
     this._onTouched();
   }
 
   onTouchStart(event: TouchEvent): void {
     if (this._cvaDisabled()) return;
     event.preventDefault();
+    this._disposeDragSession();
     this._dragStartAngle = this._getAngle(event.touches[0].clientX, event.touches[0].clientY);
     this._dragStartValue = this._value();
+    const view = this._el.nativeElement.ownerDocument.defaultView;
+    if (!view) return;
     const onMove = (e: TouchEvent) =>
       this._applyCircularDrag(e.touches[0].clientX, e.touches[0].clientY);
-    const onEnd = () => {
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onEnd);
+    const onEnd = () => this._disposeDragSession();
+    this._dragSessionDisposer = () => {
+      view.removeEventListener('touchmove', onMove);
+      view.removeEventListener('touchend', onEnd);
+      view.removeEventListener('touchcancel', onEnd);
+      this._dragSessionDisposer = null;
     };
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onEnd);
+    view.addEventListener('touchmove', onMove, { passive: false });
+    view.addEventListener('touchend', onEnd);
+    view.addEventListener('touchcancel', onEnd);
     this._onTouched();
+  }
+
+  private _disposeDragSession(): void {
+    this._dragSessionDisposer?.();
   }
 
   onKeyDown(event: KeyboardEvent): void {
