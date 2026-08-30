@@ -1,1 +1,2 @@
-export * from './neu-popover.component';
+export { NeuPopoverDirective } from './neu-popover.component';
+export type { NeuPopoverPosition, NeuPopoverTrigger } from './neu-popover.component';

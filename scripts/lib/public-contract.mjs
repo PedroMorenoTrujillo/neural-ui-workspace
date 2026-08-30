@@ -357,19 +357,38 @@ function isPublicImperative(policy, declaration, member) {
   return policy.publicImperativeMembers?.[declaration]?.includes(member) ?? false;
 }
 
+function isPublicMember(policy, declaration, member) {
+  return policy.publicMembers?.[declaration]?.includes(member) ?? false;
+}
+
 function hasClosedImperativeSurface(policy, declaration) {
   return policy.closedImperativeDeclarations?.includes(declaration) ?? false;
+}
+
+function hasClosedMemberSurface(policy, declarationKind) {
+  return policy.closedMemberKinds?.includes(declarationKind) ?? false;
+}
+
+function isInternalDeclaration(policy, entrypoint, declaration) {
+  return (
+    policy.internalEntrypoints?.includes(entrypoint) ||
+    policy.internalDeclarations?.includes(`${entrypoint}#${declaration}`)
+  );
 }
 
 function classify({
   policy,
   entrypoint,
   declaration,
+  declarationKind,
   member,
   node,
   isBinding = false,
   structuralMember = false,
 }) {
+  if (isInternalDeclaration(policy, entrypoint, declaration)) {
+    return 'INTERNAL/UNSUPPORTED';
+  }
   const override = overrideFor(policy, entrypoint, declaration, member);
   if (override) return override;
   if (node && hasTag(node, 'deprecated')) return 'DEPRECATED';
@@ -383,7 +402,13 @@ function classify({
   if (policy.frameworkMembers?.includes(member) || member.startsWith('ng')) {
     return 'INTERNAL/UNSUPPORTED';
   }
-  if (isPublicImperative(policy, declaration, member)) return 'SUPPORTED';
+  if (
+    isPublicImperative(policy, declaration, member) ||
+    isPublicMember(policy, declaration, member)
+  ) {
+    return 'SUPPORTED';
+  }
+  if (hasClosedMemberSurface(policy, declarationKind)) return 'INTERNAL/UNSUPPORTED';
   if (
     node &&
     (ts.isMethodDeclaration(node) || ts.isMethodSignature(node)) &&
@@ -404,7 +429,15 @@ function aggregateDeclarations(declarations, sourceFile) {
   return declarations.map((node) => declarationHeader(node, sourceFile)).join('\n');
 }
 
-function membersForDeclaration({ entrypoint, exportedName, node, sourceFile, angular, policy }) {
+function membersForDeclaration({
+  entrypoint,
+  exportedName,
+  declarationKind,
+  node,
+  sourceFile,
+  angular,
+  policy,
+}) {
   const members = [];
   const bindingNames = new Set(angular?.bindings.map((binding) => binding.propertyName) ?? []);
 
@@ -413,6 +446,7 @@ function membersForDeclaration({ entrypoint, exportedName, node, sourceFile, ang
       policy,
       entrypoint,
       declaration: exportedName,
+      declarationKind,
       member: binding.propertyName,
       node: binding.member,
       isBinding: true,
@@ -467,6 +501,7 @@ function membersForDeclaration({ entrypoint, exportedName, node, sourceFile, ang
       policy,
       entrypoint,
       declaration: exportedName,
+      declarationKind,
       member: name,
       node: first,
       structuralMember,
@@ -538,6 +573,7 @@ export function generateContract({ distRoot, sourceRoot, policy }) {
         policy,
         entrypoint,
         declaration: exportedSymbol.exportedName,
+        declarationKind: kind,
         node,
       });
       const canonicalReplacement = replacementFor(policy, entrypoint, exportedSymbol.exportedName);
@@ -545,6 +581,7 @@ export function generateContract({ distRoot, sourceRoot, policy }) {
         ? membersForDeclaration({
             entrypoint,
             exportedName: exportedSymbol.exportedName,
+            declarationKind: kind,
             node,
             sourceFile: parsed.sourceFile,
             angular,
@@ -719,6 +756,17 @@ export function validatePolicy(policy, contract) {
       }
     }
   }
+  const entrypointNames = new Set(contract.entrypoints.map(({ entrypoint }) => entrypoint));
+  for (const entrypoint of policy.internalEntrypoints ?? []) {
+    if (!entrypointNames.has(entrypoint)) {
+      violations.push(`unused internal entrypoint classification: ${entrypoint}`);
+    }
+  }
+  for (const key of policy.internalDeclarations ?? []) {
+    if (!exactKeys.has(key)) {
+      violations.push(`unused internal declaration classification: ${key}`);
+    }
+  }
   const membersByDeclaration = new Map(
     contract.items.map((item) => [item.name, new Set(item.members.map((member) => member.name))]),
   );
@@ -731,6 +779,13 @@ export function validatePolicy(policy, contract) {
     for (const member of members) {
       if (!membersByDeclaration.get(declaration)?.has(member)) {
         violations.push(`unused imperative allowlist item: ${declaration}.${member}`);
+      }
+    }
+  }
+  for (const [declaration, members] of Object.entries(policy.publicMembers ?? {})) {
+    for (const member of members) {
+      if (!membersByDeclaration.get(declaration)?.has(member)) {
+        violations.push(`unused public member allowlist item: ${declaration}.${member}`);
       }
     }
   }

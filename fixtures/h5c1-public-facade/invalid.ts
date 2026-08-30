@@ -1,0 +1,82 @@
+import { NEU_COMPARE_INSTANCE } from '@neural-ui/core/compare';
+import { NeuContextMenuOverlayComponent } from '@neural-ui/core/context-menu';
+import { NEU_IV_DATA, NeuImageViewerOverlayComponent } from '@neural-ui/core/image-viewer';
+import {
+  ɵderiveNeuOptionResultCount,
+  ɵfindNeuOptionBoundaryRow,
+  ɵfindNeuOptionTypeaheadRow,
+  ɵInternalNeuConnectedOverlayFrameScheduler,
+  ɵInternalNeuConnectedOverlayGeometry,
+  ɵInternalNeuConnectedOverlayGeometryOptions,
+  ɵInternalNeuConnectedOverlayKeyIntent,
+  ɵInternalNeuConnectedOverlayPosition,
+  ɵInternalNeuConnectedOverlayRefreshReason,
+  ɵInternalNeuConnectedOverlaySessionConfig,
+  ɵInternalNeuOptionA11yOptions,
+  ɵInternalNeuOptionActiveRowConfig,
+  ɵInternalNeuOptionAnnouncementData,
+  ɵInternalNeuOptionAriaPosition,
+  ɵInternalNeuOptionScrollRequest,
+  ɵInternalNeuOptionTypeaheadConfig,
+  ɵInternalNeuOptionTypeaheadResult,
+  ɵInternalNeuOptionTypeaheadScheduler,
+  ɵInternalNeuOverlayRect,
+  ɵInternalNeuOverlayViewport,
+  ɵmoveNeuOptionActiveRow,
+  ɵpageNeuOptionActiveRow,
+  ɵreconcileNeuOptionActiveRow,
+} from '@neural-ui/core/option-api';
+import { NeuPopoverOverlayComponent } from '@neural-ui/core/popover';
+import { NEU_RADIO_GROUP } from '@neural-ui/core/radio';
+import {
+  escapeRichTextAttribute,
+  escapeRichTextHtml,
+  NEU_RICH_TEXT_ALLOWED_TAGS,
+  normalizeRichTextHtml,
+  plainTextToRichTextHtml,
+  sanitizeRichTextHtml,
+} from '@neural-ui/core/rich-text-editor';
+import { NEU_TABS_CONTEXT } from '@neural-ui/core/tabs';
+import { NeuTooltipOverlayComponent } from '@neural-ui/core/tooltip';
+import { NeuVirtualListRowComponent } from '@neural-ui/core/virtual-list';
+
+export const removedImplementationExports = [
+  NEU_COMPARE_INSTANCE,
+  NeuContextMenuOverlayComponent,
+  NEU_IV_DATA,
+  NeuImageViewerOverlayComponent,
+  ɵderiveNeuOptionResultCount,
+  ɵfindNeuOptionBoundaryRow,
+  ɵfindNeuOptionTypeaheadRow,
+  ɵInternalNeuConnectedOverlayFrameScheduler,
+  ɵInternalNeuConnectedOverlayGeometry,
+  ɵInternalNeuConnectedOverlayGeometryOptions,
+  ɵInternalNeuConnectedOverlayKeyIntent,
+  ɵInternalNeuConnectedOverlayPosition,
+  ɵInternalNeuConnectedOverlayRefreshReason,
+  ɵInternalNeuConnectedOverlaySessionConfig,
+  ɵInternalNeuOptionA11yOptions,
+  ɵInternalNeuOptionActiveRowConfig,
+  ɵInternalNeuOptionAnnouncementData,
+  ɵInternalNeuOptionAriaPosition,
+  ɵInternalNeuOptionScrollRequest,
+  ɵInternalNeuOptionTypeaheadConfig,
+  ɵInternalNeuOptionTypeaheadResult,
+  ɵInternalNeuOptionTypeaheadScheduler,
+  ɵInternalNeuOverlayRect,
+  ɵInternalNeuOverlayViewport,
+  ɵmoveNeuOptionActiveRow,
+  ɵpageNeuOptionActiveRow,
+  ɵreconcileNeuOptionActiveRow,
+  NeuPopoverOverlayComponent,
+  NEU_RADIO_GROUP,
+  NEU_RICH_TEXT_ALLOWED_TAGS,
+  escapeRichTextAttribute,
+  escapeRichTextHtml,
+  normalizeRichTextHtml,
+  plainTextToRichTextHtml,
+  sanitizeRichTextHtml,
+  NEU_TABS_CONTEXT,
+  NeuTooltipOverlayComponent,
+  NeuVirtualListRowComponent,
+];

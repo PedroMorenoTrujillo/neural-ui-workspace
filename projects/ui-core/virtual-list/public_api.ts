@@ -1,1 +1,1 @@
-export * from './neu-virtual-list.component';
+export { NeuVirtualListComponent } from './neu-virtual-list.component';

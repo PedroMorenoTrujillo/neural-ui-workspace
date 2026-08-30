@@ -1,23 +1,7 @@
 {
   "schemaVersion": 2,
-  "description": "Classification metadata for the declaration-derived Neural UI public contract. This file changes support status only; it does not alter runtime behavior.",
-  "overrides": {
-    "./compare#NEU_COMPARE_INSTANCE": "INTERNAL/UNSUPPORTED",
-    "./context-menu#NeuContextMenuOverlayComponent": "INTERNAL/UNSUPPORTED",
-    "./image-viewer#NEU_IV_DATA": "INTERNAL/UNSUPPORTED",
-    "./image-viewer#NeuImageViewerOverlayComponent": "INTERNAL/UNSUPPORTED",
-    "./popover#NeuPopoverOverlayComponent": "INTERNAL/UNSUPPORTED",
-    "./radio#NEU_RADIO_GROUP": "INTERNAL/UNSUPPORTED",
-    "./rich-text-editor#NEU_RICH_TEXT_ALLOWED_TAGS": "INTERNAL/UNSUPPORTED",
-    "./rich-text-editor#escapeRichTextAttribute": "INTERNAL/UNSUPPORTED",
-    "./rich-text-editor#escapeRichTextHtml": "INTERNAL/UNSUPPORTED",
-    "./rich-text-editor#normalizeRichTextHtml": "INTERNAL/UNSUPPORTED",
-    "./rich-text-editor#plainTextToRichTextHtml": "INTERNAL/UNSUPPORTED",
-    "./rich-text-editor#sanitizeRichTextHtml": "INTERNAL/UNSUPPORTED",
-    "./tabs#NEU_TABS_CONTEXT": "INTERNAL/UNSUPPORTED",
-    "./tooltip#NeuTooltipOverlayComponent": "INTERNAL/UNSUPPORTED",
-    "./tree-foundation#NeuTreeNavigationController": "INTERNAL/UNSUPPORTED"
-  },
+  "description": "Classification metadata for the declaration-derived Neural UI consumer contract. Supported members are intentional consumer API; declaration-visible Angular and package mechanics are internal/unsupported.",
+  "overrides": {},
   "compatibility": {
     "./table#NeuTableComponent.serverStateChange": "queryChange",
     "./table#NeuTableComponent.virtualScrollEvent": "virtualRangeChange (pending H5 semantic verification)",
@@ -30,14 +14,109 @@
     "writeValue",
     "ngTemplateContextGuard"
   ],
+  "closedMemberKinds": ["component", "directive", "service"],
+  "internalEntrypoints": ["./menu-foundation", "./tree-foundation"],
+  "internalDeclarations": [
+    "./focus-trap#NeuModalFocusDirective",
+    "./focus-trap#NeuModalInitialFocus",
+    "./foundation#NeuIdGenerator",
+    "./foundation#NeuInitialTemporalState",
+    "./foundation#NeuResponsiveState"
+  ],
   "closedImperativeDeclarations": [
     "NeuAutocompleteComponent",
+    "NeuContextMenuDirective",
+    "NeuImageViewerDirective",
     "NeuListboxComponent",
+    "NeuMenuComponent",
+    "NeuMultiselectComponent",
     "NeuOrganizationChartComponent",
+    "NeuPopoverDirective",
+    "NeuSelectComponent",
     "NeuSpeedDialComponent",
+    "NeuStepperComponent",
     "NeuTableComponent",
+    "NeuTooltipDirective",
+    "NeuTreeComponent",
     "NeuTreeTableComponent"
   ],
+  "publicMembers": {
+    "NeuButtonHarness": [
+      "click",
+      "focus",
+      "getText",
+      "hostSelector",
+      "isDisabled",
+      "isLoading",
+      "with"
+    ],
+    "NeuCheckboxHarness": ["getLabel", "hostSelector", "isChecked", "isDisabled", "toggle"],
+    "NeuCommandPaletteService": [
+      "close",
+      "execute",
+      "filteredCommands",
+      "isOpen",
+      "open",
+      "query",
+      "register",
+      "unregister"
+    ],
+    "NeuConfirmDialogService": ["confirm"],
+    "NeuConfirmPopupService": ["close", "confirm", "state"],
+    "NeuDateInputHarness": [
+      "close",
+      "getDisplayValue",
+      "hostSelector",
+      "isOpen",
+      "open",
+      "selectDay"
+    ],
+    "NeuDialogHarness": ["close", "getBodyText", "getTitle", "hostSelector", "isOpen"],
+    "NeuDialogService": ["open"],
+    "NeuInputHarness": [
+      "blur",
+      "focus",
+      "getError",
+      "getLabel",
+      "getValue",
+      "hostSelector",
+      "isDisabled",
+      "setValue"
+    ],
+    "NeuNotificationService": [
+      "clearAll",
+      "markAllRead",
+      "notifications",
+      "push",
+      "remove",
+      "unreadCount"
+    ],
+    "NeuSelectHarness": [
+      "close",
+      "getOptions",
+      "getValueText",
+      "hostSelector",
+      "isOpen",
+      "open",
+      "selectOption"
+    ],
+    "NeuSwitchHarness": ["getLabel", "hostSelector", "isChecked", "isDisabled", "toggle"],
+    "NeuTableFilterRegistry": ["has", "names", "register", "resolve", "revision", "unregister"],
+    "NeuTableHarness": ["getCellText", "getHeaderTexts", "getRowCount", "hostSelector"],
+    "NeuToastService": [
+      "clear",
+      "dismiss",
+      "error",
+      "info",
+      "position",
+      "setPosition",
+      "show",
+      "success",
+      "toasts",
+      "warning"
+    ],
+    "NeuUrlStateService": ["clearParams", "getParam", "params", "patchParams", "setParam"]
+  },
   "publicImperativeMembers": {
     "NeuAutocompleteComponent": [
       "clear",
@@ -49,13 +128,23 @@
       "selectOption"
     ],
     "NeuContextMenuDirective": ["close", "openAt"],
+    "NeuImageViewerDirective": ["close", "open"],
     "NeuListboxComponent": ["resetFilter", "setFilter", "toggleAll"],
     "NeuMenuComponent": ["activate"],
     "NeuMultiselectComponent": ["clear", "close", "focusTrigger", "open", "resetFilter", "toggle"],
     "NeuOrganizationChartComponent": ["activateNode", "toggleNode"],
     "NeuPopoverDirective": ["close", "open", "toggle"],
-    "NeuSelectComponent": ["clear", "close", "focus", "open", "resetFilter", "selectOption", "toggle"],
+    "NeuSelectComponent": [
+      "clear",
+      "close",
+      "focus",
+      "open",
+      "resetFilter",
+      "selectOption",
+      "toggle"
+    ],
     "NeuSpeedDialComponent": ["close", "open", "toggle"],
+    "NeuStepperComponent": ["goTo", "next", "prev"],
     "NeuTableComponent": [
       "applyLayout",
       "cancelCellEdit",

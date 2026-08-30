@@ -18,7 +18,12 @@ const policy = {
   overrides: {},
   compatibility: {},
   frameworkMembers: [],
+  closedMemberKinds: ['component', 'directive', 'service'],
   closedImperativeDeclarations: ['SyntheticCompoundComponent'],
+  publicMembers: {
+    SyntheticService: ['load'],
+    SyntheticServiceAlias: ['load'],
+  },
   publicImperativeMembers: {
     SyntheticCompoundComponent: ['publicMethod'],
   },
@@ -69,7 +74,7 @@ test('public properties and methods are classified independently from deprecated
   const contract = fixtureContract();
   const component = contract.items.find((item) => item.name === 'SyntheticCompoundComponent');
   const byName = Object.fromEntries(component.members.map((member) => [member.name, member]));
-  assert.equal(byName.publicProperty.status, 'REVIEW');
+  assert.equal(byName.publicProperty.status, 'INTERNAL/UNSUPPORTED');
   assert.equal(byName.publicMethod.status, 'SUPPORTED');
   assert.equal(byName.templateMechanic.status, 'INTERNAL/UNSUPPORTED');
   assert.equal(byName.legacyMethod.status, 'DEPRECATED');
@@ -81,6 +86,10 @@ test('public properties and methods are classified independently from deprecated
   assert.equal(
     contract.items.find((item) => item.name === 'INTERNAL_SYNTHETIC_TOKEN').status,
     'INTERNAL/UNSUPPORTED',
+  );
+  assert.equal(
+    contract.items.find((item) => item.name === 'SyntheticService').members[0].status,
+    'SUPPORTED',
   );
 });
 

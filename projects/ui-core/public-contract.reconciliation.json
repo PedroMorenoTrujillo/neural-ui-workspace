@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1381,
-    "bindingDelta": 214,
-    "mapped": 937,
+    "declarationBindings": 1374,
+    "bindingDelta": 207,
+    "mapped": 932,
     "aliasCorrections": 4,
-    "missingOldEntries": 224,
-    "newlyDiscovered": 438,
+    "missingOldEntries": 229,
+    "newlyDiscovered": 436,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 340,
+      "declaration-or-selector-was-not-recorded": 339,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 89
+      "multiline-annotated-or-compound-declaration-was-missed": 88
     }
   },
   "mappings": [
@@ -3405,14 +3405,6 @@
       "newId": "./toolbar#NeuToolbarComponent.input:wrap"
     },
     {
-      "oldToken": "tooltip/neu-tooltip.component.ts#input:text",
-      "newId": "./tooltip#NeuTooltipOverlayComponent.input:text"
-    },
-    {
-      "oldToken": "tooltip/neu-tooltip.component.ts#input:tooltipId",
-      "newId": "./tooltip#NeuTooltipOverlayComponent.input:tooltipId"
-    },
-    {
       "oldToken": "tooltip/neu-tooltip.directive.ts#input:neuTooltip",
       "newId": "./tooltip#NeuTooltipDirective.input:neuTooltip"
     },
@@ -3745,24 +3737,12 @@
       "newId": "./virtual-list#NeuVirtualListComponent.input:emptyLabel"
     },
     {
-      "oldToken": "virtual-list/neu-virtual-list.component.ts#input:index",
-      "newId": "./virtual-list#NeuVirtualListRowComponent.input:index"
-    },
-    {
-      "oldToken": "virtual-list/neu-virtual-list.component.ts#input:item",
-      "newId": "./virtual-list#NeuVirtualListRowComponent.input:item"
-    },
-    {
       "oldToken": "virtual-list/neu-virtual-list.component.ts#input:items",
       "newId": "./virtual-list#NeuVirtualListComponent.input:items"
     },
     {
       "oldToken": "virtual-list/neu-virtual-list.component.ts#input:itemSize",
-      "newId": "./virtual-list#NeuVirtualListRowComponent.input:itemSize"
-    },
-    {
-      "oldToken": "virtual-list/neu-virtual-list.component.ts#input:label",
-      "newId": "./virtual-list#NeuVirtualListRowComponent.input:label"
+      "newId": "./virtual-list#NeuVirtualListComponent.input:itemSize"
     },
     {
       "oldToken": "virtual-list/neu-virtual-list.component.ts#input:trackBy",
@@ -3945,6 +3925,8 @@
     "table/neu-table.component.ts#input:virtualScrollResizeDelay",
     "table/neu-table.component.ts#input:virtualScrollStep",
     "table/neu-table.component.ts#input:virtualScrollVisibleItems",
+    "tooltip/neu-tooltip.component.ts#input:text",
+    "tooltip/neu-tooltip.component.ts#input:tooltipId",
     "tree-table/neu-tree-table.component.ts#input:allFilterOptionLabel",
     "tree-table/neu-tree-table.component.ts#input:cancelInlineEditLabel",
     "tree-table/neu-tree-table.component.ts#input:clearFilterLabel",
@@ -3997,7 +3979,10 @@
     "tree-table/neu-tree-table.component.ts#input:useUrlState",
     "tree-table/neu-tree-table.component.ts#input:virtualScrollVisibleItems",
     "tree-table/neu-tree-table.component.ts#output:expansionChange",
-    "tree-table/neu-tree-table.component.ts#output:serverStateChange"
+    "tree-table/neu-tree-table.component.ts#output:serverStateChange",
+    "virtual-list/neu-virtual-list.component.ts#input:index",
+    "virtual-list/neu-virtual-list.component.ts#input:item",
+    "virtual-list/neu-virtual-list.component.ts#input:label"
   ],
   "newlyDiscovered": [
     {
@@ -5741,16 +5726,8 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./virtual-list#NeuVirtualListComponent.input:itemSize",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
       "id": "./virtual-list#NeuVirtualListComponent.output:itemClick",
       "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./virtual-list#NeuVirtualListRowComponent.input:template",
-      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     }
   ],
   "ambiguities": [
