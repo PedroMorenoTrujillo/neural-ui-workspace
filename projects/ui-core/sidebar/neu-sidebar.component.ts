@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ViewEncapsulation,
   computed,
   effect,
@@ -128,10 +129,12 @@ function unlockDocumentScroll(document: Document): void {
 })
 export class NeuSidebarComponent {
   private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
   private readonly urlState = inject(NeuUrlStateService);
   private readonly openParam = computed(() => this.urlState.getParam(this.urlParam()));
   private previousActiveElement: HTMLElement | null = null;
+  private pendingFocusTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** Posición del sidebar: izquierda o derecha de la pantalla / Sidebar position: left or right of the screen */
   side = input<'left' | 'right'>('left');
@@ -198,28 +201,36 @@ export class NeuSidebarComponent {
     effect(() => {
       const isOpenNow = this.isOpen();
       const isPersistent = this.persistent();
+      const shouldRestoreFocus = this.restoreFocus();
+
+      this.cancelPendingFocus();
 
       if (isPersistent) {
+        this.previousActiveElement = null;
         return;
       }
 
       if (isOpenNow) {
-        // Save the current active element
-        this.previousActiveElement = this.document.activeElement as HTMLElement;
+        // Preserve the original trigger when a close is immediately superseded by a reopen.
+        this.previousActiveElement ??= this.document.activeElement as HTMLElement;
 
         // Move focus to first focusable element inside the sidebar
         this.focusFirstElement();
-      } else if (
-        this.restoreFocus() &&
-        this.previousActiveElement &&
-        this.previousActiveElement.focus
-      ) {
+      } else if (shouldRestoreFocus && this.previousActiveElement) {
         // Restore focus to the element that had it before opening
-        setTimeout(() => {
-          this.previousActiveElement?.focus();
+        const target = this.previousActiveElement;
+        this.scheduleFocus(() => {
           this.previousActiveElement = null;
-        }, 0);
+          if (this.isValidFocusTarget(target)) target.focus();
+        });
+      } else {
+        this.previousActiveElement = null;
       }
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.cancelPendingFocus();
+      this.previousActiveElement = null;
     });
   }
 
@@ -242,9 +253,31 @@ export class NeuSidebarComponent {
 
   /** Mueve el foco al primer elemento focusable / Moves focus to first focusable element */
   private focusFirstElement(): void {
-    setTimeout(() => {
+    this.scheduleFocus(() => {
       this.focusTrapRef()?.focusFirst();
+    });
+  }
+
+  private scheduleFocus(callback: () => void): void {
+    this.cancelPendingFocus();
+    this.pendingFocusTimer = setTimeout(() => {
+      this.pendingFocusTimer = null;
+      if (!this.destroyRef.destroyed) callback();
     }, 0);
+  }
+
+  private cancelPendingFocus(): void {
+    if (this.pendingFocusTimer === null) return;
+    clearTimeout(this.pendingFocusTimer);
+    this.pendingFocusTimer = null;
+  }
+
+  private isValidFocusTarget(target: HTMLElement): boolean {
+    return (
+      target.isConnected &&
+      target.ownerDocument === this.document &&
+      this.document.documentElement.contains(target)
+    );
   }
 
   /** Focus trap: cicla entre elementos focusables con Tab/Shift+Tab / Focus trap cycling */

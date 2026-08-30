@@ -86,6 +86,10 @@ describe('NeuSidebarComponent', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
+    document
+      .querySelectorAll('[data-sidebar-focus-trigger]')
+      .forEach((element) => element.remove());
     document.documentElement.style.overflow = originalHtmlOverflow;
     document.body.style.overflow = originalBodyOverflow;
   });
@@ -420,6 +424,162 @@ describe('NeuSidebarComponent', () => {
   });
 
   // ── Focus management ──────────────────────────────────────────────────────
+
+  function createFocusTrigger(): HTMLButtonElement {
+    const trigger = document.createElement('button');
+    trigger.dataset['sidebarFocusTrigger'] = '';
+    document.body.append(trigger);
+    trigger.focus();
+    return trigger;
+  }
+
+  it('restores focus once after a normal close', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    _menuParam.set('open');
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    _menuParam.set(null);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    expect(document.activeElement).toBe(trigger);
+    expect(focus).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance).toBeTruthy();
+  });
+
+  it('does not restore focus after destruction', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    _menuParam.set('open');
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.detectChanges();
+    const sidebar = f.debugElement.children[0].componentInstance as NeuSidebarComponent;
+    vi.runOnlyPendingTimers();
+
+    _menuParam.set(null);
+    f.detectChanges();
+    f.destroy();
+    vi.runAllTimers();
+
+    expect(focus).not.toHaveBeenCalled();
+    expect(sidebar['pendingFocusTimer']).toBeNull();
+    expect(sidebar['previousActiveElement']).toBeNull();
+  });
+
+  it('rejects a restoration target detached before the callback', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    _menuParam.set('open');
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    _menuParam.set(null);
+    f.detectChanges();
+    trigger.remove();
+    vi.runOnlyPendingTimers();
+
+    expect(trigger.isConnected).toBe(false);
+    expect(focus).not.toHaveBeenCalled();
+    expect(f.debugElement.children[0].componentInstance['pendingFocusTimer']).toBeNull();
+    expect(f.debugElement.children[0].componentInstance['previousActiveElement']).toBeNull();
+  });
+
+  it('replaces pending focus work across close-reopen-close', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    _menuParam.set('open');
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    _menuParam.set(null);
+    f.detectChanges();
+    _menuParam.set('open');
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+    expect(focus).not.toHaveBeenCalled();
+
+    _menuParam.set(null);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+    vi.runAllTimers();
+
+    expect(document.activeElement).toBe(trigger);
+    expect(focus).toHaveBeenCalledTimes(1);
+    expect(f.debugElement.children[0].componentInstance['pendingFocusTimer']).toBeNull();
+  });
+
+  it('is safe to destroy after focus restoration completed', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    _menuParam.set('open');
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    _menuParam.set(null);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+    f.destroy();
+    vi.runAllTimers();
+
+    expect(focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('survives 100 destroy-before-restore cycles without focusing the trigger', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+
+    for (let cycle = 0; cycle < 100; cycle += 1) {
+      trigger.focus();
+      focus.mockClear();
+      _menuParam.set('open');
+      const f = TestBed.createComponent(FocusHostComponent);
+      f.detectChanges();
+      vi.runOnlyPendingTimers();
+      _menuParam.set(null);
+      f.detectChanges();
+      f.destroy();
+      vi.runAllTimers();
+      expect(focus).not.toHaveBeenCalled();
+    }
+  });
+
+  it('restores valid focus exactly once in each of 100 normal close cycles', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+
+    for (let cycle = 0; cycle < 100; cycle += 1) {
+      trigger.focus();
+      focus.mockClear();
+      _menuParam.set('open');
+      const f = TestBed.createComponent(FocusHostComponent);
+      f.detectChanges();
+      vi.runOnlyPendingTimers();
+      _menuParam.set(null);
+      f.detectChanges();
+      vi.runOnlyPendingTimers();
+      vi.runAllTimers();
+      expect(focus).toHaveBeenCalledTimes(1);
+      f.destroy();
+    }
+  });
 
   it('collapsedChange should emit when collapsed input changes', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);

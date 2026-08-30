@@ -182,6 +182,7 @@ describe('NeuNotificationCenterComponent', () => {
     vi.useFakeTimers();
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
 
     svc.push({ message: 'Unread', duration: 0 });
     expect(svc.notifications()[0].read).toBe(false);
@@ -190,7 +191,121 @@ describe('NeuNotificationCenterComponent', () => {
     vi.advanceTimersByTime(500);
 
     expect(svc.notifications()[0].read).toBe(true);
-    vi.useRealTimers();
+    expect(markAllRead).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('cancels the delayed mutation when destroyed before 500ms', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+    svc.push({ message: 'Unread', duration: 0 });
+
+    f.componentInstance['_toggle']();
+    f.destroy();
+    vi.advanceTimersByTime(1000);
+
+    expect(svc.unreadCount()).toBe(1);
+    expect(markAllRead).not.toHaveBeenCalled();
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('cancels the current open-session mutation when closed before 500ms', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+    svc.push({ message: 'Unread', duration: 0 });
+
+    f.componentInstance['_toggle']();
+    f.componentInstance['_toggle']();
+    vi.advanceTimersByTime(1000);
+
+    expect(f.componentInstance['_isOpen']()).toBe(false);
+    expect(svc.unreadCount()).toBe(1);
+    expect(markAllRead).not.toHaveBeenCalled();
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('replaces superseded open-session work across open-close-open', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+    svc.push({ message: 'Unread', duration: 0 });
+
+    f.componentInstance['_toggle']();
+    vi.advanceTimersByTime(250);
+    f.componentInstance['_toggle']();
+    f.componentInstance['_toggle']();
+    vi.advanceTimersByTime(250);
+
+    expect(svc.unreadCount()).toBe(1);
+    expect(markAllRead).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(250);
+    vi.advanceTimersByTime(1000);
+
+    expect(svc.unreadCount()).toBe(0);
+    expect(markAllRead).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('is safe to destroy after the delayed mutation already completed', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+    svc.push({ message: 'Unread', duration: 0 });
+
+    f.componentInstance['_toggle']();
+    vi.advanceTimersByTime(500);
+    f.destroy();
+    vi.advanceTimersByTime(1000);
+
+    expect(svc.unreadCount()).toBe(0);
+    expect(markAllRead).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('survives 100 destroy-before-delay cycles without a service mutation', async () => {
+    vi.useFakeTimers();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+
+    for (let cycle = 0; cycle < 100; cycle += 1) {
+      svc.push({ message: `Unread ${cycle}`, duration: 0 });
+      const f = setup();
+      f.componentInstance['_toggle']();
+      f.detectChanges();
+      f.destroy();
+      vi.advanceTimersByTime(501);
+      expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+      await Promise.resolve();
+    }
+
+    expect(svc.unreadCount()).toBe(100);
+    expect(markAllRead).not.toHaveBeenCalled();
+  });
+
+  it('runs exactly one delayed mutation for each of 100 surviving opens', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+
+    for (let cycle = 0; cycle < 100; cycle += 1) {
+      svc.push({ message: `Unread ${cycle}`, duration: 0 });
+      f.componentInstance['_toggle']();
+      vi.advanceTimersByTime(500);
+      expect(svc.unreadCount()).toBe(0);
+      f.componentInstance['_toggle']();
+    }
+
+    vi.advanceTimersByTime(1000);
+    expect(markAllRead).toHaveBeenCalledTimes(100);
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
   });
 
   it('_relativeTime should return "Ahora" for recent dates', () => {
@@ -290,8 +405,8 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
-    const readAllBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find(
-      (b: any) => b.textContent.includes('Leer'),
+    const readAllBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find((b: any) =>
+      b.textContent.includes('Leer'),
     ) as HTMLButtonElement;
     expect(readAllBtn).toBeTruthy();
     readAllBtn.click();
@@ -307,8 +422,8 @@ describe('NeuNotificationCenterComponent', () => {
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
-    const clearBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find(
-      (b: any) => b.textContent.includes('Limpiar'),
+    const clearBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find((b: any) =>
+      b.textContent.includes('Limpiar'),
     ) as HTMLButtonElement;
     expect(clearBtn).toBeTruthy();
     clearBtn.click();

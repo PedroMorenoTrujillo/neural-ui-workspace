@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Injectable,
-  OnDestroy,
   ViewEncapsulation,
   computed,
   inject,
@@ -155,8 +155,8 @@ export class NeuNotificationService {
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-      (backdropClick)="_isOpen.set(false)"
-      (detach)="_isOpen.set(false)"
+      (backdropClick)="_toggle()"
+      (detach)="_isOpen() && _toggle()"
     >
       <div
         class="neu-nc__panel"
@@ -222,6 +222,8 @@ export class NeuNotificationCenterComponent {
   protected readonly _svc = inject(NeuNotificationService);
   private readonly overlay = inject(Overlay);
   private readonly temporal = inject(NeuInitialTemporalState);
+  private readonly destroyRef = inject(DestroyRef);
+  private pendingMarkReadTimer: ReturnType<typeof setTimeout> | null = null;
   protected readonly _isOpen = signal(false);
   protected readonly _panelId = inject(NeuIdGenerator).getId('neu-nc-panel-');
   protected readonly _viewportMargin = 16;
@@ -250,13 +252,32 @@ export class NeuNotificationCenterComponent {
   ];
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
+  constructor() {
+    this.destroyRef.onDestroy(() => this.cancelPendingMarkRead());
+  }
+
   protected _toggle(): void {
     const opening = !this._isOpen();
     this._isOpen.set(opening);
     if (opening) {
-      // Mark all as read when panel opens
-      setTimeout(() => this._svc.markAllRead(), 500);
+      this.scheduleMarkAllRead();
+    } else {
+      this.cancelPendingMarkRead();
     }
+  }
+
+  private scheduleMarkAllRead(): void {
+    this.cancelPendingMarkRead();
+    this.pendingMarkReadTimer = setTimeout(() => {
+      this.pendingMarkReadTimer = null;
+      if (!this.destroyRef.destroyed) this._svc.markAllRead();
+    }, 500);
+  }
+
+  private cancelPendingMarkRead(): void {
+    if (this.pendingMarkReadTimer === null) return;
+    clearTimeout(this.pendingMarkReadTimer);
+    this.pendingMarkReadTimer = null;
   }
 
   protected _relativeTime(date: Date): string {
