@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { replaceGlobalProperty } from '../testing/global-property-test.util';
 import { NeuScrollTopComponent, NeuScrollTopIconDirective } from './neu-scroll-top.component';
 
 @Component({ imports: [NeuScrollTopComponent], template: '<div><neu-scroll-top [target]="target" [threshold]="threshold" /></div>' })
@@ -55,6 +56,7 @@ describe('NeuScrollTopComponent', () => {
   });
 
   it('honors reduced-motion preferences when scrolling', async () => {
+    const initialMatchMediaDescriptor = Object.getOwnPropertyDescriptor(window, 'matchMedia');
     const local = TestBed.createComponent(HostComponent);
     local.componentInstance.target = 'parent';
     local.detectChanges();
@@ -64,12 +66,23 @@ describe('NeuScrollTopComponent', () => {
     Object.defineProperty(parent, 'scrollTo', { configurable: true, value: scrollTo });
     Object.defineProperty(parent, 'scrollTop', { configurable: true, value: 101 });
     const media = vi.fn(() => ({ matches: true }));
-    Object.defineProperty(window, 'matchMedia', { configurable: true, value: media });
-    parent.dispatchEvent(new Event('scroll'));
-    local.detectChanges();
+    const restoreMatchMedia = replaceGlobalProperty(
+      window,
+      'matchMedia',
+      media as unknown as typeof window.matchMedia,
+    );
+    try {
+      parent.dispatchEvent(new Event('scroll'));
+      local.detectChanges();
 
-    (local.nativeElement.querySelector('button') as HTMLButtonElement).click();
-    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'auto' });
+      (local.nativeElement.querySelector('button') as HTMLButtonElement).click();
+      expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'auto' });
+    } finally {
+      restoreMatchMedia();
+      expect(Object.getOwnPropertyDescriptor(window, 'matchMedia')).toEqual(
+        initialMatchMediaDescriptor,
+      );
+    }
   });
 
   it('supports a projected icon template without changing its native button label', () => {

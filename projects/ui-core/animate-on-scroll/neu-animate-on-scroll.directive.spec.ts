@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { replaceGlobalProperty } from '../testing/global-property-test.util';
 import { NeuAnimateOnScrollDirective } from './neu-animate-on-scroll.directive';
 
 class IntersectionObserverMock {
@@ -30,23 +31,43 @@ class AnimateHost {
 
 describe('NeuAnimateOnScrollDirective', () => {
   let fixture: ComponentFixture<AnimateHost>;
-  let originalObserver: typeof IntersectionObserver | undefined;
-  let originalMatchMedia: typeof window.matchMedia;
+  let restoreObserver: () => void;
+  let restoreMatchMedia: () => void;
+  let initialMatchMediaDescriptor: PropertyDescriptor | undefined;
+
+  function setMatchMedia(matches: boolean): void {
+    restoreMatchMedia?.();
+    restoreMatchMedia = replaceGlobalProperty(
+      window,
+      'matchMedia',
+      vi.fn().mockReturnValue({
+        matches,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }),
+    );
+  }
 
   beforeEach(async () => {
-    originalObserver = globalThis.IntersectionObserver;
-    originalMatchMedia = window.matchMedia;
+    initialMatchMediaDescriptor = Object.getOwnPropertyDescriptor(window, 'matchMedia');
     IntersectionObserverMock.instances = [];
-    globalThis.IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver;
-    window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+    restoreObserver = replaceGlobalProperty(
+      globalThis,
+      'IntersectionObserver',
+      IntersectionObserverMock as unknown as typeof IntersectionObserver,
+    );
+    setMatchMedia(false);
     await TestBed.configureTestingModule({ imports: [AnimateHost] }).compileComponents();
     fixture = TestBed.createComponent(AnimateHost);
     fixture.detectChanges();
   });
 
   afterEach(() => {
-    globalThis.IntersectionObserver = originalObserver as typeof IntersectionObserver;
-    window.matchMedia = originalMatchMedia;
+    restoreObserver();
+    restoreMatchMedia();
+    expect(Object.getOwnPropertyDescriptor(window, 'matchMedia')).toEqual(
+      initialMatchMediaDescriptor,
+    );
   });
 
   it('observes the host using configured thresholds and applies enter/leave classes', () => {
@@ -79,7 +100,7 @@ describe('NeuAnimateOnScrollDirective', () => {
   it('keeps content visible and avoids observers when reduced motion is requested', () => {
     fixture.destroy();
     IntersectionObserverMock.instances = [];
-    window.matchMedia = vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+    setMatchMedia(true);
     fixture = TestBed.createComponent(AnimateHost);
     fixture.detectChanges();
     expect(IntersectionObserverMock.instances).toHaveLength(0);
@@ -88,7 +109,12 @@ describe('NeuAnimateOnScrollDirective', () => {
 
   it('falls back to the enter state when IntersectionObserver is unavailable', () => {
     fixture.destroy();
-    globalThis.IntersectionObserver = undefined as unknown as typeof IntersectionObserver;
+    restoreObserver();
+    restoreObserver = replaceGlobalProperty(
+      globalThis,
+      'IntersectionObserver',
+      undefined as unknown as typeof IntersectionObserver,
+    );
     fixture = TestBed.createComponent(AnimateHost);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('section').classList).toContain('enter-animation');

@@ -1,4 +1,4 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
@@ -22,6 +22,34 @@ const ROWS: StateRow[] = [
   { id: 2, name: 'Beta' },
   { id: 3, name: 'Gamma' },
 ];
+
+@Component({
+  imports: [NeuTableComponent],
+  template: `
+    <neu-table
+      [columns]="columns"
+      [data]="rows"
+      expandMode="multiple"
+      [expandedRowKeys]="expandedKeys()"
+      (expandedRowKeysChange)="expandedKeys.set($event)"
+      stateKey="controlled-expansion-host"
+      stateStorage="local"
+      [urlStateOptions]="urlStateOptions"
+    />
+    <output>{{ expandedKeys().join(',') }}</output>
+  `,
+})
+class ControlledExpansionHostComponent {
+  readonly columns = COLUMNS;
+  readonly rows = ROWS;
+  readonly expandedKeys = signal<readonly unknown[]>([]);
+  readonly urlStateOptions = {
+    searchParam: 'oq',
+    sortParam: 'osort',
+    sortDirectionParam: 'odir',
+    pageParam: 'opage',
+  };
+}
 
 const ROLE_ADMIN = { id: 'admin', label: 'Admin' };
 const ROLE_VIEWER = { id: 'viewer', label: 'Viewer' };
@@ -814,6 +842,21 @@ describe('NeuTable canonical state integration', () => {
     await fixture.whenStable();
     fixture.componentInstance.collapseRow(ROWS[0]);
     expect(changes[1]).toEqual(['off-page']);
+  });
+
+  it('commits a controlled expansion echoed synchronously by a template owner', async () => {
+    const fixture = TestBed.createComponent(ControlledExpansionHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const expand = fixture.nativeElement.querySelector(
+      '.neu-table__expand-btn',
+    ) as HTMLButtonElement;
+    expand.click();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('output').textContent).toBe('1');
+    expect(expand.getAttribute('aria-expanded')).toBe('true');
   });
 
   it('restores every persisted family before one initial server query', async () => {

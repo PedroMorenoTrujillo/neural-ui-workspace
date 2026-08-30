@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
+import { replaceGlobalProperty } from '../testing/global-property-test.util';
 import {
   NEURAL_LOCALE,
   NEURAL_NOW,
@@ -111,56 +112,59 @@ describe('Neural hydration foundation', () => {
       removeEventListener,
     } as unknown as MediaQueryList;
     const matchMedia = vi.fn().mockReturnValue(media);
-    const originalMatchMedia = window.matchMedia;
-    Object.defineProperty(window, 'matchMedia', { configurable: true, value: matchMedia });
-    await TestBed.configureTestingModule({
-      imports: [ResponsiveHost],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(ResponsiveHost);
+    const initialMatchMediaDescriptor = Object.getOwnPropertyDescriptor(window, 'matchMedia');
+    const restoreMatchMedia = replaceGlobalProperty(window, 'matchMedia', matchMedia);
+    try {
+      await TestBed.configureTestingModule({
+        imports: [ResponsiveHost],
+      }).compileComponents();
+      const fixture = TestBed.createComponent(ResponsiveHost);
 
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(fixture.componentInstance.first()).toBe(true);
-    expect(fixture.componentInstance.second()).toBe(true);
-    expect(matchMedia).toHaveBeenCalledTimes(1);
-    expect(addEventListener).toHaveBeenCalledTimes(1);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(fixture.componentInstance.first()).toBe(true);
+      expect(fixture.componentInstance.second()).toBe(true);
+      expect(matchMedia).toHaveBeenCalledTimes(1);
+      expect(addEventListener).toHaveBeenCalledTimes(1);
 
-    listener?.({ matches: false } as MediaQueryListEvent);
-    expect(fixture.componentInstance.first()).toBe(false);
-    expect(fixture.componentInstance.second()).toBe(false);
+      listener?.({ matches: false } as MediaQueryListEvent);
+      expect(fixture.componentInstance.first()).toBe(false);
+      expect(fixture.componentInstance.second()).toBe(false);
 
-    fixture.destroy();
-    expect(removeEventListener).toHaveBeenCalledTimes(1);
-    Object.defineProperty(window, 'matchMedia', {
-      configurable: true,
-      value: originalMatchMedia,
-    });
+      fixture.destroy();
+      expect(removeEventListener).toHaveBeenCalledTimes(1);
+    } finally {
+      restoreMatchMedia();
+      expect(Object.getOwnPropertyDescriptor(window, 'matchMedia')).toEqual(
+        initialMatchMediaDescriptor,
+      );
+    }
   });
 
   it('supports legacy media-query listeners', async () => {
     const addListener = vi.fn();
     const removeListener = vi.fn();
     const media = { matches: false, addListener, removeListener } as unknown as MediaQueryList;
-    const originalMatchMedia = window.matchMedia;
-    Object.defineProperty(window, 'matchMedia', {
-      configurable: true,
-      value: () => media,
-    });
-    await TestBed.configureTestingModule({
-      imports: [ResponsiveHost],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(ResponsiveHost);
+    const initialMatchMediaDescriptor = Object.getOwnPropertyDescriptor(window, 'matchMedia');
+    const restoreMatchMedia = replaceGlobalProperty(window, 'matchMedia', () => media);
+    try {
+      await TestBed.configureTestingModule({
+        imports: [ResponsiveHost],
+      }).compileComponents();
+      const fixture = TestBed.createComponent(ResponsiveHost);
 
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(fixture.componentInstance.first()).toBe(false);
-    expect(addListener).toHaveBeenCalledTimes(1);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(fixture.componentInstance.first()).toBe(false);
+      expect(addListener).toHaveBeenCalledTimes(1);
 
-    fixture.destroy();
-    expect(removeListener).toHaveBeenCalledTimes(1);
-    Object.defineProperty(window, 'matchMedia', {
-      configurable: true,
-      value: originalMatchMedia,
-    });
+      fixture.destroy();
+      expect(removeListener).toHaveBeenCalledTimes(1);
+    } finally {
+      restoreMatchMedia();
+      expect(Object.getOwnPropertyDescriptor(window, 'matchMedia')).toEqual(
+        initialMatchMediaDescriptor,
+      );
+    }
   });
 });
