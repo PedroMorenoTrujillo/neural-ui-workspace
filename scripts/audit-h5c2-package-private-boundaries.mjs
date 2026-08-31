@@ -232,10 +232,10 @@ if (process.argv.includes('--update-ledger')) {
 }
 const errors = [];
 const expectedActions = {
-  PRIVATE_CLASS_MEMBER: 67,
-  PROTECTED_TEMPLATE_VISIBLE_MEMBER: 252,
+  PRIVATE_CLASS_MEMBER: 73,
+  PROTECTED_TEMPLATE_VISIBLE_MEMBER: 245,
   KEEP_PHYSICALLY_PUBLISHED_DEPENDENCY: 3,
-  TYPE_ONLY_INTERNALIZATION: 8,
+  TYPE_ONLY_INTERNALIZATION: 9,
 };
 if (h5c2Targets.length !== 330) errors.push(`expected 330 targets, found ${h5c2Targets.length}`);
 for (const [action, expected] of Object.entries(expectedActions)) {

@@ -87,6 +87,7 @@ describe('NeuTable canonical state integration', () => {
     window.localStorage.clear();
     window.sessionStorage.clear();
     await TestBed.configureTestingModule({
+      imports: [NeuTableComponent],
       providers: [
         provideRouter([]),
         provideZonelessChangeDetection(),

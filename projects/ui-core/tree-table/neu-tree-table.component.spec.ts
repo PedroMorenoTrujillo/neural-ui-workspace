@@ -1,4 +1,4 @@
-import { Component, TemplateRef } from '@angular/core';
+import { Component, provideZonelessChangeDetection, TemplateRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   NeuTableCaptionDirective,
@@ -679,6 +679,231 @@ describe('NeuTreeTableComponent', () => {
       'root',
       'matching-child',
     ]);
+  });
+
+  it('keeps projections fresh across no-filter, filter edits, clear, and input replacement', () => {
+    const original: NeuTreeTableNode[] = [
+      {
+        id: 'root',
+        label: 'Root',
+        children: [
+          { id: 'alpha', label: 'Alpha' },
+          { id: 'beta', label: 'Beta' },
+        ],
+      },
+      { id: 'other', label: 'Other' },
+    ];
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', original);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('pagination', false);
+    fixture.componentRef.setInput('expandedKeys', ['root']);
+    fixture.componentRef.setInput('query', query());
+    fixture.detectChanges();
+
+    const ids = () => fixture.componentInstance.flatRows().map((row) => row['id']);
+    const initialRows = fixture.componentInstance.flatRows();
+    expect(ids()).toEqual(['root', 'alpha', 'beta', 'other']);
+
+    fixture.componentRef.setInput('query', query('alpha'));
+    fixture.detectChanges();
+    expect(ids()).toEqual(['root', 'alpha']);
+
+    fixture.componentRef.setInput('query', query('beta'));
+    fixture.detectChanges();
+    expect(ids()).toEqual(['root', 'beta']);
+
+    fixture.componentRef.setInput('query', query());
+    fixture.detectChanges();
+    expect(ids()).toEqual(['root', 'alpha', 'beta', 'other']);
+    expect(fixture.componentInstance.flatRows()[0]).not.toBe(initialRows[0]);
+
+    fixture.componentRef.setInput('query', query());
+    fixture.detectChanges();
+    expect(ids()).toEqual(['root', 'alpha', 'beta', 'other']);
+
+    const replacement: NeuTreeTableNode[] = [
+      { id: 'replacement', label: 'Replacement', children: [{ id: 'fresh', label: 'Fresh' }] },
+    ];
+    fixture.componentRef.setInput('nodes', replacement);
+    fixture.componentRef.setInput('expandedKeys', ['replacement']);
+    fixture.detectChanges();
+    expect(ids()).toEqual(['replacement', 'fresh']);
+    expect((fixture.componentInstance.flatRows()[0] as any).__treeNode).toBe(replacement[0]);
+    expect(original[0].children?.map((node) => node.id)).toEqual(['alpha', 'beta']);
+  });
+
+  it('keeps filter, sort, clear, re-sort, re-filter, and selection projections coherent', () => {
+    const nodes: NeuTreeTableNode[] = [
+      {
+        id: 'group-b',
+        label: 'Group B',
+        children: [
+          { id: 'beta', label: 'Match beta' },
+          { id: 'alpha', label: 'Match alpha' },
+        ],
+      },
+      {
+        id: 'group-a',
+        label: 'Group A',
+        children: [{ id: 'gamma', label: 'Other gamma' }],
+      },
+    ];
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', nodes);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('pagination', false);
+    fixture.componentRef.setInput('expandedKeys', ['group-a', 'group-b']);
+    fixture.componentRef.setInput('selectionMode', 'single');
+    fixture.componentRef.setInput('selection', nodes[0].children?.[0] ?? null);
+    fixture.componentRef.setInput('query', query('match'));
+    fixture.detectChanges();
+
+    const ids = () => fixture.componentInstance.flatRows().map((row) => row['id']);
+    expect(ids()).toEqual(['group-b', 'beta', 'alpha']);
+    expect((fixture.componentInstance.selectedRows()[0] as any).__treeNode).toBe(
+      nodes[0].children?.[0],
+    );
+
+    fixture.componentRef.setInput('sort', [{ key: 'label', dir: 'asc' }]);
+    fixture.detectChanges();
+    expect(ids()).toEqual(['group-b', 'alpha', 'beta']);
+
+    fixture.componentRef.setInput('query', query());
+    fixture.detectChanges();
+    expect(ids()).toEqual(['group-a', 'gamma', 'group-b', 'alpha', 'beta']);
+
+    fixture.componentRef.setInput('sort', [{ key: 'label', dir: 'desc' }]);
+    fixture.detectChanges();
+    expect(ids()).toEqual(['group-b', 'beta', 'alpha', 'group-a', 'gamma']);
+
+    fixture.componentRef.setInput('query', query('match'));
+    fixture.detectChanges();
+    expect(ids()).toEqual(['group-b', 'beta', 'alpha']);
+    expect((fixture.componentInstance.selectedRows()[0] as any).__treeNode).toBe(
+      nodes[0].children?.[0],
+    );
+  });
+
+  it('keeps zero-match and repeated pure projections isolated from consumer nodes', () => {
+    const nodes: NeuTreeTableNode[] = [
+      { id: 'root', label: 'Root', children: [{ id: 'child', label: 'Child' }] },
+    ];
+    const options: Parameters<typeof projectNeuTreeTable>[1] = {
+      query: query(),
+      sort: [],
+      filterMode: 'strict',
+      exactMatch: false,
+      columns: COLUMNS as unknown as NeuTableColumn<Record<string, unknown>>[],
+    };
+    const first = projectNeuTreeTable(nodes, options);
+    (first.roots[0].row as { label: string }).label = 'Internal mutation';
+    const second = projectNeuTreeTable(nodes, options);
+    const empty = projectNeuTreeTable(nodes, { ...options, query: query('missing') });
+
+    expect(second.roots[0].row.label).toBe('Root');
+    expect(second.roots[0]).not.toBe(first.roots[0]);
+    expect(second.roots[0].children[0]).not.toBe(first.roots[0].children[0]);
+    expect(second.nodesById.get('child')?.node).toBe(nodes[0].children?.[0]);
+    expect(empty.roots).toEqual([]);
+    expect(empty.nodesById.size).toBe(0);
+    expect(nodes[0].label).toBe('Root');
+  });
+
+  it('skips per-node query matching when no filter is active', () => {
+    const trim = vi.spyOn(String.prototype, 'trim');
+    try {
+      projectNeuTreeTable(
+        [{ id: 'root', label: 'Root', children: [{ id: 'child', label: 'Child' }] }],
+        {
+          query: query(),
+          sort: [],
+          filterMode: 'lenient',
+          exactMatch: false,
+          columns: COLUMNS as unknown as NeuTableColumn<Record<string, unknown>>[],
+        },
+      );
+      expect(trim).toHaveBeenCalledTimes(1);
+    } finally {
+      trim.mockRestore();
+    }
+  });
+
+  it('keeps repeated projection churn bounded and emits no work after destroy', async () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    const nodes = Array.from({ length: 12 }, (_, index) => ({
+      id: `root-${index}`,
+      label: `Root ${index}`,
+      children: [{ id: `child-${index}`, label: `Child ${index}` }],
+    }));
+    fixture.componentRef.setInput('nodes', nodes);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('pagination', false);
+    fixture.componentRef.setInput('selectionMode', 'multiple');
+    let queryEvents = 0;
+    fixture.componentInstance.queryChange.subscribe(() => queryEvents++);
+
+    for (let index = 0; index < 40; index += 1) {
+      fixture.componentRef.setInput('query', query(index % 3 === 0 ? 'child' : ''));
+      fixture.componentRef.setInput('sort', [
+        { key: 'label', dir: index % 2 === 0 ? 'asc' : 'desc' },
+      ]);
+      fixture.componentRef.setInput(
+        'expandedKeys',
+        index % 2 === 0 ? nodes.map((node) => node.id) : [],
+      );
+      fixture.componentRef.setInput('selection', index % 2 === 0 ? [nodes[index % 12]] : []);
+      fixture.detectChanges();
+
+      const hierarchy = fixture.componentInstance['hierarchy']();
+      expect(hierarchy.nodesById.size).toBeLessThanOrEqual(24);
+      expect(fixture.componentInstance.flatRows().length).toBeLessThanOrEqual(24);
+    }
+
+    for (let index = 0; index < 10; index += 1) {
+      fixture.componentInstance['onTableQueryChange'](query(index % 2 ? 'root' : 'child'));
+    }
+    expect(queryEvents).toBe(10);
+    const renderedTable = fixture.nativeElement.querySelector('table') as HTMLTableElement;
+    fixture.destroy();
+    const eventsAtDestroy = queryEvents;
+    await Promise.resolve();
+    expect(queryEvents).toBe(eventsAtDestroy);
+    expect(fixture.componentRef.hostView.destroyed).toBe(true);
+    TestBed.resetTestingModule();
+    expect(renderedTable.isConnected).toBe(false);
+  });
+
+  it('recomputes filter transitions under explicit zoneless change detection', async () => {
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [NeuTreeTableComponent],
+        providers: [provideZonelessChangeDetection()],
+      })
+      .compileComponents();
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('pagination', false);
+    fixture.componentRef.setInput('expandedKeys', ['workspace', 'ui-core']);
+    fixture.componentRef.setInput('query', query('tree'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.flatRows().map((row) => row['id'])).toEqual([
+      'workspace',
+      'ui-core',
+      'tree',
+    ]);
+
+    fixture.componentRef.setInput('query', query());
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.flatRows().map((row) => row['id'])).toEqual([
+      'workspace',
+      'ui-core',
+      'tree',
+    ]);
+    fixture.destroy();
   });
 
   it('keeps controlled selection authoritative while emitting one proposal', () => {

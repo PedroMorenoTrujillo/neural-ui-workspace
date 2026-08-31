@@ -40,31 +40,31 @@ export function projectNeuTreeTable<T extends Record<string, unknown>>(
     stableSort(node.children ?? [], options.sort, options.columns),
   );
   const full = new Map<number, NeuTreeTableProjectedNode<T>>();
-  const filtered = new Map<number, NeuTreeTableProjectedNode<T>>();
   const hasFilter = hasActiveFilter(options.query);
+  const filtered = hasFilter ? new Map<number, NeuTreeTableProjectedNode<T>>() : null;
 
   for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex -= 1) {
     const entry = entries[entryIndex];
     const node = entry.node;
     const row = toRow(node, entry.level, entry.parent?.id, entry.index + 1, entry.setSize);
     const fullChildren = finalizeSiblings(entry.childEntryIndices, full);
-    const filteredChildren = finalizeSiblings(entry.childEntryIndices, filtered);
     full.set(entryIndex, { node, row, children: fullChildren });
+    if (!filtered) continue;
 
+    const filteredChildren = finalizeSiblings(entry.childEntryIndices, filtered);
     const matches = matchesQuery(row, options.query, options.columns, options.exactMatch);
-    if (hasFilter && !matches && filteredChildren.length === 0) continue;
+    if (!matches && filteredChildren.length === 0) continue;
     filtered.set(entryIndex, {
       node,
       row,
-      children:
-        hasFilter && matches && options.filterMode === 'lenient' ? fullChildren : filteredChildren,
+      children: matches && options.filterMode === 'lenient' ? fullChildren : filteredChildren,
     });
   }
 
   const rootIndices = entries.flatMap((entry, index) =>
     entry.parentEntryIndex == null ? [index] : [],
   );
-  const projected = finalizeSiblings(rootIndices, filtered);
+  const projected = finalizeSiblings(rootIndices, filtered ?? full);
   const nodesById = new Map<string, NeuTreeTableProjectedNode<T>>();
   const stack = [...projected].reverse();
   while (stack.length) {

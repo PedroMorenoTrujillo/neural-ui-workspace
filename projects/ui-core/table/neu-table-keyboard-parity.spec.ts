@@ -36,6 +36,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
   beforeEach(async () => {
     HTMLElement.prototype.scrollTo ??= vi.fn();
     await TestBed.configureTestingModule({
+      imports: [NeuTableComponent],
       providers: [
         provideRouter([]),
         provideZonelessChangeDetection(),

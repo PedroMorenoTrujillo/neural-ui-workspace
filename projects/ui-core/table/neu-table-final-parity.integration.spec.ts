@@ -54,6 +54,7 @@ class EditorHost {
 describe('NeuTable G01-G16 final parity integration', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [NeuTableComponent, EditorHost],
       providers: [
         provideRouter([]),
         provideZonelessChangeDetection(),
@@ -118,9 +119,9 @@ describe('NeuTable G01-G16 final parity integration', () => {
     deep.componentRef.setInput('compareSelectionBy', 'deepEquals');
     deep.detectChanges();
     deep.componentInstance.selectRow(ROWS[0]);
-    expect(deep.componentInstance['isRowSelected'](JSON.parse(JSON.stringify(ROWS[0])) as Row)).toBe(
-      true,
-    );
+    expect(
+      deep.componentInstance['isRowSelected'](JSON.parse(JSON.stringify(ROWS[0])) as Row),
+    ).toBe(true);
     expect(deep.componentInstance['getRowKey'](ROWS[0])).toBe(
       deep.componentInstance['getRowKey']({ ...ROWS[0] }),
     );

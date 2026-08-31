@@ -8,13 +8,22 @@ import {
   NeuTableQueryState,
   NeuTableServerState,
 } from '@neural-ui/core/table';
+import { NeuTreeTableComponent, NeuTreeTableNode } from '@neural-ui/core/tree-table';
 import { NeuNavComponent, NeuNavItem } from '@neural-ui/core/nav';
 import { NeuChartComponent } from '@neural-ui/core/chart';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ReactiveFormsModule, NeuInputComponent, NeuDialogComponent, NeuTableComponent, NeuNavComponent, NeuChartComponent],
+  imports: [
+    ReactiveFormsModule,
+    NeuInputComponent,
+    NeuDialogComponent,
+    NeuTableComponent,
+    NeuTreeTableComponent,
+    NeuNavComponent,
+    NeuChartComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <neu-nav [items]="navItems"></neu-nav>
@@ -30,14 +39,20 @@ import { NeuChartComponent } from '@neural-ui/core/chart';
       (queryChange)="query.set($event)"
       (serverStateChange)="onLegacyServerState($event)"
     ></neu-table>
+    <neu-tree-table [nodes]="treeNodes" [columns]="columns" [pagination]="false"></neu-tree-table>
     <neu-chart [series]="series" [categories]="['Now']"></neu-chart>
   `,
 })
 export class AppComponent {
   readonly name = new FormControl('', { nonNullable: true });
-  readonly navItems: NeuNavItem[] = [{ id: 'home', label: 'Home', icon: 'lucideHouse', route: '/' }];
+  readonly navItems: NeuNavItem[] = [
+    { id: 'home', label: 'Home', icon: 'lucideHouse', route: '/' },
+  ];
   readonly columns: NeuTableColumn[] = [{ key: 'name', header: 'Name' }];
   readonly rows = [{ id: 1, name: 'Neural UI' }];
+  readonly treeNodes: NeuTreeTableNode[] = [
+    { id: 'root', label: 'Neural UI', children: [{ id: 'child', label: 'TreeTable' }] },
+  ];
   readonly query = signal<NeuTableQueryState | undefined>(undefined);
   readonly series = [{ name: 'Users', data: [1] }];
 

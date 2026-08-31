@@ -52,6 +52,7 @@ packageJson.dependencies = {
   '@angular/core': angularVersion,
   '@angular/forms': angularVersion,
   '@angular/platform-browser': angularVersion,
+  '@angular/platform-server': angularVersion,
   '@angular/router': angularVersion,
   '@neural-ui/core': `file:${join(fixture, packageTarball)}`,
   // v31 is the last ng-icons line whose Angular peer range includes 19 and 20.
@@ -129,12 +130,13 @@ try {
       ],
     ],
     ['npm', ['run', 'build']],
+    ['node', ['src/ssr-tree-table.mjs']],
     [
       'node',
       [
         '--input-type=module',
         '--eval',
-        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/chart'); console.log('SSR entrypoint imports passed')",
+        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/tree-table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/chart'); console.log('SSR entrypoint imports passed')",
       ],
     ],
   ];

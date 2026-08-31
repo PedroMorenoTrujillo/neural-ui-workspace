@@ -5019,6 +5019,8 @@ describe('NeuTableComponent advanced layout features', () => {
     ) as HTMLTableCellElement;
     firstCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
     f.detectChanges();
+    await f.whenStable();
+    f.detectChanges();
     const editor = f.debugElement.query(By.directive(NeuInlineEditorComponent))
       ?.componentInstance as NeuInlineEditorComponent;
     expect(editor).toBeTruthy();
@@ -6996,6 +6998,25 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     expect(internalFilters(fixture.componentInstance)._openFilterKey()).toBeNull();
   });
 
+  it('lets the eager trigger cancel a filter open before the deferred feature settles', () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<OverlayFilterRow>);
+    fixture.componentRef.setInput('columns', OVERLAY_FILTER_COLUMNS);
+    fixture.componentRef.setInput('data', OVERLAY_FILTER_DATA);
+    fixture.componentRef.setInput('advancedFilterMode', 'menu');
+    fixture.componentRef.setInput('searchable', false);
+    fixture.componentRef.setInput('pagination', false);
+    fixture.detectChanges();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[aria-label="Open filter for Name"]',
+    )!;
+
+    trigger.click();
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+    expect(internalFilters(fixture.componentInstance)._openFilterKey()).toBeNull();
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('switches columns in one activation without orphaning the first overlay', async () => {
     const fixture = await createOverlayTable();
     const first = await openFilterOverlay(fixture, 'Status');
@@ -8941,5 +8962,32 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(fixture.componentInstance['getRowKey'](cyclic)).toBe(cycleKey);
     expect(stringify).toHaveBeenCalledTimes(3);
     stringify.mockRestore();
+  });
+
+  it('terminates optional feature load failures without retaining filter or editor state', () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<(typeof MANY_ROWS)[number]>);
+    const editableColumn = { ...COLUMNS[0], editable: true };
+    fixture.componentRef.setInput('columns', [editableColumn]);
+    fixture.componentRef.setInput('data', MANY_ROWS.slice(0, 1));
+    fixture.componentRef.setInput('editMode', 'cell');
+    const table = fixture.componentInstance as unknown as {
+      _openFilterKey: { (): string | null; set(value: string | null): void };
+      _state: { snapshot(): { editingCell: unknown } };
+      _optionalFeatureLoadFailed(kind: 'filter' | 'editor', error: unknown): void;
+      startCellEdit(row: (typeof MANY_ROWS)[number], column: typeof editableColumn): void;
+    };
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    table._openFilterKey.set(editableColumn.key);
+    table._optionalFeatureLoadFailed('filter', new Error('chunk unavailable'));
+    table._optionalFeatureLoadFailed('filter', new Error('same failed chunk'));
+    expect(table._openFilterKey()).toBeNull();
+
+    table.startCellEdit(MANY_ROWS[0], editableColumn);
+    expect(table._state.snapshot().editingCell).not.toBeNull();
+    table._optionalFeatureLoadFailed('editor', new Error('chunk unavailable'));
+    expect(table._state.snapshot().editingCell).toBeNull();
+    expect(error).toHaveBeenCalledTimes(2);
+    error.mockRestore();
   });
 });

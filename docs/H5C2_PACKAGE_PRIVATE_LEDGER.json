@@ -5,10 +5,10 @@
   "summary": {
     "total": 330,
     "actions": {
-      "PROTECTED_TEMPLATE_VISIBLE_MEMBER": 252,
-      "PRIVATE_CLASS_MEMBER": 67,
+      "PROTECTED_TEMPLATE_VISIBLE_MEMBER": 245,
+      "PRIVATE_CLASS_MEMBER": 73,
       "KEEP_PHYSICALLY_PUBLISHED_DEPENDENCY": 3,
-      "TYPE_ONLY_INTERNALIZATION": 8
+      "TYPE_ONLY_INTERNALIZATION": 9
     }
   },
   "symbols": [
@@ -1958,8 +1958,8 @@
       "declaration": "NeuTableComponent",
       "member": "_filterOpts",
       "kind": "method",
-      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
-      "templateVisible": true,
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
       "frameworkVisible": false
     },
     {
@@ -2088,8 +2088,8 @@
       "declaration": "NeuTableComponent",
       "member": "columnFilterControl",
       "kind": "method",
-      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
-      "templateVisible": true,
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
       "frameworkVisible": false
     },
     {
@@ -2108,8 +2108,8 @@
       "declaration": "NeuTableComponent",
       "member": "editingValue",
       "kind": "method",
-      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
-      "templateVisible": true,
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
       "frameworkVisible": false
     },
     {
@@ -2228,8 +2228,8 @@
       "declaration": "NeuTableComponent",
       "member": "inlineEditorOptions",
       "kind": "method",
-      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
-      "templateVisible": true,
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
       "frameworkVisible": false
     },
     {
@@ -2238,8 +2238,8 @@
       "declaration": "NeuTableComponent",
       "member": "inlineEditorType",
       "kind": "method",
-      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
-      "templateVisible": true,
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
       "frameworkVisible": false
     },
     {
@@ -2428,8 +2428,8 @@
       "declaration": "NeuTableComponent",
       "member": "onPageSizeChange",
       "kind": "method",
-      "action": "PRIVATE_CLASS_MEMBER",
-      "templateVisible": false,
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
       "frameworkVisible": false
     },
     {
@@ -2508,8 +2508,8 @@
       "declaration": "NeuTableComponent",
       "member": "setEditingValue",
       "kind": "method",
-      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
-      "templateVisible": true,
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
       "frameworkVisible": false
     },
     {
@@ -2708,18 +2708,19 @@
       "declaration": "NeuTableComponent",
       "member": "_pageSizeControl",
       "kind": "property",
-      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
-      "templateVisible": true,
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
       "frameworkVisible": false
     },
     {
       "id": "./table#NeuTableComponent.property:_pageSizeOptions",
-      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./table",
       "declaration": "NeuTableComponent",
       "member": "_pageSizeOptions",
       "kind": "property",
-      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
-      "templateVisible": true,
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
       "frameworkVisible": false
     },
     {

@@ -21,11 +21,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { ScrollingModule } from '@angular/cdk/scrolling';
-import type { Subscription } from 'rxjs';
+import { CdkScrollable } from '@angular/cdk/scrolling';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
 import {
@@ -56,16 +52,9 @@ import {
   resolveNeuTableFilterMatchMode,
 } from './neu-table-filter.engine';
 import { NeuUrlStateService } from '@neural-ui/core/url-state';
-import { NeuInputComponent } from '@neural-ui/core/input';
-import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
-import { NeuSelectComponent } from '@neural-ui/core/select';
-import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
-import { NeuDateInputComponent } from '@neural-ui/core/date-input';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
-import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuInlineEditorComponent, NeuInlineEditorType } from '@neural-ui/core/inline-editor';
-import { NeuContextMenuDirective } from '@neural-ui/core/context-menu';
+import type { NeuInlineEditorType } from '@neural-ui/core/inline-editor';
+import type { NeuContextMenuDirective } from '@neural-ui/core/context-menu';
 import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
 import type { NeuSelectOption } from '@neural-ui/core/select';
 import type {
@@ -160,7 +149,6 @@ import type {
   NeuTableBodySectionContext,
 } from './neu-table.types';
 import {
-  NeuTableAdvancedFilterController,
   isNeuTableDateRange,
   neuTableAdvancedFilterControlKind,
   neuTableAdvancedFilterDatePrecision,
@@ -172,7 +160,7 @@ import {
   neuTableInstantFilterValue,
   neuTableInstantRangeControlValue,
   neuTableNumberRangeValue,
-} from './neu-table-advanced-filter.controller';
+} from './neu-table-advanced-filter.utils';
 import {
   NeuTableStateController,
   type InternalAppliedColumnFilter,
@@ -228,6 +216,18 @@ import {
   NeuTableManagedRowCoordinator,
   type NeuTableManagedRowAdapter,
 } from './neu-table-managed-row.directive';
+import { NeuTableCheckboxComponent } from './neu-table-checkbox.component';
+import { NeuTableOptionalFeatureErrorComponent } from './neu-table-optional-feature-error.component';
+import {
+  NeuTableAdvancedFilterFeatureComponent,
+  NeuTableEditorFeatureComponent,
+  NeuTableInlineFilterFeatureComponent,
+} from './neu-table-optional-features.component';
+import type {
+  InternalNeuTableAdvancedFilterBridge,
+  InternalNeuTableControl,
+  InternalNeuTableOptionalFeatureHost,
+} from './neu-table-optional-features.types';
 
 export type {
   NeuTableAction,
@@ -352,6 +352,18 @@ interface InternalResolvedAppliedColumnFilter<T> {
 
 interface InternalResolvedGlobalFilterField<T> {
   values: (row: T) => readonly unknown[];
+}
+
+class InternalNeuTableValueControl<T> implements InternalNeuTableControl<T> {
+  constructor(
+    public value: T,
+    private readonly _change: (value: T) => void,
+  ) {}
+
+  setValue(value: T, options?: { emitEvent?: boolean }): void {
+    this.value = value;
+    if (options?.emitEvent !== false) this._change(value);
+  }
 }
 
 type InternalResolvedAdvancedFilterTexts = Required<NeuTableAdvancedFilterTexts>;
@@ -521,18 +533,13 @@ export type NeuTableColumnInput<T extends object> =
   providers: [NeuTableManagedRowCoordinator],
   imports: [
     NgTemplateOutlet,
-    ReactiveFormsModule,
-    OverlayModule,
-    ScrollingModule,
-    NeuInputComponent,
-    NeuNumberInputComponent,
-    NeuSelectComponent,
-    NeuMultiselectComponent,
-    NeuDateInputComponent,
+    CdkScrollable,
     NeuIconComponent,
-    NeuCheckboxComponent,
-    NeuButtonComponent,
-    NeuInlineEditorComponent,
+    NeuTableCheckboxComponent,
+    NeuTableOptionalFeatureErrorComponent,
+    NeuTableAdvancedFilterFeatureComponent,
+    NeuTableInlineFilterFeatureComponent,
+    NeuTableEditorFeatureComponent,
     NeuTableRowReorderHandleDirective,
   ],
   encapsulation: ViewEncapsulation.None,
@@ -544,248 +551,6 @@ export type NeuTableColumnInput<T extends object> =
     '[class.neu-table__host--flex]': 'scrollHeight() === "flex"',
   },
   template: `
-    <!--
-      E2 boundary: this content is independent from the desktop connected-overlay host so a
-      future mobile dialog can render the same surface without moving filter state into the host.
-    -->
-    <ng-template #filterOverlayContent let-column>
-      <div class="neu-table__filter-overlay-content">
-        @if (_filterDraftKind()) {
-          @if (_filterDraftReadOnly()) {
-            <p class="neu-table__filter-overlay-summary" role="status">
-              {{ _filterOverlayActiveRuleSummary(_filterDraftRules().length) }}
-              {{ _advancedFilterText().multipleRulesActive }}
-            </p>
-          } @else {
-            @if (_filterDraftHasMultipleRules()) {
-              <neu-select
-                class="neu-table__filter-overlay-control neu-table__filter-overlay-operator"
-                [floatingLabel]="false"
-                [label]="_advancedFilterText().operator"
-                [options]="_filterOverlayOperatorOptions()"
-                [formControl]="_filterOverlayOperatorControl"
-              />
-            }
-            <div class="neu-table__filter-overlay-rules">
-              @for (rule of _filterDraftRules(); track rule.id; let index = $index) {
-                <div
-                  class="neu-table__filter-overlay-rule"
-                  role="group"
-                  [attr.data-neu-table-filter-rule-id]="rule.id"
-                  [attr.aria-labelledby]="_filterOverlayRuleLabelId(column.key, rule.id)"
-                >
-                  <div class="neu-table__filter-overlay-rule-header">
-                    <span
-                      class="neu-table__filter-overlay-rule-label"
-                      [id]="_filterOverlayRuleLabelId(column.key, rule.id)"
-                    >
-                      {{ _filterOverlayRuleLabel(index) }}
-                    </span>
-                    <button
-                      type="button"
-                      class="neu-table__filter-overlay-remove-rule"
-                      [attr.aria-label]="_filterOverlayRemoveRuleLabel(index)"
-                      (click)="_removeFilterDraftRule(rule.id)"
-                    >
-                      <span aria-hidden="true">×</span>
-                    </button>
-                  </div>
-                  @if (
-                    _filterDraftKind() === 'text' ||
-                    _filterDraftKind() === 'number' ||
-                    _filterDraftKind() === 'date'
-                  ) {
-                    <neu-select
-                      class="neu-table__filter-overlay-control neu-table__filter-overlay-mode"
-                      [floatingLabel]="false"
-                      [label]="_advancedFilterText().matchMode"
-                      [options]="_filterOverlayModeOptions(column)"
-                      [formControl]="rule.modeControl"
-                    />
-                  }
-                  @switch (_filterDraftKind()) {
-                    @case ('text') {
-                      <neu-input
-                        class="neu-table__filter-overlay-control"
-                        [floatingLabel]="false"
-                        [label]="_advancedFilterText().value"
-                        [formControl]="rule.textControl"
-                      />
-                    }
-                    @case ('number') {
-                      @if (rule.mode() === 'between') {
-                        <div class="neu-table__filter-overlay-range">
-                          <neu-number-input
-                            [nullable]="true"
-                            [label]="_advancedFilterText().from"
-                            [formControl]="rule.numberFromControl"
-                          />
-                          <neu-number-input
-                            [nullable]="true"
-                            [label]="_advancedFilterText().to"
-                            [formControl]="rule.numberToControl"
-                          />
-                        </div>
-                      } @else {
-                        <neu-number-input
-                          class="neu-table__filter-overlay-control"
-                          [nullable]="true"
-                          [label]="_advancedFilterText().value"
-                          [formControl]="rule.numberControl"
-                        />
-                      }
-                    }
-                    @case ('date') {
-                      @if (rule.mode() === 'between') {
-                        @if (_filterOverlayDatePrecision(column) === 'instant') {
-                          <div class="neu-table__filter-overlay-range">
-                            <neu-date-input
-                              type="datetime-local"
-                              [label]="_advancedFilterText().from"
-                              [formControl]="rule.instantFromControl"
-                            />
-                            <neu-date-input
-                              type="datetime-local"
-                              [label]="_advancedFilterText().to"
-                              [formControl]="rule.instantToControl"
-                            />
-                          </div>
-                        } @else {
-                          <neu-date-input
-                            class="neu-table__filter-overlay-control"
-                            type="range"
-                            [label]="_advancedFilterText().value"
-                            [formControl]="rule.dateControl"
-                          />
-                        }
-                      } @else {
-                        <neu-date-input
-                          class="neu-table__filter-overlay-control"
-                          [type]="
-                            _filterOverlayDatePrecision(column) === 'instant'
-                              ? 'datetime-local'
-                              : 'date'
-                          "
-                          [label]="_advancedFilterText().value"
-                          [formControl]="rule.dateControl"
-                        />
-                      }
-                    }
-                    @case ('boolean') {
-                      <neu-select
-                        class="neu-table__filter-overlay-control"
-                        [floatingLabel]="false"
-                        [label]="_advancedFilterText().value"
-                        [placeholder]="_advancedFilterText().all"
-                        [options]="_filterOverlayBooleanOptions()"
-                        [clearable]="true"
-                        [clearAriaLabel]="_advancedFilterText().all"
-                        [formControl]="rule.booleanControl"
-                      />
-                    }
-                    @case ('select') {
-                      <neu-select
-                        class="neu-table__filter-overlay-control"
-                        [floatingLabel]="false"
-                        [label]="_filterOverlayControlLabel(column)"
-                        [placeholder]="allFilterOptionLabel()"
-                        [options]="_filterOverlayOptions(column)"
-                        [optionLabel]="typedFilterOptionLabel(column)"
-                        [optionValue]="typedFilterOptionValue(column)"
-                        [optionDisabled]="typedFilterOptionDisabled(column)"
-                        [searchable]="typedFilterSearchable(column)"
-                        [virtualScroll]="typedFilterVirtualScroll(column)"
-                        [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(column)"
-                        [clearable]="true"
-                        [clearAriaLabel]="_advancedFilterText().clear"
-                        [formControl]="rule.selectControl"
-                        (selectionChange)="_onFilterOverlaySingleValueCommitted(rule.id)"
-                      />
-                    }
-                    @case ('multiSelect') {
-                      <neu-multiselect
-                        class="neu-table__filter-overlay-control"
-                        [floatingLabel]="false"
-                        [label]="_filterOverlayControlLabel(column)"
-                        [placeholder]="allFilterOptionLabel()"
-                        [options]="_filterOverlayOptions(column)"
-                        [optionLabel]="typedFilterOptionLabel(column)"
-                        [optionValue]="typedFilterOptionValue(column)"
-                        [optionDisabled]="typedFilterOptionDisabled(column)"
-                        [searchable]="typedFilterSearchable(column)"
-                        [virtualScroll]="typedFilterVirtualScroll(column)"
-                        [virtualScrollVisibleItems]="typedFilterVirtualScrollVisibleItems(column)"
-                        [clearable]="true"
-                        [clearAriaLabel]="_advancedFilterText().clear"
-                        [formControl]="rule.multiSelectControl"
-                      />
-                    }
-                    @case ('custom') {
-                      @if (_filterOverlayCustomTemplate(column); as customTemplate) {
-                        <div class="neu-table__filter-overlay-custom">
-                          <ng-container
-                            [ngTemplateOutlet]="customTemplate"
-                            [ngTemplateOutletContext]="_filterOverlayCustomContext(column)"
-                          />
-                        </div>
-                      }
-                    }
-                  }
-                </div>
-              }
-            </div>
-            @if (_filterDraftCanAddRule()) {
-              <button
-                neu-button
-                type="button"
-                variant="secondary"
-                size="sm"
-                class="neu-table__filter-overlay-add-rule"
-                data-neu-table-filter-add-rule
-                (click)="_addFilterDraftRule()"
-              >
-                {{ _advancedFilterText().addRule }}
-              </button>
-            }
-          }
-          <div class="neu-table__filter-overlay-actions">
-            @if (!_filterDraftReadOnly()) {
-              <button
-                neu-button
-                type="button"
-                variant="ghost"
-                size="sm"
-                (click)="_clearFilterDraft()"
-              >
-                {{ _advancedFilterText().clear }}
-              </button>
-            }
-            <span class="neu-table__filter-overlay-actions-spacer"></span>
-            <button
-              neu-button
-              type="button"
-              variant="secondary"
-              size="sm"
-              (click)="_closeFilterOverlay()"
-            >
-              {{ _advancedFilterText().cancel }}
-            </button>
-            @if (!_filterDraftReadOnly()) {
-              <button
-                neu-button
-                type="button"
-                size="sm"
-                [disabled]="!_filterDraftValid()"
-                (click)="_applyFilterDraft()"
-              >
-                {{ _advancedFilterText().apply }}
-              </button>
-            }
-          </div>
-        }
-      </div>
-    </ng-template>
-
     <div
       class="neu-table-container"
       [class.neu-table--sticky-header]="_verticalScrollEnabled()"
@@ -1037,14 +802,16 @@ export type NeuTableColumnInput<T extends object> =
           @if (pageSizeOptions().length > 0) {
             <div class="neu-table__page-size">
               <label class="neu-table__page-size-label">{{ pageSizeLabel() }}</label>
-              <neu-select
+              <select
                 class="neu-table__page-size-select"
-                [floatingLabel]="false"
-                [options]="_pageSizeOptions()"
-                [formControl]="_pageSizeControl"
                 [attr.aria-label]="pageSizeAriaLabel()"
-                size="sm"
-              />
+                [value]="effectivePageSize()"
+                (change)="onPageSizeChange($event)"
+              >
+                @for (size of pageSizeOptions(); track size) {
+                  <option [value]="size">{{ size }}</option>
+                }
+              </select>
             </div>
           }
           @if (showCurrentPageReport()) {
@@ -1288,8 +1055,7 @@ export type NeuTableColumnInput<T extends object> =
                     }
                     @if (_isFilterOverlayEligible(col)) {
                       <button
-                        cdkOverlayOrigin
-                        #filterOverlayOrigin="cdkOverlayOrigin"
+                        #filterOverlayOrigin
                         type="button"
                         class="neu-table__filter-overlay-trigger"
                         [class.neu-table__filter-overlay-trigger--open]="
@@ -1310,6 +1076,7 @@ export type NeuTableColumnInput<T extends object> =
                             : null
                         "
                         (click)="_toggleFilterOverlay(col.key, $event)"
+                        (keydown.escape)="_closeFilterOverlay()"
                       >
                         <svg
                           viewBox="0 0 24 24"
@@ -1330,60 +1097,18 @@ export type NeuTableColumnInput<T extends object> =
                           </span>
                         }
                       </button>
-                      <ng-template
-                        cdkConnectedOverlay
-                        [cdkConnectedOverlayOrigin]="filterOverlayOrigin"
-                        [cdkConnectedOverlayOpen]="_openFilterKey() === col.key"
-                        [cdkConnectedOverlayPositions]="_filterOverlayPositions"
-                        [cdkConnectedOverlayHasBackdrop]="false"
-                        [cdkConnectedOverlayPush]="true"
-                        [cdkConnectedOverlayFlexibleDimensions]="true"
-                        [cdkConnectedOverlayViewportMargin]="8"
-                        (attach)="_onFilterOverlayAttached(col.key)"
-                        (detach)="_onFilterOverlayDetached(col.key)"
-                        (overlayOutsideClick)="_onFilterOverlayOutsideClick(col.key, $event)"
-                      >
-                        <section
-                          class="neu-table__filter-overlay"
-                          role="dialog"
-                          tabindex="-1"
-                          aria-modal="false"
-                          [id]="_filterOverlayPanelId(col.key)"
-                          [attr.aria-labelledby]="_filterOverlayTitleId(col.key)"
-                        >
-                          <header class="neu-table__filter-overlay-header">
-                            <h2
-                              class="neu-table__filter-overlay-title"
-                              [id]="_filterOverlayTitleId(col.key)"
-                            >
-                              {{ _filterOverlayTitle(col) }}
-                            </h2>
-                            <button
-                              type="button"
-                              class="neu-table__filter-overlay-close"
-                              data-neu-table-filter-initial-focus
-                              [attr.aria-label]="_filterOverlayCloseLabel(col)"
-                              (click)="_closeFilterOverlay()"
-                            >
-                              <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                aria-hidden="true"
-                              >
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                              </svg>
-                            </button>
-                          </header>
-                          <ng-container
-                            [ngTemplateOutlet]="filterOverlayContent"
-                            [ngTemplateOutletContext]="{ $implicit: col }"
-                          />
-                        </section>
-                      </ng-template>
+                      @defer (when _openFilterKey() === col.key) {
+                        <neu-table-advanced-filter-feature
+                          [host]="$any(_optionalFeaturesHost())"
+                          [column]="$any(col)"
+                          [origin]="filterOverlayOrigin"
+                        />
+                      } @error {
+                        <neu-table-optional-feature-error
+                          kind="filter"
+                          [host]="$any(_optionalFeaturesHost())"
+                        />
+                      }
                     }
                     @if (sortable() && col.sortable !== false) {
                       @if (sortPriorityDescription(col.key); as description) {
@@ -1451,142 +1176,17 @@ export type NeuTableColumnInput<T extends object> =
                         <span class="neu-table__filter-multiple-summary" role="status">
                           {{ _filterOverlayActiveRuleSummary(_filterOverlayRuleCount(col.key)) }}
                         </span>
-                      } @else {
-                        @if (col.filterConfig; as config) {
-                          @switch (config.kind) {
-                            @case ('text') {
-                              <neu-input
-                                [floatingLabel]="false"
-                                [label]="modernFilterLabel(col)"
-                                [placeholder]="filterPlaceholder()"
-                                [formControl]="typedColumnFilterControl(col)"
-                                (keydown)="commitInlineFilterOnEnter(col, $event)"
-                              />
-                            }
-                            @case ('number') {
-                              @if (modernFilterMode(col) === 'between') {
-                                <div class="neu-table__filter-range">
-                                  <neu-number-input
-                                    [nullable]="true"
-                                    [label]="rangeFilterLabel(col, 'from')"
-                                    [formControl]="typedRangeStartControl(col)"
-                                    (keydown)="commitInlineFilterOnEnter(col, $event)"
-                                  />
-                                  <neu-number-input
-                                    [nullable]="true"
-                                    [label]="rangeFilterLabel(col, 'to')"
-                                    [formControl]="typedRangeEndControl(col)"
-                                    (keydown)="commitInlineFilterOnEnter(col, $event)"
-                                  />
-                                </div>
-                              } @else {
-                                <neu-number-input
-                                  [nullable]="true"
-                                  [label]="modernFilterLabel(col)"
-                                  [formControl]="typedColumnFilterControl(col)"
-                                  (keydown)="commitInlineFilterOnEnter(col, $event)"
-                                />
-                              }
-                            }
-                            @case ('date') {
-                              @if (isDateOnlyRange(col)) {
-                                <neu-date-input
-                                  type="range"
-                                  [label]="modernFilterLabel(col)"
-                                  [placeholder]="filterPlaceholder()"
-                                  [formControl]="typedColumnFilterControl(col)"
-                                />
-                              } @else if (isInstantRange(col)) {
-                                <div class="neu-table__filter-range">
-                                  <neu-date-input
-                                    type="datetime-local"
-                                    [label]="rangeFilterLabel(col, 'from')"
-                                    [formControl]="typedInstantRangeStartControl(col)"
-                                  />
-                                  <neu-date-input
-                                    type="datetime-local"
-                                    [label]="rangeFilterLabel(col, 'to')"
-                                    [formControl]="typedInstantRangeEndControl(col)"
-                                  />
-                                </div>
-                              } @else {
-                                <neu-date-input
-                                  [type]="dateInputType(col)"
-                                  [label]="modernFilterLabel(col)"
-                                  [formControl]="typedColumnFilterControl(col)"
-                                />
-                              }
-                            }
-                            @case ('boolean') {
-                              <neu-select
-                                [floatingLabel]="false"
-                                [label]="modernFilterLabel(col)"
-                                [placeholder]="allFilterOptionLabel()"
-                                [options]="typedBooleanFilterOptions()"
-                                [clearable]="true"
-                                [formControl]="typedColumnFilterControl(col)"
-                              />
-                            }
-                            @case ('select') {
-                              <neu-select
-                                [floatingLabel]="false"
-                                [label]="modernFilterLabel(col)"
-                                [placeholder]="allFilterOptionLabel()"
-                                [options]="typedFilterOptions(col)"
-                                [optionLabel]="typedFilterOptionLabel(col)"
-                                [optionValue]="typedFilterOptionValue(col)"
-                                [optionDisabled]="typedFilterOptionDisabled(col)"
-                                [searchable]="typedFilterSearchable(col)"
-                                [virtualScroll]="typedFilterVirtualScroll(col)"
-                                [virtualScrollVisibleItems]="
-                                  typedFilterVirtualScrollVisibleItems(col)
-                                "
-                                [clearable]="true"
-                                [formControl]="typedColumnFilterControl(col)"
-                              />
-                            }
-                            @case ('multiSelect') {
-                              <neu-multiselect
-                                [floatingLabel]="false"
-                                [label]="modernFilterLabel(col)"
-                                [placeholder]="allFilterOptionLabel()"
-                                [options]="typedFilterOptions(col)"
-                                [optionLabel]="typedFilterOptionLabel(col)"
-                                [optionValue]="typedFilterOptionValue(col)"
-                                [optionDisabled]="typedFilterOptionDisabled(col)"
-                                [searchable]="typedFilterSearchable(col)"
-                                [virtualScroll]="typedFilterVirtualScroll(col)"
-                                [virtualScrollVisibleItems]="
-                                  typedFilterVirtualScrollVisibleItems(col)
-                                "
-                                [clearable]="true"
-                                [formControl]="typedMultiSelectFilterControl(col)"
-                              />
-                            }
-                          }
-                        } @else if (col.filterable) {
-                          @if (col.filterType === 'select') {
-                            <neu-select
-                              [floatingLabel]="false"
-                              [options]="_filterOpts(col)"
-                              [formControl]="columnFilterControl(col.key)"
-                              [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                            />
-                          } @else if (col.filterType === 'date') {
-                            <neu-date-input
-                              [formControl]="columnFilterControl(col.key)"
-                              [placeholder]="filterPlaceholder()"
-                              [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                            />
-                          } @else {
-                            <neu-input
-                              [floatingLabel]="false"
-                              [placeholder]="filterPlaceholder()"
-                              [formControl]="columnFilterControl(col.key)"
-                              [attr.aria-label]="filterAriaPrefix() + ' ' + col.header"
-                              (keydown)="commitInlineFilterOnEnter(col, $event)"
-                            />
-                          }
+                      } @else if (col.filterConfig || col.filterable) {
+                        @defer (on immediate) {
+                          <neu-table-inline-filter-feature
+                            [host]="$any(_optionalFeaturesHost())"
+                            [column]="$any(col)"
+                          />
+                        } @error {
+                          <neu-table-optional-feature-error
+                            kind="filter"
+                            [host]="$any(_optionalFeaturesHost())"
+                          />
                         }
                       }
                     </th>
@@ -1995,20 +1595,19 @@ export type NeuTableColumnInput<T extends object> =
                                     "
                                   />
                                 } @else {
-                                  <neu-inline-editor
-                                    class="neu-table__edit-control"
-                                    [type]="inlineEditorType(col)"
-                                    [value]="$any(editingValue())"
-                                    [options]="inlineEditorOptions(col)"
-                                    [startInEdit]="true"
-                                    [saveOnBlur]="true"
-                                    [editLabel]="inlineEditLabel()"
-                                    [saveLabel]="saveInlineEditLabel()"
-                                    [cancelLabel]="cancelInlineEditLabel()"
-                                    (valueChange)="setEditingValue($event)"
-                                    (editCommit)="commitCellEdit(row, col)"
-                                    (editCancel)="cancelCellEdit(undefined, row, col)"
-                                  />
+                                  @defer (on immediate) {
+                                    <neu-table-editor-feature
+                                      class="neu-table__edit-control"
+                                      [host]="$any(_optionalFeaturesHost())"
+                                      [row]="$any(row)"
+                                      [column]="$any(col)"
+                                    />
+                                  } @error {
+                                    <neu-table-optional-feature-error
+                                      kind="editor"
+                                      [host]="$any(_optionalFeaturesHost())"
+                                    />
+                                  }
                                 }
                                 @if (cellEditingError(); as editError) {
                                   <span class="neu-table__edit-error" role="alert">{{
@@ -2271,27 +1870,25 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _restoredStateSignature: string | null = null;
   private _pendingEditorFocus = false;
 
-  private readonly _advancedFilter = new NeuTableAdvancedFilterController<T>(
-    () => this._focusOverlayChildTrigger('date'),
-    (key) => this._currentTypedColumn(key),
-  );
   protected readonly _openFilterKey = signal<string | null>(null);
-  protected readonly _filterDraftKind = this._advancedFilter.kind;
-  protected readonly _filterDraftMode = this._advancedFilter.mode;
-  protected readonly _filterDraftValue = this._advancedFilter.value;
-  protected readonly _filterDraftValid = this._advancedFilter.valid;
-  protected readonly _filterDraftHasMultipleRules = this._advancedFilter.hasMultipleRules;
-  protected readonly _filterDraftOperator = this._advancedFilter.operator;
-  protected readonly _filterDraftRules = this._advancedFilter.rules;
-  protected readonly _filterDraftCanAddRule = this._advancedFilter.canAddRule;
-  protected readonly _filterDraftReadOnly = this._advancedFilter.readOnly;
-  protected readonly _filterOverlayOperatorControl = this._advancedFilter.operatorControl;
-  protected readonly _filterOverlayPositions: ConnectedPosition[] = [
+  private _optionalAdvancedFilter: InternalNeuTableAdvancedFilterBridge | null = null;
+  protected readonly _filterDraftKind = () => this._optionalAdvancedFilter?.kind() ?? null;
+  protected readonly _filterDraftMode = () => this._optionalAdvancedFilter?.mode() ?? null;
+  protected readonly _filterDraftValue = () => this._optionalAdvancedFilter?.value() ?? null;
+  protected readonly _filterDraftValid = () => this._optionalAdvancedFilter?.valid() ?? false;
+  protected readonly _filterDraftHasMultipleRules = () =>
+    this._optionalAdvancedFilter?.hasMultipleRules() ?? false;
+  protected readonly _filterDraftOperator = () => this._optionalAdvancedFilter?.operator() ?? 'and';
+  protected readonly _filterDraftRules = () => this._optionalAdvancedFilter?.rules() ?? [];
+  protected readonly _filterDraftCanAddRule = () =>
+    this._optionalAdvancedFilter?.canAddRule() ?? false;
+  protected readonly _filterDraftReadOnly = () => this._optionalAdvancedFilter?.readOnly() ?? false;
+  protected readonly _filterOverlayPositions = [
     { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 6 },
     { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
     { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -6 },
     { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
-  ];
+  ] as const;
 
   // ── Inputs de datos ─────────────────────────────────────────────────
   readonly columns = input<readonly NeuTableColumnInput<T>[]>([]);
@@ -2701,15 +2298,32 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   );
   private readonly _appliedFilters = this._state.createFiltersFacade();
   private readonly _columnFilters = this._createLegacyColumnFiltersFacade();
-  protected readonly _pageSizeControl = new FormControl('', { nonNullable: true });
-  private readonly _columnFilterControls = new Map<string, FormControl<string>>();
-  private readonly _typedColumnFilterControls = new Map<string, FormControl<unknown>>();
-  private readonly _typedRangeStartControls = new Map<string, FormControl<number | null>>();
-  private readonly _typedRangeEndControls = new Map<string, FormControl<number | null>>();
-  private readonly _typedInstantRangeStartControls = new Map<string, FormControl<string>>();
-  private readonly _typedInstantRangeEndControls = new Map<string, FormControl<string>>();
-  private readonly _typedMultiSelectFilterControls = new Map<string, FormControl<unknown[]>>();
-  private readonly _filterControlSubscriptions = new Map<object, Subscription>();
+  private readonly _pageSizeControl = new InternalNeuTableValueControl('', (value) =>
+    this.onPageSizeChange(value),
+  );
+  private readonly _columnFilterControls = new Map<string, InternalNeuTableControl<string>>();
+  private readonly _typedColumnFilterControls = new Map<string, InternalNeuTableControl<unknown>>();
+  private readonly _typedRangeStartControls = new Map<
+    string,
+    InternalNeuTableControl<number | null>
+  >();
+  private readonly _typedRangeEndControls = new Map<
+    string,
+    InternalNeuTableControl<number | null>
+  >();
+  private readonly _typedInstantRangeStartControls = new Map<
+    string,
+    InternalNeuTableControl<string>
+  >();
+  private readonly _typedInstantRangeEndControls = new Map<
+    string,
+    InternalNeuTableControl<string>
+  >();
+  private readonly _typedMultiSelectFilterControls = new Map<
+    string,
+    InternalNeuTableControl<unknown[]>
+  >();
+  private readonly _filterControlSubscriptions = new Map<object, never>();
   private _filterColumnSignatures = new Map<string, InternalFilterColumnSignature>();
   /** True when a legacy or typed column filter is available. */
   protected readonly _hasFilterableCol = computed(() =>
@@ -2804,16 +2418,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   /** Convierte filterOptions de string[] a NeuSelectOption[] con opción "Todos" al inicio.
    *  Converts filterOptions from string[] to NeuSelectOption[] with a leading "All" option. */
-  protected _filterOpts(col: NeuTableColumn<T>): NeuSelectOption[] {
+  private _filterOpts(col: NeuTableColumn<T>): NeuSelectOption[] {
     return [
       { label: this.allFilterOptionLabel(), value: '' },
       ...(col.filterOptions ?? []).map((o) => ({ label: o, value: o })),
     ];
   }
-
-  protected readonly _pageSizeOptions = computed<NeuSelectOption[]>(() =>
-    this.pageSizeOptions().map((size) => ({ label: String(size), value: String(size) })),
-  );
 
   private _urlConfig(): InternalNeuTableUrlStateConfig {
     return {
@@ -2860,7 +2470,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     afterNextRender(() => this._browserEnhancementsReady.set(true));
     this._destroyRef.onDestroy(() => {
       this._destroyed = true;
-      this._advancedFilter.destroy();
       this._stopFilterOverlayFocusContainment();
       this._clearFilterOverlayOwnership();
       this._openFilterKey.set(null);
@@ -2874,10 +2483,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this._managedRowCoordinator.disconnect();
       this._disposeAllFilterControls();
     });
-
-    this._pageSizeControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) => this.onPageSizeChange(value));
 
     effect(() => {
       const controlled = this.query();
@@ -3306,8 +2911,107 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   private readonly _confirmPending = signal<{ rowKey: unknown; actionKey: string } | null>(null);
+  private readonly _optionalFeatureFailures = new Set<'filter' | 'editor'>();
 
   // ── Advanced filter overlay ───────────────────────────────────────────
+  protected readonly _optionalFeaturesHost = () =>
+    this as unknown as InternalNeuTableOptionalFeatureHost<Record<string, unknown>>;
+
+  protected _optionalFeatureLoadFailed(kind: 'filter' | 'editor', error: unknown): void {
+    if (this._destroyed || this._optionalFeatureFailures.has(kind)) return;
+    this._optionalFeatureFailures.add(kind);
+    if (kind === 'filter') this._closeFilterOverlay();
+    else this.cancelCellEdit();
+    console.error(`[NeuralUI Table] Optional ${kind} feature failed to load.`, error);
+  }
+
+  protected _registerOptionalAdvancedFilter(
+    feature: InternalNeuTableAdvancedFilterBridge | null,
+  ): void {
+    this._optionalAdvancedFilter = feature;
+  }
+
+  private readonly _advancedFilterBridge = (): InternalNeuTableAdvancedFilterBridge => {
+    if (!this._optionalAdvancedFilter) {
+      throw new Error('The deferred Table filter feature is not active.');
+    }
+    return this._optionalAdvancedFilter;
+  };
+
+  protected get _filterOverlayOperatorControl(): InternalNeuTableControl<InternalAppliedFilterOperator> {
+    return this._advancedFilterBridge().operatorControl;
+  }
+
+  protected get _filterOverlayModeControl(): InternalNeuTableControl<unknown> {
+    return this._advancedFilterBridge().rules()[0]!.modeControl;
+  }
+
+  protected get _filterOverlayTextControl(): InternalNeuTableControl<string> {
+    return this._advancedFilterBridge().rules()[0]!.textControl;
+  }
+
+  protected get _filterOverlayNumberControl(): InternalNeuTableControl<number | null> {
+    return this._advancedFilterBridge().rules()[0]!.numberControl;
+  }
+
+  protected get _filterOverlayNumberFromControl(): InternalNeuTableControl<number | null> {
+    return this._advancedFilterBridge().rules()[0]!.numberFromControl;
+  }
+
+  protected get _filterOverlayNumberToControl(): InternalNeuTableControl<number | null> {
+    return this._advancedFilterBridge().rules()[0]!.numberToControl;
+  }
+
+  protected get _filterOverlayInstantFromControl(): InternalNeuTableControl<string> {
+    return this._advancedFilterBridge().rules()[0]!.instantFromControl;
+  }
+
+  protected get _filterOverlayInstantToControl(): InternalNeuTableControl<string> {
+    return this._advancedFilterBridge().rules()[0]!.instantToControl;
+  }
+
+  protected get _filterOverlayBooleanControl(): InternalNeuTableControl<unknown> {
+    return this._advancedFilterBridge().rules()[0]!.booleanControl;
+  }
+
+  protected get _filterOverlayDateControl(): InternalNeuTableControl<unknown> {
+    return this._advancedFilterBridge().rules()[0]!.dateControl;
+  }
+
+  protected get _filterOverlaySelectControl(): InternalNeuTableControl<unknown> {
+    return this._advancedFilterBridge().rules()[0]!.selectControl;
+  }
+
+  protected get _filterOverlayMultiSelectControl(): InternalNeuTableControl<unknown[]> {
+    return this._advancedFilterBridge().rules()[0]!.multiSelectControl;
+  }
+
+  protected _filterOverlayControlKind(column: NeuTableColumn<T>): string {
+    return neuTableAdvancedFilterControlKind(column);
+  }
+
+  protected _filterOverlayDatePrecision(column: NeuTableColumn<T>): 'date-only' | 'instant' {
+    return neuTableAdvancedFilterDatePrecision(column);
+  }
+
+  protected _filterOverlayModeOptions(
+    column: NeuTableColumn<T>,
+  ): readonly NeuSelectOption<NeuTableFilterMatchMode>[] {
+    const text = this._advancedFilterText();
+    return neuTableAdvancedFilterModes(column).map((mode) => ({
+      label: text[mode as keyof typeof text] ?? mode,
+      value: mode,
+    }));
+  }
+
+  protected _filterOverlayOptions(column: NeuTableColumn<T>): readonly unknown[] {
+    const config = column.filterConfig;
+    if (config?.kind === 'select' || config?.kind === 'multiSelect') {
+      return config.options ?? [];
+    }
+    return column.filterType === 'select' ? this._filterOpts(column) : [];
+  }
+
   protected _isFilterOverlayEligible(column: NeuTableColumn<T>): boolean {
     if (this.advancedFilterMode() !== 'menu') return false;
     const kind = column.filterConfig?.kind;
@@ -3334,84 +3038,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return false;
   }
 
-  protected _filterOverlayControlKind(column: NeuTableColumn<T>): string {
-    return neuTableAdvancedFilterControlKind(column);
-  }
-
-  protected _filterOverlayDatePrecision(column: NeuTableColumn<T>): 'date-only' | 'instant' {
-    return neuTableAdvancedFilterDatePrecision(column);
-  }
-
-  protected get _filterOverlayModeControl(): FormControl<unknown> {
-    return this._advancedFilter.modeControl;
-  }
-
-  protected get _filterOverlayTextControl(): FormControl<string> {
-    return this._advancedFilter.textControl;
-  }
-
-  protected get _filterOverlayNumberControl(): FormControl<number | null> {
-    return this._advancedFilter.numberControl;
-  }
-
-  protected get _filterOverlayNumberFromControl(): FormControl<number | null> {
-    return this._advancedFilter.numberFromControl;
-  }
-
-  protected get _filterOverlayNumberToControl(): FormControl<number | null> {
-    return this._advancedFilter.numberToControl;
-  }
-
-  protected get _filterOverlayInstantFromControl(): FormControl<string> {
-    return this._advancedFilter.instantFromControl;
-  }
-
-  protected get _filterOverlayInstantToControl(): FormControl<string> {
-    return this._advancedFilter.instantToControl;
-  }
-
-  protected get _filterOverlayBooleanControl(): FormControl<unknown> {
-    return this._advancedFilter.booleanControl;
-  }
-
-  protected get _filterOverlayDateControl(): FormControl<unknown> {
-    return this._advancedFilter.dateControl;
-  }
-
-  protected get _filterOverlaySelectControl(): FormControl<unknown> {
-    return this._advancedFilter.selectControl;
-  }
-
-  protected get _filterOverlayMultiSelectControl(): FormControl<unknown[]> {
-    return this._advancedFilter.multiSelectControl;
-  }
-
-  protected _filterOverlayModeOptions(
-    column: NeuTableColumn<T>,
-  ): readonly NeuSelectOption<NeuTableFilterMatchMode>[] {
-    const text = this._advancedFilterText();
-    return neuTableAdvancedFilterModes(column).map((mode) => ({
-      label: text[mode as keyof typeof text] ?? mode,
-      value: mode,
-    }));
-  }
-
-  protected _filterOverlayOperatorOptions(): readonly NeuSelectOption<InternalAppliedFilterOperator>[] {
-    const text = this._advancedFilterText();
-    return [
-      { label: text.matchAll, value: 'and' },
-      { label: text.matchAny, value: 'or' },
-    ];
-  }
-
-  protected _filterOverlayOptions(column: NeuTableColumn<T>): readonly unknown[] {
-    const config = column.filterConfig;
-    if (config?.kind === 'select' || config?.kind === 'multiSelect') {
-      return config.options ?? [];
-    }
-    return column.filterType === 'select' ? this._filterOpts(column) : [];
-  }
-
   protected _filterOverlayCustomTemplate(
     column: NeuTableColumn<T>,
   ): TemplateRef<NeuTableFilterTemplateContext<T>> | null {
@@ -3420,22 +3046,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this.filterTemplates().find((template) => template.columnKey() === column.key)?.templateRef ??
       null
     );
-  }
-
-  protected _filterOverlayCustomContext(
-    column: NeuTableColumn<T>,
-  ): NeuTableFilterTemplateContext<T> {
-    const context = {
-      column,
-      value: this._filterDraftValue(),
-      setValue: (value: unknown) => this._setCustomFilterDraftValue(column.key, value),
-      clear: () => this._setCustomFilterDraftValue(column.key, null),
-      active: this._isFilterOverlayActive(column.key),
-    } as Omit<NeuTableFilterTemplateContext<T>, '$implicit'> &
-      Partial<Pick<NeuTableFilterTemplateContext<T>, '$implicit'>>;
-    const complete = context as NeuTableFilterTemplateContext<T>;
-    complete.$implicit = complete;
-    return complete;
   }
 
   protected _filterOverlayTriggerId(key: string): string {
@@ -3517,12 +3127,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._escapeReturnFocus = null;
     const column = this._currentTypedColumn(key);
     if (!column || !this._isFilterOverlayEligible(column)) return;
-    this._advancedFilter.initialize(
-      column,
-      this._appliedFilters()[column.key] as Parameters<
-        NeuTableAdvancedFilterController<T>['initialize']
-      >[1],
-    );
     this._openFilterKey.set(key);
   }
 
@@ -3534,11 +3138,10 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._lastFilterWorkflowFocus = null;
     this._escapeReturnFocus = null;
     this._activeFilterTrigger = null;
-    this._advancedFilter.discard();
     if (trigger) this._focusElementIfAvailable(trigger);
   }
 
-  protected _onFilterOverlayAttached(key: string): void {
+  protected _onFilterOverlayAttached(key: string, custom = false): void {
     if (this._openFilterKey() !== key || !isPlatformBrowser(this._platformId)) return;
     this._startFilterOverlayFocusContainment();
     this._document.dispatchEvent(
@@ -3549,7 +3152,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     );
     initialFocus?.focus();
     this._lastFilterWorkflowFocus = initialFocus ?? null;
-    if (this._filterDraftKind() === 'custom') {
+    if (custom) {
       queueMicrotask(() => this._focusCustomFilterControl());
     }
   }
@@ -3581,35 +3184,26 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._closeFilterOverlay();
   }
 
-  protected _onFilterOverlaySingleValueCommitted(ruleId: string): void {
-    queueMicrotask(() => this._focusFilterDraftRule(ruleId, 'select'));
-  }
-
-  private _setCustomFilterDraftValue(key: string, value: unknown): void {
-    const column = this._currentTypedColumn(key);
-    if (
-      this._openFilterKey() !== key ||
-      column?.filterConfig?.kind !== 'custom' ||
-      !this._filterOverlayCustomTemplate(column)
-    ) {
-      return;
-    }
-    this._advancedFilter.setValue(value);
+  protected _applyOptionalAdvancedFilter(key: string, filter: InternalAppliedColumnFilter): void {
+    if (this._openFilterKey() !== key || !this._currentTypedColumn(key)) return;
+    const changed = this._writeAppliedFilter(key, filter);
+    if (changed) this._emitQueryState(changed.current);
+    this._closeFilterOverlay();
   }
 
   protected _clearFilterDraft(): void {
-    this._advancedFilter.clear();
+    this._advancedFilterBridge().clear();
   }
 
   protected _addFilterDraftRule(): void {
-    const id = this._advancedFilter.addRule();
+    const id = this._advancedFilterBridge().addRule();
     if (id) queueMicrotask(() => this._focusFilterDraftRule(id));
   }
 
   protected _removeFilterDraftRule(id: string): void {
     const rules = this._filterDraftRules();
     const index = rules.findIndex((rule) => rule.id === id);
-    if (index < 0 || !this._advancedFilter.removeRule(id)) return;
+    if (index < 0 || !this._advancedFilterBridge().removeRule(id)) return;
     const remaining = this._filterDraftRules();
     const target = remaining[Math.min(index, remaining.length - 1)];
     queueMicrotask(() => {
@@ -3623,16 +3217,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   protected _applyFilterDraft(): void {
-    const key = this._openFilterKey();
-    const column = key ? this._currentTypedColumn(key) : null;
-    const result = this._advancedFilter.buildApplyResult();
-    if (!key || !column || !result || result.key !== key) return;
-    const changed = this._writeAppliedFilter(key, result.filter);
-    if (changed) this._emitQueryState(changed.current);
-    this._closeFilterOverlay();
+    const result = this._optionalAdvancedFilter?.buildApplyResult();
+    if (result) this._applyOptionalAdvancedFilter(result.key, result.filter);
   }
 
-  private _focusFilterDraftRule(id: string, kind: 'default' | 'select' = 'default'): void {
+  protected _focusFilterDraftRule(id: string, kind: 'default' | 'select' = 'default'): void {
     const rule = this._filterOverlayPanel()?.querySelector<HTMLElement>(
       `[data-neu-table-filter-rule-id="${id}"]`,
     );
@@ -3913,7 +3502,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._focusElementIfAvailable(this._expandedOverlayChildTrigger(panel));
   }
 
-  private _focusOverlayChildTrigger(kind: 'select' | 'date'): void {
+  protected _focusOverlayChildTrigger(kind: 'select' | 'date'): void {
     const panel = this._filterOverlayPanel();
     if (!panel) return;
     const selector =
@@ -5701,9 +5290,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     }
   }
 
-  private onPageSizeChange(value: string | number | { target?: { value?: unknown } } | null): void {
+  protected onPageSizeChange(
+    value: string | number | Event | { target?: { value?: unknown } } | null,
+  ): void {
     const normalizedValue =
-      value && typeof value === 'object' ? (value.target?.value ?? null) : value;
+      value && typeof value === 'object'
+        ? ((value.target as HTMLSelectElement | null)?.value ?? null)
+        : value;
     const size = Number(normalizedValue);
     if (!Number.isFinite(size) || size <= 0) return;
     const changed = this._state.update({ pageSize: size, page: 1 }, 'ui');
@@ -6282,7 +5875,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     );
   }
 
-  protected editingValue(): unknown {
+  private editingValue(): unknown {
     this._editingRevision();
     return this._editingController.cell()?.value ?? '';
   }
@@ -6297,18 +5890,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._editingController.cell()?.error ?? null;
   }
 
-  protected inlineEditorType(col: NeuTableColumnInput<T>): NeuInlineEditorType {
+  private inlineEditorType(col: NeuTableColumnInput<T>): NeuInlineEditorType {
     return this.asRuntimeColumn(col).editor ?? 'text';
   }
 
-  protected inlineEditorOptions(col: NeuTableColumnInput<T>): NeuSelectOption[] {
+  private inlineEditorOptions(col: NeuTableColumnInput<T>): NeuSelectOption[] {
     return (this.asRuntimeColumn(col).editOptions ?? []).map((option) => ({
       label: option,
       value: option,
     }));
   }
 
-  protected setEditingValue(value: unknown): void {
+  private setEditingValue(value: unknown): void {
     if (this._editingController.setCellValue(value)) {
       this._editingRevision.update((revision) => revision + 1);
     }
@@ -6987,15 +6580,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     );
   }
 
-  protected typedColumnFilterControl(col: NeuTableColumn<T>): FormControl<unknown> {
+  protected typedColumnFilterControl(col: NeuTableColumn<T>): InternalNeuTableControl<unknown> {
     let control = this._typedColumnFilterControls.get(col.key);
     if (!control) {
-      control = new FormControl<unknown>(
+      control = new InternalNeuTableValueControl(
         this._typedFilterControlValue(col, this._appliedSingleFilterValue(col.key)),
-      );
-      const subscription = control.valueChanges
-        .pipe(takeUntilDestroyed(this._destroyRef))
-        .subscribe((value) => {
+        (value) => {
           const currentColumn = this._currentTypedColumn(col.key);
           if (currentColumn) {
             this._scheduleInlineFilter(
@@ -7003,8 +6593,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
               this._typedFilterValueFromControl(currentColumn, value),
             );
           }
-        });
-      this._trackFilterControl(control, subscription);
+        },
+      );
       this._typedColumnFilterControls.set(col.key, control);
     }
     return control;
@@ -7053,40 +6643,36 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     );
   }
 
-  protected typedRangeStartControl(col: NeuTableColumn<T>): FormControl<number | null> {
+  protected typedRangeStartControl(col: NeuTableColumn<T>): InternalNeuTableControl<number | null> {
     return this._typedNumberRangeControl(col, 'from');
   }
 
-  protected typedRangeEndControl(col: NeuTableColumn<T>): FormControl<number | null> {
+  protected typedRangeEndControl(col: NeuTableColumn<T>): InternalNeuTableControl<number | null> {
     return this._typedNumberRangeControl(col, 'to');
   }
 
-  protected typedInstantRangeStartControl(col: NeuTableColumn<T>): FormControl<string> {
+  protected typedInstantRangeStartControl(col: NeuTableColumn<T>): InternalNeuTableControl<string> {
     return this._typedInstantRangeControl(col, 'from');
   }
 
-  protected typedInstantRangeEndControl(col: NeuTableColumn<T>): FormControl<string> {
+  protected typedInstantRangeEndControl(col: NeuTableColumn<T>): InternalNeuTableControl<string> {
     return this._typedInstantRangeControl(col, 'to');
   }
 
-  protected typedMultiSelectFilterControl(col: NeuTableColumn<T>): FormControl<unknown[]> {
+  protected typedMultiSelectFilterControl(
+    col: NeuTableColumn<T>,
+  ): InternalNeuTableControl<unknown[]> {
     let control = this._typedMultiSelectFilterControls.get(col.key);
     if (!control) {
-      control = new FormControl<unknown[]>(
+      control = new InternalNeuTableValueControl(
         this._multiSelectFilterControlValue(this._appliedSingleFilterValue(col.key)),
-        {
-          nonNullable: true,
-        },
-      );
-      const subscription = control.valueChanges
-        .pipe(takeUntilDestroyed(this._destroyRef))
-        .subscribe((value) => {
+        (value) => {
           const currentColumn = this._currentTypedColumn(col.key);
           if (currentColumn?.filterConfig?.kind === 'multiSelect') {
             this._scheduleInlineFilter(currentColumn, value);
           }
-        });
-      this._trackFilterControl(control, subscription);
+        },
+      );
       this._typedMultiSelectFilterControls.set(col.key, control);
     }
     return control;
@@ -7145,23 +6731,20 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _typedNumberRangeControl(
     col: NeuTableColumn<T>,
     boundary: 'from' | 'to',
-  ): FormControl<number | null> {
+  ): InternalNeuTableControl<number | null> {
     const controls =
       boundary === 'from' ? this._typedRangeStartControls : this._typedRangeEndControls;
     let control = controls.get(col.key);
     if (!control) {
-      control = new FormControl<number | null>(
+      control = new InternalNeuTableValueControl(
         neuTableNumberRangeValue(this._appliedSingleFilterValue(col.key))[boundary],
-      );
-      const subscription = control.valueChanges
-        .pipe(takeUntilDestroyed(this._destroyRef))
-        .subscribe((value) => {
+        (value) => {
           const currentColumn = this._currentTypedColumn(col.key);
           if (currentColumn?.filterConfig?.kind !== 'number') return;
           const range = neuTableNumberRangeValue(this._appliedSingleFilterValue(col.key));
           this._scheduleInlineFilter(currentColumn, { ...range, [boundary]: value });
-        });
-      this._trackFilterControl(control, subscription);
+        },
+      );
       controls.set(col.key, control);
     }
     return control;
@@ -7170,22 +6753,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _typedInstantRangeControl(
     col: NeuTableColumn<T>,
     boundary: 'from' | 'to',
-  ): FormControl<string> {
+  ): InternalNeuTableControl<string> {
     const controls =
       boundary === 'from'
         ? this._typedInstantRangeStartControls
         : this._typedInstantRangeEndControls;
     let control = controls.get(col.key);
     if (!control) {
-      control = new FormControl<string>(
+      control = new InternalNeuTableValueControl(
         neuTableInstantRangeControlValue(this._appliedSingleFilterValue(col.key), boundary),
-        {
-          nonNullable: true,
-        },
-      );
-      const subscription = control.valueChanges
-        .pipe(takeUntilDestroyed(this._destroyRef))
-        .subscribe((value) => {
+        (value) => {
           const currentColumn = this._currentTypedColumn(col.key);
           if (!currentColumn || !this.isInstantRange(currentColumn)) return;
           const range = neuTableDateRangeFilterValue(this._appliedSingleFilterValue(col.key));
@@ -7193,8 +6770,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
             ...range,
             [boundary]: neuTableInstantFilterValue(value),
           });
-        });
-      this._trackFilterControl(control, subscription);
+        },
+      );
       controls.set(col.key, control);
     }
     return control;
@@ -7562,10 +7139,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       : constraint.value;
   }
 
-  private _trackFilterControl(control: object, subscription: Subscription): void {
-    this._filterControlSubscriptions.set(control, subscription);
-  }
-
   private _disposeFilterControlsForKey(key: string): void {
     this._disposeControlFromMap(this._columnFilterControls, key);
     this._disposeControlFromMap(this._typedColumnFilterControls, key);
@@ -7577,10 +7150,6 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   private _disposeControlFromMap<C extends object>(map: Map<string, C>, key: string): void {
-    const control = map.get(key);
-    if (!control) return;
-    this._filterControlSubscriptions.get(control)?.unsubscribe();
-    this._filterControlSubscriptions.delete(control);
     map.delete(key);
   }
 
@@ -7595,26 +7164,42 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       ...this._typedMultiSelectFilterControls.keys(),
     ]);
     for (const key of keys) this._disposeFilterControlsForKey(key);
-    for (const subscription of this._filterControlSubscriptions.values()) {
-      subscription.unsubscribe();
-    }
     this._filterControlSubscriptions.clear();
     this._filterColumnSignatures.clear();
   }
 
-  protected columnFilterControl(key: string): FormControl<string> {
+  protected _registerOptionalFilterControls(
+    key: string,
+    controls: Parameters<
+      InternalNeuTableOptionalFeatureHost<
+        Record<string, unknown>
+      >['_registerOptionalFilterControls']
+    >[1],
+  ): void {
+    this._disposeFilterControlsForKey(key);
+    if (controls.legacy) this._columnFilterControls.set(key, controls.legacy);
+    if (controls.single) this._typedColumnFilterControls.set(key, controls.single);
+    if (controls.rangeStart) this._typedRangeStartControls.set(key, controls.rangeStart);
+    if (controls.rangeEnd) this._typedRangeEndControls.set(key, controls.rangeEnd);
+    if (controls.instantStart) this._typedInstantRangeStartControls.set(key, controls.instantStart);
+    if (controls.instantEnd) this._typedInstantRangeEndControls.set(key, controls.instantEnd);
+    if (controls.multi) this._typedMultiSelectFilterControls.set(key, controls.multi);
+  }
+
+  protected _unregisterOptionalFilterControls(key: string): void {
+    this._disposeFilterControlsForKey(key);
+  }
+
+  private columnFilterControl(key: string): InternalNeuTableControl<string> {
     let control = this._columnFilterControls.get(key);
     if (!control) {
-      control = new FormControl(String(this.getColumnFilterValue(key)), {
-        nonNullable: true,
-      });
-      const subscription = control.valueChanges
-        .pipe(takeUntilDestroyed(this._destroyRef))
-        .subscribe((value) => {
+      control = new InternalNeuTableValueControl(
+        String(this.getColumnFilterValue(key)),
+        (value) => {
           const column = this._currentTypedColumn(key);
           if (column) this._scheduleInlineFilter(column, value);
-        });
-      this._trackFilterControl(control, subscription);
+        },
+      );
       this._columnFilterControls.set(key, control);
     }
     return control;

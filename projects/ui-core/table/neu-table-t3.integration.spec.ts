@@ -141,6 +141,7 @@ describe('NeuTable T3 integration', () => {
 
   async function create() {
     await TestBed.configureTestingModule({
+      imports: [NeuTableComponent, T3Host],
       providers: [provideZonelessChangeDetection(), provideRouter([])],
     }).compileComponents();
     const fixture = TestBed.createComponent(T3Host);

@@ -58,6 +58,7 @@ const COLUMNS: NeuTableColumn<Row>[] = [
 describe('NeuTable sorting and global-filter migration parity', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [NeuTableComponent],
       providers: [
         provideRouter([]),
         provideZonelessChangeDetection(),
@@ -549,7 +550,9 @@ describe('NeuTable sorting and global-filter migration parity', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    fixture.componentInstance['onSearch']({ target: { value: 'Administrator' } } as unknown as Event);
+    fixture.componentInstance['onSearch']({
+      target: { value: 'Administrator' },
+    } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([1, 3]);
     fixture.componentInstance['onSearch']({ target: { value: 'Viewer' } } as unknown as Event);
     expect(fixture.componentInstance.filteredData().map((row) => row.id)).toEqual([2]);

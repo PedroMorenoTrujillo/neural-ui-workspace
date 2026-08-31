@@ -52,6 +52,7 @@ class LazyPlaceholderHost {
 describe('NeuTable lazy virtual integration', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [NeuTableComponent],
       providers: [
         provideRouter([]),
         provideZonelessChangeDetection(),
@@ -469,7 +470,10 @@ describe('NeuTable lazy virtual integration', () => {
     const selected: number[] = [];
     fixture.componentInstance.rowSelect.subscribe((event) => selected.push(event.index));
 
-    fixture.componentInstance['toggleRow'](fixture.componentInstance.data()[1] as LazyRow, 'checkbox');
+    fixture.componentInstance['toggleRow'](
+      fixture.componentInstance.data()[1] as LazyRow,
+      'checkbox',
+    );
 
     expect(selectable).toHaveBeenCalledWith(expect.objectContaining({ id: 501 }), 501);
     expect(selected).toEqual([501]);
@@ -641,7 +645,10 @@ describe('NeuTable lazy virtual integration', () => {
 
     expect((fixture.componentInstance as any)['_lazyVirtualActive']()).toBe(false);
     expect((fixture.componentInstance as any)['_logicalTotalItems']()).toBe(20);
-    expect((fixture.componentInstance as any)['_virtualRange']()).toMatchObject({ first: 0, end: 6 });
+    expect((fixture.componentInstance as any)['_virtualRange']()).toMatchObject({
+      first: 0,
+      end: 6,
+    });
     expect((fixture.componentInstance as any)['_virtualSlots']()).toEqual([]);
     (fixture.componentInstance as any)._emitLazyRequest('scroll');
     expect(requests).toEqual([]);

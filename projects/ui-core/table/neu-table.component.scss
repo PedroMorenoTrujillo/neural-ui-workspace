@@ -1063,20 +1063,18 @@
 .neu-table__page-size-select {
   display: block;
   min-width: 78px;
+  min-height: 34px;
+  padding: 0 var(--neu-space-8) 0 var(--neu-space-3);
+  color: var(--neu-text);
+  font: inherit;
+  background-color: var(--neu-surface);
+  border: 1px solid var(--neu-border-hover);
+  border-radius: var(--neu-radius-md);
+  cursor: pointer;
 
-  .neu-select__trigger {
-    min-width: 78px;
-  }
-}
-
-@supports selector(:has(*)) {
-  .neu-table-container:has(.neu-table__page-size .neu-select--open) {
-    overflow: visible;
-  }
-
-  .neu-table__footer:has(.neu-table__page-size .neu-select--open) {
-    position: relative;
-    z-index: 4;
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
   }
 }
 
