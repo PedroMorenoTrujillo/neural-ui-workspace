@@ -420,12 +420,28 @@ describe('NeuSelectComponent', () => {
     expect(onChange).toHaveBeenCalledWith('es');
   });
 
-  it('should call onTouched on close', async () => {
+  it('should mark touched for a user close and keep programmatic close silent', async () => {
     const { comp } = await setup();
     const onTouched = vi.fn();
     comp.registerOnTouched(onTouched);
+    comp.open();
     comp.close();
-    expect(onTouched).toHaveBeenCalled();
+    expect(onTouched).not.toHaveBeenCalled();
+    comp.open();
+    comp.close(true, null, 'trigger');
+    expect(onTouched).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not mark touched when CVA disable closes an open panel', async () => {
+    const { f, comp } = await setup();
+    const onTouched = vi.fn();
+    comp.registerOnTouched(onTouched);
+    comp.open();
+    comp.setDisabledState(true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(comp.isOpen()).toBe(false);
+    expect(onTouched).not.toHaveBeenCalled();
   });
 
   it('setDisabledState should disable trigger', async () => {

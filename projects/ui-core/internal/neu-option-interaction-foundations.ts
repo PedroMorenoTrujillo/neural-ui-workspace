@@ -631,6 +631,31 @@ export interface InternalNeuOptionAnnouncementData {
   readonly empty: boolean;
 }
 
+interface InternalNeuOptionAriaProjection {
+  readonly positions: Uint32Array;
+  readonly renderedSize: number;
+}
+
+const optionAriaProjectionCache = new WeakMap<object, InternalNeuOptionAriaProjection>();
+
+function optionAriaProjection<T, G>(
+  rows: readonly InternalNeuOptionNormalizedRow<T, G>[],
+): InternalNeuOptionAriaProjection {
+  const cached = optionAriaProjectionCache.get(rows);
+  if (cached) return cached;
+
+  const positions = new Uint32Array(rows.length);
+  let renderedSize = 0;
+  for (let index = 0; index < rows.length; index += 1) {
+    if (rows[index]?.kind === 'option') {
+      positions[index] = ++renderedSize;
+    }
+  }
+  const projection = { positions, renderedSize };
+  optionAriaProjectionCache.set(rows, projection);
+  return projection;
+}
+
 /** Returns null for missing, disabled, group, and loading rows. */
 export function deriveNeuOptionActiveDescendant<T, G>(
   baseId: string,
@@ -652,24 +677,18 @@ export function deriveNeuOptionAriaPosition<T, G>(
     return null;
   }
 
-  const optionPosition = rows
-    .slice(0, rowIndex + 1)
-    .filter((candidate) => candidate.kind === 'option').length;
+  const projection = optionAriaProjection(rows);
   const offset = normalizeCount(options.logicalOffset ?? 0);
-  const renderedSize = rows.reduce(
-    (count, candidate) => count + (candidate.kind === 'option' ? 1 : 0),
-    0,
-  );
-  const minimumSize = offset + renderedSize;
+  const minimumSize = offset + projection.renderedSize;
   const setSize = Math.max(minimumSize, normalizeCount(options.totalSize ?? minimumSize));
-  return { posInSet: offset + optionPosition, setSize };
+  return { posInSet: offset + projection.positions[rowIndex]!, setSize };
 }
 
 export function deriveNeuOptionResultCount<T, G>(
   rows: readonly InternalNeuOptionNormalizedRow<T, G>[],
   totalSize?: number,
 ): number {
-  const renderedCount = rows.reduce((count, row) => count + (row.kind === 'option' ? 1 : 0), 0);
+  const renderedCount = optionAriaProjection(rows).renderedSize;
   return Math.max(renderedCount, normalizeCount(totalSize ?? renderedCount));
 }
 

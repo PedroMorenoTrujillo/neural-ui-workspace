@@ -564,6 +564,23 @@ describe('option A11y presentation helpers', () => {
     expect(deriveNeuOptionResultCount(rows, 100)).toBe(100);
   });
 
+  it('projects all ARIA positions with linear row access', () => {
+    const source = normalizeNeuOptionRows(Array.from({ length: 1_000 }, (_, index) => index));
+    let rowReads = 0;
+    const rows = new Proxy(source, {
+      get(target, property, receiver) {
+        if (typeof property === 'string' && /^\d+$/.test(property)) rowReads += 1;
+        return Reflect.get(target, property, receiver);
+      },
+    });
+
+    for (let index = 0; index < rows.length; index += 1) {
+      expect(deriveNeuOptionAriaPosition(rows, index)?.posInSet).toBe(index + 1);
+    }
+
+    expect(rowReads).toBeLessThan(3_100);
+  });
+
   it('returns structured, language-neutral announcement metadata', () => {
     const rows = interactionRows();
     expect(deriveNeuOptionAnnouncementData(rows, 4, 'label')).toEqual({

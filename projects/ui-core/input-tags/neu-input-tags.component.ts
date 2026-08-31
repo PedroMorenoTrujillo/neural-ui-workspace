@@ -178,6 +178,29 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
   readonly activeOptionId = computed(() => this.activeIndex() >= 0 && this.panelVisible() ? this.optionId(this.activeIndex()) : null);
   readonly nativePattern = computed(() => { const value = this.pattern(); return value instanceof RegExp ? value.source : value; });
   readonly hostClasses = computed(() => ({ 'neu-input-tags': true, 'neu-input-tags--disabled': this.isDisabled(), 'neu-input-tags--readonly': this.readonly(), 'neu-input-tags--focus': this.panelOpen(), 'neu-input-tags--invalid': this.invalid(), 'neu-input-tags--filled': this.variant() === 'filled', 'neu-input-tags--fluid': this.fluid(), 'neu-input-tags--size-sm': this.size() === 'sm', 'neu-input-tags--size-lg': this.size() === 'lg' }));
+  private readonly modelValueIndex = computed(() => {
+    const values = this.model();
+    return {
+      values: new Set(values.filter((value) => !(typeof value === 'number' && value === 0))),
+      positiveZero: values.some((value) => Object.is(value, 0)),
+      negativeZero: values.some((value) => Object.is(value, -0)),
+    };
+  });
+  private readonly groupedOptionOffsets = computed(() => {
+    const objectOffsets = new WeakMap<object, number>();
+    const primitiveOffsets: Array<readonly [T, number]> = [];
+    let offset = 0;
+    for (const entry of this.groupedOptions()) {
+      const group = entry.group;
+      if ((typeof group === 'object' && group !== null) || typeof group === 'function') {
+        objectOffsets.set(group as object, offset);
+      } else {
+        primitiveOffsets.push([group, offset]);
+      }
+      offset += entry.options.length;
+    }
+    return { objectOffsets, primitiveOffsets };
+  });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly inputElement = viewChild<ElementRef<HTMLInputElement>>('inputElement');
@@ -271,7 +294,7 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
   trackOption(index: number, option: T): unknown { return this.optionValueOf(option) ?? index; }
   trackGroup(index: number, group: T): unknown { return this.resolveOption(this.optionValue(), group) ?? this.groupLabelOf(group) ?? index; }
   optionId(index: number): string { return `${this.panelId}-option-${index}`; }
-  groupedOptionIndex(group: T, index: number): number { const match = this.groupedOptions().find((entry) => entry.group === group); return (match ? this.groupedOptions().slice(0, this.groupedOptions().indexOf(match)).reduce((count, entry) => count + entry.options.length, 0) : 0) + index; }
+  groupedOptionIndex(group: T, index: number): number { const offsets = this.groupedOptionOffsets(); const objectGroup = (typeof group === 'object' && group !== null) || typeof group === 'function'; const offset = objectGroup ? offsets.objectOffsets.get(group as object) : offsets.primitiveOffsets.find(([candidate]) => candidate === group)?.[1]; return (offset ?? 0) + index; }
   isActiveOption(option: T): boolean { return this.availableOptions()[this.activeIndex()] === option; }
   onOptionHover(option: T): void { if (!this.focusOnHover() || this.optionIsDisabled(option)) return; const index = this.availableOptions().indexOf(option); if (index >= 0) this.activeIndex.set(index); }
 
@@ -298,7 +321,7 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
   private groupChildrenOf(group: T): readonly T[] { const value = this.resolveOption(this.optionGroupChildren(), group); return Array.isArray(value) ? value as readonly T[] : []; }
   protected optionIsDisabled(option: T): boolean { return Boolean(this.resolveOption(this.optionDisabled(), option)); }
   private resolveOption(accessor: NeuInputTagsOptionAccessor<T> | null, option: T): unknown { if (typeof accessor === 'function') return accessor(option); if (typeof accessor === 'string' && option && typeof option === 'object') return (option as Record<string, unknown>)[accessor]; return undefined; }
-  private containsValue(value: T): boolean { return this.model().some((item) => Object.is(item, value)); }
+  private containsValue(value: T): boolean { const index = this.modelValueIndex(); if (typeof value === 'number' && value === 0) return Object.is(value, -0) ? index.negativeZero : index.positiveZero; return index.values.has(value); }
   private splitValues(value: string): string[] { const trimmed = value.trim(); if (!trimmed) return []; const delimiter = this.delimiter(); if (!delimiter) return [trimmed]; return typeof delimiter === 'string' ? trimmed.split(delimiter).map((item) => item.trim()).filter(Boolean) : trimmed.split(delimiter).map((item) => item.trim()).filter(Boolean); }
   private delimiterMatches(key: string): boolean { const delimiter = this.delimiter(); if (!delimiter || key.length !== 1) return false; if (typeof delimiter === 'string') return key === delimiter; delimiter.lastIndex = 0; return delimiter.test(key); }
   private scheduleComplete(event: Event): void { this.clearSearchTimer(); if (!this.typeahead() || this.query().length < Math.max(0, this.minQueryLength())) { this.closePanel(); return; } this.searchTimer = setTimeout(() => this.requestComplete(event), Math.max(0, this.delay())); }

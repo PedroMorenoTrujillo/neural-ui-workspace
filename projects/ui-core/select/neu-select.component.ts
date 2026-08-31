@@ -701,13 +701,13 @@ export class NeuSelectComponent<
    * Esto es intencional para evitar serializaciones ambiguas o engañosas.
    * Usa `optionValue` para persistir valores completos en URL.
    * Pasar `null` (default) deshabilita la sincronización.
-   */
+  */
   urlParam = input<string | null>(null);
 
   /**
    * Emite el modelo original al seleccionar una opción y null al limpiar.
    * Con NeuSelectOption mantiene el contrato legacy, incluido el campo data.
-  */
+   */
   readonly selectionChange = output<T | null>();
   readonly changeDetail = output<NeuSelectChangeEvent<T, V>>();
   readonly filter = output<NeuSelectFilterEvent<T>>();
@@ -789,6 +789,19 @@ export class NeuSelectComponent<
     this.multiple() ? this.currentValues().length > 0 : this._value() !== null,
   );
   readonly editableText = computed(() => this.editableQuery() ?? this.selectedLabel() ?? '');
+
+  private readonly selectedValueIndex = computed(() => {
+    const config = this.identityConfig();
+    if (config.compareWith || (config.identityAccessor != null && this.optionValue() == null)) {
+      return null;
+    }
+    const values = this.currentValues();
+    return {
+      values: new Set(values.filter((value) => !(typeof value === 'number' && value === 0))),
+      positiveZero: values.some((value) => Object.is(value, 0)),
+      negativeZero: values.some((value) => Object.is(value, -0)),
+    };
+  });
 
   readonly ownerId = computed(() => this.id() || this._triggerId.replace('-trigger', ''));
   readonly triggerId = computed(() => this.inputId() || this._triggerId);
@@ -1010,7 +1023,7 @@ export class NeuSelectComponent<
     if (!this.isOpen()) {
       if (this.filterValue() === null) this.searchQuery.set('');
       this.resetPanelPosition();
-      this._onTouched();
+      if (reason !== 'programmatic') this._onTouched();
       return;
     }
     this.adoptOverlaySignal();
@@ -1031,7 +1044,7 @@ export class NeuSelectComponent<
     this.applyActiveRow(this.activeRowController.clear());
     this.resetPanelPosition();
     this.typeaheadController.reset();
-    this._onTouched();
+    if (reason !== 'programmatic') this._onTouched();
     this.closed.emit({ originalEvent, reason });
     this.requestFocusRestoration(intent.focusRestoration);
   }
@@ -1428,6 +1441,14 @@ export class NeuSelectComponent<
   }
 
   isOptionSelected(option: T): boolean {
+    const index = this.selectedValueIndex();
+    if (index) {
+      const value = this.optionValueOf(option);
+      if (typeof value === 'number' && value === 0) {
+        return Object.is(value, -0) ? index.negativeZero : index.positiveZero;
+      }
+      return index.values.has(value);
+    }
     return this.currentValues().some((value) => this.optionMatchesValue(option, value));
   }
 

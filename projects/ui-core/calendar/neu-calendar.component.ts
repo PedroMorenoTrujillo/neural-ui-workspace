@@ -288,6 +288,12 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
 export class NeuCalendarComponent {
   private readonly temporal = inject(NeuInitialTemporalState);
   private readonly defaultLocale = inject(NEURAL_LOCALE);
+  private readonly eventDateKeyFormatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: this.temporal.timeZone(),
+  });
   readonly eventTpl = contentChild(NeuCalendarEventDirective);
   readonly events = input<NeuCalendarEvent[]>([]);
   readonly view = input<NeuCalendarView>('month');
@@ -320,11 +326,56 @@ export class NeuCalendarComponent {
       .sort((a, b) => a.start.getTime() - b.start.getTime()),
   );
 
+  private readonly eventsByDate = computed(() => {
+    const index = new Map<string, NormalizedCalendarEvent[]>();
+    for (const event of this.normalizedEvents()) {
+      const key = this.eventDateKey(event.start);
+      const events = index.get(key);
+      if (events) events.push(event);
+      else index.set(key, [event]);
+    }
+    return index;
+  });
+
+  private readonly weekdayFormatter = computed(
+    () => new Intl.DateTimeFormat(this.locale(), { weekday: 'short' }),
+  );
+  private readonly agendaLabelFormatter = computed(
+    () =>
+      new Intl.DateTimeFormat(this.locale(), {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+      }),
+  );
+  private readonly monthLabelFormatter = computed(
+    () => new Intl.DateTimeFormat(this.locale(), { month: 'long', year: 'numeric' }),
+  );
+  private readonly shortDateFormatter = computed(
+    () => new Intl.DateTimeFormat(this.locale(), { month: 'short', day: 'numeric' }),
+  );
+  private readonly eventTimeFormatter = computed(
+    () =>
+      new Intl.DateTimeFormat(this.locale(), {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: this.temporal.timeZone(),
+      }),
+  );
+  private readonly dayAriaFormatter = computed(
+    () =>
+      new Intl.DateTimeFormat(this.locale(), {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+  );
+
   readonly weekdays = computed(() => {
     const base = startOfWeek(new Date(2026, 0, 4), this.firstDayOfWeek());
-    return Array.from({ length: 7 }, (_, index) =>
-      new Intl.DateTimeFormat(this.locale(), { weekday: 'short' }).format(addDays(base, index)),
-    );
+    const formatter = this.weekdayFormatter();
+    return Array.from({ length: 7 }, (_, index) => formatter.format(addDays(base, index)));
   });
 
   readonly monthDays = computed<CalendarDayCell[]>(() => {
@@ -349,24 +400,18 @@ export class NeuCalendarComponent {
   readonly selectedDayEvents = computed<NormalizedCalendarEvent[]>(() => this.selectedDay().events);
 
   readonly selectedAgendaLabel = computed(() =>
-    new Intl.DateTimeFormat(this.locale(), {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    }).format(this._selectedDate()),
+    this.agendaLabelFormatter().format(this._selectedDate()),
   );
 
   readonly currentLabel = computed(() => {
     const selected = this._selectedDate();
     if (this.view() === 'month') {
-      return new Intl.DateTimeFormat(this.locale(), { month: 'long', year: 'numeric' }).format(
-        selected,
-      );
+      return this.monthLabelFormatter().format(selected);
     }
 
     const weekStart = startOfWeek(selected, this.firstDayOfWeek());
     const weekEnd = addDays(weekStart, 6);
-    const formatter = new Intl.DateTimeFormat(this.locale(), { month: 'short', day: 'numeric' });
+    const formatter = this.shortDateFormatter();
     return `${formatter.format(weekStart)} - ${formatter.format(weekEnd)}`;
   });
 
@@ -416,11 +461,7 @@ export class NeuCalendarComponent {
   formatEventMeta(event: NormalizedCalendarEvent): string {
     if (event.meta) return event.meta;
     if (event.allDay) return this.resolvedLabels().allDay;
-    return new Intl.DateTimeFormat(this.locale(), {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: this.temporal.timeZone(),
-    }).format(event.start);
+    return this.eventTimeFormatter().format(event.start);
   }
 
   eventTooltip(event: NormalizedCalendarEvent): string {
@@ -429,16 +470,11 @@ export class NeuCalendarComponent {
   }
 
   formatWeekDate(date: Date): string {
-    return new Intl.DateTimeFormat(this.locale(), { month: 'short', day: 'numeric' }).format(date);
+    return this.shortDateFormatter().format(date);
   }
 
   formatDayAriaLabel(day: CalendarDayCell): string {
-    const dateLabel = new Intl.DateTimeFormat(this.locale(), {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(day.date);
+    const dateLabel = this.dayAriaFormatter().format(day.date);
     const eventLabel = this.resolvedLabels().eventCount(day.events.length);
     return `${dateLabel}, ${eventLabel}`;
   }
@@ -477,9 +513,7 @@ export class NeuCalendarComponent {
       inCurrentMonth,
       isToday: sameDay(normalizedDate, today),
       isSelected: sameDay(normalizedDate, this._selectedDate()),
-      events: this.normalizedEvents().filter(
-        (event) => this.eventDateKey(event.start) === this.localDateKey(normalizedDate),
-      ),
+      events: this.eventsByDate().get(this.localDateKey(normalizedDate))?.slice() ?? [],
     };
   }
 
@@ -509,12 +543,7 @@ export class NeuCalendarComponent {
   }
 
   private eventDateKey(date: Date): string {
-    const parts = new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      timeZone: this.temporal.timeZone(),
-    }).formatToParts(date);
+    const parts = this.eventDateKeyFormatter.formatToParts(date);
     const value = (type: 'year' | 'month' | 'day') =>
       parts.find((part) => part.type === type)?.value ?? '';
     return `${value('year')}-${value('month')}-${value('day')}`;

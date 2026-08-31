@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   Component,
   Directive,
@@ -806,7 +806,7 @@ describe('NeuMultiselectComponent', () => {
 
   // ── Escape cierra panel ───────────────────────────────────────────────────
 
-  it('close() should set isOpen to false and call onTouched', () => {
+  it('close() should distinguish programmatic and user touch ownership', () => {
     const f = TestBed.createComponent(NeuMultiselectComponent);
     f.componentRef.setInput('options', OPTIONS);
     f.detectChanges();
@@ -816,7 +816,25 @@ describe('NeuMultiselectComponent', () => {
     comp.open();
     comp.close();
     expect(comp.isOpen()).toBe(false);
-    expect(onTouched).toHaveBeenCalled();
+    expect(onTouched).not.toHaveBeenCalled();
+    comp.open();
+    comp.close(null, 'trigger');
+    expect(onTouched).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not mark touched when CVA disable closes an open panel', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    const onTouched = vi.fn();
+    comp.registerOnTouched(onTouched);
+    comp.open();
+    comp.setDisabledState(true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(comp.isOpen()).toBe(false);
+    expect(onTouched).not.toHaveBeenCalled();
   });
 
   it('syncPanelPosition should notify the virtual viewport when virtualScroll=true', async () => {
@@ -1479,6 +1497,24 @@ describe('NeuMultiselectComponent', () => {
     comp._values.set(['angular', 'react']);
     expect(comp['isSelected']('angular')).toBe(true);
     expect(comp['isSelected']('vue')).toBe(false);
+  });
+
+  it('indexes canonical selected values once instead of scanning 1,000 selections per row', () => {
+    const data = Array.from({ length: 10_000 }, (_, id) => ({ id, label: `Option ${id}` }));
+    const valueAccessor = vi.fn((option: { id: number }) => option.id);
+    const f = TestBed.createComponent(NeuMultiselectComponent) as ComponentFixture<
+      NeuMultiselectComponent<{ id: number; label: string }, number>
+    >;
+    f.componentRef.setInput('options', data);
+    f.componentRef.setInput('optionLabel', 'label');
+    f.componentRef.setInput('optionValue', valueAccessor);
+    f.detectChanges();
+    f.componentInstance.writeValue(Array.from({ length: 1_000 }, (_, index) => index));
+    valueAccessor.mockClear();
+
+    for (const option of data) f.componentInstance.isOptionSelected(option);
+
+    expect(valueAccessor).toHaveBeenCalledTimes(data.length);
   });
 
   // ── Keyboard DOM dispatch on option elements ──────────────────────────────

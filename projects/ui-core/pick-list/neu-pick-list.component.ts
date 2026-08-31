@@ -145,7 +145,10 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
 
   private isSelectedValue(selection: Set<V>, option: T): boolean {
     const value = this.optionValueOf(option);
-    return [...selection].some((selected) => neuOptionValuesEqual(selected, value));
+    if (typeof value === 'number' && value === 0) {
+      return [...selection].some((selected) => neuOptionValuesEqual(selected, value));
+    }
+    return selection.has(value);
   }
 
   private isValueDisabled(options: readonly T[], value: V): boolean {

@@ -1,5 +1,7 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NEURAL_TIME_ZONE } from '@neural-ui/core/foundation';
+import { vi } from 'vitest';
 import { NeuCalendarComponent, NeuCalendarEventDirective } from './neu-calendar.component';
 
 const EVENTS = [
@@ -343,6 +345,71 @@ describe('NeuCalendarComponent', () => {
       .find((cell) => localDayKey(cell.date) === '2026-05-14');
     expect(day?.events.length).toBe(2);
     expect(fixture.componentInstance.visibleEvents(day?.events ?? []).length).toBe(1);
+  });
+
+  it('indexes a replacement event collection without retaining stale dates', () => {
+    const fixture = setup();
+    const may14 = fixture.componentInstance.monthDays().find((cell) => localDayKey(cell.date) === '2026-05-14');
+    expect(may14?.events.map((event) => event.id)).toEqual(['a', 'b']);
+
+    fixture.componentRef.setInput('events', [
+      { id: 'replacement', title: 'Replacement', start: '2026-05-20T09:00:00' },
+    ]);
+    fixture.detectChanges();
+
+    const days = fixture.componentInstance.monthDays();
+    expect(days.find((cell) => localDayKey(cell.date) === '2026-05-14')?.events).toEqual([]);
+    expect(days.find((cell) => localDayKey(cell.date) === '2026-05-20')?.events[0]?.id).toBe('replacement');
+  });
+
+  it('constructs a bounded formatter set for an event-heavy month', async () => {
+    const OriginalDateTimeFormat = Intl.DateTimeFormat;
+    let formatterCount = 0;
+    const formatter = vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(function (
+      locales?: Intl.LocalesArgument,
+      options?: Intl.DateTimeFormatOptions,
+    ) {
+      formatterCount += 1;
+      return new OriginalDateTimeFormat(locales, options);
+    });
+    try {
+      const fixture = TestBed.createComponent(NeuCalendarComponent);
+      fixture.componentRef.setInput('events', Array.from({ length: 1_000 }, (_, index) => ({
+        id: String(index),
+        title: String(index),
+        start: new Date(2026, 4, (index % 31) + 1),
+      })));
+      fixture.componentRef.setInput('selectedDate', '2026-05-14');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(fixture.componentInstance.monthDays().length).toBe(42);
+      expect(formatterCount).toBe(7);
+    } finally {
+      formatter.mockRestore();
+    }
+  });
+
+  it('keeps midnight, year-boundary and DST event keys in the configured timezone', async () => {
+    await TestBed.resetTestingModule().configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: NEURAL_TIME_ZONE, useValue: 'America/New_York' },
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(NeuCalendarComponent);
+    fixture.componentRef.setInput('events', [
+      { id: 'year-boundary', title: 'Year boundary', start: '2026-01-01T03:30:00.000Z' },
+      { id: 'dst-before', title: 'DST before', start: '2026-03-08T06:30:00.000Z' },
+      { id: 'dst-after', title: 'DST after', start: '2026-03-08T07:30:00.000Z' },
+    ]);
+    fixture.componentRef.setInput('selectedDate', '2025-12-31');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual(['year-boundary']);
+
+    fixture.componentRef.setInput('selectedDate', '2026-03-08');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual(['dst-before', 'dst-after']);
   });
 
   it('should render the more label when a day exceeds maxVisibleEvents', async () => {

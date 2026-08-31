@@ -497,6 +497,19 @@ export class NeuListboxComponent<
     this.values().map((value, index) => ({ key: index, value: this.nativeValue(value) })),
   );
 
+  private readonly selectedValueIndex = computed(() => {
+    const config = this.identityConfig();
+    if (config.compareWith || (config.identityAccessor != null && this.optionValue() == null)) {
+      return null;
+    }
+    const values = this.values();
+    return {
+      values: new Set(values.filter((value) => !(typeof value === 'number' && value === 0))),
+      positiveZero: values.some((value) => Object.is(value, 0)),
+      negativeZero: values.some((value) => Object.is(value, -0)),
+    };
+  });
+
   private onChange: (value: V | V[] | null) => void = () => {};
   private onTouched: () => void = () => {};
 
@@ -538,9 +551,24 @@ export class NeuListboxComponent<
     return resolveNeuOptionDisabled(option, this.optionDisabled());
   }
   private isSelected(value: V): boolean {
+    const index = this.selectedValueIndex();
+    if (index) {
+      if (typeof value === 'number' && value === 0) {
+        return Object.is(value, -0) ? index.negativeZero : index.positiveZero;
+      }
+      return index.values.has(value);
+    }
     return this.values().some((selected) => this.valuesEqual(selected, value));
   }
   protected isOptionSelected(option: T): boolean {
+    const index = this.selectedValueIndex();
+    if (index) {
+      const value = this.optionValueOf(option);
+      if (typeof value === 'number' && value === 0) {
+        return Object.is(value, -0) ? index.negativeZero : index.positiveZero;
+      }
+      return index.values.has(value);
+    }
     return this.values().some((selected) => this.optionMatchesValue(option, selected));
   }
   private trackByOption(_index: number, option: T): unknown {
@@ -976,10 +1004,8 @@ export class NeuListboxComponent<
   private modelValue(): V | readonly V[] | null {
     return this.multiple() ? this.values() : (this.values()[0] ?? null);
   }
-  private selectedOptions(values: readonly V[]): T[] {
-    return this.allOptions().filter((option) =>
-      values.some((value) => this.optionMatchesValue(option, value)),
-    );
+  private selectedOptions(_values: readonly V[]): T[] {
+    return this.allOptions().filter((option) => this.isOptionSelected(option));
   }
   private allOptions(): readonly T[] {
     const config = this.groupConfig();

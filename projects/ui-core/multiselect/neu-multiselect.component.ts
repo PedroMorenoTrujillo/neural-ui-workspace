@@ -429,7 +429,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
             [attr.aria-activedescendant]="activeDescendantId()"
             (keydown)="onTriggerKeyDown($event)"
           >
-            <ng-template #multiselectOptionTpl let-row>
+            <ng-template #multiselectOptionTpl let-row let-rowIndex="rowIndex">
               @if (row.kind === 'group') {
                 <div class="neu-multiselect__group" role="presentation" [id]="optionRowId(row)">
                   @if (groupTpl(); as groupTemplate) {
@@ -464,11 +464,11 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
                   [id]="optionRowId(row)"
                   [attr.aria-selected]="isOptionSelected(row.option)"
                   [attr.aria-disabled]="row.disabled ? 'true' : null"
-                  [attr.aria-posinset]="optionAriaPosition(row)"
+                  [attr.aria-posinset]="optionAriaPosition(row, rowIndex)"
                   [attr.aria-setsize]="logicalTotal()"
                   [attr.tabindex]="row.disabled ? null : '-1'"
                   (click)="toggleOption(row.option, $event)"
-                  (mouseenter)="onOptionHover(filteredRows().indexOf(row))"
+                  (mouseenter)="onOptionHover(rowIndex)"
                   (keydown.enter)="toggleOption(row.option, $event)"
                   (keydown.space)="toggleOption(row.option, $event)"
                   (keydown.arrowDown)="focusOptionByIndex($any($event), row.option, 1)"
@@ -534,18 +534,24 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
                 [style.height]="virtualViewportHeight()"
                 (scrolledIndexChange)="onVirtualIndexChange($event)"
               >
-                <ng-container *cdkVirtualFor="let row of renderedRows(); trackBy: trackByRow">
+                <ng-container
+                  *cdkVirtualFor="
+                    let row of renderedRows();
+                    trackBy: trackByRow;
+                    let rowIndex = index
+                  "
+                >
                   <ng-container
                     [ngTemplateOutlet]="multiselectOptionTpl"
-                    [ngTemplateOutletContext]="{ $implicit: row }"
+                    [ngTemplateOutletContext]="{ $implicit: row, rowIndex }"
                   />
                 </ng-container>
               </cdk-virtual-scroll-viewport>
             } @else {
-              @for (row of renderedRows(); track trackByRow($index, row)) {
+              @for (row of renderedRows(); track trackByRow($index, row); let rowIndex = $index) {
                 <ng-container
                   [ngTemplateOutlet]="multiselectOptionTpl"
-                  [ngTemplateOutletContext]="{ $implicit: row }"
+                  [ngTemplateOutletContext]="{ $implicit: row, rowIndex }"
                 />
               }
             }
@@ -942,6 +948,27 @@ export class NeuMultiselectComponent<
     this._values().slice(0, Math.max(0, this.maxSelectedLabels())),
   );
 
+  private readonly selectedValueIndex = computed(() => {
+    return this.usesCanonicalValueIdentity() ? this.createValueIndex(this._values()) : null;
+  });
+
+  private readonly optionByValueIndex = computed(() => {
+    if (!this.usesCanonicalValueIdentity()) return null;
+    const values = new Map<V, T>();
+    let positiveZero: T | null = null;
+    let negativeZero: T | null = null;
+    for (const option of this.allOptions()) {
+      const value = this.optionValueOf(option);
+      if (typeof value === 'number' && value === 0) {
+        if (Object.is(value, -0)) negativeZero ??= option;
+        else positiveZero ??= option;
+      } else if (!values.has(value)) {
+        values.set(value, option);
+      }
+    }
+    return { values, positiveZero, negativeZero };
+  });
+
   readonly hasError = computed(() => !!this.errorMessage());
 
   readonly describedBy = computed(() => {
@@ -1104,11 +1131,18 @@ export class NeuMultiselectComponent<
 
   // --- Helpers ---
   protected labelFor(value: V): string {
-    const option = this.allOptions().find((candidate) => this.optionMatchesValue(candidate, value));
-    return option === undefined ? String(value) : this.optionLabelOf(option);
+    const option = this.optionFor(value);
+    return option === null ? String(value) : this.optionLabelOf(option);
   }
 
   protected optionFor(value: V): T | null {
+    const index = this.optionByValueIndex();
+    if (index) {
+      if (typeof value === 'number' && value === 0) {
+        return (Object.is(value, -0) ? index.negativeZero : index.positiveZero) ?? null;
+      }
+      return index.values.get(value) ?? null;
+    }
     return this.allOptions().find((option) => this.optionMatchesValue(option, value)) ?? null;
   }
 
@@ -1117,6 +1151,10 @@ export class NeuMultiselectComponent<
   }
 
   protected isSelected(value: V): boolean {
+    const index = this.selectedValueIndex();
+    if (index) {
+      return this.indexHasValue(index, value);
+    }
     return this._values().some((current) => this.valuesEqual(current, value));
   }
 
@@ -1138,6 +1176,10 @@ export class NeuMultiselectComponent<
   }
 
   isOptionSelected(option: T): boolean {
+    const index = this.selectedValueIndex();
+    if (index) {
+      return this.indexHasValue(index, this.optionValueOf(option));
+    }
     return this._values().some((value) => this.optionMatchesValue(option, value));
   }
 
@@ -1149,9 +1191,35 @@ export class NeuMultiselectComponent<
   }
 
   private selectedOptions(values: readonly V[]): T[] {
+    const index = this.usesCanonicalValueIdentity() ? this.createValueIndex(values) : null;
     return this.allOptions().filter((option) =>
-      values.some((value) => this.optionMatchesValue(option, value)),
+      index
+        ? this.indexHasValue(index, this.optionValueOf(option))
+        : values.some((value) => this.optionMatchesValue(option, value)),
     );
+  }
+
+  private usesCanonicalValueIdentity(): boolean {
+    const config = this.identityConfig();
+    return !config.compareWith && config.identityAccessor == null;
+  }
+
+  private createValueIndex(values: readonly V[]) {
+    return {
+      values: new Set(values.filter((value) => !(typeof value === 'number' && value === 0))),
+      positiveZero: values.some((value) => Object.is(value, 0)),
+      negativeZero: values.some((value) => Object.is(value, -0)),
+    };
+  }
+
+  private indexHasValue(
+    index: { values: Set<V>; positiveZero: boolean; negativeZero: boolean },
+    value: V,
+  ): boolean {
+    if (typeof value === 'number' && value === 0) {
+      return Object.is(value, -0) ? index.negativeZero : index.positiveZero;
+    }
+    return index.values.has(value);
   }
 
   private valuesEqual(left: V, right: V): boolean {
@@ -1273,7 +1341,7 @@ export class NeuMultiselectComponent<
     }
     this.resetPanelPosition();
     this.closed.emit({ originalEvent: event, reason });
-    this._onTouched();
+    if (reason !== 'programmatic' && reason !== 'disabled') this._onTouched();
     this.requestFocusRestoration(intent.focusRestoration);
   }
 
@@ -1358,15 +1426,32 @@ export class NeuMultiselectComponent<
     let next = [...this._values()];
     if (this.allFilteredSelected()) {
       const enabledValues = enabled.map((option) => this.optionValueOf(option));
-      next = next.filter(
-        (value) => !enabledValues.some((enabledValue) => this.valuesEqual(enabledValue, value)),
+      const enabledIndex = this.usesCanonicalValueIdentity()
+        ? this.createValueIndex(enabledValues)
+        : null;
+      next = next.filter((value) =>
+        enabledIndex
+          ? !this.indexHasValue(enabledIndex, value)
+          : !enabledValues.some((enabledValue) => this.valuesEqual(enabledValue, value)),
       );
     } else {
+      const nextIndex = this.usesCanonicalValueIdentity() ? this.createValueIndex(next) : null;
       enabled.forEach((option) => {
         const value = this.optionValueOf(option);
-        if (!next.some((current) => this.valuesEqual(current, value))) {
+        const selected = nextIndex
+          ? this.indexHasValue(nextIndex, value)
+          : next.some((current) => this.valuesEqual(current, value));
+        if (!selected) {
           if (this.selectionLimit() != null && next.length >= this.selectionLimit()!) return;
           next.push(value);
+          if (nextIndex) {
+            if (typeof value === 'number' && value === 0) {
+              if (Object.is(value, -0)) nextIndex.negativeZero = true;
+              else nextIndex.positiveZero = true;
+            } else {
+              nextIndex.values.add(value);
+            }
+          }
         }
       });
     }
@@ -1518,8 +1603,7 @@ export class NeuMultiselectComponent<
     return deriveNeuOptionRowId(this._panelId, row);
   }
 
-  protected optionAriaPosition(row: InternalNeuOptionRow<T>): number {
-    const rowIndex = this.filteredRows().indexOf(row);
+  protected optionAriaPosition(row: InternalNeuOptionRow<T>, rowIndex: number): number {
     return (
       deriveNeuOptionAriaPosition(this.filteredRows(), rowIndex, {
         logicalOffset: this.dataFirst(),
