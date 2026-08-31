@@ -1,11 +1,30 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuSplitButtonComponent, NeuSplitButtonAction } from './neu-split-button.component';
+import {
+  NeuSplitButtonAction,
+  NeuSplitButtonComponent,
+  NeuSplitButtonItemDirective,
+} from './neu-split-button.component';
 
 const ACTIONS: NeuSplitButtonAction[] = [
   { id: 'save', label: 'Guardar borrador' },
   { id: 'schedule', label: 'Programar' },
   { id: 'delete', label: 'Eliminar', disabled: true },
 ];
+
+@Component({
+  imports: [NeuSplitButtonComponent, NeuSplitButtonItemDirective],
+  template: `
+    <neu-split-button label="Publicar" [actions]="actions">
+      <ng-template neuSplitButtonItem let-action>
+        <span class="custom-split-action">custom:{{ action.id }}</span>
+      </ng-template>
+    </neu-split-button>
+  `,
+})
+class SplitButtonTemplateHostComponent {
+  readonly actions = ACTIONS;
+}
 
 describe('NeuSplitButtonComponent', () => {
   beforeEach(async () => {
@@ -382,5 +401,93 @@ describe('NeuSplitButtonComponent', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.isOpen()).toBe(false);
     expect(document.activeElement).toBe(trigger);
+  });
+
+  it('renders the consumer action template with the selected action context', async () => {
+    const fixture = TestBed.createComponent(SplitButtonTemplateHostComponent);
+    fixture.detectChanges();
+    const splitButton = fixture.nativeElement.querySelector(
+      'neu-split-button',
+    ) as HTMLElement;
+    splitButton.querySelector<HTMLButtonElement>('.neu-split-button__chevron')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const customActions = document.querySelectorAll('.custom-split-action');
+    expect(customActions).toHaveLength(3);
+    expect(customActions[1].textContent?.trim()).toBe('custom:schedule');
+  });
+
+  it('opens from ArrowUp at the last eligible action and activates it with Enter', async () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', ACTIONS);
+    const emitted: NeuSplitButtonAction[] = [];
+    fixture.componentInstance.actionClick.subscribe((action) => emitted.push(action));
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-split-button__chevron',
+    ) as HTMLButtonElement;
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    trigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const items = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.neu-split-button__dropdown-item'),
+    );
+    expect(document.activeElement).toBe(items[1]);
+
+    items[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(emitted.map((action) => action.id)).toEqual(['schedule']);
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+  });
+
+  it('does not open while disabled or reopen an already open menu', () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    fixture.componentInstance.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
+    );
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+
+    fixture.componentRef.setInput('disabled', false);
+    fixture.detectChanges();
+    fixture.componentInstance.isOpen.set(true);
+    fixture.componentInstance.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
+    );
+    expect(fixture.componentInstance.isOpen()).toBe(true);
+  });
+
+  it('handles an all-disabled action list without assigning a focus target', async () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', [
+      { id: 'one', label: 'One', disabled: true },
+      { id: 'two', label: 'Two', disabled: true },
+    ]);
+    fixture.detectChanges();
+    fixture.componentInstance.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(
+      Array.from(
+        document.querySelectorAll<HTMLButtonElement>('.neu-split-button__dropdown-item'),
+      ).every((item) => item.tabIndex === -1),
+    ).toBe(true);
   });
 });

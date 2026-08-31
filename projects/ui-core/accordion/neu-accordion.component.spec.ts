@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { NeuAccordionComponent, NeuAccordionItem } from './neu-accordion.component';
+import {
+  NeuAccordionComponent,
+  NeuAccordionHeaderDirective,
+  NeuAccordionItem,
+} from './neu-accordion.component';
 
 const ITEMS: NeuAccordionItem[] = [
   { id: '1', title: '¿Qué es NeuralUI?', content: 'Una librería de componentes Angular.' },
@@ -20,6 +24,20 @@ class TestHostComponent {
   items = ITEMS;
   multiple = false;
   lastToggle: { id: string; expanded: boolean } | undefined;
+}
+
+@Component({
+  template: `
+    <neu-accordion [items]="items">
+      <ng-template neuAccordionHeader let-item let-expanded="expanded">
+        <span class="custom-accordion-header">{{ item.id }}:{{ expanded }}</span>
+      </ng-template>
+    </neu-accordion>
+  `,
+  imports: [NeuAccordionComponent, NeuAccordionHeaderDirective],
+})
+class AccordionTemplateHostComponent {
+  readonly items = ITEMS.slice(0, 1);
 }
 
 describe('NeuAccordionComponent', () => {
@@ -197,5 +215,17 @@ describe('NeuAccordionComponent', () => {
     (df.componentInstance as any)._sanitizer = { sanitize: () => null };
 
     expect(df.componentInstance.sanitize('<script>bad()</script>')).toBe('');
+  });
+
+  it('renders a consumer header template with item and expansion context', () => {
+    const df = TestBed.createComponent(AccordionTemplateHostComponent);
+    df.detectChanges();
+    const header = df.nativeElement.querySelector('.custom-accordion-header');
+    expect(header.textContent?.trim()).toBe('1:false');
+
+    df.nativeElement.querySelector('button').click();
+    df.detectChanges();
+    expect(header.textContent?.trim()).toBe('1:true');
+    expect(df.nativeElement.querySelector('.neu-accordion__title')).toBeNull();
   });
 });

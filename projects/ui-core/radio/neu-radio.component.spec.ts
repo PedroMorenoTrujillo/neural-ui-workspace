@@ -110,4 +110,18 @@ describe('NeuRadioComponent + NeuRadioGroupComponent', () => {
     f.componentInstance.select('c');
     expect(changed).toBe('c');
   });
+
+  it('omits optional label markup when no label is provided', () => {
+    @Component({
+      template: `<neu-radio-group><neu-radio value="unlabelled" /></neu-radio-group>`,
+      imports: [NeuRadioGroupComponent, NeuRadioComponent],
+    })
+    class UnlabelledRadioHostComponent {}
+
+    const f = TestBed.createComponent(UnlabelledRadioHostComponent);
+    f.detectChanges();
+
+    expect(f.nativeElement.querySelector('.neu-radio__label')).toBeNull();
+    expect(f.nativeElement.querySelector('input[type="radio"]')).toBeTruthy();
+  });
 });

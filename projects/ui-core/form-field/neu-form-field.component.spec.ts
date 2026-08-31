@@ -54,6 +54,15 @@ describe('NeuFormFieldComponent', () => {
     expect(host.querySelector('.neu-form-field__suffix')?.textContent).toBe('USD');
     expect(host.querySelector('[role="alert"]')?.textContent).toContain('Invalid');
   });
+
+  it('omits empty descriptions and merges nullable external IDs without duplicates', () => {
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.describedBy()).toBe('');
+    expect(
+      fixture.componentInstance.mergeDescribedBy(null, undefined, '', 'external external'),
+    ).toBe('external');
+  });
 });
 
 @Component({

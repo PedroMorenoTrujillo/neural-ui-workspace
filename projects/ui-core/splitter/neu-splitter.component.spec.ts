@@ -189,6 +189,25 @@ describe('NeuSplitterComponent', () => {
     expect(f.componentInstance['_sizes']()[1]).toBe(40);
   });
 
+  it('normalizes explicit null pane sizes at the defensive input boundary', async () => {
+    const f = setup([{ size: null as unknown as number }, { size: 100 }]);
+    await f.whenStable();
+
+    expect(f.componentInstance['_sizes']()).toEqual([0, 100]);
+  });
+
+  it('does not install mouse or touch drag listeners without an owning window', async () => {
+    const f = setup([{ size: 50 }, { size: 50 }]);
+    await f.whenStable();
+    const component = f.componentInstance as any;
+    component._el = { nativeElement: { ownerDocument: { defaultView: null } } };
+
+    component._startDrag({ preventDefault: vi.fn(), clientX: 10, clientY: 20 }, 0);
+    expect(component._dragSessionDisposer).toBeNull();
+    component._startTouchDrag({ touches: [{ clientX: 10, clientY: 20 }] }, 0);
+    expect(component._dragSessionDisposer).toBeNull();
+  });
+
   it('_startDrag with vertical direction should respond to clientY movement', async () => {
     // El drag vertical debe responder al eje Y del mouse
     // Vertical drag must respond to the mouse Y axis

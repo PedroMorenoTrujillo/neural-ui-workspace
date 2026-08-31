@@ -1,11 +1,34 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuTimelineComponent, NeuTimelineItem } from './neu-timeline.component';
+import {
+  NeuTimelineComponent,
+  NeuTimelineItem,
+  NeuTimelineItemDirective,
+  NeuTimelineMarkerDirective,
+} from './neu-timeline.component';
 
 const ITEMS: NeuTimelineItem[] = [
   { title: 'Evento A', time: 'Hace 2h', description: 'Descripción A', variant: 'success' },
   { title: 'Evento B', time: '12 Mar', description: 'Descripción B', variant: 'warning' },
   { title: 'Evento C', variant: 'danger' },
 ];
+
+@Component({
+  imports: [NeuTimelineComponent, NeuTimelineItemDirective, NeuTimelineMarkerDirective],
+  template: `
+    <neu-timeline [items]="items">
+      <ng-template neuTimelineMarker let-item>
+        <span class="custom-marker">{{ item.variant }}</span>
+      </ng-template>
+      <ng-template neuTimelineItem let-item let-index="index">
+        <span class="custom-item">{{ index }}:{{ item.title }}</span>
+      </ng-template>
+    </neu-timeline>
+  `,
+})
+class TimelineTemplateHostComponent {
+  readonly items = ITEMS;
+}
 
 describe('NeuTimelineComponent', () => {
   beforeEach(async () => {
@@ -130,5 +153,18 @@ describe('NeuTimelineComponent', () => {
     const lines = fixture.nativeElement.querySelectorAll('.neu-timeline__line');
     const items = fixture.nativeElement.querySelectorAll('.neu-timeline__item');
     expect(lines.length).toBe(items.length - 1);
+  });
+
+  it('renders consumer item and marker templates with their documented contexts', () => {
+    const fixture = TestBed.createComponent(TimelineTemplateHostComponent);
+    fixture.detectChanges();
+
+    const markers = fixture.nativeElement.querySelectorAll('.custom-marker');
+    const items = fixture.nativeElement.querySelectorAll('.custom-item');
+    expect(markers).toHaveLength(3);
+    expect(markers[0].textContent?.trim()).toBe('success');
+    expect(items).toHaveLength(3);
+    expect(items[1].textContent?.trim()).toBe('1:Evento B');
+    expect(fixture.nativeElement.querySelector('.neu-timeline__title')).toBeNull();
   });
 });

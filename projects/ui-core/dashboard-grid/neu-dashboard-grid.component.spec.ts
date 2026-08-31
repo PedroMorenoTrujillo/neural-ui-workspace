@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, PLATFORM_ID, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
 import { By } from '@angular/platform-browser';
@@ -273,5 +273,16 @@ describe('NeuDashboardGridComponent', () => {
     await f.whenStable();
 
     expect(f.nativeElement.querySelector('.projected-missing')?.textContent).toContain('Ghost');
+  });
+
+  it('does not schedule or attach projected tiles on the server platform', async () => {
+    TestBed.overrideProvider(PLATFORM_ID, { useValue: 'server' });
+    const f = TestBed.createComponent(NeuDashboardGridComponent);
+    f.componentRef.setInput('tiles', [{ id: 'server', title: 'Server' }]);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(() => f.componentInstance['_attachProjectedTiles']()).not.toThrow();
+    expect(f.nativeElement.querySelectorAll('.neu-dg__tile')).toHaveLength(1);
   });
 });

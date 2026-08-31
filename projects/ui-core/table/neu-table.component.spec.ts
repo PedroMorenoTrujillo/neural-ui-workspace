@@ -34,6 +34,7 @@ import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
 import { By } from '@angular/platform-browser';
 import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
 import { NeuTableFilterRegistry } from './neu-table-filter.registry';
+import { NeuTableOptionalFeatureErrorComponent } from './neu-table-optional-feature-error.component';
 
 const E3_ADVANCED_FILTER_TEXTS = {
   openFilter: 'Open filter for {column}',
@@ -8078,6 +8079,115 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(labels.some((label) => label?.includes('Status'))).toBe(true);
   });
 
+  it('drives advanced rule add, remove, clear, and apply through the lazy overlay UI', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Name');
+
+    document
+      .querySelector<HTMLButtonElement>('.neu-table__filter-overlay-add-rule')!
+      .click();
+    await settle(fixture);
+    expect(internal._filterDraftRules()).toHaveLength(2);
+
+    document
+      .querySelector<HTMLButtonElement>('.neu-table__filter-overlay-remove-rule')!
+      .click();
+    await settle(fixture);
+    expect(internal._filterDraftRules()).toHaveLength(1);
+
+    internal._filterOverlayTextControl.setValue('Beta');
+    const action = (label: string): HTMLButtonElement =>
+      Array.from(
+        document.querySelectorAll<HTMLButtonElement>(
+          '.neu-table__filter-overlay-actions button',
+        ),
+      ).find((button) => button.textContent?.trim() === label)!;
+    action('Clear').click();
+    await settle(fixture);
+    expect(internal._filterOverlayTextControl.value).toBe('');
+
+    internal._filterOverlayTextControl.setValue('Beta');
+    action('Apply').click();
+    await settle(fixture);
+    expect(fixture.componentInstance.filteredData().map((row) => row.name)).toEqual(['Beta']);
+  });
+
+  it('commits a real Select option through the lazy advanced overlay boundary', async () => {
+    const fixture = await createAdvancedTable();
+    const internal = internalFilters(fixture.componentInstance);
+    await open(fixture, 'Status');
+
+    document
+      .querySelector<HTMLButtonElement>('.neu-table__filter-overlay .neu-select__trigger')!
+      .click();
+    await settle(fixture);
+    const active = Array.from(
+      document.querySelectorAll<HTMLElement>('.neu-select__option'),
+    ).find((option) => option.textContent?.includes('active'))!;
+    active.click();
+    await settle(fixture);
+
+    expect(internal._filterOverlaySelectControl.value).toBe('active');
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
+    expect(document.activeElement).toBe(
+      document.querySelector('.neu-table__filter-overlay .neu-select__trigger'),
+    );
+  });
+
+  it('applies every text and number inline filter on genuine Enter events', async () => {
+    interface InlineFilterRow {
+      name: string;
+      range: number;
+      score: number;
+    }
+
+    const fixture = TestBed.createComponent(NeuTableComponent<InlineFilterRow>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'name', header: 'Name', filterConfig: { kind: 'text' } },
+      {
+        key: 'range',
+        header: 'Range',
+        filterConfig: { kind: 'number', mode: 'between' },
+      },
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number' } },
+    ] satisfies NeuTableColumn<InlineFilterRow>[]);
+    fixture.componentRef.setInput('data', [{ name: 'Alpha', range: 5, score: 10 }]);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
+    fixture.componentRef.setInput('advancedFilterMode', 'off');
+    fixture.componentRef.setInput('filterOptions', { on: 'enter' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const setColumnFilter = vi.spyOn(fixture.componentInstance, 'setColumnFilter');
+    const host = fixture.nativeElement as HTMLElement;
+    const inputs = [
+      host.querySelector<HTMLInputElement>('.neu-input__field')!,
+      ...host.querySelectorAll<HTMLInputElement>('.neu-number-input__field'),
+    ];
+    expect(inputs).toHaveLength(4);
+
+    inputs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    inputs[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', repeat: true, bubbles: true }),
+    );
+    expect(setColumnFilter).not.toHaveBeenCalled();
+
+    for (const input of inputs) {
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    }
+    expect(setColumnFilter.mock.calls.map(([key]) => key)).toEqual([
+      'name',
+      'range',
+      'range',
+      'score',
+    ]);
+  });
+
   it('maps eligibility, precision, and human match-mode labels without exposing deferred kinds', async () => {
     const fixture = await createAdvancedTable();
     const internal = internalFilters(fixture.componentInstance);
@@ -9088,6 +9198,22 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(table._state.snapshot().editingCell).toBeNull();
     expect(error).toHaveBeenCalledTimes(2);
     error.mockRestore();
+  });
+
+  it('reports a deferred optional-feature component failure only once across input changes', async () => {
+    const failure = vi.fn();
+    const fixture = TestBed.createComponent(NeuTableOptionalFeatureErrorComponent);
+    fixture.componentRef.setInput('host', { _optionalFeatureLoadFailed: failure } as any);
+    fixture.componentRef.setInput('kind', 'filter');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(failure).toHaveBeenCalledTimes(1);
+    expect(failure.mock.calls[0][0]).toBe('filter');
+
+    fixture.componentRef.setInput('kind', 'editor');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(failure).toHaveBeenCalledTimes(1);
   });
 
   it('normalizes persisted identity, expansion, layout, and filter lifecycle boundaries', () => {
