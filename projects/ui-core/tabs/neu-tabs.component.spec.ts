@@ -63,6 +63,21 @@ describe('NeuTabsComponent', () => {
     expect(tabs.length).toBe(3);
   });
 
+  it('updates the active indicator when scrollIntoView is unavailable', () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
+      ?.componentInstance as NeuTabsComponent;
+    const activeTab = f.nativeElement.querySelector('.neu-tabs__tab') as HTMLElement;
+    Object.defineProperty(activeTab, 'scrollIntoView', {
+      configurable: true,
+      value: undefined,
+    });
+
+    expect(() => (tabsComp as any)._updateIndicator()).not.toThrow();
+    expect((tabsComp as any)._indicatorLeft()).toBe(`${activeTab.offsetLeft}px`);
+  });
+
   // ── Tab selection ─────────────────────────────────────────────────────────
 
   it('should emit tabChange when a tab is clicked', () => {

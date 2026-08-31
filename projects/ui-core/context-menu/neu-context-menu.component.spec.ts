@@ -258,6 +258,35 @@ describe('NeuContextMenuOverlayComponent', () => {
     expect(icon.textContent).toContain('📋');
   });
 
+  it('renders separators after the first item and keeps plain items icon-free', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set([
+      { key: 'plain', label: 'Plain' },
+      { key: 'separated', label: 'Separated', separator: true },
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelectorAll('.neu-context-menu__separator')).toHaveLength(1);
+    expect(f.nativeElement.querySelector('.neu-context-menu__icon')).toBeNull();
+  });
+
+  it('activates the focused enabled item from the real keyboard listener', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set(ITEMS);
+    const selected: NeuContextMenuItem[] = [];
+    f.componentInstance._selectFn = (item) => selected.push(item);
+    f.detectChanges();
+    await f.whenStable();
+    const first = f.nativeElement.querySelector('.neu-context-menu__item') as HTMLButtonElement;
+    first.focus();
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+
+    expect(selected.map((item) => item.key)).toEqual(['copy']);
+  });
+
   it('should render separator HR for non-first items with separator=true', async () => {
     const itemsWithSep = [
       { key: 'a', label: 'A', icon: '📋' },

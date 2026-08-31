@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import {
   NeuAccordionComponent,
   NeuAccordionHeaderDirective,
@@ -220,8 +221,11 @@ describe('NeuAccordionComponent', () => {
   it('renders a consumer header template with item and expansion context', () => {
     const df = TestBed.createComponent(AccordionTemplateHostComponent);
     df.detectChanges();
+    const accordion = df.debugElement.query(By.directive(NeuAccordionComponent))
+      .componentInstance as NeuAccordionComponent;
     const header = df.nativeElement.querySelector('.custom-accordion-header');
     expect(header.textContent?.trim()).toBe('1:false');
+    expect(accordion.headerTpl()).toBeTruthy();
 
     df.nativeElement.querySelector('button').click();
     df.detectChanges();

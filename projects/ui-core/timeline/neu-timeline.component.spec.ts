@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import {
   NeuTimelineComponent,
   NeuTimelineItem,
@@ -158,6 +159,8 @@ describe('NeuTimelineComponent', () => {
   it('renders consumer item and marker templates with their documented contexts', () => {
     const fixture = TestBed.createComponent(TimelineTemplateHostComponent);
     fixture.detectChanges();
+    const timeline = fixture.debugElement.query(By.directive(NeuTimelineComponent))
+      .componentInstance as NeuTimelineComponent;
 
     const markers = fixture.nativeElement.querySelectorAll('.custom-marker');
     const items = fixture.nativeElement.querySelectorAll('.custom-item');
@@ -165,6 +168,8 @@ describe('NeuTimelineComponent', () => {
     expect(markers[0].textContent?.trim()).toBe('success');
     expect(items).toHaveLength(3);
     expect(items[1].textContent?.trim()).toBe('1:Evento B');
+    expect(timeline.itemTpl()).toBeTruthy();
+    expect(timeline.markerTpl()).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.neu-timeline__title')).toBeNull();
   });
 });

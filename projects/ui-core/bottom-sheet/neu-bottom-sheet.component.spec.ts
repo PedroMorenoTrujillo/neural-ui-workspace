@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 import { NeuBottomSheetComponent } from './neu-bottom-sheet.component';
 
 describe('NeuBottomSheetComponent', () => {
@@ -105,5 +107,18 @@ describe('NeuBottomSheetComponent', () => {
     fixture.detectChanges();
     expect(document.activeElement).toBe(origin);
     origin.remove();
+  });
+
+  it('routes the focus-surface Escape output through the close contract', () => {
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+    const closed = vi.spyOn(fixture.componentInstance.closed, 'emit');
+    const modalFocus = fixture.debugElement
+      .query(By.directive(NeuModalFocusDirective))
+      .injector.get(NeuModalFocusDirective);
+
+    modalFocus.neuModalFocusEscape.emit(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(closed).toHaveBeenCalledTimes(1);
   });
 });
