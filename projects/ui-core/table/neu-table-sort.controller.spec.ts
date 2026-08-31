@@ -200,4 +200,31 @@ describe('NeuTableSortController', () => {
       valueController.sort(tied, [{ key: 'value', dir: 'asc' }], [column]).map((row) => row.id),
     ).toEqual([1, 2, 3]);
   });
+
+  it('resolves each multi-sort accessor once per row while preserving stable ordering', () => {
+    const primary = vi.fn((row: Row) => row.primary);
+    const secondary = vi.fn((row: Row) => row.secondary);
+    const rows: Row[] = [
+      { id: 1, name: 'A', score: 0, primary: 1, secondary: 2 },
+      { id: 2, name: 'B', score: 0, primary: 1, secondary: 1 },
+      { id: 3, name: 'C', score: 0, primary: 2, secondary: 0 },
+    ];
+
+    const sorted = controller.sort(
+      rows,
+      [
+        { key: 'primary', dir: 'asc' },
+        { key: 'secondary', dir: 'asc' },
+      ],
+      [
+        { key: 'primary', header: 'Primary', sortAccessor: primary },
+        { key: 'secondary', header: 'Secondary', sortAccessor: secondary },
+      ],
+    );
+
+    expect(sorted.map((row) => row.id)).toEqual([2, 1, 3]);
+    expect(primary).toHaveBeenCalledTimes(rows.length);
+    expect(secondary).toHaveBeenCalledTimes(rows.length);
+    expect(rows.map((row) => row.id)).toEqual([1, 2, 3]);
+  });
 });

@@ -49,4 +49,44 @@ describe('NeuTableGroupingController', () => {
     expect(groups[0]).toMatchObject({ label: '—', expanded: true });
     expect(controller.rowspan('rowspan', groups, 99)).toEqual({ hidden: false, span: 1 });
   });
+
+  it('accumulates a large group without mutating the source and freezes the final rows', () => {
+    const large = Array.from({ length: 10_000 }, (_, index) => ({ id: index, team: 'A' }));
+    const groups = controller.groups(large, (row) => row.team, new Set(['A']));
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toMatchObject({ count: 10_000, firstRowIndex: 0, lastRowIndex: 9_999 });
+    expect(groups[0].rows[0]).toBe(large[0]);
+    expect(groups[0].rows[9_999]).toBe(large[9_999]);
+    expect(Object.isFrozen(groups[0].rows)).toBe(true);
+    expect(Object.isFrozen(large)).toBe(false);
+  });
+
+  it('projects O(1) rowspan values for empty, single and multiple groups', () => {
+    expect(controller.rowspanProjection('rowspan', [])).toEqual(new Int32Array());
+    const single = controller.groups(
+      [
+        { id: 1, team: 'A' },
+        { id: 2, team: 'A' },
+        { id: 3, team: 'A' },
+      ],
+      (row) => row.team,
+      new Set(),
+    );
+    expect([...controller.rowspanProjection('rowspan', single)]).toEqual([3, 0, 0]);
+
+    const multiple = controller.groups(
+      [
+        { id: 1, team: 'A' },
+        { id: 2, team: 'A' },
+        { id: 3, team: 'B' },
+        { id: 4, team: 'C' },
+        { id: 5, team: 'C' },
+      ],
+      (row) => row.team,
+      new Set(),
+    );
+    expect([...controller.rowspanProjection('rowspan', multiple)]).toEqual([2, 0, 1, 2, 0]);
+    expect([...controller.rowspanProjection('subheader', multiple)]).toEqual([]);
+  });
 });

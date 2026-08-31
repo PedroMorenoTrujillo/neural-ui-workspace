@@ -1022,6 +1022,43 @@ describe('NeuTable canonical state integration', () => {
     expect(window.sessionStorage.getItem('neu-table-t1-lifecycle')).not.toBeNull();
   });
 
+  it('skips disabled persistence and snapshots each committed revision at most once', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('groupBy', 'name');
+    fixture.componentRef.setInput('expandableRowGroups', true);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance as any;
+    const snapshot = vi.spyOn(table._persistenceAdapter, 'snapshot');
+    const write = vi.spyOn(table._persistenceAdapter, 'write');
+
+    table._state.setSearch('disabled', 'api');
+    expect(snapshot).not.toHaveBeenCalled();
+    expect(write).not.toHaveBeenCalled();
+
+    fixture.componentRef.setInput('stateKey', 'neu-table-h6b1a-once');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    table._state.setSearch('', 'api');
+    snapshot.mockClear();
+    write.mockClear();
+
+    table._state.setEditingKeys(new Set([1]), 'api');
+    expect(snapshot).not.toHaveBeenCalled();
+    expect(write).not.toHaveBeenCalled();
+
+    table.toggleGroup(table.visibleGroups()[0]);
+    expect(snapshot).toHaveBeenCalledTimes(1);
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(window.sessionStorage.getItem('neu-table-h6b1a-once')).not.toBeNull();
+  });
+
   it('resets every live state family and emits each affected public projection once', async () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);

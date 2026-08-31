@@ -53,18 +53,40 @@ export class NeuTableSortController<T extends object> {
   ): T[] {
     if (entries.length === 0) return [...rows];
     const plans = this._plans(columns);
-    return [...rows].sort((a, b) => {
-      for (const entry of entries) {
-        const plan = plans.get(entry.key) ?? {
-          accessor: (row: T) => (row as Record<string, unknown>)[entry.key],
-        };
+    if (entries.length === 1) {
+      const entry = entries[0];
+      const plan = plans.get(entry.key) ?? {
+        accessor: (row: T) => (row as Record<string, unknown>)[entry.key],
+      };
+      return [...rows].sort((a, b) => {
         const compared = plan.comparator
           ? plan.comparator(a, b)
           : compareNeuTableSortValues(plan.accessor(a), plan.accessor(b));
+        return entry.dir === 'asc' ? compared : -compared;
+      });
+    }
+    const resolvedPlans = entries.map((entry) => {
+      const fallback: InternalNeuTableSortPlan<T> = {
+        accessor: (row: T) => (row as Record<string, unknown>)[entry.key],
+      };
+      return { entry, plan: plans.get(entry.key) ?? fallback };
+    });
+    const decorated = rows.map((row, index) => ({
+      row,
+      index,
+      values: resolvedPlans.map(({ plan }) => (plan.comparator ? undefined : plan.accessor(row))),
+    }));
+    decorated.sort((a, b) => {
+      for (let index = 0; index < resolvedPlans.length; index += 1) {
+        const { entry, plan } = resolvedPlans[index];
+        const compared = plan.comparator
+          ? plan.comparator(a.row, b.row)
+          : compareNeuTableSortValues(a.values[index], b.values[index]);
         if (compared !== 0) return entry.dir === 'asc' ? compared : -compared;
       }
-      return 0;
+      return a.index - b.index;
     });
+    return decorated.map(({ row }) => row);
   }
 
   private _plans(columns: readonly NeuTableColumn<T>[]): Map<string, InternalNeuTableSortPlan<T>> {

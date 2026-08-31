@@ -85,6 +85,7 @@ const _DEFAULT_LAYOUT: NeuTableLayout = {
  * authoritative snapshot; uncontrolled mode commits the same normalized intent.
  */
 export class NeuTableStateController<K = unknown> {
+  private _revision = 0;
   private readonly _state = signal<InternalNeuTableState<K>>(
     cloneState({
       page: 1,
@@ -138,6 +139,11 @@ export class NeuTableStateController<K = unknown> {
 
   snapshot(): InternalNeuTableState<K> {
     return cloneState(this._state());
+  }
+
+  /** Monotonic identity for committed canonical state; intentionally package-private. */
+  revision(): number {
+    return this._revision;
   }
 
   createFiltersFacade(
@@ -329,9 +335,13 @@ export class NeuTableStateController<K = unknown> {
         changedKeys.filter((key) => !controlledKeys.has(key)).map((key) => [key, proposed[key]]),
       ) as Partial<InternalNeuTableState<K>>;
       const committed = normalizeUpdate(previous, uncontrolledPatch);
-      if (stateChangedKeys(previous, committed).length > 0) this._state.set(committed);
+      if (stateChangedKeys(previous, committed).length > 0) {
+        this._state.set(committed);
+        this._revision += 1;
+      }
     } else {
       this._state.set(proposed);
+      this._revision += 1;
     }
     this._onChange?.(change);
     return change;
@@ -430,6 +440,7 @@ export class NeuTableStateController<K = unknown> {
     const changedKeys = stateChangedKeys(previous, current);
     if (changedKeys.length === 0) return null;
     this._state.set(current);
+    this._revision += 1;
     const change: InternalNeuTableStateChange<K> = {
       previous: cloneState(previous),
       current: cloneState(current),

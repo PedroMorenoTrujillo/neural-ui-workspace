@@ -14,6 +14,17 @@ export interface InternalNeuTableRowspan {
   readonly span: number;
 }
 
+interface MutableNeuTableGroup<T extends object> {
+  key: unknown;
+  label: string;
+  rows: T[];
+  count: number;
+  groupIndex: number;
+  expanded: boolean;
+  firstRowIndex: number;
+  lastRowIndex: number;
+}
+
 /** Pure group ordering, partition and rowspan resolver. */
 export class NeuTableGroupingController<T extends object> {
   order(
@@ -35,24 +46,20 @@ export class NeuTableGroupingController<T extends object> {
     value: (row: T, index: number) => unknown,
     expandedKeys: ReadonlySet<unknown>,
   ): InternalNeuTableGroup<T>[] {
-    const groups: InternalNeuTableGroup<T>[] = [];
+    const groups: MutableNeuTableGroup<T>[] = [];
     rows.forEach((row, rowIndex) => {
       const key = value(row, rowIndex);
       const previous = groups[groups.length - 1];
       if (previous && Object.is(previous.key, key)) {
-        const nextRows = [...previous.rows, row];
-        groups[groups.length - 1] = {
-          ...previous,
-          rows: Object.freeze(nextRows),
-          count: nextRows.length,
-          lastRowIndex: rowIndex,
-        };
+        previous.rows.push(row);
+        previous.count += 1;
+        previous.lastRowIndex = rowIndex;
         return;
       }
       groups.push({
         key,
         label: String(key ?? '—'),
-        rows: Object.freeze([row]),
+        rows: [row],
         count: 1,
         groupIndex: groups.length,
         expanded: expandedKeys.has(key),
@@ -60,7 +67,22 @@ export class NeuTableGroupingController<T extends object> {
         lastRowIndex: rowIndex,
       });
     });
-    return groups;
+    return groups.map((group) => ({ ...group, rows: Object.freeze(group.rows) }));
+  }
+
+  /** One bounded projection per group recomputation; render bindings perform O(1) index reads. */
+  rowspanProjection(
+    mode: NeuTableRowGroupMode,
+    groups: readonly InternalNeuTableGroup<T>[],
+  ): Int32Array {
+    if (mode !== 'rowspan' || groups.length === 0) return new Int32Array(0);
+    const projection = new Int32Array(groups[groups.length - 1].lastRowIndex + 1);
+    projection.fill(1);
+    for (const group of groups) {
+      projection[group.firstRowIndex] = group.count;
+      projection.fill(0, group.firstRowIndex + 1, group.lastRowIndex + 1);
+    }
+    return projection;
   }
 
   rowspan(
@@ -69,9 +91,19 @@ export class NeuTableGroupingController<T extends object> {
     rowIndex: number,
   ): InternalNeuTableRowspan {
     if (mode !== 'rowspan') return { hidden: false, span: 1 };
-    const group = groups.find(
-      (candidate) => rowIndex >= candidate.firstRowIndex && rowIndex <= candidate.lastRowIndex,
-    );
+    let low = 0;
+    let high = groups.length - 1;
+    let group: InternalNeuTableGroup<T> | undefined;
+    while (low <= high) {
+      const middle = (low + high) >>> 1;
+      const candidate = groups[middle];
+      if (rowIndex < candidate.firstRowIndex) high = middle - 1;
+      else if (rowIndex > candidate.lastRowIndex) low = middle + 1;
+      else {
+        group = candidate;
+        break;
+      }
+    }
     if (!group) return { hidden: false, span: 1 };
     return rowIndex === group.firstRowIndex
       ? { hidden: false, span: group.count }

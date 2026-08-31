@@ -1900,7 +1900,9 @@ describe('NeuTableComponent', () => {
       .find((component) => component.type() === 'range');
     expect(rangeDateInput).toBeTruthy();
     rangeDateInput!['_leftCursor'].set(new Date(2026, 7, 1));
-    const rangeDay = rangeDateInput!['_leftDays']().find((cell) => cell.rangeStart || cell.rangeEnd);
+    const rangeDay = rangeDateInput!
+      ['_leftDays']()
+      .find((cell) => cell.rangeStart || cell.rangeEnd);
     expect(rangeDay?.date.getDate()).toBe(20);
   });
 
@@ -8887,5 +8889,57 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(table._getExportProjection().map((column: { header: string }) => column.header)).toEqual(
       ['Exported'],
     );
+  });
+
+  it('reuses the safe local projection when filtering and sorting are inactive', () => {
+    const fixture = TestBed.createComponent(NeuTableComponent);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', MANY_ROWS);
+    fixture.componentRef.setInput('sortable', true);
+
+    expect(fixture.componentInstance.filteredData()).toBe(fixture.componentInstance.sortedData());
+    expect(fixture.componentInstance.sortedData()).not.toBe(MANY_ROWS);
+  });
+
+  it('caches fallback JSON identity per data projection without changing fallback semantics', () => {
+    interface IdentityRow {
+      missing?: string;
+      name: string;
+      nested?: { value: undefined; date: Date };
+      self?: IdentityRow;
+    }
+    const fixture = TestBed.createComponent(NeuTableComponent<IdentityRow>);
+    const first: IdentityRow = {
+      name: 'stable',
+      nested: { value: undefined, date: new Date('2026-08-31T00:00:00.000Z') },
+    };
+    fixture.componentRef.setInput('rowKey', 'missing');
+    fixture.componentRef.setInput('data', [first]);
+    const stringify = vi.spyOn(JSON, 'stringify');
+    stringify.mockClear();
+
+    const expected = JSON.stringify(first);
+    stringify.mockClear();
+    expect(fixture.componentInstance['getRowKey'](first)).toBe(expected);
+    expect(fixture.componentInstance['getRowKey'](first)).toBe(expected);
+    expect(fixture.componentInstance['getRowKey'](first)).toBe(expected);
+    expect(stringify).toHaveBeenCalledTimes(1);
+
+    const replacement: IdentityRow = {
+      name: 'stable',
+      nested: { value: undefined, date: new Date('2026-08-31T00:00:00.000Z') },
+    };
+    fixture.componentRef.setInput('data', [replacement]);
+    expect(fixture.componentInstance['getRowKey'](replacement)).toBe(expected);
+    expect(stringify).toHaveBeenCalledTimes(2);
+
+    const cyclic: IdentityRow = { name: 'cycle' };
+    cyclic.self = cyclic;
+    fixture.componentRef.setInput('data', [cyclic]);
+    const cycleKey = fixture.componentInstance['getRowKey'](cyclic);
+    expect(typeof cycleKey).toBe('symbol');
+    expect(fixture.componentInstance['getRowKey'](cyclic)).toBe(cycleKey);
+    expect(stringify).toHaveBeenCalledTimes(3);
+    stringify.mockRestore();
   });
 });

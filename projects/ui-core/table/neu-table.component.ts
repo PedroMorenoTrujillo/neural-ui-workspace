@@ -180,6 +180,7 @@ import {
   type InternalAppliedFilterOperator,
   type InternalNeuTableState,
   type InternalNeuTableStateChange,
+  type InternalNeuTableStateKey,
 } from './neu-table-state.controller';
 import {
   NeuTableUrlStateAdapter,
@@ -459,6 +460,19 @@ const _NEU_TABLE_VIRTUALIZATION_OPTIONS: Required<NeuTableVirtualizationOptions>
   autoSize: false,
   step: 0,
 };
+
+const _NEU_TABLE_PERSISTED_STATE_KEYS = new Set<InternalNeuTableStateKey>([
+  'page',
+  'pageSize',
+  'search',
+  'sort',
+  'sortEntries',
+  'filters',
+  'selectionKeys',
+  'expansionKeys',
+  'groupExpansionKeys',
+  'layout',
+]);
 
 const _NEU_TABLE_URL_STATE_OPTIONS: Required<NeuTableUrlStateOptions> = {
   enabled: true,
@@ -2207,6 +2221,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this.getSelectionKey(row),
   );
   private readonly _referenceIdentity = new NeuTableReferenceIdentity<T>();
+  private readonly _fallbackRowIdentityCache = computed(() => {
+    this.data();
+    this.frozenData();
+    this.rowKey();
+    return new WeakMap<T, unknown>();
+  });
   private readonly _sortController = new NeuTableSortController<T>();
   private readonly _queryController = new NeuTableQueryController<T>();
   private readonly _filterRegistry = inject(NeuTableFilterRegistry);
@@ -2819,6 +2839,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _measuredHeaderHeight = signal(0);
   private readonly _frozenStackOffsets = signal<ReadonlyMap<string, number>>(new Map());
   private _pendingViewportBinding = false;
+  private _lastAutomaticPersistenceOwner = '';
+  private _lastAutomaticPersistenceRevision = -1;
 
   constructor() {
     const managedRowAdapter: NeuTableManagedRowAdapter<T> = {
@@ -3123,6 +3145,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
           }
         }
         if (urlSnapshot) this._state.update(urlSnapshot, 'url');
+        this._lastAutomaticPersistenceOwner = signature;
+        this._lastAutomaticPersistenceRevision = this._state.revision();
         this._statePersistenceReady = true;
       });
     });
@@ -3977,6 +4001,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const globalFields = this._resolvedGlobalFilterFields();
     const activeColumnFilters = this._resolvedAppliedFilters();
     const q = this.searchQuery().trim().toLocaleLowerCase(this.filterLocale());
+    if (!q && activeColumnFilters.length === 0) return rows;
     const exact = this._exactMatch();
     const matches = (text: string) =>
       exact
@@ -3999,13 +4024,15 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly sortedData = computed<NeuTableRuntimeRow<T>[]>(() => {
     if (this.serverSide()) return this.filteredData();
     const data = this.filteredData();
-    const sorted = this.sortable()
-      ? (this._sortController.sort(
-          data,
-          this.currentSort(),
-          this._typedColumns(),
-        ) as NeuTableRuntimeRow<T>[])
-      : [...data];
+    const currentSort = this.currentSort();
+    const sorted =
+      this.sortable() && currentSort.length > 0
+        ? (this._sortController.sort(
+            data,
+            currentSort,
+            this._typedColumns(),
+          ) as NeuTableRuntimeRow<T>[])
+        : data;
     const groupKey = this.groupBy();
     return groupKey
       ? this._groupingController.order(
@@ -4217,6 +4244,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this._state.groupExpansionKeys(),
     );
   });
+
+  private readonly _visibleGroupRowspans = computed(() =>
+    this._groupingController.rowspanProjection(this.rowGroupMode(), this.visibleGroups()),
+  );
+
+  private readonly _frozenGroupRowspans = computed(() =>
+    this._groupingController.rowspanProjection(this.rowGroupMode(), this.frozenGroups()),
+  );
 
   readonly visiblePageEntries = computed<NeuTablePageEntry<T>[]>(() => {
     if (this._lazyVirtualActive()) {
@@ -5967,11 +6002,16 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const resolved =
       typeof identity === 'function' ? identity(row) : this.getRowValue(row, String(identity));
     if (resolved !== undefined) return resolved;
+    const cache = this._fallbackRowIdentityCache();
+    if (cache.has(row)) return cache.get(row);
+    let fallback: unknown;
     try {
-      return JSON.stringify(row);
+      fallback = JSON.stringify(row);
     } catch {
-      return this._referenceIdentity.key(row);
+      fallback = this._referenceIdentity.key(row);
     }
+    cache.set(row, fallback);
+    return fallback;
   }
 
   private getSelectionKey(row: T): unknown {
@@ -6885,19 +6925,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   protected groupRowspan(rowIndex: number, frozen = false): number {
-    return this._groupingController.rowspan(
-      this.rowGroupMode(),
-      frozen ? this.frozenGroups() : this.visibleGroups(),
-      rowIndex,
-    ).span;
+    return (frozen ? this._frozenGroupRowspans() : this._visibleGroupRowspans())[rowIndex] ?? 1;
   }
 
   protected hideGroupRowspanCell(rowIndex: number, frozen = false): boolean {
-    return this._groupingController.rowspan(
-      this.rowGroupMode(),
-      frozen ? this.frozenGroups() : this.visibleGroups(),
-      rowIndex,
-    ).hidden;
+    return (frozen ? this._frozenGroupRowspans() : this._visibleGroupRowspans())[rowIndex] === 0;
   }
 
   protected getSortPriority(key: string): number {
@@ -7592,13 +7624,30 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return this._columnFilters()[key] ?? '';
   }
 
-  private _onCanonicalStateChange(_change: InternalNeuTableStateChange<unknown>): void {
+  private _onCanonicalStateChange(change: InternalNeuTableStateChange<unknown>): void {
+    if (!change.changedKeys.some((key) => _NEU_TABLE_PERSISTED_STATE_KEYS.has(key))) return;
     this._saveStateIfReady();
   }
 
   private _saveStateIfReady(): void {
     if (!this._statePersistenceReady || this._restoringState) return;
-    this.saveState();
+    const key = this.stateKey()?.trim() ?? '';
+    if (!key) return;
+    const storageKind = this.stateStorage();
+    const storage = this._stateStorageFor(storageKind);
+    if (!storage) return;
+    const owner = `${storageKind}:${key}`;
+    const revision = this._state.revision();
+    if (
+      owner === this._lastAutomaticPersistenceOwner &&
+      revision === this._lastAutomaticPersistenceRevision
+    ) {
+      return;
+    }
+    const snapshot = this.currentState();
+    if (this._persistenceAdapter.write(storage, key, snapshot)) this.stateSave.emit(snapshot);
+    this._lastAutomaticPersistenceOwner = owner;
+    this._lastAutomaticPersistenceRevision = revision;
   }
 
   private _stateStorageFor(kind: NeuTableStateStorage): Storage | null {
