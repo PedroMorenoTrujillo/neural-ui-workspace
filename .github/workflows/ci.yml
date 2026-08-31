@@ -32,3 +32,20 @@ jobs:
           name: neural-ui-core-dist
           path: dist/neural-ui/core
           if-no-files-found: error
+
+      - name: Upload npm artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neural-ui-core-npm
+          path: |
+            dist/release/neural-ui-core-*.tgz
+            !dist/release/*-sourcemaps.tgz
+            dist/release/release-manifest.json
+          if-no-files-found: error
+
+      - name: Upload source-map artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neural-ui-core-sourcemaps
+          path: dist/release/*-sourcemaps.tgz
+          if-no-files-found: error

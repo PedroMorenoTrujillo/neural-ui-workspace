@@ -5,7 +5,9 @@ import { fileURLToPath } from 'node:url';
 const workspaceRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const commands = [
   ['npm', ['test']],
+  ['npm', ['run', 'test:release-artifacts']],
   ['npm', ['run', 'build']],
+  ['npm', ['run', 'prepare:release-artifacts']],
   ['npm', ['run', 'audit:entrypoints']],
   ['npm', ['run', 'audit:cva']],
   ['npm', ['run', 'audit:bundle']],
@@ -20,6 +22,7 @@ const commands = [
   ['npm', ['run', 'test:ssr-smoke']],
   ['npm', ['run', 'verify:package']],
   ['npm', ['run', 'audit:package']],
+  ['npm', ['run', 'verify:release-artifacts']],
 ];
 
 for (const [command, args] of commands) {
