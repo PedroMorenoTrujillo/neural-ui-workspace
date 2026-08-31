@@ -13,7 +13,12 @@ const nonVisualEntryPoints = new Set([
   'testing',
 ]);
 const nonDemoEntryPoints = new Set(['button', 'confirm-dialog', 'toggle-button-group', 'testing']);
-const demoEntryPointOverrides = new Map([['table-core', 'table-demo']]);
+const demoEntryPointOverrides = new Map([
+  ['animate-on-scroll', 'utilities-demo'],
+  ['key-filter', 'utilities-demo'],
+  ['ripple', 'utilities-demo'],
+  ['table-core', 'table-demo'],
+]);
 
 function dirs(path) {
   return readdirSync(path)
