@@ -1,5 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, PLATFORM_ID, signal, type WritableSignal } from '@angular/core';
+import {
+  Component,
+  DebugElement,
+  PLATFORM_ID,
+  getDebugNode,
+  signal,
+  type WritableSignal,
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { provideRouter } from '@angular/router';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -35,6 +42,10 @@ import { By } from '@angular/platform-browser';
 import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
 import { NeuTableFilterRegistry } from './neu-table-filter.registry';
 import { NeuTableOptionalFeatureErrorComponent } from './neu-table-optional-feature-error.component';
+import {
+  NeuTableAdvancedFilterFeatureComponent,
+  NeuTableInlineFilterFeatureComponent,
+} from './neu-table-optional-features.component';
 
 const E3_ADVANCED_FILTER_TEXTS = {
   openFilter: 'Open filter for {column}',
@@ -8186,6 +8197,89 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       'range',
       'score',
     ]);
+  });
+
+  it('keeps lazy filter boundary guards fail-closed for invalid events and drafts', async () => {
+    const fixture = await createAdvancedTable();
+    const table = fixture.componentInstance;
+    const setColumnFilter = vi.spyOn(table, 'setColumnFilter');
+    const inlineFeatures = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'neu-table-inline-filter-feature',
+      ),
+    ).map(
+      (element) =>
+        (getDebugNode(element) as DebugElement).injector.get(
+          NeuTableInlineFilterFeatureComponent,
+        ) as any,
+    );
+    const created = inlineFeatures.find((feature) => feature.column().key === 'createdAt');
+    expect(created).toBeTruthy();
+    created._onEnter(new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(setColumnFilter).not.toHaveBeenCalled();
+
+    const rangeFixture = await createAdvancedTable({
+      columns: [
+        {
+          key: 'createdAt',
+          header: 'Created range',
+          filterConfig: { kind: 'date', mode: 'between' },
+        },
+      ] satisfies NeuTableColumn<AdvancedFilterRow>[],
+    });
+    const rangeElement = (rangeFixture.nativeElement as HTMLElement).querySelector(
+      'neu-table-inline-filter-feature',
+    ) as HTMLElement;
+    const rangeFeature = (getDebugNode(rangeElement) as DebugElement).injector.get(
+      NeuTableInlineFilterFeatureComponent,
+    ) as any;
+    expect(
+      rangeFeature._valueFromSingle(
+        {
+          key: 'createdAt',
+          header: 'Created',
+          filterConfig: { kind: 'date', mode: 'between' },
+        },
+        'not-a-range',
+      ),
+    ).toEqual({ from: null, to: null });
+    expect(
+      created._valueFromSingle(
+        {
+          key: 'instant',
+          header: 'Instant',
+          filterConfig: { kind: 'date', precision: 'instant', mode: 'after' },
+        },
+        '2026-08-20T12:30',
+      ),
+    ).toBe(new Date('2026-08-20T12:30').toISOString());
+    rangeFixture.destroy();
+    created._syncing = true;
+    created._schedule('ignored');
+    created._syncing = false;
+    expect(setColumnFilter).not.toHaveBeenCalled();
+
+    await open(fixture, 'Score');
+    const advanced = fixture.debugElement
+      .query(By.directive(NeuTableAdvancedFilterFeatureComponent))
+      .injector.get(NeuTableAdvancedFilterFeatureComponent) as any;
+    advanced._removeRule('missing-rule');
+    expect(advanced._filterDraftRules()).toHaveLength(1);
+    const scoreRule = advanced._filterDraftRules()[0];
+    scoreRule.modeControl.setValue('between');
+    scoreRule.numberFromControl.setValue(20);
+    scoreRule.numberToControl.setValue(10);
+    advanced._apply();
+    expect(internalFilters(table)._appliedFilters()['score']).toBeUndefined();
+
+    internalFilters(table)._closeFilterOverlay();
+    await settle(fixture);
+    await open(fixture, 'Active');
+    const booleanFeature = fixture.debugElement
+      .query(By.directive(NeuTableAdvancedFilterFeatureComponent))
+      .injector.get(NeuTableAdvancedFilterFeatureComponent) as any;
+    booleanFeature._addRule();
+    expect(booleanFeature._filterDraftRules()).toHaveLength(0);
   });
 
   it('maps eligibility, precision, and human match-mode labels without exposing deferred kinds', async () => {

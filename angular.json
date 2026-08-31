@@ -35,6 +35,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/ui-core/tsconfig.spec.json",
+            "runnerConfig": "vitest.coverage.config.mts",
             "exclude": ["**/*.stress.spec.ts"],
             "coverage": true,
             "coverageReporters": [
@@ -44,10 +45,10 @@
               "json-summary"
             ],
             "coverageThresholds": {
-              "statements": 95,
-              "branches": 95,
-              "functions": 95,
-              "lines": 95,
+              "statements": 95.01,
+              "branches": 95.01,
+              "functions": 95.01,
+              "lines": 95.01,
               "perFile": false
             }
           }
