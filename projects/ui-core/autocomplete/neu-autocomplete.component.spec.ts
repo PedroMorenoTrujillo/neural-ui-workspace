@@ -1,12 +1,60 @@
 import { Component } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
   NeuAutocompleteComponent,
+  NeuAutocompleteClearIconDirective,
+  NeuAutocompleteDropdownIconDirective,
+  NeuAutocompleteEmptyDirective,
+  NeuAutocompleteFooterDirective,
+  NeuAutocompleteGroupDirective,
+  NeuAutocompleteHeaderDirective,
   NeuAutocompleteItemDirective,
+  NeuAutocompleteLoaderDirective,
+  NeuAutocompleteLoadingIconDirective,
   NeuAutocompleteOption,
 } from './neu-autocomplete.component';
+
+@Component({
+  imports: [
+    NeuAutocompleteComponent,
+    NeuAutocompleteItemDirective,
+    NeuAutocompleteGroupDirective,
+    NeuAutocompleteLoaderDirective,
+    NeuAutocompleteHeaderDirective,
+    NeuAutocompleteFooterDirective,
+    NeuAutocompleteEmptyDirective,
+    NeuAutocompleteLoadingIconDirective,
+    NeuAutocompleteClearIconDirective,
+    NeuAutocompleteDropdownIconDirective,
+  ],
+  template: `
+    <neu-autocomplete
+      [options]="options"
+      [loading]="loading"
+      [lazy]="lazy"
+      [dropdown]="true"
+      [clearable]="true"
+    >
+      <ng-template neuAutocompleteHeader><span class="auto-header">Header</span></ng-template>
+      <ng-template neuAutocompleteFooter><span class="auto-footer">Footer</span></ng-template>
+      <ng-template neuAutocompleteItem let-option><span class="auto-item">{{ option.label }}</span></ng-template>
+      <ng-template neuAutocompleteGroup let-group><span class="auto-group">{{ group }}</span></ng-template>
+      <ng-template neuAutocompleteLoader let-index="logicalIndex"><span class="auto-loader">{{ index }}</span></ng-template>
+      <ng-template neuAutocompleteEmpty><span class="auto-empty">Empty</span></ng-template>
+      <ng-template neuAutocompleteLoadingIcon><span class="auto-loading-icon">L</span></ng-template>
+      <ng-template neuAutocompleteClearIcon><span class="auto-clear-icon">C</span></ng-template>
+      <ng-template neuAutocompleteDropdownIcon><span class="auto-dropdown-icon">D</span></ng-template>
+    </neu-autocomplete>
+  `,
+})
+class AutocompleteTemplatesHost {
+  options = OPTIONS;
+  loading = false;
+  lazy = false;
+}
 
 const OPTIONS: NeuAutocompleteOption[] = [
   { value: 1, label: 'Angular' },
@@ -873,5 +921,54 @@ describe('NeuAutocompleteComponent', () => {
 
     expect(fixture.componentInstance['_query']()).toBe('beta');
     expect(fixture.componentInstance['optionLabelOf']('beta')).toBe('beta');
+  });
+
+  it('renders the complete projected option surface across results, loading and empty states', () => {
+    const host = TestBed.createComponent(AutocompleteTemplatesHost);
+    host.detectChanges();
+    const component = host.debugElement.query(By.directive(NeuAutocompleteComponent))
+      .componentInstance as any;
+    for (const accessor of [
+      'itemTpl',
+      'groupTpl',
+      'loaderTpl',
+      'headerTpl',
+      'footerTpl',
+      'emptyTpl',
+      'loadingIconTpl',
+      'clearIconTpl',
+      'dropdownIconTpl',
+    ]) {
+      expect(component[accessor]()).toBeTruthy();
+    }
+
+    component.writeValue(1);
+    component['onQueryChange']('a');
+    host.detectChanges();
+    expect(document.querySelector('.auto-header')).toBeTruthy();
+    expect(document.querySelector('.auto-footer')).toBeTruthy();
+    expect(document.querySelector('.auto-item')?.textContent).toContain('Angular');
+    expect(host.nativeElement.querySelector('.auto-clear-icon')).toBeTruthy();
+    expect(host.nativeElement.querySelector('.auto-dropdown-icon')).toBeTruthy();
+
+    const loadingHost = TestBed.createComponent(AutocompleteTemplatesHost);
+    loadingHost.componentInstance.loading = true;
+    loadingHost.componentInstance.lazy = true;
+    loadingHost.detectChanges();
+    const loadingComponent = loadingHost.debugElement.query(By.directive(NeuAutocompleteComponent))
+      .componentInstance as any;
+    loadingComponent.openAll();
+    loadingHost.detectChanges();
+    expect(loadingHost.nativeElement.querySelector('.auto-loading-icon')).toBeTruthy();
+    expect(document.querySelector('.auto-loader')).toBeTruthy();
+
+    const emptyHost = TestBed.createComponent(AutocompleteTemplatesHost);
+    emptyHost.componentInstance.options = [];
+    emptyHost.detectChanges();
+    const emptyComponent = emptyHost.debugElement.query(By.directive(NeuAutocompleteComponent))
+      .componentInstance as any;
+    emptyComponent.openAll();
+    emptyHost.detectChanges();
+    expect(document.querySelector('.auto-empty')?.textContent).toContain('Empty');
   });
 });

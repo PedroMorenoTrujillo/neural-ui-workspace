@@ -1,5 +1,6 @@
 import {
   buildNeuTableFilterState,
+  isNeuTableFilterValueEmpty,
   matchNeuTableBoolean,
   matchNeuTableDate,
   matchNeuTableNumber,
@@ -8,7 +9,9 @@ import {
   normalizeNeuTableAppliedFilterValue,
   normalizeNeuTableDatePoint,
   resolveNeuTableFilterMatchMode,
+  resolveNeuTableFilterAccessor,
 } from './neu-table-filter.engine';
+import { NeuTableFilterRegistry } from './neu-table-filter.registry';
 import type { NeuTableColumn, NeuTableFilterMatchMode } from './neu-table.types';
 
 interface FilterUser {
@@ -124,22 +127,12 @@ describe('NeuTable filter engine', () => {
 
     it('rejects invalid active ranges but keeps empty ranges inactive', () => {
       expect(
-        matchNeuTableDate(
-          '2026-08-10',
-          { from: 'not-a-date', to: '2026-08-20' },
-          'between',
-        ),
+        matchNeuTableDate('2026-08-10', { from: 'not-a-date', to: '2026-08-20' }, 'between'),
       ).toBe(false);
       expect(
-        matchNeuTableDate(
-          '2026-08-10',
-          { from: '2026-08-01', to: 'not-a-date' },
-          'between',
-        ),
+        matchNeuTableDate('2026-08-10', { from: '2026-08-01', to: 'not-a-date' }, 'between'),
       ).toBe(false);
-      expect(
-        matchNeuTableDate('2026-08-10', { from: null, to: null }, 'between'),
-      ).toBe(true);
+      expect(matchNeuTableDate('2026-08-10', { from: null, to: null }, 'between')).toBe(true);
     });
 
     it('compares instants as UTC timestamps and rejects invalid values', () => {
@@ -295,9 +288,7 @@ describe('NeuTable filter engine', () => {
       filterConfig: { kind: 'date', mode: 'between' },
     };
 
-    expect(
-      buildNeuTableFilterState(numberColumn, { from: 'invalid', to: 100 }),
-    ).toBeNull();
+    expect(buildNeuTableFilterState(numberColumn, { from: 'invalid', to: 100 })).toBeNull();
     expect(
       buildNeuTableFilterState(dateColumn, { from: '2026-08-01', to: 'not-a-date' }),
     ).toBeNull();
@@ -399,9 +390,9 @@ describe('NeuTable filter engine', () => {
       expect(matchesNeuTableFilter({ score: false } as unknown as FilterUser, column, false)).toBe(
         true,
       );
-      expect(
-        matchesNeuTableFilter({ score: Number.NaN } as FilterUser, column, Number.NaN),
-      ).toBe(true);
+      expect(matchesNeuTableFilter({ score: Number.NaN } as FilterUser, column, Number.NaN)).toBe(
+        true,
+      );
     });
 
     it('matches select values with Neural option identity semantics', () => {
@@ -454,5 +445,198 @@ describe('NeuTable filter engine', () => {
     expect(rangeSnapshot.from).not.toBe(date);
     expect(rangeSnapshot.metadata).toBe(range.metadata);
     expect(normalizeNeuTableAppliedFilterValue(column, opaque)).toBe(opaque);
+  });
+
+  it('handles malformed, open-ended, overridden, and registry-backed filter boundaries', () => {
+    expect(isNeuTableFilterValueEmpty({ value: null })).toBe(false);
+    expect(isNeuTableFilterValueEmpty({ from: '', to: undefined })).toBe(true);
+    expect(isNeuTableFilterValueEmpty({ from: 0, to: null })).toBe(false);
+    expect(matchNeuTableText('anything', '')).toBe(true);
+    expect(matchNeuTableNumber(Number.POSITIVE_INFINITY, 1)).toBe(false);
+    expect(matchNeuTableNumber('  ', 1)).toBe(false);
+    expect(matchNeuTableNumber('12', '12')).toBe(true);
+    expect(matchNeuTableNumber(12, 'invalid')).toBe(false);
+    expect(matchNeuTableNumber(12, 10, 'unknown' as never)).toBe(false);
+    expect(matchNeuTableNumber(12, 10, 'between')).toBe(false);
+    expect(matchNeuTableNumber(12, { from: null, to: 11 }, 'between')).toBe(false);
+    expect(matchNeuTableNumber(12, { from: 13, to: null }, 'between')).toBe(false);
+
+    expect(normalizeNeuTableDatePoint(new Date('invalid'))).toBeNull();
+    expect(normalizeNeuTableDatePoint(new Date('2026-08-20T10:30:00Z'), 'instant')).toEqual({
+      precision: 'instant',
+      value: '2026-08-20T10:30:00.000Z',
+    });
+    expect(normalizeNeuTableDatePoint(new Date('2026-08-20T10:30:00Z'))).toEqual({
+      precision: 'date-only',
+      value: '2026-08-20',
+    });
+    expect(normalizeNeuTableDatePoint({ precision: 'date-only', value: '2026-02-30' })).toBeNull();
+    expect(normalizeNeuTableDatePoint({ precision: 'instant', value: 'invalid' })).toBeNull();
+    expect(normalizeNeuTableDatePoint({ precision: 'other', value: '2026-08-20' })).toBeNull();
+    expect(normalizeNeuTableDatePoint(' ')).toBeNull();
+    expect(matchNeuTableDate(new Date('invalid'), '2026-08-20')).toBe(false);
+    expect(matchNeuTableDate('2026-08-20', 'invalid')).toBe(false);
+    expect(
+      matchNeuTableDate(
+        '2026-08-20T10:30:00Z',
+        {
+          from: { precision: 'date-only', value: '2026-08-20' },
+          to: { precision: 'instant', value: '2026-08-20T10:30:00Z' },
+        },
+        'between',
+        'instant',
+      ),
+    ).toBe(true);
+    expect(matchNeuTableDate('2026-08-20', { from: null, to: '2026-08-19' }, 'between')).toBe(
+      false,
+    );
+    expect(matchNeuTableBoolean(true, 'all')).toBe(true);
+    expect(matchNeuTableBoolean(true, 'true')).toBe(false);
+
+    const row = {
+      name: 'Ana',
+      score: 12,
+      active: true,
+      createdAt: '2026-08-20',
+      profile: { department: 'Engineering' },
+    };
+    const legacy: NeuTableColumn<FilterUser, string> = {
+      key: 'name',
+      header: 'Name',
+      filterable: true,
+    };
+    const numberColumn: NeuTableColumn<FilterUser, string> = {
+      key: 'score',
+      header: 'Score',
+      filterConfig: { kind: 'number', mode: 'equals' },
+    };
+    const booleanColumn: NeuTableColumn<FilterUser, string> = {
+      key: 'active',
+      header: 'Active',
+      filterConfig: { kind: 'boolean' },
+    };
+    const customPredicate: NeuTableColumn<FilterUser, string> = {
+      key: 'name',
+      header: 'Predicate',
+      filterConfig: { kind: 'custom', predicate: (value, expected) => value === expected },
+    };
+    const customRegistry: NeuTableColumn<FilterUser, string> = {
+      key: 'name',
+      header: 'Registry',
+      filterConfig: { kind: 'custom', mode: 'prefix' },
+    };
+    const registry = new NeuTableFilterRegistry();
+    registry.register<FilterUser>(
+      'prefix',
+      (value, expected, context) =>
+        context.columnKey === 'name' && String(value).startsWith(String(expected)),
+    );
+
+    expect(matchesNeuTableFilter(row, legacy, '')).toBe(true);
+    expect(matchesNeuTableFilter(row, legacy, 'AN', 'unsupported')).toBe(true);
+    expect(matchesNeuTableFilter(row, numberColumn, 10, 'unsupported')).toBe(false);
+    expect(matchesNeuTableFilter(row, booleanColumn, true)).toBe(true);
+    expect(matchesNeuTableFilter(row, customPredicate, 'Ana')).toBe(true);
+    expect(matchesNeuTableFilter(row, customRegistry, 'An', undefined, registry)).toBe(true);
+    expect(matchesNeuTableFilter(row, customRegistry, 'An', 'missing', registry)).toBe(false);
+    expect(resolveNeuTableFilterAccessor(row, numberColumn)).toBe(12);
+
+    expect(normalizeNeuTableAppliedFilterValue(legacy, '')).toBe('');
+    expect(normalizeNeuTableAppliedFilterValue(legacy, 'Ana')).toBe('Ana');
+    expect(normalizeNeuTableAppliedFilterValue(numberColumn, 'invalid')).toBe('invalid');
+    expect(
+      normalizeNeuTableAppliedFilterValue(
+        { key: 'createdAt', header: 'Date', filterConfig: { kind: 'date', mode: 'between' } },
+        { from: new Date('2026-08-01T00:00:00Z') },
+      ),
+    ).toEqual({ from: '2026-08-01', to: null });
+
+    expect(buildNeuTableFilterState(legacy, 'Ana')).toBeNull();
+    expect(buildNeuTableFilterState(booleanColumn, 'true')).toBeNull();
+    expect(buildNeuTableFilterState(booleanColumn, false)).toEqual({
+      kind: 'boolean',
+      mode: 'false',
+      value: false,
+    });
+    expect(buildNeuTableFilterState(customRegistry, 'Ana', 'override')).toEqual({
+      kind: 'custom',
+      mode: 'override',
+      value: 'Ana',
+      localOnly: false,
+    });
+    expect(resolveNeuTableFilterMatchMode(legacy, 'unsupported')).toBe('contains');
+    expect(resolveNeuTableFilterMatchMode(booleanColumn)).toBeUndefined();
+    expect(resolveNeuTableFilterMatchMode(customRegistry, 'custom')).toBe('prefix');
+    expect(resolveNeuTableFilterMatchMode(numberColumn, 'gte')).toBe('gte');
+  });
+
+  it('canonicalizes every supported date and persisted-range boundary', () => {
+    const instantColumn: NeuTableColumn<FilterUser, string> = {
+      key: 'createdAt',
+      header: 'Created',
+      filterConfig: { kind: 'date', precision: 'instant' },
+    };
+    const dateRangeColumn: NeuTableColumn<FilterUser, string> = {
+      key: 'createdAt',
+      header: 'Created',
+      filterConfig: { kind: 'date', mode: 'between' },
+    };
+    const numberRangeColumn: NeuTableColumn<FilterUser, string> = {
+      key: 'score',
+      header: 'Score',
+      filterConfig: { kind: 'number', mode: 'between' },
+    };
+
+    expect(normalizeNeuTableDatePoint({ precision: 'date-only', value: '2026-08-20' })).toEqual({
+      precision: 'date-only',
+      value: '2026-08-20',
+    });
+    expect(normalizeNeuTableDatePoint('2026-08-20T23:30:00.000Z')).toEqual({
+      precision: 'date-only',
+      value: '2026-08-20',
+    });
+    expect(normalizeNeuTableDatePoint('2026-08-20T23:30:00.000Z', 'instant')).toEqual({
+      precision: 'instant',
+      value: '2026-08-20T23:30:00.000Z',
+    });
+    expect(
+      matchNeuTableDate(new Date('2026-08-20T12:00:00Z'), '2026-08-20T12:00:00Z', 'is', 'instant'),
+    ).toBe(true);
+    expect(matchNeuTableDate('invalid', '2026-08-20T12:00:00Z', 'is', 'instant')).toBe(false);
+    expect(matchNeuTableDate(123, '2026-08-20T12:00:00Z', 'is', 'instant')).toBe(false);
+    expect(matchNeuTableDate('2026-08-20', { from: '2026-08-20', to: null }, 'between')).toBe(true);
+    expect(matchNeuTableDate('2026-08-20', { from: null, to: '2026-08-20' }, 'between')).toBe(true);
+
+    expect(
+      matchesNeuTableFilter(
+        { createdAt: '2026-08-20T12:00:00Z' } as FilterUser,
+        instantColumn,
+        '2026-08-20T12:00:00Z',
+      ),
+    ).toBe(true);
+    expect(normalizeNeuTableAppliedFilterValue(instantColumn, '2026-08-20T12:00:00Z')).toBe(
+      '2026-08-20T12:00:00.000Z',
+    );
+    expect(normalizeNeuTableAppliedFilterValue(dateRangeColumn, 'malformed')).toBe('malformed');
+    expect(normalizeNeuTableAppliedFilterValue(numberRangeColumn, { to: 10 })).toEqual({
+      from: null,
+      to: 10,
+    });
+    expect(normalizeNeuTableAppliedFilterValue(numberRangeColumn, { from: 1 })).toEqual({
+      from: 1,
+      to: null,
+    });
+    expect(normalizeNeuTableAppliedFilterValue(numberRangeColumn, { from: 1, to: 10 })).toEqual({
+      from: 1,
+      to: 10,
+    });
+    expect(
+      normalizeNeuTableAppliedFilterValue(
+        { key: 'name', header: 'Name', filterConfig: { kind: 'multiSelect' } },
+        'not-an-array',
+      ),
+    ).toBe('not-an-array');
+    expect(buildNeuTableFilterState(instantColumn, 'invalid')).toBeNull();
+    expect(resolveNeuTableFilterMatchMode(instantColumn, 'unsupported')).toBe('is');
   });
 });

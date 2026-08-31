@@ -6013,6 +6013,104 @@ describe('NeuTableComponent canonical applied filter state', () => {
     await TestBed.configureTestingModule({ providers: mkProviders() }).compileComponents();
   });
 
+  it('keeps every inline typed-filter adapter canonical across absent and specialized configs', async () => {
+    const columns = [
+      { key: 'name', header: 'Name', filterable: true },
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number', mode: 'between' } },
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: { kind: 'date', mode: 'between', precision: 'date-only' },
+      },
+      {
+        key: 'instant',
+        header: 'Instant',
+        filterConfig: { kind: 'date', mode: 'between', precision: 'instant' },
+      },
+      { key: 'active', header: 'Active', filterConfig: { kind: 'boolean' } },
+      {
+        key: 'role',
+        header: 'Role',
+        filterConfig: {
+          kind: 'select',
+          options: ROLE_FILTER_OPTIONS,
+          optionLabel: (option: RoleFilterOption) => option.name,
+          optionValue: (option: RoleFilterOption) => option.id,
+          optionDisabled: (option: RoleFilterOption) => option.disabled === true,
+          searchable: true,
+          virtualScroll: true,
+          virtualScrollVisibleItems: 3,
+        },
+      },
+      { key: 'status', header: 'Status', filterConfig: { kind: 'multiSelect' } },
+      { key: 'custom', header: 'Custom', filterConfig: { kind: 'custom', predicate: () => true } },
+    ] as NeuTableColumn<Record<string, unknown>>[];
+    const fixture = TestBed.createComponent(NeuTableComponent<Record<string, unknown>>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', []);
+    fixture.componentRef.setInput('pagination', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.componentInstance as any;
+    const [legacy, number, dateOnly, instant, boolean, select, multiSelect, custom] = columns;
+
+    expect(table.modernFilterMode(legacy)).toBeNull();
+    expect(table.modernFilterMode(number)).toBe('between');
+    expect(table.modernFilterMode(dateOnly)).toBe('between');
+    expect(table.modernFilterMode(boolean)).toBeNull();
+    expect(table.modernFilterMode(select)).toBe('equals');
+    expect(table.modernFilterMode(multiSelect)).toBe('in');
+    expect(table.modernFilterMode(custom)).toBeNull();
+    expect(table.modernFilterLabel(number)).toContain('(between)');
+    expect(table.modernFilterLabel(boolean)).not.toContain('(');
+    expect(table.rangeFilterLabel(number, 'from')).toContain('From');
+    expect(table.rangeFilterLabel(number, 'to')).toContain('To');
+    expect(table.dateInputType(dateOnly)).toBe('date');
+    expect(table.dateInputType(instant)).toBe('datetime-local');
+    expect(table.isDateOnlyRange(dateOnly)).toBe(true);
+    expect(table.isDateOnlyRange(instant)).toBe(false);
+    expect(table.isInstantRange(instant)).toBe(true);
+    expect(table.isInstantRange(dateOnly)).toBe(false);
+
+    expect(table.typedFilterOptions(select)).toBe(ROLE_FILTER_OPTIONS);
+    expect(table.typedFilterOptions(multiSelect)).toEqual([]);
+    expect(table.typedFilterOptions(number)).toEqual([]);
+    expect(table.typedFilterOptionLabel(select)?.(ROLE_FILTER_OPTIONS[0])).toBe('Guest');
+    expect(table.typedFilterOptionLabel(number)).toBeNull();
+    expect(table.typedFilterOptionValue(select)?.(ROLE_FILTER_OPTIONS[1])).toBe(1);
+    expect(table.typedFilterOptionValue(number)).toBeNull();
+    expect(table.typedFilterOptionDisabled(select)?.(ROLE_FILTER_OPTIONS[2])).toBe(true);
+    expect(table.typedFilterOptionDisabled(number)).toBeNull();
+    expect(table.typedFilterSearchable(select)).toBe(true);
+    expect(table.typedFilterSearchable(multiSelect)).toBe(false);
+    expect(table.typedFilterVirtualScroll(select)).toBe(true);
+    expect(table.typedFilterVirtualScroll(number)).toBe(false);
+    expect(table.typedFilterVirtualScrollVisibleItems(select)).toBe(3);
+    expect(table.typedFilterVirtualScrollVisibleItems(multiSelect)).toBe(8);
+    expect(table.typedFilterVirtualScrollVisibleItems(number)).toBe(8);
+
+    expect(table._typedFilterControlValue(legacy, 'ignored')).toBe('');
+    expect(table._typedFilterControlValue(boolean, false)).toBe(false);
+    expect(table._typedFilterControlValue(boolean, 'false')).toBeNull();
+    expect(table._typedFilterControlValue(select, '')).toBeNull();
+    expect(table._typedFilterControlValue(multiSelect, ['active'])).toEqual(['active']);
+    expect(table._typedFilterControlValue(multiSelect, 'active')).toEqual([]);
+    expect(table._typedFilterControlValue(dateOnly, null)).toEqual({ start: null, end: null });
+    expect(table._typedFilterControlValue(custom, { bounded: true })).toEqual({ bounded: true });
+    expect(table._typedFilterValueFromControl(legacy, 'Ana')).toBe('Ana');
+    expect(table._typedFilterValueFromControl(instant, 'unchanged')).toBe('unchanged');
+    expect(table._typedFilterValueFromControl(dateOnly, 'invalid')).toEqual({
+      from: null,
+      to: null,
+    });
+    expect(
+      table._typedFilterValueFromControl(dateOnly, {
+        start: new Date(2026, 7, 20),
+        end: new Date(2026, 7, 21),
+      }),
+    ).toEqual({ from: '2026-08-20', to: '2026-08-21' });
+  });
+
   it('keeps one mutable applied store while preserving exact legacy and typed single projections', async () => {
     const fixture = TestBed.createComponent(NeuTableComponent<FilterUser>);
     fixture.componentRef.setInput('columns', [
@@ -8989,5 +9087,118 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(table._state.snapshot().editingCell).toBeNull();
     expect(error).toHaveBeenCalledTimes(2);
     error.mockRestore();
+  });
+
+  it('normalizes persisted identity, expansion, layout, and filter lifecycle boundaries', () => {
+    const roleOne = { id: 1, label: 'Admin' };
+    const roleTwo = { id: 2, label: 'Editor' };
+    const fixture = TestBed.createComponent(NeuTableComponent<any>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'name', header: 'Name', filterable: true },
+      {
+        key: 'role',
+        header: 'Role',
+        filterConfig: { kind: 'select', options: [roleOne, roleTwo] },
+      },
+      {
+        key: 'roles',
+        header: 'Roles',
+        filterConfig: { kind: 'multiSelect', options: [roleOne, roleTwo] },
+      },
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number', mode: 'between' } },
+      {
+        key: 'createdAt',
+        header: 'Created',
+        filterConfig: { kind: 'date', precision: 'instant', mode: 'between' },
+      },
+    ]);
+    fixture.componentRef.setInput('data', []);
+    fixture.componentRef.setInput('initialLayout', {
+      columnOrder: ['role', 'missing'],
+      hiddenColumns: ['name', 'missing'],
+      columnWidths: { role: '12rem', missing: '10rem' },
+    });
+    fixture.detectChanges();
+    const table = fixture.componentInstance as any;
+
+    expect([...table._normalizeExpansionKeys([1, 2], 'none')]).toEqual([]);
+    expect([...table._normalizeExpansionKeys([1, 2], 'multiple')]).toEqual([1, 2]);
+    expect([...table._normalizeExpansionKeys([], 'single')]).toEqual([]);
+    expect([...table._normalizeExpansionKeys([2, 1], 'single')]).toEqual([2]);
+
+    expect(
+      table._normalizePersistedLayout({
+        columnOrder: ['roles', 'missing'],
+        hiddenColumns: ['role', 'missing'],
+        columnWidths: { role: '11rem', missing: '9rem' },
+      }),
+    ).toEqual({
+      columnOrder: ['roles', 'name', 'role', 'score', 'createdAt'],
+      hiddenColumns: ['role'],
+      columnWidths: { role: '11rem' },
+    });
+    expect(table._initialNormalizedLayout()).toEqual({
+      columnOrder: ['role', 'name', 'roles', 'score', 'createdAt'],
+      hiddenColumns: ['name'],
+      columnWidths: { role: '12rem', missing: '10rem' },
+    });
+
+    const persistedRole = { id: 1, label: 'Admin' };
+    expect(table._rebindPersistedFilterValue(table.columns()[0], persistedRole)).toBe(
+      persistedRole,
+    );
+    expect(table._rebindPersistedFilterValue(table.columns()[1], persistedRole)).toBe(roleOne);
+    expect(
+      table._rebindPersistedFilterValue(table.columns()[2], [persistedRole, { id: 99 }]),
+    ).toEqual([roleOne, { id: 99 }]);
+    expect(table._rebindPersistedFilterValue(table.columns()[2], persistedRole)).toEqual([roleOne]);
+
+    expect(table._filterColumnSignature({ key: 'plain', header: 'Plain' })).toEqual({
+      kind: 'none',
+      controlKind: 'none',
+    });
+    expect(
+      table._filterColumnSignature({ key: 'legacy', header: 'Legacy', filterable: true }),
+    ).toEqual({ kind: 'legacy', controlKind: 'legacy:text' });
+    expect(table._filterColumnSignature(table.columns()[3]).controlKind).toBe('number:between');
+    expect(table._filterColumnSignature(table.columns()[4]).controlKind).toBe(
+      'date:instant:between',
+    );
+    expect(table._filterColumnSignature(table.columns()[1]).controlKind).toBe('select');
+    expect(table._filterColumnSignature(table.columns()[2]).controlKind).toBe('multiSelect');
+    expect(
+      table._optionValueSemanticsChanged(
+        () => 1,
+        () => 2,
+      ),
+    ).toBe(false);
+    expect(table._optionValueSemanticsChanged('id', 'key')).toBe(true);
+    expect(table._optionValueSemanticsChanged('id', 'id')).toBe(false);
+
+    const projected = { value: 'canonical', projectionValue: 'legacy' };
+    expect(table._appliedConstraintProjectionValue(projected)).toBe('legacy');
+    expect(table._appliedConstraintProjectionValue({ value: 'canonical' })).toBe('canonical');
+    expect(
+      table._projectLegacyColumnFilters({
+        name: { operator: 'and', constraints: [projected] },
+        role: { operator: 'or', constraints: [{ value: 1 }, { value: 2 }] },
+      }),
+    ).toEqual({ name: 'legacy' });
+
+    const restored = table._restorePersistedFilters({
+      filters: {
+        role: {
+          operator: 'and',
+          constraints: [{ mode: 'equals', value: persistedRole }, { value: roleTwo }],
+        },
+        removed: { operator: 'and', constraints: [{ value: 'kept' }] },
+      },
+    });
+    expect(restored.role.constraints[0].value).toBe(roleOne);
+    expect(restored.role.constraints[1].mode).toBeUndefined();
+    expect(restored.removed.constraints[0].value).toBe('kept');
+
+    expect(table._stateStorageFor('local')).toBe(window.localStorage);
+    expect(table._stateStorageFor('session')).toBe(window.sessionStorage);
   });
 });

@@ -441,4 +441,111 @@ describe('NeuCascadeSelectComponent', () => {
     expect(selection.node.id).toBe(5_000);
     expect(selection.ancestors).toHaveLength(5_000);
   });
+
+  it('routes trigger, option, breadcrumb and back interactions through the rendered contract', () => {
+    const component = fixture.componentInstance as any;
+    for (const accessor of ['itemTpl', 'selectedTpl', 'headerTpl', 'footerTpl', 'emptyTpl']) {
+      expect(component[accessor]()).toBeUndefined();
+    }
+
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-cascade-select__trigger',
+    ) as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+    expect(component.open()).toBe(true);
+
+    let option = document.querySelector('.neu-cascade-select__option') as HTMLButtonElement;
+    option.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(component.activePath()).toEqual([hierarchy[0]]);
+
+    (document.querySelector('.neu-cascade-select__breadcrumb') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.activePath()).toEqual([]);
+    option = document.querySelector('.neu-cascade-select__option') as HTMLButtonElement;
+    option.click();
+    fixture.detectChanges();
+    (document.querySelector('.neu-cascade-select__back') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.activePath()).toEqual([]);
+
+    trigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    expect(component.open()).toBe(false);
+  });
+
+  it('fails closed for disabled, missing, primitive and all-disabled navigation boundaries', () => {
+    const component = fixture.componentInstance as any;
+    component.writeValue(999);
+    expect(component.selectedNode()).toBeNull();
+    component.openPanel();
+    expect(component.activePath()).toEqual([]);
+    component.close();
+    component.close();
+    component.goBack();
+
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    component.toggle();
+    component.openPanel();
+    component.clear(new Event('clear'));
+    expect(component.value()).toBe(999);
+    fixture.componentRef.setInput('disabled', false);
+    fixture.detectChanges();
+
+    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    expect(component.open()).toBe(true);
+    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: ' ', cancelable: true }));
+    expect(component.open()).toBe(false);
+    component.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }),
+    );
+    expect(component.open()).toBe(true);
+    component.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
+    );
+    expect(component.open()).toBe(true);
+    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'x' }));
+
+    component.onOptionKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }),
+      99,
+    );
+    component.onOptionKeydown(
+      new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }),
+      99,
+    );
+    component.onOptionKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }),
+      1,
+    );
+    expect(component.activePath()).toEqual([]);
+
+    const primitiveFixture = TestBed.createComponent(NeuCascadeSelectComponent);
+    const primitive = primitiveFixture.componentInstance as any;
+    primitiveFixture.componentRef.setInput('nodes', ['leaf', null]);
+    primitiveFixture.componentRef.setInput('optionDisabled', () => true);
+    primitiveFixture.detectChanges();
+    expect(primitive.hasChildren('leaf')).toBe(false);
+    expect(primitive.hasChildren(null)).toBe(false);
+    primitive.openPanel();
+    primitive.onOptionKeydown(
+      new KeyboardEvent('keydown', { key: 'Home', cancelable: true }),
+      0,
+    );
+    primitive.onOptionKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
+      0,
+    );
+    expect(primitive.activeIndex()).toBe(0);
+
+    component.onOverlayPositionChange({ connectionPair: { originY: 'top' } } as any);
+    expect(component.isPanelAbove()).toBe(true);
+    component.onOverlayPositionChange({ connectionPair: { originY: 'bottom' } } as any);
+    expect(component.isPanelAbove()).toBe(false);
+  });
 });

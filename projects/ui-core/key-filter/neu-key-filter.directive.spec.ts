@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, PLATFORM_ID, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NeuKeyFilterDirective } from './neu-key-filter.directive';
 
@@ -7,7 +7,7 @@ import { NeuKeyFilterDirective } from './neu-key-filter.directive';
   template: `<input [neuKeyFilter]="pattern()" [neuKeyFilterValidateOnly]="validateOnly()" />`,
 })
 class KeyFilterHost {
-  pattern = signal<RegExp | 'int' | 'alpha' | 'alphanum'>(/^[a-z]*$/i);
+  pattern = signal<RegExp | 'int' | 'alpha' | 'alphanum' | null>(/^[a-z]*$/i);
   validateOnly = signal(false);
 }
 
@@ -25,7 +25,12 @@ describe('NeuKeyFilterDirective', () => {
   });
 
   function beforeInput(data: string, inputType = 'insertText'): Event {
-    const event = new InputEvent('beforeinput', { bubbles: true, cancelable: true, data, inputType });
+    const event = new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      data,
+      inputType,
+    });
     input.dispatchEvent(event);
     return event;
   }
@@ -70,7 +75,9 @@ describe('NeuKeyFilterDirective', () => {
     fixture.detectChanges();
     input.value = 'a';
     expect(beforeInput('1').defaultPrevented).toBe(false);
-    expect(directive.validate({ value: 'a1' } as never)).toEqual({ neuKeyFilter: { pattern: '/^[a-z]*$/i' } });
+    expect(directive.validate({ value: 'a1' } as never)).toEqual({
+      neuKeyFilter: { pattern: '/^[a-z]*$/i' },
+    });
   });
 
   it('keeps the latest valid value as a fallback when an uncontrolled input event is invalid', () => {
@@ -111,5 +118,86 @@ describe('NeuKeyFilterDirective', () => {
     fixture.componentInstance.validateOnly.set(true);
     fixture.detectChanges();
     expect(directive.validate({ value: 'abc' } as never)).toBeNull();
+  });
+
+  it('covers null patterns, validation bypass, clipboard fallback, and stateful expressions', () => {
+    expect(directive.validate({ value: 'invalid1' } as never)).toBeNull();
+
+    fixture.componentInstance.pattern.set(null);
+    fixture.detectChanges();
+    input.value = 'anything';
+    expect(beforeInput('1').defaultPrevented).toBe(false);
+
+    fixture.componentInstance.pattern.set(/^[a-z]*$/gi);
+    fixture.detectChanges();
+    input.value = 'a';
+    expect(beforeInput('b').defaultPrevented).toBe(false);
+    expect(beforeInput('1').defaultPrevented).toBe(true);
+
+    const transfer = { getData: vi.fn(() => '2') };
+    const paste = new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      data: null,
+      inputType: 'insertFromPaste',
+    });
+    Object.defineProperty(paste, 'dataTransfer', { configurable: true, value: transfer });
+    directive.onBeforeInput(paste);
+    expect(transfer.getData).toHaveBeenCalledWith('text');
+    expect(paste.defaultPrevented).toBe(true);
+
+    const emptyPaste = new InputEvent('beforeinput', {
+      cancelable: true,
+      data: null,
+      inputType: 'insertFromPaste',
+    });
+    directive.onBeforeInput(emptyPaste);
+    expect(emptyPaste.defaultPrevented).toBe(false);
+  });
+
+  it('preserves composition and validate-only input without mutating the host', () => {
+    input.value = 'base';
+    directive.onCompositionStart();
+    input.value = 'base1';
+    directive.onInput();
+    expect(input.value).toBe('base1');
+
+    fixture.componentInstance.validateOnly.set(true);
+    fixture.detectChanges();
+    directive.onCompositionEnd();
+    directive.onInput();
+    expect(input.value).toBe('base1');
+    expect(directive.validate({ value: null } as never)).toBeNull();
+  });
+
+  it('uses end-of-value insertion when selection offsets are unavailable', () => {
+    input.value = 'a';
+    Object.defineProperty(input, 'selectionStart', { configurable: true, get: () => null });
+    Object.defineProperty(input, 'selectionEnd', { configurable: true, get: () => null });
+    const event = new InputEvent('beforeinput', {
+      cancelable: true,
+      data: '1',
+      inputType: 'insertText',
+    });
+    directive.onBeforeInput(event);
+    expect(event.defaultPrevented).toBe(true);
+
+    fixture.componentInstance.pattern.set('int');
+    fixture.detectChanges();
+    expect((directive as any).patternLabel()).toBe('int');
+    fixture.componentInstance.pattern.set(null);
+    fixture.detectChanges();
+    expect((directive as any).patternLabel()).toBe('');
+  });
+
+  it('does not read the native value during server-side construction', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [KeyFilterHost],
+      providers: [{ provide: PLATFORM_ID, useValue: 'server' }],
+    }).compileComponents();
+    const serverFixture = TestBed.createComponent(KeyFilterHost);
+    serverFixture.detectChanges();
+    expect(serverFixture.nativeElement.querySelector('input')).toBeTruthy();
   });
 });

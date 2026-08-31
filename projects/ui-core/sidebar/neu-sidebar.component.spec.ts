@@ -540,47 +540,6 @@ describe('NeuSidebarComponent', () => {
     expect(focus).toHaveBeenCalledTimes(1);
   });
 
-  it('survives 100 destroy-before-restore cycles without focusing the trigger', () => {
-    vi.useFakeTimers();
-    const trigger = createFocusTrigger();
-    const focus = vi.spyOn(trigger, 'focus');
-
-    for (let cycle = 0; cycle < 100; cycle += 1) {
-      trigger.focus();
-      focus.mockClear();
-      _menuParam.set('open');
-      const f = TestBed.createComponent(FocusHostComponent);
-      f.detectChanges();
-      vi.runOnlyPendingTimers();
-      _menuParam.set(null);
-      f.detectChanges();
-      f.destroy();
-      vi.runAllTimers();
-      expect(focus).not.toHaveBeenCalled();
-    }
-  });
-
-  it('restores valid focus exactly once in each of 100 normal close cycles', () => {
-    vi.useFakeTimers();
-    const trigger = createFocusTrigger();
-    const focus = vi.spyOn(trigger, 'focus');
-
-    for (let cycle = 0; cycle < 100; cycle += 1) {
-      trigger.focus();
-      focus.mockClear();
-      _menuParam.set('open');
-      const f = TestBed.createComponent(FocusHostComponent);
-      f.detectChanges();
-      vi.runOnlyPendingTimers();
-      _menuParam.set(null);
-      f.detectChanges();
-      vi.runOnlyPendingTimers();
-      vi.runAllTimers();
-      expect(focus).toHaveBeenCalledTimes(1);
-      f.destroy();
-    }
-  });
-
   it('collapsedChange should emit when collapsed input changes', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.detectChanges();

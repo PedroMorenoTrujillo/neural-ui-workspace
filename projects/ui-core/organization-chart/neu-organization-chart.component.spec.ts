@@ -463,9 +463,231 @@ describe('NeuOrganizationChartComponent', () => {
       };
     }
     const fixture = setup([deep]);
+    fixture.componentRef.setInput('selectionMode', 'single');
+    fixture.detectChanges();
     const items = fixture.nativeElement.querySelectorAll('[role="treeitem"]');
     expect(items).toHaveLength(1_001);
     expect(items[1_000].getAttribute('aria-level')).toBe('1001');
     expect(fixture.nativeElement.querySelector('.neu-organization-chart__tree--flat')).toBeTruthy();
+  });
+
+  it('keeps context callbacks, selection guards, and checkbox deselection explicit', () => {
+    const fixture = setup();
+    const chart = fixture.componentInstance as any;
+    const root = NODES[0];
+    const leaf = root.children![1];
+
+    expect(chart.gapX()).toBe(40);
+    expect(chart.gapY()).toBe(40);
+    fixture.componentRef.setInput('gap', [12] as const);
+    expect(chart.gapY()).toBe(12);
+    expect(chart.deepIndent(100)).toBe(24);
+
+    expect(chart.canSelect(root)).toBe(false);
+    fixture.componentRef.setInput('selectionMode', 'single');
+    fixture.componentRef.setInput('selectable', false);
+    expect(chart.canSelect({ ...root, selectable: true })).toBe(true);
+    expect(chart.canSelect({ ...root, selectable: false })).toBe(false);
+    expect(chart.canSelect({ ...root, disabled: true })).toBe(false);
+    expect(chart.canSelect(root)).toBe(false);
+
+    expect(chart.canCollapse(leaf)).toBe(false);
+    fixture.componentRef.setInput('collapsible', false);
+    expect(chart.canCollapse({ ...root, collapsible: true })).toBe(true);
+    expect(chart.canCollapse({ ...root, collapsible: false })).toBe(false);
+    expect(chart.canCollapse({ ...root, disabled: true })).toBe(false);
+    expect(chart.canCollapse(root)).toBe(false);
+
+    fixture.componentRef.setInput('selectable', true);
+    fixture.componentRef.setInput('collapsible', true);
+    fixture.componentRef.setInput('selectionMode', 'checkbox');
+    const selectEvents: string[] = [];
+    const unselectEvents: string[] = [];
+    fixture.componentInstance.nodeSelect.subscribe(({ node }) => selectEvents.push(node.id));
+    fixture.componentInstance.nodeUnselect.subscribe(({ node }) => unselectEvents.push(node.id));
+    chart.activateNode(root);
+    chart.activateNode(root);
+    expect(fixture.componentInstance.selectionKeys()).toEqual([]);
+    expect(selectEvents).toEqual(['ceo']);
+    expect(unselectEvents).toEqual(['ceo']);
+
+    const nodeContext = chart.nodeTemplateContext(root, null, 0, 0, [0]);
+    const event = new Event('click');
+    nodeContext.select();
+    nodeContext.select(event);
+    nodeContext.toggle();
+    nodeContext.toggle(event);
+    const leafToggleContext = chart.toggleTemplateContext(leaf);
+    expect(leafToggleContext.childCount).toBe(0);
+    leafToggleContext.toggle();
+    leafToggleContext.toggle(event);
+  });
+
+  it('handles interactive content and every keyboard navigation boundary', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('selectionMode', 'single');
+    fixture.componentRef.setInput('collapsible', true);
+    fixture.detectChanges();
+    const chart = fixture.componentInstance as any;
+    const root = NODES[0];
+    const items = Array.from(
+      fixture.nativeElement.querySelectorAll('[role="treeitem"]'),
+    ) as HTMLElement[];
+
+    const nested = document.createElement('button');
+    items[0].appendChild(nested);
+    chart.onNodeContentClick(root, {
+      target: nested,
+      currentTarget: items[0],
+    } as unknown as MouseEvent);
+    expect(fixture.componentInstance.selectionKeys()).toBeUndefined();
+    chart.onNodeContentClick(root, {
+      target: items[0],
+      currentTarget: items[0],
+    } as unknown as MouseEvent);
+    expect(fixture.componentInstance.selectionKeys()).toEqual(['ceo']);
+
+    const nestedKey = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    Object.defineProperties(nestedKey, {
+      target: { value: nested },
+      currentTarget: { value: items[0] },
+    });
+    chart.onNodeKeydown(root, nestedKey);
+    expect(nestedKey.defaultPrevented).toBe(false);
+
+    for (const [key, expected] of [
+      ['ArrowDown', items[1]],
+      ['End', items.at(-1)],
+      ['Home', items[0]],
+      ['ArrowUp', undefined],
+    ] as const) {
+      const keyboard = new KeyboardEvent('keydown', { key, cancelable: true });
+      Object.defineProperties(keyboard, {
+        target: { value: items[0] },
+        currentTarget: { value: items[0] },
+      });
+      chart.onNodeKeydown(root, keyboard);
+      if (expected) expect(document.activeElement).toBe(expected);
+      else expect(keyboard.defaultPrevented).toBe(false);
+    }
+
+    const unknown = new KeyboardEvent('keydown', { key: 'PageDown', cancelable: true });
+    Object.defineProperties(unknown, {
+      target: { value: items[0] },
+      currentTarget: { value: items[0] },
+    });
+    chart.onNodeKeydown(root, unknown);
+    expect(unknown.defaultPrevented).toBe(false);
+
+    const flatTree = document.createElement('ul');
+    flatTree.className = 'neu-organization-chart__tree neu-organization-chart__tree--flat';
+    const flatItems = [1, 2, 2, 1].map((level) => {
+      const item = document.createElement('li');
+      item.className = 'neu-organization-chart__branch';
+      item.tabIndex = 0;
+      item.setAttribute('aria-level', String(level));
+      flatTree.appendChild(item);
+      return item;
+    });
+    fixture.nativeElement.appendChild(flatTree);
+    expect(chart.firstChildItem(flatItems[0])).toBe(flatItems[1]);
+    expect(chart.firstChildItem(flatItems[3])).toBeUndefined();
+    expect(chart.parentItem(flatItems[2])).toBe(flatItems[0]);
+    expect(chart.parentItem(flatItems[0])).toBeUndefined();
+  });
+
+  it('covers collapsed arrows, empty selectable subtrees, and hierarchy edge lookups', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('selectionMode', 'checkbox');
+    fixture.componentRef.setInput('collapsible', true);
+    fixture.detectChanges();
+    const chart = fixture.componentInstance as any;
+    const root = NODES[0];
+    const items = Array.from(
+      fixture.nativeElement.querySelectorAll('[role="treeitem"]'),
+    ) as HTMLElement[];
+
+    expect(chart.deepRenderEntries()).toEqual([]);
+    expect(
+      chart.isPartialSelected({
+        id: 'disabled-only',
+        label: 'Disabled only',
+        disabled: true,
+      }),
+    ).toBe(false);
+
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    Object.defineProperties(enter, {
+      target: { value: items[0] },
+      currentTarget: { value: items[0] },
+    });
+    chart.onNodeKeydown(root, enter);
+    expect(enter.defaultPrevented).toBe(true);
+
+    chart.toggleNode(root);
+    const forward = new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true });
+    Object.defineProperties(forward, {
+      target: { value: items[0] },
+      currentTarget: { value: items[0] },
+    });
+    chart.onNodeKeydown(root, forward);
+    expect(fixture.componentInstance.collapsedKeys()).toEqual([]);
+
+    chart.toggleNode(root);
+    const backWhileCollapsed = new KeyboardEvent('keydown', {
+      key: 'ArrowLeft',
+      cancelable: true,
+    });
+    Object.defineProperties(backWhileCollapsed, {
+      target: { value: items[0] },
+      currentTarget: { value: items[0] },
+    });
+    chart.onNodeKeydown(root, backWhileCollapsed);
+    expect(backWhileCollapsed.defaultPrevented).toBe(false);
+
+    const noTarget = new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true });
+    Object.defineProperties(noTarget, {
+      target: { value: items[0] },
+      currentTarget: { value: items[0] },
+    });
+    chart.onNodeKeydown(root, noTarget);
+    expect(noTarget.defaultPrevented).toBe(false);
+
+    expect(chart.firstChildItem(items[4])).toBeUndefined();
+    expect(chart.parentItem(items[0])).toBeUndefined();
+    expect(chart.parentItem(items[2])).toBe(items[1]);
+
+    const flatTree = document.createElement('ul');
+    flatTree.className = 'neu-organization-chart__tree--flat';
+    const levelTwo = document.createElement('li');
+    levelTwo.className = 'neu-organization-chart__branch';
+    levelTwo.tabIndex = 0;
+    levelTwo.setAttribute('aria-level', '2');
+    const nextRoot = document.createElement('li');
+    nextRoot.className = 'neu-organization-chart__branch';
+    nextRoot.tabIndex = 0;
+    nextRoot.setAttribute('aria-level', '1');
+    flatTree.append(levelTwo, nextRoot);
+    fixture.nativeElement.appendChild(flatTree);
+    expect(chart.firstChildItem(levelTwo)).toBeUndefined();
+
+    const nonSelectableParent: NeuOrganizationChartNode<Person> = {
+      id: 'parent',
+      label: 'Parent',
+      selectable: false,
+      children: [
+        { id: 'first-child', label: 'First child' },
+        { id: 'second-child', label: 'Second child' },
+      ],
+    };
+    fixture.componentRef.setInput('nodes', [nonSelectableParent]);
+    fixture.componentInstance.selectionKeys.set([]);
+    fixture.detectChanges();
+    const actions = fixture.nativeElement.querySelectorAll('.neu-organization-chart__node-action');
+    actions[1].click();
+    actions[2].click();
+    expect(new Set(fixture.componentInstance.selectionKeys())).toEqual(
+      new Set(['first-child', 'second-child']),
+    );
   });
 });

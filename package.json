@@ -41,6 +41,7 @@
     "test:table-body-section-template-types": "node scripts/test-table-body-section-template-types.mjs",
     "test": "ng test ui-core --watch=false",
     "test:coverage": "ng test ui-core --watch=false --coverage",
+    "test:stress:sidebar": "ng test ui-core --watch=false --no-coverage --include=sidebar/neu-sidebar.component.stress.spec.ts --runner-config=vitest.stress.config.mts",
     "sandbox": "ng serve sandbox --open"
   },
   "private": true,

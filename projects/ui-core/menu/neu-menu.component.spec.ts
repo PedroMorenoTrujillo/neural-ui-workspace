@@ -130,6 +130,80 @@ describe('NeuMenuComponent', () => {
     );
     expect(document.activeElement).toBe(buttons[2]);
   });
+
+  it('opens and closes nested menus with arrows and activates commands from the keyboard', () => {
+    const command = vi.fn();
+    fixture.componentRef.setInput('items', [
+      {
+        key: 'parent',
+        label: 'Parent',
+        children: [{ key: 'child', label: 'Child', command }],
+      },
+      { key: 'plain', label: 'Plain', command },
+    ]);
+    fixture.detectChanges();
+    const rootButtons = Array.from(
+      fixture.nativeElement.querySelectorAll(':scope > .neu-menu__list > button'),
+    ) as HTMLButtonElement[];
+    const child = fixture.nativeElement.querySelector(
+      '.neu-menu__child [role="menuitem"]',
+    ) as HTMLButtonElement;
+
+    rootButtons[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(child);
+    child.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(rootButtons[0]);
+
+    rootButtons[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    expect(command).toHaveBeenCalledWith(
+      expect.objectContaining({ item: expect.objectContaining({ key: 'plain' }) }),
+    );
+    fixture.componentInstance.activate({ key: 'direct', label: 'Direct', command });
+    expect(command).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        originalEvent: expect.any(Event),
+        item: expect.objectContaining({ key: 'direct' }),
+      }),
+    );
+  });
+
+  it('mirrors nested open and close arrows in RTL and ignores an orphan close', () => {
+    fixture.nativeElement.setAttribute('dir', 'rtl');
+    fixture.nativeElement.style.direction = 'rtl';
+    fixture.componentRef.setInput('items', [
+      { key: 'parent', label: 'Parent', children: [{ key: 'child', label: 'Child' }] },
+    ]);
+    fixture.detectChanges();
+    (
+      fixture.nativeElement.querySelector('.neu-menu__child neu-menu') as HTMLElement
+    ).style.direction = 'rtl';
+    const root = fixture.nativeElement.querySelector(
+      ':scope > .neu-menu__list > button',
+    ) as HTMLButtonElement;
+    root.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    );
+    const child = fixture.nativeElement.querySelector(
+      '.neu-menu__child [role="menuitem"]',
+    ) as HTMLButtonElement;
+    expect(document.activeElement).toBe(child);
+    child.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(root);
+    root.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    const emit = vi.spyOn(fixture.componentInstance.itemClick, 'emit');
+    fixture.componentInstance.activate({ key: 'disabled', label: 'Disabled', disabled: true });
+    expect(emit).not.toHaveBeenCalled();
+  });
 });
 
 describe('NeuMenuButtonComponent', () => {
@@ -196,6 +270,31 @@ describe('NeuMenuButtonComponent', () => {
     expect(fixture.componentInstance.open()).toBe(false);
     expect(document.activeElement).toBe(trigger);
   });
+
+  it('opens with ArrowUp, focuses the last eligible item, and ignores unrelated keys', async () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'first', label: 'First' },
+      { key: 'disabled', label: 'Disabled', disabled: true },
+      { key: 'last', label: 'Last' },
+    ]);
+    const component = fixture.componentInstance as any;
+    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(component.open()).toBe(false);
+    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
+    component.openMenu(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const eligible = Array.from(
+      document.querySelectorAll('.neu-menu-button__panel [role="menuitem"]:not([disabled])'),
+    );
+    expect(document.activeElement).toBe(eligible.at(-1));
+    component.onOverlayKeydown(new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(component.open()).toBe(true);
+
+    component.close();
+    component.onOverlayAttach();
+    await fixture.whenStable();
+  });
 });
 
 describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
@@ -247,6 +346,29 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
       new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
     );
     expect(document.activeElement).toBe(buttons[1]);
+  });
+
+  it('tracks focus, ignores unrelated targets, and activates the focused LTR item', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuMenubarComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(NeuMenubarComponent);
+    fixture.componentRef.setInput('items', items);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const component = fixture.componentInstance;
+    const clicked = vi.spyOn(component.itemClick, 'emit');
+    const direct = fixture.nativeElement.querySelector('.neu-menubar__item') as HTMLButtonElement;
+    const nav = fixture.nativeElement.querySelector('nav') as HTMLElement;
+
+    nav.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    nav.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    direct.focus();
+    direct.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    direct.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'help' }));
+    direct.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true }));
+    direct.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', bubbles: true }));
   });
 
   it('forwards the tiered menu label and item clicks', async () => {

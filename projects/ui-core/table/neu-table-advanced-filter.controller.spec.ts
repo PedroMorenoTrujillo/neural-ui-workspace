@@ -1,8 +1,16 @@
 import {
   NeuTableAdvancedFilterController,
   isNeuTableDateRange,
+  neuTableAdvancedFilterControlKind,
+  neuTableAdvancedFilterDatePrecision,
+  neuTableAdvancedFilterModes,
+  neuTableDateInputControlValue,
+  neuTableDateRangeControlValue,
+  neuTableDateRangeFilterValue,
   neuTableDateFilterValue,
+  neuTableInstantRangeControlValue,
   neuTableInstantFilterValue,
+  neuTableNumberRangeValue,
 } from './neu-table-advanced-filter.controller';
 import type { NeuTableColumn } from './neu-table.types';
 
@@ -59,6 +67,60 @@ const customColumn: NeuTableColumn<FilterRow> = {
 };
 
 describe('NeuTableAdvancedFilterController', () => {
+  it('normalizes every legacy and typed control boundary without locale-dependent values', () => {
+    const legacySelect: NeuTableColumn<FilterRow> = {
+      key: 'role',
+      header: 'Role',
+      filterType: 'select',
+    };
+    const legacyDate: NeuTableColumn<FilterRow> = {
+      key: 'createdAt',
+      header: 'Created',
+      filterType: 'date',
+    };
+    const legacyText: NeuTableColumn<FilterRow> = {
+      key: 'name',
+      header: 'Name',
+      filterable: true,
+    };
+    const inert: NeuTableColumn<FilterRow> = { key: 'name', header: 'Name' };
+
+    expect(neuTableAdvancedFilterControlKind(legacySelect)).toBe('select');
+    expect(neuTableAdvancedFilterControlKind(legacyDate)).toBe('date');
+    expect(neuTableAdvancedFilterControlKind(legacyText)).toBe('text');
+    expect(neuTableAdvancedFilterControlKind(customColumn)).toBe('none');
+    expect(neuTableAdvancedFilterControlKind(inert)).toBe('none');
+    expect(neuTableAdvancedFilterDatePrecision(dateColumn)).toBe('date-only');
+    expect(neuTableAdvancedFilterDatePrecision(instantColumn)).toBe('instant');
+    expect(neuTableAdvancedFilterDatePrecision(legacyDate)).toBe('date-only');
+    expect(neuTableAdvancedFilterModes(numberColumn)).toContain('between');
+    expect(neuTableAdvancedFilterModes(dateColumn)).toContain('after');
+    expect(neuTableAdvancedFilterModes(textColumn)).toContain('notContains');
+
+    expect(neuTableNumberRangeValue(null)).toEqual({ from: null, to: null });
+    expect(neuTableNumberRangeValue({ from: 0, to: '10' })).toEqual({
+      from: 0,
+      to: null,
+    });
+    expect(neuTableDateRangeFilterValue(null)).toEqual({ from: null, to: null });
+    expect(neuTableDateRangeFilterValue({ from: 0, to: '' })).toEqual({
+      from: 0,
+      to: '',
+    });
+    expect(neuTableDateRangeControlValue(null)).toEqual({ start: null, end: null });
+    expect(neuTableDateRangeControlValue({ from: '2026-02-03', to: 'invalid' })).toEqual({
+      start: new Date(2026, 1, 3),
+      end: null,
+    });
+    expect(neuTableDateInputControlValue('2026-02-03', 'date-only')).toBe('2026-02-03');
+    expect(neuTableDateInputControlValue(null, 'date-only')).toBe('');
+    expect(neuTableDateInputControlValue(new Date('invalid'), 'instant')).toBe('');
+    expect(neuTableDateInputControlValue({ value: '' }, 'instant')).toBe('');
+    expect(neuTableInstantRangeControlValue({ from: 'invalid' }, 'from')).toBe('');
+    expect(neuTableDateFilterValue(null, 'date-only')).toBeNull();
+    expect(neuTableDateFilterValue(new Date('invalid'), 'date-only')).toBeNull();
+  });
+
   it('starts empty with reusable controls and no apply result', () => {
     const controller = new NeuTableAdvancedFilterController<FilterRow>();
 
@@ -76,6 +138,8 @@ describe('NeuTableAdvancedFilterController', () => {
     expect(controller.instantToControl.value).toBe('');
     expect(controller.booleanControl.value).toBeNull();
     expect(controller.dateControl.value).toBeNull();
+    expect(controller.selectControl.value).toBeNull();
+    expect(controller.multiSelectControl.value).toEqual([]);
     expect(controller.buildApplyResult()).toBeNull();
 
     controller.destroy();
@@ -606,5 +670,103 @@ describe('NeuTableAdvancedFilterController', () => {
     expect(controller.mode()).toBe('gt');
 
     controller.destroy();
+  });
+
+  it('rejects unavailable, stale, non-finite, and malformed draft mutations', () => {
+    let currentColumn: NeuTableColumn<FilterRow> | null = null;
+    const controller = new NeuTableAdvancedFilterController<FilterRow>(
+      () => undefined,
+      () => currentColumn,
+    );
+
+    controller.initialize({ key: 'name', header: 'Name' }, undefined);
+    expect(controller.kind()).toBeNull();
+    expect(controller.rules()).toEqual([]);
+    expect(controller.addRule()).toBeNull();
+    expect(controller.removeRule('missing')).toBe(false);
+    controller.clear();
+    expect(controller.setValue('ignored')).toBe(false);
+    expect(controller.buildApplyResult()).toBeNull();
+
+    currentColumn = numberColumn;
+    controller.initialize(numberColumn, { constraints: [] });
+    expect(controller.removeRule('missing')).toBe(false);
+    controller.numberControl.setValue(Number.POSITIVE_INFINITY);
+    expect(controller.valid()).toBe(false);
+    controller.modeControl.setValue('between');
+    controller.numberFromControl.setValue(Number.NaN);
+    controller.numberToControl.setValue(10);
+    expect(controller.valid()).toBe(false);
+
+    currentColumn = instantColumn;
+    controller.initialize(instantColumn, { constraints: [] });
+    controller.modeControl.setValue('between');
+    controller.instantFromControl.setValue('invalid');
+    controller.instantToControl.setValue('2026-08-21T12:00');
+    expect(controller.valid()).toBe(false);
+
+    currentColumn = dateColumn;
+    controller.initialize(dateColumn, { constraints: [] });
+    controller.modeControl.setValue('between');
+    controller.dateControl.setValue('not-a-range');
+    expect(controller.value()).toEqual({ from: null, to: null });
+    controller.dateControl.setValue({
+      start: new Date(2026, 7, 22),
+      end: new Date(2026, 7, 21),
+    });
+    expect(controller.valid()).toBe(false);
+
+    currentColumn = textColumn;
+    controller.initialize(textColumn, { constraints: [] });
+    currentColumn = null;
+    expect(controller.addRule()).toBeNull();
+    expect(controller.removeRule(controller.rules()[0].id)).toBe(false);
+    expect(controller.buildApplyResult()).toBeNull();
+
+    controller.destroy();
+    controller.destroy();
+  });
+
+  it('keeps operator, clear, legacy validation, and stale-control guards deterministic', () => {
+    const controller = new NeuTableAdvancedFilterController<FilterRow>();
+    controller.initialize(selectColumn, { operator: 'and', constraints: [{ value: 'admin' }] });
+    controller.setOperator('unsupported');
+    expect(controller.operator()).toBe('and');
+    controller.setOperator('and');
+    expect(controller.operatorControl.value).toBe('and');
+    controller.clear();
+    expect(controller.operator()).toBe('or');
+    expect(controller.buildApplyResult()?.filter.constraints).toEqual([]);
+
+    const legacyText: NeuTableColumn<FilterRow> = {
+      key: 'name',
+      header: 'Name',
+      filterable: true,
+    };
+    controller.initialize(legacyText, { constraints: [] });
+    controller.textControl.setValue('valid');
+    expect(controller.valid()).toBe(true);
+    controller.textControl.setValue(42 as never);
+    controller.modeControl.setValue('endsWith');
+    expect(controller.valid()).toBe(false);
+
+    let current: NeuTableColumn<FilterRow> | null = customColumn;
+    const resolvingController = new NeuTableAdvancedFilterController<FilterRow>(
+      () => undefined,
+      () => current,
+    );
+    resolvingController.initialize(customColumn, { constraints: [] });
+    current = null;
+    expect(resolvingController.setValue('stale')).toBe(false);
+
+    current = dateColumn;
+    resolvingController.initialize(dateColumn, { constraints: [] });
+    current = null;
+    resolvingController.dateControl.setValue('2026-08-20');
+    expect(resolvingController.value()).toBeNull();
+
+    expect(neuTableDateInputControlValue(new Date('2026-08-20T10:11:00Z'), 'instant')).not.toBe('');
+    controller.destroy();
+    resolvingController.destroy();
   });
 });

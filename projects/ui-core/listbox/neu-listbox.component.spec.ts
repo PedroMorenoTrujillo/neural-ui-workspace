@@ -950,4 +950,116 @@ describe('NeuListboxComponent', () => {
     component.activeIndex.set(0);
     expect(component.activeDescendantId()).toBeNull();
   });
+
+  it('routes the complete rendered pointer, touch, filter, toggle and blur lifecycle', () => {
+    const component = fixture.componentInstance as any;
+    const doubleClicks: unknown[] = [];
+    component.optionDoubleClick.subscribe((event: unknown) => doubleClicks.push(event));
+    fixture.componentRef.setInput('searchable', true);
+    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('checkbox', true);
+    fixture.componentRef.setInput('showToggleAll', true);
+    fixture.detectChanges();
+
+    for (const accessor of [
+      'itemTpl',
+      'indicatorTpl',
+      'groupTpl',
+      'filterTpl',
+      'loaderTpl',
+      'headerTpl',
+      'footerTpl',
+      'emptyTpl',
+      'emptyFilterTpl',
+    ]) {
+      expect(component[accessor]()).toBeUndefined();
+    }
+
+    const list = fixture.nativeElement.querySelector('.neu-listbox__options') as HTMLElement;
+    const search = fixture.nativeElement.querySelector('.neu-listbox__search') as HTMLInputElement;
+    const first = fixture.nativeElement.querySelector('.neu-listbox__option') as HTMLElement;
+    list.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    first.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    first.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
+    first.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    search.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    search.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    (fixture.nativeElement.querySelector('.neu-listbox__toggle-all') as HTMLButtonElement).click();
+    list.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+
+    expect(doubleClicks).toHaveLength(1);
+    expect(component.values()).toEqual(['a', 'b']);
+    expect(component.focused()).toBe(false);
+  });
+
+  it('preserves numeric identity, controlled select-all and virtual/lazy guard boundaries', () => {
+    const numericFixture = TestBed.createComponent(NeuListboxComponent);
+    const numeric = numericFixture.componentInstance as any;
+    const numericOptions = [
+      { label: 'Positive zero', value: 0 },
+      { label: 'Negative zero', value: -0 },
+      { label: 'One', value: 1 },
+    ];
+    numericFixture.componentRef.setInput('options', numericOptions);
+    numericFixture.componentRef.setInput('multiple', true);
+    numericFixture.componentRef.setInput('checkbox', true);
+    numeric.writeValue([0, -0]);
+    numericFixture.detectChanges();
+
+    expect(numeric.isOptionSelected(numericOptions[0])).toBe(true);
+    expect(numeric.isOptionSelected(numericOptions[1])).toBe(true);
+    expect(numeric.isOptionSelected(numericOptions[2])).toBe(false);
+    numericFixture.componentRef.setInput('identityConfig', {
+      compareWith: (left: number, right: number) => Object.is(left, right),
+    });
+    numericFixture.detectChanges();
+    expect(numeric.isOptionSelected(numericOptions[0])).toBe(true);
+    expect(numeric.isOptionSelected(numericOptions[2])).toBe(false);
+
+    numericFixture.componentRef.setInput('selectAll', true);
+    numericFixture.detectChanges();
+    const before = numeric.values();
+    numeric.toggleAll(new Event('toggle'));
+    expect(numeric.values()).toBe(before);
+    expect(numeric.allSelected()).toBe(true);
+
+    numericFixture.componentRef.setInput('virtualScroll', true);
+    numericFixture.componentRef.setInput('virtualScrollViewportItems', 1);
+    numericFixture.componentRef.setInput('virtualScrollBuffer', -1);
+    numericFixture.componentRef.setInput('virtualScrollItemSize', 0);
+    numeric.virtualFirst.set(99);
+    numericFixture.detectChanges();
+    expect(numeric.renderedRows()).toHaveLength(1);
+    expect(numeric.virtualTopHeight()).toBeGreaterThanOrEqual(0);
+    expect(numeric['safeItemSize']()).toBe(1);
+    numeric.activeIndex.set(0);
+    numeric['ensureActiveRendered'](0);
+    expect(numeric.virtualFirst()).toBe(0);
+    numeric['moveActive'](new KeyboardEvent('keydown', { cancelable: true }), -1);
+
+    numericFixture.componentRef.setInput('lazy', true);
+    numericFixture.componentRef.setInput('loading', true);
+    numericFixture.componentRef.setInput('options', []);
+    numericFixture.componentRef.setInput('totalItems', 20);
+    numericFixture.componentRef.setInput('dataFirst', 4);
+    numericFixture.detectChanges();
+    expect(numeric.filteredOptions()).toEqual([]);
+    expect(numeric.logicalOptionCount()).toBe(20);
+    expect(numeric.virtualTopHeight()).toBe(4);
+    numeric.setFilter('missing');
+    numeric.setFilter('');
+    numeric['onScroll']({ currentTarget: { scrollTop: 12 } } as unknown as Event);
+    expect(numeric.virtualFirst()).toBe(12);
+
+    numericFixture.componentRef.setInput('disabled', true);
+    numericFixture.detectChanges();
+    numeric['onListFocus'](new FocusEvent('focus'));
+    numeric['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(numeric.focused()).toBe(false);
+  });
 });

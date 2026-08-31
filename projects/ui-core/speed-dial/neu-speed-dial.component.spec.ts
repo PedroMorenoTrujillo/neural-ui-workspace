@@ -226,4 +226,80 @@ describe('NeuSpeedDialComponent', () => {
     expect(trigger.disabled).toBe(true);
     outside.remove();
   });
+
+  it('keeps every arc, tooltip and interaction guard bounded at public configuration edges', () => {
+    const fixture = TestBed.createComponent(NeuSpeedDialComponent);
+    fixture.componentRef.setInput('items', [
+      { key: 'one', label: 'One', badge: 0 },
+      { key: 'two', label: 'Two', tooltip: 'Explicit' },
+      { key: 'hidden', label: 'Hidden', visible: false },
+      { key: 'separator', label: 'Separator', separator: true },
+      { key: 'disabled', label: 'Disabled', disabled: true },
+    ]);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    expect(component.resolvedItems().map((item: any) => item.key)).toEqual([
+      'one',
+      'two',
+      'disabled',
+    ]);
+    expect(component.tooltipText(component.resolvedItems()[0])).toBe('');
+    expect(component.tooltipText(component.resolvedItems()[1])).toBe('Explicit');
+
+    fixture.componentRef.setInput('tooltip', {});
+    fixture.componentRef.setInput('direction', 'left');
+    fixture.detectChanges();
+    expect(component.tooltipText(component.resolvedItems()[0])).toBe('One');
+    expect(component.tooltipPosition()).toBe('top');
+    fixture.componentRef.setInput('direction', 'right');
+    fixture.detectChanges();
+    expect(component.tooltipPosition()).toBe('right');
+
+    const layouts = [
+      ['circle', 'up'],
+      ['semi-circle', 'down'],
+      ['semi-circle', 'left'],
+      ['semi-circle', 'right'],
+      ['semi-circle', 'up'],
+      ['quarter-circle', 'up-left'],
+      ['quarter-circle', 'up-right'],
+      ['quarter-circle', 'down-left'],
+      ['quarter-circle', 'unknown'],
+    ] as const;
+    for (const [type, direction] of layouts) {
+      fixture.componentRef.setInput('type', type);
+      fixture.componentRef.setInput('direction', direction);
+      fixture.detectChanges();
+      expect(component.itemStyle(0)['--neu-speed-x']).toMatch(/px$/);
+      expect(component.itemStyle(1)['--neu-speed-y']).toMatch(/px$/);
+    }
+
+    fixture.componentRef.setInput('animation', { itemDelay: -10 });
+    fixture.componentRef.setInput('type', 'linear');
+    fixture.detectChanges();
+    expect(component.itemStyle(0)['--neu-speed-delay']).toBe('0ms');
+
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-speed-dial__trigger',
+    ) as HTMLButtonElement;
+    fixture.componentRef.setInput('items', [{ key: 'off', label: 'Off', disabled: true }]);
+    fixture.detectChanges();
+    trigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    expect(component.focusedIndex()).toBe(-1);
+    component.onDocumentPointerDown(
+      new PointerEvent('pointerdown', { bubbles: true }),
+    );
+    fixture.componentRef.setInput('hideOnClickOutside', false);
+    component.open();
+    fixture.detectChanges();
+    component.onDocumentPointerDown(
+      new PointerEvent('pointerdown', { bubbles: true }),
+    );
+    expect(component.isOpen()).toBe(true);
+    component.activateItem(new Event('click'), component.resolvedItems()[0]);
+    expect(component.isOpen()).toBe(true);
+    component.close();
+  });
 });

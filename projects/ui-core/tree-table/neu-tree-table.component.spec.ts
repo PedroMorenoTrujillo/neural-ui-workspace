@@ -2,8 +2,20 @@ import { Component, provideZonelessChangeDetection, TemplateRef } from '@angular
 import { TestBed } from '@angular/core/testing';
 import {
   NeuTableCaptionDirective,
+  NeuTableCellEditorDirective,
+  NeuTableCellViewDirective,
   NeuTableColumn,
+  NeuTableEmptyDirective,
   NeuTableExpandDirective,
+  NeuTableFooterGroupDirective,
+  NeuTableGroupFooterDirective,
+  NeuTableGroupHeaderDirective,
+  NeuTableHeaderGroupDirective,
+  NeuTableLoadingBodyDirective,
+  NeuTablePaginatorLeftDirective,
+  NeuTablePaginatorRightDirective,
+  NeuTableSummaryDirective,
+  NeuTableToolbarDirective,
 } from '@neural-ui/core/table';
 import { By } from '@angular/platform-browser';
 import { NeuTableComponent } from '@neural-ui/core/table';
@@ -15,6 +27,7 @@ import {
   NeuTreeTableRowEditEvent,
 } from './neu-tree-table.component';
 import {
+  NeuTreeTableBodyDirective,
   NeuTreeTableBodySectionDirective,
   NeuTreeTableManagedRowDirective,
   NeuTreeTableNodeDirective,
@@ -75,7 +88,7 @@ function query(
   standalone: true,
   imports: [NeuTreeTableComponent, NeuTableExpandDirective],
   template: `
-    <neu-tree-table [nodes]="nodes" [columns]="columns" expandMode="multiple">
+    <neu-tree-table [nodes]="nodes" [columns]="columns" expandMode="multiple" selectionMode="multiple">
       <ng-template neuTableExpand let-node let-row="row">
         <span class="tree-detail">{{ node.label }} / {{ row.__treeLevel }}</span>
       </ng-template>
@@ -91,10 +104,12 @@ class TreeTableExpandHostComponent {
   standalone: true,
   imports: [NeuTreeTableComponent, NeuTreeTableNodeDirective, NeuTableCaptionDirective],
   template: `
-    <neu-tree-table [nodes]="nodes" [columns]="columns">
+    <neu-tree-table [nodes]="nodes" [columns]="columns" selectionMode="multiple">
       <ng-template neuTableCaption>Repository hierarchy</ng-template>
-      <ng-template neuTreeTableNode let-node let-level="level">
+      <ng-template neuTreeTableNode let-node let-level="level" let-toggle="toggle" let-toggleSelection="toggleSelection">
         <strong class="custom-node">{{ node.label }} level {{ level }}</strong>
+        <button class="custom-node-toggle" type="button" (click)="toggle()">Toggle</button>
+        <button class="custom-node-select" type="button" (click)="toggleSelection()">Select</button>
       </ng-template>
     </neu-tree-table>
   `,
@@ -203,6 +218,78 @@ class TreeTableFinalApiHostComponent {
   readonly exportOptions = { enabled: true, formats: ['csv' as const] };
   readonly virtualizationOptions = { visibleItems: 8, overscan: 2 };
   readonly urlStateOptions = { enabled: true, pageParam: 'treePage' };
+}
+
+@Component({
+  standalone: true,
+  imports: [
+    NeuTreeTableComponent,
+    NeuTableToolbarDirective,
+    NeuTableCaptionDirective,
+    NeuTableHeaderGroupDirective,
+    NeuTableFooterGroupDirective,
+    NeuTableLoadingBodyDirective,
+    NeuTableEmptyDirective,
+    NeuTableSummaryDirective,
+    NeuTablePaginatorLeftDirective,
+    NeuTablePaginatorRightDirective,
+    NeuTableGroupHeaderDirective,
+    NeuTableGroupFooterDirective,
+    NeuTableCellViewDirective,
+    NeuTableCellEditorDirective,
+  ],
+  template: `
+    <neu-tree-table
+      [nodes]="nodes"
+      [columns]="columns"
+      [loading]="loading"
+      [pagination]="true"
+      [pageSize]="1"
+      groupBy="owner"
+      editMode="cell"
+    >
+      <ng-template neuTableToolbar><span class="slot-toolbar">Toolbar</span></ng-template>
+      <ng-template neuTableCaption let-colspan="colspan"><caption class="slot-caption">Caption {{ colspan }}</caption></ng-template>
+      <ng-template neuTableHeaderGroup let-colspan="colspan"><tr class="slot-header"><th [attr.colspan]="colspan">Header</th></tr></ng-template>
+      <ng-template neuTableFooterGroup let-colspan="colspan"><tr class="slot-footer"><td [attr.colspan]="colspan">Footer</td></tr></ng-template>
+      <ng-template neuTableLoadingBody let-colspan="colspan"><tr class="slot-loading"><td [attr.colspan]="colspan">Loading</td></tr></ng-template>
+      <ng-template neuTableEmpty let-message="message" let-colspan="colspan"><tr class="slot-empty"><td [attr.colspan]="colspan">{{ message }}</td></tr></ng-template>
+      <ng-template neuTableSummary let-colspan="colspan"><tfoot class="slot-summary"><tr><td [attr.colspan]="colspan">Summary</td></tr></tfoot></ng-template>
+      <ng-template neuTablePaginatorLeft let-currentPage><span class="slot-page-left">Left {{ currentPage }}</span></ng-template>
+      <ng-template neuTablePaginatorRight let-totalPages="totalPages"><span class="slot-page-right">Right {{ totalPages }}</span></ng-template>
+      <ng-template neuTableGroupHeader let-label="label" let-count="count"><tr class="slot-group-header"><td>Group {{ label }} {{ count }}</td></tr></ng-template>
+      <ng-template neuTableGroupFooter let-label="label"><tr class="slot-group-footer"><td>End {{ label }}</td></tr></ng-template>
+      <ng-template neuTableCellView="owner" let-value="value"><span class="slot-cell-view">View {{ value }}</span></ng-template>
+      <ng-template neuTableCellEditor="owner" let-value let-setValue="setValue"><input class="slot-cell-editor" [value]="value" (input)="setValue('Edited')" /></ng-template>
+    </neu-tree-table>
+  `,
+})
+class TreeTableAllSlotsHostComponent {
+  nodes: NeuTreeTableNode<RepoMeta>[] = NODES;
+  loading = false;
+  columns: NeuTableColumn<NeuTreeTableRow<RepoMeta>>[] = COLUMNS.map((column) =>
+    column.key === 'owner' ? { ...column, editable: true } : column,
+  );
+}
+
+@Component({
+  standalone: true,
+  imports: [NeuTreeTableComponent, NeuTreeTableBodyDirective],
+  template: `
+    <neu-tree-table [nodes]="nodes" [columns]="columns" selectionMode="multiple">
+      <ng-template neuTreeTableBody let-node let-level="level" let-toggleSelection="toggleSelection" let-toggleExpansion="toggleExpansion">
+        <tr class="slot-tree-body">
+          <td>{{ node.label }} / {{ level }}</td>
+          <td><button class="body-select" (click)="toggleSelection()">Select</button></td>
+          <td><button class="body-expand" (click)="toggleExpansion()">Expand</button></td>
+        </tr>
+      </ng-template>
+    </neu-tree-table>
+  `,
+})
+class TreeTableBodyHostComponent {
+  nodes = NODES;
+  columns = COLUMNS;
 }
 
 describe('NeuTreeTableComponent', () => {
@@ -1043,6 +1130,24 @@ describe('NeuTreeTableComponent', () => {
     ).toBeTruthy();
   });
 
+  it('keeps projected node-template selection and expansion callbacks live', () => {
+    const fixture = TestBed.createComponent(TreeTableCompositionHostComponent);
+    fixture.detectChanges();
+    const component = fixture.debugElement.query(By.directive(NeuTreeTableComponent))
+      .componentInstance as NeuTreeTableComponent;
+    const selections: string[][] = [];
+    const expansions: string[][] = [];
+    component.selectionChange.subscribe((nodes) => selections.push(nodes.map((node) => node.id)));
+    component.expandedKeysChange.subscribe((keys) => expansions.push([...keys]));
+
+    (fixture.nativeElement.querySelector('.custom-node-select') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.custom-node-toggle') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(selections.at(-1)).toEqual(['workspace']);
+    expect(expansions.at(-1)).toEqual([]);
+  });
+
   it('composes a consumer tree-column template inside indentation and toggler chrome', () => {
     const fixture = TestBed.createComponent(TreeTableConsumerCellHostComponent);
     fixture.detectChanges();
@@ -1066,12 +1171,359 @@ describe('NeuTreeTableComponent', () => {
     expect(detail.hasAttribute('data-neu-tree-node-id')).toBe(false);
   });
 
+  it('keeps managed body-section focus navigation on semantic node rows', async () => {
+    const fixture = TestBed.createComponent(TreeTableBodySectionHostComponent);
+    fixture.detectChanges();
+    const rows = () =>
+      [...fixture.nativeElement.querySelectorAll('.advanced-node-row')] as HTMLTableRowElement[];
+    const press = (row: HTMLTableRowElement, key: string) =>
+      row.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+
+    rows()[0].focus();
+    press(rows()[0], 'ArrowDown');
+    expect(document.activeElement).toBe(rows()[1]);
+    press(rows()[1], 'ArrowUp');
+    expect(document.activeElement).toBe(rows()[0]);
+    press(rows()[1], 'ArrowLeft');
+    expect(document.activeElement).toBe(rows()[0]);
+    press(rows()[0], 'ArrowRight');
+    await Promise.resolve();
+    expect(document.activeElement).toBe(rows()[1]);
+    press(rows()[0], 'ArrowLeft');
+    fixture.detectChanges();
+    press(rows()[0], 'ArrowRight');
+    fixture.detectChanges();
+    expect(rows().length).toBeGreaterThan(1);
+  });
+
   it('strictly compiles a representative consumer using only the final canonical API', () => {
     const fixture = TestBed.createComponent(TreeTableFinalApiHostComponent);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.strict-final-node')?.textContent).toContain(
       'Workspace / 0',
     );
+  });
+
+  it('projects structural, grouped, paginator, loading, empty, view, and editor templates', () => {
+    const fixture = TestBed.createComponent(TreeTableAllSlotsHostComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.slot-toolbar')?.textContent).toContain('Toolbar');
+    expect(fixture.nativeElement.querySelector('.slot-caption')?.textContent).toContain('Caption');
+    expect(fixture.nativeElement.querySelector('.slot-header')?.textContent).toContain('Header');
+    expect(fixture.nativeElement.querySelector('.slot-footer')?.textContent).toContain('Footer');
+    expect(fixture.nativeElement.querySelector('.slot-summary')?.textContent).toContain('Summary');
+    expect(fixture.nativeElement.querySelector('.slot-page-left')?.textContent).toContain('Left');
+    expect(fixture.nativeElement.querySelector('.slot-page-right')?.textContent).toContain('Right');
+    expect(fixture.nativeElement.querySelector('.slot-group-header')?.textContent).toContain(
+      'Platform',
+    );
+    expect(fixture.nativeElement.querySelector('.slot-group-footer')?.textContent).toContain(
+      'Platform',
+    );
+    expect(fixture.nativeElement.querySelector('.slot-cell-view')?.textContent).toContain(
+      'Platform',
+    );
+
+    const treeTable = fixture.debugElement.query(By.directive(NeuTreeTableComponent))
+      .componentInstance as NeuTreeTableComponent;
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent;
+    table.startCellEdit(treeTable.flatRows()[0], treeTable.resolvedColumns()[1]);
+    fixture.detectChanges();
+    const editor = fixture.nativeElement.querySelector('.slot-cell-editor') as HTMLInputElement;
+    expect(editor.value).toBe('Platform');
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+
+    const loadingFixture = TestBed.createComponent(TreeTableAllSlotsHostComponent);
+    loadingFixture.componentInstance.loading = true;
+    loadingFixture.detectChanges();
+    expect(loadingFixture.nativeElement.querySelector('.slot-loading')?.textContent).toContain(
+      'Loading',
+    );
+
+    const emptyFixture = TestBed.createComponent(TreeTableAllSlotsHostComponent);
+    emptyFixture.componentInstance.nodes = [];
+    emptyFixture.detectChanges();
+    expect(emptyFixture.nativeElement.querySelector('.slot-empty')?.textContent).toContain(
+      'No rows found',
+    );
+  });
+
+  it('projects the tree body context and keeps its selection and expansion callbacks live', () => {
+    const fixture = TestBed.createComponent(TreeTableBodyHostComponent);
+    const selection: string[][] = [];
+    const expansion: string[][] = [];
+    fixture.detectChanges();
+    const treeTable = fixture.debugElement.query(By.directive(NeuTreeTableComponent))
+      .componentInstance as NeuTreeTableComponent;
+    treeTable.selectionChange.subscribe((nodes) => selection.push(nodes.map((node) => node.id)));
+    treeTable.expandedKeysChange.subscribe((keys) => expansion.push([...keys]));
+
+    expect(fixture.nativeElement.querySelector('.slot-tree-body')?.textContent).toContain(
+      'Workspace / 0',
+    );
+    (fixture.nativeElement.querySelector('.body-select') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.body-expand') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(selection.length).toBeGreaterThan(0);
+    expect(selection.every((proposal) => proposal.join(',') === 'workspace')).toBe(true);
+    expect(expansion.at(-1)).toEqual([]);
+  });
+
+  it('maps the complete inner-table event lifecycle to tree identities and request reasons', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('selectionMode', 'multiple');
+    fixture.componentRef.setInput('editMode', 'row');
+    fixture.componentRef.setInput('serverSide', true);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent;
+    const row = component.flatRows()[0];
+    const column = COLUMNS[1] as unknown as NeuTableColumn<Record<string, unknown>>;
+    const received: string[] = [];
+
+    component.nodeSelect.subscribe((event) => received.push(`select:${event.node.id}`));
+    component.nodeUnselect.subscribe((event) => received.push(`unselect:${event.node.id}`));
+    component.cellEditInit.subscribe((event) => received.push(`cell-init:${event.node.id}`));
+    component.cellEditCancel.subscribe((event) => received.push(`cell-cancel:${event.node.id}`));
+    component.editValidationError.subscribe((event) => received.push(`invalid:${event.message}`));
+    component.queryChange.subscribe((event) => received.push(`query:${event.search}`));
+    component.sortChange.subscribe((event) => received.push(`sort:${event[0]?.dir}`));
+    component.lazyRequest.subscribe((event) => received.push(`lazy:${event.reason}`));
+    component.editingRowKeysChange.subscribe((keys) => received.push(`keys:${keys.join(',')}`));
+    component.rowEditInit.subscribe((event) => received.push(`row-init:${event.node.id}`));
+    component.rowEditSave.subscribe((event) => received.push(`row-save:${event.node.id}`));
+    component.rowEditCancel.subscribe((event) => received.push(`row-cancel:${event.node.id}`));
+
+    const selectionEvent = {
+      row,
+      key: 'workspace',
+      index: 0,
+      source: 'row',
+      selection: [row],
+    } as const;
+    table.rowSelect.emit(selectionEvent);
+    table.rowUnselect.emit(selectionEvent);
+    const cellEvent = {
+      row,
+      rowKey: 'workspace',
+      rowIndex: 0,
+      column,
+      value: 'DX',
+      previousValue: 'Platform',
+    };
+    table.cellEditInit.emit(cellEvent);
+    table.cellEditCancel.emit(cellEvent);
+    table.editValidationError.emit({
+      mode: 'cell',
+      row,
+      rowKey: 'workspace',
+      rowIndex: 0,
+      column,
+      value: 'DX',
+      message: 'Rejected',
+    });
+    const nextQuery = query('server');
+    table.queryChange.emit(nextQuery);
+    table.sortChange.emit([{ key: 'label', dir: 'desc' }]);
+    table.lazyRequest.emit({
+      reason: 'virtual-scroll',
+      query: nextQuery,
+      range: { first: 4, end: 8 },
+    } as never);
+    table.editingRowKeysChange.emit([123, 'workspace']);
+    const rowEditEvent = {
+      row,
+      draft: { ...row, owner: 'DX' },
+      rowKey: 'workspace',
+      rowIndex: 0,
+      editingRowKeys: ['workspace'],
+    };
+    table.rowEditInit.emit(rowEditEvent);
+    table.rowEditSave.emit(rowEditEvent);
+    table.rowEditCancel.emit(rowEditEvent);
+
+    expect(received).toEqual([
+      'select:workspace',
+      'unselect:workspace',
+      'cell-init:workspace',
+      'cell-cancel:workspace',
+      'invalid:Rejected',
+      'query:server',
+      'lazy:query',
+      'sort:desc',
+      'lazy:virtual',
+      'keys:123,workspace',
+      'row-init:workspace',
+      'row-save:workspace',
+      'row-cancel:workspace',
+    ]);
+  });
+
+  it('implements the public scroll, reset, and row-edit boundary for present and missing nodes', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('editMode', 'row');
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent;
+    const resetScroll = vi.spyOn(table, 'resetVirtualScroll');
+    const scrollIndex = vi.spyOn(table, 'scrollToIndex');
+    const scrollOffset = vi.spyOn(table, 'scrollToOffset');
+    const resetState = vi.spyOn(table, 'resetState');
+    const startEdit = vi.spyOn(table, 'startRowEdit');
+    const saveEdit = vi.spyOn(table, 'saveRowEdit').mockReturnValue(true);
+    const cancelEdit = vi.spyOn(table, 'cancelRowEdit');
+
+    component.resetScrollTop('smooth');
+    component.scrollToVirtualIndex(2, 'smooth');
+    component.scrollTo({ index: 3 });
+    component.scrollTo({ offset: 120, behavior: 'smooth' });
+    component.scrollTo({ nodeId: 'workspace' });
+    component.scrollTo({});
+    expect(component.scrollToNode('missing')).toBe(false);
+    component.reset();
+    expect(component.startRowEdit('missing')).toBe(false);
+    expect(component.startRowEdit('workspace')).toBe(true);
+    expect(component.saveRowEdit('missing')).toBe(false);
+    expect(component.saveRowEdit('workspace')).toBe(true);
+    expect(component.cancelRowEdit('missing')).toBe(false);
+    expect(component.cancelRowEdit('workspace')).toBe(true);
+
+    expect(resetScroll).toHaveBeenCalledWith('smooth');
+    expect(resetScroll).toHaveBeenCalledWith('auto');
+    expect(scrollIndex).toHaveBeenCalledWith(2, 'smooth');
+    expect(scrollIndex).toHaveBeenCalledWith(3, 'auto');
+    expect(scrollIndex).toHaveBeenCalledWith(0, 'auto');
+    expect(scrollOffset).toHaveBeenCalledWith(120, 'smooth');
+    expect(resetState).toHaveBeenCalledTimes(1);
+    expect(startEdit).toHaveBeenCalledTimes(1);
+    expect(saveEdit).toHaveBeenCalledTimes(1);
+    expect(cancelEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('covers lazy expansion and controlled row-edit validation boundaries', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    const lazyNode: NeuTreeTableNode = { id: 'lazy', label: 'Lazy', leaf: false };
+    fixture.componentRef.setInput('nodes', [lazyNode]);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('editMode', 'row');
+    const lazy: string[] = [];
+    fixture.componentInstance.lazyRequest.subscribe((event) => lazy.push(event.reason));
+    fixture.detectChanges();
+
+    fixture.componentInstance.toggleNode(lazyNode);
+    fixture.detectChanges();
+    expect(lazy).toEqual(['node-expand']);
+
+    const row = fixture.componentInstance.flatRows()[0];
+    const tableEvent = {
+      row,
+      draft: { ...row, owner: 'DX' },
+      rowKey: 'lazy',
+      rowIndex: 0,
+      editingRowKeys: ['lazy'],
+    };
+    expect(fixture.componentInstance.tableRowEditValidator(tableEvent)).toBe(true);
+
+    const validator = vi.fn(() => ({ valid: false, message: 'Owner required' }));
+    fixture.componentRef.setInput('rowEditValidator', validator);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.tableRowEditValidator(tableEvent)).toEqual({
+      valid: false,
+      message: 'Owner required',
+    });
+    expect(validator).toHaveBeenCalledWith(
+      expect.objectContaining({ node: lazyNode, draft: { owner: 'DX' } }),
+    );
+  });
+
+  it('prunes uncontrolled selection after nodes are replaced and preserves controlled stale values', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('selectionMode', 'multiple');
+    fixture.detectChanges();
+    fixture.componentInstance['onTableSelectionChange']([fixture.componentInstance.flatRows()[0]]);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selectedRows().map((row) => row['id'])).toEqual(['workspace']);
+
+    fixture.componentRef.setInput('nodes', [{ id: 'replacement', label: 'Replacement' }]);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selectedRows()).toEqual([]);
+
+    fixture.componentRef.setInput('selection', NODES[0]);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selectedRows()).toEqual([]);
+  });
+
+  it('supports row-level Home, End, selection, expansion, and relative keyboard boundaries', async () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('selectionMode', 'multiple');
+    const selections: string[][] = [];
+    fixture.componentInstance.selectionChange.subscribe((nodes) =>
+      selections.push(nodes.map((node) => node.id)),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const findRow = (id: string) =>
+      fixture.nativeElement.querySelector(
+        `tr[data-neu-tree-node-id="${id}"]`,
+      ) as HTMLTableRowElement;
+    const press = (row: HTMLTableRowElement, key: string) => {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      row.dispatchEvent(event);
+      return event;
+    };
+    let root = findRow('workspace');
+    let child = findRow('ui-core');
+
+    root.focus();
+    press(root, 'End');
+    expect(document.activeElement).toBe(child);
+    press(child, 'Home');
+    expect(document.activeElement).toBe(root);
+    press(root, 'ArrowUp');
+    press(child, 'ArrowDown');
+    press(root, ' ');
+    fixture.detectChanges();
+    root = findRow('workspace');
+    press(root, 'Enter');
+    expect(selections).toEqual([['workspace'], []]);
+
+    press(root, 'ArrowLeft');
+    fixture.detectChanges();
+    root = findRow('workspace');
+    expect(root.getAttribute('aria-expanded')).toBe('false');
+    press(root, 'ArrowRight');
+    fixture.detectChanges();
+    root = findRow('workspace');
+    child = findRow('ui-core');
+    press(root, 'ArrowRight');
+    await Promise.resolve();
+    expect(document.activeElement).toBe(child);
+    press(child, 'ArrowLeft');
+    expect(document.activeElement).toBe(root);
+    expect(press(child, 'PageDown').defaultPrevented).toBe(false);
+
+    press(root, 'ArrowLeft');
+    fixture.detectChanges();
+    root = findRow('workspace');
+    root.style.direction = 'rtl';
+    press(root, 'ArrowLeft');
+    fixture.detectChanges();
+    expect(findRow('workspace').getAttribute('aria-expanded')).toBe('true');
   });
 
   it('projects cycles, shared branches, and depth 5,000 without mutating consumer nodes', () => {

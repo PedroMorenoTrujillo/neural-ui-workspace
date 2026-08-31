@@ -1,8 +1,48 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
-import { NeuTreeSelectComponent, NeuTreeSelectNode } from './neu-tree-select.component';
+import {
+  NeuTreeSelectComponent,
+  NeuTreeSelectEmptyDirective,
+  NeuTreeSelectFooterDirective,
+  NeuTreeSelectHeaderDirective,
+  NeuTreeSelectNode,
+  NeuTreeSelectNodeDirective,
+  NeuTreeSelectSelectedDirective,
+} from './neu-tree-select.component';
+
+@Component({
+  imports: [
+    NeuTreeSelectComponent,
+    NeuTreeSelectNodeDirective,
+    NeuTreeSelectSelectedDirective,
+    NeuTreeSelectHeaderDirective,
+    NeuTreeSelectFooterDirective,
+    NeuTreeSelectEmptyDirective,
+  ],
+  template: `
+    <neu-tree-select [nodes]="nodes" [searchable]="true">
+      <ng-template neuTreeSelectHeader><span class="tree-header">Header</span></ng-template>
+      <ng-template neuTreeSelectNode let-node let-level="level" let-toggle="toggle">
+        <button class="tree-template-toggle" type="button" (click)="toggle()">
+          {{ node.label }}-{{ level }}
+        </button>
+      </ng-template>
+      <ng-template neuTreeSelectSelected let-node>
+        <span class="tree-selected">{{ node?.label }}</span>
+      </ng-template>
+      <ng-template neuTreeSelectEmpty><span class="tree-empty">Empty slot</span></ng-template>
+      <ng-template neuTreeSelectFooter><span class="tree-footer">Footer</span></ng-template>
+    </neu-tree-select>
+  `,
+})
+class TreeSelectTemplatesHost {
+  nodes: NeuTreeSelectNode[] = [
+    { value: 'root', label: 'Root', children: [{ value: 'leaf', label: 'Leaf' }] },
+  ];
+}
 
 describe('NeuTreeSelectComponent', () => {
   let fixture: ComponentFixture<NeuTreeSelectComponent<NeuTreeSelectNode, string>>;
@@ -577,5 +617,37 @@ describe('NeuTreeSelectComponent', () => {
       deep = { value: `deep-${level}`, label: `Deep ${level}`, children: [deep] };
     }
     expect((fixture.componentInstance as any).flatten([deep])).toHaveLength(5001);
+  });
+
+  it('renders every typed template slot and executes the node toggle callback', () => {
+    const host = TestBed.createComponent(TreeSelectTemplatesHost);
+    host.detectChanges();
+    const component = host.debugElement.query(By.directive(NeuTreeSelectComponent))
+      .componentInstance as any;
+    component.writeValue('leaf');
+    component.toggle();
+    host.detectChanges();
+
+    expect(document.querySelector('.tree-header')?.textContent).toContain('Header');
+    expect(document.querySelector('.tree-footer')?.textContent).toContain('Footer');
+    expect(document.querySelector('.tree-template-toggle')?.textContent).toContain('Root-0');
+    (document.querySelector('.tree-template-toggle') as HTMLButtonElement).click();
+    host.detectChanges();
+    expect(component.expanded().has('root')).toBe(true);
+    component.toggle();
+    host.detectChanges();
+    expect(document.querySelectorAll('.tree-template-toggle')).toHaveLength(2);
+    component.close();
+    host.detectChanges();
+    expect(host.nativeElement.querySelector('.tree-selected')?.textContent).toContain('Root');
+
+    const emptyHost = TestBed.createComponent(TreeSelectTemplatesHost);
+    emptyHost.componentInstance.nodes = [];
+    emptyHost.detectChanges();
+    const emptyComponent = emptyHost.debugElement.query(By.directive(NeuTreeSelectComponent))
+      .componentInstance as any;
+    emptyComponent.toggle();
+    emptyHost.detectChanges();
+    expect(document.querySelector('.tree-empty')?.textContent).toContain('Empty slot');
   });
 });

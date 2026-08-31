@@ -406,4 +406,43 @@ describe('NeuCommandPaletteComponent', () => {
     expect(disabledExecuted).toBe(false);
     expect(svc.isOpen()).toBe(true);
   });
+
+  it('handles empty, disabled-only, Home, End, and inactive navigation boundaries', () => {
+    const f = setup();
+    const component = f.componentInstance;
+    const svc = mkSvc();
+
+    component['_onInputKey'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component['_activeIndex']()).toBe(-1);
+    expect(component.activeOptionId()).toBeNull();
+
+    svc.register(
+      { id: 'disabled-a', label: 'Disabled A', disabled: true, action: () => {} },
+      { id: 'disabled-b', label: 'Disabled B', disabled: true, action: () => {} },
+    );
+    component['_onInputKey'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component['_activeIndex']()).toBe(-1);
+    component.setActive(0);
+    component.setActive(99);
+    expect(component['_activeIndex']()).toBe(99);
+    component.execute(svc.filteredCommands()[0]);
+    expect(svc.isOpen()).toBe(false);
+    component['_onInputKey'](new KeyboardEvent('keydown', { key: 'End' }));
+    expect(component['_activeIndex']()).toBe(-1);
+
+    svc.register(
+      { id: 'first', label: 'First', action: () => {} },
+      { id: 'last', label: 'Last', action: () => {} },
+    );
+    component['_onInputKey'](new KeyboardEvent('keydown', { key: 'End' }));
+    expect(component['_activeIndex']()).toBe(3);
+    component['_onInputKey'](new KeyboardEvent('keydown', { key: 'Home' }));
+    expect(component['_activeIndex']()).toBe(2);
+    component['_activeIndex'].set(-1);
+    component['_onInputKey'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component['_activeIndex']()).toBe(3);
+
+    svc.query.set('no-match');
+    expect(svc.filteredCommands()).toEqual([]);
+  });
 });

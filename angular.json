@@ -35,6 +35,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/ui-core/tsconfig.spec.json",
+            "exclude": ["**/*.stress.spec.ts"],
             "coverage": true,
             "coverageReporters": [
               "text",
