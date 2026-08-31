@@ -2090,6 +2090,7 @@ describe('NeuTableComponent', () => {
       .map((debugElement) => debugElement.componentInstance as NeuDateInputComponent)
       .find((component) => component.type() === 'range');
     expect(rangeDateInput).toBeTruthy();
+    rangeDateInput!['_leftCursor'].set(new Date(2026, 7, 1));
     const fromCell = rangeDateInput!['_leftDays']().find((cell) => cell.rangeStart);
     expect(fromCell?.date.getFullYear()).toBe(2026);
     expect(fromCell?.date.getMonth()).toBe(7);
