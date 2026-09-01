@@ -20,22 +20,42 @@ neu-scheduler-gantt {
   white-space: nowrap;
 }
 
+.neu-scheduler-gantt .neu-timeline-grid__row-label strong,
+.neu-scheduler-gantt .neu-timeline-grid__row-label span,
+.neu-scheduler-gantt .neu-timeline-grid__item-title,
+.neu-scheduler-gantt .neu-timeline-grid__item-subtitle,
+.neu-scheduler-gantt .neu-timeline-grid__item-meta {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.neu-scheduler-gantt .neu-timeline-grid__item {
+  border-radius: var(--neu-radius-md);
+  box-shadow: none;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .neu-scheduler-gantt .neu-timeline-grid__item:hover {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--neu-primary) 32%, transparent);
+  }
+}
+
+.neu-scheduler-gantt .neu-timeline-grid__item--selected {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--neu-primary) 64%, transparent);
+}
+
 .neu-scheduler-gantt__summary {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--neu-border);
-  border-radius: calc(var(--neu-radius, 1rem) * 0.9);
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--neu-primary) 8%, transparent),
-      transparent 48%
-    ),
-    var(--neu-surface);
+  padding: 0.25rem 0 0.75rem;
+  border-block-end: 1px solid var(--neu-border);
+  background: transparent;
   color: var(--neu-text);
 }
 
@@ -60,12 +80,29 @@ neu-scheduler-gantt {
 }
 
 @media (max-width: 720px) {
+  .neu-scheduler-gantt .neu-timeline-grid__header,
+  .neu-scheduler-gantt .neu-timeline-grid__row {
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+  }
+
   .neu-scheduler-gantt .neu-timeline-grid__row-label {
-    min-inline-size: 10rem;
+    min-inline-size: 0;
   }
 
   .neu-scheduler-gantt__summary {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-scheduler-gantt .neu-timeline-grid__item--selected {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .neu-scheduler-gantt .neu-timeline-grid__item:focus-visible {
+    outline-color: CanvasText;
+    outline-style: dashed;
   }
 }
