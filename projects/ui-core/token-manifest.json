@@ -479,6 +479,7 @@
         "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/spinner/neu-spinner.component.scss",
         "projects/ui-core/split-button/neu-split-button.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
@@ -2014,7 +2015,9 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/scroll-top/neu-scroll-top.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,
@@ -3513,13 +3516,16 @@
         "projects/ui-core/autocomplete/neu-autocomplete.component.scss",
         "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
+        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/filter-bar/neu-filter-bar.component.scss",
         "projects/ui-core/multiselect/neu-multiselect.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
+        "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/slider/neu-slider.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/stepper/neu-stepper.component.scss",
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
@@ -3553,6 +3559,7 @@
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/scroll-top/neu-scroll-top.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/stepper/neu-stepper.component.scss",
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
@@ -3575,6 +3582,7 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss"
       ],
@@ -3620,10 +3628,12 @@
       "consumedIn": [
         "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
+        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
         "projects/ui-core/data-view/neu-data-view.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/scroll-top/neu-scroll-top.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/stepper/neu-stepper.component.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/neu-table.component.scss",
@@ -3652,6 +3662,7 @@
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/scroll-top/neu-scroll-top.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/stepper/neu-stepper.component.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/neu-table.component.scss",
@@ -3674,7 +3685,9 @@
       "defaultSource": "root",
       "consumedIn": [
         "projects/ui-core/button/neu-button.component.scss",
+        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/neu-table.component.scss",
         "projects/ui-core/toggle-button-group/neu-toggle-button-group.component.scss"
@@ -3774,6 +3787,7 @@
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
         "projects/ui-core/skeleton/neu-skeleton.component.scss",
         "projects/ui-core/slider/neu-slider.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/switch/neu-switch.component.scss",
@@ -4048,6 +4062,7 @@
       "consumedIn": [
         "projects/ui-core/compare/neu-compare.component.scss",
         "projects/ui-core/input-tags/neu-input-tags.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/uploader/neu-uploader.component.scss"
@@ -4102,6 +4117,7 @@
         "projects/ui-core/scroll-top/neu-scroll-top.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/split-button/neu-split-button.component.scss",
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
@@ -4130,6 +4146,7 @@
         "projects/ui-core/kanban/neu-kanban.component.scss",
         "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
@@ -4155,6 +4172,7 @@
       "defaultSource": "root",
       "consumedIn": [
         "projects/ui-core/kanban/neu-kanban.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/switch/neu-switch.component.scss"
@@ -4891,6 +4909,7 @@
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
         "projects/ui-core/slider/neu-slider.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/split-button/neu-split-button.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
         "projects/ui-core/styles/_presets.scss",
@@ -5083,7 +5102,6 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
-        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,
@@ -5550,6 +5568,7 @@
         "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/spinner/neu-spinner.component.scss",
         "projects/ui-core/split-button/neu-split-button.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
@@ -6446,6 +6465,7 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/bottom-sheet/neu-bottom-sheet.component.scss",
         "projects/ui-core/modal/neu-modal.component.scss",
         "projects/ui-core/styles/_tokens.scss"
       ],
@@ -6467,6 +6487,7 @@
       "consumedIn": [
         "projects/ui-core/confirm-popup/neu-confirm-popup.component.scss",
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/styles/_cdk-overlay.scss",
         "projects/ui-core/styles/_tokens.scss"
       ],
