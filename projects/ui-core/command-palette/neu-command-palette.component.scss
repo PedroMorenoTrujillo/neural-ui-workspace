@@ -5,7 +5,7 @@
   position: fixed;
   inset: 0;
   background: var(--neu-overlay-bg);
-  z-index: 1200;
+  z-index: var(--neu-z-modal, 200);
   animation: neu-cp-fade-in 80ms ease;
 }
 
@@ -30,7 +30,7 @@
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius-xl);
   box-shadow: var(--neu-cmd-shadow);
-  z-index: 1201;
+  z-index: calc(var(--neu-z-modal, 200) + 1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -150,8 +150,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .neu-cmd__item {
+  .neu-cmd__item,
+  .neu-cp-backdrop,
+  .neu-cmd {
     transition: none;
+    animation: none;
   }
 }
 

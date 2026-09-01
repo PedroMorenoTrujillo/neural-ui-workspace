@@ -94,3 +94,15 @@
     stroke-dashoffset: -124px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-spinner,
+  .neu-spinner__arc {
+    animation: none;
+  }
+
+  .neu-spinner__arc {
+    stroke-dasharray: 70, 200;
+    stroke-dashoffset: 0;
+  }
+}

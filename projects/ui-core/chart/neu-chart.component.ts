@@ -3,9 +3,11 @@ import {
   Component,
   ViewEncapsulation,
   computed,
+  inject,
   input,
 } from '@angular/core';
 import { ChartComponent } from 'ng-apexcharts';
+import { NeuResponsiveState } from '@neural-ui/core/internal';
 
 export type NeuChartType =
   | 'line'
@@ -57,7 +59,11 @@ function computeParetoCumulative(data: number[]): number[] {
   imports: [ChartComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'neu-chart' },
+  host: {
+    class: 'neu-chart',
+    role: 'group',
+    '[attr.aria-label]': 'title() || "Chart"',
+  },
   /* v8 ignore start -- Angular template factory; every chart input/config binding is covered. */
   template: `
     <apx-chart
@@ -74,6 +80,7 @@ function computeParetoCumulative(data: number[]): number[] {
       [legend]="legendConfig()"
       [tooltip]="tooltipConfig()"
       [plotOptions]="plotOptionsConfig()"
+      [title]="$any({ text: title() || undefined })"
     />
   `,
   /* v8 ignore stop */
@@ -100,6 +107,10 @@ export class NeuChartComponent {
   showDataLabels = input<boolean>(false);
   /** Título de la gráfica. / Chart title. */
   title = input<string>('');
+
+  private readonly _reducedMotion = inject(NeuResponsiveState).observe(
+    '(prefers-reduced-motion: reduce)',
+  );
 
   // --------------------------------------------------
   // Helpers privados
@@ -160,7 +171,7 @@ export class NeuChartComponent {
       toolbar: { show: false },
       sparkline: { enabled: false },
       zoom: { enabled: false },
-      animations: { enabled: true, speed: 500 },
+      animations: { enabled: !this._reducedMotion(), speed: 500 },
     };
   });
 
@@ -290,6 +301,7 @@ export class NeuChartComponent {
               color: 'var(--neu-text-secondary, #64748b)',
               formatter: (w: any) => {
                 const vals: number[] = w.globals.series;
+                if (!vals.length) return '0%';
                 const avg = vals.reduce((s: number, v: number) => s + v, 0) / vals.length;
                 return `${Math.round(avg)}%`;
               },

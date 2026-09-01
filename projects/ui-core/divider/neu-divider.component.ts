@@ -69,10 +69,13 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@a
       }
 
       .neu-divider__label {
-        white-space: nowrap;
+        min-width: 0;
+        max-width: 100%;
         padding: 0 var(--neu-space-2);
         letter-spacing: 0.04em;
         font-weight: 500;
+        overflow-wrap: anywhere;
+        text-align: center;
       }
     `,
   ],

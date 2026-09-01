@@ -32,7 +32,7 @@ import { NgIcon } from '@ng-icons/core';
     '[style.color]': '"inherit"',
     '[attr.aria-hidden]': 'decorative() ? "true" : null',
     '[attr.role]': 'decorative() ? null : "img"',
-    '[attr.aria-label]': 'decorative() ? null : ariaLabel() || null',
+    '[attr.aria-label]': 'decorative() ? null : ariaLabel() || name()',
   },
   template: `<ng-icon [name]="name()" [size]="resolvedSize()" [strokeWidth]="strokeWidth()" />`,
   styleUrl: './neu-icon.component.scss',

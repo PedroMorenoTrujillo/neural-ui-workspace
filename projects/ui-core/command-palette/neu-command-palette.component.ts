@@ -17,6 +17,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { Overlay } from '@angular/cdk/overlay';
 
 export interface NeuCommand {
   id: string;
@@ -196,8 +197,15 @@ export class NeuCommandPaletteComponent {
   protected readonly _svc = inject(NeuCommandPaletteService);
   protected readonly _activeIndex = signal(0);
   readonly listId = inject(NeuIdGenerator).getId('neu-command-list-');
+  private readonly _scrollStrategy = inject(Overlay).scrollStrategies.block();
 
   constructor() {
+    effect((onCleanup) => {
+      if (!this._svc.isOpen()) return;
+      this._scrollStrategy.enable();
+      onCleanup(() => this._scrollStrategy.disable());
+    });
+
     effect(() => {
       const commands = this._svc.filteredCommands();
       const current = this._activeIndex();

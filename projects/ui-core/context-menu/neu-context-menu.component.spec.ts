@@ -258,6 +258,18 @@ describe('NeuContextMenuDirective', () => {
     expect(strategy._topOffset).toBe('492px');
     dir.close();
   });
+
+  it('ignores unrelated host keys and stale overlay finalization', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuContextMenuDirective) as any;
+    const key = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    dir.onHostKeydown(key);
+    expect(key.defaultPrevented).toBe(false);
+    dir._finalizeClose({} as any);
+    expect(dir._overlayRef).toBeNull();
+  });
 });
 
 describe('NeuContextMenuOverlayComponent', () => {

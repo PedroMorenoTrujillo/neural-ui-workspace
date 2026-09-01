@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export interface NeuAccordionItem {
   /** ID único del panel / Unique panel ID */
@@ -57,9 +58,9 @@ export class NeuAccordionHeaderDirective { constructor(readonly templateRef: Tem
           <button
             class="neu-accordion__header"
             type="button"
-            [id]="'neu-acc-btn-' + item.id"
+            [id]="headerId(item.id)"
             [attr.aria-expanded]="isExpanded(item.id)"
-            [attr.aria-controls]="'neu-acc-panel-' + item.id"
+            [attr.aria-controls]="panelId(item.id)"
             [disabled]="item.disabled"
             (click)="toggle(item.id)"
           >
@@ -81,9 +82,11 @@ export class NeuAccordionHeaderDirective { constructor(readonly templateRef: Tem
           </button>
           <div
             class="neu-accordion__panel"
-            [id]="'neu-acc-panel-' + item.id"
+            [id]="panelId(item.id)"
             role="region"
-            [attr.aria-labelledby]="'neu-acc-btn-' + item.id"
+            [attr.aria-labelledby]="headerId(item.id)"
+            [attr.aria-hidden]="!isExpanded(item.id)"
+            [attr.inert]="!isExpanded(item.id) ? '' : null"
           >
             <div class="neu-accordion__body" [innerHTML]="sanitize(item.content)"></div>
           </div>
@@ -98,6 +101,7 @@ export class NeuAccordionComponent {
   readonly headerTpl = contentChild(NeuAccordionHeaderDirective);
   /* v8 ignore stop */
   private readonly _sanitizer = inject(DomSanitizer);
+  private readonly _uid = inject(NeuIdGenerator).getId('neu-accordion-');
 
   /** Lista de paneles / Panel list */
   items = input<NeuAccordionItem[]>([]);
@@ -133,6 +137,8 @@ export class NeuAccordionComponent {
   }
 
   readonly isExpanded = (id: string) => this._expanded().has(id);
+  protected readonly headerId = (id: string) => `${this._uid}-button-${id}`;
+  protected readonly panelId = (id: string) => `${this._uid}-panel-${id}`;
 
   sanitize(html: string): SafeHtml {
     return this._sanitizer.sanitize(SecurityContext.HTML, html) ?? '';

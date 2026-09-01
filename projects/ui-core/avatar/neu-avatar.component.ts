@@ -34,12 +34,12 @@ export type NeuAvatarStatus = 'online' | 'offline' | 'busy' | 'away' | '';
       [attr.aria-label]="alt() || name() || 'Avatar'"
       role="img"
     >
-      @if (src() && !imgError()) {
+      @if (src() && failedSrc() !== src()) {
         <img
           class="neu-avatar__img"
           [src]="src()"
           [alt]="alt() || name()"
-          (error)="imgError.set(true)"
+          (error)="failedSrc.set(src())"
         />
       } @else {
         <span class="neu-avatar__initials" aria-hidden="true">{{ initials() }}</span>
@@ -73,7 +73,7 @@ export class NeuAvatarComponent {
   status = input<NeuAvatarStatus>('');
 
   /** @internal Imagen fallida / Failed image */
-  protected readonly imgError = signal(false);
+  protected readonly failedSrc = signal('');
 
   protected readonly initials = computed(() => {
     const n = this.name().trim();
@@ -87,6 +87,6 @@ export class NeuAvatarComponent {
   protected readonly hostClasses = computed(() => [
     `neu-avatar--${this.size()}`,
     `neu-avatar--${this.shape()}`,
-    ...(!this.src() || this.imgError() ? [`neu-avatar--${this.color()}`] : []),
+    ...(!this.src() || this.failedSrc() === this.src() ? [`neu-avatar--${this.color()}`] : []),
   ]);
 }

@@ -59,4 +59,12 @@ describe('NeuIconComponent', () => {
     expect(fixture.nativeElement.getAttribute('role')).toBe('img');
     expect(fixture.nativeElement.getAttribute('aria-label')).toBe('Guardar');
   });
+
+  it('uses the registered icon name as a defensive accessible fallback', () => {
+    const fixture = TestBed.createComponent(NeuIconComponent);
+    fixture.componentRef.setInput('name', 'lucideSave');
+    fixture.componentRef.setInput('decorative', false);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.getAttribute('aria-label')).toBe('lucideSave');
+  });
 });

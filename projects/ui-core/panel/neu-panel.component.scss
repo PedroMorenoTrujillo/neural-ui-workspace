@@ -36,6 +36,11 @@
   background: var(--neu-surface-3, #e5e7eb);
 }
 
+.neu-panel__header button:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--neu-focus-ring);
+}
+
 .neu-panel__body,
 .neu-fieldset {
   padding: 1rem;
@@ -74,8 +79,14 @@
 
 .neu-scroll-area__viewport:focus-visible,
 .neu-scroll-area__bar:focus-visible {
-  outline: 2px solid var(--neu-primary, #2563eb);
+  outline: 2px solid transparent;
   outline-offset: 2px;
+  box-shadow: var(--neu-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-scroll-area__bar,
+  .neu-scroll-area__thumb { transition: none; }
 }
 
 .neu-scroll-area__viewport--enhanced {

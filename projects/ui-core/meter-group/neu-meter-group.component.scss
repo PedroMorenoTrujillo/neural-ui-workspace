@@ -94,3 +94,7 @@
   font-variant-numeric: tabular-nums;
   color: var(--neu-text-muted, #6b7280);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-meter-group__segment { transition: none; }
+}

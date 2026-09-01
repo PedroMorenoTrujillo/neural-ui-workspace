@@ -112,4 +112,19 @@ describe('NeuMeterGroupComponent', () => {
     const comp = f.componentInstance as any;
     expect(comp['_effectiveTotal']()).toBe(1);
   });
+
+  it('clamps negative and overflowing values and keeps duplicate labels renderable', async () => {
+    const f = TestBed.createComponent(NeuMeterGroupComponent);
+    f.componentRef.setInput('items', [
+      { label: 'Repeated', value: -10 },
+      { label: 'Repeated', value: 150 },
+    ]);
+    f.componentRef.setInput('total', 100);
+    f.detectChanges();
+    await f.whenStable();
+    const meter = f.nativeElement.querySelector('[role="meter"]');
+    expect(meter.getAttribute('aria-valuenow')).toBe('100');
+    expect(f.nativeElement.querySelectorAll('.neu-meter-group__segment')).toHaveLength(2);
+    expect(f.nativeElement.querySelector('.neu-meter-group__legend').getAttribute('aria-hidden')).toBeNull();
+  });
 });

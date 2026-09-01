@@ -479,4 +479,24 @@ describe('NeuNotificationCenterComponent', () => {
     expect(f.componentInstance['_isOpen']()).toBe(false);
     expect(document.activeElement).toBe(bell);
   });
+
+  it('covers template Escape handling and close paths without focus restoration', async () => {
+    const f = setup();
+    f.componentInstance['_toggle']();
+    f.detectChanges();
+    await f.whenStable();
+    const panel = document.querySelector('.neu-nc__panel') as HTMLElement;
+    panel.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    f.detectChanges();
+    await Promise.resolve();
+    expect(f.componentInstance['_isOpen']()).toBe(false);
+
+    f.componentInstance['_toggle']();
+    f.componentInstance['_close'](false);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
+    f.componentInstance['_onOverlayDetach']();
+    f.componentInstance['_onOverlayKeydown'](new KeyboardEvent('keydown', { key: 'Enter' }));
+  });
 });

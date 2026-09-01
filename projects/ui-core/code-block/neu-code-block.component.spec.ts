@@ -247,6 +247,55 @@ describe('NeuCodeBlockComponent', () => {
     expect(() => comp.copy()).not.toThrow();
   });
 
+  it('falls back without an unhandled rejection when clipboard permission is denied', async () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.componentRef.setInput('code', 'safe fallback');
+    f.detectChanges();
+    const doc: Document = TestBed.inject(DOCUMENT);
+    const win = doc.defaultView as Window & typeof globalThis;
+    const focused = doc.createElement('button');
+    doc.body.appendChild(focused);
+    focused.focus();
+    Object.defineProperty(win, 'navigator', {
+      value: {
+        ...win.navigator,
+        clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
+      },
+      configurable: true,
+    });
+    Object.defineProperty(doc, 'execCommand', {
+      value: vi.fn().mockReturnValue(true),
+      writable: true,
+      configurable: true,
+    });
+
+    f.componentInstance.copy();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect((f.componentInstance as any).copied()).toBe(true);
+    expect(doc.activeElement).toBe(focused);
+    focused.remove();
+  });
+
+  it('does not report success when the fallback copy command returns false', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    const doc: Document = TestBed.inject(DOCUMENT);
+    const win = doc.defaultView as Window & typeof globalThis;
+    Object.defineProperty(win, 'navigator', {
+      value: { ...win.navigator, clipboard: undefined },
+      configurable: true,
+    });
+    Object.defineProperty(doc, 'execCommand', {
+      value: vi.fn().mockReturnValue(false),
+      writable: true,
+      configurable: true,
+    });
+    f.componentInstance.copy();
+    expect((f.componentInstance as any).copied()).toBe(false);
+  });
+
   // ── Custom aria-labels ─────────────────────────────────────────────────────
 
   it('should render copyAriaLabel on button', () => {

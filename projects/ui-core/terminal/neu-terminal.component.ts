@@ -1,10 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   OnChanges,
   SimpleChanges,
   ViewEncapsulation,
+  inject,
   input,
   output,
   signal,
@@ -31,7 +33,7 @@ export interface NeuTerminalCommand {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-terminal-host' },
   template: `
-    <section class="neu-terminal" [attr.aria-label]="ariaLabel()" (click)="focusInput()">
+    <section #terminal class="neu-terminal" [attr.aria-label]="ariaLabel()" (click)="focusInput()">
       @if (welcomeMessage()) {
         <p class="neu-terminal__welcome">{{ welcomeMessage() }}</p>
       }
@@ -67,6 +69,8 @@ export interface NeuTerminalCommand {
 })
 export class NeuTerminalComponent implements OnChanges {
   readonly commandInput = viewChild.required<ElementRef<HTMLInputElement>>('commandInput');
+  private readonly terminal = viewChild.required<ElementRef<HTMLElement>>('terminal');
+  private readonly destroyRef = inject(DestroyRef);
   readonly welcomeMessage = input('');
   readonly prompt = input('$');
   /** Adds a safe response after the latest command, compatible with PrimeNG's response input. */
@@ -89,11 +93,26 @@ export class NeuTerminalComponent implements OnChanges {
     if (changes['output']) {
       const external = this.output();
       if (external !== this.outputSnapshot) {
+        const previous = this.outputSnapshot;
         this.outputSnapshot = external;
-        this.entries.update((entries) => [
-          ...entries.filter((entry) => entry.type === 'command'),
-          ...external.map((line) => this.outputEntry(line)),
-        ]);
+        const extendsPrevious =
+          external.length >= previous.length &&
+          previous.every(
+            (line, index) =>
+              line.text === external[index]?.text && line.kind === external[index]?.kind,
+          );
+        if (!external.length && previous.length) {
+          this.entries.set([]);
+        } else if (extendsPrevious) {
+          const additions = external.slice(previous.length).map((line) => this.outputEntry(line));
+          if (additions.length) this.entries.update((entries) => [...entries, ...additions]);
+        } else {
+          this.entries.update((entries) => [
+            ...entries.filter((entry) => entry.type === 'command'),
+            ...external.map((line) => this.outputEntry(line)),
+          ]);
+        }
+        this.scrollToEnd();
       }
     }
     if (changes['response'] && this.response() && this.entries().some((entry) => entry.type === 'command')) {
@@ -127,10 +146,12 @@ export class NeuTerminalComponent implements OnChanges {
     this.historyIndex = this.history.length;
     this.draft.set('');
     this.commandSubmit.emit({ command });
+    this.scrollToEnd();
   }
 
   appendOutput(text: string, kind: NeuTerminalLine['kind'] = 'output'): void {
     this.entries.update((entries) => [...entries, this.outputEntry({ text, kind })]);
+    this.scrollToEnd();
   }
 
   clear(): void {
@@ -149,6 +170,14 @@ export class NeuTerminalComponent implements OnChanges {
 
   private outputEntry(line: NeuTerminalLine): TerminalEntry {
     return { id: ++this.nextId, type: 'output', text: line.text, kind: line.kind ?? 'output' };
+  }
+
+  private scrollToEnd(): void {
+    queueMicrotask(() => {
+      if (this.destroyRef.destroyed) return;
+      const element = this.terminal().nativeElement;
+      element.scrollTop = element.scrollHeight;
+    });
   }
 }
 

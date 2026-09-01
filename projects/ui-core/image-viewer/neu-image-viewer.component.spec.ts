@@ -17,6 +17,7 @@ function mkData(partial: Partial<{ items: typeof ITEMS; initialIndex: number }> 
   return {
     items: partial.items ?? ITEMS,
     initialIndex: partial.initialIndex ?? 0,
+    ariaLabel: 'Image viewer',
     close: vi.fn(),
   };
 }
@@ -492,7 +493,9 @@ describe('NeuImageViewerDirective', () => {
     dir.open();
     vi.runAllTimers();
 
-    const closeButton = document.body.querySelector('[aria-label="Cerrar"]') as HTMLButtonElement;
+    const closeButton = document.body.querySelector(
+      '[aria-label="Close image viewer"]',
+    ) as HTMLButtonElement;
     closeButton.click();
 
     expect(closeSpy).toHaveBeenCalled();
@@ -532,5 +535,16 @@ describe('NeuImageViewerDirective', () => {
 
     f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(data.close).toHaveBeenCalled();
+  });
+
+  it('does not create an overlay for empty or blank viewer input', () => {
+    const f = TestBed.createComponent(HostForDirective);
+    f.detectChanges();
+    const dir = f.debugElement.children[0].injector.get(NeuImageViewerDirective) as any;
+    const createSpy = vi.spyOn(TestBed.inject(Overlay), 'create');
+    dir.neuImageViewer = () => '';
+    dir.open();
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(dir._overlayRef).toBeNull();
   });
 });

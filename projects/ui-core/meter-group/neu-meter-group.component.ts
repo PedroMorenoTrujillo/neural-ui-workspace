@@ -40,7 +40,7 @@ export interface NeuMeterItem {
       [attr.aria-valuenow]="_usedSum()"
       [attr.aria-label]="ariaLabel()"
     >
-      @for (item of _segments(); track item.label) {
+      @for (item of _segments(); track $index) {
         <div
           class="neu-meter-group__segment"
           [style.width.%]="item.pct"
@@ -51,8 +51,8 @@ export interface NeuMeterItem {
       }
     </div>
     @if (showLegend()) {
-      <ul class="neu-meter-group__legend" aria-hidden="true">
-        @for (item of _segments(); track item.label) {
+      <ul class="neu-meter-group__legend" [attr.aria-label]="ariaLabel() + ' details'">
+        @for (item of _segments(); track $index) {
           <li class="neu-meter-group__legend-item">
             <span
               class="neu-meter-group__legend-dot"
@@ -92,7 +92,10 @@ export class NeuMeterGroupComponent {
     'neu-meter-group--rounded': this.rounded(),
   }));
 
-  protected readonly _usedSum = computed(() => this.items().reduce((s, i) => s + i.value, 0));
+  protected readonly _usedSum = computed(() => {
+    const used = this.items().reduce((sum, item) => sum + Math.max(0, item.value), 0);
+    return this.total() > 0 ? Math.min(this.total(), used) : used;
+  });
 
   protected readonly _effectiveTotal = computed(() =>
     this.total() > 0 ? this.total() : this._usedSum() || 1,
@@ -102,7 +105,7 @@ export class NeuMeterGroupComponent {
     const total = this._effectiveTotal();
     return this.items().map((item) => ({
       ...item,
-      pct: Math.max(0, Math.min(100, (item.value / total) * 100)),
+      pct: Math.max(0, Math.min(100, (Math.max(0, item.value) / total) * 100)),
     }));
   });
 }

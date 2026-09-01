@@ -1,5 +1,6 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { NeuSplitterComponent, NeuSplitterPane } from './neu-splitter.component';
 
 function setup(panes: NeuSplitterPane[] = [], direction: 'horizontal' | 'vertical' = 'horizontal') {
@@ -9,6 +10,17 @@ function setup(panes: NeuSplitterPane[] = [], direction: 'horizontal' | 'vertica
   f.detectChanges();
   return f;
 }
+
+@Component({
+  imports: [NeuSplitterComponent],
+  template: `
+    <neu-splitter [panes]="[{ size: 50 }, { size: 50 }]">
+      <div ngProjectAs="neu-splitter-pane" class="pane-a">Panel A</div>
+      <div ngProjectAs="neu-splitter-pane" class="pane-b">Panel B</div>
+    </neu-splitter>
+  `,
+})
+class SplitterProjectionHostComponent {}
 
 beforeEach(() =>
   TestBed.configureTestingModule({
@@ -356,5 +368,45 @@ describe('NeuSplitterComponent', () => {
     f.destroy();
     expect(component._dragSessionDisposer).toBeNull();
     expect(component._dragIndex).toBe(-1);
+  });
+
+  it('projects each declared pane into one rendered slot', async () => {
+    const f = TestBed.createComponent(SplitterProjectionHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const splitter = f.debugElement.query(By.directive(NeuSplitterComponent));
+    const panes = splitter.nativeElement.querySelectorAll('.neu-splitter__pane');
+    expect(panes).toHaveLength(2);
+    expect(panes[0].querySelector('.pane-a')?.textContent).toContain('Panel A');
+    expect(panes[0].querySelector('.pane-b')).toBeNull();
+    expect(panes[1].querySelector('.pane-b')?.textContent).toContain('Panel B');
+  });
+
+  it('enforces pane max constraints and emits keyboard size changes', async () => {
+    const f = setup([
+      { size: 50, min: 10, max: 55 },
+      { size: 50, min: 10, max: 90 },
+    ]);
+    Object.defineProperty(f.nativeElement, 'offsetWidth', { configurable: true, value: 100 });
+    const events: number[][] = [];
+    f.componentInstance.sizeChange.subscribe((sizes) => events.push(sizes));
+    for (let index = 0; index < 10; index += 1) {
+      f.componentInstance['_onHandleKey'](
+        new KeyboardEvent('keydown', { key: 'ArrowRight' }),
+        0,
+      );
+    }
+    expect(f.componentInstance['_sizes']()[0]).toBeCloseTo(55);
+    expect(events.length).toBeGreaterThan(0);
+    f.detectChanges();
+    const handle = f.nativeElement.querySelector('[role="separator"]');
+    expect(handle.getAttribute('aria-orientation')).toBe('vertical');
+    expect(handle.getAttribute('aria-valuemax')).toBe('55');
+  });
+
+  it('rejects adjustments outside a valid adjacent pane pair', async () => {
+    const f = setup([{ size: 100 }]);
+    await f.whenStable();
+    expect(f.componentInstance['_adjustPair'](1, 2)).toBe(false);
   });
 });

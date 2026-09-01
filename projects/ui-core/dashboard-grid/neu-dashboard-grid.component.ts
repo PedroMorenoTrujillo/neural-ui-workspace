@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Injector,
   PLATFORM_ID,
   ViewEncapsulation,
+  afterNextRender,
   effect,
   inject,
   input,
@@ -72,12 +74,18 @@ export interface NeuDashboardTileConfig {
           [style.--tile-rows]="tile.rows ?? 1"
         >
           <!-- Drag handle -->
-          <div class="neu-dg__tile-handle" cdkDragHandle>
+          <button
+            type="button"
+            class="neu-dg__tile-handle"
+            cdkDragHandle
+            [attr.aria-label]="'Move ' + (tile.title || tile.id) + '; use arrow keys to reorder'"
+            (keydown)="_onHandleKey($event, $index)"
+          >
             @if (tile.title) {
               <span class="neu-dg__tile-title">{{ tile.title }}</span>
             }
             <span class="neu-dg__handle-icon" aria-hidden="true">⠿</span>
-          </div>
+          </button>
           <!-- Drag placeholder -->
           <div *cdkDragPlaceholder class="neu-dg__placeholder"></div>
           <!-- Drag preview -->
@@ -94,6 +102,7 @@ export interface NeuDashboardTileConfig {
 })
 export class NeuDashboardGridComponent {
   private readonly _host = inject(ElementRef) as ElementRef<HTMLElement>;
+  private readonly _injector = inject(Injector);
   private readonly _platformId = inject(PLATFORM_ID);
 
   readonly tiles = input<NeuDashboardTileConfig[]>([]);
@@ -127,6 +136,32 @@ export class NeuDashboardGridComponent {
     moveItemInArray(tiles, event.previousIndex, event.currentIndex);
     this._orderedTiles.set(tiles);
     this.orderChange.emit(tiles);
+  }
+
+  protected _onHandleKey(event: KeyboardEvent, index: number): void {
+    const delta =
+      event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+        ? -1
+        : event.key === 'ArrowRight' || event.key === 'ArrowDown'
+          ? 1
+          : 0;
+    if (!delta) return;
+    event.preventDefault();
+    const nextIndex = Math.max(0, Math.min(this._orderedTiles().length - 1, index + delta));
+    if (nextIndex === index) return;
+    const tiles = [...this._orderedTiles()];
+    moveItemInArray(tiles, index, nextIndex);
+    this._orderedTiles.set(tiles);
+    this.orderChange.emit(tiles);
+    afterNextRender(
+      () => {
+        const handles = this._host.nativeElement.querySelectorAll<HTMLButtonElement>(
+          '.neu-dg__tile-handle',
+        );
+        handles[nextIndex]?.focus();
+      },
+      { injector: this._injector },
+    );
   }
 
   private _attachProjectedTiles(): void {

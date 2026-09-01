@@ -39,14 +39,14 @@ export type NeuScrollAreaVariant = 'auto' | 'hover' | 'scroll' | 'always' | 'hid
         <header class="neu-panel__header">
           <h3>{{ header() }}</h3>
           @if (collapsible()) {
-            <button type="button" (click)="toggle()" [attr.aria-expanded]="!collapsed()">
+            <button type="button" (click)="toggle()" [attr.aria-expanded]="!collapsed()" [attr.aria-controls]="_bodyId">
               {{ collapsed() ? expandLabel() : collapseLabel() }}
             </button>
           }
         </header>
       }
       @if (!collapsed()) {
-        <div class="neu-panel__body"><ng-content /></div>
+        <div class="neu-panel__body" [id]="_bodyId"><ng-content /></div>
       }
     </section>
   `,
@@ -59,6 +59,7 @@ export class NeuPanelComponent {
   readonly collapseLabel = input('Collapse');
   readonly collapsedChange = output<boolean>();
   readonly collapsed = signal(false);
+  protected readonly _bodyId = inject(NeuIdGenerator).getId('neu-panel-body-');
 
   toggle(): void {
     this.collapsed.set(!this.collapsed());

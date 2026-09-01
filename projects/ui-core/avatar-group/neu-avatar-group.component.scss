@@ -5,14 +5,12 @@
 
   > .neu-avatar-host {
     position: relative;
-    box-sizing: content-box;
-    border: 2px solid var(--neu-surface);
-    border-radius: 50%;
   }
 
-  > .neu-avatar-host:not(:first-child) { margin-inline-start: -0.75rem; }
+  > .neu-avatar-host > .neu-avatar { box-shadow: 0 0 0 2px var(--neu-surface); }
+  > .neu-avatar-host:not(:first-child) { margin-inline-start: -0.5rem; }
 }
 
 @media (forced-colors: active) {
-  .neu-avatar-group > .neu-avatar-host { border-color: Canvas; }
+  .neu-avatar-group > .neu-avatar-host > .neu-avatar { outline: 2px solid Canvas; }
 }

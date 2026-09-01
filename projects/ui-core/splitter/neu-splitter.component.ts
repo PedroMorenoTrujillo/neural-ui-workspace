@@ -4,12 +4,14 @@ import {
   DestroyRef,
   ElementRef,
   ViewEncapsulation,
+  afterRenderEffect,
   effect,
   inject,
   input,
   output,
   signal,
   untracked,
+  viewChildren,
 } from '@angular/core';
 
 export type NeuSplitterDirection = 'horizontal' | 'vertical';
@@ -31,6 +33,7 @@ export interface NeuSplitterPane {
     '[class.neu-splitter--vertical]': 'direction() === "vertical"',
   },
   template: `
+    <div class="neu-splitter__projection-source" aria-hidden="true"><ng-content select="neu-splitter-pane" /></div>
     @for (size of _sizes(); track $index) {
       <div
         class="neu-splitter__pane"
@@ -38,7 +41,7 @@ export interface NeuSplitterPane {
         [style.min-width]="direction() === 'horizontal' ? (panes()[$index]?.min ?? 0) + 'px' : null"
         [style.min-height]="direction() === 'vertical' ? (panes()[$index]?.min ?? 0) + 'px' : null"
       >
-        <ng-content select="neu-splitter-pane" />
+        <div class="neu-splitter__pane-slot" #paneSlot></div>
       </div>
       @if (!$last) {
         <div
@@ -46,8 +49,9 @@ export interface NeuSplitterPane {
           role="separator"
           tabindex="0"
           [attr.aria-valuenow]="size"
-          [attr.aria-valuemin]="0"
-          [attr.aria-valuemax]="100"
+          [attr.aria-valuemin]="_ariaMin($index)"
+          [attr.aria-valuemax]="_ariaMax($index)"
+          [attr.aria-orientation]="direction() === 'horizontal' ? 'vertical' : 'horizontal'"
           [attr.aria-label]="'Separador ' + ($index + 1)"
           (mousedown)="_startDrag($event, $index)"
           (touchstart)="_startTouchDrag($event, $index)"
@@ -67,6 +71,7 @@ export class NeuSplitterComponent {
 
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _paneSlots = viewChildren<ElementRef<HTMLElement>>('paneSlot');
   protected readonly _sizes = signal<number[]>([]);
   private _dragSessionDisposer: (() => void) | null = null;
 
@@ -85,6 +90,11 @@ export class NeuSplitterComponent {
           this._sizes.set(ps.map((p) => p.size ?? remaining));
         }
       });
+    });
+    afterRenderEffect(() => {
+      this._sizes();
+      this._paneSlots();
+      this._attachProjectedPanes();
     });
   }
 
@@ -122,8 +132,10 @@ export class NeuSplitterComponent {
     this._dragPos = this.direction() === 'horizontal' ? t.clientX : t.clientY;
     const view = this._el.nativeElement.ownerDocument.defaultView;
     if (!view) return;
-    const onMove = (ev: TouchEvent) =>
+    const onMove = (ev: TouchEvent) => {
+      ev.preventDefault();
       this._onDragMove(ev.touches[0].clientX, ev.touches[0].clientY);
+    };
     const onEnd = () => {
       this._disposeDragSession();
       this.sizeChange.emit(this._sizes());
@@ -135,7 +147,7 @@ export class NeuSplitterComponent {
       this._dragIndex = -1;
       this._dragSessionDisposer = null;
     };
-    view.addEventListener('touchmove', onMove, { passive: true });
+    view.addEventListener('touchmove', onMove, { passive: false });
     view.addEventListener('touchend', onEnd);
     view.addEventListener('touchcancel', onEnd);
   }
@@ -148,10 +160,10 @@ export class NeuSplitterComponent {
     const step = 2;
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
       e.preventDefault();
-      this._adjustPair(index, -step);
+      if (this._adjustPair(index, -step)) this.sizeChange.emit(this._sizes());
     } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       e.preventDefault();
-      this._adjustPair(index, step);
+      if (this._adjustPair(index, step)) this.sizeChange.emit(this._sizes());
     }
   }
 
@@ -167,8 +179,9 @@ export class NeuSplitterComponent {
     this._adjustPair(this._dragIndex, (delta / total) * 100);
   }
 
-  private _adjustPair(index: number, delta: number): void {
+  private _adjustPair(index: number, delta: number): boolean {
     const sizes = [...this._sizes()];
+    if (sizes[index] == null || sizes[index + 1] == null) return false;
     const container = this._el.nativeElement;
     const total =
       this.direction() === 'horizontal' ? container.offsetWidth : container.offsetHeight;
@@ -176,20 +189,49 @@ export class NeuSplitterComponent {
     const minB = this.panes()[index + 1]?.min ?? 0;
     const minPctA = total > 0 ? (minA / total) * 100 : 0;
     const minPctB = total > 0 ? (minB / total) * 100 : 0;
-
-    let newA = sizes[index] + delta;
-    let newB = sizes[index + 1] - delta;
-    if (newA < minPctA) {
-      newB -= minPctA - newA;
-      newA = minPctA;
-    }
-    if (newB < minPctB) {
-      newA -= minPctB - newB;
-      newB = minPctB;
-    }
-
-    sizes[index] = Math.max(0, newA);
-    sizes[index + 1] = Math.max(0, newB);
+    const maxA = this.panes()[index]?.max;
+    const maxB = this.panes()[index + 1]?.max;
+    const maxPctA = total > 0 && maxA != null ? (maxA / total) * 100 : 100;
+    const maxPctB = total > 0 && maxB != null ? (maxB / total) * 100 : 100;
+    const pairTotal = sizes[index] + sizes[index + 1];
+    const lower = Math.max(0, minPctA, pairTotal - maxPctB);
+    const upper = Math.min(100, maxPctA, pairTotal - minPctB);
+    const newA = Math.max(lower, Math.min(upper, sizes[index] + delta));
+    const newB = pairTotal - newA;
+    if (newA === sizes[index] && newB === sizes[index + 1]) return false;
+    sizes[index] = newA;
+    sizes[index + 1] = newB;
     this._sizes.set(sizes);
+    return true;
+  }
+
+  protected _ariaMin(index: number): number {
+    const total = this._containerSize();
+    return total > 0 ? Math.round(((this.panes()[index]?.min ?? 0) / total) * 100) : 0;
+  }
+
+  protected _ariaMax(index: number): number {
+    const total = this._containerSize();
+    const max = this.panes()[index]?.max;
+    return total > 0 && max != null ? Math.round((max / total) * 100) : 100;
+  }
+
+  private _containerSize(): number {
+    return this.direction() === 'horizontal'
+      ? this._el.nativeElement.offsetWidth
+      : this._el.nativeElement.offsetHeight;
+  }
+
+  private _attachProjectedPanes(): void {
+    const host = this._el.nativeElement as HTMLElement;
+    if (!host.ownerDocument.defaultView) return;
+    const source = host.querySelector<HTMLElement>('.neu-splitter__projection-source');
+    if (!source) return;
+    const projected = Array.from(source.children);
+    const slots = this._paneSlots();
+    projected.forEach((pane, index) => {
+      const slot = slots[index]?.nativeElement;
+      if (slot && pane.parentElement !== slot) slot.appendChild(pane);
+    });
   }
 }

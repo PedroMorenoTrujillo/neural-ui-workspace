@@ -6,6 +6,7 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { NeuImageViewerDirective, type NeuImageViewerItem } from '@neural-ui/core/image-viewer';
 
@@ -24,12 +25,14 @@ import { NeuImageViewerDirective, type NeuImageViewerItem } from '@neural-ui/cor
             class="neu-image-gallery__thumbs"
             [class.neu-image-gallery__thumbs--left]="thumbnailPosition() === 'left'"
           >
-            @for (item of items(); track item.src; let i = $index) {
+            @for (item of items(); track $index; let i = $index) {
               <button
                 type="button"
                 class="neu-image-gallery__thumb"
                 [class.neu-image-gallery__thumb--active]="activeIndex() === i"
                 [attr.aria-label]="item.alt || 'Image ' + (i + 1)"
+                [attr.aria-current]="activeIndex() === i ? 'true' : null"
+                [attr.aria-pressed]="activeIndex() === i"
                 (click)="setActiveIndex(i)"
               >
                 <img [src]="item.src" [alt]="item.alt || ''" />
@@ -114,10 +117,20 @@ export class NeuImageGalleryComponent {
   readonly activeIndexChange = output<number>();
 
   private readonly _activeIndex = signal(0);
+  private _hasInitializedIndex = false;
 
   constructor() {
     effect(() => {
-      this._activeIndex.set(this._clampIndex(this.initialIndex()));
+      this.items();
+      const initialIndex = this.initialIndex();
+      untracked(() => {
+        if (!this._hasInitializedIndex) {
+          this._activeIndex.set(this._clampIndex(initialIndex));
+          this._hasInitializedIndex = true;
+        } else {
+          this._activeIndex.update((index) => this._clampIndex(index));
+        }
+      });
     });
   }
 

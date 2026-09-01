@@ -78,10 +78,23 @@ describe('Neural generated ID collisions', () => {
     expect(autocompleteIds).toHaveLength(2);
     expect(new Set(autocompleteIds).size).toBe(2);
 
-    const tooltipIds = Array.from(
+    const tooltipTriggers = Array.from(
       host.querySelectorAll<HTMLButtonElement>('button[neuTooltip]'),
-      (element) => element.getAttribute('aria-describedby'),
     );
+    expect(
+      tooltipTriggers.map((element) => element.getAttribute('aria-describedby')),
+    ).toEqual([null, null]);
+
+    for (const trigger of tooltipTriggers) {
+      trigger.dispatchEvent(new Event('mouseenter'));
+    }
+    fixture.detectChanges();
+
+    const tooltipIds = tooltipTriggers.map((element) =>
+      element.getAttribute('aria-describedby'),
+    );
+    expect(tooltipIds.every((id) => id?.startsWith('neu-tooltip-'))).toBe(true);
     expect(new Set(tooltipIds).size).toBe(2);
+    expect(tooltipIds.every((id) => id !== null && document.getElementById(id))).toBe(true);
   });
 });

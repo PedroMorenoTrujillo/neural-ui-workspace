@@ -41,6 +41,14 @@ class AccordionTemplateHostComponent {
   readonly items = ITEMS.slice(0, 1);
 }
 
+@Component({
+  template: `<neu-accordion [items]="items" /><neu-accordion [items]="items" />`,
+  imports: [NeuAccordionComponent],
+})
+class MultipleAccordionHostComponent {
+  readonly items = ITEMS.slice(0, 1);
+}
+
 describe('NeuAccordionComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
@@ -231,5 +239,22 @@ describe('NeuAccordionComponent', () => {
     df.detectChanges();
     expect(header.textContent?.trim()).toBe('1:true');
     expect(df.nativeElement.querySelector('.neu-accordion__title')).toBeNull();
+  });
+
+  it('keeps relationships unique across instances and hides collapsed content from interaction', async () => {
+    const df = TestBed.createComponent(MultipleAccordionHostComponent);
+    df.detectChanges();
+    await df.whenStable();
+    const buttons = df.nativeElement.querySelectorAll('button[aria-controls]');
+    const panels = df.nativeElement.querySelectorAll('.neu-accordion__panel');
+    expect(buttons[0].id).not.toBe(buttons[1].id);
+    expect(panels[0].id).not.toBe(panels[1].id);
+    expect(buttons[0].getAttribute('aria-controls')).toBe(panels[0].id);
+    expect(panels[0].getAttribute('aria-hidden')).toBe('true');
+    expect(panels[0].hasAttribute('inert')).toBe(true);
+    buttons[0].click();
+    df.detectChanges();
+    expect(panels[0].getAttribute('aria-hidden')).toBe('false');
+    expect(panels[0].hasAttribute('inert')).toBe(false);
   });
 });

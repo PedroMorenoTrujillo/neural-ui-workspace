@@ -32,6 +32,7 @@ export const NEU_IV_DATA = new InjectionToken<_NeuIvData>('NEU_IV_DATA');
 interface _NeuIvData {
   items: NeuImageViewerItem[];
   initialIndex: number;
+  ariaLabel: string;
   close: () => void;
 }
 
@@ -49,7 +50,7 @@ interface _NeuIvData {
     class: 'neu-iv',
     'aria-modal': 'true',
     role: 'dialog',
-    'aria-label': 'Visor de imágenes',
+    '[attr.aria-label]': '_data.ariaLabel',
     tabIndex: '0',
     '(keydown)': '_onKey($event)',
     '(click)': '_onBackdropClick($event)',
@@ -72,7 +73,7 @@ interface _NeuIvData {
           <button
             type="button"
             class="neu-iv__btn neu-iv__btn--close"
-            aria-label="Cerrar"
+            aria-label="Close image viewer"
             (click)="_data.close()"
           >
             ✕
@@ -101,7 +102,7 @@ interface _NeuIvData {
         <button
           type="button"
           class="neu-iv__arrow neu-iv__arrow--prev"
-          aria-label="Anterior"
+          aria-label="Previous image"
           [disabled]="_index() === 0"
           (click)="_navigate(-1)"
         >
@@ -110,7 +111,7 @@ interface _NeuIvData {
         <button
           type="button"
           class="neu-iv__arrow neu-iv__arrow--next"
-          aria-label="Siguiente"
+          aria-label="Next image"
           [disabled]="_index() === _data.items.length - 1"
           (click)="_navigate(1)"
         >
@@ -268,10 +269,10 @@ export class NeuImageViewerDirective implements OnDestroy {
 
   open(): void {
     if (this._overlayRef) return;
+    const items = this._normalizeItems();
+    if (!items.length) return;
 
     this._element.focus({ preventScroll: true });
-
-    const items = this._normalizeItems();
     const overlayRef = this._overlay.create({
       hasBackdrop: false,
       scrollStrategy: this._overlay.scrollStrategies.block(),
@@ -281,6 +282,8 @@ export class NeuImageViewerDirective implements OnDestroy {
     const data: _NeuIvData = {
       items,
       initialIndex: Math.max(0, Math.min(this.neuIvIndex(), items.length - 1)),
+      ariaLabel:
+        this._element.getAttribute('aria-label')?.trim() || items[0].alt?.trim() || 'Image viewer',
       close: () => this.close(),
     };
 
@@ -311,8 +314,10 @@ export class NeuImageViewerDirective implements OnDestroy {
 
   private _normalizeItems(): NeuImageViewerItem[] {
     const v = this.neuImageViewer();
-    if (typeof v === 'string') return [{ src: v }];
-    if (Array.isArray(v)) return v;
-    return [v];
+    const values = typeof v === 'string' ? [{ src: v }] : Array.isArray(v) ? v : [v];
+    return values.filter(
+      (item): item is NeuImageViewerItem =>
+        !!item && typeof item.src === 'string' && item.src.trim().length > 0,
+    );
   }
 }

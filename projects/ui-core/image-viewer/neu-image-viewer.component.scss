@@ -5,7 +5,7 @@
   background: var(--neu-image-viewer-bg);
   display: flex;
   flex-direction: column;
-  z-index: 1300;
+  z-index: var(--neu-z-modal, 200);
   outline: none;
 }
 
@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
   flex-shrink: 0;
 }
 
@@ -38,8 +38,8 @@
 
 .neu-iv__btn {
   all: unset;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -116,6 +116,10 @@
 
   &:hover:not(:disabled) {
     background: var(--neu-image-viewer-arrow-hover);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--neu-focus-ring);
   }
 
   &:disabled {

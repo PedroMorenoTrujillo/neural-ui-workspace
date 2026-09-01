@@ -185,21 +185,30 @@ export class NeuCodeBlockComponent {
     const win = this.doc.defaultView;
 
     if (win?.navigator?.clipboard) {
-      void win.navigator.clipboard.writeText(text).then(() => this._markCopied());
+      void win.navigator.clipboard
+        .writeText(text)
+        .then(() => this._markCopied())
+        .catch(() => this._copyWithTextarea(text));
     } else {
-      // Fallback para HTTP o navegadores sin Clipboard API
-      const ta = this.doc.createElement('textarea');
-      ta.value = text;
-      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
-      this.doc.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      try {
-        this.doc.execCommand('copy');
-        this._markCopied();
-      } finally {
-        this.doc.body.removeChild(ta);
-      }
+      this._copyWithTextarea(text);
+    }
+  }
+
+  private _copyWithTextarea(text: string): void {
+    const previousFocus = this.doc.activeElement as HTMLElement | null;
+    const ta = this.doc.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+    this.doc.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      if (this.doc.execCommand?.('copy')) this._markCopied();
+    } catch {
+      // The component stays in its idle state when both copy mechanisms fail.
+    } finally {
+      this.doc.body.removeChild(ta);
+      previousFocus?.focus();
     }
   }
 

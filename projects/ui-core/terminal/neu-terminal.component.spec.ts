@@ -102,4 +102,45 @@ describe('NeuTerminalComponent', () => {
 
     expect(document.activeElement).toBe(input);
   });
+
+  it('keeps command and incremental controlled output chronological and clears the transcript', async () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.draft.set('help');
+    component.submit();
+    fixture.componentRef.setInput('output', [{ text: 'Available commands' }]);
+    fixture.detectChanges();
+    component.draft.set('version');
+    component.submit();
+    fixture.componentRef.setInput('output', [
+      { text: 'Available commands' },
+      { text: 'NeuralUI 1.0' },
+    ]);
+    fixture.detectChanges();
+    expect(component.entries().map((entry) => entry.text)).toEqual([
+      'help',
+      'Available commands',
+      'version',
+      'NeuralUI 1.0',
+    ]);
+
+    fixture.componentRef.setInput('output', []);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.entries()).toEqual([]);
+  });
+
+  it('reconciles a non-prefix controlled replacement and cancels queued scrolling on destroy', async () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.draft.set('status');
+    component.submit();
+    fixture.componentRef.setInput('output', [{ text: 'old' }]);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('output', [{ text: 'replacement', kind: 'info' }]);
+    fixture.detectChanges();
+    expect(component.entries().map((entry) => entry.text)).toEqual(['status', 'replacement']);
+    fixture.destroy();
+    await Promise.resolve();
+  });
 });

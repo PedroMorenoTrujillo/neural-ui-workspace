@@ -16,6 +16,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@a
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-skeleton',
+    'aria-hidden': 'true',
     '[class.neu-skeleton--text]': 'variant() === "text"',
     '[class.neu-skeleton--circle]': 'variant() === "circle"',
     '[class.neu-skeleton--rect]': 'variant() === "rect"',

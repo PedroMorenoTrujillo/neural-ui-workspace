@@ -300,4 +300,40 @@ describe('NeuDashboardGridComponent', () => {
     expect(() => f.componentInstance['_attachProjectedTiles']()).not.toThrow();
     expect(f.nativeElement.querySelectorAll('.neu-dg__tile')).toHaveLength(1);
   });
+
+  it('reorders with arrow keys, emits the new order, and preserves handle focus', async () => {
+    const f = setup();
+    await f.whenStable();
+    const changes: string[][] = [];
+    f.componentInstance.orderChange.subscribe((tiles) =>
+      changes.push(tiles.map((tile) => tile.id)),
+    );
+    const first = f.nativeElement.querySelector('.neu-dg__tile-handle') as HTMLButtonElement;
+    first.focus();
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.componentInstance['_orderedTiles']().map((tile) => tile.id)).toEqual(['b', 'a', 'c']);
+    expect(changes).toEqual([['b', 'a', 'c']]);
+    expect(document.activeElement).toBe(
+      f.nativeElement.querySelectorAll('.neu-dg__tile-handle')[1],
+    );
+  });
+
+  it('supports every arrow alias and ignores unrelated or boundary keys', async () => {
+    const f = setup();
+    await f.whenStable();
+    const component = f.componentInstance;
+    const ignored = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    component['_onHandleKey'](ignored, 0);
+    expect(ignored.defaultPrevented).toBe(false);
+    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
+    expect(component['_orderedTiles']().map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
+    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowDown' }), 0);
+    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowUp' }), 1);
+    expect(component['_orderedTiles']().map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
+  });
 });

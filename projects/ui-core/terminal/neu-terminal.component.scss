@@ -37,6 +37,6 @@
   color: inherit;
   font: inherit;
 }
-.neu-terminal__input:focus-visible { outline: 2px solid var(--neu-primary, #38bdf8); outline-offset: 2px; }
-.neu-terminal:has(.neu-terminal__input:focus-visible) { outline: 2px solid var(--neu-primary, #38bdf8); outline-offset: 2px; }
+.neu-terminal__input:focus-visible { outline: 2px solid transparent; outline-offset: 2px; }
+.neu-terminal:has(.neu-terminal__input:focus-visible) { outline: 2px solid transparent; outline-offset: 2px; box-shadow: var(--neu-focus-ring); }
 @media (forced-colors: active) { .neu-terminal { border-color: CanvasText; background: Canvas; color: CanvasText; } .neu-terminal__prompt { color: Highlight; } }

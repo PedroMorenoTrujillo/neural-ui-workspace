@@ -50,6 +50,12 @@ describe('NeuChartComponent', () => {
     expect(f.nativeElement.classList).toContain('neu-chart');
   });
 
+  it('labels the chart as a group so interactive legends are not nested in an image role', () => {
+    const { f } = mk({ title: 'Revenue by month' });
+    expect(f.nativeElement.getAttribute('role')).toBe('group');
+    expect(f.nativeElement.getAttribute('aria-label')).toBe('Revenue by month');
+  });
+
   it('should default to line type', () => {
     const { comp } = mk();
     expect(comp.type()).toBe('line');

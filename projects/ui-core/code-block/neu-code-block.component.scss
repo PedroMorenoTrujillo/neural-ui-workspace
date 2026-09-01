@@ -68,6 +68,7 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  min-height: 2.75rem;
   padding: 4px 10px;
   background: var(--neu-code-block-copy-bg, rgba(255, 255, 255, 0.12));
   border: 1px solid var(--neu-code-block-copy-border, rgba(255, 255, 255, 0.22));
@@ -90,6 +91,11 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
     background: var(--neu-code-block-copy-hover-bg, rgba(255, 255, 255, 0.18));
     color: var(--neu-code-block-copy-hover-text, #ffffff);
     border-color: var(--neu-code-block-copy-hover-border, rgba(255, 255, 255, 0.34));
+  }
+
+  &:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--neu-focus-ring);
   }
 }
 

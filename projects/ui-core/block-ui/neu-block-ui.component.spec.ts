@@ -198,4 +198,11 @@ describe('NeuBlockUIDirective', () => {
     await f.whenStable();
     expect(host.hasAttribute('inert')).toBe(false);
   });
+
+  it('safely skips sibling blocking when the host is detached', () => {
+    const f = TestBed.createComponent(NeuBlockUIComponent);
+    f.detectChanges();
+    f.nativeElement.remove();
+    expect(() => f.componentInstance['blockSiblingInteraction']()).not.toThrow();
+  });
 });

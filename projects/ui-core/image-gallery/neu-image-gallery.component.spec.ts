@@ -198,4 +198,20 @@ describe('NeuImageGalleryComponent', () => {
     ) as HTMLButtonElement;
     expect(next.disabled).toBe(true);
   });
+
+  it('retains a valid local selection when items are replaced and marks the active thumbnail', async () => {
+    const f = TestBed.createComponent(NeuImageGalleryComponent);
+    f.componentRef.setInput('items', ITEMS);
+    f.detectChanges();
+    await f.whenStable();
+    f.componentInstance.setActiveIndex(2);
+    f.componentRef.setInput('items', ITEMS.slice(0, 2));
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.componentInstance.activeIndex()).toBe(1);
+    const active = f.nativeElement.querySelector('.neu-image-gallery__thumb--active');
+    expect(active.getAttribute('aria-current')).toBe('true');
+    expect(active.getAttribute('aria-pressed')).toBe('true');
+  });
 });

@@ -129,4 +129,19 @@ describe('NeuAvatarComponent', () => {
     // Color class is on inner span.neu-avatar, not on the host
     expect(df.nativeElement.querySelector('.neu-avatar--blue')).toBeTruthy();
   });
+
+  it('recovers when a failed source is replaced with a different image', async () => {
+    const df = TestBed.createComponent(NeuAvatarComponent);
+    df.componentRef.setInput('src', 'broken.jpg');
+    df.componentRef.setInput('name', 'Test User');
+    df.detectChanges();
+    (df.nativeElement.querySelector('img') as HTMLImageElement).dispatchEvent(new Event('error'));
+    df.detectChanges();
+    expect(df.nativeElement.querySelector('.neu-avatar__initials')).toBeTruthy();
+
+    df.componentRef.setInput('src', 'working.jpg');
+    df.detectChanges();
+    await df.whenStable();
+    expect((df.nativeElement.querySelector('img') as HTMLImageElement).src).toContain('working.jpg');
+  });
 });

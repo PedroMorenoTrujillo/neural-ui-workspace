@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
+import { Overlay } from '@angular/cdk/overlay';
 
 export interface NeuGalleryItem {
   src: string;
@@ -120,15 +121,14 @@ export class NeuGalleryCaptionDirective {
           <div
             class="neu-gallery__thumbnails"
             [class.neu-gallery__thumbnails--start]="thumbnailPosition() === 'start'"
-            role="tablist"
+            role="group"
             [attr.aria-label]="thumbnailLabel()"
           >
-            @for (item of items(); track item.src; let index = $index) {
+            @for (item of items(); track $index; let index = $index) {
               <button
                 type="button"
                 class="neu-gallery__thumbnail"
-                role="tab"
-                [attr.aria-selected]="index === activeIndex()"
+                [attr.aria-pressed]="index === activeIndex()"
                 [attr.aria-label]="item.alt"
                 [class.neu-gallery__thumbnail--active]="index === activeIndex()"
                 (click)="setActiveIndex(index, true)"
@@ -259,11 +259,18 @@ export class NeuGalleryComponent {
   private readonly _zoom = signal(1);
   private readonly _rotation = signal(0);
   private readonly _flip = signal({ x: 1, y: 1 });
+  private readonly _scrollStrategy = inject(Overlay).scrollStrategies.block();
   private _hasInitializedIndex = false;
   private _wasControlled = false;
   private _pointerStart: { x: number; y: number } | null = null;
 
   constructor() {
+    effect((onCleanup) => {
+      if (!this._previewOpen()) return;
+      this._scrollStrategy.enable();
+      onCleanup(() => this._scrollStrategy.disable());
+    });
+
     effect(() => {
       const requested = this.activeIndexInput();
       this.items();
