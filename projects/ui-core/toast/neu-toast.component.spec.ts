@@ -97,14 +97,10 @@ describe('NeuToastContainerComponent', () => {
     expect(f.nativeElement.querySelectorAll('.neu-toast').length).toBe(0);
   });
 
-  it('should have aria-live="polite" on host element', () => {
+  it('should avoid nesting a container live region around semantic toast items', () => {
     const { f } = setup();
-    expect(f.nativeElement.getAttribute('aria-live')).toBe('polite');
-  });
-
-  it('should have aria-atomic="false" on host element', () => {
-    const { f } = setup();
-    expect(f.nativeElement.getAttribute('aria-atomic')).toBe('false');
+    expect(f.nativeElement.getAttribute('aria-live')).toBeNull();
+    expect(f.nativeElement.getAttribute('aria-atomic')).toBeNull();
   });
 
   it('should apply position class when service.setPosition() is called', () => {

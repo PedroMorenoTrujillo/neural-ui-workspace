@@ -3,9 +3,12 @@ import {
   Component,
   HostListener,
   ViewEncapsulation,
+  effect,
+  inject,
   input,
   output,
 } from '@angular/core';
+import { Overlay } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 
@@ -34,7 +37,7 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
         (neuModalFocusEscape)="requestClose()"
         role="dialog"
         aria-modal="true"
-        [attr.aria-label]="ariaLabel() || title()"
+        [attr.aria-label]="ariaLabel() || title() || 'Bottom sheet'"
       >
         <div class="neu-bottom-sheet__handle" aria-hidden="true"></div>
         @if (title()) {
@@ -70,6 +73,15 @@ export class NeuBottomSheetComponent {
   readonly size = input<NeuBottomSheetSize>('md');
   readonly initialFocus = input('first');
   readonly closed = output<void>();
+  private readonly scrollStrategy = inject(Overlay).scrollStrategies.block();
+
+  constructor() {
+    effect((onCleanup) => {
+      if (!this.open()) return;
+      this.scrollStrategy.enable();
+      onCleanup(() => this.scrollStrategy.disable());
+    });
+  }
 
   requestClose(): void {
     if (!this.disableClose()) {

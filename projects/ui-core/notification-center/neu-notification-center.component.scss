@@ -52,8 +52,8 @@
 /* ── Panel ────────────────────────────────────────────────────── */
 .neu-nc__panel {
   position: relative;
-  width: 320px;
-  max-height: 420px;
+  width: min(20rem, calc(100vw - 2rem));
+  max-height: min(26.25rem, calc(100dvh - 2rem));
   display: flex;
   flex-direction: column;
   background: var(--neu-surface-1, #ffffff);
@@ -100,7 +100,7 @@
 .neu-nc__action-btn {
   all: unset;
   font-size: 0.75rem;
-  color: var(--neu-color-primary, #0ea5e9);
+  color: var(--neu-primary-dark, #005fcc);
   cursor: pointer;
   padding: 2px 6px;
   border-radius: var(--neu-radius-sm, 4px);
@@ -108,6 +108,15 @@
   &:hover {
     background: var(--neu-color-primary-alpha, rgb(14 165 233 / 0.1));
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring-color, var(--neu-color-primary, #0ea5e9));
+    outline-offset: 2px;
+  }
+}
+
+[data-theme='dark'] .neu-nc__action-btn {
+  color: var(--neu-primary-light, #339dff);
 }
 
 /* ── List ─────────────────────────────────────────────────────── */
@@ -198,5 +207,17 @@
 
   &:hover {
     color: var(--neu-text-primary, #111);
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 2px solid var(--neu-focus-ring-color, var(--neu-color-primary, #0ea5e9));
+    outline-offset: 1px;
+  }
+}
+
+@media (pointer: coarse) {
+  .neu-nc__item-close {
+    opacity: 1;
   }
 }

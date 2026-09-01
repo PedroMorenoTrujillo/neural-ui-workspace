@@ -66,8 +66,16 @@
 }
 
 html[data-theme='dark'] {
+  .neu-block-ui:not(.neu-block-ui--light) .neu-block-ui__overlay {
+    background: var(--neu-block-ui-bg, rgba(3, 7, 18, 0.72));
+  }
+
   .neu-block-ui__message {
     color: #ffffff;
+  }
+
+  .neu-block-ui--light .neu-block-ui__message {
+    color: #111827;
   }
 }
 

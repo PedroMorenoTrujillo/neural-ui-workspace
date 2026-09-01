@@ -5,7 +5,10 @@
   box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.14);
   padding: 6px;
   min-width: 180px;
-  max-width: 260px;
+  max-width: min(260px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   z-index: 2000;
   outline: none;
   animation: neu-ctx-in 80ms ease;

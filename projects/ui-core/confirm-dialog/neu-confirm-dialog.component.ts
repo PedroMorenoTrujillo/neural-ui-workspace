@@ -4,10 +4,9 @@ import {
   Injectable,
   ViewEncapsulation,
   inject,
-  input,
-  signal,
 } from '@angular/core';
 import { Dialog, DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export interface NeuConfirmDialogData {
   /** Título del diálogo / Dialog title */
@@ -36,14 +35,15 @@ export interface NeuConfirmDialogData {
     class: 'neu-confirm-dialog',
     role: 'alertdialog',
     'aria-modal': 'true',
-    '[attr.aria-labelledby]': '"neu-confirm-title"',
-    '[attr.aria-describedby]': '"neu-confirm-msg"',
+    '[attr.aria-labelledby]': 'data.title ? titleId : null',
+    '[attr.aria-label]': 'data.title ? null : data.message',
+    '[attr.aria-describedby]': 'messageId',
   },
   template: `
     @if (data.title) {
-      <h2 class="neu-confirm-dialog__title" id="neu-confirm-title">{{ data.title }}</h2>
+      <h2 class="neu-confirm-dialog__title" [id]="titleId">{{ data.title }}</h2>
     }
-    <p class="neu-confirm-dialog__message" id="neu-confirm-msg">{{ data.message }}</p>
+    <p class="neu-confirm-dialog__message" [id]="messageId">{{ data.message }}</p>
     <div class="neu-confirm-dialog__actions">
       <button
         type="button"
@@ -69,6 +69,8 @@ export interface NeuConfirmDialogData {
 export class NeuConfirmDialogComponent {
   readonly data: NeuConfirmDialogData = inject(DIALOG_DATA);
   private readonly _dialogRef = inject(DialogRef<boolean>);
+  protected readonly titleId = inject(NeuIdGenerator).getId('neu-confirm-title-');
+  protected readonly messageId = inject(NeuIdGenerator).getId('neu-confirm-message-');
 
   accept(): void {
     this._dialogRef.close(true);
@@ -102,7 +104,7 @@ export class NeuConfirmDialogService {
       data,
       panelClass: 'neu-confirm-dialog-panel',
       backdropClass: 'neu-confirm-dialog-backdrop',
-      disableClose: true,
+      disableClose: false,
     });
     return new Promise<boolean>((resolve) => {
       ref.closed.subscribe((result) => resolve(result ?? false));

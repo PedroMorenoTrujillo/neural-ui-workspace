@@ -19,6 +19,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { Overlay, OverlayRef, ConnectedPosition } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuPopoverPosition = 'top' | 'bottom' | 'left' | 'right';
 export type NeuPopoverTrigger = 'click' | 'hover' | 'focus';
@@ -32,7 +33,12 @@ export type NeuPopoverTrigger = 'click' | 'hover' | 'focus';
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'neu-popover' },
+  host: {
+    class: 'neu-popover',
+    '[attr.id]': '_id()',
+    '[attr.role]': '_role()',
+    '[attr.aria-modal]': '_role() === "dialog" ? "false" : null',
+  },
   template: `
     @if (_templateRef) {
       <ng-container [ngTemplateOutlet]="_templateRef" [ngTemplateOutletContext]="_context" />
@@ -44,6 +50,8 @@ export type NeuPopoverTrigger = 'click' | 'hover' | 'focus';
 })
 export class NeuPopoverOverlayComponent {
   readonly _text = signal('');
+  readonly _id = signal('');
+  readonly _role = signal<'dialog' | null>(null);
   _templateRef: TemplateRef<unknown> | null = null;
   _context: unknown = {};
 }
@@ -65,6 +73,8 @@ export class NeuPopoverOverlayComponent {
   host: {
     '[attr.aria-haspopup]': '_hostAriaHasPopup()',
     '[attr.aria-expanded]': '_hostAriaExpanded()',
+    '[attr.aria-controls]': '_hostAriaControls()',
+    '[attr.aria-describedby]': '_hostAriaDescribedBy()',
   },
 })
 export class NeuPopoverDirective implements OnDestroy {
@@ -98,6 +108,7 @@ export class NeuPopoverDirective implements OnDestroy {
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _injector = inject(Injector);
   private readonly _vcr = inject(ViewContainerRef);
+  private readonly _popoverId = inject(NeuIdGenerator).getId('neu-popover-');
 
   private _overlayRef: OverlayRef | null = null;
   private _compRef: ComponentRef<NeuPopoverOverlayComponent> | null = null;
@@ -132,6 +143,14 @@ export class NeuPopoverDirective implements OnDestroy {
     this.close();
   }
 
+  @HostListener('keydown.escape', ['$event'])
+  protected onEscape(event: Event): void {
+    if (!(event instanceof KeyboardEvent) || event.key !== 'Escape' || !this._isOpen()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.close();
+  }
+
   /** Abre el popover / Opens the popover */
   open(): void {
     if (this.neuPopoverDisabled() || this._isOpen()) return;
@@ -146,6 +165,8 @@ export class NeuPopoverDirective implements OnDestroy {
     } else {
       comp._text.set(this.neuPopoverText());
     }
+    comp._id.set(this._popoverId);
+    comp._role.set(this.neuPopoverTrigger() === 'click' ? 'dialog' : null);
     this._isOpen.set(true);
     this.popoverOpened.emit();
 
@@ -153,13 +174,14 @@ export class NeuPopoverDirective implements OnDestroy {
     if (this.neuPopoverTrigger() === 'click') {
       this._overlayRef!.backdropClick().subscribe(() => this.close());
     }
+    this._overlayRef!.keydownEvents().subscribe((event) => this.onEscape(event));
+    this._overlayRef!.detachments().subscribe(() => this._finalizeClose());
   }
 
   /** Cierra el popover / Closes the popover */
   close(): void {
-    this._overlayRef?.detach();
-    this._isOpen.set(false);
-    this.popoverClosed.emit();
+    if (!this._isOpen()) return;
+    this._finalizeClose();
   }
 
   /** Alterna la visibilidad / Toggles visibility */
@@ -168,7 +190,11 @@ export class NeuPopoverDirective implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this._overlayRef?.dispose();
+    this._isOpen.set(false);
+    const overlayRef = this._overlayRef;
+    this._overlayRef = null;
+    this._compRef = null;
+    overlayRef?.dispose();
   }
 
   protected _hostAriaHasPopup(): 'dialog' | null {
@@ -180,6 +206,14 @@ export class NeuPopoverDirective implements OnDestroy {
       return null;
     }
     return this._isOpen() ? 'true' : 'false';
+  }
+
+  protected _hostAriaControls(): string | null {
+    return this.neuPopoverTrigger() === 'click' && this._isOpen() ? this._popoverId : null;
+  }
+
+  protected _hostAriaDescribedBy(): string | null {
+    return this.neuPopoverTrigger() !== 'click' && this._isOpen() ? this._popoverId : null;
   }
 
   private _toggle(): void {
@@ -194,7 +228,7 @@ export class NeuPopoverDirective implements OnDestroy {
     const isClick = this.neuPopoverTrigger() === 'click';
     const positions: ConnectedPosition[] = [
       ...POSITIONS[pos],
-      ...POSITIONS[pos === 'bottom' ? 'top' : 'bottom'],
+      ...POSITIONS[OPPOSITE_POSITION[pos]],
     ];
     this._overlayRef = this._overlay.create({
       // Solo usamos backdrop en trigger 'click' — hover/focus lo cierran con sus propios listeners.
@@ -204,11 +238,30 @@ export class NeuPopoverDirective implements OnDestroy {
       positionStrategy: this._overlay
         .position()
         .flexibleConnectedTo(this._el)
-        .withPositions(positions),
+        .withPositions(positions)
+        .withPush(true)
+        .withViewportMargin(8),
       scrollStrategy: this._overlay.scrollStrategies.reposition(),
     });
   }
+
+  private _finalizeClose(): void {
+    if (!this._isOpen()) return;
+    this._isOpen.set(false);
+    const overlayRef = this._overlayRef;
+    this._overlayRef = null;
+    this._compRef = null;
+    overlayRef?.dispose();
+    this.popoverClosed.emit();
+  }
 }
+
+const OPPOSITE_POSITION: Record<NeuPopoverPosition, NeuPopoverPosition> = {
+  top: 'bottom',
+  bottom: 'top',
+  left: 'right',
+  right: 'left',
+};
 
 const POSITIONS: Record<NeuPopoverPosition, ConnectedPosition[]> = {
   bottom: [

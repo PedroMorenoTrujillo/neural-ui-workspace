@@ -7,6 +7,7 @@ import {
   OnDestroy,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
@@ -29,7 +30,7 @@ export type NeuTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 @Directive({
   selector: '[neuTooltip]',
   host: {
-    '[attr.aria-describedby]': '_tooltipId',
+    '[attr.aria-describedby]': '_isVisible() ? _tooltipId : null',
     // Sólo añadimos tabindex en elementos que no son nativamente focusables
     '[attr.tabindex]': '_needsTabindex() ? "0" : null',
   },
@@ -53,6 +54,7 @@ export class NeuTooltipDirective implements OnDestroy {
   private _overlayRef: OverlayRef | null = null;
   private _tooltipRef: ComponentRef<NeuTooltipOverlayComponent> | null = null;
   private _hideTimeout: ReturnType<typeof setTimeout> | null = null;
+  protected readonly _isVisible = signal(false);
 
   @HostListener('mouseenter')
   @HostListener('focus')
@@ -69,12 +71,26 @@ export class NeuTooltipDirective implements OnDestroy {
     this._tooltipRef = this._overlayRef!.attach(portal);
     this._tooltipRef!.setInput('text', this.neuTooltip());
     this._tooltipRef!.setInput('tooltipId', this._tooltipId);
+    this._isVisible.set(true);
   }
 
   @HostListener('mouseleave')
   @HostListener('blur')
   hide(): void {
+    if (this._hideTimeout) clearTimeout(this._hideTimeout);
     this._hideTimeout = setTimeout(() => this._detach(), 100);
+  }
+
+  @HostListener('keydown.escape', ['$event'])
+  protected dismiss(event: Event): void {
+    if (!(event instanceof KeyboardEvent) || !this._isVisible()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (this._hideTimeout) {
+      clearTimeout(this._hideTimeout);
+      this._hideTimeout = null;
+    }
+    this._detach();
   }
 
   private _createOverlay(): void {
@@ -127,12 +143,20 @@ export class NeuTooltipDirective implements OnDestroy {
   }
 
   private _detach(): void {
-    this._overlayRef?.detach();
+    const overlayRef = this._overlayRef;
+    this._overlayRef = null;
     this._tooltipRef = null;
+    this._hideTimeout = null;
+    this._isVisible.set(false);
+    overlayRef?.dispose();
   }
 
   ngOnDestroy(): void {
     if (this._hideTimeout) clearTimeout(this._hideTimeout);
+    this._hideTimeout = null;
+    this._isVisible.set(false);
     this._overlayRef?.dispose();
+    this._overlayRef = null;
+    this._tooltipRef = null;
   }
 }

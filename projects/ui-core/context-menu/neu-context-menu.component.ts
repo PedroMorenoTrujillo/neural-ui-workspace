@@ -18,8 +18,8 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
+import { GlobalPositionStrategy, Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { NeuRovingMenuController } from '@neural-ui/core/internal';
 
@@ -80,10 +80,12 @@ export class NeuContextMenuItemDirective {
             [ngTemplateOutlet]="itemTemplate"
             [ngTemplateOutletContext]="{ $implicit: item }"
           />
-        } @else if (item.icon) {
-          <span class="neu-context-menu__icon" aria-hidden="true">{{ item.icon }}</span>
+        } @else {
+          @if (item.icon) {
+            <span class="neu-context-menu__icon" aria-hidden="true">{{ item.icon }}</span>
+          }
+          {{ item.label }}
         }
-        {{ item.label }}
       </button>
     }
   `,
@@ -166,9 +168,10 @@ export class NeuContextMenuOverlayComponent {
   }
 
   private focusActive(): void {
-    this.host
-      .querySelector<HTMLElement>(`[data-neu-context-menu-index="${this.controller.index}"]`)
-      ?.focus({ preventScroll: true });
+    const active = this.host.querySelector<HTMLElement>(
+      `[data-neu-context-menu-index="${this.controller.index}"]`,
+    );
+    (active ?? this.host).focus({ preventScroll: true });
   }
 }
 
@@ -211,10 +214,12 @@ export class NeuContextMenuDirective implements OnDestroy {
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _injector = inject(Injector);
   private readonly _vcr = inject(ViewContainerRef);
+  private readonly _document = inject(DOCUMENT);
   private _overlayRef: OverlayRef | null = null;
   private _compRef: ComponentRef<NeuContextMenuOverlayComponent> | null = null;
   private _origin: HTMLElement | null = null;
   private _onClose: (() => void) | null = null;
+  private _positionEpoch = 0;
 
   @HostListener('contextmenu', ['$event'])
   onContextMenu(event: MouseEvent): void {
@@ -238,11 +243,12 @@ export class NeuContextMenuDirective implements OnDestroy {
     this._close();
     this._origin = origin ?? this._el.nativeElement;
     this._onClose = onClose ?? null;
+    const positionStrategy = this._overlay.position().global().left(`${x}px`).top(`${y}px`);
     this._overlayRef = this._overlay.create({
       hasBackdrop: true,
       backdropClass: 'neu-context-menu-backdrop',
-      positionStrategy: this._overlay.position().global().left(`${x}px`).top(`${y}px`),
-      scrollStrategy: this._overlay.scrollStrategies.close(),
+      positionStrategy,
+      scrollStrategy: this._overlay.scrollStrategies.reposition({ scrollThrottle: 0 }),
     });
 
     const portal = new ComponentPortal(NeuContextMenuOverlayComponent, this._vcr, this._injector);
@@ -257,6 +263,14 @@ export class NeuContextMenuDirective implements OnDestroy {
     this._compRef.instance._requestInitialFocus();
 
     this._overlayRef.backdropClick().subscribe(() => this._close());
+    this._overlayRef.keydownEvents().subscribe((event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      this._close();
+    });
+    const overlayRef = this._overlayRef;
+    this._overlayRef.detachments().subscribe(() => this._finalizeClose(overlayRef));
+    this._constrainToViewport(overlayRef, positionStrategy, x, y);
     this.menuOpened.emit();
   }
 
@@ -265,22 +279,66 @@ export class NeuContextMenuDirective implements OnDestroy {
   }
 
   private _close(): void {
-    const wasOpen = this._overlayRef?.hasAttached() === true;
-    if (wasOpen) {
-      this._overlayRef?.detach();
-      this.menuClosed.emit();
+    const overlayRef = this._overlayRef;
+    if (!overlayRef) return;
+    if (overlayRef.hasAttached()) {
+      overlayRef.detach();
+    } else {
+      this._finalizeClose(overlayRef);
     }
-    this._overlayRef?.dispose();
+  }
+
+  private _finalizeClose(overlayRef: OverlayRef): void {
+    if (this._overlayRef !== overlayRef) return;
+    this._positionEpoch += 1;
     this._overlayRef = null;
     this._compRef = null;
-    if (wasOpen) {
-      const origin = this._origin;
-      const onClose = this._onClose;
-      this._origin = null;
-      this._onClose = null;
-      onClose?.();
-      origin?.focus();
-    }
+    const origin = this._origin;
+    const onClose = this._onClose;
+    this._origin = null;
+    this._onClose = null;
+    overlayRef.dispose();
+    this.menuClosed.emit();
+    onClose?.();
+    if (origin?.isConnected) origin.focus({ preventScroll: true });
+  }
+
+  private _constrainToViewport(
+    overlayRef: OverlayRef,
+    positionStrategy: GlobalPositionStrategy,
+    x: number,
+    y: number,
+  ): void {
+    const epoch = ++this._positionEpoch;
+    const constrain = () => {
+      if (
+        epoch !== this._positionEpoch ||
+        this._overlayRef !== overlayRef ||
+        !overlayRef.hasAttached()
+      ) {
+        return;
+      }
+
+      const viewport = this._document.defaultView;
+      const viewportWidth = viewport?.innerWidth ?? this._document.documentElement.clientWidth;
+      const viewportHeight = viewport?.innerHeight ?? this._document.documentElement.clientHeight;
+      const rect = overlayRef.overlayElement.getBoundingClientRect();
+      const margin = 8;
+      const left = Math.max(margin, Math.min(x, viewportWidth - rect.width - margin));
+      const top = Math.max(margin, Math.min(y, viewportHeight - rect.height - margin));
+
+      positionStrategy.left(`${left}px`).top(`${top}px`);
+      overlayRef.updatePosition();
+    };
+
+    // The portal is attached synchronously, but its projected menu items are not
+    // guaranteed to have their final size until the next rendered frame. Clamp
+    // once immediately and once after layout so pointer and keyboard openings
+    // stay inside the viewport in every browser engine.
+    queueMicrotask(() => {
+      constrain();
+      this._document.defaultView?.requestAnimationFrame(constrain);
+    });
   }
 
   ngOnDestroy(): void {

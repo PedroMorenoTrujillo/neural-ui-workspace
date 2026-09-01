@@ -130,6 +130,30 @@ describe('NeuConfirmDialogComponent', () => {
     expect(f.nativeElement.getAttribute('role')).toBe('alertdialog');
     expect(f.nativeElement.getAttribute('aria-modal')).toBe('true');
   });
+
+  it('should reference existing unique title and message ids', async () => {
+    mkDialogBed({ message: 'Proceed?', title: 'Confirm' } as any);
+    const first = TestBed.createComponent(NeuConfirmDialogComponent);
+    const second = TestBed.createComponent(NeuConfirmDialogComponent);
+    first.detectChanges();
+    second.detectChanges();
+
+    const firstTitle = first.nativeElement.getAttribute('aria-labelledby');
+    const firstMessage = first.nativeElement.getAttribute('aria-describedby');
+    const secondTitle = second.nativeElement.getAttribute('aria-labelledby');
+    expect(firstTitle).not.toBe(secondTitle);
+    expect(first.nativeElement.querySelector(`#${firstTitle}`)).toBeTruthy();
+    expect(first.nativeElement.querySelector(`#${firstMessage}`)).toBeTruthy();
+  });
+
+  it('should use the message as an accessible name when no title is supplied', async () => {
+    mkDialogBed({ message: 'Proceed without a title?' });
+    const f = TestBed.createComponent(NeuConfirmDialogComponent);
+    f.detectChanges();
+
+    expect(f.nativeElement.getAttribute('aria-labelledby')).toBeNull();
+    expect(f.nativeElement.getAttribute('aria-label')).toBe('Proceed without a title?');
+  });
 });
 
 describe('NeuConfirmDialogService', () => {
@@ -158,5 +182,20 @@ describe('NeuConfirmDialogService', () => {
     vi.spyOn(dialog, 'open').mockReturnValue({ closed: subject } as any);
     const result = await svc.confirm({ message: 'Test?' });
     expect(result).toBe(true);
+  });
+
+  it('allows standard Escape and backdrop cancellation through the CDK dialog contract', async () => {
+    TestBed.configureTestingModule({
+      imports: [DialogModule],
+      providers: [provideZonelessChangeDetection(), NeuConfirmDialogService],
+    });
+    const svc = TestBed.inject(NeuConfirmDialogService);
+    const dialog = (svc as any)._dialog;
+    const subject = { subscribe: (cb: (v: boolean | undefined) => void) => cb(undefined) };
+    const open = vi.spyOn(dialog, 'open').mockReturnValue({ closed: subject } as any);
+
+    await svc.confirm({ message: 'Cancel me' });
+
+    expect(open.mock.calls[0]?.[1]).toMatchObject({ disableClose: false });
   });
 });

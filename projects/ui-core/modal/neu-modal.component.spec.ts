@@ -492,6 +492,52 @@ describe('NeuDialogComponent', () => {
 
     expect(() => (f.componentInstance as any).focusInitialElement()).not.toThrow();
   });
+
+  it('locks background scrolling only while a declarative dialog is open', async () => {
+    await TestBed.configureTestingModule({
+      imports: [DialogModule],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    }).compileComponents();
+    const f = TestBed.createComponent(NeuDialogComponent);
+    const enable = vi.spyOn((f.componentInstance as any).scrollStrategy, 'enable');
+    const disable = vi.spyOn((f.componentInstance as any).scrollStrategy, 'disable');
+    f.componentRef.setInput('open', true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(enable).toHaveBeenCalledTimes(1);
+
+    f.componentRef.setInput('open', false);
+    f.detectChanges();
+    await f.whenStable();
+    expect(disable).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves the original focus target across a close-open race', async () => {
+    await TestBed.configureTestingModule({
+      imports: [DialogModule],
+      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    }).compileComponents();
+    const origin = document.createElement('button');
+    document.body.append(origin);
+    origin.focus();
+    const f = TestBed.createComponent(NeuDialogComponent);
+    f.componentRef.setInput('open', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    f.componentRef.setInput('open', false);
+    f.detectChanges();
+    f.componentRef.setInput('open', true);
+    f.detectChanges();
+    await Promise.resolve();
+    expect(document.activeElement).not.toBe(origin);
+
+    f.componentRef.setInput('open', false);
+    f.detectChanges();
+    await Promise.resolve();
+    expect(document.activeElement).toBe(origin);
+    origin.remove();
+  });
 });
 
 // ── NeuDialogService ──────────────────────────────────────────────────────────

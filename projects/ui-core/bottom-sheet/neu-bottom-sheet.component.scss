@@ -5,7 +5,7 @@
 .neu-bottom-sheet__backdrop {
   position: fixed;
   inset: 0;
-  z-index: 900;
+  z-index: calc(var(--neu-z-modal, 200) - 1);
   border: 0;
   background: var(--neu-overlay-bg);
 }
@@ -15,8 +15,9 @@
   inset-inline-end: 0;
   bottom: 0;
   inset-inline-start: 0;
-  z-index: 901;
+  z-index: var(--neu-z-modal, 200);
   max-height: min(80vh, 42rem);
+  max-height: min(80dvh, 42rem);
   border-radius: 1rem 1rem 0 0;
   background: var(--neu-surface, #fff);
   color: var(--neu-text, #111827);
@@ -27,6 +28,8 @@
 .neu-bottom-sheet--full {
   max-height: 100vh;
   height: 100vh;
+  max-height: 100dvh;
+  height: 100dvh;
   border-radius: 0;
 }
 
@@ -57,7 +60,8 @@
 }
 
 .neu-bottom-sheet__body {
-  padding: 1rem;
+  padding: 1rem max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
 }
 
 @media (forced-colors: active) {

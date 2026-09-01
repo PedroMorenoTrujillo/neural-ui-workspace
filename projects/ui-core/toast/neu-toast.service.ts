@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.types';
 
@@ -23,6 +23,10 @@ export class NeuToastService {
   readonly position = signal<NeuToastPosition>('top-right');
 
   private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.clear());
+  }
 
   setPosition(position: NeuToastPosition): void {
     this.position.set(position);

@@ -454,4 +454,29 @@ describe('NeuNotificationCenterComponent', () => {
     svc.push({ message: 'Persistente', duration: 0 });
     expect(svc.notifications().length).toBe(1);
   });
+
+  it('moves focus into the panel and restores it to the bell on Escape', async () => {
+    const f = setup();
+    const bell = f.nativeElement.querySelector('.neu-nc__bell') as HTMLButtonElement;
+    bell.focus();
+    bell.click();
+    f.detectChanges();
+    await f.whenStable();
+    await Promise.resolve();
+
+    const panel = document.querySelector('.neu-nc__panel') as HTMLElement;
+    expect(document.activeElement).toBe(panel);
+    const escape = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    f.componentInstance['_onOverlayKeydown'](escape);
+    f.detectChanges();
+    await Promise.resolve();
+
+    expect(escape.defaultPrevented).toBe(true);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
+    expect(document.activeElement).toBe(bell);
+  });
 });

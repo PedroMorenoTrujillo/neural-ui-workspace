@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   Injectable,
   ViewEncapsulation,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
@@ -55,6 +57,10 @@ export class NeuNotificationService {
   readonly unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
 
   private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.clearAll());
+  }
 
   /** Agrega una notificación / Adds a notification */
   push(opts: Partial<NeuNotificationOptions> & Pick<NeuNotificationOptions, 'message'>): string {
@@ -127,6 +133,7 @@ export class NeuNotificationService {
   template: `
     <!-- Bell button -->
     <button
+      #bell
       cdkOverlayOrigin
       #notificationOrigin="cdkOverlayOrigin"
       type="button"
@@ -155,15 +162,19 @@ export class NeuNotificationService {
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-      (backdropClick)="_toggle()"
-      (detach)="_isOpen() && _toggle()"
+      (attach)="_onOverlayAttach()"
+      (backdropClick)="_close()"
+      (detach)="_onOverlayDetach()"
+      (overlayKeydown)="_onOverlayKeydown($event)"
     >
       <div
+        #panel
         class="neu-nc__panel"
         [id]="_panelId"
         role="dialog"
         aria-modal="false"
         aria-label="Notificaciones"
+        tabindex="-1"
       >
         <div class="neu-nc__panel-header">
           <span class="neu-nc__panel-title">Notificaciones</span>
@@ -223,6 +234,8 @@ export class NeuNotificationCenterComponent {
   private readonly overlay = inject(Overlay);
   private readonly temporal = inject(NeuInitialTemporalState);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly bellRef = viewChild<ElementRef<HTMLButtonElement>>('bell');
+  private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
   private pendingMarkReadTimer: ReturnType<typeof setTimeout> | null = null;
   protected readonly _isOpen = signal(false);
   protected readonly _panelId = inject(NeuIdGenerator).getId('neu-nc-panel-');
@@ -253,17 +266,53 @@ export class NeuNotificationCenterComponent {
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.cancelPendingMarkRead());
+    this.destroyRef.onDestroy(() => {
+      this.cancelPendingMarkRead();
+      this._isOpen.set(false);
+    });
   }
 
   protected _toggle(): void {
-    const opening = !this._isOpen();
-    this._isOpen.set(opening);
-    if (opening) {
-      this.scheduleMarkAllRead();
+    if (this._isOpen()) {
+      this._close();
     } else {
-      this.cancelPendingMarkRead();
+      this._isOpen.set(true);
+      this.scheduleMarkAllRead();
     }
+  }
+
+  protected _close(restoreFocus = true): void {
+    if (!this._isOpen()) return;
+    this._isOpen.set(false);
+    this.cancelPendingMarkRead();
+    if (!restoreFocus) return;
+    queueMicrotask(() => {
+      const bell = this.bellRef()?.nativeElement;
+      if (!this.destroyRef.destroyed && bell?.isConnected) {
+        bell.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  protected _onOverlayAttach(): void {
+    queueMicrotask(() => {
+      const panel = this.panelRef()?.nativeElement;
+      if (this._isOpen() && !this.destroyRef.destroyed && panel?.isConnected) {
+        const firstAction = panel.querySelector<HTMLElement>('button:not([disabled])');
+        (firstAction ?? panel).focus({ preventScroll: true });
+      }
+    });
+  }
+
+  protected _onOverlayDetach(): void {
+    if (this._isOpen()) this._close();
+  }
+
+  protected _onOverlayKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !this._isOpen()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this._close();
   }
 
   private scheduleMarkAllRead(): void {

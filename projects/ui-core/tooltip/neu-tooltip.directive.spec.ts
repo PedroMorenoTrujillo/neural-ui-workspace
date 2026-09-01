@@ -40,9 +40,16 @@ describe('NeuTooltipDirective', () => {
     expect(btn).toBeTruthy();
   });
 
-  it('should set aria-describedby on host element', () => {
+  it('should only set aria-describedby while the described tooltip exists', () => {
     const btn = fixture.nativeElement.querySelector('button');
-    expect(btn.getAttribute('aria-describedby')).toMatch(/^neu-tooltip-/);
+    expect(btn.getAttribute('aria-describedby')).toBeNull();
+
+    btn.dispatchEvent(new Event('mouseenter'));
+    fixture.detectChanges();
+
+    const describedBy = btn.getAttribute('aria-describedby');
+    expect(describedBy).toMatch(/^neu-tooltip-/);
+    expect(document.getElementById(describedBy!)).toBeTruthy();
   });
 
   it('should not add tabindex to focusable elements', () => {
@@ -261,5 +268,24 @@ describe('NeuTooltipDirective', () => {
     // Timer advances but detach is never called (no throw expected)
     vi.advanceTimersByTime(300);
     vi.useRealTimers();
+  });
+
+  it('dismisses immediately with Escape and removes the ARIA reference', () => {
+    const btn = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    btn.dispatchEvent(new Event('mouseenter'));
+    fixture.detectChanges();
+    expect(btn.getAttribute('aria-describedby')).toMatch(/^neu-tooltip-/);
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    btn.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(btn.getAttribute('aria-describedby')).toBeNull();
+    expect(document.querySelector('.neu-tooltip')).toBeNull();
   });
 });

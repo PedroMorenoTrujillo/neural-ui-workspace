@@ -229,6 +229,35 @@ describe('NeuContextMenuDirective', () => {
     expect(closed).toHaveLength(1);
     expect(dir._overlayRef).toBeNull();
   });
+
+  it('constrains a pointer-opened menu to the visible viewport', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuContextMenuDirective) as any;
+    vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(800);
+    vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(600);
+
+    dir.openAt(9999, 9999);
+    const pane = dir._overlayRef.overlayElement as HTMLElement;
+    vi.spyOn(pane, 'getBoundingClientRect').mockReturnValue({
+      width: 200,
+      height: 100,
+      top: 0,
+      right: 200,
+      bottom: 100,
+      left: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    await Promise.resolve();
+
+    const strategy = dir._overlayRef.getConfig().positionStrategy as any;
+    expect(strategy._xOffset).toBe('592px');
+    expect(strategy._topOffset).toBe('492px');
+    dir.close();
+  });
 });
 
 describe('NeuContextMenuOverlayComponent', () => {
@@ -319,6 +348,9 @@ describe('NeuContextMenuOverlayComponent', () => {
 
     expect(f.nativeElement.querySelector('.custom-context-item')?.textContent).toBe('copy');
     expect(f.nativeElement.querySelector('.neu-context-menu__icon')).toBeNull();
+    expect(
+      (f.nativeElement.querySelector('.neu-context-menu__item') as HTMLElement).textContent?.trim(),
+    ).toBe('copy');
   });
 
   it('activates the focused enabled item from the real keyboard listener', async () => {
@@ -460,5 +492,15 @@ describe('NeuContextMenuOverlayComponent', () => {
       new KeyboardEvent('keydown', { key: 'c', bubbles: true, cancelable: true }),
     );
     expect(document.activeElement).toBe(buttons[0]);
+  });
+
+  it('focuses the menu surface when every item is disabled', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set([{ key: 'disabled', label: 'Disabled', disabled: true }]);
+    f.componentInstance._requestInitialFocus();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(document.activeElement).toBe(f.nativeElement);
   });
 });

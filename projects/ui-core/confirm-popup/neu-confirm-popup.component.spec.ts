@@ -47,4 +47,51 @@ describe('NeuConfirmPopupComponent', () => {
     service.close(true);
     expect(service.state()).toBeNull();
   });
+
+  it('resolves a superseded service confirmation instead of leaking its promise', async () => {
+    const first = service.confirm({ message: 'First?' });
+    const second = service.confirm({ message: 'Second?' });
+
+    await expect(first).resolves.toBe(false);
+    service.close(true);
+    await expect(second).resolves.toBe(true);
+  });
+
+  it('provides unique accessible naming and rejects with Escape while restoring focus', async () => {
+    const origin = document.createElement('button');
+    document.body.append(origin);
+    origin.focus();
+    const promise = service.confirm({ title: 'Delete', message: 'Delete item?' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await Promise.resolve();
+
+    const dialog = fixture.nativeElement.querySelector('[role="alertdialog"]') as HTMLElement;
+    const labelledBy = dialog.getAttribute('aria-labelledby');
+    const describedBy = dialog.getAttribute('aria-describedby');
+    expect(labelledBy).toMatch(/^neu-confirm-popup-title-/);
+    expect(describedBy).toMatch(/^neu-confirm-popup-message-/);
+    expect(fixture.nativeElement.querySelector('.neu-confirm-popup__reject')).toBe(
+      document.activeElement,
+    );
+
+    dialog.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await expect(promise).resolves.toBe(false);
+    expect(service.state()).toBeNull();
+    expect(document.activeElement).toBe(origin);
+    origin.remove();
+  });
+
+  it('resolves a pending service confirmation when its rendering host is destroyed', async () => {
+    const promise = service.confirm({ message: 'Still there?' });
+    fixture.detectChanges();
+
+    fixture.destroy();
+
+    await expect(promise).resolves.toBe(false);
+    expect(service.state()).toBeNull();
+  });
 });

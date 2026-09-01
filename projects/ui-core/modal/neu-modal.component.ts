@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewEncapsulation,
   effect,
@@ -10,6 +11,7 @@ import {
   output,
   viewChild,
 } from '@angular/core';
+import { Overlay } from '@angular/cdk/overlay';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
@@ -120,20 +122,43 @@ export class NeuDialogComponent {
   private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
   /* v8 ignore stop */
   private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly scrollStrategy = inject(Overlay).scrollStrategies.block();
   private previousActiveElement: HTMLElement | null = null;
+  private focusEpoch = 0;
 
   /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
   protected readonly _uid = inject(NeuIdGenerator).getId('dialog-');
 
   constructor() {
+    effect((onCleanup) => {
+      if (!this.open()) return;
+      this.scrollStrategy.enable();
+      onCleanup(() => this.scrollStrategy.disable());
+    });
+
     effect(() => {
+      const epoch = ++this.focusEpoch;
       if (!this.open()) {
-        this.restorePreviousFocus();
+        this.restorePreviousFocus(epoch);
         return;
       }
 
-      this.previousActiveElement = this.document.activeElement as HTMLElement | null;
-      queueMicrotask(() => this.focusInitialElement());
+      this.previousActiveElement ??= this.document.activeElement as HTMLElement | null;
+      queueMicrotask(() => {
+        if (epoch === this.focusEpoch && this.open() && !this.destroyRef.destroyed) {
+          this.focusInitialElement();
+        }
+      });
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.focusEpoch += 1;
+      const target = this.previousActiveElement;
+      this.previousActiveElement = null;
+      if (this.restoreFocus() && this.isValidFocusTarget(target)) {
+        target.focus({ preventScroll: true });
+      }
     });
   }
 
@@ -159,15 +184,27 @@ export class NeuDialogComponent {
     }
   }
 
-  private restorePreviousFocus(): void {
-    if (!this.restoreFocus() || !this.previousActiveElement?.focus) {
+  private restorePreviousFocus(epoch: number): void {
+    const target = this.previousActiveElement;
+    if (!this.restoreFocus() || !target?.focus) {
       this.previousActiveElement = null;
       return;
     }
 
     queueMicrotask(() => {
-      this.previousActiveElement?.focus();
-      this.previousActiveElement = null;
+      if (
+        epoch === this.focusEpoch &&
+        !this.open() &&
+        !this.destroyRef.destroyed &&
+        this.isValidFocusTarget(target)
+      ) {
+        target.focus({ preventScroll: true });
+        if (this.previousActiveElement === target) this.previousActiveElement = null;
+      }
     });
+  }
+
+  private isValidFocusTarget(target: HTMLElement | null): target is HTMLElement {
+    return !!target?.isConnected && target.ownerDocument === this.document;
   }
 }

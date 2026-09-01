@@ -424,13 +424,41 @@ describe('NeuPopoverOverlayComponent', () => {
       offsetX: -6,
     });
     expect(positions[1]).toMatchObject({
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 6,
+      originX: 'end',
+      originY: 'center',
+      overlayX: 'start',
+      overlayY: 'center',
+      offsetX: 6,
     });
 
     dir.close();
+  });
+
+  it('links click popovers to their dialog and closes exactly once with Escape', async () => {
+    const f = TestBed.createComponent(NeuPopoverHost);
+    f.detectChanges();
+    await f.whenStable();
+    const button = f.nativeElement.querySelector('button') as HTMLButtonElement;
+    const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
+    const closed: void[] = [];
+    dir.popoverClosed.subscribe(() => closed.push(undefined as void));
+
+    button.click();
+    f.detectChanges();
+    await f.whenStable();
+
+    const controlledId = button.getAttribute('aria-controls');
+    expect(controlledId).toMatch(/^neu-popover-/);
+    expect(document.getElementById(controlledId!)?.getAttribute('role')).toBe('dialog');
+
+    button.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    f.detectChanges();
+
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(button.hasAttribute('aria-controls')).toBe(false);
+    expect(document.getElementById(controlledId!)).toBeNull();
+    expect(closed).toHaveLength(1);
   });
 });

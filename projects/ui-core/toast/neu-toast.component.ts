@@ -32,8 +32,6 @@ const TOAST_ICONS: Record<NeuToastType, string> = {
   imports: [NeuIconComponent],
   host: {
     class: 'neu-toast-container',
-    'aria-live': 'polite',
-    'aria-atomic': 'false',
     '[class.neu-toast-container--top-right]': 'toastService.position() === "top-right"',
     '[class.neu-toast-container--top-left]': 'toastService.position() === "top-left"',
     '[class.neu-toast-container--bottom-right]': 'toastService.position() === "bottom-right"',

@@ -89,6 +89,23 @@ describe('NeuBottomSheetComponent', () => {
     fixture.componentRef.setInput('title', '');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.neu-bottom-sheet__header')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')?.getAttribute('aria-label')).toBe(
+      'Bottom sheet',
+    );
+  });
+
+  it('locks document scrolling only for the lifetime of an open sheet', async () => {
+    const enable = vi.spyOn((fixture.componentInstance as any).scrollStrategy, 'enable');
+    const disable = vi.spyOn((fixture.componentInstance as any).scrollStrategy, 'disable');
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(enable).toHaveBeenCalledTimes(1);
+
+    fixture.componentRef.setInput('open', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(disable).toHaveBeenCalledTimes(1);
   });
 
   it('moves focus into the modal surface and restores the opening control on destroy', async () => {
