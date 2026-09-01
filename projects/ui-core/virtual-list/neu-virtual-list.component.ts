@@ -76,6 +76,7 @@ export class NeuVirtualListRowComponent {
           [itemSize]="itemSize()"
           [label]="_defaultItemLabel(item)"
           [template]="itemTemplate"
+          (click)="itemClick.emit({ item, index })"
         />
       </ng-container>
     </cdk-virtual-scroll-viewport>

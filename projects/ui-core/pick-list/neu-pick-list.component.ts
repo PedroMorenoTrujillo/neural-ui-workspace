@@ -29,7 +29,7 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> { constructor(readon
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-pick-list' },
   template: `
-    <section class="neu-pick-list__column">
+    <section class="neu-pick-list__column" [attr.aria-label]="sourceHeader()">
       <h3>{{ sourceHeader() }}</h3>
       @for (item of source(); track optionValueOf(item)) {
         <button type="button" [class.is-selected]="isSourceSelected(item)" [disabled]="isOptionDisabled(item)" [attr.aria-pressed]="isSourceSelected(item)" (click)="toggleSource(optionValueOf(item))">
@@ -41,7 +41,7 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> { constructor(readon
       <button type="button" aria-label="Move selected items to target" (click)="moveToTarget()" [disabled]="!hasMovableSourceSelection()">›</button>
       <button type="button" aria-label="Move selected items to source" (click)="moveToSource()" [disabled]="!hasMovableTargetSelection()">‹</button>
     </div>
-    <section class="neu-pick-list__column">
+    <section class="neu-pick-list__column" [attr.aria-label]="targetHeader()">
       <h3>{{ targetHeader() }}</h3>
       @for (item of target(); track optionValueOf(item)) {
         <button type="button" [class.is-selected]="isTargetSelected(item)" [disabled]="isOptionDisabled(item)" [attr.aria-pressed]="isTargetSelected(item)" (click)="toggleTarget(optionValueOf(item))">
@@ -164,12 +164,12 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-order-list' },
   template: `
-    <div class="neu-order-list__items">
+    <div class="neu-order-list__items" role="list" aria-label="Ordered items">
       @for (item of items(); track optionValueOf(item); let i = $index) {
-        <div class="neu-order-list__item">
+        <div class="neu-order-list__item" role="listitem">
           @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, index: i }" /> } @else { <span>{{ optionLabelOf(item) }}</span> }
-          <button type="button" [disabled]="!canMove(i, -1)" (click)="move(i, -1)">↑</button>
-          <button type="button" [disabled]="!canMove(i, 1)" (click)="move(i, 1)">↓</button>
+          <button type="button" [attr.aria-label]="'Move ' + optionLabelOf(item) + ' up'" [disabled]="!canMove(i, -1)" (click)="move(i, -1)">↑</button>
+          <button type="button" [attr.aria-label]="'Move ' + optionLabelOf(item) + ' down'" [disabled]="!canMove(i, 1)" (click)="move(i, 1)">↓</button>
         </div>
       }
     </div>

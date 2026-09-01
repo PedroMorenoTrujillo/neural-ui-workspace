@@ -6,8 +6,12 @@
 .neu-pagination {
   display: inline-flex;
   align-items: center;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 3px;
   gap: 4px;
   font-family: var(--neu-font-sans);
+  scrollbar-width: thin;
 }
 
 .neu-pagination__btn {

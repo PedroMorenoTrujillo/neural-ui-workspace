@@ -6,6 +6,11 @@
 .neu-virtual-list__viewport {
   width: 100%;
   overflow-y: auto;
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
 }
 
 .neu-virtual-list__item-default {

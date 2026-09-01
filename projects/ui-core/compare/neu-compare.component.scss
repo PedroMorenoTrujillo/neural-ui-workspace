@@ -10,4 +10,5 @@
 .neu-compare--disabled { opacity: .6; }
 .neu-compare--disabled .neu-compare__handle, .neu-compare--disabled .neu-compare__input { cursor: not-allowed; }
 .neu-compare:focus-within .neu-compare__handle { box-shadow: var(--neu-focus-ring, 0 0 0 3px rgb(0 122 255 / .15)); }
+@media (pointer: coarse) { .neu-compare__handle { width: 2.75rem; height: 2.75rem; } }
 @media (forced-colors: active) { .neu-compare:focus-within .neu-compare__handle { outline: 2px solid Highlight; outline-offset: 2px; } }

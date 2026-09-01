@@ -195,17 +195,6 @@ describe('NeuVirtualListComponent', () => {
     expect(checkViewportSize).toHaveBeenCalledTimes(1);
   });
 
-  it('itemClick output emits when listening to events', () => {
-    const f = setup([1, 2, 3]);
-    const clicks: any[] = [];
-    f.componentInstance.itemClick.subscribe((v: any) => clicks.push(v));
-    // Manually emit since the component doesn't bind click in its template
-    // We test that the output is accessible and emit-able
-    (f.componentInstance as any).itemClick.emit({ item: 1, index: 0 });
-    expect(clicks.length).toBe(1);
-    expect(clicks[0].item).toBe(1);
-  });
-
   it('trackBy input is used in _trackBy', () => {
     const f = setup([10, 20, 30]);
     f.componentRef.setInput('trackBy', (i: number, item: number) => item);
@@ -334,5 +323,29 @@ describe('NeuVirtualListComponent', () => {
     expect(rows.length).toBe(2);
     expect(rows[0].textContent).toContain('0-Alpha');
     expect(rows[1].textContent).toContain('1-Beta');
+  });
+
+  it('emits the clicked item and index from a rendered virtual row', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    })
+      .overrideComponent(NeuVirtualListComponent, {
+        remove: { imports: [ScrollingModule] },
+        add: { imports: [FakeVirtualScrollViewportComponent, FakeCdkVirtualForDirective] },
+      })
+      .compileComponents();
+
+    const f = TestBed.createComponent(NeuVirtualListComponent<string>);
+    f.componentRef.setInput('items', ['Alpha', 'Beta']);
+    const clicks: { item: string; index: number }[] = [];
+    f.componentInstance.itemClick.subscribe((event) => clicks.push(event));
+    f.detectChanges();
+    await f.whenStable();
+
+    const rows = f.nativeElement.querySelectorAll('neu-virtual-list-row') as NodeListOf<HTMLElement>;
+    rows[1].click();
+
+    expect(clicks).toEqual([{ item: 'Beta', index: 1 }]);
   });
 });

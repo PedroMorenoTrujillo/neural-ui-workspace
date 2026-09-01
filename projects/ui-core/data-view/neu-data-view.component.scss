@@ -22,6 +22,11 @@
   background: var(--neu-surface, #fff);
   color: inherit;
   padding: 0 0.75rem;
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary, #2563eb);
+    outline-offset: 2px;
+  }
 }
 
 .neu-data-view__sort {
@@ -108,4 +113,17 @@ html[data-theme='dark'] {
   height: 1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+}
+
+@media (max-width: 480px) {
+  .neu-data-view__search,
+  .neu-data-view__search input,
+  .neu-data-view__sort {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .neu-data-view__pagination {
+    justify-content: space-between;
+  }
 }

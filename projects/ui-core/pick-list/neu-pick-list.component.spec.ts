@@ -234,6 +234,9 @@ describe('NeuOrderListComponent', () => {
     const buttons = fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
     expect(buttons[0].disabled).toBe(true);
     expect(buttons[5].disabled).toBe(true);
+    expect(buttons[0].getAttribute('aria-label')).toBe('Move Alpha up');
+    expect(buttons[1].getAttribute('aria-label')).toBe('Move Alpha down');
+    expect(fixture.nativeElement.querySelector('[role="list"]')).toBeTruthy();
 
     buttons[1].click();
     expect(changed).toHaveBeenLastCalledWith([items[1], items[0], items[2]]);

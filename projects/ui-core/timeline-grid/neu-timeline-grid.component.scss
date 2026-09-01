@@ -135,6 +135,12 @@ neu-timeline-grid {
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
+.neu-timeline-grid__slot-button:focus-visible,
+.neu-timeline-grid__item:focus-visible {
+  outline: 2px solid var(--neu-primary);
+  outline-offset: -2px;
+}
+
 .neu-timeline-grid__slot--selected {
   border-radius: var(--neu-radius-md);
   background: color-mix(in srgb, var(--neu-primary) 10%, var(--neu-surface-2));
@@ -166,8 +172,9 @@ neu-timeline-grid {
 }
 
 .neu-timeline-grid__item--selected {
-  outline: 2px solid color-mix(in srgb, var(--neu-primary) 48%, transparent);
-  outline-offset: 1px;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--neu-primary) 48%, transparent),
+    var(--neu-shadow-sm);
 }
 
 .neu-timeline-grid__item--default {
