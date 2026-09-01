@@ -40,9 +40,21 @@
   touch-action: manipulation;
   opacity: 0;
   z-index: var(--neu-z-overlay, 1000);
+  transition: opacity 150ms ease;
+}
+
+.cdk-overlay-backdrop-showing {
+  opacity: 1;
+}
+
+.cdk-overlay-dark-backdrop {
+  background: var(--neu-overlay-bg, rgb(15 23 42 / 45%));
 }
 
 .cdk-overlay-transparent-backdrop {
+  transition:
+    visibility 1ms linear,
+    opacity 1ms linear;
   visibility: hidden;
   opacity: 1;
 }
@@ -51,6 +63,10 @@
 .cdk-high-contrast-active .cdk-overlay-transparent-backdrop {
   visibility: visible;
   opacity: 0;
+}
+
+.cdk-overlay-backdrop-noop-animation {
+  transition: none;
 }
 
 .cdk-overlay-connected-position-bounding-box {
@@ -66,4 +82,45 @@
   position: fixed;
   inline-size: 100%;
   overflow-y: scroll;
+}
+
+// Angular CDK can promote the overlay host to the browser top layer. Keep the
+// host visually neutral while Neural components own the actual surfaces.
+.cdk-overlay-popover {
+  position: fixed;
+  inset: auto;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  outline: 0;
+  pointer-events: none;
+  text-decoration: none;
+  white-space: normal;
+
+  &::backdrop {
+    display: none;
+  }
+
+  .cdk-overlay-backdrop {
+    position: fixed;
+    z-index: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cdk-overlay-backdrop {
+    transition-duration: 0.01ms;
+  }
+}
+
+@media (forced-colors: active) {
+  .cdk-overlay-backdrop-showing {
+    opacity: 0.6;
+  }
 }

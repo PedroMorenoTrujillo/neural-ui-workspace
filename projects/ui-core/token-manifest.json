@@ -3115,6 +3115,7 @@
         "projects/ui-core/command-palette/neu-command-palette.component.scss",
         "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
         "projects/ui-core/modal/neu-modal.component.scss",
+        "projects/ui-core/styles/_cdk-overlay.scss",
         "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,
@@ -3554,7 +3555,8 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss"
+        "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/tabs/neu-tabs.component.scss"
       ],
       "public": true,
       "documented": true,
@@ -6431,7 +6433,7 @@
       "category": "foundation",
       "owner": "global",
       "description": "Foundation token for z overlay.",
-      "default": "99",
+      "default": "400",
       "fallback": [],
       "declaredIn": [
         "projects/ui-core/styles/_tokens.scss"

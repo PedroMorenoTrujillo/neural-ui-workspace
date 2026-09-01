@@ -86,6 +86,13 @@
   line-height: 1;
 }
 
+:where([data-theme='dark'], .dark) {
+  .neu-tabs__tab--active,
+  .neu-tabs__tab-badge {
+    color: var(--neu-primary-light, var(--neu-primary));
+  }
+}
+
 // ---- Indicador deslizante / Sliding indicator (animated underline) ----
 .neu-tabs__indicator {
   position: absolute;

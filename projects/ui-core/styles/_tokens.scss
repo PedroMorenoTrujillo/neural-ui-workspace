@@ -165,7 +165,9 @@
   --neu-z-base: 1;
   --neu-z-dropdown: 50;
   --neu-z-sticky: 80;
-  --neu-z-overlay: 99;
+  // Shared CDK container. It must sit above Neural modal/toast layers so
+  // connected overlays opened from inside dialogs are never trapped below them.
+  --neu-z-overlay: 400;
   --neu-z-sidebar: 100;
   --neu-z-modal: 200;
   --neu-z-toast: 300;

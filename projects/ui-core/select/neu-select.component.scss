@@ -167,12 +167,12 @@ $select-height: 48px;
   font: inherit;
 
   &::placeholder {
-    color: color-mix(in srgb, var(--neu-text) 62%, var(--neu-surface) 38%);
+    color: var(--neu-text-muted);
   }
 }
 
 .neu-select__placeholder {
-  color: color-mix(in srgb, var(--neu-text) 62%, var(--neu-surface) 38%);
+  color: var(--neu-text-muted);
   // En modo floating label, el placeholder se oculta hasta que el select está abierto
   .neu-select:not(.neu-select--no-float):not(.neu-select--open) & {
     visibility: hidden;
