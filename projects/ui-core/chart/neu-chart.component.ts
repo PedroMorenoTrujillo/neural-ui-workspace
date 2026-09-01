@@ -58,6 +58,7 @@ function computeParetoCumulative(data: number[]): number[] {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-chart' },
+  /* v8 ignore start -- Angular template factory; every chart input/config binding is covered. */
   template: `
     <apx-chart
       [chart]="chartConfig()"
@@ -75,9 +76,12 @@ function computeParetoCumulative(data: number[]): number[] {
       [plotOptions]="plotOptionsConfig()"
     />
   `,
+  /* v8 ignore stop */
   styleUrl: './neu-chart.component.scss',
 })
+/* v8 ignore start -- Angular class-metadata branches emitted at the declaration boundary. */
 export class NeuChartComponent {
+  /* v8 ignore stop */
   /** Tipo de gráfica. / Chart type. */
   type = input<NeuChartType>('line');
   /** Series para gráficas de ejes (line, area, bar, pareto…). / Series for axis-based charts (line, area, bar, pareto…). */

@@ -1,7 +1,27 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { vi } from 'vitest';
-import { NeuOrderListComponent, NeuPickListComponent, NeuPickListItemDirective, NeuTransferItem } from './neu-pick-list.component';
+import {
+  NeuOrderListComponent,
+  NeuOrderListItemDirective,
+  NeuPickListComponent,
+  NeuPickListItemDirective,
+  NeuTransferItem,
+} from './neu-pick-list.component';
+
+@Component({
+  imports: [NeuOrderListComponent, NeuOrderListItemDirective],
+  template: `
+    <neu-order-list [items]="items">
+      <ng-template neuOrderListItem let-item let-index="index">
+        <span class="order-template">{{ index }} · {{ item.label }}</span>
+      </ng-template>
+    </neu-order-list>
+  `,
+})
+class OrderListTemplateHostComponent {
+  readonly items: NeuTransferItem[] = [{ value: 'a', label: 'Alpha' }];
+}
 
 describe('NeuPickListComponent', () => {
   let fixture: ComponentFixture<NeuPickListComponent>;
@@ -191,6 +211,14 @@ describe('NeuPickListComponent', () => {
 });
 
 describe('NeuOrderListComponent', () => {
+  it('passes each item and index to the projected order template', async () => {
+    await TestBed.configureTestingModule({ imports: [OrderListTemplateHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(OrderListTemplateHostComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.order-template')?.textContent).toContain('0 · Alpha');
+  });
+
   it('renders boundary disabled actions and emits reordered copies from template actions', async () => {
     await TestBed.configureTestingModule({ imports: [NeuOrderListComponent] }).compileComponents();
     const fixture = TestBed.createComponent(NeuOrderListComponent);

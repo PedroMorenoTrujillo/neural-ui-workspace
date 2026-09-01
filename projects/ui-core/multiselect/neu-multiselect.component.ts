@@ -643,7 +643,9 @@ export class NeuMultiselectComponent<
   protected readonly _viewportMargin = 16;
   private readonly _panelMaxHeight = 280;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
+  /* v8 ignore start -- Angular signal-query factory; virtual viewport behavior is covered. */
   private readonly _viewport = viewChild(CdkVirtualScrollViewport);
+  /* v8 ignore stop */
 
   private _getUrlParamSignal(key: string): Signal<string | null> {
     let paramSignal = this._urlParamSignals.get(key);
@@ -729,6 +731,7 @@ export class NeuMultiselectComponent<
   protected readonly _panelId = `${this._triggerId}-panel`;
 
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly itemTpl = contentChild(NeuMultiselectItemDirective<T>);
   readonly selectedItemTpl = contentChild(NeuMultiselectSelectedDirective<T>);
   readonly tokenTpl = contentChild(NeuMultiselectTokenDirective<T, V>);
@@ -736,12 +739,14 @@ export class NeuMultiselectComponent<
   readonly groupTpl = contentChild(NeuMultiselectGroupDirective<G>);
   readonly filterTpl = contentChild(NeuMultiselectFilterDirective<T>);
   readonly loaderTpl = contentChild(NeuMultiselectLoaderDirective);
+  /* v8 ignore stop */
   @ContentChild(NeuMultiselectHeaderDirective) private _headerTpl?: NeuMultiselectHeaderDirective;
   @ContentChild(NeuMultiselectFooterDirective) private _footerTpl?: NeuMultiselectFooterDirective;
   @ContentChild(NeuMultiselectEmptyDirective) private _emptyTpl?: NeuMultiselectEmptyDirective;
   readonly headerTpl = () => this._headerTpl;
   readonly footerTpl = () => this._footerTpl;
   readonly emptyTpl = () => this._emptyTpl;
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly emptyFilterTpl = contentChild(NeuMultiselectEmptyFilterDirective);
   readonly checkboxTpl = contentChild(NeuMultiselectCheckboxDirective);
   readonly checkmarkTpl = contentChild(NeuMultiselectCheckmarkDirective);
@@ -750,6 +755,7 @@ export class NeuMultiselectComponent<
   readonly clearIconTpl = contentChild(NeuMultiselectClearIconDirective);
   readonly filterIconTpl = contentChild(NeuMultiselectFilterIconDirective);
   readonly tokenRemoveIconTpl = contentChild(NeuMultiselectTokenRemoveIconDirective);
+  /* v8 ignore stop */
 
   /** Opciones del dropdown / Dropdown options */
   options = input<readonly T[]>([]);

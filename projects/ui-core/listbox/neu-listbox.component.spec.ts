@@ -1062,4 +1062,51 @@ describe('NeuListboxComponent', () => {
     numeric['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     expect(numeric.focused()).toBe(false);
   });
+
+  it('covers range, meta, hover, typeahead and native scrolling edge branches', () => {
+    const component = fixture.componentInstance as any;
+    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('metaKeySelection', true);
+    fixture.detectChanges();
+
+    component.focused.set(false);
+    component.onOptionMouseEnter(1);
+    fixture.componentRef.setInput('focusOnHover', false);
+    component.focused.set(true);
+    component.onOptionMouseEnter(1);
+
+    fixture.componentRef.setInput('identityConfig', {
+      compareWith: (left: string, right: string) => left === right,
+    });
+    fixture.detectChanges();
+    component.writeValue(['a']);
+    expect(component.isSelected('a')).toBe(true);
+    expect(component.isSelected('missing')).toBe(false);
+
+    component.activeIndex.set(0);
+    component.selectOption(
+      new MouseEvent('click', { shiftKey: true }),
+      component.visibleRows()[1],
+      1,
+    );
+    expect(component.values()).toEqual(['a', 'b']);
+    component.onKeyDown(
+      new KeyboardEvent('keydown', { key: 'Home', shiftKey: true, ctrlKey: true }),
+    );
+    component.onKeyDown(
+      new KeyboardEvent('keydown', { key: 'End', shiftKey: true, ctrlKey: true }),
+    );
+    component.onKeyDown(new KeyboardEvent('keydown', { key: 'q' }));
+    component.selectRange(new Event('range'), 2);
+
+    fixture.componentRef.setInput('focusOnHover', true);
+    fixture.detectChanges();
+    component.activeIndex.set(0);
+    const row = component.visibleRows()[0];
+    const element = document.getElementById(component.rowId(row));
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(element, 'scrollIntoView', { configurable: true, value: scrollIntoView });
+    component.scrollActiveIntoView();
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+  });
 });

@@ -3489,6 +3489,7 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/autocomplete/neu-autocomplete.component.scss",
         "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",

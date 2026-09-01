@@ -8255,6 +8255,9 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     ).toBe(new Date('2026-08-20T12:30').toISOString());
     rangeFixture.destroy();
     created._syncing = true;
+    created._singleChanged('ignored');
+    created._rangeChanged();
+    created._instantRangeChanged();
     created._schedule('ignored');
     created._syncing = false;
     expect(setColumnFilter).not.toHaveBeenCalled();
@@ -8280,6 +8283,99 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       .injector.get(NeuTableAdvancedFilterFeatureComponent) as any;
     booleanFeature._addRule();
     expect(booleanFeature._filterDraftRules()).toHaveLength(0);
+  });
+
+  it('keeps deferred option adapters total for typed, legacy and absent configurations', () => {
+    const fixture = TestBed.createComponent(NeuTableAdvancedFilterFeatureComponent);
+    let advancedText: any = E3_ADVANCED_FILTER_TEXTS;
+    const host = {
+      _openFilterKey: () => null,
+      _appliedFilters: () => ({}),
+      _registerOptionalAdvancedFilter: vi.fn(),
+      _advancedFilterText: () => advancedText,
+      _filterOverlayCustomTemplate: () => null,
+      _isFilterOverlayActive: () => false,
+    } as any;
+    const feature = fixture.componentInstance as any;
+    const setColumn = (column: NeuTableColumn<AdvancedFilterRow>) => {
+      fixture.componentRef.setInput('host', host);
+      fixture.componentRef.setInput('column', column);
+    };
+
+    const optionLabel = (option: unknown) => String(option);
+    const optionValue = (option: unknown) => option;
+    const optionDisabled = () => false;
+    setColumn({
+      key: 'status',
+      header: 'Status',
+      filterConfig: {
+        kind: 'select',
+        options: ['active'],
+        optionLabel,
+        optionValue,
+        optionDisabled,
+        searchable: true,
+        virtualScroll: true,
+        virtualScrollVisibleItems: 3,
+      },
+    });
+    expect(feature._options()).toEqual(['active']);
+    expect(feature._optionLabel()).toBe(optionLabel);
+    expect(feature._optionValue()).toBe(optionValue);
+    expect(feature._optionDisabled()).toBe(optionDisabled);
+    expect(feature._searchable()).toBe(true);
+    expect(feature._virtualScroll()).toBe(true);
+    expect(feature._virtualScrollVisibleItems()).toBe(3);
+
+    setColumn({ key: 'status', header: 'Status', filterConfig: { kind: 'multiSelect' } });
+    expect(feature._options()).toEqual([]);
+    expect(feature._optionLabel()).toBeNull();
+    expect(feature._optionValue()).toBeNull();
+    expect(feature._optionDisabled()).toBeNull();
+    expect(feature._searchable()).toBe(false);
+    expect(feature._virtualScroll()).toBe(false);
+    expect(feature._virtualScrollVisibleItems()).toBe(8);
+
+    setColumn({
+      key: 'status',
+      header: 'Legacy status',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: ['active', 'pending'],
+    });
+    expect(feature._options()).toEqual([
+      { label: 'All', value: '' },
+      { label: 'active', value: 'active' },
+      { label: 'pending', value: 'pending' },
+    ]);
+    expect(feature._optionLabel()).toBeNull();
+    expect(feature._optionValue()).toBeNull();
+    expect(feature._optionDisabled()).toBeNull();
+
+    setColumn({
+      key: 'status',
+      header: 'Legacy status without options',
+      filterable: true,
+      filterType: 'select',
+    });
+    expect(feature._options()).toEqual([{ label: 'All', value: '' }]);
+
+    setColumn({ key: 'name', header: 'Plain' });
+    expect(feature._options()).toEqual([]);
+    expect(feature._virtualScrollVisibleItems()).toBe(8);
+    advancedText = { ...E3_ADVANCED_FILTER_TEXTS, contains: undefined };
+    fixture.componentRef.setInput('host', { ...host });
+    const modes = feature._filterOverlayModeOptions();
+    expect(modes[0].label).toBe('contains');
+    expect(modes.map((option: NeuSelectOption) => option.value)).toEqual([
+      'contains',
+      'startsWith',
+      'endsWith',
+      'equals',
+      'notEquals',
+      'notContains',
+    ]);
+    fixture.destroy();
   });
 
   it('maps eligibility, precision, and human match-mode labels without exposing deferred kinds', async () => {
@@ -9191,6 +9287,67 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(events.map((event) => event.totalRecords)).toEqual([0, 20]);
   });
 
+  it('routes every paginator, radio, column pointer and row reorder template listener', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', MANY_ROWS);
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
+    fixture.componentRef.setInput('pageSize', 5);
+    fixture.componentRef.setInput('pageSizeOptions', [5, 10]);
+    fixture.componentRef.setInput('selectable', 'single');
+    fixture.componentRef.setInput('reorderableRows', true);
+    fixture.componentRef.setInput('paginatorOptions', {
+      showFirstLastPageButtons: true,
+      showPageLinks: true,
+      showJumpToPageInput: true,
+      showJumpToPageDropdown: true,
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const host = fixture.nativeElement as HTMLElement;
+
+    const pageSize = host.querySelector('.neu-table__page-size-select') as HTMLSelectElement;
+    pageSize.value = '10';
+    pageSize.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.effectivePageSize()).toBe(10);
+
+    fixture.componentInstance.goToPage(2);
+    fixture.detectChanges();
+    (host.querySelector('[aria-label="Previous page"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    (host.querySelector('[aria-label="Page 2"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const jumpInput = host.querySelector('.neu-table__jump-input') as HTMLInputElement;
+    jumpInput.value = '1';
+    jumpInput.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(1);
+    const jumpSelect = host.querySelector('.neu-table__jump-select') as HTMLSelectElement;
+    jumpSelect.value = '2';
+    jumpSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+
+    (host.querySelector('.neu-table__radio') as HTMLInputElement).dispatchEvent(
+      new Event('change', { bubbles: true }),
+    );
+    (host.querySelector('th[data-neu-table-column-key]') as HTMLElement).dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, clientX: 0 }),
+    );
+    const movable = Array.from(
+      host.querySelectorAll('.neu-table__row-reorder-move'),
+    ).find((button) => !(button as HTMLButtonElement).disabled) as HTMLButtonElement;
+    movable.click();
+
+    expect(fixture.componentInstance.currentPage()).toBe(2);
+    expect(fixture.componentInstance.selectedRows()).toHaveLength(1);
+  });
+
   it('projects explicit, selected, filtered, page and loaded export scopes without duplicates', () => {
     const fixture = TestBed.createComponent(NeuTableComponent);
     fixture.componentRef.setInput('columns', [
@@ -9421,5 +9578,429 @@ describe('NeuTableComponent functional advanced filter menu', () => {
 
     expect(table._stateStorageFor('local')).toBe(window.localStorage);
     expect(table._stateStorageFor('session')).toBe(window.sessionStorage);
+  });
+
+  it('covers advanced bridge, missing header targets and every typed filter adapter branch', () => {
+    const columns: NeuTableColumn<any>[] = [
+      { key: 'name', header: 'Name', filterConfig: { kind: 'text' } },
+      { key: 'score', header: 'Score', filterConfig: { kind: 'number', mode: 'between' } },
+      {
+        key: 'day',
+        header: 'Day',
+        filterConfig: { kind: 'date', mode: 'between' },
+      },
+      {
+        key: 'instant',
+        header: 'Instant',
+        filterConfig: { kind: 'date', mode: 'between', precision: 'instant' },
+      },
+      {
+        key: 'role',
+        header: 'Role',
+        filterConfig: {
+          kind: 'select',
+          options: [{ id: 1, label: 'Admin' }],
+          optionLabel: 'label',
+          optionValue: 'id',
+          optionDisabled: () => false,
+          searchable: true,
+          virtualScroll: true,
+          virtualScrollVisibleItems: 3,
+        },
+      },
+      { key: 'roles', header: 'Roles', filterConfig: { kind: 'multiSelect' } },
+      { key: 'active', header: 'Active', filterConfig: { kind: 'boolean' } },
+      { key: 'custom', header: 'Custom', filterConfig: { kind: 'custom', predicate: () => true } },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<any>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', []);
+    fixture.detectChanges();
+    const table = fixture.componentInstance as any;
+
+    expect([
+      table._filterDraftKind(),
+      table._filterDraftMode(),
+      table._filterDraftValue(),
+      table._filterDraftValid(),
+      table._filterDraftHasMultipleRules(),
+      table._filterDraftOperator(),
+      table._filterDraftRules(),
+      table._filterDraftCanAddRule(),
+      table._filterDraftReadOnly(),
+    ]).toEqual([null, null, null, false, false, 'and', [], false, false]);
+
+    const rules = [{ id: 'one' }];
+    table._optionalAdvancedFilter = {
+      kind: () => 'text',
+      mode: () => 'contains',
+      value: () => 'Ada',
+      valid: () => true,
+      hasMultipleRules: () => true,
+      operator: () => 'or',
+      rules: () => rules,
+      canAddRule: () => true,
+      readOnly: () => true,
+    };
+    expect([
+      table._filterDraftKind(),
+      table._filterDraftMode(),
+      table._filterDraftValue(),
+      table._filterDraftValid(),
+      table._filterDraftHasMultipleRules(),
+      table._filterDraftOperator(),
+      table._filterDraftRules(),
+      table._filterDraftCanAddRule(),
+      table._filterDraftReadOnly(),
+    ]).toEqual(['text', 'contains', 'Ada', true, true, 'or', rules, true, true]);
+
+    const missingEvent = new Event('test') as any;
+    for (const callback of ['pointerDown', 'resizeStart', 'dragStart', 'dragOver', 'drop']) {
+      table._columnHeaderInteractions[callback]('missing', missingEvent);
+    }
+    table._columnHeaderInteractions.dragEnd('missing');
+    table._columnHeaderInteractions.pointerDown('name', missingEvent);
+    table._columnHeaderInteractions.dragOver('name', missingEvent);
+    table._columnHeaderInteractions.dragEnd('name');
+
+    const [text, number, day, instant, select, multi, boolean, custom] = columns;
+    expect(table.modernFilterMode(text)).toBe('contains');
+    expect(table.modernFilterMode({ ...text, filterConfig: { kind: 'text', mode: 'equals' } })).toBe(
+      'equals',
+    );
+    expect(table.modernFilterMode(number)).toBe('between');
+    expect(table.modernFilterMode(day)).toBe('between');
+    expect(table.modernFilterMode(select)).toBe('equals');
+    expect(table.modernFilterMode(multi)).toBe('in');
+    expect(table.modernFilterMode(boolean)).toBeNull();
+    expect(table.modernFilterMode(custom)).toBeNull();
+    expect(table.isDateOnlyRange(day)).toBe(true);
+    expect(table.isInstantRange(instant)).toBe(true);
+    expect(table.dateInputType(instant)).toBe('datetime-local');
+    expect(table.dateInputType(day)).toBe('date');
+
+    expect(table.typedFilterOptions(select)).toHaveLength(1);
+    expect(table.typedFilterOptions(multi)).toEqual([]);
+    expect(table.typedFilterOptions(text)).toEqual([]);
+    expect(table.typedFilterOptionLabel(select)).toBe('label');
+    expect(table.typedFilterOptionValue(select)).toBe('id');
+    expect(table.typedFilterOptionDisabled(select)).toBeTypeOf('function');
+    expect(table.typedFilterOptionLabel(multi)).toBeNull();
+    expect(table.typedFilterOptionValue(multi)).toBeNull();
+    expect(table.typedFilterOptionDisabled(multi)).toBeNull();
+    expect(table.typedFilterOptionLabel(text)).toBeNull();
+    expect(table.typedFilterSearchable(select)).toBe(true);
+    expect(table.typedFilterSearchable(multi)).toBe(false);
+    expect(table.typedFilterVirtualScroll(select)).toBe(true);
+    expect(table.typedFilterVirtualScroll(text)).toBe(false);
+    expect(table.typedFilterVirtualScrollVisibleItems(select)).toBe(3);
+    expect(table.typedFilterVirtualScrollVisibleItems(multi)).toBe(8);
+    expect(table.typedFilterVirtualScrollVisibleItems(text)).toBe(8);
+
+    expect(table._typedFilterControlValue(text, 4)).toBe('');
+    expect(table._typedFilterControlValue(number, undefined)).toBeNull();
+    expect(table._typedFilterControlValue(boolean, 'true')).toBeNull();
+    expect(table._typedFilterControlValue(select, '')).toBeNull();
+    expect(table._typedFilterControlValue(multi, 'bad')).toEqual([]);
+    expect(table._typedFilterValueFromControl(day, 'bad')).toEqual({ from: null, to: null });
+    expect(table._typedFilterValueFromControl(instant, '2026-01-01')).toBe('2026-01-01');
+    expect(
+      table._normalizeAppliedFilterInput(null, {
+        operator: 'and',
+        constraints: [{ value: 'raw' }],
+      }),
+    ).toEqual({ operator: 'and', constraints: [{ value: 'raw' }] });
+
+    const textControl = table.typedColumnFilterControl(text);
+    const multiControl = table.typedMultiSelectFilterControl(multi);
+    const numberFrom = table.typedRangeStartControl(number);
+    const numberTo = table.typedRangeEndControl(number);
+    const instantFrom = table.typedInstantRangeStartControl(instant);
+    const instantTo = table.typedInstantRangeEndControl(instant);
+    expect(table.typedColumnFilterControl(text)).toBe(textControl);
+    expect(table.typedMultiSelectFilterControl(multi)).toBe(multiControl);
+    expect(table.typedRangeStartControl(number)).toBe(numberFrom);
+    expect(table.typedRangeEndControl(number)).toBe(numberTo);
+    expect(table.typedInstantRangeStartControl(instant)).toBe(instantFrom);
+    expect(table.typedInstantRangeEndControl(instant)).toBe(instantTo);
+    textControl.setValue('Ada');
+    multiControl.setValue([1]);
+    numberFrom.setValue(1);
+    numberTo.setValue(2);
+    instantFrom.setValue('2026-01-01T10:00');
+    instantTo.setValue('2026-01-02T10:00');
+
+    fixture.componentRef.setInput('columns', []);
+    fixture.detectChanges();
+    textControl.setValue('removed');
+    multiControl.setValue([]);
+    numberFrom.setValue(null);
+    numberTo.setValue(null);
+    instantFrom.setValue('');
+    instantTo.setValue('');
+  });
+
+  it('covers stable public guards for selection, sorting, context and filter clearing', () => {
+    const rows = [
+      { id: 1, name: 'Alpha' },
+      { id: 2, name: 'Beta' },
+    ];
+    const columns = [
+      { key: 'id', header: 'ID', sortable: true },
+      { key: 'name', header: 'Name', sortable: true, filterable: true },
+    ];
+    const fixture = TestBed.createComponent(NeuTableComponent<any>);
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', rows);
+    fixture.componentRef.setInput('rowKey', 'id');
+    fixture.componentRef.setInput('selectable', 'multiple');
+    fixture.componentRef.setInput('rowSelectable', () => false);
+    fixture.componentRef.setInput('sortable', true);
+    fixture.detectChanges();
+    const table = fixture.componentInstance as any;
+
+    expect(table.headerSelectionState().disabled).toBe(true);
+    table.toggleAll();
+
+    fixture.componentRef.setInput('rowSelectable', undefined);
+    fixture.detectChanges();
+    expect(table.headerSelectionState().disabled).toBe(false);
+    const selectionUpdate = vi.spyOn(table._state, 'setSelectionKeys').mockReturnValueOnce(null);
+    table.toggleAll();
+    expect(selectionUpdate).toHaveBeenCalled();
+    selectionUpdate.mockRestore();
+
+    table._applyRowSelection(rows[0], new Set(), 'api');
+
+    const stateUpdate = vi.spyOn(table._state, 'update').mockReturnValueOnce(null);
+    table.sortBy('name');
+    expect(stateUpdate).toHaveBeenCalled();
+    stateUpdate.mockRestore();
+
+    const ignoredClick = { preventDefault: vi.fn() } as unknown as MouseEvent;
+    table._suppressColumnClickKey.set('name');
+    table.onSortableHeaderClick('name', ignoredClick);
+    expect(table._suppressColumnClickKey()).toBeNull();
+
+    const keyTarget = document.createElement('th');
+    const missingKeyEvent = {
+      target: keyTarget,
+      currentTarget: keyTarget,
+      key: 'Enter',
+      repeat: false,
+      preventDefault: vi.fn(),
+    } as unknown as KeyboardEvent;
+    table.onSortableHeaderKeydown('missing', missingKeyEvent);
+    expect((missingKeyEvent.preventDefault as any)).not.toHaveBeenCalled();
+
+    fixture.componentRef.setInput('contextMenuSelection', rows[0]);
+    fixture.detectChanges();
+    table._proposeContextMenuSelection(rows[1]);
+    expect(table._contextMenuKey()).toBe(1);
+
+    fixture.componentRef.setInput('selectable', false);
+    fixture.detectChanges();
+    table._applyRangeSelection(rows[0]);
+    table._focusKeyboardRow('missing');
+
+    const interactive = document.createElement('button');
+    const current = document.createElement('div');
+    expect(
+      table._eventOriginatesFromInteractiveDescendant({
+        currentTarget: current,
+        target: interactive,
+        composedPath: () => [document.createTextNode('text'), interactive, current],
+      } as unknown as Event),
+    ).toBe(true);
+
+    table._state.update(
+      {
+        filters: { name: { operator: 'and', constraints: [{ value: 'Alpha' }] } },
+      },
+      'api',
+    );
+    table._openFilterKey.set('name');
+    table.clearColumnFilters();
+    expect(table._openFilterKey()).toBeNull();
+  });
+
+  it('covers filter-overlay ownership, focus and geometry fallbacks with connected DOM', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<any>);
+    fixture.componentRef.setInput('columns', [{ key: 'name', header: 'Name', filterable: true }]);
+    fixture.detectChanges();
+    const table = fixture.componentInstance as any;
+    table._openFilterKey.set('name');
+
+    const container = document.createElement('div');
+    container.className = 'cdk-overlay-container';
+    const parentPane = document.createElement('div');
+    parentPane.className = 'cdk-overlay-pane';
+    const panel = document.createElement('section');
+    panel.id = table._filterOverlayPanelId('name');
+    parentPane.append(panel);
+    container.append(parentPane);
+    document.body.append(container);
+
+    const childTrigger = document.createElement('button');
+    childTrigger.className = 'neu-select__trigger';
+    childTrigger.setAttribute('aria-expanded', 'true');
+    childTrigger.setAttribute('aria-controls', 'owned-child');
+    panel.append(childTrigger);
+    const childPane = document.createElement('div');
+    childPane.className = 'cdk-overlay-pane';
+    const childPanel = document.createElement('div');
+    childPanel.id = 'owned-child';
+    const childButton = document.createElement('button');
+    childPane.append(childPanel, childButton);
+    container.append(childPane);
+
+    table._captureFilterOverlayChildActivation(null);
+    expect(table._pendingFilterOverlayChildTrigger).toBeNull();
+    table._captureFilterOverlayChildActivation(childTrigger);
+    expect(table._pendingFilterOverlayChildTrigger).toBe(childTrigger);
+    table._refreshFilterOverlayOwnership(panel);
+    expect(table._filterOverlayOwnedChildPanes.get(childPane)).toBe(childTrigger);
+    expect(table._filterOverlayPaneMatchesTrigger(childPane, childTrigger)).toBe(true);
+
+    const dateTrigger = document.createElement('button');
+    dateTrigger.className = 'neu-date-input__trigger';
+    const datePane = document.createElement('div');
+    datePane.innerHTML = '<div class="neu-date-input__panel"></div>';
+    expect(table._filterOverlayPaneMatchesTrigger(datePane, dateTrigger)).toBe(true);
+    expect(table._filterOverlayPaneMatchesTrigger(document.createElement('div'), dateTrigger)).toBe(
+      false,
+    );
+
+    const parentButton = document.createElement('button');
+    panel.append(parentButton);
+    const hidden = document.createElement('button');
+    hidden.setAttribute('aria-hidden', 'true');
+    panel.append(hidden);
+    const focusable = table._filterOverlaySessionFocusableElements();
+    expect(focusable).toContain(parentButton);
+    expect(focusable).toContain(childButton);
+    expect(focusable).not.toContain(hidden);
+    expect(table._isInFilterOverlaySession(document.createTextNode('outside'))).toBe(false);
+    expect(table._isInFilterOverlaySession(childButton)).toBe(true);
+    expect(table._escapeFocusTarget(null)).toBeNull();
+    expect(table._escapeFocusTarget(parentButton)).toBeNull();
+    expect(table._escapeFocusTarget(childButton)).toBe(childTrigger);
+
+    const backdrop = document.createElement('div');
+    container.append(backdrop);
+    table._filterOverlayOwnedChildBackdrops.set(backdrop, childTrigger);
+    expect(table._ownedFilterOverlayBackdropTrigger(backdrop)).toBe(childTrigger);
+    childTrigger.setAttribute('aria-expanded', 'false');
+    expect(table._ownedFilterOverlayBackdropTrigger(backdrop)).toBeNull();
+    childTrigger.setAttribute('aria-expanded', 'true');
+
+    const rect = { left: 10, right: 30, top: 20, bottom: 40 };
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(rect as DOMRect);
+    expect(table._eventPointInside(panel, { clientX: 20, clientY: 30 } as MouseEvent)).toBe(true);
+    expect(table._eventPointInside(panel, { clientX: 5, clientY: 30 } as MouseEvent)).toBe(false);
+    expect(table._eventPointInside(panel, { clientX: 20, clientY: 50 } as MouseEvent)).toBe(false);
+
+    table._focusElementIfAvailable(null);
+    const detached = document.createElement('button');
+    table._focusElementIfAvailable(detached);
+    const focus = vi.spyOn(parentButton, 'focus');
+    table._focusElementIfAvailable(parentButton);
+    expect(focus).toHaveBeenCalled();
+    table._lastFilterWorkflowFocus = detached;
+    table._restoreFilterWorkflowFocus();
+    table._focusOverlayChildTrigger('select');
+    table._focusOverlayChildTrigger('date');
+
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    table._toggleFilterOverlay('name', event);
+    expect(table._openFilterKey()).toBeNull();
+    table._toggleFilterOverlay('missing', event);
+    expect(table._openFilterKey()).toBeNull();
+    table._onFilterOverlayAttached('missing');
+    table._openFilterKey.set('name');
+    table._onFilterOverlayAttached('name');
+
+    childTrigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    childTrigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }),
+    );
+    childButton.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    childButton.dispatchEvent(
+      new KeyboardEvent('keyup', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    parentButton.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+    const unfocusable = document.createElement('span');
+    panel.append(unfocusable);
+    unfocusable.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+    document.body.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+    parentButton.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+    table._escapeReturnFocus = null;
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Escape', bubbles: true }));
+    parentButton.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    document.body.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    const custom = document.createElement('div');
+    custom.className = 'neu-table__filter-overlay-custom';
+    const customButton = document.createElement('button');
+    custom.append(customButton);
+    panel.append(custom);
+    table._focusCustomFilterControl();
+    expect(table._lastFilterWorkflowFocus).toBe(customButton);
+
+    let draftRules = [{ id: 'one' }, { id: 'two' }];
+    let nextRuleId: string | null = null;
+    let allowRemove = false;
+    table._optionalAdvancedFilter = {
+      rules: () => draftRules,
+      addRule: () => nextRuleId,
+      removeRule: (id: string) => {
+        if (!allowRemove) return false;
+        draftRules = draftRules.filter((rule) => rule.id !== id);
+        return true;
+      },
+    };
+    table._addFilterDraftRule();
+    nextRuleId = 'three';
+    table._addFilterDraftRule();
+    table._removeFilterDraftRule('missing');
+    table._removeFilterDraftRule('one');
+    allowRemove = true;
+    table._removeFilterDraftRule('one');
+    table._removeFilterDraftRule('two');
+    await Promise.resolve();
+
+    table._onFilterOverlayOutsideClick('name', {
+      target: childButton,
+    } as unknown as MouseEvent);
+
+    table._openFilterKey.set(null);
+    parentButton.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    table._openFilterKey.set('name');
+    document.dispatchEvent(
+      new CustomEvent('neu-table-filter-session-opened', { detail: 'another-table' }),
+    );
+    expect(table._openFilterKey()).toBeNull();
+
+    const emptyFilter = { operator: 'and', constraints: [] };
+    table._openFilterKey.set('other');
+    table._applyOptionalAdvancedFilter('name', emptyFilter);
+    table._openFilterKey.set('name');
+    table._applyOptionalAdvancedFilter('name', emptyFilter);
+    table._openFilterKey.set('missing');
+    table._focusOverlayChildTrigger('select');
+
+    table._clearFilterOverlayOwnership();
+    expect(table._filterOverlayOwnedChildPanes.size).toBe(0);
+    container.remove();
   });
 });

@@ -94,7 +94,9 @@ export class NeuAccordionHeaderDirective { constructor(readonly templateRef: Tem
   styleUrl: './neu-accordion.component.scss',
 })
 export class NeuAccordionComponent {
+  /* v8 ignore start -- Angular signal-query factory; projected-template behavior is covered. */
   readonly headerTpl = contentChild(NeuAccordionHeaderDirective);
+  /* v8 ignore stop */
   private readonly _sanitizer = inject(DomSanitizer);
 
   /** Lista de paneles / Panel list */

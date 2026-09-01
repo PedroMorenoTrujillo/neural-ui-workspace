@@ -394,4 +394,19 @@ describe('NeuInputComponent', () => {
     expect(() => input.dispatchEvent(new Event('blur'))).not.toThrow();
     expect((f.componentInstance as any)['_value']()).toBe('unregistered');
   });
+
+  it('synchronises autofill through the native animationstart binding', () => {
+    const { f, comp } = mk();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    const changed = vi.fn();
+    comp.registerOnChange(changed);
+    input.value = 'credential-manager-value';
+    const event = new Event('animationstart', { bubbles: true }) as AnimationEvent;
+    Object.defineProperty(event, 'animationName', { value: 'neu-autofill-start' });
+
+    input.dispatchEvent(event);
+
+    expect(changed).toHaveBeenCalledWith('credential-manager-value');
+    expect(comp._value()).toBe('credential-manager-value');
+  });
 });

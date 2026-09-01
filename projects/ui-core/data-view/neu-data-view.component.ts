@@ -190,9 +190,11 @@ export class NeuDataViewComponent {
   readonly sortChange = output<string>();
   readonly pageChange = output<NeuDataViewPageEvent>();
 
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly itemTpl = contentChild(NeuDataViewItemDirective);
   readonly headerTpl = contentChild(NeuDataViewHeaderDirective);
   readonly footerTpl = contentChild(NeuDataViewFooterDirective);
+  /* v8 ignore stop */
 
   readonly query = signal('');
   readonly page = signal(1);

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, PLATFORM_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { replaceGlobalProperty } from '../testing/global-property-test.util';
 import { NeuScrollTopComponent, NeuScrollTopIconDirective } from './neu-scroll-top.component';
@@ -100,5 +100,21 @@ describe('NeuScrollTopComponent', () => {
     local.detectChanges();
     expect(local.nativeElement.querySelector('[data-test-icon]')).toBeTruthy();
     expect(local.nativeElement.querySelector('button')?.getAttribute('aria-label')).toBe('Scroll to top');
+  });
+
+  it('keeps programmatic scrolling and rebinding inert on the server', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [NeuScrollTopComponent],
+      providers: [{ provide: PLATFORM_ID, useValue: 'server' }],
+    }).compileComponents();
+    const local = TestBed.createComponent(NeuScrollTopComponent);
+    local.detectChanges();
+    const component = local.componentInstance as any;
+
+    component.scrollToTop();
+    component.rebind('window');
+
+    expect(component.visible()).toBe(false);
   });
 });

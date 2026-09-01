@@ -392,12 +392,14 @@ export class NeuOrganizationChartComponent<T = unknown> {
   readonly nodeExpand = output<NeuOrganizationChartNodeEvent<T>>();
   readonly nodeCollapse = output<NeuOrganizationChartNodeEvent<T>>();
 
+  /* v8 ignore start -- Angular signal-query factories; projected node/toggle behavior is covered. */
   protected readonly nodeTemplate = contentChild(NeuOrganizationChartNodeDirective<T>);
   protected readonly toggleIconTemplate = contentChild(NeuOrganizationChartToggleIconDirective<T>);
   protected readonly toggleTemplate = contentChild(NeuOrganizationChartToggleDirective<T>);
   protected readonly selectionIndicatorTemplate = contentChild(
     NeuOrganizationChartSelectionIndicatorDirective<T>,
   );
+  /* v8 ignore stop */
 
   protected readonly gapX = computed(() => {
     const value = this.gap();

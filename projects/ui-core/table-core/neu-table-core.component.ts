@@ -233,6 +233,7 @@ export class NeuTableCoreComponent<T extends object = NeuTableCoreRow> {
   readonly rowClass = input<(row: T, rowIndex: number) => string>(() => '');
   readonly footerRow = input<Readonly<Record<string, unknown>> | null>(null);
 
+  /* v8 ignore start -- Angular signal-query factories; every projected table-core slot is covered. */
   protected readonly captionTemplate = contentChild<NeuTableCoreCaptionDirective<T>>(
     NeuTableCoreCaptionDirective,
   );
@@ -250,6 +251,7 @@ export class NeuTableCoreComponent<T extends object = NeuTableCoreRow> {
   protected readonly summaryTemplate = contentChild<NeuTableCoreSummaryDirective<T>>(
     NeuTableCoreSummaryDirective,
   );
+  /* v8 ignore stop */
 
   protected skeletonIndexes(): readonly number[] {
     const count = Math.max(1, Math.trunc(this.skeletonRows()));

@@ -161,4 +161,18 @@ describe('NeuPasswordComponent', () => {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     expect(formFixture.componentInstance.control.value).toBe('Changed1!');
   });
+
+  it('synchronises credential-manager autofill through animationstart', () => {
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    const changed = vi.fn();
+    fixture.componentInstance.registerOnChange(changed);
+    input.value = 'Autofilled9!';
+    const event = new Event('animationstart', { bubbles: true }) as AnimationEvent;
+    Object.defineProperty(event, 'animationName', { value: 'neu-autofill-start' });
+
+    input.dispatchEvent(event);
+
+    expect(changed).toHaveBeenCalledWith('Autofilled9!');
+    expect(fixture.componentInstance.value()).toBe('Autofilled9!');
+  });
 });

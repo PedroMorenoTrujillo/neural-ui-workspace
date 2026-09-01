@@ -1445,6 +1445,31 @@ describe('NeuTreeTableComponent', () => {
     );
   });
 
+  it('keeps controlled expansion, RTL toggles and non-data body entries stable', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('expandedKeys', []);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.toggleNode(NODES[0]);
+    expect(component.effectiveExpandedKeys()).toEqual(new Set());
+
+    const toggle = document.createElement('button');
+    toggle.style.direction = 'rtl';
+    const event = new KeyboardEvent('keydown', {
+      key: 'ArrowLeft',
+      cancelable: true,
+    });
+    Object.defineProperty(event, 'currentTarget', { configurable: true, value: toggle });
+    component.onTreeToggleKeydown(component.flatRows()[0], event);
+    expect(event.defaultPrevented).toBe(true);
+
+    const empty = { kind: 'empty', key: 'empty', colspan: 3, message: 'Empty' } as any;
+    const context = component.treeBodySectionContext([empty], COLUMNS, 3, false, false);
+    expect(context.entries[0]).toBe(empty);
+  });
+
   it('prunes uncontrolled selection after nodes are replaced and preserves controlled stale values', () => {
     const fixture = TestBed.createComponent(NeuTreeTableComponent);
     fixture.componentRef.setInput('nodes', NODES);
@@ -1524,6 +1549,78 @@ describe('NeuTreeTableComponent', () => {
     press(root, 'ArrowLeft');
     fixture.detectChanges();
     expect(findRow('workspace').getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('routes the treegrid host keyboard contract and rejects non-row targets deterministically', async () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('selectionMode', 'multiple');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    const row = (id: string) =>
+      fixture.nativeElement.querySelector(
+        `tr[data-neu-tree-node-id="${id}"]`,
+      ) as HTMLTableRowElement;
+    const invoke = (target: EventTarget, key: string) => {
+      const event = new KeyboardEvent('keydown', { key, cancelable: true });
+      Object.defineProperty(event, 'target', { configurable: true, value: target });
+      component.onHostKeydown(event);
+      return event;
+    };
+
+    let root = row('workspace');
+    let child = row('ui-core');
+    expect(invoke(root, 'ArrowDown').defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(child);
+    expect(invoke(child, 'ArrowUp').defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(root);
+    expect(invoke(child, 'Home').defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(root);
+    expect(invoke(root, 'End').defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(child);
+    expect(invoke(root, 'Enter').defaultPrevented).toBe(true);
+    expect(invoke(root, ' ').defaultPrevented).toBe(true);
+
+    expect(invoke(root, 'ArrowLeft').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+    root = row('workspace');
+    expect(invoke(root, 'ArrowRight').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+    root = row('workspace');
+    child = row('ui-core');
+    expect(invoke(root, 'ArrowRight').defaultPrevented).toBe(true);
+    await Promise.resolve();
+    expect(document.activeElement).toBe(child);
+    expect(invoke(child, 'ArrowLeft').defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(root);
+    expect(invoke(child, 'ArrowRight').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+    expect(invoke(row('tree'), 'ArrowRight').defaultPrevented).toBe(false);
+    expect(invoke(root, 'PageDown').defaultPrevented).toBe(false);
+
+    fixture.componentRef.setInput('selectionMode', 'none');
+    fixture.detectChanges();
+    root = row('workspace');
+    expect(invoke(root, 'Enter').defaultPrevented).toBe(false);
+
+    const missingId = document.createElement('tr');
+    expect(invoke(missingId, 'Home').defaultPrevented).toBe(false);
+    const unknown = document.createElement('tr');
+    unknown.dataset['neuTreeNodeId'] = 'unknown';
+    expect(invoke(unknown, 'ArrowRight').defaultPrevented).toBe(false);
+    const nested = document.createElement('button');
+    root.append(nested);
+    expect(invoke(nested, 'Home').defaultPrevented).toBe(false);
+    expect(invoke(document.createTextNode('not-an-element'), 'Home').defaultPrevented).toBe(false);
+
+    const prevented = new KeyboardEvent('keydown', { key: 'Home', cancelable: true });
+    prevented.preventDefault();
+    Object.defineProperty(prevented, 'target', { configurable: true, value: root });
+    component.onHostKeydown(prevented);
+    expect(prevented.defaultPrevented).toBe(true);
   });
 
   it('projects cycles, shared branches, and depth 5,000 without mutating consumer nodes', () => {

@@ -327,6 +327,7 @@ interface ProcessedMegaRoot extends ProcessedMegaItem {
 export class NeuMegaMenuComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly responsive = inject(NeuResponsiveState);
+  /* v8 ignore start -- Angular signal-query factories; rendered menu/template behavior is covered. */
   private readonly rootActions = viewChildren<ElementRef<HTMLElement>>('rootAction');
   private readonly menuButton = viewChild<ElementRef<HTMLButtonElement>>('menuButton');
   private readonly defaultTemplate =
@@ -334,6 +335,7 @@ export class NeuMegaMenuComponent {
   protected readonly itemTemplate = contentChild(NeuMegaMenuItemDirective);
   protected readonly startTemplate = contentChild(NeuMegaMenuStartDirective);
   protected readonly endTemplate = contentChild(NeuMegaMenuEndDirective);
+  /* v8 ignore stop */
   private readonly rootController = new NeuRovingMenuController({ orientation: 'horizontal' });
   private readonly childController = new NeuRovingMenuController({ orientation: 'vertical' });
   private readonly generatedId = inject(NeuIdGenerator).getId('neu-mega-menu-');

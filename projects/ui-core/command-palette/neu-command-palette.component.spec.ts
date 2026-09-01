@@ -1,11 +1,24 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { COMPOSITION_BUFFER_MODE } from '@angular/forms';
 import {
   NeuCommand,
   NeuCommandPaletteComponent,
+  NeuCommandPaletteItemDirective,
   NeuCommandPaletteService,
 } from './neu-command-palette.component';
+
+@Component({
+  imports: [NeuCommandPaletteComponent, NeuCommandPaletteItemDirective],
+  template: `
+    <neu-command-palette>
+      <ng-template neuCommandPaletteItem let-command let-index="index">
+        <span class="custom-command">{{ index }}:{{ command.id }}</span>
+      </ng-template>
+    </neu-command-palette>
+  `,
+})
+class CommandPaletteTemplateHostComponent {}
 
 const CMDS: NeuCommand[] = [
   { id: 'home', label: 'Ir al inicio', group: 'Navegación', action: () => {} },
@@ -310,6 +323,31 @@ describe('NeuCommandPaletteComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(svc.isOpen()).toBe(false);
+  });
+
+  it('closes from the modal-focus Escape output binding', async () => {
+    const f = setup();
+    const svc = mkSvc();
+    svc.open();
+    f.detectChanges();
+    await f.whenStable();
+
+    (f.nativeElement.querySelector('.neu-cmd') as HTMLElement).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+
+    expect(svc.isOpen()).toBe(false);
+  });
+
+  it('renders the consumer command template with command and index context', async () => {
+    const f = TestBed.createComponent(CommandPaletteTemplateHostComponent);
+    const svc = mkSvc();
+    svc.register({ id: 'custom', label: 'Custom', action: () => {} });
+    svc.open();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelector('.custom-command')?.textContent?.trim()).toBe('0:custom');
   });
 
   it('Enter should do nothing when there is no active command', () => {

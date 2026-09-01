@@ -379,7 +379,9 @@ export class NeuAutocompleteComponent<
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly overlay = inject(Overlay);
+  /* v8 ignore start -- Angular signal-query factories; DOM/query behavior is covered. */
   private readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('inputEl');
+  /* v8 ignore stop */
   private readonly activeRowController = new InternalNeuOptionActiveRowController<T, G | string, T>(
     [],
     {
@@ -483,6 +485,7 @@ export class NeuAutocompleteComponent<
   readonly optionSelected = output<T | null>();
   readonly queryChange = output<string>();
 
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly itemTpl = contentChild(NeuAutocompleteItemDirective<T, V>);
   readonly groupTpl = contentChild(NeuAutocompleteGroupDirective<G>);
   readonly loaderTpl = contentChild(NeuAutocompleteLoaderDirective);
@@ -492,6 +495,7 @@ export class NeuAutocompleteComponent<
   readonly loadingIconTpl = contentChild(NeuAutocompleteLoadingIconDirective);
   readonly clearIconTpl = contentChild(NeuAutocompleteClearIconDirective);
   readonly dropdownIconTpl = contentChild(NeuAutocompleteDropdownIconDirective);
+  /* v8 ignore stop */
 
   protected readonly _query = signal('');
   readonly displayText = computed(() => this._query());

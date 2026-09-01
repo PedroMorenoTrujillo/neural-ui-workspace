@@ -462,6 +462,19 @@ describe('NeuCascadeSelectComponent', () => {
     fixture.detectChanges();
     expect(component.activePath()).toEqual([hierarchy[0]]);
 
+    option = document.querySelector('.neu-cascade-select__option') as HTMLButtonElement;
+    option.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(component.activePath()).toEqual([hierarchy[0], hierarchy[0].children![0]]);
+    const breadcrumbs = document.querySelectorAll(
+      '.neu-cascade-select__breadcrumb',
+    ) as NodeListOf<HTMLButtonElement>;
+    breadcrumbs[1].click();
+    fixture.detectChanges();
+    expect(component.activePath()).toEqual([hierarchy[0]]);
+
     (document.querySelector('.neu-cascade-select__breadcrumb') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(component.activePath()).toEqual([]);

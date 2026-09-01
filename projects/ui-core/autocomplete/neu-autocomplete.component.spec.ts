@@ -971,4 +971,60 @@ describe('NeuAutocompleteComponent', () => {
     emptyHost.detectChanges();
     expect(document.querySelector('.auto-empty')?.textContent).toContain('Empty');
   });
+
+  it('covers disabled keys, lazy deduplication, focus containment and frame fallbacks', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    const disabledKey = new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true });
+    const view = component.document.defaultView as Window;
+    const requestDescriptor = Object.getOwnPropertyDescriptor(view, 'requestAnimationFrame');
+    const cancelDescriptor = Object.getOwnPropertyDescriptor(view, 'cancelAnimationFrame');
+
+    try {
+      f.componentRef.setInput('disabled', true);
+      f.detectChanges();
+      component.onKeyDown(disabledKey);
+      expect(disabledKey.defaultPrevented).toBe(true);
+
+      f.componentRef.setInput('disabled', false);
+      f.componentRef.setInput('lazy', true);
+      f.detectChanges();
+      const lazy = vi.spyOn(component.lazyRequest, 'emit');
+      component.open(null, 'programmatic');
+      component.open(null, 'programmatic');
+      expect(lazy).toHaveBeenCalledTimes(1);
+
+      component._focused.set(true);
+      component._onBlur(new FocusEvent('blur', { relatedTarget: input }));
+      expect(component._focused()).toBe(true);
+
+      component._isOpen.set(false);
+      component.overlaySession.open(input);
+      component.prepareOverlaySession();
+      expect(component.overlaySession.isOpen).toBe(false);
+      component._isOpen.set(true);
+      component.prepareOverlaySession();
+      expect(component.overlaySession.isOpen).toBe(true);
+
+      Object.defineProperty(view, 'requestAnimationFrame', {
+        configurable: true,
+        writable: true,
+        value: undefined,
+      });
+      Object.defineProperty(view, 'cancelAnimationFrame', {
+        configurable: true,
+        writable: true,
+        value: undefined,
+      });
+      const frame = component.requestFrame(vi.fn());
+      component.cancelFrame(frame);
+      component.cancelFrame(-1);
+    } finally {
+      if (requestDescriptor) Object.defineProperty(view, 'requestAnimationFrame', requestDescriptor);
+      else delete (view as any).requestAnimationFrame;
+      if (cancelDescriptor) Object.defineProperty(view, 'cancelAnimationFrame', cancelDescriptor);
+      else delete (view as any).cancelAnimationFrame;
+    }
+  });
 });

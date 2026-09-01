@@ -1,6 +1,6 @@
 import { Component, PLATFORM_ID, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragPreview, CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
 import { By } from '@angular/platform-browser';
 import { NeuDashboardGridComponent, NeuDashboardTileConfig } from './neu-dashboard-grid.component';
 
@@ -174,6 +174,21 @@ describe('NeuDashboardGridComponent', () => {
     const tile = f.nativeElement.querySelector('.neu-dg__tile') as HTMLDivElement;
     expect(tile.style.getPropertyValue('--tile-cols')).toBe('2');
     expect(tile.style.getPropertyValue('--tile-rows')).toBe('3');
+  });
+
+  it('renders drag previews from a title and falls back to the tile id', async () => {
+    const f = setup([{ id: 'fallback' }, { id: 'named', title: 'Named tile' }]);
+    await f.whenStable();
+    const previews = f.debugElement.queryAllNodes(By.directive(CdkDragPreview));
+
+    expect(previews).toHaveLength(2);
+    for (const [index, expected] of ['fallback', 'Named tile'].entries()) {
+      const preview = previews[index].injector.get(CdkDragPreview);
+      const view = preview.templateRef.createEmbeddedView({});
+      view.detectChanges();
+      expect(view.rootNodes.map((node) => node.textContent ?? '').join('')).toContain(expected);
+      view.destroy();
+    }
   });
 
   it('should clone the tiles input into the ordered signal', async () => {

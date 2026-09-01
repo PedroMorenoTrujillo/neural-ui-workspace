@@ -49,6 +49,13 @@ describe('NeuTerminalComponent', () => {
     expect(component.draft()).toBe('second');
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
     expect(component.draft()).toBe('first');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(component.draft()).toBe('second');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(component.draft()).toBe('');
+    fixture.componentRef.setInput('output', [{ text: 'external' }]);
+    fixture.detectChanges();
+    expect(component.entries().filter((entry) => entry.type === 'command')).toHaveLength(2);
     component.appendOutput('ready');
     component.clear();
     expect(emitted).toHaveBeenCalledTimes(2);
@@ -84,5 +91,15 @@ describe('NeuTerminalComponent', () => {
     fixture.detectChanges();
     component.focusInput();
     expect(component.disabled()).toBe(true);
+  });
+
+  it('focuses the command input through the terminal surface click binding', () => {
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.blur();
+
+    (fixture.nativeElement.querySelector('.neu-terminal') as HTMLElement).click();
+
+    expect(document.activeElement).toBe(input);
   });
 });

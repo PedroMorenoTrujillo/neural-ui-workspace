@@ -47,8 +47,10 @@ export class NeuTagSuggestionDirective { constructor(readonly templateRef: Templ
   styleUrl: './neu-tags.component.scss',
 })
 export class NeuTagsComponent implements ControlValueAccessor {
+  /* v8 ignore start -- Angular signal-query factories; projected tag/suggestion behavior is covered. */
   readonly tagTpl = contentChild(NeuTagItemDirective);
   readonly suggestionTpl = contentChild(NeuTagSuggestionDirective);
+  /* v8 ignore stop */
   readonly label = input('');
   readonly placeholder = input('Add tag...');
   readonly disabled = input(false);

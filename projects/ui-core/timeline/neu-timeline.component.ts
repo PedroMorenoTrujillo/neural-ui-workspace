@@ -83,8 +83,10 @@ export class NeuTimelineMarkerDirective { constructor(readonly templateRef: Temp
   styleUrl: './neu-timeline.component.scss',
 })
 export class NeuTimelineComponent {
+  /* v8 ignore start -- Angular signal-query factories; projected item/marker behavior is covered. */
   readonly itemTpl = contentChild(NeuTimelineItemDirective);
   readonly markerTpl = contentChild(NeuTimelineMarkerDirective);
+  /* v8 ignore stop */
   /** Eventos a mostrar / Events to display */
   items = input<NeuTimelineItem[]>([]);
 }

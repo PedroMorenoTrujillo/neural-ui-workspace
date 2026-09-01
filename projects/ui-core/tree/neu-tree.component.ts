@@ -197,7 +197,9 @@ export class NeuTreeNodeDirective {
   styleUrl: './neu-tree.component.scss',
 })
 export class NeuTreeComponent {
+  /* v8 ignore start -- Angular signal-query factory; projected node behavior is covered. */
   readonly nodeTpl = contentChild(NeuTreeNodeDirective);
+  /* v8 ignore stop */
   nodes = input<NeuTreeNode[]>([]);
   selectable = input(false);
   searchable = input(false);

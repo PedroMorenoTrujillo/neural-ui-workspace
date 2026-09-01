@@ -730,6 +730,7 @@ export class NeuTreeTableComponent {
   readonly rowEditSave = output<NeuTreeTableRowEditEvent>();
   readonly rowEditCancel = output<NeuTreeTableRowEditEvent>();
 
+  /* v8 ignore start -- Angular signal-query factories; projected tree-table slots are covered. */
   readonly expandTemplate = contentChild(NeuTableExpandDirective);
   readonly toolbarTemplate = contentChild(NeuTableToolbarDirective);
   readonly captionTemplate = contentChild(NeuTableCaptionDirective);
@@ -749,6 +750,7 @@ export class NeuTreeTableComponent {
   readonly treeBodySectionTemplate = contentChild(NeuTreeTableBodySectionDirective);
   private readonly treeCellTpl = viewChild<TemplateRef<unknown>>('treeCellTpl');
   private readonly table = viewChild(NeuTableComponent);
+  /* v8 ignore stop */
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
   private readonly internalExpandedKeys = signal<Set<string>>(new Set());

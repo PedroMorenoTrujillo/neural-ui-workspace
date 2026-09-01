@@ -138,6 +138,10 @@ describe('NeuDockComponent', () => {
     fixture.nativeElement
       .querySelector('.neu-dock__item')
       .dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-dock__item').classList).toContain(
+      'neu-dock__item--hovered',
+    );
     fixture.nativeElement
       .querySelector('.neu-dock__list')
       .dispatchEvent(new MouseEvent('mouseleave'));

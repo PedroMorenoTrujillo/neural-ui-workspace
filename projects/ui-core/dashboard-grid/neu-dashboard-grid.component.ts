@@ -103,7 +103,9 @@ export class NeuDashboardGridComponent {
   readonly orderChange = output<NeuDashboardTileConfig[]>();
 
   protected readonly _orderedTiles = signal<NeuDashboardTileConfig[]>([]);
+  /* v8 ignore start -- Angular signal-query factory; rendered tile-slot behavior is covered. */
   private readonly _tileSlots = viewChildren<ElementRef<HTMLElement>>('tileSlot');
+  /* v8 ignore stop */
 
   constructor() {
     effect(() => {

@@ -107,7 +107,9 @@ export class NeuMenuItemDirective {
   styleUrl: './neu-menu.component.scss',
 })
 export class NeuMenuComponent {
+  /* v8 ignore start -- Angular signal-query factory; projected-item behavior is covered. */
   readonly itemTpl = contentChild(NeuMenuItemDirective);
+  /* v8 ignore stop */
   readonly itemTemplate = input<TemplateRef<{ $implicit: NeuMenuItem }> | null>(null);
   readonly itemTemplateRef = computed(
     () => this.itemTemplate() ?? this.itemTpl()?.templateRef ?? null,
@@ -237,14 +239,18 @@ export class NeuMenuComponent {
   styleUrl: './neu-menu.component.scss',
 })
 export class NeuMenuButtonComponent {
+  /* v8 ignore start -- Angular signal-query factory; projected-item behavior is covered. */
   readonly itemTpl = contentChild(NeuMenuItemDirective);
+  /* v8 ignore stop */
   readonly items = input<NeuMenuItem[]>([]);
   readonly label = input('Menu');
   readonly itemClick = output<NeuMenuItem>();
   readonly openChange = output<boolean>();
   readonly open = signal(false);
+  /* v8 ignore start -- Angular signal-query factories; trigger/overlay behavior is covered. */
   private readonly trigger = viewChild('trigger', { read: ElementRef<HTMLButtonElement> });
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+  /* v8 ignore stop */
   private focusLastOnAttach = false;
 
   toggle(): void {

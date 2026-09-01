@@ -391,6 +391,27 @@ describe('NeuTreeComponent', () => {
     expect(document.activeElement?.textContent).toContain('Design system');
   });
 
+  it('supports RTL collapse, activation and unhandled-key navigation paths', () => {
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('selectable', true);
+    fixture.detectChanges();
+    fixture.nativeElement.style.direction = 'rtl';
+    const component = fixture.componentInstance;
+    const selected: string[][] = [];
+    component.selectionChange.subscribe((nodes) => selected.push(nodes.map((node) => node.id)));
+
+    component.onNodeKeydown(NODES[0], new KeyboardEvent('keydown', { key: 'Unidentified' }));
+    expect(component.isRenderedExpanded(NODES[0])).toBe(true);
+    component.onNodeKeydown(
+      NODES[0],
+      new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }),
+    );
+    expect(component.isRenderedExpanded(NODES[0])).toBe(false);
+    component.onNodeKeydown(NODES[0], new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(selected.at(-1)).toEqual(['workspace']);
+  });
+
   it('removes nested selection controls from sequential Tab order', async () => {
     const fixture = TestBed.createComponent(NeuTreeComponent);
     fixture.componentRef.setInput('nodes', NODES);

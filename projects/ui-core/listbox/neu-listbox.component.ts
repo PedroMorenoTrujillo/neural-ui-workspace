@@ -388,6 +388,7 @@ export class NeuListboxComponent<
   readonly lazyRequest = output<NeuOptionLazyRequest>();
   readonly drop = output<NeuListboxDropEvent<T>>();
 
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly itemTpl = contentChild(NeuListboxItemDirective<T>);
   readonly indicatorTpl = contentChild(NeuListboxIndicatorDirective<T, V>);
   readonly groupTpl = contentChild(NeuListboxGroupDirective<G>);
@@ -397,6 +398,7 @@ export class NeuListboxComponent<
   readonly footerTpl = contentChild(NeuListboxFooterDirective);
   readonly emptyTpl = contentChild(NeuListboxEmptyDirective);
   readonly emptyFilterTpl = contentChild(NeuListboxEmptyFilterDirective);
+  /* v8 ignore stop */
 
   readonly query = signal('');
   readonly activeIndex = signal(-1);

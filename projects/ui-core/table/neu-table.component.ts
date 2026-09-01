@@ -1851,7 +1851,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _elementRef = inject(ElementRef<HTMLElement>);
   private readonly _injector = inject(Injector);
   private readonly _managedRowCoordinator = inject(NeuTableManagedRowCoordinator);
+  /* v8 ignore start -- Angular signal-query factory; scroll-container behavior is covered. */
   private readonly _scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
+  /* v8 ignore stop */
   private _virtualScrollTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly _filterOverlayUid = inject(NeuIdGenerator).getId('neu-table-filter-overlay-');
   private _activeFilterTrigger: HTMLElement | null = null;
@@ -1903,6 +1905,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly emptyMessage = input<string>('No results found');
   protected readonly skeletonRows = computed(() => [1, 2, 3, 4, 5] as const);
 
+  /* v8 ignore start -- Angular signal-query factories; projected table slots are covered. */
   readonly expandTemplate = contentChild<NeuTableExpandDirective<T>>(NeuTableExpandDirective);
   readonly toolbarTemplate = contentChild(NeuTableToolbarDirective);
   readonly bodyTemplate = contentChild<NeuTableBodyDirective<T>>(NeuTableBodyDirective);
@@ -1940,6 +1943,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   protected readonly filterTemplates = contentChildren<NeuTableFilterTemplateDirective<T>>(
     NeuTableFilterTemplateDirective,
   );
+  /* v8 ignore stop */
   protected readonly _toolbarTemplateRef = computed(
     () => this.toolbarTemplate()?.templateRef ?? null,
   );

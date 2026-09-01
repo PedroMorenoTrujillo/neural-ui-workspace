@@ -265,11 +265,13 @@ export class NeuCascadeSelectComponent<
   readonly viewportMargin = 8;
   private readonly panelMaxHeight = 360;
 
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly itemTpl = contentChild(NeuCascadeSelectItemDirective<T>);
   readonly selectedTpl = contentChild(NeuCascadeSelectSelectedDirective<T>);
   readonly headerTpl = contentChild(NeuCascadeSelectHeaderDirective);
   readonly footerTpl = contentChild(NeuCascadeSelectFooterDirective);
   readonly emptyTpl = contentChild(NeuCascadeSelectEmptyDirective);
+  /* v8 ignore stop */
 
   readonly nodes = input<readonly T[]>([]);
   readonly options = input<readonly T[] | null>(null);

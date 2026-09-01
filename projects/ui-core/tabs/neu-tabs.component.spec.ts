@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { NeuTabsComponent, NeuTab, NeuTabPanelComponent } from './neu-tabs.component';
+import { NeuTabsComponent, NeuTab, NeuTabLabelDirective, NeuTabPanelComponent } from './neu-tabs.component';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 
 const TABS: NeuTab[] = [
@@ -25,6 +25,20 @@ class HostComponent {
   lastTab: string | undefined;
 }
 
+@Component({
+  imports: [NeuTabsComponent, NeuTabLabelDirective],
+  template: `
+    <neu-tabs [tabs]="tabs">
+      <ng-template neuTabLabel let-tab let-active="active">
+        <span class="custom-tab-label">{{ tab.label }} · {{ active }}</span>
+      </ng-template>
+    </neu-tabs>
+  `,
+})
+class TabLabelHostComponent {
+  readonly tabs = TABS;
+}
+
 describe('NeuTabsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -42,6 +56,21 @@ describe('NeuTabsComponent', () => {
     expect(text).toContain('Preview');
     expect(text).toContain('Código');
     expect(text).toContain('API');
+  });
+
+  it('renders projected label templates with the tab and active context', async () => {
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [TabLabelHostComponent],
+        providers: [provideRouter([]), provideZonelessChangeDetection()],
+      })
+      .compileComponents();
+    const fixture = TestBed.createComponent(TabLabelHostComponent);
+    fixture.detectChanges();
+
+    const labels = fixture.nativeElement.querySelectorAll('.custom-tab-label');
+    expect(labels).toHaveLength(3);
+    expect(labels[0].textContent).toContain('Preview · true');
   });
 
   it('should have a tablist', () => {

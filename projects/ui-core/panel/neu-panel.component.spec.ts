@@ -138,9 +138,13 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     const yBar = fixture.nativeElement.querySelector('.neu-scroll-area__bar--y') as HTMLElement;
     yBar.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 100 } as DOMRect);
     yBar.dispatchEvent(new MouseEvent('click', { clientY: 50, bubbles: true }));
+    yBar.dispatchEvent(new PointerEvent('pointerdown', { clientY: 25, bubbles: true }));
+    yBar.dispatchEvent(new PointerEvent('pointermove', { clientY: 75, buttons: 1, bubbles: true }));
     const xBar = fixture.nativeElement.querySelector('.neu-scroll-area__bar--x') as HTMLElement;
     xBar.getBoundingClientRect = () => ({ top: 0, left: 0, width: 100, height: 10 } as DOMRect);
     xBar.dispatchEvent(new MouseEvent('click', { clientX: 50, bubbles: true }));
+    xBar.dispatchEvent(new PointerEvent('pointerdown', { clientX: 25, bubbles: true }));
+    xBar.dispatchEvent(new PointerEvent('pointermove', { clientX: 75, buttons: 1, bubbles: true }));
     Object.defineProperty(viewport, 'scrollTo', { configurable: true, value: undefined });
     component.scrollTo({ top: 20, left: 25 });
     expect(viewport.scrollTop).toBe(20);
@@ -160,11 +164,14 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
 
   it('uses browser scrolling APIs and cleans up its ResizeObserver', async () => {
     const observer = { observe: vi.fn(), disconnect: vi.fn() };
+    let resizeCallback: ResizeObserverCallback | undefined;
     const previous = window.ResizeObserver;
     class TestResizeObserver {
       observe = observer.observe;
       disconnect = observer.disconnect;
-      constructor(_callback: ResizeObserverCallback) {}
+      constructor(callback: ResizeObserverCallback) {
+        resizeCallback = callback;
+      }
     }
     Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: TestResizeObserver });
     await TestBed.configureTestingModule({ imports: [EnhancedScrollAreaHostComponent] }).compileComponents();
@@ -172,6 +179,9 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     fixture.detectChanges();
     const component = fixture.debugElement.children[0].componentInstance as NeuScrollAreaComponent;
     const viewport = fixture.nativeElement.querySelector('.neu-scroll-area__viewport') as HTMLElement;
+    const refresh = vi.spyOn(component, 'refresh');
+    resizeCallback?.([], observer as unknown as ResizeObserver);
+    expect(refresh).toHaveBeenCalled();
     const scrollTo = vi.fn();
     Object.defineProperty(viewport, 'scrollTo', { configurable: true, value: scrollTo });
     component.scrollTo({ top: 12 });

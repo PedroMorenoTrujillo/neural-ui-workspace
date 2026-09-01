@@ -2507,4 +2507,114 @@ describe('NeuSelectComponent', () => {
       vi.useRealTimers();
     }
   });
+
+  it('covers locale, controlled, URL, virtual and overlay edge contracts', async () => {
+    const { f, comp } = await setup({ editable: true, searchable: true });
+    const previousTypeahead = comp.typeaheadController;
+    f.componentRef.setInput('filterConfig', { locale: 'es' });
+    f.detectChanges();
+    await f.whenStable();
+    expect(comp.typeaheadController).not.toBe(previousTypeahead);
+
+    comp.writeValue('custom');
+    expect(comp.selectedLabel()).toBe('custom');
+    comp.writeValue('mx');
+    expect(comp.selectedOptionId()).toContain('option');
+
+    f.componentRef.setInput('filterValue', 'controlled');
+    f.detectChanges();
+    comp.searchQuery.set('local');
+    comp.close(false);
+    expect(comp.searchQuery()).toBe('local');
+    comp.finishHide({ closed: false, focusRestoration: null }, null, 'programmatic');
+
+    const ignoredKey = new KeyboardEvent('keydown', { key: 'F2', cancelable: true });
+    comp.onTriggerKeyDown(ignoredKey);
+    expect(ignoredKey.defaultPrevented).toBe(false);
+    f.componentRef.setInput('selectOnFocus', true);
+    f.detectChanges();
+    comp.onOptionMouseEnter(999);
+
+    const lazy = vi.spyOn(comp.lazyRequest, 'emit');
+    f.componentRef.setInput('filterValue', null);
+    f.componentRef.setInput('lazy', true);
+    f.componentRef.setInput('virtualScroll', true);
+    comp.searchQuery.set('');
+    f.detectChanges();
+    comp.setFilter('');
+    expect(lazy).toHaveBeenCalledWith(expect.objectContaining({ reason: 'reset' }));
+    f.componentRef.setInput('lazy', false);
+    f.detectChanges();
+    comp.onPanelScroll({ currentTarget: { scrollTop: 48 } } as unknown as Event);
+    const optionRow = comp.visibleRows().find((row: any) => row.kind === 'option');
+    expect(comp.optionPosition(optionRow, 0)).toBeGreaterThan(0);
+
+    f.componentRef.setInput('options', []);
+    f.detectChanges();
+    comp.virtualFirst.set(5);
+    expect(comp.virtualTopHeight()).toBe(0);
+    expect(comp.virtualBottomHeight()).toBe(0);
+    comp.focusFirstOption();
+    comp.scrollActiveIntoView();
+    comp.moveActive(new KeyboardEvent('keydown'), {
+      rowIndex: -1,
+      row: null,
+      scrollRequest: null,
+    });
+
+    f.componentRef.setInput('options', [
+      { value: -0, label: 'Negative zero' },
+      { value: 0, label: 'Positive zero' },
+    ]);
+    f.componentRef.setInput('multiple', false);
+    f.detectChanges();
+    comp.writeValue(-0);
+    expect(comp.isOptionSelected(comp.options()[0])).toBe(true);
+    expect(comp.isOptionSelected(comp.options()[1])).toBe(false);
+
+    f.componentRef.setInput('options', [{ value: Symbol('opaque'), label: 'Opaque' }]);
+    f.detectChanges();
+    expect(comp.valueFromUrl('missing')).toBeNull();
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('multiple', true);
+    f.componentRef.setInput('editable', true);
+    f.detectChanges();
+    comp.writeValue('not-an-array');
+    expect(comp.currentValues()).toEqual([]);
+    expect(comp.modelValueFromUrl('es,mx')).toEqual(['es', 'mx']);
+    expect(comp.modelValuesEqual(['es'], null)).toBe(false);
+    expect(comp.modelValuesEqual(['es'], ['es', 'mx'])).toBe(false);
+    expect(comp.modelValuesEqual(['es'], ['es'])).toBe(true);
+
+    comp.editableQuery.set('new-value');
+    comp.commitCustomValue(new Event('change'));
+    expect(comp.currentValues()).toContain('new-value');
+    f.componentRef.setInput('editable', false);
+    f.detectChanges();
+    comp.commitCustomValue(new Event('change'));
+
+    comp.pendingOverlayFrameActions = [vi.fn()];
+    comp.runOverlayFrame();
+    expect(comp.pendingOverlayFrameActions).toEqual([]);
+    comp.handleOverlayKey(new KeyboardEvent('keydown', { key: 'PageDown' }), 'escape');
+
+    comp._isOpen.set(true);
+    comp.overlaySession.close('programmatic', false);
+    expect(comp.adoptOverlaySignal()).toBe(true);
+    comp.overlaySession.close('programmatic', false);
+    comp.onWindowResize();
+    comp.overlaySession.close('programmatic', false);
+    comp.onWindowScroll();
+
+    comp._isOpen.set(false);
+    const open = vi.spyOn(comp.overlaySession, 'open').mockReturnValueOnce(false);
+    comp.open();
+    expect(comp.isOpen()).toBe(false);
+    open.mockRestore();
+
+    const detachedOrigin = document.createElement('button');
+    comp.requestFocusRestoration(detachedOrigin);
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    expect(document.activeElement).not.toBe(detachedOrigin);
+  });
 });

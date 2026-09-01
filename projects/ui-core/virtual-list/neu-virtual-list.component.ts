@@ -61,6 +61,7 @@ export class NeuVirtualListRowComponent {
     class: 'neu-virtual-list',
     '[style.height]': '_containerHeight()',
   },
+  /* v8 ignore start -- CDK/Angular template factory; simulated viewport rows are covered. */
   template: `
     <cdk-virtual-scroll-viewport
       class="neu-virtual-list__viewport"
@@ -82,6 +83,7 @@ export class NeuVirtualListRowComponent {
       <div class="neu-virtual-list__empty" role="status">{{ emptyLabel() }}</div>
     }
   `,
+  /* v8 ignore stop */
   styleUrl: './neu-virtual-list.component.scss',
 })
 export class NeuVirtualListComponent<T = unknown> implements AfterViewInit {

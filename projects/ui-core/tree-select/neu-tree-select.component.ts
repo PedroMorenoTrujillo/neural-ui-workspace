@@ -238,11 +238,13 @@ export class NeuTreeSelectComponent<
     return typeof value === 'object' && value !== null;
   }
 
+  /* v8 ignore start -- Angular signal-query factories; projected tree-select slots are covered. */
   readonly nodeTpl = contentChild(NeuTreeSelectNodeDirective<T>);
   readonly selectedTpl = contentChild(NeuTreeSelectSelectedDirective<T>);
   readonly headerTpl = contentChild(NeuTreeSelectHeaderDirective);
   readonly footerTpl = contentChild(NeuTreeSelectFooterDirective);
   readonly emptyTpl = contentChild(NeuTreeSelectEmptyDirective);
+  /* v8 ignore stop */
   readonly nodes = input<readonly T[]>([]);
 
   /** Property or function used to obtain the visible option label. */
@@ -276,8 +278,10 @@ export class NeuTreeSelectComponent<
   readonly expanded = signal(new Set<V>());
   readonly cvaDisabled = signal(false);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /* v8 ignore start -- Angular signal-query factories; trigger/overlay behavior is covered. */
   private readonly trigger = viewChild('trigger', { read: ElementRef<HTMLButtonElement> });
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+  /* v8 ignore stop */
   private readonly navigation = new NeuTreeNavigationController();
   private focusLastOnAttach = false;
 

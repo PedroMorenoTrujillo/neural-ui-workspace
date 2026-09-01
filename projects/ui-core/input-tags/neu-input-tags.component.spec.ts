@@ -138,6 +138,58 @@ describe('NeuInputTagsComponent', () => {
     expect(component.optionId(2)).toContain('-option-2'); expect(component.itemLabel({ label: 'Name', id: 'name' })).toBe('Name'); component.focusInput();
   });
 
+  it('keeps grouped identities, zero values and optional clipboard data deterministic', () => {
+    const edgeFixture = TestBed.createComponent(NeuInputTagsComponent<any>);
+    const objectGroup = {
+      label: 'Frameworks',
+      children: [{ label: 'Angular', id: 'ng' }],
+    };
+    edgeFixture.componentRef.setInput('group', true);
+    edgeFixture.componentRef.setInput('suggestions', [objectGroup]);
+    edgeFixture.componentRef.setInput('optionGroupLabel', 'label');
+    edgeFixture.componentRef.setInput('optionGroupChildren', 'children');
+    edgeFixture.componentRef.setInput('optionLabel', 'label');
+    edgeFixture.componentRef.setInput('optionValue', 'id');
+    edgeFixture.detectChanges();
+    const edge = edgeFixture.componentInstance as any;
+
+    expect(edge.groupedOptionIndex(objectGroup, 0)).toBe(0);
+    expect(edge.groupedOptionIndex({ label: 'missing', children: [] }, 2)).toBe(2);
+    expect(edge.trackOption(7, null)).toBe(7);
+    expect(edge.trackGroup(8, {})).toBe('[object Object]');
+
+    edgeFixture.componentRef.setInput('group', false);
+    edgeFixture.componentRef.setInput('optionValue', null);
+    edgeFixture.componentRef.setInput('addOnPaste', true);
+    edgeFixture.detectChanges();
+    edge.writeValue([0, -0]);
+    expect(edge.containsValue(0)).toBe(true);
+    expect(edge.containsValue(-0)).toBe(true);
+    expect(edge.containsValue(1)).toBe(false);
+
+    const paste = new Event('paste', { cancelable: true }) as ClipboardEvent;
+    edge.onPaste(paste);
+    expect(paste.defaultPrevented).toBe(false);
+
+    edgeFixture.componentRef.setInput('suggestions', ['one']);
+    edgeFixture.componentRef.setInput('focusOnHover', false);
+    edgeFixture.detectChanges();
+    edge.activeIndex.set(-1);
+    edge.onOptionHover('one');
+    expect(edge.activeIndex()).toBe(-1);
+    edgeFixture.componentRef.setInput('focusOnHover', true);
+    edgeFixture.detectChanges();
+    edge.onOptionHover('one');
+    expect(edge.activeIndex()).toBe(0);
+
+    edgeFixture.componentRef.setInput('group', true);
+    edgeFixture.componentRef.setInput('suggestions', ['primitive-group']);
+    edgeFixture.componentRef.setInput('optionGroupLabel', (group: string) => group);
+    edgeFixture.componentRef.setInput('optionGroupChildren', () => ['child']);
+    edgeFixture.detectChanges();
+    expect(edge.groupedOptionIndex('primitive-group', 0)).toBe(0);
+  });
+
   it('runs the rendered option, blur and paste listeners with active listbox state', () => {
     vi.useFakeTimers();
     fixture.componentRef.setInput('typeahead', true); fixture.componentRef.setInput('delay', 0); fixture.componentRef.setInput('addOnPaste', true); fixture.componentRef.setInput('addOnBlur', true);

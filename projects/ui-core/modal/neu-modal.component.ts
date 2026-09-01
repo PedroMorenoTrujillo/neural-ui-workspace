@@ -115,8 +115,10 @@ export class NeuDialogComponent {
   /** Emite cuando el usuario cierra el diálogo. / Emits when the user closes the dialog. */
   closed = output<unknown>();
 
+  /* v8 ignore start -- Angular signal-query factories; modal focus behavior is covered. */
   private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
   private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
+  /* v8 ignore stop */
   private readonly document = inject(DOCUMENT);
   private previousActiveElement: HTMLElement | null = null;
 

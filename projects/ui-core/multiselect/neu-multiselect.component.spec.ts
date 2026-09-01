@@ -2738,6 +2738,173 @@ describe('NeuMultiselectComponent', () => {
     expect(comp._values()).toEqual(['react']);
   });
 
+  it('renders hidden-label, count and comma selection displays including overflow', () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('placeholder', 'Choose');
+    f.componentRef.setInput('displaySelectedLabel', false);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    comp.writeValue(['angular', 'react', 'vue']);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-multiselect__placeholder')?.textContent).toContain(
+      'Choose',
+    );
+
+    f.componentRef.setInput('displaySelectedLabel', true);
+    f.componentRef.setInput('display', 'count');
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-multiselect__count-badge')?.textContent).toContain(
+      '3',
+    );
+
+    f.componentRef.setInput('display', 'comma');
+    f.componentRef.setInput('maxSelectedLabels', 2);
+    f.detectChanges();
+    const comma = f.nativeElement.querySelector('.neu-multiselect__comma-values')?.textContent;
+    expect(comma).toContain('Angular');
+    expect(comma).toContain('React');
+    expect(comma).toContain('+1');
+
+    comp.writeValue(['angular', 'react']);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-multiselect__comma-values')?.textContent).not.toContain(
+      '+',
+    );
+  });
+
+  it('covers legacy groups, numeric identity, keyboard, lazy and overlay edge contracts', async () => {
+    const f = TestBed.createComponent(NeuMultiselectComponent);
+    f.componentRef.setInput('options', [
+      { value: 'one', label: 'One', group: 'Legacy' },
+      { value: 'two', label: 'Two', group: 'Legacy' },
+    ]);
+    f.componentRef.setInput('searchable', true);
+    f.componentRef.setInput('autofocusFilter', true);
+    f.detectChanges();
+    const comp = f.componentInstance as any;
+    expect(comp.normalizedRows().some((row: any) => row.kind === 'group')).toBe(true);
+
+    f.componentRef.setInput('options', [
+      { value: -0, label: 'Negative zero' },
+      { value: 0, label: 'Positive zero' },
+      { value: 1, label: 'One' },
+    ]);
+    f.detectChanges();
+    expect(comp.optionFor(-0)?.label).toBe('Negative zero');
+    expect(comp.optionFor(0)?.label).toBe('Positive zero');
+    comp.writeValue([-0]);
+    expect(comp.isSelected(-0)).toBe(true);
+    expect(comp.isSelected(0)).toBe(false);
+    comp.writeValue([]);
+    comp.toggleAllFiltered(new MouseEvent('click'));
+    expect(comp._values().some((value: number) => Object.is(value, -0))).toBe(true);
+    expect(comp._values().some((value: number) => Object.is(value, 0))).toBe(true);
+
+    f.componentRef.setInput('identityConfig', {
+      compareWith: (left: unknown, right: unknown) => Object.is(left, right),
+    });
+    f.detectChanges();
+    comp.writeValue([1]);
+    expect(comp.isSelected(1)).toBe(true);
+    expect(comp.optionFor('missing')).toBeNull();
+    f.componentRef.setInput('identityConfig', {});
+    f.componentRef.setInput('options', [{ value: 1, label: 'One' }]);
+    f.detectChanges();
+    expect(comp.optionFor(0)).toBeNull();
+    f.componentRef.setInput('options', OPTIONS);
+    f.detectChanges();
+    expect(comp.valueFromUrl('custom')).toBe('custom');
+    f.componentRef.setInput('options', [{ value: Symbol('opaque'), label: 'Opaque' }]);
+    f.detectChanges();
+    expect(comp.valueFromUrl('missing')).toBeNull();
+
+    f.componentRef.setInput('options', OPTIONS);
+    f.componentRef.setInput('lazy', true);
+    f.detectChanges();
+    const lazy = vi.spyOn(comp.lazyRequest, 'emit');
+    comp.applyFilter('ang');
+    comp.resetFilter(true);
+    comp.requestLazy('scroll', 8, 4);
+    comp.requestLazy('scroll', 8, 4);
+    expect(lazy).toHaveBeenCalled();
+
+    comp.open();
+    f.detectChanges();
+    comp.runOverlayFrame();
+    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
+    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'PageUp', cancelable: true }));
+    comp.onPanelKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+    expect(comp.isOpen()).toBe(false);
+
+    comp.activeRowController.setRows(comp.filteredRows());
+    comp.activeRowController.activate(0);
+    comp.activeRowIndex.set(-1);
+    comp.adoptActiveSignal();
+    comp.activeRowIndex.set(1);
+    comp.adoptActiveSignal();
+    comp.setActiveRow({ rowIndex: -1, row: null, scrollRequest: null });
+    comp.applyActiveRow(comp.activeRowController.clear());
+    comp.focusActiveOption();
+    comp.selectActive(new Event('keydown'));
+    comp.handleTypeahead(new KeyboardEvent('keydown', { key: '~', cancelable: true }));
+
+    f.componentRef.setInput('focusOnHover', false);
+    f.componentRef.setInput('filterValue', 'controlled');
+    f.detectChanges();
+    comp.onOptionHover(0);
+    comp.resetFilter(true);
+    const prevented = new KeyboardEvent('keydown', { key: 'Home', cancelable: true });
+    prevented.preventDefault();
+    comp.onTriggerKeyDown(prevented);
+
+    f.componentRef.setInput('readonly', true);
+    f.detectChanges();
+    comp.toggleAllFiltered(new MouseEvent('click'));
+    comp.commitSelection(comp._values(), null, null, false, false);
+    f.componentRef.setInput('readonly', false);
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    comp.onInputFocus(new FocusEvent('focus'));
+    comp.commitOpen(null, 'programmatic');
+    f.componentRef.setInput('disabled', false);
+    f.detectChanges();
+
+    comp.pendingOverlayFrameActions = [vi.fn()];
+    comp.runOverlayFrame();
+    expect(comp.pendingOverlayFrameActions).toEqual([]);
+    comp.finishHide({ closed: false, focusRestoration: null }, null, 'programmatic');
+
+    comp._isOpen.set(true);
+    comp.overlaySession.close('programmatic', false);
+    expect(comp.adoptOverlaySignal()).toBe(true);
+    comp.overlaySession.close('programmatic', false);
+    comp.onWindowResize();
+    comp.overlaySession.close('programmatic', false);
+    comp.onWindowScroll();
+    comp._isOpen.set(false);
+    const open = vi.spyOn(comp.overlaySession, 'open').mockReturnValueOnce(false);
+    comp.commitOpen(null, 'programmatic');
+    expect(comp.isOpen()).toBe(false);
+    open.mockRestore();
+
+    const requestFrame = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementationOnce((callback: FrameRequestCallback) => {
+        callback(0);
+        return 1;
+      })
+      .mockReturnValueOnce(9);
+    const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame');
+    comp.requestAutofocusFrame();
+    comp.requestAutofocusFrame();
+    comp.cancelAutofocusFrame();
+    expect(cancelFrame).toHaveBeenCalledWith(9);
+    requestFrame.mockRestore();
+    cancelFrame.mockRestore();
+    await f.whenStable();
+  });
+
   describe('controlled open owner', () => {
     it('keeps uncontrolled open/close ergonomic and emits one state change per committed action', () => {
       const f = TestBed.createComponent(NeuMultiselectComponent);

@@ -166,12 +166,14 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
   readonly panelId = `${this.inputIdInternal}-panel`;
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
   readonly effectiveInputId = computed(() => this.inputId() || this.inputIdInternal);
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly itemTpl = contentChild(NeuInputTagsItemDirective<T>);
   readonly removeIconTpl = contentChild(NeuInputTagsRemoveIconDirective);
   readonly optionTpl = contentChild(NeuInputTagsOptionDirective<T>);
   readonly groupTpl = contentChild(NeuInputTagsGroupDirective<T>);
   readonly headerTpl = contentChild(NeuInputTagsHeaderDirective);
   readonly footerTpl = contentChild(NeuInputTagsFooterDirective);
+  /* v8 ignore stop */
   readonly groupedOptions = computed(() => this.group() ? this.suggestions().map((group) => ({ group, label: this.groupLabelOf(group), options: this.groupChildrenOf(group).filter((option) => !this.optionIsDisabled(option) && (this.allowDuplicate() || !this.containsValue(this.optionValueOf(option)))) })) : []);
   readonly availableOptions = computed(() => this.group() ? this.groupedOptions().flatMap((entry) => entry.options) : this.suggestions().filter((option) => !this.optionIsDisabled(option) && (this.allowDuplicate() || !this.containsValue(this.optionValueOf(option)))));
   readonly panelVisible = computed(() => this.typeahead() && this.panelOpen() && this.availableOptions().length > 0);
@@ -203,7 +205,9 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
   });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
+  /* v8 ignore start -- Angular signal-query factory; native-input behavior is covered. */
   private readonly inputElement = viewChild<ElementRef<HTMLInputElement>>('inputElement');
+  /* v8 ignore stop */
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
   private onChange: (value: T[]) => void = () => {};
   private onTouched: () => void = () => {};

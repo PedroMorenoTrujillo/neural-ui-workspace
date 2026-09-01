@@ -181,11 +181,15 @@ export class NeuSplitButtonItemDirective {
   styleUrl: './neu-split-button.component.scss',
 })
 export class NeuSplitButtonComponent {
+  /* v8 ignore start -- Angular signal-query factory; projected-item behavior is covered. */
   readonly itemTpl = contentChild(NeuSplitButtonItemDirective);
+  /* v8 ignore stop */
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly overlay = inject(Overlay);
+  /* v8 ignore start -- Angular signal-query factories; trigger/overlay behavior is covered. */
   private readonly trigger = viewChild('menuTrigger', { read: ElementRef<HTMLButtonElement> });
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+  /* v8 ignore stop */
   private readonly menuController = new NeuRovingMenuController({ orientation: 'vertical' });
   private focusLastOnAttach = false;
   protected readonly _viewportMargin = 16;

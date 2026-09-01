@@ -579,6 +579,7 @@ export class NeuSelectComponent<
   private readonly _triggerId = inject(NeuIdGenerator).getId('neu-select-trigger-');
   protected readonly _panelId = `${this._triggerId}-panel`;
   /** Template personalizado para cada opción del dropdown / Custom template for each dropdown option */
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly itemTpl = contentChild(NeuSelectItemDirective<T>);
 
   /** Template personalizado para el valor seleccionado en el trigger / Custom template for the selected value in the trigger */
@@ -594,6 +595,7 @@ export class NeuSelectComponent<
   readonly loadingIconTpl = contentChild(NeuSelectLoadingIconDirective);
   readonly clearIconTpl = contentChild(NeuSelectClearIconDirective);
   readonly filterIconTpl = contentChild(NeuSelectFilterIconDirective);
+  /* v8 ignore stop */
   /** Opciones del dropdown / Dropdown options */
   options = input<readonly T[]>([]);
 

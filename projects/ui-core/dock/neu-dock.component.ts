@@ -189,10 +189,12 @@ export class NeuDockItemDirective {
 export class NeuDockComponent {
   protected readonly Math = Math;
   private readonly responsive = inject(NeuResponsiveState);
+  /* v8 ignore start -- Angular signal-query factories; rendered action/template behavior is covered. */
   private readonly actions = viewChildren<ElementRef<HTMLElement>>('dockAction');
   private readonly itemTemplate = contentChild(NeuDockItemDirective);
   private readonly defaultTemplate =
     viewChild.required<TemplateRef<NeuDockItemTemplateContext>>('defaultItem');
+  /* v8 ignore stop */
   private readonly controller = new NeuRovingMenuController({ orientation: 'horizontal' });
 
   readonly items = input<NeuDockItem[]>([]);

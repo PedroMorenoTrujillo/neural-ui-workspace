@@ -1021,6 +1021,12 @@ describe('NeuTable canonical state integration', () => {
     fixture.componentInstance.resetState();
     expect(fixture.componentInstance.searchQuery()).toBe('');
     expect(window.sessionStorage.getItem('neu-table-t1-lifecycle')).not.toBeNull();
+
+    const persistence = (fixture.componentInstance as any)._persistenceAdapter;
+    vi.spyOn(persistence, 'write').mockReturnValue(false);
+    const savesBeforeRejectedWrite = saves.length;
+    fixture.componentInstance.saveState();
+    expect(saves).toHaveLength(savesBeforeRejectedWrite);
   });
 
   it('skips disabled persistence and snapshots each committed revision at most once', async () => {
@@ -1088,6 +1094,9 @@ describe('NeuTable canonical state integration', () => {
         filters: { name: { operator: 'and', constraints: [{ value: 'Gam' }] } },
         selectionKeys: new Set([3]),
         expansionKeys: new Set([3, 'off-page']),
+        editingKeys: new Set([3]),
+        editingCell: { rowKey: 3, columnKey: 'name' },
+        groupExpansionKeys: new Set(['Gamma']),
         layout: {
           columnOrder: ['name', 'id'],
           hiddenColumns: ['id'],
@@ -1102,12 +1111,18 @@ describe('NeuTable canonical state integration', () => {
     const sorts: unknown[] = [];
     const selections: unknown[] = [];
     const expansions: unknown[] = [];
+    const editingRows: unknown[] = [];
+    const editingCells: unknown[] = [];
+    const expandedGroups: unknown[] = [];
     const layouts: unknown[] = [];
     table.queryChange.subscribe((value) => queries.push(value));
     table.searchChange.subscribe((value) => searches.push(value));
     table.sortChange.subscribe((value) => sorts.push(value));
     table.selectionChange.subscribe((value) => selections.push(value));
     table.expandedRowKeysChange.subscribe((value) => expansions.push(value));
+    table.editingRowKeysChange.subscribe((value) => editingRows.push(value));
+    table.editingCellChange.subscribe((value) => editingCells.push(value));
+    table.expandedGroupKeysChange.subscribe((value) => expandedGroups.push(value));
     table.layoutChange.subscribe((value) => layouts.push(value));
 
     table.resetState();
@@ -1132,6 +1147,9 @@ describe('NeuTable canonical state integration', () => {
     expect(sorts).toEqual([[]]);
     expect(selections).toEqual([[]]);
     expect(expansions).toEqual([[]]);
+    expect(editingRows).toEqual([[]]);
+    expect(editingCells).toEqual([null]);
+    expect(expandedGroups).toEqual([[]]);
     expect(layouts).toHaveLength(1);
     expect((table as any)._openFilterKey()).toBeNull();
 
@@ -1240,5 +1258,14 @@ describe('NeuTable canonical state integration', () => {
     expect(target.componentInstance.restoreState()).toMatchObject({ search: 'URL' });
     expect(restores).toHaveLength(1);
     expect(queries).toHaveLength(1);
+
+    const urlRead = vi.spyOn((target.componentInstance as any)._urlAdapter, 'read');
+    target.componentRef.setInput('query', queries[0] as NeuTableQueryState);
+    target.detectChanges();
+    await target.whenStable();
+    urlRead.mockClear();
+    (target.componentInstance as any)._initialQueryHandled = false;
+    expect(target.componentInstance.restoreState()).not.toBeNull();
+    expect(urlRead).not.toHaveBeenCalled();
   });
 });
