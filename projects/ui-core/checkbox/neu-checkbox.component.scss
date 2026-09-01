@@ -5,6 +5,7 @@
 .neu-checkbox {
   display: inline-flex;
   align-items: center;
+  min-height: 24px;
   gap: var(--neu-space-3);
   cursor: pointer;
   user-select: none;
@@ -51,7 +52,6 @@
   &--mixed {
     background: var(--neu-primary);
     border-color: var(--neu-primary);
-    box-shadow: var(--neu-focus-ring-strong);
   }
 }
 
@@ -78,5 +78,19 @@
   font-size: var(--neu-text-sm);
   color: var(--neu-text);
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.4;
+}
+
+@media (pointer: coarse) {
+  .neu-checkbox {
+    min-height: 44px;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-checkbox__box--checked,
+  .neu-checkbox__box--mixed {
+    border-color: Highlight;
+    background: Highlight;
+  }
 }

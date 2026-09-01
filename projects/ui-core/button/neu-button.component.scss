@@ -9,7 +9,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--neu-space-2);
+  gap: var(--neu-control-gap, var(--neu-space-2));
   border: 1px solid transparent;
   border-radius: var(--neu-radius);
   font-family: var(--neu-font-sans);
@@ -26,6 +26,10 @@
     box-shadow var(--neu-transition),
     opacity var(--neu-transition);
   outline: none;
+
+  &:active:not(:disabled):not(.neu-button--disabled) {
+    transform: translateY(1px);
+  }
 
   &:focus-visible {
     box-shadow: var(--neu-focus-ring-strong);
@@ -114,8 +118,8 @@
     border-color: var(--neu-error);
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: #dc2626;
-      border-color: #dc2626;
+      background: color-mix(in srgb, var(--neu-error) 82%, #000000 18%);
+      border-color: color-mix(in srgb, var(--neu-error) 82%, #000000 18%);
     }
   }
 

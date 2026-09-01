@@ -21,9 +21,9 @@
   gap: 0.5rem;
   width: 100%;
   min-width: 14rem;
-  min-height: 2.5rem;
-  border: 1px solid var(--neu-border, #d1d5db);
-  border-radius: 0.625rem;
+  min-height: var(--neu-control-height, 3rem);
+  border: 1.5px solid var(--neu-border, #d1d5db);
+  border-radius: var(--neu-radius, 0.5rem);
   background: var(--neu-surface, #fff);
   color: var(--neu-text, #111827);
   padding: 0.5rem 0.75rem;

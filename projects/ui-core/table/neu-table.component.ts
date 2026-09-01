@@ -809,7 +809,12 @@ export type NeuTableColumnInput<T extends object> =
                 (change)="onPageSizeChange($event)"
               >
                 @for (size of pageSizeOptions(); track size) {
-                  <option [value]="size">{{ size }}</option>
+                  <option
+                    [value]="size"
+                    [selected]="size === effectivePageSize()"
+                  >
+                    {{ size }}
+                  </option>
                 }
               </select>
             </div>

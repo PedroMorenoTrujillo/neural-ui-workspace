@@ -9348,6 +9348,24 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(fixture.componentInstance.selectedRows()).toHaveLength(1);
   });
 
+  it('keeps the native page-size selector synchronized with the effective page size', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('data', MANY_ROWS);
+    fixture.componentRef.setInput('pageSize', 10);
+    fixture.componentRef.setInput('pageSizeOptions', [5, 10, 25]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const selector = fixture.nativeElement.querySelector(
+      '.neu-table__page-size-select',
+    ) as HTMLSelectElement;
+    expect(selector.value).toBe('10');
+    expect(
+      fixture.nativeElement.querySelectorAll('.neu-table__row').length,
+    ).toBe(10);
+  });
+
   it('projects explicit, selected, filtered, page and loaded export scopes without duplicates', () => {
     const fixture = TestBed.createComponent(NeuTableComponent);
     fixture.componentRef.setInput('columns', [

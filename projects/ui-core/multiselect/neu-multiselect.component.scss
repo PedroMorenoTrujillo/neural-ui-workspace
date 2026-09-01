@@ -88,7 +88,7 @@ $panel-z: 200;
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: $trigger-min-height;
+  min-height: var(--neu-control-height, #{$trigger-min-height});
   padding: var(--neu-space-2) var(--neu-space-3);
   padding-inline-end: 36px; // hueco para chevron
   background: var(--neu-surface);
@@ -107,7 +107,7 @@ $panel-z: 200;
   &:focus-visible {
     outline: none;
     border-color: var(--neu-primary);
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+    box-shadow: var(--neu-focus-ring);
   }
 
   &[aria-disabled='true'] {
@@ -118,7 +118,7 @@ $panel-z: 200;
 
   .neu-multiselect--open & {
     border-color: var(--neu-primary);
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+    box-shadow: var(--neu-focus-ring);
   }
 
   .neu-multiselect--error & {
@@ -173,8 +173,8 @@ $panel-z: 200;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: none;
   background: transparent;
@@ -205,8 +205,8 @@ $panel-z: 200;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   margin-inline-end: 2px;
   padding: 0;
   border: none;

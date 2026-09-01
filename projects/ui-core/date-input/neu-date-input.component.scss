@@ -106,7 +106,7 @@ $drum-item-h: 36px;
   gap: var(--neu-space-2);
   width: 100%;
   min-width: 0;
-  min-height: $trigger-height;
+  min-height: var(--neu-control-height, #{$trigger-height});
   padding: 0 var(--neu-space-3);
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);

@@ -13,7 +13,7 @@
 
 .neu-input-mask__control {
   @include text.ellipsis;
-  min-height: 2.5rem;
+  min-height: var(--neu-control-height, 3rem);
   border: 1.5px solid var(--neu-border, #d1d5db);
   border-radius: var(--neu-radius, 0.625rem);
   background: var(--neu-surface, #fff);

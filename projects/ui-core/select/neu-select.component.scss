@@ -48,8 +48,8 @@ $select-height: 48px;
   display: flex;
   align-items: center;
   width: 100%;
-  height: $select-height;
-  padding: 0 var(--neu-space-3);
+  height: var(--neu-control-height, #{$select-height});
+  padding: 0 var(--neu-control-padding-inline, var(--neu-space-3));
   padding-inline-end: 36px; // espacio para el chevron
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);
@@ -76,12 +76,12 @@ $select-height: 48px;
 
   &:focus-visible {
     border-color: var(--neu-primary);
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+    box-shadow: var(--neu-focus-ring);
   }
 
   .neu-select--open & {
     border-color: var(--neu-primary);
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+    box-shadow: var(--neu-focus-ring);
     border-end-start-radius: 0;
     border-end-end-radius: 0;
   }
@@ -202,8 +202,8 @@ $select-height: 48px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   margin-inline-end: 2px;
   padding: 0;
   border: none;

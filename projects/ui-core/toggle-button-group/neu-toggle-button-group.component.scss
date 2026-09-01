@@ -6,11 +6,13 @@
 // ---- Host ----
 .neu-toggle-group-host {
   display: inline-block;
+  max-width: 100%;
 }
 
 // ---- Grupo / Group ----
 .neu-toggle-group {
   display: inline-flex;
+  max-width: 100%;
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius);
   overflow: hidden;
@@ -99,6 +101,18 @@
   &--lg &__btn {
     font-size: var(--neu-text-base);
     padding: 0.625rem var(--neu-space-5);
+  }
+}
+
+@media (max-width: 480px) {
+  .neu-toggle-group {
+    display: flex;
+  }
+
+  .neu-toggle-group__btn {
+    min-width: 0;
+    flex: 1 1 0;
+    padding-inline: var(--neu-space-2);
   }
 }
 
