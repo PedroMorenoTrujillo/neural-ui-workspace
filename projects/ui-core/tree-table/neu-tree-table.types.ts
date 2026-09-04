@@ -92,6 +92,15 @@ export interface NeuTreeTableSelectionEvent<
   readonly selection: readonly NeuTreeTableNode<T>[];
 }
 
+export interface NeuTreeTableContextMenuEvent<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> {
+  readonly originalEvent: MouseEvent | KeyboardEvent;
+  readonly node: NeuTreeTableNode<T>;
+  readonly row: NeuTreeTableRow<T>;
+  readonly index: number;
+}
+
 export interface NeuTreeTableCellEditEvent<
   T extends Record<string, unknown> = Record<string, unknown>,
 > {

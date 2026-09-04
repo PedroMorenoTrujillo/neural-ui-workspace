@@ -7,6 +7,52 @@
   min-width: 0;
 }
 
+.neu-tree__virtual {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.neu-tree__node--flat > .neu-tree__row {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.neu-tree__drop {
+  display: block;
+  min-height: 0.25rem;
+}
+
+.neu-tree__drop--inside {
+  position: absolute;
+  inset-inline-end: 0.375rem;
+  margin-block-start: -2rem;
+  inline-size: 1.25rem;
+  min-height: 1.5rem;
+}
+
+.neu-tree__drop--before {
+  order: 1;
+}
+
+.neu-tree__drop--after {
+  order: 3;
+}
+
+.neu-tree__drop[data-neu-drop-state='hover'],
+.neu-tree__drop[data-neu-drop-state='active'],
+.neu-tree__drop:focus-visible {
+  background: color-mix(in srgb, var(--neu-primary, #2563eb) 55%, transparent);
+  outline: 2px solid var(--neu-primary, #2563eb);
+}
+
+.neu-tree__spinner {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+}
+
 .neu-tree__search {
   position: relative;
   display: flex;
@@ -61,6 +107,8 @@
 
 .neu-tree__node {
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .neu-tree__node:focus-visible {
@@ -72,6 +120,7 @@
 }
 
 .neu-tree__row {
+  order: 2;
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
@@ -230,6 +279,6 @@
   font-size: 0.875rem;
 }
 
-.neu-tree__node > .neu-tree__list {
+.neu-tree__branch > .neu-tree__list {
   margin-top: 0.125rem;
 }

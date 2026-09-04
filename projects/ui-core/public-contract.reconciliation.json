@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1404,
-    "bindingDelta": 237,
+    "declarationBindings": 1456,
+    "bindingDelta": 289,
     "mapped": 932,
     "aliasCorrections": 4,
     "missingOldEntries": 229,
-    "newlyDiscovered": 466,
+    "newlyDiscovered": 518,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 351,
+      "declaration-or-selector-was-not-recorded": 398,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 106
+      "multiline-annotated-or-compound-declaration-was-missed": 111
     }
   },
   "mappings": [
@@ -4438,6 +4438,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./drag-drop#NeuDraggableDirective.input:pointerEnabled",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./drag-drop#NeuDragHandleDirective.input:disabled",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -5126,6 +5130,38 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./pick-list#NeuOrderListComponent.input:ariaLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:dragDrop",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:emptyFilterLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filter",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filterConfig",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filterLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filterPlaceholder",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filterValue",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./pick-list#NeuOrderListComponent.input:items",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -5142,7 +5178,47 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./pick-list#NeuOrderListComponent.input:selectionKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.output:filterChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.output:itemDrop",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./pick-list#NeuOrderListComponent.output:orderChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.output:selectionChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:dragDrop",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:emptyFilterLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:filter",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:filterConfig",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:filterPlaceholder",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:moveAllScope",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5162,7 +5238,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./pick-list#NeuPickListComponent.input:sourceFilterLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:sourceFilterValue",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.input:sourceHeader",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:sourceSelectionKeys",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5170,7 +5258,23 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./pick-list#NeuPickListComponent.input:targetFilterLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:targetFilterValue",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.input:targetHeader",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:targetSelectionKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.output:itemDrop",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5182,11 +5286,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./pick-list#NeuPickListComponent.output:sourceFilterChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.output:sourceSelectionChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./pick-list#NeuPickListComponent.output:targetChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.output:targetFilterChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5666,6 +5778,18 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree-table#NeuTreeTableComponent.input:contextMenu",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:contextMenuNodeDisabled",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:contextMenuSelection",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./tree-table#NeuTreeTableComponent.input:editingRowKeys",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5734,6 +5858,14 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./tree-table#NeuTreeTableComponent.output:contextMenuSelect",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:contextMenuSelectionChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./tree-table#NeuTreeTableComponent.output:editingRowKeysChange",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5790,7 +5922,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree#NeuTreeComponent.input:dragDrop",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:dragScope",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree#NeuTreeComponent.input:emptyLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:expandedKeys",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5799,6 +5943,26 @@
     },
     {
       "id": "./tree#NeuTreeComponent.input:indentSize",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:itemSize",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:lazy",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:loading",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:loadingKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:loadingLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5818,7 +5982,39 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree#NeuTreeComponent.input:selectAllLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:selection",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree#NeuTreeComponent.input:selectionMode",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:showSelectAll",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:treeId",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:virtualOverscan",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:virtualScroll",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:visibleRows",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.output:contextRequest",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5826,11 +6022,23 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree#NeuTreeComponent.output:lazyRequest",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree#NeuTreeComponent.output:nodeClick",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree#NeuTreeComponent.output:nodeDrop",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree#NeuTreeComponent.output:selectionChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.output:virtualRangeChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

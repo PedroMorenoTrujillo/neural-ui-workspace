@@ -515,6 +515,7 @@
         "./internal#deriveNeuOptionAriaPosition",
         "./internal#deriveNeuOptionRowId",
         "./internal#filterNeuOptionRows",
+        "./internal#filterNeuOptions",
         "./internal#INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS",
         "./internal#InternalNeuConnectedOverlayCloseIntent",
         "./internal#InternalNeuConnectedOverlayCloseReason",
@@ -821,6 +822,8 @@
       "entrypoint": "./pick-list",
       "types": "./types/neural-ui-core-pick-list.d.ts",
       "exports": [
+        "./pick-list#NeuListLocation",
+        "./pick-list#NeuListMove",
         "./pick-list#NeuOptionAccessor",
         "./pick-list#NeuOptionDisabledAccessor",
         "./pick-list#NeuOptionLabelAccessor",
@@ -829,7 +832,9 @@
         "./pick-list#NeuOrderListComponent",
         "./pick-list#NeuOrderListItemDirective",
         "./pick-list#NeuPickListComponent",
+        "./pick-list#NeuPickListDropEvent",
         "./pick-list#NeuPickListItemDirective",
+        "./pick-list#NeuPickListMoveAllScope",
         "./pick-list#NeuTransferItem"
       ]
     },
@@ -1361,10 +1366,17 @@
       "types": "./types/neural-ui-core-tree.d.ts",
       "exports": [
         "./tree#NeuTreeComponent",
+        "./tree#NeuTreeContextRequest",
+        "./tree#NeuTreeDragData",
+        "./tree#NeuTreeDropEvent",
+        "./tree#NeuTreeDropPosition",
+        "./tree#NeuTreeDropTarget",
+        "./tree#NeuTreeLazyRequest",
         "./tree#NeuTreeNode",
         "./tree#NeuTreeNodeDirective",
         "./tree#NeuTreeNodeTemplateContext",
-        "./tree#NeuTreeSelectionMode"
+        "./tree#NeuTreeSelectionMode",
+        "./tree#NeuTreeVirtualRange"
       ]
     },
     {
@@ -1399,6 +1411,7 @@
         "./tree-table#NeuTreeTableBodySectionDirective",
         "./tree-table#NeuTreeTableCellEditEvent",
         "./tree-table#NeuTreeTableComponent",
+        "./tree-table#NeuTreeTableContextMenuEvent",
         "./tree-table#NeuTreeTableFilterMode",
         "./tree-table#NeuTreeTableLabels",
         "./tree-table#NeuTreeTableLazyRequest",
@@ -11032,6 +11045,16 @@
           "signature": "readonly keyboardEnabled: _angular_core.InputSignalWithTransform<boolean, unknown>;"
         },
         {
+          "id": "./drag-drop#NeuDraggableDirective.input:pointerEnabled",
+          "name": "pointerEnabled",
+          "kind": "input",
+          "publicName": "neuDragPointer",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pointerEnabled: _angular_core.InputSignalWithTransform<boolean, unknown>;"
+        },
+        {
           "id": "./drag-drop#NeuDraggableDirective.input:role",
           "name": "role",
           "kind": "input",
@@ -11137,7 +11160,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuDraggableDirective<any>, \"[neuDraggable]\", never, {\n    \"data\": {\n        \"alias\": \"neuDraggable\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"scope\": {\n        \"alias\": \"neuDragScope\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"effect\": {\n        \"alias\": \"neuDragEffect\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"neuDraggableDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"keyboardEnabled\": {\n        \"alias\": \"neuDragKeyboard\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"neuDragAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"role\": {\n        \"alias\": \"neuDragRole\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabIndex\": {\n        \"alias\": \"neuDragTabIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"dragStart\": \"dragStart\";\n    \"dragMove\": \"dragMove\";\n    \"dragEnd\": \"dragEnd\";\n}, never, never, true, [\n    {\n        directive: typeof i1.CdkDrag;\n        inputs: {};\n        outputs: {};\n    }\n]>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuDraggableDirective<any>, \"[neuDraggable]\", never, {\n    \"data\": {\n        \"alias\": \"neuDraggable\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"scope\": {\n        \"alias\": \"neuDragScope\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"effect\": {\n        \"alias\": \"neuDragEffect\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"neuDraggableDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"keyboardEnabled\": {\n        \"alias\": \"neuDragKeyboard\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pointerEnabled\": {\n        \"alias\": \"neuDragPointer\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"neuDragAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"role\": {\n        \"alias\": \"neuDragRole\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabIndex\": {\n        \"alias\": \"neuDragTabIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"dragStart\": \"dragStart\";\n    \"dragMove\": \"dragMove\";\n    \"dragEnd\": \"dragEnd\";\n}, never, never, true, [\n    {\n        directive: typeof i1.CdkDrag;\n        inputs: {};\n        outputs: {};\n    }\n]>;"
         },
         {
           "id": "./drag-drop#NeuDraggableDirective.property:ɵfac",
@@ -15707,6 +15730,15 @@
       "kind": "function",
       "status": "INTERNAL/UNSUPPORTED",
       "signature": "declare function filterNeuOptionRows<T, G>(rows: readonly InternalNeuOptionNormalizedRow<T, G>[], filterValue: string, config?: NeuOptionFilterConfig<T>, labelAccessor?: NeuOptionAccessor<T> | null, policy?: InternalNeuOptionRowFilterPolicy): InternalNeuOptionNormalizedRow<T, G>[];",
+      "members": []
+    },
+    {
+      "id": "./internal#filterNeuOptions",
+      "entrypoint": "./internal",
+      "name": "filterNeuOptions",
+      "kind": "function",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "declare function filterNeuOptions<T>(options: readonly T[], filterValue: string, config?: NeuOptionFilterConfig<T>, labelAccessor?: NeuOptionAccessor<T> | null): T[];",
       "members": []
     },
     {
@@ -26888,6 +26920,24 @@
       ]
     },
     {
+      "id": "./pick-list#NeuListLocation",
+      "entrypoint": "./pick-list",
+      "name": "NeuListLocation",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuListLocation = 'source' | 'target';",
+      "members": []
+    },
+    {
+      "id": "./pick-list#NeuListMove",
+      "entrypoint": "./pick-list",
+      "name": "NeuListMove",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuListMove = 'up' | 'down' | 'top' | 'bottom';",
+      "members": []
+    },
+    {
       "id": "./pick-list#NeuOptionAccessor",
       "entrypoint": "./pick-list",
       "name": "NeuOptionAccessor",
@@ -26947,6 +26997,86 @@
       "signature": "declare class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {\n}",
       "members": [
         {
+          "id": "./pick-list#NeuOrderListComponent.input:ariaLabel",
+          "name": "ariaLabel",
+          "kind": "input",
+          "publicName": "ariaLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.input:dragDrop",
+          "name": "dragDrop",
+          "kind": "input",
+          "publicName": "dragDrop",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dragDrop: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.input:emptyFilterLabel",
+          "name": "emptyFilterLabel",
+          "kind": "input",
+          "publicName": "emptyFilterLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly emptyFilterLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.input:filter",
+          "name": "filter",
+          "kind": "input",
+          "publicName": "filter",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filter: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.input:filterConfig",
+          "name": "filterConfig",
+          "kind": "input",
+          "publicName": "filterConfig",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filterConfig: _angular_core.InputSignal<Readonly<NeuOptionFilterConfig<T>>>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.input:filterLabel",
+          "name": "filterLabel",
+          "kind": "input",
+          "publicName": "filterLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filterLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.input:filterPlaceholder",
+          "name": "filterPlaceholder",
+          "kind": "input",
+          "publicName": "filterPlaceholder",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filterPlaceholder: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.input:filterValue",
+          "name": "filterValue",
+          "kind": "input",
+          "publicName": "filterValue",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filterValue: _angular_core.InputSignal<string | null>;"
+        },
+        {
           "id": "./pick-list#NeuOrderListComponent.input:items",
           "name": "items",
           "kind": "input",
@@ -26987,12 +27117,38 @@
           "signature": "readonly optionValue: _angular_core.InputSignal<NeuOptionValueAccessor<T, V> | null>;"
         },
         {
+          "id": "./pick-list#NeuOrderListComponent.input:selectionKeys",
+          "name": "selectionKeys",
+          "kind": "input",
+          "publicName": "selectionKeys",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selectionKeys: _angular_core.InputSignal<readonly V[] | undefined>;"
+        },
+        {
           "id": "./pick-list#NeuOrderListComponent.method:canMove",
           "name": "canMove",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "canMove(index: number, direction: -1 | 1): boolean;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.method:dataIndex",
+          "name": "dataIndex",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "dataIndex(item: T): number;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.method:hasSelection",
+          "name": "hasSelection",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "hasSelection(): boolean;"
         },
         {
           "id": "./pick-list#NeuOrderListComponent.method:isOptionDisabled",
@@ -27003,12 +27159,36 @@
           "signature": "isOptionDisabled(option: T): boolean;"
         },
         {
+          "id": "./pick-list#NeuOrderListComponent.method:isSelected",
+          "name": "isSelected",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "isSelected(item: T): boolean;"
+        },
+        {
           "id": "./pick-list#NeuOrderListComponent.method:move",
           "name": "move",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "move(index: number, direction: -1 | 1): void;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.method:moveSelection",
+          "name": "moveSelection",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "moveSelection(move: NeuListMove): void;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.method:onDrop",
+          "name": "onDrop",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onDrop(event: NeuDropEvent<unknown, string>): void;"
         },
         {
           "id": "./pick-list#NeuOrderListComponent.method:optionLabelOf",
@@ -27027,6 +27207,42 @@
           "signature": "optionValueOf(option: T): V;"
         },
         {
+          "id": "./pick-list#NeuOrderListComponent.method:setFilter",
+          "name": "setFilter",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "setFilter(event: Event | string): void;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.method:toggle",
+          "name": "toggle",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "toggle(item: T): void;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.output:filterChange",
+          "name": "filterChange",
+          "kind": "output",
+          "publicName": "filterChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filterChange: _angular_core.OutputEmitterRef<string>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.output:itemDrop",
+          "name": "itemDrop",
+          "kind": "output",
+          "publicName": "itemDrop",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly itemDrop: _angular_core.OutputEmitterRef<NeuPickListDropEvent<T>>;"
+        },
+        {
           "id": "./pick-list#NeuOrderListComponent.output:orderChange",
           "name": "orderChange",
           "kind": "output",
@@ -27035,6 +27251,24 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly orderChange: _angular_core.OutputEmitterRef<T[]>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.output:selectionChange",
+          "name": "selectionChange",
+          "kind": "output",
+          "publicName": "selectionChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<T[]>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.property:effectiveFilter",
+          "name": "effectiveFilter",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveFilter: _angular_core.Signal<string>;"
         },
         {
           "id": "./pick-list#NeuOrderListComponent.property:itemTpl",
@@ -27050,7 +27284,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuOrderListComponent<any, any>, \"neu-order-list\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"orderChange\": \"orderChange\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuOrderListComponent<any, any>, \"neu-order-list\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionKeys\": {\n        \"alias\": \"selectionKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filter\": {\n        \"alias\": \"filter\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterValue\": {\n        \"alias\": \"filterValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterConfig\": {\n        \"alias\": \"filterConfig\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterPlaceholder\": {\n        \"alias\": \"filterPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterLabel\": {\n        \"alias\": \"filterLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyFilterLabel\": {\n        \"alias\": \"emptyFilterLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dragDrop\": {\n        \"alias\": \"dragDrop\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"orderChange\": \"orderChange\";\n    \"selectionChange\": \"selectionChange\";\n    \"filterChange\": \"filterChange\";\n    \"itemDrop\": \"itemDrop\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
         },
         {
           "id": "./pick-list#NeuOrderListComponent.property:ɵfac",
@@ -27059,6 +27293,14 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuOrderListComponent<any, any>, never>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListComponent.property:visibleItems",
+          "name": "visibleItems",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly visibleItems: _angular_core.Signal<T[]>;"
         }
       ]
     },
@@ -27093,7 +27335,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: T;\n    index: number;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: T;\n    index: number;\n    selected: boolean;\n}>;"
         }
       ]
     },
@@ -27106,6 +27348,66 @@
       "selector": "neu-pick-list",
       "signature": "declare class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {\n}",
       "members": [
+        {
+          "id": "./pick-list#NeuPickListComponent.input:dragDrop",
+          "name": "dragDrop",
+          "kind": "input",
+          "publicName": "dragDrop",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dragDrop: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.input:emptyFilterLabel",
+          "name": "emptyFilterLabel",
+          "kind": "input",
+          "publicName": "emptyFilterLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly emptyFilterLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.input:filter",
+          "name": "filter",
+          "kind": "input",
+          "publicName": "filter",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filter: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.input:filterConfig",
+          "name": "filterConfig",
+          "kind": "input",
+          "publicName": "filterConfig",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filterConfig: _angular_core.InputSignal<Readonly<NeuOptionFilterConfig<T>>>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.input:filterPlaceholder",
+          "name": "filterPlaceholder",
+          "kind": "input",
+          "publicName": "filterPlaceholder",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filterPlaceholder: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.input:moveAllScope",
+          "name": "moveAllScope",
+          "kind": "input",
+          "publicName": "moveAllScope",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly moveAllScope: _angular_core.InputSignal<NeuPickListMoveAllScope>;"
+        },
         {
           "id": "./pick-list#NeuPickListComponent.input:optionDisabled",
           "name": "optionDisabled",
@@ -27147,6 +27449,26 @@
           "signature": "readonly source: _angular_core.InputSignal<readonly T[]>;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.input:sourceFilterLabel",
+          "name": "sourceFilterLabel",
+          "kind": "input",
+          "publicName": "sourceFilterLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceFilterLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.input:sourceFilterValue",
+          "name": "sourceFilterValue",
+          "kind": "input",
+          "publicName": "sourceFilterValue",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceFilterValue: _angular_core.InputSignal<string | null>;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.input:sourceHeader",
           "name": "sourceHeader",
           "kind": "input",
@@ -27155,6 +27477,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly sourceHeader: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.input:sourceSelectionKeys",
+          "name": "sourceSelectionKeys",
+          "kind": "input",
+          "publicName": "sourceSelectionKeys",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceSelectionKeys: _angular_core.InputSignal<readonly V[] | undefined>;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.input:target",
@@ -27167,6 +27499,26 @@
           "signature": "readonly target: _angular_core.InputSignal<readonly T[]>;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.input:targetFilterLabel",
+          "name": "targetFilterLabel",
+          "kind": "input",
+          "publicName": "targetFilterLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetFilterLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.input:targetFilterValue",
+          "name": "targetFilterValue",
+          "kind": "input",
+          "publicName": "targetFilterValue",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetFilterValue: _angular_core.InputSignal<string | null>;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.input:targetHeader",
           "name": "targetHeader",
           "kind": "input",
@@ -27177,6 +27529,32 @@
           "signature": "readonly targetHeader: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.input:targetSelectionKeys",
+          "name": "targetSelectionKeys",
+          "kind": "input",
+          "publicName": "targetSelectionKeys",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetSelectionKeys: _angular_core.InputSignal<readonly V[] | undefined>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.method:dragData",
+          "name": "dragData",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "dragData(item: T, location: NeuListLocation): NeuPickListDragData<T>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.method:hasMovableSourceItems",
+          "name": "hasMovableSourceItems",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "hasMovableSourceItems(): boolean;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.method:hasMovableSourceSelection",
           "name": "hasMovableSourceSelection",
           "kind": "method",
@@ -27185,12 +27563,36 @@
           "signature": "hasMovableSourceSelection(): boolean;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.method:hasMovableTargetItems",
+          "name": "hasMovableTargetItems",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "hasMovableTargetItems(): boolean;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.method:hasMovableTargetSelection",
           "name": "hasMovableTargetSelection",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "hasMovableTargetSelection(): boolean;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.method:hasSourceSelection",
+          "name": "hasSourceSelection",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "hasSourceSelection(): boolean;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.method:hasTargetSelection",
+          "name": "hasTargetSelection",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "hasTargetSelection(): boolean;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.method:isOptionDisabled",
@@ -27217,6 +27619,22 @@
           "signature": "isTargetSelected(option: T): boolean;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.method:moveAllToSource",
+          "name": "moveAllToSource",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "moveAllToSource(): void;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.method:moveAllToTarget",
+          "name": "moveAllToTarget",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "moveAllToTarget(): void;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.method:moveToSource",
           "name": "moveToSource",
           "kind": "method",
@@ -27231,6 +27649,14 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "moveToTarget(): void;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.method:onDrop",
+          "name": "onDrop",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onDrop(event: NeuDropEvent<unknown, string>, target: NeuListLocation): void;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.method:optionLabelOf",
@@ -27249,6 +27675,22 @@
           "signature": "optionValueOf(option: T): V;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.method:reorderSelection",
+          "name": "reorderSelection",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reorderSelection(location: NeuListLocation, move: NeuListMove): void;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.method:setFilter",
+          "name": "setFilter",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "setFilter(location: NeuListLocation, event: Event | string): void;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.method:toggleSource",
           "name": "toggleSource",
           "kind": "method",
@@ -27263,6 +27705,16 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "toggleTarget(value: V): void;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.output:itemDrop",
+          "name": "itemDrop",
+          "kind": "output",
+          "publicName": "itemDrop",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly itemDrop: _angular_core.OutputEmitterRef<NeuPickListDropEvent<T>>;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.output:itemsChange",
@@ -27285,6 +27737,16 @@
           "signature": "readonly sourceChange: _angular_core.OutputEmitterRef<T[]>;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.output:sourceFilterChange",
+          "name": "sourceFilterChange",
+          "kind": "output",
+          "publicName": "sourceFilterChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceFilterChange: _angular_core.OutputEmitterRef<string>;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.output:sourceSelectionChange",
           "name": "sourceSelectionChange",
           "kind": "output",
@@ -27305,6 +27767,16 @@
           "signature": "readonly targetChange: _angular_core.OutputEmitterRef<T[]>;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.output:targetFilterChange",
+          "name": "targetFilterChange",
+          "kind": "output",
+          "publicName": "targetFilterChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetFilterChange: _angular_core.OutputEmitterRef<string>;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.output:targetSelectionChange",
           "name": "targetSelectionChange",
           "kind": "output",
@@ -27313,6 +27785,22 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly targetSelectionChange: _angular_core.OutputEmitterRef<T[]>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.property:effectiveSourceFilter",
+          "name": "effectiveSourceFilter",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveSourceFilter: _angular_core.Signal<string>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.property:effectiveTargetFilter",
+          "name": "effectiveTargetFilter",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveTargetFilter: _angular_core.Signal<string>;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.property:itemTpl",
@@ -27328,7 +27816,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuPickListComponent<any, any>, \"neu-pick-list\", never, {\n    \"source\": {\n        \"alias\": \"source\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"target\": {\n        \"alias\": \"target\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sourceHeader\": {\n        \"alias\": \"sourceHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"targetHeader\": {\n        \"alias\": \"targetHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"sourceChange\": \"sourceChange\";\n    \"targetChange\": \"targetChange\";\n    \"sourceSelectionChange\": \"sourceSelectionChange\";\n    \"targetSelectionChange\": \"targetSelectionChange\";\n    \"itemsChange\": \"itemsChange\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuPickListComponent<any, any>, \"neu-pick-list\", never, {\n    \"source\": {\n        \"alias\": \"source\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"target\": {\n        \"alias\": \"target\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sourceHeader\": {\n        \"alias\": \"sourceHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"targetHeader\": {\n        \"alias\": \"targetHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filter\": {\n        \"alias\": \"filter\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterConfig\": {\n        \"alias\": \"filterConfig\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sourceFilterValue\": {\n        \"alias\": \"sourceFilterValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"targetFilterValue\": {\n        \"alias\": \"targetFilterValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterPlaceholder\": {\n        \"alias\": \"filterPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sourceFilterLabel\": {\n        \"alias\": \"sourceFilterLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"targetFilterLabel\": {\n        \"alias\": \"targetFilterLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyFilterLabel\": {\n        \"alias\": \"emptyFilterLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"moveAllScope\": {\n        \"alias\": \"moveAllScope\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dragDrop\": {\n        \"alias\": \"dragDrop\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sourceSelectionKeys\": {\n        \"alias\": \"sourceSelectionKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"targetSelectionKeys\": {\n        \"alias\": \"targetSelectionKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"sourceChange\": \"sourceChange\";\n    \"targetChange\": \"targetChange\";\n    \"sourceSelectionChange\": \"sourceSelectionChange\";\n    \"targetSelectionChange\": \"targetSelectionChange\";\n    \"sourceFilterChange\": \"sourceFilterChange\";\n    \"targetFilterChange\": \"targetFilterChange\";\n    \"itemDrop\": \"itemDrop\";\n    \"itemsChange\": \"itemsChange\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.property:ɵfac",
@@ -27353,6 +27841,88 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly targetSelection: _angular_core.WritableSignal<Set<V>>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.property:visibleSource",
+          "name": "visibleSource",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly visibleSource: _angular_core.Signal<T[]>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.property:visibleTarget",
+          "name": "visibleTarget",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly visibleTarget: _angular_core.Signal<T[]>;"
+        }
+      ]
+    },
+    {
+      "id": "./pick-list#NeuPickListDropEvent",
+      "entrypoint": "./pick-list",
+      "name": "NeuPickListDropEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuPickListDropEvent<T> {\n}",
+      "members": [
+        {
+          "id": "./pick-list#NeuPickListDropEvent.property:currentIndex",
+          "name": "currentIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly currentIndex: number;"
+        },
+        {
+          "id": "./pick-list#NeuPickListDropEvent.property:from",
+          "name": "from",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly from: NeuListLocation;"
+        },
+        {
+          "id": "./pick-list#NeuPickListDropEvent.property:interaction",
+          "name": "interaction",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly interaction: 'pointer' | 'keyboard';"
+        },
+        {
+          "id": "./pick-list#NeuPickListDropEvent.property:item",
+          "name": "item",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly item: T;"
+        },
+        {
+          "id": "./pick-list#NeuPickListDropEvent.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: MouseEvent | TouchEvent | KeyboardEvent | null;"
+        },
+        {
+          "id": "./pick-list#NeuPickListDropEvent.property:previousIndex",
+          "name": "previousIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly previousIndex: number;"
+        },
+        {
+          "id": "./pick-list#NeuPickListDropEvent.property:to",
+          "name": "to",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly to: NeuListLocation;"
         }
       ]
     },
@@ -27387,9 +27957,18 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: T;\n    selected: boolean;\n    location: 'source' | 'target';\n}>;"
+          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: T;\n    selected: boolean;\n    location: NeuListLocation;\n}>;"
         }
       ]
+    },
+    {
+      "id": "./pick-list#NeuPickListMoveAllScope",
+      "entrypoint": "./pick-list",
+      "name": "NeuPickListMoveAllScope",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuPickListMoveAllScope = 'filtered' | 'all';",
+      "members": []
     },
     {
       "id": "./pick-list#NeuTransferItem",
@@ -46698,6 +47277,36 @@
           "signature": "readonly columns: _angular_core.InputSignal<NeuTableColumn<any, string>[]>;"
         },
         {
+          "id": "./tree-table#NeuTreeTableComponent.input:contextMenu",
+          "name": "contextMenu",
+          "kind": "input",
+          "publicName": "contextMenu",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly contextMenu: _angular_core.InputSignal<NeuContextMenuDirective | null>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.input:contextMenuNodeDisabled",
+          "name": "contextMenuNodeDisabled",
+          "kind": "input",
+          "publicName": "contextMenuNodeDisabled",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly contextMenuNodeDisabled: _angular_core.InputSignal<((node: NeuTreeTableNode, index: number) => boolean) | undefined>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.input:contextMenuSelection",
+          "name": "contextMenuSelection",
+          "kind": "input",
+          "publicName": "contextMenuSelection",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly contextMenuSelection: _angular_core.InputSignal<NeuTreeTableNode<Record<string, unknown>> | null | undefined>;"
+        },
+        {
           "id": "./tree-table#NeuTreeTableComponent.input:density",
           "name": "density",
           "kind": "input",
@@ -47260,6 +47869,26 @@
           "signature": "readonly columnResize: _angular_core.OutputEmitterRef<{\n    key: string;\n    width: number;\n}>;"
         },
         {
+          "id": "./tree-table#NeuTreeTableComponent.output:contextMenuSelect",
+          "name": "contextMenuSelect",
+          "kind": "output",
+          "publicName": "contextMenuSelect",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly contextMenuSelect: _angular_core.OutputEmitterRef<NeuTreeTableContextMenuEvent<Record<string, unknown>>>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableComponent.output:contextMenuSelectionChange",
+          "name": "contextMenuSelectionChange",
+          "kind": "output",
+          "publicName": "contextMenuSelectionChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly contextMenuSelectionChange: _angular_core.OutputEmitterRef<NeuTreeTableNode<Record<string, unknown>> | null>;"
+        },
+        {
           "id": "./tree-table#NeuTreeTableComponent.output:editingRowKeysChange",
           "name": "editingRowKeysChange",
           "kind": "output",
@@ -47579,7 +48208,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeTableComponent, \"neu-tree-table\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"treeColumnKey\": {\n        \"alias\": \"treeColumnKey\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tableAriaLabel\": {\n        \"alias\": \"tableAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indentSize\": {\n        \"alias\": \"indentSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exactMatchable\": {\n        \"alias\": \"exactMatchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pagination\": {\n        \"alias\": \"pagination\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionActions\": {\n        \"alias\": \"selectionActions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stickyHeader\": {\n        \"alias\": \"stickyHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stripedRows\": {\n        \"alias\": \"stripedRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"bordered\": {\n        \"alias\": \"bordered\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"roundedBorders\": {\n        \"alias\": \"roundedBorders\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortable\": {\n        \"alias\": \"sortable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiSort\": {\n        \"alias\": \"multiSort\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandMode\": {\n        \"alias\": \"expandMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportOptions\": {\n        \"alias\": \"exportOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualScroll\": {\n        \"alias\": \"virtualScroll\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualizationOptions\": {\n        \"alias\": \"virtualizationOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizableColumns\": {\n        \"alias\": \"resizableColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"reorderableColumns\": {\n        \"alias\": \"reorderableColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnChooser\": {\n        \"alias\": \"columnChooser\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"groupBy\": {\n        \"alias\": \"groupBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialLayout\": {\n        \"alias\": \"initialLayout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showRowNumbers\": {\n        \"alias\": \"showRowNumbers\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"density\": {\n        \"alias\": \"density\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSizeOptions\": {\n        \"alias\": \"pageSizeOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowClass\": {\n        \"alias\": \"rowClass\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"footerRow\": {\n        \"alias\": \"footerRow\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"serverSide\": {\n        \"alias\": \"serverSide\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"totalItems\": {\n        \"alias\": \"totalItems\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"urlStateOptions\": {\n        \"alias\": \"urlStateOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"query\": {\n        \"alias\": \"query\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sort\": {\n        \"alias\": \"sort\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterMode\": {\n        \"alias\": \"filterMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionMode\": {\n        \"alias\": \"selectionMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selection\": {\n        \"alias\": \"selection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"metaKeySelection\": {\n        \"alias\": \"metaKeySelection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editMode\": {\n        \"alias\": \"editMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editingRowKeys\": {\n        \"alias\": \"editingRowKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowEditValidator\": {\n        \"alias\": \"rowEditValidator\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n    \"nodeClick\": \"nodeClick\";\n    \"nodeDblClick\": \"nodeDblClick\";\n    \"actionClick\": \"actionClick\";\n    \"selectionActionClick\": \"selectionActionClick\";\n    \"searchChange\": \"searchChange\";\n    \"columnResize\": \"columnResize\";\n    \"columnReorder\": \"columnReorder\";\n    \"layoutChange\": \"layoutChange\";\n    \"cellEditCommit\": \"cellEditCommit\";\n    \"queryChange\": \"queryChange\";\n    \"sortChange\": \"sortChange\";\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"nodeSelect\": \"nodeSelect\";\n    \"nodeUnselect\": \"nodeUnselect\";\n    \"lazyRequest\": \"lazyRequest\";\n    \"cellEditInit\": \"cellEditInit\";\n    \"cellEditCancel\": \"cellEditCancel\";\n    \"editValidationError\": \"editValidationError\";\n    \"editingRowKeysChange\": \"editingRowKeysChange\";\n    \"rowEditInit\": \"rowEditInit\";\n    \"rowEditSave\": \"rowEditSave\";\n    \"rowEditCancel\": \"rowEditCancel\";\n}, [\n    \"expandTemplate\",\n    \"toolbarTemplate\",\n    \"captionTemplate\",\n    \"headerGroupTemplate\",\n    \"footerGroupTemplate\",\n    \"groupHeaderTemplate\",\n    \"groupFooterTemplate\",\n    \"loadingBodyTemplate\",\n    \"emptyTemplate\",\n    \"summaryTemplate\",\n    \"paginatorLeftTemplate\",\n    \"paginatorRightTemplate\",\n    \"cellViewTemplates\",\n    \"cellEditorTemplates\",\n    \"treeNodeTemplate\",\n    \"treeBodyTemplate\",\n    \"treeBodySectionTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeTableComponent, \"neu-tree-table\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"treeColumnKey\": {\n        \"alias\": \"treeColumnKey\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tableAriaLabel\": {\n        \"alias\": \"tableAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indentSize\": {\n        \"alias\": \"indentSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exactMatchable\": {\n        \"alias\": \"exactMatchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pagination\": {\n        \"alias\": \"pagination\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionActions\": {\n        \"alias\": \"selectionActions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stickyHeader\": {\n        \"alias\": \"stickyHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stripedRows\": {\n        \"alias\": \"stripedRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"bordered\": {\n        \"alias\": \"bordered\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"roundedBorders\": {\n        \"alias\": \"roundedBorders\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortable\": {\n        \"alias\": \"sortable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiSort\": {\n        \"alias\": \"multiSort\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandMode\": {\n        \"alias\": \"expandMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"exportOptions\": {\n        \"alias\": \"exportOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualScroll\": {\n        \"alias\": \"virtualScroll\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualizationOptions\": {\n        \"alias\": \"virtualizationOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizableColumns\": {\n        \"alias\": \"resizableColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"reorderableColumns\": {\n        \"alias\": \"reorderableColumns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnChooser\": {\n        \"alias\": \"columnChooser\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"groupBy\": {\n        \"alias\": \"groupBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialLayout\": {\n        \"alias\": \"initialLayout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showRowNumbers\": {\n        \"alias\": \"showRowNumbers\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"density\": {\n        \"alias\": \"density\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSizeOptions\": {\n        \"alias\": \"pageSizeOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowClass\": {\n        \"alias\": \"rowClass\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"footerRow\": {\n        \"alias\": \"footerRow\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"serverSide\": {\n        \"alias\": \"serverSide\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"totalItems\": {\n        \"alias\": \"totalItems\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"urlStateOptions\": {\n        \"alias\": \"urlStateOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"query\": {\n        \"alias\": \"query\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sort\": {\n        \"alias\": \"sort\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterMode\": {\n        \"alias\": \"filterMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionMode\": {\n        \"alias\": \"selectionMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selection\": {\n        \"alias\": \"selection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"metaKeySelection\": {\n        \"alias\": \"metaKeySelection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"contextMenu\": {\n        \"alias\": \"contextMenu\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"contextMenuSelection\": {\n        \"alias\": \"contextMenuSelection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"contextMenuNodeDisabled\": {\n        \"alias\": \"contextMenuNodeDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editMode\": {\n        \"alias\": \"editMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editingRowKeys\": {\n        \"alias\": \"editingRowKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowEditValidator\": {\n        \"alias\": \"rowEditValidator\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n    \"nodeClick\": \"nodeClick\";\n    \"nodeDblClick\": \"nodeDblClick\";\n    \"actionClick\": \"actionClick\";\n    \"selectionActionClick\": \"selectionActionClick\";\n    \"searchChange\": \"searchChange\";\n    \"columnResize\": \"columnResize\";\n    \"columnReorder\": \"columnReorder\";\n    \"layoutChange\": \"layoutChange\";\n    \"cellEditCommit\": \"cellEditCommit\";\n    \"queryChange\": \"queryChange\";\n    \"sortChange\": \"sortChange\";\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"nodeSelect\": \"nodeSelect\";\n    \"nodeUnselect\": \"nodeUnselect\";\n    \"lazyRequest\": \"lazyRequest\";\n    \"cellEditInit\": \"cellEditInit\";\n    \"cellEditCancel\": \"cellEditCancel\";\n    \"editValidationError\": \"editValidationError\";\n    \"editingRowKeysChange\": \"editingRowKeysChange\";\n    \"rowEditInit\": \"rowEditInit\";\n    \"rowEditSave\": \"rowEditSave\";\n    \"rowEditCancel\": \"rowEditCancel\";\n    \"contextMenuSelectionChange\": \"contextMenuSelectionChange\";\n    \"contextMenuSelect\": \"contextMenuSelect\";\n}, [\n    \"expandTemplate\",\n    \"toolbarTemplate\",\n    \"captionTemplate\",\n    \"headerGroupTemplate\",\n    \"footerGroupTemplate\",\n    \"groupHeaderTemplate\",\n    \"groupFooterTemplate\",\n    \"loadingBodyTemplate\",\n    \"emptyTemplate\",\n    \"summaryTemplate\",\n    \"paginatorLeftTemplate\",\n    \"paginatorRightTemplate\",\n    \"cellViewTemplates\",\n    \"cellEditorTemplates\",\n    \"treeNodeTemplate\",\n    \"treeBodyTemplate\",\n    \"treeBodySectionTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./tree-table#NeuTreeTableComponent.property:ɵfac",
@@ -47684,6 +48313,48 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly treeNodeTemplate: _angular_core.Signal<NeuTreeTableNodeDirective | undefined>;"
+        }
+      ]
+    },
+    {
+      "id": "./tree-table#NeuTreeTableContextMenuEvent",
+      "entrypoint": "./tree-table",
+      "name": "NeuTreeTableContextMenuEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeTableContextMenuEvent<T extends Record<string, unknown> = Record<string, unknown>> {\n}",
+      "members": [
+        {
+          "id": "./tree-table#NeuTreeTableContextMenuEvent.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: number;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableContextMenuEvent.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node: NeuTreeTableNode<T>;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableContextMenuEvent.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: MouseEvent | KeyboardEvent;"
+        },
+        {
+          "id": "./tree-table#NeuTreeTableContextMenuEvent.property:row",
+          "name": "row",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly row: NeuTreeTableRow<T>;"
         }
       ]
     },
@@ -48436,7 +49107,7 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-tree",
-      "signature": "declare class NeuTreeComponent {\n}",
+      "signature": "declare class NeuTreeComponent<T = unknown> {\n}",
       "members": [
         {
           "id": "./tree#NeuTreeComponent.input:ariaLabel",
@@ -48446,7 +49117,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "ariaLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:collapseLabel",
@@ -48456,7 +49127,27 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "collapseLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly collapseLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:dragDrop",
+          "name": "dragDrop",
+          "kind": "input",
+          "publicName": "dragDrop",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dragDrop: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:dragScope",
+          "name": "dragScope",
+          "kind": "input",
+          "publicName": "dragScope",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dragScope: _angular_core.InputSignal<string | readonly string[]>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:emptyLabel",
@@ -48466,7 +49157,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "emptyLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly emptyLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:expandedKeys",
+          "name": "expandedKeys",
+          "kind": "input",
+          "publicName": "expandedKeys",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:expandLabel",
@@ -48476,7 +49177,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "expandLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly expandLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:indentSize",
@@ -48486,7 +49187,57 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "indentSize: _angular_core.InputSignal<number>;"
+          "signature": "readonly indentSize: _angular_core.InputSignal<number>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:itemSize",
+          "name": "itemSize",
+          "kind": "input",
+          "publicName": "itemSize",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly itemSize: _angular_core.InputSignal<number>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:lazy",
+          "name": "lazy",
+          "kind": "input",
+          "publicName": "lazy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly lazy: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:loading",
+          "name": "loading",
+          "kind": "input",
+          "publicName": "loading",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly loading: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:loadingKeys",
+          "name": "loadingKeys",
+          "kind": "input",
+          "publicName": "loadingKeys",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly loadingKeys: _angular_core.InputSignal<readonly string[]>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:loadingLabel",
+          "name": "loadingLabel",
+          "kind": "input",
+          "publicName": "loadingLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly loadingLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:nodes",
@@ -48496,7 +49247,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "nodes: _angular_core.InputSignal<NeuTreeNode<unknown>[]>;"
+          "signature": "readonly nodes: _angular_core.InputSignal<NeuTreeNode<T>[]>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:searchable",
@@ -48506,7 +49257,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "searchable: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly searchable: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:searchPlaceholder",
@@ -48516,7 +49267,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "searchPlaceholder: _angular_core.InputSignal<string>;"
+          "signature": "readonly searchPlaceholder: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:selectable",
@@ -48526,7 +49277,27 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "selectable: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly selectable: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:selectAllLabel",
+          "name": "selectAllLabel",
+          "kind": "input",
+          "publicName": "selectAllLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selectAllLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:selection",
+          "name": "selection",
+          "kind": "input",
+          "publicName": "selection",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selection: _angular_core.InputSignal<readonly NeuTreeNode<T>[] | undefined>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:selectionMode",
@@ -48536,7 +49307,57 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "selectionMode: _angular_core.InputSignal<NeuTreeSelectionMode>;"
+          "signature": "readonly selectionMode: _angular_core.InputSignal<NeuTreeSelectionMode>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:showSelectAll",
+          "name": "showSelectAll",
+          "kind": "input",
+          "publicName": "showSelectAll",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly showSelectAll: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:treeId",
+          "name": "treeId",
+          "kind": "input",
+          "publicName": "treeId",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly treeId: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:virtualOverscan",
+          "name": "virtualOverscan",
+          "kind": "input",
+          "publicName": "virtualOverscan",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly virtualOverscan: _angular_core.InputSignal<number>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:virtualScroll",
+          "name": "virtualScroll",
+          "kind": "input",
+          "publicName": "virtualScroll",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly virtualScroll: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:visibleRows",
+          "name": "visibleRows",
+          "kind": "input",
+          "publicName": "visibleRows",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly visibleRows: _angular_core.InputSignal<number>;"
         },
         {
           "id": "./tree#NeuTreeComponent.method:activateNode",
@@ -48544,7 +49365,15 @@
           "kind": "method",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "activateNode(node: NeuTreeNode): void;"
+          "signature": "activateNode(node: NeuTreeNode<T>): void;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:ariaChecked",
+          "name": "ariaChecked",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "ariaChecked(nodeId: string): 'true' | 'false' | 'mixed';"
         },
         {
           "id": "./tree#NeuTreeComponent.method:canSelect",
@@ -48552,7 +49381,31 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "canSelect(node: NeuTreeNode): boolean;"
+          "signature": "canSelect(node: NeuTreeNode<T>): boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:checkboxState",
+          "name": "checkboxState",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "checkboxState(nodeId: string): CheckboxVisualState;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:dragData",
+          "name": "dragData",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "dragData(node: NeuTreeNode<T>): NeuTreeDragData<T>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:dropTarget",
+          "name": "dropTarget",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "dropTarget(node: NeuTreeNode<T>, position: NeuTreeDropPosition): NeuTreeDropTarget<T>;"
         },
         {
           "id": "./tree#NeuTreeComponent.method:hasChildren",
@@ -48560,7 +49413,23 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "hasChildren(node: NeuTreeNode): boolean;"
+          "signature": "hasChildren(node: NeuTreeNode<T>): boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:isCheckboxMode",
+          "name": "isCheckboxMode",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "isCheckboxMode(): boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:isExpandable",
+          "name": "isExpandable",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "isExpandable(node: NeuTreeNode<T>): boolean;"
         },
         {
           "id": "./tree#NeuTreeComponent.method:isExpanded",
@@ -48571,12 +49440,28 @@
           "signature": "isExpanded(nodeId: string): boolean;"
         },
         {
+          "id": "./tree#NeuTreeComponent.method:isLoading",
+          "name": "isLoading",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "isLoading(node: NeuTreeNode<T>): boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:isMultiMode",
+          "name": "isMultiMode",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "isMultiMode(): boolean;"
+        },
+        {
           "id": "./tree#NeuTreeComponent.method:isRenderedExpanded",
           "name": "isRenderedExpanded",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isRenderedExpanded(node: NeuTreeNode): boolean;"
+          "signature": "isRenderedExpanded(node: NeuTreeNode<T>): boolean;"
         },
         {
           "id": "./tree#NeuTreeComponent.method:isSelected",
@@ -48600,7 +49485,15 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onCheckboxChange(node: NeuTreeNode, checkedOrEvent: boolean | Event): void;"
+          "signature": "onCheckboxChange(node: NeuTreeNode<T>, value: boolean | Event): void;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:onNodeContext",
+          "name": "onNodeContext",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onNodeContext(node: NeuTreeNode<T>, event: MouseEvent): void;"
         },
         {
           "id": "./tree#NeuTreeComponent.method:onNodeKeydown",
@@ -48608,7 +49501,7 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onNodeKeydown(node: NeuTreeNode, event: KeyboardEvent): void;"
+          "signature": "onNodeKeydown(node: NeuTreeNode<T>, event: KeyboardEvent): void;"
         },
         {
           "id": "./tree#NeuTreeComponent.method:onSearch",
@@ -48617,6 +49510,30 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "onSearch(event: Event): void;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:onTreeDrop",
+          "name": "onTreeDrop",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onTreeDrop(event: NeuDropEvent<unknown, NeuTreeDropTarget<T>>): void;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:onVirtualScroll",
+          "name": "onVirtualScroll",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onVirtualScroll(event: Event): void;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:retryLazy",
+          "name": "retryLazy",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "retryLazy(node: NeuTreeNode<T>): void;"
         },
         {
           "id": "./tree#NeuTreeComponent.method:setActiveNode",
@@ -48632,7 +49549,15 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "tabIndexForNode(node: NeuTreeNode): 0 | -1;"
+          "signature": "tabIndexForNode(node: NeuTreeNode<T>): 0 | -1;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:templateContext",
+          "name": "templateContext",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "templateContext(node: NeuTreeNode<T>, level: number): NeuTreeNodeTemplateContext<T>;"
         },
         {
           "id": "./tree#NeuTreeComponent.method:toggleNode",
@@ -48640,7 +49565,25 @@
           "kind": "method",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "toggleNode(node: NeuTreeNode, event?: Event): void;"
+          "signature": "toggleNode(node: NeuTreeNode<T>, event?: Event): void;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.method:toggleSelectAll",
+          "name": "toggleSelectAll",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "toggleSelectAll(checked: boolean): void;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.output:contextRequest",
+          "name": "contextRequest",
+          "kind": "output",
+          "publicName": "contextRequest",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly contextRequest: _angular_core.OutputEmitterRef<NeuTreeContextRequest<T>>;"
         },
         {
           "id": "./tree#NeuTreeComponent.output:expansionChange",
@@ -48650,7 +49593,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "expansionChange: _angular_core.OutputEmitterRef<string[]>;"
+          "signature": "readonly expansionChange: _angular_core.OutputEmitterRef<string[]>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.output:lazyRequest",
+          "name": "lazyRequest",
+          "kind": "output",
+          "publicName": "lazyRequest",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly lazyRequest: _angular_core.OutputEmitterRef<NeuTreeLazyRequest<T>>;"
         },
         {
           "id": "./tree#NeuTreeComponent.output:nodeClick",
@@ -48660,7 +49613,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "nodeClick: _angular_core.OutputEmitterRef<NeuTreeNode<unknown>>;"
+          "signature": "readonly nodeClick: _angular_core.OutputEmitterRef<NeuTreeNode<T>>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.output:nodeDrop",
+          "name": "nodeDrop",
+          "kind": "output",
+          "publicName": "nodeDrop",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly nodeDrop: _angular_core.OutputEmitterRef<NeuTreeDropEvent<T>>;"
         },
         {
           "id": "./tree#NeuTreeComponent.output:selectionChange",
@@ -48670,7 +49633,97 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "selectionChange: _angular_core.OutputEmitterRef<NeuTreeNode<unknown>[]>;"
+          "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<NeuTreeNode<T>[]>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.output:virtualRangeChange",
+          "name": "virtualRangeChange",
+          "kind": "output",
+          "publicName": "virtualRangeChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly virtualRangeChange: _angular_core.OutputEmitterRef<NeuTreeVirtualRange>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:acceptDrop",
+          "name": "acceptDrop",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly acceptDrop: NeuDropAccept<NeuTreeDragData<T>, NeuTreeDropTarget<T>>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:allEntries",
+          "name": "allEntries",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly allEntries: _angular_core.Signal<_neural_ui_core_internal.InternalNeuTreeTraversalEntry<NeuTreeNode<T>>[]>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:checkboxStates",
+          "name": "checkboxStates",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly checkboxStates: _angular_core.Signal<Map<string, CheckboxVisualState>>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:effectiveExpandedKeys",
+          "name": "effectiveExpandedKeys",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveExpandedKeys: _angular_core.Signal<Set<string>>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:effectiveSelectedKeys",
+          "name": "effectiveSelectedKeys",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveSelectedKeys: _angular_core.Signal<Set<string>>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:eligibleNodeCount",
+          "name": "eligibleNodeCount",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly eligibleNodeCount: _angular_core.Signal<number>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:flatVisibleNodes",
+          "name": "flatVisibleNodes",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly flatVisibleNodes: _angular_core.Signal<NeuTreeFlatEntry<T>[]>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:loadingKeySet",
+          "name": "loadingKeySet",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly loadingKeySet: _angular_core.Signal<Set<string>>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:navigationIndexById",
+          "name": "navigationIndexById",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly navigationIndexById: _angular_core.Signal<Map<string, number>>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:navigationItems",
+          "name": "navigationItems",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly navigationItems: _angular_core.Signal<readonly NeuTreeNavigationItem[]>;"
         },
         {
           "id": "./tree#NeuTreeComponent.property:nodeTpl",
@@ -48678,7 +49731,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly nodeTpl: _angular_core.Signal<NeuTreeNodeDirective | undefined>;"
+          "signature": "readonly nodeTpl: _angular_core.Signal<NeuTreeNodeDirective<any> | undefined>;"
         },
         {
           "id": "./tree#NeuTreeComponent.property:ɵcmp",
@@ -48686,7 +49739,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeComponent, \"neu-tree\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectable\": {\n        \"alias\": \"selectable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionMode\": {\n        \"alias\": \"selectionMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indentSize\": {\n        \"alias\": \"indentSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandLabel\": {\n        \"alias\": \"expandLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapseLabel\": {\n        \"alias\": \"collapseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n    \"expansionChange\": \"expansionChange\";\n    \"nodeClick\": \"nodeClick\";\n}, [\n    \"nodeTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeComponent<any>, \"neu-tree\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectable\": {\n        \"alias\": \"selectable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionMode\": {\n        \"alias\": \"selectionMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selection\": {\n        \"alias\": \"selection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showSelectAll\": {\n        \"alias\": \"showSelectAll\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"lazy\": {\n        \"alias\": \"lazy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loadingKeys\": {\n        \"alias\": \"loadingKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualScroll\": {\n        \"alias\": \"virtualScroll\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"itemSize\": {\n        \"alias\": \"itemSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"visibleRows\": {\n        \"alias\": \"visibleRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualOverscan\": {\n        \"alias\": \"virtualOverscan\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dragDrop\": {\n        \"alias\": \"dragDrop\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"treeId\": {\n        \"alias\": \"treeId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dragScope\": {\n        \"alias\": \"dragScope\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indentSize\": {\n        \"alias\": \"indentSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loadingLabel\": {\n        \"alias\": \"loadingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectAllLabel\": {\n        \"alias\": \"selectAllLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandLabel\": {\n        \"alias\": \"expandLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapseLabel\": {\n        \"alias\": \"collapseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n    \"expansionChange\": \"expansionChange\";\n    \"nodeClick\": \"nodeClick\";\n    \"lazyRequest\": \"lazyRequest\";\n    \"contextRequest\": \"contextRequest\";\n    \"virtualRangeChange\": \"virtualRangeChange\";\n    \"nodeDrop\": \"nodeDrop\";\n}, [\n    \"nodeTpl\"\n], never, true, never>;"
         },
         {
           "id": "./tree#NeuTreeComponent.property:ɵfac",
@@ -48694,7 +49747,15 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeComponent, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeComponent<any>, never>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:renderNodes",
+          "name": "renderNodes",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly renderNodes: _angular_core.Signal<NeuTreeNode<T>[]>;"
         },
         {
           "id": "./tree#NeuTreeComponent.property:searchQuery",
@@ -48705,12 +49766,287 @@
           "signature": "readonly searchQuery: _angular_core.WritableSignal<string>;"
         },
         {
+          "id": "./tree#NeuTreeComponent.property:selectAllState",
+          "name": "selectAllState",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly selectAllState: _angular_core.Signal<CheckboxVisualState>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:traversalIndex",
+          "name": "traversalIndex",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly traversalIndex: _angular_core.Signal<{\n    entries: _neural_ui_core_internal.InternalNeuTreeTraversalEntry<NeuTreeNode<T>>[];\n    entryIndexById: Map<string, number>;\n    entryIndexByNode: Map<NeuTreeNode<T>, number>;\n    duplicateIds: Set<string>;\n}>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:virtualEntries",
+          "name": "virtualEntries",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly virtualEntries: _angular_core.Signal<NeuTreeFlatEntry<T>[]>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.property:virtualRange",
+          "name": "virtualRange",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly virtualRange: _angular_core.Signal<NeuTreeVirtualRange>;"
+        },
+        {
           "id": "./tree#NeuTreeComponent.property:visibleNodes",
           "name": "visibleNodes",
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly visibleNodes: _angular_core.Signal<NeuTreeNode<unknown>[]>;"
+          "signature": "readonly visibleNodes: _angular_core.Signal<NeuTreeNode<T>[]>;"
+        }
+      ]
+    },
+    {
+      "id": "./tree#NeuTreeContextRequest",
+      "entrypoint": "./tree",
+      "name": "NeuTreeContextRequest",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeContextRequest<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeContextRequest.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node: NeuTreeNode<T>;"
+        },
+        {
+          "id": "./tree#NeuTreeContextRequest.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: MouseEvent | KeyboardEvent;"
+        },
+        {
+          "id": "./tree#NeuTreeContextRequest.property:selection",
+          "name": "selection",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selection: readonly NeuTreeNode<T>[];"
+        }
+      ]
+    },
+    {
+      "id": "./tree#NeuTreeDragData",
+      "entrypoint": "./tree",
+      "name": "NeuTreeDragData",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeDragData<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeDragData.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: number;"
+        },
+        {
+          "id": "./tree#NeuTreeDragData.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node: NeuTreeNode<T>;"
+        },
+        {
+          "id": "./tree#NeuTreeDragData.property:parent",
+          "name": "parent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly parent: NeuTreeNode<T> | null;"
+        },
+        {
+          "id": "./tree#NeuTreeDragData.property:treeId",
+          "name": "treeId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly treeId: string;"
+        }
+      ]
+    },
+    {
+      "id": "./tree#NeuTreeDropEvent",
+      "entrypoint": "./tree",
+      "name": "NeuTreeDropEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeDropEvent<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeDropEvent.property:dragNode",
+          "name": "dragNode",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dragNode: NeuTreeNode<T>;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:interaction",
+          "name": "interaction",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly interaction: 'pointer' | 'keyboard';"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: MouseEvent | TouchEvent | KeyboardEvent | null;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:position",
+          "name": "position",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly position: NeuTreeDropPosition;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:sourceIndex",
+          "name": "sourceIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceIndex: number;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:sourceParent",
+          "name": "sourceParent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceParent: NeuTreeNode<T> | null;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:sourceTreeId",
+          "name": "sourceTreeId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceTreeId: string;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:targetIndex",
+          "name": "targetIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetIndex: number;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:targetNode",
+          "name": "targetNode",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetNode: NeuTreeNode<T>;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:targetParent",
+          "name": "targetParent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetParent: NeuTreeNode<T> | null;"
+        },
+        {
+          "id": "./tree#NeuTreeDropEvent.property:targetTreeId",
+          "name": "targetTreeId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetTreeId: string;"
+        }
+      ]
+    },
+    {
+      "id": "./tree#NeuTreeDropPosition",
+      "entrypoint": "./tree",
+      "name": "NeuTreeDropPosition",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTreeDropPosition = 'before' | 'inside' | 'after';",
+      "members": []
+    },
+    {
+      "id": "./tree#NeuTreeDropTarget",
+      "entrypoint": "./tree",
+      "name": "NeuTreeDropTarget",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeDropTarget<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeDropTarget.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node: NeuTreeNode<T>;"
+        },
+        {
+          "id": "./tree#NeuTreeDropTarget.property:position",
+          "name": "position",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly position: NeuTreeDropPosition;"
+        }
+      ]
+    },
+    {
+      "id": "./tree#NeuTreeLazyRequest",
+      "entrypoint": "./tree",
+      "name": "NeuTreeLazyRequest",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeLazyRequest<T = unknown> {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeLazyRequest.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly node: NeuTreeNode<T>;"
+        },
+        {
+          "id": "./tree#NeuTreeLazyRequest.property:reason",
+          "name": "reason",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly reason: 'expand' | 'retry';"
+        },
+        {
+          "id": "./tree#NeuTreeLazyRequest.property:requestId",
+          "name": "requestId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly requestId: number;"
         }
       ]
     },
@@ -48763,6 +50099,22 @@
           "signature": "disabled?: boolean;"
         },
         {
+          "id": "./tree#NeuTreeNode.property:draggable",
+          "name": "draggable",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "draggable?: boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeNode.property:droppable",
+          "name": "droppable",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "droppable?: boolean;"
+        },
+        {
           "id": "./tree#NeuTreeNode.property:expanded",
           "name": "expanded",
           "kind": "property",
@@ -48787,6 +50139,22 @@
           "signature": "label: string;"
         },
         {
+          "id": "./tree#NeuTreeNode.property:leaf",
+          "name": "leaf",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "leaf?: boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeNode.property:loading",
+          "name": "loading",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "loading?: boolean;"
+        },
+        {
           "id": "./tree#NeuTreeNode.property:selectable",
           "name": "selectable",
           "kind": "property",
@@ -48803,7 +50171,7 @@
       "kind": "directive",
       "status": "SUPPORTED",
       "selector": "ng-template[neuTreeNode]",
-      "signature": "declare class NeuTreeNodeDirective {\n}",
+      "signature": "declare class NeuTreeNodeDirective<T = unknown> {\n}",
       "members": [
         {
           "id": "./tree#NeuTreeNodeDirective.property:ɵdir",
@@ -48811,7 +50179,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTreeNodeDirective, \"ng-template[neuTreeNode]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTreeNodeDirective<any>, \"ng-template[neuTreeNode]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./tree#NeuTreeNodeDirective.property:ɵfac",
@@ -48819,7 +50187,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeNodeDirective, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeNodeDirective<any>, never>;"
         },
         {
           "id": "./tree#NeuTreeNodeDirective.property:templateRef",
@@ -48827,7 +50195,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext>;"
+          "signature": "readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext<T>>;"
         }
       ]
     },
@@ -48837,7 +50205,7 @@
       "name": "NeuTreeNodeTemplateContext",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuTreeNodeTemplateContext {\n}",
+      "signature": "interface NeuTreeNodeTemplateContext<T = unknown> {\n}",
       "members": [
         {
           "id": "./tree#NeuTreeNodeTemplateContext.property:$implicit",
@@ -48845,7 +50213,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "$implicit: NeuTreeNode;"
+          "signature": "$implicit: NeuTreeNode<T>;"
         },
         {
           "id": "./tree#NeuTreeNodeTemplateContext.property:expanded",
@@ -48864,6 +50232,30 @@
           "signature": "level: number;"
         },
         {
+          "id": "./tree#NeuTreeNodeTemplateContext.property:loading",
+          "name": "loading",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "loading: boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeTemplateContext.property:node",
+          "name": "node",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "node: NeuTreeNode<T>;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeTemplateContext.property:partial",
+          "name": "partial",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "partial: boolean;"
+        },
+        {
           "id": "./tree#NeuTreeNodeTemplateContext.property:selected",
           "name": "selected",
           "kind": "property",
@@ -48878,6 +50270,14 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "toggle: () => void;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeTemplateContext.property:toggleSelection",
+          "name": "toggleSelection",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "toggleSelection: () => void;"
         }
       ]
     },
@@ -48887,8 +50287,42 @@
       "name": "NeuTreeSelectionMode",
       "kind": "type",
       "status": "SUPPORTED",
-      "signature": "type NeuTreeSelectionMode = 'single' | 'multiple';",
+      "signature": "type NeuTreeSelectionMode = 'single' | 'multiple' | 'checkbox';",
       "members": []
+    },
+    {
+      "id": "./tree#NeuTreeVirtualRange",
+      "entrypoint": "./tree",
+      "name": "NeuTreeVirtualRange",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeVirtualRange {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeVirtualRange.property:end",
+          "name": "end",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly end: number;"
+        },
+        {
+          "id": "./tree#NeuTreeVirtualRange.property:start",
+          "name": "start",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly start: number;"
+        },
+        {
+          "id": "./tree#NeuTreeVirtualRange.property:total",
+          "name": "total",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly total: number;"
+        }
+      ]
     },
     {
       "id": "./uploader#NeuUploaderComponent",
@@ -53971,6 +55405,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly keyboardEnabled: _angular_core.InputSignalWithTransform<boolean, unknown>;"
+    },
+    {
+      "id": "./drag-drop#NeuDraggableDirective.input:pointerEnabled",
+      "entrypoint": "./drag-drop",
+      "declaration": "NeuDraggableDirective",
+      "selector": "[neuDraggable]",
+      "propertyName": "pointerEnabled",
+      "publicName": "neuDragPointer",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly pointerEnabled: _angular_core.InputSignalWithTransform<boolean, unknown>;"
     },
     {
       "id": "./drag-drop#NeuDraggableDirective.input:role",
@@ -59663,6 +61109,102 @@
       "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string>;"
     },
     {
+      "id": "./pick-list#NeuOrderListComponent.input:ariaLabel",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "ariaLabel",
+      "publicName": "ariaLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:dragDrop",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "dragDrop",
+      "publicName": "dragDrop",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dragDrop: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:emptyFilterLabel",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "emptyFilterLabel",
+      "publicName": "emptyFilterLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly emptyFilterLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filter",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "filter",
+      "publicName": "filter",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filter: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filterConfig",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "filterConfig",
+      "publicName": "filterConfig",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filterConfig: _angular_core.InputSignal<Readonly<NeuOptionFilterConfig<T>>>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filterLabel",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "filterLabel",
+      "publicName": "filterLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filterLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filterPlaceholder",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "filterPlaceholder",
+      "publicName": "filterPlaceholder",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filterPlaceholder: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.input:filterValue",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "filterValue",
+      "publicName": "filterValue",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filterValue: _angular_core.InputSignal<string | null>;"
+    },
+    {
       "id": "./pick-list#NeuOrderListComponent.input:items",
       "entrypoint": "./pick-list",
       "declaration": "NeuOrderListComponent",
@@ -59711,6 +61253,42 @@
       "signature": "readonly optionValue: _angular_core.InputSignal<NeuOptionValueAccessor<T, V> | null>;"
     },
     {
+      "id": "./pick-list#NeuOrderListComponent.input:selectionKeys",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "selectionKeys",
+      "publicName": "selectionKeys",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly selectionKeys: _angular_core.InputSignal<readonly V[] | undefined>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.output:filterChange",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "filterChange",
+      "publicName": "filterChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filterChange: _angular_core.OutputEmitterRef<string>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.output:itemDrop",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "itemDrop",
+      "publicName": "itemDrop",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly itemDrop: _angular_core.OutputEmitterRef<NeuPickListDropEvent<T>>;"
+    },
+    {
       "id": "./pick-list#NeuOrderListComponent.output:orderChange",
       "entrypoint": "./pick-list",
       "declaration": "NeuOrderListComponent",
@@ -59721,6 +61299,90 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly orderChange: _angular_core.OutputEmitterRef<T[]>;"
+    },
+    {
+      "id": "./pick-list#NeuOrderListComponent.output:selectionChange",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListComponent",
+      "selector": "neu-order-list",
+      "propertyName": "selectionChange",
+      "publicName": "selectionChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<T[]>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:dragDrop",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "dragDrop",
+      "publicName": "dragDrop",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dragDrop: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:emptyFilterLabel",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "emptyFilterLabel",
+      "publicName": "emptyFilterLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly emptyFilterLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:filter",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "filter",
+      "publicName": "filter",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filter: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:filterConfig",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "filterConfig",
+      "publicName": "filterConfig",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filterConfig: _angular_core.InputSignal<Readonly<NeuOptionFilterConfig<T>>>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:filterPlaceholder",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "filterPlaceholder",
+      "publicName": "filterPlaceholder",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filterPlaceholder: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:moveAllScope",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "moveAllScope",
+      "publicName": "moveAllScope",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly moveAllScope: _angular_core.InputSignal<NeuPickListMoveAllScope>;"
     },
     {
       "id": "./pick-list#NeuPickListComponent.input:optionDisabled",
@@ -59771,6 +61433,30 @@
       "signature": "readonly source: _angular_core.InputSignal<readonly T[]>;"
     },
     {
+      "id": "./pick-list#NeuPickListComponent.input:sourceFilterLabel",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "sourceFilterLabel",
+      "publicName": "sourceFilterLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly sourceFilterLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:sourceFilterValue",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "sourceFilterValue",
+      "publicName": "sourceFilterValue",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly sourceFilterValue: _angular_core.InputSignal<string | null>;"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.input:sourceHeader",
       "entrypoint": "./pick-list",
       "declaration": "NeuPickListComponent",
@@ -59781,6 +61467,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly sourceHeader: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:sourceSelectionKeys",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "sourceSelectionKeys",
+      "publicName": "sourceSelectionKeys",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly sourceSelectionKeys: _angular_core.InputSignal<readonly V[] | undefined>;"
     },
     {
       "id": "./pick-list#NeuPickListComponent.input:target",
@@ -59795,6 +61493,30 @@
       "signature": "readonly target: _angular_core.InputSignal<readonly T[]>;"
     },
     {
+      "id": "./pick-list#NeuPickListComponent.input:targetFilterLabel",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "targetFilterLabel",
+      "publicName": "targetFilterLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly targetFilterLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:targetFilterValue",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "targetFilterValue",
+      "publicName": "targetFilterValue",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly targetFilterValue: _angular_core.InputSignal<string | null>;"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.input:targetHeader",
       "entrypoint": "./pick-list",
       "declaration": "NeuPickListComponent",
@@ -59805,6 +61527,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly targetHeader: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.input:targetSelectionKeys",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "targetSelectionKeys",
+      "publicName": "targetSelectionKeys",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly targetSelectionKeys: _angular_core.InputSignal<readonly V[] | undefined>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.output:itemDrop",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "itemDrop",
+      "publicName": "itemDrop",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly itemDrop: _angular_core.OutputEmitterRef<NeuPickListDropEvent<T>>;"
     },
     {
       "id": "./pick-list#NeuPickListComponent.output:itemsChange",
@@ -59831,6 +61577,18 @@
       "signature": "readonly sourceChange: _angular_core.OutputEmitterRef<T[]>;"
     },
     {
+      "id": "./pick-list#NeuPickListComponent.output:sourceFilterChange",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "sourceFilterChange",
+      "publicName": "sourceFilterChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly sourceFilterChange: _angular_core.OutputEmitterRef<string>;"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.output:sourceSelectionChange",
       "entrypoint": "./pick-list",
       "declaration": "NeuPickListComponent",
@@ -59853,6 +61611,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly targetChange: _angular_core.OutputEmitterRef<T[]>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.output:targetFilterChange",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "targetFilterChange",
+      "publicName": "targetFilterChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly targetFilterChange: _angular_core.OutputEmitterRef<string>;"
     },
     {
       "id": "./pick-list#NeuPickListComponent.output:targetSelectionChange",
@@ -65221,6 +66991,42 @@
       "signature": "readonly columns: _angular_core.InputSignal<NeuTableColumn<any, string>[]>;"
     },
     {
+      "id": "./tree-table#NeuTreeTableComponent.input:contextMenu",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "contextMenu",
+      "publicName": "contextMenu",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly contextMenu: _angular_core.InputSignal<NeuContextMenuDirective | null>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:contextMenuNodeDisabled",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "contextMenuNodeDisabled",
+      "publicName": "contextMenuNodeDisabled",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly contextMenuNodeDisabled: _angular_core.InputSignal<((node: NeuTreeTableNode, index: number) => boolean) | undefined>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:contextMenuSelection",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "contextMenuSelection",
+      "publicName": "contextMenuSelection",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly contextMenuSelection: _angular_core.InputSignal<NeuTreeTableNode<Record<string, unknown>> | null | undefined>;"
+    },
+    {
       "id": "./tree-table#NeuTreeTableComponent.input:density",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -65809,6 +67615,30 @@
       "signature": "readonly columnResize: _angular_core.OutputEmitterRef<{\n    key: string;\n    width: number;\n}>;"
     },
     {
+      "id": "./tree-table#NeuTreeTableComponent.output:contextMenuSelect",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "contextMenuSelect",
+      "publicName": "contextMenuSelect",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly contextMenuSelect: _angular_core.OutputEmitterRef<NeuTreeTableContextMenuEvent<Record<string, unknown>>>;"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.output:contextMenuSelectionChange",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableComponent",
+      "selector": "neu-tree-table",
+      "propertyName": "contextMenuSelectionChange",
+      "publicName": "contextMenuSelectionChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly contextMenuSelectionChange: _angular_core.OutputEmitterRef<NeuTreeTableNode<Record<string, unknown>> | null>;"
+    },
+    {
       "id": "./tree-table#NeuTreeTableComponent.output:editingRowKeysChange",
       "entrypoint": "./tree-table",
       "declaration": "NeuTreeTableComponent",
@@ -66034,7 +67864,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "ariaLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:collapseLabel",
@@ -66046,7 +67876,31 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "collapseLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly collapseLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:dragDrop",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "dragDrop",
+      "publicName": "dragDrop",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dragDrop: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:dragScope",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "dragScope",
+      "publicName": "dragScope",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dragScope: _angular_core.InputSignal<string | readonly string[]>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:emptyLabel",
@@ -66058,7 +67912,19 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "emptyLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly emptyLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:expandedKeys",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "expandedKeys",
+      "publicName": "expandedKeys",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:expandLabel",
@@ -66070,7 +67936,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "expandLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly expandLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:indentSize",
@@ -66082,7 +67948,67 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "indentSize: _angular_core.InputSignal<number>;"
+      "signature": "readonly indentSize: _angular_core.InputSignal<number>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:itemSize",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "itemSize",
+      "publicName": "itemSize",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly itemSize: _angular_core.InputSignal<number>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:lazy",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "lazy",
+      "publicName": "lazy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly lazy: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:loading",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "loading",
+      "publicName": "loading",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly loading: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:loadingKeys",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "loadingKeys",
+      "publicName": "loadingKeys",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly loadingKeys: _angular_core.InputSignal<readonly string[]>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:loadingLabel",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "loadingLabel",
+      "publicName": "loadingLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly loadingLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:nodes",
@@ -66094,7 +68020,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "nodes: _angular_core.InputSignal<NeuTreeNode<unknown>[]>;"
+      "signature": "readonly nodes: _angular_core.InputSignal<NeuTreeNode<T>[]>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:searchable",
@@ -66106,7 +68032,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "searchable: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly searchable: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:searchPlaceholder",
@@ -66118,7 +68044,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "searchPlaceholder: _angular_core.InputSignal<string>;"
+      "signature": "readonly searchPlaceholder: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:selectable",
@@ -66130,7 +68056,31 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "selectable: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly selectable: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:selectAllLabel",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "selectAllLabel",
+      "publicName": "selectAllLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly selectAllLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:selection",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "selection",
+      "publicName": "selection",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly selection: _angular_core.InputSignal<readonly NeuTreeNode<T>[] | undefined>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:selectionMode",
@@ -66142,7 +68092,79 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "selectionMode: _angular_core.InputSignal<NeuTreeSelectionMode>;"
+      "signature": "readonly selectionMode: _angular_core.InputSignal<NeuTreeSelectionMode>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:showSelectAll",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "showSelectAll",
+      "publicName": "showSelectAll",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly showSelectAll: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:treeId",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "treeId",
+      "publicName": "treeId",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly treeId: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:virtualOverscan",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "virtualOverscan",
+      "publicName": "virtualOverscan",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly virtualOverscan: _angular_core.InputSignal<number>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:virtualScroll",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "virtualScroll",
+      "publicName": "virtualScroll",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly virtualScroll: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:visibleRows",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "visibleRows",
+      "publicName": "visibleRows",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly visibleRows: _angular_core.InputSignal<number>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.output:contextRequest",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "contextRequest",
+      "publicName": "contextRequest",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly contextRequest: _angular_core.OutputEmitterRef<NeuTreeContextRequest<T>>;"
     },
     {
       "id": "./tree#NeuTreeComponent.output:expansionChange",
@@ -66154,7 +68176,19 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "expansionChange: _angular_core.OutputEmitterRef<string[]>;"
+      "signature": "readonly expansionChange: _angular_core.OutputEmitterRef<string[]>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.output:lazyRequest",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "lazyRequest",
+      "publicName": "lazyRequest",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly lazyRequest: _angular_core.OutputEmitterRef<NeuTreeLazyRequest<T>>;"
     },
     {
       "id": "./tree#NeuTreeComponent.output:nodeClick",
@@ -66166,7 +68200,19 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "nodeClick: _angular_core.OutputEmitterRef<NeuTreeNode<unknown>>;"
+      "signature": "readonly nodeClick: _angular_core.OutputEmitterRef<NeuTreeNode<T>>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.output:nodeDrop",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "nodeDrop",
+      "publicName": "nodeDrop",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly nodeDrop: _angular_core.OutputEmitterRef<NeuTreeDropEvent<T>>;"
     },
     {
       "id": "./tree#NeuTreeComponent.output:selectionChange",
@@ -66178,7 +68224,19 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "selectionChange: _angular_core.OutputEmitterRef<NeuTreeNode<unknown>[]>;"
+      "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<NeuTreeNode<T>[]>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.output:virtualRangeChange",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "virtualRangeChange",
+      "publicName": "virtualRangeChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly virtualRangeChange: _angular_core.OutputEmitterRef<NeuTreeVirtualRange>;"
     },
     {
       "id": "./uploader#NeuUploaderComponent.input:accept",
@@ -67007,32 +69065,32 @@
   ],
   "summary": {
     "entrypoints": 105,
-    "exportedDeclarations": 804,
+    "exportedDeclarations": 817,
     "declarationKinds": {
       "class": 14,
       "component": 102,
       "directive": 144,
-      "function": 40,
-      "interface": 260,
+      "function": 41,
+      "interface": 268,
       "reexport": 55,
       "service": 11,
       "token": 3,
-      "type": 174,
+      "type": 178,
       "variable": 1
     },
-    "publicSymbols": 5500,
+    "publicSymbols": 5662,
     "statuses": {
-      "SUPPORTED": 3485,
+      "SUPPORTED": 3594,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 2011,
+      "INTERNAL/UNSUPPORTED": 2064,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1142,
-      "output": 260,
+      "input": 1182,
+      "output": 272,
       "model": 2,
-      "total": 1404
+      "total": 1456
     },
     "designTokens": 258
   }

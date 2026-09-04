@@ -15,6 +15,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import type { NeuContextMenuDirective } from '@neural-ui/core/context-menu';
 import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import {
   NeuTableAction,
@@ -29,6 +30,7 @@ import {
   NeuTableColumn,
   NeuTableColumnReorderEvent,
   NeuTableComponent,
+  NeuTableContextMenuSelectEvent,
   NeuTableEditMode,
   NeuTableEditValidationEvent,
   NeuTableExpandDirective,
@@ -75,6 +77,7 @@ import type {
   NeuTreeTableBodyRenderEntry,
   NeuTreeTableBodySectionContext,
   NeuTreeTableCellEditEvent,
+  NeuTreeTableContextMenuEvent,
   NeuTreeTableFilterMode,
   NeuTreeTableLazyRequest,
   NeuTreeTableLabels,
@@ -97,6 +100,7 @@ export type {
   NeuTreeTableBodyRenderEntry,
   NeuTreeTableBodySectionContext,
   NeuTreeTableCellEditEvent,
+  NeuTreeTableContextMenuEvent,
   NeuTreeTableFilterMode,
   NeuTreeTableLazyRequest,
   NeuTreeTableLabels,
@@ -218,6 +222,9 @@ const NEU_TREE_TABLE_LABELS = {
       [serverSide]="true"
       [totalItems]="effectiveTotalItems()"
       [urlStateOptions]="urlStateOptions()"
+      [contextMenu]="contextMenu()"
+      [contextMenuRowDisabled]="tableContextMenuRowDisabled"
+      [contextMenuSelection]="contextMenuSelectionRow()"
       [emptyMessage]="resolvedLabels().emptyMessage"
       (selectionChange)="onTableSelectionChange($event)"
       (rowSelect)="onTableRowSelect($event)"
@@ -238,6 +245,8 @@ const NEU_TREE_TABLE_LABELS = {
       (cellEditCancel)="onTableCellEditLifecycle('cancel', $event)"
       (editValidationError)="onTableEditValidationError($event)"
       (editingRowKeysChange)="editingRowKeysChange.emit($event.map(asNodeKey))"
+      (contextMenuSelectionChange)="onContextMenuSelectionChange($event)"
+      (contextMenuSelect)="onContextMenuSelect($event)"
       (rowEditInit)="onTableRowEdit('init', $event)"
       (rowEditSave)="onTableRowEdit('save', $event)"
       (rowEditCancel)="onTableRowEdit('cancel', $event)"
@@ -684,6 +693,13 @@ export class NeuTreeTableComponent {
   readonly selection = input<NeuTreeTableSelection | undefined>(undefined);
   readonly metaKeySelection = input(false);
   readonly expandedKeys = input<readonly string[] | undefined>(undefined);
+  /** Composes the existing Neural context-menu directive without retaining an overlay. */
+  readonly contextMenu = input<NeuContextMenuDirective | null>(null);
+  /** Presence makes transient context selection consumer-authoritative. */
+  readonly contextMenuSelection = input<NeuTreeTableNode | null | undefined>(undefined);
+  readonly contextMenuNodeDisabled = input<
+    ((node: NeuTreeTableNode, index: number) => boolean) | undefined
+  >(undefined);
   readonly editMode = input<NeuTableEditMode>('none');
   readonly editingRowKeys = input<readonly string[] | undefined>(undefined);
   readonly rowEditValidator = input<NeuTreeTableRowEditValidator | undefined>(undefined);
@@ -729,6 +745,20 @@ export class NeuTreeTableComponent {
   readonly rowEditInit = output<NeuTreeTableRowEditEvent>();
   readonly rowEditSave = output<NeuTreeTableRowEditEvent>();
   readonly rowEditCancel = output<NeuTreeTableRowEditEvent>();
+  readonly contextMenuSelectionChange = output<NeuTreeTableNode | null>();
+  readonly contextMenuSelect = output<NeuTreeTableContextMenuEvent>();
+
+  protected readonly contextMenuSelectionRow = computed(() => {
+    const node = this.contextMenuSelection();
+    if (node === undefined) return undefined;
+    if (node === null) return null;
+    return this.allRowsById().get(node.id) ?? null;
+  });
+
+  protected readonly tableContextMenuRowDisabled = (
+    row: Record<string, unknown>,
+    index: number,
+  ): boolean => this.contextMenuNodeDisabled()?.(this.asFlatRow(row).__treeNode, index) ?? false;
 
   /* v8 ignore start -- Angular signal-query factories; projected tree-table slots are covered. */
   readonly expandTemplate = contentChild(NeuTableExpandDirective);
@@ -916,6 +946,22 @@ export class NeuTreeTableComponent {
 
   protected onTableRowDblClick(row: Record<string, unknown>): void {
     this.nodeDblClick.emit(this.asFlatRow(row).__treeNode);
+  }
+
+  protected onContextMenuSelectionChange(row: Record<string, unknown> | null): void {
+    this.contextMenuSelectionChange.emit(row ? this.asFlatRow(row).__treeNode : null);
+  }
+
+  protected onContextMenuSelect(
+    event: NeuTableContextMenuSelectEvent<Record<string, unknown>>,
+  ): void {
+    const row = this.asFlatRow(event.row);
+    this.contextMenuSelect.emit({
+      originalEvent: event.originalEvent,
+      node: row.__treeNode,
+      row,
+      index: event.index,
+    });
   }
 
   protected onTableActionClick(event: {

@@ -88,7 +88,12 @@ function query(
   standalone: true,
   imports: [NeuTreeTableComponent, NeuTableExpandDirective],
   template: `
-    <neu-tree-table [nodes]="nodes" [columns]="columns" expandMode="multiple" selectionMode="multiple">
+    <neu-tree-table
+      [nodes]="nodes"
+      [columns]="columns"
+      expandMode="multiple"
+      selectionMode="multiple"
+    >
       <ng-template neuTableExpand let-node let-row="row">
         <span class="tree-detail">{{ node.label }} / {{ row.__treeLevel }}</span>
       </ng-template>
@@ -106,7 +111,13 @@ class TreeTableExpandHostComponent {
   template: `
     <neu-tree-table [nodes]="nodes" [columns]="columns" selectionMode="multiple">
       <ng-template neuTableCaption>Repository hierarchy</ng-template>
-      <ng-template neuTreeTableNode let-node let-level="level" let-toggle="toggle" let-toggleSelection="toggleSelection">
+      <ng-template
+        neuTreeTableNode
+        let-node
+        let-level="level"
+        let-toggle="toggle"
+        let-toggleSelection="toggleSelection"
+      >
         <strong class="custom-node">{{ node.label }} level {{ level }}</strong>
         <button class="custom-node-toggle" type="button" (click)="toggle()">Toggle</button>
         <button class="custom-node-select" type="button" (click)="toggleSelection()">Select</button>
@@ -249,18 +260,63 @@ class TreeTableFinalApiHostComponent {
       editMode="cell"
     >
       <ng-template neuTableToolbar><span class="slot-toolbar">Toolbar</span></ng-template>
-      <ng-template neuTableCaption let-colspan="colspan"><caption class="slot-caption">Caption {{ colspan }}</caption></ng-template>
-      <ng-template neuTableHeaderGroup let-colspan="colspan"><tr class="slot-header"><th [attr.colspan]="colspan">Header</th></tr></ng-template>
-      <ng-template neuTableFooterGroup let-colspan="colspan"><tr class="slot-footer"><td [attr.colspan]="colspan">Footer</td></tr></ng-template>
-      <ng-template neuTableLoadingBody let-colspan="colspan"><tr class="slot-loading"><td [attr.colspan]="colspan">Loading</td></tr></ng-template>
-      <ng-template neuTableEmpty let-message="message" let-colspan="colspan"><tr class="slot-empty"><td [attr.colspan]="colspan">{{ message }}</td></tr></ng-template>
-      <ng-template neuTableSummary let-colspan="colspan"><tfoot class="slot-summary"><tr><td [attr.colspan]="colspan">Summary</td></tr></tfoot></ng-template>
-      <ng-template neuTablePaginatorLeft let-currentPage><span class="slot-page-left">Left {{ currentPage }}</span></ng-template>
-      <ng-template neuTablePaginatorRight let-totalPages="totalPages"><span class="slot-page-right">Right {{ totalPages }}</span></ng-template>
-      <ng-template neuTableGroupHeader let-label="label" let-count="count"><tr class="slot-group-header"><td>Group {{ label }} {{ count }}</td></tr></ng-template>
-      <ng-template neuTableGroupFooter let-label="label"><tr class="slot-group-footer"><td>End {{ label }}</td></tr></ng-template>
-      <ng-template neuTableCellView="owner" let-value="value"><span class="slot-cell-view">View {{ value }}</span></ng-template>
-      <ng-template neuTableCellEditor="owner" let-value let-setValue="setValue"><input class="slot-cell-editor" [value]="value" (input)="setValue('Edited')" /></ng-template>
+      <ng-template neuTableCaption let-colspan="colspan"
+        ><caption class="slot-caption">
+          Caption
+          {{
+            colspan
+          }}
+        </caption></ng-template
+      >
+      <ng-template neuTableHeaderGroup let-colspan="colspan"
+        ><tr class="slot-header">
+          <th [attr.colspan]="colspan">Header</th>
+        </tr></ng-template
+      >
+      <ng-template neuTableFooterGroup let-colspan="colspan"
+        ><tr class="slot-footer">
+          <td [attr.colspan]="colspan">Footer</td>
+        </tr></ng-template
+      >
+      <ng-template neuTableLoadingBody let-colspan="colspan"
+        ><tr class="slot-loading">
+          <td [attr.colspan]="colspan">Loading</td>
+        </tr></ng-template
+      >
+      <ng-template neuTableEmpty let-message="message" let-colspan="colspan"
+        ><tr class="slot-empty">
+          <td [attr.colspan]="colspan">{{ message }}</td>
+        </tr></ng-template
+      >
+      <ng-template neuTableSummary let-colspan="colspan"
+        ><tfoot class="slot-summary">
+          <tr>
+            <td [attr.colspan]="colspan">Summary</td>
+          </tr>
+        </tfoot></ng-template
+      >
+      <ng-template neuTablePaginatorLeft let-currentPage
+        ><span class="slot-page-left">Left {{ currentPage }}</span></ng-template
+      >
+      <ng-template neuTablePaginatorRight let-totalPages="totalPages"
+        ><span class="slot-page-right">Right {{ totalPages }}</span></ng-template
+      >
+      <ng-template neuTableGroupHeader let-label="label" let-count="count"
+        ><tr class="slot-group-header">
+          <td>Group {{ label }} {{ count }}</td>
+        </tr></ng-template
+      >
+      <ng-template neuTableGroupFooter let-label="label"
+        ><tr class="slot-group-footer">
+          <td>End {{ label }}</td>
+        </tr></ng-template
+      >
+      <ng-template neuTableCellView="owner" let-value="value"
+        ><span class="slot-cell-view">View {{ value }}</span></ng-template
+      >
+      <ng-template neuTableCellEditor="owner" let-value let-setValue="setValue"
+        ><input class="slot-cell-editor" [value]="value" (input)="setValue('Edited')"
+      /></ng-template>
     </neu-tree-table>
   `,
 })
@@ -277,7 +333,13 @@ class TreeTableAllSlotsHostComponent {
   imports: [NeuTreeTableComponent, NeuTreeTableBodyDirective],
   template: `
     <neu-tree-table [nodes]="nodes" [columns]="columns" selectionMode="multiple">
-      <ng-template neuTreeTableBody let-node let-level="level" let-toggleSelection="toggleSelection" let-toggleExpansion="toggleExpansion">
+      <ng-template
+        neuTreeTableBody
+        let-node
+        let-level="level"
+        let-toggleSelection="toggleSelection"
+        let-toggleExpansion="toggleExpansion"
+      >
         <tr class="slot-tree-body">
           <td>{{ node.label }} / {{ level }}</td>
           <td><button class="body-select" (click)="toggleSelection()">Select</button></td>
@@ -1621,6 +1683,62 @@ describe('NeuTreeTableComponent', () => {
     Object.defineProperty(prevented, 'target', { configurable: true, value: root });
     component.onHostKeydown(prevented);
     expect(prevented.defaultPrevented).toBe(true);
+  });
+
+  it('maps the composed table context menu state and event back to tree nodes', () => {
+    const fixture = TestBed.createComponent(NeuTreeTableComponent);
+    fixture.componentRef.setInput('nodes', NODES);
+    fixture.componentRef.setInput('columns', COLUMNS);
+    fixture.componentRef.setInput('contextMenuSelection', NODES[0]);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const row = component.flatRows()[0];
+    const selections: Array<string | null> = [];
+    const events: string[] = [];
+    component.contextMenuSelectionChange.subscribe((node) => selections.push(node?.id ?? null));
+    component.contextMenuSelect.subscribe((event) =>
+      events.push(`${event.node.id}:${event.index}`),
+    );
+
+    expect(component['contextMenuSelectionRow']()?.id).toBe(NODES[0].id);
+    component['onContextMenuSelectionChange'](row);
+    component['onContextMenuSelectionChange'](null);
+    component['onContextMenuSelect']({
+      originalEvent: new MouseEvent('contextmenu'),
+      row,
+      key: row['id'],
+      index: 3,
+    });
+    const innerTable = fixture.debugElement.query(By.directive(NeuTableComponent));
+    innerTable.triggerEventHandler('contextMenuSelectionChange', row);
+    innerTable.triggerEventHandler('contextMenuSelect', {
+      originalEvent: new KeyboardEvent('keydown', { key: 'ContextMenu' }),
+      row,
+      key: row['id'],
+      index: 4,
+    });
+
+    expect(selections).toEqual([NODES[0].id, null, NODES[0].id]);
+    expect(events).toEqual([`${NODES[0].id}:3`, `${NODES[0].id}:4`]);
+
+    fixture.componentRef.setInput('contextMenuSelection', null);
+    fixture.detectChanges();
+    expect(component['contextMenuSelectionRow']()).toBeNull();
+    fixture.componentRef.setInput('contextMenuSelection', undefined);
+    fixture.detectChanges();
+    expect(component['contextMenuSelectionRow']()).toBeUndefined();
+    fixture.componentRef.setInput('contextMenuSelection', {
+      id: 'missing',
+      label: 'Missing',
+      data: {},
+    });
+    fixture.componentRef.setInput('contextMenuNodeDisabled', () => true);
+    fixture.detectChanges();
+    expect(component['contextMenuSelectionRow']()).toBeNull();
+    expect(component['tableContextMenuRowDisabled'](row, 0)).toBe(true);
+    fixture.componentRef.setInput('contextMenuNodeDisabled', undefined);
+    fixture.detectChanges();
+    expect(component['tableContextMenuRowDisabled'](row, 0)).toBe(false);
   });
 
   it('projects cycles, shared branches, and depth 5,000 without mutating consumer nodes', () => {

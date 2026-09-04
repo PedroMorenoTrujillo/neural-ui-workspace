@@ -228,6 +228,11 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
     alias: 'neuDragKeyboard',
     transform: booleanAttribute,
   });
+  /** Allows adapters to disable pointer dragging without disabling the host option itself. */
+  readonly pointerEnabled = input(true, {
+    alias: 'neuDragPointer',
+    transform: booleanAttribute,
+  });
   readonly ariaLabel = input<string | null>(null, { alias: 'neuDragAriaLabel' });
   readonly role = input<string | null>('button', { alias: 'neuDragRole' });
   readonly tabIndex = input(0, { alias: 'neuDragTabIndex' });
@@ -323,7 +328,7 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
 
   private syncCdk(): void {
     this.cdkDrag.data = this.envelope();
-    this.cdkDrag.disabled = this.disabled();
+    this.cdkDrag.disabled = this.disabled() || !this.pointerEnabled();
   }
 
   private eventBase(

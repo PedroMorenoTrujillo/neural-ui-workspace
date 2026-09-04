@@ -20,15 +20,13 @@ export {
   createNeuOptionLoadingRows,
   deriveNeuOptionRowId,
   filterNeuOptionRows,
+  filterNeuOptions,
   normalizeNeuLegacyOptionGroups,
   normalizeNeuOptionGroups,
   normalizeNeuOptionLazyWindow,
   normalizeNeuOptionRows,
 } from './neu-option-foundation';
-export type {
-  InternalNeuOptionNormalizedRow,
-  InternalNeuOptionRow,
-} from './neu-option-foundation';
+export type { InternalNeuOptionNormalizedRow, InternalNeuOptionRow } from './neu-option-foundation';
 export {
   INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS,
   InternalNeuConnectedOverlaySession,
