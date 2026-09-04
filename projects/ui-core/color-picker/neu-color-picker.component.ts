@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   ViewEncapsulation,
@@ -181,7 +182,8 @@ function hslToHex(h: number, s: number, l: number): string {
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
       (backdropClick)="_isOpen.set(false)"
-      (detach)="_isOpen.set(false)"
+      (detach)="onPanelDetached()"
+      (attach)="onPanelAttached()"
     >
       <div class="neu-cp__panel" role="dialog" aria-label="Selector de color">
         <!-- HSV Canvas -->
@@ -191,6 +193,8 @@ function hslToHex(h: number, s: number, l: number): string {
           (pointerdown)="_canvasDown($event)"
           (pointermove)="_canvasDrag($event)"
           (pointerup)="_canvasUp($event)"
+          (pointercancel)="cancelColorChange()"
+          (lostpointercapture)="cancelColorChange()"
         >
           <div
             class="neu-cp__canvas-cursor"
@@ -208,6 +212,7 @@ function hslToHex(h: number, s: number, l: number): string {
           [value]="_hue()"
           [disabled]="_isDisabled() || readonly()"
           (input)="_onHueChange(+$any($event.target).value)"
+          (change)="finishColorChange()"
           [attr.aria-label]="'Tono ' + _hue() + '°'"
         />
 
@@ -272,7 +277,46 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   readonly invalid = input(false);
 
   /** Emitido al cambiar el color / Emitted when color changes */
+  /** Browser panel attached, regardless of opening source. */
+  readonly opened = output<void>();
+  /** Browser panel detached, regardless of closing source; silent during destroy. */
+  readonly closed = output<void>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+  private panelAttached = false;
+
+  protected onPanelAttached(): void {
+    if (this.eventDestroyRef.destroyed || this.panelAttached) return;
+    this.panelAttached = true;
+    this.opened.emit();
+  }
+
+  protected onPanelDetached(): void {
+    const wasAttached = this.panelAttached;
+    this.panelAttached = false;
+    if (this.eventDestroyRef.destroyed) return;
+    this._isOpen.set(false);
+    this.cancelColorChange();
+    if (wasAttached) this.closed.emit();
+  }
+
   readonly colorChange = output<string>();
+  /** Final color after a changed canvas drag or committed hue edit, in the active format. */
+  readonly colorChangeEnd = output<string>();
+  private continuousStart: string | null = null;
+
+  protected finishColorChange(): void {
+    const previous = this.continuousStart;
+    this.continuousStart = null;
+    if (previous === null || this.eventDestroyRef.destroyed || this._isDisabled() || this.readonly()) return;
+    const value = this._textValue();
+    if (previous !== value) this.colorChangeEnd.emit(value);
+  }
+
+  protected cancelColorChange(): void {
+    this._dragging = false;
+    this.continuousStart = null;
+  }
+
 
   // ── Internal state ───────────────────────────────────────────────
   private readonly _id = inject(NeuIdGenerator).getId('neu-cp-');
@@ -366,6 +410,8 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   // ── Canvas interactions ───────────────────────────────────────
   protected _canvasDown(e: PointerEvent): void {
     if (this._isDisabled() || this.readonly()) return;
+    if (this.eventDestroyRef.destroyed) return;
+    this.continuousStart = this._textValue();
     this._dragging = true;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     this._updateFromCanvas(e);
@@ -379,6 +425,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   protected _canvasUp(e: PointerEvent): void {
     if (!this._dragging) return;
     this._dragging = false;
+    this.finishColorChange();
     (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
   }
 
@@ -399,6 +446,8 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
 
   protected _onHueChange(v: number): void {
     if (this._isDisabled() || this.readonly()) return;
+    if (this.eventDestroyRef.destroyed) return;
+    this.continuousStart ??= this._textValue();
     this._hue.set(Number(v));
     this._hasValue.set(true);
     this._commitUserValue();
@@ -454,6 +503,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
 
   // ── CVA ──────────────────────────────────────────────────────
   writeValue(val: string | null | undefined): void {
+    this.cancelColorChange();
     this._applyValue(val);
   }
 
@@ -466,6 +516,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   }
 
   setDisabledState(d: boolean): void {
+    if (d) this.cancelColorChange();
     this._cvaDisabled.set(d);
   }
 }

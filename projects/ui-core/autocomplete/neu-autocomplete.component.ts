@@ -173,6 +173,7 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
         [attr.aria-readonly]="readonly() ? 'true' : null"
         [attr.aria-busy]="loading() ? 'true' : null"
         [value]="_query()"
+        (select)="$event.stopPropagation()"
         (input)="onInput($event)"
         (focus)="_onFocus($event)"
         (blur)="_onBlur($event)"

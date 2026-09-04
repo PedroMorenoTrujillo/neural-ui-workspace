@@ -68,6 +68,10 @@ export class NeuSplitterComponent {
   readonly direction = input<NeuSplitterDirection>('horizontal');
   readonly panes = input<NeuSplitterPane[]>([]);
   readonly sizeChange = output<number[]>();
+  /** Sizes at pointer/touch drag start; keyboard uses sizeChange only. */
+  readonly resizeStart = output<number[]>();
+  /** Changed live percentage sizes during a drag. */
+  readonly resize = output<number[]>();
 
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _destroyRef = inject(DestroyRef);
@@ -102,6 +106,7 @@ export class NeuSplitterComponent {
   private _dragPos = 0;
 
   protected _startDrag(e: MouseEvent, index: number): void {
+    if (this._destroyRef.destroyed || e.button !== 0) return;
     e.preventDefault();
     this._disposeDragSession();
     this._dragIndex = index;
@@ -123,9 +128,11 @@ export class NeuSplitterComponent {
     view.addEventListener('mousemove', onMove);
     view.addEventListener('mouseup', onUp);
     view.addEventListener('blur', onUp);
+    this.resizeStart.emit([...this._sizes()]);
   }
 
   protected _startTouchDrag(e: TouchEvent, index: number): void {
+    if (this._destroyRef.destroyed || !e.touches.length) return;
     this._disposeDragSession();
     const t = e.touches[0];
     this._dragIndex = index;
@@ -150,6 +157,7 @@ export class NeuSplitterComponent {
     view.addEventListener('touchmove', onMove, { passive: false });
     view.addEventListener('touchend', onEnd);
     view.addEventListener('touchcancel', onEnd);
+    this.resizeStart.emit([...this._sizes()]);
   }
 
   private _disposeDragSession(): void {
@@ -176,7 +184,7 @@ export class NeuSplitterComponent {
     const total =
       this.direction() === 'horizontal' ? container.offsetWidth : container.offsetHeight;
     if (total === 0) return;
-    this._adjustPair(this._dragIndex, (delta / total) * 100);
+    if (this._adjustPair(this._dragIndex, (delta / total) * 100)) this.resize.emit([...this._sizes()]);
   }
 
   private _adjustPair(index: number, delta: number): boolean {

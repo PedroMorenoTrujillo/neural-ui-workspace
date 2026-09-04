@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   PLATFORM_ID,
   ViewEncapsulation,
@@ -144,7 +145,8 @@ interface SelectionPath<T> {
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="viewportMargin"
       (backdropClick)="close()"
-      (detach)="close()"
+      (detach)="onPanelDetached()"
+      (attach)="onPanelAttached()"
       (positionChange)="onOverlayPositionChange($event)"
     >
       <div
@@ -290,6 +292,30 @@ export class NeuCascadeSelectComponent<
   readonly clearable = input(false);
   readonly disabled = input(false);
 
+  /** Browser panel attached, regardless of opening source. */
+  readonly opened = output<void>();
+  /** Browser panel detached, regardless of closing source; silent during destroy. */
+  readonly closed = output<void>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+  private panelAttached = false;
+
+  protected onPanelAttached(): void {
+    if (this.eventDestroyRef.destroyed || this.panelAttached) return;
+    this.panelAttached = true;
+    this.opened.emit();
+  }
+
+  protected onPanelDetached(): void {
+    const wasAttached = this.panelAttached;
+    this.panelAttached = false;
+    if (this.eventDestroyRef.destroyed) return;
+    this.close();
+    if (wasAttached) this.closed.emit();
+  }
+
+  /** User ancestor path; restored/programmatic paths are silent. */
+  readonly groupChange = output<readonly T[]>();
+
   readonly selectionChange = output<T | null>();
 
   readonly triggerId = inject(NeuIdGenerator).getId('neu-cascade-select-');
@@ -384,10 +410,11 @@ export class NeuCascadeSelectComponent<
   }
 
   activate(node: T): void {
-    if (this.isDisabled() || this.isOptionDisabled(node)) return;
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || this.isOptionDisabled(node)) return;
     this.activeIndex.set(this.currentNodes().indexOf(node));
     if (this.hasChildren(node)) {
       this.activePath.update((path) => [...path, node]);
+      this.groupChange.emit([...this.activePath()]);
       this.activeIndex.set(this.firstEnabledIndex(this.childrenOf(node)));
       this.focusCurrentOption();
       return;
@@ -402,15 +429,18 @@ export class NeuCascadeSelectComponent<
 
   goBack(event?: Event): void {
     event?.preventDefault();
-    if (!this.activePath().length) return;
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || !this.activePath().length) return;
     this.activePath.update((path) => path.slice(0, -1));
+    this.groupChange.emit([...this.activePath()]);
     this.activeIndex.set(this.firstEnabledIndex(this.currentNodes()));
     this.focusCurrentOption();
   }
 
   goToDepth(depth: number): void {
     const nextPath = depth < 0 ? [] : this.activePath().slice(0, depth + 1);
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || nextPath.length === this.activePath().length) return;
     this.activePath.set(nextPath);
+    this.groupChange.emit([...nextPath]);
     this.activeIndex.set(this.firstEnabledIndex(this.currentNodes()));
     this.focusCurrentOption();
   }

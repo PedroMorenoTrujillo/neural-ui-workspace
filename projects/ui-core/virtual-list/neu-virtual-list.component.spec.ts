@@ -7,6 +7,7 @@ import {
   provideZonelessChangeDetection,
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { EMPTY } from 'rxjs';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NeuVirtualListComponent, NeuVirtualListRowComponent } from './neu-virtual-list.component';
 
@@ -188,7 +189,7 @@ describe('NeuVirtualListComponent', () => {
   it('ngAfterViewInit should call checkViewportSize when the viewport is available', () => {
     const f = setup([1, 2, 3]);
     const checkViewportSize = vi.fn();
-    (f.componentInstance as any)['_viewport'] = { checkViewportSize };
+    (f.componentInstance as any)['_viewport'] = { checkViewportSize, renderedRangeStream: EMPTY };
 
     f.componentInstance.ngAfterViewInit();
 

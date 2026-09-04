@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnDestroy,
   ViewEncapsulation,
   computed,
@@ -22,6 +23,12 @@ import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/interna
 export interface NeuDateRange {
   start: Date | null;
   end: Date | null;
+}
+
+/** Calendar grid interval: start inclusive, end exclusive, in local calendar time. */
+export interface NeuDateViewChangeEvent {
+  start: Date;
+  end: Date;
 }
 
 export interface NeuDatePreset {
@@ -150,7 +157,8 @@ function cloneDate(d: Date): Date {
         [cdkConnectedOverlayPush]="true"
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
         (backdropClick)="close()"
-        (detach)="close()"
+        (detach)="onPanelDetached()"
+      (attach)="onPanelAttached()"
       >
         <div
           class="neu-drp__panel"
@@ -328,7 +336,8 @@ function cloneDate(d: Date): Date {
           [cdkConnectedOverlayPush]="true"
           [cdkConnectedOverlayViewportMargin]="_viewportMargin"
           (backdropClick)="close()"
-          (detach)="close()"
+          (detach)="onPanelDetached()"
+      (attach)="onPanelAttached()"
         >
           <div
             class="neu-date-input__panel"
@@ -612,7 +621,51 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
 
   // ── Outputs ──────────────────────────────────────────────────────
   /** Emitido al confirmar el rango / Emitted when range is confirmed */
+  /** Browser panel attached, regardless of opening source. */
+  readonly opened = output<void>();
+  /** Browser panel detached, regardless of closing source; silent during destroy. */
+  readonly closed = output<void>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+  private panelAttached = false;
+
+  protected onPanelAttached(): void {
+    if (this.eventDestroyRef.destroyed || this.panelAttached) return;
+    this.panelAttached = true;
+    this.opened.emit();
+  }
+
+  protected onPanelDetached(): void {
+    const wasAttached = this.panelAttached;
+    this.panelAttached = false;
+    if (this.eventDestroyRef.destroyed) return;
+    this.close();
+    if (wasAttached) this.closed.emit();
+  }
+
   readonly rangeChange = output<NeuDateRange>();
+  /** Changed displayed calendar grid after an explicit navigation command. */
+  readonly viewChange = output<NeuDateViewChangeEvent>();
+  /** Explicit user clear; CVA writes and individual deselection are silent. */
+  readonly cleared = output<void>();
+
+  private visibleCalendarInterval(): NeuDateViewChangeEvent | null {
+    if (this.type() === 'time') return null;
+    const days = this._isRange() ? [...this._leftDays(), ...this._rightDays()] : this.calendarDays();
+    if (!days.length) return null;
+    const start = new Date(days[0].date);
+    const last = days[days.length - 1].date;
+    const end = new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1);
+    return { start, end };
+  }
+
+  private emitViewNavigation(previous: NeuDateViewChangeEvent | null): void {
+    if (this.eventDestroyRef.destroyed || !this.isOpen()) return;
+    const next = this.visibleCalendarInterval();
+    if (next && (next.start.getTime() !== previous?.start.getTime() || next.end.getTime() !== previous?.end.getTime())) {
+      this.viewChange.emit(next);
+    }
+  }
+
 
   // ── Estado interno / Internal state ──────────────────────────────
   protected readonly _id = inject(NeuIdGenerator).getId('neu-date-input-');
@@ -872,16 +925,28 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
 
   // ── Range actions ─────────────────────────────────────────────────
   protected _prevLeft(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+    this.emitViewNavigation(previous);
   }
   protected _nextLeft(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+    this.emitViewNavigation(previous);
   }
   protected _prevRight(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+    this.emitViewNavigation(previous);
   }
   protected _nextRight(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+    this.emitViewNavigation(previous);
   }
 
   protected _selectDay(date: Date): void {
@@ -922,12 +987,14 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   protected _clearRange(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
     this._pickStart.set(null);
     this._pickEnd.set(null);
     this._hoverDate.set(null);
     const range: NeuDateRange = { start: null, end: null };
     this._onChange(range);
     this.rangeChange.emit(range);
+    if (!this.eventDestroyRef.destroyed) this.cleared.emit();
   }
 
   #rangeValue(): NeuDateRange {
@@ -1099,17 +1166,23 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   prevMonth(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     if (this._viewMonth() === 0) {
       this._viewMonth.set(11);
       this._viewYear.update((y) => y - 1);
     } else this._viewMonth.update((m) => m - 1);
+    this.emitViewNavigation(previous);
   }
 
   nextMonth(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     if (this._viewMonth() === 11) {
       this._viewMonth.set(0);
       this._viewYear.update((y) => y + 1);
     } else this._viewMonth.update((m) => m + 1);
+    this.emitViewNavigation(previous);
   }
 
   selectDay(day: CalendarDay): void {
@@ -1131,17 +1204,23 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   setViewMonth(value: string | number): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     const month = Number(value);
     if (Number.isInteger(month) && month >= 0 && month <= 11) {
       this._viewMonth.set(month);
     }
+    this.emitViewNavigation(previous);
   }
 
   setViewYear(value: string | number): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     const year = Number(value);
     if (Number.isInteger(year)) {
       this._viewYear.set(year);
     }
+    this.emitViewNavigation(previous);
   }
 
   formatDayLabel(date: Date): string {
@@ -1154,19 +1233,24 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   today(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
+    const previous = this.visibleCalendarInterval();
     const d = new Date();
     this._viewYear.set(d.getFullYear());
     this._viewMonth.set(d.getMonth());
     this.selectDay({ date: d, inMonth: true, isToday: true, isSelected: false, disabled: false });
+    this.emitViewNavigation(previous);
   }
 
   clear(): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabledFinal() || this.readonly()) return;
     this._selYear.set(null);
     this._selMonth.set(null);
     this._selDay.set(null);
     this._selectedDates.set([]);
     this._value.set('');
     this._onChange('');
+    if (!this.eventDestroyRef.destroyed) this.cleared.emit();
     this.close();
   }
 

@@ -1,0 +1,122 @@
+[
+  {
+    "browser": "chromium",
+    "case": "B01 native and programmatic input text selection never reaches domain bindings",
+    "status": "PASS"
+  },
+  {
+    "browser": "chromium",
+    "case": "B01 mouse and keyboard option activation reaches template and OutputRef exactly once",
+    "status": "PASS"
+  },
+  {
+    "browser": "chromium",
+    "case": "Chart bar and pie publish domain points; background and legend do not",
+    "status": "PASS"
+  },
+  {
+    "browser": "chromium",
+    "case": "Tree overlay query clear, Escape, reopen and DateInput navigation/CVA contracts",
+    "status": "PASS"
+  },
+  {
+    "browser": "chromium",
+    "case": "VirtualList scroll publishes changing end-exclusive rendered ranges without duplicates",
+    "status": "PASS"
+  },
+  {
+    "browser": "chromium",
+    "case": "Dialog and BottomSheet close requests are distinct from actual panel removal",
+    "status": "PASS"
+  },
+  {
+    "browser": "chromium",
+    "case": "Color hue keyboard and canvas pointer interactions complete once",
+    "status": "PASS"
+  },
+  {
+    "browser": "chromium",
+    "case": "Destroy while controls have pending work produces no later domain/lifecycle callbacks",
+    "status": "PASS"
+  },
+  {
+    "browser": "firefox",
+    "case": "B01 native and programmatic input text selection never reaches domain bindings",
+    "status": "PASS"
+  },
+  {
+    "browser": "firefox",
+    "case": "B01 mouse and keyboard option activation reaches template and OutputRef exactly once",
+    "status": "PASS"
+  },
+  {
+    "browser": "firefox",
+    "case": "Chart bar and pie publish domain points; background and legend do not",
+    "status": "PASS"
+  },
+  {
+    "browser": "firefox",
+    "case": "Tree overlay query clear, Escape, reopen and DateInput navigation/CVA contracts",
+    "status": "PASS"
+  },
+  {
+    "browser": "firefox",
+    "case": "VirtualList scroll publishes changing end-exclusive rendered ranges without duplicates",
+    "status": "PASS"
+  },
+  {
+    "browser": "firefox",
+    "case": "Dialog and BottomSheet close requests are distinct from actual panel removal",
+    "status": "PASS"
+  },
+  {
+    "browser": "firefox",
+    "case": "Color hue keyboard and canvas pointer interactions complete once",
+    "status": "PASS"
+  },
+  {
+    "browser": "firefox",
+    "case": "Destroy while controls have pending work produces no later domain/lifecycle callbacks",
+    "status": "PASS"
+  },
+  {
+    "browser": "webkit",
+    "case": "B01 native and programmatic input text selection never reaches domain bindings",
+    "status": "PASS"
+  },
+  {
+    "browser": "webkit",
+    "case": "B01 mouse and keyboard option activation reaches template and OutputRef exactly once",
+    "status": "PASS"
+  },
+  {
+    "browser": "webkit",
+    "case": "Chart bar and pie publish domain points; background and legend do not",
+    "status": "PASS"
+  },
+  {
+    "browser": "webkit",
+    "case": "Tree overlay query clear, Escape, reopen and DateInput navigation/CVA contracts",
+    "status": "PASS"
+  },
+  {
+    "browser": "webkit",
+    "case": "VirtualList scroll publishes changing end-exclusive rendered ranges without duplicates",
+    "status": "PASS"
+  },
+  {
+    "browser": "webkit",
+    "case": "Dialog and BottomSheet close requests are distinct from actual panel removal",
+    "status": "PASS"
+  },
+  {
+    "browser": "webkit",
+    "case": "Color hue keyboard and canvas pointer interactions complete once",
+    "status": "PASS"
+  },
+  {
+    "browser": "webkit",
+    "case": "Destroy while controls have pending work produces no later domain/lifecycle callbacks",
+    "status": "PASS"
+  }
+]

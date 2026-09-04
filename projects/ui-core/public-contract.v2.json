@@ -210,6 +210,7 @@
       "types": "./types/neural-ui-core-chart.d.ts",
       "exports": [
         "./chart#NeuChartComponent",
+        "./chart#NeuChartDataSelectEvent",
         "./chart#NeuChartSeries",
         "./chart#NeuChartType"
       ]
@@ -322,7 +323,8 @@
       "exports": [
         "./date-input#NeuDateInputComponent",
         "./date-input#NeuDatePreset",
-        "./date-input#NeuDateRange"
+        "./date-input#NeuDateRange",
+        "./date-input#NeuDateViewChangeEvent"
       ]
     },
     {
@@ -4445,12 +4447,32 @@
           "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
         },
         {
+          "id": "./bottom-sheet#NeuBottomSheetComponent.output:hidden",
+          "name": "hidden",
+          "kind": "output",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hidden: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./bottom-sheet#NeuBottomSheetComponent.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
           "id": "./bottom-sheet#NeuBottomSheetComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuBottomSheetComponent, \"neu-bottom-sheet\", never, {\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"closeLabel\": {\n        \"alias\": \"closeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"backdrop\": {\n        \"alias\": \"backdrop\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disableClose\": {\n        \"alias\": \"disableClose\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialFocus\": {\n        \"alias\": \"initialFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"closed\": \"closed\";\n}, never, [\n    \"*\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuBottomSheetComponent, \"neu-bottom-sheet\", never, {\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"closeLabel\": {\n        \"alias\": \"closeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"backdrop\": {\n        \"alias\": \"backdrop\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disableClose\": {\n        \"alias\": \"disableClose\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialFocus\": {\n        \"alias\": \"initialFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"closed\": \"closed\";\n    \"opened\": \"opened\";\n    \"hidden\": \"hidden\";\n}, never, [\n    \"*\"\n], true, never>;"
         },
         {
           "id": "./bottom-sheet#NeuBottomSheetComponent.property:ɵfac",
@@ -6374,6 +6396,36 @@
           "signature": "writeValue(value: V | null): void;"
         },
         {
+          "id": "./cascade-select#NeuCascadeSelectComponent.output:closed",
+          "name": "closed",
+          "kind": "output",
+          "publicName": "closed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./cascade-select#NeuCascadeSelectComponent.output:groupChange",
+          "name": "groupChange",
+          "kind": "output",
+          "publicName": "groupChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly groupChange: _angular_core.OutputEmitterRef<readonly T[]>;"
+        },
+        {
+          "id": "./cascade-select#NeuCascadeSelectComponent.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
           "id": "./cascade-select#NeuCascadeSelectComponent.output:selectionChange",
           "name": "selectionChange",
           "kind": "output",
@@ -6501,7 +6553,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCascadeSelectComponent<any, any>, \"neu-cascade-select\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"options\": {\n        \"alias\": \"options\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionChildren\": {\n        \"alias\": \"optionChildren\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rootLabel\": {\n        \"alias\": \"rootLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"breadcrumbAriaLabel\": {\n        \"alias\": \"breadcrumbAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"backAriaLabel\": {\n        \"alias\": \"backAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearAriaLabel\": {\n        \"alias\": \"clearAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearable\": {\n        \"alias\": \"clearable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n}, [\n    \"itemTpl\",\n    \"selectedTpl\",\n    \"headerTpl\",\n    \"footerTpl\",\n    \"emptyTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCascadeSelectComponent<any, any>, \"neu-cascade-select\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"options\": {\n        \"alias\": \"options\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionChildren\": {\n        \"alias\": \"optionChildren\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rootLabel\": {\n        \"alias\": \"rootLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"breadcrumbAriaLabel\": {\n        \"alias\": \"breadcrumbAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"backAriaLabel\": {\n        \"alias\": \"backAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearAriaLabel\": {\n        \"alias\": \"clearAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearable\": {\n        \"alias\": \"clearable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"groupChange\": \"groupChange\";\n    \"selectionChange\": \"selectionChange\";\n}, [\n    \"itemTpl\",\n    \"selectedTpl\",\n    \"headerTpl\",\n    \"footerTpl\",\n    \"emptyTpl\"\n], never, true, never>;"
         },
         {
           "id": "./cascade-select#NeuCascadeSelectComponent.property:ɵfac",
@@ -7020,12 +7072,22 @@
           "signature": "type: _angular_core.InputSignal<NeuChartType>;"
         },
         {
+          "id": "./chart#NeuChartComponent.output:dataSelect",
+          "name": "dataSelect",
+          "kind": "output",
+          "publicName": "dataSelect",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dataSelect: _angular_core.OutputEmitterRef<NeuChartDataSelectEvent>;"
+        },
+        {
           "id": "./chart#NeuChartComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuChartComponent, \"neu-chart\", never, {\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"series\": {\n        \"alias\": \"series\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pieSeries\": {\n        \"alias\": \"pieSeries\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"categories\": {\n        \"alias\": \"categories\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"height\": {\n        \"alias\": \"height\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"colors\": {\n        \"alias\": \"colors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showDataLabels\": {\n        \"alias\": \"showDataLabels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuChartComponent, \"neu-chart\", never, {\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"series\": {\n        \"alias\": \"series\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pieSeries\": {\n        \"alias\": \"pieSeries\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"categories\": {\n        \"alias\": \"categories\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"height\": {\n        \"alias\": \"height\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"colors\": {\n        \"alias\": \"colors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showDataLabels\": {\n        \"alias\": \"showDataLabels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"dataSelect\": \"dataSelect\";\n}, never, never, true, never>;"
         },
         {
           "id": "./chart#NeuChartComponent.property:ɵfac",
@@ -7034,6 +7096,64 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuChartComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./chart#NeuChartDataSelectEvent",
+      "entrypoint": "./chart",
+      "name": "NeuChartDataSelectEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuChartDataSelectEvent {\n}",
+      "members": [
+        {
+          "id": "./chart#NeuChartDataSelectEvent.property:dataPointIndex",
+          "name": "dataPointIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "dataPointIndex: number;"
+        },
+        {
+          "id": "./chart#NeuChartDataSelectEvent.property:label",
+          "name": "label",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "label: string | undefined;"
+        },
+        {
+          "id": "./chart#NeuChartDataSelectEvent.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "originalEvent: Event;"
+        },
+        {
+          "id": "./chart#NeuChartDataSelectEvent.property:seriesIndex",
+          "name": "seriesIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "seriesIndex: number;"
+        },
+        {
+          "id": "./chart#NeuChartDataSelectEvent.property:seriesName",
+          "name": "seriesName",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "seriesName: string | undefined;"
+        },
+        {
+          "id": "./chart#NeuChartDataSelectEvent.property:value",
+          "name": "value",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "value: number;"
         }
       ]
     },
@@ -7620,6 +7740,16 @@
           "signature": "writeValue(val: string | null | undefined): void;"
         },
         {
+          "id": "./color-picker#NeuColorPickerComponent.output:closed",
+          "name": "closed",
+          "kind": "output",
+          "publicName": "closed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
           "id": "./color-picker#NeuColorPickerComponent.output:colorChange",
           "name": "colorChange",
           "kind": "output",
@@ -7628,6 +7758,26 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly colorChange: _angular_core.OutputEmitterRef<string>;"
+        },
+        {
+          "id": "./color-picker#NeuColorPickerComponent.output:colorChangeEnd",
+          "name": "colorChangeEnd",
+          "kind": "output",
+          "publicName": "colorChangeEnd",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly colorChangeEnd: _angular_core.OutputEmitterRef<string>;"
+        },
+        {
+          "id": "./color-picker#NeuColorPickerComponent.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
         },
         {
           "id": "./color-picker#NeuColorPickerComponent.property:overlayPositions",
@@ -7651,7 +7801,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuColorPickerComponent, \"neu-color-picker\", never, {\n    \"mode\": {\n        \"alias\": \"mode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"colorChange\": \"colorChange\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuColorPickerComponent, \"neu-color-picker\", never, {\n    \"mode\": {\n        \"alias\": \"mode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"colorChange\": \"colorChange\";\n    \"colorChangeEnd\": \"colorChangeEnd\";\n}, never, never, true, never>;"
         },
         {
           "id": "./color-picker#NeuColorPickerComponent.property:ɵfac",
@@ -10029,6 +10179,36 @@
           "signature": "writeValue(value: string | string[] | NeuDateRange | null): void;"
         },
         {
+          "id": "./date-input#NeuDateInputComponent.output:cleared",
+          "name": "cleared",
+          "kind": "output",
+          "publicName": "cleared",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly cleared: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./date-input#NeuDateInputComponent.output:closed",
+          "name": "closed",
+          "kind": "output",
+          "publicName": "closed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./date-input#NeuDateInputComponent.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
           "id": "./date-input#NeuDateInputComponent.output:rangeChange",
           "name": "rangeChange",
           "kind": "output",
@@ -10037,6 +10217,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly rangeChange: _angular_core.OutputEmitterRef<NeuDateRange>;"
+        },
+        {
+          "id": "./date-input#NeuDateInputComponent.output:viewChange",
+          "name": "viewChange",
+          "kind": "output",
+          "publicName": "viewChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly viewChange: _angular_core.OutputEmitterRef<NeuDateViewChangeEvent>;"
         },
         {
           "id": "./date-input#NeuDateInputComponent.property:#private",
@@ -10132,7 +10322,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDateInputComponent, \"neu-date-input\", never, {\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"locale\": {\n        \"alias\": \"locale\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabledDates\": {\n        \"alias\": \"disabledDates\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiple\": {\n        \"alias\": \"multiple\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showMonthYearPicker\": {\n        \"alias\": \"showMonthYearPicker\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"yearRange\": {\n        \"alias\": \"yearRange\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dateFormat\": {\n        \"alias\": \"dateFormat\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"floatingLabel\": {\n        \"alias\": \"floatingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"presets\": {\n        \"alias\": \"presets\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"firstDayOfWeek\": {\n        \"alias\": \"firstDayOfWeek\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"rangeChange\": \"rangeChange\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDateInputComponent, \"neu-date-input\", never, {\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"locale\": {\n        \"alias\": \"locale\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabledDates\": {\n        \"alias\": \"disabledDates\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiple\": {\n        \"alias\": \"multiple\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showMonthYearPicker\": {\n        \"alias\": \"showMonthYearPicker\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"yearRange\": {\n        \"alias\": \"yearRange\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dateFormat\": {\n        \"alias\": \"dateFormat\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"floatingLabel\": {\n        \"alias\": \"floatingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"presets\": {\n        \"alias\": \"presets\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"firstDayOfWeek\": {\n        \"alias\": \"firstDayOfWeek\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"rangeChange\": \"rangeChange\";\n    \"viewChange\": \"viewChange\";\n    \"cleared\": \"cleared\";\n}, never, never, true, never>;"
         },
         {
           "id": "./date-input#NeuDateInputComponent.property:ɵfac",
@@ -10233,6 +10423,32 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "start: Date | null;"
+        }
+      ]
+    },
+    {
+      "id": "./date-input#NeuDateViewChangeEvent",
+      "entrypoint": "./date-input",
+      "name": "NeuDateViewChangeEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuDateViewChangeEvent {\n}",
+      "members": [
+        {
+          "id": "./date-input#NeuDateViewChangeEvent.property:end",
+          "name": "end",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "end: Date;"
+        },
+        {
+          "id": "./date-input#NeuDateViewChangeEvent.property:start",
+          "name": "start",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "start: Date;"
         }
       ]
     },
@@ -12957,12 +13173,32 @@
           "signature": "openFromKeyboard(event: Event): void;"
         },
         {
+          "id": "./image-viewer#NeuImageViewerDirective.output:closed",
+          "name": "closed",
+          "kind": "output",
+          "publicName": "closed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./image-viewer#NeuImageViewerDirective.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
           "id": "./image-viewer#NeuImageViewerDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuImageViewerDirective, \"[neuImageViewer]\", [\n    \"neuImageViewer\"\n], {\n    \"neuImageViewer\": {\n        \"alias\": \"neuImageViewer\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"neuIvIndex\": {\n        \"alias\": \"neuIvIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuImageViewerDirective, \"[neuImageViewer]\", [\n    \"neuImageViewer\"\n], {\n    \"neuImageViewer\": {\n        \"alias\": \"neuImageViewer\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"neuIvIndex\": {\n        \"alias\": \"neuIvIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n}, never, never, true, never>;"
         },
         {
           "id": "./image-viewer#NeuImageViewerDirective.property:ɵfac",
@@ -20791,12 +21027,32 @@
           "signature": "closed: _angular_core.OutputEmitterRef<unknown>;"
         },
         {
+          "id": "./modal#NeuDialogComponent.output:hidden",
+          "name": "hidden",
+          "kind": "output",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hidden: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
           "id": "./modal#NeuDialogComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDialogComponent, \"neu-dialog\", never, {\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disableClose\": {\n        \"alias\": \"disableClose\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"responsive\": {\n        \"alias\": \"responsive\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreFocus\": {\n        \"alias\": \"restoreFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"closed\": \"closed\";\n}, never, [\n    \"*\",\n    \"[neu-dialog-footer]\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDialogComponent, \"neu-dialog\", never, {\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disableClose\": {\n        \"alias\": \"disableClose\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"responsive\": {\n        \"alias\": \"responsive\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreFocus\": {\n        \"alias\": \"restoreFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"closed\": \"closed\";\n    \"opened\": \"opened\";\n    \"hidden\": \"hidden\";\n}, never, [\n    \"*\",\n    \"[neu-dialog-footer]\"\n], true, never>;"
         },
         {
           "id": "./modal#NeuDialogComponent.property:ɵfac",
@@ -24331,6 +24587,14 @@
           "signature": "onInputChange(event: Event): void;"
         },
         {
+          "id": "./number-input#NeuNumberInputComponent.method:onLiveInput",
+          "name": "onLiveInput",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onLiveInput(event: Event): void;"
+        },
+        {
           "id": "./number-input#NeuNumberInputComponent.method:registerOnChange",
           "name": "registerOnChange",
           "kind": "method",
@@ -24361,6 +24625,16 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "writeValue(val: number | null): void;"
+        },
+        {
+          "id": "./number-input#NeuNumberInputComponent.output:inputDetail",
+          "name": "inputDetail",
+          "kind": "output",
+          "publicName": "inputDetail",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly inputDetail: _angular_core.OutputEmitterRef<{\n    rawText: string;\n    value: number | null;\n    state: \"valid\" | \"empty\" | \"invalid\";\n}>;"
         },
         {
           "id": "./number-input#NeuNumberInputComponent.output:valueChange",
@@ -24418,7 +24692,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuNumberInputComponent, \"neu-number-input\", never, {\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"floatingLabel\": {\n        \"alias\": \"floatingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"decrementLabel\": {\n        \"alias\": \"decrementLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"incrementLabel\": {\n        \"alias\": \"incrementLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"vertical\": {\n        \"alias\": \"vertical\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stacked\": {\n        \"alias\": \"stacked\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nullable\": {\n        \"alias\": \"nullable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuNumberInputComponent, \"neu-number-input\", never, {\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"floatingLabel\": {\n        \"alias\": \"floatingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"decrementLabel\": {\n        \"alias\": \"decrementLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"incrementLabel\": {\n        \"alias\": \"incrementLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"vertical\": {\n        \"alias\": \"vertical\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stacked\": {\n        \"alias\": \"stacked\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nullable\": {\n        \"alias\": \"nullable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n    \"inputDetail\": \"inputDetail\";\n}, never, never, true, never>;"
         },
         {
           "id": "./number-input#NeuNumberInputComponent.property:ɵfac",
@@ -27011,6 +27285,16 @@
           "signature": "readonly sourceChange: _angular_core.OutputEmitterRef<T[]>;"
         },
         {
+          "id": "./pick-list#NeuPickListComponent.output:sourceSelectionChange",
+          "name": "sourceSelectionChange",
+          "kind": "output",
+          "publicName": "sourceSelectionChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceSelectionChange: _angular_core.OutputEmitterRef<T[]>;"
+        },
+        {
           "id": "./pick-list#NeuPickListComponent.output:targetChange",
           "name": "targetChange",
           "kind": "output",
@@ -27019,6 +27303,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly targetChange: _angular_core.OutputEmitterRef<T[]>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListComponent.output:targetSelectionChange",
+          "name": "targetSelectionChange",
+          "kind": "output",
+          "publicName": "targetSelectionChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetSelectionChange: _angular_core.OutputEmitterRef<T[]>;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.property:itemTpl",
@@ -27034,7 +27328,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuPickListComponent<any, any>, \"neu-pick-list\", never, {\n    \"source\": {\n        \"alias\": \"source\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"target\": {\n        \"alias\": \"target\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sourceHeader\": {\n        \"alias\": \"sourceHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"targetHeader\": {\n        \"alias\": \"targetHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"sourceChange\": \"sourceChange\";\n    \"targetChange\": \"targetChange\";\n    \"itemsChange\": \"itemsChange\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuPickListComponent<any, any>, \"neu-pick-list\", never, {\n    \"source\": {\n        \"alias\": \"source\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"target\": {\n        \"alias\": \"target\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sourceHeader\": {\n        \"alias\": \"sourceHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"targetHeader\": {\n        \"alias\": \"targetHeader\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"sourceChange\": \"sourceChange\";\n    \"targetChange\": \"targetChange\";\n    \"sourceSelectionChange\": \"sourceSelectionChange\";\n    \"targetSelectionChange\": \"targetSelectionChange\";\n    \"itemsChange\": \"itemsChange\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.property:ɵfac",
@@ -32804,6 +33098,26 @@
           "signature": "actionClick: _angular_core.OutputEmitterRef<NeuSplitButtonAction>;"
         },
         {
+          "id": "./split-button#NeuSplitButtonComponent.output:closed",
+          "name": "closed",
+          "kind": "output",
+          "publicName": "closed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./split-button#NeuSplitButtonComponent.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
           "id": "./split-button#NeuSplitButtonComponent.output:primaryClick",
           "name": "primaryClick",
           "kind": "output",
@@ -32875,7 +33189,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSplitButtonComponent, \"neu-split-button\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variant\": {\n        \"alias\": \"variant\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"actions\": {\n        \"alias\": \"actions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"moreActionsAriaLabel\": {\n        \"alias\": \"moreActionsAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"actionsAriaLabel\": {\n        \"alias\": \"actionsAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"primaryClick\": \"primaryClick\";\n    \"actionClick\": \"actionClick\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSplitButtonComponent, \"neu-split-button\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variant\": {\n        \"alias\": \"variant\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"actions\": {\n        \"alias\": \"actions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"moreActionsAriaLabel\": {\n        \"alias\": \"moreActionsAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"actionsAriaLabel\": {\n        \"alias\": \"actionsAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"primaryClick\": \"primaryClick\";\n    \"actionClick\": \"actionClick\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
         },
         {
           "id": "./split-button#NeuSplitButtonComponent.property:ɵfac",
@@ -32952,6 +33266,26 @@
           "signature": "readonly panes: _angular_core.InputSignal<NeuSplitterPane[]>;"
         },
         {
+          "id": "./splitter#NeuSplitterComponent.output:resize",
+          "name": "resize",
+          "kind": "output",
+          "publicName": "resize",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly resize: _angular_core.OutputEmitterRef<number[]>;"
+        },
+        {
+          "id": "./splitter#NeuSplitterComponent.output:resizeStart",
+          "name": "resizeStart",
+          "kind": "output",
+          "publicName": "resizeStart",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly resizeStart: _angular_core.OutputEmitterRef<number[]>;"
+        },
+        {
           "id": "./splitter#NeuSplitterComponent.output:sizeChange",
           "name": "sizeChange",
           "kind": "output",
@@ -32967,7 +33301,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSplitterComponent, \"neu-splitter\", never, {\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"panes\": {\n        \"alias\": \"panes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"sizeChange\": \"sizeChange\";\n}, never, [\n    \"neu-splitter-pane\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSplitterComponent, \"neu-splitter\", never, {\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"panes\": {\n        \"alias\": \"panes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"sizeChange\": \"sizeChange\";\n    \"resizeStart\": \"resizeStart\";\n    \"resize\": \"resize\";\n}, never, [\n    \"neu-splitter-pane\"\n], true, never>;"
         },
         {
           "id": "./splitter#NeuSplitterComponent.property:ɵfac",
@@ -45481,6 +45815,36 @@
           "signature": "writeValue(value: V | V[] | null): void;"
         },
         {
+          "id": "./tree-select#NeuTreeSelectComponent.output:cleared",
+          "name": "cleared",
+          "kind": "output",
+          "publicName": "cleared",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly cleared: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./tree-select#NeuTreeSelectComponent.output:closed",
+          "name": "closed",
+          "kind": "output",
+          "publicName": "closed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./tree-select#NeuTreeSelectComponent.output:filter",
+          "name": "filter",
+          "kind": "output",
+          "publicName": "filter",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly filter: _angular_core.OutputEmitterRef<{\n    query: string;\n}>;"
+        },
+        {
           "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpand",
           "name": "nodeExpand",
           "kind": "output",
@@ -45489,6 +45853,26 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly nodeExpand: _angular_core.OutputEmitterRef<T>;"
+        },
+        {
+          "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpansionChange",
+          "name": "nodeExpansionChange",
+          "kind": "output",
+          "publicName": "nodeExpansionChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly nodeExpansionChange: _angular_core.OutputEmitterRef<{\n    node: T;\n    expanded: boolean;\n}>;"
+        },
+        {
+          "id": "./tree-select#NeuTreeSelectComponent.output:opened",
+          "name": "opened",
+          "kind": "output",
+          "publicName": "opened",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
         },
         {
           "id": "./tree-select#NeuTreeSelectComponent.output:selectionChange",
@@ -45570,7 +45954,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeSelectComponent<any, any>, \"neu-tree-select\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionChildren\": {\n        \"alias\": \"optionChildren\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiple\": {\n        \"alias\": \"multiple\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearable\": {\n        \"alias\": \"clearable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearLabel\": {\n        \"alias\": \"clearLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n    \"nodeExpand\": \"nodeExpand\";\n}, [\n    \"nodeTpl\",\n    \"selectedTpl\",\n    \"headerTpl\",\n    \"footerTpl\",\n    \"emptyTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeSelectComponent<any, any>, \"neu-tree-select\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionChildren\": {\n        \"alias\": \"optionChildren\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiple\": {\n        \"alias\": \"multiple\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearable\": {\n        \"alias\": \"clearable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearLabel\": {\n        \"alias\": \"clearLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"selectionChange\": \"selectionChange\";\n    \"nodeExpand\": \"nodeExpand\";\n    \"filter\": \"filter\";\n    \"cleared\": \"cleared\";\n    \"nodeExpansionChange\": \"nodeExpansionChange\";\n}, [\n    \"nodeTpl\",\n    \"selectedTpl\",\n    \"headerTpl\",\n    \"footerTpl\",\n    \"emptyTpl\"\n], never, true, never>;"
         },
         {
           "id": "./tree-select#NeuTreeSelectComponent.property:ɵfac",
@@ -49412,6 +49796,16 @@
           "signature": "readonly itemClick: _angular_core.OutputEmitterRef<{\n    item: T;\n    index: number;\n}>;"
         },
         {
+          "id": "./virtual-list#NeuVirtualListComponent.output:rangeChange",
+          "name": "rangeChange",
+          "kind": "output",
+          "publicName": "rangeChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rangeChange: _angular_core.OutputEmitterRef<{\n    start: number;\n    end: number;\n}>;"
+        },
+        {
           "id": "./virtual-list#NeuVirtualListComponent.property:itemTemplate",
           "name": "itemTemplate",
           "kind": "property",
@@ -49425,7 +49819,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuVirtualListComponent<any>, \"neu-virtual-list\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"itemSize\": {\n        \"alias\": \"itemSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"visibleRows\": {\n        \"alias\": \"visibleRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trackBy\": {\n        \"alias\": \"trackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n}, [\n    \"itemTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuVirtualListComponent<any>, \"neu-virtual-list\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"itemSize\": {\n        \"alias\": \"itemSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"visibleRows\": {\n        \"alias\": \"visibleRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trackBy\": {\n        \"alias\": \"trackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"rangeChange\": \"rangeChange\";\n    \"itemClick\": \"itemClick\";\n}, [\n    \"itemTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./virtual-list#NeuVirtualListComponent.property:ɵfac",
@@ -51011,6 +51405,30 @@
       "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
     },
     {
+      "id": "./bottom-sheet#NeuBottomSheetComponent.output:hidden",
+      "entrypoint": "./bottom-sheet",
+      "declaration": "NeuBottomSheetComponent",
+      "selector": "neu-bottom-sheet",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hidden: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./bottom-sheet#NeuBottomSheetComponent.output:opened",
+      "entrypoint": "./bottom-sheet",
+      "declaration": "NeuBottomSheetComponent",
+      "selector": "neu-bottom-sheet",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
       "id": "./breadcrumb#NeuBreadcrumbComponent.input:items",
       "entrypoint": "./breadcrumb",
       "declaration": "NeuBreadcrumbComponent",
@@ -51791,6 +52209,42 @@
       "signature": "readonly rootLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./cascade-select#NeuCascadeSelectComponent.output:closed",
+      "entrypoint": "./cascade-select",
+      "declaration": "NeuCascadeSelectComponent",
+      "selector": "neu-cascade-select",
+      "propertyName": "closed",
+      "publicName": "closed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./cascade-select#NeuCascadeSelectComponent.output:groupChange",
+      "entrypoint": "./cascade-select",
+      "declaration": "NeuCascadeSelectComponent",
+      "selector": "neu-cascade-select",
+      "propertyName": "groupChange",
+      "publicName": "groupChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly groupChange: _angular_core.OutputEmitterRef<readonly T[]>;"
+    },
+    {
+      "id": "./cascade-select#NeuCascadeSelectComponent.output:opened",
+      "entrypoint": "./cascade-select",
+      "declaration": "NeuCascadeSelectComponent",
+      "selector": "neu-cascade-select",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
       "id": "./cascade-select#NeuCascadeSelectComponent.output:selectionChange",
       "entrypoint": "./cascade-select",
       "declaration": "NeuCascadeSelectComponent",
@@ -51909,6 +52363,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "type: _angular_core.InputSignal<NeuChartType>;"
+    },
+    {
+      "id": "./chart#NeuChartComponent.output:dataSelect",
+      "entrypoint": "./chart",
+      "declaration": "NeuChartComponent",
+      "selector": "neu-chart",
+      "propertyName": "dataSelect",
+      "publicName": "dataSelect",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dataSelect: _angular_core.OutputEmitterRef<NeuChartDataSelectEvent>;"
     },
     {
       "id": "./checkbox#NeuCheckboxComponent.input:ariaLabel",
@@ -52283,6 +52749,18 @@
       "signature": "readonly required: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./color-picker#NeuColorPickerComponent.output:closed",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "closed",
+      "publicName": "closed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
       "id": "./color-picker#NeuColorPickerComponent.output:colorChange",
       "entrypoint": "./color-picker",
       "declaration": "NeuColorPickerComponent",
@@ -52293,6 +52771,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly colorChange: _angular_core.OutputEmitterRef<string>;"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.output:colorChangeEnd",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "colorChangeEnd",
+      "publicName": "colorChangeEnd",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly colorChangeEnd: _angular_core.OutputEmitterRef<string>;"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.output:opened",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
     },
     {
       "id": "./compare#NeuCompareComponent.input:defaultValue",
@@ -53195,6 +53697,42 @@
       "signature": "yearRange: _angular_core.InputSignal<number>;"
     },
     {
+      "id": "./date-input#NeuDateInputComponent.output:cleared",
+      "entrypoint": "./date-input",
+      "declaration": "NeuDateInputComponent",
+      "selector": "neu-date-input",
+      "propertyName": "cleared",
+      "publicName": "cleared",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly cleared: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.output:closed",
+      "entrypoint": "./date-input",
+      "declaration": "NeuDateInputComponent",
+      "selector": "neu-date-input",
+      "propertyName": "closed",
+      "publicName": "closed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.output:opened",
+      "entrypoint": "./date-input",
+      "declaration": "NeuDateInputComponent",
+      "selector": "neu-date-input",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
       "id": "./date-input#NeuDateInputComponent.output:rangeChange",
       "entrypoint": "./date-input",
       "declaration": "NeuDateInputComponent",
@@ -53205,6 +53743,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly rangeChange: _angular_core.OutputEmitterRef<NeuDateRange>;"
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.output:viewChange",
+      "entrypoint": "./date-input",
+      "declaration": "NeuDateInputComponent",
+      "selector": "neu-date-input",
+      "propertyName": "viewChange",
+      "publicName": "viewChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly viewChange: _angular_core.OutputEmitterRef<NeuDateViewChangeEvent>;"
     },
     {
       "id": "./divider#NeuDividerComponent.input:label",
@@ -54465,6 +55015,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly neuIvIndex: _angular_core.InputSignal<number>;"
+    },
+    {
+      "id": "./image-viewer#NeuImageViewerDirective.output:closed",
+      "entrypoint": "./image-viewer",
+      "declaration": "NeuImageViewerDirective",
+      "selector": "[neuImageViewer]",
+      "propertyName": "closed",
+      "publicName": "closed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./image-viewer#NeuImageViewerDirective.output:opened",
+      "entrypoint": "./image-viewer",
+      "declaration": "NeuImageViewerDirective",
+      "selector": "[neuImageViewer]",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
     },
     {
       "id": "./inline-editor#NeuInlineEditorComponent.input:cancelLabel",
@@ -57179,6 +57753,30 @@
       "signature": "closed: _angular_core.OutputEmitterRef<unknown>;"
     },
     {
+      "id": "./modal#NeuDialogComponent.output:hidden",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hidden: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.output:opened",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
       "id": "./multiselect#NeuMultiselectComponent.input:ariaDescribedBy",
       "entrypoint": "./multiselect",
       "declaration": "NeuMultiselectComponent",
@@ -58415,6 +59013,18 @@
       "signature": "readonly vertical: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./number-input#NeuNumberInputComponent.output:inputDetail",
+      "entrypoint": "./number-input",
+      "declaration": "NeuNumberInputComponent",
+      "selector": "neu-number-input",
+      "propertyName": "inputDetail",
+      "publicName": "inputDetail",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly inputDetail: _angular_core.OutputEmitterRef<{\n    rawText: string;\n    value: number | null;\n    state: \"valid\" | \"empty\" | \"invalid\";\n}>;"
+    },
+    {
       "id": "./number-input#NeuNumberInputComponent.output:valueChange",
       "entrypoint": "./number-input",
       "declaration": "NeuNumberInputComponent",
@@ -59221,6 +59831,18 @@
       "signature": "readonly sourceChange: _angular_core.OutputEmitterRef<T[]>;"
     },
     {
+      "id": "./pick-list#NeuPickListComponent.output:sourceSelectionChange",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "sourceSelectionChange",
+      "publicName": "sourceSelectionChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly sourceSelectionChange: _angular_core.OutputEmitterRef<T[]>;"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.output:targetChange",
       "entrypoint": "./pick-list",
       "declaration": "NeuPickListComponent",
@@ -59231,6 +59853,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly targetChange: _angular_core.OutputEmitterRef<T[]>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.output:targetSelectionChange",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListComponent",
+      "selector": "neu-pick-list",
+      "propertyName": "targetSelectionChange",
+      "publicName": "targetSelectionChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly targetSelectionChange: _angular_core.OutputEmitterRef<T[]>;"
     },
     {
       "id": "./popover#NeuPopoverDirective.input:neuPopover",
@@ -61585,6 +62219,30 @@
       "signature": "actionClick: _angular_core.OutputEmitterRef<NeuSplitButtonAction>;"
     },
     {
+      "id": "./split-button#NeuSplitButtonComponent.output:closed",
+      "entrypoint": "./split-button",
+      "declaration": "NeuSplitButtonComponent",
+      "selector": "neu-split-button",
+      "propertyName": "closed",
+      "publicName": "closed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./split-button#NeuSplitButtonComponent.output:opened",
+      "entrypoint": "./split-button",
+      "declaration": "NeuSplitButtonComponent",
+      "selector": "neu-split-button",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
       "id": "./split-button#NeuSplitButtonComponent.output:primaryClick",
       "entrypoint": "./split-button",
       "declaration": "NeuSplitButtonComponent",
@@ -61619,6 +62277,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly panes: _angular_core.InputSignal<NeuSplitterPane[]>;"
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.output:resize",
+      "entrypoint": "./splitter",
+      "declaration": "NeuSplitterComponent",
+      "selector": "neu-splitter",
+      "propertyName": "resize",
+      "publicName": "resize",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly resize: _angular_core.OutputEmitterRef<number[]>;"
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.output:resizeStart",
+      "entrypoint": "./splitter",
+      "declaration": "NeuSplitterComponent",
+      "selector": "neu-splitter",
+      "propertyName": "resizeStart",
+      "publicName": "resizeStart",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly resizeStart: _angular_core.OutputEmitterRef<number[]>;"
     },
     {
       "id": "./splitter#NeuSplitterComponent.output:sizeChange",
@@ -64419,6 +65101,42 @@
       "signature": "readonly searchPlaceholder: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./tree-select#NeuTreeSelectComponent.output:cleared",
+      "entrypoint": "./tree-select",
+      "declaration": "NeuTreeSelectComponent",
+      "selector": "neu-tree-select",
+      "propertyName": "cleared",
+      "publicName": "cleared",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly cleared: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:closed",
+      "entrypoint": "./tree-select",
+      "declaration": "NeuTreeSelectComponent",
+      "selector": "neu-tree-select",
+      "propertyName": "closed",
+      "publicName": "closed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:filter",
+      "entrypoint": "./tree-select",
+      "declaration": "NeuTreeSelectComponent",
+      "selector": "neu-tree-select",
+      "propertyName": "filter",
+      "publicName": "filter",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly filter: _angular_core.OutputEmitterRef<{\n    query: string;\n}>;"
+    },
+    {
       "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpand",
       "entrypoint": "./tree-select",
       "declaration": "NeuTreeSelectComponent",
@@ -64429,6 +65147,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly nodeExpand: _angular_core.OutputEmitterRef<T>;"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpansionChange",
+      "entrypoint": "./tree-select",
+      "declaration": "NeuTreeSelectComponent",
+      "selector": "neu-tree-select",
+      "propertyName": "nodeExpansionChange",
+      "publicName": "nodeExpansionChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly nodeExpansionChange: _angular_core.OutputEmitterRef<{\n    node: T;\n    expanded: boolean;\n}>;"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:opened",
+      "entrypoint": "./tree-select",
+      "declaration": "NeuTreeSelectComponent",
+      "selector": "neu-tree-select",
+      "propertyName": "opened",
+      "publicName": "opened",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
     },
     {
       "id": "./tree-select#NeuTreeSelectComponent.output:selectionChange",
@@ -65989,6 +66731,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly itemClick: _angular_core.OutputEmitterRef<{\n    item: T;\n    index: number;\n}>;"
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListComponent.output:rangeChange",
+      "entrypoint": "./virtual-list",
+      "declaration": "NeuVirtualListComponent",
+      "selector": "neu-virtual-list",
+      "propertyName": "rangeChange",
+      "publicName": "rangeChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly rangeChange: _angular_core.OutputEmitterRef<{\n    start: number;\n    end: number;\n}>;"
     }
   ],
   "designTokens": [
@@ -66253,32 +67007,32 @@
   ],
   "summary": {
     "entrypoints": 105,
-    "exportedDeclarations": 802,
+    "exportedDeclarations": 804,
     "declarationKinds": {
       "class": 14,
       "component": 102,
       "directive": 144,
       "function": 40,
-      "interface": 258,
+      "interface": 260,
       "reexport": 55,
       "service": 11,
       "token": 3,
       "type": 174,
       "variable": 1
     },
-    "publicSymbols": 5459,
+    "publicSymbols": 5500,
     "statuses": {
-      "SUPPORTED": 3445,
+      "SUPPORTED": 3485,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 2010,
+      "INTERNAL/UNSUPPORTED": 2011,
       "REVIEW": 0
     },
     "bindings": {
       "input": 1142,
-      "output": 230,
+      "output": 260,
       "model": 2,
-      "total": 1374
+      "total": 1404
     },
     "designTokens": 258
   }

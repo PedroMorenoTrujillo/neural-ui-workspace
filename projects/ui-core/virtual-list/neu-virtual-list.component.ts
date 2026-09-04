@@ -2,6 +2,8 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  inject,
   ContentChild,
   TemplateRef,
   ViewChild,
@@ -13,6 +15,8 @@ import {
 } from '@angular/core';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { NgTemplateOutlet } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'neu-virtual-list-row',
@@ -97,7 +101,15 @@ export class NeuVirtualListComponent<T = unknown> implements AfterViewInit {
     afterNextRender(() => this._viewport?.checkViewportSize());
   }
 
+  /** Rendered range including buffer: start inclusive, end exclusive. */
+  readonly rangeChange = output<{ start: number; end: number }>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+
   ngAfterViewInit(): void {
+    this._viewport?.renderedRangeStream.pipe(
+      distinctUntilChanged((a, b) => a.start === b.start && a.end === b.end),
+      takeUntilDestroyed(this.eventDestroyRef),
+    ).subscribe(({ start, end }) => this.rangeChange.emit({ start, end }));
     // Segundo intento de medición sincrona por si afterNextRender no cubre todos los casos
     // Second synchronous measurement pass as a fallback
     this._viewport?.checkViewportSize();

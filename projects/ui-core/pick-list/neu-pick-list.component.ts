@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, contentChild, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Directive, inject, TemplateRef, ViewEncapsulation, contentChild, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   NeuOptionDisabledAccessor,
@@ -66,18 +66,23 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   readonly targetHeader = input('Selected');
   readonly sourceChange = output<T[]>();
   readonly targetChange = output<T[]>();
+  readonly sourceSelectionChange = output<T[]>();
+  readonly targetSelectionChange = output<T[]>();
+  private readonly eventDestroyRef = inject(DestroyRef);
   readonly itemsChange = output<{ source: T[]; target: T[] }>();
   readonly sourceSelection = signal(new Set<V>());
   readonly targetSelection = signal(new Set<V>());
 
   toggleSource(value: V): void {
-    if (this.isValueDisabled(this.source(), value)) return;
+    if (this.eventDestroyRef.destroyed || this.isValueDisabled(this.source(), value)) return;
     this.sourceSelection.set(this.toggleSet(this.sourceSelection(), value));
+    this.sourceSelectionChange.emit(this.source().filter((item) => this.isSourceSelected(item)));
   }
 
   toggleTarget(value: V): void {
-    if (this.isValueDisabled(this.target(), value)) return;
+    if (this.eventDestroyRef.destroyed || this.isValueDisabled(this.target(), value)) return;
     this.targetSelection.set(this.toggleSet(this.targetSelection(), value));
+    this.targetSelectionChange.emit(this.target().filter((item) => this.isTargetSelected(item)));
   }
 
   moveToTarget(): void {
@@ -89,6 +94,7 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
       [...this.target(), ...moved],
     );
     this.sourceSelection.set(new Set());
+    if (!this.eventDestroyRef.destroyed) this.sourceSelectionChange.emit([]);
   }
 
   moveToSource(): void {
@@ -100,6 +106,7 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
       this.target().filter((item) => !this.isSelectedValue(selected, item) || this.isOptionDisabled(item)),
     );
     this.targetSelection.set(new Set());
+    if (!this.eventDestroyRef.destroyed) this.targetSelectionChange.emit([]);
   }
 
   optionLabelOf(option: T): string {

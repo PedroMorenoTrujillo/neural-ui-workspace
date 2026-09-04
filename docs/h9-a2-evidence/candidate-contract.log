@@ -1,0 +1,2 @@
+Public contract audit passed (105 entry points, 804 exported declarations, 1404 bindings, 5500 classified symbols, 222 ms).
+Legacy reconciliation: 932 mapped, 466 newly discovered, 229 missing old, 6 ambiguous.

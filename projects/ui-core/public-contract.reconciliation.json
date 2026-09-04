@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1374,
-    "bindingDelta": 207,
+    "declarationBindings": 1404,
+    "bindingDelta": 237,
     "mapped": 932,
     "aliasCorrections": 4,
     "missingOldEntries": 229,
-    "newlyDiscovered": 436,
+    "newlyDiscovered": 466,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 339,
+      "declaration-or-selector-was-not-recorded": 351,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 88
+      "multiline-annotated-or-compound-declaration-was-missed": 106
     }
   },
   "mappings": [
@@ -4066,6 +4066,14 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./bottom-sheet#NeuBottomSheetComponent.output:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./bottom-sheet#NeuBottomSheetComponent.output:opened",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./button#NeuButtonComponent.input:ariaLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4226,6 +4234,34 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./cascade-select#NeuCascadeSelectComponent.output:closed",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./cascade-select#NeuCascadeSelectComponent.output:groupChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./cascade-select#NeuCascadeSelectComponent.output:opened",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./chart#NeuChartComponent.output:dataSelect",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.output:closed",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.output:colorChangeEnd",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.output:opened",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./context-menu#NeuContextMenuDirective.input:neuContextMenu",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4340,6 +4376,22 @@
     {
       "id": "./data-view#NeuDataViewComponent.output:sortChange",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.output:cleared",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.output:closed",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.output:opened",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.output:viewChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./dock#NeuDockComponent.input:ariaLabel",
@@ -4515,6 +4567,14 @@
     },
     {
       "id": "./gallery#NeuGalleryComponent.output:zoomChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./image-viewer#NeuImageViewerDirective.output:closed",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./image-viewer#NeuImageViewerDirective.output:opened",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4886,6 +4946,14 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./modal#NeuDialogComponent.output:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.output:opened",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./multiselect#NeuMultiselectComponent.input:dataFirst",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -4968,6 +5036,10 @@
     {
       "id": "./multiselect#NeuMultiselectTokenDirective.input:neuMultiselectToken",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./number-input#NeuNumberInputComponent.output:inputDetail",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaDescribedBy",
@@ -5110,7 +5182,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./pick-list#NeuPickListComponent.output:sourceSelectionChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.output:targetChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListComponent.output:targetSelectionChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5314,8 +5394,24 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./split-button#NeuSplitButtonComponent.output:closed",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./split-button#NeuSplitButtonComponent.output:opened",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./split-button#NeuSplitButtonComponent.output:primaryClick",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.output:resize",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.output:resizeStart",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./table#NeuTableBodySectionDirective.input:typeSource",
@@ -5542,7 +5638,27 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree-select#NeuTreeSelectComponent.output:cleared",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:closed",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:filter",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpand",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpansionChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:opened",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5727,6 +5843,10 @@
     },
     {
       "id": "./virtual-list#NeuVirtualListComponent.output:itemClick",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListComponent.output:rangeChange",
       "reason": "declaration-or-selector-was-not-recorded"
     }
   ],

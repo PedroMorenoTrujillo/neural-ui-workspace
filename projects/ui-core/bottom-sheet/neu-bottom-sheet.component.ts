@@ -4,6 +4,7 @@ import {
   HostListener,
   ViewEncapsulation,
   effect,
+  afterRenderEffect,
   inject,
   input,
   output,
@@ -75,7 +76,20 @@ export class NeuBottomSheetComponent {
   readonly closed = output<void>();
   private readonly scrollStrategy = inject(Overlay).scrollStrategies.block();
 
+  private eventPanelVisible = false;
+  /** Panel mounted in the browser, independently of the trigger source. */
+  readonly opened = output<void>();
+  /** Panel unmounted after render; closed remains a request. Silent on destroy. */
+  readonly hidden = output<void>();
+
   constructor() {
+    afterRenderEffect(() => {
+      const visible = this.open();
+      if (visible === this.eventPanelVisible) return;
+      this.eventPanelVisible = visible;
+      if (visible) this.opened.emit();
+      else this.hidden.emit();
+    });
     effect((onCleanup) => {
       if (!this.open()) return;
       this.scrollStrategy.enable();

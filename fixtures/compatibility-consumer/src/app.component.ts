@@ -1,3 +1,4 @@
+import { H9EventContractComponent } from './h9-event-contract.component';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuInputComponent } from '@neural-ui/core/input';
@@ -17,6 +18,7 @@ import { NeuChartComponent } from '@neural-ui/core/chart';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    H9EventContractComponent,
     NeuInputComponent,
     NeuDialogComponent,
     NeuTableComponent,
@@ -26,6 +28,7 @@ import { NeuChartComponent } from '@neural-ui/core/chart';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <h9-event-contract />
     <neu-nav [items]="navItems"></neu-nav>
     <neu-input [formControl]="name" label="Name"></neu-input>
     <neu-dialog [open]="false" title="Compatibility dialog"></neu-dialog>

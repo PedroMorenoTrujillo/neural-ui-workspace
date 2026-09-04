@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ViewEncapsulation,
   computed,
   forwardRef,
@@ -68,6 +69,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
           [attr.aria-valuemax]="max()"
           [disabled]="_cvaDisabled()"
           [value]="_value() ?? ''"
+          (input)="onLiveInput($event)"
           (change)="onInputChange($event)"
           (focus)="onFocus()"
           (blur)="onBlur()"
@@ -94,6 +96,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
           [attr.aria-valuemax]="max()"
           [disabled]="_cvaDisabled()"
           [value]="_value() ?? ''"
+          (input)="onLiveInput($event)"
           (change)="onInputChange($event)"
           (focus)="onFocus()"
           (blur)="onBlur()"
@@ -140,6 +143,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
           [attr.aria-valuemax]="max()"
           [disabled]="_cvaDisabled()"
           [value]="_value() ?? ''"
+          (input)="onLiveInput($event)"
           (change)="onInputChange($event)"
           (focus)="onFocus()"
           (blur)="onBlur()"
@@ -187,6 +191,19 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   readonly nullable = input(false);
   /** Emitido en cada cambio numérico / Emitted on each numeric change */
   readonly valueChange = output<number>();
+  /** Native editing snapshot before commit; empty/invalid have value null. */
+  readonly inputDetail = output<{ rawText: string; value: number | null; state: 'valid' | 'empty' | 'invalid' }>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+
+  onLiveInput(event: Event): void {
+    if (this.eventDestroyRef.destroyed || this._cvaDisabled()) return;
+    const rawText = (event.target as HTMLInputElement).value;
+    const text = rawText.trim();
+    const parsed = Number(text);
+    const state = text === '' ? 'empty' : Number.isFinite(parsed) ? 'valid' : 'invalid';
+    this.inputDetail.emit({ rawText, value: state === 'valid' ? parsed : null, state });
+  }
+
 
   protected readonly _id = inject(NeuIdGenerator).getId('neu-number-input-');
   protected readonly _cvaDisabled = signal(false);

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
   TemplateRef,
@@ -137,8 +138,8 @@ export class NeuSplitButtonItemDirective {
         [cdkConnectedOverlayPush]="true"
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
         (backdropClick)="closeDropdown()"
-        (detach)="closeDropdown()"
-        (attach)="onOverlayAttach()"
+        (detach)="onPanelDetached()"
+        (attach)="onOverlayAttach(); onPanelAttached()"
         (overlayKeydown)="onOverlayKeydown($event)"
       >
         <div
@@ -243,6 +244,27 @@ export class NeuSplitButtonComponent {
   actionsAriaLabel = input<string>('Acciones');
 
   /** Emite al hacer click en el botón principal / Emits on primary button click */
+  /** Browser panel attached, regardless of opening source. */
+  readonly opened = output<void>();
+  /** Browser panel detached, regardless of closing source; silent during destroy. */
+  readonly closed = output<void>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+  private panelAttached = false;
+
+  protected onPanelAttached(): void {
+    if (this.eventDestroyRef.destroyed || this.panelAttached) return;
+    this.panelAttached = true;
+    this.opened.emit();
+  }
+
+  protected onPanelDetached(): void {
+    const wasAttached = this.panelAttached;
+    this.panelAttached = false;
+    if (this.eventDestroyRef.destroyed) return;
+    this.closeDropdown();
+    if (wasAttached) this.closed.emit();
+  }
+
   primaryClick = output<MouseEvent>();
 
   /** Emite al seleccionar una acción del dropdown / Emits when a dropdown action is selected */
@@ -273,7 +295,9 @@ export class NeuSplitButtonComponent {
   closeDropdown(): void {
     if (!this.isOpen()) return;
     this.isOpen.set(false);
-    queueMicrotask(() => this.trigger()?.nativeElement.focus({ preventScroll: true }));
+    queueMicrotask(() => {
+      if (!this.eventDestroyRef.destroyed) this.trigger()?.nativeElement.focus({ preventScroll: true });
+    });
   }
 
   onTriggerKeydown(event: KeyboardEvent): void {
@@ -284,6 +308,7 @@ export class NeuSplitButtonComponent {
 
   onOverlayAttach(): void {
     queueMicrotask(() => {
+      if (this.eventDestroyRef.destroyed) return;
       this.reconcileActions();
       if (this.focusLastOnAttach) this.menuController.setActiveIndex(this.lastEligibleIndex());
       this.focusActiveAction();

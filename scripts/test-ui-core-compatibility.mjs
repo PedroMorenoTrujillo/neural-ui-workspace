@@ -131,6 +131,7 @@ try {
     ],
     ['npm', ['run', 'build']],
     ['node', ['src/ssr-tree-table.mjs']],
+    ['node', ['src/ssr-h9-events.mjs']],
     [
       'node',
       [
@@ -154,6 +155,7 @@ try {
   }
   console.log(`Angular ${version} compatibility fixture passed`);
 } finally {
-  rmSync(fixture, { recursive: true, force: true });
+  if (process.env.NEURAL_UI_KEEP_COMPAT_FIXTURE === '1') console.log(`Retained compatibility fixture: ${fixture}`);
+  else rmSync(fixture, { recursive: true, force: true });
   rmSync(npmCache, { recursive: true, force: true });
 }

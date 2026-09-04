@@ -6,6 +6,7 @@ import {
   ElementRef,
   ViewEncapsulation,
   effect,
+  afterRenderEffect,
   inject,
   input,
   output,
@@ -130,7 +131,20 @@ export class NeuDialogComponent {
   /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
   protected readonly _uid = inject(NeuIdGenerator).getId('dialog-');
 
+  private eventPanelVisible = false;
+  /** Panel mounted in the browser, independently of the trigger source. */
+  readonly opened = output<void>();
+  /** Panel unmounted after render; closed remains a request. Silent on destroy. */
+  readonly hidden = output<void>();
+
   constructor() {
+    afterRenderEffect(() => {
+      const visible = !!this.panelRef();
+      if (visible === this.eventPanelVisible) return;
+      this.eventPanelVisible = visible;
+      if (visible) this.opened.emit();
+      else this.hidden.emit();
+    });
     effect((onCleanup) => {
       if (!this.open()) return;
       this.scrollStrategy.enable();

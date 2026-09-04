@@ -123,7 +123,7 @@ describe('NeuSplitterComponent', () => {
     const emitted: number[][] = [];
     f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
     f.componentInstance['_startDrag'](
-      { preventDefault: vi.fn(), clientX: 200, clientY: 0 } as unknown as MouseEvent,
+      { button: 0, preventDefault: vi.fn(), clientX: 200, clientY: 0 } as unknown as MouseEvent,
       0,
     );
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 210, clientY: 0 }));
@@ -214,7 +214,7 @@ describe('NeuSplitterComponent', () => {
     const component = f.componentInstance as any;
     component._el = { nativeElement: { ownerDocument: { defaultView: null } } };
 
-    component._startDrag({ preventDefault: vi.fn(), clientX: 10, clientY: 20 }, 0);
+    component._startDrag({ button: 0, preventDefault: vi.fn(), clientX: 10, clientY: 20 }, 0);
     expect(component._dragSessionDisposer).toBeNull();
     component._startTouchDrag({ touches: [{ clientX: 10, clientY: 20 }] }, 0);
     expect(component._dragSessionDisposer).toBeNull();
@@ -228,7 +228,7 @@ describe('NeuSplitterComponent', () => {
     const emitted: number[][] = [];
     f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
     f.componentInstance['_startDrag'](
-      { preventDefault: vi.fn(), clientX: 0, clientY: 200 } as unknown as MouseEvent,
+      { button: 0, preventDefault: vi.fn(), clientX: 0, clientY: 200 } as unknown as MouseEvent,
       0,
     );
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 0, clientY: 210 }));
@@ -352,9 +352,9 @@ describe('NeuSplitterComponent', () => {
     await f.whenStable();
     const component = f.componentInstance as any;
 
-    component._startDrag({ preventDefault: vi.fn(), clientX: 10, clientY: 0 } as any, 0);
+    component._startDrag({ button: 0, preventDefault: vi.fn(), clientX: 10, clientY: 0 } as any, 0);
     expect(component._dragSessionDisposer).toEqual(expect.any(Function));
-    component._startDrag({ preventDefault: vi.fn(), clientX: 20, clientY: 0 } as any, 0);
+    component._startDrag({ button: 0, preventDefault: vi.fn(), clientX: 20, clientY: 0 } as any, 0);
     expect(component._dragSessionDisposer).toEqual(expect.any(Function));
     window.dispatchEvent(new Event('blur'));
     expect(component._dragSessionDisposer).toBeNull();
@@ -364,7 +364,7 @@ describe('NeuSplitterComponent', () => {
     window.dispatchEvent(new Event('touchcancel'));
     expect(component._dragSessionDisposer).toBeNull();
 
-    component._startDrag({ preventDefault: vi.fn(), clientX: 30, clientY: 0 } as any, 0);
+    component._startDrag({ button: 0, preventDefault: vi.fn(), clientX: 30, clientY: 0 } as any, 0);
     f.destroy();
     expect(component._dragSessionDisposer).toBeNull();
     expect(component._dragIndex).toBe(-1);

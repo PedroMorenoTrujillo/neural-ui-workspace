@@ -266,9 +266,13 @@ export class NeuImageViewerDirective implements OnDestroy {
   private readonly _injector = inject(Injector);
   private readonly _element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private _overlayRef: OverlayRef | null = null;
+  private readonly eventDestroyRef = inject(DestroyRef);
+  private destroying = false;
+  readonly opened = output<void>();
+  readonly closed = output<void>();
 
   open(): void {
-    if (this._overlayRef) return;
+    if (this.destroying || this.eventDestroyRef.destroyed || this._overlayRef) return;
     const items = this._normalizeItems();
     if (!items.length) return;
 
@@ -295,6 +299,7 @@ export class NeuImageViewerDirective implements OnDestroy {
     const portal = new ComponentPortal(NeuImageViewerOverlayComponent, null, injector);
     overlayRef.attach(portal);
     this._overlayRef = overlayRef;
+    this.opened.emit();
   }
 
   openFromKeyboard(event: Event): void {
@@ -303,12 +308,16 @@ export class NeuImageViewerDirective implements OnDestroy {
   }
 
   close(): void {
-    this._overlayRef?.detach();
-    this._overlayRef?.dispose();
+    const overlayRef = this._overlayRef;
+    if (!overlayRef) return;
     this._overlayRef = null;
+    overlayRef.detach();
+    overlayRef.dispose();
+    if (!this.destroying && !this.eventDestroyRef.destroyed) this.closed.emit();
   }
 
   ngOnDestroy(): void {
+    this.destroying = true;
     this.close();
   }
 

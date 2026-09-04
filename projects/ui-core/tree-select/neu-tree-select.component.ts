@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
   TemplateRef,
@@ -149,8 +150,8 @@ export class NeuTreeSelectEmptyDirective {
       [cdkConnectedOverlayHasBackdrop]="true"
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       (backdropClick)="close()"
-      (detach)="close()"
-      (attach)="onOverlayAttach()"
+      (detach)="onPanelDetached()"
+      (attach)="onOverlayAttach(); onPanelAttached()"
       (overlayKeydown)="onOverlayKeydown($event)"
     >
       <div
@@ -169,7 +170,7 @@ export class NeuTreeSelectEmptyDirective {
             type="search"
             [placeholder]="searchPlaceholder()"
             [value]="query()"
-            (input)="query.set($any($event.target).value)"
+            (input)="onFilterInput($event)"
             (keydown)="onSearchKeydown($event)"
           />
         }
@@ -267,8 +268,43 @@ export class NeuTreeSelectComponent<
   readonly readonly = input(false);
   readonly clearLabel = input('Clear selection');
 
+  /** Browser panel attached, regardless of opening source. */
+  readonly opened = output<void>();
+  /** Browser panel detached, regardless of closing source; silent during destroy. */
+  readonly closed = output<void>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+  private panelAttached = false;
+
+  protected onPanelAttached(): void {
+    if (this.eventDestroyRef.destroyed || this.panelAttached) return;
+    this.panelAttached = true;
+    this.opened.emit();
+  }
+
+  protected onPanelDetached(): void {
+    const wasAttached = this.panelAttached;
+    this.panelAttached = false;
+    if (this.eventDestroyRef.destroyed) return;
+    this.close();
+    if (wasAttached) this.closed.emit();
+  }
+
   readonly selectionChange = output<T[]>();
   readonly nodeExpand = output<T>();
+  /** Changed raw query from user input; programmatic query writes are silent. */
+  readonly filter = output<{ query: string }>();
+  /** Explicit clear command, not empty selection/model synchronization. */
+  readonly cleared = output<void>();
+  readonly nodeExpansionChange = output<{ node: T; expanded: boolean }>();
+
+  protected onFilterInput(event: Event): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabled()) return;
+    const query = (event.target as HTMLInputElement).value;
+    if (query === this.query()) return;
+    this.query.set(query);
+    this.filter.emit({ query });
+  }
+
 
   readonly triggerId = inject(NeuIdGenerator).getId('neu-tree-select-');
   readonly panelId = inject(NeuIdGenerator).getId('neu-tree-select-panel-');
@@ -334,13 +370,16 @@ export class NeuTreeSelectComponent<
   close(): void {
     if (!this.open()) return;
     this.open.set(false);
-    queueMicrotask(() => this.trigger()?.nativeElement.focus({ preventScroll: true }));
+    queueMicrotask(() => {
+      if (!this.eventDestroyRef.destroyed) this.trigger()?.nativeElement.focus({ preventScroll: true });
+    });
   }
 
   clear(event: Event): void {
     event.stopPropagation();
-    if (this.isDisabled() || this.readonly()) return;
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || this.readonly()) return;
     this.commit([]);
+    if (!this.eventDestroyRef.destroyed) this.cleared.emit();
   }
 
   isSelected(value: V): boolean {
@@ -367,8 +406,10 @@ export class NeuTreeSelectComponent<
 
   toggleExpanded(node: T, event: Event): void {
     event.stopPropagation();
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || this.isOptionDisabled(node)) return;
     const value = this.optionValueOf(node);
     const children = this.childrenOf(node);
+    if (!children.length && !this.isLazyNode(node)) return;
     const next = new Set(this.expanded());
 
     if (next.has(value)) {
@@ -381,6 +422,7 @@ export class NeuTreeSelectComponent<
     }
 
     this.expanded.set(next);
+    if (!this.eventDestroyRef.destroyed) this.nodeExpansionChange.emit({ node, expanded: next.has(value) });
   }
 
   toggleExpandedFromTemplate(node: T): void {
@@ -395,6 +437,7 @@ export class NeuTreeSelectComponent<
 
   onOverlayAttach(): void {
     queueMicrotask(() => {
+      if (this.eventDestroyRef.destroyed) return;
       this.reconcileNavigation();
       const overlay = this.connectedOverlay()?.overlayRef.overlayElement;
       if (this.searchable()) {
@@ -548,7 +591,7 @@ export class NeuTreeSelectComponent<
   }
 
   private openPanel(focusLast: boolean): void {
-    if (this.isDisabled() || this.open()) return;
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || this.open()) return;
     this.focusLastOnAttach = focusLast;
     this.open.set(true);
   }

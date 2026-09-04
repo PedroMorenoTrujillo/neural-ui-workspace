@@ -75,6 +75,7 @@ export class NeuInputTagsFooterDirective { constructor(readonly templateRef: Tem
         [attr.aria-expanded]="panelVisible()"
         [attr.aria-controls]="panelVisible() ? panelId : null"
         [attr.aria-activedescendant]="activeOptionId()"
+        (select)="$event.stopPropagation()"
         (input)="onInput($event)"
         (keydown)="onKeyDown($event)"
         (focus)="onFocus($event)"

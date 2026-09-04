@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  output,
   ViewEncapsulation,
   computed,
   inject,
@@ -24,6 +26,20 @@ export type NeuChartType =
 export interface NeuChartSeries {
   name: string;
   data: number[];
+}
+
+/** Stable selection of a rendered domain datum. Indices are zero-based.
+ * Axis charts: seriesIndex identifies the series, dataPointIndex its datum.
+ * Pie/donut/radialBar: seriesIndex identifies the slice and dataPointIndex is 0.
+ * Pareto includes the derived cumulative series as seriesIndex 1.
+ */
+export interface NeuChartDataSelectEvent {
+  seriesIndex: number;
+  dataPointIndex: number;
+  seriesName: string | undefined;
+  label: string | undefined;
+  value: number;
+  originalEvent: Event;
 }
 
 /** Paleta por defecto Neural-Blue / Default Neural-Blue palette */
@@ -108,6 +124,39 @@ export class NeuChartComponent {
   /** Título de la gráfica. / Chart title. */
   title = input<string>('');
 
+  /** Actual user data-point activation; never render, legend or background clicks. */
+  readonly dataSelect = output<NeuChartDataSelectEvent>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+
+  private onDataPointSelection(
+    event: Event | undefined,
+    _context: unknown,
+    selection: { seriesIndex: number; dataPointIndex: number },
+  ): void {
+    if (this.eventDestroyRef.destroyed || !event) return;
+    const { seriesIndex, dataPointIndex } = selection;
+    if (!Number.isInteger(seriesIndex) || seriesIndex < 0) return;
+    const type = this.type();
+    if (type === 'pie' || type === 'donut' || type === 'radialBar') {
+      // Non-axis renderer paths share series 0; their point index identifies the slice.
+      if (seriesIndex !== 0 || !Number.isInteger(dataPointIndex) || dataPointIndex < 0) return;
+      const value = this.pieSeries()[dataPointIndex];
+      if (value === undefined) return;
+      this.dataSelect.emit({ seriesIndex: dataPointIndex, dataPointIndex: 0, seriesName: this.labels()[dataPointIndex],
+        label: this.labels()[dataPointIndex], value, originalEvent: event });
+      return;
+    }
+    if (!Number.isInteger(dataPointIndex) || dataPointIndex < 0) return;
+    const series = this.type() === 'pareto'
+      ? this.series()[0] && (seriesIndex === 0 ? this.series()[0] : seriesIndex === 1
+          ? { name: 'Cumulative %', data: computeParetoCumulative(this.series()[0].data) } : undefined)
+      : this.series()[seriesIndex];
+    const value = series?.data[dataPointIndex];
+    if (value === undefined) return;
+    this.dataSelect.emit({ seriesIndex, dataPointIndex, seriesName: series?.name,
+      label: this.categories()[dataPointIndex], value, originalEvent: event });
+  }
+
   private readonly _reducedMotion = inject(NeuResponsiveState).observe(
     '(prefers-reduced-motion: reduce)',
   );
@@ -168,6 +217,7 @@ export class NeuChartComponent {
       fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       foreColor: '#64748b',
       background: 'transparent',
+      events: { dataPointSelection: this.onDataPointSelection.bind(this) },
       toolbar: { show: false },
       sparkline: { enabled: false },
       zoom: { enabled: false },
