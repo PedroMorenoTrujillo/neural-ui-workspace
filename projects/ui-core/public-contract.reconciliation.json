@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1456,
-    "bindingDelta": 289,
+    "declarationBindings": 1476,
+    "bindingDelta": 309,
     "mapped": 932,
     "aliasCorrections": 4,
     "missingOldEntries": 229,
-    "newlyDiscovered": 518,
+    "newlyDiscovered": 538,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 398,
+      "declaration-or-selector-was-not-recorded": 407,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 111
+      "multiline-annotated-or-compound-declaration-was-missed": 122
     }
   },
   "mappings": [
@@ -4282,6 +4282,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./data-view#NeuDataViewComponent.input:currentPage",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./data-view#NeuDataViewComponent.input:emptyLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4347,6 +4351,10 @@
     },
     {
       "id": "./data-view#NeuDataViewComponent.input:sortOptions",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./data-view#NeuDataViewComponent.input:total",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4926,11 +4934,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./menu#NeuMenuComponent.input:expandedKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./menu#NeuMenuComponent.input:items",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./menu#NeuMenuComponent.input:itemTemplate",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./menu#NeuMenuComponent.output:expandedKeysChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4942,7 +4958,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./menu#NeuTieredMenuComponent.input:expandedKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./menu#NeuTieredMenuComponent.input:items",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./menu#NeuTieredMenuComponent.output:expandedKeysChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4950,7 +4974,39 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./modal#NeuDialogComponent.input:draggable",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:maximizable",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:maximized",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:maximizeLabel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:resizable",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:resizeLabel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:restoreLabel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./modal#NeuDialogComponent.output:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.output:maximizedChange",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -5127,6 +5183,30 @@
     },
     {
       "id": "./organization-chart#NeuOrganizationChartToggleIconDirective.input:neuOrganizationChartToggleIcon",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pagination#NeuPaginationComponent.input:pageSizeAriaLabel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./pagination#NeuPaginationComponent.input:pageSizeOptions",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./pagination#NeuPaginationComponent.output:pageSizeChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./panel#NeuFieldsetComponent.input:collapsed",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./panel#NeuFieldsetComponent.input:collapsible",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./panel#NeuFieldsetComponent.output:collapsedChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

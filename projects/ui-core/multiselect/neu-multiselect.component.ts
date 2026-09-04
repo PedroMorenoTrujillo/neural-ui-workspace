@@ -105,6 +105,10 @@ import {
   NeuMultiselectTokenDirective,
   NeuMultiselectTokenRemoveIconDirective,
 } from './neu-multiselect.directives';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export type { NeuSelectOption } from '@neural-ui/core/select';
 
@@ -644,6 +648,7 @@ export class NeuMultiselectComponent<
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   protected readonly _viewportMargin = 16;
   private readonly _panelMaxHeight = 280;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
@@ -1342,6 +1347,16 @@ export class NeuMultiselectComponent<
     reason: NeuMultiselectOverlayEvent['reason'] = 'programmatic',
     restoreFocus = true,
   ): void {
+    if (!this.isOpen()) return;
+    if (
+      (reason === 'escape' || reason === 'outside') &&
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'multiselect',
+        reason: reason === 'escape' ? 'escape' : 'outside-pointer',
+        originalEvent: event,
+      })
+    )
+      return;
     if (!this.isOpen()) return;
     if (this.proposeControlledOpen(false, event, reason, restoreFocus)) return;
     this.commitClose(event, reason, restoreFocus);

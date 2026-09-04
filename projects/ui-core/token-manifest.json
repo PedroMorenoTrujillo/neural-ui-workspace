@@ -3374,6 +3374,7 @@
         "projects/ui-core/kanban/neu-kanban.component.ts",
         "projects/ui-core/listbox/neu-listbox.component.scss",
         "projects/ui-core/mega-menu/neu-mega-menu.component.scss",
+        "projects/ui-core/modal/neu-modal.component.scss",
         "projects/ui-core/multiselect/neu-multiselect.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",

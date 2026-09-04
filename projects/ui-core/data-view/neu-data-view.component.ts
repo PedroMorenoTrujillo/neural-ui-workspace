@@ -136,18 +136,18 @@ export class NeuDataViewFooterDirective {
           type="button"
           variant="secondary"
           size="sm"
-          [disabled]="page() <= 1"
+          [disabled]="effectivePage() <= 1"
           (click)="previousPage()"
         >
           {{ previousLabel() }}
         </button>
-        <span>{{ page() }} / {{ pageCount() }}</span>
+        <span>{{ effectivePage() }} / {{ pageCount() }}</span>
         <button
           neu-button
           type="button"
           variant="secondary"
           size="sm"
-          [disabled]="page() >= pageCount()"
+          [disabled]="effectivePage() >= pageCount()"
           (click)="nextPage()"
         >
           {{ nextLabel() }}
@@ -177,6 +177,10 @@ export class NeuDataViewComponent {
   readonly sortAriaLabel = input('Sort items');
   readonly pagination = input(true);
   readonly pageSize = input(9);
+  /** Supplying a total marks `items` as an already-windowed remote result. */
+  readonly total = input<number | undefined>(undefined);
+  /** Optional remote page owner. Consumer echoes are intentionally silent. */
+  readonly currentPage = input<number | undefined>(undefined);
   readonly emptyLabel = input('No items found');
   readonly loading = input(false);
   readonly loadingLabel = input('Loading...');
@@ -210,6 +214,9 @@ export class NeuDataViewComponent {
   );
 
   readonly filteredItems = computed(() => {
+    if (this.total() !== undefined) {
+      return [...this.items()];
+    }
     const q = this.query().trim().toLowerCase();
     const rows = [...this.items()];
     const sort = this.sortOptions().find((option) => option.value === this.sortKey());
@@ -233,16 +240,25 @@ export class NeuDataViewComponent {
     });
   });
 
-  readonly pageCount = computed(() =>
-    Math.max(1, Math.ceil(this.filteredItems().length / Math.max(1, this.pageSize()))),
-  );
+  readonly effectivePage = computed(() => {
+    const page = this.currentPage() ?? this.page();
+    return Number.isFinite(page) ? Math.max(1, Math.trunc(page)) : 1;
+  });
+
+  readonly pageCount = computed(() => {
+    const rawCount = this.total() ?? this.filteredItems().length;
+    const rawSize = this.pageSize();
+    const count = Number.isFinite(rawCount) ? Math.max(0, rawCount) : 0;
+    const size = Number.isFinite(rawSize) ? Math.max(1, rawSize) : 1;
+    return Math.max(1, Math.ceil(count / size));
+  });
 
   readonly pagedItems = computed(() => {
-    if (!this.pagination()) {
+    if (!this.pagination() || this.total() !== undefined) {
       return this.filteredItems();
     }
     const size = Math.max(1, this.pageSize());
-    const start = (Math.min(this.page(), this.pageCount()) - 1) * size;
+    const start = (Math.min(this.effectivePage(), this.pageCount()) - 1) * size;
     return this.filteredItems().slice(start, start + size);
   });
 
@@ -265,7 +281,7 @@ export class NeuDataViewComponent {
 
   setQuery(value: string): void {
     this.query.set(value);
-    this.page.set(1);
+    if (this.currentPage() === undefined) this.page.set(1);
     this.searchChange.emit(value);
   }
 
@@ -275,11 +291,11 @@ export class NeuDataViewComponent {
   }
 
   previousPage(): void {
-    this.setPage(Math.max(1, this.page() - 1));
+    this.setPage(Math.max(1, this.effectivePage() - 1));
   }
 
   nextPage(): void {
-    this.setPage(Math.min(this.pageCount(), this.page() + 1));
+    this.setPage(Math.min(this.pageCount(), this.effectivePage() + 1));
   }
 
   trackItem(index: number, item: unknown): unknown {
@@ -297,8 +313,12 @@ export class NeuDataViewComponent {
   }
 
   private setPage(page: number): void {
-    this.page.set(page);
-    this.pageChange.emit({ page, pageSize: this.pageSize() });
+    const clamped = Number.isFinite(page)
+      ? Math.min(this.pageCount(), Math.max(1, Math.trunc(page)))
+      : this.effectivePage();
+    if (clamped === this.effectivePage()) return;
+    if (this.currentPage() === undefined) this.page.set(clamped);
+    this.pageChange.emit({ page: clamped, pageSize: Math.max(1, this.pageSize()) });
   }
 
   private searchableText(item: unknown, fields: string[]): string {

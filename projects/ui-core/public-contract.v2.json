@@ -405,10 +405,17 @@
       "entrypoint": "./foundation",
       "types": "./types/neural-ui-core-foundation.d.ts",
       "exports": [
+        "./foundation#allowsNeuOverlayDismissal",
+        "./foundation#NEU_OVERLAY_DISMISS_GUARD",
         "./foundation#NeuNow",
+        "./foundation#NeuOverlayDismissContext",
+        "./foundation#NeuOverlayDismissGuard",
+        "./foundation#NeuOverlayDismissReason",
+        "./foundation#NeuOverlaySource",
         "./foundation#NEURAL_LOCALE",
         "./foundation#NEURAL_NOW",
-        "./foundation#NEURAL_TIME_ZONE"
+        "./foundation#NEURAL_TIME_ZONE",
+        "./foundation#provideNeuOverlayDismissGuard"
       ]
     },
     {
@@ -6369,6 +6376,14 @@
           "signature": "registerOnTouched(fn: () => void): void;"
         },
         {
+          "id": "./cascade-select#NeuCascadeSelectComponent.method:requestClose",
+          "name": "requestClose",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "requestClose(reason: 'escape' | 'outside-pointer', event: Event): void;"
+        },
+        {
           "id": "./cascade-select#NeuCascadeSelectComponent.method:setDisabledState",
           "name": "setDisabledState",
           "kind": "method",
@@ -9200,6 +9215,16 @@
       "signature": "declare class NeuDataViewComponent {\n}",
       "members": [
         {
+          "id": "./data-view#NeuDataViewComponent.input:currentPage",
+          "name": "currentPage",
+          "kind": "input",
+          "publicName": "currentPage",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly currentPage: _angular_core.InputSignal<number | undefined>;"
+        },
+        {
           "id": "./data-view#NeuDataViewComponent.input:emptyLabel",
           "name": "emptyLabel",
           "kind": "input",
@@ -9370,6 +9395,16 @@
           "signature": "readonly sortOptions: _angular_core.InputSignal<NeuDataViewSortOption[]>;"
         },
         {
+          "id": "./data-view#NeuDataViewComponent.input:total",
+          "name": "total",
+          "kind": "input",
+          "publicName": "total",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly total: _angular_core.InputSignal<number | undefined>;"
+        },
+        {
           "id": "./data-view#NeuDataViewComponent.input:trackBy",
           "name": "trackBy",
           "kind": "input",
@@ -9496,6 +9531,14 @@
           "signature": "readonly sortChange: _angular_core.OutputEmitterRef<string>;"
         },
         {
+          "id": "./data-view#NeuDataViewComponent.property:effectivePage",
+          "name": "effectivePage",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectivePage: _angular_core.Signal<number>;"
+        },
+        {
           "id": "./data-view#NeuDataViewComponent.property:filteredItems",
           "name": "filteredItems",
           "kind": "property",
@@ -9533,7 +9576,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDataViewComponent, \"neu-data-view\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"mode\": {\n        \"alias\": \"mode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"modes\": {\n        \"alias\": \"modes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewSwitcher\": {\n        \"alias\": \"viewSwitcher\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewAriaLabel\": {\n        \"alias\": \"viewAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchFields\": {\n        \"alias\": \"searchFields\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchAriaLabel\": {\n        \"alias\": \"searchAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortOptions\": {\n        \"alias\": \"sortOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortAriaLabel\": {\n        \"alias\": \"sortAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pagination\": {\n        \"alias\": \"pagination\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loadingLabel\": {\n        \"alias\": \"loadingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousLabel\": {\n        \"alias\": \"previousLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextLabel\": {\n        \"alias\": \"nextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"paginationAriaLabel\": {\n        \"alias\": \"paginationAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trackBy\": {\n        \"alias\": \"trackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"modeChange\": \"modeChange\";\n    \"searchChange\": \"searchChange\";\n    \"sortChange\": \"sortChange\";\n    \"pageChange\": \"pageChange\";\n}, [\n    \"itemTpl\",\n    \"headerTpl\",\n    \"footerTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDataViewComponent, \"neu-data-view\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"mode\": {\n        \"alias\": \"mode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"modes\": {\n        \"alias\": \"modes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewSwitcher\": {\n        \"alias\": \"viewSwitcher\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewAriaLabel\": {\n        \"alias\": \"viewAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchFields\": {\n        \"alias\": \"searchFields\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchAriaLabel\": {\n        \"alias\": \"searchAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortOptions\": {\n        \"alias\": \"sortOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortAriaLabel\": {\n        \"alias\": \"sortAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pagination\": {\n        \"alias\": \"pagination\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"total\": {\n        \"alias\": \"total\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"currentPage\": {\n        \"alias\": \"currentPage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loadingLabel\": {\n        \"alias\": \"loadingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousLabel\": {\n        \"alias\": \"previousLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextLabel\": {\n        \"alias\": \"nextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"paginationAriaLabel\": {\n        \"alias\": \"paginationAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trackBy\": {\n        \"alias\": \"trackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"modeChange\": \"modeChange\";\n    \"searchChange\": \"searchChange\";\n    \"sortChange\": \"sortChange\";\n    \"pageChange\": \"pageChange\";\n}, [\n    \"itemTpl\",\n    \"headerTpl\",\n    \"footerTpl\"\n], never, true, never>;"
         },
         {
           "id": "./data-view#NeuDataViewComponent.property:ɵfac",
@@ -12218,12 +12261,91 @@
       ]
     },
     {
+      "id": "./foundation#allowsNeuOverlayDismissal",
+      "entrypoint": "./foundation",
+      "name": "allowsNeuOverlayDismissal",
+      "kind": "function",
+      "status": "SUPPORTED",
+      "signature": "declare function allowsNeuOverlayDismissal(guard: NeuOverlayDismissGuard | null, context: NeuOverlayDismissContext): boolean;",
+      "members": []
+    },
+    {
+      "id": "./foundation#NEU_OVERLAY_DISMISS_GUARD",
+      "entrypoint": "./foundation",
+      "name": "NEU_OVERLAY_DISMISS_GUARD",
+      "kind": "token",
+      "status": "SUPPORTED",
+      "signature": "const NEU_OVERLAY_DISMISS_GUARD: InjectionToken<NeuOverlayDismissGuard>;",
+      "members": []
+    },
+    {
       "id": "./foundation#NeuNow",
       "entrypoint": "./foundation",
       "name": "NeuNow",
       "kind": "type",
       "status": "SUPPORTED",
       "signature": "type NeuNow = () => Date;",
+      "members": []
+    },
+    {
+      "id": "./foundation#NeuOverlayDismissContext",
+      "entrypoint": "./foundation",
+      "name": "NeuOverlayDismissContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuOverlayDismissContext {\n}",
+      "members": [
+        {
+          "id": "./foundation#NeuOverlayDismissContext.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: Event | null;"
+        },
+        {
+          "id": "./foundation#NeuOverlayDismissContext.property:reason",
+          "name": "reason",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly reason: NeuOverlayDismissReason;"
+        },
+        {
+          "id": "./foundation#NeuOverlayDismissContext.property:source",
+          "name": "source",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly source: NeuOverlaySource;"
+        }
+      ]
+    },
+    {
+      "id": "./foundation#NeuOverlayDismissGuard",
+      "entrypoint": "./foundation",
+      "name": "NeuOverlayDismissGuard",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuOverlayDismissGuard = (context: NeuOverlayDismissContext) => boolean;",
+      "members": []
+    },
+    {
+      "id": "./foundation#NeuOverlayDismissReason",
+      "entrypoint": "./foundation",
+      "name": "NeuOverlayDismissReason",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuOverlayDismissReason = 'escape' | 'outside-pointer' | 'backdrop' | 'focus-loss';",
+      "members": []
+    },
+    {
+      "id": "./foundation#NeuOverlaySource",
+      "entrypoint": "./foundation",
+      "name": "NeuOverlaySource",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuOverlaySource = 'dialog' | 'popover' | 'menu' | 'context-menu' | 'select' | 'multiselect' | 'tree-select' | 'cascade-select' | 'color-picker';",
       "members": []
     },
     {
@@ -12251,6 +12373,15 @@
       "kind": "token",
       "status": "SUPPORTED",
       "signature": "const NEURAL_TIME_ZONE: InjectionToken<string | undefined>;",
+      "members": []
+    },
+    {
+      "id": "./foundation#provideNeuOverlayDismissGuard",
+      "entrypoint": "./foundation",
+      "name": "provideNeuOverlayDismissGuard",
+      "kind": "function",
+      "status": "SUPPORTED",
+      "signature": "declare function provideNeuOverlayDismissGuard(guard: NeuOverlayDismissGuard): Provider;",
       "members": []
     },
     {
@@ -20410,6 +20541,14 @@
           "signature": "onTriggerKeydown(event: KeyboardEvent): void;"
         },
         {
+          "id": "./menu#NeuMenuButtonComponent.method:requestClose",
+          "name": "requestClose",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "requestClose(reason: NeuOverlayDismissReason, event: Event): void;"
+        },
+        {
           "id": "./menu#NeuMenuButtonComponent.method:toggle",
           "name": "toggle",
           "kind": "method",
@@ -20491,6 +20630,16 @@
           "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./menu#NeuMenuComponent.input:expandedKeys",
+          "name": "expandedKeys",
+          "kind": "input",
+          "publicName": "expandedKeys",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
+        },
+        {
           "id": "./menu#NeuMenuComponent.input:items",
           "name": "items",
           "kind": "input",
@@ -20519,6 +20668,22 @@
           "signature": "activate(item: NeuMenuItem, originalEvent?: Event): void;"
         },
         {
+          "id": "./menu#NeuMenuComponent.method:isExpanded",
+          "name": "isExpanded",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "isExpanded(item: NeuMenuItem): boolean;"
+        },
+        {
+          "id": "./menu#NeuMenuComponent.method:onChildExpansionChange",
+          "name": "onChildExpansionChange",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onChildExpansionChange(keys: string[]): void;"
+        },
+        {
           "id": "./menu#NeuMenuComponent.method:onItemKeydown",
           "name": "onItemKeydown",
           "kind": "method",
@@ -20543,6 +20708,24 @@
           "signature": "tabIndexFor(index: number): 0 | -1;"
         },
         {
+          "id": "./menu#NeuMenuComponent.method:toggleExpanded",
+          "name": "toggleExpanded",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "toggleExpanded(item: NeuMenuItem): void;"
+        },
+        {
+          "id": "./menu#NeuMenuComponent.output:expandedKeysChange",
+          "name": "expandedKeysChange",
+          "kind": "output",
+          "publicName": "expandedKeysChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<string[]>;"
+        },
+        {
           "id": "./menu#NeuMenuComponent.output:itemClick",
           "name": "itemClick",
           "kind": "output",
@@ -20551,6 +20734,22 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMenuItem>;"
+        },
+        {
+          "id": "./menu#NeuMenuComponent.property:branchKeys",
+          "name": "branchKeys",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly branchKeys: _angular_core.Signal<string[]>;"
+        },
+        {
+          "id": "./menu#NeuMenuComponent.property:effectiveExpandedKeys",
+          "name": "effectiveExpandedKeys",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveExpandedKeys: _angular_core.Signal<readonly string[]>;"
         },
         {
           "id": "./menu#NeuMenuComponent.property:itemTemplateRef",
@@ -20574,7 +20773,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMenuComponent, \"neu-menu\", never, {\n    \"itemTemplate\": {\n        \"alias\": \"itemTemplate\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMenuComponent, \"neu-menu\", never, {\n    \"itemTemplate\": {\n        \"alias\": \"itemTemplate\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"itemClick\": \"itemClick\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
         },
         {
           "id": "./menu#NeuMenuComponent.property:ɵfac",
@@ -20787,6 +20986,16 @@
           "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./menu#NeuTieredMenuComponent.input:expandedKeys",
+          "name": "expandedKeys",
+          "kind": "input",
+          "publicName": "expandedKeys",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
+        },
+        {
           "id": "./menu#NeuTieredMenuComponent.input:items",
           "name": "items",
           "kind": "input",
@@ -20795,6 +21004,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly items: _angular_core.InputSignal<NeuMenuItem[]>;"
+        },
+        {
+          "id": "./menu#NeuTieredMenuComponent.output:expandedKeysChange",
+          "name": "expandedKeysChange",
+          "kind": "output",
+          "publicName": "expandedKeysChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<string[]>;"
         },
         {
           "id": "./menu#NeuTieredMenuComponent.output:itemClick",
@@ -20812,7 +21031,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTieredMenuComponent, \"neu-tiered-menu\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTieredMenuComponent, \"neu-tiered-menu\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"itemClick\": \"itemClick\";\n}, never, never, true, never>;"
         },
         {
           "id": "./menu#NeuTieredMenuComponent.property:ɵfac",
@@ -20973,6 +21192,16 @@
           "signature": "disableClose: _angular_core.InputSignal<boolean>;"
         },
         {
+          "id": "./modal#NeuDialogComponent.input:draggable",
+          "name": "draggable",
+          "kind": "input",
+          "publicName": "draggable",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "draggable: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./modal#NeuDialogComponent.input:layout",
           "name": "layout",
           "kind": "input",
@@ -20983,6 +21212,36 @@
           "signature": "layout: _angular_core.InputSignal<NeuDialogLayout>;"
         },
         {
+          "id": "./modal#NeuDialogComponent.input:maximizable",
+          "name": "maximizable",
+          "kind": "input",
+          "publicName": "maximizable",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "maximizable: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.input:maximized",
+          "name": "maximized",
+          "kind": "input",
+          "publicName": "maximized",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "maximized: _angular_core.InputSignal<boolean | undefined>;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.input:maximizeLabel",
+          "name": "maximizeLabel",
+          "kind": "input",
+          "publicName": "maximizeLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "maximizeLabel: _angular_core.InputSignal<string>;"
+        },
+        {
           "id": "./modal#NeuDialogComponent.input:open",
           "name": "open",
           "kind": "input",
@@ -20991,6 +21250,26 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "open: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.input:resizable",
+          "name": "resizable",
+          "kind": "input",
+          "publicName": "resizable",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "resizable: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.input:resizeLabel",
+          "name": "resizeLabel",
+          "kind": "input",
+          "publicName": "resizeLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "resizeLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./modal#NeuDialogComponent.input:responsive",
@@ -21011,6 +21290,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "restoreFocus: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.input:restoreLabel",
+          "name": "restoreLabel",
+          "kind": "input",
+          "publicName": "restoreLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "restoreLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./modal#NeuDialogComponent.input:size",
@@ -21041,12 +21330,68 @@
           "signature": "close(result?: unknown): void;"
         },
         {
+          "id": "./modal#NeuDialogComponent.method:onDragStart",
+          "name": "onDragStart",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onDragStart(event: PointerEvent): void;"
+        },
+        {
           "id": "./modal#NeuDialogComponent.method:onPanelKeydown",
           "name": "onPanelKeydown",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "onPanelKeydown(event: KeyboardEvent): void;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.method:onPointerEnd",
+          "name": "onPointerEnd",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onPointerEnd(event: PointerEvent): void;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.method:onPointerMove",
+          "name": "onPointerMove",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onPointerMove(event: PointerEvent): void;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.method:onResizeKeydown",
+          "name": "onResizeKeydown",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onResizeKeydown(event: KeyboardEvent): void;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.method:onResizeStart",
+          "name": "onResizeStart",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onResizeStart(event: PointerEvent): void;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.method:requestClose",
+          "name": "requestClose",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "requestClose(reason: 'escape' | 'backdrop', event: Event): void;"
+        },
+        {
+          "id": "./modal#NeuDialogComponent.method:toggleMaximize",
+          "name": "toggleMaximize",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "toggleMaximize(): void;"
         },
         {
           "id": "./modal#NeuDialogComponent.output:closed",
@@ -21069,6 +21414,16 @@
           "signature": "readonly hidden: _angular_core.OutputEmitterRef<void>;"
         },
         {
+          "id": "./modal#NeuDialogComponent.output:maximizedChange",
+          "name": "maximizedChange",
+          "kind": "output",
+          "publicName": "maximizedChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly maximizedChange: _angular_core.OutputEmitterRef<boolean>;"
+        },
+        {
           "id": "./modal#NeuDialogComponent.output:opened",
           "name": "opened",
           "kind": "output",
@@ -21079,12 +21434,20 @@
           "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
         },
         {
+          "id": "./modal#NeuDialogComponent.property:effectiveMaximized",
+          "name": "effectiveMaximized",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveMaximized: _angular_core.Signal<boolean>;"
+        },
+        {
           "id": "./modal#NeuDialogComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDialogComponent, \"neu-dialog\", never, {\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disableClose\": {\n        \"alias\": \"disableClose\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"responsive\": {\n        \"alias\": \"responsive\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreFocus\": {\n        \"alias\": \"restoreFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"closed\": \"closed\";\n    \"opened\": \"opened\";\n    \"hidden\": \"hidden\";\n}, never, [\n    \"*\",\n    \"[neu-dialog-footer]\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDialogComponent, \"neu-dialog\", never, {\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disableClose\": {\n        \"alias\": \"disableClose\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"responsive\": {\n        \"alias\": \"responsive\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreFocus\": {\n        \"alias\": \"restoreFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"draggable\": {\n        \"alias\": \"draggable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizable\": {\n        \"alias\": \"resizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximizable\": {\n        \"alias\": \"maximizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximized\": {\n        \"alias\": \"maximized\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximizeLabel\": {\n        \"alias\": \"maximizeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreLabel\": {\n        \"alias\": \"restoreLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizeLabel\": {\n        \"alias\": \"resizeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"closed\": \"closed\";\n    \"opened\": \"opened\";\n    \"hidden\": \"hidden\";\n    \"maximizedChange\": \"maximizedChange\";\n}, never, [\n    \"*\",\n    \"[neu-dialog-footer]\"\n], true, never>;"
         },
         {
           "id": "./modal#NeuDialogComponent.property:ɵfac",
@@ -26127,6 +26490,26 @@
           "signature": "pageSize: _angular_core.InputSignal<number>;"
         },
         {
+          "id": "./pagination#NeuPaginationComponent.input:pageSizeAriaLabel",
+          "name": "pageSizeAriaLabel",
+          "kind": "input",
+          "publicName": "pageSizeAriaLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "pageSizeAriaLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./pagination#NeuPaginationComponent.input:pageSizeOptions",
+          "name": "pageSizeOptions",
+          "kind": "input",
+          "publicName": "pageSizeOptions",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "pageSizeOptions: _angular_core.InputSignal<readonly number[]>;"
+        },
+        {
           "id": "./pagination#NeuPaginationComponent.input:total",
           "name": "total",
           "kind": "input",
@@ -26135,6 +26518,14 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "total: _angular_core.InputSignal<number>;"
+        },
+        {
+          "id": "./pagination#NeuPaginationComponent.method:changePageSize",
+          "name": "changePageSize",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "changePageSize(value: string | number): void;"
         },
         {
           "id": "./pagination#NeuPaginationComponent.method:go",
@@ -26155,12 +26546,30 @@
           "signature": "pageChange: _angular_core.OutputEmitterRef<number>;"
         },
         {
+          "id": "./pagination#NeuPaginationComponent.output:pageSizeChange",
+          "name": "pageSizeChange",
+          "kind": "output",
+          "publicName": "pageSizeChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "pageSizeChange: _angular_core.OutputEmitterRef<number>;"
+        },
+        {
+          "id": "./pagination#NeuPaginationComponent.property:normalizedPageSizeOptions",
+          "name": "normalizedPageSizeOptions",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly normalizedPageSizeOptions: _angular_core.Signal<number[]>;"
+        },
+        {
           "id": "./pagination#NeuPaginationComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuPaginationComponent, \"neu-pagination\", never, {\n    \"page\": {\n        \"alias\": \"page\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"total\": {\n        \"alias\": \"total\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxVisible\": {\n        \"alias\": \"maxVisible\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"pageChange\": \"pageChange\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuPaginationComponent, \"neu-pagination\", never, {\n    \"page\": {\n        \"alias\": \"page\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"total\": {\n        \"alias\": \"total\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSizeOptions\": {\n        \"alias\": \"pageSizeOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSizeAriaLabel\": {\n        \"alias\": \"pageSizeAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxVisible\": {\n        \"alias\": \"maxVisible\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"pageChange\": \"pageChange\";\n    \"pageSizeChange\": \"pageSizeChange\";\n}, never, never, true, never>;"
         },
         {
           "id": "./pagination#NeuPaginationComponent.property:ɵfac",
@@ -26198,6 +26607,26 @@
       "signature": "declare class NeuFieldsetComponent {\n}",
       "members": [
         {
+          "id": "./panel#NeuFieldsetComponent.input:collapsed",
+          "name": "collapsed",
+          "kind": "input",
+          "publicName": "collapsed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly collapsed: _angular_core.InputSignal<boolean | undefined>;"
+        },
+        {
+          "id": "./panel#NeuFieldsetComponent.input:collapsible",
+          "name": "collapsible",
+          "kind": "input",
+          "publicName": "collapsible",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly collapsible: _angular_core.InputSignalWithTransform<boolean, unknown>;"
+        },
+        {
           "id": "./panel#NeuFieldsetComponent.input:legend",
           "name": "legend",
           "kind": "input",
@@ -26208,12 +26637,38 @@
           "signature": "readonly legend: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./panel#NeuFieldsetComponent.method:toggle",
+          "name": "toggle",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "toggle(): void;"
+        },
+        {
+          "id": "./panel#NeuFieldsetComponent.output:collapsedChange",
+          "name": "collapsedChange",
+          "kind": "output",
+          "publicName": "collapsedChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly collapsedChange: _angular_core.OutputEmitterRef<boolean>;"
+        },
+        {
+          "id": "./panel#NeuFieldsetComponent.property:effectiveCollapsed",
+          "name": "effectiveCollapsed",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveCollapsed: _angular_core.Signal<boolean>;"
+        },
+        {
           "id": "./panel#NeuFieldsetComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuFieldsetComponent, \"neu-fieldset\", never, {\n    \"legend\": {\n        \"alias\": \"legend\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, [\n    \"*\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuFieldsetComponent, \"neu-fieldset\", never, {\n    \"legend\": {\n        \"alias\": \"legend\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapsible\": {\n        \"alias\": \"collapsible\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapsed\": {\n        \"alias\": \"collapsed\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"collapsedChange\": \"collapsedChange\";\n}, never, [\n    \"*\"\n], true, never>;"
         },
         {
           "id": "./panel#NeuFieldsetComponent.property:ɵfac",
@@ -28103,7 +28558,7 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onBlur(): void;"
+          "signature": "onBlur(event?: FocusEvent): void;"
         },
         {
           "id": "./popover#NeuPopoverDirective.method:onFocus",
@@ -28135,7 +28590,7 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onMouseLeave(): void;"
+          "signature": "onMouseLeave(event?: MouseEvent): void;"
         },
         {
           "id": "./popover#NeuPopoverDirective.method:open",
@@ -46330,6 +46785,14 @@
           "signature": "registerOnTouched(fn: () => void): void;"
         },
         {
+          "id": "./tree-select#NeuTreeSelectComponent.method:requestClose",
+          "name": "requestClose",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "requestClose(reason: 'escape' | 'outside-pointer', event: Event): void;"
+        },
+        {
           "id": "./tree-select#NeuTreeSelectComponent.method:selectNode",
           "name": "selectNode",
           "kind": "method",
@@ -54567,6 +55030,18 @@
       "signature": "readonly orderChange: _angular_core.OutputEmitterRef<NeuDashboardTileConfig[]>;"
     },
     {
+      "id": "./data-view#NeuDataViewComponent.input:currentPage",
+      "entrypoint": "./data-view",
+      "declaration": "NeuDataViewComponent",
+      "selector": "neu-data-view",
+      "propertyName": "currentPage",
+      "publicName": "currentPage",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly currentPage: _angular_core.InputSignal<number | undefined>;"
+    },
+    {
       "id": "./data-view#NeuDataViewComponent.input:emptyLabel",
       "entrypoint": "./data-view",
       "declaration": "NeuDataViewComponent",
@@ -54769,6 +55244,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly sortOptions: _angular_core.InputSignal<NeuDataViewSortOption[]>;"
+    },
+    {
+      "id": "./data-view#NeuDataViewComponent.input:total",
+      "entrypoint": "./data-view",
+      "declaration": "NeuDataViewComponent",
+      "selector": "neu-data-view",
+      "propertyName": "total",
+      "publicName": "total",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly total: _angular_core.InputSignal<number | undefined>;"
     },
     {
       "id": "./data-view#NeuDataViewComponent.input:trackBy",
@@ -58959,6 +59446,18 @@
       "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./menu#NeuMenuComponent.input:expandedKeys",
+      "entrypoint": "./menu",
+      "declaration": "NeuMenuComponent",
+      "selector": "neu-menu",
+      "propertyName": "expandedKeys",
+      "publicName": "expandedKeys",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
+    },
+    {
       "id": "./menu#NeuMenuComponent.input:items",
       "entrypoint": "./menu",
       "declaration": "NeuMenuComponent",
@@ -58981,6 +59480,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly itemTemplate: _angular_core.InputSignal<TemplateRef<{\n    $implicit: NeuMenuItem;\n}> | null>;"
+    },
+    {
+      "id": "./menu#NeuMenuComponent.output:expandedKeysChange",
+      "entrypoint": "./menu",
+      "declaration": "NeuMenuComponent",
+      "selector": "neu-menu",
+      "propertyName": "expandedKeysChange",
+      "publicName": "expandedKeysChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<string[]>;"
     },
     {
       "id": "./menu#NeuMenuComponent.output:itemClick",
@@ -59007,6 +59518,18 @@
       "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./menu#NeuTieredMenuComponent.input:expandedKeys",
+      "entrypoint": "./menu",
+      "declaration": "NeuTieredMenuComponent",
+      "selector": "neu-tiered-menu",
+      "propertyName": "expandedKeys",
+      "publicName": "expandedKeys",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
+    },
+    {
       "id": "./menu#NeuTieredMenuComponent.input:items",
       "entrypoint": "./menu",
       "declaration": "NeuTieredMenuComponent",
@@ -59017,6 +59540,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly items: _angular_core.InputSignal<NeuMenuItem[]>;"
+    },
+    {
+      "id": "./menu#NeuTieredMenuComponent.output:expandedKeysChange",
+      "entrypoint": "./menu",
+      "declaration": "NeuTieredMenuComponent",
+      "selector": "neu-tiered-menu",
+      "propertyName": "expandedKeysChange",
+      "publicName": "expandedKeysChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<string[]>;"
     },
     {
       "id": "./menu#NeuTieredMenuComponent.output:itemClick",
@@ -59115,6 +59650,18 @@
       "signature": "disableClose: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./modal#NeuDialogComponent.input:draggable",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "draggable",
+      "publicName": "draggable",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "draggable: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./modal#NeuDialogComponent.input:layout",
       "entrypoint": "./modal",
       "declaration": "NeuDialogComponent",
@@ -59127,6 +59674,42 @@
       "signature": "layout: _angular_core.InputSignal<NeuDialogLayout>;"
     },
     {
+      "id": "./modal#NeuDialogComponent.input:maximizable",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "maximizable",
+      "publicName": "maximizable",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "maximizable: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:maximized",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "maximized",
+      "publicName": "maximized",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "maximized: _angular_core.InputSignal<boolean | undefined>;"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:maximizeLabel",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "maximizeLabel",
+      "publicName": "maximizeLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "maximizeLabel: _angular_core.InputSignal<string>;"
+    },
+    {
       "id": "./modal#NeuDialogComponent.input:open",
       "entrypoint": "./modal",
       "declaration": "NeuDialogComponent",
@@ -59137,6 +59720,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "open: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:resizable",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "resizable",
+      "publicName": "resizable",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "resizable: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:resizeLabel",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "resizeLabel",
+      "publicName": "resizeLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "resizeLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./modal#NeuDialogComponent.input:responsive",
@@ -59161,6 +59768,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "restoreFocus: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:restoreLabel",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "restoreLabel",
+      "publicName": "restoreLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "restoreLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./modal#NeuDialogComponent.input:size",
@@ -59209,6 +59828,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly hidden: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.output:maximizedChange",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "maximizedChange",
+      "publicName": "maximizedChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly maximizedChange: _angular_core.OutputEmitterRef<boolean>;"
     },
     {
       "id": "./modal#NeuDialogComponent.output:opened",
@@ -60773,6 +61404,30 @@
       "signature": "pageSize: _angular_core.InputSignal<number>;"
     },
     {
+      "id": "./pagination#NeuPaginationComponent.input:pageSizeAriaLabel",
+      "entrypoint": "./pagination",
+      "declaration": "NeuPaginationComponent",
+      "selector": "neu-pagination",
+      "propertyName": "pageSizeAriaLabel",
+      "publicName": "pageSizeAriaLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "pageSizeAriaLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./pagination#NeuPaginationComponent.input:pageSizeOptions",
+      "entrypoint": "./pagination",
+      "declaration": "NeuPaginationComponent",
+      "selector": "neu-pagination",
+      "propertyName": "pageSizeOptions",
+      "publicName": "pageSizeOptions",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "pageSizeOptions: _angular_core.InputSignal<readonly number[]>;"
+    },
+    {
       "id": "./pagination#NeuPaginationComponent.input:total",
       "entrypoint": "./pagination",
       "declaration": "NeuPaginationComponent",
@@ -60797,6 +61452,42 @@
       "signature": "pageChange: _angular_core.OutputEmitterRef<number>;"
     },
     {
+      "id": "./pagination#NeuPaginationComponent.output:pageSizeChange",
+      "entrypoint": "./pagination",
+      "declaration": "NeuPaginationComponent",
+      "selector": "neu-pagination",
+      "propertyName": "pageSizeChange",
+      "publicName": "pageSizeChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "pageSizeChange: _angular_core.OutputEmitterRef<number>;"
+    },
+    {
+      "id": "./panel#NeuFieldsetComponent.input:collapsed",
+      "entrypoint": "./panel",
+      "declaration": "NeuFieldsetComponent",
+      "selector": "neu-fieldset",
+      "propertyName": "collapsed",
+      "publicName": "collapsed",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly collapsed: _angular_core.InputSignal<boolean | undefined>;"
+    },
+    {
+      "id": "./panel#NeuFieldsetComponent.input:collapsible",
+      "entrypoint": "./panel",
+      "declaration": "NeuFieldsetComponent",
+      "selector": "neu-fieldset",
+      "propertyName": "collapsible",
+      "publicName": "collapsible",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly collapsible: _angular_core.InputSignalWithTransform<boolean, unknown>;"
+    },
+    {
       "id": "./panel#NeuFieldsetComponent.input:legend",
       "entrypoint": "./panel",
       "declaration": "NeuFieldsetComponent",
@@ -60807,6 +61498,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly legend: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./panel#NeuFieldsetComponent.output:collapsedChange",
+      "entrypoint": "./panel",
+      "declaration": "NeuFieldsetComponent",
+      "selector": "neu-fieldset",
+      "propertyName": "collapsedChange",
+      "publicName": "collapsedChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly collapsedChange: _angular_core.OutputEmitterRef<boolean>;"
     },
     {
       "id": "./panel#NeuPanelComponent.input:collapseLabel",
@@ -69065,32 +69768,32 @@
   ],
   "summary": {
     "entrypoints": 105,
-    "exportedDeclarations": 817,
+    "exportedDeclarations": 824,
     "declarationKinds": {
       "class": 14,
       "component": 102,
       "directive": 144,
-      "function": 41,
-      "interface": 268,
+      "function": 43,
+      "interface": 269,
       "reexport": 55,
       "service": 11,
-      "token": 3,
-      "type": 178,
+      "token": 4,
+      "type": 181,
       "variable": 1
     },
-    "publicSymbols": 5662,
+    "publicSymbols": 5713,
     "statuses": {
-      "SUPPORTED": 3594,
+      "SUPPORTED": 3624,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 2064,
+      "INTERNAL/UNSUPPORTED": 2085,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1182,
-      "output": 272,
+      "input": 1197,
+      "output": 277,
       "model": 2,
-      "total": 1456
+      "total": 1476
     },
     "designTokens": 258
   }

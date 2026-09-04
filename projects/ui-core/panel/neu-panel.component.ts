@@ -6,6 +6,7 @@ import {
   PLATFORM_ID,
   ViewEncapsulation,
   booleanAttribute,
+  computed,
   inject,
   input,
   numberAttribute,
@@ -76,15 +77,56 @@ export class NeuPanelComponent {
   template: `
     <fieldset class="neu-fieldset">
       @if (legend()) {
-        <legend>{{ legend() }}</legend>
+        <legend [id]="_legendId">
+          @if (collapsible()) {
+            <button
+              class="neu-fieldset__toggle"
+              type="button"
+              [attr.aria-expanded]="!effectiveCollapsed()"
+              [attr.aria-controls]="_contentId"
+              (click)="toggle()"
+            >
+              <span aria-hidden="true" class="neu-fieldset__indicator">⌄</span>
+              <span>{{ legend() }}</span>
+            </button>
+          } @else {
+            {{ legend() }}
+          }
+        </legend>
       }
-      <ng-content />
+      @if (!effectiveCollapsed()) {
+        <div
+          class="neu-fieldset__content"
+          [id]="_contentId"
+          [attr.role]="collapsible() ? 'region' : null"
+          [attr.aria-labelledby]="collapsible() ? _legendId : null"
+        >
+          <ng-content />
+        </div>
+      }
     </fieldset>
   `,
   styleUrl: './neu-panel.component.scss',
 })
 export class NeuFieldsetComponent {
   readonly legend = input('');
+  readonly collapsible = input(false, { transform: booleanAttribute });
+  /** Presence makes collapse state consumer-authoritative. */
+  readonly collapsed = input<boolean | undefined>(undefined);
+  readonly collapsedChange = output<boolean>();
+  private readonly internalCollapsed = signal(false);
+  readonly effectiveCollapsed = computed(
+    () => this.collapsible() && (this.collapsed() ?? this.internalCollapsed()),
+  );
+  protected readonly _legendId = inject(NeuIdGenerator).getId('neu-fieldset-legend-');
+  protected readonly _contentId = inject(NeuIdGenerator).getId('neu-fieldset-content-');
+
+  toggle(): void {
+    if (!this.collapsible()) return;
+    const next = !this.effectiveCollapsed();
+    if (this.collapsed() === undefined) this.internalCollapsed.set(next);
+    this.collapsedChange.emit(next);
+  }
 }
 
 @Component({

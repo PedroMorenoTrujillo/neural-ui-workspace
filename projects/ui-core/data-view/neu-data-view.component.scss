@@ -58,7 +58,7 @@ html[data-theme='dark'] {
   }
 
   .neu-data-view__mode--active {
-    background: var(--neu-primary-solid);
+    background: var(--neu-primary-solid-hover, var(--neu-primary-dark, #005fcc));
     color: var(--neu-primary-solid-fg);
   }
 }

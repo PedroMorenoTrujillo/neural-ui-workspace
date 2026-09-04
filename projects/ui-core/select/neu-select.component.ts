@@ -93,6 +93,10 @@ import {
   NeuSelectLoadingIconDirective,
   NeuSelectSelectedDirective,
 } from './neu-select.directives';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export type { NeuSelectOption } from './neu-select.types';
 
@@ -124,7 +128,7 @@ export type { NeuSelectOption } from './neu-select.types';
     },
   ],
   host: {
-    '(keydown.escape)': 'close()',
+    '(keydown.escape)': 'close(true, $event, "escape")',
     '(window:resize)': 'onWindowResize()',
   },
   template: `
@@ -499,6 +503,7 @@ export class NeuSelectComponent<
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _overlay = inject(Overlay);
   private readonly _urlState = inject(NeuUrlStateService);
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   protected readonly _viewportMargin = 0;
   private readonly _panelMaxHeight = 240;
   private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
@@ -1030,6 +1035,16 @@ export class NeuSelectComponent<
       if (reason !== 'programmatic') this._onTouched();
       return;
     }
+    if (
+      (reason === 'escape' || reason === 'outside') &&
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'select',
+        reason: reason === 'escape' ? 'escape' : 'outside-pointer',
+        originalEvent,
+      })
+    )
+      return;
+    if (!this.isOpen()) return;
     this.adoptOverlaySignal();
     const intent = this.overlaySession.close(this.overlayCloseReason(reason), restoreFocus);
     this.finishHide(intent, originalEvent, reason);

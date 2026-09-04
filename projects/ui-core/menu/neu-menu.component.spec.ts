@@ -93,6 +93,46 @@ describe('NeuMenuComponent', () => {
     expect(clicked).not.toHaveBeenCalledWith(expect.objectContaining({ key: 'disabled' }));
   });
 
+  it('supports controlled expanded keys without mutating state on a proposal', () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'parent', label: 'Parent', children: [{ key: 'child', label: 'Child' }] },
+    ]);
+    fixture.componentRef.setInput('expandedKeys', []);
+    fixture.detectChanges();
+    const proposals: string[][] = [];
+    fixture.componentInstance.expandedKeysChange.subscribe((keys) => proposals.push(keys));
+    const parent = fixture.nativeElement.querySelector('[role="menuitem"]') as HTMLButtonElement;
+    expect(parent.getAttribute('aria-expanded')).toBe('false');
+    expect(fixture.nativeElement.textContent).not.toContain('Child');
+
+    parent.click();
+    fixture.detectChanges();
+    expect(proposals).toEqual([['parent']]);
+    expect(parent.getAttribute('aria-expanded')).toBe('false');
+
+    fixture.componentRef.setInput('expandedKeys', ['parent']);
+    fixture.detectChanges();
+    expect(parent.getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.textContent).toContain('Child');
+  });
+
+  it('removes expansion listeners when destroyed during a branch proposal', () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'parent', label: 'Parent', children: [{ key: 'child', label: 'Child' }] },
+    ]);
+    fixture.componentRef.setInput('expandedKeys', []);
+    fixture.detectChanges();
+    const proposals: string[][] = [];
+    fixture.componentInstance.expandedKeysChange.subscribe((keys) => proposals.push(keys));
+    const parent = fixture.nativeElement.querySelector('[role="menuitem"]') as HTMLButtonElement;
+
+    parent.click();
+    expect(proposals).toEqual([['parent']]);
+    fixture.destroy();
+    parent.click();
+    expect(proposals).toHaveLength(1);
+  });
+
   it('renders the public projected item template context', async () => {
     const customFixture = TestBed.createComponent(CustomMenuItemHostComponent);
     customFixture.detectChanges();

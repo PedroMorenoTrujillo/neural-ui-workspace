@@ -19,6 +19,11 @@ import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuRovingMenuController } from '@neural-ui/core/internal';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+  type NeuOverlayDismissReason,
+} from '@neural-ui/core/foundation';
 
 export interface NeuMenuItem {
   key: string;
@@ -69,7 +74,7 @@ export class NeuMenuItemDirective {
             [tabIndex]="tabIndexFor(index)"
             [attr.data-neu-menu-index]="index"
             [attr.aria-haspopup]="item.children?.length ? 'menu' : null"
-            [attr.aria-expanded]="item.children?.length ? 'true' : null"
+            [attr.aria-expanded]="item.children?.length ? isExpanded(item) : null"
             (focus)="setActiveIndex(index)"
             (keydown)="onItemKeydown(item, index, $event)"
             (click)="activate(item, $event)"
@@ -90,12 +95,14 @@ export class NeuMenuItemDirective {
               <span class="neu-menu__chevron" aria-hidden="true">›</span>
             }
           </button>
-          @if (item.children?.length) {
+          @if (item.children?.length && isExpanded(item)) {
             <div class="neu-menu__child">
               <neu-menu
                 [items]="item.children ?? []"
                 [ariaLabel]="item.label"
                 [itemTemplate]="itemTemplateRef()"
+                [expandedKeys]="effectiveExpandedKeys()"
+                (expandedKeysChange)="onChildExpansionChange($event)"
                 (itemClick)="itemClick.emit($event)"
               />
             </div>
@@ -116,7 +123,16 @@ export class NeuMenuComponent {
   );
   readonly items = input<NeuMenuItem[]>([]);
   readonly ariaLabel = input('Menu');
+  /** Presence makes inline hierarchy expansion consumer-authoritative. */
+  readonly expandedKeys = input<readonly string[] | undefined>(undefined);
+  readonly expandedKeysChange = output<string[]>();
   readonly itemClick = output<NeuMenuItem>();
+  private readonly collapsedKeys = signal<ReadonlySet<string>>(new Set());
+  readonly branchKeys = computed(() => collectMenuBranchKeys(this.items()));
+  readonly effectiveExpandedKeys = computed<readonly string[]>(
+    () => this.expandedKeys() ?? this.branchKeys().filter((key) => !this.collapsedKeys().has(key)),
+  );
+  private readonly effectiveExpandedKeySet = computed(() => new Set(this.effectiveExpandedKeys()));
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly controller = new NeuRovingMenuController({ orientation: 'vertical' });
@@ -140,6 +156,10 @@ export class NeuMenuComponent {
     const closeKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
     if (event.key === openKey && item.children?.length) {
       event.preventDefault();
+      if (!this.isExpanded(item)) {
+        this.toggleExpanded(item);
+        return;
+      }
       const child = (
         event.currentTarget as HTMLElement
       ).nextElementSibling?.querySelector<HTMLElement>('[role="menuitem"]:not([disabled])');
@@ -147,6 +167,11 @@ export class NeuMenuComponent {
       return;
     }
     if (event.key === closeKey) {
+      if (item.children?.length && this.isExpanded(item)) {
+        event.preventDefault();
+        this.toggleExpanded(item);
+        return;
+      }
       const parent = (event.currentTarget as HTMLElement).closest('.neu-menu__child')
         ?.previousElementSibling as HTMLElement | null;
       if (parent) {
@@ -168,9 +193,37 @@ export class NeuMenuComponent {
 
   activate(item: NeuMenuItem, originalEvent?: Event): void {
     if (!item.disabled) {
+      if (item.children?.length) {
+        this.toggleExpanded(item);
+        return;
+      }
       item.command?.({ originalEvent: originalEvent ?? new Event('menuitemactivate'), item });
       this.itemClick.emit(item);
     }
+  }
+
+  isExpanded(item: NeuMenuItem): boolean {
+    return !!item.children?.length && this.effectiveExpandedKeySet().has(item.key);
+  }
+
+  toggleExpanded(item: NeuMenuItem): void {
+    if (!item.children?.length || item.disabled) return;
+    const next = new Set(this.effectiveExpandedKeys());
+    if (next.has(item.key)) next.delete(item.key);
+    else next.add(item.key);
+    this.applyExpansionProposal([...next]);
+  }
+
+  onChildExpansionChange(keys: string[]): void {
+    this.applyExpansionProposal(keys);
+  }
+
+  private applyExpansionProposal(keys: string[]): void {
+    if (this.expandedKeys() === undefined) {
+      const expanded = new Set(keys);
+      this.collapsedKeys.set(new Set(this.branchKeys().filter((key) => !expanded.has(key))));
+    }
+    this.expandedKeysChange.emit(keys);
   }
 
   private reconcileItems(): void {
@@ -223,7 +276,7 @@ export class NeuMenuComponent {
       [cdkConnectedOverlayOpen]="open()"
       [cdkConnectedOverlayHasBackdrop]="true"
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
-      (backdropClick)="close()"
+      (backdropClick)="requestClose('outside-pointer', $event)"
       (detach)="close()"
       (attach)="onOverlayAttach()"
       (overlayKeydown)="onOverlayKeydown($event)"
@@ -252,6 +305,7 @@ export class NeuMenuButtonComponent {
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
   /* v8 ignore stop */
   private focusLastOnAttach = false;
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
 
   toggle(): void {
     if (this.open()) {
@@ -267,6 +321,18 @@ export class NeuMenuButtonComponent {
       this.openChange.emit(false);
       queueMicrotask(() => this.trigger()?.nativeElement.focus({ preventScroll: true }));
     }
+  }
+
+  requestClose(reason: NeuOverlayDismissReason, event: Event): void {
+    if (
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'menu',
+        reason,
+        originalEvent: event,
+      })
+    )
+      return;
+    this.close();
   }
 
   onTriggerKeydown(event: KeyboardEvent): void {
@@ -290,7 +356,7 @@ export class NeuMenuButtonComponent {
   onOverlayKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.close();
+      this.requestClose('escape', event);
     }
   }
 
@@ -435,6 +501,8 @@ export class NeuMenubarComponent {
   template: `<neu-menu
     [items]="items()"
     [ariaLabel]="ariaLabel()"
+    [expandedKeys]="expandedKeys()"
+    (expandedKeysChange)="expandedKeysChange.emit($event)"
     (itemClick)="itemClick.emit($event)"
   />`,
   styleUrl: './neu-menu.component.scss',
@@ -442,5 +510,21 @@ export class NeuMenubarComponent {
 export class NeuTieredMenuComponent {
   readonly items = input<NeuMenuItem[]>([]);
   readonly ariaLabel = input('Tiered menu');
+  readonly expandedKeys = input<readonly string[] | undefined>(undefined);
+  readonly expandedKeysChange = output<string[]>();
   readonly itemClick = output<NeuMenuItem>();
+}
+
+function collectMenuBranchKeys(items: readonly NeuMenuItem[]): string[] {
+  const keys: string[] = [];
+  const stack = [...items].reverse();
+  while (stack.length) {
+    const item = stack.pop()!;
+    if (!item.children?.length) continue;
+    keys.push(item.key);
+    for (let index = item.children.length - 1; index >= 0; index--) {
+      stack.push(item.children[index]);
+    }
+  }
+  return keys;
 }

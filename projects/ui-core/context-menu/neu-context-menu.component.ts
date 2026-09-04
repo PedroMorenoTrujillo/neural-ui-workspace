@@ -22,6 +22,10 @@ import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import { GlobalPositionStrategy, Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { NeuRovingMenuController } from '@neural-ui/core/internal';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export interface NeuContextMenuItem {
   /** Key para identificar la acción / Key to identify the action */
@@ -215,6 +219,7 @@ export class NeuContextMenuDirective implements OnDestroy {
   private readonly _injector = inject(Injector);
   private readonly _vcr = inject(ViewContainerRef);
   private readonly _document = inject(DOCUMENT);
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private _overlayRef: OverlayRef | null = null;
   private _compRef: ComponentRef<NeuContextMenuOverlayComponent> | null = null;
   private _origin: HTMLElement | null = null;
@@ -259,15 +264,12 @@ export class NeuContextMenuDirective implements OnDestroy {
       this.menuItemClick.emit(item);
       this._close();
     };
-    this._compRef.instance._escapeFn = () => this._close();
+    this._compRef.instance._escapeFn = () => this.requestClose('escape', null);
     this._compRef.instance._requestInitialFocus();
 
-    this._overlayRef.backdropClick().subscribe(() => this._close());
-    this._overlayRef.keydownEvents().subscribe((event) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      this._close();
-    });
+    this._overlayRef
+      .backdropClick()
+      .subscribe((event) => this.requestClose('outside-pointer', event));
     const overlayRef = this._overlayRef;
     this._overlayRef.detachments().subscribe(() => this._finalizeClose(overlayRef));
     this._constrainToViewport(overlayRef, positionStrategy, x, y);
@@ -275,6 +277,19 @@ export class NeuContextMenuDirective implements OnDestroy {
   }
 
   close(): void {
+    this._close();
+  }
+
+  private requestClose(reason: 'escape' | 'outside-pointer', event: Event | null): void {
+    if (!this._overlayRef) return;
+    if (
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'context-menu',
+        reason,
+        originalEvent: event,
+      })
+    )
+      return;
     this._close();
   }
 

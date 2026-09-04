@@ -52,6 +52,39 @@
   color: var(--neu-text, #111827);
 }
 
+.neu-fieldset__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+  padding: 0.25rem 0.375rem;
+  font: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+
+.neu-fieldset__toggle:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--neu-focus-ring);
+}
+
+.neu-fieldset__indicator {
+  transition: transform 120ms ease;
+}
+
+.neu-fieldset__toggle[aria-expanded='false'] .neu-fieldset__indicator {
+  transform: rotate(-90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-fieldset__indicator {
+    transition: none;
+  }
+}
+
 .neu-scroll-area__viewport {
   box-sizing: border-box;
   overflow: auto;
@@ -67,7 +100,11 @@
     radial-gradient(farthest-side at 50% 0, rgb(0 0 0 / 12%), transparent),
     radial-gradient(farthest-side at 50% 100%, rgb(0 0 0 / 12%), transparent) bottom;
   background-repeat: no-repeat;
-  background-size: 100% 24px, 100% 24px, 100% 8px, 100% 8px;
+  background-size:
+    100% 24px,
+    100% 24px,
+    100% 8px,
+    100% 8px;
   background-attachment: local, local, scroll, scroll;
 }
 
@@ -86,7 +123,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .neu-scroll-area__bar,
-  .neu-scroll-area__thumb { transition: none; }
+  .neu-scroll-area__thumb {
+    transition: none;
+  }
 }
 
 .neu-scroll-area__viewport--enhanced {

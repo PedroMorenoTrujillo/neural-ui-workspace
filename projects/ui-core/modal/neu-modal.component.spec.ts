@@ -1,10 +1,11 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DialogModule } from '@angular/cdk/dialog';
 import { NeuDialogComponent } from './neu-modal.component';
 import { NeuDialogService } from './neu-dialog.service';
 import { provideIcons } from '@ng-icons/core';
 import { lucideX } from '@ng-icons/lucide';
+import { provideNeuOverlayDismissGuard } from '@neural-ui/core/foundation';
 
 // ── Hosts ─────────────────────────────────────────────────────────────────────
 
@@ -537,6 +538,193 @@ describe('NeuDialogComponent', () => {
     await Promise.resolve();
     expect(document.activeElement).toBe(origin);
     origin.remove();
+  });
+
+  it('maximizes and restores once with an accessible changing toggle name', async () => {
+    const { f, comp } = await mkDialog({ maximizable: true });
+    const changes: boolean[] = [];
+    comp.maximizedChange.subscribe((value) => changes.push(value));
+    const toggle = f.nativeElement.querySelector('.neu-dialog__maximize') as HTMLButtonElement;
+    expect(toggle.getAttribute('aria-label')).toBe('Maximize dialog');
+    toggle.click();
+    f.detectChanges();
+    expect(changes).toEqual([true]);
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(toggle.getAttribute('aria-label')).toBe('Restore dialog');
+    expect(f.nativeElement.querySelector('.neu-dialog__panel').classList).toContain(
+      'neu-dialog__panel--maximized',
+    );
+    toggle.click();
+    expect(changes).toEqual([true, false]);
+  });
+
+  it('keeps controlled maximize state proposal-only until the consumer echo', async () => {
+    const { f, comp } = await mkDialog({ maximizable: true, maximized: false });
+    const changes: boolean[] = [];
+    comp.maximizedChange.subscribe((value) => changes.push(value));
+    (f.nativeElement.querySelector('.neu-dialog__maximize') as HTMLButtonElement).click();
+    f.detectChanges();
+    expect(changes).toEqual([true]);
+    expect(comp.effectiveMaximized()).toBe(false);
+    f.componentRef.setInput('maximized', true);
+    f.detectChanges();
+    expect(comp.effectiveMaximized()).toBe(true);
+    expect(changes).toHaveLength(1);
+  });
+
+  it('applies drag and keyboard resize geometry without emitting per-pixel events', async () => {
+    const { f, comp } = await mkDialog({ draggable: true, resizable: true });
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
+    const header = f.nativeElement.querySelector('.neu-dialog__header') as HTMLElement;
+    const rect = {
+      left: 300,
+      top: 200,
+      right: 700,
+      bottom: 500,
+      width: 400,
+      height: 300,
+      x: 300,
+      y: 200,
+      toJSON: () => ({}),
+    } as DOMRect;
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(rect);
+    comp.onDragStart({
+      button: 0,
+      target: header,
+      pointerId: 7,
+      clientX: 400,
+      clientY: 240,
+      preventDefault: vi.fn(),
+    } as unknown as PointerEvent);
+    comp.onPointerMove({
+      pointerId: 7,
+      clientX: 440,
+      clientY: 270,
+      preventDefault: vi.fn(),
+    } as unknown as PointerEvent);
+    expect(panel.style.transform).toContain('40px, 30px');
+    comp.onPointerEnd({ pointerId: 7 } as PointerEvent);
+
+    const handle = f.nativeElement.querySelector('.neu-dialog__resize-handle') as HTMLButtonElement;
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }));
+    expect(panel.style.width).toBe('408px');
+    expect(handle.getAttribute('aria-label')).toBe('Resize dialog');
+  });
+
+  it('releases an active pointer interaction during destruction', async () => {
+    const { f, comp } = await mkDialog({ resizable: true });
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
+    panel.setPointerCapture = vi.fn();
+    panel.hasPointerCapture = vi.fn(() => true);
+    panel.releasePointerCapture = vi.fn();
+    comp.onResizeStart({
+      button: 0,
+      target: f.nativeElement.querySelector('.neu-dialog__resize-handle'),
+      pointerId: 11,
+      clientX: 700,
+      clientY: 500,
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+    } as unknown as PointerEvent);
+
+    f.destroy();
+    expect(panel.releasePointerCapture).toHaveBeenCalledWith(11);
+  });
+
+  it('releases an active drag during destruction', async () => {
+    const { f, comp } = await mkDialog({ draggable: true });
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
+    const header = f.nativeElement.querySelector('.neu-dialog__header') as HTMLElement;
+    panel.setPointerCapture = vi.fn();
+    panel.hasPointerCapture = vi.fn(() => true);
+    panel.releasePointerCapture = vi.fn();
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue({
+      left: 300,
+      top: 200,
+      right: 700,
+      bottom: 500,
+      width: 400,
+      height: 300,
+      x: 300,
+      y: 200,
+      toJSON: () => ({}),
+    } as DOMRect);
+    comp.onDragStart({
+      button: 0,
+      target: header,
+      pointerId: 12,
+      clientX: 400,
+      clientY: 240,
+      preventDefault: vi.fn(),
+    } as unknown as PointerEvent);
+
+    f.destroy();
+    expect(panel.releasePointerCapture).toHaveBeenCalledWith(12);
+  });
+
+  it('does not emit after destruction inside a dismissal guard', async () => {
+    let f!: ComponentFixture<NeuDialogComponent>;
+    const guard = vi.fn(() => {
+      f.destroy();
+      return true;
+    });
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [DialogModule],
+        providers: [
+          provideZonelessChangeDetection(),
+          provideIcons({ lucideX }),
+          provideNeuOverlayDismissGuard(guard),
+        ],
+      })
+      .compileComponents();
+    f = TestBed.createComponent(NeuDialogComponent);
+    f.componentRef.setInput('open', true);
+    f.detectChanges();
+    const closed = vi.spyOn(f.componentInstance.closed, 'emit');
+
+    f.nativeElement
+      .querySelector('.neu-dialog__panel')
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+    expect(guard).toHaveBeenCalledOnce();
+    expect(closed).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when a dismissal guard prevents or throws during Escape', async () => {
+    const guard = vi.fn(() => false);
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [DialogModule],
+        providers: [
+          provideZonelessChangeDetection(),
+          provideIcons({ lucideX }),
+          provideNeuOverlayDismissGuard(guard),
+        ],
+      })
+      .compileComponents();
+    const f = TestBed.createComponent(NeuDialogComponent);
+    f.componentRef.setInput('open', true);
+    f.detectChanges();
+    const closed = vi.spyOn(f.componentInstance.closed, 'emit');
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+    f.nativeElement.querySelector('.neu-dialog__panel').dispatchEvent(event);
+    expect(guard).toHaveBeenCalledOnce();
+    expect(closed).not.toHaveBeenCalled();
+
+    guard.mockImplementation(() => {
+      throw new Error('consumer failure');
+    });
+    f.nativeElement.querySelector('.neu-dialog__panel').dispatchEvent(event);
+    expect(closed).not.toHaveBeenCalled();
+
+    guard.mockImplementation(() => {
+      f.componentInstance.close('guard-owned request');
+      return true;
+    });
+    f.nativeElement.querySelector('.neu-dialog__panel').dispatchEvent(event);
+    expect(closed).toHaveBeenCalledOnce();
+    expect(closed).toHaveBeenCalledWith('guard-owned request');
   });
 });
 

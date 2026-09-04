@@ -36,6 +36,10 @@ import {
   NeuTreeNavigationItem,
   walkNeuTreeDepthFirst,
 } from '@neural-ui/core/internal';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export interface NeuTreeSelectNode {
   value: string;
@@ -149,7 +153,7 @@ export class NeuTreeSelectEmptyDirective {
       [cdkConnectedOverlayOpen]="open()"
       [cdkConnectedOverlayHasBackdrop]="true"
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
-      (backdropClick)="close()"
+      (backdropClick)="requestClose('outside-pointer', $event)"
       (detach)="onPanelDetached()"
       (attach)="onOverlayAttach(); onPanelAttached()"
       (overlayKeydown)="onOverlayKeydown($event)"
@@ -273,6 +277,7 @@ export class NeuTreeSelectComponent<
   /** Browser panel detached, regardless of closing source; silent during destroy. */
   readonly closed = output<void>();
   private readonly eventDestroyRef = inject(DestroyRef);
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private panelAttached = false;
 
   protected onPanelAttached(): void {
@@ -375,6 +380,19 @@ export class NeuTreeSelectComponent<
     });
   }
 
+  requestClose(reason: 'escape' | 'outside-pointer', event: Event): void {
+    if (
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'tree-select',
+        reason,
+        originalEvent: event,
+      })
+    )
+      return;
+    if (!this.open()) return;
+    this.close();
+  }
+
   clear(event: Event): void {
     event.stopPropagation();
     if (this.eventDestroyRef.destroyed || this.isDisabled() || this.readonly()) return;
@@ -456,7 +474,7 @@ export class NeuTreeSelectComponent<
   onOverlayKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.close();
+      this.requestClose('escape', event);
     }
   }
 

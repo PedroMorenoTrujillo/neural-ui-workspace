@@ -5,17 +5,23 @@ import {
   DestroyRef,
   ElementRef,
   ViewEncapsulation,
+  computed,
   effect,
   afterRenderEffect,
   inject,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { Overlay } from '@angular/cdk/overlay';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type NeuDialogLayout = 'auto' | 'viewport';
@@ -44,6 +50,9 @@ export type NeuDialogLayout = 'auto' | 'viewport';
     '[class.neu-dialog--responsive]': 'responsive()',
     '[class.neu-dialog--layout-auto]': 'layout() === "auto"',
     '[class.neu-dialog--layout-viewport]': 'layout() === "viewport"',
+    '[class.neu-dialog--draggable]': 'draggable()',
+    '[class.neu-dialog--resizable]': 'resizable()',
+    '[class.neu-dialog--maximized]': 'effectiveMaximized()',
     '[attr.aria-hidden]': '!open()',
   },
   template: `
@@ -51,7 +60,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
       <!-- Backdrop -->
       <div
         class="neu-dialog__backdrop"
-        (click)="!disableClose() && close()"
+        (click)="requestClose('backdrop', $event)"
         aria-hidden="true"
       ></div>
 
@@ -63,6 +72,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
           [class.neu-dialog__panel--responsive]="responsive()"
           [class.neu-dialog__panel--layout-auto]="layout() === 'auto'"
           [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
+          [class.neu-dialog__panel--maximized]="effectiveMaximized()"
           role="dialog"
           tabindex="-1"
           neuFocusTrap
@@ -70,20 +80,40 @@ export type NeuDialogLayout = 'auto' | 'viewport';
           [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
           [attr.aria-modal]="true"
           (keydown)="onPanelKeydown($event)"
+          (pointermove)="onPointerMove($event)"
+          (pointerup)="onPointerEnd($event)"
+          (pointercancel)="onPointerEnd($event)"
         >
           <!-- Header -->
-          <div class="neu-dialog__header">
+          <div class="neu-dialog__header" (pointerdown)="onDragStart($event)">
             <h2 class="neu-dialog__title" [id]="'neu-dialog-title-' + _uid">{{ title() }}</h2>
-            @if (!disableClose()) {
-              <button
-                class="neu-dialog__close"
-                type="button"
-                aria-label="Close dialog"
-                (click)="close()"
-              >
-                <neu-icon name="lucideX" size="1.125rem" />
-              </button>
-            }
+            <div class="neu-dialog__actions">
+              @if (maximizable()) {
+                <button
+                  class="neu-dialog__action neu-dialog__maximize"
+                  type="button"
+                  [attr.aria-label]="effectiveMaximized() ? restoreLabel() : maximizeLabel()"
+                  [attr.aria-pressed]="effectiveMaximized()"
+                  (click)="toggleMaximize()"
+                >
+                  <span
+                    class="neu-dialog__maximize-icon"
+                    [class.neu-dialog__maximize-icon--restore]="effectiveMaximized()"
+                    aria-hidden="true"
+                  ></span>
+                </button>
+              }
+              @if (!disableClose()) {
+                <button
+                  class="neu-dialog__action neu-dialog__close"
+                  type="button"
+                  aria-label="Close dialog"
+                  (click)="close()"
+                >
+                  <neu-icon name="lucideX" size="1.125rem" />
+                </button>
+              }
+            </div>
           </div>
 
           <!-- Body -->
@@ -93,6 +123,15 @@ export type NeuDialogLayout = 'auto' | 'viewport';
 
           <!-- Footer (opcional via slot) -->
           <ng-content select="[neu-dialog-footer]" />
+          @if (resizable() && !effectiveMaximized()) {
+            <button
+              class="neu-dialog__resize-handle"
+              type="button"
+              [attr.aria-label]="resizeLabel()"
+              (pointerdown)="onResizeStart($event)"
+              (keydown)="onResizeKeydown($event)"
+            ></button>
+          }
         </div>
       </div>
     }
@@ -114,6 +153,16 @@ export class NeuDialogComponent {
   responsive = input<boolean>(true);
   /** Devuelve el foco al elemento activo antes de abrir. */
   restoreFocus = input<boolean>(true);
+  /** Pointer drag is opt-in and position remains transient. */
+  draggable = input(false);
+  /** Pointer and keyboard resize are opt-in. */
+  resizable = input(false);
+  maximizable = input(false);
+  /** Presence makes maximize state consumer-authoritative. */
+  maximized = input<boolean | undefined>(undefined);
+  maximizeLabel = input('Maximize dialog');
+  restoreLabel = input('Restore dialog');
+  resizeLabel = input('Resize dialog');
 
   /** Emite cuando el usuario cierra el diálogo. / Emits when the user closes the dialog. */
   closed = output<unknown>();
@@ -123,10 +172,15 @@ export class NeuDialogComponent {
   private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
   /* v8 ignore stop */
   private readonly document = inject(DOCUMENT);
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly scrollStrategy = inject(Overlay).scrollStrategies.block();
   private previousActiveElement: HTMLElement | null = null;
   private focusEpoch = 0;
+  private offsetX = 0;
+  private offsetY = 0;
+  private interaction: NeuDialogPointerInteraction | null = null;
+  private closeRequestEpoch = 0;
 
   /** @internal — ID único para aria-labelledby / Unique ID for aria-labelledby */
   protected readonly _uid = inject(NeuIdGenerator).getId('dialog-');
@@ -136,6 +190,11 @@ export class NeuDialogComponent {
   readonly opened = output<void>();
   /** Panel unmounted after render; closed remains a request. Silent on destroy. */
   readonly hidden = output<void>();
+  readonly maximizedChange = output<boolean>();
+  private readonly internalMaximized = signal(false);
+  readonly effectiveMaximized = computed(
+    () => this.maximizable() && (this.maximized() ?? this.internalMaximized()),
+  );
 
   constructor() {
     afterRenderEffect(() => {
@@ -149,6 +208,12 @@ export class NeuDialogComponent {
       if (!this.open()) return;
       this.scrollStrategy.enable();
       onCleanup(() => this.scrollStrategy.disable());
+    });
+
+    effect(() => {
+      if (this.open()) return;
+      this.cancelInteraction();
+      this.resetGeometry();
     });
 
     effect(() => {
@@ -167,6 +232,7 @@ export class NeuDialogComponent {
     });
 
     this.destroyRef.onDestroy(() => {
+      this.cancelInteraction();
       this.focusEpoch += 1;
       const target = this.previousActiveElement;
       this.previousActiveElement = null;
@@ -177,16 +243,210 @@ export class NeuDialogComponent {
   }
 
   close(result?: unknown): void {
+    this.closeRequestEpoch += 1;
     this.closed.emit(result);
+  }
+
+  requestClose(reason: 'escape' | 'backdrop', event: Event): void {
+    if (this.disableClose() || this.destroyRef.destroyed) return;
+    const closeRequestEpoch = this.closeRequestEpoch;
+    if (
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'dialog',
+        reason,
+        originalEvent: event,
+      })
+    )
+      return;
+    if (
+      this.destroyRef.destroyed ||
+      !this.open() ||
+      closeRequestEpoch !== this.closeRequestEpoch
+    )
+      return;
+    this.close();
   }
 
   onPanelKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
-      if (!this.disableClose()) {
-        this.close();
-      }
+      this.requestClose('escape', event);
       return;
     }
+  }
+
+  toggleMaximize(): void {
+    if (!this.maximizable() || this.destroyRef.destroyed) return;
+    this.cancelInteraction();
+    const next = !this.effectiveMaximized();
+    if (this.maximized() === undefined) this.internalMaximized.set(next);
+    this.maximizedChange.emit(next);
+  }
+
+  onDragStart(event: PointerEvent): void {
+    if (
+      !this.draggable() ||
+      this.effectiveMaximized() ||
+      this.narrowResponsiveViewport() ||
+      event.button !== 0 ||
+      (event.target as Element).closest('button, a, input, select, textarea, [role="button"]')
+    )
+      return;
+    this.beginInteraction('drag', event);
+  }
+
+  onResizeStart(event: PointerEvent): void {
+    if (
+      !this.resizable() ||
+      this.effectiveMaximized() ||
+      this.narrowResponsiveViewport() ||
+      event.button !== 0
+    )
+      return;
+    event.stopPropagation();
+    this.beginInteraction('resize', event);
+  }
+
+  onPointerMove(event: PointerEvent): void {
+    const state = this.interaction;
+    const panel = this.panelRef()?.nativeElement;
+    if (!state || !panel || state.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    const viewport = this.viewportSize();
+    const margin = 8;
+    const dx = event.clientX - state.startX;
+    const dy = event.clientY - state.startY;
+    if (state.kind === 'drag') {
+      const left = clamp(
+        state.rect.left + dx,
+        margin,
+        Math.max(margin, viewport.width - state.rect.width - margin),
+      );
+      const top = clamp(
+        state.rect.top + dy,
+        margin,
+        Math.max(margin, viewport.height - state.rect.height - margin),
+      );
+      this.offsetX = state.offsetX + left - state.rect.left;
+      this.offsetY = state.offsetY + top - state.rect.top;
+      this.applyTransform(panel);
+      return;
+    }
+
+    const rtl = state.direction === 'rtl';
+    const maxWidth = rtl ? state.rect.right - margin : viewport.width - state.rect.left - margin;
+    const maxHeight = viewport.height - state.rect.top - margin;
+    const width = clamp(state.rect.width + (rtl ? -dx : dx), Math.min(320, maxWidth), maxWidth);
+    const height = clamp(state.rect.height + dy, Math.min(180, maxHeight), maxHeight);
+    this.applySize(panel, state, width, height);
+  }
+
+  onPointerEnd(event: PointerEvent): void {
+    if (this.interaction?.pointerId !== event.pointerId) return;
+    this.releasePointer(event.pointerId);
+    this.interaction = null;
+  }
+
+  onResizeKeydown(event: KeyboardEvent): void {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+    event.preventDefault();
+    const panel = this.panelRef()?.nativeElement;
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    const step = event.shiftKey ? 32 : 8;
+    const widthDelta = event.key === 'ArrowRight' ? step : event.key === 'ArrowLeft' ? -step : 0;
+    const heightDelta = event.key === 'ArrowDown' ? step : event.key === 'ArrowUp' ? -step : 0;
+    const viewport = this.viewportSize();
+    const direction =
+      this.document.defaultView?.getComputedStyle(panel).direction === 'rtl' ? 'rtl' : 'ltr';
+    const state: NeuDialogPointerInteraction = {
+      kind: 'resize',
+      pointerId: -1,
+      startX: 0,
+      startY: 0,
+      rect,
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      direction,
+    };
+    const maxWidth = direction === 'rtl' ? rect.right - 8 : viewport.width - rect.left - 8;
+    const maxHeight = viewport.height - rect.top - 8;
+    this.applySize(
+      panel,
+      state,
+      clamp(rect.width + widthDelta, Math.min(320, maxWidth), maxWidth),
+      clamp(rect.height + heightDelta, Math.min(180, maxHeight), maxHeight),
+    );
+  }
+
+  private beginInteraction(kind: 'drag' | 'resize', event: PointerEvent): void {
+    const panel = this.panelRef()?.nativeElement;
+    if (!panel) return;
+    event.preventDefault();
+    panel.setPointerCapture?.(event.pointerId);
+    this.interaction = {
+      kind,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      rect: panel.getBoundingClientRect(),
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      direction:
+        this.document.defaultView?.getComputedStyle(panel).direction === 'rtl' ? 'rtl' : 'ltr',
+    };
+  }
+
+  private applySize(
+    panel: HTMLElement,
+    state: NeuDialogPointerInteraction,
+    width: number,
+    height: number,
+  ): void {
+    const widthDelta = width - state.rect.width;
+    const heightDelta = height - state.rect.height;
+    this.offsetX = state.offsetX + (state.direction === 'rtl' ? -widthDelta / 2 : widthDelta / 2);
+    this.offsetY = state.offsetY + heightDelta / 2;
+    panel.style.width = `${Math.round(width)}px`;
+    panel.style.height = `${Math.round(height)}px`;
+    this.applyTransform(panel);
+  }
+
+  private applyTransform(panel: HTMLElement): void {
+    panel.style.transform = `translate3d(${Math.round(this.offsetX)}px, ${Math.round(this.offsetY)}px, 0)`;
+  }
+
+  private viewportSize(): { width: number; height: number } {
+    const view = this.document.defaultView;
+    return {
+      width: Math.max(0, view?.innerWidth ?? this.document.documentElement.clientWidth),
+      height: Math.max(0, view?.innerHeight ?? this.document.documentElement.clientHeight),
+    };
+  }
+
+  private narrowResponsiveViewport(): boolean {
+    return this.responsive() && this.viewportSize().width <= 480;
+  }
+
+  private cancelInteraction(): void {
+    if (this.interaction) this.releasePointer(this.interaction.pointerId);
+    this.interaction = null;
+  }
+
+  private releasePointer(pointerId: number): void {
+    const panel = this.panelRef()?.nativeElement;
+    if (pointerId >= 0 && panel?.hasPointerCapture?.(pointerId)) {
+      panel.releasePointerCapture(pointerId);
+    }
+  }
+
+  private resetGeometry(): void {
+    this.offsetX = 0;
+    this.offsetY = 0;
+    const panel = this.panelRef()?.nativeElement;
+    if (!panel) return;
+    panel.style.removeProperty('width');
+    panel.style.removeProperty('height');
+    panel.style.removeProperty('transform');
   }
 
   private focusInitialElement(): void {
@@ -221,4 +481,19 @@ export class NeuDialogComponent {
   private isValidFocusTarget(target: HTMLElement | null): target is HTMLElement {
     return !!target?.isConnected && target.ownerDocument === this.document;
   }
+}
+
+interface NeuDialogPointerInteraction {
+  readonly kind: 'drag' | 'resize';
+  readonly pointerId: number;
+  readonly startX: number;
+  readonly startY: number;
+  readonly rect: DOMRect;
+  readonly offsetX: number;
+  readonly offsetY: number;
+  readonly direction: 'ltr' | 'rtl';
+}
+
+function clamp(value: number, minimum: number, maximum: number): number {
+  return Math.min(Math.max(value, minimum), Math.max(minimum, maximum));
 }

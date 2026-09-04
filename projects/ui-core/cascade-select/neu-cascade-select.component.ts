@@ -41,6 +41,10 @@ import {
   NeuCascadeSelectItemDirective,
   NeuCascadeSelectSelectedDirective,
 } from './neu-cascade-select.directives';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export {
   NeuCascadeSelectEmptyDirective,
@@ -144,7 +148,7 @@ interface SelectionPath<T> {
       [cdkConnectedOverlayWidth]="panelPosition().width ?? ''"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="viewportMargin"
-      (backdropClick)="close()"
+      (backdropClick)="requestClose('outside-pointer', $event)"
       (detach)="onPanelDetached()"
       (attach)="onPanelAttached()"
       (positionChange)="onOverlayPositionChange($event)"
@@ -297,6 +301,7 @@ export class NeuCascadeSelectComponent<
   /** Browser panel detached, regardless of closing source; silent during destroy. */
   readonly closed = output<void>();
   private readonly eventDestroyRef = inject(DestroyRef);
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private panelAttached = false;
 
   protected onPanelAttached(): void {
@@ -398,6 +403,19 @@ export class NeuCascadeSelectComponent<
     if (wasOpen) this.focusTrigger();
   }
 
+  requestClose(reason: 'escape' | 'outside-pointer', event: Event): void {
+    if (
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'cascade-select',
+        reason,
+        originalEvent: event,
+      })
+    )
+      return;
+    if (!this.open()) return;
+    this.close();
+  }
+
   clear(event: Event): void {
     event.stopPropagation();
     if (this.isDisabled()) return;
@@ -448,7 +466,7 @@ export class NeuCascadeSelectComponent<
   onTriggerKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.close();
+      this.requestClose('escape', event);
       return;
     }
     if (event.key === 'Enter' || event.key === ' ') {
@@ -496,7 +514,7 @@ export class NeuCascadeSelectComponent<
     }
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.close();
+      this.requestClose('escape', event);
     }
   }
 

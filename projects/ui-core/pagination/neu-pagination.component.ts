@@ -23,6 +23,20 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav class="neu-pagination" aria-label="Paginación">
+      @if (normalizedPageSizeOptions().length) {
+        <label class="neu-pagination__size">
+          <span class="neu-pagination__sr">{{ pageSizeAriaLabel() }}</span>
+          <select
+            [attr.aria-label]="pageSizeAriaLabel()"
+            [value]="pageSize()"
+            (change)="changePageSize($any($event.target).value)"
+          >
+            @for (size of normalizedPageSizeOptions(); track size) {
+              <option [value]="size">{{ size }}</option>
+            }
+          </select>
+        </label>
+      }
       <!-- Anterior -->
       <button
         class="neu-pagination__btn neu-pagination__btn--nav"
@@ -100,13 +114,32 @@ export class NeuPaginationComponent {
   /** Ítems por página / Items per page */
   pageSize = input<number>(10);
 
+  /** Empty by default so basic pagination retains no selector UI. */
+  pageSizeOptions = input<readonly number[]>([]);
+
+  pageSizeAriaLabel = input('Items per page');
+
   /** Número máximo de botones de página visibles (sin contar anterior/siguiente) / Maximum number of visible page buttons (not counting prev/next) */
   maxVisible = input<number>(7);
 
   /** Emite la nueva página al hacer click / Emits the new page on click */
   pageChange = output<number>();
 
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
+  pageSizeChange = output<number>();
+
+  readonly normalizedPageSizeOptions = computed(() => [
+    ...new Set(
+      this.pageSizeOptions()
+        .map((value) => Math.trunc(value))
+        .filter((value) => Number.isFinite(value) && value > 0),
+    ),
+  ]);
+
+  readonly totalPages = computed(() => {
+    const size = Number.isFinite(this.pageSize()) ? Math.max(1, this.pageSize()) : 1;
+    const total = Number.isFinite(this.total()) ? Math.max(0, this.total()) : 0;
+    return Math.max(1, Math.ceil(total / size));
+  });
 
   readonly pages = computed((): (number | -1)[] => {
     const total = this.totalPages();
@@ -135,5 +168,15 @@ export class NeuPaginationComponent {
     if (clamped !== this.page()) {
       this.pageChange.emit(clamped);
     }
+  }
+
+  changePageSize(value: string | number): void {
+    const nextSize = Math.trunc(Number(value));
+    if (!Number.isFinite(nextSize) || nextSize <= 0 || nextSize === this.pageSize()) return;
+    const first = Math.max(0, (Math.max(1, this.page()) - 1) * Math.max(1, this.pageSize()));
+    const nextTotalPages = Math.max(1, Math.ceil(Math.max(0, this.total()) / nextSize));
+    const nextPage = Math.min(nextTotalPages, Math.floor(first / nextSize) + 1);
+    this.pageSizeChange.emit(nextSize);
+    if (nextPage !== this.page()) this.pageChange.emit(nextPage);
   }
 }

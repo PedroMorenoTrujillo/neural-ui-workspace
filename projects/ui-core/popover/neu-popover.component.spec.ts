@@ -289,6 +289,30 @@ describe('NeuPopoverOverlayComponent', () => {
     expect(dir['_isOpen']()).toBe(false);
   });
 
+  it('routes focus-loss dismissal through the shared guard', async () => {
+    const f = TestBed.createComponent(NeuPopoverHost);
+    f.componentRef.setInput('trigger', 'focus');
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuPopoverDirective);
+    const guard = vi.fn(() => false);
+    (dir as any).dismissGuard = guard;
+    const event = new FocusEvent('blur');
+
+    dir.onFocus();
+    dir.onBlur(event);
+    expect(dir['_isOpen']()).toBe(true);
+    expect(guard).toHaveBeenCalledWith({
+      source: 'popover',
+      reason: 'focus-loss',
+      originalEvent: event,
+    });
+
+    guard.mockReturnValue(true);
+    dir.onBlur(event);
+    expect(dir['_isOpen']()).toBe(false);
+  });
+
   it('click trigger: mouseenter should NOT open the popover', async () => {
     const f = TestBed.createComponent(NeuPopoverHost);
     f.detectChanges();

@@ -174,6 +174,30 @@ describe('NeuPaginationComponent', () => {
     expect(pages).toEqual([]);
   });
 
+  it('renders an optional native page-size selector and emits deterministic state proposals once', () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('total', 95);
+    df.componentRef.setInput('page', 5);
+    df.componentRef.setInput('pageSize', 10);
+    df.componentRef.setInput('pageSizeOptions', [10, 20, 20, 0]);
+    df.componentRef.setInput('pageSizeAriaLabel', 'Rows per page');
+    df.detectChanges();
+    const sizes: number[] = [];
+    const pages: number[] = [];
+    df.componentInstance.pageSizeChange.subscribe((value) => sizes.push(value));
+    df.componentInstance.pageChange.subscribe((value) => pages.push(value));
+    const select = df.nativeElement.querySelector('select') as HTMLSelectElement;
+    expect(select.getAttribute('aria-label')).toBe('Rows per page');
+    expect(select.querySelectorAll('option')).toHaveLength(2);
+
+    select.value = '20';
+    select.dispatchEvent(new Event('change'));
+    expect(sizes).toEqual([20]);
+    expect(pages).toEqual([3]);
+    df.componentInstance.changePageSize(10);
+    expect(sizes).toEqual([20]);
+  });
+
   it('clicking the previous button from page 2 should emit page 1', async () => {
     const df = TestBed.createComponent(NeuPaginationComponent);
     df.componentRef.setInput('total', 100);

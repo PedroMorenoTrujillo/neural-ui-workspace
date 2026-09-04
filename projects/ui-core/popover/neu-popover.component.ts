@@ -20,6 +20,11 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Overlay, OverlayRef, ConnectedPosition } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+  type NeuOverlayDismissReason,
+} from '@neural-ui/core/foundation';
 
 export type NeuPopoverPosition = 'top' | 'bottom' | 'left' | 'right';
 export type NeuPopoverTrigger = 'click' | 'hover' | 'focus';
@@ -109,6 +114,7 @@ export class NeuPopoverDirective implements OnDestroy {
   private readonly _injector = inject(Injector);
   private readonly _vcr = inject(ViewContainerRef);
   private readonly _popoverId = inject(NeuIdGenerator).getId('neu-popover-');
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
 
   private _overlayRef: OverlayRef | null = null;
   private _compRef: ComponentRef<NeuPopoverOverlayComponent> | null = null;
@@ -125,10 +131,10 @@ export class NeuPopoverDirective implements OnDestroy {
     this.open();
   }
 
-  @HostListener('mouseleave')
-  onMouseLeave(): void {
+  @HostListener('mouseleave', ['$event'])
+  onMouseLeave(event?: MouseEvent): void {
     if (this.neuPopoverTrigger() !== 'hover') return;
-    this.close();
+    this.requestClose('outside-pointer', event ?? null);
   }
 
   @HostListener('focus')
@@ -137,10 +143,10 @@ export class NeuPopoverDirective implements OnDestroy {
     this.open();
   }
 
-  @HostListener('blur')
-  onBlur(): void {
+  @HostListener('blur', ['$event'])
+  onBlur(event?: FocusEvent): void {
     if (this.neuPopoverTrigger() !== 'focus') return;
-    this.close();
+    this.requestClose('focus-loss', event ?? null);
   }
 
   @HostListener('keydown.escape', ['$event'])
@@ -148,7 +154,7 @@ export class NeuPopoverDirective implements OnDestroy {
     if (!(event instanceof KeyboardEvent) || event.key !== 'Escape' || !this._isOpen()) return;
     event.preventDefault();
     event.stopPropagation();
-    this.close();
+    this.requestClose('escape', event);
   }
 
   /** Abre el popover / Opens the popover */
@@ -172,7 +178,9 @@ export class NeuPopoverDirective implements OnDestroy {
 
     // Cierra al hacer clic fuera (solo en trigger 'click') / Close on outside click (click trigger only)
     if (this.neuPopoverTrigger() === 'click') {
-      this._overlayRef!.backdropClick().subscribe(() => this.close());
+      this._overlayRef!.backdropClick().subscribe((event) =>
+        this.requestClose('outside-pointer', event),
+      );
     }
     this._overlayRef!.keydownEvents().subscribe((event) => this.onEscape(event));
     this._overlayRef!.detachments().subscribe(() => this._finalizeClose());
@@ -182,6 +190,18 @@ export class NeuPopoverDirective implements OnDestroy {
   close(): void {
     if (!this._isOpen()) return;
     this._finalizeClose();
+  }
+
+  private requestClose(reason: NeuOverlayDismissReason, event: Event | null): void {
+    if (
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'popover',
+        reason,
+        originalEvent: event,
+      })
+    )
+      return;
+    this.close();
   }
 
   /** Alterna la visibilidad / Toggles visibility */

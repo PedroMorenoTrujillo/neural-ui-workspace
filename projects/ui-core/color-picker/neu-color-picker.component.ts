@@ -16,6 +16,10 @@ import {
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export type NeuColorMode = 'hex' | 'rgb' | 'hsl';
 
@@ -181,7 +185,7 @@ function hslToHex(h: number, s: number, l: number): string {
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-      (backdropClick)="_isOpen.set(false)"
+      (backdropClick)="requestOutsideDismiss($event)"
       (detach)="onPanelDetached()"
       (attach)="onPanelAttached()"
     >
@@ -282,6 +286,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   /** Browser panel detached, regardless of closing source; silent during destroy. */
   readonly closed = output<void>();
   private readonly eventDestroyRef = inject(DestroyRef);
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private panelAttached = false;
 
   protected onPanelAttached(): void {
@@ -316,7 +321,6 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
     this._dragging = false;
     this.continuousStart = null;
   }
-
 
   // ── Internal state ───────────────────────────────────────────────
   private readonly _id = inject(NeuIdGenerator).getId('neu-cp-');
@@ -379,10 +383,25 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   @HostListener('document:mousedown', ['$event'])
   protected _outsideClick(e: MouseEvent): void {
     const target = e.target as Element | null;
+    // The CDK backdrop owns this pointer intent. Let its click callback be the
+    // single dismissal-policy evaluation for the interaction.
+    if (target?.closest('.cdk-overlay-backdrop')) return;
     const isInsidePanel = !!target?.closest('.neu-cp__panel');
     if (!this._el.nativeElement.contains(e.target as Node) && !isInsidePanel) {
-      this._isOpen.set(false);
+      this.requestOutsideDismiss(e);
     }
+  }
+
+  protected requestOutsideDismiss(event: Event): void {
+    if (
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'color-picker',
+        reason: 'outside-pointer',
+        originalEvent: event,
+      })
+    )
+      return;
+    this._isOpen.set(false);
   }
 
   // ── Computed ──────────────────────────────────────────────────
