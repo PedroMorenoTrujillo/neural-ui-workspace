@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NeuInputComponent } from './neu-input.component';
 import { provideIcons } from '@ng-icons/core';
 import { lucideAlertCircle, lucideSearch, lucideUser } from '@ng-icons/lucide';
@@ -14,11 +14,31 @@ function mk(inputs: Record<string, unknown> = {}) {
   return { f, comp: f.componentInstance as any };
 }
 
+@Component({
+  imports: [NeuInputComponent, FormsModule],
+  template: '<neu-input [ngModel]="value" (ngModelChange)="changed($event)" />',
+})
+class NgModelInitialValueHost {
+  value = 'Initial consumer value';
+  changes: string[] = [];
+  changed(value: string): void { this.value = value; this.changes.push(value); }
+}
+
 describe('NeuInputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [provideIcons({ lucideAlertCircle, lucideSearch, lucideUser })],
     }).compileComponents();
+  });
+
+  it('preserves ngModel initialization without reporting empty DOM as autofill', async () => {
+    const fixture = TestBed.createComponent(NgModelInitialValueHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value).toBe('Initial consumer value');
+    expect(fixture.componentInstance.changes).toEqual([]);
+    expect(fixture.nativeElement.querySelector('input').value).toBe('Initial consumer value');
   });
 
   // ── Rendering ─────────────────────────────────────────────────────────────
@@ -175,6 +195,16 @@ describe('NeuInputComponent', () => {
     expect(comp.hasValue()).toBe(true);
     expect(onChange).toHaveBeenCalledWith('learner@example.com');
     expect(f.nativeElement.querySelector('.neu-input__wrapper')?.classList).toContain('neu-input__wrapper--has-value');
+  });
+
+  it('does not emit duplicate changes when the native value already matches the form', () => {
+    const { f, comp } = mk({ label: 'Email' });
+    const onChange = vi.fn();
+    comp.registerOnChange(onChange);
+    comp.writeValue('learner@example.com');
+    f.detectChanges();
+    comp.syncNativeValue();
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('hasError computed should be true when errorMessage is set', () => {

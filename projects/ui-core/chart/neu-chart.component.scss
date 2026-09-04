@@ -1,6 +1,10 @@
 .neu-chart {
   display: block;
   width: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+
+  apx-chart { display: block; min-inline-size: 0; max-inline-size: 100%; }
 
   // Resetear estilos de ApexCharts para integrarlos con el sistema NeuralUI
   .apexcharts-canvas {

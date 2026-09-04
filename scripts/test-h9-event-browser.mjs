@@ -104,6 +104,17 @@ for (const [name, engine] of Object.entries({chromium, firefox, webkit})) {
    await page.mouse.move(box.x+20,box.y+20); await page.mouse.down(); await page.mouse.move(box.x+80,box.y+70,{steps:4});
    assert.equal(await count('colorEnd'),1); await page.mouse.up(); assert.equal(await count('colorEnd'),2);
   });
+  await check('NumberInput reports native edit details and omits infinite ARIA bounds', async () => {
+   await fresh(); await reset();
+   const input=page.locator('#h9-number input');
+   assert.equal(await input.getAttribute('aria-valuemin'),null);
+   assert.equal(await input.getAttribute('aria-valuemax'),null);
+   await input.fill('42');
+   assert.deepEqual((await events('number')).at(-1).payload,{rawText:'42',value:42,state:'valid'});
+   await input.fill('');
+   assert.deepEqual((await events('number')).at(-1).payload,{rawText:'',value:null,state:'empty'});
+   await reset(); await page.locator('#h9-write').click(); assert.equal(await count('number'),0);
+  });
   await check('Destroy while controls have pending work produces no later domain/lifecycle callbacks', async () => {
    await fresh(); await page.locator('#h9-autocomplete input').fill('Al');
    await page.locator('#h9-destroy').click(); const before=await log(); await page.waitForTimeout(150);

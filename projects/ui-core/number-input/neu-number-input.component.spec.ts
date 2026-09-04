@@ -30,6 +30,27 @@ class LegacyNumberOutputHostComponent {
 describe('NeuNumberInputComponent', () => {
   beforeEach(() => mk().compileComponents());
 
+  it('omits unbounded ARIA limits and updates finite limits in every layout', async () => {
+    const f = TestBed.createComponent(NeuNumberInputComponent);
+    for (const layout of ['horizontal', 'vertical', 'stacked'] as const) {
+      f.componentRef.setInput('vertical', layout === 'vertical');
+      f.componentRef.setInput('stacked', layout === 'stacked');
+      f.componentRef.setInput('min', -Infinity);
+      f.componentRef.setInput('max', Infinity);
+      f.detectChanges();
+      await f.whenStable();
+      const field: HTMLInputElement = f.nativeElement.querySelector('[role="spinbutton"]');
+      expect(field.hasAttribute('aria-valuemin')).toBe(false);
+      expect(field.hasAttribute('aria-valuemax')).toBe(false);
+      f.componentRef.setInput('min', 0);
+      f.componentRef.setInput('max', 10);
+      f.detectChanges();
+      await f.whenStable();
+      expect(field.getAttribute('aria-valuemin')).toBe('0');
+      expect(field.getAttribute('aria-valuemax')).toBe('10');
+    }
+  });
+
   it('should render with neu-number-input class', async () => {
     const f = TestBed.createComponent(NeuNumberInputComponent);
     f.detectChanges();

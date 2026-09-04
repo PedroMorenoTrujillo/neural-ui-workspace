@@ -70,7 +70,7 @@
     inset-block-start: 0;
     inset-inline-start: 50%;
     block-size: calc(var(--neu-organization-chart-gap-y) / 2);
-    border-inline-start: 1px solid var(--neu-border);
+    border-inline-start: 1px solid color-mix(in srgb, var(--neu-text-muted) 70%, var(--neu-border));
     content: '';
   }
 
@@ -81,19 +81,19 @@
       inset-block-start: calc(var(--neu-organization-chart-gap-y) / -2);
       block-size: calc(var(--neu-organization-chart-gap-y) / 2);
       inline-size: calc(50% + var(--neu-organization-chart-gap-x) / 2);
-      border-block-start: 1px solid var(--neu-border);
+      border-block-start: 1px solid color-mix(in srgb, var(--neu-text-muted) 70%, var(--neu-border));
       content: '';
       pointer-events: none;
     }
 
     &::before {
       inset-inline-start: 50%;
-      border-inline-start: 1px solid var(--neu-border);
+      border-inline-start: 1px solid color-mix(in srgb, var(--neu-text-muted) 70%, var(--neu-border));
     }
 
     &::after {
       inset-inline-end: 50%;
-      border-inline-end: 1px solid var(--neu-border);
+      border-inline-end: 1px solid color-mix(in srgb, var(--neu-text-muted) 70%, var(--neu-border));
     }
 
     &:first-child::after,
@@ -117,9 +117,9 @@
   max-inline-size: 20rem;
   min-inline-size: 10rem;
   border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-lg, 14px);
+  border-radius: var(--neu-radius-sm, 6px);
   background: var(--neu-surface);
-  box-shadow: var(--neu-shadow-sm, 0 1px 3px rgb(15 23 42 / 0.08));
+  box-shadow: none;
   color: var(--neu-text);
   transition:
     border-color 160ms ease,
@@ -213,20 +213,21 @@
 }
 
 .neu-organization-chart__toggle {
-  position: absolute;
-  inset-block-end: -0.8rem;
-  inset-inline-start: 50%;
+  position: relative;
+  align-self: center;
+  flex: 0 0 auto;
+  margin-inline-end: 0.4rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  inline-size: 1.6rem;
-  block-size: 1.6rem;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
   border: 1px solid var(--neu-border);
-  border-radius: 999px;
-  background: var(--neu-surface);
+  border-radius: var(--neu-radius-sm, 6px);
+  background: var(--neu-surface-2);
   color: var(--neu-text-muted);
   cursor: pointer;
-  transform: translateX(-50%);
+
 
   svg {
     inline-size: 0.9rem;
@@ -243,9 +244,24 @@
   }
 }
 
-[dir='rtl'] .neu-organization-chart__toggle {
-  transform: translateX(50%);
+ .neu-organization-chart__toggle:hover { color: var(--neu-text); border-color: var(--neu-text-muted); }
+.neu-organization-chart__tree--root > .neu-organization-chart__branch > .neu-organization-chart__node {
+  border-block-start: 3px solid var(--neu-primary);
 }
+.neu-organization-chart__tree[role='group'] {
+  animation: neu-organization-chart-reveal 140ms ease-out;
+  transform-origin: top center;
+}
+@keyframes neu-organization-chart-reveal {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (forced-colors: active) {
+  .neu-organization-chart__tree::before,
+  .neu-organization-chart__branch::before,
+  .neu-organization-chart__branch::after { border-color: CanvasText; }
+}
+
 
 .neu-organization-chart__empty {
   border: 1px dashed var(--neu-border);
@@ -266,6 +282,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .neu-organization-chart__tree[role="group"] { animation: none; }
   .neu-organization-chart__node {
     transition: none;
   }

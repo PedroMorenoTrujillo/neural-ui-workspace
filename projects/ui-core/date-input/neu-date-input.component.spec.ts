@@ -42,6 +42,42 @@ describe('NeuDateInputComponent', () => {
 
   // ── Rendering básico ─────────────────────────────────────────────────────
 
+  for (const type of ['date', 'range'] as const) {
+    it(`keeps the ${type} trigger and label associated when inputId changes`, () => {
+      const fixture = TestBed.createComponent(NeuDateInputComponent);
+      fixture.componentRef.setInput('type', type);
+      fixture.componentRef.setInput('label', 'Booking date');
+      fixture.componentRef.setInput('inputId', 'booking-date');
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('button').id).toBe('booking-date');
+      expect(fixture.nativeElement.querySelector('label').htmlFor).toBe('booking-date');
+      fixture.componentRef.setInput('inputId', 'updated-date');
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('button').id).toBe('updated-date');
+      expect(fixture.nativeElement.querySelector('label').htmlFor).toBe('updated-date');
+      fixture.componentRef.setInput('inputId', '');
+      fixture.detectChanges();
+      const generated = fixture.nativeElement.querySelector('button').id;
+      expect(generated).toMatch(/^neu-date-input-/);
+      expect(fixture.nativeElement.querySelector('label').htmlFor).toBe(generated);
+    });
+  }
+
+  it('renders repeated English weekday initials without duplicate tracking keys', async () => {
+    const warn = vi.spyOn(console, 'warn');
+    const fixture = TestBed.createComponent(NeuDateInputComponent);
+    fixture.componentRef.setInput('locale', 'en-US');
+    fixture.detectChanges();
+    fixture.componentInstance.toggle();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const weekdays = document.querySelectorAll('.neu-date-input__cal-weekdays span');
+    expect(weekdays.length).toBe(7);
+    expect([...weekdays].filter((day) => day.textContent === 'T').length).toBe(2);
+    expect(warn.mock.calls.some((args) => args.some((value) => String(value).includes('NG0955')))).toBe(false);
+    warn.mockRestore();
+  });
+
   it('should render label', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();

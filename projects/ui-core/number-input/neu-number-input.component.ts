@@ -65,8 +65,8 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
           role="spinbutton"
           [id]="_id"
           [attr.aria-valuenow]="_value() ?? null"
-          [attr.aria-valuemin]="min()"
-          [attr.aria-valuemax]="max()"
+          [attr.aria-valuemin]="_ariaMin()"
+          [attr.aria-valuemax]="_ariaMax()"
           [disabled]="_cvaDisabled()"
           [value]="_value() ?? ''"
           (input)="onLiveInput($event)"
@@ -92,8 +92,8 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
           role="spinbutton"
           [id]="_id"
           [attr.aria-valuenow]="_value() ?? null"
-          [attr.aria-valuemin]="min()"
-          [attr.aria-valuemax]="max()"
+          [attr.aria-valuemin]="_ariaMin()"
+          [attr.aria-valuemax]="_ariaMax()"
           [disabled]="_cvaDisabled()"
           [value]="_value() ?? ''"
           (input)="onLiveInput($event)"
@@ -139,8 +139,8 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
           role="spinbutton"
           [id]="_id"
           [attr.aria-valuenow]="_value() ?? null"
-          [attr.aria-valuemin]="min()"
-          [attr.aria-valuemax]="max()"
+          [attr.aria-valuemin]="_ariaMin()"
+          [attr.aria-valuemax]="_ariaMax()"
           [disabled]="_cvaDisabled()"
           [value]="_value() ?? ''"
           (input)="onLiveInput($event)"
@@ -209,6 +209,8 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   protected readonly _cvaDisabled = signal(false);
   protected readonly _value = signal<number | null>(0);
   protected readonly _focused = signal(false);
+  protected readonly _ariaMin = computed(() => Number.isFinite(this.min()) ? this.min() : null);
+  protected readonly _ariaMax = computed(() => Number.isFinite(this.max()) ? this.max() : null);
 
   readonly hasValue = computed(() => this._value() !== null);
   readonly canIncrement = computed(() => {

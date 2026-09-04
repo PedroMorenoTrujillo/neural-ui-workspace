@@ -114,13 +114,13 @@ function cloneDate(d: Date): Date {
   template: `
     @if (_isRange()) {
       @if (label()) {
-        <label class="neu-drp__label" [for]="_id">{{ label() }}</label>
+        <label class="neu-drp__label" [for]="inputId() || _id">{{ label() }}</label>
       }
       <button
         cdkOverlayOrigin
         #rangeOrigin="cdkOverlayOrigin"
         type="button"
-        [id]="_id"
+        [id]="inputId() || _id"
         class="neu-drp__trigger"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-label]="label() || _texts().rangeAriaLabel"
@@ -188,7 +188,7 @@ function cloneDate(d: Date): Date {
                 </button>
               </div>
               <div class="neu-drp__cal-grid">
-                @for (d of _weekDayLabels(); track d) {
+                @for (d of _weekDayLabels(); track $index) {
                   <span class="neu-drp__day-label">{{ d }}</span>
                 }
                 @for (cell of _leftDays(); track cell.ts) {
@@ -223,7 +223,7 @@ function cloneDate(d: Date): Date {
                 </button>
               </div>
               <div class="neu-drp__cal-grid">
-                @for (d of _weekDayLabels(); track d) {
+                @for (d of _weekDayLabels(); track $index) {
                   <span class="neu-drp__day-label">{{ d }}</span>
                 }
                 @for (cell of _rightDays(); track cell.ts) {
@@ -265,7 +265,7 @@ function cloneDate(d: Date): Date {
       </ng-template>
     } @else {
       @if (!floatingLabel() && label()) {
-        <label class="neu-date-input__label" [for]="_id">{{ label() }}</label>
+        <label class="neu-date-input__label" [for]="inputId() || _id">{{ label() }}</label>
       }
       <div
         class="neu-date-input"
@@ -280,7 +280,7 @@ function cloneDate(d: Date): Date {
           #singleOrigin="cdkOverlayOrigin"
           class="neu-date-input__trigger"
           type="button"
-          [id]="_id"
+          [id]="inputId() || _id"
           [disabled]="isDisabledFinal() || readonly()"
           [attr.aria-expanded]="isOpen()"
           [attr.aria-haspopup]="'dialog'"
@@ -323,7 +323,7 @@ function cloneDate(d: Date): Date {
           </span>
         </button>
         @if (floatingLabel() && label()) {
-          <label class="neu-date-input__float-label" [for]="_id">{{ label() }}</label>
+          <label class="neu-date-input__float-label" [for]="inputId() || _id">{{ label() }}</label>
         }
         <ng-template
           cdkConnectedOverlay
@@ -411,7 +411,7 @@ function cloneDate(d: Date): Date {
                   </button>
                 </div>
                 <div class="neu-date-input__cal-weekdays">
-                  @for (d of weekdays(); track d) {
+                  @for (d of weekdays(); track $index) {
                     <span>{{ d }}</span>
                   }
                 </div>

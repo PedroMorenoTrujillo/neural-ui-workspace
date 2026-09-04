@@ -210,15 +210,12 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
     if (tabEl) {
       this._indicatorLeft.set(tabEl.offsetLeft + 'px');
       this._indicatorWidth.set(tabEl.offsetWidth + 'px');
-      if (typeof tabEl.scrollIntoView === 'function') {
-        tabEl.scrollIntoView({
-          // Keep tab changes deterministic; smooth scrolling can hold route
-          // interactions open for several seconds in constrained viewports.
-          behavior: 'auto',
-          block: 'nearest',
-          inline: 'nearest',
-        });
-      }
+      // Reveal only within the tab strip; never move a consumer's document.
+      if (typeof nav.getBoundingClientRect !== 'function') return;
+      const bounds = nav.getBoundingClientRect();
+      const tabBounds = tabEl.getBoundingClientRect();
+      if (tabBounds.left < bounds.left) nav.scrollLeft += tabBounds.left - bounds.left;
+      else if (tabBounds.right > bounds.right) nav.scrollLeft += tabBounds.right - bounds.right;
     }
   }
 

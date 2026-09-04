@@ -3,6 +3,8 @@
 
 .neu-number-input {
   display: inline-flex;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
@@ -47,7 +49,8 @@
     .neu-number-input__field {
       flex: 1 1 auto;
       width: auto;
-      min-width: var(--neu-number-input-stacked-min-width, 120px);
+      min-width: 0;
+      flex-basis: var(--neu-number-input-stacked-min-width, 120px);
       border-radius: var(--neu-radius-md, 8px) 0 0 var(--neu-radius-md, 8px);
       border-inline-end: none;
       text-align: start;
@@ -88,6 +91,8 @@
 
 /* ── Wrapper interno para botones + input ────────────────────── */
 .neu-number-input__control {
+  min-inline-size: 0;
+  max-inline-size: 100%;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -96,6 +101,8 @@
 
 /* ── Field ────────────────────────────────────────────────────── */
 .neu-number-input__field {
+  min-inline-size: 0;
+  flex: 1 1 auto;
   width: var(--neu-number-input-width, 80px);
   height: var(--neu-number-input-height, 48px);
   padding: 0 8px;

@@ -232,7 +232,11 @@ export class NeuInputComponent implements ControlValueAccessor {
 
   constructor() {
     // Credential managers can fill the native control without emitting an input event.
-    afterNextRender(() => queueMicrotask(() => this.syncNativeValue()));
+    afterNextRender(() => {
+      // An empty initial DOM value is not autofill: NgModel may still be writing
+      // its initial value. Keep this callback in Angular's destroy-aware render phase.
+      if (this.nativeInput().nativeElement.value) this.syncNativeValue();
+    });
   }
 
   writeValue(val: unknown): void {

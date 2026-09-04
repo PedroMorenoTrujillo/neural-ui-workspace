@@ -92,6 +92,36 @@ describe('NeuTabsComponent', () => {
     expect(tabs.length).toBe(3);
   });
 
+  it('reveals the active tab inside its strip without scrolling the document', () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    const component = f.debugElement.query(de => de.componentInstance instanceof NeuTabsComponent).componentInstance as NeuTabsComponent;
+    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    const tab = f.nativeElement.querySelector('.neu-tabs__tab') as HTMLElement;
+    const documentScroll = vi.spyOn(window, 'scrollTo');
+    const reveal = vi.fn();
+    Object.defineProperty(tab, 'scrollIntoView', { configurable: true, value: reveal });
+    vi.spyOn(nav, 'getBoundingClientRect').mockReturnValue({ left: 100, right: 300 } as DOMRect);
+    const bounds = vi.spyOn(tab, 'getBoundingClientRect').mockReturnValue({ left: 280, right: 360 } as DOMRect);
+    (component as any)._updateIndicator();
+    expect(nav.scrollLeft).toBe(60);
+    bounds.mockReturnValue({ left: 70, right: 140 } as DOMRect);
+    (component as any)._updateIndicator();
+    expect(nav.scrollLeft).toBe(30);
+    expect(reveal).not.toHaveBeenCalled();
+    expect(documentScroll).not.toHaveBeenCalled();
+    documentScroll.mockRestore();
+  });
+
+  it('does not require browser geometry during server rendering', () => {
+    const f = TestBed.createComponent(HostComponent);
+    f.detectChanges();
+    const component = f.debugElement.query(de => de.componentInstance instanceof NeuTabsComponent).componentInstance as NeuTabsComponent;
+    const nav = f.nativeElement.querySelector('.neu-tabs__nav');
+    Object.defineProperty(nav, 'getBoundingClientRect', { configurable: true, value: undefined });
+    expect(() => (component as any)._updateIndicator()).not.toThrow();
+  });
+
   it('updates the active indicator when scrollIntoView is unavailable', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();

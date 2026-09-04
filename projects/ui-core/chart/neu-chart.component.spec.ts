@@ -45,6 +45,21 @@ describe('NeuChartComponent', () => {
 
   // ── Inputs básicos ────────────────────────────────────────────────────────
 
+  it('forwards clear and restore updates without scheduling series animations', () => {
+    const series = [{ name: 'Activity', data: [10, 20] }];
+    const { f } = mk({ series });
+    const chart = f.debugElement.query(By.directive(ApxChartStub)).componentInstance as ApxChartStub;
+    expect(chart.series()).toEqual(series);
+    f.componentRef.setInput('series', []);
+    f.detectChanges();
+    expect(chart.series()).toEqual([]);
+    expect(chart.chart().animations.enabled).toBe(false);
+    f.componentRef.setInput('series', series);
+    f.detectChanges();
+    expect(chart.series()).toEqual(series);
+    expect(chart.chart().animations.dynamicAnimation.enabled).toBe(false);
+  });
+
   it('should have neu-chart host class', () => {
     const { f } = mk();
     expect(f.nativeElement.classList).toContain('neu-chart');

@@ -5,6 +5,8 @@
 
 .neu-rating {
   display: inline-flex;
+  flex-wrap: wrap;
+  max-inline-size: 100%;
   align-items: center;
   gap: 2px;
   font-family: var(--neu-font-sans);

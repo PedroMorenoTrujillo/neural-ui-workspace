@@ -9,7 +9,6 @@ import {
   input,
 } from '@angular/core';
 import { ChartComponent } from 'ng-apexcharts';
-import { NeuResponsiveState } from '@neural-ui/core/internal';
 
 export type NeuChartType =
   | 'line'
@@ -157,10 +156,6 @@ export class NeuChartComponent {
       label: this.categories()[dataPointIndex], value, originalEvent: event });
   }
 
-  private readonly _reducedMotion = inject(NeuResponsiveState).observe(
-    '(prefers-reduced-motion: reduce)',
-  );
-
   // --------------------------------------------------
   // Helpers privados
   // --------------------------------------------------
@@ -221,7 +216,9 @@ export class NeuChartComponent {
       toolbar: { show: false },
       sparkline: { enabled: false },
       zoom: { enabled: false },
-      animations: { enabled: !this._reducedMotion(), speed: 500 },
+      // Series can be cleared or replaced while a previous render is in progress.
+      // Immediate updates avoid vendor animation callbacks retaining removed data.
+      animations: { enabled: false, dynamicAnimation: { enabled: false } },
     };
   });
 
