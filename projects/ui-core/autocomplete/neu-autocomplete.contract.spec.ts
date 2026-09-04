@@ -69,7 +69,7 @@ afterEach(() => {
   document.querySelectorAll('.cdk-overlay-container').forEach((element) => element.remove());
 });
 
-describe('NeuAutocomplete Prime 22.1 closure', () => {
+describe('NeuAutocomplete contract closure', () => {
   it('debounces consumer-owned completion with latest-wins query payloads', () => {
     vi.useFakeTimers();
     const fixture = setupCityAutocomplete();

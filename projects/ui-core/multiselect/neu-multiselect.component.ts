@@ -7,6 +7,8 @@ import {
   PLATFORM_ID,
   Signal,
   ViewEncapsulation,
+  afterNextRender,
+  afterRenderEffect,
   computed,
   contentChild,
   effect,
@@ -193,7 +195,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
         @if (floatingLabel() && label()) {
           <span class="neu-multiselect__label">{{ label() }}</span>
         }
-        <span class="neu-multiselect__chips">
+        <span #chips class="neu-multiselect__chips">
           @if (_values().length === 0) {
             <span class="neu-multiselect__placeholder">{{ placeholder() }}</span>
           } @else {
@@ -222,21 +224,23 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
                   tabindex="0"
                   (keydown)="onTokenKeydown(val, $event)"
                 >
-                  @if (tokenTpl(); as selectedTpl) {
-                    <ng-container
-                      [ngTemplateOutlet]="selectedTpl.templateRef"
-                      [ngTemplateOutletContext]="selectedContext(val, $index)"
-                    />
-                  } @else {
-                    @if (selectedItemTpl(); as selectedTpl) {
+                  <span class="neu-multiselect__chip-label">
+                    @if (tokenTpl(); as selectedTpl) {
                       <ng-container
                         [ngTemplateOutlet]="selectedTpl.templateRef"
                         [ngTemplateOutletContext]="selectedContext(val, $index)"
                       />
                     } @else {
-                      {{ labelFor(val) }}
+                      @if (selectedItemTpl(); as selectedTpl) {
+                        <ng-container
+                          [ngTemplateOutlet]="selectedTpl.templateRef"
+                          [ngTemplateOutletContext]="selectedContext(val, $index)"
+                        />
+                      } @else {
+                        {{ labelFor(val) }}
+                      }
                     }
-                  }
+                  </span>
                   @if (!readonly() && !isDisabledFinal() && !loading()) {
                     <button
                       class="neu-multiselect__chip-remove"
@@ -646,6 +650,7 @@ export class NeuMultiselectComponent<
   /* v8 ignore start -- Angular signal-query factory; virtual viewport behavior is covered. */
   private readonly _viewport = viewChild(CdkVirtualScrollViewport);
   /* v8 ignore stop */
+  private readonly _chips = viewChild('chips', { read: ElementRef<HTMLElement> });
 
   private _getUrlParamSignal(key: string): Signal<string | null> {
     let paramSignal = this._urlParamSignals.get(key);
@@ -657,6 +662,21 @@ export class NeuMultiselectComponent<
   }
 
   constructor() {
+    afterNextRender(() => {
+      const chips = this._chips()?.nativeElement;
+      const ResizeObserverCtor = this._document.defaultView?.ResizeObserver;
+      if (chips && ResizeObserverCtor) {
+        this.chipResizeObserver = new ResizeObserverCtor(() => this.measureChipOverflow());
+        this.chipResizeObserver.observe(chips);
+      }
+      this.measureChipOverflow();
+    });
+    afterRenderEffect(() => {
+      this._values();
+      this._chipMode();
+      this.display();
+      queueMicrotask(() => this.measureChipOverflow());
+    });
     this._destroyRef.onDestroy(() => {
       this.pendingOverlayFrameActions = [];
       this.cancelAutofocusFrame();
@@ -664,6 +684,7 @@ export class NeuMultiselectComponent<
       this.activeRowController.dispose();
       this.typeaheadController.dispose();
       this.overlaySession.dispose();
+      this.chipResizeObserver?.disconnect();
     });
     effect(() => {
       const param = this.urlParam();
@@ -899,6 +920,8 @@ export class NeuMultiselectComponent<
   readonly activeRowIndex = signal(-1);
   readonly isPanelAbove = signal(false);
   protected readonly _chipMode = signal<'chips' | 'count'>('count');
+  private readonly _chipOverflow = signal(false);
+  private chipResizeObserver?: ResizeObserver;
   private readonly lazySequencer = new InternalNeuOptionLazyRequestSequencer();
   private lastLazyRequestKey = '';
   private readonly activeRowController = new InternalNeuOptionActiveRowController<T, G | string>(
@@ -930,7 +953,8 @@ export class NeuMultiselectComponent<
       offsetY: position.originY === 'bottom' ? 6 : -6,
     }),
   );
-  readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
+  // A page scroll should dismiss the list instead of leaving it floating away from its trigger.
+  readonly overlayScrollStrategy = this._overlay.scrollStrategies.close();
   readonly panelPosition = signal<{
     position: string | null;
     top: string | null;
@@ -947,8 +971,11 @@ export class NeuMultiselectComponent<
 
   readonly triggerId = computed(() => this.inputId() || this.id() || this._triggerId);
   readonly effectiveDisplay = computed<NeuMultiselectDisplay>(() => {
-    if (this.display() !== 'count') return this.display();
-    return this._chipMode() === 'chips' ? 'chip' : 'count';
+    const requested = this.display();
+    const chipsRequested =
+      requested === 'chip' || (requested === 'count' && this._chipMode() === 'chips');
+    if (chipsRequested && this._chipOverflow()) return 'count';
+    return chipsRequested ? 'chip' : requested;
   });
   protected readonly _visibleChips = computed(() =>
     this._values().slice(0, Math.max(0, this.maxSelectedLabels())),
@@ -1807,6 +1834,14 @@ export class NeuMultiselectComponent<
   protected toggleChipMode(event: MouseEvent): void {
     event.stopPropagation();
     this._chipMode.set(this._chipMode() === 'chips' ? 'count' : 'chips');
+  }
+
+  private measureChipOverflow(): void {
+    const chips = this._chips()?.nativeElement;
+    if (!chips) return;
+    const hasChips = chips.querySelector('.neu-multiselect__chip') !== null;
+    const overflowing = hasChips && chips.scrollWidth > chips.clientWidth + 1;
+    if (overflowing !== this._chipOverflow()) this._chipOverflow.set(overflowing);
   }
 
   onDocumentClick(event: MouseEvent): void {

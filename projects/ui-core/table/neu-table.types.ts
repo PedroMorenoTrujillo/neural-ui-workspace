@@ -23,10 +23,10 @@ export type NeuTableColumnKey<T> = [keyof T] extends [never] ? string : Extract<
 /** Canonical identity used by selection, editing, expansion and virtual rows. */
 export type NeuTableRowKey<T> = NeuTableColumnKey<T> | string | ((row: T) => unknown);
 
-/** Prime-compatible render tracking callback. Canonical state still uses rowKey. */
+/** Render tracking callback. Canonical state still uses rowKey. */
 export type NeuTableRowTrackBy<T> = (index: number, row: T) => unknown;
 
-/** `key` preserves Neural's stable-key default; the other policies mirror Prime equality. */
+/** `key` preserves Neural's stable-key default; the other policies mirror standard equality. */
 export type NeuTableSelectionComparison = 'key' | 'equals' | 'deepEquals';
 
 export type NeuTableGroupBy<T> = string | ((row: T, index: number) => unknown);

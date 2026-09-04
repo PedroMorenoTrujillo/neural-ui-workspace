@@ -1212,7 +1212,7 @@ export class NeuTreeTableComponent {
     event.stopPropagation();
   }
 
-  /** Prime-equivalent useful imperative floor, expressed in Neural vocabulary. */
+  /** Useful imperative floor, expressed in Neural vocabulary. */
   resetScrollTop(behavior: ScrollBehavior = 'auto'): void {
     this.table()?.resetVirtualScroll(behavior);
   }

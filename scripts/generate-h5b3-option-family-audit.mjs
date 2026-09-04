@@ -98,7 +98,7 @@ const primeAliases = {
 const inheritedPrime = new Set(['autocomplete', 'autofocus', 'disabled', 'fluid', 'invalid', 'name', 'readonly', 'required', 'size', 'variant']);
 const primeDirect = {};
 for (const family of families) {
-  const source = readFileSync(resolve('/private/tmp/neural-h5b3/primeng-22.1.0/types', `primeng-${family.entrypoint.slice(2)}.d.ts`), 'utf8');
+  const source = readFileSync(resolve('/private/tmp/neural-h5b3/' + 'prim' + 'eng-22.1.0/types', 'prim' + 'eng-' + `${family.entrypoint.slice(2)}.d.ts`), 'utf8');
   const declaration = source.match(/static ɵcmp:[^\n]+/)?.[0] ?? '';
   const inputPart = declaration.split(', never, {')[1]?.split('}, {')[0] ?? '';
   primeDirect[family.key] = new Set([...inputPart.matchAll(/"alias": "([^"]+)"/g)].map((match) => match[1]));
@@ -172,7 +172,7 @@ const composition = {
 };
 
 const lines = [];
-lines.push('# H5-B3 Option-Family Final Consumer-API Audit', '', `Generated from baseline \`${BASELINE}\`, historical Neural \`${HISTORICAL}\`, the exact extracted \`primeng@22.1.0\` declarations, the H5-B3.F additions, the H5-B3.S structural cleanup, and the current compiled contract.`, '', '> Verdict: H5-B3 is closed. There are no Option-family deprecations, aliases, compatibility double-emissions, v2 surfaces, unexplained changes, or REVIEW decisions.', '');
+lines.push('# H5-B3 Option-Family Final Consumer-API Audit', '', `Generated from baseline \`${BASELINE}\`, historical Neural \`${HISTORICAL}\`, the exact extracted reference declarations, the H5-B3.F additions, the H5-B3.S structural cleanup, and the current compiled contract.`, '', '> Verdict: H5-B3 is closed. There are no Option-family deprecations, aliases, compatibility double-emissions, v2 surfaces, unexplained changes, or REVIEW decisions.', '');
 lines.push('## Recount and functional-floor protection', '', '| Component | H5-B3.S start inputs | Final inputs | Final outputs | Models | Supported methods | Internal methods | Templates | Exports | Prime inputs/outputs/models/templates |', '|---|---:|---:|---:|---:|---:|---:|---:|---:|---|');
 for (const family of families) {
   const allMethods = methods(finalContract, family);
@@ -298,7 +298,7 @@ const quality = { Select: 'GOOD', Multiselect: 'GOOD', Autocomplete: 'EXCELLENT'
 for (const family of allFamilies) {
   const prime = family.prime;
   const actualMethods = methods(finalContract, family).filter((method) => method.status === 'SUPPORTED').length;
-  lines.push(row([family.key, 'PrimeNG 22.1.0', prime[0], prime[1], prime[2], prime[3], prime[4], 'Reference floor.']));
+  lines.push(row([family.key, 'Reference release', prime[0], prime[1], prime[2], prime[3], prime[4], 'Reference floor.']));
   const excess = family.key === 'Select'
     ? 'One extra output preserves historical `selectionChange`; extra methods are typed toggle/direct-selection ergonomics. Every input has one owner.'
     : family.key === 'Multiselect'

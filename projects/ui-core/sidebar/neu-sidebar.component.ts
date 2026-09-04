@@ -281,7 +281,7 @@ export class NeuSidebarComponent {
   }
 
   /** Focus trap: cicla entre elementos focusables con Tab/Shift+Tab / Focus trap cycling */
-  @HostListener('keydown', ['$event'])
+  @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if (!this.isOpen() || this.persistent()) {
       return;

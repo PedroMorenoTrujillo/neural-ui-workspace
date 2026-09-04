@@ -2,7 +2,7 @@
 
 ## Purpose
 
-NeuralUI is an Angular design system with a coherent Neural visual language, a small public API, and consumer-controlled CSS theming. This document is the canonical engineering and product standard for the library, its packages, and its Showcase. It is intentionally not a Prime or Material compatibility target.
+NeuralUI is an Angular design system with a coherent Neural visual language, a small public API, and consumer-controlled CSS theming. This document is the canonical engineering and product standard for the library, its packages, and its Showcase. It stands on its own as an independent design-system contract.
 
 ## Architecture
 

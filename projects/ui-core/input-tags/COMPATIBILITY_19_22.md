@@ -2,7 +2,7 @@
 
 ## Scope
 
-PrimeNG 22.1.0 introduced InputTags as the dedicated replacement for the former multi-token AutoComplete path. `NeuTags` remains a deliberately separate, string-only token field and was not modified.
+The reference release introduced InputTags as the dedicated replacement for the former multi-token AutoComplete path. `NeuTags` remains a deliberately separate, string-only token field and was not modified.
 
 ## Historical review
 
@@ -15,7 +15,7 @@ PrimeNG 22.1.0 introduced InputTags as the dedicated replacement for the former 
 
 ## Neural mapping
 
-| PrimeNG 22.1 behavior | NeuralUI mapping |
+| Reference behavior | NeuralUI mapping |
 | --- | --- |
 | Multi-value CVA | `NeuInputTagsComponent` CVA and immutable `valueChange` arrays |
 | `max`, duplicate policy, delimiter | `max`, `allowDuplicate`, `delimiter` |

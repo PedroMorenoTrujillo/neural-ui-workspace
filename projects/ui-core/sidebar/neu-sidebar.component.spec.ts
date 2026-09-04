@@ -639,14 +639,14 @@ describe('NeuSidebarComponent', () => {
     expect(preventDefault).not.toHaveBeenCalled();
   });
 
-  it('uses the HostListener for Escape keydown events', () => {
+  it('uses the document HostListener for Escape even before focus enters the drawer', () => {
     _menuParam.set('open');
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.detectChanges();
     const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
     const preventDefault = vi.spyOn(event, 'preventDefault');
 
-    f.nativeElement.dispatchEvent(event);
+    document.dispatchEvent(event);
 
     expect(preventDefault).toHaveBeenCalled();
     expect(_mockSetParam).toHaveBeenCalledWith('menu', null, true);

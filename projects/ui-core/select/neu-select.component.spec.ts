@@ -121,7 +121,7 @@ describe('NeuSelectComponent', () => {
     expect(f.componentInstance.options()).toEqual([]);
   });
 
-  describe('Prime-compatible multiple mode', () => {
+  describe('Multiple mode contract', () => {
     it('preserves scalar single-mode value and closes after selection', async () => {
       const { f, comp } = await setup({ multiple: false });
       comp.open();
@@ -946,11 +946,11 @@ describe('NeuSelectComponent', () => {
       expect(selectHost).toBeTruthy();
       expect(comp.panelPosition()).toEqual({
         position: 'fixed',
-        top: '56px',
+        top: '50px',
         bottom: 'auto',
         left: '20px',
         width: '180px',
-        maxHeight: '844px',
+        maxHeight: '850px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
@@ -989,11 +989,11 @@ describe('NeuSelectComponent', () => {
 
       expect(comp.panelPosition()).toEqual({
         position: 'fixed',
-        top: '106px',
+        top: '100px',
         bottom: 'auto',
         left: '24px',
         width: '220px',
-        maxHeight: '738px',
+        maxHeight: '744px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
@@ -1708,9 +1708,10 @@ describe('NeuSelectComponent', () => {
 
     try {
       (comp as any).syncPanelPosition();
+      comp.onOverlayPositionChange({ connectionPair: { overlayY: 'bottom' } } as any);
       expect(comp.isPanelAbove()).toBe(true);
       expect(comp.panelPosition().top).toBe('auto');
-      expect(comp.panelPosition().bottom).toBe('106px');
+      expect(comp.panelPosition().bottom).toBe('100px');
       expect(comp.panelPosition().left).toBe('764px');
     } finally {
       Object.defineProperty(window, 'innerWidth', {

@@ -1,6 +1,6 @@
-# NeuAutocomplete — PrimeNG 19→22.1 parity and no-regression record
+# NeuAutocomplete — external compatibility and no-regression record
 
-Sources: the exact published `primeng` packages `19.1.4`, `20.4.0`, `21.1.9`, and `22.1.0`, including their declarations and shipped `primeng-autocomplete` implementations, plus the official AutoComplete documentation for the inspected release lines. The exact `22.1.0` package controls the current floor.
+Sources: the exact published reference packages across four release lines, including their declarations and shipped AutoComplete implementations, plus the official AutoComplete documentation for the inspected release lines. The latest package controls the current floor.
 
 ## Before-state snapshot at `ff86cecf85fed69451542df6631a2ffe36693e3e`
 
@@ -26,7 +26,7 @@ Sources: the exact published `primeng` packages `19.1.4`, `20.4.0`, `21.1.9`, an
 | Active option          | `_activeIndex` + logical index   | Eligible option row only; never group/loading/disabled/unrendered.               |
 | Overlay visibility     | `_isOpen`                        | One lifecycle transition per actual open/close.                                  |
 
-## Current PrimeNG 22.1 capability closure
+## Current capability closure
 
 | Prime capability                             | Result   | Neural contract/evidence                                                                                                                        |
 | -------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |

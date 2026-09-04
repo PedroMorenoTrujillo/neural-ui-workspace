@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+Local certification candidate: `1.15.0-rc.0`. This identifier is reserved for
+H8-C review and has not been published.
+
 ### Added
 
 - Table selection migration parity: typed none/single/multiple modes, radio and checkbox surfaces, focused controlled row selection, row preselection by `rowKey`, disabled rows, page or filtered/loaded header scopes, granular row events and aggregate select-all events.

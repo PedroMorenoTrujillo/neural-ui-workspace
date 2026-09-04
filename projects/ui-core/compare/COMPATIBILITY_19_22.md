@@ -2,7 +2,7 @@
 
 ## Scope
 
-PrimeNG 22.1.0 introduced Compare as a current before/after comparison family. It replaces the legacy ImageCompare route. `NeuImageViewer` and `NeuImageGallery` remain media-viewing components and were not changed.
+The reference release introduced Compare as a current before/after comparison family. It replaces the legacy ImageCompare route. `NeuImageViewer` and `NeuImageGallery` remain media-viewing components and were not changed.
 
 ## Historical review
 
@@ -15,7 +15,7 @@ PrimeNG 22.1.0 introduced Compare as a current before/after comparison family. I
 
 ## Neural mapping
 
-| PrimeNG 22.1 behavior | NeuralUI mapping |
+| Reference behavior | NeuralUI mapping |
 | --- | --- |
 | Comparison root | `NeuCompareComponent` |
 | Before/after content | `NeuCompareItemComponent` with `position` |

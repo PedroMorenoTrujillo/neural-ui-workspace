@@ -6,7 +6,7 @@
 - Showcase: `914ffbb2c774e4337c932255c2b6a6243f79d00b`
 - Root integration (report only): `122525ca524ab6a320a917e6306d2f34e2a7cef7`
 - Historical Neural v1.12.1: `4985b558b915f5208c69f9ef49db45528fa479a6`
-- Prime floor: `primeng@22.1.0`, its published declarations/Angular metadata/implementation, and the official SpeedDial and OrganizationChart documentation.
+- Reference floor: the published declarations/Angular metadata/implementation and the official SpeedDial and OrganizationChart documentation.
 
 Neither component existed at the historical Neural baseline. Their starting public APIs are therefore `PRIME-PARITY-INTRODUCED`; no parity-era spelling receives compatibility protection.
 

@@ -73,7 +73,7 @@ export class NeuTerminalComponent implements OnChanges {
   private readonly destroyRef = inject(DestroyRef);
   readonly welcomeMessage = input('');
   readonly prompt = input('$');
-  /** Adds a safe response after the latest command, compatible with PrimeNG's response input. */
+  /** Adds a safe response after the latest command. */
   readonly response = input<string | undefined>(undefined);
   readonly ariaLabel = input('Terminal');
   readonly inputAriaLabel = input('Terminal command');

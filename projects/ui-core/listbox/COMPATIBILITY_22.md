@@ -1,6 +1,6 @@
-# NeuListbox — PrimeNG 22.1.0 parity record
+# NeuListbox — external compatibility record
 
-Baseline: the published PrimeNG `22.1.0` Listbox declaration, implementation, and current official Listbox documentation. Neural keeps its existing `selectionChange: T[]` contract and uses typed Neural APIs where copying a Prime-specific configuration object would leak framework internals.
+Baseline: the published reference Listbox declaration, implementation, and current official Listbox documentation. Neural keeps its existing `selectionChange: T[]` contract and uses typed Neural APIs where copying vendor-specific configuration objects would leak framework internals.
 
 ## Capability closure
 

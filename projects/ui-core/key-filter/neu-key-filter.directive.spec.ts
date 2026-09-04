@@ -47,7 +47,7 @@ describe('NeuKeyFilterDirective', () => {
     expect(beforeInput('2', 'insertFromPaste').defaultPrevented).toBe(true);
   });
 
-  it('supports Prime-compatible predefined modes and a dynamic pattern', () => {
+  it('supports predefined modes and a dynamic pattern', () => {
     fixture.componentInstance.pattern.set('int');
     fixture.detectChanges();
     input.value = '-12';

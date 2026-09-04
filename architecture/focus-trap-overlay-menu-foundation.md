@@ -1,6 +1,6 @@
 # FocusTrap and overlay/menu foundation audit
 
-This audit is tied to Workspace baseline `29708ff064bd980b54900403ddbf2f9d1b2efbce` and the exact published `primeng@22.1.0` package. It is intentionally scoped: it records the next foundation work without redesigning existing public components.
+This audit is tied to Workspace baseline `29708ff064bd980b54900403ddbf2f9d1b2efbce` and the exact published reference package. It is intentionally scoped: it records the next foundation work without redesigning existing public components.
 
 ## FocusTrap decision
 
@@ -8,7 +8,7 @@ Neural exposes `NeuFocusTrapDirective` from `@neural-ui/core/focus-trap`. The di
 
 The directive queries eligible descendants on every boundary operation. It supports native controls, links, contenteditable regions, and non-negative custom `tabindex` values while excluding disabled, `aria-disabled`, hidden, inert, closed-details, disabled-fieldset, and negative-tabindex descendants. Positive tabindex ordering follows browser sequential-focus ordering before DOM-ordered tabindex zero items.
 
-PrimeNG 22.1.0 also provides a standalone directive and a runtime disabled input. Its current implementation inserts two accessibility-hidden sentinel spans and uses them to redirect focus to the opposite boundary. PrimeNG does not choose initial focus, restore focus, add roles, or own Escape. PrimeNG 19 and 20 used lifecycle/change-detection-managed sentinels; 21 reorganized lifecycle integration; 22 moved the disabled state to a signal/effect. The useful contract is stable across 19–22. Neural preserves that contract without persistent sentinels and additionally handles a focused dynamic child being removed.
+The reference release also provides a standalone directive and a runtime disabled input. Its current implementation inserts two accessibility-hidden sentinel spans and uses them to redirect focus to the opposite boundary. It does not choose initial focus, restore focus, add roles, or own Escape. Earlier release lines used lifecycle/change-detection-managed sentinels; later lines reorganized lifecycle integration and moved the disabled state to a signal/effect. The useful contract is stable across releases. Neural preserves that contract without persistent sentinels and additionally handles a focused dynamic child being removed.
 
 ## Existing overlay inventory
 
@@ -62,7 +62,7 @@ Add:
 - orientation- and RTL-aware Arrow navigation, Home/End, Enter/Space, Escape return, typeahead, submenu open/close, and deterministic disabled-item skipping;
 - a responsive breakpoint mode with a hamburger trigger, controlled panel height/scroll, outside-click handling, resize cleanup, and focus return.
 
-PrimeNG 22.1.0 has horizontal/vertical orientations, a 960px default breakpoint, scroll height, disabled/tabindex inputs, start/end and item/icon/button templates, responsive `matchMedia` behavior, and orientation-dependent composite-menu keyboard handling. Neural should match useful behavior rather than copy Prime internals.
+The reference release has horizontal/vertical orientations, a 960px default breakpoint, scroll height, disabled/tabindex inputs, start/end and item/icon/button templates, responsive `matchMedia` behavior, and orientation-dependent composite-menu keyboard handling. Neural should match useful behavior rather than copy vendor internals.
 
 Estimated complexity: **high, 7–10 engineering days** including public API, responsive/RTL behavior, unit tests, Showcase, axe, and three-browser tests. The action/link resolver and roving controller account for roughly two of those days if not completed first.
 
@@ -81,7 +81,7 @@ Add:
 - Arrow/Home/End navigation, Enter/Space activation, Escape close/trigger return, accessible trigger expansion state, labeled action list, and RTL-aware horizontal direction;
 - trigger, action, icon, and optional tooltip templates.
 
-PrimeNG 22.1.0 supports linear/circle/semi-circle/quarter-circle modes, eight directions including diagonals, radius, stagger delay, mask, tooltips, visibility state, and a composite keyboard model. These require new geometry and interaction code; no existing Neural overlay component provides it.
+The reference release supports linear/circle/semi-circle/quarter-circle modes, eight directions including diagonals, radius, stagger delay, mask, tooltips, visibility state, and a composite keyboard model. These require new geometry and interaction code; no existing Neural overlay component provides it.
 
 Estimated complexity: **medium-high, 5–7 engineering days** including all modes, motion, accessibility, Showcase, and browser coverage.
 
@@ -98,7 +98,7 @@ Add:
 - top/bottom/left/right layouts and matching `aria-orientation`;
 - command, external URL, router-link, target, active-route, disabled, badge, and tooltip rendering through the action resolver;
 - focus/blur outputs, `aria-activedescendant` or roving tabindex, responsive breakpoint handling with SSR-safe `matchMedia` cleanup, item templates, and reduced-motion support;
-- pointer-neighbor magnification state and animation. PrimeNG 22.1.0 tracks the hovered item and resets on list mouseleave; the visible scale treatment is style-driven. Neural should implement this as progressive enhancement and remove it under reduced motion/coarse pointer conditions.
+- pointer-neighbor magnification state and animation. The reference release tracks the hovered item and resets on list mouseleave; the visible scale treatment is style-driven. Neural should implement this as progressive enhancement and remove it under reduced motion/coarse pointer conditions.
 
 Estimated complexity: **medium, 4–6 engineering days** including responsive layouts, route/link behavior, magnification, Showcase, axe, and browser tests.
 

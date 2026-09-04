@@ -753,7 +753,9 @@ export class NeuSelectComponent<
   readonly overlayPositions: ConnectedPosition[] = INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS.map(
     (position) => ({
       ...position,
-      offsetY: position.originY === 'bottom' ? 6 : -6,
+      // Keep the trigger and panel visually connected. The panel owns the
+      // opposite border edge, so a gap would leave an apparent broken border.
+      offsetY: 0,
     }),
   );
   readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
@@ -1522,7 +1524,7 @@ export class NeuSelectComponent<
     const triggerRect = origin.getBoundingClientRect();
     const viewportWidth = view.innerWidth;
     const viewportHeight = view.innerHeight;
-    const gap = 6;
+    const gap = 0;
     const geometry = constrainNeuConnectedOverlayGeometry(
       triggerRect,
       { width: viewportWidth, height: viewportHeight },
@@ -1540,8 +1542,6 @@ export class NeuSelectComponent<
       width: `${geometry.width}px`,
       maxHeight: `${maxHeight}px`,
     });
-    this.isPanelAbove.set(openAbove);
-
     if (scheduleViewportCheck && this.virtualScroll()) {
       this.requestOverlayFrame(() => this._viewport()?.checkViewportSize());
     }

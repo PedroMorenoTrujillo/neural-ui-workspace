@@ -22470,7 +22470,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly overlayScrollStrategy: _angular_cdk_overlay.RepositionScrollStrategy;"
+          "signature": "readonly overlayScrollStrategy: _angular_cdk_overlay.CloseScrollStrategy;"
         },
         {
           "id": "./multiselect#NeuMultiselectComponent.property:ɵcmp",

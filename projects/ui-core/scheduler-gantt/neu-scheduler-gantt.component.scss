@@ -94,15 +94,3 @@ neu-scheduler-gantt {
     flex-direction: column;
   }
 }
-
-@media (forced-colors: active) {
-  .neu-scheduler-gantt .neu-timeline-grid__item--selected {
-    outline: 2px solid Highlight;
-    outline-offset: -2px;
-  }
-
-  .neu-scheduler-gantt .neu-timeline-grid__item:focus-visible {
-    outline-color: CanvasText;
-    outline-style: dashed;
-  }
-}

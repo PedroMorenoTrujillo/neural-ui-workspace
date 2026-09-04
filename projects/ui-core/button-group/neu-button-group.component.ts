@@ -21,7 +21,7 @@ export type NeuButtonGroupOrientation = 'horizontal' | 'vertical';
   styleUrl: './neu-button-group.component.scss',
 })
 export class NeuButtonGroupComponent {
-  /** Layout direction; horizontal matches PrimeNG's default behavior. */
+  /** Layout direction; horizontal is the default behavior. */
   orientation = input<NeuButtonGroupOrientation>('horizontal');
   /** Makes projected buttons share the available inline size. */
   fluid = input<boolean>(false);

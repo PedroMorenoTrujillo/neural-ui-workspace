@@ -208,3 +208,17 @@ neu-timeline-grid {
     gap: var(--neu-space-3);
   }
 }
+
+@media (forced-colors: active) {
+  .neu-timeline-grid__slot--selected,
+  .neu-timeline-grid__item--selected {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+  }
+
+  .neu-timeline-grid__slot-button:focus-visible,
+  .neu-timeline-grid__item:focus-visible {
+    outline-color: currentColor;
+    outline-style: dashed;
+  }
+}

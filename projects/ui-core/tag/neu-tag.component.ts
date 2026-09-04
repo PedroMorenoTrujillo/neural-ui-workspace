@@ -50,7 +50,7 @@ export class NeuTagIconDirective {
 export class NeuTagComponent {
   @ContentChild(NeuTagIconDirective) iconTemplate?: NeuTagIconDirective;
 
-  /** Semantic color treatment aligned with PrimeNG 22.1. */
+  /** Semantic color treatment aligned with the public design contract. */
   severity = input<NeuTagSeverity | null>(null);
   /** Visible label. `0` and `''` render faithfully. */
   value = input<string | number | null | undefined>(null);

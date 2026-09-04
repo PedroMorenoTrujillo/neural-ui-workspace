@@ -1,6 +1,6 @@
-# NeuMultiselect — PrimeNG 19→22.1 parity and no-regression record
+# NeuMultiselect — external compatibility and no-regression record
 
-Sources: the exact published `primeng` packages `19.1.4`, `20.4.0`, `21.1.9`, and `22.1.0`. The current floor is PrimeNG 22.1 `Select[multiple]`; deprecated MultiSelect behavior is retained only where it remains useful for migration or where Neural already provided it.
+Sources: the exact published reference packages across four release lines. The current floor is the reference Select multiple mode; deprecated behavior is retained only where it remains useful for migration or where Neural already provided it.
 
 ## Current Prime 22.1 capability closure
 
@@ -25,7 +25,7 @@ Sources: the exact published `primeng` packages `19.1.4`, `20.4.0`, `21.1.9`, an
 | Comma/list display | PARITY | Bounded visible labels and overflow summary. |
 | Chip/token display | SUPERSET | Existing Neural runtime chip/count switch plus typed token and remove-icon templates. |
 | Selected summary | SUPERSET | Count format, selected-set template, max visible labels and preserved count mode. |
-| Overlay lifecycle | PARITY | CDK open/close, outside, Escape, Tab, reposition, scroll/resize and focus restoration. |
+| Overlay lifecycle | PARITY | CDK open/close, outside, Escape, Tab, scroll-dismiss, resize and focus restoration. |
 | Keyboard navigation | PARITY | Arrow, Home/End, PageUp/PageDown, Enter/Space, Escape, Tab and typeahead. |
 | Focus policies | PARITY | Auto option, hover, select-on-focus, filter autofocus and host autofocus are independent. |
 | Active descendant | SUPERSET | O1 stable IDs point only to eligible rendered options after filter/window replacement. |

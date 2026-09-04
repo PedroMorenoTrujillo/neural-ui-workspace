@@ -212,7 +212,9 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
       this._indicatorWidth.set(tabEl.offsetWidth + 'px');
       if (typeof tabEl.scrollIntoView === 'function') {
         tabEl.scrollIntoView({
-          behavior: 'smooth',
+          // Keep tab changes deterministic; smooth scrolling can hold route
+          // interactions open for several seconds in constrained viewports.
+          behavior: 'auto',
           block: 'nearest',
           inline: 'nearest',
         });

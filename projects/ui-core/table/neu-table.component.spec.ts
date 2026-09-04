@@ -817,7 +817,7 @@ describe('NeuTableComponent P2.2F2 selection parity', () => {
     expect(table['isRowSelected'](second)).toBe(true);
   });
 
-  it('supports Prime-style meta-key row replacement without changing checkbox additivity', async () => {
+  it('supports meta-key row replacement without changing checkbox additivity', async () => {
     const fixture = await createTable({ selectable: 'multiple', metaKeySelection: true });
     const table = fixture.componentInstance;
     table['toggleRow'](rows[0], 'row', { metaKey: false, ctrlKey: false } as MouseEvent);

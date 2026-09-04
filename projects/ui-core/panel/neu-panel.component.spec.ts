@@ -92,7 +92,7 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     expect(enhancedFixture.nativeElement.querySelector('.neu-scroll-area__viewport').getAttribute('aria-label')).toBe('Activity');
   });
 
-  it('exposes Prime-compatible enhanced track variants without changing native scrolling', async () => {
+  it('exposes enhanced track variants without changing native scrolling', async () => {
     await TestBed.configureTestingModule({ imports: [NeuScrollAreaComponent] }).compileComponents();
     const fixture = TestBed.createComponent(NeuScrollAreaComponent);
     fixture.componentRef.setInput('enhanced', true);

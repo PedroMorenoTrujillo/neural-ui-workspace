@@ -2147,7 +2147,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   >(undefined);
   readonly initialLayout = input<NeuTableLayout | null>(null);
   readonly rowKey = input<NeuTableRowKey<T>>('id' as NeuTableRowKey<T>);
-  /** Render-only tracking hook equivalent to Prime's rowTrackBy callback. */
+  /** Render-only tracking hook for row identity callbacks. */
   readonly rowTrackBy = input<NeuTableRowTrackBy<T> | undefined>(undefined);
   readonly bordered = input<boolean>(true);
   readonly roundedBorders = input<boolean>(true);
@@ -2170,7 +2170,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly selectionActions = input<readonly NeuTableSelectionAction<T>[]>([]);
 
   // ── Automatic state persistence ─────────────────────────────────────
-  /** Presence enables versioned automatic persistence, matching PrimeNG's stateful opt-in. */
+  /** Presence enables versioned automatic persistence as an explicit opt-in. */
   readonly stateKey = input<string | undefined>(undefined);
   readonly stateStorage = input<NeuTableStateStorage>('session');
 

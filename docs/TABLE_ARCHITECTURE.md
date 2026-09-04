@@ -113,7 +113,7 @@ Body-section entries already reflect Neural's canonical filtered, sorted, groupe
 
 Unrestricted sibling rows are supported only when `siblingRowsSupported` is `true`. In fixed-size, lazy-sparse, and append-only virtual modes it is `false`: consumers may customize the single managed virtualization unit and must render placeholder/spacer entries, but must not add variable-height sibling rows because those rows are not virtualization records and would invalidate range math. The context exposes `virtualized` and this policy explicitly.
 
-Compared with PrimeNG, the normal Neural body keeps stronger default ownership, while the advanced body section has equivalent complete-row/multiple-row freedom. The managed-row directive adds canonical behavior that Prime consumers otherwise reconstruct with table directives and bindings.
+Compared with the reference implementation, the normal Neural body keeps stronger default ownership, while the advanced body section has equivalent complete-row/multiple-row freedom. The managed-row directive adds canonical behavior that consumers otherwise reconstruct with table directives and bindings.
 
 ## Normalization and deliberate deferrals
 

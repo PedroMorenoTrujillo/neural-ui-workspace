@@ -1,6 +1,6 @@
-# NeuSelect — PrimeNG 22.1.0 parity record
+# NeuSelect — external compatibility record
 
-Baseline: the published PrimeNG `22.1.0` Select declaration and implementation plus the current official Select documentation. Neural preserves its existing `selectionChange` and URL-state contracts, uses the O1 option foundation for shared behavior, and exposes framework-neutral Angular CDK overlay/virtual behavior instead of Prime implementation objects.
+Baseline: the published reference Select declaration and implementation plus the current official Select documentation. Neural preserves its existing `selectionChange` and URL-state contracts, uses the O1 option foundation for shared behavior, and exposes framework-neutral Angular CDK overlay/virtual behavior instead of vendor implementation objects.
 
 ## Capability closure
 

@@ -5,7 +5,7 @@ export interface NeuTableScheduledFilters<T> {
 }
 
 /**
- * One coalesced timer mirrors Prime's Table-level filter scheduling while
+ * One coalesced timer mirrors Table-level filter scheduling while
  * keeping draft values transient and canonical state single-owned.
  */
 export class NeuTableFilterScheduler<T> {

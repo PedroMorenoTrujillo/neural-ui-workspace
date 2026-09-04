@@ -1,6 +1,6 @@
 # H5-B3 Option-Family Final Consumer-API Audit
 
-Generated from baseline `300f8bd6286c6b61068bd614431eb5e600609528`, historical Neural `4985b558b915f5208c69f9ef49db45528fa479a6`, the exact extracted `primeng@22.1.0` declarations, the H5-B3.F additions, the H5-B3.S structural cleanup, and the current compiled contract.
+Generated from baseline `300f8bd6286c6b61068bd614431eb5e600609528`, historical Neural `4985b558b915f5208c69f9ef49db45528fa479a6`, the exact extracted reference declarations, the H5-B3.F additions, the H5-B3.S structural cleanup, and the current compiled contract.
 
 > Verdict: H5-B3 is closed. There are no Option-family deprecations, aliases, compatibility double-emissions, v2 surfaces, unexplained changes, or REVIEW decisions.
 
@@ -845,13 +845,13 @@ All other class methods are explicitly `INTERNAL/UNSUPPORTED`. The consumer nami
 
 | Component | Implementation | Inputs | Outputs | Models | Supported methods | Effective template regions | Material excess explanation |
 |---|---|---:|---:|---:|---:|---:|---|
-| Select | PrimeNG 22.1.0 | 70 | 9 | 0 | 5 | 16 | Reference floor. |
+| Select | Reference release | 70 | 9 | 0 | 5 | 16 | Reference floor. |
 | Select | Neural final | 56 | 10 | 0 | 7 | 13 | One extra output preserves historical `selectionChange`; extra methods are typed toggle/direct-selection ergonomics. Every input has one owner. |
-| Multiselect | PrimeNG 22.1.0 | 72 | 12 | 1 | 4 | 19 | Reference floor. |
+| Multiselect | Reference release | 72 | 12 | 1 | 4 | 19 | Reference floor. |
 | Multiselect | Neural final | 66 | 13 | 0 | 6 | 18 | One extra output preserves historical `selectionChange`; open/openChange replaces Prime model metadata; extra methods expose CDK overlay focus/toggle ergonomics. |
-| Autocomplete | PrimeNG 22.1.0 | 75 | 13 | 0 | 3 | 11 | Reference floor. |
+| Autocomplete | Reference release | 75 | 13 | 0 | 3 | 11 | Reference floor. |
 | Autocomplete | Neural final | 65 | 13 | 0 | 7 | 9 | No output excess. Extra methods expose typed focus/reset/open-all/direct-selection operations; token-mode-only Prime templates are intentionally absent. |
-| Listbox | PrimeNG 22.1.0 | 57 | 9 | 0 | 1 | 13 | Reference floor. |
+| Listbox | Reference release | 57 | 9 | 0 | 1 | 13 | Reference floor. |
 | Listbox | Neural final | 51 | 10 | 0 | 3 | 9 | One extra output is the typed Neural drop/reorder proposal; method excess is typed filter/set/toggle-all control; micro-icon regions compose through full filter/item templates. |
 
 Lower Neural counts are intentional consolidation, not capability loss. All four retain arbitrary Angular embedded-view composition while the components own combobox/listbox DOM, focus, selection, and ARIA.

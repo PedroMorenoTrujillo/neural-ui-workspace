@@ -133,10 +133,11 @@ $panel-z: 200;
 // ---- Chips área / Chips area ----
 .neu-multiselect__chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--neu-space-1);
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .neu-multiselect__placeholder {
@@ -164,7 +165,14 @@ $panel-z: 200;
   font-size: var(--neu-text-xs);
   font-weight: 500;
   max-width: 160px;
+  min-width: 0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neu-multiselect__chip-label {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }

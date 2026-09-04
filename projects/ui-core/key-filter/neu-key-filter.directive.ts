@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 
-/** Patterns supported by PrimeNG KeyFilter 22.1.0. */
+/** Named patterns supported by the key-filter contract. */
 export type NeuKeyFilterPattern =
   | 'pint'
   | 'int'
@@ -62,7 +62,7 @@ const PATTERNS: Readonly<Record<NeuKeyFilterPattern, RegExp>> = {
   },
 })
 export class NeuKeyFilterDirective implements Validator {
-  /** Pattern to apply. PrimeNG-compatible named patterns and custom RegExp values are supported. */
+  /** Pattern to apply. Named patterns and custom RegExp values are supported. */
   readonly neuKeyFilter = input<NeuKeyFilterValue>(undefined);
   /** Validate the native/form value without blocking edit events. */
   readonly neuKeyFilterValidateOnly = input(false, { transform: booleanAttribute });

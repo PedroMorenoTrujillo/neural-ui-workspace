@@ -77,7 +77,7 @@ describe('NeuCarouselComponent', () => {
     expect(fixture.componentInstance.matchedResponsiveOption()).toBeUndefined(); expect(fixture.componentInstance.effectiveVisible()).toBe(4); expect(fixture.componentInstance.effectiveScroll()).toBe(2);
   });
 
-  it('selects the tightest matching PrimeNG max-width option without mutating consumer options', () => {
+  it('selects the tightest matching max-width option without mutating consumer options', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 560 });
     const options = Object.freeze([{ breakpoint: '767px', numVisible: 2, numScroll: 2 }, { breakpoint: '1200px', numVisible: 3, numScroll: 3 }, { breakpoint: '575px', numVisible: 1, numScroll: 1 }]);
     const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
