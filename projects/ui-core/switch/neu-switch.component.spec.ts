@@ -135,6 +135,17 @@ describe('NeuSwitchComponent', () => {
     expect(emittedVal).toBe(true);
   });
 
+  it('emits checkedChange after a user change', () => {
+    const df = TestBed.createComponent(NeuSwitchComponent);
+    const changes: boolean[] = [];
+    df.componentInstance.checkedChange.subscribe((value) => changes.push(value));
+    df.detectChanges();
+    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
+    input.checked = true;
+    input.dispatchEvent(new Event('change'));
+    expect(changes).toEqual([true]);
+  });
+
   it('onBlur should call _onTouched callback', () => {
     const df = TestBed.createComponent(NeuSwitchComponent);
     df.detectChanges();

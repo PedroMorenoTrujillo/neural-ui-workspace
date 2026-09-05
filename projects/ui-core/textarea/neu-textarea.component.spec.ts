@@ -102,6 +102,20 @@ describe('NeuTextareaComponent', () => {
     expect(onChange).toHaveBeenCalledWith('Nuevo texto');
   });
 
+  it('should emit valueChange only after user input', () => {
+    const { f, comp } = mk({ label: 'Test' });
+    const emitted = vi.fn();
+    comp.valueChange.subscribe(emitted);
+
+    comp.writeValue('Programmatic');
+    expect(emitted).not.toHaveBeenCalled();
+
+    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
+    el.value = 'User value';
+    el.dispatchEvent(new Event('input'));
+    expect(emitted).toHaveBeenCalledWith('User value');
+  });
+
   it('onBlur should call onTouched', () => {
     const { f, comp } = mk({ label: 'Test' });
     const onTouched = vi.fn();

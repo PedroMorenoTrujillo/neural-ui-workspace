@@ -15807,6 +15807,16 @@
           "signature": "writeValue(val: unknown): void;"
         },
         {
+          "id": "./input#NeuInputComponent.output:valueChange",
+          "name": "valueChange",
+          "kind": "output",
+          "publicName": "valueChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string>;"
+        },
+        {
           "id": "./input#NeuInputComponent.property:hasError",
           "name": "hasError",
           "kind": "property",
@@ -15844,7 +15854,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuInputComponent, \"neu-input\", never, {\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"floatingLabel\": {\n        \"alias\": \"floatingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autocomplete\": {\n        \"alias\": \"autocomplete\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"startIcon\": {\n        \"alias\": \"startIcon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"endIcon\": {\n        \"alias\": \"endIcon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"icon\": {\n        \"alias\": \"icon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"iconPosition\": {\n        \"alias\": \"iconPosition\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxlength\": {\n        \"alias\": \"maxlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minlength\": {\n        \"alias\": \"minlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pattern\": {\n        \"alias\": \"pattern\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, [\n    \"[neu-input-start]\",\n    \"[neu-input-end]\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuInputComponent, \"neu-input\", never, {\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"floatingLabel\": {\n        \"alias\": \"floatingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autocomplete\": {\n        \"alias\": \"autocomplete\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"startIcon\": {\n        \"alias\": \"startIcon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"endIcon\": {\n        \"alias\": \"endIcon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"icon\": {\n        \"alias\": \"icon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"iconPosition\": {\n        \"alias\": \"iconPosition\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxlength\": {\n        \"alias\": \"maxlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minlength\": {\n        \"alias\": \"minlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pattern\": {\n        \"alias\": \"pattern\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n}, never, [\n    \"[neu-input-start]\",\n    \"[neu-input-end]\"\n], true, never>;"
         },
         {
           "id": "./input#NeuInputComponent.property:ɵfac",
@@ -29061,6 +29071,16 @@
           "signature": "writeValue(val: unknown): void;"
         },
         {
+          "id": "./radio#NeuRadioGroupComponent.output:valueChange",
+          "name": "valueChange",
+          "kind": "output",
+          "publicName": "valueChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly valueChange: _angular_core.OutputEmitterRef<unknown>;"
+        },
+        {
           "id": "./radio#NeuRadioGroupComponent.property:_isDisabled",
           "name": "_isDisabled",
           "kind": "property",
@@ -29090,7 +29110,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuRadioGroupComponent, \"neu-radio-group\", never, {\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, [\n    \"*\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuRadioGroupComponent, \"neu-radio-group\", never, {\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n}, never, [\n    \"*\"\n], true, never>;"
         },
         {
           "id": "./radio#NeuRadioGroupComponent.property:ɵfac",
@@ -34867,12 +34887,22 @@
           "signature": "writeValue(val: unknown): void;"
         },
         {
+          "id": "./switch#NeuSwitchComponent.output:checkedChange",
+          "name": "checkedChange",
+          "kind": "output",
+          "publicName": "checkedChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;"
+        },
+        {
           "id": "./switch#NeuSwitchComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSwitchComponent, \"neu-switch\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSwitchComponent, \"neu-switch\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"checkedChange\": \"checkedChange\";\n}, never, never, true, never>;"
         },
         {
           "id": "./switch#NeuSwitchComponent.property:ɵfac",
@@ -45207,6 +45237,16 @@
           "signature": "writeValue(val: unknown): void;"
         },
         {
+          "id": "./textarea#NeuTextareaComponent.output:valueChange",
+          "name": "valueChange",
+          "kind": "output",
+          "publicName": "valueChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string>;"
+        },
+        {
           "id": "./textarea#NeuTextareaComponent.property:hasError",
           "name": "hasError",
           "kind": "property",
@@ -45228,7 +45268,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTextareaComponent, \"neu-textarea\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rows\": {\n        \"alias\": \"rows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autoResize\": {\n        \"alias\": \"autoResize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizable\": {\n        \"alias\": \"resizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxlength\": {\n        \"alias\": \"maxlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTextareaComponent, \"neu-textarea\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rows\": {\n        \"alias\": \"rows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autoResize\": {\n        \"alias\": \"autoResize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizable\": {\n        \"alias\": \"resizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxlength\": {\n        \"alias\": \"maxlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n}, never, never, true, never>;"
         },
         {
           "id": "./textarea#NeuTextareaComponent.property:ɵfac",
@@ -58434,6 +58474,18 @@
       "signature": "type: _angular_core.InputSignal<NeuInputType>;"
     },
     {
+      "id": "./input#NeuInputComponent.output:valueChange",
+      "entrypoint": "./input",
+      "declaration": "NeuInputComponent",
+      "selector": "neu-input",
+      "propertyName": "valueChange",
+      "publicName": "valueChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string>;"
+    },
+    {
       "id": "./kanban#NeuKanbanComponent.input:columns",
       "entrypoint": "./kanban",
       "declaration": "NeuKanbanComponent",
@@ -62780,6 +62832,18 @@
       "signature": "readonly direction: _angular_core.InputSignal<\"row\" | \"column\">;"
     },
     {
+      "id": "./radio#NeuRadioGroupComponent.output:valueChange",
+      "entrypoint": "./radio",
+      "declaration": "NeuRadioGroupComponent",
+      "selector": "neu-radio-group",
+      "propertyName": "valueChange",
+      "publicName": "valueChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly valueChange: _angular_core.OutputEmitterRef<unknown>;"
+    },
+    {
       "id": "./rating#NeuRatingComponent.input:disabled",
       "entrypoint": "./rating",
       "declaration": "NeuRatingComponent",
@@ -65168,6 +65232,18 @@
       "signature": "readonly name: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./switch#NeuSwitchComponent.output:checkedChange",
+      "entrypoint": "./switch",
+      "declaration": "NeuSwitchComponent",
+      "selector": "neu-switch",
+      "propertyName": "checkedChange",
+      "publicName": "checkedChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;"
+    },
+    {
       "id": "./table-core#NeuTableCoreComponent.input:bordered",
       "entrypoint": "./table-core",
       "declaration": "NeuTableCoreComponent",
@@ -67280,6 +67356,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly size: _angular_core.InputSignal<\"sm\" | \"md\" | \"lg\">;"
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.output:valueChange",
+      "entrypoint": "./textarea",
+      "declaration": "NeuTextareaComponent",
+      "selector": "neu-textarea",
+      "propertyName": "valueChange",
+      "publicName": "valueChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string>;"
     },
     {
       "id": "./timeline-grid#NeuTimelineGridComponent.input:columns",
@@ -69993,9 +70081,9 @@
       "type": 184,
       "variable": 1
     },
-    "publicSymbols": 5733,
+    "publicSymbols": 5737,
     "statuses": {
-      "SUPPORTED": 3642,
+      "SUPPORTED": 3646,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
       "INTERNAL/UNSUPPORTED": 2087,
@@ -70003,9 +70091,9 @@
     },
     "bindings": {
       "input": 1199,
-      "output": 277,
+      "output": 281,
       "model": 2,
-      "total": 1478
+      "total": 1482
     },
     "designTokens": 258
   }

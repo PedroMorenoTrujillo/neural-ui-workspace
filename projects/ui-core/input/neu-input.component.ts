@@ -8,6 +8,7 @@ import {
   forwardRef,
   inject,
   input,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -148,6 +149,9 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
   styleUrl: './neu-input.component.scss',
 })
 export class NeuInputComponent implements ControlValueAccessor {
+  /** Emits after the user changes the value. Programmatic form writes do not emit. */
+  readonly valueChange = output<string>();
+
   /** Tipo de input HTML / HTML input type */
   type = input<NeuInputType>('text');
 
@@ -224,7 +228,9 @@ export class NeuInputComponent implements ControlValueAccessor {
   readonly startIconPath = computed(() => '');
   readonly hasStartContent = computed(() => false);
   protected readonly _hasIconLeft = computed(() => !!this.icon() && this.iconPosition() === 'left');
-  protected readonly _hasIconRight = computed(() => !!this.icon() && this.iconPosition() === 'right');
+  protected readonly _hasIconRight = computed(
+    () => !!this.icon() && this.iconPosition() === 'right',
+  );
 
   // --- ControlValueAccessor ---
   private _onChange: (v: string) => void = () => {};
@@ -262,6 +268,7 @@ export class NeuInputComponent implements ControlValueAccessor {
     const value = (event.target as HTMLInputElement).value;
     this._value.set(value);
     this._onChange(value);
+    this.valueChange.emit(value);
   }
 
   onAnimationStart(event: AnimationEvent): void {
@@ -274,6 +281,7 @@ export class NeuInputComponent implements ControlValueAccessor {
     if (value === this._value()) return;
     this._value.set(value);
     this._onChange(value);
+    this.valueChange.emit(value);
   }
 
   onFocus(): void {

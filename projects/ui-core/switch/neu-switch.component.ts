@@ -6,6 +6,7 @@ import {
   forwardRef,
   inject,
   input,
+  output,
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -60,6 +61,9 @@ export class NeuSwitchComponent implements ControlValueAccessor {
   readonly name = input<string>('');
   readonly disabled = input<boolean>(false);
 
+  /** Emite el nuevo estado tras una interacción del usuario. Los formularios Angular siguen recibiendo el mismo valor mediante ControlValueAccessor. / Emits the new state after user interaction. Angular Forms continue to receive the same value through ControlValueAccessor. */
+  readonly checkedChange = output<boolean>();
+
   protected readonly _id = inject(NeuIdGenerator).getId('neu-switch-');
 
   protected readonly _checked = signal(false);
@@ -73,6 +77,7 @@ export class NeuSwitchComponent implements ControlValueAccessor {
   onChange(event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
     this._checked.set(checked);
+    this.checkedChange.emit(checked);
     this._onChange(checked);
   }
 

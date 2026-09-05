@@ -8,6 +8,7 @@ import {
   forwardRef,
   inject,
   input,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -81,6 +82,9 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
   styleUrl: './neu-textarea.component.scss',
 })
 export class NeuTextareaComponent implements ControlValueAccessor {
+  /** Emits after the user changes the value. Programmatic form writes do not emit. */
+  readonly valueChange = output<string>();
+
   readonly label = input('');
   readonly rows = input<number>(3);
   /** Tamaño del campo: 'sm' = compacto | 'md' = estándar | 'lg' = grande / Field size */
@@ -131,6 +135,7 @@ export class NeuTextareaComponent implements ControlValueAccessor {
     const el = event.target as HTMLTextAreaElement;
     this._value.set(el.value);
     this._onChange(el.value);
+    this.valueChange.emit(el.value);
 
     if (this.autoResize()) {
       el.style.height = 'auto';

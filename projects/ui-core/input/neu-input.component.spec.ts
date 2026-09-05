@@ -21,7 +21,10 @@ function mk(inputs: Record<string, unknown> = {}) {
 class NgModelInitialValueHost {
   value = 'Initial consumer value';
   changes: string[] = [];
-  changed(value: string): void { this.value = value; this.changes.push(value); }
+  changed(value: string): void {
+    this.value = value;
+    this.changes.push(value);
+  }
 }
 
 describe('NeuInputComponent', () => {
@@ -140,6 +143,20 @@ describe('NeuInputComponent', () => {
     expect(onChange).toHaveBeenCalledWith('Pedro');
   });
 
+  it('should emit valueChange only after user input', () => {
+    const { f, comp } = mk({ label: 'Test' });
+    const emitted = vi.fn();
+    comp.valueChange.subscribe(emitted);
+
+    comp.writeValue('Programmatic');
+    expect(emitted).not.toHaveBeenCalled();
+
+    const el: HTMLInputElement = f.nativeElement.querySelector('input');
+    el.value = 'User value';
+    el.dispatchEvent(new Event('input'));
+    expect(emitted).toHaveBeenCalledWith('User value');
+  });
+
   it('onBlur should call onTouched and remove focused state', () => {
     const { f, comp } = mk({ label: 'Test' });
     const onTouched = vi.fn();
@@ -194,7 +211,9 @@ describe('NeuInputComponent', () => {
 
     expect(comp.hasValue()).toBe(true);
     expect(onChange).toHaveBeenCalledWith('learner@example.com');
-    expect(f.nativeElement.querySelector('.neu-input__wrapper')?.classList).toContain('neu-input__wrapper--has-value');
+    expect(f.nativeElement.querySelector('.neu-input__wrapper')?.classList).toContain(
+      'neu-input__wrapper--has-value',
+    );
   });
 
   it('does not emit duplicate changes when the native value already matches the form', () => {

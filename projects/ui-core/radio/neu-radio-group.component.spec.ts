@@ -85,6 +85,19 @@ describe('NeuRadioGroupComponent', () => {
     expect(changes).toEqual(['option-a']);
   });
 
+  it('should emit valueChange only after user selection', () => {
+    const f = TestBed.createComponent(NeuRadioGroupComponent);
+    f.detectChanges();
+    const emitted = vi.fn();
+    f.componentInstance.valueChange.subscribe(emitted);
+
+    f.componentInstance.writeValue('option-b');
+    expect(emitted).not.toHaveBeenCalled();
+
+    f.componentInstance.select('option-a');
+    expect(emitted).toHaveBeenCalledWith('option-a');
+  });
+
   it('select() should call onTouched callback', () => {
     const f = TestBed.createComponent(NeuRadioGroupComponent);
     f.detectChanges();

@@ -6,6 +6,7 @@ import {
   forwardRef,
   inject,
   input,
+  output,
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -53,6 +54,8 @@ export class NeuRadioGroupComponent implements ControlValueAccessor {
   readonly direction = input<'row' | 'column'>('column');
   /** Etiqueta accesible del grupo (WCAG 4.1.2). Usar cuando no hay <legend> visible. / Accessible label for the group (WCAG 4.1.2). Use when there is no visible <legend>. */
   readonly ariaLabel = input<string>('');
+  /** Emits after the user selects a value. Programmatic form writes do not emit. */
+  readonly valueChange = output<unknown>();
 
   /** Nombre HTML compartido por todos los neu-radio hijos — garantiza la exclusión mutua nativa / HTML name shared by all child neu-radio — guarantees native mutual exclusion */
   readonly _name = inject(NeuIdGenerator).getId('neu-radio-group-');
@@ -66,6 +69,7 @@ export class NeuRadioGroupComponent implements ControlValueAccessor {
   select(value: unknown): void {
     this._value.set(value);
     this._onChange(value);
+    this.valueChange.emit(value);
     this._onTouched();
   }
 

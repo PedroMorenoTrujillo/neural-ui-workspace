@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1478,
-    "bindingDelta": 311,
+    "declarationBindings": 1482,
+    "bindingDelta": 315,
     "mapped": 932,
     "aliasCorrections": 4,
     "missingOldEntries": 229,
-    "newlyDiscovered": 540,
+    "newlyDiscovered": 544,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
       "declaration-or-selector-was-not-recorded": 407,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 124
+      "multiline-annotated-or-compound-declaration-was-missed": 128
     }
   },
   "mappings": [
@@ -4802,6 +4802,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./input#NeuInputComponent.output:valueChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./listbox#NeuListboxComponent.input:dataFirst",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5394,6 +5398,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./radio#NeuRadioGroupComponent.output:valueChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./scroll-top#NeuScrollTopComponent.input:behavior",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -5614,6 +5622,10 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./switch#NeuSwitchComponent.output:checkedChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./table#NeuTableBodySectionDirective.input:typeSource",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -5740,6 +5752,10 @@
     {
       "id": "./tags#NeuTagsComponent.output:valueChange",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.output:valueChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./timeline#NeuTimelineComponent.input:items",
