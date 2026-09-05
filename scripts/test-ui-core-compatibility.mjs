@@ -137,7 +137,7 @@ try {
       [
         '--input-type=module',
         '--eval',
-        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/tree-table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/chart'); console.log('SSR entrypoint imports passed')",
+        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/tree-table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/chart'); await import('@neural-ui/core/color-picker'); console.log('SSR entrypoint imports passed')",
       ],
     ],
   ];
@@ -155,7 +155,8 @@ try {
   }
   console.log(`Angular ${version} compatibility fixture passed`);
 } finally {
-  if (process.env.NEURAL_UI_KEEP_COMPAT_FIXTURE === '1') console.log(`Retained compatibility fixture: ${fixture}`);
+  if (process.env.NEURAL_UI_KEEP_COMPAT_FIXTURE === '1')
+    console.log(`Retained compatibility fixture: ${fixture}`);
   else rmSync(fixture, { recursive: true, force: true });
   rmSync(npmCache, { recursive: true, force: true });
 }
