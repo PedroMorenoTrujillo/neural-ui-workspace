@@ -87,7 +87,7 @@ function filesIn(directory) {
     const file = join(directory, entry.name);
     return entry.isDirectory()
       ? filesIn(file)
-      : /\.(scss|css|ts|html)$/.test(file) && !file.endsWith('.spec.ts')
+      : /\.(scss|css|ts|html)$/.test(file) && !file.endsWith('.spec.ts') && !file.endsWith('neu-token-name.generated.ts')
         ? [file]
         : [];
   });

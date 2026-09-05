@@ -32,8 +32,8 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 <!-- neural-ui-metrics:start -->
 - **Version:** 1.15.0-rc.0
 - **Entry points:** 104
-- **Automated tests:** 3231
-- **Coverage:** 98.12% statements · 96.47% branches · 98.55% functions · 98.84% lines
+- **Automated tests:** 3235
+- **Coverage:** 98.12% statements · 96.48% branches · 98.55% functions · 98.85% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
@@ -230,3 +230,9 @@ For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or new
 Neural UI was created and is maintained by [Pedro Moreno Trujillo](https://github.com/PedroMorenoTrujillo).
 
 Copyright © 2026 Pedro Moreno Trujillo. Released under the MIT License.
+
+## Static typed presets / Presets estáticos tipados
+
+Use `NeuPreset`, `NeuPresetTokens`, `NeuTokenName` and build-time `neuPresetCss` from `@neural-ui/core/foundation`. Generate CSS, load after Neural styles, activate on html with `data-neu-preset`. Light/dark maps follow `data-theme`; high contrast and forced colors take precedence. No provider, browser runtime or universal Parts/PT API. See the repository `docs/THEMING_PRESETS.md` and Showcase Theming.
+
+Usa esos tipos y `neuPresetCss` durante la compilación. Carga el CSS después de Neural y activa `data-neu-preset` en html. Los mapas claro/oscuro siguen `data-theme`; alto contraste y colores forzados tienen prioridad. Sin proveedor, runtime de navegador ni API Parts/PT universal. Consulta `docs/THEMING_PRESETS.md` y Theming en Showcase.
