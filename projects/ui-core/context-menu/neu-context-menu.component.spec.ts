@@ -26,7 +26,9 @@ class TestHostComponent {
 }
 
 @Component({
-  template: `<ng-template #item let-item><strong class="custom-context-item">{{ item.key }}</strong></ng-template>`,
+  template: `<ng-template #item let-item
+    ><strong class="custom-context-item">{{ item.key }}</strong></ng-template
+  >`,
 })
 class ContextMenuTemplateHostComponent {
   readonly item = viewChild.required<TemplateRef<{ $implicit: NeuContextMenuItem }>>('item');
@@ -210,6 +212,21 @@ describe('NeuContextMenuDirective', () => {
 
     expect(detachSpy).toHaveBeenCalled();
     expect(dir._overlayRef).not.toBe(firstOverlayRef);
+  });
+
+  it('finalizes a close when the retained overlay is already detached', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuContextMenuDirective) as any;
+    const closed = vi.spyOn(dir.menuClosed, 'emit');
+
+    dir.openAt(20, 20);
+    vi.spyOn(dir._overlayRef, 'hasAttached').mockReturnValue(false);
+    dir.close();
+
+    expect(closed).toHaveBeenCalledOnce();
+    expect(dir._overlayRef).toBeNull();
   });
 
   it('Escape from the attached overlay component should close the directive overlay', async () => {

@@ -3,6 +3,10 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const workspaceRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const bundleProfile = process.env['NEURAL_UI_BUNDLE_PROFILE'] ?? 'main';
+if (!['pr', 'main', 'release'].includes(bundleProfile)) {
+  throw new Error(`Unsupported NEURAL_UI_BUNDLE_PROFILE: ${bundleProfile}`);
+}
 const commands = [
   ['npm', ['test']],
   ['npm', ['run', 'test:release-artifacts']],
@@ -10,8 +14,9 @@ const commands = [
   ['npm', ['run', 'prepare:release-artifacts']],
   ['npm', ['run', 'audit:entrypoints']],
   ['npm', ['run', 'audit:cva']],
-  ['npm', ['run', 'audit:bundle']],
+  ['npm', ['run', `audit:bundle:${bundleProfile}`]],
   ['npm', ['run', 'audit:table-architecture']],
+  ['npm', ['run', 'audit:h5c2-duplication']],
   ['npm', ['run', 'audit:logical-css']],
   ['npm', ['run', 'audit:contracts']],
   ['npm', ['run', 'audit:docs']],

@@ -112,7 +112,7 @@
 
   .neu-textarea__wrapper--focused.neu-textarea__wrapper--error &,
   .neu-textarea__wrapper--error & {
-    color: var(--neu-error);
+    color: var(--neu-error-text, var(--neu-error));
   }
 
   .neu-textarea__wrapper--disabled & {

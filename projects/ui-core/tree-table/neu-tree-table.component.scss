@@ -94,6 +94,10 @@
   text-transform: uppercase;
 }
 
+:where([data-theme='dark'], .dark) .neu-tree-table__badge {
+  color: var(--neu-primary-light, #339dff);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .neu-tree-table__toggle,
   .neu-tree-table__toggle svg {

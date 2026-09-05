@@ -1010,7 +1010,7 @@
 }
 
 .neu-table__export-btn--primary {
-  color: var(--neu-primary);
+  color: var(--neu-primary-dark, #005fcc);
   border-color: var(--neu-primary-200);
   background: var(--neu-surface);
 }
@@ -1168,6 +1168,13 @@
   &--default {
     background: var(--neu-surface-3);
     color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
+  }
+}
+
+:where([data-theme='dark'], .dark) .neu-table__cell-badge {
+  &--primary,
+  &--info {
+    color: var(--neu-primary-light, #339dff);
   }
 }
 

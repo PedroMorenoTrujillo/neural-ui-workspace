@@ -139,6 +139,15 @@ describe('NeuPaginationComponent', () => {
     expect(df.componentInstance.totalPages()).toBe(5);
   });
 
+  it('normalizes non-finite totals and page sizes to a single safe page', () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('total', Number.NaN);
+    df.componentRef.setInput('pageSize', Number.POSITIVE_INFINITY);
+    df.detectChanges();
+
+    expect(df.componentInstance.totalPages()).toBe(1);
+  });
+
   it('pages() computes visible page numbers', () => {
     const df = TestBed.createComponent(NeuPaginationComponent);
     df.componentRef.setInput('total', 30);

@@ -116,6 +116,31 @@ describe('NeuMenuComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Child');
   });
 
+  it('forwards expansion proposals from a rendered child menu', () => {
+    fixture.componentRef.setInput('items', [
+      {
+        key: 'parent',
+        label: 'Parent',
+        children: [
+          {
+            key: 'child-branch',
+            label: 'Child branch',
+            children: [{ key: 'grandchild', label: 'Grandchild' }],
+          },
+        ],
+      },
+    ]);
+    fixture.detectChanges();
+    const proposals = vi.spyOn(fixture.componentInstance.expandedKeysChange, 'emit');
+    const childBranch = fixture.nativeElement.querySelector(
+      '.neu-menu__child [role="menuitem"]',
+    ) as HTMLButtonElement;
+
+    childBranch.click();
+
+    expect(proposals).toHaveBeenCalledWith(['parent']);
+  });
+
   it('removes expansion listeners when destroyed during a branch proposal', () => {
     fixture.componentRef.setInput('items', [
       { key: 'parent', label: 'Parent', children: [{ key: 'child', label: 'Child' }] },

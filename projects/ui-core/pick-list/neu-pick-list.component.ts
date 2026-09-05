@@ -133,6 +133,7 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
                 [neuDraggableDisabled]="isOptionDisabled(item)"
                 [neuDragPointer]="dragDrop()"
                 [neuDragKeyboard]="dragDrop()"
+                neuDragRole="option"
                 [neuDragAriaLabel]="'Move ' + optionLabelOf(item)"
                 [class.is-selected]="isLocationSelected(item, location)"
                 [disabled]="isOptionDisabled(item)"
@@ -627,46 +628,50 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
         (input)="setFilter($event)"
       />
     }
-    <div role="list" neuDragDropGroup [neuDragDropGroupDisabled]="!dragDrop()">
+    <div neuDragDropGroup [neuDragDropGroupDisabled]="!dragDrop()">
       <div
         class="neu-order-list__items"
-        role="listbox"
-        aria-multiselectable="true"
+        role="group"
         [attr.aria-label]="ariaLabel()"
         [neuDropZone]="'order'"
         neuDropScope="neu-order-list"
         [neuDropZoneDisabled]="!dragDrop()"
         [neuDropAriaLabel]="'Reorder ' + ariaLabel()"
-        neuDropRole="listbox"
+        neuDropRole="group"
         (drop)="onDrop($event)"
       >
         @for (item of visibleItems(); track optionValueOf(item); let index = $index) {
           <div
             class="neu-order-list__item"
-            role="option"
-            [attr.aria-selected]="isSelected(item)"
-            [attr.aria-disabled]="isOptionDisabled(item)"
             [class.is-selected]="isSelected(item)"
             [neuDraggable]="item"
             neuDragScope="neu-order-list"
+            neuDragRole="group"
             [neuDraggableDisabled]="isOptionDisabled(item)"
             [neuDragPointer]="dragDrop()"
             [neuDragKeyboard]="dragDrop()"
             [neuDragAriaLabel]="'Move ' + optionLabelOf(item)"
-            (click)="toggle(item)"
           >
-            @if (itemTpl()) {
-              <ng-container
-                [ngTemplateOutlet]="itemTpl()!.templateRef"
-                [ngTemplateOutletContext]="{
-                  $implicit: item,
-                  index: dataIndex(item),
-                  selected: isSelected(item),
-                }"
-              />
-            } @else {
-              <span>{{ optionLabelOf(item) }}</span>
-            }
+            <button
+              class="neu-order-list__option"
+              type="button"
+              [attr.aria-pressed]="isSelected(item)"
+              [disabled]="isOptionDisabled(item)"
+              (click)="toggle(item)"
+            >
+              @if (itemTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{
+                    $implicit: item,
+                    index: dataIndex(item),
+                    selected: isSelected(item),
+                  }"
+                />
+              } @else {
+                <span>{{ optionLabelOf(item) }}</span>
+              }
+            </button>
             @for (direction of directions; track direction) {
               <button
                 type="button"

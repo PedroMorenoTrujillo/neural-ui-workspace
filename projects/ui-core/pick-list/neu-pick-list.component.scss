@@ -96,10 +96,10 @@
   align-items: center;
 }
 
-.neu-order-list__item > span,
-.neu-order-list__item > :first-child {
+.neu-order-list__option {
   min-width: 0;
   overflow-wrap: anywhere;
+  text-align: start;
 }
 
 @media (pointer: coarse) {

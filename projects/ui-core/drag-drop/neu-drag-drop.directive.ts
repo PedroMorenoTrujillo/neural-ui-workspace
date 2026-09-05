@@ -210,7 +210,8 @@ export class NeuDragDropGroupDirective implements OnChanges, OnInit {
     '[attr.tabindex]': 'disabled() ? -1 : tabIndex()',
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
-    '[attr.aria-pressed]': 'keyboardEnabled() ? (keyboardActive() ? "true" : "false") : null',
+    '[attr.aria-pressed]':
+      'keyboardEnabled() && role() === "button" ? (keyboardActive() ? "true" : "false") : null',
     '[attr.aria-keyshortcuts]': 'keyboardEnabled() ? "Enter Space Escape" : null',
     '[attr.data-neu-drag-state]': 'active() ? "active" : "idle"',
     '(keydown)': 'onKeydown($event)',
@@ -275,6 +276,12 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
   }
 
   onKeydown(event: KeyboardEvent): void {
+    // Composite draggable rows may contain native controls (for example,
+    // OrderList reorder buttons). Their keyboard activation belongs to the
+    // control, not to the draggable row that receives the bubbled event.
+    if (event.target !== this.host) {
+      return;
+    }
     if (!this.keyboardEnabled() || this.disabled()) {
       return;
     }

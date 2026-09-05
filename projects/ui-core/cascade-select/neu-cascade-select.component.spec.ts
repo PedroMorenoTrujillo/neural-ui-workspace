@@ -26,7 +26,8 @@ interface DescendantDepartment {
   descendants?: DescendantDepartment[];
 }
 
-const nextAnimationFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+const nextAnimationFrame = () =>
+  new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 const leaf = (id: number, name: string): Department => ({ id, name });
 const hierarchy: Department[] = [
@@ -63,7 +64,9 @@ const hierarchy: Department[] = [
       [clearable]="true"
       (selectionChange)="selection = $event"
     >
-      <ng-template neuCascadeSelectItem let-node let-depth="depth">Item {{ node.name }} {{ depth }}</ng-template>
+      <ng-template neuCascadeSelectItem let-node let-depth="depth"
+        >Item {{ node.name }} {{ depth }}</ng-template
+      >
       <ng-template neuCascadeSelectSelected let-node>Selected {{ node?.name }}</ng-template>
       <ng-template neuCascadeSelectHeader>Header</ng-template>
       <ng-template neuCascadeSelectEmpty>Empty</ng-template>
@@ -135,7 +138,10 @@ describe('NeuCascadeSelectComponent', () => {
   });
 
   it('supports key and function accessors, including custom children', () => {
-    const component = fixture.componentInstance as unknown as NeuCascadeSelectComponent<Department, string>;
+    const component = fixture.componentInstance as unknown as NeuCascadeSelectComponent<
+      Department,
+      string
+    >;
     expect(component['optionLabelOf'](hierarchy[0])).toBe('Europe');
     fixture.componentRef.setInput('optionLabel', (node: Department) => node.name.toUpperCase());
     fixture.componentRef.setInput('optionValue', (node: Department): string => `dep-${node.id}`);
@@ -149,7 +155,10 @@ describe('NeuCascadeSelectComponent', () => {
   });
 
   it('resolves optionChildren by key against descendant nodes', () => {
-    const component = fixture.componentInstance as unknown as NeuCascadeSelectComponent<DescendantDepartment, number>;
+    const component = fixture.componentInstance as unknown as NeuCascadeSelectComponent<
+      DescendantDepartment,
+      number
+    >;
     const nodes: DescendantDepartment[] = [
       { id: 10, name: 'Platform', descendants: [{ id: 11, name: 'Frontend' }] },
     ];
@@ -163,7 +172,10 @@ describe('NeuCascadeSelectComponent', () => {
   });
 
   it('supports the options alias and full-object values when optionValue is omitted', () => {
-    const component = fixture.componentInstance as unknown as NeuCascadeSelectComponent<Department, Department>;
+    const component = fixture.componentInstance as unknown as NeuCascadeSelectComponent<
+      Department,
+      Department
+    >;
     fixture.componentRef.setInput('nodes', []);
     fixture.componentRef.setInput('options', hierarchy);
     fixture.componentRef.setInput('optionLabel', 'name');
@@ -286,7 +298,9 @@ describe('NeuCascadeSelectComponent', () => {
 
   it('opens from trigger, closes with Escape/backdrop, and returns focus', async () => {
     const component = fixture.componentInstance;
-    const trigger = fixture.nativeElement.querySelector('.neu-cascade-select__trigger') as HTMLButtonElement;
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-cascade-select__trigger',
+    ) as HTMLButtonElement;
     trigger.focus();
     component.openPanel();
     fixture.detectChanges();
@@ -314,14 +328,18 @@ describe('NeuCascadeSelectComponent', () => {
     fixture.componentRef.setInput('label', 'Department');
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
-    const trigger = fixture.nativeElement.querySelector('.neu-cascade-select__trigger') as HTMLElement;
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-cascade-select__trigger',
+    ) as HTMLElement;
     expect(trigger.getAttribute('aria-haspopup')).toBe('listbox');
     expect(trigger.getAttribute('aria-label')).toBe('Department');
     expect(trigger.getAttribute('aria-disabled')).toBe('true');
     fixture.componentRef.setInput('disabled', false);
     component.openPanel();
     fixture.detectChanges();
-    expect(document.getElementById(`${component.panelId}-listbox`)?.getAttribute('role')).toBe('listbox');
+    expect(document.getElementById(`${component.panelId}-listbox`)?.getAttribute('role')).toBe(
+      'listbox',
+    );
     expect(document.querySelector('[role="option"]')?.getAttribute('aria-disabled')).toBeNull();
   });
 
@@ -333,7 +351,9 @@ describe('NeuCascadeSelectComponent', () => {
     component.openPanel();
     hostFixture.detectChanges();
     expect(document.querySelector('.neu-cascade-select__panel')?.textContent).toContain('Header');
-    expect(document.querySelector('.neu-cascade-select__option')?.textContent).toContain('Europe 0');
+    expect(document.querySelector('.neu-cascade-select__option')?.textContent).toContain(
+      'Europe 0',
+    );
     component.activate(hierarchy[0]);
     component.activate(hierarchy[0].children![0]);
     component.activate(hierarchy[0].children![0].children![0]);
@@ -349,8 +369,12 @@ describe('NeuCascadeSelectComponent', () => {
     fixture.componentRef.setInput('clearable', true);
     component.writeValue(3);
     fixture.detectChanges();
-    const trigger = fixture.nativeElement.querySelector('.neu-cascade-select__trigger') as HTMLButtonElement;
-    const clear = fixture.nativeElement.querySelector('.neu-cascade-select__clear') as HTMLButtonElement;
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-cascade-select__trigger',
+    ) as HTMLButtonElement;
+    const clear = fixture.nativeElement.querySelector(
+      '.neu-cascade-select__clear',
+    ) as HTMLButtonElement;
     expect(trigger.querySelector('.neu-cascade-select__clear')).toBeNull();
     clear.click();
     expect(component.value()).toBeNull();
@@ -362,7 +386,9 @@ describe('NeuCascadeSelectComponent', () => {
     fixture.componentRef.setInput('clearable', true);
     component.writeValue(3);
     fixture.detectChanges();
-    const clear = fixture.nativeElement.querySelector('.neu-cascade-select__clear') as HTMLButtonElement;
+    const clear = fixture.nativeElement.querySelector(
+      '.neu-cascade-select__clear',
+    ) as HTMLButtonElement;
     expect(clear.disabled).toBe(false);
     expect(clear.type).toBe('button');
     expect(clear.getAttribute('aria-label')).toBe('Clear selection');
@@ -371,7 +397,9 @@ describe('NeuCascadeSelectComponent', () => {
     clear.click();
     await nextAnimationFrame();
     expect(component.value()).toBeNull();
-    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.neu-cascade-select__trigger'));
+    expect(document.activeElement).toBe(
+      fixture.nativeElement.querySelector('.neu-cascade-select__trigger'),
+    );
   });
 
   it('disables clear with the component and never clears while disabled', () => {
@@ -380,7 +408,9 @@ describe('NeuCascadeSelectComponent', () => {
     component.writeValue(3);
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
-    const clear = fixture.nativeElement.querySelector('.neu-cascade-select__clear') as HTMLButtonElement;
+    const clear = fixture.nativeElement.querySelector(
+      '.neu-cascade-select__clear',
+    ) as HTMLButtonElement;
     expect(clear.disabled).toBe(true);
     clear.click();
     expect(component.value()).toBe(3);
@@ -409,6 +439,16 @@ describe('NeuCascadeSelectComponent', () => {
   it('does not throw when browser focus and positioning paths run', () => {
     expect(() => fixture.componentInstance.openPanel()).not.toThrow();
     expect(() => fixture.componentInstance.close()).not.toThrow();
+  });
+
+  it('ignores a permitted dismissal request after the panel is already closed', () => {
+    const component = fixture.componentInstance;
+    const closed = vi.spyOn(component.selectionChange, 'emit');
+
+    component.requestClose('outside-pointer', new Event('pointerdown'));
+
+    expect(component.open()).toBe(false);
+    expect(closed).not.toHaveBeenCalled();
   });
 
   it('finds selections deterministically through cycles, shared branches, and depth 5,000', () => {
@@ -514,9 +554,7 @@ describe('NeuCascadeSelectComponent', () => {
     expect(component.open()).toBe(true);
     component.onTriggerKeydown(new KeyboardEvent('keydown', { key: ' ', cancelable: true }));
     expect(component.open()).toBe(false);
-    component.onTriggerKeydown(
-      new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }),
-    );
+    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
     expect(component.open()).toBe(true);
     component.onTriggerKeydown(
       new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
@@ -528,10 +566,7 @@ describe('NeuCascadeSelectComponent', () => {
       new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }),
       99,
     );
-    component.onOptionKeydown(
-      new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }),
-      99,
-    );
+    component.onOptionKeydown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }), 99);
     component.onOptionKeydown(
       new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }),
       1,
@@ -546,10 +581,7 @@ describe('NeuCascadeSelectComponent', () => {
     expect(primitive.hasChildren('leaf')).toBe(false);
     expect(primitive.hasChildren(null)).toBe(false);
     primitive.openPanel();
-    primitive.onOptionKeydown(
-      new KeyboardEvent('keydown', { key: 'Home', cancelable: true }),
-      0,
-    );
+    primitive.onOptionKeydown(new KeyboardEvent('keydown', { key: 'Home', cancelable: true }), 0);
     primitive.onOptionKeydown(
       new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
       0,

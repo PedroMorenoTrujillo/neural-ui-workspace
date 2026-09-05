@@ -8,13 +8,21 @@
 
   &--dark {
     .neu-block-ui__overlay {
-      background: var(--neu-block-ui-bg, rgba(0, 0, 0, 0.5));
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    .neu-block-ui__message {
+      color: #ffffff;
     }
   }
 
   &--light {
     .neu-block-ui__overlay {
-      background: var(--neu-block-ui-bg, rgba(255, 255, 255, 0.9));
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .neu-block-ui__message {
+      color: #111827;
     }
   }
 }

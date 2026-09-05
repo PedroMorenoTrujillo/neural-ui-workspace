@@ -95,10 +95,29 @@ class DragDropHostComponent {
 })
 class FalsyDragDropHostComponent {}
 
+@Component({
+  standalone: true,
+  imports: [NeuDraggableDirective],
+  template: `
+    <div
+      [neuDraggable]="task"
+      neuDragRole="group"
+      (dragStart)="starts.push($event)"
+    >
+      <button type="button" (click)="clicks += 1">Move down</button>
+    </div>
+  `,
+})
+class CompositeDragHostComponent {
+  readonly task = { id: 'composite', title: 'Composite row' };
+  starts: NeuDragEvent<Task>[] = [];
+  clicks = 0;
+}
+
 describe('DragDrop public directives', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DragDropHostComponent, FalsyDragDropHostComponent],
+      imports: [DragDropHostComponent, FalsyDragDropHostComponent, CompositeDragHostComponent],
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
   });
@@ -255,6 +274,24 @@ describe('DragDrop public directives', () => {
     source.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     fixture.destroy();
     expect(() => fixture.destroy()).not.toThrow();
+  });
+
+  it('leaves keyboard activation of nested controls to the control', () => {
+    const fixture = TestBed.createComponent(CompositeDragHostComponent);
+    fixture.detectChanges();
+    const row = fixture.nativeElement.querySelector('.neu-draggable') as HTMLElement;
+    const button = row.querySelector('button') as HTMLButtonElement;
+    const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+
+    button.dispatchEvent(event);
+    button.click();
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(fixture.componentInstance.starts).toEqual([]);
+    expect(fixture.componentInstance.clicks).toBe(1);
+
+    row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(fixture.componentInstance.starts).toHaveLength(1);
   });
 });
 

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "authority": "H9-B4",
+  "methodology": {
+    "consumer": "Minified ESM with Angular, CDK, ng-icons and RxJS external; esbuild tree shaking and package sideEffects semantics.",
+    "raw": "Canonical strict bytes. Warning is baseline + max(128 B, 1%); failure is baseline + max(256 B, 2.5%).",
+    "compressed": "Node zlib per-output compression. Warning is baseline + max(64 B, 2%); failure is baseline + max(128 B, 5%).",
+    "atomicTemplates": "Angular standalone component templates retain one component implementation; input bindings do not create distinct basic and advanced closures."
+  },
+  "provenance": {
+    "h9B3LibraryCommit": "38b75030290b63041cc3a574066759b5bbb83dde",
+    "h9B3LibraryTree": "78be43648df2aa58956eeb6f0ca2d3a3bc363aba",
+    "calibration": "Final H9-B4 candidate after coverage and accessibility corrections"
+  },
+  "toolchain": {
+    "node": "22.22.3",
+    "npmExecutable": "10.9.8",
+    "packageManagerDeclaration": "npm@10.9.7",
+    "angularCli": "21.2.16",
+    "angular": "21.2.17",
+    "esbuild": "0.27.3",
+    "gzip": "Node zlib 1.2.12, level 9, per output",
+    "brotli": "Node Brotli 1.2.0, quality 11, per output"
+  },
+  "scenarios": {
+    "root-unused": { "baseline": { "raw": 0, "gzip": 20, "brotli": 1 } },
+    "provider": { "baseline": { "raw": 1693, "gzip": 736, "brotli": 653 } },
+    "button": { "baseline": { "raw": 18008, "gzip": 3139, "brotli": 2665 } },
+    "select": { "baseline": { "raw": 124667, "gzip": 21902, "brotli": 19159 } },
+    "multiselect": { "baseline": { "raw": 151344, "gzip": 28704, "brotli": 20794 } },
+    "table-basic": { "baseline": { "raw": 30198, "gzip": 4084, "brotli": 3444 } },
+    "table-advanced-lazy": { "baseline": { "raw": 939602, "gzip": 162049, "brotli": 102304 } },
+    "tree-basic": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
+    "tree-checkbox": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
+    "tree-lazy": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
+    "tree-virtual": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
+    "tree-dnd-full": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
+    "tree-table": { "baseline": { "raw": 1026326, "gzip": 177071, "brotli": 111682 } },
+    "dialog-basic": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
+    "dialog-draggable": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
+    "dialog-resizable": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
+    "dialog-maximizable": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
+    "dialog-all-advanced": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
+    "color-picker-basic": { "baseline": { "raw": 55431, "gzip": 11375, "brotli": 9988 } },
+    "color-picker-advanced": { "baseline": { "raw": 55431, "gzip": 11375, "brotli": 9988 } },
+    "pick-list-order-list": { "baseline": { "raw": 72330, "gzip": 11600, "brotli": 9885 } },
+    "menu": { "baseline": { "raw": 64072, "gzip": 9832, "brotli": 8644 } },
+    "pagination": { "baseline": { "raw": 12689, "gzip": 2453, "brotli": 2092 } }
+  },
+  "aggregate": {
+    "baseline": { "chunks": 107, "raw": 3554849, "gzip": 616591, "brotli": 499304 },
+    "raw": { "warning": 3587617, "failure": 3620385 },
+    "gzip": { "warning": 628879, "failure": 641167 },
+    "brotli": { "warning": 512000, "failure": 524288 }
+  },
+  "package": {
+    "baseline": { "packed": 707404, "unpacked": 4580468, "files": 336 },
+    "packed": { "warning": 714479, "failure": 728627 },
+    "unpacked": { "warning": 4626273, "failure": 4717883 }
+  }
+}

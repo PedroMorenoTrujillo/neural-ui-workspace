@@ -479,13 +479,21 @@ describe('NeuOrderListComponent', () => {
     const component = fixture.componentInstance;
     const changed = vi.spyOn(component.orderChange, 'emit');
     const buttons = fixture.nativeElement.querySelectorAll(
-      'button',
+      '.neu-order-list__item > button:not(.neu-order-list__option)',
     ) as NodeListOf<HTMLButtonElement>;
     expect(buttons[0].disabled).toBe(true);
     expect(buttons[5].disabled).toBe(true);
     expect(buttons[0].getAttribute('aria-label')).toBe('Move Alpha up');
     expect(buttons[1].getAttribute('aria-label')).toBe('Move Alpha down');
-    expect(fixture.nativeElement.querySelector('[role="list"]')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('.neu-order-list__items')?.getAttribute('role'),
+    ).toBe('group');
+    expect(fixture.nativeElement.querySelector('.neu-order-list__item')?.getAttribute('role')).toBe(
+      'group',
+    );
+    const option = fixture.nativeElement.querySelector('.neu-order-list__option');
+    expect(option?.getAttribute('role')).toBeNull();
+    expect(option?.getAttribute('aria-pressed')).toBe('false');
 
     buttons[1].click();
     expect(changed).toHaveBeenLastCalledWith([items[1], items[0], items[2]]);
@@ -624,7 +632,7 @@ describe('NeuOrderListComponent', () => {
     const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
     input.value = 'a';
     input.dispatchEvent(new Event('input'));
-    const row = fixture.debugElement.query(By.css('.neu-order-list__item'));
+    const row = fixture.debugElement.query(By.css('.neu-order-list__option'));
     row.triggerEventHandler('click', new MouseEvent('click'));
     fixture.detectChanges();
     for (const button of fixture.nativeElement.querySelectorAll(

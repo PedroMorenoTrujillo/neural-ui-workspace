@@ -611,6 +611,111 @@ describe('NeuDialogComponent', () => {
     expect(handle.getAttribute('aria-label')).toBe('Resize dialog');
   });
 
+  it('rejects unavailable drag, resize, maximize and pointer interactions', async () => {
+    const { comp } = await mkDialog();
+    const event = {
+      button: 0,
+      target: document.createElement('div'),
+      pointerId: 41,
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+    } as unknown as PointerEvent;
+
+    comp.toggleMaximize();
+    comp.onDragStart(event);
+    comp.onResizeStart(event);
+    comp.onPointerMove(event);
+    comp.onPointerEnd(event);
+    comp.onResizeKeydown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('handles RTL pointer resize and both rendered pointer completion events', async () => {
+    const { f } = await mkDialog({ draggable: true, resizable: true });
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
+    const header = f.nativeElement.querySelector('.neu-dialog__header') as HTMLElement;
+    const handle = f.nativeElement.querySelector('.neu-dialog__resize-handle') as HTMLButtonElement;
+    panel.style.direction = 'rtl';
+    panel.setPointerCapture = vi.fn();
+    panel.hasPointerCapture = vi.fn(() => true);
+    panel.releasePointerCapture = vi.fn();
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue({
+      left: 300,
+      top: 200,
+      right: 700,
+      bottom: 500,
+      width: 400,
+      height: 300,
+      x: 300,
+      y: 200,
+      toJSON: () => ({}),
+    } as DOMRect);
+    const pointer = (type: string, pointerId: number, clientX: number, clientY: number) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperties(event, {
+        button: { value: 0 },
+        pointerId: { value: pointerId },
+        clientX: { value: clientX },
+        clientY: { value: clientY },
+      });
+      return event;
+    };
+
+    header.dispatchEvent(pointer('pointerdown', 51, 400, 240));
+    panel.dispatchEvent(pointer('pointerup', 51, 400, 240));
+    handle.dispatchEvent(pointer('pointerdown', 52, 700, 500));
+    panel.dispatchEvent(pointer('pointermove', 52, 660, 530));
+    expect(panel.style.width).toBe('440px');
+    expect(panel.style.height).toBe('330px');
+    expect(panel.style.transform).toContain('-20px, 15px');
+    panel.dispatchEvent(pointer('pointercancel', 52, 660, 530));
+
+    expect(panel.releasePointerCapture).toHaveBeenCalledWith(51);
+    expect(panel.releasePointerCapture).toHaveBeenCalledWith(52);
+  });
+
+  it('supports coarse RTL keyboard resizing and safely ignores it without a panel', async () => {
+    const { f, comp } = await mkDialog({ resizable: true });
+    const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
+    const handle = f.nativeElement.querySelector('.neu-dialog__resize-handle') as HTMLButtonElement;
+    panel.style.direction = 'rtl';
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue({
+      left: 300,
+      top: 200,
+      right: 700,
+      bottom: 500,
+      width: 400,
+      height: 300,
+      x: 300,
+      y: 200,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    handle.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', shiftKey: true, cancelable: true }),
+    );
+    expect(panel.style.width).toBe('368px');
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+    expect(panel.style.height).toBe('308px');
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
+    expect(panel.style.height).toBe('292px');
+
+    f.componentRef.setInput('open', false);
+    f.detectChanges();
+    expect(() =>
+      comp.onResizeKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true })),
+    ).not.toThrow();
+    expect(() =>
+      comp.onDragStart({
+        button: 0,
+        target: document.createElement('div'),
+        pointerId: 60,
+        preventDefault: vi.fn(),
+      } as unknown as PointerEvent),
+    ).not.toThrow();
+  });
+
   it('releases an active pointer interaction during destruction', async () => {
     const { f, comp } = await mkDialog({ resizable: true });
     const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
