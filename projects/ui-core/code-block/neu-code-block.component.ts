@@ -29,7 +29,7 @@ import { DOCUMENT } from '@angular/common';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="neu-code-block">
+    <div class="neu-code-block" [class.neu-code-block--compact]="compact()">
       <!-- Encabezado del editor -->
       <div class="neu-code-block__header">
         <!-- Traffic lights decorativos -->
@@ -88,6 +88,9 @@ export class NeuCodeBlockComponent {
 
   /** Código fuente a mostrar / Source code to display */
   code = input<string>('');
+
+  /** Reduce espaciados y controles para ejemplos cortos / Reduces spacing and controls for short examples */
+  compact = input<boolean>(false);
 
   /** Nombre del lenguaje (decorativo) / Language name (decorative) */
   lang = input<string>('');

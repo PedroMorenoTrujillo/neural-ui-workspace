@@ -20,6 +20,17 @@ describe('NeuCodeBlockComponent', () => {
     expect(f.nativeElement.querySelector('.neu-code-block')).toBeTruthy();
   });
 
+  it('should apply the compact variant only when requested', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    const block = f.nativeElement.querySelector('.neu-code-block');
+    expect(block.classList).not.toContain('neu-code-block--compact');
+
+    f.componentRef.setInput('compact', true);
+    f.detectChanges();
+    expect(block.classList).toContain('neu-code-block--compact');
+  });
+
   it('should display the language label', () => {
     const f = TestBed.createComponent(NeuCodeBlockComponent);
     f.componentRef.setInput('lang', 'JavaScript');

@@ -16,6 +16,37 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
   overflow: hidden;
   border: 1px solid $cb-border;
   font-family: var(--neu-font-mono);
+
+  &--compact {
+    border-radius: var(--neu-radius-sm);
+
+    .neu-code-block__header {
+      padding: 0.4rem 0.65rem;
+    }
+
+    .neu-code-block__dots {
+      gap: 4px;
+
+      span {
+        width: 8px;
+        height: 8px;
+      }
+    }
+
+    .neu-code-block__copy {
+      min-height: 2rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .neu-code-block__pre {
+      padding: 0.7rem 0.8rem;
+    }
+
+    .neu-code-block__code {
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+  }
 }
 
 // ---- Header ----

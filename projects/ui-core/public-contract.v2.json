@@ -7544,6 +7544,16 @@
           "signature": "code: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./code-block#NeuCodeBlockComponent.input:compact",
+          "name": "compact",
+          "kind": "input",
+          "publicName": "compact",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "compact: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./code-block#NeuCodeBlockComponent.input:copiedAriaLabel",
           "name": "copiedAriaLabel",
           "kind": "input",
@@ -7617,7 +7627,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCodeBlockComponent, \"neu-code-block\", never, {\n    \"code\": {\n        \"alias\": \"code\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"lang\": {\n        \"alias\": \"lang\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"language\": {\n        \"alias\": \"language\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copyLabel\": {\n        \"alias\": \"copyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copiedLabel\": {\n        \"alias\": \"copiedLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copyAriaLabel\": {\n        \"alias\": \"copyAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copiedAriaLabel\": {\n        \"alias\": \"copiedAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCodeBlockComponent, \"neu-code-block\", never, {\n    \"code\": {\n        \"alias\": \"code\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"compact\": {\n        \"alias\": \"compact\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"lang\": {\n        \"alias\": \"lang\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"language\": {\n        \"alias\": \"language\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copyLabel\": {\n        \"alias\": \"copyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copiedLabel\": {\n        \"alias\": \"copiedLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copyAriaLabel\": {\n        \"alias\": \"copyAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copiedAriaLabel\": {\n        \"alias\": \"copiedAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
         },
         {
           "id": "./code-block#NeuCodeBlockComponent.property:ɵfac",
@@ -54694,6 +54704,18 @@
       "signature": "code: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./code-block#NeuCodeBlockComponent.input:compact",
+      "entrypoint": "./code-block",
+      "declaration": "NeuCodeBlockComponent",
+      "selector": "neu-code-block",
+      "propertyName": "compact",
+      "publicName": "compact",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "compact: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./code-block#NeuCodeBlockComponent.input:copiedAriaLabel",
       "entrypoint": "./code-block",
       "declaration": "NeuCodeBlockComponent",
@@ -70081,19 +70103,19 @@
       "type": 184,
       "variable": 1
     },
-    "publicSymbols": 5737,
+    "publicSymbols": 5738,
     "statuses": {
-      "SUPPORTED": 3646,
+      "SUPPORTED": 3647,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
       "INTERNAL/UNSUPPORTED": 2087,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1199,
+      "input": 1200,
       "output": 281,
       "model": 2,
-      "total": 1482
+      "total": 1483
     },
     "designTokens": 258
   }
