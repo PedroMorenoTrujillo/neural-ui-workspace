@@ -10,7 +10,9 @@ neu-scheduler-gantt {
 
 .neu-scheduler-gantt .neu-timeline-grid__row-label {
   min-inline-size: 14rem;
+  align-items: center;
   justify-content: center;
+  text-align: center;
 }
 
 .neu-scheduler-gantt .neu-timeline-grid__column-label {
