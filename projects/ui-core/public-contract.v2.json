@@ -12,7 +12,11 @@
       "entrypoint": ".",
       "types": "./types/neural-ui-core.d.ts",
       "exports": [
+        ".#defineNeuPreset",
+        ".#NeuPresetDefinition",
+        ".#NeuPresetTokens",
         ".#NeuralUIConfig",
+        ".#NeuralUIThemeConfig",
         ".#provideNeuralUI"
       ]
     },
@@ -406,6 +410,7 @@
       "types": "./types/neural-ui-core-foundation.d.ts",
       "exports": [
         "./foundation#allowsNeuOverlayDismissal",
+        "./foundation#defineNeuPreset",
         "./foundation#NEU_OVERLAY_DISMISS_GUARD",
         "./foundation#NeuNow",
         "./foundation#NeuOverlayDismissContext",
@@ -414,6 +419,7 @@
         "./foundation#NeuOverlaySource",
         "./foundation#NeuPreset",
         "./foundation#neuPresetCss",
+        "./foundation#NeuPresetDefinition",
         "./foundation#NeuPresetTokens",
         "./foundation#NEURAL_LOCALE",
         "./foundation#NEURAL_NOW",
@@ -12294,6 +12300,15 @@
       "members": []
     },
     {
+      "id": "./foundation#defineNeuPreset",
+      "entrypoint": "./foundation",
+      "name": "defineNeuPreset",
+      "kind": "function",
+      "status": "SUPPORTED",
+      "signature": "declare function defineNeuPreset<const T extends NeuPreset & {\n    readonly name: string;\n}>(preset: T): T & NeuPresetDefinition;",
+      "members": []
+    },
+    {
       "id": "./foundation#NEU_OVERLAY_DISMISS_GUARD",
       "entrypoint": "./foundation",
       "name": "NEU_OVERLAY_DISMISS_GUARD",
@@ -12406,6 +12421,32 @@
       "status": "SUPPORTED",
       "signature": "declare function neuPresetCss(name: string, preset: NeuPreset): string;",
       "members": []
+    },
+    {
+      "id": "./foundation#NeuPresetDefinition",
+      "entrypoint": "./foundation",
+      "name": "NeuPresetDefinition",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuPresetDefinition extends NeuPreset {\n}",
+      "members": [
+        {
+          "id": "./foundation#NeuPresetDefinition.property:[ɵNEU_PRESET_INSTALL]",
+          "name": "[ɵNEU_PRESET_INSTALL]",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly [ɵNEU_PRESET_INSTALL]: (document: Document, nonce: string | null) => void;"
+        },
+        {
+          "id": "./foundation#NeuPresetDefinition.property:name",
+          "name": "name",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly name: string;"
+        }
+      ]
     },
     {
       "id": "./foundation#NeuPresetTokens",
@@ -51806,6 +51847,50 @@
       ]
     },
     {
+      "id": ".#defineNeuPreset",
+      "entrypoint": ".",
+      "name": "defineNeuPreset",
+      "kind": "function",
+      "status": "SUPPORTED",
+      "signature": "declare function defineNeuPreset<const T extends NeuPreset & {\n    readonly name: string;\n}>(preset: T): T & NeuPresetDefinition;",
+      "members": []
+    },
+    {
+      "id": ".#NeuPresetDefinition",
+      "entrypoint": ".",
+      "name": "NeuPresetDefinition",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuPresetDefinition extends NeuPreset {\n}",
+      "members": [
+        {
+          "id": ".#NeuPresetDefinition.property:[ɵNEU_PRESET_INSTALL]",
+          "name": "[ɵNEU_PRESET_INSTALL]",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly [ɵNEU_PRESET_INSTALL]: (document: Document, nonce: string | null) => void;"
+        },
+        {
+          "id": ".#NeuPresetDefinition.property:name",
+          "name": "name",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly name: string;"
+        }
+      ]
+    },
+    {
+      "id": ".#NeuPresetTokens",
+      "entrypoint": ".",
+      "name": "NeuPresetTokens",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuPresetTokens = Readonly<Partial<Record<NeuTokenName, string | number>>>;",
+      "members": []
+    },
+    {
       "id": ".#NeuralUIConfig",
       "entrypoint": ".",
       "name": "NeuralUIConfig",
@@ -51846,12 +51931,38 @@
           "signature": "now?: NeuNow;"
         },
         {
+          "id": ".#NeuralUIConfig.property:theme",
+          "name": "theme",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "theme?: NeuralUIThemeConfig;"
+        },
+        {
           "id": ".#NeuralUIConfig.property:timeZone",
           "name": "timeZone",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
           "signature": "timeZone?: string;"
+        }
+      ]
+    },
+    {
+      "id": ".#NeuralUIThemeConfig",
+      "entrypoint": ".",
+      "name": "NeuralUIThemeConfig",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuralUIThemeConfig {\n}",
+      "members": [
+        {
+          "id": ".#NeuralUIThemeConfig.property:preset",
+          "name": "preset",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "preset?: NeuPresetDefinition;"
         }
       ]
     },
@@ -69869,25 +69980,25 @@
   ],
   "summary": {
     "entrypoints": 105,
-    "exportedDeclarations": 828,
+    "exportedDeclarations": 834,
     "declarationKinds": {
       "class": 14,
       "component": 102,
       "directive": 144,
-      "function": 44,
-      "interface": 270,
+      "function": 46,
+      "interface": 273,
       "reexport": 55,
       "service": 11,
       "token": 4,
-      "type": 183,
+      "type": 184,
       "variable": 1
     },
-    "publicSymbols": 5721,
+    "publicSymbols": 5733,
     "statuses": {
-      "SUPPORTED": 3632,
+      "SUPPORTED": 3642,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 2085,
+      "INTERNAL/UNSUPPORTED": 2087,
       "REVIEW": 0
     },
     "bindings": {

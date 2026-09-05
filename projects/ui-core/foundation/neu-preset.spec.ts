@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { neuPresetCss, type NeuPreset } from './neu-preset';
+import { defineNeuPreset, neuPresetCss, type NeuPreset } from './neu-preset';
 
 describe('static presets', () => {
   it('emits nothing without overrides', () => {
@@ -7,7 +7,10 @@ describe('static presets', () => {
     expect(neuPresetCss('custom', { light: {} })).toBe('');
   });
   it('preserves CSS values and independent modes deterministically', () => {
-    const preset = { light: { '--neu-text': 'var(--app-text)', '--neu-radius': 'calc(1rem / 2)' }, dark: { '--neu-text': '#fff' } } satisfies NeuPreset;
+    const preset = {
+      light: { '--neu-text': 'var(--app-text)', '--neu-radius': 'calc(1rem / 2)' },
+      dark: { '--neu-text': '#fff' },
+    } satisfies NeuPreset;
     const css = neuPresetCss('custom', preset);
     expect(css).toContain('--neu-text: var(--app-text);');
     expect(css).toContain(':not([data-theme="dark"])');
@@ -26,8 +29,29 @@ describe('static presets', () => {
   });
   it('rejects invalid identifiers and escaping declarations', () => {
     expect(() => neuPresetCss('bad"]', {})).toThrow();
-    for (const value of ['red; color: blue', 'red!important', 'red/*', '</style>', '{}', Number.NaN]) {
+    for (const value of [
+      'red; color: blue',
+      'red!important',
+      'red/*',
+      '</style>',
+      '{}',
+      Number.NaN,
+    ]) {
       expect(() => neuPresetCss('safe', { light: { '--neu-text': value } })).toThrow();
     }
+  });
+
+  it('defines and validates a named preset without losing its literal type', () => {
+    const forest = defineNeuPreset({
+      name: 'forest',
+      light: { '--neu-primary': '#166534' },
+      dark: { '--neu-primary': '#86efac' },
+    });
+
+    expect(forest.name).toBe('forest');
+    expect(forest.light['--neu-primary']).toBe('#166534');
+    expect(() => defineNeuPreset({ name: 'bad"]', light: { '--neu-primary': '#166534' } })).toThrow(
+      'Preset name',
+    );
   });
 });

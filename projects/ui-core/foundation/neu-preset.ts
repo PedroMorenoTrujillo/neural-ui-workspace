@@ -9,6 +9,41 @@ export interface NeuPreset {
   readonly dark?: NeuPresetTokens;
 }
 
+/** @internal */
+export const ɵNEU_PRESET_INSTALL = Symbol('NEU_PRESET_INSTALL');
+
+/** Named preset ready to be registered through provideNeuralUI(). */
+export interface NeuPresetDefinition extends NeuPreset {
+  readonly name: string;
+  /** @internal */
+  readonly [ɵNEU_PRESET_INSTALL]: (document: Document, nonce: string | null) => void;
+}
+
+/**
+ * Define and validate a named preset while preserving literal token types.
+ * Pass the result to provideNeuralUI({ theme: { preset } }).
+ */
+export function defineNeuPreset<const T extends NeuPreset & { readonly name: string }>(
+  preset: T,
+): T & NeuPresetDefinition {
+  const css = neuPresetCss(preset.name, preset);
+  const install = (document: Document, nonce: string | null): void => {
+    const root = document.documentElement;
+    const selector = `style[data-neu-preset-style="${preset.name}"]`;
+    const existing = document.head.querySelector<HTMLStyleElement>(selector);
+    const style = existing ?? document.createElement('style');
+    style.setAttribute('data-neu-preset-style', preset.name);
+    if (nonce) style.setAttribute('nonce', nonce);
+    style.textContent = css;
+    if (!existing) document.head.append(style);
+    root.setAttribute('data-neu-preset', preset.name);
+  };
+
+  return Object.defineProperty({ ...preset }, ɵNEU_PRESET_INSTALL, {
+    value: install,
+  }) as T & NeuPresetDefinition;
+}
+
 /**
  * Generate a stylesheet at build time and load it after Neural styles.
  * Activate on html with data-neu-preset; existing data-theme selects dark.
@@ -21,17 +56,24 @@ export function neuPresetCss(name: string, preset: NeuPreset): string {
   }
   const root = `:root[data-neu-preset="${name}"]:not([data-neu-theme="high-contrast"])`;
   const rule = (selector: string, tokens: NeuPresetTokens | undefined): string => {
-    const declarations = Object.entries(tokens ?? {}).sort(([a], [b]) => a.localeCompare(b, 'en')).map(([token, value]) => {
-      if (!/^--neu-[a-z0-9-]+$/.test(token) ||
+    const declarations = Object.entries(tokens ?? {})
+      .sort(([a], [b]) => a.localeCompare(b, 'en'))
+      .map(([token, value]) => {
+        if (
+          !/^--neu-[a-z0-9-]+$/.test(token) ||
           (typeof value !== 'string' && typeof value !== 'number') ||
           (typeof value === 'number' && !Number.isFinite(value)) ||
-          /[;{}<>]|\/\*|!\s*important/i.test(String(value))) {
-        throw new Error(`Invalid preset declaration: ${token}`);
-      }
-      return `  ${token}: ${value};`;
-    });
+          /[;{}<>]|\/\*|!\s*important/i.test(String(value))
+        ) {
+          throw new Error(`Invalid preset declaration: ${token}`);
+        }
+        return `  ${token}: ${value};`;
+      });
     return declarations.length ? `${selector} {\n${declarations.join('\n')}\n}` : '';
   };
-  const rules = [rule(`${root}:not([data-theme="dark"])`, preset.light), rule(`${root}[data-theme="dark"]`, preset.dark)].filter(Boolean);
+  const rules = [
+    rule(`${root}:not([data-theme="dark"])`, preset.light),
+    rule(`${root}[data-theme="dark"]`, preset.dark),
+  ].filter(Boolean);
   return rules.length ? `@media not (forced-colors: active) {\n${rules.join('\n')}\n}\n` : '';
 }

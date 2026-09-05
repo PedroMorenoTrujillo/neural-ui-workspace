@@ -1,5 +1,14 @@
-import { EnvironmentProviders, Provider, makeEnvironmentProviders } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {
+  CSP_NONCE,
+  EnvironmentProviders,
+  Provider,
+  inject,
+  makeEnvironmentProviders,
+  provideEnvironmentInitializer,
+} from '@angular/core';
 import { NEURAL_LOCALE, NEURAL_NOW, NEURAL_TIME_ZONE, NeuNow } from '@neural-ui/core/foundation';
+import { ɵNEU_PRESET_INSTALL, type NeuPresetDefinition } from './foundation/neu-preset';
 import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
 import {
   lucideBold,
@@ -41,6 +50,13 @@ export interface NeuralUIConfig {
   timeZone?: string;
   /** Reloj inicial inyectable para SSR, pruebas y aplicaciones deterministas. / Injectable initial clock for SSR and tests. */
   now?: NeuNow;
+  /** Configuración visual global. / Global visual configuration. */
+  theme?: NeuralUIThemeConfig;
+}
+
+export interface NeuralUIThemeConfig {
+  /** Preset tipado que se registra y activa al arrancar. / Typed preset registered and activated at startup. */
+  preset?: NeuPresetDefinition;
 }
 
 /**
@@ -63,6 +79,7 @@ export interface NeuralUIConfig {
  */
 export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProviders {
   const { iconSize = '1.25rem', iconStrokeWidth = '2' } = config;
+  const preset = config.theme?.preset;
   const deterministicProviders: Provider[] = [];
   if (config.locale)
     deterministicProviders.push({ provide: NEURAL_LOCALE, useValue: config.locale });
@@ -112,5 +129,12 @@ export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProvide
     }),
     provideNgIconsConfig({ size: iconSize, strokeWidth: iconStrokeWidth }),
     ...deterministicProviders,
+    ...(preset
+      ? [
+          provideEnvironmentInitializer(() =>
+            preset[ɵNEU_PRESET_INSTALL](inject(DOCUMENT), inject(CSP_NONCE, { optional: true })),
+          ),
+        ]
+      : []),
   ]);
 }

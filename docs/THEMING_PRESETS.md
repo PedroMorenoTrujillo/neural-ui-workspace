@@ -1,44 +1,109 @@
-# Tokens and static presets / Tokens y presets estáticos
+# Typed presets / Presets tipados
 
 ## English
 
-Behavior/state: Inputs, Outputs, Models and services. Content/markup: templates, slots and directives. Design values: existing CSS tokens. Reusable design mappings: presets. Universal Parts/PT is intentionally excluded; no internal DOM injection contract exists.
+A preset is a named, typed set of Neural design-token values. It changes the visual language of every component consistently without changing component markup, state or behavior.
 
-The source of truth is `styles/_tokens.scss` plus documented component fallback tokens, indexed by `token-manifest.json`. There are 266 public tokens; private geometry and local bridges are excluded from `NeuTokenName`. Values accept CSS strings and finite numbers: colors, lengths, fonts, shadows, functions and consumer variables. Type checking validates names, not CSS semantics or contrast.
-
-A preset is a small typed map, not a theme engine. Import the build helper from `@neural-ui/core/foundation`. No new provider or entrypoint is required. Use `satisfies NeuPreset` on literals for unknown-name diagnostics. Untrusted CSS is unsupported.
+Define the preset in a regular TypeScript file:
 
 ```ts
-import { neuPresetCss, type NeuPreset } from '@neural-ui/core/foundation';
-const shared = { '--neu-radius': '6px' } as const;
-const preset = {
-  light: { ...shared, '--neu-text': 'var(--app-text)', '--neu-primary-solid': '#14532d' },
-  dark: { ...shared, '--neu-text': '#f0fdf4', '--neu-primary-solid': '#86efac', '--neu-primary-solid-fg': '#052e16' },
-} satisfies NeuPreset;
-const css = neuPresetCss('forest', preset);
-// In your build script: writeFileSync('src/forest.css', css).
+// forest.preset.ts
+import { defineNeuPreset } from '@neural-ui/core';
+
+export const forestPreset = defineNeuPreset({
+  name: 'forest',
+  light: {
+    '--neu-primary': '#166534',
+    '--neu-primary-solid': '#166534',
+    '--neu-primary-solid-fg': '#ffffff',
+    '--neu-bg': '#f0fdf4',
+    '--neu-text': '#142d20',
+  },
+  dark: {
+    '--neu-primary': '#86efac',
+    '--neu-primary-solid': '#86efac',
+    '--neu-primary-solid-fg': '#052e16',
+    '--neu-bg': '#081a10',
+    '--neu-text': '#f0fdf4',
+  },
+});
 ```
 
-Load the generated CSS after `@neural-ui/core/styles`. Set `data-neu-preset="forest"` on html, alongside existing `data-theme="light"` or `data-theme="dark"`. Remove the preset attribute for exact defaults. No CSS is injected, no token mutation loop runs, and no preset JavaScript needs to enter the browser. Definition and generation work on the server; include the same stylesheet and attributes in server and client markup. The existing app owns theme selection and persistence. Presets dispatch no events.
+Register it once in the existing application configuration:
 
-Light and dark maps are independent: omitted values use that mode's library defaults. Share values explicitly with object spread. Compose base and override with `{ light: { ...base.light, ...override.light }, dark: { ...base.dark, ...override.dark } }`; last token wins. This is a shallow token merge, not a recursive schema.
+```ts
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideNeuralUI } from '@neural-ui/core';
+import { forestPreset } from './forest.preset';
 
-Generated rules apply only to the document root. Subtree isolation is unsupported because root aliases and body overlays require a broader contract. Semantic aliases resolve where declared: mapping a root token updates root aliases; component fallback tokens resolve at use sites. A single brand token does not control every state: pair primary-solid, its foreground/hover, focus, surfaces and state colors as appropriate.
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideNeuralUI({
+      theme: { preset: forestPreset },
+    }),
+  ],
+};
+```
 
-Precedence: default tokens, then selected preset (loaded later), then deliberate consumer CSS under normal specificity rules. Root `data-neu-theme="high-contrast"` disables the custom preset. `forced-colors: active` disables its entire stylesheet rules, preserving browser/library accessibility styling. Existing reduced-motion rules and component invariants remain; do not override them with consumer CSS. Verify contrast for your own palette; arbitrary values cannot guarantee accessibility. Cascade layers and Bare are not introduced.
+That is the complete setup. No custom script, `index.html` edit or additional `angular.json` entry is required. The normal `ng add @neural-ui/core` installation already registers the base Neural stylesheet.
+
+At startup, the provider validates the token names, emits the preset CSS after the base styles and activates the preset on the document root. The existing `data-theme="light"` or `data-theme="dark"` selection chooses the corresponding map. Omitted tokens retain the library default for that mode.
+
+The generated rules are compatible with SSR and reuse server-rendered preset styles during hydration. Angular's `CSP_NONCE` is applied when available. Root `data-neu-theme="high-contrast"` and `forced-colors: active` take precedence over custom preset values. Applications must still verify contrast for their own palette.
+
+`neuPresetCss` remains available from `@neural-ui/core/foundation` as a low-level build-time primitive for tooling authors. Application setup should normally use `defineNeuPreset` with `provideNeuralUI`.
 
 ## Español
 
-Comportamiento/estado: Inputs, Outputs, Models y servicios. Contenido/estructura: templates, slots y directivas. Valores de diseño: tokens CSS existentes. Configuración reutilizable: presets. Parts/PT universal queda excluido deliberadamente; no existe un contrato de inyección al DOM interno.
+Un preset es un conjunto tipado y con nombre de valores de los tokens de diseño de Neural. Cambia el lenguaje visual de todos los componentes de forma coherente sin modificar su HTML, estado ni comportamiento.
 
-La fuente de verdad es `styles/_tokens.scss` junto con los fallbacks públicos documentados, indexados en `token-manifest.json`. Hay 266 tokens públicos; geometría privada y puentes locales quedan fuera de `NeuTokenName`. Los valores admiten cadenas CSS y números finitos: colores, longitudes, fuentes, sombras, funciones y variables del consumidor. Los tipos validan nombres, no semántica CSS ni contraste.
+Define el preset en un archivo TypeScript normal:
 
-Un preset es un mapa tipado pequeño, no un motor de temas. Importa el helper de compilación desde `@neural-ui/core/foundation`. No necesita proveedor ni entrypoint nuevo. Usa `satisfies NeuPreset` sobre los literales para detectar nombres desconocidos. No se admite CSS no confiable. El ejemplo anterior genera el texto CSS; guárdalo desde un script de compilación.
+```ts
+// forest.preset.ts
+import { defineNeuPreset } from '@neural-ui/core';
 
-Carga el CSS generado después de `@neural-ui/core/styles`. Activa `data-neu-preset="forest"` en html, junto al mecanismo existente `data-theme="light"` o `data-theme="dark"`. Retira el atributo del preset para recuperar los valores por defecto. No hay inyección CSS, bucle de mutaciones ni JavaScript del preset necesario en el navegador. La definición/generación funciona en servidor; entrega la misma hoja y atributos en servidor y cliente. La aplicación conserva la selección y persistencia del tema. Los presets no emiten eventos.
+export const forestPreset = defineNeuPreset({
+  name: 'forest',
+  light: {
+    '--neu-primary': '#166534',
+    '--neu-primary-solid': '#166534',
+    '--neu-primary-solid-fg': '#ffffff',
+    '--neu-bg': '#f0fdf4',
+    '--neu-text': '#142d20',
+  },
+  dark: {
+    '--neu-primary': '#86efac',
+    '--neu-primary-solid': '#86efac',
+    '--neu-primary-solid-fg': '#052e16',
+    '--neu-bg': '#081a10',
+    '--neu-text': '#f0fdf4',
+  },
+});
+```
 
-Los mapas claro y oscuro son independientes: un valor omitido usa el valor de la biblioteca para ese modo. Comparte valores mediante spread. Compón base y override con `{ light: { ...base.light, ...override.light }, dark: { ...base.dark, ...override.dark } }`; gana el último token. Es una mezcla superficial por token, sin esquema recursivo.
+Regístralo una sola vez en la configuración existente de la aplicación:
 
-Las reglas generadas se aplican solo a la raíz del documento. No se garantiza aislamiento de subárboles porque los alias raíz y overlays en body requieren un contrato adicional. Los alias semánticos se resuelven donde se declaran; los fallbacks de componente, donde se usan. Un token de marca no controla todos los estados: combina primary-solid, texto/hover, foco, superficies y estados según corresponda.
+```ts
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideNeuralUI } from '@neural-ui/core';
+import { forestPreset } from './forest.preset';
 
-Precedencia: tokens por defecto, preset seleccionado cargado después, y CSS deliberado del consumidor según la especificidad normal. `data-neu-theme="high-contrast"` en la raíz desactiva el preset. `forced-colors: active` desactiva todas sus reglas y conserva los estilos accesibles de biblioteca/navegador. Se mantienen las reglas de movimiento reducido y las invariantes de componentes; no las anules mediante CSS. Verifica el contraste de tu paleta; valores arbitrarios no garantizan accesibilidad. No se introducen cascade layers ni Bare.
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideNeuralUI({
+      theme: { preset: forestPreset },
+    }),
+  ],
+};
+```
+
+Esa es toda la configuración. No hace falta crear un script, editar `index.html` ni añadir otra entrada a `angular.json`. La instalación normal con `ng add @neural-ui/core` ya registra la hoja de estilos base de Neural.
+
+Al arrancar, el provider valida los nombres de los tokens, añade el CSS del preset después de los estilos base y lo activa en la raíz del documento. La selección existente `data-theme="light"` o `data-theme="dark"` elige el mapa correspondiente. Los tokens omitidos conservan el valor predeterminado de la librería para ese modo.
+
+Las reglas generadas son compatibles con SSR y reutilizan durante la hidratación los estilos renderizados en el servidor. Se aplica `CSP_NONCE` de Angular cuando está disponible. `data-neu-theme="high-contrast"` en la raíz y `forced-colors: active` tienen prioridad sobre los valores personalizados. La aplicación debe seguir comprobando el contraste de su propia paleta.
+
+`neuPresetCss` continúa disponible en `@neural-ui/core/foundation` como primitiva de bajo nivel para quienes construyan tooling. La configuración habitual de una aplicación debe usar `defineNeuPreset` con `provideNeuralUI`.
