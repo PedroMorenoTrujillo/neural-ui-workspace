@@ -167,6 +167,34 @@ describe('NeuOrganizationChartComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Board');
   });
 
+  it('frames the primary root inside an overflowing viewport without changing public state', () => {
+    const fixture = setup();
+    const viewport = fixture.nativeElement.querySelector(
+      '.neu-organization-chart__viewport',
+    ) as HTMLElement;
+    const root = fixture.nativeElement.querySelector(
+      '.neu-organization-chart__tree--root > .neu-organization-chart__branch > .neu-organization-chart__node',
+    ) as HTMLElement;
+    Object.defineProperty(viewport, 'clientWidth', { configurable: true, value: 320 });
+    Object.defineProperty(viewport, 'scrollWidth', { configurable: true, value: 980 });
+    Object.defineProperty(viewport, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 0, width: 320 }),
+    });
+    Object.defineProperty(root, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 410, width: 160 }),
+    });
+    const scrollBy = vi.fn();
+    Object.defineProperty(viewport, 'scrollBy', { configurable: true, value: scrollBy });
+
+    (fixture.componentInstance as any).centerInitialView();
+
+    expect(scrollBy).toHaveBeenCalledWith({ left: 330, behavior: 'instant' });
+    expect(fixture.componentInstance.selectionKeys()).toBeUndefined();
+    expect(fixture.componentInstance.collapsedKeys()).toBeUndefined();
+  });
+
   it('renders strict custom node and toggle-icon template contexts', () => {
     const fixture = TestBed.createComponent(OrganizationChartHostComponent);
     fixture.detectChanges();

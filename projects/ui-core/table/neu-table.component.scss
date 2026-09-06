@@ -633,6 +633,24 @@
   }
 }
 
+@media (pointer: coarse) {
+  .neu-table__th--sortable {
+    min-block-size: 44px;
+    padding-block: 0.8rem;
+  }
+
+  .neu-table__resize-handle {
+    inset-inline-end: -12px;
+    inline-size: 28px;
+  }
+
+  .neu-table__filter-overlay-trigger,
+  .neu-table__reorder-btn {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
+}
+
 // ---- Selección / Selection ----
 .neu-table__checkbox {
   display: inline-flex;

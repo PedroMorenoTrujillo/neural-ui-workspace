@@ -359,7 +359,7 @@ describe('NeuTreeComponent', () => {
     expect(clicks).toBe(0);
   });
 
-  it('owns one tree tab stop and supports hierarchy, linear navigation, Home and End', () => {
+  it('owns one tree tab stop and preserves focus across hierarchy navigation', async () => {
     const fixture = TestBed.createComponent(NeuTreeComponent);
     fixture.componentRef.setInput('nodes', NODES);
     fixture.detectChanges();
@@ -377,7 +377,9 @@ describe('NeuTreeComponent', () => {
       new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
     );
     fixture.detectChanges();
+    await fixture.whenStable();
     expect(items().some((item) => item.textContent?.includes('Admin portal'))).toBe(true);
+    expect(document.activeElement).toBe(items()[1]);
     items()[1].dispatchEvent(
       new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
     );
@@ -458,6 +460,56 @@ describe('NeuTreeComponent', () => {
       deep = { id: `deep-${level}`, label: `Deep ${level}`, expanded: true, children: [deep] };
     }
     expect((fixture.componentInstance as any).collectExpandedKeys([deep]).size).toBe(5001);
+  });
+
+  it('renders shared identities under each parent but expands their descendants canonically once', () => {
+    const leaf: NeuTreeNode = { id: 'leaf', label: 'Leaf' };
+    const shared: NeuTreeNode = {
+      id: 'shared',
+      label: 'Shared',
+      expanded: true,
+      children: [leaf],
+    };
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', [
+      { id: 'left', label: 'Left', expanded: true, children: [shared] },
+      { id: 'right', label: 'Right', expanded: true, children: [shared] },
+    ]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent.match(/Shared/g)).toHaveLength(2);
+    expect(fixture.nativeElement.textContent.match(/Leaf/g)).toHaveLength(1);
+    expect(fixture.componentInstance.allEntries()).toHaveLength(5);
+  });
+
+  it('bounds Astra compact DAG input without changing true-tree identity or order', () => {
+    const dag = Array.from({ length: 15 }, (_, index) => ({
+      id: `dag-${index}`,
+      label: `DAG ${index}`,
+      expanded: true,
+      children: [] as NeuTreeNode[],
+    }));
+    for (let index = 0; index < dag.length - 1; index += 1) {
+      dag[index].children = [dag[index + 1], dag[index + 1]];
+    }
+    const fixture = TestBed.createComponent(NeuTreeComponent);
+    fixture.componentRef.setInput('nodes', [dag[0]]);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.allEntries()).toHaveLength(29);
+
+    const trueTree: NeuTreeNode[] = [
+      { id: 'a', label: 'A', expanded: true, children: [{ id: 'b', label: 'B' }] },
+      { id: 'c', label: 'C' },
+    ];
+    fixture.componentRef.setInput('nodes', trueTree);
+    fixture.detectChanges();
+    const entries = fixture.componentInstance.allEntries();
+    expect(entries.map(({ node }) => node.id)).toEqual(['a', 'b', 'c']);
+    expect(entries.map(({ node }) => node)).toEqual([
+      trueTree[0],
+      trueTree[0].children![0],
+      trueTree[1],
+    ]);
   });
 
   it('keeps controlled selection and expansion authoritative while emitting proposals', () => {

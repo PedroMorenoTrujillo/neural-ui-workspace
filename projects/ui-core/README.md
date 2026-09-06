@@ -30,11 +30,10 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-
 - **Version:** 1.15.0-rc.0
 - **Entry points:** 104
-- **Automated tests:** 3235
-- **Coverage:** 98.12% statements · 96.48% branches · 98.55% functions · 98.85% lines
+- **Automated tests:** 3271
+- **Coverage:** 98.1% statements · 96.46% branches · 98.51% functions · 98.82% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`

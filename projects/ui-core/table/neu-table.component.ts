@@ -934,6 +934,7 @@ export type NeuTableColumnInput<T extends object> =
         [class.neu-table__scroll-container--vertical]="_verticalScrollEnabled()"
         [class.neu-table__scroll-container--flex]="scrollHeight() === 'flex'"
         role="region"
+        tabindex="0"
         [attr.aria-label]="title() || tableAriaLabel()"
         [attr.aria-busy]="loading() ? true : null"
         [style.max-height]="_scrollContainerMaxHeight()"

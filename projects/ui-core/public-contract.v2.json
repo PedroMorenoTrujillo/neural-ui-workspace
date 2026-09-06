@@ -581,7 +581,8 @@
         "./kanban#NeuKanbanCard",
         "./kanban#NeuKanbanCardDropEvent",
         "./kanban#NeuKanbanColumn",
-        "./kanban#NeuKanbanComponent"
+        "./kanban#NeuKanbanComponent",
+        "./kanban#NeuKanbanStateMode"
       ]
     },
     {
@@ -14763,6 +14764,22 @@
           "signature": "onBlur(event: FocusEvent): void;"
         },
         {
+          "id": "./input-tags#NeuInputTagsComponent.method:onCompositionEnd",
+          "name": "onCompositionEnd",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCompositionEnd(event: Event): void;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:onCompositionStart",
+          "name": "onCompositionStart",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCompositionStart(): void;"
+        },
+        {
           "id": "./input-tags#NeuInputTagsComponent.method:onFocus",
           "name": "onFocus",
           "kind": "method",
@@ -15761,6 +15778,22 @@
           "signature": "onBlur(): void;"
         },
         {
+          "id": "./input#NeuInputComponent.method:onCompositionEnd",
+          "name": "onCompositionEnd",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCompositionEnd(event: Event): void;"
+        },
+        {
+          "id": "./input#NeuInputComponent.method:onCompositionStart",
+          "name": "onCompositionStart",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCompositionStart(): void;"
+        },
+        {
           "id": "./input#NeuInputComponent.method:onFocus",
           "name": "onFocus",
           "kind": "method",
@@ -16612,6 +16645,14 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly initialAncestry?: readonly T[];"
+        },
+        {
+          "id": "./internal#InternalNeuTreeTraversalOptions.property:sharedReferences",
+          "name": "sharedReferences",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly sharedReferences?: 'expand' | 'shallow';"
         },
         {
           "id": "./internal#InternalNeuTreeTraversalOptions.property:shouldDescend",
@@ -17865,6 +17906,16 @@
           "signature": "readonly showWipLimit: _angular_core.InputSignal<boolean>;"
         },
         {
+          "id": "./kanban#NeuKanbanComponent.input:stateMode",
+          "name": "stateMode",
+          "kind": "input",
+          "publicName": "stateMode",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly stateMode: _angular_core.InputSignal<NeuKanbanStateMode>;"
+        },
+        {
           "id": "./kanban#NeuKanbanComponent.method:assigneeInitials",
           "name": "assigneeInitials",
           "kind": "method",
@@ -17873,12 +17924,52 @@
           "signature": "assigneeInitials(assignee: NeuKanbanAssignee): string;"
         },
         {
+          "id": "./kanban#NeuKanbanComponent.method:canMove",
+          "name": "canMove",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "canMove(cardId: string, direction: NeuKanbanMoveDirection): boolean;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:cardAriaLabel",
+          "name": "cardAriaLabel",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "cardAriaLabel(card: NeuKanbanCard, column: NeuKanbanColumn, index: number): string;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:isKeyboardMoving",
+          "name": "isKeyboardMoving",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "isKeyboardMoving(cardId: string): boolean;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:moveByAction",
+          "name": "moveByAction",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "moveByAction(cardId: string, direction: NeuKanbanMoveDirection): void;"
+        },
+        {
           "id": "./kanban#NeuKanbanComponent.method:onCardDrop",
           "name": "onCardDrop",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "onCardDrop(event: CdkDragDrop<NeuKanbanCard[]>, targetColumnId: string): void;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:onCardKeydown",
+          "name": "onCardKeydown",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCardKeydown(card: NeuKanbanCard, columnId: string, cardIndex: number, event: KeyboardEvent): void;"
         },
         {
           "id": "./kanban#NeuKanbanComponent.output:cardDrop",
@@ -17914,7 +18005,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuKanbanComponent, \"neu-kanban\", never, {\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnWidth\": {\n        \"alias\": \"columnWidth\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showCounts\": {\n        \"alias\": \"showCounts\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showWipLimit\": {\n        \"alias\": \"showWipLimit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"columnsChange\": \"columnsChange\";\n    \"cardDrop\": \"cardDrop\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuKanbanComponent, \"neu-kanban\", never, {\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnWidth\": {\n        \"alias\": \"columnWidth\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showCounts\": {\n        \"alias\": \"showCounts\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showWipLimit\": {\n        \"alias\": \"showWipLimit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stateMode\": {\n        \"alias\": \"stateMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"columnsChange\": \"columnsChange\";\n    \"cardDrop\": \"cardDrop\";\n}, never, never, true, never>;"
         },
         {
           "id": "./kanban#NeuKanbanComponent.property:ɵfac",
@@ -17925,6 +18016,15 @@
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuKanbanComponent, never>;"
         }
       ]
+    },
+    {
+      "id": "./kanban#NeuKanbanStateMode",
+      "entrypoint": "./kanban",
+      "name": "NeuKanbanStateMode",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuKanbanStateMode = 'optimistic' | 'controlled';",
+      "members": []
     },
     {
       "id": "./key-filter#NeuKeyFilterDirective",
@@ -45199,6 +45299,22 @@
           "signature": "onBlur(): void;"
         },
         {
+          "id": "./textarea#NeuTextareaComponent.method:onCompositionEnd",
+          "name": "onCompositionEnd",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCompositionEnd(event: Event): void;"
+        },
+        {
+          "id": "./textarea#NeuTextareaComponent.method:onCompositionStart",
+          "name": "onCompositionStart",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCompositionStart(): void;"
+        },
+        {
           "id": "./textarea#NeuTextareaComponent.method:onFocus",
           "name": "onFocus",
           "kind": "method",
@@ -58556,6 +58672,18 @@
       "signature": "readonly showWipLimit: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./kanban#NeuKanbanComponent.input:stateMode",
+      "entrypoint": "./kanban",
+      "declaration": "NeuKanbanComponent",
+      "selector": "neu-kanban",
+      "propertyName": "stateMode",
+      "publicName": "stateMode",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly stateMode: _angular_core.InputSignal<NeuKanbanStateMode>;"
+    },
+    {
       "id": "./kanban#NeuKanbanComponent.output:cardDrop",
       "entrypoint": "./kanban",
       "declaration": "NeuKanbanComponent",
@@ -70090,7 +70218,7 @@
   ],
   "summary": {
     "entrypoints": 105,
-    "exportedDeclarations": 834,
+    "exportedDeclarations": 835,
     "declarationKinds": {
       "class": 14,
       "component": 102,
@@ -70100,22 +70228,22 @@
       "reexport": 55,
       "service": 11,
       "token": 4,
-      "type": 184,
+      "type": 185,
       "variable": 1
     },
-    "publicSymbols": 5738,
+    "publicSymbols": 5752,
     "statuses": {
-      "SUPPORTED": 3647,
+      "SUPPORTED": 3649,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 2087,
+      "INTERNAL/UNSUPPORTED": 2099,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1200,
+      "input": 1201,
       "output": 281,
       "model": 2,
-      "total": 1483
+      "total": 1484
     },
     "designTokens": 258
   }

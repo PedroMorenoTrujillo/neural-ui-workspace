@@ -1,9 +1,11 @@
-import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { isPlatformBrowser, NgClass, NgTemplateOutlet } from '@angular/common';
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
+  PLATFORM_ID,
   TemplateRef,
   ViewEncapsulation,
   computed,
@@ -12,6 +14,7 @@ import {
   input,
   model,
   output,
+  viewChild,
 } from '@angular/core';
 import type { NeuTreeNode } from '@neural-ui/core/tree';
 import { walkNeuTreeDepthFirst } from '@neural-ui/core/internal';
@@ -164,9 +167,12 @@ export class NeuOrganizationChartSelectionIndicatorDirective<T = unknown> {
   },
   template: `
     <div
+      #viewport
       class="neu-organization-chart__viewport"
       [style.--neu-organization-chart-gap-x.px]="gapX()"
       [style.--neu-organization-chart-gap-y.px]="gapY()"
+      (pointerdown)="markUserNavigation()"
+      (wheel)="markUserNavigation()"
     >
       @if (renderNodes().length) {
         <ul
@@ -399,7 +405,43 @@ export class NeuOrganizationChartComponent<T = unknown> {
   protected readonly selectionIndicatorTemplate = contentChild(
     NeuOrganizationChartSelectionIndicatorDirective<T>,
   );
+  private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   /* v8 ignore stop */
+
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private lastFramedNodes: readonly NeuOrganizationChartNode<T>[] | null = null;
+  private userNavigated = false;
+
+  constructor() {
+    afterRenderEffect(() => {
+      const nodes = this.nodes();
+      if (!this.isBrowser || !nodes.length || nodes === this.lastFramedNodes || this.userNavigated)
+        return;
+      this.lastFramedNodes = nodes;
+      this.centerInitialView();
+    });
+  }
+
+  /** Frames the primary root once after measurable browser layout. */
+  private centerInitialView(): void {
+    const viewport = this.viewport()?.nativeElement;
+    if (!viewport || viewport.scrollWidth <= viewport.clientWidth + 1) return;
+    const root = viewport.querySelector<HTMLElement>(
+      '.neu-organization-chart__tree--root > .neu-organization-chart__branch > .neu-organization-chart__node',
+    );
+    if (!root) return;
+    const viewportBounds = viewport.getBoundingClientRect();
+    const rootBounds = root.getBoundingClientRect();
+    viewport.scrollBy({
+      left:
+        rootBounds.left + rootBounds.width / 2 - (viewportBounds.left + viewportBounds.width / 2),
+      behavior: 'instant',
+    });
+  }
+
+  protected markUserNavigation(): void {
+    this.userNavigated = true;
+  }
 
   protected readonly gapX = computed(() => {
     const value = this.gap();

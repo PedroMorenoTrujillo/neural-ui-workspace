@@ -499,7 +499,9 @@ export class NeuTreeComponent<T = unknown> {
       const nodes = this.nodes();
       if (nodes === this.previousNodes) return;
       this.previousNodes = nodes;
-      const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? []);
+      const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
+        sharedReferences: 'shallow',
+      });
       const valid = new Set(entries.map(({ node }) => node.id));
       if (this.expandedKeys() === undefined) {
         const next = new Set([...this.internalExpandedKeys()].filter((key) => valid.has(key)));
@@ -736,10 +738,13 @@ export class NeuTreeComponent<T = unknown> {
     this.navigation.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });
     const result = this.navigation.handleKey(event);
     if (!result.handled) return;
-    if (result.action === 'expand' && !this.isRenderedExpanded(node)) this.toggleNode(node, event);
-    else if (result.action === 'collapse' && this.isRenderedExpanded(node))
+    if (result.action === 'expand' && !this.isRenderedExpanded(node)) {
+      this.focusAfterRender = true;
       this.toggleNode(node, event);
-    else if (result.action === 'activate') this.activateNode(node);
+    } else if (result.action === 'collapse' && this.isRenderedExpanded(node)) {
+      this.focusAfterRender = true;
+      this.toggleNode(node, event);
+    } else if (result.action === 'activate') this.activateNode(node);
     else this.materializeAndFocus(result.activeIndex);
   }
 
@@ -751,6 +756,7 @@ export class NeuTreeComponent<T = unknown> {
       if (checked) next.add(node.id);
     } else if (this.selectionMode() === 'checkbox') {
       const entries = walkNeuTreeDepthFirst([node], (candidate) => candidate.children ?? [], {
+        sharedReferences: 'shallow',
         shouldDescend: (entry) =>
           entry.node === node || (!entry.node.disabled && this.canSelect(entry.node)),
       });
@@ -815,7 +821,9 @@ export class NeuTreeComponent<T = unknown> {
   }
   private collectExpandedKeys(nodes: readonly NeuTreeNode<T>[]): Set<string> {
     return new Set(
-      walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [])
+      walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
+        sharedReferences: 'shallow',
+      })
         .filter(({ node }) => node.expanded)
         .map(({ node }) => node.id),
     );
@@ -837,13 +845,17 @@ export class NeuTreeComponent<T = unknown> {
     nodes: readonly NeuTreeNode<T>[],
     selected: Set<string>,
   ): NeuTreeNode<T>[] {
-    return walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [])
+    return walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
+      sharedReferences: 'shallow',
+    })
       .filter(({ node }) => selected.has(node.id))
       .map(({ node }) => node);
   }
 
   private filterNodes(nodes: NeuTreeNode<T>[], query: string): NeuTreeNode<T>[] {
-    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? []);
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
+      sharedReferences: 'shallow',
+    });
     const projected = new Map<number, NeuTreeNode<T>>();
     for (let index = entries.length - 1; index >= 0; index -= 1) {
       const entry = entries[index];
@@ -868,7 +880,9 @@ export class NeuTreeComponent<T = unknown> {
   }
 
   private cycleSafeProjection(nodes: readonly NeuTreeNode<T>[]): NeuTreeNode<T>[] {
-    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? []);
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
+      sharedReferences: 'shallow',
+    });
     const projected = new Map<number, NeuTreeNode<T>>();
     for (let index = entries.length - 1; index >= 0; index -= 1) {
       const entry = entries[index];

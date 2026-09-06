@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { COMPOSITION_BUFFER_MODE, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuTextareaComponent } from './neu-textarea.component';
 import { provideIcons } from '@ng-icons/core';
 import { lucideAlertCircle } from '@ng-icons/lucide';
@@ -12,6 +12,20 @@ function mk(inputs: Record<string, unknown> = {}) {
   }
   f.detectChanges();
   return { f, comp: f.componentInstance as any };
+}
+
+function composeText(element: HTMLTextAreaElement, intermediate: string, final: string): void {
+  element.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+  element.value = intermediate;
+  element.dispatchEvent(
+    new InputEvent('input', { bubbles: true, data: intermediate, isComposing: true }),
+  );
+  element.dispatchEvent(
+    new CompositionEvent('compositionupdate', { bubbles: true, data: intermediate }),
+  );
+  element.value = final;
+  element.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: final }));
+  element.dispatchEvent(new InputEvent('input', { bubbles: true, data: final }));
 }
 
 describe('NeuTextareaComponent', () => {
@@ -114,6 +128,60 @@ describe('NeuTextareaComponent', () => {
     el.value = 'User value';
     el.dispatchEvent(new Event('input'));
     expect(emitted).toHaveBeenCalledWith('User value');
+  });
+
+  it('buffers IME CVA and FormControl propagation while retaining native input events', async () => {
+    const direct = mk();
+    const cvaValues: string[] = [];
+    const domValues: string[] = [];
+    direct.comp.registerOnChange((value: string) => cvaValues.push(value));
+    const textarea = direct.f.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+    textarea.addEventListener('input', () => domValues.push(textarea.value));
+    composeText(textarea, 'に', '日本');
+    expect(domValues).toEqual(['に', '日本']);
+    expect(cvaValues).toEqual(['日本']);
+
+    @Component({
+      template: `<neu-textarea label="Notes" [formControl]="ctrl" />`,
+      imports: [NeuTextareaComponent, ReactiveFormsModule],
+    })
+    class ImeHost {
+      readonly ctrl = new FormControl('');
+    }
+    const fixture = TestBed.createComponent(ImeHost);
+    fixture.detectChanges();
+    const values: Array<string | null> = [];
+    fixture.componentInstance.ctrl.valueChanges.subscribe((value) => values.push(value));
+    composeText(fixture.nativeElement.querySelector('textarea'), 'に', '日本');
+    expect(values).toEqual(['日本']);
+  });
+
+  it('respects COMPOSITION_BUFFER_MODE=false', () => {
+    TestBed.overrideProvider(COMPOSITION_BUFFER_MODE, { useValue: false });
+    const { f, comp } = mk();
+    const values: string[] = [];
+    comp.registerOnChange((value: string) => values.push(value));
+    composeText(f.nativeElement.querySelector('textarea'), 'に', '日本');
+    expect(values).toEqual(['に', '日本']);
+  });
+
+  it('cancels pending IME propagation on blur, disable, writeValue, and destroy', () => {
+    for (const action of ['blur', 'disable', 'write', 'destroy'] as const) {
+      const fixture = mk();
+      const changes = vi.fn();
+      fixture.comp.registerOnChange(changes);
+      const textarea = fixture.f.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+      textarea.dispatchEvent(new CompositionEvent('compositionstart'));
+      textarea.value = 'draft';
+      textarea.dispatchEvent(new InputEvent('input', { isComposing: true }));
+      if (action === 'blur') textarea.dispatchEvent(new FocusEvent('blur'));
+      else if (action === 'disable') fixture.comp.setDisabledState(true);
+      else if (action === 'write') fixture.comp.writeValue('server');
+      else fixture.f.destroy();
+      textarea.dispatchEvent(new CompositionEvent('compositionend'));
+      expect(changes).not.toHaveBeenCalled();
+      if (action === 'write') expect(fixture.comp['_value']()).toBe('server');
+    }
   });
 
   it('onBlur should call onTouched', () => {

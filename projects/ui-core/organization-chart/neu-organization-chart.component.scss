@@ -1,4 +1,10 @@
 .neu-organization-chart {
+  --neu-organization-chart-connector: color-mix(
+    in srgb,
+    var(--neu-text-muted) 84%,
+    var(--neu-border)
+  );
+  --neu-organization-chart-connector-width: 2px;
   display: block;
   max-inline-size: 100%;
   min-inline-size: 0;
@@ -70,7 +76,8 @@
     inset-block-start: 0;
     inset-inline-start: 50%;
     block-size: calc(var(--neu-organization-chart-gap-y) / 2);
-    border-inline-start: 1px solid color-mix(in srgb, var(--neu-text-muted) 70%, var(--neu-border));
+    border-inline-start: var(--neu-organization-chart-connector-width) solid
+      var(--neu-organization-chart-connector);
     content: '';
   }
 
@@ -81,19 +88,22 @@
       inset-block-start: calc(var(--neu-organization-chart-gap-y) / -2);
       block-size: calc(var(--neu-organization-chart-gap-y) / 2);
       inline-size: calc(50% + var(--neu-organization-chart-gap-x) / 2);
-      border-block-start: 1px solid color-mix(in srgb, var(--neu-text-muted) 70%, var(--neu-border));
+      border-block-start: var(--neu-organization-chart-connector-width) solid
+        var(--neu-organization-chart-connector);
       content: '';
       pointer-events: none;
     }
 
     &::before {
       inset-inline-start: 50%;
-      border-inline-start: 1px solid color-mix(in srgb, var(--neu-text-muted) 70%, var(--neu-border));
+      border-inline-start: var(--neu-organization-chart-connector-width) solid
+        var(--neu-organization-chart-connector);
     }
 
     &::after {
       inset-inline-end: 50%;
-      border-inline-end: 1px solid color-mix(in srgb, var(--neu-text-muted) 70%, var(--neu-border));
+      border-inline-end: var(--neu-organization-chart-connector-width) solid
+        var(--neu-organization-chart-connector);
     }
 
     &:first-child::after,
@@ -228,6 +238,11 @@
   color: var(--neu-text-muted);
   cursor: pointer;
 
+  &::before {
+    position: absolute;
+    inset: -0.5rem;
+    content: '';
+  }
 
   svg {
     inline-size: 0.9rem;
@@ -244,8 +259,13 @@
   }
 }
 
- .neu-organization-chart__toggle:hover { color: var(--neu-text); border-color: var(--neu-text-muted); }
-.neu-organization-chart__tree--root > .neu-organization-chart__branch > .neu-organization-chart__node {
+.neu-organization-chart__toggle:hover {
+  color: var(--neu-text);
+  border-color: var(--neu-text-muted);
+}
+.neu-organization-chart__tree--root
+  > .neu-organization-chart__branch
+  > .neu-organization-chart__node {
   border-block-start: 3px solid var(--neu-primary);
 }
 .neu-organization-chart__tree[role='group'] {
@@ -253,15 +273,30 @@
   transform-origin: top center;
 }
 @keyframes neu-organization-chart-reveal {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @media (forced-colors: active) {
+  .neu-organization-chart {
+    --neu-organization-chart-connector: CanvasText;
+  }
   .neu-organization-chart__tree::before,
   .neu-organization-chart__branch::before,
-  .neu-organization-chart__branch::after { border-color: CanvasText; }
-}
+  .neu-organization-chart__branch::after {
+    border-color: CanvasText;
+  }
 
+  .neu-organization-chart__toggle {
+    border-color: ButtonText;
+    color: ButtonText;
+  }
+}
 
 .neu-organization-chart__empty {
   border: 1px dashed var(--neu-border);
@@ -282,7 +317,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .neu-organization-chart__tree[role="group"] { animation: none; }
+  .neu-organization-chart__tree[role='group'] {
+    animation: none;
+  }
   .neu-organization-chart__node {
     transition: none;
   }

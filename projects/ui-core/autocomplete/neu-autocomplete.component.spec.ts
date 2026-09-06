@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { COMPOSITION_BUFFER_MODE, FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
   NeuAutocompleteComponent,
   NeuAutocompleteClearIconDirective,
@@ -40,13 +40,21 @@ import {
     >
       <ng-template neuAutocompleteHeader><span class="auto-header">Header</span></ng-template>
       <ng-template neuAutocompleteFooter><span class="auto-footer">Footer</span></ng-template>
-      <ng-template neuAutocompleteItem let-option><span class="auto-item">{{ option.label }}</span></ng-template>
-      <ng-template neuAutocompleteGroup let-group><span class="auto-group">{{ group }}</span></ng-template>
-      <ng-template neuAutocompleteLoader let-index="logicalIndex"><span class="auto-loader">{{ index }}</span></ng-template>
+      <ng-template neuAutocompleteItem let-option
+        ><span class="auto-item">{{ option.label }}</span></ng-template
+      >
+      <ng-template neuAutocompleteGroup let-group
+        ><span class="auto-group">{{ group }}</span></ng-template
+      >
+      <ng-template neuAutocompleteLoader let-index="logicalIndex"
+        ><span class="auto-loader">{{ index }}</span></ng-template
+      >
       <ng-template neuAutocompleteEmpty><span class="auto-empty">Empty</span></ng-template>
       <ng-template neuAutocompleteLoadingIcon><span class="auto-loading-icon">L</span></ng-template>
       <ng-template neuAutocompleteClearIcon><span class="auto-clear-icon">C</span></ng-template>
-      <ng-template neuAutocompleteDropdownIcon><span class="auto-dropdown-icon">D</span></ng-template>
+      <ng-template neuAutocompleteDropdownIcon
+        ><span class="auto-dropdown-icon">D</span></ng-template
+      >
     </neu-autocomplete>
   `,
 })
@@ -110,6 +118,66 @@ describe('NeuAutocompleteComponent', () => {
     const f = setup();
     f.componentInstance['onQueryChange']('a');
     expect(f.componentInstance['_isOpen']()).toBe(true);
+  });
+
+  it('buffers IME value, query, and completion outputs until composition commits', () => {
+    const f = setup();
+    f.componentRef.setInput('delay', 0);
+    f.detectChanges();
+    const values: unknown[] = [];
+    const queries: string[] = [];
+    const completions: string[] = [];
+    f.componentInstance.registerOnChange((value) => values.push(value));
+    f.componentInstance.queryChange.subscribe((value) => queries.push(value));
+    f.componentInstance.completeMethod.subscribe((event) => completions.push(event.query));
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    input.value = 'に';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+    input.value = '日本';
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+
+    expect(values).toEqual(['日本']);
+    expect(queries).toEqual(['日本']);
+    expect(completions).toEqual(['日本']);
+  });
+
+  it('respects Angular COMPOSITION_BUFFER_MODE=false', () => {
+    TestBed.overrideProvider(COMPOSITION_BUFFER_MODE, { useValue: false });
+    const f = setup();
+    f.componentRef.setInput('delay', 0);
+    f.detectChanges();
+    const values: unknown[] = [];
+    const queries: string[] = [];
+    f.componentInstance.registerOnChange((value) => values.push(value));
+    f.componentInstance.queryChange.subscribe((value) => queries.push(value));
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    input.value = 'に';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+    input.value = '日本';
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+
+    expect(values).toEqual(['に', '日本']);
+    expect(queries).toEqual(['に', '日本']);
+  });
+
+  it('does not commit a composition that becomes disabled', () => {
+    const f = setup();
+    const values: unknown[] = [];
+    f.componentInstance.registerOnChange((value) => values.push(value));
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    input.value = 'draft';
+    f.componentInstance.setDisabledState(true);
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+
+    expect(values).toEqual([]);
   });
 
   it('onQueryChange empty should emit null via CVA', () => {
@@ -521,7 +589,9 @@ describe('NeuAutocompleteComponent', () => {
 
   it('trackByOption should prefer value, then label, then index', () => {
     const f = setup();
-    expect(f.componentInstance['trackByOption'](0, { value: 'id-1', label: 'Angular' })).toBe('id-1');
+    expect(f.componentInstance['trackByOption'](0, { value: 'id-1', label: 'Angular' })).toBe(
+      'id-1',
+    );
     expect(f.componentInstance['trackByOption'](1, { value: null, label: 'React' } as any)).toBe(
       'React',
     );
@@ -532,7 +602,10 @@ describe('NeuAutocompleteComponent', () => {
     const f = setup();
     const preventDefault = vi.fn();
 
-    f.componentInstance['onKeyDown']({ key: 'ArrowDown', preventDefault } as unknown as KeyboardEvent);
+    f.componentInstance['onKeyDown']({
+      key: 'ArrowDown',
+      preventDefault,
+    } as unknown as KeyboardEvent);
 
     expect(preventDefault).not.toHaveBeenCalled();
     expect(f.componentInstance['_activeIndex']()).toBe(-1);
@@ -1021,7 +1094,8 @@ describe('NeuAutocompleteComponent', () => {
       component.cancelFrame(frame);
       component.cancelFrame(-1);
     } finally {
-      if (requestDescriptor) Object.defineProperty(view, 'requestAnimationFrame', requestDescriptor);
+      if (requestDescriptor)
+        Object.defineProperty(view, 'requestAnimationFrame', requestDescriptor);
       else delete (view as any).requestAnimationFrame;
       if (cancelDescriptor) Object.defineProperty(view, 'cancelAnimationFrame', cancelDescriptor);
       else delete (view as any).cancelAnimationFrame;

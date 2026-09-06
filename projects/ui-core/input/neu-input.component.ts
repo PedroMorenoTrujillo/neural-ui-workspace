@@ -1,6 +1,8 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewEncapsulation,
   afterNextRender,
@@ -12,7 +14,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { COMPOSITION_BUFFER_MODE, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
@@ -110,6 +112,8 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
         "
         [value]="_value()"
         [attr.placeholder]="floatingLabel() ? ' ' : placeholder() || null"
+        (compositionstart)="onCompositionStart()"
+        (compositionend)="onCompositionEnd($event)"
         (input)="onInput($event)"
         (animationstart)="onAnimationStart($event)"
         (focus)="onFocus()"
@@ -235,6 +239,15 @@ export class NeuInputComponent implements ControlValueAccessor {
   // --- ControlValueAccessor ---
   private _onChange: (v: string) => void = () => {};
   private _onTouched: () => void = () => {};
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _compositionMode =
+    inject(COMPOSITION_BUFFER_MODE, { optional: true }) ??
+    !/android (\d+)/.test(
+      (inject(DOCUMENT).defaultView?.navigator.userAgent ?? '').toLocaleLowerCase(),
+    );
+  private _composing = false;
+  private _compositionCommit: string | null = null;
+  private _destroyed = false;
 
   constructor() {
     // Credential managers can fill the native control without emitting an input event.
@@ -243,9 +256,14 @@ export class NeuInputComponent implements ControlValueAccessor {
       // its initial value. Keep this callback in Angular's destroy-aware render phase.
       if (this.nativeInput().nativeElement.value) this.syncNativeValue();
     });
+    this._destroyRef.onDestroy(() => {
+      this._destroyed = true;
+      this.cancelComposition();
+    });
   }
 
   writeValue(val: unknown): void {
+    this.cancelComposition();
     this._value.set(val == null ? '' : String(val));
   }
 
@@ -260,6 +278,7 @@ export class NeuInputComponent implements ControlValueAccessor {
   private readonly _cvaDisabled = signal(false);
   setDisabledState(isDisabled: boolean): void {
     this._cvaDisabled.set(isDisabled);
+    if (isDisabled) this.cancelComposition();
   }
 
   readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
@@ -267,6 +286,33 @@ export class NeuInputComponent implements ControlValueAccessor {
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this._value.set(value);
+    if (this._destroyed || this.isDisabledFinal() || (this._compositionMode && this._composing))
+      return;
+    if (this._compositionCommit === value) {
+      this._compositionCommit = null;
+      return;
+    }
+    this._compositionCommit = null;
+    this._onChange(value);
+    this.valueChange.emit(value);
+  }
+
+  onCompositionStart(): void {
+    if (!this._compositionMode || this.isDisabledFinal() || this._destroyed) return;
+    this._composing = true;
+    this._compositionCommit = null;
+  }
+
+  onCompositionEnd(event: Event): void {
+    if (!this._compositionMode || !this._composing) return;
+    this._composing = false;
+    if (this._destroyed || this.isDisabledFinal()) {
+      this._compositionCommit = null;
+      return;
+    }
+    const value = (event.target as HTMLInputElement).value;
+    this._value.set(value);
+    this._compositionCommit = value;
     this._onChange(value);
     this.valueChange.emit(value);
   }
@@ -289,7 +335,13 @@ export class NeuInputComponent implements ControlValueAccessor {
   }
 
   onBlur(): void {
+    this.cancelComposition();
     this._focused.set(false);
     this._onTouched();
+  }
+
+  private cancelComposition(): void {
+    this._composing = false;
+    this._compositionCommit = null;
   }
 }

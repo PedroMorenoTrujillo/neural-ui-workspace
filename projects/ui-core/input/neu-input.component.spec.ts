@@ -1,6 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import {
+  COMPOSITION_BUFFER_MODE,
+  FormControl,
+  ReactiveFormsModule,
+  FormsModule,
+} from '@angular/forms';
 import { NeuInputComponent } from './neu-input.component';
 import { provideIcons } from '@ng-icons/core';
 import { lucideAlertCircle, lucideSearch, lucideUser } from '@ng-icons/lucide';
@@ -12,6 +17,20 @@ function mk(inputs: Record<string, unknown> = {}) {
   }
   f.detectChanges();
   return { f, comp: f.componentInstance as any };
+}
+
+function composeText(element: HTMLInputElement, intermediate: string, final: string): void {
+  element.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+  element.value = intermediate;
+  element.dispatchEvent(
+    new InputEvent('input', { bubbles: true, data: intermediate, isComposing: true }),
+  );
+  element.dispatchEvent(
+    new CompositionEvent('compositionupdate', { bubbles: true, data: intermediate }),
+  );
+  element.value = final;
+  element.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: final }));
+  element.dispatchEvent(new InputEvent('input', { bubbles: true, data: final }));
 }
 
 @Component({
@@ -155,6 +174,98 @@ describe('NeuInputComponent', () => {
     el.value = 'User value';
     el.dispatchEvent(new Event('input'));
     expect(emitted).toHaveBeenCalledWith('User value');
+  });
+
+  it('buffers IME CVA propagation while preserving native DOM input events', () => {
+    const { f, comp } = mk({ label: 'Name' });
+    const cvaValues: string[] = [];
+    const domValues: string[] = [];
+    comp.registerOnChange((value: string) => cvaValues.push(value));
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.addEventListener('input', () => domValues.push(input.value));
+
+    composeText(input, 'に', '日本');
+
+    expect(domValues).toEqual(['に', '日本']);
+    expect(cvaValues).toEqual(['日本']);
+    expect(comp['_value']()).toBe('日本');
+  });
+
+  it('buffers FormControl valueChanges until IME composition commits', async () => {
+    @Component({
+      template: `<neu-input label="Name" [formControl]="ctrl" />`,
+      imports: [NeuInputComponent, ReactiveFormsModule],
+    })
+    class ImeHost {
+      readonly ctrl = new FormControl('');
+    }
+    const fixture = TestBed.createComponent(ImeHost);
+    fixture.detectChanges();
+    const values: Array<string | null> = [];
+    fixture.componentInstance.ctrl.valueChanges.subscribe((value) => values.push(value));
+
+    composeText(fixture.nativeElement.querySelector('input'), 'に', '日本');
+
+    expect(values).toEqual(['日本']);
+    expect(fixture.componentInstance.ctrl.value).toBe('日本');
+  });
+
+  it('respects COMPOSITION_BUFFER_MODE=false', () => {
+    TestBed.overrideProvider(COMPOSITION_BUFFER_MODE, { useValue: false });
+    const { f, comp } = mk();
+    const values: string[] = [];
+    comp.registerOnChange((value: string) => values.push(value));
+
+    composeText(f.nativeElement.querySelector('input'), 'に', '日本');
+
+    expect(values).toEqual(['に', '日本']);
+  });
+
+  it('cancels pending IME propagation on blur, disable, writeValue, and destroy', () => {
+    const blurFixture = mk();
+    const blurChanges = vi.fn();
+    const touched = vi.fn();
+    blurFixture.comp.registerOnChange(blurChanges);
+    blurFixture.comp.registerOnTouched(touched);
+    const blurInput = blurFixture.f.nativeElement.querySelector('input') as HTMLInputElement;
+    blurInput.dispatchEvent(new CompositionEvent('compositionstart'));
+    blurInput.value = 'draft';
+    blurInput.dispatchEvent(new InputEvent('input', { isComposing: true }));
+    blurInput.dispatchEvent(new FocusEvent('blur'));
+    blurInput.dispatchEvent(new CompositionEvent('compositionend'));
+    expect(blurChanges).not.toHaveBeenCalled();
+    expect(touched).toHaveBeenCalledTimes(1);
+
+    const disabledFixture = mk();
+    const disabledChanges = vi.fn();
+    disabledFixture.comp.registerOnChange(disabledChanges);
+    const disabledInput = disabledFixture.f.nativeElement.querySelector(
+      'input',
+    ) as HTMLInputElement;
+    disabledInput.dispatchEvent(new CompositionEvent('compositionstart'));
+    disabledInput.value = 'draft';
+    disabledFixture.comp.setDisabledState(true);
+    disabledInput.dispatchEvent(new CompositionEvent('compositionend'));
+    expect(disabledChanges).not.toHaveBeenCalled();
+
+    const writeFixture = mk();
+    const writeChanges = vi.fn();
+    writeFixture.comp.registerOnChange(writeChanges);
+    const writeInput = writeFixture.f.nativeElement.querySelector('input') as HTMLInputElement;
+    writeInput.dispatchEvent(new CompositionEvent('compositionstart'));
+    writeFixture.comp.writeValue('server');
+    writeInput.dispatchEvent(new CompositionEvent('compositionend'));
+    expect(writeChanges).not.toHaveBeenCalled();
+    expect(writeFixture.comp['_value']()).toBe('server');
+
+    const destroyFixture = mk();
+    const destroyChanges = vi.fn();
+    destroyFixture.comp.registerOnChange(destroyChanges);
+    const destroyInput = destroyFixture.f.nativeElement.querySelector('input') as HTMLInputElement;
+    destroyInput.dispatchEvent(new CompositionEvent('compositionstart'));
+    destroyFixture.f.destroy();
+    destroyInput.dispatchEvent(new CompositionEvent('compositionend'));
+    expect(destroyChanges).not.toHaveBeenCalled();
   });
 
   it('onBlur should call onTouched and remove focused state', () => {

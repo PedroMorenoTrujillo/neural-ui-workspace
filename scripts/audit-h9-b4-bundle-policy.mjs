@@ -45,6 +45,7 @@ const scenarios = {
   'tree-lazy': { imports: [['NeuTreeComponent', 'tree']] },
   'tree-virtual': { imports: [['NeuTreeComponent', 'tree']] },
   'tree-dnd-full': { imports: [['NeuTreeComponent', 'tree']] },
+  kanban: { imports: [['NeuKanbanComponent', 'kanban']] },
   'tree-table': { imports: [['NeuTreeTableComponent', 'tree-table']] },
   'dialog-basic': { imports: [['NeuDialogComponent', 'modal']] },
   'dialog-draggable': { imports: [['NeuDialogComponent', 'modal']] },
@@ -68,6 +69,7 @@ const prScenarios = new Set([
   'button',
   'table-basic',
   'table-advanced-lazy',
+  'kanban',
   'color-picker-basic',
 ]);
 
@@ -277,7 +279,8 @@ function statusFor(value, budget) {
   return 'PASS';
 }
 
-function consumerBudget(baseline, metric) {
+function consumerBudget(baseline, metric, override) {
+  if (override) return override;
   if (metric === 'raw' && baseline === 0) return { warning: 0, failure: 0 };
   const warningFloor = metric === 'raw' ? 128 : 64;
   const failureFloor = metric === 'raw' ? 256 : 128;
@@ -339,7 +342,7 @@ for (const name of selectedNames) {
   const budgets = Object.fromEntries(
     ['raw', 'gzip', 'brotli'].map((metric) => [
       metric,
-      consumerBudget(scenarioPolicy.baseline[metric], metric),
+      consumerBudget(scenarioPolicy.baseline[metric], metric, scenarioPolicy.budget?.[metric]),
     ]),
   );
   const statuses = ['raw', 'gzip', 'brotli'].map((metric) =>

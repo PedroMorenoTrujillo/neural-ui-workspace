@@ -1,6 +1,8 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewEncapsulation,
   computed,
@@ -12,7 +14,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { COMPOSITION_BUFFER_MODE, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 /**
@@ -64,6 +66,8 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
         [attr.aria-invalid]="hasError() ? 'true' : null"
         [style.resize]="_resizeStyle()"
         [value]="_value()"
+        (compositionstart)="onCompositionStart()"
+        (compositionend)="onCompositionEnd($event)"
         (input)="onInput($event)"
         (focus)="onFocus()"
         (blur)="onBlur()"
@@ -118,6 +122,15 @@ export class NeuTextareaComponent implements ControlValueAccessor {
 
   private _onChange: (v: string) => void = () => {};
   private _onTouched: () => void = () => {};
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _compositionMode =
+    inject(COMPOSITION_BUFFER_MODE, { optional: true }) ??
+    !/android (\d+)/.test(
+      (inject(DOCUMENT).defaultView?.navigator.userAgent ?? '').toLocaleLowerCase(),
+    );
+  private _composing = false;
+  private _compositionCommit: string | null = null;
+  private _destroyed = false;
 
   constructor() {
     effect(() => {
@@ -129,13 +142,27 @@ export class NeuTextareaComponent implements ControlValueAccessor {
         }
       }
     });
+    this._destroyRef.onDestroy(() => {
+      this._destroyed = true;
+      this.cancelComposition();
+    });
   }
 
   onInput(event: Event): void {
     const el = event.target as HTMLTextAreaElement;
     this._value.set(el.value);
-    this._onChange(el.value);
-    this.valueChange.emit(el.value);
+    if (
+      !this._destroyed &&
+      !this._isDisabledState() &&
+      (!this._compositionMode || !this._composing)
+    ) {
+      if (this._compositionCommit === el.value) this._compositionCommit = null;
+      else {
+        this._compositionCommit = null;
+        this._onChange(el.value);
+        this.valueChange.emit(el.value);
+      }
+    }
 
     if (this.autoResize()) {
       el.style.height = 'auto';
@@ -143,16 +170,38 @@ export class NeuTextareaComponent implements ControlValueAccessor {
     }
   }
 
+  onCompositionStart(): void {
+    if (!this._compositionMode || this._isDisabledState() || this._destroyed) return;
+    this._composing = true;
+    this._compositionCommit = null;
+  }
+
+  onCompositionEnd(event: Event): void {
+    if (!this._compositionMode || !this._composing) return;
+    this._composing = false;
+    if (this._destroyed || this._isDisabledState()) {
+      this._compositionCommit = null;
+      return;
+    }
+    const value = (event.target as HTMLTextAreaElement).value;
+    this._value.set(value);
+    this._compositionCommit = value;
+    this._onChange(value);
+    this.valueChange.emit(value);
+  }
+
   onFocus(): void {
     this._focused.set(true);
   }
 
   onBlur(): void {
+    this.cancelComposition();
     this._focused.set(false);
     this._onTouched();
   }
 
   writeValue(val: unknown): void {
+    this.cancelComposition();
     this._value.set(val == null ? '' : String(val));
   }
 
@@ -166,5 +215,11 @@ export class NeuTextareaComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this._isDisabled.set(isDisabled);
+    if (isDisabled) this.cancelComposition();
+  }
+
+  private cancelComposition(): void {
+    this._composing = false;
+    this._compositionCommit = null;
   }
 }

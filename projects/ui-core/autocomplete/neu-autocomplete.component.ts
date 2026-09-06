@@ -24,7 +24,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { COMPOSITION_BUFFER_MODE, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuOptionAccessor,
@@ -174,6 +174,8 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
         [attr.aria-busy]="loading() ? 'true' : null"
         [value]="_query()"
         (select)="$event.stopPropagation()"
+        (compositionstart)="onCompositionStart()"
+        (compositionend)="onCompositionEnd($event)"
         (input)="onInput($event)"
         (focus)="_onFocus($event)"
         (blur)="_onBlur($event)"
@@ -520,6 +522,13 @@ export class NeuAutocompleteComponent<
   private focusSessionTouched = false;
   private onChange: (value: NeuAutocompleteValue<V> | null) => void = () => undefined;
   private onTouched: () => void = () => undefined;
+  private readonly compositionMode =
+    inject(COMPOSITION_BUFFER_MODE, { optional: true }) ??
+    !/android (\d+)/.test(
+      (this.document.defaultView?.navigator.userAgent ?? '').toLocaleLowerCase(),
+    );
+  private composing = false;
+  private compositionCommit: string | null = null;
 
   readonly viewportMargin = 16;
   readonly overlayPositions: ConnectedPosition[] = INTERNAL_NEU_CONNECTED_OVERLAY_POSITIONS.map(
@@ -531,9 +540,7 @@ export class NeuAutocompleteComponent<
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
   readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
-  readonly effectiveMinQueryLength = computed(() =>
-    Math.max(0, Math.max(1, this.minLength())),
-  );
+  readonly effectiveMinQueryLength = computed(() => Math.max(0, Math.max(1, this.minLength())));
   readonly consumerOwnedSuggestions = computed(
     () => this.suggestions() !== null || this.groupSuggestions() !== null,
   );
@@ -748,6 +755,7 @@ export class NeuAutocompleteComponent<
   }
 
   ngOnDestroy(): void {
+    this.cancelComposition();
     this.cancelCompletion();
     this.cancelActiveScroll();
     this._isOpen.set(false);
@@ -760,6 +768,33 @@ export class NeuAutocompleteComponent<
     const target = event.target as HTMLInputElement;
     const text = this.maxlength() == null ? target.value : target.value.slice(0, this.maxlength()!);
     if (target.value !== text) target.value = text;
+    this._query.set(text);
+    if (this.compositionMode && this.composing) return;
+    if (this.compositionCommit === text) {
+      this.compositionCommit = null;
+      return;
+    }
+    this.compositionCommit = null;
+    this.onQueryChange(text, event);
+  }
+
+  protected onCompositionStart(): void {
+    if (!this.compositionMode || this.isDisabledFinal() || this.readonly()) return;
+    this.composing = true;
+    this.compositionCommit = null;
+  }
+
+  protected onCompositionEnd(event: Event): void {
+    if (!this.compositionMode || !this.composing) return;
+    this.composing = false;
+    if (this.isDisabledFinal() || this.readonly()) {
+      this.compositionCommit = null;
+      return;
+    }
+    const target = event.target as HTMLInputElement;
+    const text = this.maxlength() == null ? target.value : target.value.slice(0, this.maxlength()!);
+    if (target.value !== text) target.value = text;
+    this.compositionCommit = text;
     this.onQueryChange(text, event);
   }
 
@@ -816,6 +851,7 @@ export class NeuAutocompleteComponent<
   protected _onBlur(event: FocusEvent = new FocusEvent('blur')): void {
     const next = event.relatedTarget as Node | null;
     if (next && (this.elementRef.nativeElement.contains(next) || this.isInsidePanel(next))) return;
+    this.cancelComposition();
     this._focused.set(false);
     this.commitForceSelection(event);
     if (!this.focusSessionTouched) {
@@ -937,7 +973,11 @@ export class NeuAutocompleteComponent<
     }
   }
 
-  protected onOptionPointerDown(event: MouseEvent, row: InternalNeuOptionRow<T>, rowIndex: number): void {
+  protected onOptionPointerDown(
+    event: MouseEvent,
+    row: InternalNeuOptionRow<T>,
+    rowIndex: number,
+  ): void {
     event.preventDefault();
     this.setActiveIndex(rowIndex);
     this.selectRow(event, row);
@@ -1040,6 +1080,7 @@ export class NeuAutocompleteComponent<
   }
 
   writeValue(value: NeuAutocompleteValue<V> | null | undefined): void {
+    this.cancelComposition();
     this.cancelCompletion();
     if (value === null || value === undefined) {
       this._query.set('');
@@ -1072,6 +1113,7 @@ export class NeuAutocompleteComponent<
 
   setDisabledState(disabled: boolean): void {
     this._cvaDisabled.set(disabled);
+    if (disabled) this.cancelComposition();
   }
 
   protected optionLabelOf(option: T): string {
@@ -1328,6 +1370,11 @@ export class NeuAutocompleteComponent<
     this.requestPending.set(false);
   }
 
+  private cancelComposition(): void {
+    this.composing = false;
+    this.compositionCommit = null;
+  }
+
   private commitForceSelection(originalEvent: Event | null): void {
     if (!this.forceSelection() || this.isDisabledFinal() || this.readonly()) return;
     const query = this._query();
@@ -1431,10 +1478,7 @@ export class NeuAutocompleteComponent<
   }
 
   private virtualWindowSize(): number {
-    return Math.max(
-      1,
-      this.virtualScrollVisibleItems(),
-    );
+    return Math.max(1, this.virtualScrollVisibleItems());
   }
 
   private emitLazyRequest(reason: NeuOptionLazyRequest['reason'], first: number): void {

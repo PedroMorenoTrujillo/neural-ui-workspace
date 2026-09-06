@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1483,
-    "bindingDelta": 316,
+    "declarationBindings": 1484,
+    "bindingDelta": 317,
     "mapped": 932,
     "aliasCorrections": 4,
     "missingOldEntries": 229,
-    "newlyDiscovered": 545,
+    "newlyDiscovered": 546,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
       "declaration-or-selector-was-not-recorded": 407,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 129
+      "multiline-annotated-or-compound-declaration-was-missed": 130
     }
   },
   "mappings": [
@@ -4807,6 +4807,10 @@
     },
     {
       "id": "./input#NeuInputComponent.output:valueChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./kanban#NeuKanbanComponent.input:stateMode",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {

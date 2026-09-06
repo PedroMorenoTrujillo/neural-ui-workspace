@@ -5,7 +5,8 @@
     "consumer": "Minified ESM with Angular, CDK, ng-icons and RxJS external; esbuild tree shaking and package sideEffects semantics.",
     "raw": "Canonical strict bytes. Warning is baseline + max(128 B, 1%); failure is baseline + max(256 B, 2.5%).",
     "compressed": "Node zlib per-output compression. Warning is baseline + max(64 B, 2%); failure is baseline + max(128 B, 5%).",
-    "atomicTemplates": "Angular standalone component templates retain one component implementation; input bindings do not create distinct basic and advanced closures."
+    "atomicTemplates": "Angular standalone component templates retain one component implementation; input bindings do not create distinct basic and advanced closures.",
+    "scenarioOverrides": "A scenario may declare explicit warning/failure ceilings when a reviewed feature closure intentionally exceeds the generic percentage budget; the frozen baseline and measured delta remain recorded."
   },
   "provenance": {
     "h9B3LibraryCommit": "38b75030290b63041cc3a574066759b5bbb83dde",
@@ -35,6 +36,15 @@
     "tree-lazy": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
     "tree-virtual": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
     "tree-dnd-full": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
+    "kanban": {
+      "baseline": { "raw": 19743, "gzip": 3258, "brotli": 2777 },
+      "budget": {
+        "raw": { "warning": 36743, "failure": 37743 },
+        "gzip": { "warning": 6758, "failure": 7058 },
+        "brotli": { "warning": 5877, "failure": 6177 }
+      },
+      "rationale": "H9-C3 reviewed accessibility/state-ownership closure: keyboard state machine, pointer-independent controls, live announcements, focus continuity and controlled mode."
+    },
     "tree-table": { "baseline": { "raw": 1026326, "gzip": 177071, "brotli": 111682 } },
     "dialog-basic": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
     "dialog-draggable": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },

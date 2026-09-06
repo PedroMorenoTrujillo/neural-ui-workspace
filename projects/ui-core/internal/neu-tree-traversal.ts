@@ -14,6 +14,12 @@ export interface InternalNeuTreeTraversalOptions<T> {
   readonly shouldDescend?: (entry: InternalNeuTreeTraversalEntry<T>) => boolean;
   readonly initialAncestry?: readonly T[];
   readonly includePath?: boolean;
+  /**
+   * `shallow` renders every reference but expands descendants only for the
+   * first occurrence of an object identity. This bounds compact DAG input to
+   * O(V + E) work while preserving each referenced node in its parent set.
+   */
+  readonly sharedReferences?: 'expand' | 'shallow';
 }
 
 interface VisitWork<T> {
@@ -48,6 +54,7 @@ export function walkNeuTreeDepthFirst<T>(
 ): InternalNeuTreeTraversalEntry<T>[] {
   const result: InternalNeuTreeTraversalEntry<T>[] = [];
   const ancestry = new Set<T>(options.initialAncestry ?? []);
+  const seen = new Set<T>(options.initialAncestry ?? []);
   const work: Work<T>[] = [];
   pushSiblings(work, roots, 0, null, null, '', options.includePath === true);
 
@@ -59,6 +66,8 @@ export function walkNeuTreeDepthFirst<T>(
     }
     if (ancestry.has(current.node)) continue;
 
+    const sharedReference = seen.has(current.node);
+    seen.add(current.node);
     ancestry.add(current.node);
     const entryIndex = result.length;
     const entry: InternalNeuTreeTraversalEntry<T> = {
@@ -77,7 +86,11 @@ export function walkNeuTreeDepthFirst<T>(
     }
 
     work.push({ kind: 'exit', node: current.node });
-    if (options.shouldDescend?.(entry) === false) continue;
+    if (
+      (sharedReference && options.sharedReferences === 'shallow') ||
+      options.shouldDescend?.(entry) === false
+    )
+      continue;
     const children = childrenOf(current.node);
     pushSiblings(
       work,

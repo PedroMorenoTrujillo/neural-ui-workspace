@@ -42,6 +42,14 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
     await page.evaluate(() => {
       window.__h9OriginalInput = document.querySelector('.neu-autocomplete__input');
       window.__h9OriginalColorTrigger = document.querySelector('#hydration-color .neu-cp__trigger');
+      window.__h9OriginalTextInput = document.querySelector('#hydration-input .neu-input__field');
+      window.__h9OriginalTextarea = document.querySelector(
+        '#hydration-textarea .neu-textarea__field',
+      );
+      window.__h9OriginalTree = document.querySelector('#hydration-tree .neu-tree');
+      window.__h9OriginalKanbanCard = document.querySelector(
+        '#hydration-kanban [data-neu-kanban-card-id="hydrated-card"]',
+      );
     });
     release();
     await page.waitForFunction(
@@ -66,6 +74,21 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       true,
       'hydration must retain the server ColorPicker trigger',
     );
+    for (const [saved, selector] of [
+      ['__h9OriginalTextInput', '#hydration-input .neu-input__field'],
+      ['__h9OriginalTextarea', '#hydration-textarea .neu-textarea__field'],
+      ['__h9OriginalTree', '#hydration-tree .neu-tree'],
+      ['__h9OriginalKanbanCard', '#hydration-kanban [data-neu-kanban-card-id="hydrated-card"]'],
+    ]) {
+      assert.equal(
+        await page.evaluate(
+          ({ saved, selector }) => window[saved] === document.querySelector(selector),
+          { saved, selector },
+        ),
+        true,
+        `hydration must retain ${selector}`,
+      );
+    }
     const log = async () => {
       await page.evaluate(
         () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
@@ -73,18 +96,30 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       return JSON.parse(await page.locator('#hydration-events').textContent());
     };
     assert.deepEqual(await log(), ['opened']);
+    const imeDomTrace = await page.locator('#hydration-input').evaluate((host) => {
+      const result = [];
+      const input = host.querySelector('.neu-input__field');
+      input.addEventListener('input', () => result.push(input.value));
+      input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+      input.value = 'に';
+      input.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+      input.value = '日本';
+      input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+      input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      return result;
+    });
+    assert.deepEqual(imeDomTrace, ['に', '日本']);
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    assert.deepEqual(JSON.parse(await page.locator('#hydration-ime-events').textContent()), [
+      '日本',
+    ]);
+    assert.deepEqual(await log(), ['opened']);
     await page.locator('#hydration-close').click();
     assert.deepEqual(await log(), ['opened', 'hidden']);
     await page.locator('#hydration-color .neu-cp__trigger').click();
     assert.deepEqual(await log(), ['opened', 'hidden', 'colorOpened']);
     await page.locator('.neu-cp__alpha-slider').fill('0.4');
-    assert.deepEqual(await log(), [
-      'opened',
-      'hidden',
-      'colorOpened',
-      'colorChange',
-      'colorEnd',
-    ]);
+    assert.deepEqual(await log(), ['opened', 'hidden', 'colorOpened', 'colorChange', 'colorEnd']);
     await page.keyboard.press('Escape');
     assert.deepEqual(await log(), [
       'opened',
@@ -120,6 +155,25 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       'colorClosed',
       'select',
     ]);
+    const kanbanCard = page.locator('#hydration-kanban [data-neu-kanban-card-id="hydrated-card"]');
+    await kanbanCard.focus();
+    for (const key of ['Space', 'ArrowRight', 'End', 'Enter']) await page.keyboard.press(key);
+    assert.deepEqual(await log(), [
+      'opened',
+      'hidden',
+      'colorOpened',
+      'colorChange',
+      'colorEnd',
+      'colorClosed',
+      'select',
+      'kanbanMove',
+    ]);
+    assert.equal(
+      await page
+        .locator('#hydration-kanban #two [data-neu-kanban-card-id="hydrated-card"]')
+        .count(),
+      1,
+    );
     assert.deepEqual(errors, []);
     results.push({
       browser: name,
@@ -135,6 +189,9 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       opened: 1,
       hidden: 1,
       domainSelect: 1,
+      inputImeCommits: 1,
+      kanbanMoves: 1,
+      affectedDomReused: true,
       unexpectedConsole: 0,
       pageErrors: 0,
       failedResources: 0,
