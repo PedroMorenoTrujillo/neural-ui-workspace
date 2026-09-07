@@ -99,10 +99,14 @@ export class NeuToggleButtonItemDirective<T = unknown, V = NeuToggleValueNotProv
           (click)="toggle(opt)"
           (blur)="onBlur()"
         >
-          @if (itemTpl()) { <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: opt, selected: isSelected(optionValueOf(opt)) }" /> } @else if (optionIconOf(opt)) {
-            <neu-icon [name]="optionIconOf(opt)!" size="16px" strokeWidth="2" />
+          @if (itemTpl()) {
+            <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: opt, selected: isSelected(optionValueOf(opt)) }" />
+          } @else {
+            @if (optionIconOf(opt)) {
+              <neu-icon [name]="optionIconOf(opt)!" size="16px" strokeWidth="2" />
+            }
+            {{ optionLabelOf(opt) }}
           }
-          {{ optionLabelOf(opt) }}
         </button>
       }
     </div>

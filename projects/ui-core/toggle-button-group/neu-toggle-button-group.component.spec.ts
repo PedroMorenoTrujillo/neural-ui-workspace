@@ -443,6 +443,6 @@ describe('NeuToggleButtonGroupComponent', () => {
     await TestBed.resetTestingModule().configureTestingModule({ imports: [TemplateHostComponent] }).compileComponents();
     const host = TestBed.createComponent(TemplateHostComponent);
     host.detectChanges();
-    expect(host.nativeElement.textContent).toContain('Grid');
+    expect((host.nativeElement.querySelector('button') as HTMLButtonElement).textContent?.trim()).toBe('Grid');
   });
 });
