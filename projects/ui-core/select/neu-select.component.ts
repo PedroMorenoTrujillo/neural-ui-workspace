@@ -236,7 +236,7 @@ export type { NeuSelectOption } from './neu-select.types';
         </span>
 
         <!-- Clear button -->
-        @if (clearable() && hasValue() && !isDisabledFinal() && !readonly()) {
+        @if (clearable() && hasValue() && !isDisabledFinal() && !readonly() && !loading()) {
           <button
             class="neu-select__clear"
             type="button"

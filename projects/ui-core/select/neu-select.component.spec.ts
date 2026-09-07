@@ -1672,6 +1672,14 @@ describe('NeuSelectComponent', () => {
     );
   });
 
+  it('hides the clear action while loading so trigger actions cannot overlap', async () => {
+    const { f, comp } = await setup({ clearable: true, loading: true });
+    comp.writeValue('es');
+    f.detectChanges();
+
+    expect(f.nativeElement.querySelector('.neu-select__clear')).toBeNull();
+  });
+
   it('focusOptionByIndex returns cleanly when there is no enabled next option', async () => {
     const { comp } = await setup({
       options: [{ value: 'disabled', label: 'Disabled', disabled: true }],

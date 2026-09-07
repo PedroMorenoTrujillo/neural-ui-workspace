@@ -196,7 +196,7 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
           }
         </span>
       }
-      @if (_query() && clearable() && !isDisabledFinal() && !readonly()) {
+      @if (_query() && clearable() && !isDisabledFinal() && !readonly() && !loading()) {
         <button
           type="button"
           class="neu-autocomplete__clear"

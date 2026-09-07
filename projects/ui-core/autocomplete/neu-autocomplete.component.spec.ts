@@ -1030,9 +1030,11 @@ describe('NeuAutocompleteComponent', () => {
     loadingHost.detectChanges();
     const loadingComponent = loadingHost.debugElement.query(By.directive(NeuAutocompleteComponent))
       .componentInstance as any;
+    loadingComponent.writeValue(1);
     loadingComponent.openAll();
     loadingHost.detectChanges();
     expect(loadingHost.nativeElement.querySelector('.auto-loading-icon')).toBeTruthy();
+    expect(loadingHost.nativeElement.querySelector('.auto-clear-icon')).toBeNull();
     expect(document.querySelector('.auto-loader')).toBeTruthy();
 
     const emptyHost = TestBed.createComponent(AutocompleteTemplatesHost);
