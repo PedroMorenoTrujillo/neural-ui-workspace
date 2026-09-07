@@ -35,6 +35,7 @@ const allowedNativeControlDirs = new Set([
   'input',
   'input-mask',
   'input-otp',
+  'kanban',
   'listbox',
   'mega-menu',
   'menu',

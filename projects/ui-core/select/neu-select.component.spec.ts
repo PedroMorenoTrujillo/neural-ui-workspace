@@ -896,8 +896,9 @@ describe('NeuSelectComponent', () => {
     getByIdSpy.mockRestore();
   });
 
-  it('repositions on resize and closes on page scroll when open', async () => {
+  it('repositions on resize and closes only after an effective page scroll when open', async () => {
     const { comp } = await setup();
+    const originalScrollY = window.scrollY;
     const syncSpy = vi.spyOn(
       comp as object as { syncPanelPosition: () => void },
       'syncPanelPosition',
@@ -910,10 +911,90 @@ describe('NeuSelectComponent', () => {
     comp.open();
     comp['onWindowResize']();
     expect(comp.isOpen()).toBe(true);
-    comp.onWindowScroll(new Event('scroll'));
+    Object.defineProperty(window, 'scrollY', {
+      configurable: true,
+      value: originalScrollY + 1,
+    });
+    comp.onWindowScroll();
+    expect(comp.isOpen()).toBe(true);
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+          ),
+        ),
+      ),
+    );
+    Object.defineProperty(window, 'scrollY', {
+      configurable: true,
+      value: originalScrollY + 2,
+    });
+    comp.onWindowScroll();
     await new Promise((resolve) => setTimeout(resolve, 20));
-    expect(syncSpy).toHaveBeenCalledTimes(1);
+    expect(syncSpy).toHaveBeenCalled();
     expect(comp.isOpen()).toBe(false);
+    Object.defineProperty(window, 'scrollY', {
+      configurable: true,
+      value: originalScrollY,
+    });
+  });
+
+  it('closes immediately for page scroll intent but keeps panel scrolling internal', async () => {
+    const { f, comp } = await setup();
+    comp['onWindowScrollIntent'](new WheelEvent('wheel'));
+    expect(comp.isOpen()).toBe(false);
+
+    comp.open();
+    f.detectChanges();
+
+    const outside = document.createElement('div');
+    document.body.append(outside);
+    outside.dispatchEvent(new WheelEvent('wheel', { bubbles: true }));
+    expect(comp.isOpen()).toBe(false);
+    outside.remove();
+
+    f.detectChanges();
+    comp.open();
+    f.detectChanges();
+    const panel = document.querySelector('.neu-select__panel') as HTMLElement;
+    panel.dispatchEvent(new WheelEvent('wheel', { bubbles: true }));
+    expect(comp.isOpen()).toBe(true);
+  });
+
+  it('scrolls the active option only inside the panel list', async () => {
+    const { f, comp } = await setup();
+    comp.open();
+    f.detectChanges();
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+
+    const list = document.querySelector<HTMLElement>('.neu-select__list');
+    const option = document.querySelector<HTMLElement>('.neu-select__option');
+    expect(list).not.toBeNull();
+    expect(option).not.toBeNull();
+    if (!list || !option) return;
+
+    Object.defineProperty(list, 'scrollTop', {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+    vi.spyOn(list, 'getBoundingClientRect').mockReturnValue({
+      top: 100,
+      bottom: 200,
+    } as DOMRect);
+    vi.spyOn(option, 'getBoundingClientRect').mockReturnValue({
+      top: 210,
+      bottom: 250,
+    } as DOMRect);
+    const pageScroll = vi.spyOn(window, 'scrollTo');
+
+    comp['scrollActiveIntoView']();
+
+    expect(list.scrollTop).toBe(50);
+    expect(pageScroll).not.toHaveBeenCalled();
   });
 
   it('syncPanelPosition should compute fixed panel geometry on desktop viewport', async () => {

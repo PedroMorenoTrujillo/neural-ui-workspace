@@ -74,6 +74,18 @@ describe('NeuConfirmDialogComponent', () => {
     expect(closeFn).toHaveBeenCalledWith(true);
   });
 
+  it('does not animate the primary color pair through a low-contrast intermediate state', async () => {
+    mkDialogBed({ message: 'Test' });
+    const f = TestBed.createComponent(NeuConfirmDialogComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const btn = f.nativeElement.querySelector(
+      '.neu-confirm-dialog__btn--primary',
+    ) as HTMLButtonElement;
+
+    expect(getComputedStyle(btn).transitionDuration).toBe('');
+  });
+
   it('reject button should call reject()', async () => {
     const closeFn = mkDialogBed({ message: 'Test' });
     const f = TestBed.createComponent(NeuConfirmDialogComponent);

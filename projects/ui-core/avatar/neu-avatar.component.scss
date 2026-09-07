@@ -30,11 +30,15 @@ $colors: (
   ),
   'green': (
     bg: #dcfce7,
-    fg: #15803d,
+    // Keep initials above AA even when an overlapping avatar edge is
+    // antialiased/composited against the group surface.
+    fg: #126b34,
   ),
   'amber': (
     bg: #fef3c7,
-    fg: #a84707,
+    // Leave enough contrast headroom for antialiased initials during
+    // route/theme compositing in real browsers.
+    fg: #92400e,
   ),
   'red': (
     bg: #fee2e2,

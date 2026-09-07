@@ -62,6 +62,7 @@ export type {
       [attr.accept]="accept() || null"
       [attr.multiple]="multiple() ? '' : null"
       [disabled]="isDisabledFinal()"
+      [attr.aria-label]="label() ? null : chooseLabel()"
       [attr.aria-describedby]="describedBy()"
       [attr.aria-invalid]="hasError() ? 'true' : null"
       (change)="onNativeInputChange($event)"

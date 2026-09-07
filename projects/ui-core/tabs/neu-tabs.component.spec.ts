@@ -1,7 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { NeuTabsComponent, NeuTab, NeuTabLabelDirective, NeuTabPanelComponent } from './neu-tabs.component';
+import {
+  NeuTabsComponent,
+  NeuTab,
+  NeuTabLabelDirective,
+  NeuTabPanelComponent,
+} from './neu-tabs.component';
 import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 
 const TABS: NeuTab[] = [
@@ -39,6 +44,25 @@ class TabLabelHostComponent {
   readonly tabs = TABS;
 }
 
+@Component({
+  imports: [NeuTabsComponent, NeuTabLabelDirective, NeuTabPanelComponent],
+  template: `
+    <neu-tabs [tabs]="outerTabs" tabParam="outer">
+      <neu-tab-panel tabId="outer">
+        <neu-tabs [tabs]="innerTabs" tabParam="inner">
+          <ng-template neuTabLabel let-tab>
+            <span class="nested-custom-tab-label">● {{ tab.label }}</span>
+          </ng-template>
+        </neu-tabs>
+      </neu-tab-panel>
+    </neu-tabs>
+  `,
+})
+class NestedTabLabelHostComponent {
+  readonly outerTabs: NeuTab[] = [{ id: 'outer', label: 'Outer' }];
+  readonly innerTabs: NeuTab[] = [{ id: 'inner', label: 'Inner' }];
+}
+
 describe('NeuTabsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -73,6 +97,23 @@ describe('NeuTabsComponent', () => {
     expect(labels[0].textContent).toContain('Preview · true');
   });
 
+  it('does not leak a nested tabs label template into its parent tabs', async () => {
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [NestedTabLabelHostComponent],
+        providers: [provideRouter([]), provideZonelessChangeDetection()],
+      })
+      .compileComponents();
+    const fixture = TestBed.createComponent(NestedTabLabelHostComponent);
+    fixture.detectChanges();
+
+    const tabLists = fixture.nativeElement.querySelectorAll('.neu-tabs__nav');
+    expect(tabLists).toHaveLength(2);
+    expect(tabLists[0].textContent.trim()).toBe('Outer');
+    expect(tabLists[0].querySelector('.nested-custom-tab-label')).toBeNull();
+    expect(tabLists[1].querySelector('.nested-custom-tab-label')?.textContent).toContain('Inner');
+  });
+
   it('should have a tablist', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
@@ -95,14 +136,17 @@ describe('NeuTabsComponent', () => {
   it('reveals the active tab inside its strip without scrolling the document', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
-    const component = f.debugElement.query(de => de.componentInstance instanceof NeuTabsComponent).componentInstance as NeuTabsComponent;
+    const component = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
+      .componentInstance as NeuTabsComponent;
     const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
     const tab = f.nativeElement.querySelector('.neu-tabs__tab') as HTMLElement;
     const documentScroll = vi.spyOn(window, 'scrollTo');
     const reveal = vi.fn();
     Object.defineProperty(tab, 'scrollIntoView', { configurable: true, value: reveal });
     vi.spyOn(nav, 'getBoundingClientRect').mockReturnValue({ left: 100, right: 300 } as DOMRect);
-    const bounds = vi.spyOn(tab, 'getBoundingClientRect').mockReturnValue({ left: 280, right: 360 } as DOMRect);
+    const bounds = vi
+      .spyOn(tab, 'getBoundingClientRect')
+      .mockReturnValue({ left: 280, right: 360 } as DOMRect);
     (component as any)._updateIndicator();
     expect(nav.scrollLeft).toBe(60);
     bounds.mockReturnValue({ left: 70, right: 140 } as DOMRect);
@@ -116,7 +160,8 @@ describe('NeuTabsComponent', () => {
   it('does not require browser geometry during server rendering', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
-    const component = f.debugElement.query(de => de.componentInstance instanceof NeuTabsComponent).componentInstance as NeuTabsComponent;
+    const component = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
+      .componentInstance as NeuTabsComponent;
     const nav = f.nativeElement.querySelector('.neu-tabs__nav');
     Object.defineProperty(nav, 'getBoundingClientRect', { configurable: true, value: undefined });
     expect(() => (component as any)._updateIndicator()).not.toThrow();

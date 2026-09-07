@@ -130,6 +130,36 @@ describe('NeuAvatarComponent', () => {
     expect(df.nativeElement.querySelector('.neu-avatar--blue')).toBeTruthy();
   });
 
+  it('keeps the adjusted initials palette at WCAG AA contrast', async () => {
+    const parse = (value: string) => value.match(/\d+/g)!.slice(0, 3).map(Number);
+    const luminance = (value: string) => {
+      const channels = parse(value).map((channel) => {
+        const normalized = channel / 255;
+        return normalized <= 0.04045
+          ? normalized / 12.92
+          : ((normalized + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+    };
+    for (const color of ['green', 'amber']) {
+      const df = TestBed.createComponent(NeuAvatarComponent);
+      df.componentRef.setInput('name', 'Accessible Initials');
+      df.componentRef.setInput('color', color);
+      df.detectChanges();
+      await df.whenStable();
+
+      const avatar = df.nativeElement.querySelector(`.neu-avatar--${color}`) as HTMLElement;
+      const style = getComputedStyle(avatar);
+      const foreground = luminance(style.color);
+      const background = luminance(style.backgroundColor);
+      const ratio =
+        (Math.max(foreground, background) + 0.05) /
+        (Math.min(foreground, background) + 0.05);
+
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
   it('recovers when a failed source is replaced with a different image', async () => {
     const df = TestBed.createComponent(NeuAvatarComponent);
     df.componentRef.setInput('src', 'broken.jpg');

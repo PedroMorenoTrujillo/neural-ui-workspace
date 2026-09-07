@@ -36,7 +36,20 @@ describe('NeuUploaderComponent', () => {
 
   it('should render native file input', () => {
     const { f } = mk({ label: 'Adjuntos' });
-    expect(f.nativeElement.querySelector('input[type="file"]')).toBeTruthy();
+    const input = f.nativeElement.querySelector('input[type="file"]') as HTMLInputElement;
+    const label = f.nativeElement.querySelector('label') as HTMLLabelElement;
+
+    expect(input).toBeTruthy();
+    expect(label.htmlFor).toBe(input.id);
+    expect(input.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should expose an accessible name when the visible label is omitted', () => {
+    const { f } = mk({ chooseLabel: 'Seleccionar archivos' });
+    const input = f.nativeElement.querySelector('input[type="file"]') as HTMLInputElement;
+
+    expect(f.nativeElement.querySelector('label')).toBeNull();
+    expect(input.getAttribute('aria-label')).toBe('Seleccionar archivos');
   });
 
   it('should open picker from keyboard trigger', () => {

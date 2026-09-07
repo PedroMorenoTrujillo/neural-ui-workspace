@@ -497,6 +497,18 @@ describe('NeuOrganizationChartComponent', () => {
     expect(items).toHaveLength(1_001);
     expect(items[1_000].getAttribute('aria-level')).toBe('1001');
     expect(fixture.nativeElement.querySelector('.neu-organization-chart__tree--flat')).toBeTruthy();
+
+    const viewport = fixture.nativeElement.querySelector('.neu-organization-chart__viewport');
+    viewport.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    viewport.dispatchEvent(new WheelEvent('wheel', { bubbles: true }));
+    items[0].dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    expect(document.activeElement).toBe(items[1]);
   });
 
   it('keeps context callbacks, selection guards, and checkbox deselection explicit', () => {

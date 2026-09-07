@@ -130,7 +130,9 @@ export type { NeuSelectOption } from './neu-select.types';
   host: {
     '(keydown.escape)': 'close(true, $event, "escape")',
     '(window:resize)': 'onWindowResize()',
-    '(window:scroll)': 'onWindowScroll($event)',
+    '(window:scroll)': 'onWindowScroll()',
+    '(window:wheel)': 'onWindowScrollIntent($event)',
+    '(window:touchmove)': 'onWindowScrollIntent($event)',
   },
   template: `
     @if (!floatingLabel() && label()) {
@@ -764,7 +766,9 @@ export class NeuSelectComponent<
       offsetY: 0,
     }),
   );
-  readonly overlayScrollStrategy = this._overlay.scrollStrategies.close();
+  // Reposition while the opening scroll settles; onWindowScroll owns dismissal
+  // once the viewport is stable. This avoids consuming a queued trigger scroll.
+  readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
   readonly panelPosition = signal<{
     position: string | null;
     top: string | null;
@@ -962,6 +966,9 @@ export class NeuSelectComponent<
   // CVA
   private _onChange: (v: NeuSelectModelValue<V, M>) => void = () => {};
   private _onTouched: () => void = () => {};
+  private _openedScrollPosition: { x: number; y: number } | null = null;
+  private _scrollDismissArmed = false;
+  private _scrollDismissGeneration = 0;
 
   writeValue(val: NeuSelectModelValue<V, M>): void {
     const normalized = this.multiple()
@@ -1008,6 +1015,12 @@ export class NeuSelectComponent<
     if (!this.overlaySession.open(origin)) return;
     this.syncPanelPosition();
     this._isOpen.set(true);
+    const view = this._document.defaultView;
+    this._openedScrollPosition = view
+      ? { x: view.scrollX, y: view.scrollY }
+      : null;
+    this._scrollDismissArmed = false;
+    const scrollDismissGeneration = ++this._scrollDismissGeneration;
     this.initializeActiveRow();
     this.ensureActiveRendered(this.activeIndex());
     this.opened.emit({ originalEvent, reason });
@@ -1021,6 +1034,34 @@ export class NeuSelectComponent<
         this.focusTrigger();
       }
       this.scrollActiveIntoView();
+      if (view) {
+        this.armScrollDismissWhenSettled(
+          view,
+          scrollDismissGeneration,
+          { x: view.scrollX, y: view.scrollY },
+          0,
+        );
+      }
+    });
+  }
+
+  private armScrollDismissWhenSettled(
+    view: Window,
+    generation: number,
+    previous: { x: number; y: number },
+    stableFrames: number,
+  ): void {
+    view.requestAnimationFrame(() => {
+      if (!this.isOpen() || this._scrollDismissGeneration !== generation) return;
+      const current = { x: view.scrollX, y: view.scrollY };
+      const nextStableFrames =
+        current.x === previous.x && current.y === previous.y ? stableFrames + 1 : 0;
+      this._openedScrollPosition = current;
+      if (nextStableFrames >= 3) {
+        this._scrollDismissArmed = true;
+        return;
+      }
+      this.armScrollDismissWhenSettled(view, generation, current, nextStableFrames);
     });
   }
 
@@ -1057,6 +1098,8 @@ export class NeuSelectComponent<
     reason: NeuSelectOverlayEvent['reason'],
   ): void {
     if (!intent.closed) return;
+    this._scrollDismissArmed = false;
+    this._scrollDismissGeneration++;
     this.pendingOverlayFrameActions = [];
     this._isOpen.set(false);
     if (this.resetFilterOnHide()) this.resetFilter(false);
@@ -1525,8 +1568,23 @@ export class NeuSelectComponent<
     else this.overlaySession.refreshOnResize();
   }
 
-  onWindowScroll(event: Event | null = null): void {
+  onWindowScroll(): void {
     if (!this.isOpen()) return;
+    if (!this._scrollDismissArmed) return;
+    const view = this._document.defaultView;
+    if (
+      view &&
+      this._openedScrollPosition?.x === view.scrollX &&
+      this._openedScrollPosition.y === view.scrollY
+    )
+      return;
+    this.close(false, null, 'outside');
+  }
+
+  protected onWindowScrollIntent(event: Event): void {
+    if (!this.isOpen()) return;
+    const target = event.target;
+    if (target instanceof Element && target.closest('.neu-select__panel')) return;
     this.close(false, event, 'outside');
   }
 
@@ -1850,7 +1908,16 @@ export class NeuSelectComponent<
     if (!isPlatformBrowser(this._platformId)) return;
     const row = this.visibleRows()[this.activeIndex()];
     const element = row?.kind === 'option' ? this._document.getElementById(this.rowId(row)) : null;
-    element?.scrollIntoView?.({ block: 'nearest' });
+    const list = element?.closest<HTMLElement>('.neu-select__list');
+    if (!element || !list) return;
+
+    const optionRect = element.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
+    if (optionRect.top < listRect.top) {
+      list.scrollTop -= listRect.top - optionRect.top;
+    } else if (optionRect.bottom > listRect.bottom) {
+      list.scrollTop += optionRect.bottom - listRect.bottom;
+    }
   }
 
   private emitLazyRequest(

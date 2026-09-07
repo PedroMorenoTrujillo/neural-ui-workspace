@@ -38,7 +38,9 @@ export interface NeuTab {
   disabled?: boolean;
 }
 @Directive({ selector: 'ng-template[neuTabLabel]' })
-export class NeuTabLabelDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTab; active: boolean }>) {} }
+export class NeuTabLabelDirective {
+  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTab; active: boolean }>) {}
+}
 
 /**
  * NeuralUI Tabs Component
@@ -90,7 +92,14 @@ export class NeuTabLabelDirective { constructor(readonly templateRef: TemplateRe
             (keydown.home)="focusTab($any($event), 'first')"
             (keydown.end)="focusTab($any($event), 'last')"
           >
-            @if (labelTpl()) { <ng-container [ngTemplateOutlet]="labelTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: tab, active: activeTabId() === tab.id }" /> } @else { {{ tab.label }} }
+            @if (labelTpl()) {
+              <ng-container
+                [ngTemplateOutlet]="labelTpl()!.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: tab, active: activeTabId() === tab.id }"
+              />
+            } @else {
+              {{ tab.label }}
+            }
             @if (tab.badge) {
               <span class="neu-tabs__tab-badge">{{ tab.badge }}</span>
             }
@@ -109,7 +118,9 @@ export class NeuTabLabelDirective { constructor(readonly templateRef: TemplateRe
   styleUrl: './neu-tabs.component.scss',
 })
 export class NeuTabsComponent implements AfterViewInit, OnDestroy {
-  readonly labelTpl = contentChild(NeuTabLabelDirective);
+  readonly labelTpl = contentChild(NeuTabLabelDirective, {
+    descendants: false,
+  });
   private readonly urlState = inject(NeuUrlStateService);
   private readonly elRef = inject(ElementRef);
   private readonly platformId = inject(PLATFORM_ID);
