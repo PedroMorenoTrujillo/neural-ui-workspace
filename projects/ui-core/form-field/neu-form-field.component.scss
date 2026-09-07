@@ -50,3 +50,8 @@
   border-start-end-radius: 0.625rem;
   border-end-end-radius: 0.625rem;
 }
+
+.neu-input-group:not(.neu-input-group--attached) {
+  flex-wrap: wrap;
+  gap: var(--neu-control-gap, var(--neu-space-2, 0.5rem));
+}
