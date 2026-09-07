@@ -896,7 +896,7 @@ describe('NeuSelectComponent', () => {
     getByIdSpy.mockRestore();
   });
 
-  it('onWindowResize and onWindowScroll should sync panel position only when open', async () => {
+  it('repositions on resize and closes on page scroll when open', async () => {
     const { comp } = await setup();
     const syncSpy = vi.spyOn(
       comp as object as { syncPanelPosition: () => void },
@@ -909,9 +909,11 @@ describe('NeuSelectComponent', () => {
 
     comp.open();
     comp['onWindowResize']();
-    comp.onWindowScroll();
+    expect(comp.isOpen()).toBe(true);
+    comp.onWindowScroll(new Event('scroll'));
     await new Promise((resolve) => setTimeout(resolve, 20));
-    expect(syncSpy).toHaveBeenCalledTimes(2);
+    expect(syncSpy).toHaveBeenCalledTimes(1);
+    expect(comp.isOpen()).toBe(false);
   });
 
   it('syncPanelPosition should compute fixed panel geometry on desktop viewport', async () => {

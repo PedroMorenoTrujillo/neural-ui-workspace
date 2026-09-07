@@ -130,6 +130,7 @@ export type { NeuSelectOption } from './neu-select.types';
   host: {
     '(keydown.escape)': 'close(true, $event, "escape")',
     '(window:resize)': 'onWindowResize()',
+    '(window:scroll)': 'onWindowScroll($event)',
   },
   template: `
     @if (!floatingLabel() && label()) {
@@ -763,7 +764,7 @@ export class NeuSelectComponent<
       offsetY: 0,
     }),
   );
-  readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
+  readonly overlayScrollStrategy = this._overlay.scrollStrategies.close();
   readonly panelPosition = signal<{
     position: string | null;
     top: string | null;
@@ -1524,9 +1525,9 @@ export class NeuSelectComponent<
     else this.overlaySession.refreshOnResize();
   }
 
-  onWindowScroll(): void {
-    if (this.adoptOverlaySignal()) this.syncPanelPosition();
-    else this.overlaySession.refreshOnScroll();
+  onWindowScroll(event: Event | null = null): void {
+    if (!this.isOpen()) return;
+    this.close(false, event, 'outside');
   }
 
   private syncPanelPosition(scheduleViewportCheck = true): void {
