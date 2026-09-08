@@ -19,6 +19,8 @@ import {
   CdkDropListGroup,
   type CdkDragDrop,
 } from '@angular/cdk/drag-drop';
+import { DOCUMENT } from '@angular/common';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuKanbanStateMode = 'optimistic' | 'controlled';
@@ -79,9 +81,7 @@ interface NeuKanbanKeyboardMove {
   template: `
     <div class="neu-kanban" cdkDropListGroup [attr.aria-describedby]="instructionsId">
       <p class="neu-kanban__sr-only" [id]="instructionsId">
-        To move a card with the keyboard, focus it and press Space or Enter. Use arrow keys, Home,
-        or End to choose a destination; press Space or Enter to confirm, or Escape to cancel. Move
-        buttons provide a click alternative to dragging.
+        {{ labels().instructions }}
       </p>
       <p class="neu-kanban__sr-only" aria-live="polite" aria-atomic="true">
         {{ liveMessage() }}
@@ -122,7 +122,7 @@ interface NeuKanbanKeyboardMove {
             (cdkDropListDropped)="onCardDrop($event, column.id)"
           >
             @if (column.cards.length === 0) {
-              <p class="neu-kanban__empty">Drop cards here</p>
+              <p class="neu-kanban__empty">{{ labels().empty }}</p>
             }
 
             @for (card of column.cards; track card.id; let cardIndex = $index) {
@@ -199,24 +199,24 @@ interface NeuKanbanKeyboardMove {
                     class="neu-kanban__move-trigger"
                     [attr.aria-expanded]="isMoveMenuOpen(card.id)"
                     [attr.aria-controls]="moveActionsId(card.id)"
-                    [attr.aria-label]="moveButtonLabel() + ': ' + card.title"
+                    [attr.aria-label]="resolvedMoveButtonLabel() + ': ' + card.title"
                     [attr.data-neu-kanban-move-trigger-card-id]="card.id"
                     (click)="toggleMoveMenu(card.id, $event)"
                   >
                     <span aria-hidden="true">↔</span>
-                    <span>{{ moveButtonLabel() }}</span>
+                    <span>{{ resolvedMoveButtonLabel() }}</span>
                   </button>
                   @if (isMoveMenuOpen(card.id)) {
                     <div
                       class="neu-kanban__move-actions"
                       role="group"
                       [id]="moveActionsId(card.id)"
-                      [attr.aria-label]="'Move ' + card.title"
+                      [attr.aria-label]="moveGroupLabel(card.title)"
                     >
                       <button
                         type="button"
                         [disabled]="!canMove(card.id, 'left')"
-                        [attr.aria-label]="'Move ' + card.title + ' to the previous column'"
+                        [attr.aria-label]="moveDirectionLabel(card.title, 'left')"
                         (click)="moveByAction(card.id, 'left')"
                       >
                         ←
@@ -224,7 +224,7 @@ interface NeuKanbanKeyboardMove {
                       <button
                         type="button"
                         [disabled]="!canMove(card.id, 'up')"
-                        [attr.aria-label]="'Move ' + card.title + ' up'"
+                        [attr.aria-label]="moveDirectionLabel(card.title, 'up')"
                         (click)="moveByAction(card.id, 'up')"
                       >
                         ↑
@@ -232,7 +232,7 @@ interface NeuKanbanKeyboardMove {
                       <button
                         type="button"
                         [disabled]="!canMove(card.id, 'down')"
-                        [attr.aria-label]="'Move ' + card.title + ' down'"
+                        [attr.aria-label]="moveDirectionLabel(card.title, 'down')"
                         (click)="moveByAction(card.id, 'down')"
                       >
                         ↓
@@ -240,7 +240,7 @@ interface NeuKanbanKeyboardMove {
                       <button
                         type="button"
                         [disabled]="!canMove(card.id, 'right')"
-                        [attr.aria-label]="'Move ' + card.title + ' to the next column'"
+                        [attr.aria-label]="moveDirectionLabel(card.title, 'right')"
                         (click)="moveByAction(card.id, 'right')"
                       >
                         →
@@ -258,6 +258,8 @@ interface NeuKanbanKeyboardMove {
   styleUrl: './neu-kanban.component.scss',
 })
 export class NeuKanbanComponent {
+  private readonly doc = inject(DOCUMENT);
+  private readonly defaultLocale = inject(NEURAL_LOCALE);
   readonly columns = input<NeuKanbanColumn[]>([]);
   readonly columnWidth = input<string>('320px');
   readonly showCounts = input<boolean>(true);
@@ -275,6 +277,12 @@ export class NeuKanbanComponent {
   protected readonly activeMoveCardId = signal<string | null>(null);
   protected readonly liveMessage = signal('');
   readonly connectedDropLists = computed(() => this._columns().map((column) => column.id));
+  private readonly activeLocale = signal(resolveDocumentLocale(this.doc, this.defaultLocale));
+  protected readonly labels = computed(() => kanbanLabels(this.activeLocale()));
+  protected readonly resolvedMoveButtonLabel = computed(() => {
+    const configured = this.moveButtonLabel().trim();
+    return configured && configured !== 'Move' ? configured : this.labels().move;
+  });
 
   protected readonly instructionsId = inject(NeuIdGenerator).getId('neu-kanban-instructions-');
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
@@ -299,6 +307,18 @@ export class NeuKanbanComponent {
       this.activeMoveCardId.set(null);
       this.pendingFocusCardId.set(null);
     });
+
+    const win = this.doc.defaultView;
+    if (win?.MutationObserver) {
+      const observer = new win.MutationObserver(() => {
+        this.activeLocale.set(resolveDocumentLocale(this.doc, this.defaultLocale));
+      });
+      observer.observe(this.doc.documentElement, {
+        attributes: true,
+        attributeFilter: ['lang'],
+      });
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    }
   }
 
   assigneeInitials(assignee: NeuKanbanAssignee): string {
@@ -321,7 +341,15 @@ export class NeuKanbanComponent {
   }
 
   cardAriaLabel(card: NeuKanbanCard, column: NeuKanbanColumn, index: number): string {
-    return `${card.title}, ${column.title}, position ${index + 1} of ${column.cards.length}`;
+    return this.labels().cardPosition(card.title, column.title, index + 1, column.cards.length);
+  }
+
+  protected moveGroupLabel(cardTitle: string): string {
+    return this.labels().moveGroup(cardTitle);
+  }
+
+  protected moveDirectionLabel(cardTitle: string, direction: NeuKanbanMoveDirection): string {
+    return this.labels().moveDirection(cardTitle, direction);
   }
 
   isKeyboardMoving(cardId: string): boolean {
@@ -407,7 +435,7 @@ export class NeuKanbanComponent {
       event.preventDefault();
       event.stopPropagation();
       this.keyboardMove.set(null);
-      this.liveMessage.set(`Move cancelled for ${active.cardTitle}.`);
+      this.liveMessage.set(this.labels().moveCancelled(active.cardTitle));
       return;
     }
     if (event.key === 'Enter' || event.key === ' ') {
@@ -505,7 +533,7 @@ export class NeuKanbanComponent {
     if (this.stateMode() === 'optimistic') this._columns.set(nextColumns);
     this.pendingFocusCardId.set(movedCard.id);
     this.liveMessage.set(
-      `${movedCard.title} moved to ${targetColumn.title}, position ${currentIndex + 1}.`,
+      this.labels().moved(movedCard.title, targetColumn.title, currentIndex + 1),
     );
 
     this.emittingMove = true;
@@ -542,7 +570,7 @@ export class NeuKanbanComponent {
     const column = this._columns().find((candidate) => candidate.id === move.toColumnId);
     if (!column) return;
     this.liveMessage.set(
-      `${move.cardTitle} selected. Destination ${column.title}, position ${move.currentIndex + 1}.`,
+      this.labels().selected(move.cardTitle, column.title, move.currentIndex + 1),
     );
   }
 
@@ -569,4 +597,64 @@ export class NeuKanbanComponent {
       cards: [...column.cards],
     }));
   }
+}
+
+interface NeuKanbanLocaleLabels {
+  readonly instructions: string;
+  readonly empty: string;
+  readonly move: string;
+  readonly cardPosition: (card: string, column: string, position: number, total: number) => string;
+  readonly moveGroup: (card: string) => string;
+  readonly moveDirection: (card: string, direction: NeuKanbanMoveDirection) => string;
+  readonly moveCancelled: (card: string) => string;
+  readonly moved: (card: string, column: string, position: number) => string;
+  readonly selected: (card: string, column: string, position: number) => string;
+}
+
+function resolveDocumentLocale(doc: Document, fallback: string): string {
+  return doc.documentElement.lang.trim() || fallback;
+}
+
+function kanbanLabels(locale: string): NeuKanbanLocaleLabels {
+  if (locale.toLowerCase().startsWith('es')) {
+    return {
+      instructions:
+        'Para mover una tarjeta con el teclado, enfócala y pulsa Espacio o Intro. Usa las teclas de flecha, Inicio o Fin para elegir un destino; pulsa Espacio o Intro para confirmar, o Escape para cancelar. Los botones Mover ofrecen una alternativa mediante clic al arrastre.',
+      empty: 'Suelta tarjetas aquí',
+      move: 'Mover',
+      cardPosition: (card, column, position, total) =>
+        `${card}, ${column}, posición ${position} de ${total}`,
+      moveGroup: (card) => `Mover ${card}`,
+      moveDirection: (card, direction) => {
+        if (direction === 'left') return `Mover ${card} a la columna anterior`;
+        if (direction === 'right') return `Mover ${card} a la columna siguiente`;
+        if (direction === 'up') return `Mover ${card} hacia arriba`;
+        return `Mover ${card} hacia abajo`;
+      },
+      moveCancelled: (card) => `Movimiento cancelado para ${card}.`,
+      moved: (card, column, position) => `${card} se movió a ${column}, posición ${position}.`,
+      selected: (card, column, position) =>
+        `${card} seleccionada. Destino ${column}, posición ${position}.`,
+    };
+  }
+
+  return {
+    instructions:
+      'To move a card with the keyboard, focus it and press Space or Enter. Use arrow keys, Home, or End to choose a destination; press Space or Enter to confirm, or Escape to cancel. Move buttons provide a click alternative to dragging.',
+    empty: 'Drop cards here',
+    move: 'Move',
+    cardPosition: (card, column, position, total) =>
+      `${card}, ${column}, position ${position} of ${total}`,
+    moveGroup: (card) => `Move ${card}`,
+    moveDirection: (card, direction) => {
+      if (direction === 'left') return `Move ${card} to the previous column`;
+      if (direction === 'right') return `Move ${card} to the next column`;
+      if (direction === 'up') return `Move ${card} up`;
+      return `Move ${card} down`;
+    },
+    moveCancelled: (card) => `Move cancelled for ${card}.`,
+    moved: (card, column, position) => `${card} moved to ${column}, position ${position}.`,
+    selected: (card, column, position) =>
+      `${card} selected. Destination ${column}, position ${position}.`,
+  };
 }

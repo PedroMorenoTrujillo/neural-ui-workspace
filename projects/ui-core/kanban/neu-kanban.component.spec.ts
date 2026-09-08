@@ -38,6 +38,7 @@ const COLUMNS: NeuKanbanColumn[] = [
 
 describe('NeuKanbanComponent', () => {
   beforeEach(async () => {
+    document.documentElement.lang = 'en';
     await TestBed.configureTestingModule({
       imports: [DragDropModule],
       providers: [provideZonelessChangeDetection()],
@@ -210,6 +211,109 @@ describe('NeuKanbanComponent', () => {
 
     expect(fixture.nativeElement.querySelector('.neu-kanban__empty')?.textContent).toContain(
       'Drop cards here',
+    );
+  });
+
+  it.each([
+    {
+      locale: 'es',
+      instructions: 'Para mover una tarjeta con el teclado',
+      empty: 'Suelta tarjetas aquí',
+      card: 'Qualify inbound lead, To do, posición 1 de 2',
+      trigger: 'Mover: Qualify inbound lead',
+      group: 'Mover Qualify inbound lead',
+      directions: [
+        'Mover Qualify inbound lead a la columna anterior',
+        'Mover Qualify inbound lead hacia arriba',
+        'Mover Qualify inbound lead hacia abajo',
+        'Mover Qualify inbound lead a la columna siguiente',
+      ],
+      selected: 'Qualify inbound lead seleccionada. Destino To do, posición 1.',
+      cancelled: 'Movimiento cancelado para Qualify inbound lead.',
+      moved: 'Qualify inbound lead se movió a Doing, posición 1.',
+    },
+    {
+      locale: 'en',
+      instructions: 'To move a card with the keyboard',
+      empty: 'Drop cards here',
+      card: 'Qualify inbound lead, To do, position 1 of 2',
+      trigger: 'Move: Qualify inbound lead',
+      group: 'Move Qualify inbound lead',
+      directions: [
+        'Move Qualify inbound lead to the previous column',
+        'Move Qualify inbound lead up',
+        'Move Qualify inbound lead down',
+        'Move Qualify inbound lead to the next column',
+      ],
+      selected: 'Qualify inbound lead selected. Destination To do, position 1.',
+      cancelled: 'Move cancelled for Qualify inbound lead.',
+      moved: 'Qualify inbound lead moved to Doing, position 1.',
+    },
+  ])('localizes visible and accessible movement text for $locale', async (expected) => {
+    document.documentElement.lang = expected.locale;
+    const fixture = setup([...COLUMNS, { id: 'empty', title: 'Empty', cards: [] }]);
+    await fixture.whenStable();
+
+    const instructions = fixture.nativeElement.querySelector(
+      '.neu-kanban__sr-only:not([aria-live])',
+    ) as HTMLElement;
+    const empty = fixture.nativeElement.querySelector('.neu-kanban__empty') as HTMLElement;
+    const card = fixture.nativeElement.querySelector('.neu-kanban__card') as HTMLElement;
+    const trigger = fixture.nativeElement.querySelector('.neu-kanban__move-trigger') as HTMLElement;
+    const live = fixture.nativeElement.querySelector('[aria-live]') as HTMLElement;
+
+    expect(instructions.textContent?.replace(/\s+/g, ' ').trim()).toContain(expected.instructions);
+    expect(empty.textContent?.trim()).toBe(expected.empty);
+    expect(card.getAttribute('aria-label')).toBe(expected.card);
+    expect(trigger.getAttribute('aria-label')).toBe(expected.trigger);
+
+    card.click();
+    fixture.detectChanges();
+    const group = fixture.nativeElement.querySelector('.neu-kanban__move-actions') as HTMLElement;
+    const actionLabels = Array.from(group.querySelectorAll('button')).map((button) =>
+      button.getAttribute('aria-label'),
+    );
+    expect(group.getAttribute('aria-label')).toBe(expected.group);
+    expect(actionLabels).toEqual(expected.directions);
+
+    card.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    fixture.detectChanges();
+    expect(live.textContent?.trim()).toBe(expected.selected);
+    card.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    expect(live.textContent?.trim()).toBe(expected.cancelled);
+
+    fixture.componentInstance.moveByAction('card-a', 'right');
+    fixture.detectChanges();
+    expect(live.textContent?.trim()).toBe(expected.moved);
+  });
+
+  it('preserves a custom move label and reacts to an active document-locale change', async () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('moveButtonLabel', 'Reposition');
+    fixture.detectChanges();
+
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-kanban__move-trigger',
+    ) as HTMLButtonElement;
+    expect(trigger.textContent).toContain('Reposition');
+
+    fixture.componentRef.setInput('moveButtonLabel', 'Move');
+    document.documentElement.lang = 'es';
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
+    fixture.detectChanges();
+
+    expect(trigger.textContent).toContain('Mover');
+    expect(trigger.getAttribute('aria-label')).toBe('Mover: Qualify inbound lead');
+  });
+
+  it('falls back to the injected locale when the document language is empty', async () => {
+    document.documentElement.lang = '';
+    const fixture = setup();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.neu-kanban__move-trigger')?.textContent).toContain(
+      'Move',
     );
   });
 

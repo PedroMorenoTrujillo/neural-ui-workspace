@@ -24,6 +24,7 @@ describe('NeuPaginationComponent', () => {
   let host: TestHostComponent;
 
   beforeEach(async () => {
+    document.documentElement.lang = 'en';
     await TestBed.configureTestingModule({ imports: [TestHostComponent] }).compileComponents();
     fixture = TestBed.createComponent(TestHostComponent);
     host = fixture.componentInstance;
@@ -209,6 +210,55 @@ describe('NeuPaginationComponent', () => {
     expect(pages).toEqual([3]);
     df.componentInstance.changePageSize(10);
     expect(sizes).toEqual([20]);
+  });
+
+  it.each([
+    ['es', 'Paginación', 'Elementos por página', 'Página anterior', 'Página 1', 'Página siguiente'],
+    ['en', 'Pagination', 'Items per page', 'Previous page', 'Page 1', 'Next page'],
+  ])(
+    'renders localized public labels for %s',
+    (locale, navLabel, sizeLabel, previousLabel, pageLabel, nextLabel) => {
+      document.documentElement.lang = locale;
+      const df = TestBed.createComponent(NeuPaginationComponent);
+      df.componentRef.setInput('total', 30);
+      df.componentRef.setInput('pageSizeOptions', [10, 20]);
+      df.detectChanges();
+
+      const nav = df.nativeElement.querySelector('.neu-pagination') as HTMLElement;
+      const selectDebug = df.debugElement.query(By.directive(NeuSelectComponent));
+      const selectTrigger = selectDebug.nativeElement.querySelector(
+        '.neu-select__trigger',
+      ) as HTMLElement;
+      const buttons = nav.querySelectorAll('button');
+
+      expect(nav.getAttribute('aria-label')).toBe(navLabel);
+      expect(selectTrigger.getAttribute('aria-label')).toBe(sizeLabel);
+      expect(buttons[0].getAttribute('aria-label')).toBe(previousLabel);
+      expect(nav.querySelector('[aria-current="page"]')?.getAttribute('aria-label')).toBe(
+        pageLabel,
+      );
+      expect(buttons[buttons.length - 1].getAttribute('aria-label')).toBe(nextLabel);
+    },
+  );
+
+  it('preserves a custom page-size label and reacts to an active document-locale change', async () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('pageSizeOptions', [10, 20]);
+    df.componentRef.setInput('pageSizeAriaLabel', 'Rows per page');
+    df.detectChanges();
+
+    const trigger = () =>
+      df.debugElement
+        .query(By.directive(NeuSelectComponent))
+        .nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    expect(trigger().getAttribute('aria-label')).toBe('Rows per page');
+
+    df.componentRef.setInput('pageSizeAriaLabel', 'Items per page');
+    document.documentElement.lang = 'es';
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
+    df.detectChanges();
+
+    expect(trigger().getAttribute('aria-label')).toBe('Elementos por página');
   });
 
   it('clicking the previous button from page 2 should emit page 1', async () => {

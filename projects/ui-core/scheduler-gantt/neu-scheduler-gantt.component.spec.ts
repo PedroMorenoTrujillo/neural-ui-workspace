@@ -196,6 +196,27 @@ describe('NeuSchedulerGanttComponent', () => {
     expect(fixture.componentInstance.rangeLabel().toLowerCase()).toContain('2026');
   });
 
+  it.each([
+    ['es-ES', '2 tareas', '1 tarea'],
+    ['en-US', '2 tasks', '1 task'],
+  ])('renders localized plural and singular task counts for %s', (locale, plural, singular) => {
+    const fixture = TestBed.createComponent(NeuSchedulerGanttComponent);
+    fixture.componentRef.setInput('rows', ROWS);
+    fixture.componentRef.setInput('locale', locale);
+    fixture.detectChanges();
+
+    const count = () =>
+      fixture.nativeElement.querySelector('.neu-scheduler-gantt__count')?.textContent.trim();
+    expect(count()).toBe(plural);
+
+    fixture.componentRef.setInput('rows', [
+      { ...ROWS[0], tasks: [ROWS[0].tasks[0]] },
+    ] satisfies NeuSchedulerGanttRow[]);
+    fixture.detectChanges();
+
+    expect(count()).toBe(singular);
+  });
+
   it('normalizes reversed explicit bounds and reversed task dates', () => {
     const fixture = TestBed.createComponent(NeuSchedulerGanttComponent);
     fixture.componentRef.setInput('rows', [

@@ -72,7 +72,7 @@ export interface NeuSchedulerGanttSelectedSlot {
           <span class="neu-scheduler-gantt__title">{{ title() }}</span>
           <span class="neu-scheduler-gantt__range">{{ rangeLabel() }}</span>
         </div>
-        <span class="neu-scheduler-gantt__count">{{ taskCount() }} tasks</span>
+        <span class="neu-scheduler-gantt__count">{{ taskCountLabel() }}</span>
       </header>
     }
 
@@ -150,6 +150,13 @@ export class NeuSchedulerGanttComponent {
   readonly taskCount = computed(() =>
     this.rows().reduce((total, row) => total + row.tasks.length, 0),
   );
+
+  protected readonly taskCountLabel = computed(() => {
+    const count = this.taskCount();
+    const spanish = this.resolvedLocale().toLowerCase().startsWith('es');
+    const noun = spanish ? (count === 1 ? 'tarea' : 'tareas') : count === 1 ? 'task' : 'tasks';
+    return `${count} ${noun}`;
+  });
 
   readonly rangeLabel = computed(() => {
     const bounds = this._bounds();

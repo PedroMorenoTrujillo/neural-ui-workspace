@@ -8,8 +8,11 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select';
 
 /**
@@ -27,13 +30,13 @@ import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nav class="neu-pagination" aria-label="Paginación">
+    <nav class="neu-pagination" [attr.aria-label]="labels().pagination">
       @if (normalizedPageSizeOptions().length) {
         <neu-select
           class="neu-pagination__size"
           size="sm"
           [floatingLabel]="false"
-          [ariaLabel]="pageSizeAriaLabel()"
+          [ariaLabel]="resolvedPageSizeAriaLabel()"
           [options]="pageSizeSelectOptions()"
           optionLabel="label"
           optionValue="value"
@@ -45,7 +48,7 @@ import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select
         class="neu-pagination__btn neu-pagination__btn--nav"
         type="button"
         [disabled]="page() <= 1"
-        [attr.aria-label]="'Página anterior'"
+        [attr.aria-label]="labels().previousPage"
         (click)="go(page() - 1)"
       >
         <svg
@@ -72,7 +75,7 @@ import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select
             class="neu-pagination__btn"
             [class.neu-pagination__btn--active]="p === page()"
             type="button"
-            [attr.aria-label]="'Página ' + p"
+            [attr.aria-label]="labels().page(p)"
             [attr.aria-current]="p === page() ? 'page' : null"
             (click)="go(p)"
           >
@@ -86,7 +89,7 @@ import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select
         class="neu-pagination__btn neu-pagination__btn--nav"
         type="button"
         [disabled]="page() >= totalPages()"
-        [attr.aria-label]="'Página siguiente'"
+        [attr.aria-label]="labels().nextPage"
         (click)="go(page() + 1)"
       >
         <svg
@@ -108,6 +111,8 @@ import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select
   styleUrl: './neu-pagination.component.scss',
 })
 export class NeuPaginationComponent {
+  private readonly doc = inject(DOCUMENT);
+  private readonly defaultLocale = inject(NEURAL_LOCALE);
   private readonly destroyRef = inject(DestroyRef);
 
   /** Página actual (1-indexed) / Current page (1-indexed) */
@@ -146,6 +151,12 @@ export class NeuPaginationComponent {
       value: size,
     })),
   );
+  private readonly activeLocale = signal(resolveDocumentLocale(this.doc, this.defaultLocale));
+  protected readonly labels = computed(() => paginationLabels(this.activeLocale()));
+  protected readonly resolvedPageSizeAriaLabel = computed(() => {
+    const configured = this.pageSizeAriaLabel().trim();
+    return configured && configured !== 'Items per page' ? configured : this.labels().itemsPerPage;
+  });
 
   protected readonly pageSizeControl = new FormControl(10, { nonNullable: true });
 
@@ -161,6 +172,18 @@ export class NeuPaginationComponent {
         this.pageSizeControl.setValue(pageSize, { emitEvent: false });
       }
     });
+
+    const win = this.doc.defaultView;
+    if (win?.MutationObserver) {
+      const observer = new win.MutationObserver(() => {
+        this.activeLocale.set(resolveDocumentLocale(this.doc, this.defaultLocale));
+      });
+      observer.observe(this.doc.documentElement, {
+        attributes: true,
+        attributeFilter: ['lang'],
+      });
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    }
   }
 
   readonly totalPages = computed(() => {
@@ -207,4 +230,34 @@ export class NeuPaginationComponent {
     this.pageSizeChange.emit(nextSize);
     if (nextPage !== this.page()) this.pageChange.emit(nextPage);
   }
+}
+
+interface NeuPaginationLocaleLabels {
+  readonly pagination: string;
+  readonly itemsPerPage: string;
+  readonly previousPage: string;
+  readonly nextPage: string;
+  readonly page: (page: number) => string;
+}
+
+function resolveDocumentLocale(doc: Document, fallback: string): string {
+  return doc.documentElement.lang.trim() || fallback;
+}
+
+function paginationLabels(locale: string): NeuPaginationLocaleLabels {
+  return locale.toLowerCase().startsWith('es')
+    ? {
+        pagination: 'Paginación',
+        itemsPerPage: 'Elementos por página',
+        previousPage: 'Página anterior',
+        nextPage: 'Página siguiente',
+        page: (page) => `Página ${page}`,
+      }
+    : {
+        pagination: 'Pagination',
+        itemsPerPage: 'Items per page',
+        previousPage: 'Previous page',
+        nextPage: 'Next page',
+        page: (page) => `Page ${page}`,
+      };
 }
