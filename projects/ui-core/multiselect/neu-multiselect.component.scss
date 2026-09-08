@@ -282,6 +282,22 @@ $panel-z: 200;
   overflow: visible;
 }
 
+.neu-multiselect__header,
+.neu-multiselect__footer-custom {
+  flex-shrink: 0;
+  padding: var(--neu-space-3);
+  color: var(--neu-text);
+  font-size: var(--neu-text-sm);
+}
+
+.neu-multiselect__header {
+  border-bottom: 1px solid var(--neu-border);
+}
+
+.neu-multiselect__footer-custom {
+  border-top: 1px solid var(--neu-border);
+}
+
 @media (max-width: 600px) {
   .neu-multiselect__panel {
     inset-inline-start: auto;

@@ -123,8 +123,12 @@
 }
 
 .neu-listbox__option-content {
-  @include text.ellipsis;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  gap: 0.625rem;
   min-width: 0;
+  overflow: hidden;
 }
 
 .neu-listbox__group {

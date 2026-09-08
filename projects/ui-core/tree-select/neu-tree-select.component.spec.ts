@@ -67,6 +67,7 @@ describe('NeuTreeSelectComponent', () => {
 
   it('renders its placeholder and an optional label', () => {
     expect(fixture.nativeElement.textContent).toContain('Select');
+    expect(fixture.nativeElement.querySelector('.neu-tree-select__chevron')).toBeTruthy();
     fixture.componentRef.setInput('label', 'Role');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('label')?.textContent).toContain('Role');
@@ -654,6 +655,12 @@ describe('NeuTreeSelectComponent', () => {
 
     expect(document.querySelector('.tree-header')?.textContent).toContain('Header');
     expect(document.querySelector('.tree-footer')?.textContent).toContain('Footer');
+    expect(
+      document.querySelector('.tree-header')?.closest('.neu-tree-select__header'),
+    ).toBeTruthy();
+    expect(
+      document.querySelector('.tree-footer')?.closest('.neu-tree-select__footer'),
+    ).toBeTruthy();
     expect(document.querySelector('.tree-template-toggle')?.textContent).toContain('Root-0');
     (document.querySelector('.tree-template-toggle') as HTMLButtonElement).click();
     host.detectChanges();
@@ -673,5 +680,11 @@ describe('NeuTreeSelectComponent', () => {
     emptyComponent.toggle();
     emptyHost.detectChanges();
     expect(document.querySelector('.tree-empty')?.textContent).toContain('Empty slot');
+    expect(
+      document
+        .querySelector('.tree-empty')
+        ?.closest('.neu-tree-select__empty')
+        ?.getAttribute('role'),
+    ).toBe('status');
   });
 });

@@ -1,19 +1,17 @@
 .neu-dock {
   display: block;
   inline-size: fit-content;
-  max-inline-size: 100%;
 }
 
 .neu-dock__container {
-  max-inline-size: 100%;
+  inline-size: max-content;
   padding: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--neu-border, #cbd5e1) 85%, transparent);
   border-radius: 1.1rem;
   background: color-mix(in srgb, var(--neu-surface, #fff) 88%, transparent);
   box-shadow: var(--neu-shadow-lg, 0 18px 40px rgb(15 23 42 / 18%));
   backdrop-filter: blur(16px);
-  overflow: auto hidden;
-  scrollbar-width: thin;
+  overflow: visible;
 }
 
 .neu-dock__list {

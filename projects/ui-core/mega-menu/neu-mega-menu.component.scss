@@ -72,6 +72,13 @@
   outline: none;
 }
 .neu-mega-menu__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  inline-size: 1rem;
+  block-size: 1rem;
+  line-height: 1;
   margin-inline-start: 0.1rem;
   transition: transform 160ms ease;
 }

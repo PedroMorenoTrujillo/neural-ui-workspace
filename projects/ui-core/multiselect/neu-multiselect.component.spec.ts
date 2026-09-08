@@ -171,7 +171,6 @@ class TemplateHostComponent {
     [filterValue]="filterValue()"
     [loading]="loading()"
     [lazy]="lazy()"
-
     [clearable]="true"
   >
     <ng-template neuMultiselectHeader><span class="all-header">Header</span></ng-template>
@@ -197,7 +196,9 @@ class TemplateHostComponent {
     <ng-template neuMultiselectEmptyFilter
       ><span class="all-empty-filter">No match</span></ng-template
     >
-    <ng-template neuMultiselectCheckbox><span class="all-checkbox">□</span></ng-template>
+    <ng-template neuMultiselectCheckbox let-selected="selected"
+      ><span class="all-checkbox">{{ selected ? '✓' : '' }}</span></ng-template
+    >
     <ng-template neuMultiselectCheckmark><span class="all-checkmark">✓</span></ng-template>
     <ng-template neuMultiselectDropdownIcon><span class="all-dropdown">⌄</span></ng-template>
     <ng-template neuMultiselectLoadingIcon><span class="all-loading-icon">…</span></ng-template>
@@ -235,6 +236,19 @@ class AllTemplatesMultiselectHostComponent {
   lazy = signal(false);
 }
 
+@Component({
+  template: `<neu-multiselect [options]="options" [formControl]="control" [checkmark]="true">
+    <ng-template neuMultiselectCheckmark>
+      <span class="selected-checkmark" aria-hidden="true">✓</span>
+    </ng-template>
+  </neu-multiselect>`,
+  imports: [NeuMultiselectComponent, NeuMultiselectCheckmarkDirective, ReactiveFormsModule],
+})
+class CheckmarkTemplateMultiselectHostComponent {
+  options = OPTIONS;
+  control = new FormControl<string[]>(['angular'], { nonNullable: true });
+}
+
 describe('NeuMultiselectComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -245,6 +259,7 @@ describe('NeuMultiselectComponent', () => {
         TemplateHostComponent,
         RawFrameworkMultiselectHostComponent,
         AllTemplatesMultiselectHostComponent,
+        CheckmarkTemplateMultiselectHostComponent,
       ],
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
@@ -2548,9 +2563,14 @@ describe('NeuMultiselectComponent', () => {
     await f.whenStable();
     expect(document.querySelector('.all-header')).toBeTruthy();
     expect(document.querySelector('.all-footer')).toBeTruthy();
+    expect(document.querySelector('.all-header')?.closest('.neu-multiselect__header')).toBeTruthy();
+    expect(
+      document.querySelector('.all-footer')?.closest('.neu-multiselect__footer-custom'),
+    ).toBeTruthy();
     expect(document.querySelector('.all-group')?.textContent).toContain('Frontend');
     expect(document.querySelector('.all-item')?.textContent).toContain('Angular');
     expect(document.querySelector('.all-checkbox')).toBeTruthy();
+    expect(document.querySelector('.all-checkbox')?.textContent).toBe('✓');
     expect(f.nativeElement.querySelector('.all-selected')?.textContent).toContain('1');
     expect(f.nativeElement.querySelector('.all-dropdown')).toBeTruthy();
     expect(f.nativeElement.querySelector('.all-clear-icon')).toBeTruthy();
@@ -2577,11 +2597,37 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.all-empty')).toBeTruthy();
+    expect(document.querySelector('.all-empty')?.closest('.neu-multiselect__empty')).toBeTruthy();
+    expect(
+      document
+        .querySelector('.all-empty')
+        ?.closest('.neu-multiselect__empty')
+        ?.getAttribute('role'),
+    ).toBe('status');
 
     f.componentInstance.filterValue.set('missing');
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.all-empty-filter')).toBeTruthy();
+  });
+
+  it('renders a custom checkmark only for selected options', async () => {
+    const f = TestBed.createComponent(CheckmarkTemplateMultiselectHostComponent);
+    f.detectChanges();
+    const component = f.debugElement.query(By.directive(NeuMultiselectComponent))
+      .componentInstance as NeuMultiselectComponent;
+
+    component.open();
+    f.detectChanges();
+    await f.whenStable();
+
+    const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option'));
+    const angular = options.find((option) => option.textContent?.includes('Angular'));
+    const react = options.find((option) => option.textContent?.includes('React'));
+
+    expect(angular?.querySelector('.selected-checkmark')).toBeTruthy();
+    expect(react?.querySelector('.selected-checkmark')).toBeFalsy();
+    expect(document.querySelectorAll('.selected-checkmark')).toHaveLength(1);
   });
 
   it('covers focus, overlay, token and keyboard policy branches with public interactions', async () => {
@@ -2768,9 +2814,9 @@ describe('NeuMultiselectComponent', () => {
 
     comp.writeValue(['angular', 'react']);
     f.detectChanges();
-    expect(f.nativeElement.querySelector('.neu-multiselect__comma-values')?.textContent).not.toContain(
-      '+',
-    );
+    expect(
+      f.nativeElement.querySelector('.neu-multiselect__comma-values')?.textContent,
+    ).not.toContain('+');
   });
 
   it('covers legacy groups, numeric identity, keyboard, lazy and overlay edge contracts', async () => {

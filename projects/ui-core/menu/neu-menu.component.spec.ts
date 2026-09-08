@@ -29,6 +29,23 @@ class CustomMenuItemHostComponent {
   readonly items = [{ key: 'edit', label: 'Edit' }];
 }
 
+@Component({
+  imports: [NeuMenubarComponent, NeuMenuItemDirective],
+  template: `
+    <neu-menubar [items]="items">
+      <ng-template neuMenuItem let-item>
+        <span class="menubar-custom">★ {{ item.label }}</span>
+      </ng-template>
+    </neu-menubar>
+  `,
+})
+class CustomMenubarItemHostComponent {
+  readonly items = [
+    { key: 'file', label: 'File', children: [{ key: 'new', label: 'New' }] },
+    { key: 'help', label: 'Help' },
+  ];
+}
+
 describe('NeuMenuComponent', () => {
   let fixture: ComponentFixture<NeuMenuComponent>;
 
@@ -167,6 +184,9 @@ describe('NeuMenuComponent', () => {
     (customFixture.nativeElement.querySelector('.neu-menu-button__trigger') as HTMLElement).click();
     customFixture.detectChanges();
     expect(document.querySelector('.neu-menu-button__panel em')?.textContent).toBe('Edit');
+    expect(document.querySelector('.neu-menu-button__panel button')?.textContent?.trim()).toBe(
+      'Edit',
+    );
   });
 
   it('uses one roving tab stop and supports arrows, Home, End and typeahead', () => {
@@ -393,6 +413,51 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     fixture.detectChanges();
     (document.querySelector('.neu-menu-button__panel button') as HTMLButtonElement).click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'new' }));
+  });
+
+  it('uses projected visuals for root and child items without duplicating labels', async () => {
+    await TestBed.configureTestingModule({
+      imports: [CustomMenubarItemHostComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CustomMenubarItemHostComponent);
+    fixture.detectChanges();
+
+    const rootLabels = fixture.nativeElement.querySelectorAll('.menubar-custom');
+    expect(rootLabels).toHaveLength(2);
+    expect(rootLabels[0].textContent.trim()).toBe('★ File');
+
+    (fixture.nativeElement.querySelector('.neu-menu-button__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const child = document.querySelector('.neu-menu-button__panel .menubar-custom') as HTMLElement;
+    expect(child.textContent.trim()).toBe('★ New');
+    expect(child.closest('button')?.textContent?.trim()).toBe('★ New');
+  });
+
+  it('runs direct commands and keeps disabled branches closed', () => {
+    const command = vi.fn();
+    const fixture = TestBed.createComponent(NeuMenubarComponent);
+    fixture.componentRef.setInput('items', [
+      { key: 'run', label: 'Run', command },
+      {
+        key: 'locked',
+        label: 'Locked',
+        disabled: true,
+        children: [{ key: 'child', label: 'Child' }],
+      },
+    ]);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.neu-menubar__item') as HTMLButtonElement).click();
+    const locked = fixture.nativeElement.querySelector(
+      '.neu-menu-button__trigger',
+    ) as HTMLButtonElement;
+    locked.click();
+
+    expect(command).toHaveBeenCalledOnce();
+    expect(locked.disabled).toBe(true);
+    expect(locked.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('keeps one menubar tab stop and mirrors horizontal arrows in RTL', async () => {

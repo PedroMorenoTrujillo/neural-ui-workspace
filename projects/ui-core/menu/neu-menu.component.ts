@@ -79,17 +79,26 @@ export class NeuMenuItemDirective {
             (keydown)="onItemKeydown(item, index, $event)"
             (click)="activate(item, $event)"
           >
-            @if (itemTemplateRef()) {
-              <ng-container
-                [ngTemplateOutlet]="itemTemplateRef()"
-                [ngTemplateOutletContext]="{ $implicit: item }"
-              />
-            } @else if (item.icon) {
-              <neu-icon class="neu-menu__icon" [name]="item.icon" size="1rem" aria-hidden="true" />
-            }
-            <span class="neu-menu__label">{{ item.label }}</span>
-            @if (item.shortcut) {
-              <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd>
+            @if (itemTemplateRef(); as itemTemplate) {
+              <span class="neu-menu__custom-content">
+                <ng-container
+                  [ngTemplateOutlet]="itemTemplate"
+                  [ngTemplateOutletContext]="{ $implicit: item }"
+                />
+              </span>
+            } @else {
+              @if (item.icon) {
+                <neu-icon
+                  class="neu-menu__icon"
+                  [name]="item.icon"
+                  size="1rem"
+                  aria-hidden="true"
+                />
+              }
+              <span class="neu-menu__label">{{ item.label }}</span>
+              @if (item.shortcut) {
+                <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd>
+              }
             }
             @if (item.children?.length) {
               <span class="neu-menu__chevron" aria-hidden="true">›</span>
@@ -265,6 +274,7 @@ export class NeuMenuComponent {
       size="sm"
       [attr.aria-expanded]="open()"
       aria-haspopup="menu"
+      [disabled]="disabled()"
       (click)="toggle()"
       (keydown)="onTriggerKeydown($event)"
     >
@@ -297,6 +307,8 @@ export class NeuMenuButtonComponent {
   /* v8 ignore stop */
   readonly items = input<NeuMenuItem[]>([]);
   readonly label = input('Menu');
+  /** Prevents the trigger from opening the menu and exposes the disabled button state. */
+  readonly disabled = input(false);
   readonly itemClick = output<NeuMenuItem>();
   readonly openChange = output<boolean>();
   readonly open = signal(false);
@@ -308,6 +320,7 @@ export class NeuMenuButtonComponent {
   private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
 
   toggle(): void {
+    if (this.disabled()) return;
     if (this.open()) {
       this.close();
     } else {
@@ -366,7 +379,7 @@ export class NeuMenuButtonComponent {
   }
 
   private openMenu(focusLast: boolean): void {
-    if (this.open()) return;
+    if (this.open() || this.disabled()) return;
     this.focusLastOnAttach = focusLast;
     this.open.set(true);
     this.openChange.emit(true);
@@ -375,7 +388,7 @@ export class NeuMenuButtonComponent {
 
 @Component({
   selector: 'neu-menubar',
-  imports: [NeuButtonComponent, NeuMenuButtonComponent],
+  imports: [NeuButtonComponent, NeuMenuButtonComponent, NeuMenuItemDirective, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-menubar' },
@@ -389,17 +402,33 @@ export class NeuMenuButtonComponent {
       (focusin)="onFocusin($event)"
     >
       @for (item of items(); track item.key; let index = $index) {
-        @if (item.children?.length) {
+        @if (item.visible !== false && item.separator) {
+          <span class="neu-menubar__separator" role="separator"></span>
+        } @else if (item.visible !== false && item.children?.length) {
           <neu-menu-button
             role="none"
             [attr.data-neu-menubar-index]="index"
             [items]="item.children ?? []"
             [label]="item.label"
+            [disabled]="!!item.disabled"
             (itemClick)="itemClick.emit($event)"
           >
-            {{ item.label }}
+            @if (itemTpl(); as itemTemplate) {
+              <ng-container
+                [ngTemplateOutlet]="itemTemplate.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: item }"
+              />
+              <ng-template neuMenuItem let-childItem>
+                <ng-container
+                  [ngTemplateOutlet]="itemTemplate.templateRef"
+                  [ngTemplateOutletContext]="{ $implicit: childItem }"
+                />
+              </ng-template>
+            } @else {
+              {{ item.label }}
+            }
           </neu-menu-button>
-        } @else {
+        } @else if (item.visible !== false) {
           <button
             neu-button
             type="button"
@@ -409,9 +438,16 @@ export class NeuMenuButtonComponent {
             role="menuitem"
             [attr.data-neu-menubar-index]="index"
             [disabled]="!!item.disabled"
-            (click)="itemClick.emit(item)"
+            (click)="activate(item, $event)"
           >
-            {{ item.label }}
+            @if (itemTpl(); as itemTemplate) {
+              <ng-container
+                [ngTemplateOutlet]="itemTemplate.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: item }"
+              />
+            } @else {
+              {{ item.label }}
+            }
           </button>
         }
       }
@@ -420,6 +456,9 @@ export class NeuMenuButtonComponent {
   styleUrl: './neu-menu.component.scss',
 })
 export class NeuMenubarComponent {
+  /* v8 ignore start -- Angular signal-query factory; projected-item behavior is covered. */
+  readonly itemTpl = contentChild(NeuMenuItemDirective);
+  /* v8 ignore stop */
   readonly items = input<NeuMenuItem[]>([]);
   readonly ariaLabel = input('Menu bar');
   readonly itemClick = output<NeuMenuItem>();
@@ -458,7 +497,13 @@ export class NeuMenubarComponent {
       return;
     }
     this.applyTabIndexes();
-    this.itemElements()[result.activeIndex]?.focus();
+    this.focusItemAtIndex(result.activeIndex);
+  }
+
+  protected activate(item: NeuMenuItem, originalEvent: Event): void {
+    if (item.disabled) return;
+    item.command?.({ originalEvent, item });
+    this.itemClick.emit(item);
   }
 
   private reconcile(): void {
@@ -480,6 +525,14 @@ export class NeuMenubarComponent {
         ':scope > .neu-menubar__list > button, :scope > .neu-menubar__list > neu-menu-button > button',
       ),
     );
+  }
+
+  private focusItemAtIndex(index: number): void {
+    const owner = this.host.querySelector<HTMLElement>(
+      `:scope > .neu-menubar__list > [data-neu-menubar-index="${index}"]`,
+    );
+    const target = owner?.matches('button') ? owner : owner?.querySelector<HTMLElement>('button');
+    target?.focus();
   }
 
   private applyTabIndexes(): void {

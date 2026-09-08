@@ -70,6 +70,7 @@ describe('NeuMegaMenuComponent', () => {
       fixture.nativeElement.querySelector('.neu-mega-menu__root-action[href]').getAttribute('href'),
     ).toContain('/pricing');
     expect(fixture.nativeElement.textContent).toContain('Docs');
+    expect(fixture.nativeElement.querySelector('.neu-mega-menu__chevron polyline')).toBeTruthy();
   });
 
   it('opens root panels, skips disabled children and closes with Escape', async () => {

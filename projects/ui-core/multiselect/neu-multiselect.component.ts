@@ -105,10 +105,7 @@ import {
   NeuMultiselectTokenDirective,
   NeuMultiselectTokenRemoveIconDirective,
 } from './neu-multiselect.directives';
-import {
-  NEU_OVERLAY_DISMISS_GUARD,
-  allowsNeuOverlayDismissal,
-} from '@neural-ui/core/foundation';
+import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
 
 export type { NeuSelectOption } from '@neural-ui/core/select';
 
@@ -380,7 +377,9 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
           (keydown)="onPanelKeyDown($event)"
         >
           @if (headerTpl(); as header) {
-            <ng-container [ngTemplateOutlet]="header.templateRef" />
+            <div class="neu-multiselect__header">
+              <ng-container [ngTemplateOutlet]="header.templateRef" />
+            </div>
           }
           <!-- Search -->
           @if (effectiveFilterEnabled()) {
@@ -491,20 +490,23 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
                         [ngTemplateOutlet]="checkboxTemplate.templateRef"
                         [ngTemplateOutletContext]="{
                           open: isOpen(),
+                          selected: isOptionSelected(row.option),
                           disabled: row.disabled,
                           readonly: readonly(),
                         }"
                       />
                     } @else {
                       @if (checkmark() && checkmarkTpl(); as checkmarkTemplate) {
-                        <ng-container
-                          [ngTemplateOutlet]="checkmarkTemplate.templateRef"
-                          [ngTemplateOutletContext]="{
-                            open: isOpen(),
-                            disabled: row.disabled,
-                            readonly: readonly(),
-                          }"
-                        />
+                        @if (isOptionSelected(row.option)) {
+                          <ng-container
+                            [ngTemplateOutlet]="checkmarkTemplate.templateRef"
+                            [ngTemplateOutletContext]="{
+                              open: isOpen(),
+                              disabled: row.disabled,
+                              readonly: readonly(),
+                            }"
+                          />
+                        }
                       } @else {
                         <svg
                           class="neu-multiselect__checkbox-check"
@@ -565,17 +567,17 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
             }
 
             @if (!loading() && filteredRows().length === 0) {
-              @if (effectiveFilterValue() && emptyFilterTpl(); as emptyFilterTemplate) {
-                <ng-container [ngTemplateOutlet]="emptyFilterTemplate.templateRef" />
-              } @else {
-                @if (!effectiveFilterValue() && emptyTpl(); as emptyTemplate) {
-                  <ng-container [ngTemplateOutlet]="emptyTemplate.templateRef" />
+              <div class="neu-multiselect__empty" role="status">
+                @if (effectiveFilterValue() && emptyFilterTpl(); as emptyFilterTemplate) {
+                  <ng-container [ngTemplateOutlet]="emptyFilterTemplate.templateRef" />
                 } @else {
-                  <div class="neu-multiselect__empty">
+                  @if (!effectiveFilterValue() && emptyTpl(); as emptyTemplate) {
+                    <ng-container [ngTemplateOutlet]="emptyTemplate.templateRef" />
+                  } @else {
                     {{ effectiveFilterValue() ? noResultsMessage() : emptyMessage() }}
-                  </div>
+                  }
                 }
-              }
+              </div>
             }
           </div>
 
@@ -605,7 +607,9 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
             </div>
           }
           @if (footerTpl()) {
-            <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+            <div class="neu-multiselect__footer-custom">
+              <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+            </div>
           }
         </div>
       </ng-template>

@@ -10,8 +10,7 @@ export type NeuMultiselectSize = 'sm' | 'md' | 'lg';
 export type NeuMultiselectVariant = 'outlined' | 'filled';
 export type NeuMultiselectDisplay = 'comma' | 'chip' | 'count';
 
-export interface NeuMultiselectItemContext<T, V>
-  extends NeuOptionTemplateContext<T> {
+export interface NeuMultiselectItemContext<T, V> extends NeuOptionTemplateContext<T> {
   readonly value: V;
 }
 
@@ -47,6 +46,10 @@ export interface NeuMultiselectIconContext {
   readonly open: boolean;
   readonly disabled: boolean;
   readonly readonly: boolean;
+}
+
+export interface NeuMultiselectCheckboxContext extends NeuMultiselectIconContext {
+  readonly selected: boolean;
 }
 
 export interface NeuMultiselectChangeEvent<T, V> {

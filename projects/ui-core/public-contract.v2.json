@@ -688,6 +688,7 @@
       "types": "./types/neural-ui-core-multiselect.d.ts",
       "exports": [
         "./multiselect#NeuMultiselectChangeEvent",
+        "./multiselect#NeuMultiselectCheckboxContext",
         "./multiselect#NeuMultiselectCheckboxDirective",
         "./multiselect#NeuMultiselectCheckmarkDirective",
         "./multiselect#NeuMultiselectClearIconDirective",
@@ -20846,12 +20847,20 @@
           "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMenuItem>;"
         },
         {
+          "id": "./menu#NeuMenubarComponent.property:itemTpl",
+          "name": "itemTpl",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly itemTpl: _angular_core.Signal<NeuMenuItemDirective | undefined>;"
+        },
+        {
           "id": "./menu#NeuMenubarComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMenubarComponent, \"neu-menubar\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMenubarComponent, \"neu-menubar\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
         },
         {
           "id": "./menu#NeuMenubarComponent.property:ɵfac",
@@ -20872,6 +20881,16 @@
       "selector": "neu-menu-button",
       "signature": "declare class NeuMenuButtonComponent {\n}",
       "members": [
+        {
+          "id": "./menu#NeuMenuButtonComponent.input:disabled",
+          "name": "disabled",
+          "kind": "input",
+          "publicName": "disabled",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+        },
         {
           "id": "./menu#NeuMenuButtonComponent.input:items",
           "name": "items",
@@ -20990,7 +21009,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMenuButtonComponent, \"neu-menu-button\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n    \"openChange\": \"openChange\";\n}, [\n    \"itemTpl\"\n], [\n    \"*\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMenuButtonComponent, \"neu-menu-button\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n    \"openChange\": \"openChange\";\n}, [\n    \"itemTpl\"\n], [\n    \"*\"\n], true, never>;"
         },
         {
           "id": "./menu#NeuMenuButtonComponent.property:ɵfac",
@@ -21988,6 +22007,24 @@
       ]
     },
     {
+      "id": "./multiselect#NeuMultiselectCheckboxContext",
+      "entrypoint": "./multiselect",
+      "name": "NeuMultiselectCheckboxContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuMultiselectCheckboxContext extends NeuMultiselectIconContext {\n}",
+      "members": [
+        {
+          "id": "./multiselect#NeuMultiselectCheckboxContext.property:selected",
+          "name": "selected",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selected: boolean;"
+        }
+      ]
+    },
+    {
       "id": "./multiselect#NeuMultiselectCheckboxDirective",
       "entrypoint": "./multiselect",
       "name": "NeuMultiselectCheckboxDirective",
@@ -22018,7 +22055,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<NeuMultiselectIconContext>;"
+          "signature": "readonly templateRef: TemplateRef<NeuMultiselectCheckboxContext>;"
         }
       ]
     },
@@ -60070,6 +60107,18 @@
       "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMenuItem>;"
     },
     {
+      "id": "./menu#NeuMenuButtonComponent.input:disabled",
+      "entrypoint": "./menu",
+      "declaration": "NeuMenuButtonComponent",
+      "selector": "neu-menu-button",
+      "propertyName": "disabled",
+      "publicName": "disabled",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./menu#NeuMenuButtonComponent.input:items",
       "entrypoint": "./menu",
       "declaration": "NeuMenuButtonComponent",
@@ -70488,32 +70537,32 @@
   ],
   "summary": {
     "entrypoints": 105,
-    "exportedDeclarations": 835,
+    "exportedDeclarations": 836,
     "declarationKinds": {
       "class": 14,
       "component": 102,
       "directive": 144,
       "function": 46,
-      "interface": 273,
+      "interface": 274,
       "reexport": 55,
       "service": 11,
       "token": 4,
       "type": 185,
       "variable": 1
     },
-    "publicSymbols": 5770,
+    "publicSymbols": 5774,
     "statuses": {
-      "SUPPORTED": 3658,
+      "SUPPORTED": 3661,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 2108,
+      "INTERNAL/UNSUPPORTED": 2109,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1210,
+      "input": 1211,
       "output": 281,
       "model": 2,
-      "total": 1493
+      "total": 1494
     },
     "designTokens": 258
   }

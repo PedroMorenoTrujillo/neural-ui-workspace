@@ -124,7 +124,10 @@ export class NeuTreeSelectEmptyDirective {
         (click)="toggle()"
         (keydown)="onTriggerKeydown($event)"
       >
-        <span [class.neu-tree-select__placeholder]="!selectedLabel()">
+        <span
+          class="neu-tree-select__value"
+          [class.neu-tree-select__placeholder]="!selectedLabel()"
+        >
           @if (selectedTpl() && selectedNode()) {
             <ng-container
               [ngTemplateOutlet]="selectedTpl()!.templateRef"
@@ -133,6 +136,15 @@ export class NeuTreeSelectEmptyDirective {
           } @else {
             {{ selectedLabel() || placeholder() }}
           }
+        </span>
+        <span
+          class="neu-tree-select__chevron"
+          [class.neu-tree-select__chevron--open]="open()"
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="m7 9 5 5 5-5" />
+          </svg>
         </span>
       </button>
       @if (clearable() && values().length) {
@@ -167,7 +179,9 @@ export class NeuTreeSelectEmptyDirective {
         [attr.aria-multiselectable]="multiple() ? 'true' : null"
       >
         @if (headerTpl()) {
-          <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
+          <div class="neu-tree-select__header">
+            <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
+          </div>
         }
         @if (searchable()) {
           <input
@@ -222,14 +236,18 @@ export class NeuTreeSelectEmptyDirective {
           </button>
         }
         @if (!visibleNodes().length) {
-          @if (emptyTpl()) {
-            <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
-          } @else {
-            <div class="neu-tree-select__empty">{{ emptyLabel() }}</div>
-          }
+          <div class="neu-tree-select__empty" role="status">
+            @if (emptyTpl()) {
+              <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
+            } @else {
+              {{ emptyLabel() }}
+            }
+          </div>
         }
         @if (footerTpl()) {
-          <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+          <div class="neu-tree-select__footer">
+            <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
+          </div>
         }
       </div>
     </ng-template>

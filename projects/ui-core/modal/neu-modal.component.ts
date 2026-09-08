@@ -18,10 +18,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
-import {
-  NEU_OVERLAY_DISMISS_GUARD,
-  allowsNeuOverlayDismissal,
-} from '@neural-ui/core/foundation';
+import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type NeuDialogLayout = 'auto' | 'viewport';
@@ -96,11 +93,17 @@ export type NeuDialogLayout = 'auto' | 'viewport';
                   [attr.aria-pressed]="effectiveMaximized()"
                   (click)="toggleMaximize()"
                 >
-                  <span
-                    class="neu-dialog__maximize-icon"
-                    [class.neu-dialog__maximize-icon--restore]="effectiveMaximized()"
-                    aria-hidden="true"
-                  ></span>
+                  <span class="neu-dialog__maximize-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      @if (effectiveMaximized()) {
+                        <path d="m14 10 7-7m0 0v6m0-6h-6M10 14l-7 7m0 0v-6m0 6h6" />
+                      } @else {
+                        <path
+                          d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"
+                        />
+                      }
+                    </svg>
+                  </span>
                 </button>
               }
               @if (!disableClose()) {
@@ -258,11 +261,7 @@ export class NeuDialogComponent {
       })
     )
       return;
-    if (
-      this.destroyRef.destroyed ||
-      !this.open() ||
-      closeRequestEpoch !== this.closeRequestEpoch
-    )
+    if (this.destroyRef.destroyed || !this.open() || closeRequestEpoch !== this.closeRequestEpoch)
       return;
     this.close();
   }

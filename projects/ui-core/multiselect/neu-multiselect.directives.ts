@@ -2,6 +2,7 @@ import { Directive, TemplateRef, input } from '@angular/core';
 import { NeuOptionFilterConfig } from '@neural-ui/core/option-api';
 import { NeuSelectOption } from '@neural-ui/core/select';
 import {
+  NeuMultiselectCheckboxContext,
   NeuMultiselectFilterContext,
   NeuMultiselectGroupContext,
   NeuMultiselectIconContext,
@@ -95,24 +96,46 @@ export class NeuMultiselectLoaderDirective {
 }
 
 @Directive({ selector: 'ng-template[neuMultiselectHeader]' })
-export class NeuMultiselectHeaderDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuMultiselectHeaderDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectFooter]' })
-export class NeuMultiselectFooterDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuMultiselectFooterDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectEmpty]' })
-export class NeuMultiselectEmptyDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuMultiselectEmptyDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectEmptyFilter]' })
-export class NeuMultiselectEmptyFilterDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuMultiselectEmptyFilterDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectCheckbox]' })
-export class NeuMultiselectCheckboxDirective { constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {} }
+export class NeuMultiselectCheckboxDirective {
+  constructor(readonly templateRef: TemplateRef<NeuMultiselectCheckboxContext>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectCheckmark]' })
-export class NeuMultiselectCheckmarkDirective { constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {} }
+export class NeuMultiselectCheckmarkDirective {
+  constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectDropdownIcon]' })
-export class NeuMultiselectDropdownIconDirective { constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {} }
+export class NeuMultiselectDropdownIconDirective {
+  constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectLoadingIcon]' })
-export class NeuMultiselectLoadingIconDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuMultiselectLoadingIconDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectClearIcon]' })
-export class NeuMultiselectClearIconDirective { constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {} }
+export class NeuMultiselectClearIconDirective {
+  constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectFilterIcon]' })
-export class NeuMultiselectFilterIconDirective { constructor(readonly templateRef: TemplateRef<void>) {} }
+export class NeuMultiselectFilterIconDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
 @Directive({ selector: 'ng-template[neuMultiselectTokenRemoveIcon]' })
-export class NeuMultiselectTokenRemoveIconDirective { constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {} }
+export class NeuMultiselectTokenRemoveIconDirective {
+  constructor(readonly templateRef: TemplateRef<NeuMultiselectIconContext>) {}
+}

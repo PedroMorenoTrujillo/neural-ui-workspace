@@ -45,7 +45,8 @@
 
 .neu-pick-list__column button,
 .neu-pick-list__actions button,
-.neu-order-list__item button {
+.neu-order-list__item button,
+.neu-order-list__toolbar button {
   min-height: 2.5rem;
   border: 1px solid var(--neu-border, #d1d5db);
   border-radius: 0.5rem;
@@ -105,7 +106,8 @@
 @media (pointer: coarse) {
   .neu-pick-list__column button,
   .neu-pick-list__actions button,
-  .neu-order-list__item button {
+  .neu-order-list__item button,
+  .neu-order-list__toolbar button {
     min-height: 2.75rem;
     min-width: 2.75rem;
   }

@@ -546,11 +546,13 @@ describe('NeuDialogComponent', () => {
     comp.maximizedChange.subscribe((value) => changes.push(value));
     const toggle = f.nativeElement.querySelector('.neu-dialog__maximize') as HTMLButtonElement;
     expect(toggle.getAttribute('aria-label')).toBe('Maximize dialog');
+    const maximizePath = toggle.querySelector('path')?.getAttribute('d');
     toggle.click();
     f.detectChanges();
     expect(changes).toEqual([true]);
     expect(toggle.getAttribute('aria-pressed')).toBe('true');
     expect(toggle.getAttribute('aria-label')).toBe('Restore dialog');
+    expect(toggle.querySelector('path')?.getAttribute('d')).not.toBe(maximizePath);
     expect(f.nativeElement.querySelector('.neu-dialog__panel').classList).toContain(
       'neu-dialog__panel--maximized',
     );

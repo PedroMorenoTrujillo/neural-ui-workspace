@@ -153,7 +153,18 @@ interface ProcessedMegaRoot extends ProcessedMegaItem {
                   [ngTemplateOutlet]="itemTemplateRef()"
                   [ngTemplateOutletContext]="templateContext(root, rootIndex)"
                 />
-                <span class="neu-mega-menu__chevron" aria-hidden="true">⌄</span>
+                <svg
+                  class="neu-mega-menu__chevron"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
               </button>
             } @else if (root.action.kind === 'router') {
               <a
