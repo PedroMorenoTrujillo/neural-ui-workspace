@@ -56,9 +56,30 @@ describe('NeuDataViewComponent', () => {
   });
 
   it('uses NeuralUI primitives for sort and navigation controls', () => {
+    expect(fixture.nativeElement.querySelector('.neu-data-view__search neu-input')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('neu-select.neu-data-view__sort')).toBeTruthy();
     expect(fixture.nativeElement.querySelectorAll('button[neu-button]').length).toBeGreaterThan(0);
     expect(fixture.nativeElement.querySelector('.neu-data-view__sort select')).toBeFalsy();
+  });
+
+  it('supports localized display labels without changing the public mode values', () => {
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', ['Uno']);
+    direct.componentRef.setInput('modeLabels', {
+      list: 'Lista',
+      grid: 'Cuadrícula',
+      table: 'Tabla',
+    });
+    direct.detectChanges();
+
+    const buttons = Array.from(
+      direct.nativeElement.querySelectorAll('.neu-data-view__mode'),
+    ) as HTMLButtonElement[];
+    expect(buttons.map((button) => button.textContent?.trim())).toEqual([
+      'Lista',
+      'Cuadrícula',
+      'Tabla',
+    ]);
   });
 
   it('emits mode, search, sort and bounded page changes', () => {

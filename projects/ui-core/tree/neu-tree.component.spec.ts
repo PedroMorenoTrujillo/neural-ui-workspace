@@ -57,7 +57,7 @@ describe('NeuTreeComponent', () => {
     fixture.componentRef.setInput('searchable', true);
     fixture.detectChanges();
 
-    const input = fixture.nativeElement.querySelector('.neu-tree__search-input');
+    const input = fixture.nativeElement.querySelector('.neu-tree__search-input input');
     input.value = 'admin';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -159,7 +159,7 @@ describe('NeuTreeComponent', () => {
     fixture.componentRef.setInput('emptyLabel', 'Nothing found');
     fixture.detectChanges();
 
-    const input = fixture.nativeElement.querySelector('.neu-tree__search-input');
+    const input = fixture.nativeElement.querySelector('.neu-tree__search-input input');
     input.value = 'zzz';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -258,7 +258,7 @@ describe('NeuTreeComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('NEW');
     const input = fixture.nativeElement.querySelector(
-      '.neu-tree__search-input',
+      '.neu-tree__search-input input',
     ) as HTMLInputElement;
     input.value = 'leaf';
     input.dispatchEvent(new Event('input'));
@@ -280,7 +280,7 @@ describe('NeuTreeComponent', () => {
     fixture.detectChanges();
 
     const input = fixture.nativeElement.querySelector(
-      '.neu-tree__search-input',
+      '.neu-tree__search-input input',
     ) as HTMLInputElement;
     input.value = 'root';
     input.dispatchEvent(new Event('input'));

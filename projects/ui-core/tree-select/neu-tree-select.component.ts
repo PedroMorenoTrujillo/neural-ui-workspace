@@ -36,10 +36,7 @@ import {
   NeuTreeNavigationItem,
   walkNeuTreeDepthFirst,
 } from '@neural-ui/core/internal';
-import {
-  NEU_OVERLAY_DISMISS_GUARD,
-  allowsNeuOverlayDismissal,
-} from '@neural-ui/core/foundation';
+import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
 
 export interface NeuTreeSelectNode {
   value: string;
@@ -103,7 +100,10 @@ export class NeuTreeSelectEmptyDirective {
       multi: true,
     },
   ],
-  host: { class: 'neu-tree-select' },
+  host: {
+    class: 'neu-tree-select',
+    '(window:resize)': 'onViewportResize()',
+  },
   template: `
     @if (label()) {
       <label class="neu-tree-select__label" [for]="triggerId">{{ label() }}</label>
@@ -151,6 +151,7 @@ export class NeuTreeSelectEmptyDirective {
       cdkConnectedOverlay
       [cdkConnectedOverlayOrigin]="origin"
       [cdkConnectedOverlayOpen]="open()"
+      [cdkConnectedOverlayWidth]="panelWidth()"
       [cdkConnectedOverlayHasBackdrop]="true"
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       (backdropClick)="requestClose('outside-pointer', $event)"
@@ -310,13 +311,13 @@ export class NeuTreeSelectComponent<
     this.filter.emit({ query });
   }
 
-
   readonly triggerId = inject(NeuIdGenerator).getId('neu-tree-select-');
   readonly panelId = inject(NeuIdGenerator).getId('neu-tree-select-panel-');
   readonly open = signal(false);
   readonly query = signal('');
   readonly values = signal<V[]>([]);
   readonly expanded = signal(new Set<V>());
+  protected readonly panelWidth = signal<number | string>('');
   readonly cvaDisabled = signal(false);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   /* v8 ignore start -- Angular signal-query factories; trigger/overlay behavior is covered. */
@@ -376,7 +377,8 @@ export class NeuTreeSelectComponent<
     if (!this.open()) return;
     this.open.set(false);
     queueMicrotask(() => {
-      if (!this.eventDestroyRef.destroyed) this.trigger()?.nativeElement.focus({ preventScroll: true });
+      if (!this.eventDestroyRef.destroyed)
+        this.trigger()?.nativeElement.focus({ preventScroll: true });
     });
   }
 
@@ -440,7 +442,8 @@ export class NeuTreeSelectComponent<
     }
 
     this.expanded.set(next);
-    if (!this.eventDestroyRef.destroyed) this.nodeExpansionChange.emit({ node, expanded: next.has(value) });
+    if (!this.eventDestroyRef.destroyed)
+      this.nodeExpansionChange.emit({ node, expanded: next.has(value) });
   }
 
   toggleExpandedFromTemplate(node: T): void {
@@ -610,8 +613,20 @@ export class NeuTreeSelectComponent<
 
   private openPanel(focusLast: boolean): void {
     if (this.eventDestroyRef.destroyed || this.isDisabled() || this.open()) return;
+    this.syncPanelWidth();
     this.focusLastOnAttach = focusLast;
     this.open.set(true);
+  }
+
+  protected onViewportResize(): void {
+    if (!this.open()) return;
+    this.syncPanelWidth();
+    this.connectedOverlay()?.overlayRef.updatePosition();
+  }
+
+  private syncPanelWidth(): void {
+    const width = this.trigger()?.nativeElement.getBoundingClientRect().width ?? 0;
+    this.panelWidth.set(width > 0 ? Math.round(width) : '');
   }
 
   private reconcileNavigation(): void {

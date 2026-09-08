@@ -341,16 +341,20 @@ $drum-item-h: 36px;
 .neu-date-input__cal-title--pickers {
   display: inline-flex;
   gap: var(--neu-space-2);
+  align-items: center;
 }
 
 .neu-date-input__picker {
-  min-width: 88px;
-  border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-sm);
-  background: var(--neu-surface);
-  color: var(--neu-text);
-  padding: var(--neu-space-1) var(--neu-space-2);
-  font: inherit;
+  display: block;
+  min-width: 0;
+}
+
+.neu-date-input__picker--month {
+  width: 7.5rem;
+}
+
+.neu-date-input__picker--year {
+  width: 5.5rem;
 }
 
 .neu-date-input__cal-footer {

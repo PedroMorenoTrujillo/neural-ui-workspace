@@ -14,19 +14,10 @@
   scrollbar-width: thin;
 }
 
-.neu-pagination__size select {
-  min-height: 36px;
-  border: 1.5px solid var(--neu-border);
-  border-radius: var(--neu-radius);
-  background: var(--neu-surface);
-  color: var(--neu-text);
-  padding-inline: 0.625rem 1.75rem;
-  font: inherit;
-}
-
-.neu-pagination__size select:focus-visible {
-  outline: 2px solid var(--neu-primary);
-  outline-offset: 2px;
+.neu-pagination__size {
+  display: block;
+  flex: 0 0 4.5rem;
+  inline-size: 4.5rem;
 }
 
 .neu-pagination__sr {

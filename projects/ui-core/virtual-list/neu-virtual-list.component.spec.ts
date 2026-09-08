@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { EMPTY } from 'rxjs';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { NeuVirtualListComponent, NeuVirtualListRowComponent } from './neu-virtual-list.component';
 
 @Component({
@@ -196,6 +196,20 @@ describe('NeuVirtualListComponent', () => {
     expect(checkViewportSize).toHaveBeenCalledTimes(1);
   });
 
+  it('remeasures the viewport when its visible geometry changes', async () => {
+    const f = setup(Array.from({ length: 50 }, (_, index) => index));
+    await f.whenStable();
+    const viewport = (f.componentInstance as any)['_viewport'] as CdkVirtualScrollViewport;
+    const checkViewportSize = vi.spyOn(viewport, 'checkViewportSize');
+
+    f.componentRef.setInput('itemSize', 44);
+    f.componentRef.setInput('visibleRows', 5);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(checkViewportSize).toHaveBeenCalled();
+  });
+
   it('trackBy input is used in _trackBy', () => {
     const f = setup([10, 20, 30]);
     f.componentRef.setInput('trackBy', (i: number, item: number) => item);
@@ -344,7 +358,9 @@ describe('NeuVirtualListComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    const rows = f.nativeElement.querySelectorAll('neu-virtual-list-row') as NodeListOf<HTMLElement>;
+    const rows = f.nativeElement.querySelectorAll(
+      'neu-virtual-list-row',
+    ) as NodeListOf<HTMLElement>;
     rows[1].click();
 
     expect(clicks).toEqual([{ item: 'Beta', index: 1 }]);

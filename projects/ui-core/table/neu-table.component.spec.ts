@@ -9309,9 +9309,16 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     await fixture.whenStable();
     const host = fixture.nativeElement as HTMLElement;
 
-    const pageSize = host.querySelector('.neu-table__page-size-select') as HTMLSelectElement;
-    pageSize.value = '10';
-    pageSize.dispatchEvent(new Event('change', { bubbles: true }));
+    const pageSize = host.querySelector(
+      '.neu-table__page-size-select .neu-select__trigger',
+    ) as HTMLElement;
+    pageSize.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const tenRowsOption = Array.from(
+      document.querySelectorAll<HTMLElement>('.neu-select__option'),
+    ).find((option) => option.textContent?.trim() === '10');
+    tenRowsOption?.click();
     fixture.detectChanges();
     await fixture.whenStable();
     expect(fixture.componentInstance.effectivePageSize()).toBe(10);
@@ -9328,9 +9335,16 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     jumpInput.dispatchEvent(new Event('change', { bubbles: true }));
     fixture.detectChanges();
     expect(fixture.componentInstance.currentPage()).toBe(1);
-    const jumpSelect = host.querySelector('.neu-table__jump-select') as HTMLSelectElement;
-    jumpSelect.value = '2';
-    jumpSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    const jumpSelect = host.querySelector(
+      '.neu-table__jump-select .neu-select__trigger',
+    ) as HTMLElement;
+    jumpSelect.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const secondPageOption = Array.from(
+      document.querySelectorAll<HTMLElement>('.neu-select__option'),
+    ).find((option) => option.textContent?.trim() === '2');
+    secondPageOption?.click();
     fixture.detectChanges();
 
     (host.querySelector('.neu-table__radio') as HTMLInputElement).dispatchEvent(
@@ -9348,7 +9362,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(fixture.componentInstance.selectedRows()).toHaveLength(1);
   });
 
-  it('keeps the native page-size selector synchronized with the effective page size', async () => {
+  it('keeps the Neural page-size selector synchronized with the effective page size', async () => {
     const fixture = TestBed.createComponent(NeuTableComponent);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', MANY_ROWS);
@@ -9358,9 +9372,9 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     await fixture.whenStable();
 
     const selector = fixture.nativeElement.querySelector(
-      '.neu-table__page-size-select',
-    ) as HTMLSelectElement;
-    expect(selector.value).toBe('10');
+      '.neu-table__page-size-select .neu-select__value',
+    ) as HTMLElement;
+    expect(selector.textContent?.trim()).toBe('10');
     expect(
       fixture.nativeElement.querySelectorAll('.neu-table__row').length,
     ).toBe(10);

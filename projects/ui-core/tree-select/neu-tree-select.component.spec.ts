@@ -566,6 +566,30 @@ describe('NeuTreeSelectComponent', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  it('matches the overlay panel width to the visible trigger', async () => {
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-tree-select__trigger',
+    ) as HTMLButtonElement;
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      width: 360,
+      height: 48,
+      top: 0,
+      right: 360,
+      bottom: 48,
+      left: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+
+    fixture.componentInstance.toggle();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const overlayPane = document.querySelector('.cdk-overlay-pane') as HTMLElement;
+    expect(overlayPane.style.width).toBe('360px');
+  });
+
   it('hands ArrowDown and ArrowUp from search to the first and last eligible treeitems', async () => {
     const component = fixture.componentInstance;
     component.toggle();

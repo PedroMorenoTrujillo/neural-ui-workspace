@@ -1,5 +1,3 @@
-@use '../styles/text-overflow' as text;
-
 .neu-data-view {
   display: block;
   color: var(--neu-text, #111827);
@@ -14,19 +12,14 @@
   margin-bottom: 1rem;
 }
 
-.neu-data-view__search input {
-  @include text.ellipsis;
-  min-height: 2.25rem;
-  border: 1px solid var(--neu-border, #d1d5db);
-  border-radius: 0.5rem;
-  background: var(--neu-surface, #fff);
-  color: inherit;
-  padding: 0 0.75rem;
+.neu-data-view__search {
+  display: block;
+  min-width: min(100%, 15rem);
+}
 
-  &:focus-visible {
-    outline: 2px solid var(--neu-primary, #2563eb);
-    outline-offset: 2px;
-  }
+.neu-data-view__search .neu-input-host {
+  display: block;
+  width: 100%;
 }
 
 .neu-data-view__sort {
@@ -117,7 +110,7 @@ html[data-theme='dark'] {
 
 @media (max-width: 480px) {
   .neu-data-view__search,
-  .neu-data-view__search input,
+  .neu-data-view__search .neu-input-host,
   .neu-data-view__sort {
     width: 100%;
     min-width: 0;

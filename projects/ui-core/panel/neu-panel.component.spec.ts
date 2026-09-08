@@ -148,6 +148,11 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
         .querySelector('.neu-scroll-area__viewport')
         .getAttribute('aria-label'),
     ).toBe('Activity');
+    expect(
+      getComputedStyle(
+        enhancedFixture.nativeElement.querySelector('.neu-scroll-area__viewport'),
+      ).scrollbarWidth,
+    ).toBe('none');
   });
 
   it('exposes enhanced track variants without changing native scrolling', async () => {

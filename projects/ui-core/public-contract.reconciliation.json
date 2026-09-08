@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1484,
-    "bindingDelta": 317,
+    "declarationBindings": 1493,
+    "bindingDelta": 326,
     "mapped": 932,
     "aliasCorrections": 4,
     "missingOldEntries": 229,
-    "newlyDiscovered": 546,
+    "newlyDiscovered": 555,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 407,
+      "declaration-or-selector-was-not-recorded": 415,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 130
+      "multiline-annotated-or-compound-declaration-was-missed": 131
     }
   },
   "mappings": [
@@ -4318,6 +4318,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./data-view#NeuDataViewComponent.input:modeLabels",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./data-view#NeuDataViewComponent.input:modes",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4518,6 +4522,14 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./gallery#NeuGalleryComponent.input:flipHorizontalLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:flipVerticalLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./gallery#NeuGalleryComponent.input:imageLoading",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4550,6 +4562,18 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./gallery#NeuGalleryComponent.input:resetLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:rotateLeftLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:rotateRightLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./gallery#NeuGalleryComponent.input:showItemNavigators",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4567,6 +4591,14 @@
     },
     {
       "id": "./gallery#NeuGalleryComponent.input:toolbarLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:zoomInLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:zoomOutLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4807,6 +4839,10 @@
     },
     {
       "id": "./input#NeuInputComponent.output:valueChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./kanban#NeuKanbanComponent.input:moveButtonLabel",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {

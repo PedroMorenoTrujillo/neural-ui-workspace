@@ -127,6 +127,7 @@ describe('NeuAlertComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-alert__title').textContent.trim()).toBe('Atención');
+    expect(f.nativeElement.classList).toContain('neu-alert--with-title');
   });
 
   it('should not render title element when empty', async () => {
@@ -135,6 +136,7 @@ describe('NeuAlertComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-alert__title')).toBeNull();
+    expect(f.nativeElement.classList).not.toContain('neu-alert--with-title');
   });
 
   it('liveRegion returns assertive for error type', async () => {

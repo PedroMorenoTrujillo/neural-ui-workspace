@@ -1,5 +1,3 @@
-@use '../styles/text-overflow' as text;
-
 .neu-tree {
   display: flex;
   flex-direction: column;
@@ -53,44 +51,9 @@
   border-radius: 50%;
 }
 
-.neu-tree__search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.neu-tree__search-icon {
-  position: absolute;
-  inset-inline-start: 0.875rem;
-  width: 0.9375rem;
-  height: 0.9375rem;
-  color: var(--neu-text-muted);
-  pointer-events: none;
-}
-
 .neu-tree__search-input {
-  @include text.ellipsis;
+  display: block;
   width: 100%;
-  min-height: 2.625rem;
-  border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-lg, 14px);
-  background: var(--neu-surface);
-  color: var(--neu-text);
-  padding: 0.6875rem 0.875rem 0.6875rem 2.4rem;
-  outline: none;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background-color 160ms ease;
-
-  &::placeholder {
-    color: var(--neu-text-muted);
-  }
-
-  &:focus {
-    border-color: color-mix(in srgb, var(--neu-primary) 62%, var(--neu-border));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--neu-primary) 16%, transparent);
-  }
 }
 
 .neu-tree__list {
@@ -149,7 +112,10 @@
   flex: 0 0 auto;
   width: 1.75rem;
   height: 1.75rem;
-  margin-top: 0.4rem;
+  // Keep the disclosure control centred on the first text line. The row may
+  // grow when a description is present, so centring against the whole row
+  // would make the chevron drift downwards.
+  margin-top: 0.25rem;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -189,7 +155,9 @@
 
 .neu-tree__checkbox {
   flex: 0 0 auto;
-  margin: 0.8rem 0 0;
+  // NeuCheckbox has a 24px internal hit area. This offset aligns its visual
+  // box with the first line and with the disclosure control above.
+  margin: 0.35rem 0 0;
 
   .neu-checkbox {
     gap: 0;
@@ -236,15 +204,18 @@
   padding: 0 0.45rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--neu-primary) 12%, transparent);
-  color: var(--neu-primary);
+  color: var(--neu-primary-dark, #005fcc);
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
+[data-theme='dark'] .neu-tree__badge {
+  color: var(--neu-primary-light, #339dff);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .neu-tree__search-input,
   .neu-tree__row,
   .neu-tree__toggle,
   .neu-tree__toggle svg {

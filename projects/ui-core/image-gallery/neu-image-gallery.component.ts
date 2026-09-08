@@ -89,16 +89,18 @@ import { NeuImageViewerDirective, type NeuImageViewerItem } from '@neural-ui/cor
             />
           }
 
-          <div class="neu-image-gallery__meta">
-            @if (showCounter()) {
-              <span class="neu-image-gallery__counter">
-                {{ activeIndex() + 1 }} / {{ items().length }}
-              </span>
-            }
-            @if (currentItem().caption) {
-              <span class="neu-image-gallery__caption">{{ currentItem().caption }}</span>
-            }
-          </div>
+          @if (showCounter() || currentItem().caption) {
+            <div class="neu-image-gallery__meta">
+              @if (showCounter()) {
+                <span class="neu-image-gallery__counter">
+                  {{ activeIndex() + 1 }} / {{ items().length }}
+                </span>
+              }
+              @if (currentItem().caption) {
+                <span class="neu-image-gallery__caption">{{ currentItem().caption }}</span>
+              }
+            </div>
+          }
         </div>
       </div>
     }

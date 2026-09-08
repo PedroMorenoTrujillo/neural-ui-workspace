@@ -118,6 +118,7 @@ export class NeuAlertComponent {
     'neu-alert--outline': this.outline(),
     'neu-alert--closable': this.closable(),
     'neu-alert--with-icon': this.showIcon(),
+    'neu-alert--with-title': Boolean(this.title()),
     'neu-alert--dismissed': this._dismissed(),
   }));
 

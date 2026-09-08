@@ -181,13 +181,13 @@
 .neu-nc__item-msg {
   margin: 0 0 4px;
   font-size: 0.8125rem;
-  color: var(--neu-text-secondary, #4b5563);
+  color: color-mix(in srgb, var(--neu-text, #0f172a) 78%, var(--neu-surface, #fff));
   line-height: 1.4;
 }
 
 .neu-nc__item-time {
   font-size: 0.6875rem;
-  color: var(--neu-text-secondary, #9ca3af);
+  color: color-mix(in srgb, var(--neu-text, #0f172a) 78%, var(--neu-surface, #fff));
 }
 
 .neu-nc__item-close {

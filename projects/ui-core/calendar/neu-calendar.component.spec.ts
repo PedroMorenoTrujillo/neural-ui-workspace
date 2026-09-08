@@ -245,6 +245,22 @@ describe('NeuCalendarComponent', () => {
     expect(events).toEqual(['a']);
   });
 
+  it('should move the visible agenda to the date of the clicked event', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+
+    const launchEvent = fixture.componentInstance.normalizedEvents().find(
+      (event) => event.id === 'c',
+    );
+    fixture.componentInstance.onEventClick(
+      new MouseEvent('click'),
+      launchEvent!,
+    );
+
+    expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-16');
+    expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual(['c']);
+  });
+
   it('formatEventMeta should prefer meta, then all-day, then time', async () => {
     const fixture = setup();
     await fixture.whenStable();
@@ -463,6 +479,23 @@ describe('NeuCalendarComponent', () => {
       .monthDays()
       .find((cell) => localDayKey(cell.date) === '2026-05-14');
     expect(fixture.componentInstance.monthVisibleEvents(day?.events ?? []).length).toBe(2);
+  });
+
+  it('should open the complete day agenda from the month more button', async () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('selectedDate', '2026-05-16');
+    fixture.componentRef.setInput('maxVisibleEvents', 1);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const moreButton = fixture.nativeElement.querySelector(
+      '.neu-calendar__month-grid .neu-calendar__more',
+    ) as HTMLButtonElement;
+    moreButton.click();
+    fixture.detectChanges();
+
+    expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-14');
+    expect(fixture.componentInstance.selectedDayEvents()).toHaveLength(2);
   });
 
   it('should select a date from the rendered month day button', async () => {

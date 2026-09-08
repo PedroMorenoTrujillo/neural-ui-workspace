@@ -72,8 +72,10 @@
 .neu-tree-select__panel {
   display: grid;
   gap: 0.25rem;
-  min-width: 16rem;
+  width: 100%;
+  min-width: 0;
   max-height: 20rem;
+  box-sizing: border-box;
   overflow: auto;
   border: 1px solid var(--neu-border, #d1d5db);
   border-radius: 0.75rem;

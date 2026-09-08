@@ -5,6 +5,7 @@ import {
   OnDestroy,
   ViewEncapsulation,
   computed,
+  effect,
   forwardRef,
   inject,
   input,
@@ -13,9 +14,15 @@ import {
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  ControlValueAccessor,
+  FormControl,
+  NG_VALUE_ACCESSOR,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
+import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select';
 
 // ── Exported types ───────────────────────────────────────────────────────────
 
@@ -92,7 +99,7 @@ function cloneDate(d: Date): Date {
  */
 @Component({
   selector: 'neu-date-input',
-  imports: [OverlayModule],
+  imports: [OverlayModule, ReactiveFormsModule, NeuSelectComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -158,7 +165,7 @@ function cloneDate(d: Date): Date {
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
         (backdropClick)="close()"
         (detach)="onPanelDetached()"
-      (attach)="onPanelAttached()"
+        (attach)="onPanelAttached()"
       >
         <div
           class="neu-drp__panel"
@@ -337,7 +344,7 @@ function cloneDate(d: Date): Date {
           [cdkConnectedOverlayViewportMargin]="_viewportMargin"
           (backdropClick)="close()"
           (detach)="onPanelDetached()"
-      (attach)="onPanelAttached()"
+          (attach)="onPanelAttached()"
         >
           <div
             class="neu-date-input__panel"
@@ -368,26 +375,26 @@ function cloneDate(d: Date): Date {
                   </button>
                   @if (showMonthYearPicker()) {
                     <span class="neu-date-input__cal-title neu-date-input__cal-title--pickers">
-                      <select
-                        class="neu-date-input__picker"
-                        [value]="_viewMonth()"
-                        [attr.aria-label]="_texts().chooseMonth"
-                        (change)="setViewMonth($any($event.target).value)"
-                      >
-                        @for (month of monthOptions(); track month.value) {
-                          <option [value]="month.value">{{ month.label }}</option>
-                        }
-                      </select>
-                      <select
-                        class="neu-date-input__picker"
-                        [value]="_viewYear()"
-                        [attr.aria-label]="_texts().chooseYear"
-                        (change)="setViewYear($any($event.target).value)"
-                      >
-                        @for (year of yearOptions(); track year) {
-                          <option [value]="year">{{ year }}</option>
-                        }
-                      </select>
+                      <neu-select
+                        class="neu-date-input__picker neu-date-input__picker--month"
+                        size="sm"
+                        [floatingLabel]="false"
+                        [ariaLabel]="_texts().chooseMonth"
+                        [options]="monthOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [formControl]="monthPickerControl"
+                      />
+                      <neu-select
+                        class="neu-date-input__picker neu-date-input__picker--year"
+                        size="sm"
+                        [floatingLabel]="false"
+                        [ariaLabel]="_texts().chooseYear"
+                        [options]="yearSelectOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [formControl]="yearPickerControl"
+                      />
                     </span>
                   } @else {
                     <span class="neu-date-input__cal-title">{{ monthLabel() }}</span>
@@ -650,7 +657,9 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
 
   private visibleCalendarInterval(): NeuDateViewChangeEvent | null {
     if (this.type() === 'time') return null;
-    const days = this._isRange() ? [...this._leftDays(), ...this._rightDays()] : this.calendarDays();
+    const days = this._isRange()
+      ? [...this._leftDays(), ...this._rightDays()]
+      : this.calendarDays();
     if (!days.length) return null;
     const start = new Date(days[0].date);
     const last = days[days.length - 1].date;
@@ -661,11 +670,14 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   private emitViewNavigation(previous: NeuDateViewChangeEvent | null): void {
     if (this.eventDestroyRef.destroyed || !this.isOpen()) return;
     const next = this.visibleCalendarInterval();
-    if (next && (next.start.getTime() !== previous?.start.getTime() || next.end.getTime() !== previous?.end.getTime())) {
+    if (
+      next &&
+      (next.start.getTime() !== previous?.start.getTime() ||
+        next.end.getTime() !== previous?.end.getTime())
+    ) {
       this.viewChange.emit(next);
     }
   }
-
 
   // ── Estado interno / Internal state ──────────────────────────────
   protected readonly _id = inject(NeuIdGenerator).getId('neu-date-input-');
@@ -833,6 +845,30 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
   );
 
   constructor() {
+    const monthPickerSubscription = this.monthPickerControl.valueChanges.subscribe((value) =>
+      this.setViewMonth(value),
+    );
+    const yearPickerSubscription = this.yearPickerControl.valueChanges.subscribe((value) =>
+      this.setViewYear(value),
+    );
+    this.eventDestroyRef.onDestroy(() => {
+      monthPickerSubscription.unsubscribe();
+      yearPickerSubscription.unsubscribe();
+    });
+
+    effect(() => {
+      const month = this._viewMonth();
+      if (this.monthPickerControl.value !== month) {
+        this.monthPickerControl.setValue(month, { emitEvent: false });
+      }
+    });
+    effect(() => {
+      const year = this._viewYear();
+      if (this.yearPickerControl.value !== year) {
+        this.yearPickerControl.setValue(year, { emitEvent: false });
+      }
+    });
+
     if (typeof MutationObserver !== 'undefined') {
       this._langObserver = new MutationObserver(() => {
         this._documentLang.set(this.#normalizedLocale(this.doc.documentElement.lang) || 'es');
@@ -1095,6 +1131,13 @@ export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
     const start = center - span;
     return Array.from({ length: span * 2 + 1 }, (_, index) => start + index);
   });
+
+  readonly yearSelectOptions = computed<NeuSelectOption<number>[]>(() =>
+    this.yearOptions().map((year) => ({ label: String(year), value: year })),
+  );
+
+  protected readonly monthPickerControl = new FormControl(this._viewMonth(), { nonNullable: true });
+  protected readonly yearPickerControl = new FormControl(this._viewYear(), { nonNullable: true });
 
   readonly calendarDays = computed((): CalendarDay[] => {
     const year = this._viewYear();

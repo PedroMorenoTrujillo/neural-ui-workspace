@@ -350,6 +350,29 @@ describe('NeuCommandPaletteComponent', () => {
     expect(f.nativeElement.querySelector('.custom-command')?.textContent?.trim()).toBe('0:custom');
   });
 
+  it('uses the consumer command template instead of duplicating the default row', async () => {
+    const f = TestBed.createComponent(CommandPaletteTemplateHostComponent);
+    const svc = mkSvc();
+    svc.register({
+      id: 'custom',
+      label: 'Default label',
+      group: 'Default group',
+      shortcut: 'Ctrl+D',
+      icon: '★',
+      action: () => {},
+    });
+    svc.open();
+    f.detectChanges();
+    await f.whenStable();
+
+    const item = f.nativeElement.querySelector('.neu-cmd__item') as HTMLElement;
+    expect(item.textContent?.trim()).toBe('0:custom');
+    expect(item.querySelector('.neu-cmd__item-label')).toBeNull();
+    expect(item.querySelector('.neu-cmd__item-icon')).toBeNull();
+    expect(item.querySelector('.neu-cmd__item-group')).toBeNull();
+    expect(item.querySelector('.neu-cmd__item-shortcut')).toBeNull();
+  });
+
   it('Enter should do nothing when there is no active command', () => {
     const f = TestBed.createComponent(NeuCommandPaletteComponent);
     f.detectChanges();

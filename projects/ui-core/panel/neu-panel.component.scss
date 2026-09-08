@@ -129,9 +129,16 @@
 }
 
 .neu-scroll-area__viewport--enhanced {
-  /* Keep native bars as a reliable fallback; overlay tracks add a themeable affordance. */
+  /* Native scrolling remains the source of truth; only its duplicated visual bars are hidden. */
   padding-inline-end: calc(1rem + 10px);
   padding-block-end: calc(1rem + 10px);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.neu-scroll-area__viewport--enhanced::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .neu-scroll-area__bar {

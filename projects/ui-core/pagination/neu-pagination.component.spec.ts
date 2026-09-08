@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { NeuSelectComponent } from '@neural-ui/core/select';
 import { NeuPaginationComponent } from './neu-pagination.component';
 
 @Component({
@@ -183,7 +185,7 @@ describe('NeuPaginationComponent', () => {
     expect(pages).toEqual([]);
   });
 
-  it('renders an optional native page-size selector and emits deterministic state proposals once', () => {
+  it('renders an optional Neural page-size selector and emits deterministic state proposals once', () => {
     const df = TestBed.createComponent(NeuPaginationComponent);
     df.componentRef.setInput('total', 95);
     df.componentRef.setInput('page', 5);
@@ -195,12 +197,14 @@ describe('NeuPaginationComponent', () => {
     const pages: number[] = [];
     df.componentInstance.pageSizeChange.subscribe((value) => sizes.push(value));
     df.componentInstance.pageChange.subscribe((value) => pages.push(value));
-    const select = df.nativeElement.querySelector('select') as HTMLSelectElement;
-    expect(select.getAttribute('aria-label')).toBe('Rows per page');
-    expect(select.querySelectorAll('option')).toHaveLength(2);
+    expect(df.nativeElement.querySelector('select')).toBeNull();
+    const selectDebug = df.debugElement.query(By.directive(NeuSelectComponent));
+    const select = selectDebug.componentInstance as NeuSelectComponent;
+    const trigger = selectDebug.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    expect(trigger.getAttribute('aria-label')).toBe('Rows per page');
+    expect(select.options()).toHaveLength(2);
 
-    select.value = '20';
-    select.dispatchEvent(new Event('change'));
+    select.selectOption(select.options()[1]);
     expect(sizes).toEqual([20]);
     expect(pages).toEqual([3]);
     df.componentInstance.changePageSize(10);

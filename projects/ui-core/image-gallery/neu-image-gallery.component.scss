@@ -1,9 +1,15 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
 .neu-image-gallery {
   display: grid;
   gap: var(--neu-space-3);
+  min-inline-size: 0;
 
   &--left {
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: 4.5rem minmax(0, 1fr);
     align-items: start;
   }
 }
@@ -14,7 +20,9 @@
   overflow: hidden;
   background: color-mix(in srgb, var(--neu-surface-2) 82%, black 18%);
   border: 1px solid var(--neu-border);
-  min-height: 280px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  aspect-ratio: 4 / 3;
 }
 
 .neu-image-gallery__viewer-trigger {
@@ -49,14 +57,19 @@
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--neu-surface) 70%, black 30%);
-  background: color-mix(in srgb, var(--neu-surface) 74%, black 26%);
-  color: var(--neu-text);
+  border: 1px solid color-mix(in srgb, white 32%, transparent);
+  background: color-mix(in srgb, black 58%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, black 24%, transparent);
+  color: white;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 1;
+}
+
+.neu-image-gallery__nav:hover:not(:disabled) {
+  background: color-mix(in srgb, black 72%, transparent);
 }
 
 .neu-image-gallery__nav:disabled {
@@ -74,23 +87,45 @@
 
 .neu-image-gallery__meta {
   position: absolute;
-  inset-inline-end: var(--neu-space-3);
+  inset-inline: var(--neu-space-3);
   bottom: var(--neu-space-3);
   display: flex;
-  gap: var(--neu-space-2);
   align-items: center;
+  justify-self: end;
+  inline-size: fit-content;
+  max-inline-size: calc(100% - (2 * var(--neu-space-3)));
+  min-block-size: 2rem;
+  padding-inline: var(--neu-space-3);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, white 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, black 68%, transparent);
+  box-shadow: 0 3px 12px color-mix(in srgb, black 20%, transparent);
+  color: white;
 }
 
 .neu-image-gallery__counter,
 .neu-image-gallery__caption {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0 var(--neu-space-3);
-  border-radius: 999px;
-  background: color-mix(in srgb, black 62%, var(--neu-surface) 38%);
-  color: white;
+  min-inline-size: 0;
   font-size: var(--neu-text-xs);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.neu-image-gallery__counter {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.neu-image-gallery__counter:not(:last-child) {
+  margin-inline-end: var(--neu-space-2);
+  padding-inline-end: var(--neu-space-2);
+  border-inline-end: 1px solid color-mix(in srgb, white 28%, transparent);
+}
+
+.neu-image-gallery__caption {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .neu-image-gallery__thumbs {

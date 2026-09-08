@@ -1,11 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ViewEncapsulation,
   computed,
+  effect,
+  inject,
   input,
   output,
 } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select';
 
 /**
  * NeuralUI Pagination Component
@@ -18,24 +23,22 @@ import {
  */
 @Component({
   selector: 'neu-pagination',
-  imports: [],
+  imports: [ReactiveFormsModule, NeuSelectComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav class="neu-pagination" aria-label="Paginación">
       @if (normalizedPageSizeOptions().length) {
-        <label class="neu-pagination__size">
-          <span class="neu-pagination__sr">{{ pageSizeAriaLabel() }}</span>
-          <select
-            [attr.aria-label]="pageSizeAriaLabel()"
-            [value]="pageSize()"
-            (change)="changePageSize($any($event.target).value)"
-          >
-            @for (size of normalizedPageSizeOptions(); track size) {
-              <option [value]="size">{{ size }}</option>
-            }
-          </select>
-        </label>
+        <neu-select
+          class="neu-pagination__size"
+          size="sm"
+          [floatingLabel]="false"
+          [ariaLabel]="pageSizeAriaLabel()"
+          [options]="pageSizeSelectOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [formControl]="pageSizeControl"
+        />
       }
       <!-- Anterior -->
       <button
@@ -105,6 +108,8 @@ import {
   styleUrl: './neu-pagination.component.scss',
 })
 export class NeuPaginationComponent {
+  private readonly destroyRef = inject(DestroyRef);
+
   /** Página actual (1-indexed) / Current page (1-indexed) */
   page = input<number>(1);
 
@@ -134,6 +139,29 @@ export class NeuPaginationComponent {
         .filter((value) => Number.isFinite(value) && value > 0),
     ),
   ]);
+
+  readonly pageSizeSelectOptions = computed<NeuSelectOption<number>[]>(() =>
+    this.normalizedPageSizeOptions().map((size) => ({
+      label: String(size),
+      value: size,
+    })),
+  );
+
+  protected readonly pageSizeControl = new FormControl(10, { nonNullable: true });
+
+  constructor() {
+    const pageSizeSubscription = this.pageSizeControl.valueChanges.subscribe((value) =>
+      this.changePageSize(value),
+    );
+    this.destroyRef.onDestroy(() => pageSizeSubscription.unsubscribe());
+
+    effect(() => {
+      const pageSize = this.pageSize();
+      if (this.pageSizeControl.value !== pageSize) {
+        this.pageSizeControl.setValue(pageSize, { emitEvent: false });
+      }
+    });
+  }
 
   readonly totalPages = computed(() => {
     const size = Number.isFinite(this.pageSize()) ? Math.max(1, this.pageSize()) : 1;
@@ -170,7 +198,7 @@ export class NeuPaginationComponent {
     }
   }
 
-  changePageSize(value: string | number): void {
+  changePageSize(value: string | number | null): void {
     const nextSize = Math.trunc(Number(value));
     if (!Number.isFinite(nextSize) || nextSize <= 0 || nextSize === this.pageSize()) return;
     const first = Math.max(0, (Math.max(1, this.page()) - 1) * Math.max(1, this.pageSize()));

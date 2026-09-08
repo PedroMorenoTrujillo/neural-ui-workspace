@@ -160,38 +160,103 @@ export class NeuGalleryCaptionDirective {
           (pointerup)="onPointerUp($event)"
         >
           <div class="neu-gallery__toolbar" role="toolbar" [attr.aria-label]="toolbarLabel()">
-            <span>{{ activeIndex() + 1 }} / {{ items().length }}</span>
-            <button
-              type="button"
-              (click)="zoom(-0.25)"
-              [disabled]="zoomLevel() <= 1"
-              aria-label="Zoom out"
-            >
-              −
-            </button>
-            <button
-              type="button"
-              (click)="zoom(0.25)"
-              [disabled]="zoomLevel() >= maxZoom()"
-              aria-label="Zoom in"
-            >
-              +
-            </button>
-            <button type="button" (click)="rotate(-90)" aria-label="Rotate left">↶</button>
-            <button type="button" (click)="rotate(90)" aria-label="Rotate right">↷</button>
-            <button type="button" (click)="flip('x')" aria-label="Flip horizontally">↔</button>
-            <button type="button" (click)="flip('y')" aria-label="Flip vertically">↕</button>
-            <button type="button" (click)="resetTransform()" aria-label="Reset image">⟳</button>
-            <a
-              class="neu-gallery__download"
-              [href]="activeItem().src"
-              [attr.download]="downloadName()"
-              [attr.aria-label]="downloadLabel()"
-              >⇩</a
-            >
-            <button type="button" (click)="closePreview()" [attr.aria-label]="closeLabel()">
-              ×
-            </button>
+            <span class="neu-gallery__counter">
+              {{ activeIndex() + 1 }} / {{ items().length }}
+            </span>
+            <div class="neu-gallery__toolbar-actions">
+              <button
+                type="button"
+                class="neu-gallery__tool"
+                (click)="zoom(-0.25)"
+                [disabled]="zoomLevel() <= 1"
+                [attr.aria-label]="zoomOutLabel()"
+                [attr.title]="zoomOutLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">−</span>
+                <span class="neu-gallery__tool-label">{{ zoomOutLabel() }}</span>
+              </button>
+              <button
+                type="button"
+                class="neu-gallery__tool"
+                (click)="zoom(0.25)"
+                [disabled]="zoomLevel() >= maxZoom()"
+                [attr.aria-label]="zoomInLabel()"
+                [attr.title]="zoomInLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">+</span>
+                <span class="neu-gallery__tool-label">{{ zoomInLabel() }}</span>
+              </button>
+              <button
+                type="button"
+                class="neu-gallery__tool"
+                (click)="rotate(-90)"
+                [attr.aria-label]="rotateLeftLabel()"
+                [attr.title]="rotateLeftLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">↶</span>
+                <span class="neu-gallery__tool-label">{{ rotateLeftLabel() }}</span>
+              </button>
+              <button
+                type="button"
+                class="neu-gallery__tool"
+                (click)="rotate(90)"
+                [attr.aria-label]="rotateRightLabel()"
+                [attr.title]="rotateRightLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">↷</span>
+                <span class="neu-gallery__tool-label">{{ rotateRightLabel() }}</span>
+              </button>
+              <button
+                type="button"
+                class="neu-gallery__tool"
+                (click)="flip('x')"
+                [attr.aria-label]="flipHorizontalLabel()"
+                [attr.title]="flipHorizontalLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">↔</span>
+                <span class="neu-gallery__tool-label">{{ flipHorizontalLabel() }}</span>
+              </button>
+              <button
+                type="button"
+                class="neu-gallery__tool"
+                (click)="flip('y')"
+                [attr.aria-label]="flipVerticalLabel()"
+                [attr.title]="flipVerticalLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">↕</span>
+                <span class="neu-gallery__tool-label">{{ flipVerticalLabel() }}</span>
+              </button>
+              <button
+                type="button"
+                class="neu-gallery__tool"
+                (click)="resetTransform()"
+                [attr.aria-label]="resetLabel()"
+                [attr.title]="resetLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">⟳</span>
+                <span class="neu-gallery__tool-label">{{ resetLabel() }}</span>
+              </button>
+              <a
+                class="neu-gallery__download neu-gallery__tool"
+                [href]="activeItem().src"
+                [attr.download]="downloadName()"
+                [attr.aria-label]="downloadLabel()"
+                [attr.title]="downloadLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">⇩</span>
+                <span class="neu-gallery__tool-label">{{ downloadLabel() }}</span>
+              </a>
+              <button
+                type="button"
+                class="neu-gallery__tool neu-gallery__tool--close"
+                (click)="closePreview()"
+                [attr.aria-label]="closeLabel()"
+                [attr.title]="closeLabel()"
+              >
+                <span class="neu-gallery__tool-icon" aria-hidden="true">×</span>
+                <span class="neu-gallery__tool-label">{{ closeLabel() }}</span>
+              </button>
+            </div>
           </div>
           <img
             class="neu-gallery__lightbox-image"
@@ -241,6 +306,20 @@ export class NeuGalleryComponent {
   readonly thumbnailLabel = input('Gallery thumbnails');
   readonly previewLabel = input('Image preview');
   readonly toolbarLabel = input('Image controls');
+  /** Visible and accessible label for decreasing image zoom. / Etiqueta visible y accesible para alejar la imagen. */
+  readonly zoomOutLabel = input('Zoom out');
+  /** Visible and accessible label for increasing image zoom. / Etiqueta visible y accesible para acercar la imagen. */
+  readonly zoomInLabel = input('Zoom in');
+  /** Visible and accessible label for counterclockwise rotation. / Etiqueta visible y accesible para girar a la izquierda. */
+  readonly rotateLeftLabel = input('Rotate left');
+  /** Visible and accessible label for clockwise rotation. / Etiqueta visible y accesible para girar a la derecha. */
+  readonly rotateRightLabel = input('Rotate right');
+  /** Visible and accessible label for horizontal flipping. / Etiqueta visible y accesible para voltear horizontalmente. */
+  readonly flipHorizontalLabel = input('Flip horizontally');
+  /** Visible and accessible label for vertical flipping. / Etiqueta visible y accesible para voltear verticalmente. */
+  readonly flipVerticalLabel = input('Flip vertically');
+  /** Visible and accessible label for restoring the original transform. / Etiqueta visible y accesible para restaurar la transformación original. */
+  readonly resetLabel = input('Reset image');
   readonly previousLabel = input('Previous image');
   readonly nextLabel = input('Next image');
   readonly closeLabel = input('Close preview');

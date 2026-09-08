@@ -168,15 +168,17 @@ export class NeuCommandPaletteService {
                   [ngTemplateOutlet]="itemTpl()!.templateRef"
                   [ngTemplateOutletContext]="{ $implicit: cmd, index: i }"
                 />
-              } @else if (cmd.icon) {
-                <span class="neu-cmd__item-icon" aria-hidden="true">{{ cmd.icon }}</span>
-              }
-              <span class="neu-cmd__item-label">{{ cmd.label }}</span>
-              @if (cmd.group) {
-                <span class="neu-cmd__item-group">{{ cmd.group }}</span>
-              }
-              @if (cmd.shortcut) {
-                <kbd class="neu-cmd__item-shortcut">{{ cmd.shortcut }}</kbd>
+              } @else {
+                @if (cmd.icon) {
+                  <span class="neu-cmd__item-icon" aria-hidden="true">{{ cmd.icon }}</span>
+                }
+                <span class="neu-cmd__item-label">{{ cmd.label }}</span>
+                @if (cmd.group) {
+                  <span class="neu-cmd__item-group">{{ cmd.group }}</span>
+                }
+                @if (cmd.shortcut) {
+                  <kbd class="neu-cmd__item-shortcut">{{ cmd.shortcut }}</kbd>
+                }
               }
             </li>
           }

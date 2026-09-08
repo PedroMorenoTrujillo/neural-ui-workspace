@@ -1,6 +1,7 @@
 .neu-calendar {
   display: grid;
   gap: var(--neu-space-4);
+  container-type: inline-size;
   padding: var(--neu-space-4);
   overflow: hidden;
   border-radius: calc(var(--neu-radius-lg) + 4px);
@@ -42,6 +43,29 @@
     .neu-calendar__weekdays,
     .neu-calendar__week-grid {
       min-width: 0;
+    }
+  }
+}
+
+@container (min-width: 1120px) {
+  .neu-calendar--month {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 310px);
+    align-items: start;
+
+    .neu-calendar__header {
+      grid-column: 1 / -1;
+    }
+
+    .neu-calendar__viewport {
+      grid-column: 1;
+    }
+
+    .neu-calendar__agenda {
+      grid-column: 2;
+      position: sticky;
+      top: var(--neu-space-4);
+      max-height: min(680px, calc(100vh - 2 * var(--neu-space-4)));
+      overflow-y: auto;
     }
   }
 }
@@ -229,6 +253,7 @@ html[data-theme='dark'] {
 
 .neu-calendar__day-select:focus-visible,
 .neu-calendar__event:focus-visible,
+.neu-calendar__more:focus-visible,
 .neu-calendar__nav-btn:focus-visible,
 .neu-calendar__today:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--neu-primary) 75%, white 25%);
@@ -413,13 +438,25 @@ html[data-theme='dark'] {
   border: 1px dashed color-mix(in srgb, var(--neu-border) 92%, transparent 8%);
   background: color-mix(in srgb, var(--neu-surface-2) 72%, var(--neu-surface) 28%);
   font-size: 11px;
+  font-family: inherit;
   color: var(--neu-text-muted);
   box-sizing: border-box;
+  cursor: pointer;
+  transition:
+    border-color var(--neu-transition),
+    background var(--neu-transition),
+    color var(--neu-transition);
 }
 
 .neu-calendar__more--summary {
   font-weight: 700;
   letter-spacing: 0.01em;
+}
+
+.neu-calendar__more:hover {
+  border-color: color-mix(in srgb, var(--neu-primary) 42%, var(--neu-border) 58%);
+  background: color-mix(in srgb, var(--neu-primary) 8%, var(--neu-surface) 92%);
+  color: var(--neu-text);
 }
 
 .neu-calendar__agenda {
@@ -474,6 +511,13 @@ html[data-theme='dark'] {
 
 .neu-calendar__agenda-event {
   min-height: 48px;
+}
+
+.neu-calendar__event-description {
+  margin-top: 3px;
+  color: var(--neu-text-muted);
+  font-size: var(--neu-text-xs);
+  line-height: 1.45;
 }
 
 .neu-calendar__agenda-empty {

@@ -17,6 +17,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select';
 
 export type NeuDataViewMode = 'list' | 'grid' | 'table';
@@ -50,7 +51,13 @@ export class NeuDataViewFooterDirective {
 
 @Component({
   selector: 'neu-data-view',
-  imports: [NgTemplateOutlet, ReactiveFormsModule, NeuButtonComponent, NeuSelectComponent],
+  imports: [
+    NgTemplateOutlet,
+    ReactiveFormsModule,
+    NeuButtonComponent,
+    NeuInputComponent,
+    NeuSelectComponent,
+  ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -69,11 +76,12 @@ export class NeuDataViewFooterDirective {
         @if (searchable()) {
           <label class="neu-data-view__search">
             <span class="neu-data-view__sr">{{ searchAriaLabel() }}</span>
-            <input
+            <neu-input
               type="search"
+              size="sm"
+              [floatingLabel]="false"
               [placeholder]="searchPlaceholder()"
-              [value]="query()"
-              (input)="setQuery($any($event.target).value)"
+              [formControl]="_searchControl"
             />
           </label>
         }
@@ -100,7 +108,7 @@ export class NeuDataViewFooterDirective {
                 [attr.aria-pressed]="mode() === item"
                 (click)="setMode(item)"
               >
-                {{ item }}
+                {{ modeLabel(item) }}
               </button>
             }
           </div>
@@ -167,6 +175,7 @@ export class NeuDataViewComponent {
   readonly items = input<unknown[]>([]);
   readonly mode = input<NeuDataViewMode>('list');
   readonly modes = input<NeuDataViewMode[]>(['list', 'grid', 'table']);
+  readonly modeLabels = input<Partial<Record<NeuDataViewMode, string>>>({});
   readonly viewSwitcher = input(true);
   readonly viewAriaLabel = input('View mode');
   readonly searchable = input(true);
@@ -203,6 +212,7 @@ export class NeuDataViewComponent {
   readonly query = signal('');
   readonly page = signal(1);
   readonly sortKey = signal('');
+  protected readonly _searchControl = new FormControl('', { nonNullable: true });
   protected readonly _sortControl = new FormControl<string | null>('');
 
   protected readonly _selectSortOptions = computed<NeuSelectOption[]>(() =>
@@ -263,9 +273,20 @@ export class NeuDataViewComponent {
   });
 
   constructor() {
+    this._searchControl.valueChanges
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((value) => this.setQuery(value));
+
     this._sortControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => this.setSort(value ?? ''));
+
+    effect(() => {
+      const query = this.query();
+      if (this._searchControl.value !== query) {
+        this._searchControl.setValue(query, { emitEvent: false });
+      }
+    });
 
     effect(() => {
       const sortKey = this.sortKey();
@@ -277,6 +298,13 @@ export class NeuDataViewComponent {
 
   setMode(mode: NeuDataViewMode): void {
     this.modeChange.emit(mode);
+  }
+
+  modeLabel(mode: NeuDataViewMode): string {
+    return (
+      this.modeLabels()[mode] ??
+      ({ list: 'List', grid: 'Grid', table: 'Table' } satisfies Record<NeuDataViewMode, string>)[mode]
+    );
   }
 
   setQuery(value: string): void {

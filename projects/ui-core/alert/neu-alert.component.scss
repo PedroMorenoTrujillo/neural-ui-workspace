@@ -1,6 +1,6 @@
 .neu-alert {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   padding: 12px 16px;
   border-radius: var(--neu-radius-md, 8px);
@@ -40,13 +40,21 @@
   &--outline {
     background: transparent;
   }
+
+  &--with-title {
+    align-items: flex-start;
+  }
 }
 
 /* ── Icon ──────────────────────────────────────────────────────── */
 .neu-alert__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   font-size: 1.1em;
-  line-height: 1.5;
+  line-height: 1;
+  block-size: 1.3125rem;
   font-style: normal;
 }
 
@@ -69,7 +77,6 @@
 /* ── Close button ───────────────────────────────────────────────── */
 .neu-alert__close {
   flex-shrink: 0;
-  align-self: flex-start;
   color: inherit;
   opacity: 0.78;
   --neu-button-ghost-hover-bg: var(--neu-alert-dismiss-hover-bg, rgba(0, 0, 0, 0.08));
@@ -81,4 +88,8 @@
   &:focus-visible {
     opacity: 1;
   }
+}
+
+.neu-alert--with-title .neu-alert__close {
+  align-self: flex-start;
 }

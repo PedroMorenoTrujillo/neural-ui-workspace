@@ -59,13 +59,15 @@ describe('NeuKanbanComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.neu-kanban__card').length).toBe(3);
   });
 
-  it('exposes truthful card focus, keyboard instructions, and click move actions', async () => {
+  it('exposes truthful card focus, keyboard instructions, and a visible move trigger per card', async () => {
     const fixture = setup();
     await fixture.whenStable();
 
     const card = fixture.nativeElement.querySelector('.neu-kanban__card') as HTMLElement;
     const instructions = fixture.nativeElement.querySelector('.neu-kanban__sr-only');
-    const actions = fixture.nativeElement.querySelector('.neu-kanban__move-actions') as HTMLElement;
+    const triggers = fixture.nativeElement.querySelectorAll(
+      '.neu-kanban__move-trigger',
+    ) as NodeListOf<HTMLButtonElement>;
 
     expect(card.tabIndex).toBe(0);
     expect(card.getAttribute('role')).toBe('button');
@@ -74,7 +76,52 @@ describe('NeuKanbanComponent', () => {
     );
     expect(card.getAttribute('aria-describedby')).toBe(instructions.id);
     expect(card.getAttribute('aria-keyshortcuts')).toContain('Escape');
+    expect(card.getAttribute('aria-expanded')).toBe('false');
+    expect(triggers).toHaveLength(3);
+    expect(triggers[0].textContent).toContain('Move');
+    expect(fixture.nativeElement.querySelector('.neu-kanban__move-actions')).toBeFalsy();
+
+    card.click();
+    fixture.detectChanges();
+
+    const actions = fixture.nativeElement.querySelector('.neu-kanban__move-actions') as HTMLElement;
+    expect(card.getAttribute('aria-expanded')).toBe('true');
     expect(actions.querySelectorAll('button')).toHaveLength(4);
+    expect(card.getAttribute('aria-controls')).toBe(actions.id);
+  });
+
+  it('opens one move menu at a time and closes it outside or with Escape', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const triggers = fixture.nativeElement.querySelectorAll(
+      '.neu-kanban__move-trigger',
+    ) as NodeListOf<HTMLButtonElement>;
+
+    triggers[0].click();
+    fixture.detectChanges();
+    expect(triggers[0].getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.querySelectorAll('.neu-kanban__move-actions')).toHaveLength(1);
+
+    triggers[1].click();
+    fixture.detectChanges();
+    expect(triggers[0].getAttribute('aria-expanded')).toBe('false');
+    expect(triggers[1].getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.querySelectorAll('.neu-kanban__move-actions')).toHaveLength(1);
+
+    const action = fixture.nativeElement.querySelector(
+      '.neu-kanban__move-actions button:not(:disabled)',
+    ) as HTMLButtonElement;
+    action.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.neu-kanban__move-actions')).toBeFalsy();
+    expect(document.activeElement).toBe(triggers[1]);
+
+    triggers[0].click();
+    fixture.detectChanges();
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-kanban__move-actions')).toBeFalsy();
   });
 
   it('should show counts and wip limit by default', async () => {
@@ -310,8 +357,15 @@ describe('NeuKanbanComponent', () => {
     await fixture.whenStable();
     const drops = vi.fn();
     fixture.componentInstance.cardDrop.subscribe(drops);
-    const firstCardActions = fixture.nativeElement.querySelectorAll(
-      '.neu-kanban__card-shell:first-child .neu-kanban__move-actions button',
+    const firstCardShell = fixture.nativeElement.querySelector(
+      '.neu-kanban__card-shell:first-child',
+    ) as HTMLElement;
+    const trigger = firstCardShell.querySelector('.neu-kanban__move-trigger') as HTMLButtonElement;
+
+    trigger.click();
+    fixture.detectChanges();
+    const firstCardActions = firstCardShell.querySelectorAll(
+      '.neu-kanban__move-actions button',
     ) as NodeListOf<HTMLButtonElement>;
 
     firstCardActions[3].click();
@@ -319,6 +373,7 @@ describe('NeuKanbanComponent', () => {
 
     expect(drops).toHaveBeenCalledTimes(1);
     expect(fixture.componentInstance['_columns']()[1].cards[0].id).toBe('card-a');
+    expect(fixture.nativeElement.querySelector('.neu-kanban__move-actions')).toBeFalsy();
   });
 
   it.each([
@@ -347,6 +402,9 @@ describe('NeuKanbanComponent', () => {
         '[data-neu-kanban-card-id="moving"]',
       ) as HTMLElement;
       const shell = movingCard.parentElement!;
+      const trigger = shell.querySelector('.neu-kanban__move-trigger') as HTMLButtonElement;
+      trigger.click();
+      fixture.detectChanges();
       const button = shell.querySelectorAll<HTMLButtonElement>('.neu-kanban__move-actions button')[
         actionIndex
       ];

@@ -1770,7 +1770,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly hostClasses: _angular_core.Signal<{\n    [x: string]: boolean;\n    'neu-alert': boolean;\n    'neu-alert--outline': boolean;\n    'neu-alert--closable': boolean;\n    'neu-alert--with-icon': boolean;\n    'neu-alert--dismissed': boolean;\n}>;"
+          "signature": "readonly hostClasses: _angular_core.Signal<{\n    [x: string]: boolean;\n    'neu-alert': boolean;\n    'neu-alert--outline': boolean;\n    'neu-alert--closable': boolean;\n    'neu-alert--with-icon': boolean;\n    'neu-alert--with-title': boolean;\n    'neu-alert--dismissed': boolean;\n}>;"
         },
         {
           "id": "./alert#NeuAlertComponent.property:liveRegion",
@@ -9316,6 +9316,16 @@
           "signature": "readonly mode: _angular_core.InputSignal<NeuDataViewMode>;"
         },
         {
+          "id": "./data-view#NeuDataViewComponent.input:modeLabels",
+          "name": "modeLabels",
+          "kind": "input",
+          "publicName": "modeLabels",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly modeLabels: _angular_core.InputSignal<Partial<Record<NeuDataViewMode, string>>>;"
+        },
+        {
           "id": "./data-view#NeuDataViewComponent.input:modes",
           "name": "modes",
           "kind": "input",
@@ -9484,6 +9494,14 @@
           "signature": "displayItem(item: unknown): string;"
         },
         {
+          "id": "./data-view#NeuDataViewComponent.method:modeLabel",
+          "name": "modeLabel",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "modeLabel(mode: NeuDataViewMode): string;"
+        },
+        {
           "id": "./data-view#NeuDataViewComponent.method:nextPage",
           "name": "nextPage",
           "kind": "method",
@@ -9617,7 +9635,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDataViewComponent, \"neu-data-view\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"mode\": {\n        \"alias\": \"mode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"modes\": {\n        \"alias\": \"modes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewSwitcher\": {\n        \"alias\": \"viewSwitcher\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewAriaLabel\": {\n        \"alias\": \"viewAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchFields\": {\n        \"alias\": \"searchFields\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchAriaLabel\": {\n        \"alias\": \"searchAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortOptions\": {\n        \"alias\": \"sortOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortAriaLabel\": {\n        \"alias\": \"sortAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pagination\": {\n        \"alias\": \"pagination\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"total\": {\n        \"alias\": \"total\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"currentPage\": {\n        \"alias\": \"currentPage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loadingLabel\": {\n        \"alias\": \"loadingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousLabel\": {\n        \"alias\": \"previousLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextLabel\": {\n        \"alias\": \"nextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"paginationAriaLabel\": {\n        \"alias\": \"paginationAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trackBy\": {\n        \"alias\": \"trackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"modeChange\": \"modeChange\";\n    \"searchChange\": \"searchChange\";\n    \"sortChange\": \"sortChange\";\n    \"pageChange\": \"pageChange\";\n}, [\n    \"itemTpl\",\n    \"headerTpl\",\n    \"footerTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuDataViewComponent, \"neu-data-view\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"mode\": {\n        \"alias\": \"mode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"modes\": {\n        \"alias\": \"modes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"modeLabels\": {\n        \"alias\": \"modeLabels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewSwitcher\": {\n        \"alias\": \"viewSwitcher\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewAriaLabel\": {\n        \"alias\": \"viewAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchFields\": {\n        \"alias\": \"searchFields\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchAriaLabel\": {\n        \"alias\": \"searchAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortOptions\": {\n        \"alias\": \"sortOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortAriaLabel\": {\n        \"alias\": \"sortAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pagination\": {\n        \"alias\": \"pagination\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pageSize\": {\n        \"alias\": \"pageSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"total\": {\n        \"alias\": \"total\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"currentPage\": {\n        \"alias\": \"currentPage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loadingLabel\": {\n        \"alias\": \"loadingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousLabel\": {\n        \"alias\": \"previousLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextLabel\": {\n        \"alias\": \"nextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"paginationAriaLabel\": {\n        \"alias\": \"paginationAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trackBy\": {\n        \"alias\": \"trackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"modeChange\": \"modeChange\";\n    \"searchChange\": \"searchChange\";\n    \"sortChange\": \"sortChange\";\n    \"pageChange\": \"pageChange\";\n}, [\n    \"itemTpl\",\n    \"headerTpl\",\n    \"footerTpl\"\n], never, true, never>;"
         },
         {
           "id": "./data-view#NeuDataViewComponent.property:ɵfac",
@@ -10468,6 +10486,14 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly yearOptions: _angular_core.Signal<number[]>;"
+        },
+        {
+          "id": "./date-input#NeuDateInputComponent.property:yearSelectOptions",
+          "name": "yearSelectOptions",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly yearSelectOptions: _angular_core.Signal<NeuSelectOption<number, unknown>[]>;"
         }
       ]
     },
@@ -12634,6 +12660,26 @@
           "signature": "readonly downloadLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./gallery#NeuGalleryComponent.input:flipHorizontalLabel",
+          "name": "flipHorizontalLabel",
+          "kind": "input",
+          "publicName": "flipHorizontalLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly flipHorizontalLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./gallery#NeuGalleryComponent.input:flipVerticalLabel",
+          "name": "flipVerticalLabel",
+          "kind": "input",
+          "publicName": "flipVerticalLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly flipVerticalLabel: _angular_core.InputSignal<string>;"
+        },
+        {
           "id": "./gallery#NeuGalleryComponent.input:imageLoading",
           "name": "imageLoading",
           "kind": "input",
@@ -12714,6 +12760,36 @@
           "signature": "readonly previousLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./gallery#NeuGalleryComponent.input:resetLabel",
+          "name": "resetLabel",
+          "kind": "input",
+          "publicName": "resetLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly resetLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./gallery#NeuGalleryComponent.input:rotateLeftLabel",
+          "name": "rotateLeftLabel",
+          "kind": "input",
+          "publicName": "rotateLeftLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rotateLeftLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./gallery#NeuGalleryComponent.input:rotateRightLabel",
+          "name": "rotateRightLabel",
+          "kind": "input",
+          "publicName": "rotateRightLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rotateRightLabel: _angular_core.InputSignal<string>;"
+        },
+        {
           "id": "./gallery#NeuGalleryComponent.input:showItemNavigators",
           "name": "showItemNavigators",
           "kind": "input",
@@ -12762,6 +12838,26 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly toolbarLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./gallery#NeuGalleryComponent.input:zoomInLabel",
+          "name": "zoomInLabel",
+          "kind": "input",
+          "publicName": "zoomInLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly zoomInLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./gallery#NeuGalleryComponent.input:zoomOutLabel",
+          "name": "zoomOutLabel",
+          "kind": "input",
+          "publicName": "zoomOutLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly zoomOutLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./gallery#NeuGalleryComponent.method:closePreview",
@@ -13021,7 +13117,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuGalleryComponent, \"neu-gallery\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"activeIndexInput\": {\n        \"alias\": \"activeIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialIndex\": {\n        \"alias\": \"initialIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"circular\": {\n        \"alias\": \"circular\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showThumbnails\": {\n        \"alias\": \"showThumbnails\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailPosition\": {\n        \"alias\": \"thumbnailPosition\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showItemNavigators\": {\n        \"alias\": \"showItemNavigators\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"objectFit\": {\n        \"alias\": \"objectFit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"imageLoading\": {\n        \"alias\": \"imageLoading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxZoom\": {\n        \"alias\": \"maxZoom\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailLabel\": {\n        \"alias\": \"thumbnailLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewLabel\": {\n        \"alias\": \"previewLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"toolbarLabel\": {\n        \"alias\": \"toolbarLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousLabel\": {\n        \"alias\": \"previousLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextLabel\": {\n        \"alias\": \"nextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"closeLabel\": {\n        \"alias\": \"closeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"downloadLabel\": {\n        \"alias\": \"downloadLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"activeIndexChange\": \"activeIndexChange\";\n    \"previewChange\": \"previewChange\";\n    \"zoomChange\": \"zoomChange\";\n    \"rotationChange\": \"rotationChange\";\n    \"flipChange\": \"flipChange\";\n    \"imageError\": \"imageError\";\n}, [\n    \"itemTemplate\",\n    \"captionTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuGalleryComponent, \"neu-gallery\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"activeIndexInput\": {\n        \"alias\": \"activeIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialIndex\": {\n        \"alias\": \"initialIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"circular\": {\n        \"alias\": \"circular\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showThumbnails\": {\n        \"alias\": \"showThumbnails\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailPosition\": {\n        \"alias\": \"thumbnailPosition\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showItemNavigators\": {\n        \"alias\": \"showItemNavigators\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"objectFit\": {\n        \"alias\": \"objectFit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"imageLoading\": {\n        \"alias\": \"imageLoading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxZoom\": {\n        \"alias\": \"maxZoom\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailLabel\": {\n        \"alias\": \"thumbnailLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewLabel\": {\n        \"alias\": \"previewLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"toolbarLabel\": {\n        \"alias\": \"toolbarLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"zoomOutLabel\": {\n        \"alias\": \"zoomOutLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"zoomInLabel\": {\n        \"alias\": \"zoomInLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rotateLeftLabel\": {\n        \"alias\": \"rotateLeftLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rotateRightLabel\": {\n        \"alias\": \"rotateRightLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"flipHorizontalLabel\": {\n        \"alias\": \"flipHorizontalLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"flipVerticalLabel\": {\n        \"alias\": \"flipVerticalLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resetLabel\": {\n        \"alias\": \"resetLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousLabel\": {\n        \"alias\": \"previousLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextLabel\": {\n        \"alias\": \"nextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"closeLabel\": {\n        \"alias\": \"closeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"downloadLabel\": {\n        \"alias\": \"downloadLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"activeIndexChange\": \"activeIndexChange\";\n    \"previewChange\": \"previewChange\";\n    \"zoomChange\": \"zoomChange\";\n    \"rotationChange\": \"rotationChange\";\n    \"flipChange\": \"flipChange\";\n    \"imageError\": \"imageError\";\n}, [\n    \"itemTemplate\",\n    \"captionTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./gallery#NeuGalleryComponent.property:ɵfac",
@@ -17886,6 +17982,16 @@
           "signature": "readonly columnWidth: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./kanban#NeuKanbanComponent.input:moveButtonLabel",
+          "name": "moveButtonLabel",
+          "kind": "input",
+          "publicName": "moveButtonLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly moveButtonLabel: _angular_core.InputSignal<string>;"
+        },
+        {
           "id": "./kanban#NeuKanbanComponent.input:showCounts",
           "name": "showCounts",
           "kind": "input",
@@ -17948,6 +18054,22 @@
           "signature": "isKeyboardMoving(cardId: string): boolean;"
         },
         {
+          "id": "./kanban#NeuKanbanComponent.method:isMoveMenuOpen",
+          "name": "isMoveMenuOpen",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "isMoveMenuOpen(cardId: string): boolean;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:moveActionsId",
+          "name": "moveActionsId",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "moveActionsId(cardId: string): string;"
+        },
+        {
           "id": "./kanban#NeuKanbanComponent.method:moveByAction",
           "name": "moveByAction",
           "kind": "method",
@@ -17970,6 +18092,38 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "onCardKeydown(card: NeuKanbanCard, columnId: string, cardIndex: number, event: KeyboardEvent): void;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:onDocumentPointerDown",
+          "name": "onDocumentPointerDown",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onDocumentPointerDown(event: PointerEvent): void;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:onMoveMenuKeydown",
+          "name": "onMoveMenuKeydown",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onMoveMenuKeydown(cardId: string, event: KeyboardEvent): void;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:openMoveMenu",
+          "name": "openMoveMenu",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "openMoveMenu(cardId: string): void;"
+        },
+        {
+          "id": "./kanban#NeuKanbanComponent.method:toggleMoveMenu",
+          "name": "toggleMoveMenu",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "toggleMoveMenu(cardId: string, event: MouseEvent): void;"
         },
         {
           "id": "./kanban#NeuKanbanComponent.output:cardDrop",
@@ -18005,7 +18159,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuKanbanComponent, \"neu-kanban\", never, {\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnWidth\": {\n        \"alias\": \"columnWidth\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showCounts\": {\n        \"alias\": \"showCounts\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showWipLimit\": {\n        \"alias\": \"showWipLimit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stateMode\": {\n        \"alias\": \"stateMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"columnsChange\": \"columnsChange\";\n    \"cardDrop\": \"cardDrop\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuKanbanComponent, \"neu-kanban\", never, {\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnWidth\": {\n        \"alias\": \"columnWidth\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showCounts\": {\n        \"alias\": \"showCounts\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showWipLimit\": {\n        \"alias\": \"showWipLimit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"moveButtonLabel\": {\n        \"alias\": \"moveButtonLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stateMode\": {\n        \"alias\": \"stateMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"columnsChange\": \"columnsChange\";\n    \"cardDrop\": \"cardDrop\";\n}, never, never, true, never>;"
         },
         {
           "id": "./kanban#NeuKanbanComponent.property:ɵfac",
@@ -26763,7 +26917,7 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "changePageSize(value: string | number): void;"
+          "signature": "changePageSize(value: string | number | null): void;"
         },
         {
           "id": "./pagination#NeuPaginationComponent.method:go",
@@ -26824,6 +26978,14 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly pages: _angular_core.Signal<number[]>;"
+        },
+        {
+          "id": "./pagination#NeuPaginationComponent.property:pageSizeSelectOptions",
+          "name": "pageSizeSelectOptions",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly pageSizeSelectOptions: _angular_core.Signal<NeuSelectOption<number, unknown>[]>;"
         },
         {
           "id": "./pagination#NeuPaginationComponent.property:totalPages",
@@ -55492,6 +55654,18 @@
       "signature": "readonly mode: _angular_core.InputSignal<NeuDataViewMode>;"
     },
     {
+      "id": "./data-view#NeuDataViewComponent.input:modeLabels",
+      "entrypoint": "./data-view",
+      "declaration": "NeuDataViewComponent",
+      "selector": "neu-data-view",
+      "propertyName": "modeLabels",
+      "publicName": "modeLabels",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly modeLabels: _angular_core.InputSignal<Partial<Record<NeuDataViewMode, string>>>;"
+    },
+    {
       "id": "./data-view#NeuDataViewComponent.input:modes",
       "entrypoint": "./data-view",
       "declaration": "NeuDataViewComponent",
@@ -56932,6 +57106,30 @@
       "signature": "readonly downloadLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./gallery#NeuGalleryComponent.input:flipHorizontalLabel",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "flipHorizontalLabel",
+      "publicName": "flipHorizontalLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly flipHorizontalLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:flipVerticalLabel",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "flipVerticalLabel",
+      "publicName": "flipVerticalLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly flipVerticalLabel: _angular_core.InputSignal<string>;"
+    },
+    {
       "id": "./gallery#NeuGalleryComponent.input:imageLoading",
       "entrypoint": "./gallery",
       "declaration": "NeuGalleryComponent",
@@ -57028,6 +57226,42 @@
       "signature": "readonly previousLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./gallery#NeuGalleryComponent.input:resetLabel",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "resetLabel",
+      "publicName": "resetLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly resetLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:rotateLeftLabel",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "rotateLeftLabel",
+      "publicName": "rotateLeftLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly rotateLeftLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:rotateRightLabel",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "rotateRightLabel",
+      "publicName": "rotateRightLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly rotateRightLabel: _angular_core.InputSignal<string>;"
+    },
+    {
       "id": "./gallery#NeuGalleryComponent.input:showItemNavigators",
       "entrypoint": "./gallery",
       "declaration": "NeuGalleryComponent",
@@ -57086,6 +57320,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly toolbarLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:zoomInLabel",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "zoomInLabel",
+      "publicName": "zoomInLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly zoomInLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:zoomOutLabel",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "zoomOutLabel",
+      "publicName": "zoomOutLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly zoomOutLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./gallery#NeuGalleryComponent.output:activeIndexChange",
@@ -58646,6 +58904,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly columnWidth: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./kanban#NeuKanbanComponent.input:moveButtonLabel",
+      "entrypoint": "./kanban",
+      "declaration": "NeuKanbanComponent",
+      "selector": "neu-kanban",
+      "propertyName": "moveButtonLabel",
+      "publicName": "moveButtonLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly moveButtonLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./kanban#NeuKanbanComponent.input:showCounts",
@@ -70231,19 +70501,19 @@
       "type": 185,
       "variable": 1
     },
-    "publicSymbols": 5752,
+    "publicSymbols": 5770,
     "statuses": {
-      "SUPPORTED": 3649,
+      "SUPPORTED": 3658,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 2099,
+      "INTERNAL/UNSUPPORTED": 2108,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1201,
+      "input": 1210,
       "output": 281,
       "model": 2,
-      "total": 1484
+      "total": 1493
     },
     "designTokens": 258
   }

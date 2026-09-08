@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  ElementRef,
   TemplateRef,
   ViewEncapsulation,
   computed,
@@ -11,6 +12,7 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
@@ -174,7 +176,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                     type="button"
                     class="neu-calendar__day-select"
                     [attr.aria-label]="formatDayAriaLabel(day)"
-                    (click)="selectDate(day.date)"
+                    (click)="openDay(day.date)"
                   >
                     <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
                     @if (day.events.length > 0) {
@@ -198,6 +200,16 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                       @if (eventTpl()) { <ng-container [ngTemplateOutlet]="eventTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: event, view: 'month' }" /> } @else { <span class="neu-calendar__event-title">{{ event.title }}</span><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span> }
                     </button>
                   }
+                  @if (day.events.length > monthVisibleEvents(day.events).length) {
+                    <button
+                      type="button"
+                      class="neu-calendar__more neu-calendar__more--summary"
+                      [attr.aria-label]="resolvedLabels().moreEvents(day.events.length - monthVisibleEvents(day.events).length)"
+                      (click)="openDay(day.date)"
+                    >
+                      {{ resolvedLabels().moreEvents(day.events.length - monthVisibleEvents(day.events).length) }}
+                    </button>
+                  }
                 </div>
               </article>
             }
@@ -215,7 +227,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                   type="button"
                   class="neu-calendar__week-head neu-calendar__day-select"
                   [attr.aria-label]="formatDayAriaLabel(day)"
-                  (click)="selectDate(day.date)"
+                  (click)="openDay(day.date)"
                 >
                   <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
                   <span class="neu-calendar__week-date">{{ formatWeekDate(day.date) }}</span>
@@ -242,9 +254,13 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                   }
 
                   @if (day.events.length > maxVisibleEvents()) {
-                    <span class="neu-calendar__more">{{
-                      resolvedLabels().moreEvents(day.events.length - maxVisibleEvents())
-                    }}</span>
+                    <button
+                      type="button"
+                      class="neu-calendar__more neu-calendar__more--summary"
+                      (click)="openDay(day.date)"
+                    >
+                      {{ resolvedLabels().moreEvents(day.events.length - maxVisibleEvents()) }}
+                    </button>
                   }
                 </div>
               </article>
@@ -253,7 +269,12 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
         }
       </div>
 
-      <section class="neu-calendar__agenda" aria-live="polite">
+      <section
+        #agenda
+        class="neu-calendar__agenda"
+        aria-live="polite"
+        tabindex="-1"
+      >
         <div class="neu-calendar__agenda-header">
           <h4 class="neu-calendar__agenda-title">{{ selectedAgendaLabel() }}</h4>
           <span class="neu-calendar__agenda-count">{{
@@ -275,7 +296,18 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                 [attr.aria-label]="eventTooltip(event)"
                 (click)="onEventClick($event, event)"
               >
-                @if (eventTpl()) { <ng-container [ngTemplateOutlet]="eventTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: event, view: 'agenda' }" /> } @else { <span class="neu-calendar__event-title">{{ event.title }}</span><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span> }
+                @if (eventTpl()) {
+                  <ng-container
+                    [ngTemplateOutlet]="eventTpl()!.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: event, view: 'agenda' }"
+                  />
+                } @else {
+                  <span class="neu-calendar__event-title">{{ event.title }}</span>
+                  <span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span>
+                  @if (event.description) {
+                    <span class="neu-calendar__event-description">{{ event.description }}</span>
+                  }
+                }
               </button>
             }
           </div>
@@ -295,6 +327,7 @@ export class NeuCalendarComponent {
     timeZone: this.temporal.timeZone(),
   });
   readonly eventTpl = contentChild(NeuCalendarEventDirective);
+  private readonly agenda = viewChild<ElementRef<HTMLElement>>('agenda');
   readonly events = input<NeuCalendarEvent[]>([]);
   readonly view = input<NeuCalendarView>('month');
   readonly selectedDate = input<Date | string>(this.temporal.today());
@@ -305,8 +338,11 @@ export class NeuCalendarComponent {
   /** First weekday, using JavaScript day numbers (0 Sunday … 6 Saturday). Default: 1 (Monday). */
   readonly firstDayOfWeek = input<number>(1);
 
+  /** Emits the active date after navigation or direct day selection. */
   readonly selectedDateChange = output<Date>();
+  /** Emits the active date after navigation or direct day selection. */
   readonly dateSelect = output<Date>();
+  /** Emits the opened event after synchronizing the built-in agenda with its start date. */
   readonly eventClick = output<NeuCalendarEvent>();
 
   private readonly _selectedDate = signal(this.temporal.today());
@@ -450,6 +486,11 @@ export class NeuCalendarComponent {
     this.dateSelect.emit(nextDate);
   }
 
+  protected openDay(date: Date): void {
+    this.selectDate(date);
+    this.revealAgenda();
+  }
+
   visibleEvents(events: NormalizedCalendarEvent[]): NormalizedCalendarEvent[] {
     return events.slice(0, this.maxVisibleEvents());
   }
@@ -481,13 +522,13 @@ export class NeuCalendarComponent {
 
   onDaySpace(event: Event, date: Date): void {
     event.preventDefault();
-    this.selectDate(date);
+    this.openDay(date);
   }
 
   onDayKeydown(event: KeyboardEvent, date: Date): void {
     if (event.key === 'Enter') {
       event.preventDefault();
-      this.selectDate(date);
+      this.openDay(date);
       return;
     }
 
@@ -498,6 +539,11 @@ export class NeuCalendarComponent {
 
   onEventClick(event: MouseEvent, calendarEvent: NormalizedCalendarEvent): void {
     event.stopPropagation();
+    // Keep the visible agenda in sync with the event that the user opened.
+    // Without this transition, clicking an event on another day left the
+    // detail surface showing the previously selected date.
+    this.selectDate(this.eventCalendarDate(calendarEvent.start));
+    this.revealAgenda();
     this.eventClick.emit({
       ...calendarEvent,
       start: new Date(calendarEvent.start),
@@ -547,6 +593,19 @@ export class NeuCalendarComponent {
     const value = (type: 'year' | 'month' | 'day') =>
       parts.find((part) => part.type === type)?.value ?? '';
     return `${value('year')}-${value('month')}-${value('day')}`;
+  }
+
+  private eventCalendarDate(date: Date): Date {
+    const [year, month, day] = this.eventDateKey(date).split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  private revealAgenda(): void {
+    queueMicrotask(() => {
+      const agenda = this.agenda()?.nativeElement;
+      agenda?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+      agenda?.focus({ preventScroll: true });
+    });
   }
 
   private localDateKey(date: Date): string {

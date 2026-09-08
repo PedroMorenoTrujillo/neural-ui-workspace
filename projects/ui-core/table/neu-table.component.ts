@@ -21,6 +21,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { NeuTableExpandDirective } from './neu-table-expand.directive';
 import { NeuTableToolbarDirective } from './neu-table-toolbar.directive';
@@ -56,7 +57,7 @@ import { NeuIconComponent } from '@neural-ui/core/icon';
 import type { NeuInlineEditorType } from '@neural-ui/core/inline-editor';
 import type { NeuContextMenuDirective } from '@neural-ui/core/context-menu';
 import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
-import type { NeuSelectOption } from '@neural-ui/core/select';
+import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select';
 import type {
   NeuOptionDisabledAccessor,
   NeuOptionLabelAccessor,
@@ -533,8 +534,10 @@ export type NeuTableColumnInput<T extends object> =
   providers: [NeuTableManagedRowCoordinator],
   imports: [
     NgTemplateOutlet,
+    ReactiveFormsModule,
     CdkScrollable,
     NeuIconComponent,
+    NeuSelectComponent,
     NeuTableCheckboxComponent,
     NeuTableOptionalFeatureErrorComponent,
     NeuTableAdvancedFilterFeatureComponent,
@@ -801,22 +804,17 @@ export type NeuTableColumnInput<T extends object> =
           }
           @if (pageSizeOptions().length > 0) {
             <div class="neu-table__page-size">
-              <label class="neu-table__page-size-label">{{ pageSizeLabel() }}</label>
-              <select
+              <span class="neu-table__page-size-label">{{ pageSizeLabel() }}</span>
+              <neu-select
                 class="neu-table__page-size-select"
-                [attr.aria-label]="pageSizeAriaLabel()"
-                [value]="effectivePageSize()"
-                (change)="onPageSizeChange($event)"
-              >
-                @for (size of pageSizeOptions(); track size) {
-                  <option
-                    [value]="size"
-                    [selected]="size === effectivePageSize()"
-                  >
-                    {{ size }}
-                  </option>
-                }
-              </select>
+                size="sm"
+                [floatingLabel]="false"
+                [ariaLabel]="pageSizeAriaLabel()"
+                [options]="_pageSizeSelectOptions()"
+                optionLabel="label"
+                optionValue="value"
+                [formControl]="_pageSizeControl"
+              />
             </div>
           }
           @if (showCurrentPageReport()) {
@@ -890,16 +888,16 @@ export type NeuTableColumnInput<T extends object> =
                 />
               }
               @if (showJumpToPageDropdown()) {
-                <select
+                <neu-select
                   class="neu-table__jump-select"
-                  [value]="currentPage()"
-                  [attr.aria-label]="jumpToPageAriaLabel()"
-                  (change)="goToPage(+$any($event.target).value)"
-                >
-                  @for (page of pageNumbersAll(); track page) {
-                    <option [value]="page">{{ page }}</option>
-                  }
-                </select>
+                  size="sm"
+                  [floatingLabel]="false"
+                  [ariaLabel]="jumpToPageAriaLabel()"
+                  [options]="_jumpPageOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  [formControl]="_jumpPageControl"
+                />
               }
             </nav>
           }
@@ -2308,9 +2306,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   );
   private readonly _appliedFilters = this._state.createFiltersFacade();
   private readonly _columnFilters = this._createLegacyColumnFiltersFacade();
-  private readonly _pageSizeControl = new InternalNeuTableValueControl('', (value) =>
-    this.onPageSizeChange(value),
-  );
+  protected readonly _pageSizeControl = new FormControl('', { nonNullable: true });
+  protected readonly _jumpPageControl = new FormControl('', { nonNullable: true });
   private readonly _columnFilterControls = new Map<string, InternalNeuTableControl<string>>();
   private readonly _typedColumnFilterControls = new Map<string, InternalNeuTableControl<unknown>>();
   private readonly _typedRangeStartControls = new Map<
@@ -2463,6 +2460,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private _lastAutomaticPersistenceRevision = -1;
 
   constructor() {
+    const pageSizeSubscription = this._pageSizeControl.valueChanges.subscribe((value) =>
+      this.onPageSizeChange(value),
+    );
+    const jumpPageSubscription = this._jumpPageControl.valueChanges.subscribe((value) =>
+      this.goToPage(Number(value)),
+    );
     const managedRowAdapter: NeuTableManagedRowAdapter<T> = {
       state: (entry) => this._managedRowState(entry),
       pointerDown: (entry, event) => this.onRowPointerDown(entry.row, entry.frozen, event),
@@ -2479,6 +2482,8 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     this._managedRowCoordinator.connect(managedRowAdapter);
     afterNextRender(() => this._browserEnhancementsReady.set(true));
     this._destroyRef.onDestroy(() => {
+      pageSizeSubscription.unsubscribe();
+      jumpPageSubscription.unsubscribe();
       this._destroyed = true;
       this._stopFilterOverlayFocusContainment();
       this._clearFilterOverlayOwnership();
@@ -2658,6 +2663,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       const nextSize = String(this.effectivePageSize());
       if (this._pageSizeControl.value !== nextSize) {
         this._pageSizeControl.setValue(nextSize, { emitEvent: false });
+      }
+    });
+
+    effect(() => {
+      const nextPage = String(this.currentPage());
+      if (this._jumpPageControl.value !== nextPage) {
+        this._jumpPageControl.setValue(nextPage, { emitEvent: false });
       }
     });
 
@@ -4099,7 +4111,13 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     ),
   );
 
-  private readonly _jumpPageOptions = computed<NeuSelectOption[]>(() =>
+  protected readonly _pageSizeSelectOptions = computed<NeuSelectOption[]>(() =>
+    this.pageSizeOptions().map((size) => ({
+      label: String(size),
+      value: String(size),
+    })),
+  );
+  protected readonly _jumpPageOptions = computed<NeuSelectOption[]>(() =>
     Array.from({ length: this.totalPages() }, (_, index) => ({
       label: String(index + 1),
       value: String(index + 1),

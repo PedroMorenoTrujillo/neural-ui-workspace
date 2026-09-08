@@ -28,6 +28,7 @@ import {
   type NeuTreeNavigationItem,
   walkNeuTreeDepthFirst,
 } from '@neural-ui/core/internal';
+import { NeuInputComponent } from '@neural-ui/core/input';
 
 export interface NeuTreeNode<T = unknown> {
   id: string;
@@ -129,6 +130,7 @@ export class NeuTreeNodeDirective<T = unknown> {
   imports: [
     NgTemplateOutlet,
     NeuCheckboxComponent,
+    NeuInputComponent,
     NeuDragDropGroupDirective,
     NeuDraggableDirective,
     NeuDropZoneDirective,
@@ -143,28 +145,14 @@ export class NeuTreeNodeDirective<T = unknown> {
       [neuDragDropGroupDisabled]="!dragDrop()"
     >
       @if (searchable()) {
-        <label class="neu-tree__search" [attr.aria-label]="searchPlaceholder()">
-          <svg
-            class="neu-tree__search-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="m20 20-3.5-3.5"></path>
-          </svg>
-          <input
-            class="neu-tree__search-input"
-            type="search"
-            [value]="searchQuery()"
-            [attr.placeholder]="searchPlaceholder()"
-            (input)="onSearch($event)"
-          />
-        </label>
+        <neu-input
+          class="neu-tree__search-input"
+          type="search"
+          size="sm"
+          [floatingLabel]="false"
+          [placeholder]="searchPlaceholder()"
+          (valueChange)="onSearchValue($event)"
+        />
       }
 
       @if (showSelectAll() && isCheckboxMode()) {
@@ -577,6 +565,10 @@ export class NeuTreeComponent<T = unknown> {
   }
   onSearch(event: Event): void {
     this.searchQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  protected onSearchValue(value: string): void {
+    this.searchQuery.set(value);
   }
 
   toggleNode(node: NeuTreeNode<T>, event?: Event): void {

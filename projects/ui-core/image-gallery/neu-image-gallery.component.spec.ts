@@ -134,6 +134,16 @@ describe('NeuImageGalleryComponent', () => {
     expect(f.nativeElement.querySelector('.neu-image-gallery__counter')).toBeFalsy();
   });
 
+  it('should not render an empty metadata surface', async () => {
+    const f = TestBed.createComponent(NeuImageGalleryComponent);
+    f.componentRef.setInput('items', [{ src: '/plain.jpg', alt: 'Plain image' }]);
+    f.componentRef.setInput('showCounter', false);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelector('.neu-image-gallery__meta')).toBeFalsy();
+  });
+
   it('should render non-clickable image when viewerEnabled=false', async () => {
     const f = TestBed.createComponent(NeuImageGalleryComponent);
     f.componentRef.setInput('items', ITEMS);

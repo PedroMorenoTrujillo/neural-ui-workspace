@@ -506,7 +506,7 @@
       position: sticky;
       top: var(--neu-table-header-height, 44px);
       z-index: 1;
-      background: var(--neu-surface-2);
+      background: var(--neu-surface);
     }
 
     // Sticky thead keeps arbitrary grouped/multi-row headers together. Child
@@ -1084,18 +1084,9 @@
 .neu-table__page-size-select {
   display: block;
   min-width: 78px;
-  min-height: 34px;
-  padding: 0 var(--neu-space-8) 0 var(--neu-space-3);
-  color: var(--neu-text);
-  font: inherit;
-  background-color: var(--neu-surface);
-  border: 1px solid var(--neu-border-hover);
-  border-radius: var(--neu-radius-md);
-  cursor: pointer;
 
-  &:focus-visible {
-    outline: 2px solid var(--neu-primary);
-    outline-offset: 2px;
+  .neu-select__trigger {
+    min-height: 34px;
   }
 }
 
@@ -1664,7 +1655,7 @@
   .neu-table__th--filter-placeholder {
     height: 42px;
     padding: 0.35rem var(--neu-space-3);
-    background: var(--neu-surface-2);
+    background: var(--neu-surface);
     border-bottom: 1px solid var(--neu-border);
     font-weight: 400;
     text-transform: none;
@@ -1794,6 +1785,9 @@
 .neu-table__jump-input,
 .neu-table__jump-select {
   width: 4.5rem;
+}
+
+.neu-table__jump-input {
   min-height: 2rem;
   padding: 0 var(--neu-space-2);
   border: 1px solid var(--neu-border);
@@ -1802,8 +1796,11 @@
   color: var(--neu-text);
 }
 
-.neu-table__jump-input:focus-visible,
-.neu-table__jump-select:focus-visible {
+.neu-table__jump-input:focus-visible {
   outline: 2px solid var(--neu-primary);
   outline-offset: 2px;
+}
+
+.neu-table__jump-select .neu-select__trigger {
+  min-height: 2rem;
 }

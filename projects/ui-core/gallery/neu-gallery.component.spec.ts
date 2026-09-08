@@ -232,6 +232,45 @@ describe('NeuGalleryComponent', () => {
     expect(fixture.componentInstance.isPreviewOpen()).toBe(false);
   });
 
+  it('renders named toolbar controls with visible and native labels', () => {
+    const fixture = TestBed.createComponent(NeuGalleryComponent);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.componentRef.setInput('zoomOutLabel', 'Alejar');
+    fixture.componentRef.setInput('zoomInLabel', 'Acercar');
+    fixture.componentRef.setInput('rotateLeftLabel', 'Girar a la izquierda');
+    fixture.componentRef.setInput('rotateRightLabel', 'Girar a la derecha');
+    fixture.componentRef.setInput('flipHorizontalLabel', 'Voltear horizontalmente');
+    fixture.componentRef.setInput('flipVerticalLabel', 'Voltear verticalmente');
+    fixture.componentRef.setInput('resetLabel', 'Restablecer imagen');
+    fixture.componentRef.setInput('downloadLabel', 'Descargar imagen');
+    fixture.componentRef.setInput('closeLabel', 'Cerrar vista ampliada');
+    fixture.detectChanges();
+    fixture.componentInstance.openPreview();
+    fixture.detectChanges();
+
+    const controls = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.neu-gallery__tool'),
+    );
+    expect(controls).toHaveLength(9);
+    expect(controls.map((control) => control.getAttribute('aria-label'))).toEqual([
+      'Alejar',
+      'Acercar',
+      'Girar a la izquierda',
+      'Girar a la derecha',
+      'Voltear horizontalmente',
+      'Voltear verticalmente',
+      'Restablecer imagen',
+      'Descargar imagen',
+      'Cerrar vista ampliada',
+    ]);
+    expect(controls.map((control) => control.getAttribute('title'))).toEqual(
+      controls.map((control) => control.getAttribute('aria-label')),
+    );
+    expect(
+      controls.map((control) => control.querySelector('.neu-gallery__tool-label')?.textContent),
+    ).toEqual(controls.map((control) => control.getAttribute('aria-label')));
+  });
+
   it('renders strict projected item and caption templates', () => {
     const fixture = TestBed.createComponent(GalleryTemplateHost);
     fixture.detectChanges();

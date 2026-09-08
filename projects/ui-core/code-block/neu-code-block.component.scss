@@ -11,7 +11,15 @@ $cb-text: var(--neu-code-block-text, #d9e2ff);
 $cb-accent: var(--neu-code-block-accent, #9ab8ff);
 $cb-muted: var(--neu-code-block-muted, #8f99bd);
 
+:host {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
 .neu-code-block {
+  min-inline-size: 0;
   border-radius: var(--neu-radius-lg);
   overflow: hidden;
   border: 1px solid $cb-border;

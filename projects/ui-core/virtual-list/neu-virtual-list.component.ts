@@ -9,6 +9,7 @@ import {
   ViewChild,
   ViewEncapsulation,
   afterNextRender,
+  afterRenderEffect,
   computed,
   input,
   output,
@@ -99,6 +100,14 @@ export class NeuVirtualListComponent<T = unknown> implements AfterViewInit {
     // Fuerza checkViewportSize() tras el primer paint completo (necesario en modo zoneless)
     // Forces checkViewportSize() after the first full paint (needed in zoneless mode)
     afterNextRender(() => this._viewport?.checkViewportSize());
+    // Inputs can change while the viewport is already scrolled. CDK otherwise
+    // keeps its previous measurement and may leave a blank area at the end.
+    afterRenderEffect(() => {
+      this.items();
+      this.itemSize();
+      this.visibleRows();
+      this._viewport?.checkViewportSize();
+    });
   }
 
   /** Rendered range including buffer: start inclusive, end exclusive. */
@@ -106,10 +115,12 @@ export class NeuVirtualListComponent<T = unknown> implements AfterViewInit {
   private readonly eventDestroyRef = inject(DestroyRef);
 
   ngAfterViewInit(): void {
-    this._viewport?.renderedRangeStream.pipe(
-      distinctUntilChanged((a, b) => a.start === b.start && a.end === b.end),
-      takeUntilDestroyed(this.eventDestroyRef),
-    ).subscribe(({ start, end }) => this.rangeChange.emit({ start, end }));
+    this._viewport?.renderedRangeStream
+      .pipe(
+        distinctUntilChanged((a, b) => a.start === b.start && a.end === b.end),
+        takeUntilDestroyed(this.eventDestroyRef),
+      )
+      .subscribe(({ start, end }) => this.rangeChange.emit({ start, end }));
     // Segundo intento de medición sincrona por si afterNextRender no cubre todos los casos
     // Second synchronous measurement pass as a fallback
     this._viewport?.checkViewportSize();
@@ -124,7 +135,7 @@ export class NeuVirtualListComponent<T = unknown> implements AfterViewInit {
   readonly visibleRows = input<number>(10);
 
   /** Texto cuando la lista está vacía / Empty state text */
-  readonly emptyLabel = input<string>('Sin resultados');
+  readonly emptyLabel = input<string>('No results');
 
   /** Función de tracking / Tracking function */
   readonly trackBy = input<(index: number, item: T) => unknown>((i) => i);

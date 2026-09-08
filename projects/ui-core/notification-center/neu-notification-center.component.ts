@@ -52,8 +52,11 @@ const DEFAULT_ICONS: Record<NeuNotificationType, string> = {
 export class NeuNotificationService {
   private readonly ids = inject(NeuIdGenerator);
   private readonly temporal = inject(NeuInitialTemporalState);
+
+  /** Lista reactiva de notificaciones, con la más reciente primero / Reactive notification list, newest first */
   readonly notifications = signal<NeuNotification[]>([]);
 
+  /** Número de notificaciones sin leer / Number of unread notifications */
   readonly unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
 
   private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
