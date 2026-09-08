@@ -129,7 +129,7 @@
 .neu-gallery__toolbar-actions {
   flex: 1 1 auto;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex-wrap: nowrap;
   gap: var(--neu-space-2);
   min-inline-size: 0;
@@ -137,6 +137,11 @@
   overflow-x: auto;
   padding-block-end: 0.125rem;
   scrollbar-width: thin;
+}
+.neu-gallery__toolbar-actions > :first-child {
+  // Auto margins align short toolbars without placing overflowing controls
+  // before the scroll origin on narrow screens (including RTL).
+  margin-inline-start: auto;
 }
 .neu-gallery__toolbar button,
 .neu-gallery__download {

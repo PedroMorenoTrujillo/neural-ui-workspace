@@ -24,6 +24,24 @@ describe('NeuConfirmPopupComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Keep');
   });
 
+  it('keeps an anchored popup inside the viewport and clears offsets after resizing', async () => {
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = fixture.nativeElement.querySelector('.neu-confirm-popup') as HTMLElement;
+    const bounds = vi.spyOn(panel, 'getBoundingClientRect');
+    bounds.mockReturnValue({ left: window.innerWidth - 50, right: window.innerWidth + 238,
+      top: window.innerHeight - 30, bottom: window.innerHeight + 170 } as DOMRect);
+    window.dispatchEvent(new Event('resize'));
+    expect(panel.style.transform).toBe('translate(-254px, -186px)');
+    bounds.mockReturnValue({ left: 20, right: 308, top: 30, bottom: 230 } as DOMRect);
+    window.dispatchEvent(new Event('resize'));
+    expect(panel.style.transform).toBe('translate(0px, 0px)');
+    bounds.mockReturnValue({ left: -100, right: 188, top: -10, bottom: 190 } as DOMRect);
+    window.dispatchEvent(new Event('resize'));
+    expect(panel.style.transform).toBe('translate(116px, 26px)');
+  });
+
   it('prefers service state and resolves accepted confirmations', async () => {
     const accepted = vi.spyOn(fixture.componentInstance.accepted, 'emit');
     const promise = service.confirm({ title: 'Continue', message: 'Proceed?', acceptLabel: 'Yes', rejectLabel: 'No' });
