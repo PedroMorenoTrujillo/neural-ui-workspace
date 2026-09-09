@@ -168,6 +168,7 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('urlState', true);
     fixture.componentRef.setInput('multiSort', true);
     fixture.componentRef.setInput('pageSize', 1);
     fixture.detectChanges();
@@ -189,6 +190,7 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('urlState', true);
     fixture.componentRef.setInput('pageSize', 1);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -207,6 +209,7 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('urlState', true);
     fixture.componentRef.setInput('pageSize', 1);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -290,6 +293,7 @@ describe('NeuTable canonical state integration', () => {
     const fixture = TestBed.createComponent(NeuTableComponent<StateRow>);
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS);
+    fixture.componentRef.setInput('urlState', true);
     fixture.componentRef.setInput('pageSize', 1);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -478,6 +482,7 @@ describe('NeuTable canonical state integration', () => {
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS.slice(1, 2));
     fixture.componentRef.setInput('serverSide', true);
+    fixture.componentRef.setInput('urlState', true);
     fixture.componentRef.setInput('lazyLoadOnInit', true);
     fixture.componentRef.setInput('totalItems', 3);
     fixture.componentRef.setInput('pageSize', 1);
@@ -658,6 +663,7 @@ describe('NeuTable canonical state integration', () => {
     fixture.componentRef.setInput('columns', COLUMNS);
     fixture.componentRef.setInput('data', ROWS.slice(0, 1));
     fixture.componentRef.setInput('serverSide', true);
+    fixture.componentRef.setInput('urlState', true);
     fixture.componentRef.setInput('totalItems', 3);
     fixture.componentRef.setInput('pageSize', 25);
     fixture.componentRef.setInput('sort', [{ key: 'name', dir: 'desc' }]);
@@ -959,6 +965,7 @@ describe('NeuTable canonical state integration', () => {
     const urlWins = TestBed.createComponent(NeuTableComponent<StateRow>);
     urlWins.componentRef.setInput('columns', COLUMNS);
     urlWins.componentRef.setInput('data', ROWS);
+    urlWins.componentRef.setInput('urlState', true);
     urlWins.componentRef.setInput('stateKey', key);
     urlWins.componentRef.setInput('pageSize', 5);
     urlWins.detectChanges();
@@ -1245,6 +1252,7 @@ describe('NeuTable canonical state integration', () => {
     const target = TestBed.createComponent(NeuTableComponent<StateRow>);
     target.componentRef.setInput('columns', COLUMNS);
     target.componentRef.setInput('data', ROWS);
+    target.componentRef.setInput('urlState', true);
     target.componentRef.setInput('stateKey', key);
     const restores: unknown[] = [];
     const queries: unknown[] = [];

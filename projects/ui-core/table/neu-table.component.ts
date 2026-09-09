@@ -492,7 +492,7 @@ const _NEU_TABLE_PERSISTED_STATE_KEYS = new Set<InternalNeuTableStateKey>([
 ]);
 
 const _NEU_TABLE_URL_STATE_OPTIONS: Required<NeuTableUrlStateOptions> = {
-  enabled: true,
+  enabled: false,
   pageParam: 'page',
   searchParam: 'q',
   sortParam: 'sort',
@@ -520,9 +520,9 @@ export type NeuTableColumnInput<T extends object> =
  * NeuralUI Table — Componente Estrella
  *
  * Tabla de datos con:
- *   - Búsqueda/filtrado → ?q=...
- *   - Paginación → ?page=...
- *   - Ordenación → ?sort=col&sortDir=asc|desc
+ *   - Búsqueda y filtrado
+ *   - Paginación y ordenación
+ *   - Sincronización URL opcional mediante [urlState]="true"
  *   - Selección de filas (múltiple) opcional
  *   - Skeleton de carga animado
  *   - Scroll horizontal elegante en mobile (<400px)
@@ -531,7 +531,7 @@ export type NeuTableColumnInput<T extends object> =
  *   <neu-table [columns]="cols" [data]="rows" />
  *
  * Múltiples tablas por página:
- *   <neu-table pageParam="userPage" searchParam="userQ" sortParam="userSort" ... />
+ *   <neu-table [urlState]="true" [urlStateOptions]="{ pageParam: 'userPage' }" ... />
  */
 @Component({
   selector: 'neu-table',
@@ -1978,6 +1978,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly paginatorOptions = input<NeuTablePaginatorOptions>({});
   readonly exportOptions = input<NeuTableExportConfig<T>>({});
   readonly virtualizationOptions = input<NeuTableVirtualizationOptions>({});
+  /**
+   * Opt-in URL synchronization for page, search and sorting state.
+   * Disabled by default so rendering a Table never mutates the current route.
+   */
+  readonly urlState = input<boolean>(false);
+  /** Advanced URL parameter names. `enabled` remains supported for compatibility. */
   readonly urlStateOptions = input<NeuTableUrlStateOptions>({});
   readonly exactMatchable = input<boolean>(false);
   readonly tableAriaLabel = input<string>('Data table');
@@ -1997,10 +2003,14 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   private readonly _virtualizationOptions = computed<Required<NeuTableVirtualizationOptions>>(
     () => ({ ..._NEU_TABLE_VIRTUALIZATION_OPTIONS, ...this.virtualizationOptions() }),
   );
-  private readonly _urlStateOptions = computed<Required<NeuTableUrlStateOptions>>(() => ({
-    ..._NEU_TABLE_URL_STATE_OPTIONS,
-    ...this.urlStateOptions(),
-  }));
+  private readonly _urlStateOptions = computed<Required<NeuTableUrlStateOptions>>(() => {
+    const options = this.urlStateOptions();
+    return {
+      ..._NEU_TABLE_URL_STATE_OPTIONS,
+      ...options,
+      enabled: this.urlState() || options.enabled === true,
+    };
+  });
 
   protected readonly filterDelay = computed(() => this._filterOptions().delay);
   protected readonly filterOn = computed(() => this._filterOptions().on);

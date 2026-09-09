@@ -39,12 +39,12 @@ Six cohesive configuration objects replace scalar clusters:
 | `paginatorOptions`      | advanced paginator presentation                             |
 | `exportOptions`         | export enablement, format, scope, naming, and value policy  |
 | `virtualizationOptions` | viewport size, overscan, delay, retention, and request step |
-| `urlStateOptions`       | URL synchronization and parameter names                     |
+| `urlStateOptions`       | advanced URL parameter names                                |
 
-The remaining 71 inputs are direct because they represent primary data/state, a distinct capability switch, or an established integration boundary:
+The remaining 72 inputs are direct because they represent primary data/state, a distinct capability switch, or an established integration boundary:
 
 - **Core/data (9):** `columns`, `data`, `frozenData`, `loading`, `title`, `emptyMessage`, `tableAriaLabel`, `rowKey`, `rowTrackBy`.
-- **Query/filter/page/sort (15):** `pageSize`, `pagination`, `searchable`, `advancedFilterMode`, `advancedFilterTexts`, `exactMatchable`, `sortable`, `defaultSortOrder`, `resetPageOnSort`, `removableSort`, `sort`, `globalFilterFields`, `pageSizeOptions`, `paginatorPosition`, `multiSort`.
+- **Query/filter/page/sort (16):** `pageSize`, `pagination`, `searchable`, `advancedFilterMode`, `advancedFilterTexts`, `exactMatchable`, `sortable`, `defaultSortOrder`, `resetPageOnSort`, `removableSort`, `sort`, `globalFilterFields`, `pageSizeOptions`, `paginatorPosition`, `multiSort`, `urlState` (opt-in, disabled by default).
 - **Interaction (10):** `selectable`, `compareSelectionBy`, `selection`, `rowSelectable`, `selectAllScope`, `selectOnRowClick`, `metaKeySelection`, `expandMode`, `expandedRowKeys`, `selectionActions`.
 - **Viewport/server (8):** `stickyHeader`, `scrollHeight`, `virtualScroll`, `serverSide`, `query`, `lazyLoadOnInit`, `totalItems`, `dataFirst`.
 - **Layout/reorder/context (10):** `resizableColumns`, `columnResizeMode`, `reorderableColumns`, `reorderableRows`, `rowReorderable`, `contextMenu`, `contextMenuRowDisabled`, `contextMenuSelection`, `columnChooser`, `initialLayout`.

@@ -3408,6 +3408,33 @@ describe('NeuTableComponent', () => {
   // ── useUrlState=false: rutas de estado interno ────────────────────────
   // useUrlState=false: internal state paths
 
+  it('keeps URL state disabled by default and supports the direct opt-in input', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect((f.componentInstance as any).useUrlState()).toBe(false);
+
+    f.componentRef.setInput('urlState', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect((f.componentInstance as any).useUrlState()).toBe(true);
+  });
+
+  it('keeps the legacy urlStateOptions.enabled opt-in working', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('urlStateOptions', { enabled: true });
+    f.detectChanges();
+    await f.whenStable();
+
+    expect((f.componentInstance as any).useUrlState()).toBe(true);
+  });
+
   it('useUrlState=false: currentPage uses internal page signal', async () => {
     // Con useUrlState=false, currentPage lee del signal interno
     // With useUrlState=false, currentPage reads from internal signal

@@ -57,7 +57,7 @@ const selectors = readdirSync('projects/ui-core/table')
   .map((match) => match[1]);
 
 const expected = {
-  inputs: 79,
+  inputs: 80,
   outputs: 38,
   supportedMethods: 32,
   totalMethods: 292,

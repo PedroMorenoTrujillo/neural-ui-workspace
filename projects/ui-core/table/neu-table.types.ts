@@ -501,6 +501,10 @@ export interface NeuTableVirtualizationOptions {
 }
 
 export interface NeuTableUrlStateOptions {
+  /**
+   * Legacy activation flag. Prefer the direct `[urlState]="true"` Table input;
+   * this option remains supported for backwards compatibility.
+   */
   enabled?: boolean;
   pageParam?: string;
   searchParam?: string;
