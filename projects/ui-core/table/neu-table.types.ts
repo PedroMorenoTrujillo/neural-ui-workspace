@@ -481,8 +481,11 @@ export interface NeuTablePaginatorOptions {
   showPageLinks?: boolean;
   showFirstLastPageButtons?: boolean;
   showCurrentPageReport?: boolean;
+  /** Supports {first}, {last}, {totalRecords}, {currentPage} and {totalPages}. */
   currentPageReportTemplate?: string;
+  /** Shows a free page-number field unless the page dropdown is also enabled. */
   showJumpToPageInput?: boolean;
+  /** Shows a constrained page selector and takes precedence over the number field. */
   showJumpToPageDropdown?: boolean;
   alwaysShow?: boolean;
 }

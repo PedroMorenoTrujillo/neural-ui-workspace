@@ -2051,7 +2051,12 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     () => this._paginatorOptions().currentPageReportTemplate || undefined,
   );
   protected readonly showJumpToPageInput = computed(
-    () => this._paginatorOptions().showJumpToPageInput,
+    // A paginator must expose a single jump control. When both legacy flags
+    // are supplied, the Select wins because it constrains the value to a
+    // valid page and avoids rendering two controls with the same purpose.
+    () =>
+      this._paginatorOptions().showJumpToPageInput &&
+      !this._paginatorOptions().showJumpToPageDropdown,
   );
   protected readonly showJumpToPageDropdown = computed(
     () => this._paginatorOptions().showJumpToPageDropdown,

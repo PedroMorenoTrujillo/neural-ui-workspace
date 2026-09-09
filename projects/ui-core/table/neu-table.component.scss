@@ -131,8 +131,8 @@
 .neu-table__filter-overlay {
   display: flex;
   flex-direction: column;
-  inline-size: min(380px, calc(100vw - 16px));
-  max-block-size: min(420px, calc(100dvh - 16px));
+  inline-size: min(340px, calc(100vw - 16px));
+  max-block-size: min(390px, calc(100dvh - 16px));
   overflow: auto;
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius-md);
@@ -149,8 +149,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--neu-space-3);
-  padding: var(--neu-space-3) var(--neu-space-4);
+  gap: var(--neu-space-2);
+  padding: var(--neu-space-2) var(--neu-space-3);
   border-bottom: 1px solid var(--neu-border);
 }
 
@@ -193,8 +193,8 @@
 .neu-table__filter-overlay-content {
   display: flex;
   flex-direction: column;
-  gap: var(--neu-space-3);
-  padding: var(--neu-space-4);
+  gap: var(--neu-space-2);
+  padding: var(--neu-space-3);
 }
 
 .neu-table__filter-overlay-control {
@@ -205,14 +205,14 @@
 .neu-table__filter-overlay-rules {
   display: flex;
   flex-direction: column;
-  gap: var(--neu-space-3);
+  gap: var(--neu-space-2);
 }
 
 .neu-table__filter-overlay-rule {
   display: flex;
   flex-direction: column;
-  gap: var(--neu-space-3);
-  padding: var(--neu-space-3);
+  gap: var(--neu-space-2);
+  padding: var(--neu-space-2);
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius-md);
   background: var(--neu-surface-2);
@@ -262,7 +262,7 @@
 .neu-table__filter-overlay-range {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--neu-space-3);
+  gap: var(--neu-space-2);
 }
 
 .neu-table__filter-overlay-summary {
@@ -641,7 +641,13 @@
 }
 
 .neu-table__sort-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0.75rem;
   margin-inline-start: 4px;
+  vertical-align: middle;
+  line-height: 1;
   font-style: normal;
   font-size: 10px;
   opacity: 0.5;

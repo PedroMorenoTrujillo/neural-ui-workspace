@@ -9441,7 +9441,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       showFirstLastPageButtons: true,
       showPageLinks: true,
       showJumpToPageInput: true,
-      showJumpToPageDropdown: true,
+      showJumpToPageDropdown: false,
     });
     fixture.detectChanges();
     await fixture.whenStable();
@@ -9473,6 +9473,15 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     jumpInput.dispatchEvent(new Event('change', { bubbles: true }));
     fixture.detectChanges();
     expect(fixture.componentInstance.currentPage()).toBe(1);
+
+    fixture.componentRef.setInput('paginatorOptions', {
+      showFirstLastPageButtons: true,
+      showPageLinks: true,
+      showJumpToPageInput: true,
+      showJumpToPageDropdown: true,
+    });
+    fixture.detectChanges();
+    expect(host.querySelector('.neu-table__jump-input')).toBeNull();
     const jumpSelect = host.querySelector(
       '.neu-table__jump-select .neu-select__trigger',
     ) as HTMLElement;
