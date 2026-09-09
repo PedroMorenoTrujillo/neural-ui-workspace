@@ -8263,6 +8263,31 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     expect(labels.some((label) => label?.includes('Status'))).toBe(true);
   });
 
+  it('applies number inline filters while the user types', async () => {
+    const fixture = TestBed.createComponent(NeuTableComponent<{ id: number }>);
+    fixture.componentRef.setInput('columns', [
+      { key: 'id', header: 'ID', filterConfig: { kind: 'number' } },
+    ] satisfies NeuTableColumn<{ id: number }>[]);
+    fixture.componentRef.setInput('data', [{ id: 1 }, { id: 2 }]);
+    fixture.componentRef.setInput('advancedFilterMode', 'off');
+    fixture.componentRef.setInput('filterOptions', { on: 'input', delay: 0 });
+    fixture.componentRef.setInput('urlStateOptions', {
+      ...fixture.componentInstance.urlStateOptions(),
+      enabled: false,
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const setColumnFilter = vi.spyOn(fixture.componentInstance, 'setColumnFilter');
+    const input = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+      '.neu-number-input__field',
+    )!;
+    input.value = '2';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(setColumnFilter).toHaveBeenCalledWith('id', 2);
+  });
+
   it('drives advanced rule add, remove, clear, and apply through the lazy overlay UI', async () => {
     const fixture = await createAdvancedTable();
     const internal = internalFilters(fixture.componentInstance);

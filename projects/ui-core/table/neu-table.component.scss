@@ -1704,6 +1704,18 @@
 
 // ── Fila de filtros de columna / Column filter row ─────────────────────
 .neu-table__filter-row {
+  // Angular form controls do not all expose the same host box by default.
+  // Keep the host itself on the same compact rhythm as its visible control so
+  // table-cell vertical alignment cannot make text inputs look taller than
+  // number, date or selection filters.
+  neu-table-inline-filter-feature
+    > :is(neu-input, neu-number-input, neu-select, neu-multiselect, neu-date-input) {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 30px;
+  }
+
   .neu-table__th--filter,
   .neu-table__th--filter-placeholder {
     height: 42px;

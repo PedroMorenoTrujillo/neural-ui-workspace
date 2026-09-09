@@ -10,5 +10,6 @@ import { Directive, input } from '@angular/core';
   },
 })
 export class NeuTableRowReorderHandleDirective {
+  /** Prevents this element from starting a row reorder interaction. */
   readonly disabled = input(false, { alias: 'neuTableRowReorderHandleDisabled' });
 }

@@ -572,12 +572,14 @@ export class NeuTableAdvancedFilterFeatureComponent {
                 [nullable]="true"
                 [label]="_rangeLabel('from')"
                 [formControl]="rangeStartControl"
+                (inputDetail)="_onNumberInput(rangeStartControl, $event)"
                 (keydown)="_onEnter($event)"
               />
               <neu-number-input
                 [nullable]="true"
                 [label]="_rangeLabel('to')"
                 [formControl]="rangeEndControl"
+                (inputDetail)="_onNumberInput(rangeEndControl, $event)"
                 (keydown)="_onEnter($event)"
               />
             </div>
@@ -586,6 +588,7 @@ export class NeuTableAdvancedFilterFeatureComponent {
               [nullable]="true"
               [label]="_modernFilterLabel()"
               [formControl]="singleControl"
+              (inputDetail)="_onNumberInput(singleControl, $event)"
               (keydown)="_onEnter($event)"
             />
           }
@@ -823,6 +826,14 @@ export class NeuTableInlineFilterFeatureComponent {
         ? { from: this.rangeStartControl.value, to: this.rangeEndControl.value }
         : this._valueFromSingle(column, this.singleControl.value);
     this.host().setColumnFilter(column.key, value);
+  }
+
+  protected _onNumberInput(
+    control: FormControl<unknown>,
+    detail: { value: number | null; state: 'valid' | 'empty' | 'invalid' },
+  ): void {
+    if (detail.state === 'invalid' || Object.is(control.value, detail.value)) return;
+    control.setValue(detail.value);
   }
 
   private _singleChanged(value: unknown): void {
