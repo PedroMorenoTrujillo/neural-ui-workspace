@@ -117,6 +117,8 @@ import type {
   NeuTableDatePoint,
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
+  NeuTableFilterDisplay,
+  NeuTableFilterLabelDisplay,
   NeuTableFilterOn,
   NeuTableFilterOptions,
   NeuTableGlobalFilterAccessor,
@@ -278,6 +280,8 @@ export type {
   NeuTableDatePoint,
   NeuTableDateRangeValue,
   NeuTableFilterConfig,
+  NeuTableFilterDisplay,
+  NeuTableFilterLabelDisplay,
   NeuTableFilterOptions,
   NeuTableGlobalFilterAccessor,
   NeuTableGlobalFilterField,
@@ -1150,7 +1154,7 @@ export type NeuTableColumnInput<T extends object> =
                 }
               </tr>
               <!-- ── Fila de filtros de columna / Column filter row ── -->
-              @if (_hasFilterableCol()) {
+              @if (_showFilterRow()) {
                 <tr
                   class="neu-table__filter-row"
                   [attr.aria-rowindex]="_ariaCoordinatesActive() ? 2 : null"
@@ -1185,6 +1189,7 @@ export type NeuTableColumnInput<T extends object> =
                           <neu-table-inline-filter-feature
                             [host]="$any(_optionalFeaturesHost())"
                             [column]="$any(col)"
+                            [labelDisplay]="filterLabelDisplay()"
                           />
                         } @error {
                           <neu-table-optional-feature-error
@@ -1955,6 +1960,18 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   // ── Inputs de funcionalidad ──────────────────────────────────────────
   readonly searchable = input<boolean>(true);
   readonly advancedFilterMode = input<NeuTableAdvancedFilterMode>('off');
+  /**
+   * Controls whether configured column filters render inline, in the column
+   * menu, or in both places. `both` keeps the pre-existing Table behavior.
+   * Menu triggers additionally require `advancedFilterMode="menu"`.
+   */
+  readonly filterDisplay = input<NeuTableFilterDisplay>('both');
+  /**
+   * Controls the presentation of labels generated for inline filter controls.
+   * `sr-only` keeps each real label associated with its control while removing
+   * it from the visual layout.
+   */
+  readonly filterLabelDisplay = input<NeuTableFilterLabelDisplay>('visible');
   readonly advancedFilterTexts = input<Partial<NeuTableAdvancedFilterTexts>>({});
   readonly labels = input<NeuTableLabels>({});
   readonly filterOptions = input<NeuTableFilterOptions>({});
@@ -2150,6 +2167,11 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   readonly rowTrackBy = input<NeuTableRowTrackBy<T> | undefined>(undefined);
   readonly bordered = input<boolean>(true);
   readonly roundedBorders = input<boolean>(true);
+  /**
+   * Applies Neural alternating row surfaces to built-in and consumer-owned
+   * direct body rows. Custom structural/detail rows can opt out with
+   * `data-neu-table-stripe="exclude"`; nested tables keep their own policy.
+   */
   readonly stripedRows = input<boolean>(false);
 
   // ── Inputs nuevos v1.3.0 ──────────────────────────────────────────────
@@ -2335,6 +2357,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   /** True when a legacy or typed column filter is available. */
   protected readonly _hasFilterableCol = computed(() =>
     this.visibleColumns().some((column) => column.filterable || column.filterConfig),
+  );
+  protected readonly _showFilterRow = computed(
+    () => this._hasFilterableCol() && this.filterDisplay() !== 'menu',
   );
   protected readonly typedBooleanFilterOptions = computed<NeuSelectOption<boolean>[]>(() => [
     { label: this.filterTrueLabel(), value: true },
@@ -2802,7 +2827,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
       this.stickyHeader();
       this.renderedPageEntries();
       this.headerGroupTemplate();
-      this._hasFilterableCol();
+      this._showFilterRow();
       untracked(() => this._scheduleViewportBinding());
     });
 
@@ -3035,7 +3060,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   }
 
   protected _isFilterOverlayEligible(column: NeuTableColumn<T>): boolean {
-    if (this.advancedFilterMode() !== 'menu') return false;
+    if (this.advancedFilterMode() !== 'menu' || this.filterDisplay() === 'row') return false;
     const kind = column.filterConfig?.kind;
     if (
       kind === 'text' ||
@@ -3729,7 +3754,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
   );
 
   private readonly _virtualHeaderHeight = computed(
-    () => this._measuredHeaderHeight() || 44 + (this._hasFilterableCol() ? 52 : 0),
+    () => this._measuredHeaderHeight() || 44 + (this._showFilterRow() ? 52 : 0),
   );
 
   protected readonly _virtualScrollActive = computed(
@@ -4155,7 +4180,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     return cols;
   });
 
-  protected readonly _ariaHeaderRowCount = computed(() => (this._hasFilterableCol() ? 2 : 1));
+  protected readonly _ariaHeaderRowCount = computed(() => (this._showFilterRow() ? 2 : 1));
 
   /**
    * Native tables already expose complete row coordinates. Explicit ARIA is

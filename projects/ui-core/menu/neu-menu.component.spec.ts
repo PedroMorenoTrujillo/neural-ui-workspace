@@ -133,6 +133,41 @@ describe('NeuMenuComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Child');
   });
 
+  it('proposes opening a controlled collapsed branch with the directional key', () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'parent', label: 'Parent', children: [{ key: 'child', label: 'Child' }] },
+    ]);
+    fixture.componentRef.setInput('expandedKeys', []);
+    fixture.detectChanges();
+    const proposals = vi.spyOn(fixture.componentInstance.expandedKeysChange, 'emit');
+    const parent = fixture.nativeElement.querySelector('[role="menuitem"]') as HTMLButtonElement;
+    const event = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      bubbles: true,
+      cancelable: true,
+    });
+
+    parent.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(proposals).toHaveBeenCalledWith(['parent']);
+    expect(parent.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('ignores expansion requests for leaves and disabled branches', () => {
+    const proposals = vi.spyOn(fixture.componentInstance.expandedKeysChange, 'emit');
+
+    fixture.componentInstance.toggleExpanded({ key: 'leaf', label: 'Leaf' });
+    fixture.componentInstance.toggleExpanded({
+      key: 'locked',
+      label: 'Locked',
+      disabled: true,
+      children: [{ key: 'child', label: 'Child' }],
+    });
+
+    expect(proposals).not.toHaveBeenCalled();
+  });
+
   it('forwards expansion proposals from a rendered child menu', () => {
     fixture.componentRef.setInput('items', [
       {
@@ -315,6 +350,21 @@ describe('NeuMenuButtonComponent', () => {
     trigger.click();
     expect(component.open()).toBe(false);
     expect(changes).toHaveBeenLastCalledWith(false);
+  });
+
+  it('keeps a disabled trigger closed for pointer and keyboard requests', () => {
+    const component = fixture.componentInstance;
+    const changes = vi.spyOn(component.openChange, 'emit');
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+
+    component.toggle();
+    component.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
+    );
+
+    expect(component.open()).toBe(false);
+    expect(changes).not.toHaveBeenCalled();
   });
 
   it('closes once, propagates a selected item and closes from the backdrop', () => {

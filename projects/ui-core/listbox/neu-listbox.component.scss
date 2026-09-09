@@ -77,7 +77,7 @@
 
 .neu-listbox__option {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.625rem;
   border-radius: 0.5rem;
   padding: 0.625rem 0.75rem;
@@ -111,10 +111,17 @@
   display: inline-grid;
   place-items: center;
   flex: 0 0 1rem;
+  box-sizing: border-box;
   width: 1rem;
   height: 1rem;
   color: var(--neu-primary, #2563eb);
   font-weight: 700;
+  line-height: 1;
+}
+
+.neu-listbox__option > .neu-listbox__indicator {
+  align-self: flex-start;
+  margin-block-start: 0.25rem;
 }
 
 .neu-listbox__indicator--checkbox {
@@ -124,7 +131,7 @@
 
 .neu-listbox__option-content {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex: 1 1 auto;
   gap: 0.625rem;
   min-width: 0;

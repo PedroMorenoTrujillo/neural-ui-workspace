@@ -49,7 +49,11 @@ import type {
   InternalNeuTableOptionalFeatureHost,
   InternalNeuTableControl,
 } from './neu-table-optional-features.types';
-import type { NeuTableColumn, NeuTableFilterMatchMode } from './neu-table.types';
+import type {
+  NeuTableColumn,
+  NeuTableFilterLabelDisplay,
+  NeuTableFilterMatchMode,
+} from './neu-table.types';
 
 type OptionalRow = Record<string, unknown>;
 type OptionalHost = InternalNeuTableOptionalFeatureHost<OptionalRow>;
@@ -544,7 +548,11 @@ export class NeuTableAdvancedFilterFeatureComponent {
   ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: {
+    class: 'neu-table__inline-filter',
+    style: 'display: contents',
+    '[class.neu-table__inline-filter--sr-only-label]': 'labelDisplay() === "sr-only"',
+  },
   template: `
     @if (column().filterConfig; as config) {
       @switch (config.kind) {
@@ -683,6 +691,7 @@ export class NeuTableAdvancedFilterFeatureComponent {
 export class NeuTableInlineFilterFeatureComponent {
   readonly host = input.required<OptionalHost>();
   readonly column = input.required<OptionalColumn>();
+  readonly labelDisplay = input<NeuTableFilterLabelDisplay>('visible');
 
   private readonly _legacyControl = new FormControl<unknown>(null);
   private readonly _textControl = new FormControl<unknown>(null);

@@ -5,7 +5,6 @@ import {
   inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
 import { NeuResponsiveState } from '@neural-ui/core/internal';
@@ -117,12 +116,10 @@ export class NeuStepperComponent {
   /** Emite el nuevo índice al cambiar / Emits the new index on change */
   stepChange = output<number>();
 
-  /** Set de pasos completados / Set of completed steps */
-  private readonly _completed = signal<Set<number>>(new Set());
   readonly isCompact = this.responsive.observe('(max-width: 767px)');
 
   readonly isCompleted = (i: number) =>
-    this._completed().has(i) || (this.steps()[i]?.completed ?? false) || i < this.activeStep();
+    (this.steps()[i]?.completed ?? false) || i < this.activeStep();
 
   readonly stepTooltip = (step: NeuStepperStep) =>
     step.description ? `${step.label} - ${step.description}` : step.label;
@@ -139,9 +136,6 @@ export class NeuStepperComponent {
   /** Marca el paso actual como completado y avanza al siguiente / Marks the current step as completed and advances to the next */
   next(): void {
     const current = this.activeStep();
-    const updated = new Set(this._completed());
-    updated.add(current);
-    this._completed.set(updated);
     if (current < this.steps().length - 1) {
       this.stepChange.emit(current + 1);
     }

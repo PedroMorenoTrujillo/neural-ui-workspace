@@ -27,7 +27,26 @@
   }
 
   &--striped {
-    .neu-table__row:not(.neu-table__row--selected):nth-child(even) {
+    // Scope striping to this Table's direct body rows so nested tables keep
+    // their own visual policy. Body-section templates may render plain <tr>
+    // elements; known structural/detail rows and explicit opt-outs do not
+    // participate in the alternating sequence.
+    > .neu-table__scroll-container
+      > .neu-table
+      > .neu-table__body
+      > tr:nth-child(
+        even
+          of
+          :not(
+            .neu-table__row--placeholder,
+            .neu-table__row-expand-detail,
+            .neu-table__group-row,
+            .neu-table__group-footer-row,
+            .neu-table__spacer-row,
+            .neu-table__row--loading,
+            [data-neu-table-stripe='exclude']
+          )
+      ):not(.neu-table__row--selected):not([aria-selected='true']) {
       background: color-mix(in srgb, var(--neu-surface-2) 70%, transparent);
     }
   }
@@ -1647,6 +1666,34 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+// Preserve the real generated <label> and its control association while
+// removing only its visual footprint from compact inline-filter layouts.
+.neu-table__inline-filter--sr-only-label
+  :is(
+    .neu-input__static-label,
+    .neu-input__label,
+    .neu-number-input__label,
+    .neu-number-input__floating-label,
+    .neu-date-input__label,
+    .neu-date-input__float-label,
+    .neu-drp__label,
+    .neu-select__static-label,
+    .neu-select__label,
+    .neu-multiselect__static-label,
+    .neu-multiselect__label
+  ) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 // ── Fila de filtros de columna / Column filter row ─────────────────────

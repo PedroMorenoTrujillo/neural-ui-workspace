@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1494,
-    "bindingDelta": 327,
+    "declarationBindings": 1496,
+    "bindingDelta": 329,
     "mapped": 932,
     "aliasCorrections": 4,
     "missingOldEntries": 229,
-    "newlyDiscovered": 556,
+    "newlyDiscovered": 558,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
       "declaration-or-selector-was-not-recorded": 416,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 131
+      "multiline-annotated-or-compound-declaration-was-missed": 133
     }
   },
   "mappings": [
@@ -5695,6 +5695,14 @@
     },
     {
       "id": "./table#NeuTableComponent.input:exportOptions",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.input:filterDisplay",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.input:filterLabelDisplay",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {

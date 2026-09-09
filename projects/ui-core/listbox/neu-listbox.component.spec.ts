@@ -174,6 +174,47 @@ describe('NeuListboxComponent', () => {
     expect(host.nativeElement.textContent).toContain('Template: Alpha');
   });
 
+  it('aligns a checkbox with the first line of a composed option in every interaction state', async () => {
+    @Component({
+      imports: [NeuListboxComponent, NeuListboxItemDirective],
+      template: `
+        <neu-listbox [options]="options" [multiple]="true" [checkbox]="true">
+          <ng-template neuListboxItem let-option>
+            <span class="option-icon" aria-hidden="true">★</span>
+            <span class="option-copy">
+              <strong>{{ option.label }}</strong>
+              <small>Can edit content</small>
+            </span>
+          </ng-template>
+        </neu-listbox>
+      `,
+    })
+    class ComposedItemHostComponent {
+      readonly options = [{ label: 'Editor', value: 'editor', description: 'Can edit content' }];
+    }
+
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ imports: [ComposedItemHostComponent] })
+      .compileComponents();
+    const host = TestBed.createComponent(ComposedItemHostComponent);
+    host.detectChanges();
+
+    const option = host.nativeElement.querySelector('.neu-listbox__option') as HTMLElement;
+    const indicator = option.querySelector('.neu-listbox__indicator') as HTMLElement;
+    const content = option.querySelector('.neu-listbox__option-content') as HTMLElement;
+    expect(getComputedStyle(option).alignItems).toBe('flex-start');
+    expect(getComputedStyle(content).alignItems).toBe('flex-start');
+    expect(getComputedStyle(indicator).alignSelf).toBe('flex-start');
+    expect(getComputedStyle(indicator).marginBlockStart).toBe('0.25rem');
+
+    option.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    option.click();
+    host.detectChanges();
+    expect(option.classList).toContain('neu-listbox__option--selected');
+    expect(option.classList).toContain('neu-listbox__option--active');
+    expect(getComputedStyle(indicator).marginBlockStart).toBe('0.25rem');
+  });
+
   it('keyboard selection ignores an active index with no option', () => {
     const component = fixture.componentInstance;
     component.activeIndex.set(99);

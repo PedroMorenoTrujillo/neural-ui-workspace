@@ -494,6 +494,7 @@ describe('NeuOrderListComponent', () => {
     const option = fixture.nativeElement.querySelector('.neu-order-list__option');
     expect(option?.getAttribute('role')).toBeNull();
     expect(option?.getAttribute('aria-pressed')).toBe('false');
+    expect(fixture.nativeElement.querySelector('.neu-order-list__toolbar')).toBeNull();
 
     buttons[1].click();
     expect(changed).toHaveBeenLastCalledWith([items[1], items[0], items[2]]);
@@ -544,6 +545,10 @@ describe('NeuOrderListComponent', () => {
     fixture.componentRef.setInput('selectionKeys', ['c']);
     fixture.componentRef.setInput('filter', true);
     fixture.detectChanges();
+    const toolbar = fixture.nativeElement.querySelector('.neu-order-list__toolbar');
+    expect(toolbar?.querySelectorAll('button')).toHaveLength(4);
+    expect(toolbar?.getAttribute('aria-label')).toBe('Reorder selected items');
+    expect(toolbar?.querySelector('button[disabled]')).toBeNull();
     const orders: string[][] = [];
     const selections: string[][] = [];
     fixture.componentInstance.orderChange.subscribe((next) =>

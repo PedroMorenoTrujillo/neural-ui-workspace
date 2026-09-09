@@ -688,18 +688,19 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
         }
       </div>
     </div>
-    <div class="neu-order-list__toolbar" aria-label="Reorder selected items">
-      @for (move of listMoves; track move) {
-        <button
-          type="button"
-          [attr.aria-label]="orderActionLabel(move)"
-          [disabled]="!hasSelection()"
-          (click)="moveSelection(move)"
-        >
-          {{ moveIcon(move) }}
-        </button>
-      }
-    </div>
+    @if (hasSelection()) {
+      <div class="neu-order-list__toolbar" aria-label="Reorder selected items">
+        @for (move of listMoves; track move) {
+          <button
+            type="button"
+            [attr.aria-label]="orderActionLabel(move)"
+            (click)="moveSelection(move)"
+          >
+            {{ moveIcon(move) }}
+          </button>
+        }
+      </div>
+    }
   `,
   styleUrl: './neu-pick-list.component.scss',
 })

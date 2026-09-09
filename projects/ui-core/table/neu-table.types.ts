@@ -583,6 +583,18 @@ export type NeuTableFilterKind =
 
 export type NeuTableAdvancedFilterMode = 'off' | 'menu';
 
+/**
+ * Chooses where configured column filters are exposed.
+ *
+ * `row` renders the compact inline filter row, `menu` renders only the
+ * per-column filter triggers (when `advancedFilterMode` is `menu`), and
+ * `both` preserves the historical combined surface.
+ */
+export type NeuTableFilterDisplay = 'row' | 'menu' | 'both';
+
+/** Controls whether generated inline-filter labels are visual or accessible-only. */
+export type NeuTableFilterLabelDisplay = 'visible' | 'sr-only';
+
 export interface NeuTableAdvancedFilterTexts {
   openFilter: string;
   filterTitle: string;

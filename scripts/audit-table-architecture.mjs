@@ -56,7 +56,13 @@ const selectors = readdirSync('projects/ui-core/table')
   ])
   .map((match) => match[1]);
 
-const expected = { inputs: 77, outputs: 38, supportedMethods: 32, totalMethods: 292, selectors: 20 };
+const expected = {
+  inputs: 79,
+  outputs: 38,
+  supportedMethods: 32,
+  totalMethods: 292,
+  selectors: 20,
+};
 const actual = { inputs, outputs, supportedMethods, totalMethods, selectors: selectors.length };
 const violations = Object.entries(expected)
   .filter(([key, value]) => actual[key] !== value)
@@ -64,6 +70,8 @@ const violations = Object.entries(expected)
 
 const requiredConfigInputs = [
   'labels',
+  'filterDisplay',
+  'filterLabelDisplay',
   'filterOptions',
   'paginatorOptions',
   'exportOptions',

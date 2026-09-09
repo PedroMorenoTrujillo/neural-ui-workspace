@@ -1432,6 +1432,21 @@ describe('NeuTableComponent', () => {
     expect(f.nativeElement.classList.contains('neu-table__host--relaxed')).toBe(true);
   });
 
+  it('should opt into Neural alternating row styling when stripedRows=true', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('stripedRows', true);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(
+      f.nativeElement
+        .querySelector('.neu-table-container')
+        ?.classList.contains('neu-table-container--striped'),
+    ).toBe(true);
+  });
+
   // ── v1.3.0: showRowNumbers ────────────────────────────────────────────────
 
   it('should render row number column when showRowNumbers=true', async () => {
@@ -6831,6 +6846,27 @@ const OVERLAY_FILTER_DATA: OverlayFilterRow[] = [
   },
 ];
 
+const INLINE_FILTER_LABEL_COLUMNS = [
+  { key: 'text', header: 'Text', filterConfig: { kind: 'text' } },
+  { key: 'amount', header: 'Amount', filterConfig: { kind: 'number', mode: 'equals' } },
+  {
+    key: 'created',
+    header: 'Created',
+    filterConfig: { kind: 'date', mode: 'between', precision: 'instant' },
+  },
+  { key: 'enabled', header: 'Enabled', filterConfig: { kind: 'boolean' } },
+  {
+    key: 'status',
+    header: 'Status',
+    filterConfig: { kind: 'select', options: ['active', 'pending'] },
+  },
+  {
+    key: 'tags',
+    header: 'Tags',
+    filterConfig: { kind: 'multiSelect', options: ['core', 'ops'] },
+  },
+] satisfies readonly NeuTableColumn<Record<string, unknown>>[];
+
 describe('NeuTableComponent advanced filter overlay foundation', () => {
   beforeEach(async () => {
     if (!HTMLElement.prototype.scrollTo) {
@@ -6859,6 +6895,19 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
       enabled: false,
     });
     await settle(fixture);
+    return fixture;
+  }
+
+  async function createInlineLabelTable(): Promise<
+    ComponentFixture<NeuTableComponent<Record<string, unknown>>>
+  > {
+    const fixture = TestBed.createComponent(NeuTableComponent<Record<string, unknown>>);
+    fixture.componentRef.setInput('columns', INLINE_FILTER_LABEL_COLUMNS);
+    fixture.componentRef.setInput('data', []);
+    fixture.componentRef.setInput('pagination', false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
     return fixture;
   }
 
@@ -6906,6 +6955,103 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
       (fixture.nativeElement as HTMLElement).querySelectorAll('.neu-table__filter-overlay-trigger'),
     ).toHaveLength(0);
     expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+  });
+
+  it.each([
+    { display: 'row', filterRow: true, menuTriggers: 0 },
+    { display: 'menu', filterRow: false, menuTriggers: OVERLAY_FILTER_COLUMNS.length },
+    { display: 'both', filterRow: true, menuTriggers: OVERLAY_FILTER_COLUMNS.length },
+  ] as const)(
+    'filterDisplay=$display exposes the requested filter surface',
+    async ({ display, filterRow, menuTriggers }) => {
+      const fixture = await createOverlayTable();
+      fixture.componentRef.setInput('filterDisplay', display);
+      await settle(fixture);
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector('.neu-table__filter-row') !== null,
+      ).toBe(filterRow);
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.neu-table__filter-overlay-trigger',
+        ),
+      ).toHaveLength(menuTriggers);
+    },
+  );
+
+  it('closes an open menu when filterDisplay changes to row', async () => {
+    const fixture = await createOverlayTable();
+    const trigger = await openFilterOverlay(fixture, 'Status');
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    fixture.componentRef.setInput('filterDisplay', 'row');
+    await settle(fixture);
+
+    expect(document.querySelector('.neu-table__filter-overlay')).toBeNull();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.neu-table__filter-overlay-trigger'),
+    ).toHaveLength(0);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.neu-table__filter-row'),
+    ).toBeTruthy();
+  });
+
+  it('keeps generated inline-filter labels visible by default', async () => {
+    const fixture = await createInlineLabelTable();
+    const root = fixture.nativeElement as HTMLElement;
+    const features = root.querySelectorAll('neu-table-inline-filter-feature');
+    const labels = root.querySelectorAll(
+      '.neu-table__filter-row :is(.neu-input__static-label, .neu-number-input__label, .neu-number-input__floating-label, .neu-date-input__label, .neu-select__static-label, .neu-multiselect__static-label)',
+    );
+
+    expect(fixture.componentInstance.filterLabelDisplay()).toBe('visible');
+    expect(features).toHaveLength(INLINE_FILTER_LABEL_COLUMNS.length);
+    expect(labels).toHaveLength(7);
+    expect(root.querySelectorAll('.neu-table__inline-filter--sr-only-label')).toHaveLength(0);
+  });
+
+  it('keeps every generated inline-filter label associated and visually hidden in sr-only mode', async () => {
+    const fixture = await createInlineLabelTable();
+    fixture.componentRef.setInput('filterLabelDisplay', 'sr-only');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const features = Array.from(
+      root.querySelectorAll<HTMLElement>('neu-table-inline-filter-feature'),
+    );
+    const labels = Array.from(
+      root.querySelectorAll<HTMLLabelElement>(
+        '.neu-table__filter-row :is(.neu-input__static-label, .neu-number-input__label, .neu-number-input__floating-label, .neu-date-input__label, .neu-select__static-label, .neu-multiselect__static-label)',
+      ),
+    );
+
+    expect(features).toHaveLength(INLINE_FILTER_LABEL_COLUMNS.length);
+    expect(
+      features.every((feature) =>
+        feature.classList.contains('neu-table__inline-filter--sr-only-label'),
+      ),
+    ).toBe(true);
+    expect(labels).toHaveLength(7);
+    expect(labels.map((label) => label.textContent?.trim())).toEqual([
+      'Filter by Text (contains)',
+      'Filter by Amount (equals)',
+      'From Created',
+      'To Created',
+      'Filter by Enabled',
+      'Filter by Status (equals)',
+      'Filter by Tags (in)',
+    ]);
+    expect(
+      labels.every((label) => label.htmlFor !== '' && document.getElementById(label.htmlFor)),
+    ).toBe(true);
+
+    const componentStyles = Array.from(document.head.querySelectorAll('style'))
+      .map((style) => style.textContent ?? '')
+      .join('\n');
+    expect(componentStyles).toContain('.neu-table__inline-filter--sr-only-label :is(');
+    expect(componentStyles).toContain('clip-path: inset(50%)');
   });
 
   it('opens and closes the parent dialog shell with a stable trigger contract', async () => {
@@ -8095,24 +8241,18 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     const internal = internalFilters(fixture.componentInstance);
     await open(fixture, 'Name');
 
-    document
-      .querySelector<HTMLButtonElement>('.neu-table__filter-overlay-add-rule')!
-      .click();
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-add-rule')!.click();
     await settle(fixture);
     expect(internal._filterDraftRules()).toHaveLength(2);
 
-    document
-      .querySelector<HTMLButtonElement>('.neu-table__filter-overlay-remove-rule')!
-      .click();
+    document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-remove-rule')!.click();
     await settle(fixture);
     expect(internal._filterDraftRules()).toHaveLength(1);
 
     internal._filterOverlayTextControl.setValue('Beta');
     const action = (label: string): HTMLButtonElement =>
       Array.from(
-        document.querySelectorAll<HTMLButtonElement>(
-          '.neu-table__filter-overlay-actions button',
-        ),
+        document.querySelectorAll<HTMLButtonElement>('.neu-table__filter-overlay-actions button'),
       ).find((button) => button.textContent?.trim() === label)!;
     action('Clear').click();
     await settle(fixture);
@@ -8133,9 +8273,9 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       .querySelector<HTMLButtonElement>('.neu-table__filter-overlay .neu-select__trigger')!
       .click();
     await settle(fixture);
-    const active = Array.from(
-      document.querySelectorAll<HTMLElement>('.neu-select__option'),
-    ).find((option) => option.textContent?.includes('active'))!;
+    const active = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option')).find(
+      (option) => option.textContent?.includes('active'),
+    )!;
     active.click();
     await settle(fixture);
 
@@ -8204,9 +8344,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     const table = fixture.componentInstance;
     const setColumnFilter = vi.spyOn(table, 'setColumnFilter');
     const inlineFeatures = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll(
-        'neu-table-inline-filter-feature',
-      ),
+      (fixture.nativeElement as HTMLElement).querySelectorAll('neu-table-inline-filter-feature'),
     ).map(
       (element) =>
         (getDebugNode(element) as DebugElement).injector.get(
@@ -9353,9 +9491,9 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     (host.querySelector('th[data-neu-table-column-key]') as HTMLElement).dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true, clientX: 0 }),
     );
-    const movable = Array.from(
-      host.querySelectorAll('.neu-table__row-reorder-move'),
-    ).find((button) => !(button as HTMLButtonElement).disabled) as HTMLButtonElement;
+    const movable = Array.from(host.querySelectorAll('.neu-table__row-reorder-move')).find(
+      (button) => !(button as HTMLButtonElement).disabled,
+    ) as HTMLButtonElement;
     movable.click();
 
     expect(fixture.componentInstance.currentPage()).toBe(2);
@@ -9375,9 +9513,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       '.neu-table__page-size-select .neu-select__value',
     ) as HTMLElement;
     expect(selector.textContent?.trim()).toBe('10');
-    expect(
-      fixture.nativeElement.querySelectorAll('.neu-table__row').length,
-    ).toBe(10);
+    expect(fixture.nativeElement.querySelectorAll('.neu-table__row').length).toBe(10);
   });
 
   it('projects explicit, selected, filtered, page and loaded export scopes without duplicates', () => {
@@ -9697,9 +9833,9 @@ describe('NeuTableComponent functional advanced filter menu', () => {
 
     const [text, number, day, instant, select, multi, boolean, custom] = columns;
     expect(table.modernFilterMode(text)).toBe('contains');
-    expect(table.modernFilterMode({ ...text, filterConfig: { kind: 'text', mode: 'equals' } })).toBe(
-      'equals',
-    );
+    expect(
+      table.modernFilterMode({ ...text, filterConfig: { kind: 'text', mode: 'equals' } }),
+    ).toBe('equals');
     expect(table.modernFilterMode(number)).toBe('between');
     expect(table.modernFilterMode(day)).toBe('between');
     expect(table.modernFilterMode(select)).toBe('equals');
@@ -9823,7 +9959,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       preventDefault: vi.fn(),
     } as unknown as KeyboardEvent;
     table.onSortableHeaderKeydown('missing', missingKeyEvent);
-    expect((missingKeyEvent.preventDefault as any)).not.toHaveBeenCalled();
+    expect(missingKeyEvent.preventDefault as any).not.toHaveBeenCalled();
 
     fixture.componentRef.setInput('contextMenuSelection', rows[0]);
     fixture.detectChanges();

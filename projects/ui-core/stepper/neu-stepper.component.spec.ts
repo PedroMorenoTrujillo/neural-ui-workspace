@@ -129,12 +129,16 @@ describe('NeuStepperComponent', () => {
 
   // ── next() ────────────────────────────────────────────────────────────────
 
-  it('next() marks current step completed and emits next index', () => {
-    const { comp } = mk({ activeStep: 0 });
+  it('next() proposes the next index and completion follows the controlled activeStep', () => {
+    const { f, comp } = mk({ activeStep: 0 });
     const emitted: number[] = [];
     comp.stepChange.subscribe((v: number) => emitted.push(v));
     comp.next();
     expect(emitted).toEqual([1]);
+    expect(comp.isCompleted(0)).toBe(false);
+
+    f.componentRef.setInput('activeStep', 1);
+    f.detectChanges();
     expect(comp.isCompleted(0)).toBe(true);
   });
 
@@ -154,6 +158,27 @@ describe('NeuStepperComponent', () => {
     comp.stepChange.subscribe((v: number) => emitted.push(v));
     comp.prev();
     expect(emitted).toEqual([1]);
+  });
+
+  it('clears transient completion when the controlled step moves backwards', () => {
+    const { f, comp } = mk({ activeStep: 1 });
+    const emitted: number[] = [];
+    comp.stepChange.subscribe((v: number) => emitted.push(v));
+
+    comp.next();
+    f.componentRef.setInput('activeStep', emitted.at(-1));
+    f.detectChanges();
+    expect(f.nativeElement.querySelectorAll('.neu-stepper__step--completed')).toHaveLength(2);
+
+    comp.prev();
+    f.componentRef.setInput('activeStep', emitted.at(-1));
+    f.detectChanges();
+
+    const renderedSteps = f.nativeElement.querySelectorAll('.neu-stepper__step');
+    expect(renderedSteps[0].classList).toContain('neu-stepper__step--completed');
+    expect(renderedSteps[1].classList).toContain('neu-stepper__step--active');
+    expect(renderedSteps[1].classList).not.toContain('neu-stepper__step--completed');
+    expect(renderedSteps[2].classList).not.toContain('neu-stepper__step--completed');
   });
 
   it('prev() on first step does not emit', () => {

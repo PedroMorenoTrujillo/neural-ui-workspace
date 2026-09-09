@@ -241,6 +241,62 @@ class VirtualBodySectionHost {
   readonly rows = ROWS.slice(0, 1);
 }
 
+@Component({
+  imports: [NeuTableComponent, NeuTableBodySectionDirective],
+  template: `
+    <neu-table
+      class="outer-table"
+      [columns]="columns"
+      [data]="rows"
+      [pagination]="false"
+      [searchable]="false"
+      [stripedRows]="true"
+    >
+      <ng-template
+        neuTableBodySection
+        [neuTableBodySectionOf]="rows"
+        let-entries
+        let-colspan="colspan"
+      >
+        @for (entry of entries; track entry.key) {
+          @if (entry.kind === 'data') {
+            <tr [attr.data-plain-row]="entry.row.id">
+              <td>{{ entry.row.name }}</td>
+              <td>{{ entry.row.team }}</td>
+            </tr>
+            @if (entry.row.id === 1) {
+              <tr data-detail-row data-neu-table-stripe="exclude">
+                <td [attr.colspan]="colspan">
+                  <neu-table
+                    class="nested-table"
+                    [columns]="columns"
+                    [data]="nestedRows"
+                    [pagination]="false"
+                    [searchable]="false"
+                  />
+                </td>
+              </tr>
+            }
+          }
+        }
+      </ng-template>
+    </neu-table>
+    <neu-table
+      class="default-table"
+      [columns]="columns"
+      [data]="nestedRows"
+      [pagination]="false"
+      [searchable]="false"
+      [stripedRows]="true"
+    />
+  `,
+})
+class PlainStripedBodySectionHost {
+  readonly columns = COLUMNS;
+  readonly rows = ROWS;
+  readonly nestedRows = ROWS.slice(0, 2);
+}
+
 describe('NeuTable full body-section composition', () => {
   beforeEach(async () => {
     HTMLElement.prototype.scrollTo ??= vi.fn();
@@ -476,5 +532,49 @@ describe('NeuTable full body-section composition', () => {
     );
     expect(fixture.nativeElement.querySelector('.consumer-detail')).toBeNull();
     expect(fixture.nativeElement.querySelectorAll('tbody > tr').length).toBeLessThanOrEqual(8);
+  });
+
+  it('stripes classless custom body rows without leaking into detail or nested table rows', async () => {
+    const fixture = await create(PlainStripedBodySectionHost);
+    const outer = fixture.nativeElement.querySelector(
+      '.outer-table > .neu-table-container',
+    ) as HTMLElement;
+    const outerBody = outer.querySelector(':scope > .neu-table__scroll-container > table > tbody')!;
+    const plainRows = Array.from(
+      outerBody.querySelectorAll(':scope > tr[data-plain-row]'),
+    ) as HTMLTableRowElement[];
+    const detailRow = outerBody.querySelector(
+      ':scope > tr[data-detail-row]',
+    ) as HTMLTableRowElement;
+    const nested = detailRow.querySelector('.neu-table-container') as HTMLElement;
+    const nestedRows = Array.from(
+      nested.querySelectorAll(':scope > .neu-table__scroll-container > table > tbody > tr'),
+    ) as HTMLTableRowElement[];
+    const defaultTable = fixture.nativeElement.querySelector(
+      '.default-table > .neu-table-container',
+    ) as HTMLElement;
+    const defaultRows = Array.from(
+      defaultTable.querySelectorAll(
+        ':scope > .neu-table__scroll-container > table > tbody > tr.neu-table__row',
+      ),
+    ) as HTMLTableRowElement[];
+
+    expect(outer.classList.contains('neu-table-container--striped')).toBe(true);
+    expect(plainRows).toHaveLength(3);
+    expect(plainRows.every((row) => !row.classList.contains('neu-table__row'))).toBe(true);
+    expect(detailRow.getAttribute('data-neu-table-stripe')).toBe('exclude');
+    expect(nested.classList.contains('neu-table-container--striped')).toBe(false);
+    expect(nestedRows).toHaveLength(2);
+    expect(nestedRows.every((row) => row.classList.contains('neu-table__row'))).toBe(true);
+    expect(defaultTable.classList.contains('neu-table-container--striped')).toBe(true);
+    expect(defaultRows).toHaveLength(2);
+
+    const componentStyles = Array.from(document.head.querySelectorAll('style'))
+      .map((style) => style.textContent ?? '')
+      .join('\n');
+    expect(componentStyles).toContain(
+      '.neu-table-container--striped > .neu-table__scroll-container > .neu-table > .neu-table__body > tr:nth-child',
+    );
+    expect(componentStyles).toContain('[data-neu-table-stripe=exclude]');
   });
 });
