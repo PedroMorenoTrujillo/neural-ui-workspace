@@ -85,7 +85,7 @@ export class NeuMeterGroupComponent {
   readonly showLegend = input<boolean>(true);
 
   /** Aria-label de la barra / Aria-label for the bar */
-  readonly ariaLabel = input<string>('Medidor');
+  readonly ariaLabel = input<string>('Meter');
 
   readonly hostClasses = computed(() => ({
     'neu-meter-group': true,

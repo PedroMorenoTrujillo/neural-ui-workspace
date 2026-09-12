@@ -5055,7 +5055,9 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const multiple = this.multiSort();
     const entries = this._sortController.next(this.currentSort(), key, {
       multiple,
-      additive: multiple && event?.shiftKey === true,
+      additive:
+        multiple &&
+        (event?.shiftKey === true || event?.ctrlKey === true || event?.metaKey === true),
       removable: this.removableSort(),
       defaultOrder: this.defaultSortOrder() === -1 ? -1 : 1,
     });

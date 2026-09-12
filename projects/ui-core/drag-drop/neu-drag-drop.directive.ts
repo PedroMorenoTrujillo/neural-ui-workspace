@@ -26,39 +26,65 @@ import {
 } from '@angular/cdk/drag-drop';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+/** One or more application-defined channels used to match sources and destinations. */
 export type NeuDragScope = string | readonly string[];
+/** Operation proposed to the consumer after a compatible drop. */
 export type NeuDragEffect = 'copy' | 'move' | 'link' | 'none';
+/** Input method that initiated the drag-and-drop lifecycle. */
 export type NeuDragInteraction = 'pointer' | 'keyboard';
+/** Layout model used to calculate pointer insertion indexes inside a drop zone. */
+export type NeuDropOrientation = 'horizontal' | 'vertical' | 'mixed';
 
+/** Common immutable data emitted throughout a drag lifecycle. */
 export interface NeuDragEvent<T> {
+  /** Consumer payload attached to the drag source. */
   readonly data: T;
+  /** Normalized source scopes. */
   readonly scope: readonly string[];
+  /** Operation proposed by the source or accepting destination. */
   readonly effect: NeuDragEffect;
+  /** Whether the lifecycle was driven by a pointer or the keyboard. */
   readonly interaction: NeuDragInteraction;
+  /** Native initiating event, or null for lifecycle changes without a native event. */
   readonly originalEvent: MouseEvent | TouchEvent | KeyboardEvent | null;
 }
 
+/** Pointer coordinates emitted while a drag source moves. */
 export interface NeuDragMoveEvent<T> extends NeuDragEvent<T> {
+  /** Current page coordinates reported by Angular CDK. */
   readonly pointerPosition: Readonly<{ x: number; y: number }>;
+  /** Distance travelled since pickup. */
   readonly distance: Readonly<{ x: number; y: number }>;
 }
 
+/** Completion state emitted after a pointer or keyboard drag ends. */
 export interface NeuDragEndEvent<T> extends NeuDragEvent<T> {
+  /** Distance travelled; keyboard interactions always report zero. */
   readonly distance: Readonly<{ x: number; y: number }>;
+  /** True when the source was cancelled or released outside a compatible destination. */
   readonly cancelled: boolean;
 }
 
+/** Accepted destination proposal emitted without mutating consumer collections. */
 export interface NeuDropEvent<T, Z = unknown> extends NeuDragEvent<T> {
+  /** Consumer data attached to the accepting drop zone. */
   readonly targetData: Z;
+  /** Source index reported for pointer sorting or transfer operations. */
   readonly previousIndex?: number;
+  /** Proposed destination index reported for pointer sorting or transfer operations. */
   readonly currentIndex?: number;
 }
 
+/** Predicate used to accept or reject a typed payload for a destination. */
 export type NeuDropAccept<T, Z = unknown> = (data: T, targetData: Z) => boolean;
 
+/** Immutable collection result returned by neuTransfer. */
 export interface NeuTransferProposal<T> {
+  /** New source collection with the transferred item removed. */
   readonly source: readonly T[];
+  /** New destination collection with the transferred item inserted. */
   readonly target: readonly T[];
+  /** Original item reference that was transferred. */
   readonly item: T;
 }
 
@@ -67,6 +93,7 @@ interface DragEnvelope<T> {
   readonly data: T;
   readonly scope: readonly string[];
   readonly effect: NeuDragEffect;
+  readonly markPointerDropAccepted: () => void;
 }
 
 interface DropEnvelope<Z> {
@@ -76,7 +103,8 @@ interface DropEnvelope<Z> {
 
 interface KeyboardDragSession {
   readonly drag: DragEnvelope<unknown>;
-  readonly finish: (event: KeyboardEvent, cancelled: boolean) => void;
+  readonly group: NeuDragDropGroupDirective | null;
+  readonly finish: (event: KeyboardEvent | null, cancelled: boolean) => void;
   readonly focusSource: () => void;
 }
 
@@ -92,7 +120,7 @@ class NeuKeyboardDragRegistry {
     this.active.set(session);
   }
 
-  finish(event: KeyboardEvent, cancelled: boolean): KeyboardDragSession | null {
+  finish(event: KeyboardEvent | null, cancelled: boolean): KeyboardDragSession | null {
     const session = this.active();
     if (!session) {
       return null;
@@ -109,6 +137,15 @@ class NeuKeyboardDragRegistry {
       this.active.set(null);
     }
   }
+
+  cancelGroup(group: NeuDragDropGroupDirective): void {
+    const session = this.active();
+    if (session?.group !== group) {
+      return;
+    }
+    this.active.set(null);
+    session.finish(null, true);
+  }
 }
 
 function normalizeScope(scope: NeuDragScope): readonly string[] {
@@ -124,7 +161,11 @@ function isDragEnvelope(value: unknown): value is DragEnvelope<unknown> {
     return false;
   }
   const record = value as Record<PropertyKey, unknown>;
-  return Array.isArray(record['scope']) && typeof record['effect'] === 'string';
+  return (
+    Array.isArray(record['scope']) &&
+    typeof record['effect'] === 'string' &&
+    typeof record['markPointerDropAccepted'] === 'function'
+  );
 }
 
 /** Returns a reordered copy and never mutates the consumer's collection. */
@@ -177,12 +218,14 @@ export function neuTransfer<T>(
   },
 })
 export class NeuDragDropGroupDirective implements OnChanges, OnInit {
+  /** Disables pointer and keyboard interactions for all descendant sources and zones. */
   readonly disabled = input(false, {
     alias: 'neuDragDropGroupDisabled',
     transform: booleanAttribute,
   });
 
   private readonly group = inject(CdkDropListGroup, { self: true });
+  private readonly keyboardRegistry = inject(NeuKeyboardDragRegistry);
 
   ngOnInit(): void {
     this.syncCdk();
@@ -194,6 +237,9 @@ export class NeuDragDropGroupDirective implements OnChanges, OnInit {
 
   private syncCdk(): void {
     this.group.disabled = this.disabled();
+    if (this.disabled()) {
+      this.keyboardRegistry.cancelGroup(this);
+    }
   }
 }
 
@@ -205,26 +251,31 @@ export class NeuDragDropGroupDirective implements OnChanges, OnInit {
   host: {
     class: 'neu-draggable',
     '[class.neu-draggable--active]': 'active()',
-    '[class.neu-draggable--disabled]': 'disabled()',
+    '[class.neu-draggable--disabled]': '_disabled()',
     '[attr.role]': 'role()',
-    '[attr.tabindex]': 'disabled() ? -1 : tabIndex()',
+    '[attr.tabindex]': '_disabled() ? -1 : tabIndex()',
     '[attr.aria-label]': 'ariaLabel()',
-    '[attr.aria-disabled]': 'disabled() ? "true" : null',
+    '[attr.aria-disabled]': '_disabled() ? "true" : null',
     '[attr.aria-pressed]':
       'keyboardEnabled() && role() === "button" ? (keyboardActive() ? "true" : "false") : null',
-    '[attr.aria-keyshortcuts]': 'keyboardEnabled() ? "Enter Space Escape" : null',
+    '[attr.aria-keyshortcuts]': 'keyboardEnabled() && !_disabled() ? "Enter Space Escape" : null',
     '[attr.data-neu-drag-state]': 'active() ? "active" : "idle"',
     '(keydown)': 'onKeydown($event)',
   },
 })
 export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
+  /** Required payload emitted unchanged to compatible drop zones. */
   readonly data = input.required<T>({ alias: 'neuDraggable' });
+  /** Application-defined channel or channels that must overlap a destination scope. */
   readonly scope = input<NeuDragScope>('default', { alias: 'neuDragScope' });
+  /** Proposed operation exposed by source lifecycle events. */
   readonly effect = input<NeuDragEffect>('move', { alias: 'neuDragEffect' });
+  /** Prevents both pointer and keyboard pickup for this source. */
   readonly disabled = input(false, {
     alias: 'neuDraggableDisabled',
     transform: booleanAttribute,
   });
+  /** Enables Space/Enter pickup and Escape cancellation on the source host. */
   readonly keyboardEnabled = input(true, {
     alias: 'neuDragKeyboard',
     transform: booleanAttribute,
@@ -234,12 +285,18 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
     alias: 'neuDragPointer',
     transform: booleanAttribute,
   });
+  /** Accessible name for the draggable host. */
   readonly ariaLabel = input<string | null>(null, { alias: 'neuDragAriaLabel' });
+  /** Accessible role for the draggable host, or null to preserve native semantics. */
   readonly role = input<string | null>('button', { alias: 'neuDragRole' });
+  /** Keyboard tab order used while the source is enabled. */
   readonly tabIndex = input(0, { alias: 'neuDragTabIndex' });
 
+  /** Emits once when pointer or keyboard pickup starts. */
   readonly dragStart = output<NeuDragEvent<T>>();
+  /** Emits pointer coordinates while an active pointer drag moves. */
   readonly dragMove = output<NeuDragMoveEvent<T>>();
+  /** Emits completion and whether the operation was cancelled or rejected. */
   readonly dragEnd = output<NeuDragEndEvent<T>>();
 
   readonly pointerActive = signal(false);
@@ -250,6 +307,14 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
   private readonly keyboardRegistry = inject(NeuKeyboardDragRegistry);
+  private readonly dragDropGroup = inject(NeuDragDropGroupDirective, {
+    optional: true,
+    skipSelf: true,
+  });
+  protected readonly _disabled = computed(
+    () => this.disabled() || !!this.dragDropGroup?.disabled(),
+  );
+  private pointerDropAccepted = false;
 
   constructor() {
     this.cdkDrag.started
@@ -282,14 +347,14 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
     if (event.target !== this.host) {
       return;
     }
-    if (!this.keyboardEnabled() || this.disabled()) {
-      return;
-    }
-
     if (event.key === 'Escape' && this.keyboardActive()) {
       event.preventDefault();
       event.stopPropagation();
       this.keyboardRegistry.finish(event, true);
+      return;
+    }
+
+    if (!this.keyboardEnabled() || this._disabled()) {
       return;
     }
 
@@ -309,6 +374,7 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
     this.keyboardRegistry.start(
       {
         drag: envelope as DragEnvelope<unknown>,
+        group: this.dragDropGroup,
         finish: (finishEvent, cancelled) => {
           this.keyboardActive.set(false);
           this.dragEnd.emit({
@@ -330,6 +396,9 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
       data: this.data(),
       scope: normalizeScope(this.scope()),
       effect: this.effect(),
+      markPointerDropAccepted: () => {
+        this.pointerDropAccepted = true;
+      },
     };
   }
 
@@ -341,7 +410,7 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
   private eventBase(
     envelope: DragEnvelope<T>,
     interaction: NeuDragInteraction,
-    originalEvent: MouseEvent | TouchEvent | KeyboardEvent,
+    originalEvent: MouseEvent | TouchEvent | KeyboardEvent | null,
   ): NeuDragEvent<T> {
     return {
       data: envelope.data,
@@ -353,6 +422,7 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
   }
 
   private onPointerStart(event: CdkDragStart<DragEnvelope<T>>): void {
+    this.pointerDropAccepted = false;
     this.pointerActive.set(true);
     const envelope = event.source.data;
     this.dragStart.emit(this.eventBase(envelope, 'pointer', event.event));
@@ -373,7 +443,7 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
     this.dragEnd.emit({
       ...this.eventBase(envelope, 'pointer', event.event),
       distance: event.distance,
-      cancelled: false,
+      cancelled: !this.pointerDropAccepted,
     });
   }
 }
@@ -385,10 +455,10 @@ export class NeuDraggableDirective<T = unknown> implements OnChanges, OnInit {
   hostDirectives: [CdkDragHandle],
   host: {
     class: 'neu-drag-handle',
-    '[attr.aria-hidden]': '"true"',
   },
 })
 export class NeuDragHandleDirective implements OnChanges, OnInit {
+  /** Disables this handle without disabling the containing drag source. */
   readonly disabled = input(false, {
     alias: 'neuDragHandleDisabled',
     transform: booleanAttribute,
@@ -418,32 +488,52 @@ export class NeuDragHandleDirective implements OnChanges, OnInit {
     class: 'neu-drop-zone',
     '[class.neu-drop-zone--active]': 'keyboardAccepting()',
     '[class.neu-drop-zone--hover]': 'pointerHover()',
-    '[class.neu-drop-zone--disabled]': 'disabled()',
+    '[class.neu-drop-zone--disabled]': '_disabled()',
     '[attr.role]': 'role()',
-    '[attr.tabindex]': 'disabled() ? -1 : tabIndex()',
+    '[attr.tabindex]': '_disabled() ? -1 : tabIndex()',
     '[attr.aria-label]': 'ariaLabel()',
-    '[attr.aria-disabled]': 'disabled() ? "true" : null',
-    '[attr.aria-keyshortcuts]': '"Enter Space Escape"',
+    '[attr.aria-disabled]': '_disabled() ? "true" : null',
+    '[attr.aria-keyshortcuts]': '_disabled() ? null : "Enter Space Escape"',
     '[attr.data-neu-drop-state]':
       'pointerHover() ? "hover" : (keyboardAccepting() ? "active" : "idle")',
     '(keydown)': 'onKeydown($event)',
   },
 })
 export class NeuDropZoneDirective<T = unknown, Z = unknown> implements OnChanges, OnInit {
+  /** Consumer data identifying this destination. */
   readonly data = input<Z | undefined>(undefined, { alias: 'neuDropZone' });
+  /** Application-defined channel or channels that must overlap the source scope. */
   readonly scope = input<NeuDragScope>('default', { alias: 'neuDropScope' });
+  /** Operation proposed by drop events accepted by this destination. */
   readonly effect = input<NeuDragEffect>('move', { alias: 'neuDropEffect' });
+  /** Prevents pointer and keyboard drops on this destination. */
   readonly disabled = input(false, {
     alias: 'neuDropZoneDisabled',
     transform: booleanAttribute,
   });
+  /** Enables or disables positional sorting inside this zone. */
+  readonly sortingDisabled = input(false, {
+    alias: 'neuDropSortingDisabled',
+    transform: booleanAttribute,
+  });
+  /** Describes how CDK calculates the insertion index while pointer-dragging. */
+  readonly orientation = input<NeuDropOrientation>('vertical', {
+    alias: 'neuDropOrientation',
+  });
+  /** Optional typed predicate evaluated after scope compatibility. */
   readonly accept = input<NeuDropAccept<T, Z> | null>(null, { alias: 'neuDropAccept' });
+  /** Accessible name for the destination. */
   readonly ariaLabel = input<string | null>(null, { alias: 'neuDropAriaLabel' });
+  /** Accessible role for the destination, or null for a non-interactive pointer-only zone. */
   readonly role = input<string | null>('button', { alias: 'neuDropRole' });
+  /** Keyboard tab order used while the destination is enabled. */
   readonly tabIndex = input(0, { alias: 'neuDropTabIndex' });
 
+  /** Emits when a compatible pointer drag enters this destination. */
   readonly dragEnter = output<NeuDropEvent<T, Z>>();
+  /** Emits when a compatible pointer drag leaves this destination. */
   readonly dragLeave = output<NeuDropEvent<T, Z>>();
+  /** Emits the accepted pointer or keyboard proposal without mutating consumer state. */
   readonly drop = output<NeuDropEvent<T, Z>>();
 
   readonly pointerHover = signal(false);
@@ -453,6 +543,14 @@ export class NeuDropZoneDirective<T = unknown, Z = unknown> implements OnChanges
   >;
   private readonly destroyRef = inject(DestroyRef);
   private readonly keyboardRegistry = inject(NeuKeyboardDragRegistry);
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly dragDropGroup = inject(NeuDragDropGroupDirective, {
+    optional: true,
+    skipSelf: true,
+  });
+  protected readonly _disabled = computed(
+    () => this.disabled() || !!this.dragDropGroup?.disabled(),
+  );
 
   readonly keyboardAccepting = computed(() => {
     const session = this.keyboardRegistry.active();
@@ -480,6 +578,9 @@ export class NeuDropZoneDirective<T = unknown, Z = unknown> implements OnChanges
   }
 
   onKeydown(event: KeyboardEvent): void {
+    if (event.target !== this.host) {
+      return;
+    }
     const session = this.keyboardRegistry.active();
     if (event.key === 'Escape' && session) {
       event.preventDefault();
@@ -490,7 +591,7 @@ export class NeuDropZoneDirective<T = unknown, Z = unknown> implements OnChanges
 
     if (
       !session ||
-      this.disabled() ||
+      this._disabled() ||
       !this.acceptsEnvelope(session.drag) ||
       (event.key !== 'Enter' && event.key !== ' ')
     ) {
@@ -513,12 +614,13 @@ export class NeuDropZoneDirective<T = unknown, Z = unknown> implements OnChanges
       data: this.targetData(),
     };
     this.cdkDropList.disabled = this.disabled();
-    this.cdkDropList.sortingDisabled = true;
+    this.cdkDropList.sortingDisabled = this.sortingDisabled();
+    this.cdkDropList.orientation = this.orientation();
     this.cdkDropList.enterPredicate = (drag) => this.acceptsEnvelope(drag.data);
   }
 
   private acceptsEnvelope(envelope: unknown): envelope is DragEnvelope<T> {
-    if (this.disabled() || !isDragEnvelope(envelope)) {
+    if (this._disabled() || !isDragEnvelope(envelope)) {
       return false;
     }
     if (!scopesMatch(envelope.scope, normalizeScope(this.scope()))) {
@@ -569,6 +671,7 @@ export class NeuDropZoneDirective<T = unknown, Z = unknown> implements OnChanges
     if (!this.acceptsEnvelope(envelope)) {
       return;
     }
+    envelope.markPointerDropAccepted();
     this.drop.emit(
       this.dropEvent(envelope, 'pointer', event.event, {
         previousIndex: event.previousIndex,

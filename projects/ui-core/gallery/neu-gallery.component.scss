@@ -151,8 +151,8 @@
   justify-content: center;
   min-inline-size: 2.75rem;
   min-block-size: 2.75rem;
-  padding-inline: 0.75rem;
-  gap: 0.4rem;
+  inline-size: 2.75rem;
+  padding: 0;
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius);
   background: var(--neu-surface);
@@ -168,20 +168,6 @@
 .neu-gallery__toolbar button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-.neu-gallery__tool-icon {
-  display: inline-grid;
-  place-items: center;
-  min-inline-size: 1.35rem;
-  font-size: 1.4rem;
-  font-weight: 500;
-  line-height: 1;
-}
-.neu-gallery__tool-label {
-  font-size: var(--neu-text-xs);
-  font-weight: 650;
-  line-height: 1;
-  white-space: nowrap;
 }
 .neu-gallery__tool--close {
   color: var(--neu-danger, var(--neu-text));

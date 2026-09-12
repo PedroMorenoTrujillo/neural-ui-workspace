@@ -11,7 +11,7 @@
   "provenance": {
     "h9B3LibraryCommit": "38b75030290b63041cc3a574066759b5bbb83dde",
     "h9B3LibraryTree": "78be43648df2aa58956eeb6f0ca2d3a3bc363aba",
-    "calibration": "Final H9-B4 candidate after coverage and accessibility corrections"
+    "calibration": "Neural UI 1.15.0 release candidate after the reviewed component, accessibility, composition, and documentation expansion"
   },
   "toolchain": {
     "node": "22.22.3",
@@ -25,47 +25,39 @@
   },
   "scenarios": {
     "root-unused": { "baseline": { "raw": 0, "gzip": 20, "brotli": 1 } },
-    "provider": { "baseline": { "raw": 1693, "gzip": 736, "brotli": 653 } },
-    "button": { "baseline": { "raw": 18008, "gzip": 3139, "brotli": 2665 } },
-    "select": { "baseline": { "raw": 124667, "gzip": 21902, "brotli": 19159 } },
-    "multiselect": { "baseline": { "raw": 151344, "gzip": 28704, "brotli": 20794 } },
-    "table-basic": { "baseline": { "raw": 30198, "gzip": 4084, "brotli": 3444 } },
-    "table-advanced-lazy": { "baseline": { "raw": 939602, "gzip": 162049, "brotli": 102304 } },
-    "tree-basic": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
-    "tree-checkbox": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
-    "tree-lazy": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
-    "tree-virtual": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
-    "tree-dnd-full": { "baseline": { "raw": 82739, "gzip": 15801, "brotli": 13560 } },
-    "kanban": {
-      "baseline": { "raw": 19743, "gzip": 3258, "brotli": 2777 },
-      "budget": {
-        "raw": { "warning": 36743, "failure": 37743 },
-        "gzip": { "warning": 6758, "failure": 7058 },
-        "brotli": { "warning": 5877, "failure": 6177 }
-      },
-      "rationale": "H9-C3 reviewed accessibility/state-ownership closure: keyboard state machine, pointer-independent controls, live announcements, focus continuity and controlled mode."
-    },
-    "tree-table": { "baseline": { "raw": 1026326, "gzip": 177071, "brotli": 111682 } },
-    "dialog-basic": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
-    "dialog-draggable": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
-    "dialog-resizable": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
-    "dialog-maximizable": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
-    "dialog-all-advanced": { "baseline": { "raw": 48970, "gzip": 9447, "brotli": 8221 } },
-    "color-picker-basic": { "baseline": { "raw": 55431, "gzip": 11375, "brotli": 9988 } },
-    "color-picker-advanced": { "baseline": { "raw": 55431, "gzip": 11375, "brotli": 9988 } },
-    "pick-list-order-list": { "baseline": { "raw": 72330, "gzip": 11600, "brotli": 9885 } },
-    "menu": { "baseline": { "raw": 64072, "gzip": 9832, "brotli": 8644 } },
-    "pagination": { "baseline": { "raw": 12689, "gzip": 2453, "brotli": 2092 } }
+    "provider": { "baseline": { "raw": 2178, "gzip": 948, "brotli": 854 } },
+    "button": { "baseline": { "raw": 18064, "gzip": 3148, "brotli": 2672 } },
+    "select": { "baseline": { "raw": 125947, "gzip": 22311, "brotli": 19379 } },
+    "multiselect": { "baseline": { "raw": 152576, "gzip": 28867, "brotli": 20847 } },
+    "table-basic": { "baseline": { "raw": 30198, "gzip": 4084, "brotli": 3446 } },
+    "table-advanced-lazy": { "baseline": { "raw": 954019, "gzip": 165462, "brotli": 103647 } },
+    "tree-basic": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "tree-checkbox": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "tree-lazy": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "tree-virtual": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "tree-dnd-full": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "kanban": { "baseline": { "raw": 43578, "gzip": 7879, "brotli": 6860 } },
+    "tree-table": { "baseline": { "raw": 1040899, "gzip": 180473, "brotli": 113265 } },
+    "dialog-basic": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "dialog-draggable": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "dialog-resizable": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "dialog-maximizable": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "dialog-all-advanced": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "color-picker-basic": { "baseline": { "raw": 55431, "gzip": 11375, "brotli": 10007 } },
+    "color-picker-advanced": { "baseline": { "raw": 55431, "gzip": 11375, "brotli": 10007 } },
+    "pick-list-order-list": { "baseline": { "raw": 76025, "gzip": 11936, "brotli": 10202 } },
+    "menu": { "baseline": { "raw": 70946, "gzip": 10266, "brotli": 8913 } },
+    "pagination": { "baseline": { "raw": 140883, "gzip": 24933, "brotli": 21379 } }
   },
   "aggregate": {
-    "baseline": { "chunks": 107, "raw": 3554849, "gzip": 616591, "brotli": 499304 },
-    "raw": { "warning": 3587617, "failure": 3620385 },
-    "gzip": { "warning": 628879, "failure": 641167 },
-    "brotli": { "warning": 512000, "failure": 524288 }
+    "baseline": { "chunks": 107, "raw": 3672316, "gzip": 634881, "brotli": 514169 },
+    "raw": { "warning": 3705084, "failure": 3737852 },
+    "gzip": { "warning": 647169, "failure": 659457 },
+    "brotli": { "warning": 526457, "failure": 538745 }
   },
   "package": {
-    "baseline": { "packed": 707404, "unpacked": 4580468, "files": 336 },
-    "packed": { "warning": 714479, "failure": 728627 },
-    "unpacked": { "warning": 4626273, "failure": 4717883 }
+    "baseline": { "packed": 741374, "unpacked": 4749112, "files": 336 },
+    "packed": { "warning": 748788, "failure": 763616 },
+    "unpacked": { "warning": 4796604, "failure": 4891586 }
   }
 }

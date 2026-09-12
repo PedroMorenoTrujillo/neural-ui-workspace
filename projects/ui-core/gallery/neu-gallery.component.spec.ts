@@ -1,5 +1,18 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideIcons } from '@ng-icons/core';
+import {
+  lucideChevronLeft,
+  lucideChevronRight,
+  lucideDownload,
+  lucideFlipHorizontal2,
+  lucideFlipVertical2,
+  lucideRotateCcw,
+  lucideRotateCw,
+  lucideX,
+  lucideZoomIn,
+  lucideZoomOut,
+} from '@ng-icons/lucide';
 import {
   NeuGalleryCaptionDirective,
   NeuGalleryComponent,
@@ -30,7 +43,21 @@ class GalleryTemplateHost {
 describe('NeuGalleryComponent', () => {
   beforeEach(async () =>
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideIcons({
+          lucideChevronLeft,
+          lucideChevronRight,
+          lucideDownload,
+          lucideFlipHorizontal2,
+          lucideFlipVertical2,
+          lucideRotateCcw,
+          lucideRotateCw,
+          lucideX,
+          lucideZoomIn,
+          lucideZoomOut,
+        }),
+      ],
     }).compileComponents(),
   );
 
@@ -232,7 +259,7 @@ describe('NeuGalleryComponent', () => {
     expect(fixture.componentInstance.isPreviewOpen()).toBe(false);
   });
 
-  it('renders named toolbar controls with visible and native labels', () => {
+  it('renders uniform icon-only toolbar controls with accessible labels and tooltips', () => {
     const fixture = TestBed.createComponent(NeuGalleryComponent);
     fixture.componentRef.setInput('items', ITEMS);
     fixture.componentRef.setInput('zoomOutLabel', 'Alejar');
@@ -266,9 +293,11 @@ describe('NeuGalleryComponent', () => {
     expect(controls.map((control) => control.getAttribute('title'))).toEqual(
       controls.map((control) => control.getAttribute('aria-label')),
     );
-    expect(
-      controls.map((control) => control.querySelector('.neu-gallery__tool-label')?.textContent),
-    ).toEqual(controls.map((control) => control.getAttribute('aria-label')));
+    expect(controls.map((control) => control.getAttribute('title'))).toEqual(
+      controls.map((control) => control.getAttribute('aria-label')),
+    );
+    expect(controls.every((control) => control.querySelector('neu-icon'))).toBe(true);
+    expect(controls.every((control) => !control.textContent?.trim())).toBe(true);
   });
 
   it('renders strict projected item and caption templates', () => {

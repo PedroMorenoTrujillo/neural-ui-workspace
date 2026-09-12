@@ -21,38 +21,59 @@ import {
 export type NeuSchedulerGanttScale = 'day' | 'week';
 
 export interface NeuSchedulerGanttTask {
+  /** Stable task identifier. / Identificador estable de la tarea. */
   id: string;
+  /** Main label rendered inside the task block. / Etiqueta principal del bloque de tarea. */
   title: string;
+  /** Inclusive task start. / Inicio inclusivo de la tarea. */
   start: string | Date;
+  /** Inclusive task end; defaults to start. / Fin inclusivo; usa start cuando se omite. */
   end?: string | Date;
+  /** Secondary line inside the task. / Línea secundaria de la tarea. */
   subtitle?: string;
+  /** Short metadata appended to progress. / Metadato breve añadido al progreso. */
   meta?: string;
+  /** Semantic visual variant. / Variante visual semántica. */
   variant?: NeuTimelineGridItemVariant;
+  /** Progress percentage clamped to 0–100. / Porcentaje de progreso limitado a 0–100. */
   progress?: number;
 }
 
 export interface NeuSchedulerGanttRow {
+  /** Stable row identifier. / Identificador estable de la fila. */
   id: string;
+  /** Sticky row label. / Etiqueta fija de la fila. */
   label: string;
+  /** Optional explanatory row text. / Texto explicativo opcional de la fila. */
   description?: string;
+  /** Tasks placed on this row. / Tareas colocadas en esta fila. */
   tasks: NeuSchedulerGanttTask[];
 }
 
 export interface NeuSchedulerGanttTaskClick {
+  /** Owning row identifier. / Identificador de la fila propietaria. */
   rowId: string;
+  /** Owning row label. / Etiqueta de la fila propietaria. */
   rowLabel: string;
+  /** Original consumer task. / Tarea original del consumidor. */
   task: NeuSchedulerGanttTask;
 }
 
 export interface NeuSchedulerGanttSlotClick {
+  /** Owning row identifier. / Identificador de la fila propietaria. */
   rowId: string;
+  /** Generated time-column identifier. / Identificador de la columna temporal generada. */
   columnId: string;
+  /** ISO date represented by the slot. / Fecha ISO representada por el slot. */
   date: string;
+  /** Scale active when the slot was clicked. / Escala activa al pulsar el slot. */
   scale: NeuSchedulerGanttScale;
 }
 
 export interface NeuSchedulerGanttSelectedSlot {
+  /** Row that owns the controlled selection. / Fila propietaria de la selección controlada. */
   rowId: string;
+  /** Date mapped to the matching day or week column. / Fecha asociada a la columna diaria o semanal. */
   date: string | Date;
 }
 
@@ -93,21 +114,35 @@ export interface NeuSchedulerGanttSelectedSlot {
 export class NeuSchedulerGanttComponent {
   private readonly temporal = inject(NeuInitialTemporalState);
   private readonly defaultLocale = inject(NEURAL_LOCALE);
+  /** Task rows used to infer both the visible range and grid blocks. / Filas usadas para inferir el rango visible y los bloques de la rejilla. */
   readonly rows = input<NeuSchedulerGanttRow[]>([]);
+  /** Optional lower range bound; inferred from tasks when null. / Límite inferior opcional; se infiere de las tareas cuando es null. */
   readonly startDate = input<string | Date | null>(null);
+  /** Optional upper range bound; inferred from tasks when null. / Límite superior opcional; se infiere de las tareas cuando es null. */
   readonly endDate = input<string | Date | null>(null);
+  /** Intl locale for generated dates; defaults to NEURAL_LOCALE. / Locale de Intl para las fechas; usa NEURAL_LOCALE por defecto. */
   readonly locale = input<string | undefined>(undefined);
+  /** Groups the generated columns by day or ISO week. / Agrupa las columnas generadas por día o semana ISO. */
   readonly scale = input<NeuSchedulerGanttScale>('day');
+  /** Heading shown when showSummary is enabled. / Título mostrado cuando showSummary está activo. */
   readonly title = input('Delivery timeline');
+  /** Uses the compact density of the underlying timeline grid. / Usa la densidad compacta de la rejilla temporal interna. */
   readonly compact = input(false);
+  /** Keeps row labels visible during horizontal scrolling. / Mantiene visibles las etiquetas durante el scroll horizontal. */
   readonly stickyLabels = input(true);
+  /** CSS width used as the minimum for every generated time column. / Ancho CSS mínimo de cada columna temporal generada. */
   readonly minColumnWidth = input('112px');
+  /** Shows title, inferred range and task count above the grid. / Muestra título, rango inferido y número de tareas sobre la rejilla. */
   readonly showSummary = input(true);
+  /** Controlled identifier of the highlighted task. / Identificador controlado de la tarea resaltada. */
   readonly selectedTaskId = input<string | null>(null);
+  /** Controlled empty-slot selection. / Selección controlada de un slot vacío. */
   readonly selectedSlot = input<NeuSchedulerGanttSelectedSlot | null>(null);
   readonly resolvedLocale = computed(() => this.locale() || this.defaultLocale);
 
+  /** Emits the original task together with its owning row. / Emite la tarea original junto a su fila propietaria. */
   readonly taskClick = output<NeuSchedulerGanttTaskClick>();
+  /** Emits the row, generated column, ISO date and active scale. / Emite fila, columna generada, fecha ISO y escala activa. */
   readonly slotClick = output<NeuSchedulerGanttSlotClick>();
 
   private readonly _bounds = computed(() => {

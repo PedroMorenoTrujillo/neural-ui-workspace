@@ -79,6 +79,17 @@ describe('NeuDashboardGridComponent', () => {
     expect(f.nativeElement.style.getPropertyValue('--neu-dg-cols')).toBe('4');
   });
 
+  it('uses mixed drop-list orientation so a CSS grid can reorder across rows and columns', async () => {
+    const f = setup();
+    f.detectChanges();
+    await f.whenStable();
+
+    const dropList = f.debugElement
+      .query(By.directive(CdkDropList))
+      .injector.get(CdkDropList) as CdkDropList<NeuDashboardTileConfig[]>;
+    expect(dropList.orientation).toBe('mixed');
+  });
+
   it('_onDrop should reorder tiles and emit orderChange', async () => {
     const f = setup();
     await f.whenStable();
@@ -100,7 +111,8 @@ describe('NeuDashboardGridComponent', () => {
     expect(TILES.map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
 
     const replacement = [{ id: 'server', title: 'Server layout' }];
-    f.componentRef.setInput('tiles', replacement); f.detectChanges();
+    f.componentRef.setInput('tiles', replacement);
+    f.detectChanges();
     expect(f.componentInstance['_orderedTiles']()).toEqual(replacement);
   });
 

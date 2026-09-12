@@ -22,18 +22,44 @@ export type NeuCalendarView = 'month' | 'week';
 export type NeuCalendarEventVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface NeuCalendarEvent {
+  /** Stable event identifier. / Identificador estable del evento. */
   id: string;
+  /** Visible event title. / Título visible del evento. */
   title: string;
+  /** Start date or date-time. / Fecha o fecha y hora de inicio. */
   start: string | Date;
+  /** Optional end date or date-time. / Fecha o fecha y hora de fin opcional. */
   end?: string | Date;
+  /** Longer text shown in the agenda. / Texto ampliado mostrado en la agenda. */
   description?: string;
+  /** Short metadata shown beside the title. / Metadato breve mostrado junto al título. */
   meta?: string;
+  /** Uses the localized all-day label instead of a time. / Usa la etiqueta localizada de día completo en lugar de una hora. */
   allDay?: boolean;
+  /** Semantic colour applied to the event. / Color semántico aplicado al evento. */
   variant?: NeuCalendarEventVariant;
 }
 export type NeuCalendarEventView = 'month' | 'week' | 'agenda';
+
+export interface NeuCalendarEventContext {
+  /** Event currently being rendered. / Evento que se está renderizando. */
+  readonly $implicit: NeuCalendarEvent;
+  /** Surface where the template is rendered. / Superficie donde se renderiza la plantilla. */
+  readonly view: NeuCalendarEventView;
+}
+
+/** Replaces each event's visual content in month, week and agenda views. / Sustituye el contenido visual de cada evento en las vistas mensual, semanal y agenda. */
 @Directive({ selector: 'ng-template[neuCalendarEvent]' })
-export class NeuCalendarEventDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuCalendarEvent; view: NeuCalendarEventView }>) {} }
+export class NeuCalendarEventDirective {
+  constructor(readonly templateRef: TemplateRef<NeuCalendarEventContext>) {}
+
+  static ngTemplateContextGuard(
+    _directive: NeuCalendarEventDirective,
+    context: unknown,
+  ): context is NeuCalendarEventContext {
+    return true;
+  }
+}
 
 export interface NeuCalendarLabels {
   previousButtonAriaLabel: string;
@@ -197,17 +223,33 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                       [attr.aria-label]="eventTooltip(event)"
                       (click)="onEventClick($event, event)"
                     >
-                      @if (eventTpl()) { <ng-container [ngTemplateOutlet]="eventTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: event, view: 'month' }" /> } @else { <span class="neu-calendar__event-title">{{ event.title }}</span><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span> }
+                      @if (eventTpl()) {
+                        <ng-container
+                          [ngTemplateOutlet]="eventTpl()!.templateRef"
+                          [ngTemplateOutletContext]="{ $implicit: event, view: 'month' }"
+                        />
+                      } @else {
+                        <span class="neu-calendar__event-title">{{ event.title }}</span
+                        ><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span>
+                      }
                     </button>
                   }
                   @if (day.events.length > monthVisibleEvents(day.events).length) {
                     <button
                       type="button"
                       class="neu-calendar__more neu-calendar__more--summary"
-                      [attr.aria-label]="resolvedLabels().moreEvents(day.events.length - monthVisibleEvents(day.events).length)"
+                      [attr.aria-label]="
+                        resolvedLabels().moreEvents(
+                          day.events.length - monthVisibleEvents(day.events).length
+                        )
+                      "
                       (click)="openDay(day.date)"
                     >
-                      {{ resolvedLabels().moreEvents(day.events.length - monthVisibleEvents(day.events).length) }}
+                      {{
+                        resolvedLabels().moreEvents(
+                          day.events.length - monthVisibleEvents(day.events).length
+                        )
+                      }}
                     </button>
                   }
                 </div>
@@ -249,7 +291,15 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                       [attr.aria-label]="eventTooltip(event)"
                       (click)="onEventClick($event, event)"
                     >
-                      @if (eventTpl()) { <ng-container [ngTemplateOutlet]="eventTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: event, view: 'week' }" /> } @else { <span class="neu-calendar__event-title">{{ event.title }}</span><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span> }
+                      @if (eventTpl()) {
+                        <ng-container
+                          [ngTemplateOutlet]="eventTpl()!.templateRef"
+                          [ngTemplateOutletContext]="{ $implicit: event, view: 'week' }"
+                        />
+                      } @else {
+                        <span class="neu-calendar__event-title">{{ event.title }}</span
+                        ><span class="neu-calendar__event-meta">{{ formatEventMeta(event) }}</span>
+                      }
                     </button>
                   }
 
@@ -269,12 +319,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
         }
       </div>
 
-      <section
-        #agenda
-        class="neu-calendar__agenda"
-        aria-live="polite"
-        tabindex="-1"
-      >
+      <section #agenda class="neu-calendar__agenda" aria-live="polite" tabindex="-1">
         <div class="neu-calendar__agenda-header">
           <h4 class="neu-calendar__agenda-title">{{ selectedAgendaLabel() }}</h4>
           <span class="neu-calendar__agenda-count">{{
@@ -328,12 +373,19 @@ export class NeuCalendarComponent {
   });
   readonly eventTpl = contentChild(NeuCalendarEventDirective);
   private readonly agenda = viewChild<ElementRef<HTMLElement>>('agenda');
+  /** Events grouped by their start date; the component never mutates this array. / Eventos agrupados por su fecha de inicio; el componente nunca modifica el array. */
   readonly events = input<NeuCalendarEvent[]>([]);
+  /** Active month or week layout. / Layout mensual o semanal activo. */
   readonly view = input<NeuCalendarView>('month');
+  /** Controlled date used for navigation, selection and the visible range. / Fecha controlada usada para navegación, selección y rango visible. */
   readonly selectedDate = input<Date | string>(this.temporal.today());
+  /** Intl locale used for weekday, month and time formatting. / Locale de Intl usado para formatear días, meses y horas. */
   readonly locale = input<string>(this.defaultLocale);
+  /** Maximum event chips per day before showing the “more” summary. / Máximo de eventos por día antes de mostrar el resumen «más». */
   readonly maxVisibleEvents = input<number>(3);
+  /** Shows the current range and navigation actions. / Muestra el rango actual y las acciones de navegación. */
   readonly showHeader = input<boolean>(true);
+  /** Overrides visible copy and accessible labels; omitted keys keep locale defaults. / Sobrescribe textos visibles y accesibles; las claves omitidas conservan los valores del locale. */
   readonly labels = input<NeuCalendarLabelOverrides>({});
   /** First weekday, using JavaScript day numbers (0 Sunday … 6 Saturday). Default: 1 (Monday). */
   readonly firstDayOfWeek = input<number>(1);

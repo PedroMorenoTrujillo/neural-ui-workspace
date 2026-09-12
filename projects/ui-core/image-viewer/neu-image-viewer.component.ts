@@ -17,6 +17,7 @@ import {
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
+import { NeuIconComponent } from '@neural-ui/core/icon';
 
 export interface NeuImageViewerItem {
   src: string;
@@ -42,7 +43,7 @@ interface _NeuIvData {
  */
 @Component({
   selector: 'neu-image-viewer-overlay',
-  imports: [NeuFocusTrapDirective, NeuModalFocusDirective],
+  imports: [NeuFocusTrapDirective, NeuModalFocusDirective, NeuIconComponent],
   hostDirectives: [NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,22 +62,23 @@ interface _NeuIvData {
       <div class="neu-iv__toolbar">
         <span class="neu-iv__counter">{{ _index() + 1 }} / {{ _data.items.length }}</span>
         <div class="neu-iv__toolbar-actions">
-          <button type="button" class="neu-iv__btn" aria-label="Zoom in" (click)="_zoom(0.25)">
-            ＋
+          <button type="button" class="neu-iv__btn" aria-label="Zoom in" title="Zoom in" (click)="_zoom(0.25)">
+            <neu-icon name="lucideZoomIn" size="1.25rem" />
           </button>
-          <button type="button" class="neu-iv__btn" aria-label="Zoom out" (click)="_zoom(-0.25)">
-            －
+          <button type="button" class="neu-iv__btn" aria-label="Zoom out" title="Zoom out" (click)="_zoom(-0.25)">
+            <neu-icon name="lucideZoomOut" size="1.25rem" />
           </button>
-          <button type="button" class="neu-iv__btn" aria-label="Reset zoom" (click)="_resetZoom()">
-            ⟳
+          <button type="button" class="neu-iv__btn" aria-label="Reset zoom" title="Reset zoom" (click)="_resetZoom()">
+            <neu-icon name="lucideRotateCcw" size="1.25rem" />
           </button>
           <button
             type="button"
             class="neu-iv__btn neu-iv__btn--close"
             aria-label="Close image viewer"
+            title="Close image viewer"
             (click)="_data.close()"
           >
-            ✕
+            <neu-icon name="lucideX" size="1.25rem" />
           </button>
         </div>
       </div>
@@ -106,7 +108,7 @@ interface _NeuIvData {
           [disabled]="_index() === 0"
           (click)="_navigate(-1)"
         >
-          ‹
+          <neu-icon name="lucideChevronLeft" size="1.25rem" />
         </button>
         <button
           type="button"
@@ -115,7 +117,7 @@ interface _NeuIvData {
           [disabled]="_index() === _data.items.length - 1"
           (click)="_navigate(1)"
         >
-          ›
+          <neu-icon name="lucideChevronRight" size="1.25rem" />
         </button>
       }
     </div>

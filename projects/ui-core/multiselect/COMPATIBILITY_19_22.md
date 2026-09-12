@@ -2,9 +2,9 @@
 
 Sources: the exact published reference packages across four release lines. The current floor is the reference Select multiple mode; deprecated behavior is retained only where it remains useful for migration or where Neural already provided it.
 
-## Current Prime 22.1 capability closure
+## Current Reference 22.1 capability closure
 
-| Prime capability | Result | Neural contract/evidence |
+| Reference capability | Result | Neural contract/evidence |
 | --- | --- | --- |
 | Multiple array selection | PARITY | Immutable add/remove/toggle with fresh CVA and public arrays. |
 | Reactive/template forms | SUPERSET | CVA, silent writes/reset, cloned programmatic arrays, direct+CVA disabled ownership, touched on exit. |
@@ -35,14 +35,14 @@ Sources: the exact published reference packages across four release lines. The c
 | Accessibility | SUPERSET | Combobox/listbox multiselect semantics, accessible tokens/removal, logical positions and focus restoration. |
 | SSR, zoneless, RTL and forced colors | PARITY | Deterministic IDs, guarded browser access, signal state, logical CSS and high-contrast styling. |
 | URL synchronization | SUPERSET | Existing Neural URL-safe primitive array synchronization remains intact. |
-| Prime append/overlay/motion objects | N/A | CDK owns portal, positioning, backdrop and lifecycle without leaking Prime internals. |
-| Prime style/pass-through/tooltip plumbing | N/A | Neural tokens, host classes and structural templates provide the useful result. |
+| Reference append/overlay/motion objects | N/A | CDK owns portal, positioning, backdrop and lifecycle without leaking Reference internals. |
+| Reference style/pass-through/tooltip plumbing | N/A | Neural tokens, host classes and structural templates provide the useful result. |
 
 Current relevant gaps: **0**.
 
-## Meaningful Prime evolution
+## Meaningful Reference evolution
 
-| Capability | Prime 19.1 | Prime 20.4 | Prime 21.1 | Prime 22.1 | Neural before | Neural after | Classification |
+| Capability | Reference 19.1 | Reference 20.4 | Reference 21.1 | Reference 22.1 | Neural before | Neural after | Classification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Dedicated MultiSelect | Primary | Primary | Primary | Deprecated but shipped | Dedicated | Dedicated | HISTORICAL-KEEP |
 | `Select[multiple]` | Absent | Absent | Absent | Recommended current path | Family split | NeuMultiselect owns multiple | CURRENT FLOOR |
@@ -51,7 +51,7 @@ Current relevant gaps: **0**.
 | Chips, count and selection limit | MultiSelect | MultiSelect | MultiSelect | Deprecated MultiSelect | Chips/count runtime switch | Preserved and extended | HISTORICAL-MIGRATION-USEFUL |
 | Select-all and detailed remove events | MultiSelect | MultiSelect | MultiSelect | Deprecated MultiSelect | Basic loaded select-all | Typed truthful scope and atomic events | HISTORICAL-MIGRATION-USEFUL |
 | Controlled overlay visibility | Input only | Input only | Input only | Two-way output added | Not present | Canonical `open` + `openChange` owner/proposal/echo | CURRENT FLOOR |
-| Prime portal/z-index/motion/pass-through | Prime-specific | Prime-specific | Prime-specific | Prime-specific | CDK overlay | CDK overlay | OBSOLETE/N/A |
+| Reference portal/z-index/motion/pass-through | Reference-specific | Reference-specific | Reference-specific | Reference-specific | CDK overlay | CDK overlay | OBSOLETE/N/A |
 | Typed strict templates | Untyped `any` | Untyped `any` | Untyped `any` | Untyped `any` | Five weakly inferred slots | Eighteen strict contexts | HISTORICAL-MIGRATION-USEFUL |
 
 ## Neural useful-behavior regression matrix

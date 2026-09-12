@@ -70,13 +70,13 @@ export class NeuFilterBarComponent {
   readonly clearable = input<boolean>(true);
 
   /** Texto del botón de limpiar / Clear button text */
-  readonly clearLabel = input<string>('Limpiar todo');
+  readonly clearLabel = input<string>('Clear all');
 
   /** Permite selección múltiple / Allows multi-selection */
   readonly multi = input<boolean>(true);
 
   /** Aria-label de la barra / Aria-label for the bar */
-  readonly ariaLabel = input<string>('Filtros');
+  readonly ariaLabel = input<string>('Filters');
 
   /** Emitido con los chips activos al cambiar / Emitted with active chips on change */
   readonly filterChange = output<NeuFilterChip[]>();

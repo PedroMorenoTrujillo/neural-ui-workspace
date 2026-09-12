@@ -17,7 +17,7 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 
 ## Features
 
-- **80 component entry points + testing** — components, overlays, utilities, styles and public harnesses
+- **104 public entry points** — components, overlays, utilities, styles, schematics and public testing harnesses
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
@@ -30,10 +30,10 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.15.0-rc.0
+- **Version:** 1.15.0
 - **Entry points:** 104
-- **Automated tests:** 3291
-- **Coverage:** 98.06% statements · 96.39% branches · 98.51% functions · 98.81% lines
+- **Automated tests:** 3324
+- **Coverage:** 98.13% statements · 96.44% branches · 98.61% functions · 98.91% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`

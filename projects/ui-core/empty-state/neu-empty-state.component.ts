@@ -58,7 +58,7 @@ export class NeuEmptyStateComponent {
   /** Tamaño del icono. Por defecto 3rem. / Icon size. Default 3rem. */
   iconSize = input<string>('3rem');
   /** Título principal del estado vacío. / Main title of the empty state. */
-  title = input<string>('No hay nada aquí');
+  title = input<string>('Nothing to see here');
   /** Descripción secundaria opcional. / Optional secondary description. */
   description = input<string>('');
   /** Texto del botón de acción. Si está vacío, no se muestra el botón. / Action button text. If empty, the button is not shown. */

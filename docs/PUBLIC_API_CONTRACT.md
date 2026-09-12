@@ -29,7 +29,7 @@ Interface and enum members are structural parts of their exported type signature
 
 ## Canonical Neural naming policy
 
-Neural vocabulary is canonical whenever Neural and Prime-shaped names express the same result. Compatibility names may remain temporarily, but they do not define a second behavior owner.
+Neural vocabulary is canonical whenever Neural and Reference-shaped names express the same result. Compatibility names may remain temporarily, but they do not define a second behavior owner.
 
 | Concept              | Canonical contract                                                 |
 | -------------------- | ------------------------------------------------------------------ |

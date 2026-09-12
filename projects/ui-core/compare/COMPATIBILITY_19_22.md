@@ -6,7 +6,7 @@ The reference release introduced Compare as a current before/after comparison fa
 
 ## Historical review
 
-| Prime line | Relevant state |
+| Reference line | Relevant state |
 | --- | --- |
 | 19 | No current Compare family; legacy ImageCompare was the comparison route. |
 | 20 | ImageCompare remained the legacy surface. |
@@ -27,4 +27,4 @@ The reference release introduced Compare as a current before/after comparison fa
 | Hover and drag updates | `slideOnHover`, pointer capture and live `valueChange` |
 | Completion event | `valueChangeEnd` |
 
-Prime pass-through customization is intentionally absent. The Neural API provides native composition and CSS tokens instead.
+Reference pass-through customization is intentionally absent. The Neural API provides native composition and CSS tokens instead.

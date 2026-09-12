@@ -51,7 +51,7 @@ export interface NeuConfirmDialogData {
         [class.neu-confirm-dialog__btn--danger]="data.rejectVariant === 'danger'"
         (click)="reject()"
       >
-        {{ data.rejectLabel ?? 'Cancelar' }}
+        {{ data.rejectLabel ?? 'Cancel' }}
       </button>
       <button
         type="button"
@@ -60,7 +60,7 @@ export interface NeuConfirmDialogData {
         [class.neu-confirm-dialog__btn--danger]="data.acceptVariant === 'danger'"
         (click)="accept()"
       >
-        {{ data.acceptLabel ?? 'Aceptar' }}
+        {{ data.acceptLabel ?? 'Confirm' }}
       </button>
     </div>
   `,
@@ -88,7 +88,7 @@ export class NeuConfirmDialogComponent {
  *
  * Uso:
  *   inject(NeuConfirmDialogService)
- *     .confirm({ message: '¿Eliminar este registro?', acceptVariant: 'danger' })
+ *     .confirm({ message: 'Delete this record?', acceptVariant: 'danger' })
  *     .then(ok => ok && doDelete());
  */
 @Injectable({ providedIn: 'root' })

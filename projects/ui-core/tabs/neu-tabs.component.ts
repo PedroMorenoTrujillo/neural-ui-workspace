@@ -170,7 +170,7 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   flush = input<boolean>(false);
 
   /** Etiqueta accesible del rol tablist / Accessible label for the tablist role */
-  ariaLabel = input<string>('Pestañas de contenido');
+  ariaLabel = input<string>('Content tabs');
 
   /** Emite al cambiar de pestaña / Emits when the tab changes */
   tabChange = output<string>();

@@ -114,6 +114,18 @@ describe('NeuConfirmDialogComponent', () => {
     expect(f.nativeElement.textContent).toContain('No, volver');
   });
 
+  it('should use locale-neutral English action labels by default', async () => {
+    mkDialogBed({ message: 'Test' });
+    const f = TestBed.createComponent(NeuConfirmDialogComponent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const buttons = [...f.nativeElement.querySelectorAll('button')].map((button: Element) =>
+      button.textContent?.trim(),
+    );
+    expect(buttons).toEqual(['Cancel', 'Confirm']);
+  });
+
   it('should apply danger class when rejectVariant is danger', async () => {
     mkDialogBed({ message: 'Test', rejectVariant: 'danger' } as any);
     const f = TestBed.createComponent(NeuConfirmDialogComponent);

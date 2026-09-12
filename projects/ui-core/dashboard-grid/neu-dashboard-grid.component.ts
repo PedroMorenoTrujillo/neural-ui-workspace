@@ -25,20 +25,20 @@ import {
 } from '@angular/cdk/drag-drop';
 
 export interface NeuDashboardTileConfig {
-  /** Identificador único / Unique identifier */
+  /** Stable unique identifier used to match projected content with a tile. */
   id: string;
-  /** Número de columnas que ocupa / Column span */
+  /** Number of grid columns occupied by the tile. Defaults to 1. */
   cols?: number;
-  /** Número de filas que ocupa / Row span */
+  /** Number of grid rows occupied by the tile. Defaults to 1. */
   rows?: number;
-  /** Título del tile / Tile title */
+  /** Optional title rendered inside the drag handle. */
   title?: string;
 }
 
 /**
  * NeuralUI DashboardGrid
  *
- * Cuadrícula de tiles reordenables mediante drag-and-drop (CDK DragDrop).
+ * Reorderable dashboard tile grid built with Angular CDK DragDrop.
  *
  * Uso:
  *   <neu-dashboard-grid [tiles]="tileConfigs" [columns]="3">
@@ -62,6 +62,7 @@ export interface NeuDashboardTileConfig {
     <div
       class="neu-dg__grid"
       cdkDropList
+      cdkDropListOrientation="mixed"
       [cdkDropListData]="_orderedTiles()"
       (cdkDropListDropped)="_onDrop($event)"
     >
@@ -108,7 +109,7 @@ export class NeuDashboardGridComponent {
   readonly tiles = input<NeuDashboardTileConfig[]>([]);
   readonly columns = input<number>(3);
 
-  /** Emitido cuando el orden cambia / Emitted when order changes */
+  /** Emits the proposed tile order after pointer or keyboard reordering. */
   readonly orderChange = output<NeuDashboardTileConfig[]>();
 
   protected readonly _orderedTiles = signal<NeuDashboardTileConfig[]>([]);
@@ -155,9 +156,8 @@ export class NeuDashboardGridComponent {
     this.orderChange.emit(tiles);
     afterNextRender(
       () => {
-        const handles = this._host.nativeElement.querySelectorAll<HTMLButtonElement>(
-          '.neu-dg__tile-handle',
-        );
+        const handles =
+          this._host.nativeElement.querySelectorAll<HTMLButtonElement>('.neu-dg__tile-handle');
         handles[nextIndex]?.focus();
       },
       { injector: this._injector },
@@ -167,10 +167,9 @@ export class NeuDashboardGridComponent {
   private _attachProjectedTiles(): void {
     if (!isPlatformBrowser(this._platformId)) return;
     const slots = new Map(
-      this._tileSlots().filter(Boolean).map((slotRef) => [
-        slotRef.nativeElement.dataset['slotId'],
-        slotRef.nativeElement,
-      ]),
+      this._tileSlots()
+        .filter(Boolean)
+        .map((slotRef) => [slotRef.nativeElement.dataset['slotId'], slotRef.nativeElement]),
     );
 
     const projectedTiles = this._host.nativeElement.querySelectorAll(

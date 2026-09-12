@@ -22,13 +22,13 @@ Sources: the exact published reference packages across four release lines, inclu
 | Matched option         | `matchedOption`                  | Raw `T` only; reconciled across immutable replacement.                           |
 | Custom arbitrary value | `customTextValue`                | String only when force selection is off; no synthetic option object.             |
 | Canonical CVA value    | `canonicalValue`                 | `V`, custom string, or null; editing a selected option cannot leave a stale `V`. |
-| Suggestions            | `suggestions`/`groupSuggestions` | Consumer-owned in Prime mode; legacy `options` retains local filtering.          |
+| Suggestions            | `suggestions`/`groupSuggestions` | Consumer-owned in Reference mode; legacy `options` retains local filtering.          |
 | Active option          | `_activeIndex` + logical index   | Eligible option row only; never group/loading/disabled/unrendered.               |
 | Overlay visibility     | `_isOpen`                        | One lifecycle transition per actual open/close.                                  |
 
 ## Current capability closure
 
-| Prime capability                             | Result   | Neural contract/evidence                                                                                                                        |
+| Reference capability                             | Result   | Neural contract/evidence                                                                                                                        |
 | -------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Consumer-owned suggestions                   | PARITY   | `suggestions` and `groupSuggestions` are replaced by the consumer; networking and cancellation stay outside the component.                      |
 | Completion, delay and minimum query length   | PARITY   | Typed `completeMethod`, latest-wins cancellable scheduling, canonical `minLength`, and no below-floor request.                                 |
@@ -37,7 +37,7 @@ Sources: the exact published reference packages across four release lines, inclu
 | Force selection                              | PARITY   | Case-insensitive exact labels resolve atomically; invalid text clears text/model/selection without stale form state.                            |
 | Label/value/disabled accessors               | SUPERSET | Direct, nested and computed O1 accessors with falsy and `NaN` value semantics.                                                                  |
 | Grouping                                     | SUPERSET | Typed nested/computed groups, legacy flat groups, disabled groups/options, strict group template, keyboard and virtual/lazy composition.        |
-| Identity/data key                            | SUPERSET | O1 identity configuration and replacement reconciliation exceed Prime's string-only data key.                                                   |
+| Identity/data key                            | SUPERSET | O1 identity configuration and replacement reconciliation exceed Reference's string-only data key.                                                   |
 | Loading                                      | PARITY   | Busy input/list, loading icon and typed loader rows that are never option `T`.                                                                  |
 | Virtual scrolling                            | SUPERSET | Bounded manual window, buffer, logical total, loader rows, stable active state, and truthful set/position ARIA without total-sized fake arrays. |
 | Lazy loading                                 | SUPERSET | Bounded typed requests include first/end/count, monotonic request ID, query/filter metadata and reason; consumer owns network cancellation.     |
@@ -62,19 +62,19 @@ Sources: the exact published reference packages across four release lines, inclu
 | Forced colors                                | PARITY   | Native high-contrast borders, focus, active, selected and disabled distinctions.                                                                |
 | Reduced motion                               | PARITY   | Overlay/spinner/input transitions are removed under the user preference.                                                                        |
 | Size, variant and fluid                      | PARITY   | `sm`/`md`/`lg`, outlined/filled and full-width Neural results.                                                                                  |
-| Legacy Neural local options                  | SUPERSET | Existing local case-insensitive filtering remains available without weakening consumer-owned Prime mode.                                        |
+| Legacy Neural local options                  | SUPERSET | Existing local case-insensitive filtering remains available without weakening consumer-owned Reference mode.                                        |
 | Legacy floating label/hint/error             | SUPERSET | All useful Neural presentation and semantic feedback remains.                                                                                   |
 | Public control methods                       | SUPERSET | `open`, `close`, `focus`, `clear`, `reset`, `openAll`, and preserved direct option selection.                                                   |
-| Multiple/token entry                         | N/A      | Deprecated in Prime 22 and owned by InputTags; not added to single-value NeuAutocomplete.                                                       |
-| Prime append/z-index/overlay/motion objects  | N/A      | CDK owns the useful portal, collision, scrolling and lifecycle result without Prime internals.                                                  |
-| Prime style/pass-through plumbing            | N/A      | Neural tokens, host states and structural templates provide the useful result.                                                                  |
+| Multiple/token entry                         | N/A      | Deprecated in Reference 22 and owned by InputTags; not added to single-value NeuAutocomplete.                                                       |
+| Reference append/z-index/overlay/motion objects  | N/A      | CDK owns the useful portal, collision, scrolling and lifecycle result without Reference internals.                                                  |
+| Reference style/pass-through plumbing            | N/A      | Neural tokens, host states and structural templates provide the useful result.                                                                  |
 | InputTags catalog surface                    | N/A      | Separate missing component recorded for future catalog expansion; not implemented in O5.                                                        |
 
 Counts: **PARITY 25 · SUPERSET 10 · GAP 0 · N/A 4**.
 
-## Meaningful Prime evolution
+## Meaningful Reference evolution
 
-| Capability                | Prime 19.1                      | Prime 20.4                                          | Prime 21.1                                  | Prime 22.1                                        | Neural before     | Neural after                                             | Classification                              |
+| Capability                | Reference 19.1                      | Reference 20.4                                          | Reference 21.1                                  | Reference 22.1                                        | Neural before     | Neural after                                             | Classification                              |
 | ------------------------- | ------------------------------- | --------------------------------------------------- | ------------------------------------------- | ------------------------------------------------- | ----------------- | -------------------------------------------------------- | ------------------------------------------- |
 | Minimum query API         | `minLength`                     | `minQueryLength` added; `minLength` deprecated      | Both shipped                                | `minLength` removed                               | `minLength` only  | Canonical historical `minLength`                         | CURRENT FLOOR / NEURAL-NATIVE                |
 | Token/chips additions     | Multiple only                   | `addOnTab`, `addOnBlur`, `separator`, `onAdd` added | Retained                                    | Deprecated for InputTags                          | Absent            | Still absent                                             | OBSOLETE/N/A                                |
@@ -82,7 +82,7 @@ Counts: **PARITY 25 · SUPERSET 10 · GAP 0 · N/A 4**.
 | Native/form inputs        | Component-owned inputs          | Expanded base/input conventions                     | Retained                                    | Signal-based BaseInput/BaseEditableHolder surface | Minimal           | Forwarded current useful metadata                        | CURRENT FLOOR                               |
 | Completion/focus policies | Complete/delay/min/focus family | Current naming expanded                             | Retained                                    | Signal inputs, same useful behavior               | Local query only  | Typed consumer completion and independent focus policies | CURRENT FLOOR                               |
 | Strict template typing    | Untyped templates               | Untyped templates                                   | Typed context declarations but `any` option | Generic declarations still default `any`          | Weak item only    | Actual Angular strict item/group/loader directives       | HISTORICAL-MIGRATION-USEFUL                 |
-| Overlay/virtual/lazy      | Prime overlay/scroller objects  | Expanded Prime plumbing                             | Retained                                    | Motion/pass-through plumbing added                | CDK basic virtual | Bounded CDK result and typed lazy contract               | CURRENT FLOOR                               |
+| Overlay/virtual/lazy      | Reference overlay/scroller objects  | Expanded Reference plumbing                             | Retained                                    | Motion/pass-through plumbing added                | CDK basic virtual | Bounded CDK result and typed lazy contract               | CURRENT FLOOR                               |
 
 ## Deprecated token-mode classification
 
@@ -98,7 +98,7 @@ Counts: **PARITY 25 · SUPERSET 10 · GAP 0 · N/A 4**.
 | `onAdd`                 | OBSOLETE/N/A   | Not added.                                             |
 | `onUnselect`            | OBSOLETE/N/A   | Not added.                                             |
 
-Prime 22.1 ships InputTags and Neural has no equivalent component. Catalog classification: **InputTags → MISSING EQUIVALENT NEURAL COMPONENT → CATALOG EXPANSION REQUIRED**.
+Reference 22.1 ships InputTags and Neural has no equivalent component. Catalog classification: **InputTags → MISSING EQUIVALENT NEURAL COMPONENT → CATALOG EXPANSION REQUIRED**.
 
 Complete preserved catalog-expansion ledger: **Tag, SpeedDial, ButtonGroup, ScrollPanel, ScrollTop, AvatarGroup, Image, InputTags**.
 

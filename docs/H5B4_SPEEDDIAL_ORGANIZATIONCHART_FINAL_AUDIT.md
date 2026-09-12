@@ -8,11 +8,11 @@
 - Historical Neural v1.12.1: `4985b558b915f5208c69f9ef49db45528fa479a6`
 - Reference floor: the published declarations/Angular metadata/implementation and the official SpeedDial and OrganizationChart documentation.
 
-Neither component existed at the historical Neural baseline. Their starting public APIs are therefore `PRIME-PARITY-INTRODUCED`; no parity-era spelling receives compatibility protection.
+Neither component existed at the historical Neural baseline. Their starting public APIs are therefore `REFERENCE-PARITY-INTRODUCED`; no parity-era spelling receives compatibility protection.
 
 ## Mechanical surface recount
 
-| Component | Surface | Prime 22.1 | Starting Neural | Final Neural |
+| Component | Surface | Reference 22.1 | Starting Neural | Final Neural |
 | --- | ---: | ---: | ---: | ---: |
 | SpeedDial | main-tag inputs excluding models | 22 | 14 | 15 |
 | SpeedDial | explicit outputs | 4 | 5 | 5 |
@@ -27,9 +27,9 @@ Neither component existed at the historical Neural baseline. Their starting publ
 | OrganizationChart | template/composition regions | 4 | 2 | 4 |
 | OrganizationChart | entrypoint exports | n/a | 9 | 13 |
 
-Prime SpeedDial effective inputs are `id`, `style`, `className`, `model`, `visible`, `direction`, `transitionDelay`, `type`, `radius`, `mask`, `disabled`, `hideOnClickOutside`, `buttonStyle`, `buttonClassName`, `maskStyle`, `maskClassName`, `showIcon`, `hideIcon`, `rotateAnimation`, `ariaLabel`, `ariaLabelledBy`, `tooltipOptions`, and `buttonProps`. Its outputs are `visibleChange`, `onClick`, `onShow`, and `onHide`; `visible` is a model. Its template regions are `button`, `item`, and `icon`. Prime's declared `show`/`hide` are implementation helpers rather than documented/supported consumer methods.
+Reference SpeedDial effective inputs are `id`, `style`, `className`, `model`, `visible`, `direction`, `transitionDelay`, `type`, `radius`, `mask`, `disabled`, `hideOnClickOutside`, `buttonStyle`, `buttonClassName`, `maskStyle`, `maskClassName`, `showIcon`, `hideIcon`, `rotateAnimation`, `ariaLabel`, `ariaLabelledBy`, `tooltipOptions`, and `buttonProps`. Its outputs are `visibleChange`, `onClick`, `onShow`, and `onHide`; `visible` is a model. Its template regions are `button`, `item`, and `icon`. Reference's declared `show`/`hide` are implementation helpers rather than documented/supported consumer methods.
 
-Prime OrganizationChart effective inputs are `value`, `selectionMode`, `collapsible`, `selectable`, and `gap`; `selectionKeys` and `collapsedKeys` are models. Its outputs are `onNodeSelect`, `onNodeUnselect`, `onNodeExpand`, and `onNodeCollapse`. Its template regions are `node`, `togglericon`, `checkboxicon`, and `collapsebutton`. It exposes no supported consumer method. Exact 22.1 package inspection found no `preserveSpace` binding or implementation.
+Reference OrganizationChart effective inputs are `value`, `selectionMode`, `collapsible`, `selectable`, and `gap`; `selectionKeys` and `collapsedKeys` are models. Its outputs are `onNodeSelect`, `onNodeUnselect`, `onNodeExpand`, and `onNodeCollapse`. Its template regions are `node`, `togglericon`, `checkboxicon`, and `collapsebutton`. It exposes no supported consumer method. Exact 22.1 package inspection found no `preserveSpace` binding or implementation.
 
 ## SpeedDial functional gap ledger
 
@@ -37,7 +37,7 @@ Prime OrganizationChart effective inputs are `value`, `selectionMode`, `collapsi
 | --- | --- | --- | --- |
 | Canonical controlled visibility | `visible` model plus `onVisibleChange` | one nullable controlled `open` input and one `openChange` proposal; lifecycle fires only on committed state | CLOSED |
 | Programmatic visibility | parity `show`/`hide` implementation methods leaked | supported `open`, `close`, `toggle`; all helpers protected/private | CLOSED |
-| Event atomicity | duplicate model/output mirrors and Prime-shaped lifecycle names | one proposal plus distinct `opened`, `closed`, `triggerClick`, `itemActivate` details | CLOSED |
+| Event atomicity | duplicate model/output mirrors and Reference-shaped lifecycle names | one proposal plus distinct `opened`, `closed`, `triggerClick`, `itemActivate` details | CLOSED |
 | Keyboard and focus | native Enter/Space could double-toggle; boundary focus incomplete; mixed link/button query order unsafe | native click owns Enter/Space; arrows/Home/End/typeahead skip disabled; Escape/item restore trigger; mixed action kinds use explicit DOM index | CLOSED |
 | Outside/mask/disabled | close existed but focus/state semantics were not canonical | outside does not steal focus; mask closes; disabling closes; controlled owner must echo proposals | CLOSED |
 | Tooltip | item type could carry text but no coherent global integration | `tooltip` config enables label tooltips/position; per-item tooltip wins | CLOSED |
@@ -45,8 +45,8 @@ Prime OrganizationChart effective inputs are `value`, `selectionMode`, `collapsi
 | Item customization | item template existed with weak context | arbitrary typed item content with item/index/active/disabled/open | CLOSED |
 | Animation | separate transition and rotate micro-inputs | coherent `animation` config (`itemDelay`, `rotateTrigger`) | CLOSED |
 | Directionality | forced public `textDirection` | inferred from computed document direction; logical layout retained | CLOSED |
-| Prime button/style props | object/style micro-surface | ordinary CSS plus trigger template; no lost behavior | CLOSED |
-| Prime icon region | dedicated region | richer trigger and item templates cover open/close icon and item content | CLOSED |
+| Reference button/style props | object/style micro-surface | ordinary CSS plus trigger template; no lost behavior | CLOSED |
+| Reference icon region | dedicated region | richer trigger and item templates cover open/close icon and item content | CLOSED |
 
 `SPEEDDIAL GAP COUNT = 0`.
 
@@ -54,28 +54,28 @@ Prime OrganizationChart effective inputs are `value`, `selectionMode`, `collapsi
 
 Flags use `S` superset, `D` duplicate, `M` micro-configuration, `L` implementation leakage. “Owner” states the better owner when applicable. Frequency is a product judgment from normal consumer use.
 
-| Input / type | Provenance | Domain, purpose, frequency | Prime equivalent / owner | Flags | Action | Justification |
+| Input / type | Provenance | Domain, purpose, frequency | Reference equivalent / owner | Flags | Action | Justification |
 | --- | --- | --- | --- | --- | --- | --- |
-| `ariaLabel: string` | PRIME-PARITY-INTRODUCED | accessibility; trigger name; common | `ariaLabel`, main tag | none | KEEP-DIRECT | First-class native accessibility semantic. |
-| `direction: NeuSpeedDialDirection` | PRIME-PARITY-INTRODUCED | layout; expansion direction; common | `direction`, main tag | S (8 directions) | KEEP-NEURAL-SUPERSET | Valuable diagonal direction superset. |
-| `disabled: boolean` | PRIME-PARITY-INTRODUCED | state/accessibility; global gate; common | `disabled`, main tag | none | KEEP-DIRECT | Native interaction state. |
-| `hideIcon: string \| null` | PRIME-PARITY-INTRODUCED | visual; closed/open icon; occasional | `hideIcon`, main tag | M; owner trigger template | MOVE-TO-TEMPLATE | Arbitrary trigger content is more capable and avoids icon-detail inputs. |
-| `hideOnClickOutside: boolean` | PRIME-PARITY-INTRODUCED | interaction; outside-close policy; occasional | same, main tag | none | KEEP-DIRECT | Genuine behavior policy. |
-| `id: string` | PRIME-PARITY-INTRODUCED | identity/ARIA; stable menu id; occasional | `id`, main tag | none | KEEP-DIRECT | Required for deterministic relationships/testing. |
-| `items: NeuSpeedDialItem[]` | PRIME-PARITY-INTRODUCED | data; action model; common | `model`, main tag | none | KEEP-DIRECT | Primary simple API. |
-| `mask: boolean` | PRIME-PARITY-INTRODUCED | overlay; modal-like backdrop; occasional | `mask`, main tag | none | KEEP-DIRECT | Functional interaction/layout mode. |
-| `radius: number` | PRIME-PARITY-INTRODUCED | layout; radial distance; occasional | `radius`, main tag | none | KEEP-DIRECT | Core radial geometry, not cosmetic detail. |
-| `rotateAnimation: boolean` | PRIME-PARITY-INTRODUCED | motion; trigger rotation; occasional | same, main tag | M; owner animation config | MOVE-TO-CONFIG | Belongs with motion policy. |
-| `showIcon: string` | PRIME-PARITY-INTRODUCED | visual; trigger icon; common | `showIcon`, main tag | M; owner trigger template | MOVE-TO-TEMPLATE | Arbitrary content covers icons and richer states. |
-| `textDirection: NeuTextDirection` | PRIME-PARITY-INTRODUCED | directionality implementation hint; rare | no direct Prime owner | L; owner document/host direction | INTERNALIZE | Direction is already available from computed CSS. |
-| `transitionDelay: number` | PRIME-PARITY-INTRODUCED | motion; item staggering; occasional | same, main tag | M; owner animation config | MOVE-TO-CONFIG | Coherent advanced motion configuration. |
-| `type: NeuSpeedDialType` | PRIME-PARITY-INTRODUCED | layout; linear/radial geometry; common | `type`, main tag | none | KEEP-DIRECT | Core behavior/layout mode. |
+| `ariaLabel: string` | REFERENCE-PARITY-INTRODUCED | accessibility; trigger name; common | `ariaLabel`, main tag | none | KEEP-DIRECT | First-class native accessibility semantic. |
+| `direction: NeuSpeedDialDirection` | REFERENCE-PARITY-INTRODUCED | layout; expansion direction; common | `direction`, main tag | S (8 directions) | KEEP-NEURAL-SUPERSET | Valuable diagonal direction superset. |
+| `disabled: boolean` | REFERENCE-PARITY-INTRODUCED | state/accessibility; global gate; common | `disabled`, main tag | none | KEEP-DIRECT | Native interaction state. |
+| `hideIcon: string \| null` | REFERENCE-PARITY-INTRODUCED | visual; closed/open icon; occasional | `hideIcon`, main tag | M; owner trigger template | MOVE-TO-TEMPLATE | Arbitrary trigger content is more capable and avoids icon-detail inputs. |
+| `hideOnClickOutside: boolean` | REFERENCE-PARITY-INTRODUCED | interaction; outside-close policy; occasional | same, main tag | none | KEEP-DIRECT | Genuine behavior policy. |
+| `id: string` | REFERENCE-PARITY-INTRODUCED | identity/ARIA; stable menu id; occasional | `id`, main tag | none | KEEP-DIRECT | Required for deterministic relationships/testing. |
+| `items: NeuSpeedDialItem[]` | REFERENCE-PARITY-INTRODUCED | data; action model; common | `model`, main tag | none | KEEP-DIRECT | Primary simple API. |
+| `mask: boolean` | REFERENCE-PARITY-INTRODUCED | overlay; modal-like backdrop; occasional | `mask`, main tag | none | KEEP-DIRECT | Functional interaction/layout mode. |
+| `radius: number` | REFERENCE-PARITY-INTRODUCED | layout; radial distance; occasional | `radius`, main tag | none | KEEP-DIRECT | Core radial geometry, not cosmetic detail. |
+| `rotateAnimation: boolean` | REFERENCE-PARITY-INTRODUCED | motion; trigger rotation; occasional | same, main tag | M; owner animation config | MOVE-TO-CONFIG | Belongs with motion policy. |
+| `showIcon: string` | REFERENCE-PARITY-INTRODUCED | visual; trigger icon; common | `showIcon`, main tag | M; owner trigger template | MOVE-TO-TEMPLATE | Arbitrary content covers icons and richer states. |
+| `textDirection: NeuTextDirection` | REFERENCE-PARITY-INTRODUCED | directionality implementation hint; rare | no direct Reference owner | L; owner document/host direction | INTERNALIZE | Direction is already available from computed CSS. |
+| `transitionDelay: number` | REFERENCE-PARITY-INTRODUCED | motion; item staggering; occasional | same, main tag | M; owner animation config | MOVE-TO-CONFIG | Coherent advanced motion configuration. |
+| `type: NeuSpeedDialType` | REFERENCE-PARITY-INTRODUCED | layout; linear/radial geometry; common | `type`, main tag | none | KEEP-DIRECT | Core behavior/layout mode. |
 
 Unexplained inputs: 0. Review inputs: 0.
 
 ## Final SpeedDial inputs
 
-| Input / type | Domain | Prime main-tag equivalent | Why direct |
+| Input / type | Domain | Reference main-tag equivalent | Why direct |
 | --- | --- | --- | --- |
 | `id: string` | identity | `id` | deterministic identity/ARIA |
 | `items: readonly NeuSpeedDialItem[]` | data/actions | `model` | primary simple API |
@@ -110,7 +110,7 @@ Supported method allowlist: `open(): void`, `close(): void`, `toggle(): void`. S
 
 ## SpeedDial composition and context
 
-| Prime region | Neural selector | Coverage |
+| Reference region | Neural selector | Coverage |
 | --- | --- | --- |
 | `button` | `neuSpeedDialTrigger` | arbitrary Angular trigger/open-close content |
 | `item` + `icon` | `neuSpeedDialItem` | arbitrary item content including icon, badge, pipes, components, directives and events |
@@ -132,35 +132,35 @@ H8 recommendations: establish tokenized FAB/item sizes and icon scale; tune radi
 | Tree value/model | multiple `nodes` roots supported | preserved as valuable Neural superset; empty state retained | CLOSED |
 | Selection ownership | `selectable` and `selectionMode` looked overlapping | retained: global/per-node gate versus selection policy; `selectionKeys` is sole controlled owner | CLOSED |
 | Collapse ownership | `collapsedKeys` controlled state | retained without semantic inversion; `expanded === false` seeds uncontrolled collapse | CLOSED |
-| Node style/class | node type lacked exact Prime style/class capability | typed `style` and canonical `className` added to node model | CLOSED |
+| Node style/class | node type lacked exact Reference style/class capability | typed `style` and canonical `className` added to node model | CLOSED |
 | Templates | node/toggle only | node, toggle, toggle-icon and selection-indicator arbitrary typed regions | CLOSED |
 | Arbitrary node content | content nested in an interactive button | treeitem owns keyboard/ARIA; content container safely permits buttons/forms; explicit context action remains available | CLOSED |
 | Accessibility | incomplete treeitem state/keyboard | tree/treeitem roles, roving focus, selected/checked/expanded, labels, disabled/non-selectable behavior, arrows/Home/End/Enter/Space | CLOSED |
 | Event atomicity | `nodeActivate` duplicated interaction detail | removed; model state mutates before one semantic detail/lifecycle output | CLOSED |
 | Layout/connectors | multiple roots/connectors/gap existed | retained, logical CSS and responsive viewport verified | CLOSED |
-| `preserveSpace` | presumed from docs/history | absent from exact Prime 22.1 package; no floor capability exists | CLOSED |
+| `preserveSpace` | presumed from docs/history | absent from exact Reference 22.1 package; no floor capability exists | CLOSED |
 
 `ORGANIZATIONCHART GAP COUNT = 0`.
 
 ## Complete starting OrganizationChart input ledger
 
-| Input / type | Provenance | Domain, purpose, frequency | Prime equivalent / owner | Flags | Action | Justification |
+| Input / type | Provenance | Domain, purpose, frequency | Reference equivalent / owner | Flags | Action | Justification |
 | --- | --- | --- | --- | --- | --- | --- |
-| `ariaLabel: string` | PRIME-PARITY-INTRODUCED | accessibility; tree name; common | no direct main-tag input in exact Prime | S | KEEP-NEURAL-SUPERSET | First-class accessible name. |
-| `collapseLabel: string` | PRIME-PARITY-INTRODUCED | accessibility/i18n; toggle name; common | internal Prime locale text | S | KEEP-NEURAL-SUPERSET | Consumer/localization-facing native semantics. |
-| `collapsible: boolean` | PRIME-PARITY-INTRODUCED | behavior; collapse gate; common | same, main tag | none | KEEP-DIRECT | Principal chart behavior. |
-| `emptyLabel: string` | PRIME-PARITY-INTRODUCED | empty state/a11y; occasional | no direct equivalent | S | KEEP-NEURAL-SUPERSET | Useful localized empty state. |
-| `expandLabel: string` | PRIME-PARITY-INTRODUCED | accessibility/i18n; toggle name; common | internal Prime locale text | S | KEEP-NEURAL-SUPERSET | Consumer/localization-facing native semantics. |
-| `gap: NeuOrganizationChartGap` | PRIME-PARITY-INTRODUCED | layout; connector spacing; occasional | `gap`, main tag | S (number or axes) | KEEP-NEURAL-SUPERSET | Coherent layout primitive. |
-| `nodes: readonly NeuOrganizationChartNode<T>[]` | PRIME-PARITY-INTRODUCED | data/tree; common | `value`, main tag | S (multiple roots) | KEEP-NEURAL-SUPERSET | Primary API and valuable forest support. |
-| `selectable: boolean` | PRIME-PARITY-INTRODUCED | selection gate; common | `selectable`, main tag | not duplicate | KEEP-DIRECT | Distinct global gate; per-node override remains. |
-| `selectionMode: single \| multiple \| null` | PRIME-PARITY-INTRODUCED | selection policy; common | same, main tag | S (multiple) | KEEP-NEURAL-SUPERSET | Distinct cardinality/selection policy. |
+| `ariaLabel: string` | REFERENCE-PARITY-INTRODUCED | accessibility; tree name; common | no direct main-tag input in exact Reference | S | KEEP-NEURAL-SUPERSET | First-class accessible name. |
+| `collapseLabel: string` | REFERENCE-PARITY-INTRODUCED | accessibility/i18n; toggle name; common | internal Reference locale text | S | KEEP-NEURAL-SUPERSET | Consumer/localization-facing native semantics. |
+| `collapsible: boolean` | REFERENCE-PARITY-INTRODUCED | behavior; collapse gate; common | same, main tag | none | KEEP-DIRECT | Principal chart behavior. |
+| `emptyLabel: string` | REFERENCE-PARITY-INTRODUCED | empty state/a11y; occasional | no direct equivalent | S | KEEP-NEURAL-SUPERSET | Useful localized empty state. |
+| `expandLabel: string` | REFERENCE-PARITY-INTRODUCED | accessibility/i18n; toggle name; common | internal Reference locale text | S | KEEP-NEURAL-SUPERSET | Consumer/localization-facing native semantics. |
+| `gap: NeuOrganizationChartGap` | REFERENCE-PARITY-INTRODUCED | layout; connector spacing; occasional | `gap`, main tag | S (number or axes) | KEEP-NEURAL-SUPERSET | Coherent layout primitive. |
+| `nodes: readonly NeuOrganizationChartNode<T>[]` | REFERENCE-PARITY-INTRODUCED | data/tree; common | `value`, main tag | S (multiple roots) | KEEP-NEURAL-SUPERSET | Primary API and valuable forest support. |
+| `selectable: boolean` | REFERENCE-PARITY-INTRODUCED | selection gate; common | `selectable`, main tag | not duplicate | KEEP-DIRECT | Distinct global gate; per-node override remains. |
+| `selectionMode: single \| multiple \| null` | REFERENCE-PARITY-INTRODUCED | selection policy; common | same, main tag | S (multiple) | KEEP-NEURAL-SUPERSET | Distinct cardinality/selection policy. |
 
 Unexplained inputs: 0. Review inputs: 0.
 
 ## Final OrganizationChart inputs
 
-| Input / type | Domain | Prime equivalent | Why direct |
+| Input / type | Domain | Reference equivalent | Why direct |
 | --- | --- | --- | --- |
 | `nodes: readonly NeuOrganizationChartNode<T>[]` | data | `value` | primary tree/forest API |
 | `selectionMode: NeuOrganizationChartSelectionMode \| null` | selection policy | same | principal behavior |
@@ -171,8 +171,8 @@ Unexplained inputs: 0. Review inputs: 0.
 | `ariaLabelledBy: string \| null` | accessibility | none direct | native name relationship |
 | `ariaDescribedBy: string \| null` | accessibility | none direct | native description relationship |
 | `emptyLabel: string` | empty state/i18n | none direct | useful localized state |
-| `expandLabel: string` | accessibility/i18n | Prime locale/internal | native toggle label |
-| `collapseLabel: string` | accessibility/i18n | Prime locale/internal | native toggle label |
+| `expandLabel: string` | accessibility/i18n | Reference locale/internal | native toggle label |
+| `collapseLabel: string` | accessibility/i18n | Reference locale/internal | native toggle label |
 
 Models remain `selectionKeys: readonly string[] | undefined` and `collapsedKeys: readonly string[] | undefined`.
 
@@ -194,7 +194,7 @@ Supported method allowlist: `activateNode(node, originalEvent?)` and `toggleNode
 
 ## OrganizationChart composition, selection and collapse decisions
 
-| Prime region | Neural selector | Coverage |
+| Reference region | Neural selector | Coverage |
 | --- | --- | --- |
 | `node` | `neuOrganizationChartNode` | arbitrary typed node content |
 | `collapsebutton` | `neuOrganizationChartToggle` | arbitrary full toggle content |
@@ -205,11 +205,11 @@ Node context exposes node, data, index, level, path, parent, leaf, selectable, s
 
 Selection result: `selectable` is a global gate with a per-node override; `selectionMode` chooses no/single/multiple policy; `selectionKeys` owns controlled selection. They are not duplicates.
 
-Collapse result: keep `collapsedKeys`. Exact Prime uses the same negative-semantics model, the starting unpublished API already implements it, and inversion to `expandedKeys` would change defaults and controlled semantics. This task does not start a cross-tree v2 redesign.
+Collapse result: keep `collapsedKeys`. Exact Reference uses the same negative-semantics model, the starting unpublished API already implements it, and inversion to `expandedKeys` would change defaults and controlled semantics. This task does not start a cross-tree v2 redesign.
 
 ## Public types
 
-SpeedDial final exports are the component plus `NeuSpeedDialAnimationConfig`, `NeuSpeedDialDirection`, `NeuSpeedDialItem`, `NeuSpeedDialItemDirective`, `NeuSpeedDialItemEvent`, `NeuSpeedDialItemTemplateContext`, `NeuSpeedDialTooltipConfig`, `NeuSpeedDialTriggerDirective`, `NeuSpeedDialTriggerTemplateContext`, `NeuSpeedDialType`, `NeuSpeedDialVisibilityEvent`, and `NeuSpeedDialVisibilityReason` (13 total). Prime-shaped duplicate visibility/item DTOs were replaced by semantic event types; layout helpers remain internal.
+SpeedDial final exports are the component plus `NeuSpeedDialAnimationConfig`, `NeuSpeedDialDirection`, `NeuSpeedDialItem`, `NeuSpeedDialItemDirective`, `NeuSpeedDialItemEvent`, `NeuSpeedDialItemTemplateContext`, `NeuSpeedDialTooltipConfig`, `NeuSpeedDialTriggerDirective`, `NeuSpeedDialTriggerTemplateContext`, `NeuSpeedDialType`, `NeuSpeedDialVisibilityEvent`, and `NeuSpeedDialVisibilityReason` (13 total). Reference-shaped duplicate visibility/item DTOs were replaced by semantic event types; layout helpers remain internal.
 
 OrganizationChart final exports are the component plus `NeuOrganizationChartGap`, `NeuOrganizationChartNode`, `NeuOrganizationChartNodeDirective`, `NeuOrganizationChartNodeEvent`, `NeuOrganizationChartNodeTemplateContext`, `NeuOrganizationChartSelectionIndicatorDirective`, `NeuOrganizationChartSelectionIndicatorTemplateContext`, `NeuOrganizationChartSelectionMode`, `NeuOrganizationChartToggleDirective`, `NeuOrganizationChartToggleIconDirective`, `NeuOrganizationChartToggleIconTemplateContext`, and `NeuOrganizationChartToggleTemplateContext` (13 total). No controller/traversal/layout helper is exported.
 

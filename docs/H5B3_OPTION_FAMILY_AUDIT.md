@@ -6,7 +6,7 @@ Generated from baseline `300f8bd6286c6b61068bd614431eb5e600609528`, historical N
 
 ## Recount and functional-floor protection
 
-| Component | H5-B3.S start inputs | Final inputs | Final outputs | Models | Supported methods | Internal methods | Templates | Exports | Prime inputs/outputs/models/templates |
+| Component | H5-B3.S start inputs | Final inputs | Final outputs | Models | Supported methods | Internal methods | Templates | Exports | Reference inputs/outputs/models/templates |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---|
 | NeuSelectComponent | 68 | 56 | 10 | 0 | 7 | 43 | 13 | 34 | 70/9/0/16 |
 | NeuMultiselectComponent | 78 | 66 | 13 | 0 | 6 | 34 | 18 | 41 | 72/12/1/19 |
@@ -23,80 +23,80 @@ Generated from baseline `300f8bd6286c6b61068bd614431eb5e600609528`, historical N
 
 ## NeuSelectComponent complete starting input ledger (68)
 
-| Input | Exact type | Provenance | Domain | Purpose | Frequency | Prime equivalent | Prime owner | Neural-only | Duplicate owner | Micro-config | Leakage | Existing config owner | New config owner | Template owner | Directive owner | Final action | Justification |
+| Input | Exact type | Provenance | Domain | Purpose | Frequency | Reference equivalent | Reference owner | Neural-only | Duplicate owner | Micro-config | Leakage | Existing config owner | New config owner | Template owner | Directive owner | Final action | Justification |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | ariaDescribedBy | string \| null | SHARED/EVOLVED | ACCESSIBILITY | accessibility consumer policy (ariaDescribedBy) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| ariaFilterLabel | string | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaFilterLabel) | COMMON | ariaFilterLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| ariaLabel | string \| null | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaLabel) | COMMON | ariaLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| ariaLabelledBy | string \| null | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaLabelledBy) | COMMON | ariaLabelledBy | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| ariaFilterLabel | string | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaFilterLabel) | COMMON | ariaFilterLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| ariaLabel | string \| null | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaLabel) | COMMON | ariaLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| ariaLabelledBy | string \| null | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaLabelledBy) | COMMON | ariaLabelledBy | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | autocomplete | string \| null | SHARED/EVOLVED | FORM/NATIVE | form and native consumer policy (autocomplete) | COMMON | autocomplete | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| autofocus | boolean | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (autofocus) | COMMON | autofocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| autofocusFilter | boolean | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (autofocusFilter) | COMMON | autofocusFilter | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| autoOptionFocus | boolean | PRIME-PARITY | DATA/IDENTITY | data and identity consumer policy (autoOptionFocus) | COMMON | autoOptionFocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| checkmark | boolean | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (checkmark) | COMMON | checkmark | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| autofocus | boolean | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (autofocus) | COMMON | autofocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| autofocusFilter | boolean | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (autofocusFilter) | COMMON | autofocusFilter | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| autoOptionFocus | boolean | REFERENCE-PARITY | DATA/IDENTITY | data and identity consumer policy (autoOptionFocus) | COMMON | autoOptionFocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| checkmark | boolean | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (checkmark) | COMMON | checkmark | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | clearable | boolean | HISTORICAL-NEURAL | CLEAR | clear consumer policy (clearable) | CORE | showClear | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | clearAriaLabel | string | HISTORICAL-NEURAL | ACCESSIBILITY | accessibility consumer policy (clearAriaLabel) | COMMON | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
 | disabled | boolean | HISTORICAL-NEURAL | FORM/NATIVE | form and native consumer policy (disabled) | CORE | disabled | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| editable | boolean | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (editable) | COMMON | editable | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| emptyFilterMessage | string | PRIME-PARITY | FILTERING | filtering consumer policy (emptyFilterMessage) | ADVANCED | emptyFilterMessage | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | Filtered empty is already owned by noResultsMessage. |
-| emptyMessage | string | PRIME-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (emptyMessage) | COMMON | emptyMessage | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| editable | boolean | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (editable) | COMMON | editable | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| emptyFilterMessage | string | REFERENCE-PARITY | FILTERING | filtering consumer policy (emptyFilterMessage) | ADVANCED | emptyFilterMessage | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | Filtered empty is already owned by noResultsMessage. |
+| emptyMessage | string | REFERENCE-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (emptyMessage) | COMMON | emptyMessage | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | errorMessage | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (errorMessage) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| filter | boolean | PRIME-PARITY | FILTERING | filtering consumer policy (filter) | ADVANCED | filter | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | searchable is the historical filter-UI enablement owner. |
-| filterBy | string \| null | PRIME-PARITY | FILTERING | filtering consumer policy (filterBy) | ADVANCED | filterBy | MAIN TAG | no | yes | no | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns the single-field matcher. |
+| filter | boolean | REFERENCE-PARITY | FILTERING | filtering consumer policy (filter) | ADVANCED | filter | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | searchable is the historical filter-UI enablement owner. |
+| filterBy | string \| null | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterBy) | ADVANCED | filterBy | MAIN TAG | no | yes | no | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns the single-field matcher. |
 | filterConfig | Readonly<NeuOptionFilterConfig<T>> | SHARED/EVOLVED | FILTERING | filtering consumer policy (filterConfig) | ADVANCED | filterBy/filterFields/filterMatchMode/filterLocale | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| filterFields | Readonly<readonly _neural_ui_core_option_api.NeuOptionAccessor<T, unknown>[] > \| null | PRIME-PARITY | FILTERING | filtering consumer policy (filterFields) | ADVANCED | filterFields | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns the multi-field matcher. |
-| filterLocale | string | PRIME-PARITY | FILTERING | filtering consumer policy (filterLocale) | ADVANCED | filterLocale | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns locale-sensitive matching. |
-| filterMatchMode | NeuOptionFilterMatchMode | PRIME-PARITY | FILTERING | filtering consumer policy (filterMatchMode) | ADVANCED | filterMatchMode | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns matching policy. |
-| filterValue | string \| null | PRIME-PARITY | FILTERING | filtering consumer policy (filterValue) | ADVANCED | filterValue | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| filterFields | Readonly<readonly _neural_ui_core_option_api.NeuOptionAccessor<T, unknown>[] > \| null | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterFields) | ADVANCED | filterFields | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns the multi-field matcher. |
+| filterLocale | string | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterLocale) | ADVANCED | filterLocale | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns locale-sensitive matching. |
+| filterMatchMode | NeuOptionFilterMatchMode | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterMatchMode) | ADVANCED | filterMatchMode | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns matching policy. |
+| filterValue | string \| null | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterValue) | ADVANCED | filterValue | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | floatingLabel | boolean | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (floatingLabel) | COMMON | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
 | fluid | boolean | SHARED/EVOLVED | ACCESSIBILITY | accessibility consumer policy (fluid) | COMMON | fluid | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| focusOnHover | boolean | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (focusOnHover) | COMMON | focusOnHover | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| group | boolean | PRIME-PARITY | GROUPING | grouping consumer policy (group) | ADVANCED | group | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | Grouping is inferred from historical option.group data; groupConfig owns accessors. |
+| focusOnHover | boolean | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (focusOnHover) | COMMON | focusOnHover | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| group | boolean | REFERENCE-PARITY | GROUPING | grouping consumer policy (group) | ADVANCED | group | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | Grouping is inferred from historical option.group data; groupConfig owns accessors. |
 | groupConfig | NeuOptionGroupConfig<T, G> \| null | SHARED/EVOLVED | GROUPING | grouping consumer policy (groupConfig) | ADVANCED | group/optionGroupLabel/optionGroupChildren | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | groups | readonly G[] | SHARED/EVOLVED | GROUPING | grouping consumer policy (groups) | ADVANCED | optionGroupChildren data | CONFIG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | hint | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (hint) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| id | string \| null | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (id) | COMMON | id | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| id | string \| null | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (id) | COMMON | id | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | identityConfig | Readonly<NeuOptionIdentityConfig<T, V, I>> | SHARED/EVOLVED | DATA/IDENTITY | data and identity consumer policy (identityConfig) | COMMON | dataKey | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| inputId | string \| null | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (inputId) | COMMON | inputId | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| inputId | string \| null | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (inputId) | COMMON | inputId | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | invalid | boolean | SHARED/EVOLVED | ACCESSIBILITY | accessibility consumer policy (invalid) | COMMON | invalid | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | label | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (label) | CORE | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| lazy | boolean | PRIME-PARITY | LAZY | lazy consumer policy (lazy) | ADVANCED | lazy | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| lazy | boolean | REFERENCE-PARITY | LAZY | lazy consumer policy (lazy) | ADVANCED | lazy | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | lazyFirst | number | SHARED/EVOLVED | LAZY | lazy consumer policy (lazyFirst) | ADVANCED | none | NO EQUIVALENT | yes | yes | no | yes | none | none | none | none | REMOVE-DUPLICATE | Replaced by canonical Neural dataFirst. |
 | loading | boolean | HISTORICAL-NEURAL | SELECTION/BEHAVIOR | selection and behavior consumer policy (loading) | CORE | loading | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| loadingIcon | string \| null | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (loadingIcon) | COMMON | loadingIcon | MAIN TAG | no | yes | no | no | none | none | loading-icon template | none | MOVE-TO-TEMPLATE | neuSelectLoadingIcon owns arbitrary loading presentation. |
+| loadingIcon | string \| null | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (loadingIcon) | COMMON | loadingIcon | MAIN TAG | no | yes | no | no | none | none | loading-icon template | none | MOVE-TO-TEMPLATE | neuSelectLoadingIcon owns arbitrary loading presentation. |
 | loadingLabel | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (loadingLabel) | COMMON | loader semantics | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | multiple | M | H5-B3.F | SELECTION/BEHAVIOR | selection and behavior consumer policy (multiple) | CORE | multiple | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | name | string | SHARED/EVOLVED | FORM/NATIVE | form and native consumer policy (name) | COMMON | name | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | noResultsMessage | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (noResultsMessage) | COMMON | emptyFilterMessage | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| optionDisabled | NeuOptionDisabledAccessor<T> \| null | PRIME-PARITY | DATA/IDENTITY | data and identity consumer policy (optionDisabled) | COMMON | optionDisabled | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| optionGroupChildren | string | PRIME-PARITY | GROUPING | grouping consumer policy (optionGroupChildren) | ADVANCED | optionGroupChildren | MAIN TAG | no | yes | no | no | groupConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | groupConfig owns children access. |
-| optionGroupLabel | string | PRIME-PARITY | GROUPING | grouping consumer policy (optionGroupLabel) | ADVANCED | optionGroupLabel | MAIN TAG | no | yes | yes | no | groupConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | groupConfig owns label access. |
-| optionLabel | NeuOptionLabelAccessor<T> \| null | PRIME-PARITY | DATA/IDENTITY | data and identity consumer policy (optionLabel) | COMMON | optionLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| optionDisabled | NeuOptionDisabledAccessor<T> \| null | REFERENCE-PARITY | DATA/IDENTITY | data and identity consumer policy (optionDisabled) | COMMON | optionDisabled | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| optionGroupChildren | string | REFERENCE-PARITY | GROUPING | grouping consumer policy (optionGroupChildren) | ADVANCED | optionGroupChildren | MAIN TAG | no | yes | no | no | groupConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | groupConfig owns children access. |
+| optionGroupLabel | string | REFERENCE-PARITY | GROUPING | grouping consumer policy (optionGroupLabel) | ADVANCED | optionGroupLabel | MAIN TAG | no | yes | yes | no | groupConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | groupConfig owns label access. |
+| optionLabel | NeuOptionLabelAccessor<T> \| null | REFERENCE-PARITY | DATA/IDENTITY | data and identity consumer policy (optionLabel) | COMMON | optionLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | options | readonly T[] | HISTORICAL-NEURAL | DATA/IDENTITY | data and identity consumer policy (options) | CORE | options | MAIN TAG | no | no | yes | yes | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| optionValue | NeuOptionValueAccessor<T, V> \| null | PRIME-PARITY | DATA/IDENTITY | data and identity consumer policy (optionValue) | COMMON | optionValue | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| optionValue | NeuOptionValueAccessor<T, V> \| null | REFERENCE-PARITY | DATA/IDENTITY | data and identity consumer policy (optionValue) | COMMON | optionValue | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | placeholder | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (placeholder) | CORE | placeholder | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| readonly | boolean | PRIME-PARITY | FORM/NATIVE | form and native consumer policy (readonly) | COMMON | readonly | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| readonly | boolean | REFERENCE-PARITY | FORM/NATIVE | form and native consumer policy (readonly) | COMMON | readonly | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | required | boolean | SHARED/EVOLVED | FORM/NATIVE | form and native consumer policy (required) | COMMON | required | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| resetFilterOnHide | boolean | PRIME-PARITY | FILTERING | filtering consumer policy (resetFilterOnHide) | ADVANCED | resetFilterOnHide | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| scrollHeight | string | PRIME-PARITY | OVERLAY | overlay consumer policy (scrollHeight) | ADVANCED | scrollHeight | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| resetFilterOnHide | boolean | REFERENCE-PARITY | FILTERING | filtering consumer policy (resetFilterOnHide) | ADVANCED | resetFilterOnHide | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| scrollHeight | string | REFERENCE-PARITY | OVERLAY | overlay consumer policy (scrollHeight) | ADVANCED | scrollHeight | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | searchable | boolean | HISTORICAL-NEURAL | FILTERING | filtering consumer policy (searchable) | CORE | filter | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | searchPlaceholder | string | HISTORICAL-NEURAL | FILTERING | filtering consumer policy (searchPlaceholder) | ADVANCED | filterPlaceholder | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| selectOnFocus | boolean | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (selectOnFocus) | COMMON | selectOnFocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| showClear | boolean | PRIME-PARITY | CLEAR | clear consumer policy (showClear) | COMMON | showClear | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | clearable is the historical clear affordance owner. |
+| selectOnFocus | boolean | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (selectOnFocus) | COMMON | selectOnFocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| showClear | boolean | REFERENCE-PARITY | CLEAR | clear consumer policy (showClear) | COMMON | showClear | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | clearable is the historical clear affordance owner. |
 | size | NeuSelectSize | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (size) | COMMON | size | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| tabindex | number | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (tabindex) | COMMON | tabindex | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| tabindex | number | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (tabindex) | COMMON | tabindex | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | totalRecords | number \| null | SHARED/EVOLVED | LAZY | lazy consumer policy (totalRecords) | ADVANCED | none | NO EQUIVALENT | yes | yes | no | yes | none | none | none | none | REMOVE-DUPLICATE | Replaced by canonical Neural totalItems. |
 | urlParam | string \| null | HISTORICAL-NEURAL | SELECTION/BEHAVIOR | selection and behavior consumer policy (urlParam) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
 | variant | NeuSelectVariant | SHARED/EVOLVED | ACCESSIBILITY | accessibility consumer policy (variant) | COMMON | variant | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | virtualScroll | boolean | HISTORICAL-NEURAL | VIRTUALIZATION | virtualization consumer policy (virtualScroll) | ADVANCED | virtualScroll | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | virtualScrollBuffer | number | SHARED/EVOLVED | VIRTUALIZATION | virtualization consumer policy (virtualScrollBuffer) | ADVANCED | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| virtualScrollItemSize | number \| null | PRIME-PARITY | VIRTUALIZATION | virtualization consumer policy (virtualScrollItemSize) | ADVANCED | virtualScrollItemSize | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| virtualScrollOptions | NeuSelectVirtualScrollOptions \| null | PRIME-PARITY | VIRTUALIZATION | virtualization consumer policy (virtualScrollOptions) | ADVANCED | virtualScrollOptions | MAIN TAG | no | yes | yes | yes | none | none | none | none | REMOVE-DUPLICATE | The established Neural virtualization scalars are the sole owner. |
+| virtualScrollItemSize | number \| null | REFERENCE-PARITY | VIRTUALIZATION | virtualization consumer policy (virtualScrollItemSize) | ADVANCED | virtualScrollItemSize | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| virtualScrollOptions | NeuSelectVirtualScrollOptions \| null | REFERENCE-PARITY | VIRTUALIZATION | virtualization consumer policy (virtualScrollOptions) | ADVANCED | virtualScrollOptions | MAIN TAG | no | yes | yes | yes | none | none | none | none | REMOVE-DUPLICATE | The established Neural virtualization scalars are the sole owner. |
 | virtualScrollVisibleItems | number | HISTORICAL-NEURAL | VIRTUALIZATION | virtualization consumer policy (virtualScrollVisibleItems) | ADVANCED | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
 
 ### NeuSelectComponent complete final direct-input list (56)
 
-| Input | Exact type | Domain | Prime direct equivalent | Why it belongs on the main tag | Excess category |
+| Input | Exact type | Domain | Reference direct equivalent | Why it belongs on the main tag | Excess category |
 |---|---|---|---|---|---|
 | ariaDescribedBy | string \| null | ACCESSIBILITY | none | Truthful native form/accessibility contract. | A — REAL NEURAL SUPERSET |
 | ariaFilterLabel | string | ACCESSIBILITY | ariaFilterLabel | Truthful native form/accessibility contract. | not excess |
@@ -155,7 +155,7 @@ Generated from baseline `300f8bd6286c6b61068bd614431eb5e600609528`, historical N
 | virtualScrollItemSize | number \| null | VIRTUALIZATION | virtualScrollItemSize | Independent, commonly useful semantic product choice. | not excess |
 | virtualScrollVisibleItems | number | VIRTUALIZATION | none | Independent, commonly useful semantic product choice. | A — REAL NEURAL SUPERSET |
 
-### NeuSelectComponent Prime excess accounting
+### NeuSelectComponent Reference excess accounting
 
 | Category | Count |
 |---|---:|
@@ -163,96 +163,96 @@ Generated from baseline `300f8bd6286c6b61068bd614431eb5e600609528`, historical N
 | B — CONTROLLED-STATE ARCHITECTURE | 0 |
 | C — HISTORICAL NEURAL ERGONOMICS | 1 |
 | D — SEMANTIC DIFFERENCE | 3 |
-| E — PRIME DELEGATES ELSEWHERE | 0 |
+| E — REFERENCE DELEGATES ELSEWHERE | 0 |
 | F — OTHER | 0 |
-| TOTAL FINAL INPUTS WITHOUT PRIME MAIN-TAG EQUIVALENT | 9 |
+| TOTAL FINAL INPUTS WITHOUT REFERENCE MAIN-TAG EQUIVALENT | 9 |
 
 ## NeuMultiselectComponent complete starting input ledger (78)
 
-| Input | Exact type | Provenance | Domain | Purpose | Frequency | Prime equivalent | Prime owner | Neural-only | Duplicate owner | Micro-config | Leakage | Existing config owner | New config owner | Template owner | Directive owner | Final action | Justification |
+| Input | Exact type | Provenance | Domain | Purpose | Frequency | Reference equivalent | Reference owner | Neural-only | Duplicate owner | Micro-config | Leakage | Existing config owner | New config owner | Template owner | Directive owner | Final action | Justification |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | ariaDescribedBy | string \| null | SHARED/EVOLVED | ACCESSIBILITY | accessibility consumer policy (ariaDescribedBy) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| ariaFilterLabel | string | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaFilterLabel) | COMMON | ariaFilterLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| ariaLabel | string \| null | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaLabel) | COMMON | ariaLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| ariaLabelledBy | string \| null | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaLabelledBy) | COMMON | ariaLabelledBy | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| autocomplete | string | PRIME-PARITY | FORM/NATIVE | form and native consumer policy (autocomplete) | COMMON | autocomplete | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| autofocus | boolean | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (autofocus) | COMMON | autofocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| autofocusFilter | boolean | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (autofocusFilter) | COMMON | autofocusFilter | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| autoOptionFocus | boolean | PRIME-PARITY | DATA/IDENTITY | data and identity consumer policy (autoOptionFocus) | COMMON | autoOptionFocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| ariaFilterLabel | string | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaFilterLabel) | COMMON | ariaFilterLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| ariaLabel | string \| null | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaLabel) | COMMON | ariaLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| ariaLabelledBy | string \| null | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (ariaLabelledBy) | COMMON | ariaLabelledBy | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| autocomplete | string | REFERENCE-PARITY | FORM/NATIVE | form and native consumer policy (autocomplete) | COMMON | autocomplete | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| autofocus | boolean | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (autofocus) | COMMON | autofocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| autofocusFilter | boolean | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (autofocusFilter) | COMMON | autofocusFilter | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| autoOptionFocus | boolean | REFERENCE-PARITY | DATA/IDENTITY | data and identity consumer policy (autoOptionFocus) | COMMON | autoOptionFocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | checkmark | boolean | SHARED/EVOLVED | SELECTION/BEHAVIOR | selection and behavior consumer policy (checkmark) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
 | clearable | boolean | HISTORICAL-NEURAL | CLEAR | clear consumer policy (clearable) | CORE | showClear | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | clearAllLabel | string | HISTORICAL-NEURAL | CLEAR | clear consumer policy (clearAllLabel) | COMMON | clearIcon aria-label | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | clearAriaLabel | string | HISTORICAL-NEURAL | ACCESSIBILITY | accessibility consumer policy (clearAriaLabel) | COMMON | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
 | disabled | boolean | HISTORICAL-NEURAL | FORM/NATIVE | form and native consumer policy (disabled) | CORE | disabled | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| display | NeuMultiselectDisplay | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (display) | COMMON | display | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| displaySelectedLabel | boolean | PRIME-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (displaySelectedLabel) | COMMON | displaySelectedLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| emptyFilterMessage | string | PRIME-PARITY | FILTERING | filtering consumer policy (emptyFilterMessage) | ADVANCED | emptyFilterMessage | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | Filtered empty is already owned by noResultsMessage. |
-| emptyMessage | string | PRIME-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (emptyMessage) | COMMON | emptyMessage | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| display | NeuMultiselectDisplay | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (display) | COMMON | display | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| displaySelectedLabel | boolean | REFERENCE-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (displaySelectedLabel) | COMMON | displaySelectedLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| emptyFilterMessage | string | REFERENCE-PARITY | FILTERING | filtering consumer policy (emptyFilterMessage) | ADVANCED | emptyFilterMessage | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | Filtered empty is already owned by noResultsMessage. |
+| emptyMessage | string | REFERENCE-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (emptyMessage) | COMMON | emptyMessage | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | errorMessage | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (errorMessage) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| filter | boolean | PRIME-PARITY | FILTERING | filtering consumer policy (filter) | ADVANCED | filter | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | searchable is the historical filter-UI enablement owner. |
-| filterBy | string \| null | PRIME-PARITY | FILTERING | filtering consumer policy (filterBy) | ADVANCED | filterBy | MAIN TAG | no | yes | no | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns the single-field matcher. |
+| filter | boolean | REFERENCE-PARITY | FILTERING | filtering consumer policy (filter) | ADVANCED | filter | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | searchable is the historical filter-UI enablement owner. |
+| filterBy | string \| null | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterBy) | ADVANCED | filterBy | MAIN TAG | no | yes | no | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns the single-field matcher. |
 | filterConfig | Readonly<NeuOptionFilterConfig<T>> | SHARED/EVOLVED | FILTERING | filtering consumer policy (filterConfig) | ADVANCED | filterBy/filterFields/filterMatchMode/filterLocale | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| filterFields | readonly NeuOptionAccessor<T, unknown>[] | PRIME-PARITY | FILTERING | filtering consumer policy (filterFields) | ADVANCED | filterFields | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns the multi-field matcher. |
-| filterLocale | string | PRIME-PARITY | FILTERING | filtering consumer policy (filterLocale) | ADVANCED | filterLocale | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns locale-sensitive matching. |
-| filterMatchMode | NeuOptionFilterMatchMode | PRIME-PARITY | FILTERING | filtering consumer policy (filterMatchMode) | ADVANCED | filterMatchMode | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns matching policy. |
-| filterValue | string \| null | PRIME-PARITY | FILTERING | filtering consumer policy (filterValue) | ADVANCED | filterValue | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| filterFields | readonly NeuOptionAccessor<T, unknown>[] | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterFields) | ADVANCED | filterFields | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns the multi-field matcher. |
+| filterLocale | string | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterLocale) | ADVANCED | filterLocale | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns locale-sensitive matching. |
+| filterMatchMode | NeuOptionFilterMatchMode | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterMatchMode) | ADVANCED | filterMatchMode | MAIN TAG | no | yes | yes | no | filterConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | filterConfig owns matching policy. |
+| filterValue | string \| null | REFERENCE-PARITY | FILTERING | filtering consumer policy (filterValue) | ADVANCED | filterValue | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | floatingLabel | boolean | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (floatingLabel) | COMMON | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| fluid | boolean | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (fluid) | COMMON | fluid | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| focusOnHover | boolean | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (focusOnHover) | COMMON | focusOnHover | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| group | boolean | PRIME-PARITY | GROUPING | grouping consumer policy (group) | ADVANCED | group | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | Grouping is inferred from historical option.group data; groupConfig owns accessors. |
+| fluid | boolean | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (fluid) | COMMON | fluid | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| focusOnHover | boolean | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (focusOnHover) | COMMON | focusOnHover | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| group | boolean | REFERENCE-PARITY | GROUPING | grouping consumer policy (group) | ADVANCED | group | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | Grouping is inferred from historical option.group data; groupConfig owns accessors. |
 | groupConfig | NeuOptionGroupConfig<T, G> \| null | SHARED/EVOLVED | GROUPING | grouping consumer policy (groupConfig) | ADVANCED | group/optionGroupLabel/optionGroupChildren | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | groups | readonly G[] | SHARED/EVOLVED | GROUPING | grouping consumer policy (groups) | ADVANCED | optionGroupChildren data | CONFIG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| highlightOnSelect | boolean | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (highlightOnSelect) | COMMON | highlightOnSelect | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| highlightOnSelect | boolean | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (highlightOnSelect) | COMMON | highlightOnSelect | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | hint | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (hint) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| id | string \| null | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (id) | COMMON | id | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| id | string \| null | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (id) | COMMON | id | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | identityConfig | NeuOptionIdentityConfig<T, V, I> | SHARED/EVOLVED | DATA/IDENTITY | data and identity consumer policy (identityConfig) | COMMON | dataKey | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| inputId | string \| null | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (inputId) | COMMON | inputId | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| inputId | string \| null | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (inputId) | COMMON | inputId | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | invalid | boolean | SHARED/EVOLVED | ACCESSIBILITY | accessibility consumer policy (invalid) | COMMON | invalid | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | label | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (label) | CORE | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| lazy | boolean | PRIME-PARITY | LAZY | lazy consumer policy (lazy) | ADVANCED | lazy | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| lazy | boolean | REFERENCE-PARITY | LAZY | lazy consumer policy (lazy) | ADVANCED | lazy | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | lazyFirst | number | SHARED/EVOLVED | LAZY | lazy consumer policy (lazyFirst) | ADVANCED | none | NO EQUIVALENT | yes | yes | no | yes | none | none | none | none | REMOVE-DUPLICATE | Replaced by canonical Neural dataFirst. |
 | loading | boolean | HISTORICAL-NEURAL | SELECTION/BEHAVIOR | selection and behavior consumer policy (loading) | CORE | loading | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | loadingLabel | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (loadingLabel) | COMMON | loader semantics | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| maxSelectedLabels | number | PRIME-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (maxSelectedLabels) | COMMON | maxSelectedLabels | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| maxSelectedLabels | number | REFERENCE-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (maxSelectedLabels) | COMMON | maxSelectedLabels | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | name | string \| null | SHARED/EVOLVED | FORM/NATIVE | form and native consumer policy (name) | COMMON | name | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | noResultsMessage | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (noResultsMessage) | COMMON | emptyFilterMessage | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | open | boolean \| null | H5-B3.F | OVERLAY | overlay consumer policy (open) | CORE | overlayVisible | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| optionDisabled | NeuOptionDisabledAccessor<T> \| null | PRIME-PARITY | DATA/IDENTITY | data and identity consumer policy (optionDisabled) | COMMON | optionDisabled | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| optionGroupChildren | NeuOptionAccessor<G, readonly T[]> \| null | PRIME-PARITY | GROUPING | grouping consumer policy (optionGroupChildren) | ADVANCED | optionGroupChildren | MAIN TAG | no | yes | no | no | groupConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | groupConfig owns children access. |
-| optionGroupLabel | NeuOptionAccessor<G, unknown> \| null | PRIME-PARITY | GROUPING | grouping consumer policy (optionGroupLabel) | ADVANCED | optionGroupLabel | MAIN TAG | no | yes | yes | no | groupConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | groupConfig owns label access. |
-| optionLabel | NeuOptionLabelAccessor<T> \| null | PRIME-PARITY | DATA/IDENTITY | data and identity consumer policy (optionLabel) | COMMON | optionLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| optionDisabled | NeuOptionDisabledAccessor<T> \| null | REFERENCE-PARITY | DATA/IDENTITY | data and identity consumer policy (optionDisabled) | COMMON | optionDisabled | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| optionGroupChildren | NeuOptionAccessor<G, readonly T[]> \| null | REFERENCE-PARITY | GROUPING | grouping consumer policy (optionGroupChildren) | ADVANCED | optionGroupChildren | MAIN TAG | no | yes | no | no | groupConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | groupConfig owns children access. |
+| optionGroupLabel | NeuOptionAccessor<G, unknown> \| null | REFERENCE-PARITY | GROUPING | grouping consumer policy (optionGroupLabel) | ADVANCED | optionGroupLabel | MAIN TAG | no | yes | yes | no | groupConfig | none | none | none | MOVE-TO-EXISTING-CONFIG | groupConfig owns label access. |
+| optionLabel | NeuOptionLabelAccessor<T> \| null | REFERENCE-PARITY | DATA/IDENTITY | data and identity consumer policy (optionLabel) | COMMON | optionLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | options | readonly T[] | HISTORICAL-NEURAL | DATA/IDENTITY | data and identity consumer policy (options) | CORE | options | MAIN TAG | no | no | yes | yes | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| optionValue | NeuOptionValueAccessor<T, V> \| null | PRIME-PARITY | DATA/IDENTITY | data and identity consumer policy (optionValue) | COMMON | optionValue | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| optionValue | NeuOptionValueAccessor<T, V> \| null | REFERENCE-PARITY | DATA/IDENTITY | data and identity consumer policy (optionValue) | COMMON | optionValue | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | placeholder | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (placeholder) | CORE | placeholder | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| readonly | boolean | PRIME-PARITY | FORM/NATIVE | form and native consumer policy (readonly) | COMMON | readonly | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| readonly | boolean | REFERENCE-PARITY | FORM/NATIVE | form and native consumer policy (readonly) | COMMON | readonly | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | required | boolean | SHARED/EVOLVED | FORM/NATIVE | form and native consumer policy (required) | COMMON | required | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| resetFilterOnHide | boolean | PRIME-PARITY | FILTERING | filtering consumer policy (resetFilterOnHide) | ADVANCED | resetFilterOnHide | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| scrollHeight | string | PRIME-PARITY | OVERLAY | overlay consumer policy (scrollHeight) | ADVANCED | scrollHeight | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| resetFilterOnHide | boolean | REFERENCE-PARITY | FILTERING | filtering consumer policy (resetFilterOnHide) | ADVANCED | resetFilterOnHide | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| scrollHeight | string | REFERENCE-PARITY | OVERLAY | overlay consumer policy (scrollHeight) | ADVANCED | scrollHeight | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | searchable | boolean | HISTORICAL-NEURAL | FILTERING | filtering consumer policy (searchable) | CORE | filter | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | searchPlaceholder | string | HISTORICAL-NEURAL | FILTERING | filtering consumer policy (searchPlaceholder) | ADVANCED | filterPlaceholder | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | selectAll | boolean | HISTORICAL-NEURAL | SELECTION/BEHAVIOR | selection and behavior consumer policy (selectAll) | COMMON | selectAll | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | selectAllLabel | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (selectAllLabel) | COMMON | header checkbox aria-label | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | selectAllState | boolean \| null | SHARED/EVOLVED | SELECTION/BEHAVIOR | selection and behavior consumer policy (selectAllState) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| selectedItemsLabel | string | PRIME-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (selectedItemsLabel) | COMMON | selectedItemsLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| selectionLimit | number \| null | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (selectionLimit) | COMMON | selectionLimit | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| selectOnFocus | boolean | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (selectOnFocus) | COMMON | selectOnFocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| showClear | boolean | PRIME-PARITY | CLEAR | clear consumer policy (showClear) | COMMON | showClear | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | clearable is the historical clear affordance owner. |
-| showToggleAll | boolean | PRIME-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (showToggleAll) | COMMON | showToggleAll | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | selectAll is the sole select-all enablement owner. |
+| selectedItemsLabel | string | REFERENCE-PARITY | PRESENTATION/COPY | presentation and copy consumer policy (selectedItemsLabel) | COMMON | selectedItemsLabel | MAIN TAG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| selectionLimit | number \| null | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (selectionLimit) | COMMON | selectionLimit | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| selectOnFocus | boolean | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (selectOnFocus) | COMMON | selectOnFocus | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| showClear | boolean | REFERENCE-PARITY | CLEAR | clear consumer policy (showClear) | COMMON | showClear | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | clearable is the historical clear affordance owner. |
+| showToggleAll | boolean | REFERENCE-PARITY | SELECTION/BEHAVIOR | selection and behavior consumer policy (showToggleAll) | COMMON | showToggleAll | MAIN TAG | no | yes | no | no | none | none | none | none | REMOVE-DUPLICATE | selectAll is the sole select-all enablement owner. |
 | size | NeuMultiselectSize | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (size) | COMMON | size | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| tabindex | number | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (tabindex) | COMMON | tabindex | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| tabindex | number | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (tabindex) | COMMON | tabindex | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | totalRecords | number \| null | SHARED/EVOLVED | LAZY | lazy consumer policy (totalRecords) | ADVANCED | none | NO EQUIVALENT | yes | yes | no | yes | none | none | none | none | REMOVE-DUPLICATE | Replaced by canonical Neural totalItems. |
 | unselectAllLabel | string | HISTORICAL-NEURAL | PRESENTATION/COPY | presentation and copy consumer policy (unselectAllLabel) | COMMON | header checkbox aria-label | CONFIG | no | no | yes | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | urlParam | string \| null | HISTORICAL-NEURAL | SELECTION/BEHAVIOR | selection and behavior consumer policy (urlParam) | COMMON | none | NO EQUIVALENT | yes | no | no | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| variant | NeuMultiselectVariant | PRIME-PARITY | ACCESSIBILITY | accessibility consumer policy (variant) | COMMON | variant | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| variant | NeuMultiselectVariant | REFERENCE-PARITY | ACCESSIBILITY | accessibility consumer policy (variant) | COMMON | variant | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | virtualScroll | boolean | HISTORICAL-NEURAL | VIRTUALIZATION | virtualization consumer policy (virtualScroll) | ADVANCED | virtualScroll | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
 | virtualScrollBuffer | number | SHARED/EVOLVED | VIRTUALIZATION | virtualization consumer policy (virtualScrollBuffer) | ADVANCED | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
-| virtualScrollItemSize | number | PRIME-PARITY | VIRTUALIZATION | virtualization consumer policy (virtualScrollItemSize) | ADVANCED | virtualScrollItemSize | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
-| virtualScrollOptions | NeuMultiselectVirtualScrollOptions | PRIME-PARITY | VIRTUALIZATION | virtualization consumer policy (virtualScrollOptions) | ADVANCED | virtualScrollOptions | MAIN TAG | no | yes | yes | yes | none | none | none | none | REMOVE-DUPLICATE | The established Neural virtualization scalars are the sole owner. |
+| virtualScrollItemSize | number | REFERENCE-PARITY | VIRTUALIZATION | virtualization consumer policy (virtualScrollItemSize) | ADVANCED | virtualScrollItemSize | MAIN TAG | no | no | no | no | none | none | none | none | KEEP-DIRECT | A common, independent semantic choice on the owning form control. |
+| virtualScrollOptions | NeuMultiselectVirtualScrollOptions | REFERENCE-PARITY | VIRTUALIZATION | virtualization consumer policy (virtualScrollOptions) | ADVANCED | virtualScrollOptions | MAIN TAG | no | yes | yes | yes | none | none | none | none | REMOVE-DUPLICATE | The established Neural virtualization scalars are the sole owner. |
 | virtualScrollVisibleItems | number | HISTORICAL-NEURAL | VIRTUALIZATION | virtualization consumer policy (virtualScrollVisibleItems) | ADVANCED | none | NO EQUIVALENT | yes | no | yes | no | none | none | none | none | KEEP-NEURAL-SUPERSET | Independent Neural product policy with direct consumer value. |
 
 ### NeuMultiselectComponent complete final direct-input list (66)
 
-| Input | Exact type | Domain | Prime direct equivalent | Why it belongs on the main tag | Excess category |
+| Input | Exact type | Domain | Reference direct equivalent | Why it belongs on the main tag | Excess category |
 |---|---|---|---|---|---|
 | ariaDescribedBy | string \| null | ACCESSIBILITY | none | Truthful native form/accessibility contract. | A — REAL NEURAL SUPERSET |
 | ariaFilterLabel | string | ACCESSIBILITY | ariaFilterLabel | Truthful native form/accessibility contract. | not excess |
@@ -321,7 +321,7 @@ Generated from baseline `300f8bd6286c6b61068bd614431eb5e600609528`, historical N
 | virtualScrollItemSize | number | VIRTUALIZATION | virtualScrollItemSize | Independent, commonly useful semantic product choice. | not excess |
 | virtualScrollVisibleItems | number | VIRTUALIZATION | none | Independent, commonly useful semantic product choice. | A — REAL NEURAL SUPERSET |
 
-### NeuMultiselectComponent Prime excess accounting
+### NeuMultiselectComponent Reference excess accounting
 
 | Category | Count |
 |---|---:|
@@ -329,9 +329,9 @@ Generated from baseline `300f8bd6286c6b61068bd614431eb5e600609528`, historical N
 | B — CONTROLLED-STATE ARCHITECTURE | 0 |
 | C — HISTORICAL NEURAL ERGONOMICS | 1 |
 | D — SEMANTIC DIFFERENCE | 3 |
-| E — PRIME DELEGATES ELSEWHERE | 0 |
+| E — REFERENCE DELEGATES ELSEWHERE | 0 |
 | F — OTHER | 0 |
-| TOTAL FINAL INPUTS WITHOUT PRIME MAIN-TAG EQUIVALENT | 11 |
+| TOTAL FINAL INPUTS WITHOUT REFERENCE MAIN-TAG EQUIVALENT | 11 |
 
 ## Micro-input cluster analysis
 
@@ -385,18 +385,18 @@ The result deliberately avoids giant configs: only matching/access policy (`filt
 
 ### NeuSelectComponent starting output ledger
 
-| Starting output | Payload | Provenance | Category | Prime equivalent | Duplicate? | Final action | Canonical output | Justification |
+| Starting output | Payload | Provenance | Category | Reference equivalent | Duplicate? | Final action | Canonical output | Justification |
 |---|---|---|---|---|---|---|---|---|
 | multipleSelectionChange | NeuSelectChangeEvent<T, V, true> | H5-B3.F | DETAIL | onChange | yes | MERGE | changeDetail | Multiple and single detail payloads are one discriminated union. |
-| onBlur | FocusEvent | PRIME-PARITY | FOCUS | onBlur | yes | MERGE | blurEvent | Canonical Neural focus-boundary name. |
-| onChange | NeuSelectChangeEvent<T, V> | PRIME-PARITY | DETAIL | onChange | yes | MERGE | changeDetail | Canonical discriminated selection detail event. |
-| onClear | Event | PRIME-PARITY | DETAIL | onClear | yes | MERGE | cleared | Canonical atomic clear detail. |
-| onClick | MouseEvent | PRIME-PARITY | INTERACTION | onClick | yes | MERGE | triggerClick | Names the trigger interaction precisely. |
-| onFilter | NeuSelectFilterEvent<T> | PRIME-PARITY | FILTER | onFilter | yes | MERGE | filter | Canonical filter detail. |
-| onFocus | FocusEvent | PRIME-PARITY | FOCUS | onFocus | yes | MERGE | focusEvent | Canonical focus-boundary name. |
-| onHide | NeuSelectOverlayEvent | PRIME-PARITY | LIFECYCLE | onHide/onPanelHide | yes | MERGE | closed | Lifecycle completion, separate from controlled state. |
-| onLazyLoad | NeuOptionLazyRequest | PRIME-PARITY | LAZY | onLazyLoad | yes | MERGE | lazyRequest | Canonical data request name. |
-| onShow | NeuSelectOverlayEvent | PRIME-PARITY | LIFECYCLE | onShow/onPanelShow | yes | MERGE | opened | Lifecycle completion, separate from controlled state. |
+| onBlur | FocusEvent | REFERENCE-PARITY | FOCUS | onBlur | yes | MERGE | blurEvent | Canonical Neural focus-boundary name. |
+| onChange | NeuSelectChangeEvent<T, V> | REFERENCE-PARITY | DETAIL | onChange | yes | MERGE | changeDetail | Canonical discriminated selection detail event. |
+| onClear | Event | REFERENCE-PARITY | DETAIL | onClear | yes | MERGE | cleared | Canonical atomic clear detail. |
+| onClick | MouseEvent | REFERENCE-PARITY | INTERACTION | onClick | yes | MERGE | triggerClick | Names the trigger interaction precisely. |
+| onFilter | NeuSelectFilterEvent<T> | REFERENCE-PARITY | FILTER | onFilter | yes | MERGE | filter | Canonical filter detail. |
+| onFocus | FocusEvent | REFERENCE-PARITY | FOCUS | onFocus | yes | MERGE | focusEvent | Canonical focus-boundary name. |
+| onHide | NeuSelectOverlayEvent | REFERENCE-PARITY | LIFECYCLE | onHide/onPanelHide | yes | MERGE | closed | Lifecycle completion, separate from controlled state. |
+| onLazyLoad | NeuOptionLazyRequest | REFERENCE-PARITY | LAZY | onLazyLoad | yes | MERGE | lazyRequest | Canonical data request name. |
+| onShow | NeuSelectOverlayEvent | REFERENCE-PARITY | LIFECYCLE | onShow/onPanelShow | yes | MERGE | opened | Lifecycle completion, separate from controlled state. |
 | selectionChange | T \| null | HISTORICAL-NEURAL | CONTROLLED-STATE | onChange | no | KEEP | selectionChange | Historical value-state proposal; single mode remains source compatible. |
 
 ### NeuSelectComponent complete final outputs
@@ -416,19 +416,19 @@ The result deliberately avoids giant configs: only matching/access policy (`filt
 
 ### NeuMultiselectComponent starting output ledger
 
-| Starting output | Payload | Provenance | Category | Prime equivalent | Duplicate? | Final action | Canonical output | Justification |
+| Starting output | Payload | Provenance | Category | Reference equivalent | Duplicate? | Final action | Canonical output | Justification |
 |---|---|---|---|---|---|---|---|---|
-| onBlur | FocusEvent | PRIME-PARITY | FOCUS | onBlur | yes | MERGE | blurEvent | Canonical Neural focus-boundary name. |
-| onChange | NeuMultiselectChangeEvent<T, V> | PRIME-PARITY | DETAIL | onChange | yes | MERGE | changeDetail | Canonical selection detail event. |
-| onClear | Event | PRIME-PARITY | DETAIL | onClear | yes | MERGE | cleared | Canonical atomic clear detail. |
-| onClick | MouseEvent | PRIME-PARITY | INTERACTION | onClick | yes | MERGE | triggerClick | Names the trigger interaction precisely. |
-| onFilter | NeuMultiselectFilterEvent | PRIME-PARITY | FILTER | onFilter | yes | MERGE | filter | Canonical filter detail. |
-| onFocus | FocusEvent | PRIME-PARITY | FOCUS | onFocus | yes | MERGE | focusEvent | Canonical focus-boundary name. |
-| onLazyLoad | NeuOptionLazyRequest | PRIME-PARITY | LAZY | onLazyLoad | yes | MERGE | lazyRequest | Canonical data request name. |
-| onPanelHide | NeuMultiselectOverlayEvent | PRIME-PARITY | LIFECYCLE | onHide/onPanelHide | yes | MERGE | closed | Canonical lifecycle completion. |
-| onPanelShow | NeuMultiselectOverlayEvent | PRIME-PARITY | LIFECYCLE | onShow/onPanelShow | yes | MERGE | opened | Canonical lifecycle completion. |
-| onRemove | NeuMultiselectRemoveEvent<T, V> | PRIME-PARITY | DETAIL | onRemove | yes | MERGE | remove | Canonical item-removal detail. |
-| onSelectAllChange | NeuMultiselectSelectAllChangeEvent<T, V> | PRIME-PARITY | DETAIL | onSelectAllChange | yes | MERGE | selectAllChangeDetail | Canonical select-all detail. |
+| onBlur | FocusEvent | REFERENCE-PARITY | FOCUS | onBlur | yes | MERGE | blurEvent | Canonical Neural focus-boundary name. |
+| onChange | NeuMultiselectChangeEvent<T, V> | REFERENCE-PARITY | DETAIL | onChange | yes | MERGE | changeDetail | Canonical selection detail event. |
+| onClear | Event | REFERENCE-PARITY | DETAIL | onClear | yes | MERGE | cleared | Canonical atomic clear detail. |
+| onClick | MouseEvent | REFERENCE-PARITY | INTERACTION | onClick | yes | MERGE | triggerClick | Names the trigger interaction precisely. |
+| onFilter | NeuMultiselectFilterEvent | REFERENCE-PARITY | FILTER | onFilter | yes | MERGE | filter | Canonical filter detail. |
+| onFocus | FocusEvent | REFERENCE-PARITY | FOCUS | onFocus | yes | MERGE | focusEvent | Canonical focus-boundary name. |
+| onLazyLoad | NeuOptionLazyRequest | REFERENCE-PARITY | LAZY | onLazyLoad | yes | MERGE | lazyRequest | Canonical data request name. |
+| onPanelHide | NeuMultiselectOverlayEvent | REFERENCE-PARITY | LIFECYCLE | onHide/onPanelHide | yes | MERGE | closed | Canonical lifecycle completion. |
+| onPanelShow | NeuMultiselectOverlayEvent | REFERENCE-PARITY | LIFECYCLE | onShow/onPanelShow | yes | MERGE | opened | Canonical lifecycle completion. |
+| onRemove | NeuMultiselectRemoveEvent<T, V> | REFERENCE-PARITY | DETAIL | onRemove | yes | MERGE | remove | Canonical item-removal detail. |
+| onSelectAllChange | NeuMultiselectSelectAllChangeEvent<T, V> | REFERENCE-PARITY | DETAIL | onSelectAllChange | yes | MERGE | selectAllChangeDetail | Canonical select-all detail. |
 | openChange | boolean | H5-B3.F | CONTROLLED-STATE | overlayVisibleChange | no | KEEP | openChange | The sole controlled visibility proposal. |
 | selectionChange | T[] | HISTORICAL-NEURAL | CONTROLLED-STATE | onChange | no | KEEP | selectionChange | Historical selected-values state proposal. |
 
@@ -560,9 +560,9 @@ Select `changeDetail` is a discriminated union: `{ multiple: false; value: V | n
 
 ## Template and composition inventory
 
-### NeuSelectComponent: 13 Neural selectors / 16 Prime regions
+### NeuSelectComponent: 13 Neural selectors / 16 Reference regions
 
-| Prime region | Prime purpose | Neural equivalent | DOM ownership | Typed context | Equivalent result | Neural stronger | Gap |
+| Reference region | Reference purpose | Neural equivalent | DOM ownership | Typed context | Equivalent result | Neural stronger | Gap |
 |---|---|---|---|---|---|---|---|
 | item | option row | neuSelectItem | component owns option/ARIA DOM | NeuSelectItemContext<T, V> | yes | yes — arbitrary row content | no |
 | group | group heading | neuSelectGroup | component owns grouped list DOM | NeuSelectGroupContext<T, G> | yes | no | no |
@@ -577,13 +577,13 @@ Select `changeDetail` is a discriminated union: `{ multiple: false; value: V | n
 | loadingIcon | loading icon | neuSelectLoadingIcon | component owns trigger status | NeuSelectIconContext | yes | no | no |
 | clearIcon | clear icon | neuSelectClearIcon | component owns clear button | NeuSelectIconContext | yes | no | no |
 | filterIcon | filter icon | neuSelectFilterIcon | component owns filter input | NeuSelectIconContext | yes | no | no |
-| onIcon/offIcon/cancelIcon | Prime internal option/check states | neuSelectItem | component owns option selection DOM | NeuSelectItemContext<T, V> | yes | yes — full item composition | no |
+| onIcon/offIcon/cancelIcon | Reference internal option/check states | neuSelectItem | component owns option selection DOM | NeuSelectItemContext<T, V> | yes | yes — full item composition | no |
 
 Context quality: every typed context above is **SUFFICIENT**; context-free shell regions intentionally expose none. No context is overexposed or underexposed, no internal Option controller is public, and no context uses `any`.
 
-### NeuMultiselectComponent: 18 Neural selectors / 19 Prime regions
+### NeuMultiselectComponent: 18 Neural selectors / 19 Reference regions
 
-| Prime region | Prime purpose | Neural equivalent | DOM ownership | Typed context | Equivalent result | Neural stronger | Gap |
+| Reference region | Reference purpose | Neural equivalent | DOM ownership | Typed context | Equivalent result | Neural stronger | Gap |
 |---|---|---|---|---|---|---|---|
 | item | option row | neuMultiselectItem | component owns option/ARIA DOM | NeuMultiselectItemContext<T, V> | yes | yes | no |
 | group | group heading | neuMultiselectGroup | component owns grouped list DOM | NeuMultiselectGroupContext<T, G> | yes | no | no |
@@ -832,7 +832,7 @@ These two components were structurally protected during H5-B3.S, then mechanical
 
 ## All-four supported method allowlists
 
-| Component | Neural supported allowlist | Internal/unsupported methods | Prime consumer-control allowlist |
+| Component | Neural supported allowlist | Internal/unsupported methods | Reference consumer-control allowlist |
 |---|---|---:|---|
 | NeuSelectComponent | `clear`, `close`, `focus`, `open`, `resetFilter`, `selectOption`, `toggle` | 43 | `clear`, `focus`, `hide`, `resetFilter`, `show` |
 | NeuMultiselectComponent | `clear`, `close`, `focusTrigger`, `open`, `resetFilter`, `toggle` | 34 | `clear`, `hide`, `resetFilter`, `show` |
@@ -841,16 +841,16 @@ These two components were structurally protected during H5-B3.S, then mechanical
 
 All other class methods are explicitly `INTERNAL/UNSUPPORTED`. The consumer naming scan found no public `show()`/`hide()` aliases and no retired onX output names. The canonical `filter` outputs on Select, Multiselect, and Listbox are legitimate event names, not the removed duplicate filter-enable inputs.
 
-## Final all-four Prime main-tag comparison
+## Final all-four Reference main-tag comparison
 
-| Component | Implementation | Inputs | Outputs | Models | Supported methods | Effective template regions | Material excess explanation |
+| Component | Implementation | Inputs | Outputs | Models | Supported methods | Effective template regions | Significant excess explanation |
 |---|---|---:|---:|---:|---:|---:|---|
 | Select | Reference release | 70 | 9 | 0 | 5 | 16 | Reference floor. |
 | Select | Neural final | 56 | 10 | 0 | 7 | 13 | One extra output preserves historical `selectionChange`; extra methods are typed toggle/direct-selection ergonomics. Every input has one owner. |
 | Multiselect | Reference release | 72 | 12 | 1 | 4 | 19 | Reference floor. |
-| Multiselect | Neural final | 66 | 13 | 0 | 6 | 18 | One extra output preserves historical `selectionChange`; open/openChange replaces Prime model metadata; extra methods expose CDK overlay focus/toggle ergonomics. |
+| Multiselect | Neural final | 66 | 13 | 0 | 6 | 18 | One extra output preserves historical `selectionChange`; open/openChange replaces Reference model metadata; extra methods expose CDK overlay focus/toggle ergonomics. |
 | Autocomplete | Reference release | 75 | 13 | 0 | 3 | 11 | Reference floor. |
-| Autocomplete | Neural final | 65 | 13 | 0 | 7 | 9 | No output excess. Extra methods expose typed focus/reset/open-all/direct-selection operations; token-mode-only Prime templates are intentionally absent. |
+| Autocomplete | Neural final | 65 | 13 | 0 | 7 | 9 | No output excess. Extra methods expose typed focus/reset/open-all/direct-selection operations; token-mode-only Reference templates are intentionally absent. |
 | Listbox | Reference release | 57 | 9 | 0 | 1 | 13 | Reference floor. |
 | Listbox | Neural final | 51 | 10 | 0 | 3 | 9 | One extra output is the typed Neural drop/reorder proposal; method excess is typed filter/set/toggle-all control; micro-icon regions compose through full filter/item templates. |
 
@@ -858,12 +858,12 @@ Lower Neural counts are intentional consolidation, not capability loss. All four
 
 ## All-four composition closure
 
-| Component | Neural effective selectors | Prime effective regions | Mapping result | Gap count | Context quality |
+| Component | Neural effective selectors | Reference effective regions | Mapping result | Gap count | Context quality |
 |---|---:|---:|---|---:|---|
-| Select | 13 | 16 | 13 selectors cover 16 Prime regions; whole item composition covers on/off/cancel micro-icons. | 0 | SUFFICIENT |
-| Multiselect | 18 | 19 | 18 selectors cover 19 Prime regions; whole token/checkbox composition absorbs duplicate facet/icon regions. | 0 | SUFFICIENT |
-| Autocomplete | 9 | 11 | 9 selectors cover item, group, loader, header, footer, empty, loading, clear and dropdown; Prime selected-item/remove-token regions are obsolete multiple-token mode. | 0 | SUFFICIENT |
-| Listbox | 9 | 13 | 9 selectors cover item, group, filter, loader, header, footer, empty, filtered-empty and selection indicator; whole filter/item templates cover Prime micro-icons and facets. | 0 | SUFFICIENT |
+| Select | 13 | 16 | 13 selectors cover 16 Reference regions; whole item composition covers on/off/cancel micro-icons. | 0 | SUFFICIENT |
+| Multiselect | 18 | 19 | 18 selectors cover 19 Reference regions; whole token/checkbox composition absorbs duplicate facet/icon regions. | 0 | SUFFICIENT |
+| Autocomplete | 9 | 11 | 9 selectors cover item, group, loader, header, footer, empty, loading, clear and dropdown; Reference selected-item/remove-token regions are obsolete multiple-token mode. | 0 | SUFFICIENT |
+| Listbox | 9 | 13 | 9 selectors cover item, group, filter, loader, header, footer, empty, filtered-empty and selection indicator; whole filter/item templates cover Reference micro-icons and facets. | 0 | SUFFICIENT |
 
 No template context exposes an internal controller or `any`; context-free shell regions intentionally expose no context. Angular control flow, signals, pipes, directives, components, forms/CVAs, and consumer events remain available inside every embedded view.
 
@@ -871,7 +871,7 @@ No template context exposes an internal controller or `any`; context-free shell 
 
 | Component | Inputs | Outputs | Models | Effective composition selectors | Result |
 |---|---:|---:|---:|---:|---|
-| NeuTableComponent | 77 | 38 | 0 | 20 | PRIME-PARITY CLOSED; COMPOSITION FREEDOM CLOSED |
+| NeuTableComponent | 77 | 38 | 0 | 20 | REFERENCE-PARITY CLOSED; COMPOSITION FREEDOM CLOSED |
 | NeuTreeTableComponent | 46 | 23 | 0 | 18 | FUNCTIONAL GAP 0; API QUALITY EXCELLENT |
 
 TreeTable effective composition is its 3 specific directives plus 15 applicable shared Table directives. The dedicated table-architecture audit also passed with facade `77/38/96/20` and core size `35677 B raw / 4675 B gzip / 3919 B Brotli`.
@@ -899,8 +899,8 @@ Final contract: **106 entrypoints**, **828 exported declarations**, **1142 input
 |---|---|---|
 | Select | GOOD | Consumer surface is larger than minimal because useful historical Neural contracts remain, but every input/output has one justified owner and no compatibility alias. |
 | Multiselect | GOOD | Consumer surface is larger than minimal because useful historical Neural contracts remain, but every input/output has one justified owner and no compatibility alias. |
-| Autocomplete | EXCELLENT | Counts are below Prime, supported methods are tightly allowlisted, composition remains complete, and no structural gap or duplicate owner remains. |
-| Listbox | EXCELLENT | Counts are below Prime, supported methods are tightly allowlisted, composition remains complete, and no structural gap or duplicate owner remains. |
+| Autocomplete | EXCELLENT | Counts are below Reference, supported methods are tightly allowlisted, composition remains complete, and no structural gap or duplicate owner remains. |
+| Listbox | EXCELLENT | Counts are below Reference, supported methods are tightly allowlisted, composition remains complete, and no structural gap or duplicate owner remains. |
 
 - SELECT GAP COUNT = 0
 - MULTISELECT GAP COUNT = 0

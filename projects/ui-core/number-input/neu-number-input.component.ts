@@ -178,9 +178,9 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   /** Muestra el label como flotante dentro del campo. No compatible con vertical=true. / Shows the label as floating inside the field. Not compatible with vertical=true. */
   readonly floatingLabel = input<boolean>(false);
   /** Aria-label del botón de decremento */
-  readonly decrementLabel = input<string>('Disminuir');
+  readonly decrementLabel = input<string>('Decrease');
   /** Aria-label del botón de incremento */
-  readonly incrementLabel = input<string>('Aumentar');
+  readonly incrementLabel = input<string>('Increase');
   /** Muestra los botones en vertical / Shows buttons vertically */
   readonly vertical = input<boolean>(false);
   /** Agrupa ambos botones apilados al final del input / Groups both buttons stacked at input end */
@@ -192,7 +192,11 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
   /** Emitido en cada cambio numérico / Emitted on each numeric change */
   readonly valueChange = output<number>();
   /** Native editing snapshot before commit; empty/invalid have value null. */
-  readonly inputDetail = output<{ rawText: string; value: number | null; state: 'valid' | 'empty' | 'invalid' }>();
+  readonly inputDetail = output<{
+    rawText: string;
+    value: number | null;
+    state: 'valid' | 'empty' | 'invalid';
+  }>();
   private readonly eventDestroyRef = inject(DestroyRef);
 
   onLiveInput(event: Event): void {
@@ -204,13 +208,12 @@ export class NeuNumberInputComponent implements ControlValueAccessor {
     this.inputDetail.emit({ rawText, value: state === 'valid' ? parsed : null, state });
   }
 
-
   protected readonly _id = inject(NeuIdGenerator).getId('neu-number-input-');
   protected readonly _cvaDisabled = signal(false);
   protected readonly _value = signal<number | null>(0);
   protected readonly _focused = signal(false);
-  protected readonly _ariaMin = computed(() => Number.isFinite(this.min()) ? this.min() : null);
-  protected readonly _ariaMax = computed(() => Number.isFinite(this.max()) ? this.max() : null);
+  protected readonly _ariaMin = computed(() => (Number.isFinite(this.min()) ? this.min() : null));
+  protected readonly _ariaMax = computed(() => (Number.isFinite(this.max()) ? this.max() : null));
 
   readonly hasValue = computed(() => this._value() !== null);
   readonly canIncrement = computed(() => {

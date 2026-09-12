@@ -76,9 +76,10 @@
     inset-block-start: 0;
     inset-inline-start: 50%;
     block-size: calc(var(--neu-organization-chart-gap-y) / 2);
-    border-inline-start: var(--neu-organization-chart-connector-width) solid
-      var(--neu-organization-chart-connector);
+    inline-size: var(--neu-organization-chart-connector-width);
+    background: var(--neu-organization-chart-connector);
     content: '';
+    pointer-events: none;
   }
 
   > .neu-organization-chart__branch {
@@ -86,35 +87,35 @@
     &::after {
       position: absolute;
       inset-block-start: calc(var(--neu-organization-chart-gap-y) / -2);
-      block-size: calc(var(--neu-organization-chart-gap-y) / 2);
-      inline-size: calc(50% + var(--neu-organization-chart-gap-x) / 2);
-      border-block-start: var(--neu-organization-chart-connector-width) solid
-        var(--neu-organization-chart-connector);
+      background: var(--neu-organization-chart-connector);
       content: '';
       pointer-events: none;
     }
 
     &::before {
-      inset-inline-start: 50%;
-      border-inline-start: var(--neu-organization-chart-connector-width) solid
-        var(--neu-organization-chart-connector);
+      inset-inline-start: calc(var(--neu-organization-chart-gap-x) / -2);
+      block-size: var(--neu-organization-chart-connector-width);
+      inline-size: calc(100% + var(--neu-organization-chart-gap-x));
     }
 
     &::after {
-      inset-inline-end: 50%;
-      border-inline-end: var(--neu-organization-chart-connector-width) solid
-        var(--neu-organization-chart-connector);
+      inset-inline-start: 50%;
+      block-size: calc(var(--neu-organization-chart-gap-y) / 2);
+      inline-size: var(--neu-organization-chart-connector-width);
     }
 
-    &:first-child::after,
+    &:first-child::before {
+      inset-inline-start: 50%;
+      inline-size: calc(50% + var(--neu-organization-chart-gap-x) / 2);
+    }
+
     &:last-child::before {
-      border-block-start-color: transparent;
+      inset-inline-start: calc(var(--neu-organization-chart-gap-x) / -2);
+      inline-size: calc(50% + var(--neu-organization-chart-gap-x) / 2);
     }
 
-    &:only-child::before,
-    &:only-child::after {
-      inline-size: 0;
-      border-block-start: 0;
+    &:only-child::before {
+      display: none;
     }
   }
 }
@@ -289,7 +290,7 @@
   .neu-organization-chart__tree::before,
   .neu-organization-chart__branch::before,
   .neu-organization-chart__branch::after {
-    border-color: CanvasText;
+    background-color: CanvasText;
   }
 
   .neu-organization-chart__toggle {

@@ -172,4 +172,48 @@ describe('NeuTimelineComponent', () => {
     expect(timeline.markerTpl()).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.neu-timeline__title')).toBeNull();
   });
+
+  it('supports alignment, compact density and an accessible list name', () => {
+    const fixture = TestBed.createComponent(NeuTimelineComponent);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.componentRef.setInput('align', 'alternate');
+    fixture.componentRef.setInput('compact', true);
+    fixture.componentRef.setInput('ariaLabel', 'Release history');
+    fixture.detectChanges();
+
+    const list = fixture.nativeElement.querySelector('.neu-timeline');
+    expect(list.classList).toContain('neu-timeline--alternate');
+    expect(list.classList).toContain('neu-timeline--compact');
+    expect(list.getAttribute('aria-label')).toBe('Release history');
+  });
+
+  it('can render newest entries first without mutating the input collection', () => {
+    const fixture = TestBed.createComponent(NeuTimelineComponent);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.componentRef.setInput('reverse', true);
+    fixture.detectChanges();
+
+    const titles = Array.from(
+      fixture.nativeElement.querySelectorAll('.neu-timeline__title'),
+      (element: Element) => element.textContent?.trim(),
+    );
+    expect(titles).toEqual(['Evento C', 'Evento B', 'Evento A']);
+    expect(ITEMS[0].title).toBe('Evento A');
+  });
+
+  it('supports alignment, compact spacing, an accessible label and reversed rendering', () => {
+    const fixture = TestBed.createComponent(NeuTimelineComponent);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.componentRef.setInput('align', 'alternate');
+    fixture.componentRef.setInput('compact', true);
+    fixture.componentRef.setInput('reverse', true);
+    fixture.componentRef.setInput('ariaLabel', 'Order history');
+    fixture.detectChanges();
+
+    const timeline = fixture.nativeElement.querySelector('.neu-timeline');
+    expect(timeline.classList).toContain('neu-timeline--alternate');
+    expect(timeline.classList).toContain('neu-timeline--compact');
+    expect(timeline.getAttribute('aria-label')).toBe('Order history');
+    expect(timeline.querySelector('.neu-timeline__title')?.textContent).toContain('Evento C');
+  });
 });

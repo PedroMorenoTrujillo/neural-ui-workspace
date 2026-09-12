@@ -4,19 +4,19 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1497,
-    "bindingDelta": 330,
+    "declarationBindings": 1506,
+    "bindingDelta": 339,
     "mapped": 932,
     "aliasCorrections": 4,
     "missingOldEntries": 229,
-    "newlyDiscovered": 559,
+    "newlyDiscovered": 568,
     "ambiguities": 6,
     "discoveryReasons": {
       "binding-alias-was-not-modeled": 1,
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 416,
+      "declaration-or-selector-was-not-recorded": 424,
       "model-binding-was-not-supported": 2,
-      "multiline-annotated-or-compound-declaration-was-missed": 134
+      "multiline-annotated-or-compound-declaration-was-missed": 135
     }
   },
   "mappings": [
@@ -4254,6 +4254,10 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./code-block#NeuCodeBlockComponent.input:wrap",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./color-picker#NeuColorPickerComponent.input:showAlpha",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -4486,12 +4490,20 @@
       "reason": "compound-declaration-collision-hidden-by-file-oriented-snapshot"
     },
     {
+      "id": "./drag-drop#NeuDropZoneDirective.input:orientation",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./drag-drop#NeuDropZoneDirective.input:role",
       "reason": "compound-declaration-collision-hidden-by-file-oriented-snapshot"
     },
     {
       "id": "./drag-drop#NeuDropZoneDirective.input:scope",
       "reason": "compound-declaration-collision-hidden-by-file-oriented-snapshot"
+    },
+    {
+      "id": "./drag-drop#NeuDropZoneDirective.input:sortingDisabled",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./drag-drop#NeuDropZoneDirective.input:tabIndex",
@@ -5338,6 +5350,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./pick-list#NeuOrderListItemDirective.input:neuOrderListItem",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.input:dragDrop",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -5443,6 +5459,10 @@
     },
     {
       "id": "./pick-list#NeuPickListComponent.output:targetSelectionChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./pick-list#NeuPickListItemDirective.input:neuPickListItem",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5818,7 +5838,23 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./timeline#NeuTimelineComponent.input:align",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./timeline#NeuTimelineComponent.input:ariaLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./timeline#NeuTimelineComponent.input:compact",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./timeline#NeuTimelineComponent.input:items",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./timeline#NeuTimelineComponent.input:reverse",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

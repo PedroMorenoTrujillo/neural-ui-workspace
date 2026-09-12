@@ -1,6 +1,15 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideIcons } from '@ng-icons/core';
+import {
+  lucideChevronLeft,
+  lucideChevronRight,
+  lucideRotateCcw,
+  lucideX,
+  lucideZoomIn,
+  lucideZoomOut,
+} from '@ng-icons/lucide';
 import {
   NEU_IV_DATA,
   NeuImageViewerDirective,
@@ -31,7 +40,18 @@ function setupOverlay(data = mkData()) {
 
 beforeEach(() =>
   TestBed.configureTestingModule({
-    providers: [provideZonelessChangeDetection(), Overlay],
+    providers: [
+      provideZonelessChangeDetection(),
+      Overlay,
+      provideIcons({
+        lucideChevronLeft,
+        lucideChevronRight,
+        lucideRotateCcw,
+        lucideX,
+        lucideZoomIn,
+        lucideZoomOut,
+      }),
+    ],
   }).compileComponents(),
 );
 
@@ -332,6 +352,26 @@ describe('NeuImageViewerDirective', () => {
   });
 
   // ── Toolbar button DOM click tests ────────────────────────────────────────
+
+  it('renders uniformly sized icon-only toolbar and navigation controls', async () => {
+    const { f } = setupOverlay();
+    await f.whenStable();
+
+    const controls = Array.from(
+      (f.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+        '.neu-iv__btn, .neu-iv__arrow',
+      ),
+    );
+    expect(controls).toHaveLength(6);
+    expect(controls.every((control) => control.querySelector('neu-icon'))).toBe(true);
+    expect(controls.every((control) => !control.textContent?.trim())).toBe(true);
+    expect(
+      controls.every(
+        (control) =>
+          control.querySelector('ng-icon')?.getAttribute('style')?.includes('1.25rem') ?? false,
+      ),
+    ).toBe(true);
+  });
 
   it('clicking zoom-in button zooms in via template handler', async () => {
     // Clic en botón de zoom in debe hacer zoom vía handler del template

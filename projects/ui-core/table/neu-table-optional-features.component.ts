@@ -148,24 +148,35 @@ type OptionalColumn = NeuTableColumn<OptionalRow>;
                     class="neu-table__filter-overlay-rule"
                     role="group"
                     [attr.data-neu-table-filter-rule-id]="rule.id"
-                    [attr.aria-labelledby]="host()._filterOverlayRuleLabelId(column().key, rule.id)"
+                    [attr.aria-labelledby]="
+                      _filterDraftHasMultipleRules()
+                        ? host()._filterOverlayRuleLabelId(column().key, rule.id)
+                        : null
+                    "
+                    [attr.aria-label]="
+                      _filterDraftHasMultipleRules()
+                        ? null
+                        : host()._filterOverlayControlLabel(column())
+                    "
                   >
-                    <div class="neu-table__filter-overlay-rule-header">
-                      <span
-                        class="neu-table__filter-overlay-rule-label"
-                        [id]="host()._filterOverlayRuleLabelId(column().key, rule.id)"
-                      >
-                        {{ host()._filterOverlayRuleLabel(index) }}
-                      </span>
-                      <button
-                        type="button"
-                        class="neu-table__filter-overlay-remove-rule"
-                        [attr.aria-label]="host()._filterOverlayRemoveRuleLabel(index)"
-                        (click)="_removeRule(rule.id)"
-                      >
-                        <span aria-hidden="true">×</span>
-                      </button>
-                    </div>
+                    @if (_filterDraftHasMultipleRules()) {
+                      <div class="neu-table__filter-overlay-rule-header">
+                        <span
+                          class="neu-table__filter-overlay-rule-label"
+                          [id]="host()._filterOverlayRuleLabelId(column().key, rule.id)"
+                        >
+                          {{ host()._filterOverlayRuleLabel(index) }}
+                        </span>
+                        <button
+                          type="button"
+                          class="neu-table__filter-overlay-remove-rule"
+                          [attr.aria-label]="host()._filterOverlayRemoveRuleLabel(index)"
+                          (click)="_removeRule(rule.id)"
+                        >
+                          <span aria-hidden="true">×</span>
+                        </button>
+                      </div>
+                    }
                     @if (
                       _filterDraftKind() === 'text' ||
                       _filterDraftKind() === 'number' ||

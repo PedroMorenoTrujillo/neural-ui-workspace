@@ -29,8 +29,23 @@ export interface NeuAccordionItem {
   /** Deshabilita este panel / Disables this panel */
   disabled?: boolean;
 }
+
+export interface NeuAccordionHeaderContext {
+  readonly $implicit: NeuAccordionItem;
+  readonly expanded: boolean;
+}
+
 @Directive({ selector: 'ng-template[neuAccordionHeader]' })
-export class NeuAccordionHeaderDirective { constructor(readonly templateRef: TemplateRef<{ $implicit: NeuAccordionItem; expanded: boolean }>) {} }
+export class NeuAccordionHeaderDirective {
+  constructor(readonly templateRef: TemplateRef<NeuAccordionHeaderContext>) {}
+
+  static ngTemplateContextGuard(
+    _directive: NeuAccordionHeaderDirective,
+    context: unknown,
+  ): context is NeuAccordionHeaderContext {
+    return true;
+  }
+}
 
 /**
  * NeuralUI Accordion Component
@@ -64,7 +79,14 @@ export class NeuAccordionHeaderDirective { constructor(readonly templateRef: Tem
             [disabled]="item.disabled"
             (click)="toggle(item.id)"
           >
-            @if (headerTpl()) { <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: item, expanded: isExpanded(item.id) }" /> } @else { <span class="neu-accordion__title">{{ item.title }}</span> }
+            @if (headerTpl()) {
+              <ng-container
+                [ngTemplateOutlet]="headerTpl()!.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: item, expanded: isExpanded(item.id) }"
+              />
+            } @else {
+              <span class="neu-accordion__title">{{ item.title }}</span>
+            }
             <span class="neu-accordion__chevron" aria-hidden="true">
               <svg
                 width="16"

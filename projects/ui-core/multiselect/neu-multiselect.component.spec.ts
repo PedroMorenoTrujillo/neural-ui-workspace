@@ -416,7 +416,7 @@ describe('NeuMultiselectComponent', () => {
     f.detectChanges();
     f.componentInstance.ctrl.setValue(['angular', 'vue']);
     f.detectChanges();
-    expect(f.nativeElement.textContent).toContain('2 seleccionados');
+    expect(f.nativeElement.textContent).toContain('2 selected');
   });
 
   // ── Select all then deselect one (edge case) ─────────────────────────────

@@ -14,7 +14,7 @@ import {
   imports: [NeuOrderListComponent, NeuOrderListItemDirective],
   template: `
     <neu-order-list [items]="items">
-      <ng-template neuOrderListItem let-item let-index="index">
+      <ng-template [neuOrderListItem]="items" let-item let-index="index">
         <span class="order-template">{{ index }} · {{ item.label }}</span>
       </ng-template>
     </neu-order-list>
@@ -37,6 +37,11 @@ describe('NeuPickListComponent', () => {
     fixture.componentRef.setInput('source', [alpha, beta]);
     fixture.componentRef.setInput('target', [{ value: 'd', label: 'Disabled', disabled: true }]);
     fixture.detectChanges();
+  });
+
+  it('exposes typed template context guards for pick and order items', () => {
+    expect(NeuPickListItemDirective.ngTemplateContextGuard({} as never, {})).toBe(true);
+    expect(NeuOrderListItemDirective.ngTemplateContextGuard({} as never, {})).toBe(true);
   });
 
   it('renders configured headers, items and transfer action states', () => {
@@ -434,7 +439,7 @@ describe('NeuPickListComponent', () => {
       imports: [NeuPickListComponent, NeuPickListItemDirective],
       template: `
         <neu-pick-list [source]="source" [optionLabel]="'name'" [optionValue]="'id'">
-          <ng-template neuPickListItem let-item>{{ item.name }}</ng-template>
+          <ng-template [neuPickListItem]="source" let-item>{{ item.name }}</ng-template>
         </neu-pick-list>
       `,
     })

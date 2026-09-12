@@ -63,6 +63,18 @@ export interface NeuPickListDropEvent<T> {
   readonly originalEvent: MouseEvent | TouchEvent | KeyboardEvent | null;
 }
 
+export interface NeuPickListItemContext<T> {
+  readonly $implicit: T;
+  readonly selected: boolean;
+  readonly location: NeuListLocation;
+}
+
+export interface NeuOrderListItemContext<T> {
+  readonly $implicit: T;
+  readonly index: number;
+  readonly selected: boolean;
+}
+
 interface NeuPickListDragData<T> {
   readonly item: T;
   readonly location: NeuListLocation;
@@ -71,20 +83,28 @@ interface NeuPickListDragData<T> {
 
 @Directive({ selector: 'ng-template[neuPickListItem]' })
 export class NeuPickListItemDirective<T = NeuTransferItem> {
-  constructor(
-    readonly templateRef: TemplateRef<{
-      $implicit: T;
-      selected: boolean;
-      location: NeuListLocation;
-    }>,
-  ) {}
+  /** Vincula la colección de origen para inferir estrictamente el tipo del contexto de la plantilla / Binds the source collection to strictly infer the template context type */
+  readonly neuPickListItem = input<readonly T[] | ''>('');
+  constructor(readonly templateRef: TemplateRef<NeuPickListItemContext<T>>) {}
+  static ngTemplateContextGuard<T>(
+    _directive: NeuPickListItemDirective<T>,
+    context: unknown,
+  ): context is NeuPickListItemContext<T> {
+    return true;
+  }
 }
 
 @Directive({ selector: 'ng-template[neuOrderListItem]' })
 export class NeuOrderListItemDirective<T = NeuTransferItem> {
-  constructor(
-    readonly templateRef: TemplateRef<{ $implicit: T; index: number; selected: boolean }>,
-  ) {}
+  /** Vincula la colección para inferir estrictamente el tipo del contexto de la plantilla / Binds the collection to strictly infer the template context type */
+  readonly neuOrderListItem = input<readonly T[] | ''>('');
+  constructor(readonly templateRef: TemplateRef<NeuOrderListItemContext<T>>) {}
+  static ngTemplateContextGuard<T>(
+    _directive: NeuOrderListItemDirective<T>,
+    context: unknown,
+  ): context is NeuOrderListItemContext<T> {
+    return true;
+  }
 }
 
 @Component({

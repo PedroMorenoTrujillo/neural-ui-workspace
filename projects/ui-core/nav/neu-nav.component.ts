@@ -478,13 +478,13 @@ export class NeuNavComponent {
   collapsible = input<boolean>(true);
 
   /** Etiqueta accesible del <nav> / Accessible label for the <nav> */
-  ariaLabel = input<string>('Navegación principal');
+  ariaLabel = input<string>('Main navigation');
 
   /** Aria-label del botón cuando el nav está colapsado / Aria-label for the button when the nav is collapsed */
-  expandLabel = input<string>('Expandir menú');
+  expandLabel = input<string>('Expand navigation');
 
   /** Aria-label del botón cuando el nav está expandido / Aria-label for the button when the nav is expanded */
-  collapseLabel = input<string>('Colapsar menú');
+  collapseLabel = input<string>('Collapse navigation');
 
   /** Emite cuando cambia el estado colapsado / Emits when the collapsed state changes */
   collapsedChange = output<boolean>();

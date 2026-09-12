@@ -93,10 +93,7 @@ import {
   NeuSelectLoadingIconDirective,
   NeuSelectSelectedDirective,
 } from './neu-select.directives';
-import {
-  NEU_OVERLAY_DISMISS_GUARD,
-  allowsNeuOverlayDismissal,
-} from '@neural-ui/core/foundation';
+import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
 
 export type { NeuSelectOption } from './neu-select.types';
 
@@ -242,7 +239,6 @@ export type { NeuSelectOption } from './neu-select.types';
           <button
             class="neu-select__clear"
             type="button"
-            aria-label="Limpiar selección"
             [attr.aria-label]="clearAriaLabel()"
             (click)="clearValue($event)"
           >
@@ -446,9 +442,7 @@ export type { NeuSelectOption } from './neu-select.types';
                 } @else if (!currentFilter() && emptyTpl()) {
                   <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
                 } @else {
-                  {{
-                    currentFilter() ? noResultsMessage() : emptyMessage()
-                  }}
+                  {{ currentFilter() ? noResultsMessage() : emptyMessage() }}
                 }
               </div>
             }
@@ -626,7 +620,7 @@ export class NeuSelectComponent<
   label = input<string>('');
 
   /** Placeholder cuando no hay selección / Placeholder when there is no selection */
-  placeholder = input<string>('Seleccionar...');
+  placeholder = input<string>('Select...');
 
   /** Mensaje de error / Error message */
   errorMessage = input<string>('');
@@ -665,7 +659,7 @@ export class NeuSelectComponent<
   autofocusFilter = input(false);
 
   /** Placeholder del input de búsqueda / Search input placeholder */
-  searchPlaceholder = input<string>('Buscar...');
+  searchPlaceholder = input<string>('Search...');
 
   /** Muestra estado de carga dentro del panel / Shows a loading state inside the panel */
   loading = input<boolean>(false);
@@ -698,11 +692,11 @@ export class NeuSelectComponent<
   editable = input(false);
 
   /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
-  noResultsMessage = input<string>('Sin resultados');
+  noResultsMessage = input<string>('No results');
   emptyMessage = input<string>('No options available');
 
   /** Aria-label del botón de limpiar / Aria-label for the clear button */
-  clearAriaLabel = input<string>('Limpiar selección');
+  clearAriaLabel = input<string>('Clear selection');
 
   /**
    * Sincroniza el valor seleccionado con este query param de la URL.
@@ -711,7 +705,7 @@ export class NeuSelectComponent<
    * Esto es intencional para evitar serializaciones ambiguas o engañosas.
    * Usa `optionValue` para persistir valores completos en URL.
    * Pasar `null` (default) deshabilita la sincronización.
-  */
+   */
   urlParam = input<string | null>(null);
 
   /**
@@ -940,9 +934,7 @@ export class NeuSelectComponent<
   });
 
   readonly virtualViewportHeight = computed(() => {
-    const desiredHeight =
-      this.virtualScrollVisibleItems() *
-      this.effectiveVirtualScrollItemSize();
+    const desiredHeight = this.virtualScrollVisibleItems() * this.effectiveVirtualScrollItemSize();
     const panelMaxHeight = this.panelPosition().maxHeight;
     const searchOffset = this.searchable() ? 52 : 0;
 
@@ -1016,9 +1008,7 @@ export class NeuSelectComponent<
     this.syncPanelPosition();
     this._isOpen.set(true);
     const view = this._document.defaultView;
-    this._openedScrollPosition = view
-      ? { x: view.scrollX, y: view.scrollY }
-      : null;
+    this._openedScrollPosition = view ? { x: view.scrollX, y: view.scrollY } : null;
     this._scrollDismissArmed = false;
     const scrollDismissGeneration = ++this._scrollDismissGeneration;
     this.initializeActiveRow();

@@ -119,14 +119,18 @@ import {
       <button
         class="neu-listbox__toggle-all"
         type="button"
+        role="checkbox"
         [disabled]="isDisabled() || readonly()"
         [attr.aria-label]="toggleAllLabel()"
-        [attr.aria-pressed]="allSelected()"
+        [attr.aria-checked]="
+          allSelected() ? 'true' : partiallySelected() ? 'mixed' : 'false'
+        "
         (click)="toggleAll($event)"
       >
-        <span class="neu-listbox__indicator" aria-hidden="true">{{
-          allSelected() ? '✓' : ''
-        }}</span>
+        <span
+          class="neu-listbox__indicator neu-listbox__indicator--checkbox"
+          aria-hidden="true"
+        >{{ allSelected() ? '✓' : partiallySelected() ? '−' : '' }}</span>
         <span>{{ toggleAllLabel() }}</span>
       </button>
     }
@@ -829,6 +833,12 @@ export class NeuListboxComponent<
     if (this.selectAll() !== null) return this.selectAll()!;
     const rows = this.eligibleVisibleRows();
     return rows.length > 0 && rows.every((row) => this.isOptionSelected(row.option));
+  }
+  protected partiallySelected(): boolean {
+    if (this.selectAll() !== null) return false;
+    const rows = this.eligibleVisibleRows();
+    const selectedCount = rows.filter((row) => this.isOptionSelected(row.option)).length;
+    return selectedCount > 0 && selectedCount < rows.length;
   }
   protected onScroll(event: Event): void {
     if (!this.virtualScroll()) return;

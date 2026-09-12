@@ -2323,6 +2323,26 @@ describe('NeuTableComponent', () => {
     expect(comp['_sortEntries']()[1].key).toBe('age');
   });
 
+  it('multiSort: ctrl/cmd+click should accumulate sort entries', async () => {
+    const f = TestBed.createComponent(NeuTableComponent);
+    f.componentRef.setInput('columns', COLUMNS);
+    f.componentRef.setInput('data', DATA);
+    f.componentRef.setInput('sortable', true);
+    f.componentRef.setInput('multiSort', true);
+    f.detectChanges();
+    await f.whenStable();
+    const comp = f.componentInstance as any;
+
+    comp.sortBy('name', new MouseEvent('click', { metaKey: true }));
+    comp.sortBy('age', new MouseEvent('click', { ctrlKey: true }));
+    await f.whenStable();
+
+    expect(comp['_sortEntries']().map((entry: { key: string }) => entry.key)).toEqual([
+      'name',
+      'age',
+    ]);
+  });
+
   it('getSortPriority returns correct index for multiSort', async () => {
     const f = TestBed.createComponent(NeuTableComponent);
     f.componentRef.setInput('columns', COLUMNS);
@@ -8293,13 +8313,20 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     const internal = internalFilters(fixture.componentInstance);
     await open(fixture, 'Name');
 
+    expect(document.querySelector('.neu-table__filter-overlay-rule-label')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay-remove-rule')).toBeNull();
+
     document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-add-rule')!.click();
     await settle(fixture);
     expect(internal._filterDraftRules()).toHaveLength(2);
+    expect(document.querySelectorAll('.neu-table__filter-overlay-rule-label')).toHaveLength(2);
+    expect(document.querySelectorAll('.neu-table__filter-overlay-remove-rule')).toHaveLength(2);
 
     document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-remove-rule')!.click();
     await settle(fixture);
     expect(internal._filterDraftRules()).toHaveLength(1);
+    expect(document.querySelector('.neu-table__filter-overlay-rule-label')).toBeNull();
+    expect(document.querySelector('.neu-table__filter-overlay-remove-rule')).toBeNull();
 
     internal._filterOverlayTextControl.setValue('Beta');
     const action = (label: string): HTMLButtonElement =>

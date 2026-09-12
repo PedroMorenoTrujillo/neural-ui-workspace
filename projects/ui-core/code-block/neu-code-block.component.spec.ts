@@ -31,6 +31,17 @@ describe('NeuCodeBlockComponent', () => {
     expect(block.classList).toContain('neu-code-block--compact');
   });
 
+  it('should apply the wrapping variant only when requested', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    const block = f.nativeElement.querySelector('.neu-code-block');
+    expect(block.classList).not.toContain('neu-code-block--wrap');
+
+    f.componentRef.setInput('wrap', true);
+    f.detectChanges();
+    expect(block.classList).toContain('neu-code-block--wrap');
+  });
+
   it('should display the language label', () => {
     const f = TestBed.createComponent(NeuCodeBlockComponent);
     f.componentRef.setInput('lang', 'JavaScript');

@@ -45,16 +45,11 @@
   justify-content: center;
   border-radius: 8px;
   color: #fff;
-  font-size: 1.1rem;
   cursor: pointer;
   transition: background 100ms;
 
   &:hover {
     background: var(--neu-image-viewer-btn-hover);
-  }
-
-  &--close {
-    font-size: 0.875rem;
   }
 
   &:focus-visible {
@@ -110,7 +105,6 @@
   border-radius: 50%;
   background: var(--neu-image-viewer-arrow-bg);
   color: #fff;
-  font-size: 1.8rem;
   cursor: pointer;
   transition: background 120ms;
 

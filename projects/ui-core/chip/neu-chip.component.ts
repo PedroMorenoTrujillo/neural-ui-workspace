@@ -79,7 +79,7 @@ export class NeuChipComponent {
   disabled = input<boolean>(false);
 
   /** Aria-label del botón de eliminar / Aria-label for the delete button */
-  removeAriaLabel = input<string>('Eliminar');
+  removeAriaLabel = input<string>('Remove');
 
   /** Emite al hacer clic o pulsar espacio/enter / Emits on click or space/enter press */
   selectedChange = output<boolean>();

@@ -238,10 +238,10 @@ export class NeuSplitButtonComponent {
   actions = input<NeuSplitButtonAction[]>([]);
 
   /** Aria-label del botón de desplegable / Aria-label for the dropdown button */
-  moreActionsAriaLabel = input<string>('Más opciones');
+  moreActionsAriaLabel = input<string>('More options');
 
   /** Aria-label del menú desplegable / Aria-label for the dropdown menu */
-  actionsAriaLabel = input<string>('Acciones');
+  actionsAriaLabel = input<string>('Actions');
 
   /** Emite al hacer click en el botón principal / Emits on primary button click */
   /** Browser panel attached, regardless of opening source. */
@@ -296,7 +296,8 @@ export class NeuSplitButtonComponent {
     if (!this.isOpen()) return;
     this.isOpen.set(false);
     queueMicrotask(() => {
-      if (!this.eventDestroyRef.destroyed) this.trigger()?.nativeElement.focus({ preventScroll: true });
+      if (!this.eventDestroyRef.destroyed)
+        this.trigger()?.nativeElement.focus({ preventScroll: true });
     });
   }
 

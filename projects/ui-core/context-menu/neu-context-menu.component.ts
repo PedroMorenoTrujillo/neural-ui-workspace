@@ -22,10 +22,7 @@ import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import { GlobalPositionStrategy, Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { NeuRovingMenuController } from '@neural-ui/core/internal';
-import {
-  NEU_OVERLAY_DISMISS_GUARD,
-  allowsNeuOverlayDismissal,
-} from '@neural-ui/core/foundation';
+import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
 
 export interface NeuContextMenuItem {
   /** Key para identificar la acción / Key to identify the action */
@@ -41,9 +38,27 @@ export interface NeuContextMenuItem {
   /** Variante de color / Color variant */
   variant?: 'default' | 'danger';
 }
+
+/**
+ * Contexto disponible dentro de `neuContextMenuItem`.
+ * Context available inside `neuContextMenuItem`.
+ */
+export interface NeuContextMenuItemContext {
+  /** Elemento que se está renderizando / Item currently being rendered */
+  $implicit: NeuContextMenuItem;
+}
+
+/** Personaliza cada opción del menú contextual / Customizes every context-menu option */
 @Directive({ selector: 'ng-template[neuContextMenuItem]' })
 export class NeuContextMenuItemDirective {
-  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuContextMenuItem }>) {}
+  constructor(readonly templateRef: TemplateRef<NeuContextMenuItemContext>) {}
+
+  static ngTemplateContextGuard(
+    _directive: NeuContextMenuItemDirective,
+    context: unknown,
+  ): context is NeuContextMenuItemContext {
+    return true;
+  }
 }
 
 /**

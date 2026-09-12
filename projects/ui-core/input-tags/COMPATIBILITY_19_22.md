@@ -6,7 +6,7 @@ The reference release introduced InputTags as the dedicated replacement for the 
 
 ## Historical review
 
-| Prime line | Relevant state |
+| Reference line | Relevant state |
 | --- | --- |
 | 19 | Token entry lived under AutoComplete multiple mode. |
 | 20 | AutoComplete retained token options such as separator, blur and Tab commits. |
@@ -29,4 +29,4 @@ The reference release introduced InputTags as the dedicated replacement for the 
 | Native text input metadata | `inputId`, `name`, `autocomplete`, `autofocus`, title, length/pattern constraints and ARIA metadata forwarded to the real input |
 | Keyboard and ARIA combobox | Arrow navigation, Enter selection, Escape close, Backspace removal and listbox semantics |
 
-Prime-specific pass-through, overlay attachment/configuration, motion configuration and raw style/class objects remain intentionally absent. Neural uses its colocated, SSR-safe panel plus semantic inputs, projected templates and design tokens; exposing Prime implementation objects would add plumbing without a distinct migration capability.
+Reference-specific pass-through, overlay attachment/configuration, motion configuration and raw style/class objects remain intentionally absent. Neural uses its colocated, SSR-safe panel plus semantic inputs, projected templates and design tokens; exposing Reference implementation objects would add plumbing without a distinct migration capability.

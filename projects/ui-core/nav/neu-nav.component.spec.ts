@@ -212,9 +212,7 @@ describe('NeuNavComponent', () => {
     f.componentInstance['toggleGroup']('group-default-badge');
     f.detectChanges();
 
-    const badges = Array.from(
-      f.nativeElement.querySelectorAll('.neu-nav__item-badge--default'),
-    );
+    const badges = Array.from(f.nativeElement.querySelectorAll('.neu-nav__item-badge--default'));
     expect(badges.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -371,7 +369,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
 
     expect(f.componentInstance.isCollapsed()).toBe(true);
-    expect(button.getAttribute('aria-label')).toBe('Expandir menú');
+    expect(button.getAttribute('aria-label')).toBe('Expand navigation');
   });
 
   // ── Group accordion (L1 → L2) ───────────────────────────────────────────

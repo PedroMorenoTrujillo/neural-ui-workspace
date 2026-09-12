@@ -814,7 +814,7 @@ export class NeuMultiselectComponent<
   fluid = input<boolean>(false);
 
   /** Placeholder cuando no hay selección / Placeholder when there is no selection */
-  placeholder = input<string>('Seleccionar...');
+  placeholder = input<string>('Select...');
 
   /** Mensaje de error / Error message */
   errorMessage = input<string>('');
@@ -846,7 +846,7 @@ export class NeuMultiselectComponent<
   autofocusFilter = input<boolean>(false);
 
   /** Placeholder del input de búsqueda / Search input placeholder */
-  searchPlaceholder = input<string>('Buscar...');
+  searchPlaceholder = input<string>('Search...');
 
   loading = input<boolean>(false);
   loadingLabel = input<string>('Loading...');
@@ -856,7 +856,7 @@ export class NeuMultiselectComponent<
   unselectAllLabel = input<string>('Unselect all');
   selectionLimit = input<number | null>(null);
   maxSelectedLabels = input<number>(3);
-  selectedItemsLabel = input<string>('{0} seleccionados');
+  selectedItemsLabel = input<string>('{0} selected');
   displaySelectedLabel = input<boolean>(true);
   display = input<NeuMultiselectDisplay>('count');
   checkmark = input<boolean>(false);
@@ -866,11 +866,11 @@ export class NeuMultiselectComponent<
   autoOptionFocus = input<boolean>(true);
 
   /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
-  noResultsMessage = input<string>('Sin resultados');
+  noResultsMessage = input<string>('No results');
   emptyMessage = input<string>('No options available');
 
   /** Texto del botón de limpiar todas las selecciones / Button text to clear all selections */
-  clearAllLabel = input<string>('Limpiar todo');
+  clearAllLabel = input<string>('Clear all');
 
   /** Muestra un botón × en el trigger para limpiar la selección de una vez / Shows a × button in the trigger to clear the selection at once */
   clearable = input<boolean>(false);
@@ -888,7 +888,7 @@ export class NeuMultiselectComponent<
   scrollHeight = input<string>('14rem');
 
   /** Aria-label del botón clear que aparece en el trigger / Aria-label for the clear button shown in the trigger */
-  clearAriaLabel = input<string>('Limpiar selección');
+  clearAriaLabel = input<string>('Clear selection');
 
   /**
    * Sincroniza los valores seleccionados con este query param de la URL.

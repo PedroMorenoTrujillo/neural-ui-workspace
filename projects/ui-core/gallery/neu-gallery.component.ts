@@ -16,6 +16,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 import { Overlay } from '@angular/cdk/overlay';
+import { NeuIconComponent } from '@neural-ui/core/icon';
 
 export interface NeuGalleryItem {
   src: string;
@@ -47,7 +48,7 @@ export class NeuGalleryCaptionDirective {
 /** An image gallery with typed content templates, preview controls, and touch/keyboard navigation. */
 @Component({
   selector: 'neu-gallery',
-  imports: [NgTemplateOutlet, NeuFocusTrapDirective, NeuModalFocusDirective],
+  imports: [NgTemplateOutlet, NeuFocusTrapDirective, NeuModalFocusDirective, NeuIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-gallery', '[class.neu-gallery--fullscreen]': 'isPreviewOpen()' },
   template: `
@@ -70,7 +71,7 @@ export class NeuGalleryCaptionDirective {
               [attr.aria-label]="previousLabel()"
               (click)="previous()"
             >
-              ‹
+              <neu-icon name="lucideChevronLeft" size="1.25rem" />
             </button>
           }
           <button
@@ -103,7 +104,7 @@ export class NeuGalleryCaptionDirective {
               [attr.aria-label]="nextLabel()"
               (click)="next()"
             >
-              ›
+              <neu-icon name="lucideChevronRight" size="1.25rem" />
             </button>
           }
           @if (captionTemplate) {
@@ -172,8 +173,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="zoomOutLabel()"
                 [attr.title]="zoomOutLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">−</span>
-                <span class="neu-gallery__tool-label">{{ zoomOutLabel() }}</span>
+                <neu-icon name="lucideZoomOut" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -183,8 +183,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="zoomInLabel()"
                 [attr.title]="zoomInLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">+</span>
-                <span class="neu-gallery__tool-label">{{ zoomInLabel() }}</span>
+                <neu-icon name="lucideZoomIn" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -193,8 +192,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="rotateLeftLabel()"
                 [attr.title]="rotateLeftLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">↶</span>
-                <span class="neu-gallery__tool-label">{{ rotateLeftLabel() }}</span>
+                <neu-icon name="lucideRotateCcw" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -203,8 +201,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="rotateRightLabel()"
                 [attr.title]="rotateRightLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">↷</span>
-                <span class="neu-gallery__tool-label">{{ rotateRightLabel() }}</span>
+                <neu-icon name="lucideRotateCw" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -213,8 +210,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="flipHorizontalLabel()"
                 [attr.title]="flipHorizontalLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">↔</span>
-                <span class="neu-gallery__tool-label">{{ flipHorizontalLabel() }}</span>
+                <neu-icon name="lucideFlipHorizontal2" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -223,8 +219,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="flipVerticalLabel()"
                 [attr.title]="flipVerticalLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">↕</span>
-                <span class="neu-gallery__tool-label">{{ flipVerticalLabel() }}</span>
+                <neu-icon name="lucideFlipVertical2" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -233,8 +228,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="resetLabel()"
                 [attr.title]="resetLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">⟳</span>
-                <span class="neu-gallery__tool-label">{{ resetLabel() }}</span>
+                <neu-icon name="lucideRotateCcw" size="1.25rem" />
               </button>
               <a
                 class="neu-gallery__download neu-gallery__tool"
@@ -243,8 +237,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="downloadLabel()"
                 [attr.title]="downloadLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">⇩</span>
-                <span class="neu-gallery__tool-label">{{ downloadLabel() }}</span>
+                <neu-icon name="lucideDownload" size="1.25rem" />
               </a>
               <button
                 type="button"
@@ -253,8 +246,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="closeLabel()"
                 [attr.title]="closeLabel()"
               >
-                <span class="neu-gallery__tool-icon" aria-hidden="true">×</span>
-                <span class="neu-gallery__tool-label">{{ closeLabel() }}</span>
+                <neu-icon name="lucideX" size="1.25rem" />
               </button>
             </div>
           </div>
@@ -273,7 +265,7 @@ export class NeuGalleryCaptionDirective {
               (click)="previous()"
               [attr.aria-label]="previousLabel()"
             >
-              ‹
+              <neu-icon name="lucideChevronLeft" size="1.25rem" />
             </button>
             <button
               type="button"
@@ -282,7 +274,7 @@ export class NeuGalleryCaptionDirective {
               (click)="next()"
               [attr.aria-label]="nextLabel()"
             >
-              ›
+              <neu-icon name="lucideChevronRight" size="1.25rem" />
             </button>
           }
         </div>
@@ -306,19 +298,19 @@ export class NeuGalleryComponent {
   readonly thumbnailLabel = input('Gallery thumbnails');
   readonly previewLabel = input('Image preview');
   readonly toolbarLabel = input('Image controls');
-  /** Visible and accessible label for decreasing image zoom. / Etiqueta visible y accesible para alejar la imagen. */
+  /** Accessible label and native tooltip for decreasing image zoom. / Etiqueta accesible y tooltip nativo para alejar la imagen. */
   readonly zoomOutLabel = input('Zoom out');
-  /** Visible and accessible label for increasing image zoom. / Etiqueta visible y accesible para acercar la imagen. */
+  /** Accessible label and native tooltip for increasing image zoom. / Etiqueta accesible y tooltip nativo para acercar la imagen. */
   readonly zoomInLabel = input('Zoom in');
-  /** Visible and accessible label for counterclockwise rotation. / Etiqueta visible y accesible para girar a la izquierda. */
+  /** Accessible label and native tooltip for counterclockwise rotation. / Etiqueta accesible y tooltip nativo para girar a la izquierda. */
   readonly rotateLeftLabel = input('Rotate left');
-  /** Visible and accessible label for clockwise rotation. / Etiqueta visible y accesible para girar a la derecha. */
+  /** Accessible label and native tooltip for clockwise rotation. / Etiqueta accesible y tooltip nativo para girar a la derecha. */
   readonly rotateRightLabel = input('Rotate right');
-  /** Visible and accessible label for horizontal flipping. / Etiqueta visible y accesible para voltear horizontalmente. */
+  /** Accessible label and native tooltip for horizontal flipping. / Etiqueta accesible y tooltip nativo para voltear horizontalmente. */
   readonly flipHorizontalLabel = input('Flip horizontally');
-  /** Visible and accessible label for vertical flipping. / Etiqueta visible y accesible para voltear verticalmente. */
+  /** Accessible label and native tooltip for vertical flipping. / Etiqueta accesible y tooltip nativo para voltear verticalmente. */
   readonly flipVerticalLabel = input('Flip vertically');
-  /** Visible and accessible label for restoring the original transform. / Etiqueta visible y accesible para restaurar la transformación original. */
+  /** Accessible label and native tooltip for restoring the original transform. / Etiqueta accesible y tooltip nativo para restaurar la transformación original. */
   readonly resetLabel = input('Reset image');
   readonly previousLabel = input('Previous image');
   readonly nextLabel = input('Next image');

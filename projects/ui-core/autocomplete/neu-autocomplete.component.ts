@@ -450,7 +450,7 @@ export class NeuAutocompleteComponent<
   readonly label = input('');
   readonly hint = input('');
   readonly errorMessage = input('');
-  readonly emptyLabel = input('Sin resultados');
+  readonly emptyLabel = input('No results');
   readonly showEmptyMessage = input(true);
   readonly loadingLabel = input('Loading...');
   readonly searchMessage = input<string | null>(null);

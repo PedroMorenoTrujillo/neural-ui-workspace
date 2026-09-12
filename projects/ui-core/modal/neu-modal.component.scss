@@ -147,6 +147,10 @@ neu-dialog {
 }
 
 .neu-dialog__panel--maximized {
+  // Maximizing changes the panel from content-sized to viewport-sized. The
+  // body must absorb the extra height so the footer stays anchored to the
+  // bottom edge instead of following the short body content.
+  --neu-dialog-body-flex: 1 1 auto;
   width: calc(100% - 16px) !important;
   height: calc(100% - 16px) !important;
   max-width: none;

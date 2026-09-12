@@ -25,6 +25,7 @@
       "types": "./types/neural-ui-core-accordion.d.ts",
       "exports": [
         "./accordion#NeuAccordionComponent",
+        "./accordion#NeuAccordionHeaderContext",
         "./accordion#NeuAccordionHeaderDirective",
         "./accordion#NeuAccordionItem"
       ]
@@ -160,6 +161,7 @@
       "exports": [
         "./calendar#NeuCalendarComponent",
         "./calendar#NeuCalendarEvent",
+        "./calendar#NeuCalendarEventContext",
         "./calendar#NeuCalendarEventDirective",
         "./calendar#NeuCalendarEventVariant",
         "./calendar#NeuCalendarEventView",
@@ -296,6 +298,7 @@
       "exports": [
         "./context-menu#NeuContextMenuDirective",
         "./context-menu#NeuContextMenuItem",
+        "./context-menu#NeuContextMenuItemContext",
         "./context-menu#NeuContextMenuItemDirective"
       ]
     },
@@ -364,6 +367,7 @@
         "./drag-drop#NeuDragScope",
         "./drag-drop#NeuDropAccept",
         "./drag-drop#NeuDropEvent",
+        "./drag-drop#NeuDropOrientation",
         "./drag-drop#NeuDropZoneDirective",
         "./drag-drop#neuReorder",
         "./drag-drop#neuTransfer",
@@ -849,9 +853,11 @@
         "./pick-list#NeuOptionValue",
         "./pick-list#NeuOptionValueAccessor",
         "./pick-list#NeuOrderListComponent",
+        "./pick-list#NeuOrderListItemContext",
         "./pick-list#NeuOrderListItemDirective",
         "./pick-list#NeuPickListComponent",
         "./pick-list#NeuPickListDropEvent",
+        "./pick-list#NeuPickListItemContext",
         "./pick-list#NeuPickListItemDirective",
         "./pick-list#NeuPickListMoveAllScope",
         "./pick-list#NeuTransferItem"
@@ -1319,10 +1325,13 @@
       "entrypoint": "./timeline",
       "types": "./types/neural-ui-core-timeline.d.ts",
       "exports": [
+        "./timeline#NeuTimelineAlign",
         "./timeline#NeuTimelineComponent",
         "./timeline#NeuTimelineItem",
+        "./timeline#NeuTimelineItemContext",
         "./timeline#NeuTimelineItemDirective",
         "./timeline#NeuTimelineItemVariant",
+        "./timeline#NeuTimelineMarkerContext",
         "./timeline#NeuTimelineMarkerDirective"
       ]
     },
@@ -1578,6 +1587,32 @@
       ]
     },
     {
+      "id": "./accordion#NeuAccordionHeaderContext",
+      "entrypoint": "./accordion",
+      "name": "NeuAccordionHeaderContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuAccordionHeaderContext {\n}",
+      "members": [
+        {
+          "id": "./accordion#NeuAccordionHeaderContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuAccordionItem;"
+        },
+        {
+          "id": "./accordion#NeuAccordionHeaderContext.property:expanded",
+          "name": "expanded",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly expanded: boolean;"
+        }
+      ]
+    },
+    {
       "id": "./accordion#NeuAccordionHeaderDirective",
       "entrypoint": "./accordion",
       "name": "NeuAccordionHeaderDirective",
@@ -1586,6 +1621,14 @@
       "selector": "ng-template[neuAccordionHeader]",
       "signature": "declare class NeuAccordionHeaderDirective {\n}",
       "members": [
+        {
+          "id": "./accordion#NeuAccordionHeaderDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuAccordionHeaderDirective, context: unknown): context is NeuAccordionHeaderContext;"
+        },
         {
           "id": "./accordion#NeuAccordionHeaderDirective.property:ɵdir",
           "name": "ɵdir",
@@ -1608,7 +1651,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: NeuAccordionItem;\n    expanded: boolean;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<NeuAccordionHeaderContext>;"
         }
       ]
     },
@@ -5282,6 +5325,32 @@
       ]
     },
     {
+      "id": "./calendar#NeuCalendarEventContext",
+      "entrypoint": "./calendar",
+      "name": "NeuCalendarEventContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuCalendarEventContext {\n}",
+      "members": [
+        {
+          "id": "./calendar#NeuCalendarEventContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuCalendarEvent;"
+        },
+        {
+          "id": "./calendar#NeuCalendarEventContext.property:view",
+          "name": "view",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly view: NeuCalendarEventView;"
+        }
+      ]
+    },
+    {
       "id": "./calendar#NeuCalendarEventDirective",
       "entrypoint": "./calendar",
       "name": "NeuCalendarEventDirective",
@@ -5290,6 +5359,14 @@
       "selector": "ng-template[neuCalendarEvent]",
       "signature": "declare class NeuCalendarEventDirective {\n}",
       "members": [
+        {
+          "id": "./calendar#NeuCalendarEventDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuCalendarEventDirective, context: unknown): context is NeuCalendarEventContext;"
+        },
         {
           "id": "./calendar#NeuCalendarEventDirective.property:ɵdir",
           "name": "ɵdir",
@@ -5312,7 +5389,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: NeuCalendarEvent;\n    view: NeuCalendarEventView;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<NeuCalendarEventContext>;"
         }
       ]
     },
@@ -7618,6 +7695,16 @@
           "signature": "language: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./code-block#NeuCodeBlockComponent.input:wrap",
+          "name": "wrap",
+          "kind": "input",
+          "publicName": "wrap",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "wrap: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./code-block#NeuCodeBlockComponent.method:copy",
           "name": "copy",
           "kind": "method",
@@ -7631,7 +7718,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCodeBlockComponent, \"neu-code-block\", never, {\n    \"code\": {\n        \"alias\": \"code\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"compact\": {\n        \"alias\": \"compact\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"lang\": {\n        \"alias\": \"lang\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"language\": {\n        \"alias\": \"language\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copyLabel\": {\n        \"alias\": \"copyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copiedLabel\": {\n        \"alias\": \"copiedLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copyAriaLabel\": {\n        \"alias\": \"copyAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copiedAriaLabel\": {\n        \"alias\": \"copiedAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCodeBlockComponent, \"neu-code-block\", never, {\n    \"code\": {\n        \"alias\": \"code\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"compact\": {\n        \"alias\": \"compact\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"wrap\": {\n        \"alias\": \"wrap\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"lang\": {\n        \"alias\": \"lang\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"language\": {\n        \"alias\": \"language\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copyLabel\": {\n        \"alias\": \"copyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copiedLabel\": {\n        \"alias\": \"copiedLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copyAriaLabel\": {\n        \"alias\": \"copyAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"copiedAriaLabel\": {\n        \"alias\": \"copiedAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
         },
         {
           "id": "./code-block#NeuCodeBlockComponent.property:ɵfac",
@@ -9116,6 +9203,24 @@
       ]
     },
     {
+      "id": "./context-menu#NeuContextMenuItemContext",
+      "entrypoint": "./context-menu",
+      "name": "NeuContextMenuItemContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuContextMenuItemContext {\n}",
+      "members": [
+        {
+          "id": "./context-menu#NeuContextMenuItemContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "$implicit: NeuContextMenuItem;"
+        }
+      ]
+    },
+    {
       "id": "./context-menu#NeuContextMenuItemDirective",
       "entrypoint": "./context-menu",
       "name": "NeuContextMenuItemDirective",
@@ -9124,6 +9229,14 @@
       "selector": "ng-template[neuContextMenuItem]",
       "signature": "declare class NeuContextMenuItemDirective {\n}",
       "members": [
+        {
+          "id": "./context-menu#NeuContextMenuItemDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuContextMenuItemDirective, context: unknown): context is NeuContextMenuItemContext;"
+        },
         {
           "id": "./context-menu#NeuContextMenuItemDirective.property:ɵdir",
           "name": "ɵdir",
@@ -9146,7 +9259,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: NeuContextMenuItem;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<NeuContextMenuItemContext>;"
         }
       ]
     },
@@ -11434,6 +11547,15 @@
       ]
     },
     {
+      "id": "./drag-drop#NeuDropOrientation",
+      "entrypoint": "./drag-drop",
+      "name": "NeuDropOrientation",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuDropOrientation = 'horizontal' | 'vertical' | 'mixed';",
+      "members": []
+    },
+    {
       "id": "./drag-drop#NeuDropZoneDirective",
       "entrypoint": "./drag-drop",
       "name": "NeuDropZoneDirective",
@@ -11493,6 +11615,16 @@
           "signature": "readonly effect: _angular_core.InputSignal<NeuDragEffect>;"
         },
         {
+          "id": "./drag-drop#NeuDropZoneDirective.input:orientation",
+          "name": "orientation",
+          "kind": "input",
+          "publicName": "neuDropOrientation",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly orientation: _angular_core.InputSignal<NeuDropOrientation>;"
+        },
+        {
           "id": "./drag-drop#NeuDropZoneDirective.input:role",
           "name": "role",
           "kind": "input",
@@ -11511,6 +11643,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly scope: _angular_core.InputSignal<NeuDragScope>;"
+        },
+        {
+          "id": "./drag-drop#NeuDropZoneDirective.input:sortingDisabled",
+          "name": "sortingDisabled",
+          "kind": "input",
+          "publicName": "neuDropSortingDisabled",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sortingDisabled: _angular_core.InputSignalWithTransform<boolean, unknown>;"
         },
         {
           "id": "./drag-drop#NeuDropZoneDirective.input:tabIndex",
@@ -11590,7 +11732,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuDropZoneDirective<any, any>, \"[neuDropZone]\", never, {\n    \"data\": {\n        \"alias\": \"neuDropZone\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"scope\": {\n        \"alias\": \"neuDropScope\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"effect\": {\n        \"alias\": \"neuDropEffect\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"neuDropZoneDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"accept\": {\n        \"alias\": \"neuDropAccept\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"neuDropAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"role\": {\n        \"alias\": \"neuDropRole\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabIndex\": {\n        \"alias\": \"neuDropTabIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"dragEnter\": \"dragEnter\";\n    \"dragLeave\": \"dragLeave\";\n    \"drop\": \"drop\";\n}, never, never, true, [\n    {\n        directive: typeof i1.CdkDropList;\n        inputs: {};\n        outputs: {};\n    }\n]>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuDropZoneDirective<any, any>, \"[neuDropZone]\", never, {\n    \"data\": {\n        \"alias\": \"neuDropZone\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"scope\": {\n        \"alias\": \"neuDropScope\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"effect\": {\n        \"alias\": \"neuDropEffect\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"neuDropZoneDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortingDisabled\": {\n        \"alias\": \"neuDropSortingDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"orientation\": {\n        \"alias\": \"neuDropOrientation\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"accept\": {\n        \"alias\": \"neuDropAccept\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"neuDropAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"role\": {\n        \"alias\": \"neuDropRole\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabIndex\": {\n        \"alias\": \"neuDropTabIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"dragEnter\": \"dragEnter\";\n    \"dragLeave\": \"dragLeave\";\n    \"drop\": \"drop\";\n}, never, never, true, [\n    {\n        directive: typeof i1.CdkDropList;\n        inputs: {};\n        outputs: {};\n    }\n]>;"
         },
         {
           "id": "./drag-drop#NeuDropZoneDirective.property:ɵfac",
@@ -28170,7 +28312,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly itemTpl: _angular_core.Signal<NeuOrderListItemDirective<any> | undefined>;"
+          "signature": "readonly itemTpl: _angular_core.Signal<NeuOrderListItemDirective<T> | undefined>;"
         },
         {
           "id": "./pick-list#NeuOrderListComponent.property:ɵcmp",
@@ -28199,6 +28341,40 @@
       ]
     },
     {
+      "id": "./pick-list#NeuOrderListItemContext",
+      "entrypoint": "./pick-list",
+      "name": "NeuOrderListItemContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuOrderListItemContext<T> {\n}",
+      "members": [
+        {
+          "id": "./pick-list#NeuOrderListItemContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: T;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListItemContext.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: number;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListItemContext.property:selected",
+          "name": "selected",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selected: boolean;"
+        }
+      ]
+    },
+    {
       "id": "./pick-list#NeuOrderListItemDirective",
       "entrypoint": "./pick-list",
       "name": "NeuOrderListItemDirective",
@@ -28208,12 +28384,30 @@
       "signature": "declare class NeuOrderListItemDirective<T = NeuTransferItem> {\n}",
       "members": [
         {
+          "id": "./pick-list#NeuOrderListItemDirective.input:neuOrderListItem",
+          "name": "neuOrderListItem",
+          "kind": "input",
+          "publicName": "neuOrderListItem",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly neuOrderListItem: _angular_core.InputSignal<\"\" | readonly T[]>;"
+        },
+        {
+          "id": "./pick-list#NeuOrderListItemDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard<T>(_directive: NeuOrderListItemDirective<T>, context: unknown): context is NeuOrderListItemContext<T>;"
+        },
+        {
           "id": "./pick-list#NeuOrderListItemDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuOrderListItemDirective<any>, \"ng-template[neuOrderListItem]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuOrderListItemDirective<any>, \"ng-template[neuOrderListItem]\", never, {\n    \"neuOrderListItem\": {\n        \"alias\": \"neuOrderListItem\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
         },
         {
           "id": "./pick-list#NeuOrderListItemDirective.property:ɵfac",
@@ -28229,7 +28423,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: T;\n    index: number;\n    selected: boolean;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<NeuOrderListItemContext<T>>;"
         }
       ]
     },
@@ -28702,7 +28896,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly itemTpl: _angular_core.Signal<NeuPickListItemDirective<any> | undefined>;"
+          "signature": "readonly itemTpl: _angular_core.Signal<NeuPickListItemDirective<T> | undefined>;"
         },
         {
           "id": "./pick-list#NeuPickListComponent.property:ɵcmp",
@@ -28821,6 +29015,40 @@
       ]
     },
     {
+      "id": "./pick-list#NeuPickListItemContext",
+      "entrypoint": "./pick-list",
+      "name": "NeuPickListItemContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuPickListItemContext<T> {\n}",
+      "members": [
+        {
+          "id": "./pick-list#NeuPickListItemContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: T;"
+        },
+        {
+          "id": "./pick-list#NeuPickListItemContext.property:location",
+          "name": "location",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly location: NeuListLocation;"
+        },
+        {
+          "id": "./pick-list#NeuPickListItemContext.property:selected",
+          "name": "selected",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly selected: boolean;"
+        }
+      ]
+    },
+    {
       "id": "./pick-list#NeuPickListItemDirective",
       "entrypoint": "./pick-list",
       "name": "NeuPickListItemDirective",
@@ -28830,12 +29058,30 @@
       "signature": "declare class NeuPickListItemDirective<T = NeuTransferItem> {\n}",
       "members": [
         {
+          "id": "./pick-list#NeuPickListItemDirective.input:neuPickListItem",
+          "name": "neuPickListItem",
+          "kind": "input",
+          "publicName": "neuPickListItem",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly neuPickListItem: _angular_core.InputSignal<\"\" | readonly T[]>;"
+        },
+        {
+          "id": "./pick-list#NeuPickListItemDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard<T>(_directive: NeuPickListItemDirective<T>, context: unknown): context is NeuPickListItemContext<T>;"
+        },
+        {
           "id": "./pick-list#NeuPickListItemDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuPickListItemDirective<any>, \"ng-template[neuPickListItem]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuPickListItemDirective<any>, \"ng-template[neuPickListItem]\", never, {\n    \"neuPickListItem\": {\n        \"alias\": \"neuPickListItem\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
         },
         {
           "id": "./pick-list#NeuPickListItemDirective.property:ɵfac",
@@ -28851,7 +29097,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: T;\n    selected: boolean;\n    location: NeuListLocation;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<NeuPickListItemContext<T>>;"
         }
       ]
     },
@@ -46038,6 +46284,15 @@
       ]
     },
     {
+      "id": "./timeline#NeuTimelineAlign",
+      "entrypoint": "./timeline",
+      "name": "NeuTimelineAlign",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTimelineAlign = 'left' | 'right' | 'alternate';",
+      "members": []
+    },
+    {
       "id": "./timeline#NeuTimelineComponent",
       "entrypoint": "./timeline",
       "name": "NeuTimelineComponent",
@@ -46047,6 +46302,36 @@
       "signature": "declare class NeuTimelineComponent {\n}",
       "members": [
         {
+          "id": "./timeline#NeuTimelineComponent.input:align",
+          "name": "align",
+          "kind": "input",
+          "publicName": "align",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly align: _angular_core.InputSignal<NeuTimelineAlign>;"
+        },
+        {
+          "id": "./timeline#NeuTimelineComponent.input:ariaLabel",
+          "name": "ariaLabel",
+          "kind": "input",
+          "publicName": "ariaLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./timeline#NeuTimelineComponent.input:compact",
+          "name": "compact",
+          "kind": "input",
+          "publicName": "compact",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly compact: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./timeline#NeuTimelineComponent.input:items",
           "name": "items",
           "kind": "input",
@@ -46054,7 +46339,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "items: i0.InputSignal<NeuTimelineItem[]>;"
+          "signature": "readonly items: _angular_core.InputSignal<NeuTimelineItem[]>;"
+        },
+        {
+          "id": "./timeline#NeuTimelineComponent.input:reverse",
+          "name": "reverse",
+          "kind": "input",
+          "publicName": "reverse",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly reverse: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./timeline#NeuTimelineComponent.property:itemTpl",
@@ -46062,7 +46357,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly itemTpl: i0.Signal<NeuTimelineItemDirective | undefined>;"
+          "signature": "readonly itemTpl: _angular_core.Signal<NeuTimelineItemDirective | undefined>;"
         },
         {
           "id": "./timeline#NeuTimelineComponent.property:markerTpl",
@@ -46070,7 +46365,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly markerTpl: i0.Signal<NeuTimelineMarkerDirective | undefined>;"
+          "signature": "readonly markerTpl: _angular_core.Signal<NeuTimelineMarkerDirective | undefined>;"
         },
         {
           "id": "./timeline#NeuTimelineComponent.property:ɵcmp",
@@ -46078,7 +46373,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuTimelineComponent, \"neu-timeline\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, [\n    \"itemTpl\",\n    \"markerTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTimelineComponent, \"neu-timeline\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"align\": {\n        \"alias\": \"align\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"compact\": {\n        \"alias\": \"compact\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"reverse\": {\n        \"alias\": \"reverse\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, [\n    \"itemTpl\",\n    \"markerTpl\"\n], never, true, never>;"
         },
         {
           "id": "./timeline#NeuTimelineComponent.property:ɵfac",
@@ -46086,7 +46381,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuTimelineComponent, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTimelineComponent, never>;"
         }
       ]
     },
@@ -46141,6 +46436,32 @@
       ]
     },
     {
+      "id": "./timeline#NeuTimelineItemContext",
+      "entrypoint": "./timeline",
+      "name": "NeuTimelineItemContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTimelineItemContext {\n}",
+      "members": [
+        {
+          "id": "./timeline#NeuTimelineItemContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuTimelineItem;"
+        },
+        {
+          "id": "./timeline#NeuTimelineItemContext.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: number;"
+        }
+      ]
+    },
+    {
       "id": "./timeline#NeuTimelineItemDirective",
       "entrypoint": "./timeline",
       "name": "NeuTimelineItemDirective",
@@ -46150,12 +46471,20 @@
       "signature": "declare class NeuTimelineItemDirective {\n}",
       "members": [
         {
+          "id": "./timeline#NeuTimelineItemDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuTimelineItemDirective, context: unknown): context is NeuTimelineItemContext;"
+        },
+        {
           "id": "./timeline#NeuTimelineItemDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: i0.ɵɵDirectiveDeclaration<NeuTimelineItemDirective, \"ng-template[neuTimelineItem]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTimelineItemDirective, \"ng-template[neuTimelineItem]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./timeline#NeuTimelineItemDirective.property:ɵfac",
@@ -46163,7 +46492,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuTimelineItemDirective, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTimelineItemDirective, never>;"
         },
         {
           "id": "./timeline#NeuTimelineItemDirective.property:templateRef",
@@ -46171,7 +46500,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: NeuTimelineItem;\n    index: number;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<NeuTimelineItemContext>;"
         }
       ]
     },
@@ -46185,6 +46514,24 @@
       "members": []
     },
     {
+      "id": "./timeline#NeuTimelineMarkerContext",
+      "entrypoint": "./timeline",
+      "name": "NeuTimelineMarkerContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTimelineMarkerContext {\n}",
+      "members": [
+        {
+          "id": "./timeline#NeuTimelineMarkerContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuTimelineItem;"
+        }
+      ]
+    },
+    {
       "id": "./timeline#NeuTimelineMarkerDirective",
       "entrypoint": "./timeline",
       "name": "NeuTimelineMarkerDirective",
@@ -46194,12 +46541,20 @@
       "signature": "declare class NeuTimelineMarkerDirective {\n}",
       "members": [
         {
+          "id": "./timeline#NeuTimelineMarkerDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(_directive: NeuTimelineMarkerDirective, context: unknown): context is NeuTimelineMarkerContext;"
+        },
+        {
           "id": "./timeline#NeuTimelineMarkerDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: i0.ɵɵDirectiveDeclaration<NeuTimelineMarkerDirective, \"ng-template[neuTimelineMarker]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTimelineMarkerDirective, \"ng-template[neuTimelineMarker]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./timeline#NeuTimelineMarkerDirective.property:ɵfac",
@@ -46207,7 +46562,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuTimelineMarkerDirective, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTimelineMarkerDirective, never>;"
         },
         {
           "id": "./timeline#NeuTimelineMarkerDirective.property:templateRef",
@@ -46215,7 +46570,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: NeuTimelineItem;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<NeuTimelineMarkerContext>;"
         }
       ]
     },
@@ -55153,6 +55508,18 @@
       "signature": "language: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./code-block#NeuCodeBlockComponent.input:wrap",
+      "entrypoint": "./code-block",
+      "declaration": "NeuCodeBlockComponent",
+      "selector": "neu-code-block",
+      "propertyName": "wrap",
+      "publicName": "wrap",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "wrap: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./color-picker#NeuColorPickerComponent.input:ariaDescribedBy",
       "entrypoint": "./color-picker",
       "declaration": "NeuColorPickerComponent",
@@ -56701,6 +57068,18 @@
       "signature": "readonly effect: _angular_core.InputSignal<NeuDragEffect>;"
     },
     {
+      "id": "./drag-drop#NeuDropZoneDirective.input:orientation",
+      "entrypoint": "./drag-drop",
+      "declaration": "NeuDropZoneDirective",
+      "selector": "[neuDropZone]",
+      "propertyName": "orientation",
+      "publicName": "neuDropOrientation",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly orientation: _angular_core.InputSignal<NeuDropOrientation>;"
+    },
+    {
       "id": "./drag-drop#NeuDropZoneDirective.input:role",
       "entrypoint": "./drag-drop",
       "declaration": "NeuDropZoneDirective",
@@ -56723,6 +57102,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly scope: _angular_core.InputSignal<NeuDragScope>;"
+    },
+    {
+      "id": "./drag-drop#NeuDropZoneDirective.input:sortingDisabled",
+      "entrypoint": "./drag-drop",
+      "declaration": "NeuDropZoneDirective",
+      "selector": "[neuDropZone]",
+      "propertyName": "sortingDisabled",
+      "publicName": "neuDropSortingDisabled",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly sortingDisabled: _angular_core.InputSignalWithTransform<boolean, unknown>;"
     },
     {
       "id": "./drag-drop#NeuDropZoneDirective.input:tabIndex",
@@ -62799,6 +63190,18 @@
       "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<T[]>;"
     },
     {
+      "id": "./pick-list#NeuOrderListItemDirective.input:neuOrderListItem",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuOrderListItemDirective",
+      "selector": "ng-template[neuOrderListItem]",
+      "propertyName": "neuOrderListItem",
+      "publicName": "neuOrderListItem",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly neuOrderListItem: _angular_core.InputSignal<\"\" | readonly T[]>;"
+    },
+    {
       "id": "./pick-list#NeuPickListComponent.input:dragDrop",
       "entrypoint": "./pick-list",
       "declaration": "NeuPickListComponent",
@@ -63121,6 +63524,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly targetSelectionChange: _angular_core.OutputEmitterRef<T[]>;"
+    },
+    {
+      "id": "./pick-list#NeuPickListItemDirective.input:neuPickListItem",
+      "entrypoint": "./pick-list",
+      "declaration": "NeuPickListItemDirective",
+      "selector": "ng-template[neuPickListItem]",
+      "propertyName": "neuPickListItem",
+      "publicName": "neuPickListItem",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly neuPickListItem: _angular_core.InputSignal<\"\" | readonly T[]>;"
     },
     {
       "id": "./popover#NeuPopoverDirective.input:neuPopover",
@@ -68033,6 +68448,42 @@
       "signature": "readonly slotClick: _angular_core.OutputEmitterRef<NeuTimelineGridSlotSelection>;"
     },
     {
+      "id": "./timeline#NeuTimelineComponent.input:align",
+      "entrypoint": "./timeline",
+      "declaration": "NeuTimelineComponent",
+      "selector": "neu-timeline",
+      "propertyName": "align",
+      "publicName": "align",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly align: _angular_core.InputSignal<NeuTimelineAlign>;"
+    },
+    {
+      "id": "./timeline#NeuTimelineComponent.input:ariaLabel",
+      "entrypoint": "./timeline",
+      "declaration": "NeuTimelineComponent",
+      "selector": "neu-timeline",
+      "propertyName": "ariaLabel",
+      "publicName": "ariaLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./timeline#NeuTimelineComponent.input:compact",
+      "entrypoint": "./timeline",
+      "declaration": "NeuTimelineComponent",
+      "selector": "neu-timeline",
+      "propertyName": "compact",
+      "publicName": "compact",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly compact: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./timeline#NeuTimelineComponent.input:items",
       "entrypoint": "./timeline",
       "declaration": "NeuTimelineComponent",
@@ -68042,7 +68493,19 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "items: i0.InputSignal<NeuTimelineItem[]>;"
+      "signature": "readonly items: _angular_core.InputSignal<NeuTimelineItem[]>;"
+    },
+    {
+      "id": "./timeline#NeuTimelineComponent.input:reverse",
+      "entrypoint": "./timeline",
+      "declaration": "NeuTimelineComponent",
+      "selector": "neu-timeline",
+      "propertyName": "reverse",
+      "publicName": "reverse",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly reverse: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./toggle-button-group#NeuToggleButtonGroupComponent.input:disabled",
@@ -70623,32 +71086,32 @@
   ],
   "summary": {
     "entrypoints": 105,
-    "exportedDeclarations": 838,
+    "exportedDeclarations": 847,
     "declarationKinds": {
       "class": 14,
       "component": 102,
       "directive": 144,
       "function": 46,
-      "interface": 274,
+      "interface": 281,
       "reexport": 55,
       "service": 11,
       "token": 4,
-      "type": 187,
+      "type": 189,
       "variable": 1
     },
-    "publicSymbols": 5779,
+    "publicSymbols": 5818,
     "statuses": {
-      "SUPPORTED": 3666,
+      "SUPPORTED": 3698,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 2109,
+      "INTERNAL/UNSUPPORTED": 2116,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1214,
+      "input": 1223,
       "output": 281,
       "model": 2,
-      "total": 1497
+      "total": 1506
     },
     "designTokens": 258
   }

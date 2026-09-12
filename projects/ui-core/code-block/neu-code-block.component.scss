@@ -168,3 +168,14 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
   white-space: pre;
   tab-size: 2;
 }
+
+.neu-code-block--wrap {
+  .neu-code-block__pre {
+    overflow-x: hidden;
+  }
+
+  .neu-code-block__code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}

@@ -4,7 +4,7 @@ Baseline: the published reference Select declaration and implementation plus the
 
 ## Capability closure
 
-| Prime capability | Result | Neural contract/evidence |
+| Reference capability | Result | Neural contract/evidence |
 | --- | --- | --- |
 | Basic single selection and placeholder | PARITY | Typed `options`, `optionLabel`, `optionValue`, `optionDisabled`, CVA value, placeholder, pointer and keyboard selection. |
 | Forms, disabled and invalid state | PARITY | Reactive/template CVA, required, invalid, direct/CVA disabled ownership, silent programmatic writes, touched on meaningful exit. |
@@ -28,12 +28,12 @@ Baseline: the published reference Select declaration and implementation plus the
 | SSR, hydration, zoneless and RTL | PARITY | Deterministic IDs, no browser-global construction access, signal state, import/SSR smoke coverage, and direction-neutral interaction/layout. |
 | Item and selected-item templates | SUPERSET | Strict generic contexts preserve raw `T`, resolved `V`, index, identity and state; Angular template type tests prove invalid member/callback access fails compilation. |
 | Group, loader, header, footer and empty templates | SUPERSET | Strict typed group/filter/loader contexts and structural projection for panel regions. |
-| Dropdown/loading/clear/filter icon templates | PARITY | Dedicated typed icon directives cover Prime icon slots without exposing internal component instances. |
+| Dropdown/loading/clear/filter icon templates | PARITY | Dedicated typed icon directives cover Reference icon slots without exposing internal component instances. |
 | Change/filter/focus/blur/click/open/close/clear/lazy events | PARITY | Canonical Neural output names preserve original events and typed option/value/filter/request data without onX aliases. |
 | Public reset/filter/overlay/focus/clear methods | PARITY | `resetFilter`, `open`, `close`, `toggle`, `focus`, `clear`, and `selectOption`. |
 | Multiple selection and on/off/cancel icon results | PARITY | `multiple` provides typed array values; `changeDetail` is discriminated by mode, and item composition owns visual option-state customization. |
-| `appendTo`, overlay options and motion options | N/A | Angular CDK overlay owns portal placement, positioning, backdrop and focus lifecycle; Prime-specific objects would leak implementation internals. |
-| Style/panel style classes, tooltip and unstyled/pass-through plumbing | N/A | Presentation-only Prime framework plumbing; Neural exposes tokens, host classes and structural templates. |
+| `appendTo`, overlay options and motion options | N/A | Angular CDK overlay owns portal placement, positioning, backdrop and focus lifecycle; Reference-specific objects would leak implementation internals. |
+| Style/panel style classes, tooltip and unstyled/pass-through plumbing | N/A | Presentation-only Reference framework plumbing; Neural exposes tokens, host classes and structural templates. |
 
 Relevant capability gaps: **0**.
 

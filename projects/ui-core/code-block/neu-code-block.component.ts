@@ -29,7 +29,11 @@ import { DOCUMENT } from '@angular/common';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="neu-code-block" [class.neu-code-block--compact]="compact()">
+    <div
+      class="neu-code-block"
+      [class.neu-code-block--compact]="compact()"
+      [class.neu-code-block--wrap]="wrap()"
+    >
       <!-- Encabezado del editor -->
       <div class="neu-code-block__header">
         <!-- Traffic lights decorativos -->
@@ -91,6 +95,9 @@ export class NeuCodeBlockComponent {
 
   /** Reduce espaciados y controles para ejemplos cortos / Reduces spacing and controls for short examples */
   compact = input<boolean>(false);
+
+  /** Ajusta las líneas largas al ancho disponible y evita el scroll horizontal / Wraps long lines to the available width and avoids horizontal scrolling */
+  wrap = input<boolean>(false);
 
   /** Nombre del lenguaje (decorativo) / Language name (decorative) */
   lang = input<string>('');

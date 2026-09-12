@@ -84,6 +84,33 @@ describe('NeuListboxComponent', () => {
     expect(emitted).toHaveBeenLastCalledWith([options[1]]);
   });
 
+  it('renders toggle-all as a checkbox with unchecked, mixed and checked states', () => {
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('checkbox', true);
+    fixture.componentRef.setInput('showToggleAll', true);
+    fixture.detectChanges();
+
+    const toggleAll = fixture.nativeElement.querySelector(
+      '.neu-listbox__toggle-all',
+    ) as HTMLButtonElement;
+    const indicator = toggleAll.querySelector('.neu-listbox__indicator') as HTMLElement;
+
+    expect(toggleAll.getAttribute('role')).toBe('checkbox');
+    expect(toggleAll.getAttribute('aria-checked')).toBe('false');
+    expect(indicator.classList).toContain('neu-listbox__indicator--checkbox');
+
+    component['toggleOption'](options[0]);
+    fixture.detectChanges();
+    expect(toggleAll.getAttribute('aria-checked')).toBe('mixed');
+    expect(indicator.textContent?.trim()).toBe('−');
+
+    component['toggleOption'](options[1]);
+    fixture.detectChanges();
+    expect(toggleAll.getAttribute('aria-checked')).toBe('true');
+    expect(indicator.textContent?.trim()).toBe('✓');
+  });
+
   it('filters, renders empty state and handles keyboard navigation', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('searchable', true);

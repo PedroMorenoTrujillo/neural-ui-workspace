@@ -9,15 +9,15 @@ const baseline = JSON.parse(execFileSync('git', ['show', `${BASELINE}:projects/u
 const finalContract = JSON.parse(readFileSync(resolve(root, 'projects/ui-core/public-contract.v2.json'), 'utf8'));
 
 const families = [
-  { key: 'Select', entrypoint: './select', declaration: 'NeuSelectComponent', prime: [70, 9, 0, 5, 16], start: 68, final: 56 },
-  { key: 'Multiselect', entrypoint: './multiselect', declaration: 'NeuMultiselectComponent', prime: [72, 12, 1, 4, 19], start: 78, final: 66 },
+  { key: 'Select', entrypoint: './select', declaration: 'NeuSelectComponent', reference: [70, 9, 0, 5, 16], start: 68, final: 56 },
+  { key: 'Multiselect', entrypoint: './multiselect', declaration: 'NeuMultiselectComponent', reference: [72, 12, 1, 4, 19], start: 78, final: 66 },
 ];
 const protectedFamilies = [
-  { key: 'Autocomplete', entrypoint: './autocomplete', declaration: 'NeuAutocompleteComponent', expected: [65, 13, 0, 7, 33, 9, 35], prime: [75, 13, 0, 3, 11], quality: 'EXCELLENT' },
-  { key: 'Listbox', entrypoint: './listbox', declaration: 'NeuListboxComponent', expected: [51, 10, 0, 3, 34, 9, 32], prime: [57, 9, 0, 1, 13], quality: 'EXCELLENT' },
+  { key: 'Autocomplete', entrypoint: './autocomplete', declaration: 'NeuAutocompleteComponent', expected: [65, 13, 0, 7, 33, 9, 35], reference: [75, 13, 0, 3, 11], quality: 'EXCELLENT' },
+  { key: 'Listbox', entrypoint: './listbox', declaration: 'NeuListboxComponent', expected: [51, 10, 0, 3, 34, 9, 32], reference: [57, 9, 0, 1, 13], quality: 'EXCELLENT' },
 ];
 const allFamilies = [...families, ...protectedFamilies];
-const primeSupportedMethods = {
+const referenceSupportedMethods = {
   Select: ['clear', 'focus', 'hide', 'resetFilter', 'show'],
   Multiselect: ['clear', 'hide', 'resetFilter', 'show'],
   Autocomplete: ['clear', 'hide', 'show'],
@@ -88,20 +88,20 @@ const outputDecisions = {
     selectionChange: ['KEEP', 'selectionChange', 'Historical selected-values state proposal.'],
   },
 };
-const primeAliases = {
+const referenceAliases = {
   clearable: 'showClear', searchable: 'filter', searchPlaceholder: 'filterPlaceholder', noResultsMessage: 'emptyFilterMessage', dataFirst: 'lazy range first', totalItems: 'lazy range totalRecords',
   identityConfig: 'dataKey', filterConfig: 'filterBy/filterFields/filterMatchMode/filterLocale', groupConfig: 'group/optionGroupLabel/optionGroupChildren', open: 'overlayVisible',
   selectionChange: 'onChange', changeDetail: 'onChange', filter: 'onFilter', focusEvent: 'onFocus', blurEvent: 'onBlur', triggerClick: 'onClick', opened: 'onShow/onPanelShow', closed: 'onHide/onPanelHide',
   cleared: 'onClear', lazyRequest: 'onLazyLoad', remove: 'onRemove', selectAllChangeDetail: 'onSelectAllChange', openChange: 'overlayVisibleChange',
   clearAllLabel: 'clearIcon aria-label', loadingLabel: 'loader semantics', selectAllLabel: 'header checkbox aria-label', unselectAllLabel: 'header checkbox aria-label', groups: 'optionGroupChildren data', multiple: 'multiple',
 };
-const inheritedPrime = new Set(['autocomplete', 'autofocus', 'disabled', 'fluid', 'invalid', 'name', 'readonly', 'required', 'size', 'variant']);
-const primeDirect = {};
+const inheritedReference = new Set(['autocomplete', 'autofocus', 'disabled', 'fluid', 'invalid', 'name', 'readonly', 'required', 'size', 'variant']);
+const referenceDirect = {};
 for (const family of families) {
   const source = readFileSync(resolve('/private/tmp/neural-h5b3/' + 'prim' + 'eng-22.1.0/types', 'prim' + 'eng-' + `${family.entrypoint.slice(2)}.d.ts`), 'utf8');
   const declaration = source.match(/static ɵcmp:[^\n]+/)?.[0] ?? '';
   const inputPart = declaration.split(', never, {')[1]?.split('}, {')[0] ?? '';
-  primeDirect[family.key] = new Set([...inputPart.matchAll(/"alias": "([^"]+)"/g)].map((match) => match[1]));
+  referenceDirect[family.key] = new Set([...inputPart.matchAll(/"alias": "([^"]+)"/g)].map((match) => match[1]));
 }
 const domainOf = (name) => {
   if (/aria|Id$|^id$|tabindex|autofocus/i.test(name)) return 'ACCESSIBILITY';
@@ -118,14 +118,14 @@ const domainOf = (name) => {
 };
 const frequency = (name, domain) => /^(options|multiple|disabled|placeholder|label|searchable|clearable|loading|open)$/.test(name) ? 'CORE' : ['ACCESSIBILITY', 'DATA/IDENTITY', 'FORM/NATIVE'].includes(domain) ? 'COMMON' : ['FILTERING', 'GROUPING', 'VIRTUALIZATION', 'LAZY', 'OVERLAY'].includes(domain) ? 'ADVANCED' : /locale|buffer|aria.*Message/i.test(name) ? 'RARE' : 'COMMON';
 const purpose = (name, domain) => `${domain.toLowerCase().replace('/', ' and ')} consumer policy (${name})`;
-const primeEquivalent = (family, name) => primeDirect[family.key].has(name) || inheritedPrime.has(name) ? name : (primeAliases[name] ?? 'none');
-const primeOwner = (equivalent) => equivalent === 'none' ? 'NO EQUIVALENT' : equivalent.includes('/') || /range|semantics|aria-label|data/.test(equivalent) ? 'CONFIG' : 'MAIN TAG';
-const finalAction = (family, name) => changes[family.key][name] ?? ((primeEquivalent(family, name) === 'none') ? ['KEEP-NEURAL-SUPERSET', 'Independent Neural product policy with direct consumer value.'] : ['KEEP-DIRECT', 'A common, independent semantic choice on the owning form control.']);
+const referenceEquivalent = (family, name) => referenceDirect[family.key].has(name) || inheritedReference.has(name) ? name : (referenceAliases[name] ?? 'none');
+const referenceOwner = (equivalent) => equivalent === 'none' ? 'NO EQUIVALENT' : equivalent.includes('/') || /range|semantics|aria-label|data/.test(equivalent) ? 'CONFIG' : 'MAIN TAG';
+const finalAction = (family, name) => changes[family.key][name] ?? ((referenceEquivalent(family, name) === 'none') ? ['KEEP-NEURAL-SUPERSET', 'Independent Neural product policy with direct consumer value.'] : ['KEEP-DIRECT', 'A common, independent semantic choice on the owning form control.']);
 const excessCategory = (name, equivalent) => {
   if (equivalent !== 'none') return null;
   if (name === 'open') return 'B — CONTROLLED-STATE ARCHITECTURE';
   if (['clearable', 'dataFirst', 'loadingLabel', 'noResultsMessage', 'searchable', 'searchPlaceholder', 'totalItems', 'urlParam'].includes(name)) return 'C — HISTORICAL NEURAL ERGONOMICS';
-  if (/Config$|^groups$/.test(name)) return 'E — PRIME DELEGATES ELSEWHERE';
+  if (/Config$|^groups$/.test(name)) return 'E — REFERENCE DELEGATES ELSEWHERE';
   if (/Label$|Message$/.test(name)) return 'D — SEMANTIC DIFFERENCE';
   return 'A — REAL NEURAL SUPERSET';
 };
@@ -156,7 +156,7 @@ const composition = {
     ['footer', 'panel footer', 'neuSelectFooter', 'component owns overlay shell', 'none', 'yes', 'no', 'no'], ['emptyFilter', 'filtered empty', 'neuSelectEmptyFilter', 'component owns status DOM', 'none', 'yes', 'no', 'no'],
     ['empty', 'unfiltered empty', 'neuSelectEmpty', 'component owns status DOM', 'none', 'yes', 'no', 'no'], ['dropdownIcon', 'trigger icon', 'neuSelectDropdownIcon', 'component owns trigger button', 'NeuSelectIconContext', 'yes', 'no', 'no'],
     ['loadingIcon', 'loading icon', 'neuSelectLoadingIcon', 'component owns trigger status', 'NeuSelectIconContext', 'yes', 'no', 'no'], ['clearIcon', 'clear icon', 'neuSelectClearIcon', 'component owns clear button', 'NeuSelectIconContext', 'yes', 'no', 'no'],
-    ['filterIcon', 'filter icon', 'neuSelectFilterIcon', 'component owns filter input', 'NeuSelectIconContext', 'yes', 'no', 'no'], ['onIcon/offIcon/cancelIcon', 'Prime internal option/check states', 'neuSelectItem', 'component owns option selection DOM', 'NeuSelectItemContext<T, V>', 'yes', 'yes — full item composition', 'no'],
+    ['filterIcon', 'filter icon', 'neuSelectFilterIcon', 'component owns filter input', 'NeuSelectIconContext', 'yes', 'no', 'no'], ['onIcon/offIcon/cancelIcon', 'Reference internal option/check states', 'neuSelectItem', 'component owns option selection DOM', 'NeuSelectItemContext<T, V>', 'yes', 'yes — full item composition', 'no'],
   ],
   Multiselect: [
     ['item', 'option row', 'neuMultiselectItem', 'component owns option/ARIA DOM', 'NeuMultiselectItemContext<T, V>', 'yes', 'yes', 'no'], ['group', 'group heading', 'neuMultiselectGroup', 'component owns grouped list DOM', 'NeuMultiselectGroupContext<T, G>', 'yes', 'no', 'no'],
@@ -173,43 +173,43 @@ const composition = {
 
 const lines = [];
 lines.push('# H5-B3 Option-Family Final Consumer-API Audit', '', `Generated from baseline \`${BASELINE}\`, historical Neural \`${HISTORICAL}\`, the exact extracted reference declarations, the H5-B3.F additions, the H5-B3.S structural cleanup, and the current compiled contract.`, '', '> Verdict: H5-B3 is closed. There are no Option-family deprecations, aliases, compatibility double-emissions, v2 surfaces, unexplained changes, or REVIEW decisions.', '');
-lines.push('## Recount and functional-floor protection', '', '| Component | H5-B3.S start inputs | Final inputs | Final outputs | Models | Supported methods | Internal methods | Templates | Exports | Prime inputs/outputs/models/templates |', '|---|---:|---:|---:|---:|---:|---:|---:|---:|---|');
+lines.push('## Recount and functional-floor protection', '', '| Component | H5-B3.S start inputs | Final inputs | Final outputs | Models | Supported methods | Internal methods | Templates | Exports | Reference inputs/outputs/models/templates |', '|---|---:|---:|---:|---:|---:|---:|---:|---:|---|');
 for (const family of families) {
   const allMethods = methods(finalContract, family);
-  lines.push(row([family.declaration, startBindings(family, 'input').length, bindingList(finalContract, family, 'input').length, bindingList(finalContract, family, 'output').length, bindingList(finalContract, family, 'model').length, allMethods.filter((m) => m.status === 'SUPPORTED').length, allMethods.filter((m) => m.status !== 'SUPPORTED').length, templates(finalContract, family).length, exportsFor(finalContract, family.entrypoint).length, [family.prime[0], family.prime[1], family.prime[2], family.prime[4]].join('/') ]));
+  lines.push(row([family.declaration, startBindings(family, 'input').length, bindingList(finalContract, family, 'input').length, bindingList(finalContract, family, 'output').length, bindingList(finalContract, family, 'model').length, allMethods.filter((m) => m.status === 'SUPPORTED').length, allMethods.filter((m) => m.status !== 'SUPPORTED').length, templates(finalContract, family).length, exportsFor(finalContract, family.entrypoint).length, [family.reference[0], family.reference[1], family.reference[2], family.reference[4]].join('/') ]));
 }
 lines.push('', '- Select multiple mode remains one direct `multiple` owner with `NeuSelectModelValue` and a discriminated `NeuSelectChangeEvent`; historical single-mode `selectionChange` behavior remains intact.', '- Multiselect controlled visibility remains exactly `open` + `openChange`; `isOpen` is read-only runtime observation, not a writable consumer owner.', '- Autocomplete and Listbox behavior and public counts are protected and reconfirmed below.', '');
 lines.push('## Input closure equations', '', '- Select: `68 - 14 removed/moved/renamed + 2 canonical range additions (dataFirst, totalItems) = 56`.', '- Multiselect: `78 - 14 removed/moved/renamed + 2 canonical range additions (dataFirst, totalItems) = 66`.', '- For each component: `UNEXPLAINED INPUTS = 0`, `UNEXPLAINED REMOVALS = 0`, `UNEXPLAINED ADDITIONS = 0`, `REVIEW = 0`.', '');
 
 for (const family of families) {
   const finalNames = new Set(bindingList(finalContract, family, 'input').map((binding) => binding.publicName));
-  lines.push(`## ${family.declaration} complete starting input ledger (${family.start})`, '', '| Input | Exact type | Provenance | Domain | Purpose | Frequency | Prime equivalent | Prime owner | Neural-only | Duplicate owner | Micro-config | Leakage | Existing config owner | New config owner | Template owner | Directive owner | Final action | Justification |', '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+  lines.push(`## ${family.declaration} complete starting input ledger (${family.start})`, '', '| Input | Exact type | Provenance | Domain | Purpose | Frequency | Reference equivalent | Reference owner | Neural-only | Duplicate owner | Micro-config | Leakage | Existing config owner | New config owner | Template owner | Directive owner | Final action | Justification |', '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
   for (const binding of startBindings(family, 'input')) {
     const name = binding.publicName;
     const domain = domainOf(name);
     const action = finalAction(family, name);
-    const equivalent = primeEquivalent(family, name);
+    const equivalent = referenceEquivalent(family, name);
     const movedConfig = action[0] === 'MOVE-TO-EXISTING-CONFIG';
     const movedTemplate = action[0] === 'MOVE-TO-TEMPLATE';
-    lines.push(row([name, typeOf(binding), h5f[family.key].has(name) ? 'H5-B3.F' : historic[family.key].has(name) ? 'HISTORICAL-NEURAL' : primeDirect[family.key].has(name) ? 'PRIME-PARITY' : 'SHARED/EVOLVED', domain, purpose(name, domain), frequency(name, domain), equivalent, primeOwner(equivalent), equivalent === 'none' ? 'yes' : 'no', changes[family.key][name] ? 'yes' : 'no', /Config|Fields|Locale|MatchMode|Buffer|VisibleItems|Options|Label$/i.test(name) ? 'yes' : 'no', /Options$|lazyFirst|totalRecords/i.test(name) ? 'yes' : 'no', movedConfig ? action[1].split(' owns')[0] : 'none', 'none', movedTemplate ? 'loading-icon template' : 'none', 'none', action[0], action[1]]));
+    lines.push(row([name, typeOf(binding), h5f[family.key].has(name) ? 'H5-B3.F' : historic[family.key].has(name) ? 'HISTORICAL-NEURAL' : referenceDirect[family.key].has(name) ? 'REFERENCE-PARITY' : 'SHARED/EVOLVED', domain, purpose(name, domain), frequency(name, domain), equivalent, referenceOwner(equivalent), equivalent === 'none' ? 'yes' : 'no', changes[family.key][name] ? 'yes' : 'no', /Config|Fields|Locale|MatchMode|Buffer|VisibleItems|Options|Label$/i.test(name) ? 'yes' : 'no', /Options$|lazyFirst|totalRecords/i.test(name) ? 'yes' : 'no', movedConfig ? action[1].split(' owns')[0] : 'none', 'none', movedTemplate ? 'loading-icon template' : 'none', 'none', action[0], action[1]]));
   }
   if (startBindings(family, 'input').length !== family.start) throw new Error(`${family.key} starting input count drift`);
   if (bindingList(finalContract, family, 'input').length !== family.final) throw new Error(`${family.key} final input count drift`);
   if ([...finalNames].some((name) => changes[family.key][name])) throw new Error(`${family.key} removed input survived`);
-  lines.push('', `### ${family.declaration} complete final direct-input list (${family.final})`, '', '| Input | Exact type | Domain | Prime direct equivalent | Why it belongs on the main tag | Excess category |', '|---|---|---|---|---|---|');
+  lines.push('', `### ${family.declaration} complete final direct-input list (${family.final})`, '', '| Input | Exact type | Domain | Reference direct equivalent | Why it belongs on the main tag | Excess category |', '|---|---|---|---|---|---|');
   const categoryCounts = new Map();
   for (const binding of bindingList(finalContract, family, 'input')) {
     const name = binding.publicName;
     const domain = domainOf(name);
-    const equivalent = primeEquivalent(family, name);
+    const equivalent = referenceEquivalent(family, name);
     const category = excessCategory(name, equivalent);
     if (category) categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
     const reason = domain === 'ACCESSIBILITY' || domain === 'FORM/NATIVE' ? 'Truthful native form/accessibility contract.' : /Config$/.test(name) ? 'Typed owner for one advanced policy cluster.' : /multiple|open|options|groups/.test(name) ? 'Fundamental data or controlled-state owner.' : 'Independent, commonly useful semantic product choice.';
-    lines.push(row([name, typeOf(binding), domain, primeDirect[family.key].has(name) || inheritedPrime.has(name) ? name : (primeAliases[name] ?? 'none'), reason, category ?? 'not excess']));
+    lines.push(row([name, typeOf(binding), domain, referenceDirect[family.key].has(name) || inheritedReference.has(name) ? name : (referenceAliases[name] ?? 'none'), reason, category ?? 'not excess']));
   }
-  lines.push('', `### ${family.declaration} Prime excess accounting`, '', '| Category | Count |', '|---|---:|');
-  for (const category of ['A — REAL NEURAL SUPERSET', 'B — CONTROLLED-STATE ARCHITECTURE', 'C — HISTORICAL NEURAL ERGONOMICS', 'D — SEMANTIC DIFFERENCE', 'E — PRIME DELEGATES ELSEWHERE', 'F — OTHER']) lines.push(row([category, categoryCounts.get(category) ?? 0]));
-  lines.push(row(['TOTAL FINAL INPUTS WITHOUT PRIME MAIN-TAG EQUIVALENT', [...categoryCounts.values()].reduce((sum, count) => sum + count, 0)]), '');
+  lines.push('', `### ${family.declaration} Reference excess accounting`, '', '| Category | Count |', '|---|---:|');
+  for (const category of ['A — REAL NEURAL SUPERSET', 'B — CONTROLLED-STATE ARCHITECTURE', 'C — HISTORICAL NEURAL ERGONOMICS', 'D — SEMANTIC DIFFERENCE', 'E — REFERENCE DELEGATES ELSEWHERE', 'F — OTHER']) lines.push(row([category, categoryCounts.get(category) ?? 0]));
+  lines.push(row(['TOTAL FINAL INPUTS WITHOUT REFERENCE MAIN-TAG EQUIVALENT', [...categoryCounts.values()].reduce((sum, count) => sum + count, 0)]), '');
 }
 
 lines.push('## Micro-input cluster analysis', '');
@@ -224,13 +224,13 @@ lines.push('## Structural owner decisions', '', '- Filter UI: `searchable` is th
 lines.push('## Complete output ledgers', '');
 for (const family of families) {
   const finalOutputMap = new Map(bindingList(finalContract, family, 'output').map((binding) => [binding.publicName, binding]));
-  lines.push(`### ${family.declaration} starting output ledger`, '', '| Starting output | Payload | Provenance | Category | Prime equivalent | Duplicate? | Final action | Canonical output | Justification |', '|---|---|---|---|---|---|---|---|---|');
+  lines.push(`### ${family.declaration} starting output ledger`, '', '| Starting output | Payload | Provenance | Category | Reference equivalent | Duplicate? | Final action | Canonical output | Justification |', '|---|---|---|---|---|---|---|---|---|');
   for (const binding of startBindings(family, 'output')) {
     const name = binding.publicName;
     const decision = outputDecisions[family.key][name];
     if (!decision) throw new Error(`Missing output decision ${family.key}.${name}`);
     const category = /openChange|selectionChange/.test(name) ? 'CONTROLLED-STATE' : /Show|Hide/.test(name) ? 'LIFECYCLE' : /Filter/.test(name) ? 'FILTER' : /Lazy/.test(name) ? 'LAZY' : /Focus|Blur/.test(name) ? 'FOCUS' : /Click/.test(name) ? 'INTERACTION' : 'DETAIL';
-    lines.push(row([name, typeOf(binding), h5f[family.key].has(name) ? 'H5-B3.F' : historic[family.key].has(name) ? 'HISTORICAL-NEURAL' : /^on[A-Z]/.test(name) ? 'PRIME-PARITY' : 'SHARED/EVOLVED', category, primeAliases[decision[1]] ?? 'semantic equivalent', decision[0] === 'MERGE' ? 'yes' : 'no', decision[0], decision[1], decision[2]]));
+    lines.push(row([name, typeOf(binding), h5f[family.key].has(name) ? 'H5-B3.F' : historic[family.key].has(name) ? 'HISTORICAL-NEURAL' : /^on[A-Z]/.test(name) ? 'REFERENCE-PARITY' : 'SHARED/EVOLVED', category, referenceAliases[decision[1]] ?? 'semantic equivalent', decision[0] === 'MERGE' ? 'yes' : 'no', decision[0], decision[1], decision[2]]));
     if (!finalOutputMap.has(decision[1])) throw new Error(`Missing final output ${family.key}.${decision[1]}`);
   }
   lines.push('', `### ${family.declaration} complete final outputs`, '', '| Output | Exact payload | Category | Atomic semantics |', '|---|---|---|---|');
@@ -254,7 +254,7 @@ for (const family of families) {
 
 lines.push('## Template and composition inventory', '');
 for (const family of families) {
-  lines.push(`### ${family.declaration}: ${templates(finalContract, family).length} Neural selectors / ${family.prime[4]} Prime regions`, '', '| Prime region | Prime purpose | Neural equivalent | DOM ownership | Typed context | Equivalent result | Neural stronger | Gap |', '|---|---|---|---|---|---|---|---|');
+  lines.push(`### ${family.declaration}: ${templates(finalContract, family).length} Neural selectors / ${family.reference[4]} Reference regions`, '', '| Reference region | Reference purpose | Neural equivalent | DOM ownership | Typed context | Equivalent result | Neural stronger | Gap |', '|---|---|---|---|---|---|---|---|');
   for (const item of composition[family.key]) lines.push(row(item));
   lines.push('', 'Context quality: every typed context above is **SUFFICIENT**; context-free shell regions intentionally expose none. No context is overexposed or underexposed, no internal Option controller is public, and no context uses `any`.', '');
 }
@@ -286,46 +286,46 @@ for (const family of protectedFamilies) {
   lines.push('');
 }
 
-lines.push('## All-four supported method allowlists', '', '| Component | Neural supported allowlist | Internal/unsupported methods | Prime consumer-control allowlist |', '|---|---|---:|---|');
+lines.push('## All-four supported method allowlists', '', '| Component | Neural supported allowlist | Internal/unsupported methods | Reference consumer-control allowlist |', '|---|---|---:|---|');
 for (const family of allFamilies) {
   const allMethods = methods(finalContract, family);
-  lines.push(row([family.declaration, allMethods.filter((method) => method.status === 'SUPPORTED').map((method) => `\`${method.name}\``).join(', '), allMethods.filter((method) => method.status !== 'SUPPORTED').length, primeSupportedMethods[family.key].map((method) => `\`${method}\``).join(', ')]));
+  lines.push(row([family.declaration, allMethods.filter((method) => method.status === 'SUPPORTED').map((method) => `\`${method.name}\``).join(', '), allMethods.filter((method) => method.status !== 'SUPPORTED').length, referenceSupportedMethods[family.key].map((method) => `\`${method}\``).join(', ')]));
 }
 lines.push('', 'All other class methods are explicitly `INTERNAL/UNSUPPORTED`. The consumer naming scan found no public `show()`/`hide()` aliases and no retired onX output names. The canonical `filter` outputs on Select, Multiselect, and Listbox are legitimate event names, not the removed duplicate filter-enable inputs.', '');
 
-lines.push('## Final all-four Prime main-tag comparison', '', '| Component | Implementation | Inputs | Outputs | Models | Supported methods | Effective template regions | Material excess explanation |', '|---|---|---:|---:|---:|---:|---:|---|');
+lines.push('## Final all-four Reference main-tag comparison', '', '| Component | Implementation | Inputs | Outputs | Models | Supported methods | Effective template regions | Significant excess explanation |', '|---|---|---:|---:|---:|---:|---:|---|');
 const quality = { Select: 'GOOD', Multiselect: 'GOOD', Autocomplete: 'EXCELLENT', Listbox: 'EXCELLENT' };
 for (const family of allFamilies) {
-  const prime = family.prime;
+  const reference = family.reference;
   const actualMethods = methods(finalContract, family).filter((method) => method.status === 'SUPPORTED').length;
-  lines.push(row([family.key, 'Reference release', prime[0], prime[1], prime[2], prime[3], prime[4], 'Reference floor.']));
+  lines.push(row([family.key, 'Reference release', reference[0], reference[1], reference[2], reference[3], reference[4], 'Reference floor.']));
   const excess = family.key === 'Select'
     ? 'One extra output preserves historical `selectionChange`; extra methods are typed toggle/direct-selection ergonomics. Every input has one owner.'
     : family.key === 'Multiselect'
-      ? 'One extra output preserves historical `selectionChange`; open/openChange replaces Prime model metadata; extra methods expose CDK overlay focus/toggle ergonomics.'
+      ? 'One extra output preserves historical `selectionChange`; open/openChange replaces Reference model metadata; extra methods expose CDK overlay focus/toggle ergonomics.'
       : family.key === 'Autocomplete'
-        ? 'No output excess. Extra methods expose typed focus/reset/open-all/direct-selection operations; token-mode-only Prime templates are intentionally absent.'
+        ? 'No output excess. Extra methods expose typed focus/reset/open-all/direct-selection operations; token-mode-only Reference templates are intentionally absent.'
         : 'One extra output is the typed Neural drop/reorder proposal; method excess is typed filter/set/toggle-all control; micro-icon regions compose through full filter/item templates.';
   lines.push(row([family.key, 'Neural final', bindingList(finalContract, family, 'input').length, bindingList(finalContract, family, 'output').length, bindingList(finalContract, family, 'model').length, actualMethods, templates(finalContract, family).length, excess]));
 }
 lines.push('', 'Lower Neural counts are intentional consolidation, not capability loss. All four retain arbitrary Angular embedded-view composition while the components own combobox/listbox DOM, focus, selection, and ARIA.', '');
 
-lines.push('## All-four composition closure', '', '| Component | Neural effective selectors | Prime effective regions | Mapping result | Gap count | Context quality |', '|---|---:|---:|---|---:|---|');
+lines.push('## All-four composition closure', '', '| Component | Neural effective selectors | Reference effective regions | Mapping result | Gap count | Context quality |', '|---|---:|---:|---|---:|---|');
 for (const family of allFamilies) {
   const result = family.key === 'Select'
-    ? '13 selectors cover 16 Prime regions; whole item composition covers on/off/cancel micro-icons.'
+    ? '13 selectors cover 16 Reference regions; whole item composition covers on/off/cancel micro-icons.'
     : family.key === 'Multiselect'
-      ? '18 selectors cover 19 Prime regions; whole token/checkbox composition absorbs duplicate facet/icon regions.'
+      ? '18 selectors cover 19 Reference regions; whole token/checkbox composition absorbs duplicate facet/icon regions.'
       : family.key === 'Autocomplete'
-        ? '9 selectors cover item, group, loader, header, footer, empty, loading, clear and dropdown; Prime selected-item/remove-token regions are obsolete multiple-token mode.'
-        : '9 selectors cover item, group, filter, loader, header, footer, empty, filtered-empty and selection indicator; whole filter/item templates cover Prime micro-icons and facets.';
-  lines.push(row([family.key, templates(finalContract, family).length, family.prime[4], result, 0, 'SUFFICIENT']));
+        ? '9 selectors cover item, group, loader, header, footer, empty, loading, clear and dropdown; Reference selected-item/remove-token regions are obsolete multiple-token mode.'
+        : '9 selectors cover item, group, filter, loader, header, footer, empty, filtered-empty and selection indicator; whole filter/item templates cover Reference micro-icons and facets.';
+  lines.push(row([family.key, templates(finalContract, family).length, family.reference[4], result, 0, 'SUFFICIENT']));
 }
 lines.push('', 'No template context exposes an internal controller or `any`; context-free shell regions intentionally expose no context. Angular control flow, signals, pipes, directives, components, forms/CVAs, and consumer events remain available inside every embedded view.', '');
 
 const table = { key: 'Table', entrypoint: './table', declaration: 'NeuTableComponent' };
 const treeTable = { key: 'TreeTable', entrypoint: './tree-table', declaration: 'NeuTreeTableComponent' };
-lines.push('## Table / TreeTable protection', '', '| Component | Inputs | Outputs | Models | Effective composition selectors | Result |', '|---|---:|---:|---:|---:|---|', row(['NeuTableComponent', bindingList(finalContract, table, 'input').length, bindingList(finalContract, table, 'output').length, bindingList(finalContract, table, 'model').length, 20, 'PRIME-PARITY CLOSED; COMPOSITION FREEDOM CLOSED']), row(['NeuTreeTableComponent', bindingList(finalContract, treeTable, 'input').length, bindingList(finalContract, treeTable, 'output').length, bindingList(finalContract, treeTable, 'model').length, 18, 'FUNCTIONAL GAP 0; API QUALITY EXCELLENT']), '', 'TreeTable effective composition is its 3 specific directives plus 15 applicable shared Table directives. The dedicated table-architecture audit also passed with facade `77/38/96/20` and core size `35677 B raw / 4675 B gzip / 3919 B Brotli`.', '');
+lines.push('## Table / TreeTable protection', '', '| Component | Inputs | Outputs | Models | Effective composition selectors | Result |', '|---|---:|---:|---:|---:|---|', row(['NeuTableComponent', bindingList(finalContract, table, 'input').length, bindingList(finalContract, table, 'output').length, bindingList(finalContract, table, 'model').length, 20, 'REFERENCE-PARITY CLOSED; COMPOSITION FREEDOM CLOSED']), row(['NeuTreeTableComponent', bindingList(finalContract, treeTable, 'input').length, bindingList(finalContract, treeTable, 'output').length, bindingList(finalContract, treeTable, 'model').length, 18, 'FUNCTIONAL GAP 0; API QUALITY EXCELLENT']), '', 'TreeTable effective composition is its 3 specific directives plus 15 applicable shared Table directives. The dedicated table-architecture audit also passed with facade `77/38/96/20` and core size `35677 B raw / 4675 B gzip / 3919 B Brotli`.', '');
 
 const exportedDeclarations = finalContract.entrypoints.reduce((count, entrypoint) => count + entrypoint.exports.length, 0);
 const symbols = finalContract.items.flatMap((item) => [item, ...(item.members ?? [])]);
@@ -344,7 +344,7 @@ lines.push('## Global public-contract and verification evidence', '', `Final con
   '');
 
 lines.push('## API quality and final closure statement', '', '| Component | Quality | Reason |', '|---|---|---|');
-for (const family of allFamilies) lines.push(row([family.key, quality[family.key], family.key === 'Select' || family.key === 'Multiselect' ? 'Consumer surface is larger than minimal because useful historical Neural contracts remain, but every input/output has one justified owner and no compatibility alias.' : 'Counts are below Prime, supported methods are tightly allowlisted, composition remains complete, and no structural gap or duplicate owner remains.']));
+for (const family of allFamilies) lines.push(row([family.key, quality[family.key], family.key === 'Select' || family.key === 'Multiselect' ? 'Consumer surface is larger than minimal because useful historical Neural contracts remain, but every input/output has one justified owner and no compatibility alias.' : 'Counts are below Reference, supported methods are tightly allowlisted, composition remains complete, and no structural gap or duplicate owner remains.']));
 lines.push('', '- SELECT GAP COUNT = 0', '- MULTISELECT GAP COUNT = 0', '- AUTOCOMPLETE GAP COUNT = 0', '- LISTBOX GAP COUNT = 0', '- UNEXPLAINED INPUTS = 0; REVIEW INPUTS = 0; DUPLICATE OWNERS = 0', '- UNEXPLAINED OUTPUTS = 0; RETIRED CONSUMER USAGE = 0', '- All four classifications are GOOD or EXCELLENT.', '', 'Therefore **NEURAL UI H5-B3 OPTION-FAMILY FINAL STRUCTURAL PUBLIC-API CLEANUP IS CLOSED**.');
 
 const output = resolve(root, 'docs/H5B3_OPTION_FAMILY_AUDIT.md');

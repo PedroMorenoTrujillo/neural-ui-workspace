@@ -19,8 +19,11 @@ import {
   lucideCircleAlert,
   lucideCircleCheck,
   lucideCircleX,
+  lucideDownload,
   lucideExternalLink,
   lucideEraser,
+  lucideFlipHorizontal2,
+  lucideFlipVertical2,
   lucideImage,
   lucideInbox,
   lucideInfo,
@@ -31,12 +34,16 @@ import {
   lucideMinus,
   lucidePencil,
   lucidePlus,
+  lucideRotateCcw,
+  lucideRotateCw,
   lucideTriangleAlert,
   lucideTrendingDown,
   lucideTrendingUp,
   lucideUnderline,
   lucideUpload,
   lucideX,
+  lucideZoomIn,
+  lucideZoomOut,
 } from '@ng-icons/lucide';
 
 export interface NeuralUIConfig {
@@ -102,6 +109,14 @@ export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProvide
       lucideChevronRight,
       lucideChevronLeft,
       lucideChevronUp,
+      // Gallery and image viewer controls
+      lucideZoomIn,
+      lucideZoomOut,
+      lucideRotateCcw,
+      lucideRotateCw,
+      lucideFlipHorizontal2,
+      lucideFlipVertical2,
+      lucideDownload,
       // Nav external link
       lucideExternalLink,
       // EmptyState default icon

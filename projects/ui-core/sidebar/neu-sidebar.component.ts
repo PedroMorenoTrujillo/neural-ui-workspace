@@ -155,10 +155,10 @@ export class NeuSidebarComponent {
   hideHeader = input<boolean>(false);
 
   /** Etiqueta accesible para el <aside> / Accessible label for the <aside> */
-  ariaLabel = input<string>('Menú de navegación');
+  ariaLabel = input<string>('Navigation menu');
 
   /** Etiqueta accesible para el botón cerrar / Accessible label for the close button */
-  closeLabel = input<string>('Cerrar menú de navegación');
+  closeLabel = input<string>('Close navigation menu');
   /** Cierra el overlay al pulsar Escape / Closes the overlay when pressing Escape */
   closeOnEscape = input<boolean>(true);
   /** Devuelve el foco al elemento activo antes de abrir / Restores focus after close */
