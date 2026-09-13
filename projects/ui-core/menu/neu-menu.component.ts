@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
@@ -55,7 +54,6 @@ export class NeuMenuItemDirective {
   selector: 'neu-menu',
   imports: [NeuButtonComponent, NeuIconComponent, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-menu' },
   template: `
     <div class="neu-menu__list" role="menu" [attr.aria-label]="ariaLabel()">
@@ -260,7 +258,6 @@ export class NeuMenuComponent {
   selector: 'neu-menu-button',
   imports: [OverlayModule, NeuButtonComponent, NeuMenuComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-menu-button' },
   template: `
     <button
@@ -390,7 +387,6 @@ export class NeuMenuButtonComponent {
   selector: 'neu-menubar',
   imports: [NeuButtonComponent, NeuMenuButtonComponent, NeuMenuItemDirective, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-menubar' },
   template: `
     <nav
@@ -549,7 +545,6 @@ export class NeuMenubarComponent {
   selector: 'neu-tiered-menu',
   imports: [NeuMenuComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-tiered-menu' },
   template: `<neu-menu
     [items]="items()"

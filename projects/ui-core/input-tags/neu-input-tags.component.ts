@@ -1,6 +1,5 @@
 import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   Directive,
@@ -85,7 +84,6 @@ export class NeuInputTagsFooterDirective {
   selector: 'neu-input-tags',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

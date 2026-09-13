@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   Directive,
@@ -116,7 +115,6 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
     NeuDropZoneDirective,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-pick-list' },
   template: `
     <div neuDragDropGroup [neuDragDropGroupDisabled]="!dragDrop()" class="neu-pick-list__layout">
@@ -635,7 +633,6 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
     NeuDropZoneDirective,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-order-list' },
   template: `
     @if (filter()) {

@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ContentChild,
   Directive,
@@ -49,7 +48,6 @@ export class NeuGalleryCaptionDirective {
 @Component({
   selector: 'neu-gallery',
   imports: [NgTemplateOutlet, NeuFocusTrapDirective, NeuModalFocusDirective, NeuIconComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-gallery', '[class.neu-gallery--fullscreen]': 'isPreviewOpen()' },
   template: `
     @if (items().length) {

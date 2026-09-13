@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -26,7 +25,6 @@ export type NeuToolbarWrap = 'nowrap' | 'wrap';
   selector: 'neu-toolbar',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
   template: `
     <div class="neu-toolbar__section neu-toolbar__section--start">

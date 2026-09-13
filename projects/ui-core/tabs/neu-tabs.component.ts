@@ -1,6 +1,5 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
@@ -58,7 +57,6 @@ export class NeuTabLabelDirective {
   selector: 'neu-tabs',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{ provide: NEU_TABS_CONTEXT, useExisting: NeuTabsComponent }],
   template: `
     <!-- Barra de pestañas -->
@@ -329,7 +327,6 @@ export class NeuTabsComponent implements AfterViewInit, OnDestroy {
   selector: 'neu-tab-panel',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isActive()) {
       <div

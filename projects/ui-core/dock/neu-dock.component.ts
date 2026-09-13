@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
@@ -61,7 +60,6 @@ export class NeuDockItemDirective {
     NeuTooltipDirective,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-dock',
     '[class.neu-dock--top]': 'position() === "top"',

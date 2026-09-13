@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Directive, TemplateRef, ViewEncapsulation, computed, contentChild, forwardRef, inject, input, output, signal } from '@angular/core';
+import { Component, Directive, TemplateRef, ViewEncapsulation, computed, contentChild, forwardRef, inject, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
@@ -12,7 +12,6 @@ export class NeuTagSuggestionDirective { constructor(readonly templateRef: Templ
   selector: 'neu-tags',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NeuTagsComponent), multi: true }],
   host: { class: 'neu-tags' },
   template: `

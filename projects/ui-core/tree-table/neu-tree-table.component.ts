@@ -1,6 +1,5 @@
 import {
   ElementRef,
-  ChangeDetectionStrategy,
   Component,
   TemplateRef,
   ViewEncapsulation,
@@ -173,7 +172,6 @@ const NEU_TREE_TABLE_LABELS = {
     NeuTableToolbarDirective,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <neu-table
       class="neu-tree-table"

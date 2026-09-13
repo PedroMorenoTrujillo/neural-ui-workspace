@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
   TemplateRef,
@@ -36,7 +35,6 @@ export type {
   selector: 'neu-uploader',
   imports: [NgTemplateOutlet, NeuButtonComponent, NeuProgressBarComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

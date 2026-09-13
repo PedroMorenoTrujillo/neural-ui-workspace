@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ViewEncapsulation,
@@ -68,7 +67,6 @@ function unlockDocumentScroll(document: Document): void {
   selector: 'neu-sidebar',
   imports: [NeuFocusTrapDirective, NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Overlay de fondo — solo visible en modo overlay -->
     @if (!persistent()) {

@@ -1,6 +1,5 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   inject,
@@ -23,7 +22,6 @@ import { distinctUntilChanged } from 'rxjs';
   selector: 'neu-virtual-list-row',
   standalone: true,
   imports: [NgTemplateOutlet],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (template(); as projectedTemplate) {
       <ng-container [ngTemplateOutlet]="projectedTemplate" [ngTemplateOutletContext]="context()" />
@@ -61,7 +59,6 @@ export class NeuVirtualListRowComponent {
   selector: 'neu-virtual-list',
   imports: [ScrollingModule, NeuVirtualListRowComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-virtual-list',
     '[style.height]': '_containerHeight()',

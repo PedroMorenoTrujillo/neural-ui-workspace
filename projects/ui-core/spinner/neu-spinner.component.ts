@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -27,7 +26,6 @@ export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 
   selector: 'neu-spinner',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-spinner-host', role: 'status', 'aria-live': 'polite' },
   template: `
     <svg

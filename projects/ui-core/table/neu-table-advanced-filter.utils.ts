@@ -1,4 +1,3 @@
-import type { NeuDateRange } from '@neural-ui/core/date-input';
 import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
 import type {
   NeuTableColumn,
@@ -67,7 +66,7 @@ export function neuTableNumberRangeValue(value: unknown): NeuTableNumberRangeVal
   };
 }
 
-export function neuTableDateRangeControlValue(value: unknown): NeuDateRange {
+export function neuTableDateRangeControlValue(value: unknown): CivilDateRange {
   if (!isRecord(value)) return { start: null, end: null };
   return {
     start: dateOnlyControlDate(value['from']),
@@ -99,9 +98,10 @@ export function neuTableDateInputControlValue(
 }
 
 export function neuTableDateFilterValue(
-  date: Date | null,
+  date: Date | CivilDate | null,
   precision: 'date-only' | 'instant',
 ): string | null {
+  if (isCivilDate(date)) return precision === 'date-only' ? date : null;
   if (!date || Number.isNaN(date.getTime())) return null;
   return precision === 'date-only' ? formatLocalDate(date) : date.toISOString();
 }
@@ -112,15 +112,14 @@ export function neuTableInstantFilterValue(value: unknown): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
-export function isNeuTableDateRange(value: unknown): value is NeuDateRange {
+export function isNeuTableDateRange(value: unknown): value is CivilDateRange {
   return isRecord(value) && ('start' in value || 'end' in value);
 }
 
-function dateOnlyControlDate(value: unknown): Date | null {
+function dateOnlyControlDate(value: unknown): CivilDate | null {
   const canonicalDate = normalizeNeuTableDatePoint(value, 'date-only')?.value;
   if (!canonicalDate) return null;
-  const [year, month, day] = canonicalDate.split('-').map(Number);
-  return new Date(year, month - 1, day);
+  return civilDate(canonicalDate);
 }
 
 function dateControlDate(value: unknown): Date | null {
@@ -144,3 +143,9 @@ function formatLocalDateTime(date: Date): string {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
+import {
+  civilDate,
+  isCivilDate,
+  type CivilDate,
+  type CivilDateRange,
+} from '@neural-ui/core/date-input';

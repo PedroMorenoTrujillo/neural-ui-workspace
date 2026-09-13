@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -82,7 +81,6 @@ export interface NeuSchedulerGanttSelectedSlot {
   standalone: true,
   imports: [NeuTimelineGridComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-scheduler-gantt',
   },

@@ -1,14 +1,15 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { OverlayModule, type ConnectedPosition } from '@angular/cdk/overlay';
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  type WritableSignal,
   ViewEncapsulation,
   computed,
   effect,
   inject,
   input,
+  signal,
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -59,6 +60,21 @@ type OptionalRow = Record<string, unknown>;
 type OptionalHost = InternalNeuTableOptionalFeatureHost<OptionalRow>;
 type OptionalColumn = NeuTableColumn<OptionalRow>;
 
+function controlViewBridge<T>(
+  control: FormControl<T>,
+  view: WritableSignal<T>,
+): InternalNeuTableControl<T> {
+  return {
+    get value() {
+      return control.value;
+    },
+    setValue(value, options) {
+      view.set(value);
+      control.setValue(value, options);
+    },
+  };
+}
+
 @Component({
   selector: 'neu-table-advanced-filter-feature',
   imports: [
@@ -73,7 +89,6 @@ type OptionalColumn = NeuTableColumn<OptionalRow>;
     NeuButtonComponent,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
     <ng-template
@@ -203,12 +218,10 @@ type OptionalColumn = NeuTableColumn<OptionalRow>;
                         @if (rule.mode() === 'between') {
                           <div class="neu-table__filter-overlay-range">
                             <neu-number-input
-                              [nullable]="true"
                               [label]="_text().from"
                               [formControl]="rule.numberFromControl"
                             />
                             <neu-number-input
-                              [nullable]="true"
                               [label]="_text().to"
                               [formControl]="rule.numberToControl"
                             />
@@ -216,7 +229,6 @@ type OptionalColumn = NeuTableColumn<OptionalRow>;
                         } @else {
                           <neu-number-input
                             class="neu-table__filter-overlay-control"
-                            [nullable]="true"
                             [label]="_text().value"
                             [formControl]="rule.numberControl"
                           />
@@ -227,12 +239,12 @@ type OptionalColumn = NeuTableColumn<OptionalRow>;
                           @if (_datePrecision() === 'instant') {
                             <div class="neu-table__filter-overlay-range">
                               <neu-date-input
-                                type="datetime-local"
+                                mode="datetime"
                                 [label]="_text().from"
                                 [formControl]="rule.instantFromControl"
                               />
                               <neu-date-input
-                                type="datetime-local"
+                                mode="datetime"
                                 [label]="_text().to"
                                 [formControl]="rule.instantToControl"
                               />
@@ -240,7 +252,7 @@ type OptionalColumn = NeuTableColumn<OptionalRow>;
                           } @else {
                             <neu-date-input
                               class="neu-table__filter-overlay-control"
-                              type="range"
+                              mode="range"
                               [label]="_text().value"
                               [formControl]="rule.dateControl"
                             />
@@ -248,7 +260,7 @@ type OptionalColumn = NeuTableColumn<OptionalRow>;
                         } @else {
                           <neu-date-input
                             class="neu-table__filter-overlay-control"
-                            [type]="_datePrecision() === 'instant' ? 'datetime-local' : 'date'"
+                            [mode]="_datePrecision() === 'instant' ? 'datetime' : 'date'"
                             [label]="_text().value"
                             [formControl]="rule.dateControl"
                           />
@@ -558,7 +570,6 @@ export class NeuTableAdvancedFilterFeatureComponent {
     NeuDateInputComponent,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-table__inline-filter',
     style: 'display: contents',
@@ -580,14 +591,12 @@ export class NeuTableAdvancedFilterFeatureComponent {
           @if (_mode() === 'between') {
             <div class="neu-table__filter-range">
               <neu-number-input
-                [nullable]="true"
                 [label]="_rangeLabel('from')"
                 [formControl]="rangeStartControl"
                 (inputDetail)="_onNumberInput(rangeStartControl, $event)"
                 (keydown)="_onEnter($event)"
               />
               <neu-number-input
-                [nullable]="true"
                 [label]="_rangeLabel('to')"
                 [formControl]="rangeEndControl"
                 (inputDetail)="_onNumberInput(rangeEndControl, $event)"
@@ -596,7 +605,6 @@ export class NeuTableAdvancedFilterFeatureComponent {
             </div>
           } @else {
             <neu-number-input
-              [nullable]="true"
               [label]="_modernFilterLabel()"
               [formControl]="singleControl"
               (inputDetail)="_onNumberInput(singleControl, $event)"
@@ -607,29 +615,33 @@ export class NeuTableAdvancedFilterFeatureComponent {
         @case ('date') {
           @if (_isDateOnlyRange()) {
             <neu-date-input
-              type="range"
+              mode="range"
               [label]="_modernFilterLabel()"
               [placeholder]="host().filterPlaceholder()"
-              [formControl]="singleControl"
+              [value]="_singleDateValue()"
+              (valueChange)="singleControl.setValue($event)"
             />
           } @else if (_isInstantRange()) {
             <div class="neu-table__filter-range">
               <neu-date-input
-                type="datetime-local"
+                mode="datetime"
                 [label]="_rangeLabel('from')"
-                [formControl]="instantStartControl"
+                [value]="_instantStartValue()"
+                (valueChange)="instantStartControl.setValue($event)"
               />
               <neu-date-input
-                type="datetime-local"
+                mode="datetime"
                 [label]="_rangeLabel('to')"
-                [formControl]="instantEndControl"
+                [value]="_instantEndValue()"
+                (valueChange)="instantEndControl.setValue($event)"
               />
             </div>
           } @else {
             <neu-date-input
-              [type]="config.precision === 'instant' ? 'datetime-local' : 'date'"
+              [mode]="config.precision === 'instant' ? 'datetime' : 'date'"
               [label]="_modernFilterLabel()"
-              [formControl]="singleControl"
+              [value]="_singleDateValue()"
+              (valueChange)="singleControl.setValue($event)"
             />
           }
         }
@@ -686,9 +698,10 @@ export class NeuTableAdvancedFilterFeatureComponent {
         />
       } @else if (column().filterType === 'date') {
         <neu-date-input
-          [formControl]="singleControl"
+          [value]="_singleDateValue()"
           [placeholder]="host().filterPlaceholder()"
           [attr.aria-label]="host().filterAriaPrefix() + ' ' + column().header"
+          (valueChange)="singleControl.setValue($event)"
         />
       } @else {
         <neu-input
@@ -719,6 +732,17 @@ export class NeuTableInlineFilterFeatureComponent {
   protected readonly instantStartControl = new FormControl('', { nonNullable: true });
   protected readonly instantEndControl = new FormControl('', { nonNullable: true });
   protected readonly multiControl = new FormControl<unknown[]>([], { nonNullable: true });
+  protected readonly _singleDateValue = signal<unknown>(null);
+  protected readonly _instantStartValue = signal('');
+  protected readonly _instantEndValue = signal('');
+  private readonly _instantStartBridge = controlViewBridge(
+    this.instantStartControl,
+    this._instantStartValue,
+  );
+  private readonly _instantEndBridge = controlViewBridge(
+    this.instantEndControl,
+    this._instantEndValue,
+  );
 
   private readonly _destroyRef = inject(DestroyRef);
   private _syncing = false;
@@ -757,7 +781,11 @@ export class NeuTableInlineFilterFeatureComponent {
       this._selectControl,
     ]) {
       control.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
-        if (control === this.singleControl) this._singleChanged(value);
+        if (control !== this.singleControl) return;
+        if (!this.column().filterConfig || this.column().filterConfig?.kind === 'date') {
+          this._singleDateValue.set(value);
+        }
+        this._singleChanged(value);
       });
     }
     this.rangeStartControl.valueChanges
@@ -768,10 +796,16 @@ export class NeuTableInlineFilterFeatureComponent {
       .subscribe(() => this._rangeChanged());
     this.instantStartControl.valueChanges
       .pipe(takeUntilDestroyed())
-      .subscribe(() => this._instantRangeChanged());
+      .subscribe((value) => {
+        this._instantStartValue.set(value);
+        this._instantRangeChanged();
+      });
     this.instantEndControl.valueChanges
       .pipe(takeUntilDestroyed())
-      .subscribe(() => this._instantRangeChanged());
+      .subscribe((value) => {
+        this._instantEndValue.set(value);
+        this._instantRangeChanged();
+      });
     this.multiControl.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe((value) => this._schedule([...value]));
@@ -841,7 +875,7 @@ export class NeuTableInlineFilterFeatureComponent {
 
   protected _onNumberInput(
     control: FormControl<unknown>,
-    detail: { value: number | null; state: 'valid' | 'empty' | 'invalid' },
+    detail: { value: number | null; state: 'valid' | 'incomplete' | 'invalid' },
   ): void {
     if (detail.state === 'invalid' || Object.is(control.value, detail.value)) return;
     control.setValue(detail.value);
@@ -899,15 +933,15 @@ export class NeuTableInlineFilterFeatureComponent {
         this.multiControl.setValue(Array.isArray(value) ? [...value] : [], { emitEvent: false });
       } else if (config?.kind === 'number' && this._mode() === 'between') {
         const range = neuTableNumberRangeValue(value);
-        this.rangeStartControl.setValue(range.from, { emitEvent: false });
-        this.rangeEndControl.setValue(range.to, { emitEvent: false });
+        this.rangeStartControl.setValue(range.from);
+        this.rangeEndControl.setValue(range.to);
       } else if (this._isInstantRange()) {
-        this.instantStartControl.setValue(neuTableInstantRangeControlValue(value, 'from'), {
-          emitEvent: false,
-        });
-        this.instantEndControl.setValue(neuTableInstantRangeControlValue(value, 'to'), {
-          emitEvent: false,
-        });
+        const from = neuTableInstantRangeControlValue(value, 'from');
+        const to = neuTableInstantRangeControlValue(value, 'to');
+        this._instantStartValue.set(from);
+        this._instantEndValue.set(to);
+        this.instantStartControl.setValue(from);
+        this.instantEndControl.setValue(to);
       } else {
         let controlValue: unknown = value;
         if (!config) controlValue = String(value ?? '');
@@ -921,8 +955,13 @@ export class NeuTableInlineFilterFeatureComponent {
           controlValue = this._isDateOnlyRange()
             ? neuTableDateRangeControlValue(value)
             : neuTableDateInputControlValue(value, config.precision ?? 'date-only');
+          this._singleDateValue.set(controlValue);
         }
-        this.singleControl.setValue(controlValue, { emitEvent: false });
+        if (!config && column.filterType === 'date') this._singleDateValue.set(controlValue);
+        this.singleControl.setValue(
+          controlValue,
+          config?.kind === 'number' || config?.kind === 'date' ? undefined : { emitEvent: false },
+        );
       }
 
       const controls: Parameters<OptionalHost['_registerOptionalFilterControls']>[1] = {};
@@ -932,8 +971,8 @@ export class NeuTableInlineFilterFeatureComponent {
         controls.rangeStart = this.rangeStartControl;
         controls.rangeEnd = this.rangeEndControl;
       } else if (this._isInstantRange()) {
-        controls.instantStart = this.instantStartControl;
-        controls.instantEnd = this.instantEndControl;
+        controls.instantStart = this._instantStartBridge;
+        controls.instantEnd = this._instantEndBridge;
       } else controls.single = this.singleControl;
       this.host()._registerOptionalFilterControls(column.key, controls);
     } finally {
@@ -946,7 +985,6 @@ export class NeuTableInlineFilterFeatureComponent {
   selector: 'neu-table-editor-feature',
   imports: [NeuInlineEditorComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
     <neu-inline-editor

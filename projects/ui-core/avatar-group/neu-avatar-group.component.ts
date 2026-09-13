@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, input } from '@angular/core';
+import { Component, ViewEncapsulation, computed, input } from '@angular/core';
 
 /** Composes projected avatars into an overlapping visual group. */
 @Component({
   selector: 'neu-avatar-group',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClasses()',
     '[attr.role]': 'ariaLabel() || ariaLabelledBy() ? "group" : null',

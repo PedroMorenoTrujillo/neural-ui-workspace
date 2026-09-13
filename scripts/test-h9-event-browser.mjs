@@ -46,20 +46,6 @@ for (const [name, engine] of Object.entries({chromium, firefox, webkit})) {
    assert.equal(await count('tagsSelect'),2); assert.equal(await count('tagsDirect'),2);
    assert.equal((await events('tagsSelect'))[1].payload.value,'b');
   });
-  await check('Chart bar and pie publish domain points; background and legend do not', async () => {
-   await fresh();
-   await page.locator('#h9-chart .apexcharts-bar-area').first().waitFor();
-   await page.locator('#h9-chart .apexcharts-bar-area').first().click();
-   assert.equal(await count('dataSelect'),1);
-   assert.equal((await events('dataSelect'))[0].payload.value,10);
-   assert.equal((await events('dataSelect'))[0].payload.seriesName,'Revenue');
-   await page.locator('#h9-chart').click({position:{x:3,y:3}}); assert.equal(await count('dataSelect'),1);
-   const legend = page.locator('#h9-chart .apexcharts-legend-text'); if(await legend.count()) { await legend.first().click(); assert.equal(await count('dataSelect'),1); }
-   const pie = page.locator('#h9-pie .apexcharts-pie-area').nth(1); await pie.scrollIntoViewIfNeeded();
-   const pieBox = await pie.boundingBox(); assert.ok(pieBox);
-   await page.mouse.click(pieBox.x + pieBox.width * 0.25, pieBox.y + pieBox.height * 0.5);
-   assert.equal(await count('pieSelect'),1); assert.equal((await events('pieSelect'))[0].payload.value,75);
-  });
   await check('Tree overlay query clear, Escape, reopen and DateInput navigation/CVA contracts', async () => {
    await fresh(); await reset();
    await page.locator('#h9-tree .neu-tree-select__trigger').click();

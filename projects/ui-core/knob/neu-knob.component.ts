@@ -1,51 +1,48 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
   ViewEncapsulation,
   computed,
-  forwardRef,
   inject,
   input,
+  model,
   output,
-  signal,
+  viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
-/**
- * NeuralUI Knob Component
- *
- * Control de dial rotatorio para selección de valores numéricos. Implementa CVA.
- *
- * Uso: <neu-knob [min]="0" [max]="100" formControlName="volume" />
- */
+/** Accessible numeric dial backed by a single number ModelSignal. */
 @Component({
   selector: 'neu-knob',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class]': 'hostClasses()' },
-  providers: [
-    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NeuKnobComponent), multi: true },
-  ],
+  host: { '[class]': 'hostClasses()', '[hidden]': 'hidden()' },
   template: `
     <div
+      #dial
       class="neu-knob__dial"
-      role="slider"
-      tabindex="0"
-      [attr.id]="_id"
-      [attr.aria-valuemin]="min()"
-      [attr.aria-valuemax]="max()"
-      [attr.aria-valuenow]="_value()"
-      [attr.aria-label]="label() || 'Knob'"
-      [attr.aria-disabled]="_cvaDisabled()"
+      role="spinbutton"
+      [tabindex]="disabled() ? -1 : 0"
+      [attr.id]="inputId()"
+      [attr.aria-valuemin]="resolvedMin()"
+      [attr.aria-valuemax]="resolvedMax()"
+      [attr.aria-valuenow]="ariaValueNow()"
+      [attr.aria-valuetext]="ariaValueText()"
+      [attr.aria-label]="label() ? null : ariaLabel() || 'Knob'"
+      [attr.aria-labelledby]="label() ? inputId() + '-label' : null"
+      [attr.aria-describedby]="ariaDescribedBy() || null"
+      [attr.aria-disabled]="disabled() ? 'true' : null"
+      [attr.aria-readonly]="readonly() ? 'true' : null"
+      [attr.aria-required]="required() ? 'true' : null"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-busy]="pending() ? 'true' : null"
       [style.width.px]="size()"
       [style.height.px]="size()"
-      (mousedown)="onMouseDown($event)"
-      (touchstart)="onTouchStart($event)"
+      (pointerdown)="onPointerDown($event)"
       (keydown)="onKeyDown($event)"
+      (blur)="onBlur()"
     >
       <svg
         class="neu-knob__svg"
@@ -54,241 +51,222 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
         [attr.height]="size()"
         aria-hidden="true"
       >
-        <!-- Track arc: 260° arc (same as value-arc) so the background only covers
-             the usable range, not a full 360° ring. -->
         <circle
           class="neu-knob__track"
           [attr.cx]="size() / 2"
           [attr.cy]="size() / 2"
-          [attr.r]="_radius()"
+          [attr.r]="radius()"
           fill="none"
-          [attr.stroke-width]="_strokeWidth()"
+          [attr.stroke-width]="strokeWidth()"
           stroke-linecap="round"
-          [attr.stroke-dasharray]="_arcDashArray()"
+          [attr.stroke-dasharray]="arcDashArray()"
           stroke-dashoffset="0"
           [attr.transform]="'rotate(-220 ' + size() / 2 + ' ' + size() / 2 + ')'"
         />
-        <!-- Value arc -->
         <circle
           class="neu-knob__value-arc"
           [attr.cx]="size() / 2"
           [attr.cy]="size() / 2"
-          [attr.r]="_radius()"
+          [attr.r]="radius()"
           fill="none"
-          [attr.stroke-width]="_strokeWidth()"
+          [attr.stroke-width]="strokeWidth()"
           stroke-linecap="round"
-          [attr.stroke-dasharray]="_arcDashArray()"
-          [attr.stroke-dashoffset]="_arcDashOffset()"
+          [attr.stroke-dasharray]="arcDashArray()"
+          [attr.stroke-dashoffset]="arcDashOffset()"
           [attr.transform]="'rotate(-220 ' + size() / 2 + ' ' + size() / 2 + ')'"
         />
-        <!-- Indicator dot -->
         <circle
           class="neu-knob__indicator"
-          [attr.cx]="_indicatorX()"
-          [attr.cy]="_indicatorY()"
-          [attr.r]="_strokeWidth() / 2 + 1"
+          [attr.cx]="indicatorX()"
+          [attr.cy]="indicatorY()"
+          [attr.r]="strokeWidth() / 2 + 1"
           [attr.transform]="
-            'rotate(' + _indicatorAngle() + ' ' + size() / 2 + ' ' + size() / 2 + ')'
+            'rotate(' + indicatorAngle() + ' ' + size() / 2 + ' ' + size() / 2 + ')'
           "
         />
       </svg>
       @if (showValue()) {
-        <span
-          class="neu-knob__display"
-          style="color: var(--neu-knob-display-color, var(--neu-text, #0f172a)) !important; -webkit-text-fill-color: var(--neu-knob-display-color, var(--neu-text, #0f172a)) !important;"
-          >{{ _value() }}</span
-        >
+        <span class="neu-knob__display">{{ displayValue() }}</span>
       }
     </div>
     @if (label()) {
-      <label class="neu-knob__label" [attr.for]="_id">{{ label() }}</label>
+      <span class="neu-knob__label" [id]="inputId() + '-label'">{{ label() }}</span>
     }
   `,
   styleUrl: './neu-knob.component.scss',
 })
-export class NeuKnobComponent implements ControlValueAccessor {
-  /** Valor mínimo / Min value */
-  readonly min = input<number>(0);
-  /** Valor máximo / Max value */
-  readonly max = input<number>(100);
-  /** Incremento por paso / Step increment */
+export class NeuKnobComponent implements FormValueControl<number> {
+  readonly value = model<number>(0);
+
+  readonly min = input<number | undefined>(0);
+  readonly max = input<number | undefined>(100);
   readonly step = input<number>(1);
-  /** Tamaño del dial en px / Dial size in px */
   readonly size = input<number>(80);
-  /** Muestra el valor numérico en el centro / Shows the numeric value in the center */
   readonly showValue = input<boolean>(true);
-  /** Etiqueta visible / Visible label */
   readonly label = input<string>('');
-  /** Emitido en cada cambio / Emitted on each change */
-  readonly valueChange = output<number>();
+  readonly ariaLabel = input<string>('');
+  readonly ariaDescribedBy = input<string>('');
+  readonly valueText = input<((value: number) => string) | undefined>(undefined);
+  readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-knob-'));
+  readonly name = input<string>('');
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly invalid = input<boolean>(false);
+  readonly pending = input<boolean>(false);
+  readonly touched = input<boolean>(false);
+  readonly dirty = input<boolean>(false);
+  readonly required = input<boolean>(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly touch = output<void>();
 
-  protected readonly _id = inject(NeuIdGenerator).getId('neu-knob-');
-  protected readonly _cvaDisabled = signal(false);
-  protected readonly _value = signal(0);
+  private readonly dial = viewChild.required<ElementRef<HTMLElement>>('dial');
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
+  private dragStartAngle = 0;
+  private dragStartValue = 0;
+  private activePointerId: number | null = null;
+  private dragSessionDisposer: (() => void) | null = null;
 
-  protected readonly _strokeWidth = computed(() => Math.max(4, this.size() * 0.1));
-  protected readonly _radius = computed(() => (this.size() - this._strokeWidth()) / 2 - 2);
-  private readonly _circumference = computed(() => 2 * Math.PI * this._radius());
-  /** Arc spans 260° (from -40° to 220°) */
-  private readonly _arcLength = computed(() => (260 / 360) * this._circumference());
-
-  private readonly _normalizedValue = computed(() => {
-    const range = this.max() - this.min();
-    return range === 0 ? 0 : (this._value() - this.min()) / range;
+  readonly resolvedMin = computed(() => (Number.isFinite(this.min()) ? (this.min() as number) : 0));
+  readonly resolvedMax = computed(() =>
+    Number.isFinite(this.max()) ? Math.max(this.resolvedMin(), this.max() as number) : 100,
+  );
+  readonly resolvedValue = computed(() =>
+    Number.isFinite(this.value()) ? this.value() : this.resolvedMin(),
+  );
+  readonly visualValue = computed(() => this.clamp(this.resolvedValue()));
+  readonly ariaValueNow = computed(() => (Number.isFinite(this.value()) ? this.value() : null));
+  readonly displayValue = computed(
+    () => this.valueText()?.(this.resolvedValue()) ?? `${this.resolvedValue()}`,
+  );
+  readonly ariaValueText = computed(() => this.valueText()?.(this.resolvedValue()) ?? null);
+  readonly hasError = computed(() => this.invalid() || this.errors().length > 0);
+  readonly strokeWidth = computed(() => Math.max(4, this.size() * 0.1));
+  readonly radius = computed(() => (this.size() - this.strokeWidth()) / 2 - 2);
+  private readonly circumference = computed(() => 2 * Math.PI * this.radius());
+  private readonly arcLength = computed(() => (260 / 360) * this.circumference());
+  private readonly normalizedValue = computed(() => {
+    const range = this.resolvedMax() - this.resolvedMin();
+    return range === 0 ? 0 : (this.visualValue() - this.resolvedMin()) / range;
   });
-
-  protected readonly _arcDashArray = computed(
-    () => `${this._arcLength()} ${this._circumference()}`,
-  );
-  protected readonly _arcDashOffset = computed(
-    () => this._arcLength() * (1 - this._normalizedValue()),
-  );
-
-  // Indicator position on the track (relative to SVG center)
-  // El arco empieza en rotate(-220°) desde el Este del SVG.
-  // El punto indicador reposa en el Norte (12 en punto).
-  // Para que el indicador siga el arco, la rotación CW debe ser:
-  //   θ = 230° + normalizedValue × 260°
-  // (arco de 7:40 → 1:20 pasando por 12:00 en la mitad)
-  // Arc starts at rotate(-220°) from East; indicator natural position is North (12 o'clock).
-  // Correct clockwise rotation formula: θ = 230 + normalizedValue × 260.
-  protected readonly _indicatorAngle = computed(() => this._normalizedValue() * 260 + 230);
-  protected readonly _indicatorX = computed(() => this.size() / 2);
-  protected readonly _indicatorY = computed(() => this.size() / 2 - this._radius());
-
-  private _dragStartAngle = 0;
-  private _dragStartValue = 0;
-  private _onChange: (v: number) => void = () => {};
-  private _onTouched: () => void = () => {};
-  private _dragSessionDisposer: (() => void) | null = null;
-
-  private readonly _el = inject(ElementRef<HTMLElement>);
-  private readonly _destroyRef = inject(DestroyRef);
-
-  constructor() {
-    this._destroyRef.onDestroy(() => this._disposeDragSession());
-  }
-
-  /** Calcula el ángulo en grados desde el centro del dial al punto (x, y).
-   *  Calculates the angle in degrees from the dial center to point (x, y). */
-  private _getAngle(clientX: number, clientY: number): number {
-    const dial = this._el.nativeElement.querySelector('.neu-knob__dial') as HTMLElement;
-    const rect = dial
-      ? dial.getBoundingClientRect()
-      : this._el.nativeElement.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    return Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
-  }
-
+  readonly arcDashArray = computed(() => `${this.arcLength()} ${this.circumference()}`);
+  readonly arcDashOffset = computed(() => this.arcLength() * (1 - this.normalizedValue()));
+  readonly indicatorAngle = computed(() => this.normalizedValue() * 260 + 230);
+  readonly indicatorX = computed(() => this.size() / 2);
+  readonly indicatorY = computed(() => this.size() / 2 - this.radius());
   readonly hostClasses = computed(() => ({
     'neu-knob': true,
-    'neu-knob--disabled': this._cvaDisabled(),
+    'neu-knob--disabled': this.disabled(),
+    'neu-knob--readonly': this.readonly(),
+    'neu-knob--invalid': this.hasError(),
   }));
 
-  writeValue(val: number | null): void {
-    this._value.set(this._clamp(val ?? this.min()));
+  constructor() {
+    this.destroyRef.onDestroy(() => this.disposeDragSession());
   }
 
-  registerOnChange(fn: (v: number) => void): void {
-    this._onChange = fn;
-  }
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-  setDisabledState(disabled: boolean): void {
-    this._cvaDisabled.set(disabled);
-  }
-
-  onMouseDown(event: MouseEvent): void {
-    if (this._cvaDisabled()) return;
+  onPointerDown(event: PointerEvent): void {
+    if (this.disabled() || this.readonly() || (event.button !== 0 && event.pointerType !== 'touch'))
+      return;
     event.preventDefault();
-    this._disposeDragSession();
-    this._dragStartAngle = this._getAngle(event.clientX, event.clientY);
-    this._dragStartValue = this._value();
-    const view = this._el.nativeElement.ownerDocument.defaultView;
+    this.disposeDragSession();
+    this.focus();
+    this.activePointerId = event.pointerId;
+    this.dragStartAngle = this.getAngle(event.clientX, event.clientY);
+    this.dragStartValue = this.resolvedValue();
+    const view = this.host.nativeElement.ownerDocument.defaultView;
     if (!view) return;
-    const onMove = (e: MouseEvent) => this._applyCircularDrag(e.clientX, e.clientY);
-    const onEnd = () => this._disposeDragSession();
-    this._dragSessionDisposer = () => {
-      view.removeEventListener('mousemove', onMove);
-      view.removeEventListener('mouseup', onEnd);
-      view.removeEventListener('blur', onEnd);
-      this._dragSessionDisposer = null;
+    const onMove = (move: PointerEvent) => {
+      if (move.pointerId === this.activePointerId)
+        this.applyCircularDrag(move.clientX, move.clientY);
     };
-    view.addEventListener('mousemove', onMove);
-    view.addEventListener('mouseup', onEnd);
-    view.addEventListener('blur', onEnd);
-    this._onTouched();
-  }
-
-  onTouchStart(event: TouchEvent): void {
-    if (this._cvaDisabled()) return;
-    event.preventDefault();
-    this._disposeDragSession();
-    this._dragStartAngle = this._getAngle(event.touches[0].clientX, event.touches[0].clientY);
-    this._dragStartValue = this._value();
-    const view = this._el.nativeElement.ownerDocument.defaultView;
-    if (!view) return;
-    const onMove = (e: TouchEvent) =>
-      this._applyCircularDrag(e.touches[0].clientX, e.touches[0].clientY);
-    const onEnd = () => this._disposeDragSession();
-    this._dragSessionDisposer = () => {
-      view.removeEventListener('touchmove', onMove);
-      view.removeEventListener('touchend', onEnd);
-      view.removeEventListener('touchcancel', onEnd);
-      this._dragSessionDisposer = null;
+    const onEnd = (end: PointerEvent) => {
+      if (end.pointerId === this.activePointerId) this.disposeDragSession();
     };
-    view.addEventListener('touchmove', onMove, { passive: false });
-    view.addEventListener('touchend', onEnd);
-    view.addEventListener('touchcancel', onEnd);
-    this._onTouched();
-  }
-
-  private _disposeDragSession(): void {
-    this._dragSessionDisposer?.();
+    this.dragSessionDisposer = () => {
+      view.removeEventListener('pointermove', onMove);
+      view.removeEventListener('pointerup', onEnd);
+      view.removeEventListener('pointercancel', onEnd);
+      view.removeEventListener('blur', this.disposeDragSession);
+      this.activePointerId = null;
+      this.dragSessionDisposer = null;
+    };
+    view.addEventListener('pointermove', onMove);
+    view.addEventListener('pointerup', onEnd);
+    view.addEventListener('pointercancel', onEnd);
+    view.addEventListener('blur', this.disposeDragSession);
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    if (this._cvaDisabled()) return;
-    let delta = 0;
-    if (event.key === 'ArrowUp' || event.key === 'ArrowRight') delta = this.step();
-    else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') delta = -this.step();
-    else if (event.key === 'Home') {
-      this._emit(this.min());
-      return;
-    } else if (event.key === 'End') {
-      this._emit(this.max());
-      return;
-    }
-    if (delta !== 0) {
-      event.preventDefault();
-      this._emit(this._clamp(this._value() + delta));
-    }
+    if (this.disabled() || this.readonly()) return;
+    let next: number | null = null;
+    if (event.key === 'ArrowUp' || event.key === 'ArrowRight')
+      next = this.resolvedValue() + this.resolvedStep();
+    else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft')
+      next = this.resolvedValue() - this.resolvedStep();
+    else if (event.key === 'Home') next = this.resolvedMin();
+    else if (event.key === 'End') next = this.resolvedMax();
+    if (next === null) return;
+    event.preventDefault();
+    this.commit(next);
   }
 
-  /** Aplica el drag circular calculando el delta de ángulo respecto al punto inicial.
-   *  Applies circular drag by computing the angle delta from the start point. */
-  private _applyCircularDrag(clientX: number, clientY: number): void {
-    let deltaAngle = this._getAngle(clientX, clientY) - this._dragStartAngle;
-    // Normalizar a [-180, 180] para evitar saltos al cruzar el eje / Normalize to avoid jumps
+  onBlur(): void {
+    this.disposeDragSession();
+    this.touch.emit();
+  }
+
+  focus(options?: FocusOptions): void {
+    this.dial().nativeElement.focus(options);
+  }
+
+  reset(): void {
+    this.disposeDragSession();
+  }
+
+  private readonly disposeDragSession = (): void => {
+    this.dragSessionDisposer?.();
+  };
+
+  private getAngle(clientX: number, clientY: number): number {
+    const rect = this.dial().nativeElement.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+  }
+
+  private applyCircularDrag(clientX: number, clientY: number): void {
+    let deltaAngle = this.getAngle(clientX, clientY) - this.dragStartAngle;
     if (deltaAngle > 180) deltaAngle -= 360;
     if (deltaAngle < -180) deltaAngle += 360;
-    const range = this.max() - this.min();
-    // 260° de arco = rango completo / 260° arc = full range
-    const valueDelta = (deltaAngle / 260) * range;
-    this._emit(this._clamp(this._dragStartValue + valueDelta));
+    const range = this.resolvedMax() - this.resolvedMin();
+    this.commit(this.dragStartValue + (deltaAngle / 260) * range);
   }
 
-  private _emit(value: number): void {
-    const snapped = Math.round(value / this.step()) * this.step();
-    const clamped = this._clamp(snapped);
-    this._value.set(clamped);
-    this._onChange(clamped);
-    this.valueChange.emit(clamped);
+  private commit(candidate: number): void {
+    const value = this.clamp(this.snap(candidate));
+    if (Number.isFinite(value) && !Object.is(value, this.value())) this.value.set(value);
   }
 
-  private _clamp(v: number): number {
-    return Math.min(this.max(), Math.max(this.min(), v));
+  private resolvedStep(): number {
+    return Number.isFinite(this.step()) && this.step() > 0 ? this.step() : 1;
+  }
+
+  private snap(value: number): number {
+    const step = this.resolvedStep();
+    const minimum = this.resolvedMin();
+    const precision = Math.max(this.decimalPlaces(step), this.decimalPlaces(minimum));
+    return Number((minimum + Math.round((value - minimum) / step) * step).toFixed(precision));
+  }
+
+  private clamp(value: number): number {
+    return Math.min(this.resolvedMax(), Math.max(this.resolvedMin(), value));
+  }
+
+  private decimalPlaces(value: number): number {
+    const text = value.toString().toLowerCase();
+    if (text.includes('e-')) return Number(text.split('e-')[1]);
+    return text.includes('.') ? text.length - text.indexOf('.') - 1 : 0;
   }
 }

@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, effect, input, untracked } from '@angular/core';
+import { Component, effect, input, untracked } from '@angular/core';
 import type { InternalNeuTableOptionalFeatureHost } from './neu-table-optional-features.types';
 
 /** @internal Deterministic failure terminus for the private deferred Table feature chunk. */
 @Component({
   selector: 'neu-table-optional-feature-error',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `<span class="sr-only" role="alert">Table feature unavailable</span>`,
 })

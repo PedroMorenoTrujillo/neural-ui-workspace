@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   inject,
@@ -12,7 +11,6 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
 @Component({
   selector: 'neu-checkbox',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-checkbox-host' },
   template: `
     <label class="neu-checkbox" [class.neu-checkbox--disabled]="disabled()" [for]="_id">

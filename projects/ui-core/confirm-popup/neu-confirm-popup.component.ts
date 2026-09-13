@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -54,7 +53,6 @@ export class NeuConfirmPopupService {
   selector: 'neu-confirm-popup',
   imports: [NeuButtonComponent, NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-confirm-popup-host', '(window:resize)': 'fitToViewport()' },
   template: `
     @if (open() || service.state()) {

@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   Directive,
@@ -92,7 +91,6 @@ export class NeuTreeSelectEmptyDirective {
   selector: 'neu-tree-select',
   imports: [OverlayModule, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

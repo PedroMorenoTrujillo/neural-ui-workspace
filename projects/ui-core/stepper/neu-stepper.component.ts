@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   inject,
@@ -36,7 +35,6 @@ export interface NeuStepperStep {
   selector: 'neu-stepper',
   imports: [NeuTooltipDirective],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Cabecera de pasos -->
     <div class="neu-stepper">

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ContentChild, DestroyRef, Directive, PLATFORM_ID, TemplateRef, afterNextRender, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, ContentChild, DestroyRef, Directive, PLATFORM_ID, TemplateRef, afterNextRender, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 
 export interface NeuCarouselResponsiveOption { breakpoint: string | number; numVisible: number; numScroll?: number; }
@@ -10,7 +10,7 @@ export interface NeuCarouselPageEvent { page: number; first: number; }
 
 /** Generic paged content carousel. It never mutates the consumer's item array. */
 @Component({
-  selector: 'neu-carousel', imports: [NgTemplateOutlet], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'neu-carousel', imports: [NgTemplateOutlet],
   host: { class: 'neu-carousel', '[class.neu-carousel--vertical]': 'orientation() === "vertical"' },
   template: `
     <section class="neu-carousel__root" role="region" [attr.aria-label]="ariaLabel()" (keydown)="onKeydown($event)" (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)">

@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
@@ -143,7 +142,6 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
   selector: 'neu-calendar',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="neu-calendar"

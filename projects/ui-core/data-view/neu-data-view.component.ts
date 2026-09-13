@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   Directive,
@@ -59,7 +58,6 @@ export class NeuDataViewFooterDirective {
     NeuSelectComponent,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-data-view',
     '[class.neu-data-view--grid]': 'mode() === "grid"',

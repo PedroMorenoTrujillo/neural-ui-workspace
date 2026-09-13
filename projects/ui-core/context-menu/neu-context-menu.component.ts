@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ComponentRef,
   Directive,
@@ -68,7 +67,6 @@ export class NeuContextMenuItemDirective {
   selector: 'neu-context-menu-overlay',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-context-menu',
     role: 'menu',

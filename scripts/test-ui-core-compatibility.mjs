@@ -7,18 +7,16 @@ import { fileURLToPath } from 'node:url';
 const workspaceRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const fixtureRoot = join(workspaceRoot, 'fixtures', 'compatibility-consumer');
 const distRoot = join(workspaceRoot, 'dist', 'neural-ui', 'core');
-const version = process.argv[process.argv.indexOf('--angular') + 1];
+const workspacePackageJson = JSON.parse(readFileSync(join(workspaceRoot, 'package.json'), 'utf8'));
+const frameworkVersion = workspacePackageJson.dependencies['@angular/core'];
+const toolingVersion = workspacePackageJson.devDependencies['@angular/build'];
 
-if (!/^(19|20|21|22)$/.test(version ?? '')) {
-  console.error('Usage: npm run test:compat -- --angular <19|20|21|22>');
-  process.exit(1);
-}
 if (!existsSync(join(distRoot, 'package.json'))) {
   console.error('Compatibility test requires the compiled dist package. Run npm run build first.');
   process.exit(1);
 }
 
-const fixture = mkdtempSync(join(tmpdir(), `neural-ui-angular-${version}-`));
+const fixture = mkdtempSync(join(tmpdir(), 'neural-ui-angular-22-'));
 const npmCache = mkdtempSync(join(tmpdir(), 'neural-ui-npm-cache-'));
 cpSync(fixtureRoot, fixture, { recursive: true });
 
@@ -40,46 +38,36 @@ if (!packageTarball) {
   process.exit(1);
 }
 
-const typescriptByAngular = { 19: '~5.7.0', 20: '~5.8.0', 21: '~5.9.0', 22: '~6.0.0' };
-const angularVersion = `^${version}.0.0`;
-const ngApexchartsByAngular = { 19: '1.15.0', 20: '1.16.0', 21: '2.3.0', 22: '2.3.0' };
 const packageJsonPath = join(fixture, 'package.json');
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 packageJson.dependencies = {
-  '@angular/cdk': angularVersion,
-  '@angular/common': angularVersion,
-  '@angular/compiler': angularVersion,
-  '@angular/core': angularVersion,
-  '@angular/forms': angularVersion,
-  '@angular/platform-browser': angularVersion,
-  '@angular/platform-server': angularVersion,
-  '@angular/router': angularVersion,
+  '@angular/cdk': workspacePackageJson.dependencies['@angular/cdk'],
+  '@angular/common': frameworkVersion,
+  '@angular/compiler': frameworkVersion,
+  '@angular/core': frameworkVersion,
+  '@angular/forms': frameworkVersion,
+  '@angular/platform-browser': frameworkVersion,
+  '@angular/platform-server': frameworkVersion,
+  '@angular/router': frameworkVersion,
+  '@angular/ssr': toolingVersion,
   '@neural-ui/core': `file:${join(fixture, packageTarball)}`,
-  // v31 is the last ng-icons line whose Angular peer range includes 19 and 20.
-  '@ng-icons/core': '^31.4.0',
-  '@ng-icons/lucide': '^31.4.0',
-  apexcharts: '^5.10.4',
-  // Pin the major-specific adapter: newer 1.x releases dropped Angular 19 support.
-  'ng-apexcharts': ngApexchartsByAngular[version],
-  rxjs: '~7.8.0',
-  tslib: '^2.3.0',
+  '@ng-icons/core': workspacePackageJson.dependencies['@ng-icons/core'],
+  '@ng-icons/lucide': workspacePackageJson.dependencies['@ng-icons/lucide'],
+  rxjs: workspacePackageJson.dependencies.rxjs,
+  tslib: workspacePackageJson.dependencies.tslib,
 };
 packageJson.devDependencies = {
-  '@angular/build': angularVersion,
-  '@angular/cli': angularVersion,
-  '@angular/compiler-cli': angularVersion,
-  typescript: typescriptByAngular[version],
+  '@types/node': '^24.0.0',
+  '@angular-devkit/schematics': workspacePackageJson.devDependencies['@angular-devkit/schematics'],
+  '@angular/build': toolingVersion,
+  '@angular/cli': workspacePackageJson.devDependencies['@angular/cli'],
+  '@angular/compiler-cli': workspacePackageJson.devDependencies['@angular/compiler-cli'],
+  '@angular/ssr': toolingVersion,
+  '@schematics/angular': workspacePackageJson.devDependencies['@schematics/angular'],
+  '@types/node': '^22.0.0',
+  typescript: workspacePackageJson.devDependencies.typescript,
 };
 writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
-
-if (version === '19') {
-  const mainPath = join(fixture, 'src', 'main.ts');
-  const mainSource = readFileSync(mainPath, 'utf8').replaceAll(
-    'provideZonelessChangeDetection',
-    'provideExperimentalZonelessChangeDetection',
-  );
-  writeFileSync(mainPath, mainSource);
-}
 
 try {
   const commands = [
@@ -132,12 +120,13 @@ try {
     ['npm', ['run', 'build']],
     ['node', ['src/ssr-tree-table.mjs']],
     ['node', ['src/ssr-h9-events.mjs']],
+    ['node', ['src/ssr-n2-forms.mjs']],
     [
       'node',
       [
         '--input-type=module',
         '--eval',
-        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/tree-table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/chart'); await import('@neural-ui/core/color-picker'); console.log('SSR entrypoint imports passed')",
+        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/tree-table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/color-picker'); console.log('SSR entrypoint imports passed')",
       ],
     ],
   ];
@@ -153,7 +142,7 @@ try {
     }
     if (result.status !== 0) process.exit(result.status ?? 1);
   }
-  console.log(`Angular ${version} compatibility fixture passed`);
+  console.log(`Angular ${frameworkVersion} consumer fixture passed`);
 } finally {
   if (process.env.NEURAL_UI_KEEP_COMPAT_FIXTURE === '1')
     console.log(`Retained compatibility fixture: ${fixture}`);

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "projects/ui-core/styles/_tokens.scss",
-  "tokenCount": 286,
-  "publicTokenCount": 266,
+  "tokenCount": 288,
+  "publicTokenCount": 268,
   "tokens": [
     {
       "token": "--neu-accent",
@@ -447,7 +447,6 @@
         "projects/ui-core/card/neu-card.component.scss",
         "projects/ui-core/carousel/neu-carousel.component.scss",
         "projects/ui-core/cascade-select/neu-cascade-select.component.scss",
-        "projects/ui-core/chart/neu-chart.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/command-palette/neu-command-palette.component.scss",
         "projects/ui-core/confirm-popup/neu-confirm-popup.component.scss",
@@ -1405,6 +1404,7 @@
       "defaultSource": null,
       "consumedIn": [
         "projects/ui-core/button/neu-button.component.scss",
+        "projects/ui-core/form-field/neu-form-field.component.scss",
         "projects/ui-core/input-tags/neu-input-tags.component.scss",
         "projects/ui-core/styles/_presets.scss"
       ],
@@ -1547,6 +1547,7 @@
         "projects/ui-core/autocomplete/neu-autocomplete.component.scss",
         "projects/ui-core/calendar/neu-calendar.component.scss",
         "projects/ui-core/empty-state/neu-empty-state.component.scss",
+        "projects/ui-core/gallery/neu-gallery.component.scss",
         "projects/ui-core/input-tags/neu-input-tags.component.scss",
         "projects/ui-core/kanban/neu-kanban.component.scss",
         "projects/ui-core/listbox/neu-listbox.component.scss",
@@ -3041,6 +3042,42 @@
       "status": "canonical"
     },
     {
+      "token": "--neu-organization-chart-connector",
+      "category": "component",
+      "owner": "organization-chart",
+      "description": "Component token for organization chart connector.",
+      "default": null,
+      "fallback": [],
+      "declaredIn": [
+        "projects/ui-core/organization-chart/neu-organization-chart.component.scss"
+      ],
+      "defaultSource": null,
+      "consumedIn": [
+        "projects/ui-core/organization-chart/neu-organization-chart.component.scss"
+      ],
+      "public": true,
+      "documented": false,
+      "status": "canonical"
+    },
+    {
+      "token": "--neu-organization-chart-connector-width",
+      "category": "component",
+      "owner": "organization-chart",
+      "description": "Component token for organization chart connector width.",
+      "default": null,
+      "fallback": [],
+      "declaredIn": [
+        "projects/ui-core/organization-chart/neu-organization-chart.component.scss"
+      ],
+      "defaultSource": null,
+      "consumedIn": [
+        "projects/ui-core/organization-chart/neu-organization-chart.component.scss"
+      ],
+      "public": true,
+      "documented": false,
+      "status": "canonical"
+    },
+    {
       "token": "--neu-organization-chart-gap-x",
       "category": "component",
       "owner": "organization-chart",
@@ -3615,7 +3652,8 @@
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/toggle-button-group/neu-toggle-button-group.component.scss",
         "projects/ui-core/toolbar/neu-toolbar.component.scss",
-        "projects/ui-core/tree-table/neu-tree-table.component.scss"
+        "projects/ui-core/tree-table/neu-tree-table.component.scss",
+        "projects/ui-core/tree/neu-tree.component.scss"
       ],
       "public": true,
       "documented": true,
@@ -3669,7 +3707,8 @@
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/neu-table.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
-        "projects/ui-core/tree-table/neu-tree-table.component.scss"
+        "projects/ui-core/tree-table/neu-tree-table.component.scss",
+        "projects/ui-core/tree/neu-tree.component.scss"
       ],
       "public": true,
       "documented": true,
@@ -3800,7 +3839,6 @@
         "projects/ui-core/button-group/neu-button-group.component.scss",
         "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/cascade-select/neu-cascade-select.component.scss",
-        "projects/ui-core/chart/neu-chart.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/gallery/neu-gallery.component.scss",
         "projects/ui-core/image-gallery/neu-image-gallery.component.scss",
@@ -3976,6 +4014,7 @@
         "projects/ui-core/badge/neu-badge.component.scss",
         "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/checkbox/neu-checkbox.component.scss",
+        "projects/ui-core/code-block/neu-code-block.component.scss",
         "projects/ui-core/color-picker/neu-color-picker.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/inline-editor/neu-inline-editor.component.scss",
@@ -4230,8 +4269,8 @@
       "consumedIn": [
         "projects/ui-core/calendar/neu-calendar.component.scss",
         "projects/ui-core/card/neu-card.component.scss",
-        "projects/ui-core/chart/neu-chart.component.scss",
         "projects/ui-core/kanban/neu-kanban.component.scss",
+        "projects/ui-core/menu/neu-menu.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/styles/_presets.scss",
@@ -4431,6 +4470,7 @@
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/divider/neu-divider.component.ts",
         "projects/ui-core/empty-state/neu-empty-state.component.scss",
+        "projects/ui-core/form-field/neu-form-field.component.scss",
         "projects/ui-core/gallery/neu-gallery.component.scss",
         "projects/ui-core/image-gallery/neu-image-gallery.component.scss",
         "projects/ui-core/inline-editor/neu-inline-editor.component.scss",
@@ -4967,7 +5007,6 @@
         "projects/ui-core/card/neu-card.component.scss",
         "projects/ui-core/carousel/neu-carousel.component.scss",
         "projects/ui-core/cascade-select/neu-cascade-select.component.scss",
-        "projects/ui-core/chart/neu-chart.component.scss",
         "projects/ui-core/checkbox/neu-checkbox.component.scss",
         "projects/ui-core/command-palette/neu-command-palette.component.scss",
         "projects/ui-core/confirm-popup/neu-confirm-popup.component.scss",
@@ -4976,7 +5015,6 @@
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/dock/neu-dock.component.scss",
         "projects/ui-core/gallery/neu-gallery.component.scss",
-        "projects/ui-core/image-gallery/neu-image-gallery.component.scss",
         "projects/ui-core/input-mask/neu-input-mask.component.scss",
         "projects/ui-core/input-tags/neu-input-tags.component.scss",
         "projects/ui-core/input/neu-input.component.scss",
@@ -4987,6 +5025,7 @@
         "projects/ui-core/modal/neu-modal.component.scss",
         "projects/ui-core/multiselect/neu-multiselect.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
+        "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",
         "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
@@ -5069,8 +5108,6 @@
         "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/calendar/neu-calendar.component.scss",
         "projects/ui-core/card/neu-card.component.scss",
-        "projects/ui-core/chart/neu-chart.component.scss",
-        "projects/ui-core/chart/neu-chart.component.ts",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/color-picker/neu-color-picker.component.scss",
         "projects/ui-core/command-palette/neu-command-palette.component.scss",
@@ -5138,6 +5175,7 @@
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
+        "projects/ui-core/gallery/neu-gallery.component.scss",
         "projects/ui-core/multiselect/neu-multiselect.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
         "projects/ui-core/panel/neu-panel.component.scss",
@@ -5619,7 +5657,6 @@
         "projects/ui-core/card/neu-card.component.scss",
         "projects/ui-core/carousel/neu-carousel.component.scss",
         "projects/ui-core/cascade-select/neu-cascade-select.component.scss",
-        "projects/ui-core/chart/neu-chart.component.scss",
         "projects/ui-core/checkbox/neu-checkbox.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/command-palette/neu-command-palette.component.scss",
@@ -5632,7 +5669,6 @@
         "projects/ui-core/empty-state/neu-empty-state.component.scss",
         "projects/ui-core/form-field/neu-form-field.component.scss",
         "projects/ui-core/gallery/neu-gallery.component.scss",
-        "projects/ui-core/image-gallery/neu-image-gallery.component.scss",
         "projects/ui-core/input-mask/neu-input-mask.component.scss",
         "projects/ui-core/input-tags/neu-input-tags.component.scss",
         "projects/ui-core/input/neu-input.component.scss",
@@ -5646,6 +5682,7 @@
         "projects/ui-core/modal/neu-modal.component.scss",
         "projects/ui-core/multiselect/neu-multiselect.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
+        "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",
         "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
@@ -5871,7 +5908,6 @@
         "projects/ui-core/avatar/neu-avatar.component.scss",
         "projects/ui-core/calendar/neu-calendar.component.scss",
         "projects/ui-core/cascade-select/neu-cascade-select.component.scss",
-        "projects/ui-core/chart/neu-chart.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/command-palette/neu-command-palette.component.scss",
         "projects/ui-core/confirm-popup/neu-confirm-popup.component.scss",
@@ -5882,6 +5918,7 @@
         "projects/ui-core/divider/neu-divider.component.ts",
         "projects/ui-core/empty-state/neu-empty-state.component.scss",
         "projects/ui-core/form-field/neu-form-field.component.scss",
+        "projects/ui-core/gallery/neu-gallery.component.scss",
         "projects/ui-core/inline-editor/neu-inline-editor.component.scss",
         "projects/ui-core/input-mask/neu-input-mask.component.scss",
         "projects/ui-core/input-tags/neu-input-tags.component.scss",
@@ -5940,7 +5977,6 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
-        "projects/ui-core/chart/neu-chart.component.ts",
         "projects/ui-core/color-picker/neu-color-picker.component.scss",
         "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
         "projects/ui-core/context-menu/neu-context-menu.component.scss",
@@ -5968,7 +6004,6 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
-        "projects/ui-core/chart/neu-chart.component.ts",
         "projects/ui-core/color-picker/neu-color-picker.component.scss",
         "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
         "projects/ui-core/filter-bar/neu-filter-bar.component.scss",
@@ -6382,6 +6417,7 @@
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/textarea/neu-textarea.component.scss",
         "projects/ui-core/toast/neu-toast.component.scss",
+        "projects/ui-core/tree-select/neu-tree-select.component.scss",
         "projects/ui-core/uploader/neu-uploader.component.scss"
       ],
       "public": true,
@@ -6601,7 +6637,6 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
-        "projects/ui-core/sidebar/neu-sidebar.component.scss",
         "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,

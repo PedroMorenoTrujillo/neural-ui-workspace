@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   Injectable,
@@ -105,7 +104,6 @@ export class NeuCommandPaletteService {
   selector: 'neu-command-palette',
   imports: [NgTemplateOutlet, NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown)': '_onDocKey($event)',
   },

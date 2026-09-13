@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   contentChild,
@@ -41,7 +40,6 @@ type NeuTableCoreData<T extends object> = [T] extends [Record<string, unknown>]
   selector: 'neu-table-core',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-table-core__host',
     '[class.neu-table-core__host--compact]': 'density() === "compact"',

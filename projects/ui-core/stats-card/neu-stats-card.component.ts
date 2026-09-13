@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -26,7 +25,6 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
   selector: 'neu-stats-card',
   imports: [NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-stats-card' },
   template: `
     <div class="neu-stats-card__inner">

@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -128,7 +127,6 @@ export class NeuNotificationService {
   selector: 'neu-notification-center',
   imports: [OverlayModule],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-nc',
     '[attr.aria-label]': '"Centro de notificaciones"',

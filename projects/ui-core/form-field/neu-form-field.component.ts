@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, input } from '@angular/core';
+import { Component, ViewEncapsulation, computed, inject, input } from '@angular/core';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuFormFieldSize = 'sm' | 'md' | 'lg';
@@ -8,7 +8,6 @@ export type NeuFormFieldSize = 'sm' | 'md' | 'lg';
   exportAs: 'neuFormField',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'classes()' },
   template: `
     @if (label()) {
@@ -72,7 +71,6 @@ export class NeuFormFieldComponent {
   selector: 'neu-input-group',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'classes()' },
   template: `<ng-content />`,
   styleUrl: './neu-form-field.component.scss',

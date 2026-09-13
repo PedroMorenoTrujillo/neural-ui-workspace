@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   Directive,
@@ -46,7 +45,6 @@ interface _NeuIvData {
   imports: [NeuFocusTrapDirective, NeuModalFocusDirective, NeuIconComponent],
   hostDirectives: [NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-iv',
     'aria-modal': 'true',

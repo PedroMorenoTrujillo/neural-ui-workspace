@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, InjectionToken, ViewEncapsulation, computed, forwardRef, inject, input, output, signal } from '@angular/core';
+import { Component, ElementRef, InjectionToken, ViewEncapsulation, computed, forwardRef, inject, input, output, signal } from '@angular/core';
 
 export type NeuCompareOrientation = 'horizontal' | 'vertical';
 export interface NeuCompareValueChangeEvent { originalEvent: Event; value: number; }
@@ -7,7 +7,6 @@ export const NEU_COMPARE_INSTANCE = new InjectionToken<NeuCompareComponent>('NEU
 @Component({
   selector: 'neu-compare',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{ provide: NEU_COMPARE_INSTANCE, useExisting: forwardRef(() => NeuCompareComponent) }],
   host: { '[class]': 'hostClasses()', '(pointerdown)': 'onRootPointerDown($event)', '(pointermove)': 'onRootPointerMove($event)', '(pointerup)': 'onRootPointerUp($event)', '(pointercancel)': 'onRootPointerUp($event)' },
   template: '<ng-content />',
@@ -53,11 +52,11 @@ export class NeuCompareComponent {
   private normalizeValue(value: number): number { const min = this.normalizedMin(); const max = this.normalizedMax(); const step = Number(this.step()); const snapped = Number.isFinite(step) && step > 0 ? min + Math.round((value - min) / step) * step : value; return Math.min(max, Math.max(min, Number.isFinite(snapped) ? snapped : min)); }
 }
 
-@Component({ selector: 'neu-compare-item', encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, host: { class: 'neu-compare__item', '[style.clip-path]': 'clipPath()', '[attr.data-position]': 'position()' }, template: '<ng-content />' })
+@Component({ selector: 'neu-compare-item', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__item', '[style.clip-path]': 'clipPath()', '[attr.data-position]': 'position()' }, template: '<ng-content />' })
 export class NeuCompareItemComponent { readonly position = input<'before' | 'after'>('before'); private readonly compare = inject(NEU_COMPARE_INSTANCE); readonly clipPath = computed(() => this.compare.getItemStyle(this.position()).clipPath); }
 
-@Component({ selector: 'neu-compare-handle', encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, host: { class: 'neu-compare__handle', '[style]': 'handleStyle()', '(pointerdown)': 'onPointerDown($event)' }, template: '<ng-content />' })
+@Component({ selector: 'neu-compare-handle', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__handle', '[style]': 'handleStyle()', '(pointerdown)': 'onPointerDown($event)' }, template: '<ng-content />' })
 export class NeuCompareHandleComponent { private readonly compare = inject(NEU_COMPARE_INSTANCE); readonly handleStyle = computed(() => this.compare.getHandleStyle()); onPointerDown(event: PointerEvent): void { this.compare.onThumbPointerDown(event); } }
 
-@Component({ selector: 'neu-compare-indicator', encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, host: { class: 'neu-compare__indicator' }, template: '<input class="neu-compare__input" type="range" [min]="compare.min()" [max]="compare.max()" [step]="compare.step()" [value]="compare.currentValue()" [disabled]="compare.disabled()" [attr.aria-label]="ariaLabel() || null" [attr.aria-labelledby]="ariaLabelledBy() || null" [attr.aria-orientation]="compare.orientation()" (input)="compare.onInputChange($event)" /><ng-content />' })
+@Component({ selector: 'neu-compare-indicator', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__indicator' }, template: '<input class="neu-compare__input" type="range" [min]="compare.min()" [max]="compare.max()" [step]="compare.step()" [value]="compare.currentValue()" [disabled]="compare.disabled()" [attr.aria-label]="ariaLabel() || null" [attr.aria-labelledby]="ariaLabelledBy() || null" [attr.aria-orientation]="compare.orientation()" (input)="compare.onInputChange($event)" /><ng-content />' })
 export class NeuCompareIndicatorComponent { readonly ariaLabel = input<string>('Compare position'); readonly ariaLabelledBy = input<string>(''); protected readonly compare = inject(NEU_COMPARE_INSTANCE); }

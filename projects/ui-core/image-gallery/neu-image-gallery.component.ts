@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
@@ -13,7 +12,6 @@ import { NeuImageViewerDirective, type NeuImageViewerItem } from '@neural-ui/cor
 @Component({
   selector: 'neu-image-gallery',
   imports: [NeuImageViewerDirective],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (items().length > 0) {
       <div

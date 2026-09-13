@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Injectable,
   ViewEncapsulation,
@@ -30,7 +29,6 @@ export interface NeuConfirmDialogData {
   selector: 'neu-confirm-dialog',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-confirm-dialog',
     role: 'alertdialog',

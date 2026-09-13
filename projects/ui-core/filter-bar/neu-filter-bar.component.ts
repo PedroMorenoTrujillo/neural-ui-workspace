@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -33,7 +32,6 @@ export interface NeuFilterChip {
   selector: 'neu-filter-bar',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()', role: 'group', '[attr.aria-label]': 'ariaLabel()' },
   template: `
     <div class="neu-filter-bar__chips">

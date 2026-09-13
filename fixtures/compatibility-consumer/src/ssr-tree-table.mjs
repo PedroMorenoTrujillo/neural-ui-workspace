@@ -1,13 +1,9 @@
 await import('@angular/compiler');
 
-const angularCore = await import('@angular/core');
-const { Component } = angularCore;
+const { Component, provideZonelessChangeDetection } = await import('@angular/core');
 const { bootstrapApplication } = await import('@angular/platform-browser');
 const { provideServerRendering, renderApplication } = await import('@angular/platform-server');
 const { NeuTreeTableComponent } = await import('@neural-ui/core/tree-table');
-const provideZoneless =
-  angularCore.provideZonelessChangeDetection ??
-  angularCore.provideExperimentalZonelessChangeDetection;
 
 const columns = [{ key: 'label', header: 'Node' }];
 
@@ -73,7 +69,7 @@ async function render(component) {
     (context) =>
       bootstrapApplication(
         component,
-        { providers: [provideServerRendering(), provideZoneless()] },
+        { providers: [provideServerRendering(), provideZonelessChangeDetection()] },
         context,
       ),
     { document: '<!doctype html><html><body><app-root></app-root></body></html>', url: '/' },

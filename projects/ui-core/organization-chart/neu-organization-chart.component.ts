@@ -1,7 +1,6 @@
 import { isPlatformBrowser, NgClass, NgTemplateOutlet } from '@angular/common';
 import {
   afterRenderEffect,
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
@@ -161,7 +160,6 @@ export class NeuOrganizationChartSelectionIndicatorDirective<T = unknown> {
   standalone: true,
   imports: [NgClass, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-organization-chart',
   },

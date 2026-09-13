@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ContentChild,
   Directive,
@@ -28,7 +27,6 @@ export class NeuTagIconDirective {
   selector: 'neu-tag',
   imports: [NeuIconComponent, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClasses()',
     '[attr.aria-label]': 'ariaLabel() || null',

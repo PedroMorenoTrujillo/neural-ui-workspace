@@ -1,6 +1,5 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -87,7 +86,6 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
   selector: 'neu-rich-text-editor',
   imports: [NeuButtonComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-rich-text-editor-host',
     '[class.neu-rich-text-editor-host--sm]': 'size() === "sm"',

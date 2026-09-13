@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   Directive,
@@ -58,7 +57,6 @@ export class NeuSplitButtonItemDirective {
   selector: 'neu-split-button',
   imports: [OverlayModule, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-split-button-host',
     '(document:click)': 'onDocumentClick($event)',

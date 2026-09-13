@@ -13,18 +13,19 @@
     "zoneless"
   ],
   "license": "MIT",
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
   "peerDependencies": {
-    "@angular-devkit/schematics": ">=19.0.0 <23.0.0",
-    "@angular/cdk": ">=19.0.0 <23.0.0",
-    "@angular/common": ">=19.0.0 <23.0.0",
-    "@angular/core": ">=19.0.0 <23.0.0",
-    "@angular/forms": ">=19.0.0 <23.0.0",
-    "@angular/router": ">=19.0.0 <23.0.0",
-    "@schematics/angular": ">=19.0.0 <23.0.0",
+    "@angular-devkit/schematics": ">=22.0.0 <23.0.0",
+    "@angular/cdk": ">=22.0.0 <23.0.0",
+    "@angular/common": ">=22.0.0 <23.0.0",
+    "@angular/core": ">=22.0.0 <23.0.0",
+    "@angular/forms": ">=22.0.0 <23.0.0",
+    "@angular/router": ">=22.0.0 <23.0.0",
+    "@schematics/angular": ">=22.0.0 <23.0.0",
     "@ng-icons/core": ">=31.4.0 <34.0.0",
-    "@ng-icons/lucide": ">=31.4.0 <34.0.0",
-    "apexcharts": ">=4.0.0 <6.0.0",
-    "ng-apexcharts": ">=1.15.0 <3.0.0"
+    "@ng-icons/lucide": ">=31.4.0 <34.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

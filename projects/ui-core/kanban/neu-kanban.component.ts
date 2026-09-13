@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -73,7 +72,6 @@ interface NeuKanbanKeyboardMove {
   selector: 'neu-kanban',
   imports: [CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[style.--neu-kanban-column-width]': 'columnWidth()',
     '(document:pointerdown)': 'onDocumentPointerDown($event)',

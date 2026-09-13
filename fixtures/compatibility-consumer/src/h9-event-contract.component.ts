@@ -4,8 +4,11 @@ import { NeuAutocompleteComponent, NeuAutocompleteSelectEvent } from '@neural-ui
 import { NeuInputTagsComponent, NeuInputTagsSelectEvent } from '@neural-ui/core/input-tags';
 import { NeuTreeSelectComponent } from '@neural-ui/core/tree-select';
 import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
-import { NeuDateInputComponent, NeuDateViewChangeEvent } from '@neural-ui/core/date-input';
-import { NeuChartComponent, NeuChartDataSelectEvent } from '@neural-ui/core/chart';
+import {
+  NeuDateInputComponent,
+  NeuDateViewChangeEvent,
+  civilDate,
+} from '@neural-ui/core/date-input';
 import { NeuVirtualListComponent } from '@neural-ui/core/virtual-list';
 import { NeuDialogComponent } from '@neural-ui/core/modal';
 import { NeuBottomSheetComponent } from '@neural-ui/core/bottom-sheet';
@@ -30,7 +33,6 @@ interface Option {
     NeuTreeSelectComponent,
     NeuCascadeSelectComponent,
     NeuDateInputComponent,
-    NeuChartComponent,
     NeuVirtualListComponent,
     NeuDialogComponent,
     NeuBottomSheetComponent,
@@ -97,22 +99,6 @@ interface Option {
           (opened)="record('dateOpened')"
           (closed)="record('dateClosed')"
           (cleared)="record('dateCleared')"
-        />
-      </section>
-      <section id="h9-chart">
-        <neu-chart
-          type="bar"
-          [series]="series"
-          [categories]="['Jan', 'Feb']"
-          (dataSelect)="onData($event)"
-        />
-      </section>
-      <section id="h9-pie">
-        <neu-chart
-          type="pie"
-          [pieSeries]="[25, 75]"
-          [labels]="['A', 'B']"
-          (dataSelect)="record('pieSelect', $event)"
         />
       </section>
       <section id="h9-virtual">
@@ -182,7 +168,7 @@ interface Option {
         (closed)="record('imageClosed')"
       />
       <section id="h9-number">
-        <neu-number-input [nullable]="true" (inputDetail)="onNumber($event)" />
+        <neu-number-input [(value)]="numberValue" (inputDetail)="onNumber($event)" />
       </section>
     }
   `,
@@ -215,12 +201,12 @@ export class H9EventContractComponent {
   readonly mounted = signal(true);
   readonly dialogOpen = signal(false);
   readonly sheetOpen = signal(false);
+  readonly numberValue = signal<number | null>(null);
   readonly options: Option[] = [
     { value: 'a', label: 'Alpha' },
     { value: 'b', label: 'Beta' },
   ];
   readonly tree: Option[] = [{ value: 'root', label: 'Root', children: this.options }];
-  readonly series = [{ name: 'Revenue', data: [10, 30] }];
   readonly items = Array.from({ length: 300 }, (_, i) => `Row ${i}`);
   readonly image =
     'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="40" height="40" fill="blue"/%3E%3C/svg%3E';
@@ -250,16 +236,13 @@ export class H9EventContractComponent {
   onView(value: NeuDateViewChangeEvent): void {
     this.record('view', value);
   }
-  onData(value: NeuChartDataSelectEvent): void {
-    this.record('dataSelect', value);
-  }
   onRange(value: { start: number; end: number }): void {
     this.record('range', value);
   }
   onNumber(value: {
     rawText: string;
     value: number | null;
-    state: 'valid' | 'empty' | 'invalid';
+    state: 'valid' | 'incomplete' | 'invalid';
   }): void {
     this.record('number', value);
   }
@@ -277,8 +260,8 @@ export class H9EventContractComponent {
     this.tags()?.writeValue([]);
     this.treeSelect()?.writeValue(null);
     this.cascade()?.writeValue(null);
-    this.date()?.writeValue('2026-01-01');
+    this.date()?.value.set(civilDate('2026-01-01'));
     this.color()?.writeValue('oklch(0.7 0.12 280 / 0.65)');
-    this.number()?.writeValue(null);
+    this.numberValue.set(null);
   }
 }

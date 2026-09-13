@@ -109,7 +109,7 @@ describe('NeuTableAdvancedFilterController', () => {
     });
     expect(neuTableDateRangeControlValue(null)).toEqual({ start: null, end: null });
     expect(neuTableDateRangeControlValue({ from: '2026-02-03', to: 'invalid' })).toEqual({
-      start: new Date(2026, 1, 3),
+      start: '2026-02-03',
       end: null,
     });
     expect(neuTableDateInputControlValue('2026-02-03', 'date-only')).toBe('2026-02-03');
@@ -216,13 +216,13 @@ describe('NeuTableAdvancedFilterController', () => {
     controller.initialize(dateColumn, {
       constraints: [{ mode: 'between', value: { from: '2026-08-20', to: '2026-08-22' } }],
     });
-    expect(controller.dateControl.value).toMatchObject({
-      start: expect.any(Date),
-      end: expect.any(Date),
+    expect(controller.dateControl.value).toEqual({
+      start: '2026-08-20',
+      end: '2026-08-22',
     });
     controller.dateControl.setValue({
-      start: new Date(2026, 7, 21),
-      end: new Date(2026, 7, 23),
+      start: '2026-08-21',
+      end: '2026-08-23',
     });
     expect(controller.buildApplyResult()?.filter.constraints[0]).toEqual({
       mode: 'between',

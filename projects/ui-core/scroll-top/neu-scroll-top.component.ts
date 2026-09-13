@@ -1,6 +1,5 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   ContentChild,
   DestroyRef,
@@ -32,7 +31,6 @@ export class NeuScrollTopIconDirective {
   selector: 'neu-scroll-top',
   imports: [NeuIconComponent, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
   template: `
     @if (visible()) {

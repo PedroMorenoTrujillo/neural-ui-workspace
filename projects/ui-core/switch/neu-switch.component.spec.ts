@@ -1,212 +1,112 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { NeuSwitchComponent } from './neu-switch.component';
 
-@Component({
-  template: `<neu-switch [label]="label" [formControl]="ctrl" />`,
-  imports: [NeuSwitchComponent, ReactiveFormsModule],
-})
-class TestHostComponent {
-  label = 'Notificaciones';
-  ctrl = new FormControl(false);
+function create(inputs: Record<string, unknown> = {}) {
+  const fixture = TestBed.createComponent(NeuSwitchComponent);
+  for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
+  fixture.detectChanges();
+  return {
+    fixture,
+    component: fixture.componentInstance,
+    input: fixture.nativeElement.querySelector('input') as HTMLInputElement,
+  };
 }
 
-describe('NeuSwitchComponent', () => {
-  let fixture: ComponentFixture<TestHostComponent>;
-  let host: TestHostComponent;
+describe('NeuSwitchComponent Signal Forms contract', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [TestHostComponent] }).compileComponents();
-    fixture = TestBed.createComponent(TestHostComponent);
-    host = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should render label', () => {
-    expect(fixture.nativeElement.textContent).toContain('Notificaciones');
-  });
-
-  it('should not be checked by default', () => {
-    const input = fixture.nativeElement.querySelector('input[type="checkbox"]');
-    expect(input.checked).toBe(false);
-  });
-
-  it('should check when formControl is set to true', () => {
-    host.ctrl.setValue(true);
-    fixture.detectChanges();
-    const input = fixture.nativeElement.querySelector('input[type="checkbox"]');
+  it('renders a labelled semantic switch with native and ARIA states', () => {
+    const { fixture, input } = create({
+      label: 'Notifications',
+      name: 'notifications',
+      checked: true,
+      required: true,
+      readonly: true,
+      pending: true,
+    });
+    const label = fixture.nativeElement.querySelector('label') as HTMLLabelElement;
+    expect(label.htmlFor).toBe(input.id);
+    expect(input.type).toBe('checkbox');
+    expect(input.getAttribute('role')).toBe('switch');
+    expect(input.name).toBe('notifications');
     expect(input.checked).toBe(true);
+    expect(input.required).toBe(true);
+    expect(input.getAttribute('aria-checked')).toBe('true');
+    expect(input.getAttribute('aria-required')).toBe('true');
+    expect(input.getAttribute('aria-readonly')).toBe('true');
+    expect(input.getAttribute('aria-busy')).toBe('true');
   });
 
-  it('should update formControl when clicked', () => {
-    const input = fixture.nativeElement.querySelector('input[type="checkbox"]');
-    input.click();
+  it('publishes exactly one strict boolean update on user change', () => {
+    const { component, input } = create();
+    const changes = vi.fn();
+    component.checked.subscribe(changes);
+    input.checked = true;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(component.checked()).toBe(true);
+    expect(changes).toHaveBeenCalledExactlyOnceWith(true);
+  });
+
+  it('renders parent writes without output echo', () => {
+    const { fixture, component, input } = create();
+    const changes = vi.fn();
+    component.checked.subscribe(changes);
+    fixture.componentRef.setInput('checked', true);
     fixture.detectChanges();
-    expect(host.ctrl.value).toBe(true);
-  });
-
-  it('should be disabled when disabled input is true', () => {
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.componentRef.setInput('disabled', true);
-    df.componentRef.setInput('label', 'Test');
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
-    expect(input.disabled).toBe(true);
-  });
-
-  it('should apply disabled class', () => {
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.componentRef.setInput('disabled', true);
-    df.componentRef.setInput('label', 'Test');
-    df.detectChanges();
-    const el = df.nativeElement.querySelector('.neu-switch--disabled');
-    expect(el).toBeTruthy();
-  });
-
-  it('should be disabled when formControl is disabled', () => {
-    host.ctrl.disable();
-    fixture.detectChanges();
-    const input = fixture.nativeElement.querySelector('input[type="checkbox"]');
-    expect(input.disabled).toBe(true);
-  });
-
-  it('writeValue with null should set checked to false', () => {
-    // writeValue(null) debe establecer el estado checked a false
-    // writeValue(null) must set the checked state to false
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.componentRef.setInput('label', 'Test');
-    df.detectChanges();
-    df.componentInstance.writeValue(true);
-    df.componentInstance.writeValue(null);
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
-    expect(input.checked).toBe(false);
-  });
-
-  it('writeValue(true) should set checked to true', () => {
-    // writeValue(true) debe establecer el estado checked a true
-    // writeValue(true) must set the checked state to true
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.componentRef.setInput('label', 'Test');
-    df.detectChanges();
-    df.componentInstance.writeValue(true);
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
     expect(input.checked).toBe(true);
+    expect(changes).not.toHaveBeenCalled();
   });
 
-  it('should apply name attribute to input', () => {
-    // El atributo name debe propagarse al input nativo
-    // The name attribute must be propagated to the native input
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.componentRef.setInput('label', 'Test');
-    df.componentRef.setInput('name', 'my-switch');
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
-    expect(input.name).toBe('my-switch');
-  });
-
-  it('setDisabledState should toggle disabled', () => {
-    // setDisabledState(true/false) debe actualizar _isDisabled computed
-    // setDisabledState(true/false) must update _isDisabled computed
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.componentRef.setInput('label', 'Test');
-    df.detectChanges();
-    df.componentInstance.setDisabledState(true);
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
-    expect(input.disabled).toBe(true);
-    df.componentInstance.setDisabledState(false);
-    df.detectChanges();
+  it('keeps readonly focusable and prevents pointer/keyboard mutation', () => {
+    const { component, input } = create({ readonly: true, checked: false });
+    const changes = vi.fn();
+    component.checked.subscribe(changes);
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    input.dispatchEvent(click);
+    input.checked = true;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(click.defaultPrevented).toBe(true);
     expect(input.disabled).toBe(false);
+    expect(component.checked()).toBe(false);
+    expect(input.checked).toBe(false);
+    expect(changes).not.toHaveBeenCalled();
+    component.focus();
+    expect(document.activeElement).toBe(input);
   });
 
-  it('onChange emits the checked value via registerOnChange', async () => {
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.detectChanges();
-    let emittedVal: boolean | undefined;
-    df.componentInstance.registerOnChange((v: boolean) => (emittedVal = v));
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
-    input.checked = true;
-    input.dispatchEvent(new Event('change'));
-    df.detectChanges();
-    await df.whenStable();
-    expect(emittedVal).toBe(true);
+  it('makes disabled non-interactive and leaves the value unchanged', () => {
+    const { component, input } = create({ disabled: true, checked: true });
+    const changes = vi.fn();
+    component.checked.subscribe(changes);
+    input.checked = false;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(input.disabled).toBe(true);
+    expect(component.checked()).toBe(true);
+    expect(changes).not.toHaveBeenCalled();
   });
 
-  it('emits checkedChange after a user change', () => {
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    const changes: boolean[] = [];
-    df.componentInstance.checkedChange.subscribe((value) => changes.push(value));
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
-    input.checked = true;
-    input.dispatchEvent(new Event('change'));
-    expect(changes).toEqual([true]);
-  });
-
-  it('onBlur should call _onTouched callback', () => {
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.detectChanges();
-    let touched = false;
-    df.componentInstance.registerOnTouched(() => (touched = true));
-    df.componentInstance.onBlur();
-    expect(touched).toBe(true);
-  });
-
-  it('onChange on disabled switch should not be called', async () => {
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.componentRef.setInput('disabled', true);
-    df.detectChanges();
-    let called = false;
-    df.componentInstance.registerOnChange(() => (called = true));
-    // With disabled=true the HTML input is disabled so the event won't fire,
-    // but we verify the disabled state is applied correctly
-    expect(df.nativeElement.querySelector('input').disabled).toBe(true);
-    expect(called).toBe(false);
-  });
-
-  it('onChange event on enabled switch should update checked state and call _onChange', () => {
-    // El evento change en el checkbox debe actualizar el estado y notificar al CVA
-    // The change event on the checkbox must update state and notify CVA
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.detectChanges();
-    const values: boolean[] = [];
-    df.componentInstance.registerOnChange((v: boolean) => values.push(v));
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
-    input.checked = true;
-    input.dispatchEvent(new Event('change'));
-    expect(values.length).toBeGreaterThan(0);
-    expect(values[values.length - 1]).toBe(true);
-  });
-
-  it('onChange should not throw when no onChange callback registered (uses default noop)', () => {
-    // onChange sin callback registrado no debe lanzar error (usa función por defecto)
-    // onChange without registered callback must not throw (uses default noop function)
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
-    input.checked = true;
-    // No registerOnChange called — default () => {} is invoked
-    expect(() => input.dispatchEvent(new Event('change'))).not.toThrow();
-  });
-
-  it('onBlur should not throw when no onTouched callback registered (uses default noop)', () => {
-    // onBlur sin callback registrado no debe lanzar error (usa función por defecto)
-    // onBlur without registered callback must not throw (uses default noop function)
-    const df = TestBed.createComponent(NeuSwitchComponent);
-    df.detectChanges();
-    // No registerOnTouched called — default () => {} is invoked
-    expect(() => df.componentInstance.onBlur()).not.toThrow();
-  });
-
-  it('fires touched through the native blur binding', () => {
-    const df = TestBed.createComponent(NeuSwitchComponent);
+  it('touches on blur, not focus, and reset emits no value change', () => {
+    const { component, input } = create({ checked: true });
     const touched = vi.fn();
-    df.componentInstance.registerOnTouched(touched);
-    df.detectChanges();
-    (df.nativeElement.querySelector('input') as HTMLInputElement).dispatchEvent(new Event('blur'));
-    expect(touched).toHaveBeenCalled();
+    const changed = vi.fn();
+    component.touch.subscribe(touched);
+    component.checked.subscribe(changed);
+    component.focus();
+    expect(touched).not.toHaveBeenCalled();
+    input.dispatchEvent(new FocusEvent('blur'));
+    expect(touched).toHaveBeenCalledTimes(1);
+    component.reset();
+    expect(component.checked()).toBe(true);
+    expect(changed).not.toHaveBeenCalled();
+  });
+
+  it('reflects validation and hidden states', () => {
+    const { fixture, component, input } = create({ invalid: true, hidden: true });
+    expect(component.hasError()).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(fixture.nativeElement.hidden).toBe(true);
   });
 });

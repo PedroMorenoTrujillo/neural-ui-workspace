@@ -1,6 +1,5 @@
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
@@ -126,7 +125,6 @@ export class NeuSpeedDialTriggerDirective {
     NeuTooltipDirective,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-speed-dial',
     '[class.neu-speed-dial--open]': 'isOpen()',

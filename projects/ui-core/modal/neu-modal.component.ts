@@ -1,6 +1,5 @@
 import { DOCUMENT } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -41,7 +40,6 @@ export type NeuDialogLayout = 'auto' | 'viewport';
   selector: 'neu-dialog',
   imports: [NeuFocusTrapDirective, NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.neu-dialog--open]': 'open()',
     '[class.neu-dialog--responsive]': 'responsive()',

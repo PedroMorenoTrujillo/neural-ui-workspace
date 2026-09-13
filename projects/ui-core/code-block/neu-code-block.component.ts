@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ViewEncapsulation,
@@ -27,7 +26,6 @@ import { DOCUMENT } from '@angular/common';
   selector: 'neu-code-block',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="neu-code-block"

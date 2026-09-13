@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -26,7 +25,6 @@ export type NeuButtonIconPosition = 'left' | 'right';
   selector: 'button[neu-button]',
   imports: [NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClasses()',
     '[attr.disabled]': 'isDisabled() ? "" : null',

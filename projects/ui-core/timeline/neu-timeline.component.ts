@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   TemplateRef,
@@ -76,7 +75,6 @@ export class NeuTimelineMarkerDirective {
   selector: 'neu-timeline',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ol
       class="neu-timeline"

@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
@@ -81,7 +80,6 @@ interface ProcessedMegaRoot extends ProcessedMegaItem {
   selector: 'neu-mega-menu',
   imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, NeuBadgeComponent, NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-mega-menu',
     '[class.neu-mega-menu--horizontal]': 'orientation() === "horizontal"',

@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
@@ -136,7 +135,6 @@ export class NeuTreeNodeDirective<T = unknown> {
     NeuDropZoneDirective,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="neu-tree"

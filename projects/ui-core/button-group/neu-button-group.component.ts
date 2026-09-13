@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, input } from '@angular/core';
+import { Component, ViewEncapsulation, computed, input } from '@angular/core';
 
 export type NeuButtonGroupOrientation = 'horizontal' | 'vertical';
 
@@ -10,7 +10,6 @@ export type NeuButtonGroupOrientation = 'horizontal' | 'vertical';
   selector: 'neu-button-group',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-button-group-host' },
   template: `
     <div class="neu-button-group" [class]="groupClasses()" role="group"

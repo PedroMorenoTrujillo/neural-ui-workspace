@@ -24,15 +24,64 @@ class HarnessHostComponent {}
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <button neu-button disabled aria-busy="true">Save</button>
-    <neu-input><label class="neu-input__static-label">Name</label><input class="neu-input__field" value="Ada" disabled><p class="neu-input__error">Required</p></neu-input>
-    <neu-checkbox><label><input class="neu-checkbox__input" type="checkbox" checked><span class="neu-checkbox__label">Accept</span></label></neu-checkbox>
-    <neu-switch><label><input class="neu-switch__input" type="checkbox"><span class="neu-switch__label">Enabled</span></label></neu-switch>
-    <neu-select><button class="neu-select__trigger" aria-expanded="true"></button><span class="neu-select__value">One</span></neu-select>
-    <div class="neu-select__panel"><button class="neu-select__option">One</button><button class="neu-select__option">Two</button></div>
-    <neu-date-input><button class="neu-date-input__trigger" aria-expanded="true">May 14</button></neu-date-input>
+    <neu-input
+      ><label class="neu-input__static-label">Name</label
+      ><input class="neu-input__field" value="Ada" disabled />
+      <p class="neu-input__error">Required</p></neu-input
+    >
+    <neu-checkbox
+      ><label
+        ><input class="neu-checkbox__input" type="checkbox" checked /><span
+          class="neu-checkbox__label"
+          >Accept</span
+        ></label
+      ></neu-checkbox
+    >
+    <neu-switch
+      ><label
+        ><input class="neu-switch__input" type="checkbox" /><span class="neu-switch__label"
+          >Enabled</span
+        ></label
+      ></neu-switch
+    >
+    <neu-select
+      ><button class="neu-select__trigger" aria-expanded="true"></button
+      ><span class="neu-select__value">One</span></neu-select
+    >
+    <div class="neu-select__panel">
+      <button class="neu-select__option">One</button><button class="neu-select__option">Two</button>
+    </div>
+    <neu-date-input
+      ><div class="neu-date-input__trigger">
+        <input class="neu-date-input__field" aria-expanded="true" value="May 14" /><button
+          class="neu-date-input__open"
+        >
+          Open
+        </button>
+      </div></neu-date-input
+    >
     <div class="neu-date-input__panel"><button class="neu-date-input__cal-day">14</button></div>
-    <neu-table><table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>Ada</td></tr></tbody></table></neu-table>
-    <neu-dialog><section class="neu-dialog__panel"><h2 class="neu-dialog__title">Confirm</h2><div class="neu-dialog__body">Continue?</div><button class="neu-dialog__close">Close</button></section></neu-dialog>
+    <neu-table
+      ><table>
+        <thead>
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ada</td>
+          </tr>
+        </tbody>
+      </table></neu-table
+    >
+    <neu-dialog
+      ><section class="neu-dialog__panel">
+        <h2 class="neu-dialog__title">Confirm</h2>
+        <div class="neu-dialog__body">Continue?</div>
+        <button class="neu-dialog__close">Close</button>
+      </section></neu-dialog
+    >
   `,
 })
 class StaticHarnessHostComponent {}

@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CdkDrag, CdkDragHandle, CdkDropList } from '@angular/cdk/drag-drop';
 import { By } from '@angular/platform-browser';
@@ -29,7 +29,7 @@ interface Task {
     NeuDropZoneDirective,
   ],
   template: `
-    <section neuDragDropGroup [neuDragDropGroupDisabled]="groupDisabled">
+    <section neuDragDropGroup [neuDragDropGroupDisabled]="groupDisabled()">
       <div
         [neuDropZone]="'source'"
         neuDropScope="task"
@@ -42,11 +42,11 @@ interface Task {
           neuDragScope="task"
           neuDragEffect="copy"
           neuDragAriaLabel="Move audit task"
-          [neuDraggableDisabled]="dragDisabled"
+          [neuDraggableDisabled]="dragDisabled()"
           (dragStart)="starts.push($event)"
           (dragEnd)="ends.push($event)"
         >
-          <span neuDragHandle [neuDragHandleDisabled]="handleDisabled">Handle</span>
+          <span neuDragHandle [neuDragHandleDisabled]="handleDisabled()">Handle</span>
           {{ task.title }}
         </button>
         <button
@@ -65,9 +65,9 @@ interface Task {
         [neuDropScope]="['task', 'note']"
         neuDropEffect="copy"
         neuDropAriaLabel="Accepted tasks"
-        [neuDropZoneDisabled]="dropDisabled"
-        [neuDropSortingDisabled]="sortingDisabled"
-        [neuDropOrientation]="orientation"
+        [neuDropZoneDisabled]="dropDisabled()"
+        [neuDropSortingDisabled]="sortingDisabled()"
+        [neuDropOrientation]="orientation()"
         [neuDropAccept]="acceptTask"
         (dragEnter)="enters.push($event)"
         (dragLeave)="leaves.push($event)"
@@ -84,12 +84,12 @@ interface Task {
 class DragDropHostComponent {
   readonly task: Task = { id: 'audit', title: 'Audit release' };
   readonly secondTask: Task = { id: 'notes', title: 'Release notes' };
-  dragDisabled = false;
-  handleDisabled = false;
-  dropDisabled = false;
-  groupDisabled = false;
-  sortingDisabled = false;
-  orientation: NeuDropOrientation = 'mixed';
+  readonly dragDisabled = signal(false);
+  readonly handleDisabled = signal(false);
+  readonly dropDisabled = signal(false);
+  readonly groupDisabled = signal(false);
+  readonly sortingDisabled = signal(false);
+  readonly orientation = signal<NeuDropOrientation>('mixed');
   starts: NeuDragEvent<Task>[] = [];
   ends: NeuDragEndEvent<Task>[] = [];
   enters: NeuDropEvent<Task, string>[] = [];
@@ -158,9 +158,8 @@ describe('DragDrop public directives', () => {
     expect(target.sortingDisabled).toBe(false);
     expect(target.orientation).toBe('mixed');
 
-    fixture.componentInstance.sortingDisabled = true;
-    fixture.componentInstance.orientation = 'horizontal';
-    fixture.changeDetectorRef.markForCheck();
+    fixture.componentInstance.sortingDisabled.set(true);
+    fixture.componentInstance.orientation.set('horizontal');
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -274,9 +273,8 @@ describe('DragDrop public directives', () => {
 
   it('applies dynamic disabled state to both the public and CDK contracts', async () => {
     const fixture = setup();
-    fixture.componentInstance.dragDisabled = true;
-    fixture.componentInstance.dropDisabled = true;
-    fixture.changeDetectorRef.markForCheck();
+    fixture.componentInstance.dragDisabled.set(true);
+    fixture.componentInstance.dropDisabled.set(true);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -299,8 +297,7 @@ describe('DragDrop public directives', () => {
     const handle = handleDebug.injector.get(CdkDragHandle);
     expect(handle.disabled).toBe(false);
 
-    fixture.componentInstance.handleDisabled = true;
-    fixture.changeDetectorRef.markForCheck();
+    fixture.componentInstance.handleDisabled.set(true);
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -315,8 +312,7 @@ describe('DragDrop public directives', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.starts).toHaveLength(1);
 
-    fixture.componentInstance.groupDisabled = true;
-    fixture.changeDetectorRef.markForCheck();
+    fixture.componentInstance.groupDisabled.set(true);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();

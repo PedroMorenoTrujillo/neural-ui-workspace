@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   computed,
   input,
@@ -41,7 +40,6 @@ export interface NeuTimelineGridSlotSelection {
   selector: 'neu-timeline-grid',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.neu-timeline-grid--compact]': 'compact()',
     '[class.neu-timeline-grid--sticky-labels]': 'stickyLabels()',

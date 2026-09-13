@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, inject } from '@angular/core';
+import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { NeuToastService } from './neu-toast.service';
 import { NeuToastType } from './neu-toast.types';
 import { NeuIconComponent } from '@neural-ui/core/icon';
@@ -28,7 +28,6 @@ const TOAST_ICONS: Record<NeuToastType, string> = {
 @Component({
   selector: 'neu-toast-container',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NeuIconComponent],
   host: {
     class: 'neu-toast-container',

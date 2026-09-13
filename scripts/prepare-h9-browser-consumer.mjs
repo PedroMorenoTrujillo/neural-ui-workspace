@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, symlinkSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -13,7 +13,11 @@ cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, {recursive:true})
 mkdirSync(join(fixture, 'node_modules'), {recursive:true});
 for (const name of readdirSync(dependencies)) {
  if (name === '@neural-ui' || name === '.package-lock.json') continue;
- symlinkSync(join(dependencies, name), join(fixture, 'node_modules', name));
+ cpSync(join(dependencies, name), join(fixture, 'node_modules', name), {
+  recursive: true,
+  dereference: true,
+  preserveTimestamps: true,
+ });
 }
 mkdirSync(join(fixture, 'node_modules/@neural-ui'), {recursive:true});
 // Copy a completed package so concurrent library builds cannot invalidate the consumer.
@@ -26,20 +30,18 @@ import {${name}} from './${file}';
 @Component({selector:'app-root',imports:[${name}],template:'<h9-event-contract />'}) export class AppComponent {}`);
 const mainName = hydrate ? name : 'AppComponent';
 const mainFile = hydrate ? file : 'app.component';
-const version = Number(JSON.parse(readFileSync(join(dependencies,'@angular/core/package.json'),'utf8')).version.split('.')[0]);
-const zoneless = version === 19 ? 'provideExperimentalZonelessChangeDetection' : 'provideZonelessChangeDetection';
-writeFileSync(join(fixture,'src/main.ts'), `import {${zoneless}} from '@angular/core';
+writeFileSync(join(fixture,'src/main.ts'), `import {provideZonelessChangeDetection} from '@angular/core';
 import {bootstrapApplication,provideClientHydration} from '@angular/platform-browser';
 import {provideNeuralUI} from '@neural-ui/core';
 import {${mainName}} from './${mainFile}';
-bootstrapApplication(${mainName},{providers:[${zoneless}(),${hydrate?'provideClientHydration(),':''}provideNeuralUI()]});`);
+bootstrapApplication(${mainName},{providers:[provideZonelessChangeDetection(),${hydrate?'provideClientHydration(),':''}provideNeuralUI()]});`);
 if (hydrate) {
- writeFileSync(join(fixture,'src/main.server.ts'), `import {${zoneless}} from '@angular/core';
+ writeFileSync(join(fixture,'src/main.server.ts'), `import {provideZonelessChangeDetection} from '@angular/core';
 import {bootstrapApplication,provideClientHydration,BootstrapContext} from '@angular/platform-browser';
 import {provideServerRendering} from '@angular/platform-server';
 import {provideNeuralUI} from '@neural-ui/core';
 import {${name}} from './${file}';
-export default (context:BootstrapContext) => bootstrapApplication(${name},{providers:[${zoneless}(),provideClientHydration(),provideServerRendering(),provideNeuralUI()]},context);`);
+export default (context:BootstrapContext) => bootstrapApplication(${name},{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideServerRendering(),provideNeuralUI()]},context);`);
  writeFileSync(join(fixture,'src/server.ts'), `import {renderApplication} from '@angular/platform-server';
 import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import bootstrap from './main.server';

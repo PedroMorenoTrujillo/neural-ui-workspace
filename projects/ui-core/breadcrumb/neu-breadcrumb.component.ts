@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@angular/core';
+import { Component, ViewEncapsulation, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 export interface NeuBreadcrumbItem {
@@ -31,7 +31,6 @@ export interface NeuBreadcrumbItem {
   selector: 'neu-breadcrumb',
   imports: [RouterLink],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav class="neu-breadcrumb" aria-label="Breadcrumb">
       <ol class="neu-breadcrumb__list">

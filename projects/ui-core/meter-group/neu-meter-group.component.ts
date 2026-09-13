@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -28,7 +27,6 @@ export interface NeuMeterItem {
   selector: 'neu-meter-group',
   imports: [DecimalPipe],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
   template: `
     <div

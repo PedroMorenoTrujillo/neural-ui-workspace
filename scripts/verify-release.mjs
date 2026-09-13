@@ -23,7 +23,9 @@ const commands = [
   ['npm', ['run', 'test:angular-compatibility']],
   ['npm', ['run', 'test:table-body-section-template-types']],
   ['npm', ['run', 'test:schematics']],
-  ...(process.env['NEURAL_UI_FULL_MATRIX'] === '1' ? [['npm', ['run', 'test:compat:matrix']]] : []),
+  ...(process.env['NEURAL_UI_ANGULAR_22_CONSUMER'] === '1'
+    ? [['npm', ['run', 'test:angular-22-consumer']]]
+    : []),
   ['npm', ['run', 'test:imports']],
   ['npm', ['run', 'test:ssr-smoke']],
   ['npm', ['run', 'verify:package']],

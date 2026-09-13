@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
   ViewEncapsulation,
@@ -25,7 +24,6 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
   selector: 'neu-rating',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="neu-rating"

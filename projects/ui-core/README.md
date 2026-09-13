@@ -3,13 +3,13 @@
 <p>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
-  <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
+  <img src="https://img.shields.io/badge/Angular-22-dd0031?logo=angular" alt="Angular 22" />
   <img src="https://img.shields.io/badge/quality-release%20gated-22c55e" alt="Release gated quality" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
 </p>
 
 Modern Angular UI component library — **signals-first**, fully **standalone**, with dedicated subpath entry points and no Zone.js requirement.  
-Built for Angular 19–22 with OnPush change detection and no Zone.js requirement.
+Built exclusively for Angular 22 with OnPush change detection and no Zone.js requirement.
 
 > Live documentation and examples → [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app)
 
@@ -31,9 +31,9 @@ Built for Angular 19–22 with OnPush change detection and no Zone.js requiremen
 
 <!-- neural-ui-metrics:start -->
 - **Version:** 1.15.0
-- **Entry points:** 104
-- **Automated tests:** 3324
-- **Coverage:** 98.13% statements · 96.44% branches · 98.61% functions · 98.91% lines
+- **Entry points:** 103
+- **Automated tests:** 3270
+- **Coverage:** 98.12% statements · 95.96% branches · 98.6% functions · 98.88% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
@@ -49,7 +49,7 @@ For the current quality checklist and accessibility audit snapshot, see [QUALITY
 ## Installation
 
 ```bash
-npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
+npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide
 ```
 
 ---
@@ -166,7 +166,7 @@ Representative entry points:
 - **Navigation and layout**: `@neural-ui/core/tabs`, `@neural-ui/core/nav`, `@neural-ui/core/sidebar`, `@neural-ui/core/menu`, `@neural-ui/core/dock`, `@neural-ui/core/speed-dial`, `@neural-ui/core/mega-menu`, `@neural-ui/core/accordion`, `@neural-ui/core/toolbar`, `@neural-ui/core/dashboard-grid`
 - **Data and overlays**: `@neural-ui/core/table`, `@neural-ui/core/modal`, `@neural-ui/core/popover`, `@neural-ui/core/context-menu`, `@neural-ui/core/command-palette`, `@neural-ui/core/virtual-list`, `@neural-ui/core/confirm-dialog`
 - **Feedback and utilities**: `@neural-ui/core/alert`, `@neural-ui/core/toast`, `@neural-ui/core/tooltip`, `@neural-ui/core/block-ui`, `@neural-ui/core/url-state`
-- **Visualization and display**: `@neural-ui/core/chart`, `@neural-ui/core/compare`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/scheduler-gantt`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
+- **Visualization and display**: `@neural-ui/core/compare`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/scheduler-gantt`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
 
 For the complete catalog, examples, and API tables, use the live docs at [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app).
 
@@ -211,17 +211,23 @@ For the full token list, see `styles/_tokens.scss` in the published package sour
 
 | Package            | Required version   |
 | ------------------ | ------------------ |
-| `@angular/core`    | `>=19.0.0 <23.0.0` |
-| `@angular/cdk`     | `>=19.0.0 <23.0.0` |
-| `@angular/common`  | `>=19.0.0 <23.0.0` |
-| `@angular/forms`   | `>=19.0.0 <23.0.0` |
-| `@angular/router`  | `>=19.0.0 <23.0.0` |
+| `@angular/core`    | `>=22.0.0 <23.0.0` |
+| `@angular/cdk`     | `>=22.0.0 <23.0.0` |
+| `@angular/common`  | `>=22.0.0 <23.0.0` |
+| `@angular/forms`   | `>=22.0.0 <23.0.0` |
+| `@angular/router`  | `>=22.0.0 <23.0.0` |
 | `@ng-icons/core`   | `>=31.4.0 <34.0.0` |
 | `@ng-icons/lucide` | `>=31.4.0 <34.0.0` |
-| `apexcharts`       | `>=4.0.0 <6.0.0`   |
-| `ng-apexcharts`    | `>=1.15.0 <3.0.0`  |
 
-For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or newer. Angular 20+ projects can use the newer `ng-apexcharts@2.x` line.
+Neural UI 2.x supports Angular 22 only. Angular 19–22 applications that cannot yet
+adopt the Angular 22-only line should remain on Neural UI 1.x.
+
+### Charts in Neural UI 2
+
+Neural UI 1.x included the `@neural-ui/core/chart` entry point backed by ApexCharts.
+That entry point is **removed in Neural UI 2.0**. Charts are not replaced by another
+library inside Neural UI; Neural Charts is planned as a separate future product, with
+no package name or release date announced.
 
 ---
 

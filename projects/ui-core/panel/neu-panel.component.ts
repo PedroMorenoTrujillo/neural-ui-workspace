@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
   OnDestroy,
@@ -32,7 +31,6 @@ export type NeuScrollAreaVariant = 'auto' | 'hover' | 'scroll' | 'always' | 'hid
   selector: 'neu-panel',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-panel' },
   template: `
     <section class="neu-panel__surface">
@@ -72,7 +70,6 @@ export class NeuPanelComponent {
   selector: 'neu-fieldset',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-fieldset-host' },
   template: `
     <fieldset class="neu-fieldset">
@@ -133,7 +130,6 @@ export class NeuFieldsetComponent {
   selector: 'neu-scroll-area',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-scroll-area', '[attr.data-neu-scroll-variant]': 'variant()' },
   template: `
     <div

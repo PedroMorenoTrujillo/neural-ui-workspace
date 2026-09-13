@@ -1,7 +1,6 @@
 import { DOCUMENT, NgClass, NgStyle, NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -74,7 +73,6 @@ import {
   selector: 'neu-listbox',
   imports: [NgClass, NgStyle, NgTemplateOutlet, CdkDrag, CdkDropList],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NeuListboxComponent), multi: true },
   ],

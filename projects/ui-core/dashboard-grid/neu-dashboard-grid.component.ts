@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
   Injector,
@@ -49,7 +48,6 @@ export interface NeuDashboardTileConfig {
   selector: 'neu-dashboard-grid',
   imports: [CdkDrag, CdkDragPlaceholder, CdkDragPreview, CdkDropList],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-dg',
     '[style.--neu-dg-cols]': 'columns()',

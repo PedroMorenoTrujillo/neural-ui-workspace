@@ -1,11 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import {
-  COMPOSITION_BUFFER_MODE,
-  FormControl,
-  ReactiveFormsModule,
-  FormsModule,
-} from '@angular/forms';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NeuInputComponent } from './neu-input.component';
 import { provideIcons } from '@ng-icons/core';
 import { lucideAlertCircle, lucideSearch, lucideUser } from '@ng-icons/lucide';
@@ -137,58 +132,43 @@ describe('NeuInputComponent', () => {
     expect(f.nativeElement.querySelector('.neu-input__error')).toBeTruthy();
   });
 
-  // ── CVA ───────────────────────────────────────────────────────────────────
+  // ── Signal control contract ───────────────────────────────────────────────
 
-  it('writeValue should update _value', () => {
-    const { comp } = mk({ label: 'Test' });
-    comp.writeValue('hello');
-    expect(comp['_value']()).toBe('hello');
-  });
-
-  it('writeValue with null should set empty string', () => {
-    const { comp } = mk({ label: 'Test' });
-    comp.writeValue(null);
-    expect(comp['_value']()).toBe('');
-  });
-
-  it('should call onChange when typing', () => {
+  it('an external value input updates the public model without output echo', () => {
     const { f, comp } = mk({ label: 'Test' });
-    const onChange = vi.fn();
-    comp.registerOnChange(onChange);
+    const changed = vi.fn();
+    comp.value.subscribe(changed);
+    f.componentRef.setInput('value', 'hello');
+    f.detectChanges();
+    expect(comp.value()).toBe('hello');
+    expect(changed).not.toHaveBeenCalled();
+  });
+
+  it('should update value and emit exactly once when typing', () => {
+    const { f, comp } = mk({ label: 'Test' });
+    const changed = vi.fn();
+    comp.value.subscribe(changed);
     const input: HTMLInputElement = f.nativeElement.querySelector('input');
     input.value = 'Pedro';
     input.dispatchEvent(new Event('input'));
     f.detectChanges();
-    expect(onChange).toHaveBeenCalledWith('Pedro');
+    expect(comp.value()).toBe('Pedro');
+    expect(changed).toHaveBeenCalledExactlyOnceWith('Pedro');
   });
 
-  it('should emit valueChange only after user input', () => {
-    const { f, comp } = mk({ label: 'Test' });
-    const emitted = vi.fn();
-    comp.valueChange.subscribe(emitted);
-
-    comp.writeValue('Programmatic');
-    expect(emitted).not.toHaveBeenCalled();
-
-    const el: HTMLInputElement = f.nativeElement.querySelector('input');
-    el.value = 'User value';
-    el.dispatchEvent(new Event('input'));
-    expect(emitted).toHaveBeenCalledWith('User value');
-  });
-
-  it('buffers IME CVA propagation while preserving native DOM input events', () => {
+  it('buffers IME model propagation while preserving native DOM input events', () => {
     const { f, comp } = mk({ label: 'Name' });
-    const cvaValues: string[] = [];
+    const modelValues: string[] = [];
     const domValues: string[] = [];
-    comp.registerOnChange((value: string) => cvaValues.push(value));
+    comp.value.subscribe((value: string) => modelValues.push(value));
     const input = f.nativeElement.querySelector('input') as HTMLInputElement;
     input.addEventListener('input', () => domValues.push(input.value));
 
     composeText(input, 'に', '日本');
 
     expect(domValues).toEqual(['に', '日本']);
-    expect(cvaValues).toEqual(['日本']);
-    expect(comp['_value']()).toBe('日本');
+    expect(modelValues).toEqual(['日本']);
+    expect(comp.value()).toBe('日本');
   });
 
   it('buffers FormControl valueChanges until IME composition commits', async () => {
@@ -210,23 +190,12 @@ describe('NeuInputComponent', () => {
     expect(fixture.componentInstance.ctrl.value).toBe('日本');
   });
 
-  it('respects COMPOSITION_BUFFER_MODE=false', () => {
-    TestBed.overrideProvider(COMPOSITION_BUFFER_MODE, { useValue: false });
-    const { f, comp } = mk();
-    const values: string[] = [];
-    comp.registerOnChange((value: string) => values.push(value));
-
-    composeText(f.nativeElement.querySelector('input'), 'に', '日本');
-
-    expect(values).toEqual(['に', '日本']);
-  });
-
-  it('cancels pending IME propagation on blur, disable, writeValue, and destroy', () => {
+  it('cancels or supersedes pending IME propagation on blur, disable, external write, and destroy', () => {
     const blurFixture = mk();
     const blurChanges = vi.fn();
     const touched = vi.fn();
-    blurFixture.comp.registerOnChange(blurChanges);
-    blurFixture.comp.registerOnTouched(touched);
+    blurFixture.comp.value.subscribe(blurChanges);
+    blurFixture.comp.touch.subscribe(touched);
     const blurInput = blurFixture.f.nativeElement.querySelector('input') as HTMLInputElement;
     blurInput.dispatchEvent(new CompositionEvent('compositionstart'));
     blurInput.value = 'draft';
@@ -238,29 +207,31 @@ describe('NeuInputComponent', () => {
 
     const disabledFixture = mk();
     const disabledChanges = vi.fn();
-    disabledFixture.comp.registerOnChange(disabledChanges);
+    disabledFixture.comp.value.subscribe(disabledChanges);
     const disabledInput = disabledFixture.f.nativeElement.querySelector(
       'input',
     ) as HTMLInputElement;
     disabledInput.dispatchEvent(new CompositionEvent('compositionstart'));
     disabledInput.value = 'draft';
-    disabledFixture.comp.setDisabledState(true);
+    disabledFixture.f.componentRef.setInput('disabled', true);
+    disabledFixture.f.detectChanges();
     disabledInput.dispatchEvent(new CompositionEvent('compositionend'));
     expect(disabledChanges).not.toHaveBeenCalled();
 
     const writeFixture = mk();
     const writeChanges = vi.fn();
-    writeFixture.comp.registerOnChange(writeChanges);
+    writeFixture.comp.value.subscribe(writeChanges);
     const writeInput = writeFixture.f.nativeElement.querySelector('input') as HTMLInputElement;
     writeInput.dispatchEvent(new CompositionEvent('compositionstart'));
-    writeFixture.comp.writeValue('server');
+    writeFixture.f.componentRef.setInput('value', 'server');
+    writeFixture.f.detectChanges();
     writeInput.dispatchEvent(new CompositionEvent('compositionend'));
     expect(writeChanges).not.toHaveBeenCalled();
-    expect(writeFixture.comp['_value']()).toBe('server');
+    expect(writeFixture.comp.value()).toBe('server');
 
     const destroyFixture = mk();
     const destroyChanges = vi.fn();
-    destroyFixture.comp.registerOnChange(destroyChanges);
+    destroyFixture.comp.value.subscribe(destroyChanges);
     const destroyInput = destroyFixture.f.nativeElement.querySelector('input') as HTMLInputElement;
     destroyInput.dispatchEvent(new CompositionEvent('compositionstart'));
     destroyFixture.f.destroy();
@@ -268,10 +239,10 @@ describe('NeuInputComponent', () => {
     expect(destroyChanges).not.toHaveBeenCalled();
   });
 
-  it('onBlur should call onTouched and remove focused state', () => {
+  it('onBlur should emit touch and remove focused state', () => {
     const { f, comp } = mk({ label: 'Test' });
     const onTouched = vi.fn();
-    comp.registerOnTouched(onTouched);
+    comp.touch.subscribe(onTouched);
     const input: HTMLInputElement = f.nativeElement.querySelector('input');
     input.dispatchEvent(new Event('focus'));
     f.detectChanges();
@@ -280,14 +251,6 @@ describe('NeuInputComponent', () => {
     f.detectChanges();
     expect(comp['_focused']()).toBe(false);
     expect(onTouched).toHaveBeenCalled();
-  });
-
-  it('setDisabledState should disable the input', () => {
-    const { f, comp } = mk({ label: 'Test' });
-    comp.setDisabledState(true);
-    f.detectChanges();
-    const input: HTMLInputElement = f.nativeElement.querySelector('input');
-    expect(input.disabled).toBe(true);
   });
 
   it('disabled input should disable native element', () => {
@@ -299,21 +262,21 @@ describe('NeuInputComponent', () => {
   // ── Computed state ────────────────────────────────────────────────────────
 
   it('hasValue computed should be true when value is non-empty', () => {
-    const { comp } = mk({ label: 'Test' });
-    comp.writeValue('x');
+    const { f, comp } = mk({ label: 'Test' });
+    f.componentRef.setInput('value', 'x');
+    f.detectChanges();
     expect(comp.hasValue()).toBe(true);
   });
 
   it('hasValue computed should be false for empty string', () => {
     const { comp } = mk({ label: 'Test' });
-    comp.writeValue('');
     expect(comp.hasValue()).toBe(false);
   });
 
   it('synchronises a browser-autofilled value with the form control state', () => {
     const { f, comp } = mk({ label: 'Email', floatingLabel: true });
-    const onChange = vi.fn();
-    comp.registerOnChange(onChange);
+    const changed = vi.fn();
+    comp.value.subscribe(changed);
     const input = f.nativeElement.querySelector('input') as HTMLInputElement;
     input.value = 'learner@example.com';
 
@@ -321,7 +284,7 @@ describe('NeuInputComponent', () => {
     f.detectChanges();
 
     expect(comp.hasValue()).toBe(true);
-    expect(onChange).toHaveBeenCalledWith('learner@example.com');
+    expect(changed).toHaveBeenCalledExactlyOnceWith('learner@example.com');
     expect(f.nativeElement.querySelector('.neu-input__wrapper')?.classList).toContain(
       'neu-input__wrapper--has-value',
     );
@@ -329,12 +292,12 @@ describe('NeuInputComponent', () => {
 
   it('does not emit duplicate changes when the native value already matches the form', () => {
     const { f, comp } = mk({ label: 'Email' });
-    const onChange = vi.fn();
-    comp.registerOnChange(onChange);
-    comp.writeValue('learner@example.com');
+    const changed = vi.fn();
+    comp.value.subscribe(changed);
+    f.componentRef.setInput('value', 'learner@example.com');
     f.detectChanges();
     comp.syncNativeValue();
-    expect(onChange).not.toHaveBeenCalled();
+    expect(changed).not.toHaveBeenCalled();
   });
 
   it('hasError computed should be true when errorMessage is set', () => {
@@ -362,8 +325,25 @@ describe('NeuInputComponent', () => {
     expect(input.readOnly).toBe(true);
   });
 
+  it('readonly remains focusable and selectable while blocking edits', () => {
+    const { f, comp } = mk({ readonly: true, value: 'select me', label: 'Test' });
+    const changed = vi.fn();
+    comp.value.subscribe(changed);
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.focus();
+    input.setSelectionRange(0, 6);
+    expect(document.activeElement).toBe(input);
+    expect(input.selectionStart).toBe(0);
+    input.value = 'mutated';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    f.detectChanges();
+
+    expect(comp.value()).toBe('select me');
+    expect(changed).not.toHaveBeenCalled();
+  });
+
   it('should set maxlength attribute', () => {
-    const { f } = mk({ label: 'Test', maxlength: 20 });
+    const { f } = mk({ label: 'Test', maxLength: 20 });
     const input: HTMLInputElement = f.nativeElement.querySelector('input');
     expect(input.maxLength).toBe(20);
   });
@@ -459,20 +439,13 @@ describe('NeuInputComponent', () => {
     expect(f.nativeElement.querySelector('.neu-input__icon--end')).toBeTruthy();
   });
 
-  it('onBlur should call _onTouched', () => {
+  it('onBlur should emit touch', () => {
     const f = TestBed.createComponent(NeuInputComponent);
     f.detectChanges();
-    let touched = false;
-    f.componentInstance.registerOnTouched(() => (touched = true));
+    const touched = vi.fn();
+    f.componentInstance.touch.subscribe(touched);
     f.componentInstance.onBlur();
-    expect(touched).toBe(true);
-  });
-
-  it('writeValue null should set empty string', () => {
-    const f = TestBed.createComponent(NeuInputComponent);
-    f.detectChanges();
-    f.componentInstance.writeValue(null);
-    expect(f.componentInstance['_value']()).toBe('');
+    expect(touched).toHaveBeenCalledOnce();
   });
 
   it('startIcon renders start icon block in template', async () => {
@@ -489,13 +462,12 @@ describe('NeuInputComponent', () => {
     expect(startSpan).toBeTruthy();
   });
 
-  it('writeValue with a string value should update _value signal', () => {
-    // writeValue con un string debe actualizar la señal _value
-    // writeValue with a string must update the _value signal
+  it('a string value input should update the model signal', () => {
     const f = TestBed.createComponent(NeuInputComponent);
     f.detectChanges();
-    f.componentInstance.writeValue('hello');
-    expect(f.componentInstance['_value']()).toBe('hello');
+    f.componentRef.setInput('value', 'hello');
+    f.detectChanges();
+    expect(f.componentInstance.value()).toBe('hello');
   });
 
   it('renders projected start and end icon slots and full native attributes', async () => {
@@ -510,11 +482,11 @@ describe('NeuInputComponent', () => {
           [floatingLabel]="false"
           [startIcon]="true"
           [endIcon]="true"
-          [minlength]="2"
-          [maxlength]="8"
+          [minLength]="2"
+          [maxLength]="8"
           min="1"
           max="9"
-          pattern="[a-z]+"
+          [pattern]="patterns"
         >
           <span neu-input-start class="start-slot">S</span>
           <span neu-input-end class="end-slot">E</span>
@@ -522,7 +494,9 @@ describe('NeuInputComponent', () => {
       `,
       imports: [NeuInputComponent],
     })
-    class InputSlotHostComponent {}
+    class InputSlotHostComponent {
+      readonly patterns = [/[a-z]+/];
+    }
 
     await TestBed.configureTestingModule({ imports: [InputSlotHostComponent] }).compileComponents();
     const f = TestBed.createComponent(InputSlotHostComponent);
@@ -542,7 +516,7 @@ describe('NeuInputComponent', () => {
     expect(input.getAttribute('pattern')).toBe('[a-z]+');
   });
 
-  it('input and blur before CVA registration use the default callbacks safely', async () => {
+  it('input and blur without output subscribers are safe', async () => {
     const f = TestBed.createComponent(NeuInputComponent);
     f.detectChanges();
     await f.whenStable();
@@ -552,21 +526,55 @@ describe('NeuInputComponent', () => {
 
     expect(() => input.dispatchEvent(new Event('input', { bubbles: true }))).not.toThrow();
     expect(() => input.dispatchEvent(new Event('blur'))).not.toThrow();
-    expect((f.componentInstance as any)['_value']()).toBe('unregistered');
+    expect(f.componentInstance.value()).toBe('unregistered');
   });
 
   it('synchronises autofill through the native animationstart binding', () => {
     const { f, comp } = mk();
     const input = f.nativeElement.querySelector('input') as HTMLInputElement;
     const changed = vi.fn();
-    comp.registerOnChange(changed);
+    comp.value.subscribe(changed);
     input.value = 'credential-manager-value';
     const event = new Event('animationstart', { bubbles: true }) as AnimationEvent;
     Object.defineProperty(event, 'animationName', { value: 'neu-autofill-start' });
 
     input.dispatchEvent(event);
 
-    expect(changed).toHaveBeenCalledWith('credential-manager-value');
-    expect(comp._value()).toBe('credential-manager-value');
+    expect(changed).toHaveBeenCalledExactlyOnceWith('credential-manager-value');
+    expect(comp.value()).toBe('credential-manager-value');
+  });
+
+  it('focus targets the native input and reset clears only ephemeral UI state', () => {
+    const { f, comp } = mk({ value: 'kept' });
+    const changed = vi.fn();
+    comp.value.subscribe(changed);
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new Event('focus'));
+    input.dispatchEvent(new CompositionEvent('compositionstart'));
+
+    comp.focus({ preventScroll: true });
+    expect(document.activeElement).toBe(input);
+    comp.reset();
+
+    expect(comp.value()).toBe('kept');
+    expect(comp['_focused']()).toBe(false);
+    expect(comp['_compositionDraft']()).toBeNull();
+    expect(changed).not.toHaveBeenCalled();
+  });
+
+  it('ignores unrelated animation events and blocked autofill synchronisation', () => {
+    const { f, comp } = mk({ value: 'kept', readonly: true });
+    const changed = vi.fn();
+    comp.value.subscribe(changed);
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'ignored';
+
+    const event = new Event('animationstart') as AnimationEvent;
+    Object.defineProperty(event, 'animationName', { value: 'other-animation' });
+    comp.onAnimationStart(event);
+    comp.syncNativeValue();
+
+    expect(comp.value()).toBe('kept');
+    expect(changed).not.toHaveBeenCalled();
   });
 });

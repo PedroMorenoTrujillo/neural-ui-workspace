@@ -130,6 +130,8 @@ export type NeuTokenName =
   | '--neu-number-input-stacked-min-width'
   | '--neu-number-input-width'
   | '--neu-on-primary'
+  | '--neu-organization-chart-connector'
+  | '--neu-organization-chart-connector-width'
   | '--neu-organization-chart-gap-x'
   | '--neu-organization-chart-gap-y'
   | '--neu-otp-cell-bg'

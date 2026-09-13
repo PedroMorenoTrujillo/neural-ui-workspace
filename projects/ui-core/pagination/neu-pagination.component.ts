@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ViewEncapsulation,
@@ -28,7 +27,6 @@ import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select
   selector: 'neu-pagination',
   imports: [ReactiveFormsModule, NeuSelectComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav class="neu-pagination" [attr.aria-label]="labels().pagination">
       @if (normalizedPageSizeOptions().length) {

@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -550,7 +549,6 @@ export type NeuTableColumnInput<T extends object> =
     NeuTableRowReorderHandleDirective,
   ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.neu-table__host]': 'true',
     '[class.neu-table__host--compact]': 'density() === "compact"',

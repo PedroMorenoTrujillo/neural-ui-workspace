@@ -6,7 +6,6 @@ import {
   OverlayModule,
 } from '@angular/cdk/overlay';
 import {
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostListener,
@@ -109,7 +108,6 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
   selector: 'neu-autocomplete',
   imports: [NgTemplateOutlet, OverlayModule],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

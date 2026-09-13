@@ -1,5 +1,9 @@
 # H9-A2 certified Library event API candidate
 
+> Historical Neural UI 1.x handoff. Its Chart sections document the former
+> `@neural-ui/core/chart` contract and are retained as migration evidence. Neural UI
+> 2.0 removes that entrypoint; current consumers and gates no longer execute it.
+
 PUBLICATION_LOCKED_PENDING_USER_LOCAL_REVIEW. No push, tag, publish or release.
 
 ## Baseline
@@ -187,8 +191,8 @@ hashes are in metrics.json.
 ## Reproduction
 
 1. Build Library with `npm run build`; audit with `npm run audit:contracts`.
-2. Run `npm run test:coverage:components` and `npm run test:compat:matrix`.
-   `NEURAL_UI_KEEP_COMPAT_FIXTURE=1 npm run test:compat -- --angular 22` retains a
+2. Run `npm run test:coverage:components` and `npm run test:angular-22-consumer`.
+   `NEURAL_UI_KEEP_COMPAT_FIXTURE=1 npm run test:angular-22-consumer` retains a
    temporary Angular 22 consumer when SSR/hydration investigation is required.
 3. Run `node scripts/prepare-h9-browser-consumer.mjs`. It prints a private fixture
    directory. Build there with `node_modules/.bin/ng build`, serve its dist/browser

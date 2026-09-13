@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -68,7 +67,6 @@ const DEFAULT_COLOR: NeuSrgbColor = hsvToSrgb(210, 80, 90);
   selector: 'neu-color-picker',
   imports: [OverlayModule],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

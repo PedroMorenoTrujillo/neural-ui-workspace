@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   input,
@@ -27,7 +26,6 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
   selector: 'neu-empty-state',
   imports: [NeuIconComponent, NeuButtonComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
   template: `
     <div class="neu-empty-state__inner">

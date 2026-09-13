@@ -3,7 +3,7 @@
 <p>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
-  <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
+  <img src="https://img.shields.io/badge/Angular-22-dd0031?logo=angular" alt="Angular 22" />
   <img src="https://img.shields.io/badge/quality-release%20gated-22c55e" alt="Release gated quality" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
 </p>
@@ -36,9 +36,9 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 <!-- neural-ui-metrics:start -->
 - **Version:** 1.15.0
-- **Entry points:** 104
-- **Automated tests:** 3324
-- **Coverage:** 98.13% statements · 96.44% branches · 98.61% functions · 98.91% lines
+- **Entry points:** 103
+- **Automated tests:** 3270
+- **Coverage:** 98.12% statements · 95.96% branches · 98.6% functions · 98.88% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
@@ -55,7 +55,7 @@ For the current quality checklist and accessibility audit snapshot, see [project
 ## Installation
 
 ```bash
-npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
+npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide
 ```
 
 ---
@@ -218,7 +218,7 @@ Representative entry points:
 - **Data and overlays**: `@neural-ui/core/table`, `@neural-ui/core/tree`, `@neural-ui/core/tree-table`, `@neural-ui/core/modal`, `@neural-ui/core/popover`, `@neural-ui/core/context-menu`, `@neural-ui/core/command-palette`, `@neural-ui/core/virtual-list`, `@neural-ui/core/confirm-dialog`
 - **Rich data display**: `@neural-ui/core/kanban`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/image-gallery`, `@neural-ui/core/uploader`
 - **Feedback and utilities**: `@neural-ui/core/alert`, `@neural-ui/core/toast`, `@neural-ui/core/tooltip`, `@neural-ui/core/block-ui`, `@neural-ui/core/url-state`
-- **Visualization and display**: `@neural-ui/core/chart`, `@neural-ui/core/compare`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/scheduler-gantt`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
+- **Visualization and display**: `@neural-ui/core/compare`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/scheduler-gantt`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
 
 For the complete catalog, examples, and API tables, use the live docs at [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app).
 
@@ -239,17 +239,23 @@ Neural Admin Pro is a full-stack Angular and NestJS product with PostgreSQL, aut
 
 | Package            | Required version   |
 | ------------------ | ------------------ |
-| `@angular/core`    | `>=19.0.0 <23.0.0` |
-| `@angular/cdk`     | `>=19.0.0 <23.0.0` |
-| `@angular/common`  | `>=19.0.0 <23.0.0` |
-| `@angular/forms`   | `>=19.0.0 <23.0.0` |
-| `@angular/router`  | `>=19.0.0 <23.0.0` |
+| `@angular/core`    | `>=22.0.0 <23.0.0` |
+| `@angular/cdk`     | `>=22.0.0 <23.0.0` |
+| `@angular/common`  | `>=22.0.0 <23.0.0` |
+| `@angular/forms`   | `>=22.0.0 <23.0.0` |
+| `@angular/router`  | `>=22.0.0 <23.0.0` |
 | `@ng-icons/core`   | `>=31.4.0 <34.0.0` |
 | `@ng-icons/lucide` | `>=31.4.0 <34.0.0` |
-| `apexcharts`       | `>=4.0.0 <6.0.0`   |
-| `ng-apexcharts`    | `>=1.15.0 <3.0.0`  |
 
-For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or newer. Angular 20+ projects can use the newer `ng-apexcharts@2.x` line.
+Neural UI 2.x supports Angular 22 only. Angular 19–22 applications that cannot yet
+adopt the Angular 22-only line should remain on Neural UI 1.x.
+
+### Charts in Neural UI 2
+
+Neural UI 1.x included the `@neural-ui/core/chart` entry point backed by ApexCharts.
+That entry point is **removed in Neural UI 2.0**. Charts are not replaced by another
+library inside Neural UI; Neural Charts is planned as a separate future product, with
+no package name or release date announced.
 
 ---
 
@@ -260,69 +266,6 @@ For Angular 19 projects, use `ng-apexcharts@1.15.x` with `apexcharts@4.x` or new
 3. Run tests: `npm test`
 4. Run the release gate: `npm run verify:release`
 5. Open a pull request
-
----
-
-## Known issues & workarounds
-
-### Angular 20.x — npm peer resolution on install
-
-**Affected versions:** Angular 20.x projects with mixed Angular/CDK minors  
-**Symptom:** `npm install` may fail with `ERESOLVE` or peer dependency conflicts while installing `@neural-ui/core` and its required peers.
-
-**Root cause:** Angular 20.x is supported, but installation can fail when `@angular/*` packages and `@angular/cdk` are not aligned to the same minor version in the host app.
-
-**Solution — align Angular packages before installing:**
-
-Make sure all Angular packages, especially `@angular/cdk`, use the same 20.x minor in your app, then reinstall dependencies.
-
-```bash
-npm install @angular/core@20.x @angular/common@20.x @angular/forms@20.x @angular/router@20.x @angular/cdk@20.x
-npm install @neural-ui/core @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
-```
-
-### Angular 21.2.x — NG3004 with `FormsModule`
-
-**Affected versions:** Angular 21.2.0 – 21.2.7  
-**Symptom:** Using `FormsModule` (even standalone imports) in any component causes the build error:
-
-```
-NG3004: NeuXxx is not a known element... ɵNgNoValidate is not exported from the types definition file
-```
-
-**Root cause:** `ɵNgNoValidate` is accidentally not `export`ed from `@angular/forms/types/forms.d.ts` in those patch releases.
-
-**Solution — use `ReactiveFormsModule` + `FormControl`:**
-
-Replace every template-driven value binding with a `FormControl` + `[formControl]` directive:
-
-```typescript
-// Before (triggers NG3004)
-import { FormsModule } from '@angular/forms';
-// ...
-imports: ([FormsModule],
-  // ...
-  (isChecked = false));
-```
-
-```typescript
-// After (works correctly)
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-// ...
-imports: [ReactiveFormsModule],
-// ...
-readonly isChecked = new FormControl(false, { nonNullable: true });
-```
-
-```html
-<!-- Before -->
-<neu-checkbox [value]="isChecked" (valueChange)="isChecked = $event" label="Accept" />
-
-<!-- After -->
-<neu-checkbox [formControl]="isChecked" label="Accept" />
-```
-
-All NeuralUI form components implement `ControlValueAccessor` (`NG_VALUE_ACCESSOR`) and work with both binding strategies. Prefer `ReactiveFormsModule` for Angular 21+.
 
 ---
 

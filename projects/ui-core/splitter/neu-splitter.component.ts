@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -26,7 +25,6 @@ export interface NeuSplitterPane {
   selector: 'neu-splitter',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-splitter',
     '[class.neu-splitter--horizontal]': 'direction() === "horizontal"',

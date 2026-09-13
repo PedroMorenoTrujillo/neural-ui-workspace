@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 await import('@angular/compiler');
 const core = await import('@angular/core');
+const { provideZonelessChangeDetection } = core;
 const { bootstrapApplication, provideClientHydration } = await import('@angular/platform-browser');
 const { provideServerRendering, renderApplication } = await import('@angular/platform-server');
 const imports = [];
@@ -38,14 +39,16 @@ core.Component({
    (colorChange)="record('colorChange')" (colorChangeEnd)="record('colorEnd')" />
 `,
 })(H9SSR);
-const zoneless =
-  core.provideZonelessChangeDetection ?? core.provideExperimentalZonelessChangeDetection;
 const html = await renderApplication(
   (context) =>
     bootstrapApplication(
       H9SSR,
       {
-        providers: [provideServerRendering(), provideClientHydration(), zoneless()],
+        providers: [
+          provideServerRendering(),
+          provideClientHydration(),
+          provideZonelessChangeDetection(),
+        ],
       },
       context,
     ),

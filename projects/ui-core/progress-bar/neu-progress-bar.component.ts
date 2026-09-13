@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -23,7 +22,6 @@ export type NeuProgressVariant = 'primary' | 'success' | 'warning' | 'danger';
   selector: 'neu-progress-bar',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="neu-progress" [class]="hostClasses()">
       @if (label()) {

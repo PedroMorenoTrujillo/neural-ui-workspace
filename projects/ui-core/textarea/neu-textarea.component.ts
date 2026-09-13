@@ -1,225 +1,216 @@
-import { DOCUMENT } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
   ViewEncapsulation,
   computed,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { COMPOSITION_BUFFER_MODE, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
-/**
- * NeuralUI Textarea Component
- *
- * Textarea con floating label y soporte completo para Angular Forms.
- * Soporta auto-resize opcional.
- *
- * Uso:
- *   <neu-textarea label="Descripción" [formControl]="ctrl" />
- *   <neu-textarea label="Bio" [rows]="5" [autoResize]="true" />
- */
+/** Multiline string field with native Angular 22 Signal Forms interop. */
 @Component({
   selector: 'neu-textarea',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-textarea-host',
     '[class.neu-textarea-host--sm]': 'size() === "sm"',
     '[class.neu-textarea-host--lg]': 'size() === "lg"',
+    '[hidden]': 'hidden()',
   },
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuTextareaComponent),
-      multi: true,
-    },
-  ],
   template: `
     <div
       class="neu-textarea__wrapper"
-      [class.neu-textarea__wrapper--focused]="_focused()"
+      [class.neu-textarea__wrapper--focused]="focused()"
       [class.neu-textarea__wrapper--has-value]="hasValue()"
       [class.neu-textarea__wrapper--error]="hasError()"
-      [class.neu-textarea__wrapper--disabled]="_isDisabledState()"
+      [class.neu-textarea__wrapper--disabled]="disabled()"
     >
       <textarea
-        #textareaRef
+        #nativeTextarea
         class="neu-textarea__field"
-        [id]="_id"
+        [id]="inputId()"
         [rows]="rows()"
         [placeholder]="' '"
-        [attr.disabled]="_isDisabledState() ? true : null"
-        [attr.readonly]="readonly() ? true : null"
-        [attr.required]="required() ? true : null"
-        [attr.maxlength]="maxlength() ?? null"
+        [disabled]="disabled()"
+        [attr.readonly]="readonly() ? '' : null"
+        [attr.required]="required() ? '' : null"
+        [attr.minlength]="minLength() ?? null"
+        [attr.maxlength]="maxLength() ?? null"
+        [attr.pattern]="nativePattern()"
         [attr.name]="name() || null"
-        [attr.aria-describedby]="hasError() ? _id + '-error' : hint() ? _id + '-hint' : null"
+        [attr.aria-describedby]="
+          hasVisibleError() ? inputId() + '-error' : hint() ? inputId() + '-hint' : null
+        "
         [attr.aria-invalid]="hasError() ? 'true' : null"
-        [style.resize]="_resizeStyle()"
-        [value]="_value()"
+        [attr.aria-required]="required() ? 'true' : null"
+        [attr.aria-readonly]="readonly() ? 'true' : null"
+        [attr.aria-busy]="pending() ? 'true' : null"
+        [style.resize]="resizeStyle()"
+        [value]="displayValue()"
         (compositionstart)="onCompositionStart()"
         (compositionend)="onCompositionEnd($event)"
         (input)="onInput($event)"
         (focus)="onFocus()"
         (blur)="onBlur()"
       ></textarea>
-      <label class="neu-textarea__label" [for]="_id">{{ label() }}</label>
-      @if (hint() && !hasError()) {
-        <span class="neu-textarea__hint" [id]="_id + '-hint'">{{ hint() }}</span>
+      <label class="neu-textarea__label" [for]="inputId()">{{ label() }}</label>
+      @if (hint() && !hasVisibleError()) {
+        <span class="neu-textarea__hint" [id]="inputId() + '-hint'">{{ hint() }}</span>
       }
-      @if (hasError()) {
-        <span class="neu-textarea__error" role="alert" [id]="_id + '-error'">{{
-          errorMessage()
-        }}</span>
+      @if (hasVisibleError()) {
+        <span class="neu-textarea__error" role="alert" [id]="inputId() + '-error'">
+          {{ errorMessage() }}
+        </span>
       }
     </div>
   `,
   styleUrl: './neu-textarea.component.scss',
 })
-export class NeuTextareaComponent implements ControlValueAccessor {
-  /** Emits after the user changes the value. Programmatic form writes do not emit. */
-  readonly valueChange = output<string>();
+export class NeuTextareaComponent implements FormValueControl<string> {
+  readonly value = model<string>('');
 
   readonly label = input('');
   readonly rows = input<number>(3);
-  /** Tamaño del campo: 'sm' = compacto | 'md' = estándar | 'lg' = grande / Field size */
   readonly size = input<'sm' | 'md' | 'lg'>('md');
   readonly autoResize = input<boolean>(false);
-  /** Permite al usuario redimensionar el campo manualmente (por defecto: true) / Allows the user to manually resize the field (default: true) */
   readonly resizable = input<boolean>(true);
   readonly errorMessage = input<string>('');
   readonly hint = input<string>('');
   readonly disabled = input<boolean>(false);
   readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly invalid = input<boolean>(false);
+  readonly pending = input<boolean>(false);
+  readonly touched = input<boolean>(false);
+  readonly dirty = input<boolean>(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
   readonly required = input<boolean>(false);
   readonly name = input<string>('');
-  readonly maxlength = input<number | null>(null);
+  readonly minLength = input<number | undefined>(undefined);
+  readonly maxLength = input<number | undefined>(undefined);
+  readonly pattern = input<readonly RegExp[]>([]);
+  readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-textarea-'));
+  readonly touch = output<void>();
 
-  protected readonly _id = inject(NeuIdGenerator).getId('neu-textarea-');
+  protected readonly focused = signal(false);
+  private readonly nativeTextarea =
+    viewChild.required<ElementRef<HTMLTextAreaElement>>('nativeTextarea');
+  private readonly compositionDraft = signal<string | null>(null);
+  private readonly destroyRef = inject(DestroyRef);
+  private composing = false;
+  private compositionBaseValue = '';
+  private compositionCommit: string | null = null;
+  private destroyed = false;
 
-  protected readonly _value = signal('');
-  protected readonly _focused = signal(false);
-  protected readonly _isDisabled = signal(false);
-
-  protected readonly _isDisabledState = computed(() => this.disabled() || this._isDisabled());
-  readonly hasValue = computed(() => this._value().length > 0);
-  readonly hasError = computed(() => !!this.errorMessage());
-  protected readonly _resizeStyle = computed(() => {
-    if (this.autoResize()) return 'none';
-    return this.resizable() ? 'vertical' : 'none';
+  protected readonly displayValue = computed(() => {
+    const current = this.value();
+    const normalized = typeof current === 'string' ? current : '';
+    const draft = this.compositionDraft();
+    return draft !== null && normalized === this.compositionBaseValue ? draft : normalized;
   });
-
-  private readonly _textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textareaRef');
-
-  private _onChange: (v: string) => void = () => {};
-  private _onTouched: () => void = () => {};
-  private readonly _destroyRef = inject(DestroyRef);
-  private readonly _compositionMode =
-    inject(COMPOSITION_BUFFER_MODE, { optional: true }) ??
-    !/android (\d+)/.test(
-      (inject(DOCUMENT).defaultView?.navigator.userAgent ?? '').toLocaleLowerCase(),
-    );
-  private _composing = false;
-  private _compositionCommit: string | null = null;
-  private _destroyed = false;
+  readonly hasValue = computed(() => this.displayValue().length > 0);
+  readonly hasError = computed(
+    () => this.invalid() || this.errors().length > 0 || !!this.errorMessage(),
+  );
+  protected readonly hasVisibleError = computed(() => this.hasError() && !!this.errorMessage());
+  protected readonly resizeStyle = computed(() =>
+    this.autoResize() ? 'none' : this.resizable() ? 'vertical' : 'none',
+  );
+  protected readonly nativePattern = computed(() => {
+    const patterns = this.pattern();
+    return patterns.length === 1 ? patterns[0].source : null;
+  });
 
   constructor() {
     effect(() => {
-      if (this.autoResize()) {
-        const el = this._textareaRef()?.nativeElement;
-        if (el) {
-          el.style.height = 'auto';
-          el.style.height = `${el.scrollHeight}px`;
-        }
-      }
+      this.displayValue();
+      if (!this.autoResize()) return;
+      queueMicrotask(() => {
+        if (!this.destroyed) this.resizeToContent();
+      });
     });
-    this._destroyRef.onDestroy(() => {
-      this._destroyed = true;
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
       this.cancelComposition();
     });
   }
 
   onInput(event: Event): void {
-    const el = event.target as HTMLTextAreaElement;
-    this._value.set(el.value);
-    if (
-      !this._destroyed &&
-      !this._isDisabledState() &&
-      (!this._compositionMode || !this._composing)
-    ) {
-      if (this._compositionCommit === el.value) this._compositionCommit = null;
-      else {
-        this._compositionCommit = null;
-        this._onChange(el.value);
-        this.valueChange.emit(el.value);
-      }
+    const element = event.target as HTMLTextAreaElement;
+    if (this.destroyed || this.disabled() || this.readonly()) return;
+    if (this.composing) {
+      this.compositionDraft.set(element.value);
+    } else if (this.compositionCommit === element.value) {
+      this.compositionCommit = null;
+    } else {
+      this.compositionCommit = null;
+      this.value.set(element.value);
     }
-
-    if (this.autoResize()) {
-      el.style.height = 'auto';
-      el.style.height = `${el.scrollHeight}px`;
-    }
+    if (this.autoResize()) this.resizeToContent(element);
   }
 
   onCompositionStart(): void {
-    if (!this._compositionMode || this._isDisabledState() || this._destroyed) return;
-    this._composing = true;
-    this._compositionCommit = null;
+    if (this.disabled() || this.readonly() || this.destroyed) return;
+    this.composing = true;
+    this.compositionBaseValue = this.displayValue();
+    this.compositionDraft.set(this.nativeTextarea().nativeElement.value);
+    this.compositionCommit = null;
   }
 
   onCompositionEnd(event: Event): void {
-    if (!this._compositionMode || !this._composing) return;
-    this._composing = false;
-    if (this._destroyed || this._isDisabledState()) {
-      this._compositionCommit = null;
+    if (!this.composing) return;
+    this.composing = false;
+    if (this.destroyed || this.disabled() || this.readonly()) {
+      this.compositionDraft.set(null);
+      this.compositionCommit = null;
       return;
     }
-    const value = (event.target as HTMLTextAreaElement).value;
-    this._value.set(value);
-    this._compositionCommit = value;
-    this._onChange(value);
-    this.valueChange.emit(value);
+    const next = (event.target as HTMLTextAreaElement).value;
+    const externalWriteWon = this.displayValue() !== this.compositionBaseValue;
+    this.compositionDraft.set(null);
+    if (externalWriteWon) {
+      this.compositionCommit = null;
+      return;
+    }
+    this.compositionCommit = next;
+    this.value.set(next);
   }
 
   onFocus(): void {
-    this._focused.set(true);
+    this.focused.set(true);
   }
 
   onBlur(): void {
     this.cancelComposition();
-    this._focused.set(false);
-    this._onTouched();
+    this.focused.set(false);
+    this.touch.emit();
   }
 
-  writeValue(val: unknown): void {
+  focus(options?: FocusOptions): void {
+    this.nativeTextarea().nativeElement.focus(options);
+  }
+
+  reset(): void {
     this.cancelComposition();
-    this._value.set(val == null ? '' : String(val));
+    this.focused.set(false);
   }
 
-  registerOnChange(fn: (v: string) => void): void {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this._isDisabled.set(isDisabled);
-    if (isDisabled) this.cancelComposition();
+  private resizeToContent(element = this.nativeTextarea().nativeElement): void {
+    element.style.height = 'auto';
+    element.style.height = `${element.scrollHeight}px`;
   }
 
   private cancelComposition(): void {
-    this._composing = false;
-    this._compositionCommit = null;
+    this.composing = false;
+    this.compositionDraft.set(null);
+    this.compositionCommit = null;
   }
 }

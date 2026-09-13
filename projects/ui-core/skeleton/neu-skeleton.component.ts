@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@angular/core';
+import { Component, ViewEncapsulation, input } from '@angular/core';
 
 /**
  * NeuralUI Skeleton Component
@@ -13,7 +13,6 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@a
 @Component({
   selector: 'neu-skeleton',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-skeleton',
     'aria-hidden': 'true',

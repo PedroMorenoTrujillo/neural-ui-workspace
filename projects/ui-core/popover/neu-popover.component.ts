@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ComponentRef,
   Directive,
@@ -37,7 +36,6 @@ export type NeuPopoverTrigger = 'click' | 'hover' | 'focus';
   selector: 'neu-popover-overlay',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-popover',
     '[attr.id]': '_id()',

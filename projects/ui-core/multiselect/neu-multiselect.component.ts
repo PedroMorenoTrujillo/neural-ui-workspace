@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ContentChild,
   DestroyRef,
@@ -130,7 +129,6 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
   selector: 'neu-multiselect',
   imports: [NgTemplateOutlet, OverlayModule, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

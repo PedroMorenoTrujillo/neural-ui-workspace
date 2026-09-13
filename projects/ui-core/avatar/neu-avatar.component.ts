@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -25,7 +24,6 @@ export type NeuAvatarStatus = 'online' | 'offline' | 'busy' | 'away' | '';
   selector: 'neu-avatar',
   imports: [NgClass],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-avatar-host' },
   template: `
     <span

@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -34,7 +33,6 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertType, string> = {
   selector: 'neu-alert',
   imports: [NeuButtonComponent, NeuIconComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClasses()',
     '[attr.role]': 'alertRole()',

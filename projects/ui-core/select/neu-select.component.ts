@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -116,7 +115,6 @@ export type { NeuSelectOption } from './neu-select.types';
   selector: 'neu-select',
   imports: [NgTemplateOutlet, OverlayModule, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

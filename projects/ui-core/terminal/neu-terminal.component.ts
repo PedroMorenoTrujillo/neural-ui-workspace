@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -30,7 +29,6 @@ export interface NeuTerminalCommand {
   selector: 'neu-terminal',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-terminal-host' },
   template: `
     <section #terminal class="neu-terminal" [attr.aria-label]="ariaLabel()" (click)="focusInput()">

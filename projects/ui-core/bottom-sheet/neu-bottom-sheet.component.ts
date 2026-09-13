@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   HostListener,
   ViewEncapsulation,
@@ -19,7 +18,6 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
   selector: 'neu-bottom-sheet',
   imports: [NeuButtonComponent, NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-bottom-sheet-host',
     '[class.neu-bottom-sheet-host--open]': 'open()',

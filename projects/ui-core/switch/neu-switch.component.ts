@@ -1,53 +1,47 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  ElementRef,
   ViewEncapsulation,
   computed,
-  forwardRef,
   inject,
   input,
+  model,
   output,
-  signal,
+  viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormCheckboxControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
-/**
- * NeuralUI Switch Component
- *
- * Toggle animado para formularios de configuración en dashboards.
- * Usa el Electric-Blue (--neu-primary) cuando está activo.
- *
- * Uso:
- *   <neu-switch label="Notificaciones" [formControl]="notifsCtrl" />
- */
+/** Boolean switch backed by the official Angular 22 checkbox control contract. */
 @Component({
   selector: 'neu-switch',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'neu-switch-host' },
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuSwitchComponent),
-      multi: true,
-    },
-  ],
+  host: { class: 'neu-switch-host', '[hidden]': 'hidden()' },
   template: `
-    <label class="neu-switch" [class.neu-switch--disabled]="_isDisabled()" [for]="_id">
+    <label class="neu-switch" [class.neu-switch--disabled]="disabled()" [for]="inputId()">
       <input
+        #nativeInput
         type="checkbox"
         role="switch"
         class="neu-switch__input"
-        [id]="_id"
+        [id]="inputId()"
         [attr.name]="name() || null"
-        [checked]="_checked()"
-        [disabled]="_isDisabled()"
+        [checked]="checked()"
+        [disabled]="disabled()"
+        [attr.required]="required() ? '' : null"
+        [attr.readonly]="readonly() ? '' : null"
+        [attr.aria-checked]="checked()"
+        [attr.aria-disabled]="disabled() ? 'true' : null"
+        [attr.aria-readonly]="readonly() ? 'true' : null"
+        [attr.aria-required]="required() ? 'true' : null"
+        [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-busy]="pending() ? 'true' : null"
+        (click)="onClick($event)"
         (change)="onChange($event)"
         (blur)="onBlur()"
       />
-      <span class="neu-switch__track" [class.neu-switch__track--on]="_checked()">
-        <span class="neu-switch__thumb" [class.neu-switch__thumb--on]="_checked()"></span>
+      <span class="neu-switch__track" [class.neu-switch__track--on]="checked()">
+        <span class="neu-switch__thumb" [class.neu-switch__thumb--on]="checked()"></span>
       </span>
       @if (label()) {
         <span class="neu-switch__label">{{ label() }}</span>
@@ -56,48 +50,46 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
   `,
   styleUrl: './neu-switch.component.scss',
 })
-export class NeuSwitchComponent implements ControlValueAccessor {
+export class NeuSwitchComponent implements FormCheckboxControl {
+  readonly checked = model<boolean>(false);
+
   readonly label = input<string>('');
   readonly name = input<string>('');
   readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly invalid = input<boolean>(false);
+  readonly pending = input<boolean>(false);
+  readonly touched = input<boolean>(false);
+  readonly dirty = input<boolean>(false);
+  readonly required = input<boolean>(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-switch-'));
+  readonly touch = output<void>();
 
-  /** Emite el nuevo estado tras una interacción del usuario. Los formularios Angular siguen recibiendo el mismo valor mediante ControlValueAccessor. / Emits the new state after user interaction. Angular Forms continue to receive the same value through ControlValueAccessor. */
-  readonly checkedChange = output<boolean>();
+  private readonly nativeInput = viewChild.required<ElementRef<HTMLInputElement>>('nativeInput');
+  readonly hasError = computed(() => this.invalid() || this.errors().length > 0);
 
-  protected readonly _id = inject(NeuIdGenerator).getId('neu-switch-');
-
-  protected readonly _checked = signal(false);
-  /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState / Internal disabled state — combines the `disabled` input with CVA setDisabledState */
-  private readonly _cvaDisabled = signal(false);
-  protected readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
-
-  private _onChange: (v: boolean) => void = () => {};
-  private _onTouched: () => void = () => {};
+  onClick(event: MouseEvent): void {
+    if (this.readonly()) event.preventDefault();
+  }
 
   onChange(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this._checked.set(checked);
-    this.checkedChange.emit(checked);
-    this._onChange(checked);
+    const target = event.target as HTMLInputElement;
+    if (this.disabled() || this.readonly()) {
+      target.checked = this.checked();
+      return;
+    }
+    this.checked.set(target.checked);
   }
 
   onBlur(): void {
-    this._onTouched();
+    this.touch.emit();
   }
 
-  writeValue(val: unknown): void {
-    this._checked.set(!!val);
+  focus(options?: FocusOptions): void {
+    this.nativeInput().nativeElement.focus(options);
   }
 
-  registerOnChange(fn: (v: boolean) => void): void {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this._cvaDisabled.set(isDisabled);
-  }
+  reset(): void {}
 }

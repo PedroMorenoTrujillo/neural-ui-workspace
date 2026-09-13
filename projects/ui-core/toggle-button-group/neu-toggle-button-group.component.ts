@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   TemplateRef,
@@ -72,7 +71,6 @@ export class NeuToggleButtonItemDirective<T = unknown, V = NeuToggleValueNotProv
   selector: 'neu-toggle-button-group',
   imports: [NeuIconComponent, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

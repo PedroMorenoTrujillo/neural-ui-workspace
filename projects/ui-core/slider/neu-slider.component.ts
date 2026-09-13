@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -23,7 +22,6 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
   selector: 'neu-slider',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="neu-slider" [class.neu-slider--disabled]="disabled()">
       @if (label()) {

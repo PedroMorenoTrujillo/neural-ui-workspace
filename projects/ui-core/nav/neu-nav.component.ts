@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ViewEncapsulation,
@@ -48,7 +47,6 @@ export interface NeuNavItem {
   selector: 'neu-nav',
   imports: [RouterLink, RouterLinkActive, NeuIconComponent, NeuTooltipDirective],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="neu-nav-wrapper" [class.neu-nav-wrapper--collapsed]="isCollapsed()">
       <nav

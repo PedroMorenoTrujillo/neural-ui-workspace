@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -22,7 +21,6 @@ import { NgIcon } from '@ng-icons/core';
   selector: 'neu-icon',
   imports: [NgIcon],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-icon',
     '[style.display]': '"inline-flex"',

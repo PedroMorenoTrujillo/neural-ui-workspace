@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   TemplateRef,
@@ -61,7 +60,6 @@ export class NeuAccordionHeaderDirective {
   selector: 'neu-accordion',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="neu-accordion" [class.neu-accordion--bordered]="bordered()">
       @for (item of items(); track item.id) {
