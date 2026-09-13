@@ -17,12 +17,6 @@ import {
   NeuSelectSelectedDirective,
 } from '@neural-ui/core/select';
 import {
-  NeuMultiselectComponent,
-  NeuMultiselectFilterDirective,
-  NeuMultiselectItemDirective,
-  NeuMultiselectTokenDirective,
-} from '@neural-ui/core/multiselect';
-import {
   FilterContextFixtureDirective,
   FixtureGroup,
   FixturePerson,
@@ -42,10 +36,6 @@ import {
     NeuSelectFilterDirective,
     NeuSelectItemDirective,
     NeuSelectSelectedDirective,
-    NeuMultiselectComponent,
-    NeuMultiselectFilterDirective,
-    NeuMultiselectItemDirective,
-    NeuMultiselectTokenDirective,
     NeuAutocompleteComponent,
     NeuAutocompleteGroupDirective,
     NeuAutocompleteItemDirective,
@@ -76,23 +66,11 @@ import {
         <button type="button" (click)="filter('Ada')">Filter select</button>
       </ng-template>
     </neu-select>
-    <neu-select [options]="options" [optionLabel]="'profile.name'" [multiple]="true">
+    <neu-select [options]="options" [optionLabel]="'profile.name'" mode="multiple">
       <ng-template [neuSelectSelected]="options" let-selected="options" let-values="values">
         {{ selected[0]?.profile?.name }} {{ values.length }}
       </ng-template>
     </neu-select>
-    <neu-multiselect [options]="options" [optionLabel]="'profile.name'" [searchable]="true">
-      <ng-template [neuMultiselectItem]="options" let-person="option" let-selected="selected">
-        {{ person.profile.name }} {{ selected }}
-      </ng-template>
-      <ng-template [neuMultiselectToken]="options" let-person="option" let-remove="remove">
-        {{ person?.profile?.name }}
-        <button type="button" (click)="remove()">Remove</button>
-      </ng-template>
-      <ng-template [neuMultiselectFilter]="filterConfig" let-filter="filter">
-        <button type="button" (click)="filter('Grace')">Filter multiselect</button>
-      </ng-template>
-    </neu-multiselect>
     <neu-autocomplete [suggestions]="options" [optionLabel]="'profile.name'">
       <ng-template [neuAutocompleteItem]="options" let-person="option">
         {{ person.profile.name }}

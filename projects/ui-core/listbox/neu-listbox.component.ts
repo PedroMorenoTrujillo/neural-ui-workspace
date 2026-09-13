@@ -9,26 +9,27 @@ import {
   computed,
   contentChild,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
   untracked,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuOptionDisabledAccessor,
   NeuOptionFilterConfig,
   NeuOptionGroupConfig,
-  NeuOptionIdentityConfig,
+  NeuOptionActivatedEvent,
+  NeuOptionDataRequest,
   NeuOptionLabelAccessor,
   NeuOptionLazyRequest,
   NeuOptionValue,
-  NeuOptionValueAccessor,
-  neuOptionValuesEqual,
-  neuOptionsEqual,
+  NeuSelectionMode,
+  NeuSelectionValue,
+  NeuViewportRange,
   resolveNeuOptionDisabled,
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
@@ -60,28 +61,19 @@ import {
   NeuListboxItemDirective,
   NeuListboxLoaderDirective,
 } from './neu-listbox.directives';
-import {
-  NeuListboxChangeEvent,
-  NeuListboxDropEvent,
-  NeuListboxFilterEvent,
-  NeuListboxOption,
-  NeuListboxOptionEvent,
-  NeuListboxSelectAllEvent,
-} from './neu-listbox.types';
+import { NeuListboxDropEvent, NeuListboxOption } from './neu-listbox.types';
 
 @Component({
   selector: 'neu-listbox',
   imports: [NgClass, NgStyle, NgTemplateOutlet, CdkDrag, CdkDropList],
   encapsulation: ViewEncapsulation.None,
-  providers: [
-    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NeuListboxComponent), multi: true },
-  ],
   host: {
     class: 'neu-listbox',
     '[class.neu-listbox--disabled]': 'isDisabled()',
     '[class.neu-listbox--invalid]': 'invalid()',
     '[class.neu-listbox--fluid]': 'fluid()',
     '[class.neu-listbox--striped]': 'striped()',
+    '[hidden]': 'hidden()',
   },
   template: `
     @if (label()) {
@@ -304,9 +296,9 @@ import {
 export class NeuListboxComponent<
   T = NeuListboxOption,
   V = NeuOptionValue<T>,
+  M extends NeuSelectionMode = 'single',
   G = unknown,
-  I = unknown,
-> implements ControlValueAccessor {
+> implements FormValueControl<NeuSelectionValue<V, M>> {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
@@ -318,7 +310,7 @@ export class NeuListboxComponent<
     [],
     {
       rowKey: (row) => row.option,
-      keysEqual: (left, right) => neuOptionsEqual(left, right, this.identityPolicy()),
+      keysEqual: (left, right) => this.valuesEqual(this.optionValueOf(left), this.optionValueOf(right)),
       requestScrollOnChange: true,
     },
   );
@@ -339,7 +331,8 @@ export class NeuListboxComponent<
   readonly hint = input('');
   readonly emptyLabel = input('No options found');
   readonly noResultsMessage = input('No results found');
-  readonly multiple = input(false);
+  readonly mode = input<M>('single' as M);
+  readonly multiple = computed(() => this.mode() === 'multiple');
   readonly searchable = input(false);
   readonly searchPlaceholder = input('Search...');
   readonly filterValue = input<string | null>(null);
@@ -348,6 +341,11 @@ export class NeuListboxComponent<
   readonly readonly = input(false);
   readonly required = input(false);
   readonly invalid = input(false);
+  readonly hidden = input(false);
+  readonly pending = input(false);
+  readonly touched = input(false);
+  readonly dirty = input(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
   readonly name = input('');
   readonly tabindex = input(0);
   readonly autoOptionFocus = input(true);
@@ -358,7 +356,6 @@ export class NeuListboxComponent<
   readonly checkmark = input(false);
   readonly highlightOnSelect = input(true);
   readonly showToggleAll = input(true);
-  readonly selectAll = input<boolean | null>(null);
   readonly toggleAllLabel = input('Select all visible options');
   readonly striped = input(false);
   readonly fluid = input(false);
@@ -375,19 +372,17 @@ export class NeuListboxComponent<
   readonly dataFirst = input(0);
   readonly dragdrop = input(false);
   readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
-  readonly optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
+  readonly optionValue = input<(option: T) => V>((option) => resolveNeuOptionValue<T, V>(option));
   readonly optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
-  readonly identityConfig = input<Readonly<NeuOptionIdentityConfig<T, V, I>>>({});
+  readonly compareWith = input<(left: V, right: V) => boolean>(Object.is);
 
-  readonly selectionChange = output<T[]>();
-  readonly changeDetail = output<NeuListboxChangeEvent<T, V>>();
-  readonly optionClick = output<NeuListboxOptionEvent<T, V>>();
-  readonly optionDoubleClick = output<NeuListboxOptionEvent<T, V>>();
-  readonly filter = output<NeuListboxFilterEvent<T>>();
-  readonly focusEvent = output<FocusEvent>();
-  readonly blurEvent = output<FocusEvent>();
-  readonly selectAllChangeDetail = output<NeuListboxSelectAllEvent<T, V>>();
-  readonly lazyRequest = output<NeuOptionLazyRequest>();
+  readonly optionActivated = output<NeuOptionActivatedEvent<T, V>>();
+  readonly filterChange = output<string>();
+  readonly dataRequest = output<NeuOptionDataRequest>();
+  readonly rangeChange = output<NeuViewportRange>();
+  readonly focusEntered = output<FocusEvent>();
+  readonly focusLeft = output<FocusEvent>();
+  readonly touch = output<void>();
   readonly drop = output<NeuListboxDropEvent<T>>();
 
   /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
@@ -404,8 +399,12 @@ export class NeuListboxComponent<
 
   readonly query = signal('');
   readonly activeIndex = signal(-1);
-  readonly values = signal<V[]>([]);
-  readonly cvaDisabled = signal(false);
+  readonly value = model<NeuSelectionValue<V, M>>(null as NeuSelectionValue<V, M>);
+  readonly values = computed<readonly V[]>(() => {
+    const current = this.value();
+    if (this.multiple()) return Array.isArray(current) ? current as readonly V[] : [];
+    return current == null ? [] : [current as V];
+  });
   readonly focused = signal(false);
   readonly virtualFirst = signal(0);
   readonly liveMessage = signal('');
@@ -413,7 +412,7 @@ export class NeuListboxComponent<
   readonly listId = computed(() => `${this.baseId()}-list`);
   readonly labelId = computed(() => `${this.baseId()}-label`);
   readonly hintId = computed(() => `${this.baseId()}-hint`);
-  readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
+  readonly isDisabled = computed(() => this.disabled());
   readonly filterEnabled = computed(() => this.searchable());
   readonly filterPlaceholder = computed(() => this.searchPlaceholder());
   readonly currentFilter = computed(() => this.filterValue() ?? this.query());
@@ -502,10 +501,7 @@ export class NeuListboxComponent<
   );
 
   private readonly selectedValueIndex = computed(() => {
-    const config = this.identityConfig();
-    if (config.compareWith || (config.identityAccessor != null && this.optionValue() == null)) {
-      return null;
-    }
+    if (this.compareWith() !== Object.is) return null;
     const values = this.values();
     return {
       values: new Set(values.filter((value) => !(typeof value === 'number' && value === 0))),
@@ -513,9 +509,6 @@ export class NeuListboxComponent<
       negativeZero: values.some((value) => Object.is(value, -0)),
     };
   });
-
-  private onChange: (value: V | V[] | null) => void = () => {};
-  private onTouched: () => void = () => {};
 
   constructor() {
     this.destroyRef.onDestroy(() => {
@@ -533,18 +526,6 @@ export class NeuListboxComponent<
     });
   }
 
-  writeValue(value: V | readonly V[] | null | undefined): void {
-    this.values.set(value == null ? [] : Array.isArray(value) ? [...value] : [value as V]);
-  }
-  registerOnChange(fn: (value: V | V[] | null) => void): void {
-    this.onChange = fn;
-  }
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-  setDisabledState(isDisabled: boolean): void {
-    this.cvaDisabled.set(isDisabled);
-  }
   protected optionLabelOf(option: T): string {
     return resolveNeuOptionLabel(option, this.optionLabel());
   }
@@ -600,7 +581,7 @@ export class NeuListboxComponent<
 
   private toggleOption(option: T, originalEvent: Event | null = null): void {
     const rowIndex = this.visibleRows().findIndex(
-      (row) => row.kind === 'option' && neuOptionsEqual(row.option, option, this.identityPolicy()),
+      (row) => row.kind === 'option' && this.valuesEqual(this.optionValueOf(row.option), this.optionValueOf(option)),
     );
     const row = this.visibleRows()[rowIndex];
     if (row?.kind === 'option') {
@@ -627,8 +608,6 @@ export class NeuListboxComponent<
     range = false,
   ): void {
     if (this.isDisabled() || this.readonly() || row.disabled) return;
-    if (originalEvent)
-      this.optionClick.emit({ originalEvent, option: row.option, value: this.modelValue() });
     const shiftPointer = originalEvent instanceof MouseEvent && originalEvent.shiftKey;
     if ((range || shiftPointer) && this.multiple()) {
       this.captureRangeAnchor();
@@ -660,12 +639,7 @@ export class NeuListboxComponent<
   }
 
   protected onOptionDoubleClick(event: MouseEvent, row: InternalNeuOptionRow<T>): void {
-    if (!this.isDisabled() && !this.readonly() && !row.disabled)
-      this.optionDoubleClick.emit({
-        originalEvent: event,
-        option: row.option,
-        value: this.modelValue(),
-      });
+    if (!this.isDisabled() && !this.readonly() && !row.disabled) this.selectOption(event, row, this.visibleRows().indexOf(row));
   }
 
   protected onListFocus(event: FocusEvent): void {
@@ -691,7 +665,7 @@ export class NeuListboxComponent<
     const next = result.rowIndex;
     this.ensureActiveRendered(next);
     this.scrollActiveIntoView();
-    this.focusEvent.emit(event);
+    this.focusEntered.emit(event);
     if (this.selectOnFocus() && !this.multiple() && next !== -1 && selected === -1) {
       const row = this.visibleRows()[next];
       if (row?.kind === 'option') this.selectOption(event, row, next);
@@ -705,8 +679,8 @@ export class NeuListboxComponent<
     this.focused.set(false);
     this.rangeAnchorLogicalIndex = null;
     this.typeaheadController?.reset();
-    this.onTouched();
-    this.blurEvent.emit(event);
+    this.touch.emit();
+    this.focusLeft.emit(event);
   }
 
   protected onKeyDown(event: KeyboardEvent): void {
@@ -799,14 +773,9 @@ export class NeuListboxComponent<
     this.activeRowController.clear();
     this.activeIndex.set(-1);
     this.typeaheadController?.reset();
-    const emitted: NeuListboxFilterEvent<T> = {
-      originalEvent,
-      filter: value,
-      visibleOptions: this.previewFilteredOptions(value),
-      config: this.effectiveFilterConfig(),
-    };
-    this.filter.emit(emitted);
-    this.liveMessage.set(`${emitted.visibleOptions.length} options available`);
+    const visible = this.previewFilteredOptions(value);
+    this.filterChange.emit(value);
+    this.liveMessage.set(`${visible.length} options available`);
     if (this.lazy()) this.emitLazyRequest(value ? 'filter' : 'reset', 0, value);
   }
   resetFilter(): void {
@@ -818,22 +787,13 @@ export class NeuListboxComponent<
     const checked = !this.allSelected();
     const options = this.eligibleVisibleRows().map((row) => row.option);
     const value = checked ? options.map((option) => this.optionValueOf(option)) : [];
-    if (this.selectAll() === null) this.commitSelection(value, event, null, checked);
-    this.selectAllChangeDetail.emit({
-      originalEvent: event,
-      checked,
-      scope: 'visible-eligible',
-      options,
-      value,
-    });
+    this.commitSelection(value, event, null, checked);
   }
   protected allSelected(): boolean {
-    if (this.selectAll() !== null) return this.selectAll()!;
     const rows = this.eligibleVisibleRows();
     return rows.length > 0 && rows.every((row) => this.isOptionSelected(row.option));
   }
   protected partiallySelected(): boolean {
-    if (this.selectAll() !== null) return false;
     const rows = this.eligibleVisibleRows();
     const selectedCount = rows.filter((row) => this.isOptionSelected(row.option)).length;
     return selectedCount > 0 && selectedCount < rows.length;
@@ -845,6 +805,8 @@ export class NeuListboxComponent<
       Math.floor((event.currentTarget as HTMLElement).scrollTop / this.safeItemSize()),
     );
     this.virtualFirst.set(first);
+    const range = { start: first, end: first + Math.max(1, this.virtualScrollViewportItems()) };
+    this.rangeChange.emit({ render: range, visible: range });
     if (this.lazy()) this.emitLazyRequest('scroll', first);
   }
   protected canDrag(row: InternalNeuOptionRow<T>): boolean {
@@ -868,10 +830,10 @@ export class NeuListboxComponent<
       return;
     const original = [...this.allOptions()];
     const previousIndex = original.findIndex((option) =>
-      neuOptionsEqual(option, source.option, this.identityPolicy()),
+      this.valuesEqual(this.optionValueOf(option), this.optionValueOf(source.option)),
     );
     const currentIndex = original.findIndex((option) =>
-      neuOptionsEqual(option, target.option, this.identityPolicy()),
+      this.valuesEqual(this.optionValueOf(option), this.optionValueOf(target.option)),
     );
     if (previousIndex === -1 || currentIndex === -1 || previousIndex === currentIndex) return;
     const reordered = [...original];
@@ -997,12 +959,14 @@ export class NeuListboxComponent<
     selected: boolean,
   ): void {
     const immutable = [...next];
-    this.values.set(immutable);
     const model = this.multiple() ? immutable : (immutable[0] ?? null);
-    this.onChange(model);
-    const selectedOptions = this.selectedOptions(immutable);
-    this.selectionChange.emit(selectedOptions);
-    this.changeDetail.emit({ originalEvent, option, value: model, selectedOptions, selected });
+    this.value.set(model as NeuSelectionValue<V, M>);
+    if (option && originalEvent) this.optionActivated.emit({
+      option,
+      value: this.optionValueOf(option),
+      source: originalEvent.type.startsWith('key') ? 'keyboard' : 'pointer',
+      originalEvent,
+    });
     this.liveMessage.set(
       this.multiple()
         ? `${immutable.length} options selected`
@@ -1025,15 +989,10 @@ export class NeuListboxComponent<
     }).flatMap((row) => (row.kind === 'option' ? [row.option] : []));
   }
   private optionMatchesValue(option: T, value: V): boolean {
-    if (this.identityConfig().identityAccessor != null && this.optionValue() == null)
-      return neuOptionsEqual(option, value as unknown as T, this.identityPolicy());
     return this.valuesEqual(this.optionValueOf(option), value);
   }
   private valuesEqual(left: V, right: V): boolean {
-    return this.identityConfig().compareWith?.(left, right) ?? neuOptionValuesEqual(left, right);
-  }
-  private identityPolicy(): NeuOptionIdentityConfig<T, V, I> {
-    return { ...this.identityConfig(), valueAccessor: this.optionValue() };
+    return this.compareWith()(left, right);
   }
   private eligibleVisibleRows(): InternalNeuOptionRow<T>[] {
     return this.visibleRows().flatMap((row) =>
@@ -1076,7 +1035,16 @@ export class NeuListboxComponent<
     )
       return;
     this.lastLazyRequest.set(request);
-    this.lazyRequest.emit(request);
+    this.dataRequest.emit({
+      requestId: request.requestId,
+      queryRevision: request.requestId,
+      query: request.filterValue,
+      range: {
+        render: { start: request.first, end: request.end },
+        visible: { start: request.first, end: request.end },
+      },
+      reason: reason === 'scroll' ? 'viewport' : reason === 'filter' || reason === 'reset' ? 'query' : 'initial',
+    });
   }
   private scrollActiveIntoView(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -1112,6 +1080,21 @@ export class NeuListboxComponent<
     } catch {
       return String(value);
     }
+  }
+
+  focus(options?: FocusOptions): void {
+    if (this.isDisabled()) return;
+    (this.host.nativeElement as HTMLElement)
+      .querySelector<HTMLElement>('.neu-listbox__list')
+      ?.focus(options);
+  }
+
+  reset(): void {
+    this.query.set('');
+    this.activeIndex.set(-1);
+    this.virtualFirst.set(0);
+    this.rangeAnchorLogicalIndex = null;
+    this.liveMessage.set('');
   }
   private prepareActiveRowController(): void {
     const rows = this.visibleRows();

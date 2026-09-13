@@ -18,13 +18,13 @@ import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuDateInputComponent } from '@neural-ui/core/date-input';
 import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
 import { NeuInputComponent } from '@neural-ui/core/input';
-import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
 import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import type {
   NeuOptionDisabledAccessor,
   NeuOptionLabelAccessor,
   NeuOptionValueAccessor,
 } from '@neural-ui/core/option-api';
+import { resolveNeuOptionValue } from '@neural-ui/core/option-api';
 import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select';
 import {
   NeuTableAdvancedFilterController,
@@ -84,7 +84,6 @@ function controlViewBridge<T>(
     NeuInputComponent,
     NeuNumberInputComponent,
     NeuSelectComponent,
-    NeuMultiselectComponent,
     NeuDateInputComponent,
     NeuButtonComponent,
   ],
@@ -294,11 +293,12 @@ function controlViewBridge<T>(
                           [clearable]="true"
                           [clearAriaLabel]="_text().clear"
                           [formControl]="rule.selectControl"
-                          (selectionChange)="_singleValueCommitted(rule.id)"
+                          (valueChange)="_singleValueCommitted(rule.id)"
                         />
                       }
                       @case ('multiSelect') {
-                        <neu-multiselect
+                        <neu-select
+                          mode="multiple"
                           class="neu-table__filter-overlay-control"
                           [floatingLabel]="false"
                           [label]="host()._filterOverlayControlLabel(column())"
@@ -428,14 +428,14 @@ export class NeuTableAdvancedFilterFeatureComponent {
       ? ((config.optionLabel ?? null) as NeuOptionLabelAccessor<unknown> | null)
       : null;
   });
-  protected readonly _optionValue = computed<NeuOptionValueAccessor<unknown, unknown> | null>(
-    () => {
-      const config = this.column().filterConfig;
-      return config?.kind === 'select' || config?.kind === 'multiSelect'
+  protected readonly _optionValue = computed<(option: unknown) => unknown>(() => {
+    const config = this.column().filterConfig;
+    const accessor =
+      config?.kind === 'select' || config?.kind === 'multiSelect'
         ? ((config.optionValue ?? null) as NeuOptionValueAccessor<unknown, unknown> | null)
         : null;
-    },
-  );
+    return (option) => resolveNeuOptionValue(option, accessor);
+  });
   protected readonly _optionDisabled = computed<NeuOptionDisabledAccessor<unknown> | null>(() => {
     const config = this.column().filterConfig;
     return config?.kind === 'select' || config?.kind === 'multiSelect'
@@ -566,7 +566,6 @@ export class NeuTableAdvancedFilterFeatureComponent {
     NeuInputComponent,
     NeuNumberInputComponent,
     NeuSelectComponent,
-    NeuMultiselectComponent,
     NeuDateInputComponent,
   ],
   encapsulation: ViewEncapsulation.None,
@@ -662,7 +661,7 @@ export class NeuTableAdvancedFilterFeatureComponent {
             [placeholder]="host().allFilterOptionLabel()"
             [options]="config.options ?? []"
             [optionLabel]="$any(config.optionLabel ?? null)"
-            [optionValue]="$any(config.optionValue ?? null)"
+            [optionValue]="_optionValue()"
             [optionDisabled]="$any(config.optionDisabled ?? null)"
             [searchable]="config.searchable === true"
             [virtualScroll]="config.virtualScroll === true"
@@ -672,13 +671,14 @@ export class NeuTableAdvancedFilterFeatureComponent {
           />
         }
         @case ('multiSelect') {
-          <neu-multiselect
+          <neu-select
+            mode="multiple"
             [floatingLabel]="false"
             [label]="_modernFilterLabel()"
             [placeholder]="host().allFilterOptionLabel()"
             [options]="config.options ?? []"
             [optionLabel]="$any(config.optionLabel ?? null)"
-            [optionValue]="$any(config.optionValue ?? null)"
+            [optionValue]="_optionValue()"
             [optionDisabled]="$any(config.optionDisabled ?? null)"
             [searchable]="config.searchable === true"
             [virtualScroll]="config.virtualScroll === true"
@@ -752,6 +752,14 @@ export class NeuTableInlineFilterFeatureComponent {
     { label: this.host()._advancedFilterText().yes, value: true },
     { label: this.host()._advancedFilterText().no, value: false },
   ]);
+  protected readonly _optionValue = computed<(option: unknown) => unknown>(() => {
+    const config = this.column().filterConfig;
+    const accessor =
+      config?.kind === 'select' || config?.kind === 'multiSelect'
+        ? ((config.optionValue ?? null) as NeuOptionValueAccessor<unknown, unknown> | null)
+        : null;
+    return (option) => resolveNeuOptionValue(option, accessor);
+  });
   protected readonly _legacyOptions = computed<NeuSelectOption[]>(() => [
     { label: this.host().allFilterOptionLabel(), value: '' },
     ...(this.column().filterOptions ?? []).map((value) => ({ label: value, value })),
@@ -930,7 +938,7 @@ export class NeuTableInlineFilterFeatureComponent {
     try {
       const config = column.filterConfig;
       if (config?.kind === 'multiSelect') {
-        this.multiControl.setValue(Array.isArray(value) ? [...value] : [], { emitEvent: false });
+        this.multiControl.setValue(Array.isArray(value) ? [...value] : []);
       } else if (config?.kind === 'number' && this._mode() === 'between') {
         const range = neuTableNumberRangeValue(value);
         this.rangeStartControl.setValue(range.from);
@@ -958,10 +966,7 @@ export class NeuTableInlineFilterFeatureComponent {
           this._singleDateValue.set(controlValue);
         }
         if (!config && column.filterType === 'date') this._singleDateValue.set(controlValue);
-        this.singleControl.setValue(
-          controlValue,
-          config?.kind === 'number' || config?.kind === 'date' ? undefined : { emitEvent: false },
-        );
+        this.singleControl.setValue(controlValue);
       }
 
       const controls: Parameters<OptionalHost['_registerOptionalFilterControls']>[1] = {};

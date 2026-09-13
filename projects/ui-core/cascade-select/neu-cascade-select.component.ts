@@ -6,9 +6,9 @@ import {
   ViewEncapsulation,
   computed,
   contentChild,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
 } from '@angular/core';
@@ -19,15 +19,14 @@ import {
   Overlay,
   OverlayModule,
 } from '@angular/cdk/overlay';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator, walkNeuTreeDepthFirst } from '@neural-ui/core/internal';
 import {
   NeuOptionAccessor,
   NeuOptionDisabledAccessor,
   NeuOptionLabelAccessor,
   NeuOptionValue,
-  NeuOptionValueAccessor,
-  neuOptionValuesEqual,
+  NeuOptionActivatedEvent,
   readNeuOptionAccessor,
   resolveNeuOptionDisabled,
   resolveNeuOptionLabel,
@@ -75,16 +74,11 @@ interface SelectionPath<T> {
   selector: 'neu-cascade-select',
   host: {
     class: 'neu-cascade-select',
+    '[hidden]': 'hidden()',
+    '(focusout)': 'onFocusOut($event)',
   },
   imports: [NgTemplateOutlet, OverlayModule],
   encapsulation: ViewEncapsulation.None,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuCascadeSelectComponent),
-      multi: true,
-    },
-  ],
   template: `
     @if (label()) {
       <label class="neu-cascade-select__label" [for]="triggerId">{{ label() }}</label>
@@ -222,7 +216,7 @@ interface SelectionPath<T> {
               [attr.tabindex]="
                 isOptionDisabled(node) ? '-1' : activeIndex() === $index ? '0' : '-1'
               "
-              (click)="activate(node)"
+              (click)="activate(node, $event)"
               (keydown)="onOptionKeydown($any($event), $index)"
             >
               @if (itemTpl()) {
@@ -261,7 +255,7 @@ interface SelectionPath<T> {
 export class NeuCascadeSelectComponent<
   T = NeuCascadeSelectNode,
   V = NeuOptionValue<T>,
-> implements ControlValueAccessor {
+> implements FormValueControl<V | null> {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
@@ -277,10 +271,10 @@ export class NeuCascadeSelectComponent<
   readonly emptyTpl = contentChild(NeuCascadeSelectEmptyDirective);
   /* v8 ignore stop */
 
-  readonly nodes = input<readonly T[]>([]);
-  readonly options = input<readonly T[] | null>(null);
+  readonly options = input<readonly T[]>([]);
   readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
-  readonly optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
+  readonly optionValue = input<(option: T) => V>((option) => resolveNeuOptionValue<T, V>(option));
+  readonly compareWith = input<(left: V, right: V) => boolean>(Object.is);
   readonly optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
   readonly optionChildren = input<NeuOptionAccessor<T, readonly T[]> | null>(null);
 
@@ -293,6 +287,15 @@ export class NeuCascadeSelectComponent<
   readonly clearAriaLabel = input('Clear selection');
   readonly clearable = input(false);
   readonly disabled = input(false);
+  readonly readonly = input(false);
+  readonly hidden = input(false);
+  readonly invalid = input(false);
+  readonly pending = input(false);
+  readonly touched = input(false);
+  readonly dirty = input(false);
+  readonly required = input(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly touch = output<void>();
 
   /** Browser panel attached, regardless of opening source. */
   readonly opened = output<void>();
@@ -319,15 +322,14 @@ export class NeuCascadeSelectComponent<
   /** User ancestor path; restored/programmatic paths are silent. */
   readonly groupChange = output<readonly T[]>();
 
-  readonly selectionChange = output<T | null>();
+  readonly optionActivated = output<NeuOptionActivatedEvent<T, V>>();
 
   readonly triggerId = inject(NeuIdGenerator).getId('neu-cascade-select-');
   readonly panelId = `${this.triggerId}-panel`;
   readonly open = signal(false);
-  readonly value = signal<V | null>(null);
+  readonly value = model<V | null>(null);
   readonly activePath = signal<T[]>([]);
   readonly activeIndex = signal(0);
-  readonly cvaDisabled = signal(false);
   readonly isPanelAbove = signal(false);
   readonly panelPosition = signal<{ width: string | null; maxHeight: string | null }>({
     width: null,
@@ -341,8 +343,8 @@ export class NeuCascadeSelectComponent<
   ];
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
-  readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
-  readonly rootNodes = computed(() => this.options() ?? this.nodes());
+  readonly isDisabled = computed(() => this.disabled());
+  readonly rootNodes = computed(() => this.options());
   readonly currentNodes = computed(() => {
     const path = this.activePath();
     return path.length ? this.childrenOf(path[path.length - 1]) : this.rootNodes();
@@ -356,25 +358,6 @@ export class NeuCascadeSelectComponent<
     if (current === null) return null;
     return this.findSelectionPath(this.rootNodes(), current)?.node ?? null;
   });
-
-  private onChange: (value: V | null) => void = () => {};
-  private onTouched: () => void = () => {};
-
-  writeValue(value: V | null): void {
-    this.value.set(value ?? null);
-  }
-
-  registerOnChange(fn: (value: V | null) => void): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.cvaDisabled.set(isDisabled);
-  }
 
   toggle(): void {
     if (this.isDisabled()) return;
@@ -397,7 +380,6 @@ export class NeuCascadeSelectComponent<
     const wasOpen = this.open();
     this.restoreSelectionNavigation();
     this.open.set(false);
-    this.onTouched();
     if (wasOpen) this.focusTrigger();
   }
 
@@ -416,17 +398,15 @@ export class NeuCascadeSelectComponent<
 
   clear(event: Event): void {
     event.stopPropagation();
-    if (this.isDisabled()) return;
+    if (this.isDisabled() || this.readonly()) return;
     const wasOpen = this.open();
     this.value.set(null);
-    this.onChange(null);
-    this.selectionChange.emit(null);
     this.close();
     if (!wasOpen) this.focusTrigger();
   }
 
-  activate(node: T): void {
-    if (this.eventDestroyRef.destroyed || this.isDisabled() || this.isOptionDisabled(node)) return;
+  activate(node: T, originalEvent?: Event): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || this.readonly() || this.isOptionDisabled(node)) return;
     this.activeIndex.set(this.currentNodes().indexOf(node));
     if (this.hasChildren(node)) {
       this.activePath.update((path) => [...path, node]);
@@ -438,8 +418,12 @@ export class NeuCascadeSelectComponent<
 
     const value = this.optionValueOf(node);
     this.value.set(value);
-    this.onChange(value);
-    this.selectionChange.emit(node);
+    if (originalEvent) this.optionActivated.emit({
+      option: node,
+      value,
+      source: originalEvent.type.startsWith('key') ? 'keyboard' : 'pointer',
+      originalEvent,
+    });
     this.close();
   }
 
@@ -496,7 +480,7 @@ export class NeuCascadeSelectComponent<
     if (event.key === 'ArrowRight') {
       event.preventDefault();
       const node = this.currentNodes()[index];
-      if (node && this.hasChildren(node) && !this.isOptionDisabled(node)) this.activate(node);
+      if (node && this.hasChildren(node) && !this.isOptionDisabled(node)) this.activate(node, event);
       return;
     }
     if (event.key === 'ArrowLeft') {
@@ -507,7 +491,7 @@ export class NeuCascadeSelectComponent<
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       const node = this.currentNodes()[index];
-      if (node) this.activate(node);
+      if (node) this.activate(node, event);
       return;
     }
     if (event.key === 'Escape') {
@@ -534,7 +518,7 @@ export class NeuCascadeSelectComponent<
 
   isOptionSelected(option: T): boolean {
     const current = this.value();
-    return current !== null && neuOptionValuesEqual(this.optionValueOf(option), current);
+    return current !== null && this.compareWith()(this.optionValueOf(option), current);
   }
 
   trackByOption(index: number, _option: T): string {
@@ -553,6 +537,25 @@ export class NeuCascadeSelectComponent<
     this.isPanelAbove.set(event.connectionPair.originY === 'top');
   }
 
+  focus(options?: FocusOptions): void {
+    if (this.isDisabled()) return;
+    this.elementRef.nativeElement
+      .querySelector<HTMLElement>('.neu-cascade-select__trigger')
+      ?.focus(options);
+  }
+
+  reset(): void {
+    this.activePath.set([]);
+    this.activeIndex.set(this.firstEnabledIndex(this.rootNodes()));
+    this.open.set(false);
+  }
+
+  onFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget;
+    if (next instanceof Node && (this.elementRef.nativeElement.contains(next) || this.document.getElementById(this.panelId)?.contains(next))) return;
+    this.touch.emit();
+  }
+
   private childrenOf(node: T): readonly T[] {
     const accessor = this.optionChildren();
     const rawChildren = accessor
@@ -569,7 +572,7 @@ export class NeuCascadeSelectComponent<
   private findSelectionPath(nodes: readonly T[], value: V): SelectionPath<T> | null {
     const entries = walkNeuTreeDepthFirst(nodes, (node) => this.childrenOf(node));
     const entryIndex = entries.findIndex((entry) =>
-      neuOptionValuesEqual(this.optionValueOf(entry.node), value),
+      this.compareWith()(this.optionValueOf(entry.node), value),
     );
     if (entryIndex < 0) return null;
 

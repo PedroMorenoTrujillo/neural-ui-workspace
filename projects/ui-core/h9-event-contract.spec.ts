@@ -44,8 +44,8 @@ function inputText(input: HTMLInputElement, value: string): void {
   template: `<neu-autocomplete
       [options]="options"
       optionLabel="label"
-      optionValue="value"
-      (select)="selected.push($event)"
+      [optionValue]="valueOf"
+      (optionActivated)="selected.push($event)"
     />
     <neu-input-tags
       [suggestions]="options"
@@ -56,6 +56,7 @@ function inputText(input: HTMLInputElement, value: string): void {
 })
 class SelectionHost {
   options = [{ label: 'Alpha', value: 'a' }];
+  readonly valueOf = (option: { label: string; value: string }) => option.value;
   selected: unknown[] = [];
   tagsSelected: unknown[] = [];
   autocomplete = viewChild.required(NeuAutocompleteComponent);
@@ -77,7 +78,7 @@ describe('H9-A2 zoneless runtime event contracts', () => {
   it('B01 isolates native selection at the input while template and OutputRef receive one domain selection', async () => {
     const f = mount(SelectionHost);
     const host = f.componentInstance;
-    const direct = capture(host.autocomplete().select);
+    const direct = capture(host.autocomplete().optionActivated);
     const tagsDirect = capture(host.tags().select);
     const inputs = Array.from(f.nativeElement.querySelectorAll('input')) as HTMLInputElement[];
     for (const input of inputs) {
@@ -96,7 +97,9 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     const event = new MouseEvent('click');
     host.autocomplete().selectOption(host.options[0], event);
     host.tags().selectOption(event, host.options[0]);
-    expect(host.selected).toEqual([{ originalEvent: event, option: host.options[0], value: 'a' }]);
+    expect(host.selected).toEqual([
+      { originalEvent: event, option: host.options[0], value: 'a', source: 'pointer' },
+    ]);
     expect(host.tagsSelected).toEqual([{ originalEvent: event, value: 'a' }]);
     expect(direct).toEqual(host.selected);
     expect(tagsDirect).toEqual(host.tagsSelected);
@@ -174,7 +177,7 @@ describe('H9-A2 zoneless runtime event contracts', () => {
   it('CascadeSelect exposes only changed user group paths, with no selection/restore echo', async () => {
     const leaf = { value: 'leaf', label: 'Leaf' };
     const root = { value: 'root', label: 'Root', children: [leaf] };
-    const f = mount(NeuCascadeSelectComponent, { nodes: [root] });
+    const f = mount(NeuCascadeSelectComponent, { options: [root] });
     const c = f.componentInstance;
     const groups = capture(c.groupChange),
       opened = capture(c.opened),
@@ -194,11 +197,11 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     f.detectChanges();
     expect(groups).toHaveLength(3);
     expect(closed).toHaveLength(1);
-    c.writeValue(leaf);
+    c.value.set(leaf);
     c.openPanel();
     f.detectChanges();
     expect(groups).toHaveLength(3);
-    c.setDisabledState(true);
+    f.componentRef.setInput('disabled', true);
     c.goBack();
     c.goToDepth(-1);
     c.activate(root);

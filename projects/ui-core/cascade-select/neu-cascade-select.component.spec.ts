@@ -59,10 +59,10 @@ const hierarchy: Department[] = [
   ],
   template: `
     <neu-cascade-select
-      [nodes]="nodes"
+      [options]="nodes"
       label="Location"
       [clearable]="true"
-      (selectionChange)="selection = $event"
+      (valueChange)="selection = $event"
     >
       <ng-template neuCascadeSelectItem let-node let-depth="depth"
         >Item {{ node.name }} {{ depth }}</ng-template
@@ -82,10 +82,11 @@ class CascadeTemplateHost {
 @Component({
   standalone: true,
   imports: [NeuCascadeSelectComponent, ReactiveFormsModule],
-  template: `<neu-cascade-select [nodes]="nodes" optionValue="id" [formControl]="control" />`,
+  template: `<neu-cascade-select [options]="nodes" [optionValue]="valueOf" [formControl]="control" />`,
 })
 class CascadeFormHost {
   nodes = hierarchy;
+  readonly valueOf = (node: Department) => node.id;
   control = new FormControl<number | null>(null);
 }
 
@@ -100,9 +101,9 @@ describe('NeuCascadeSelectComponent', () => {
     fixture = TestBed.createComponent(NeuCascadeSelectComponent) as ComponentFixture<
       NeuCascadeSelectComponent<Department, number>
     >;
-    fixture.componentRef.setInput('nodes', hierarchy);
+    fixture.componentRef.setInput('options', hierarchy);
     fixture.componentRef.setInput('optionLabel', 'name');
-    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionValue', (option: any) => option.id);
     fixture.componentRef.setInput('optionDisabled', 'blocked');
     fixture.detectChanges();
   });
@@ -127,7 +128,7 @@ describe('NeuCascadeSelectComponent', () => {
       NeuCascadeSelectNode<number>,
       number
     >;
-    fixture.componentRef.setInput('nodes', [
+    fixture.componentRef.setInput('options', [
       { value: 0, label: 'Zero', children: [{ value: 1, label: 'One' }] },
     ]);
     fixture.componentRef.setInput('optionLabel', null);
@@ -162,7 +163,7 @@ describe('NeuCascadeSelectComponent', () => {
     const nodes: DescendantDepartment[] = [
       { id: 10, name: 'Platform', descendants: [{ id: 11, name: 'Frontend' }] },
     ];
-    fixture.componentRef.setInput('nodes', nodes);
+    fixture.componentRef.setInput('options', nodes);
     fixture.componentRef.setInput('optionChildren', 'descendants');
     fixture.detectChanges();
 
@@ -176,7 +177,7 @@ describe('NeuCascadeSelectComponent', () => {
       Department,
       Department
     >;
-    fixture.componentRef.setInput('nodes', []);
+    fixture.componentRef.setInput('options', []);
     fixture.componentRef.setInput('options', hierarchy);
     fixture.componentRef.setInput('optionLabel', 'name');
     fixture.componentRef.setInput('optionValue', null);
@@ -195,13 +196,13 @@ describe('NeuCascadeSelectComponent', () => {
       { value: 0, label: 'Zero' },
       { value: 42, label: 'Number' },
     ];
-    fixture.componentRef.setInput('nodes', nodes);
+    fixture.componentRef.setInput('options', nodes);
     fixture.componentRef.setInput('optionLabel', null);
     fixture.componentRef.setInput('optionValue', null);
     fixture.detectChanges();
     component.activate(nodes[1]);
     expect(component.value()).toBe(0);
-    component.writeValue('text');
+    component.value.set('text');
     expect(component.selectedNode()?.label).toBe('Text');
   });
 
@@ -209,28 +210,34 @@ describe('NeuCascadeSelectComponent', () => {
     const component = fixture.componentInstance;
     const changes: Array<number | null> = [];
     let touched = 0;
-    component.registerOnChange((value) => changes.push(value));
-    component.registerOnTouched(() => touched++);
-    component.writeValue(3);
+    component.value.subscribe((value) => changes.push(value));
+    component.touch.subscribe(() => touched++);
+    component.value.set(3);
+    changes.length = 0;
     expect(component.selectedNode()?.name).toBe('Malaga');
     component.activate(hierarchy[0].children![0].children![1]);
     expect(changes).toEqual([4]);
+    expect(touched).toBe(0);
+    component.onFocusOut(new FocusEvent('focusout'));
     expect(touched).toBe(1);
-    component.setDisabledState(true);
+    fixture.componentRef.setInput('disabled', true);
     expect(component.isDisabled()).toBe(true);
   });
 
   it('emits the original T model, not V', () => {
     const selected: Array<Department | null> = [];
-    fixture.componentInstance.selectionChange.subscribe((node) => selected.push(node));
-    fixture.componentInstance.activate(hierarchy[0].children![0].children![0]);
+    fixture.componentInstance.optionActivated.subscribe((event) => selected.push(event.option));
+    fixture.componentInstance.activate(
+      hierarchy[0].children![0].children![0],
+      new MouseEvent('click'),
+    );
     expect(selected).toEqual([hierarchy[0].children![0].children![0]]);
   });
 
   it('matches reconstructed domain objects through optionValue', () => {
     const component = fixture.componentInstance;
-    component.writeValue(3);
-    fixture.componentRef.setInput('nodes', [
+    component.value.set(3);
+    fixture.componentRef.setInput('options', [
       { id: 1, name: 'Europe', children: [{ id: 3, name: 'Malaga' }] },
     ] satisfies Department[]);
     fixture.detectChanges();
@@ -367,7 +374,7 @@ describe('NeuCascadeSelectComponent', () => {
   it('clears by click without opening the overlay', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('clearable', true);
-    component.writeValue(3);
+    component.value.set(3);
     fixture.detectChanges();
     const trigger = fixture.nativeElement.querySelector(
       '.neu-cascade-select__trigger',
@@ -384,7 +391,7 @@ describe('NeuCascadeSelectComponent', () => {
   it('keeps the native clear button focusable and activatable', async () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('clearable', true);
-    component.writeValue(3);
+    component.value.set(3);
     fixture.detectChanges();
     const clear = fixture.nativeElement.querySelector(
       '.neu-cascade-select__clear',
@@ -405,7 +412,7 @@ describe('NeuCascadeSelectComponent', () => {
   it('disables clear with the component and never clears while disabled', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('clearable', true);
-    component.writeValue(3);
+    component.value.set(3);
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
     const clear = fixture.nativeElement.querySelector(
@@ -418,7 +425,7 @@ describe('NeuCascadeSelectComponent', () => {
 
   it('renders the empty slot', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('nodes', []);
+    fixture.componentRef.setInput('options', []);
     component.openPanel();
     fixture.detectChanges();
     expect(document.querySelector('.neu-cascade-select__empty')).toBeTruthy();
@@ -443,7 +450,7 @@ describe('NeuCascadeSelectComponent', () => {
 
   it('ignores a permitted dismissal request after the panel is already closed', () => {
     const component = fixture.componentInstance;
-    const closed = vi.spyOn(component.selectionChange, 'emit');
+    const closed = vi.spyOn(component.optionActivated, 'emit');
 
     component.requestClose('outside-pointer', new Event('pointerdown'));
 
@@ -533,7 +540,7 @@ describe('NeuCascadeSelectComponent', () => {
 
   it('fails closed for disabled, missing, primitive and all-disabled navigation boundaries', () => {
     const component = fixture.componentInstance as any;
-    component.writeValue(999);
+    component.value.set(999);
     expect(component.selectedNode()).toBeNull();
     component.openPanel();
     expect(component.activePath()).toEqual([]);
@@ -575,7 +582,7 @@ describe('NeuCascadeSelectComponent', () => {
 
     const primitiveFixture = TestBed.createComponent(NeuCascadeSelectComponent);
     const primitive = primitiveFixture.componentInstance as any;
-    primitiveFixture.componentRef.setInput('nodes', ['leaf', null]);
+    primitiveFixture.componentRef.setInput('options', ['leaf', null]);
     primitiveFixture.componentRef.setInput('optionDisabled', () => true);
     primitiveFixture.detectChanges();
     expect(primitive.hasChildren('leaf')).toBe(false);

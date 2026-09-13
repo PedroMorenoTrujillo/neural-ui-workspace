@@ -1,6 +1,7 @@
 import { Component, afterNextRender, signal, viewChild } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { NeuAutocompleteComponent, NeuAutocompleteSelectEvent } from '@neural-ui/core/autocomplete';
+import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
+import { NeuOptionActivatedEvent } from '@neural-ui/core/option-api';
 import { NeuInputTagsComponent, NeuInputTagsSelectEvent } from '@neural-ui/core/input-tags';
 import { NeuTreeSelectComponent } from '@neural-ui/core/tree-select';
 import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
@@ -57,9 +58,9 @@ interface Option {
         <neu-autocomplete
           [options]="options"
           optionLabel="label"
-          optionValue="value"
+          [optionValue]="optionValue"
           [delay]="0"
-          (select)="onSelect($event)"
+          (optionActivated)="onSelect($event)"
         />
       </section>
       <section id="h9-tags">
@@ -85,7 +86,8 @@ interface Option {
       </section>
       <section id="h9-cascade">
         <neu-cascade-select
-          [nodes]="tree"
+          [options]="tree"
+          [optionValue]="optionValue"
           (groupChange)="record('group', $event)"
           (opened)="record('cascadeOpened')"
           (closed)="record('cascadeClosed')"
@@ -207,6 +209,7 @@ export class H9EventContractComponent {
     { value: 'b', label: 'Beta' },
   ];
   readonly tree: Option[] = [{ value: 'root', label: 'Root', children: this.options }];
+  readonly optionValue = (option: Option) => option.value;
   readonly items = Array.from({ length: 300 }, (_, i) => `Row ${i}`);
   readonly image =
     'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="40" height="40" fill="blue"/%3E%3C/svg%3E';
@@ -219,7 +222,7 @@ export class H9EventContractComponent {
   readonly cascade = viewChild(NeuCascadeSelectComponent);
   constructor() {
     afterNextRender(() => {
-      this.autocomplete()?.select.subscribe((value) => this.record('acDirect', value));
+      this.autocomplete()?.optionActivated.subscribe((value) => this.record('acDirect', value));
       this.tags()?.select.subscribe((value) => this.record('tagsDirect', value));
       this.record('ready');
     });
@@ -227,7 +230,7 @@ export class H9EventContractComponent {
   record(name: string, payload?: unknown): void {
     this.events.update((values) => [...values, { name, payload }]);
   }
-  onSelect(value: NeuAutocompleteSelectEvent<Option, string>): void {
+  onSelect(value: NeuOptionActivatedEvent<Option, string>): void {
     this.record('acSelect', value);
   }
   onTagSelect(value: NeuInputTagsSelectEvent<Option>): void {
@@ -256,10 +259,10 @@ export class H9EventContractComponent {
       });
   }
   writeValues(): void {
-    this.autocomplete()?.writeValue('a');
+    this.autocomplete()?.value.set('a');
     this.tags()?.writeValue([]);
     this.treeSelect()?.writeValue(null);
-    this.cascade()?.writeValue(null);
+    this.cascade()?.value.set(null);
     this.date()?.value.set(civilDate('2026-01-01'));
     this.color()?.writeValue('oklch(0.7 0.12 280 / 0.65)');
     this.numberValue.set(null);

@@ -19,6 +19,39 @@ export type NeuOptionValue<T> = T extends { label: string; value: infer V } ? V 
 
 export type NeuOptionCompareWith<V> = (left: V, right: V) => boolean;
 
+/** Cardinality shared by option-backed form controls. */
+export type NeuSelectionMode = 'single' | 'multiple';
+
+/** The field value is derived exclusively from the declared selection mode. */
+export type NeuSelectionValue<V, M extends NeuSelectionMode> = M extends 'multiple'
+  ? readonly V[]
+  : V | null;
+
+export interface NeuOptionActivatedEvent<T, V> {
+  readonly option: T;
+  readonly value: V;
+  readonly source: 'pointer' | 'keyboard';
+  readonly originalEvent?: Event;
+}
+
+export interface NeuIndexRange {
+  readonly start: number;
+  readonly end: number;
+}
+
+export interface NeuViewportRange {
+  readonly render: NeuIndexRange;
+  readonly visible: NeuIndexRange;
+}
+
+export interface NeuOptionDataRequest {
+  readonly requestId: number;
+  readonly queryRevision: number;
+  readonly query: string;
+  readonly range?: NeuViewportRange;
+  readonly reason: 'initial' | 'query' | 'viewport' | 'retry';
+}
+
 /**
  * Additive option identity policy. Precedence is `identityAccessor`, then
  * `compareWith`, then the resolved option value with `Object.is`.

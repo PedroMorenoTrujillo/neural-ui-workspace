@@ -32,6 +32,7 @@ import {
   ],
   template: `
     <neu-autocomplete
+      mode="free-text"
       [options]="options"
       [loading]="loading"
       [lazy]="lazy"
@@ -122,14 +123,15 @@ describe('NeuAutocompleteComponent', () => {
 
   it('buffers IME value, query, and completion outputs until composition commits', () => {
     const f = setup();
+    f.componentRef.setInput('mode', 'free-text');
     f.componentRef.setInput('delay', 0);
     f.detectChanges();
     const values: unknown[] = [];
     const queries: string[] = [];
     const completions: string[] = [];
-    f.componentInstance.registerOnChange((value) => values.push(value));
+    f.componentInstance.value.subscribe((value) => values.push(value));
     f.componentInstance.queryChange.subscribe((value) => queries.push(value));
-    f.componentInstance.completeMethod.subscribe((event) => completions.push(event.query));
+    f.componentInstance.suggestionsRequest.subscribe((event) => completions.push(event.query));
     const input = f.nativeElement.querySelector('input') as HTMLInputElement;
 
     input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
@@ -147,11 +149,12 @@ describe('NeuAutocompleteComponent', () => {
   it('respects Angular COMPOSITION_BUFFER_MODE=false', () => {
     TestBed.overrideProvider(COMPOSITION_BUFFER_MODE, { useValue: false });
     const f = setup();
+    f.componentRef.setInput('mode', 'free-text');
     f.componentRef.setInput('delay', 0);
     f.detectChanges();
     const values: unknown[] = [];
     const queries: string[] = [];
-    f.componentInstance.registerOnChange((value) => values.push(value));
+    f.componentInstance.value.subscribe((value) => values.push(value));
     f.componentInstance.queryChange.subscribe((value) => queries.push(value));
     const input = f.nativeElement.querySelector('input') as HTMLInputElement;
 
@@ -169,12 +172,12 @@ describe('NeuAutocompleteComponent', () => {
   it('does not commit a composition that becomes disabled', () => {
     const f = setup();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((value) => values.push(value));
+    f.componentInstance.value.subscribe((value) => values.push(value));
     const input = f.nativeElement.querySelector('input') as HTMLInputElement;
 
     input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
     input.value = 'draft';
-    f.componentInstance.setDisabledState(true);
+    f.componentRef.setInput('disabled', true);
     input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
 
     expect(values).toEqual([]);
@@ -182,9 +185,9 @@ describe('NeuAutocompleteComponent', () => {
 
   it('onQueryChange empty should emit null via CVA', () => {
     const f = setup();
+    f.componentInstance.value.set(1);
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
-    f.componentInstance.writeValue(1);
+    f.componentInstance.value.subscribe((v) => values.push(v));
     f.componentInstance['onQueryChange']('');
     expect(values[0]).toBeNull();
   });
@@ -192,7 +195,7 @@ describe('NeuAutocompleteComponent', () => {
   it('selectOption should set query, close, and emit CVA change', () => {
     const f = setup();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
+    f.componentInstance.value.subscribe((v) => values.push(v));
     f.componentInstance['selectOption'](OPTIONS[0]);
     expect(f.componentInstance['_query']()).toBe('Angular');
     expect(f.componentInstance['_isOpen']()).toBe(false);
@@ -202,7 +205,7 @@ describe('NeuAutocompleteComponent', () => {
   it('selectOption on disabled should not emit', () => {
     const f = setup();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
+    f.componentInstance.value.subscribe((v) => values.push(v));
     f.componentInstance['selectOption'](OPTIONS[3]); // disabled
     expect(values.length).toBe(0);
   });
@@ -210,16 +213,16 @@ describe('NeuAutocompleteComponent', () => {
   it('optionSelected output should emit the selected option', () => {
     const f = setup();
     const selected: unknown[] = [];
-    f.componentInstance.optionSelected.subscribe((o) => selected.push(o));
-    f.componentInstance['selectOption'](OPTIONS[1]);
-    expect((selected[0] as NeuAutocompleteOption).label).toBe('React');
+    f.componentInstance.optionActivated.subscribe((o) => selected.push(o));
+    f.componentInstance['selectOption'](OPTIONS[1], new MouseEvent('click'));
+    expect((selected[0] as { option: NeuAutocompleteOption }).option.label).toBe('React');
   });
 
   it('clear() should reset query and emit null', () => {
     const f = setup();
+    f.componentInstance.value.set(3);
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
-    f.componentInstance.writeValue(3);
+    f.componentInstance.value.subscribe((v) => values.push(v));
     f.componentInstance.clear();
     expect(f.componentInstance['_query']()).toBe('');
     expect(values[0]).toBeNull();
@@ -249,7 +252,7 @@ describe('NeuAutocompleteComponent', () => {
   it('Enter should select the active option', () => {
     const f = setup();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
+    f.componentInstance.value.subscribe((v) => values.push(v));
     // 'vue' → _filtered() = [Vue] en índice 0
     // 'vue' → _filtered() = [Vue] at index 0
     f.componentInstance['onQueryChange']('vue');
@@ -267,26 +270,29 @@ describe('NeuAutocompleteComponent', () => {
 
   it('writeValue with known value should set query to label', () => {
     const f = setup();
-    f.componentInstance.writeValue(2); // React
+    f.componentInstance.value.set(2); // React
+    f.detectChanges();
     expect(f.componentInstance['_query']()).toBe('React');
   });
 
   it('writeValue with null should clear query', () => {
     const f = setup();
-    f.componentInstance['_query'].set('Angular');
-    f.componentInstance.writeValue(null);
+    f.componentInstance.value.set(1);
+    f.detectChanges();
+    f.componentInstance.value.set(null);
+    f.detectChanges();
     expect(f.componentInstance['_query']()).toBe('');
   });
 
   it('setDisabledState should set _cvaDisabled', () => {
     const f = setup();
-    f.componentInstance.setDisabledState(true);
-    expect(f.componentInstance['_cvaDisabled']()).toBe(true);
+    f.componentRef.setInput('disabled', true);
+    expect(f.componentInstance.disabled()).toBe(true);
   });
 
   it('disabled input should have disabled attribute', async () => {
     const f = setup();
-    f.componentInstance.setDisabledState(true);
+    f.componentRef.setInput('disabled', true);
     f.detectChanges();
     await f.whenStable();
     const input = f.nativeElement.querySelector('.neu-autocomplete__input');
@@ -312,7 +318,7 @@ describe('NeuAutocompleteComponent', () => {
     const f = setup();
     (f.componentInstance as any)['_isOpen'].set(true);
     let touched = false;
-    f.componentInstance.registerOnTouched(() => (touched = true));
+    f.componentInstance.touch.subscribe(() => (touched = true));
     (f.componentInstance as any)['_onBlur']();
     expect(touched).toBe(true);
     // After the 150ms timeout the list should close (use fake timers or just check _focused)
@@ -345,7 +351,7 @@ describe('NeuAutocompleteComponent', () => {
 
   it('minLength=3 should not open list when query < 3 chars', () => {
     const f = setup();
-    f.componentRef.setInput('minLength', 3);
+    f.componentRef.setInput('minQueryLength', 3);
     f.componentInstance['onQueryChange']('ca');
     expect((f.componentInstance as any)['_isOpen']()).toBe(false);
     expect(f.componentInstance['_filtered']()).toEqual([]);
@@ -354,7 +360,7 @@ describe('NeuAutocompleteComponent', () => {
   it('minLength=3 should open list when query >= 3 chars', () => {
     const f = setup();
     f.componentRef.setInput('options', OPTIONS.slice(0, 3));
-    f.componentRef.setInput('minLength', 3);
+    f.componentRef.setInput('minQueryLength', 3);
     f.componentInstance['onQueryChange']('cat');
     expect((f.componentInstance as any)['_isOpen']()).toBe(true);
   });
@@ -398,7 +404,8 @@ describe('NeuAutocompleteComponent', () => {
     // writeValue con valor desconocido debe mostrar String(val) como query
     // writeValue with unknown value must display String(val) as query
     const f = setup();
-    f.componentInstance.writeValue('unknown-val');
+    f.componentInstance.value.set('unknown-val');
+    f.detectChanges();
     expect(f.componentInstance['_query']()).toBe('unknown-val');
   });
 
@@ -406,8 +413,8 @@ describe('NeuAutocompleteComponent', () => {
     // writeValue con null debe limpiar la query
     // writeValue with null must clear the query
     const f = setup();
-    f.componentInstance.writeValue('cat');
-    f.componentInstance.writeValue(null);
+    f.componentInstance.value.set('cat');
+    f.componentInstance.value.set(null);
     expect(f.componentInstance['_query']()).toBe('');
   });
 
@@ -504,7 +511,7 @@ describe('NeuAutocompleteComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
+    f.componentInstance.value.subscribe((v) => values.push(v));
     const firstOpt = document.querySelector('.neu-autocomplete__option');
     if (firstOpt) {
       firstOpt.dispatchEvent(new Event('mousedown', { bubbles: true }));
@@ -614,7 +621,7 @@ describe('NeuAutocompleteComponent', () => {
   it('Enter should not select a disabled active option', () => {
     const f = setup();
     const onChange = vi.fn();
-    f.componentInstance.registerOnChange(onChange);
+    f.componentInstance.value.subscribe(onChange);
     f.componentInstance['onQueryChange']('solid');
     onChange.mockClear();
     f.componentInstance['_activeIndex'].set(0);
@@ -703,7 +710,7 @@ describe('NeuAutocompleteComponent', () => {
     f.componentInstance['onWindowResize']();
     expect(f.componentInstance.overlayWidth()).not.toBeNull();
 
-    f.componentRef.setInput('forceSelection', true);
+    f.componentRef.setInput('mode', 'strict');
     f.componentInstance['_query'].set('Not an option');
     f.componentInstance['_isOpen'].set(true);
     f.componentInstance['_onBlur']();
@@ -840,7 +847,7 @@ describe('NeuAutocompleteComponent', () => {
     f.componentInstance['onWindowResize']();
     expect(syncSpy).not.toHaveBeenCalled();
 
-    f.componentRef.setInput('forceSelection', true);
+    f.componentRef.setInput('mode', 'strict');
     f.componentInstance['_query'].set('Angular');
     f.componentInstance['_onBlur']();
 
@@ -942,18 +949,19 @@ describe('NeuAutocompleteComponent', () => {
 
     fixture.componentRef.setInput('options', users);
     fixture.componentRef.setInput('optionLabel', 'fullName');
-    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionValue', (option: any) => option.id);
     fixture.componentRef.setInput('optionDisabled', 'inactive');
     fixture.detectChanges();
 
     const selected = vi.fn();
-    fixture.componentInstance.optionSelected.subscribe(selected);
+    fixture.componentInstance.optionActivated.subscribe(selected);
 
     fixture.componentInstance['onQueryChange']('a');
-    fixture.componentInstance['selectOption'](users[2]);
+    const activation = new MouseEvent('click');
+    fixture.componentInstance['selectOption'](users[2], activation);
 
     expect(fixture.componentInstance['_query']()).toBe('Carol');
-    expect(selected).toHaveBeenCalledWith(users[2]);
+    expect(selected).toHaveBeenCalledWith(expect.objectContaining({ option: users[2], originalEvent: activation }));
     expect(fixture.componentInstance['_query']()).toBe('Carol');
     expect(fixture.componentInstance['_isOpen']()).toBe(false);
   });
@@ -1015,7 +1023,8 @@ describe('NeuAutocompleteComponent', () => {
       expect(component[accessor]()).toBeTruthy();
     }
 
-    component.writeValue(1);
+    component.value.set(1);
+    host.detectChanges();
     component['onQueryChange']('a');
     host.detectChanges();
     expect(document.querySelector('.auto-header')).toBeTruthy();
@@ -1030,7 +1039,7 @@ describe('NeuAutocompleteComponent', () => {
     loadingHost.detectChanges();
     const loadingComponent = loadingHost.debugElement.query(By.directive(NeuAutocompleteComponent))
       .componentInstance as any;
-    loadingComponent.writeValue(1);
+    loadingComponent.value.set(1);
     loadingComponent.openAll();
     loadingHost.detectChanges();
     expect(loadingHost.nativeElement.querySelector('.auto-loading-icon')).toBeTruthy();
@@ -1065,7 +1074,7 @@ describe('NeuAutocompleteComponent', () => {
       f.componentRef.setInput('disabled', false);
       f.componentRef.setInput('lazy', true);
       f.detectChanges();
-      const lazy = vi.spyOn(component.lazyRequest, 'emit');
+      const lazy = vi.spyOn(component.suggestionsRequest, 'emit');
       component.open(null, 'programmatic');
       component.open(null, 'programmatic');
       expect(lazy).toHaveBeenCalledTimes(1);

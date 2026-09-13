@@ -15,6 +15,11 @@ const { NeuRadioComponent, NeuRadioGroupComponent } = await import('@neural-ui/c
 const { NeuNumberInputComponent } = await import('@neural-ui/core/number-input');
 const { NeuKnobComponent } = await import('@neural-ui/core/knob');
 const { NeuDateInputComponent, civilDate } = await import('@neural-ui/core/date-input');
+const { NeuSelectComponent } = await import('@neural-ui/core/select');
+const { NeuAutocompleteComponent } = await import('@neural-ui/core/autocomplete');
+const { NeuCascadeSelectComponent } = await import('@neural-ui/core/cascade-select');
+const { NeuListboxComponent } = await import('@neural-ui/core/listbox');
+const { NeuToggleButtonGroupComponent } = await import('@neural-ui/core/toggle-button-group');
 
 const changes = [];
 class N2FormsSsr {
@@ -32,6 +37,17 @@ class N2FormsSsr {
   amount = new FormControl(1234.5);
   volume = new FormControl(25, { nonNullable: true });
   date = new FormControl(civilDate('2026-03-29'));
+  options = [{ id: 1, label: 'SSR one' }, { id: 2, label: 'SSR two' }];
+  optionValue = (option) => option.id;
+  selectSingle = new FormControl(1);
+  selectMultiple = new FormControl([1], { nonNullable: true });
+  autocompleteStrict = new FormControl(1);
+  autocompleteFree = new FormControl('SSR draft');
+  cascade = new FormControl(1);
+  listboxSingle = new FormControl(1);
+  listboxMultiple = new FormControl([1], { nonNullable: true });
+  toggleSingle = new FormControl(1);
+  toggleMultiple = new FormControl([1], { nonNullable: true });
   numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -51,6 +67,15 @@ class N2FormsSsr {
     this.amount.valueChanges.subscribe((value) => changes.push(`number:${value}`));
     this.volume.valueChanges.subscribe((value) => changes.push(`knob:${value}`));
     this.date.valueChanges.subscribe((value) => changes.push(`date:${value}`));
+    this.selectSingle.valueChanges.subscribe((value) => changes.push(`select-single:${value}`));
+    this.selectMultiple.valueChanges.subscribe((value) => changes.push(`select-multiple:${value}`));
+    this.autocompleteStrict.valueChanges.subscribe((value) => changes.push(`autocomplete-strict:${value}`));
+    this.autocompleteFree.valueChanges.subscribe((value) => changes.push(`autocomplete-free:${value}`));
+    this.cascade.valueChanges.subscribe((value) => changes.push(`cascade:${value}`));
+    this.listboxSingle.valueChanges.subscribe((value) => changes.push(`listbox-single:${value}`));
+    this.listboxMultiple.valueChanges.subscribe((value) => changes.push(`listbox-multiple:${value}`));
+    this.toggleSingle.valueChanges.subscribe((value) => changes.push(`toggle-single:${value}`));
+    this.toggleMultiple.valueChanges.subscribe((value) => changes.push(`toggle-multiple:${value}`));
   }
 }
 core.Component({
@@ -70,6 +95,11 @@ core.Component({
     NeuNumberInputComponent,
     NeuKnobComponent,
     NeuDateInputComponent,
+    NeuSelectComponent,
+    NeuAutocompleteComponent,
+    NeuCascadeSelectComponent,
+    NeuListboxComponent,
+    NeuToggleButtonGroupComponent,
   ],
   template: `
     <neu-input id="ssr-input" label="SSR input" [required]="true" [readonly]="true" [formControl]="input" />
@@ -86,6 +116,15 @@ core.Component({
     <neu-number-input id="ssr-number" [formatOptions]="numberFormat" [formControl]="amount" />
     <neu-knob id="ssr-knob" [formControl]="volume" />
     <neu-date-input id="ssr-date" locale="es-ES" [formControl]="date" />
+    <neu-select id="ssr-select-single" [options]="options" [optionValue]="optionValue" [formControl]="selectSingle" />
+    <neu-select id="ssr-select-multiple" mode="multiple" [options]="options" [optionValue]="optionValue" [formControl]="selectMultiple" />
+    <neu-autocomplete id="ssr-autocomplete-strict" mode="strict" [options]="options" [optionValue]="optionValue" [formControl]="autocompleteStrict" />
+    <neu-autocomplete id="ssr-autocomplete-free" mode="free-text" [options]="options" [optionValue]="optionValue" [formControl]="autocompleteFree" />
+    <neu-cascade-select id="ssr-cascade" [options]="options" [optionValue]="optionValue" [formControl]="cascade" />
+    <neu-listbox id="ssr-listbox-single" [options]="options" [optionValue]="optionValue" [formControl]="listboxSingle" />
+    <neu-listbox id="ssr-listbox-multiple" mode="multiple" [options]="options" [optionValue]="optionValue" [formControl]="listboxMultiple" />
+    <neu-toggle-button-group id="ssr-toggle-single" [options]="options" [optionValue]="optionValue" [formControl]="toggleSingle" />
+    <neu-toggle-button-group id="ssr-toggle-multiple" mode="multiple" [options]="options" [optionValue]="optionValue" [formControl]="toggleMultiple" />
   `,
 })(N2FormsSsr);
 
@@ -123,6 +162,15 @@ for (const id of [
   'ssr-number',
   'ssr-knob',
   'ssr-date',
+  'ssr-select-single',
+  'ssr-select-multiple',
+  'ssr-autocomplete-strict',
+  'ssr-autocomplete-free',
+  'ssr-cascade',
+  'ssr-listbox-single',
+  'ssr-listbox-multiple',
+  'ssr-toggle-single',
+  'ssr-toggle-multiple',
 ]) {
   assert.match(html, new RegExp(`id="${id}"`));
 }
@@ -136,5 +184,5 @@ assert.match(html, /29\/03\/2026/);
 assert.match(html, /ngh=/);
 assert.deepEqual(changes, []);
 console.log(
-  'N2 Forms SSR passed for all 11 controls: values, states, explicit locale, hydration annotations and zero write echo',
+  'N2 Forms SSR passed for all 20 controls: values, states, explicit locale, hydration annotations and zero write echo',
 );

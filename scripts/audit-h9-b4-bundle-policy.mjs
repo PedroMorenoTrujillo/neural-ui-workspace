@@ -37,7 +37,6 @@ const scenarios = {
   provider: { imports: [['provideNeuralUI', '']] },
   button: { imports: [['NeuButtonComponent', 'button']] },
   select: { imports: [['NeuSelectComponent', 'select']] },
-  multiselect: { imports: [['NeuMultiselectComponent', 'multiselect']] },
   'table-basic': { imports: [['NeuTableCoreComponent', 'table-core']] },
   'table-advanced-lazy': { imports: [['NeuTableComponent', 'table']] },
   'tree-basic': { imports: [['NeuTreeComponent', 'tree']] },

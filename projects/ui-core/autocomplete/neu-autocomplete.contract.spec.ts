@@ -47,12 +47,12 @@ const GROUP_CONFIG: NeuOptionGroupConfig<City, Region> = {
 };
 
 function setupCityAutocomplete() {
-  const fixture = TestBed.createComponent(NeuAutocompleteComponent<City, number, Region, number>);
+  const fixture = TestBed.createComponent(NeuAutocompleteComponent<City, number, 'free-text', Region>);
   fixture.componentRef.setInput('options', CITIES);
   fixture.componentRef.setInput('optionLabel', 'profile.name');
-  fixture.componentRef.setInput('optionValue', 'id');
+  fixture.componentRef.setInput('optionValue', (option: any) => option.id);
   fixture.componentRef.setInput('optionDisabled', 'disabled');
-  fixture.componentRef.setInput('identityConfig', { identityAccessor: 'id' });
+  fixture.componentRef.setInput('mode', 'free-text');
   fixture.componentRef.setInput('delay', 20);
   fixture.detectChanges();
   return fixture;
@@ -76,7 +76,7 @@ describe('NeuAutocomplete contract closure', () => {
     fixture.componentRef.setInput('suggestions', []);
     fixture.detectChanges();
     const events: Array<{ query: string; requestId: number }> = [];
-    fixture.componentInstance.completeMethod.subscribe((event) => events.push(event));
+    fixture.componentInstance.suggestionsRequest.subscribe((event) => events.push(event));
 
     fixture.componentInstance['onQueryChange']('a', new InputEvent('input'));
     vi.advanceTimersByTime(10);
@@ -107,9 +107,9 @@ describe('NeuAutocomplete contract closure', () => {
   it('enforces empty, below-minimum, exact-minimum, above-minimum and dynamic minimum states', () => {
     vi.useFakeTimers();
     const fixture = setupCityAutocomplete();
-    fixture.componentRef.setInput('minLength', 3);
+    fixture.componentRef.setInput('minQueryLength', 3);
     const complete = vi.fn();
-    fixture.componentInstance.completeMethod.subscribe(complete);
+    fixture.componentInstance.suggestionsRequest.subscribe(complete);
 
     fixture.componentInstance['onQueryChange']('');
     fixture.componentInstance['onQueryChange']('ab');
@@ -122,7 +122,7 @@ describe('NeuAutocomplete contract closure', () => {
     vi.advanceTimersByTime(20);
     expect(complete.mock.calls.map(([event]) => event.query)).toEqual(['abc', 'abcd']);
 
-    fixture.componentRef.setInput('minLength', 5);
+    fixture.componentRef.setInput('minQueryLength', 5);
     fixture.componentInstance['onQueryChange']('abcd');
     vi.advanceTimersByTime(20);
     expect(complete).toHaveBeenCalledTimes(2);
@@ -132,7 +132,7 @@ describe('NeuAutocomplete contract closure', () => {
     vi.useFakeTimers();
     const fixture = setupCityAutocomplete();
     const complete = vi.fn();
-    fixture.componentInstance.completeMethod.subscribe(complete);
+    fixture.componentInstance.suggestionsRequest.subscribe(complete);
     fixture.componentInstance['onQueryChange']('a');
     fixture.componentInstance['onQueryChange']('');
     vi.advanceTimersByTime(30);
@@ -148,8 +148,9 @@ describe('NeuAutocomplete contract closure', () => {
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('completeOnFocus', true);
     const complete = vi.fn();
-    fixture.componentInstance.completeMethod.subscribe(complete);
-    fixture.componentInstance.writeValue('custom');
+    fixture.componentInstance.suggestionsRequest.subscribe(complete);
+    fixture.componentRef.setInput('value', 'custom');
+    fixture.detectChanges();
 
     fixture.componentInstance['_onFocus'](new FocusEvent('focus'));
 
@@ -165,10 +166,11 @@ describe('NeuAutocomplete contract closure', () => {
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('dropdown', true);
     fixture.componentRef.setInput('dropdownMode', mode);
-    fixture.componentInstance.writeValue(text);
+    fixture.componentRef.setInput('value', text);
+    fixture.detectChanges();
     const complete = vi.fn();
     const dropdown = vi.fn();
-    fixture.componentInstance.completeMethod.subscribe(complete);
+    fixture.componentInstance.suggestionsRequest.subscribe(complete);
     fixture.componentInstance.dropdownClick.subscribe(dropdown);
     const event = new MouseEvent('click');
 
@@ -183,7 +185,7 @@ describe('NeuAutocomplete contract closure', () => {
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('dropdown', true);
     const complete = vi.fn();
-    fixture.componentInstance.completeMethod.subscribe(complete);
+    fixture.componentInstance.suggestionsRequest.subscribe(complete);
     fixture.componentInstance.openAll();
     expect(complete).toHaveBeenCalledTimes(1);
 
@@ -196,26 +198,40 @@ describe('NeuAutocomplete contract closure', () => {
   it('separates typed custom text from the previous matched option and canonical value', () => {
     const fixture = setupCityAutocomplete();
     const values: unknown[] = [];
-    fixture.componentInstance.registerOnChange((value) => values.push(value));
+    fixture.componentInstance.value.subscribe((value) => values.push(value));
     fixture.componentInstance['selectOption'](CITIES[0], new MouseEvent('mousedown'));
     expect(fixture.componentInstance.matchedOption()).toBe(CITIES[0]);
-    expect(fixture.componentInstance.canonicalValue()).toBe(0);
+    expect(fixture.componentInstance.value()).toBe(0);
 
     fixture.componentInstance['onQueryChange']('Amsterdam edited');
 
     expect(fixture.componentInstance['_query']()).toBe('Amsterdam edited');
     expect(fixture.componentInstance.matchedOption()).toBeNull();
     expect(fixture.componentInstance.customTextValue()).toBe('Amsterdam edited');
-    expect(fixture.componentInstance.canonicalValue()).toBe('Amsterdam edited');
+    expect(fixture.componentInstance.value()).toBe('Amsterdam edited');
     expect(values).toEqual([0, 'Amsterdam edited']);
+  });
+
+  it('keeps a strict user query visible after clearing the previous option value', () => {
+    const fixture = setupCityAutocomplete();
+    fixture.componentRef.setInput('mode', 'strict');
+    fixture.componentRef.setInput('value', 1);
+    fixture.detectChanges();
+
+    fixture.componentInstance['onQueryChange']('Ams');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.value()).toBeNull();
+    expect(fixture.componentInstance['_query']()).toBe('Ams');
+    expect(fixture.componentInstance['_filtered']()).toEqual([CITIES[0]]);
   });
 
   it('atomically clears stale selection on a force-selection edit and normalizes invalid blur', () => {
     const fixture = setupCityAutocomplete();
-    fixture.componentRef.setInput('forceSelection', true);
+    fixture.componentRef.setInput('mode', 'strict');
     const values: unknown[] = [];
     const clear = vi.fn();
-    fixture.componentInstance.registerOnChange((value) => values.push(value));
+    fixture.componentInstance.value.subscribe((value) => values.push(value));
     fixture.componentInstance.cleared.subscribe(clear);
     fixture.componentInstance['selectOption'](CITIES[0], new MouseEvent('mousedown'));
     fixture.componentInstance['onQueryChange']('invalid');
@@ -224,7 +240,7 @@ describe('NeuAutocomplete contract closure', () => {
     fixture.componentInstance['_onBlur'](new FocusEvent('blur'));
 
     expect(fixture.componentInstance['_query']()).toBe('');
-    expect(fixture.componentInstance.canonicalValue()).toBeNull();
+    expect(fixture.componentInstance.value()).toBeNull();
     expect(values).toEqual([0, null]);
     expect(clear).toHaveBeenCalledOnce();
     expect(clear).toHaveBeenCalledWith(expect.objectContaining({ reason: 'force-selection' }));
@@ -232,9 +248,9 @@ describe('NeuAutocomplete contract closure', () => {
 
   it('resolves an exact case-insensitive force-selection label on blur', () => {
     const fixture = setupCityAutocomplete();
-    fixture.componentRef.setInput('forceSelection', true);
+    fixture.componentRef.setInput('mode', 'strict');
     const values: unknown[] = [];
-    fixture.componentInstance.registerOnChange((value) => values.push(value));
+    fixture.componentInstance.value.subscribe((value) => values.push(value));
     fixture.componentInstance['onQueryChange']('amsterdam');
     fixture.componentInstance['_onBlur'](new FocusEvent('blur'));
 
@@ -247,12 +263,14 @@ describe('NeuAutocomplete contract closure', () => {
     const fixture = setupCityAutocomplete();
     const values = vi.fn();
     const selected = vi.fn();
-    fixture.componentInstance.registerOnChange(values);
-    fixture.componentInstance.select.subscribe(selected);
+    fixture.componentInstance.value.subscribe(values);
+    fixture.componentInstance.optionActivated.subscribe(selected);
 
-    fixture.componentInstance.writeValue(1);
+    fixture.componentRef.setInput('value', 1);
+    fixture.detectChanges();
     expect(fixture.componentInstance['_query']()).toBe('Barcelona');
-    fixture.componentInstance.writeValue('Elsewhere');
+    fixture.componentRef.setInput('value', 'Elsewhere');
+    fixture.detectChanges();
     expect(fixture.componentInstance.customTextValue()).toBe('Elsewhere');
     fixture.componentInstance.reset();
 
@@ -266,7 +284,7 @@ describe('NeuAutocomplete contract closure', () => {
     const values = vi.fn();
     const clear = vi.fn();
     const query = vi.fn();
-    fixture.componentInstance.registerOnChange(values);
+    fixture.componentInstance.value.subscribe(values);
     fixture.componentInstance.cleared.subscribe(clear);
     fixture.componentInstance.queryChange.subscribe(query);
     fixture.componentInstance['selectOption'](CITIES[1]);
@@ -285,25 +303,25 @@ describe('NeuAutocomplete contract closure', () => {
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('readonly', true);
     fixture.componentRef.setInput('dropdown', true);
-    fixture.componentInstance.writeValue(0);
+    fixture.componentInstance.value.set(0);
     const values = vi.fn();
-    fixture.componentInstance.registerOnChange(values);
+    fixture.componentInstance.value.subscribe(values);
     fixture.componentInstance.openAll();
     fixture.componentInstance['selectOption'](CITIES[1], new MouseEvent('mousedown'));
     fixture.componentInstance.clear(new MouseEvent('click'), 'button');
 
     expect(fixture.componentInstance['_isOpen']()).toBe(true);
-    expect(fixture.componentInstance.canonicalValue()).toBe(0);
+    expect(fixture.componentInstance.value()).toBe(0);
     expect(values).not.toHaveBeenCalled();
   });
 
-  it('composes direct and CVA disabled ownership and blocks interaction', () => {
+  it('honors direct disabled ownership and blocks interaction', () => {
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('disabled', true);
-    fixture.componentInstance.setDisabledState(false);
-    expect(fixture.componentInstance.isDisabledFinal()).toBe(true);
     fixture.componentRef.setInput('disabled', false);
-    fixture.componentInstance.setDisabledState(true);
+    expect(fixture.componentInstance.isDisabledFinal()).toBe(false);
+    fixture.componentRef.setInput('disabled', false);
+    fixture.componentRef.setInput('disabled', true);
     fixture.componentInstance['onQueryChange']('a');
     fixture.componentInstance.openAll();
 
@@ -315,13 +333,14 @@ describe('NeuAutocomplete contract closure', () => {
   it('reconciles immutable suggestion replacement by identity without changing the model', () => {
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('suggestions', CITIES);
-    fixture.componentInstance.writeValue(1);
+    fixture.componentInstance.value.set(1);
+    fixture.detectChanges();
     const replacement = CITIES.map((city) => ({ ...city, profile: { ...city.profile } }));
     fixture.componentRef.setInput('suggestions', replacement);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.matchedOption()).toBe(replacement[1]);
-    expect(fixture.componentInstance.canonicalValue()).toBe(1);
+    expect(fixture.componentInstance.value()).toBe(1);
     expect(fixture.componentInstance['_query']()).toBe('Barcelona');
   });
 
@@ -347,7 +366,8 @@ describe('NeuAutocomplete contract closure', () => {
     fixture.componentRef.setInput('options', [
       { id: Number.NaN, profile: { name: 'Not a number' } },
     ]);
-    fixture.componentInstance.writeValue(Number.NaN);
+    fixture.componentInstance.value.set(Number.NaN);
+    fixture.detectChanges();
     expect(fixture.componentInstance['_query']()).toBe('Not a number');
   });
 
@@ -373,15 +393,15 @@ describe('NeuAutocomplete contract closure', () => {
     fixture.componentRef.setInput('virtualScrollVisibleItems', 4);
     fixture.componentRef.setInput('dataFirst', 20);
     fixture.componentRef.setInput('totalItems', 1000);
-    const lazy: Array<{ first: number; end: number; requestId: number; query: string }> = [];
-    fixture.componentInstance.lazyRequest.subscribe((event) => lazy.push(event));
+    const lazy: Array<{ requestId: number; query: string; range?: { render: { start: number; end: number } } }> = [];
+    fixture.componentInstance.suggestionsRequest.subscribe((event) => lazy.push(event));
 
     fixture.componentInstance['onQueryChange']('bar');
     vi.advanceTimersByTime(20);
     fixture.componentInstance['onPanelScroll']({ target: { scrollTop: 400 } } as unknown as Event);
 
-    expect(lazy[0]).toEqual(expect.objectContaining({ first: 20, end: 24, query: 'bar' }));
-    expect(lazy[1]).toEqual(expect.objectContaining({ first: 10, end: 14, query: 'bar' }));
+    expect(lazy[0]).toEqual(expect.objectContaining({ range: { render: { start: 20, end: 24 }, visible: { start: 20, end: 24 } }, query: 'bar' }));
+    expect(lazy[1]).toEqual(expect.objectContaining({ range: { render: { start: 10, end: 14 }, visible: { start: 10, end: 14 } }, query: 'bar' }));
     expect(lazy[1].requestId).toBeGreaterThan(lazy[0].requestId);
   });
 
@@ -407,7 +427,8 @@ describe('NeuAutocomplete contract closure', () => {
   it('keeps aria-activedescendant on an eligible rendered row and aria-selected on the value', async () => {
     const fixture = setupCityAutocomplete();
     fixture.componentRef.setInput('autoOptionFocus', true);
-    fixture.componentInstance.writeValue(1);
+    fixture.componentInstance.value.set(1);
+    fixture.detectChanges();
     fixture.componentInstance.openAll();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -427,11 +448,11 @@ describe('NeuAutocomplete contract closure', () => {
     fixture.componentRef.setInput('delay', 0);
     fixture.componentInstance['onQueryChange']('a');
     expect(fixture.componentInstance['_activeIndex']()).toBe(0);
-    expect(fixture.componentInstance.canonicalValue()).toBe('a');
+    expect(fixture.componentInstance.value()).toBe('a');
 
     fixture.componentRef.setInput('selectOnFocus', true);
     fixture.componentInstance['onOptionMouseEnter'](new MouseEvent('mouseenter'), 1);
-    expect(fixture.componentInstance.canonicalValue()).toBe(1);
+    expect(fixture.componentInstance.value()).toBe(1);
 
     fixture.componentRef.setInput('focusOnHover', false);
     fixture.componentInstance['onOptionMouseEnter'](new MouseEvent('mouseenter'), 3);
@@ -441,7 +462,7 @@ describe('NeuAutocomplete contract closure', () => {
   it('supports boundary, page, Enter, Escape and Tab keyboard behavior without duplicate selection', () => {
     const fixture = setupCityAutocomplete();
     const selected = vi.fn();
-    fixture.componentInstance.select.subscribe(selected);
+    fixture.componentInstance.optionActivated.subscribe(selected);
     fixture.componentInstance.openAll();
     fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     fixture.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'PageDown' }));
@@ -482,9 +503,8 @@ describe('NeuAutocomplete contract closure', () => {
     fixture.componentRef.setInput('tabindex', 4);
     fixture.componentRef.setInput('required', true);
     fixture.componentRef.setInput('invalid', true);
-    fixture.componentRef.setInput('minlength', 2);
-    fixture.componentRef.setInput('maxlength', 12);
-    fixture.componentRef.setInput('pattern', '[A-Za-z]+');
+    fixture.componentRef.setInput('minLength', 2);
+    fixture.componentRef.setInput('maxLength', 12);
     fixture.componentRef.setInput('ariaLabel', 'City search');
     fixture.componentRef.setInput('ariaDescribedBy', 'city-help');
     fixture.detectChanges();
@@ -500,7 +520,6 @@ describe('NeuAutocomplete contract closure', () => {
     expect(input.getAttribute('aria-invalid')).toBe('true');
     expect(input.getAttribute('minlength')).toBe('2');
     expect(input.getAttribute('maxlength')).toBe('12');
-    expect(input.pattern).toBe('[A-Za-z]+');
     expect(input.getAttribute('aria-label')).toBe('City search');
     expect(input.getAttribute('aria-describedby')).toBe('city-help');
   });
@@ -630,7 +649,7 @@ describe('NeuAutocomplete contract closure', () => {
           [groups]="groups"
           [groupConfig]="config"
           [optionLabel]="'profile.name'"
-          [optionValue]="'id'"
+          [optionValue]="valueOf"
           [dropdown]="true"
           [virtualScroll]="true"
           [virtualScrollVisibleItems]="2"
@@ -648,6 +667,7 @@ describe('NeuAutocomplete contract closure', () => {
       `,
     })
     class Host {
+      readonly valueOf = (city: City) => city.id;
       readonly cities = CITIES;
       readonly groups = GROUPS;
       readonly config = GROUP_CONFIG;
@@ -659,7 +679,7 @@ describe('NeuAutocomplete contract closure', () => {
     host.detectChanges();
     await host.whenStable();
     const autocomplete = host.debugElement.children[0]
-      .componentInstance as NeuAutocompleteComponent<City, number, Region, number>;
+      .componentInstance as NeuAutocompleteComponent<City, number, 'free-text', Region>;
 
     expect(
       [
@@ -677,18 +697,14 @@ describe('NeuAutocomplete contract closure', () => {
     expect(autocomplete.displayText()).toBe('');
     expect(autocomplete.allOptions()).toHaveLength(4);
 
-    autocomplete.writeValue('custom');
+    autocomplete.value.set(0);
+    host.detectChanges();
     autocomplete.openAll();
     host.detectChanges();
     await host.whenStable();
+    host.detectChanges();
     const input = host.nativeElement.querySelector('input') as HTMLInputElement;
     input.dispatchEvent(new KeyboardEvent('keyup', { key: 'a', bubbles: true }));
-    const dropdown = host.nativeElement.querySelector(
-      '.neu-autocomplete__dropdown',
-    ) as HTMLButtonElement;
-    dropdown.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    const clear = host.nativeElement.querySelector('.neu-autocomplete__clear') as HTMLButtonElement;
-    clear.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
 
     const option = document.querySelector('.neu-autocomplete__option') as HTMLElement;
     option.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
@@ -698,6 +714,13 @@ describe('NeuAutocomplete contract closure', () => {
     autocomplete['_viewport']()?.checkViewportSize();
     autocomplete['_viewport']()?.scrollToIndex(1);
     expect(list.scrollTop).toBe(40);
+
+    const dropdown = host.nativeElement.querySelector(
+      '.neu-autocomplete__dropdown',
+    ) as HTMLButtonElement;
+    dropdown.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    const clear = host.nativeElement.querySelector('.neu-autocomplete__clear') as HTMLButtonElement;
+    clear.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
 
     document.body.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
     document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -783,7 +806,7 @@ describe('NeuAutocomplete contract closure', () => {
     const component = fixture.componentInstance;
     const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
 
-    fixture.componentRef.setInput('maxlength', 2);
+    fixture.componentRef.setInput('maxLength', 2);
     input.value = 'abcd';
     input.dispatchEvent(new InputEvent('input', { bubbles: true }));
     expect(input.value).toBe('ab');
@@ -829,7 +852,7 @@ describe('NeuAutocomplete contract closure', () => {
     component['onDocClick'](new MouseEvent('mousedown'));
     component['onWindowResize']();
 
-    component.writeValue(99);
+    component.value.set(99);
     fixture.componentRef.setInput('options', [...CITIES, { id: 99, profile: { name: 'Late' } }]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -846,5 +869,38 @@ describe('NeuAutocomplete contract closure', () => {
     expect(first.componentInstance.inputElementId()).toBe('origin-city');
     expect(first.componentInstance.listId()).toBe('origin-city-list');
     expect(second.componentInstance.inputElementId()).toBe('destination-city');
+  });
+
+  it('keeps 10k-option filtering, virtual DOM and repeated overlay cleanup bounded', async () => {
+    const fixture = setupCityAutocomplete();
+    const component = fixture.componentInstance;
+    const many = Array.from({ length: 10_000 }, (_, id) => ({
+      id,
+      profile: { name: `City ${id}` },
+    }));
+    fixture.componentRef.setInput('options', many);
+    fixture.componentRef.setInput('virtualScroll', true);
+    fixture.componentRef.setInput('virtualScrollVisibleItems', 8);
+    fixture.componentRef.setInput('virtualScrollBuffer', 2);
+    fixture.detectChanges();
+
+    component['filterQuery'].set('City 9999');
+    component['allowEmptyQuery'].set(true);
+    fixture.detectChanges();
+    expect(component.visibleOptionCount()).toBe(1);
+    expect(component.renderedRows()).toHaveLength(1);
+
+    for (let cycle = 0; cycle < 3; cycle++) {
+      component.openAll();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.visibleOptionCount()).toBe(10_000);
+      expect(component.renderedRows().length).toBeLessThanOrEqual(12);
+      expect(document.querySelectorAll('.neu-autocomplete__panel')).toHaveLength(1);
+      component.close();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(document.querySelectorAll('.neu-autocomplete__panel')).toHaveLength(0);
+    }
   });
 });

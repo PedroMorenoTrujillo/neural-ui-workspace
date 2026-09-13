@@ -79,7 +79,6 @@ const COMPONENT_PREFIXES = [
   'toast',
   'tooltip',
   'organization-chart',
-  'multiselect',
 ];
 
 function filesIn(directory) {

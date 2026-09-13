@@ -17,12 +17,6 @@ import {
   NeuSelectSelectedDirective,
 } from '@neural-ui/core/select';
 import {
-  NeuMultiselectComponent,
-  NeuMultiselectFilterDirective,
-  NeuMultiselectItemDirective,
-  NeuMultiselectTokenDirective,
-} from '@neural-ui/core/multiselect';
-import {
   FilterContextFixtureDirective,
   FixtureGroup,
   FixturePerson,
@@ -42,10 +36,6 @@ import {
     NeuSelectFilterDirective,
     NeuSelectItemDirective,
     NeuSelectSelectedDirective,
-    NeuMultiselectComponent,
-    NeuMultiselectFilterDirective,
-    NeuMultiselectItemDirective,
-    NeuMultiselectTokenDirective,
     NeuAutocompleteComponent,
     NeuAutocompleteGroupDirective,
     NeuAutocompleteItemDirective,
@@ -73,22 +63,11 @@ import {
         <button type="button" (click)="filter(789)">Filter select</button>
       </ng-template>
     </neu-select>
-    <neu-select [options]="options" [multiple]="true">
+    <neu-select [options]="options" mode="multiple">
       <ng-template [neuSelectSelected]="options" let-selected="options">
         {{ selected[0]?.profile?.missing }}
       </ng-template>
     </neu-select>
-    <neu-multiselect [options]="options" [searchable]="true">
-      <ng-template [neuMultiselectItem]="options" let-person="option">
-        {{ person.profile.missing }}
-      </ng-template>
-      <ng-template [neuMultiselectToken]="options" let-remove="remove">
-        <button type="button" (click)="remove('invalid')">Remove</button>
-      </ng-template>
-      <ng-template [neuMultiselectFilter]="filterConfig" let-filter="filter">
-        <button type="button" (click)="filter(101)">Filter multiselect</button>
-      </ng-template>
-    </neu-multiselect>
     <neu-autocomplete [suggestions]="options">
       <ng-template [neuAutocompleteItem]="options" let-person="option">
         {{ person.profile.missing }}

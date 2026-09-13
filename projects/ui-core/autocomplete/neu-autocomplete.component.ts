@@ -15,28 +15,28 @@ import {
   computed,
   contentChild,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
   untracked,
   viewChild,
 } from '@angular/core';
-import { COMPOSITION_BUFFER_MODE, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { COMPOSITION_BUFFER_MODE } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuOptionAccessor,
   NeuOptionDisabledAccessor,
   NeuOptionFilterConfig,
   NeuOptionGroupConfig,
-  NeuOptionIdentityConfig,
   NeuOptionLabelAccessor,
   NeuOptionLazyRequest,
+  NeuOptionActivatedEvent,
   NeuOptionValue,
   NeuOptionValueAccessor,
   neuOptionValuesEqual,
-  neuOptionsEqual,
   resolveNeuOptionDisabled,
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
@@ -79,11 +79,11 @@ import {
   NeuAutocompleteGroupContext,
   NeuAutocompleteIconContext,
   NeuAutocompleteItemContext,
-  NeuAutocompleteLazyLoadEvent,
   NeuAutocompleteLoaderContext,
+  NeuAutocompleteMode,
   NeuAutocompleteOption,
   NeuAutocompleteOverlayEvent,
-  NeuAutocompleteSelectEvent,
+  NeuAutocompleteSuggestionsRequest,
   NeuAutocompleteSize,
   NeuAutocompleteValue,
   NeuAutocompleteVariant,
@@ -108,13 +108,6 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
   selector: 'neu-autocomplete',
   imports: [NgTemplateOutlet, OverlayModule],
   encapsulation: ViewEncapsulation.None,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuAutocompleteComponent),
-      multi: true,
-    },
-  ],
   host: {
     class: 'neu-autocomplete',
     '[class.neu-autocomplete--open]': '_isOpen()',
@@ -155,9 +148,8 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
         [disabled]="isDisabledFinal()"
         [attr.placeholder]="floatingLabel() ? ' ' : placeholder() || null"
         [attr.size]="inputSize()"
-        [attr.minlength]="minlength()"
-        [attr.maxlength]="maxlength()"
-        [attr.pattern]="pattern()"
+        [attr.minlength]="minLength()"
+        [attr.maxlength]="maxLength()"
         [attr.aria-label]="ariaLabel() || (!ariaLabelledBy() ? label() || placeholder() : null)"
         [attr.aria-labelledby]="ariaLabelledBy()"
         [attr.aria-describedby]="describedBy()"
@@ -370,10 +362,10 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
 export class NeuAutocompleteComponent<
   T = NeuAutocompleteOption,
   V = NeuOptionValue<T>,
+  F extends NeuAutocompleteMode = 'strict',
   G = unknown,
-  I = unknown,
 >
-  implements ControlValueAccessor, OnDestroy
+  implements FormValueControl<NeuAutocompleteValue<V, F>>, OnDestroy
 {
   private readonly generatedId = inject(NeuIdGenerator).getId('neu-autocomplete-');
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -409,14 +401,14 @@ export class NeuAutocompleteComponent<
   readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
   readonly optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
   readonly optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
-  readonly identityConfig = input<Readonly<NeuOptionIdentityConfig<T, V, I>>>({});
+  readonly compareWith = input<(left: V, right: V) => boolean>(Object.is);
 
-  readonly minLength = input<number>(0);
+  readonly minQueryLength = input<number>(0);
   readonly delay = input(300);
   readonly completeOnFocus = input(false);
   readonly dropdown = input(false);
   readonly dropdownMode = input<NeuAutocompleteDropdownMode>('blank');
-  readonly forceSelection = input(false);
+  readonly mode = input<F>('strict' as F);
   readonly filterConfig = input<Readonly<NeuOptionFilterConfig<T>>>({});
 
   readonly autoHighlight = input(false);
@@ -436,10 +428,15 @@ export class NeuAutocompleteComponent<
   readonly tabindex = input(0);
   readonly required = input(false);
   readonly invalid = input(false);
+  readonly hidden = input(false);
+  readonly pending = input(false);
+  readonly touched = input(false);
+  readonly dirty = input(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
   readonly inputSize = input<number | null>(null);
-  readonly minlength = input<number | null>(null);
-  readonly maxlength = input<number | null>(null);
-  readonly pattern = input<string | null>(null);
+  readonly minLength = input<number | undefined>(undefined);
+  readonly maxLength = input<number | undefined>(undefined);
+  readonly pattern = input<readonly RegExp[]>([]);
   readonly ariaLabel = input<string | null>(null);
   readonly ariaLabelledBy = input<string | null>(null);
   readonly ariaDescribedBy = input<string | null>(null);
@@ -472,19 +469,18 @@ export class NeuAutocompleteComponent<
   readonly dataFirst = input(0);
   readonly totalItems = input<number | null>(null);
 
-  readonly completeMethod = output<NeuAutocompleteCompleteEvent>();
-  readonly select = output<NeuAutocompleteSelectEvent<T, V>>();
-  readonly focusEvent = output<FocusEvent>();
-  readonly blurEvent = output<FocusEvent>();
+  readonly suggestionsRequest = output<NeuAutocompleteSuggestionsRequest>();
+  readonly optionActivated = output<NeuOptionActivatedEvent<T, V>>();
+  readonly focusEntered = output<FocusEvent>();
+  readonly focusLeft = output<FocusEvent>();
   readonly dropdownClick = output<NeuAutocompleteDropdownClickEvent>();
-  readonly cleared = output<NeuAutocompleteClearEvent<V>>();
+  readonly cleared = output<NeuAutocompleteClearEvent<V, F>>();
   readonly inputKeydown = output<KeyboardEvent>();
   readonly keyUp = output<KeyboardEvent>();
-  readonly opened = output<NeuAutocompleteOverlayEvent>();
-  readonly closed = output<NeuAutocompleteOverlayEvent>();
-  readonly lazyRequest = output<NeuAutocompleteLazyLoadEvent>();
-  readonly optionSelected = output<T | null>();
+  readonly opened = output<void>();
+  readonly closed = output<void>();
   readonly queryChange = output<string>();
+  readonly touch = output<void>();
 
   /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
   readonly itemTpl = contentChild(NeuAutocompleteItemDirective<T, V>);
@@ -502,11 +498,10 @@ export class NeuAutocompleteComponent<
   readonly displayText = computed(() => this._query());
   readonly matchedOption = signal<T | null>(null);
   readonly customTextValue = signal<string | null>(null);
-  readonly canonicalValue = signal<NeuAutocompleteValue<V> | null>(null);
+  readonly value = model<NeuAutocompleteValue<V, F>>(null as NeuAutocompleteValue<V, F>);
   protected readonly _isOpen = signal(false);
   protected readonly _activeIndex = signal(-1);
   protected readonly _focused = signal(false);
-  private readonly _cvaDisabled = signal(false);
   readonly overlayWidth = signal<number | null>(null);
   readonly panelAbove = signal(false);
   readonly virtualFirst = signal(0);
@@ -517,9 +512,8 @@ export class NeuAutocompleteComponent<
   private lastLazySignature = '';
   private completionTimer: ReturnType<typeof setTimeout> | null = null;
   private completionRequestId = 0;
+  private suppressNextExternalValueSync = false;
   private focusSessionTouched = false;
-  private onChange: (value: NeuAutocompleteValue<V> | null) => void = () => undefined;
-  private onTouched: () => void = () => undefined;
   private readonly compositionMode =
     inject(COMPOSITION_BUFFER_MODE, { optional: true }) ??
     !/android (\d+)/.test(
@@ -537,8 +531,8 @@ export class NeuAutocompleteComponent<
   );
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
-  readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
-  readonly effectiveMinQueryLength = computed(() => Math.max(0, Math.max(1, this.minLength())));
+  readonly isDisabledFinal = computed(() => this.disabled());
+  readonly effectiveMinQueryLength = computed(() => Math.max(0, Math.max(1, this.minQueryLength())));
   readonly consumerOwnedSuggestions = computed(
     () => this.suggestions() !== null || this.groupSuggestions() !== null,
   );
@@ -721,10 +715,43 @@ export class NeuAutocompleteComponent<
 
   constructor() {
     effect(() => {
+      const value = this.value();
+      const options = this.allOptions();
+      untracked(() => {
+        if (this.suppressNextExternalValueSync) {
+          this.suppressNextExternalValueSync = false;
+          return;
+        }
+        if (value === null) {
+          this._query.set('');
+          this.filterQuery.set('');
+          this.matchedOption.set(null);
+          this.customTextValue.set(null);
+          return;
+        }
+        const option = options.find((candidate) =>
+          this.compareWith()(this.optionValueOf(candidate), value as V),
+        );
+        if (option) {
+          const label = this.optionLabelOf(option);
+          this._query.set(label);
+          this.filterQuery.set(label);
+          this.matchedOption.set(option);
+          this.customTextValue.set(null);
+          return;
+        }
+        const text = String(value);
+        this._query.set(text);
+        this.filterQuery.set(text);
+        this.matchedOption.set(null);
+        this.customTextValue.set(this.mode() === 'free-text' ? text : null);
+      });
+    });
+    effect(() => {
       const rows = this.visibleRows();
       untracked(() => this.applyActiveResult(this.activeRowController.setRows(rows), true));
 
-      const currentValue = untracked(() => this.canonicalValue());
+      const currentValue = untracked(() => this.value());
       const currentOption = untracked(() => this.matchedOption());
       if (currentOption !== null) {
         const replacement = this.allOptions().find((option) =>
@@ -764,7 +791,7 @@ export class NeuAutocompleteComponent<
   protected onInput(event: Event): void {
     if (this.isDisabledFinal() || this.readonly()) return;
     const target = event.target as HTMLInputElement;
-    const text = this.maxlength() == null ? target.value : target.value.slice(0, this.maxlength()!);
+    const text = this.maxLength() == null ? target.value : target.value.slice(0, this.maxLength()!);
     if (target.value !== text) target.value = text;
     this._query.set(text);
     if (this.compositionMode && this.composing) return;
@@ -790,7 +817,7 @@ export class NeuAutocompleteComponent<
       return;
     }
     const target = event.target as HTMLInputElement;
-    const text = this.maxlength() == null ? target.value : target.value.slice(0, this.maxlength()!);
+    const text = this.maxLength() == null ? target.value : target.value.slice(0, this.maxLength()!);
     if (target.value !== text) target.value = text;
     this.compositionCommit = text;
     this.onQueryChange(text, event);
@@ -799,7 +826,7 @@ export class NeuAutocompleteComponent<
   private onQueryChange(query: string, originalEvent: Event | null = null): void {
     if (this.isDisabledFinal() || this.readonly()) return;
     const previousText = this._query();
-    const previousValue = this.canonicalValue();
+    const previousValue = this.value();
     this._query.set(query);
     this.filterQuery.set(query);
     this.allowEmptyQuery.set(false);
@@ -807,11 +834,11 @@ export class NeuAutocompleteComponent<
     this.setActiveIndex(-1);
     this.queryChange.emit(query);
 
-    const nextValue = this.forceSelection() || query === '' ? null : query;
-    this.customTextValue.set(this.forceSelection() || query === '' ? null : query);
-    if (!neuOptionValuesEqual(previousValue, nextValue)) {
-      this.canonicalValue.set(nextValue);
-      this.onChange(nextValue);
+    const nextValue = this.mode() === 'strict' || query === '' ? null : query;
+    this.customTextValue.set(this.mode() === 'strict' || query === '' ? null : query);
+    if (!Object.is(previousValue, nextValue)) {
+      this.suppressNextExternalValueSync = this.mode() === 'strict';
+      this.value.set(nextValue as NeuAutocompleteValue<V, F>);
     }
 
     if (!query) {
@@ -835,7 +862,7 @@ export class NeuAutocompleteComponent<
     if (this.isDisabledFinal()) return;
     this._focused.set(true);
     this.focusSessionTouched = false;
-    this.focusEvent.emit(event);
+    this.focusEntered.emit(event);
     if (this.completeOnFocus()) {
       this.filterQuery.set(this._query());
       this.scheduleCompletion(event, this._query(), 'focus', false);
@@ -854,10 +881,10 @@ export class NeuAutocompleteComponent<
     this.commitForceSelection(event);
     if (!this.focusSessionTouched) {
       this.focusSessionTouched = true;
-      this.onTouched();
+      this.touch.emit();
     }
     this.close(event, 'tab');
-    this.blurEvent.emit(event);
+    this.focusLeft.emit(event);
   }
 
   protected handleDropdownClick(event: MouseEvent): void {
@@ -947,7 +974,7 @@ export class NeuAutocompleteComponent<
           event.preventDefault();
           const row = this.visibleRows()[this._activeIndex()];
           if (row?.kind === 'option' && !row.disabled) this.selectRow(event, row);
-          else if (this.forceSelection()) this.commitForceSelection(event);
+          else if (this.mode() === 'strict') this.commitForceSelection(event);
         }
         break;
       case 'Escape':
@@ -1002,16 +1029,21 @@ export class NeuAutocompleteComponent<
     const value = this.optionValueOf(option);
     const label = this.optionLabelOf(option);
     const changed =
-      !neuOptionValuesEqual(this.canonicalValue(), value) || !this.isOptionSelected(option);
+      !neuOptionValuesEqual(this.value(), value) || !this.isOptionSelected(option);
     this._query.set(label);
     this.filterQuery.set(label);
     this.allowEmptyQuery.set(false);
     this.matchedOption.set(option);
     this.customTextValue.set(null);
-    this.canonicalValue.set(value);
-    if (changed) this.onChange(value);
-    this.select.emit({ originalEvent, option, value });
-    this.optionSelected.emit(option);
+    this.value.set(value);
+    if (changed && originalEvent) {
+      this.optionActivated.emit({
+        originalEvent,
+        option,
+        value,
+        source: originalEvent.type.startsWith('key') ? 'keyboard' : 'pointer',
+      });
+    }
     if (close) this.close(originalEvent, 'selection', this._focused());
   }
 
@@ -1020,7 +1052,7 @@ export class NeuAutocompleteComponent<
     reason: 'button' | 'force-selection' | 'programmatic' = 'programmatic',
   ): void {
     if (this.isDisabledFinal() || this.readonly()) return;
-    const previousValue = this.canonicalValue();
+    const previousValue = this.value();
     const previousText = this._query();
     if (previousValue === null && previousText === '' && this.matchedOption() === null) return;
     this.cancelCompletion();
@@ -1029,9 +1061,8 @@ export class NeuAutocompleteComponent<
     this.allowEmptyQuery.set(false);
     this.matchedOption.set(null);
     this.customTextValue.set(null);
-    this.canonicalValue.set(null);
+    this.value.set(null);
     this.setActiveIndex(-1);
-    if (previousValue !== null) this.onChange(null);
     if (previousText) this.queryChange.emit('');
     this.cleared.emit({ originalEvent, previousValue, previousText, reason });
     this.close(originalEvent, 'clear');
@@ -1043,7 +1074,7 @@ export class NeuAutocompleteComponent<
     if (!this._isOpen()) {
       this.overlaySession.open(this.inputEl()?.nativeElement ?? null);
       this._isOpen.set(this.overlaySession.isOpen);
-      this.opened.emit({ originalEvent, reason });
+      this.opened.emit();
       this.overlaySession.requestRefresh('open');
     }
     this.applyInitialFocus(false);
@@ -1074,44 +1105,14 @@ export class NeuAutocompleteComponent<
   }
 
   reset(): void {
-    this.writeValue(null);
-  }
-
-  writeValue(value: NeuAutocompleteValue<V> | null | undefined): void {
     this.cancelComposition();
     this.cancelCompletion();
-    if (value === null || value === undefined) {
-      this._query.set('');
-      this.filterQuery.set('');
-      this.allowEmptyQuery.set(false);
-      this.matchedOption.set(null);
-      this.customTextValue.set(null);
-      this.canonicalValue.set(null);
-      this.close(null, 'programmatic');
-      return;
-    }
-    const match = this.findOptionForValue(value as V);
-    this.matchedOption.set(match ?? null);
-    this.customTextValue.set(match ? null : typeof value === 'string' ? value : null);
-    this.canonicalValue.set(value);
-    const text = match ? this.optionLabelOf(match) : String(value);
-    this._query.set(text);
-    this.filterQuery.set(text);
+    this._query.set('');
+    this.filterQuery.set('');
     this.allowEmptyQuery.set(false);
+    this.matchedOption.set(null);
+    this.customTextValue.set(null);
     this.close(null, 'programmatic');
-  }
-
-  registerOnChange(fn: (value: NeuAutocompleteValue<V> | null) => void): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(disabled: boolean): void {
-    this._cvaDisabled.set(disabled);
-    if (disabled) this.cancelComposition();
   }
 
   protected optionLabelOf(option: T): string {
@@ -1132,11 +1133,7 @@ export class NeuAutocompleteComponent<
   }
 
   private optionsEqual(left: T, right: T): boolean {
-    return neuOptionsEqual(left, right, {
-      ...this.identityConfig(),
-      identityAccessor: this.identityConfig().identityAccessor,
-      valueAccessor: this.optionValue(),
-    });
+    return this.compareWith()(this.optionValueOf(left), this.optionValueOf(right));
   }
 
   protected rowId(row: InternalNeuOptionNormalizedRow<T, G | string>): string {
@@ -1285,7 +1282,7 @@ export class NeuAutocompleteComponent<
     this.setActiveIndex(-1);
     if (intent.closed) {
       this._isOpen.set(false);
-      this.closed.emit({ originalEvent, reason });
+      this.closed.emit();
     }
     const origin = this.overlaySession.consumeFocusRestorationIntent();
     if (restoreFocus && origin && !this.isDisabledFinal()) origin.focus();
@@ -1342,12 +1339,15 @@ export class NeuAutocompleteComponent<
     const emit = () => {
       this.completionTimer = null;
       this.completionRequestId += 1;
-      this.completeMethod.emit({
-        originalEvent,
-        query,
-        source,
-        requestId: this.completionRequestId,
-      });
+      if (!this.lazy()) {
+        this.suggestionsRequest.emit({
+          query,
+          source,
+          requestId: this.completionRequestId,
+          queryRevision: this.completionRequestId,
+          reason: 'query',
+        });
+      }
       if (!this.consumerOwnedSuggestions()) {
         this.requestPending.set(false);
         this.open(originalEvent, source === 'dropdown' ? 'dropdown' : 'completion');
@@ -1374,7 +1374,7 @@ export class NeuAutocompleteComponent<
   }
 
   private commitForceSelection(originalEvent: Event | null): void {
-    if (!this.forceSelection() || this.isDisabledFinal() || this.readonly()) return;
+    if (this.mode() !== 'strict' || this.isDisabledFinal() || this.readonly()) return;
     const query = this._query();
     if (!query) return;
     const match = this.allOptions().find(
@@ -1496,7 +1496,17 @@ export class NeuAutocompleteComponent<
     });
     if (signature === this.lastLazySignature) return;
     this.lastLazySignature = signature;
-    this.lazyRequest.emit({ ...request, query: this._query() });
+    this.suggestionsRequest.emit({
+      query: this._query(),
+      source: reason === 'filter' ? 'input' : 'programmatic',
+      requestId: request.requestId,
+      queryRevision: request.requestId,
+      range: {
+        render: { start: request.first, end: request.end },
+        visible: { start: request.first, end: request.end },
+      },
+      reason: reason === 'scroll' ? 'viewport' : reason === 'filter' ? 'query' : 'initial',
+    });
   }
 
   private findOptionForValue(value: V): T | undefined {

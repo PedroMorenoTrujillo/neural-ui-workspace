@@ -62,6 +62,26 @@ const expectedSignalControls = new Map([
   ],
   ['projects/ui-core/knob/neu-knob.component.ts', /readonly\s+value\s*=\s*model<number>\(0\)/],
   ['projects/ui-core/date-input/neu-date-input.component.ts', /readonly\s+value\s*=\s*model<V>\(/],
+  [
+    'projects/ui-core/select/neu-select.component.ts',
+    /readonly\s+value\s*=\s*model<NeuSelectionValue<V,\s*M>>\(/,
+  ],
+  [
+    'projects/ui-core/autocomplete/neu-autocomplete.component.ts',
+    /readonly\s+value\s*=\s*model<NeuAutocompleteValue<V,\s*F>>\(/,
+  ],
+  [
+    'projects/ui-core/cascade-select/neu-cascade-select.component.ts',
+    /readonly\s+value\s*=\s*model<V\s*\|\s*null>\(null\)/,
+  ],
+  [
+    'projects/ui-core/listbox/neu-listbox.component.ts',
+    /readonly\s+value\s*=\s*model<NeuSelectionValue<V,\s*M>>\(/,
+  ],
+  [
+    'projects/ui-core/toggle-button-group/neu-toggle-button-group.component.ts',
+    /readonly\s+value\s*=\s*model<NeuSelectionValue<NeuToggleValue<T,\s*V>,\s*M>>\(/,
+  ],
 ]);
 
 const violations = [];
@@ -156,14 +176,14 @@ for (const file of componentFiles(uiCore)) {
   }
 }
 
-if (cvaComponents.length !== 13) {
+if (cvaComponents.length !== 7) {
   violations.push(
-    `expected 13 LEGACY-CVA-YET-TO-MIGRATE components, found ${cvaComponents.length}`,
+    `expected 7 LEGACY-CVA-YET-TO-MIGRATE components, found ${cvaComponents.length}`,
   );
 }
 
-if (signalComponents.length !== 11) {
-  violations.push(`expected 11 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
+if (signalComponents.length !== 16) {
+  violations.push(`expected 16 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
 }
 
 for (const expected of expectedSignalControls.keys()) {

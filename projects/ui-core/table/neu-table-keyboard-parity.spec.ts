@@ -594,7 +594,7 @@ describe('NeuTable keyboard and accessibility migration parity', () => {
       document.createElement('textarea'),
       document.createElement('select'),
       document.createElement('neu-select'),
-      document.createElement('neu-multiselect'),
+      document.createElement('neu-select'),
       document.createElement('neu-date-input'),
       document.createElement('neu-number-input'),
     ];

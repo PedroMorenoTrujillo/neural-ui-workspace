@@ -9,6 +9,11 @@ import { NeuRadioGroupComponent } from '@neural-ui/core/radio';
 import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import { NeuKnobComponent } from '@neural-ui/core/knob';
 import { NeuDateInputComponent, civilDate } from '@neural-ui/core/date-input';
+import { NeuSelectComponent } from '@neural-ui/core/select';
+import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
+import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
+import { NeuListboxComponent } from '@neural-ui/core/listbox';
+import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-group';
 
 declare const input: NeuInputComponent;
 declare const checkbox: NeuCheckboxComponent;
@@ -25,6 +30,19 @@ declare const timeInput: NeuDateInputComponent<'time'>;
 declare const dateTimeInput: NeuDateInputComponent<'datetime'>;
 declare const multipleInput: NeuDateInputComponent<'multiple'>;
 declare const rangeInput: NeuDateInputComponent<'range'>;
+interface Person {
+  readonly id: number;
+  readonly name: string;
+}
+declare const selectSingle: NeuSelectComponent<Person, number, 'single'>;
+declare const selectMultiple: NeuSelectComponent<Person, number, 'multiple'>;
+declare const autocompleteStrict: NeuAutocompleteComponent<Person, number, 'strict'>;
+declare const autocompleteFreeText: NeuAutocompleteComponent<Person, number, 'free-text'>;
+declare const cascadeSelect: NeuCascadeSelectComponent<Person, number>;
+declare const listboxSingle: NeuListboxComponent<Person, number, 'single'>;
+declare const listboxMultiple: NeuListboxComponent<Person, number, 'multiple'>;
+declare const toggleSingle: NeuToggleButtonGroupComponent<Person, number, 'single'>;
+declare const toggleMultiple: NeuToggleButtonGroupComponent<Person, number, 'multiple'>;
 
 input.value.set(null);
 input.value.set(1);
@@ -56,3 +74,16 @@ multipleInput.value.set(civilDate('2026-03-29'));
 multipleInput.value.set(['2026-03-29']);
 rangeInput.value.set(null);
 rangeInput.value.set({ start: '2026-03-29', end: null });
+selectSingle.value.set([1]);
+selectMultiple.value.set(1);
+selectMultiple.value.set(null);
+autocompleteStrict.value.set('free text');
+autocompleteStrict.value.set([1]);
+autocompleteFreeText.value.set([1]);
+cascadeSelect.value.set({ id: 1, name: 'Ada' });
+listboxSingle.value.set([1]);
+listboxMultiple.value.set(1);
+listboxMultiple.value.set(null);
+toggleSingle.value.set([1]);
+toggleMultiple.value.set(1);
+toggleMultiple.value.set(null);

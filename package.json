@@ -16,7 +16,6 @@
     "audit:bundle:release": "node scripts/audit-h9-b4-bundle-policy.mjs --profile=release",
     "audit:n2-forms-bundle": "node scripts/audit-n2-forms-bundle.mjs",
     "audit:table-architecture": "node scripts/audit-table-architecture.mjs",
-    "audit:h5b3-option-family": "node scripts/generate-h5b3-option-family-audit.mjs",
     "audit:h5c2-boundaries": "node scripts/audit-h5c2-package-private-boundaries.mjs && node scripts/generate-h5c2-package-private-dependency-graph.mjs",
     "audit:h5c2-duplication": "node scripts/audit-h5c2-source-duplication.mjs",
     "audit:logical-css": "node scripts/audit-ui-core-logical-css.mjs",

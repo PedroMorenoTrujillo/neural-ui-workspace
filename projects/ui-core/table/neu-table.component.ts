@@ -501,7 +501,7 @@ const _NEU_TABLE_URL_STATE_OPTIONS: Required<NeuTableUrlStateOptions> = {
 
 const _NEU_TABLE_FILTER_SESSION_OPENED = 'neu-table-filter-session-opened';
 const _NEU_TABLE_FILTER_CHILD_TRIGGER =
-  '.neu-select__trigger, .neu-multiselect__trigger, .neu-date-input__trigger, .neu-drp__trigger';
+  '.neu-select__trigger, .neu-date-input__trigger, .neu-drp__trigger';
 
 export type NeuTableColumnInput<T extends object> =
   | NeuTableColumn<T>
@@ -814,7 +814,6 @@ export type NeuTableColumnInput<T extends object> =
                 [ariaLabel]="pageSizeAriaLabel()"
                 [options]="_pageSizeSelectOptions()"
                 optionLabel="label"
-                optionValue="value"
                 [formControl]="_pageSizeControl"
               />
             </div>
@@ -897,7 +896,6 @@ export type NeuTableColumnInput<T extends object> =
                   [ariaLabel]="jumpToPageAriaLabel()"
                   [options]="_jumpPageOptions()"
                   optionLabel="label"
-                  optionValue="value"
                   [formControl]="_jumpPageControl"
                 />
               }
@@ -3288,7 +3286,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
     const selector =
       kind === 'select'
         ? 'neu-select:not(.neu-table__filter-overlay-mode) .neu-select__trigger'
-        : '.neu-table__filter-overlay-mode .neu-select__trigger, input, .neu-select__trigger, .neu-multiselect__trigger';
+        : '.neu-table__filter-overlay-mode .neu-select__trigger, input, .neu-select__trigger';
     const target = rule?.querySelector<HTMLElement>(selector);
     this._focusElementIfAvailable(target ?? null);
   }
@@ -3554,7 +3552,7 @@ export class NeuTableComponent<T extends object = NeuTableRow> {
 
   private _expandedOverlayChildTrigger(panel: HTMLElement): HTMLElement | null {
     return panel.querySelector<HTMLElement>(
-      '.neu-select__trigger[aria-expanded="true"], .neu-multiselect__trigger[aria-expanded="true"], .neu-date-input__trigger[aria-expanded="true"], .neu-drp__trigger[aria-expanded="true"]',
+      '.neu-select__trigger[aria-expanded="true"], .neu-date-input__trigger[aria-expanded="true"], .neu-drp__trigger[aria-expanded="true"]',
     );
   }
 

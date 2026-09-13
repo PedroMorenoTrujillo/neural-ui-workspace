@@ -162,7 +162,7 @@ export class LoginComponent {
 
 Representative entry points:
 
-- **Forms**: `@neural-ui/core/input`, `@neural-ui/core/select`, `@neural-ui/core/multiselect`, `@neural-ui/core/autocomplete`, `@neural-ui/core/input-tags`, `@neural-ui/core/date-input`, `@neural-ui/core/number-input`, `@neural-ui/core/input-otp`
+- **Forms**: `@neural-ui/core/input`, `@neural-ui/core/select`, `@neural-ui/core/autocomplete`, `@neural-ui/core/input-tags`, `@neural-ui/core/date-input`, `@neural-ui/core/number-input`, `@neural-ui/core/input-otp`
 - **Navigation and layout**: `@neural-ui/core/tabs`, `@neural-ui/core/nav`, `@neural-ui/core/sidebar`, `@neural-ui/core/menu`, `@neural-ui/core/dock`, `@neural-ui/core/speed-dial`, `@neural-ui/core/mega-menu`, `@neural-ui/core/accordion`, `@neural-ui/core/toolbar`, `@neural-ui/core/dashboard-grid`
 - **Data and overlays**: `@neural-ui/core/table`, `@neural-ui/core/modal`, `@neural-ui/core/popover`, `@neural-ui/core/context-menu`, `@neural-ui/core/command-palette`, `@neural-ui/core/virtual-list`, `@neural-ui/core/confirm-dialog`
 - **Feedback and utilities**: `@neural-ui/core/alert`, `@neural-ui/core/toast`, `@neural-ui/core/tooltip`, `@neural-ui/core/block-ui`, `@neural-ui/core/url-state`
@@ -175,7 +175,7 @@ For the complete catalog, examples, and API tables, use the live docs at [neural
 - `NeuAutocompleteComponent` supports virtual scroll for large result sets.
 - `@neural-ui/core/modal` now includes `NeuDialogService` for programmatic dialogs.
 - `@neural-ui/core/scheduler-gantt` adds a date-driven planning layer on top of `timeline-grid` for roadmap and delivery views.
-- Select, multiselect, tabs, table, modal and URL-state flows were hardened with focused regression coverage.
+- Select (single and multiple), tabs, table, modal and URL-state flows were hardened with focused regression coverage.
 
 ---
 

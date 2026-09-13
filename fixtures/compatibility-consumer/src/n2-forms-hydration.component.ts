@@ -12,6 +12,11 @@ import { NeuRadioComponent, NeuRadioGroupComponent } from '@neural-ui/core/radio
 import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import { NeuKnobComponent } from '@neural-ui/core/knob';
 import { NeuDateInputComponent, civilDate, type CivilDate } from '@neural-ui/core/date-input';
+import { NeuSelectComponent } from '@neural-ui/core/select';
+import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
+import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
+import { NeuListboxComponent } from '@neural-ui/core/listbox';
+import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-group';
 
 @Component({
   selector: 'app-root',
@@ -30,6 +35,11 @@ import { NeuDateInputComponent, civilDate, type CivilDate } from '@neural-ui/cor
     NeuNumberInputComponent,
     NeuKnobComponent,
     NeuDateInputComponent,
+    NeuSelectComponent,
+    NeuAutocompleteComponent,
+    NeuCascadeSelectComponent,
+    NeuListboxComponent,
+    NeuToggleButtonGroupComponent,
   ],
   template: `
     <span id="n2-ready">{{ ready() }}</span>
@@ -85,9 +95,24 @@ import { NeuDateInputComponent, civilDate, type CivilDate } from '@neural-ui/cor
       locale="es-ES"
       [formControl]="dateControl"
     />
+    <neu-select id="n2-select-single" [options]="options" [optionValue]="valueOf" [formControl]="selectSingleControl" />
+    <neu-select id="n2-select-multiple" mode="multiple" [selectionOptions]="multipleOptions" [options]="options" [optionValue]="valueOf" [formControl]="selectMultipleControl" />
+    <neu-autocomplete id="n2-autocomplete-strict" mode="strict" [dropdown]="true" [options]="options" [optionValue]="valueOf" [formControl]="autocompleteStrictControl" />
+    <neu-autocomplete id="n2-autocomplete-free" mode="free-text" [options]="options" [optionValue]="valueOf" [formControl]="autocompleteFreeControl" />
+    <neu-cascade-select id="n2-cascade" [options]="options" [optionValue]="valueOf" [formControl]="cascadeControl" />
+    <neu-listbox id="n2-listbox-single" [options]="options" [optionValue]="valueOf" [formControl]="listboxSingleControl" />
+    <neu-listbox id="n2-listbox-multiple" mode="multiple" [options]="options" [optionValue]="valueOf" [formControl]="listboxMultipleControl" />
+    <neu-toggle-button-group id="n2-toggle-single" [options]="options" [optionValue]="$any(valueOf)" [formControl]="toggleSingleControl" />
+    <neu-toggle-button-group id="n2-toggle-multiple" mode="multiple" [options]="options" [optionValue]="$any(valueOf)" [formControl]="toggleMultipleControl" />
   `,
 })
 export class N2FormsHydrationComponent {
+  readonly options = [
+    { id: 1, label: 'Hydrated one' },
+    { id: 2, label: 'Hydrated two' },
+  ] as const;
+  readonly valueOf = (option: (typeof this.options)[number]) => option.id;
+  readonly multipleOptions = { chips: true, toggleAll: true } as const;
   readonly ready = signal(false);
   readonly inputControl = new FormControl('server-value', {
     nonNullable: true,
@@ -108,6 +133,15 @@ export class N2FormsHydrationComponent {
   readonly numberControl = new FormControl<number | null>(1234.5);
   readonly knobControl = new FormControl(25, { nonNullable: true });
   readonly dateControl = new FormControl<CivilDate | null>(civilDate('2026-03-29'));
+  readonly selectSingleControl = new FormControl<number | null>(1);
+  readonly selectMultipleControl = new FormControl<readonly number[]>([1], { nonNullable: true });
+  readonly autocompleteStrictControl = new FormControl<number | null>(1);
+  readonly autocompleteFreeControl = new FormControl<number | string | null>('hydrated draft');
+  readonly cascadeControl = new FormControl<number | null>(1);
+  readonly listboxSingleControl = new FormControl<number | null>(1);
+  readonly listboxMultipleControl = new FormControl<readonly number[]>([1], { nonNullable: true });
+  readonly toggleSingleControl = new FormControl<number | null>(1);
+  readonly toggleMultipleControl = new FormControl<readonly number[]>([1], { nonNullable: true });
   readonly numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -133,10 +167,19 @@ export class N2FormsHydrationComponent {
     this.numberControl.valueChanges.subscribe((value) => this.record('number', value));
     this.knobControl.valueChanges.subscribe((value) => this.record('knob', value));
     this.dateControl.valueChanges.subscribe((value) => this.record('date', value));
+    this.selectSingleControl.valueChanges.subscribe((value) => this.record('select-single', value));
+    this.selectMultipleControl.valueChanges.subscribe((value) => this.record('select-multiple', value));
+    this.autocompleteStrictControl.valueChanges.subscribe((value) => this.record('autocomplete-strict', value));
+    this.autocompleteFreeControl.valueChanges.subscribe((value) => this.record('autocomplete-free', value));
+    this.cascadeControl.valueChanges.subscribe((value) => this.record('cascade', value));
+    this.listboxSingleControl.valueChanges.subscribe((value) => this.record('listbox-single', value));
+    this.listboxMultipleControl.valueChanges.subscribe((value) => this.record('listbox-multiple', value));
+    this.toggleSingleControl.valueChanges.subscribe((value) => this.record('toggle-single', value));
+    this.toggleMultipleControl.valueChanges.subscribe((value) => this.record('toggle-multiple', value));
     afterNextRender(() => this.ready.set(true));
   }
 
-  private record(name: string, value: string | number | boolean | null): void {
-    this.newControlEvents.update((events) => [...events, `${name}:${String(value)}`]);
+  private record(name: string, value: unknown): void {
+    this.newControlEvents.update((events) => [...events, `${name}:${Array.isArray(value) ? JSON.stringify(value) : String(value)}`]);
   }
 }

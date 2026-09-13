@@ -115,7 +115,6 @@ export type NeuTokenName =
   | '--neu-meter-radius'
   | '--neu-meter-track'
   | '--neu-meter-track-bg'
-  | '--neu-multiselect-option-height'
   | '--neu-nav-toggle-bg'
   | '--neu-nav-toggle-bg-hover'
   | '--neu-nav-toggle-border'

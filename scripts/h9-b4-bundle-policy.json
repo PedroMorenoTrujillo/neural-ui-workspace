@@ -28,7 +28,6 @@
     "provider": { "baseline": { "raw": 2178, "gzip": 948, "brotli": 854 } },
     "button": { "baseline": { "raw": 18064, "gzip": 3148, "brotli": 2672 } },
     "select": { "baseline": { "raw": 125947, "gzip": 22311, "brotli": 19379 } },
-    "multiselect": { "baseline": { "raw": 152576, "gzip": 28867, "brotli": 20847 } },
     "table-basic": { "baseline": { "raw": 30198, "gzip": 4084, "brotli": 3446 } },
     "table-advanced-lazy": { "baseline": { "raw": 954019, "gzip": 165462, "brotli": 103647 } },
     "tree-basic": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },

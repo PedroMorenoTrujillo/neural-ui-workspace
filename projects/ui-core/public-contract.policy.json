@@ -26,7 +26,6 @@
     "NeuImageViewerDirective",
     "NeuListboxComponent",
     "NeuMenuComponent",
-    "NeuMultiselectComponent",
     "NeuOrganizationChartComponent",
     "NeuPopoverDirective",
     "NeuSelectComponent",
@@ -128,17 +127,13 @@
     "NeuImageViewerDirective": ["close", "open"],
     "NeuListboxComponent": ["resetFilter", "setFilter", "toggleAll"],
     "NeuMenuComponent": ["activate"],
-    "NeuMultiselectComponent": ["clear", "close", "focusTrigger", "open", "resetFilter", "toggle"],
     "NeuOrganizationChartComponent": ["activateNode", "toggleNode"],
     "NeuPopoverDirective": ["close", "open", "toggle"],
     "NeuSelectComponent": [
       "clear",
-      "close",
       "focus",
-      "open",
       "resetFilter",
-      "selectOption",
-      "toggle"
+      "selectOption"
     ],
     "NeuSpeedDialComponent": ["close", "open", "toggle"],
     "NeuStepperComponent": ["goTo", "next", "prev"],

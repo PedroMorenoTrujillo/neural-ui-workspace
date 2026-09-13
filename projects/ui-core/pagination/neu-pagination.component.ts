@@ -37,7 +37,6 @@ import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select
           [ariaLabel]="resolvedPageSizeAriaLabel()"
           [options]="pageSizeSelectOptions()"
           optionLabel="label"
-          optionValue="value"
           [formControl]="pageSizeControl"
         />
       }

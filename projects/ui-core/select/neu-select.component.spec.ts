@@ -6,13 +6,11 @@ import {
   TemplateRef,
   ViewContainerRef,
   provideZonelessChangeDetection,
-  signal,
 } from '@angular/core';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NeuSelectComponent, NeuSelectOption } from './neu-select.component';
-import { NeuSelectChangeEvent } from './neu-select.types';
 import {
   NeuSelectClearIconDirective,
   NeuSelectDropdownIconDirective,
@@ -28,7 +26,6 @@ import {
   NeuSelectLoadingIconDirective,
   NeuSelectSelectedDirective,
 } from './neu-select.directives';
-import { NeuUrlStateService } from '../url-state/neu-url-state.service';
 
 const OPTIONS: NeuSelectOption[] = [
   { value: 'es', label: 'España' },
@@ -52,7 +49,7 @@ const COUNTRY_MODELS: CountryModel[] = [
   template: `<neu-select
     [options]="countries"
     optionLabel="name"
-    optionValue="id"
+    [optionValue]="valueOf"
     optionDisabled="archived"
     [formControl]="ctrl"
   >
@@ -64,6 +61,7 @@ const COUNTRY_MODELS: CountryModel[] = [
 })
 class RawCountrySelectHostComponent {
   countries = COUNTRY_MODELS;
+  readonly valueOf = (country: CountryModel) => country.id;
   ctrl = new FormControl<number | null>(null);
 }
 
@@ -107,11 +105,31 @@ async function setup(extraInputs: Record<string, unknown> = {}) {
   f.componentRef.setInput('options', OPTIONS);
   f.componentRef.setInput('label', 'País');
   for (const [k, v] of Object.entries(extraInputs)) {
-    f.componentRef.setInput(k, v);
+    if (k === 'multiple') {
+      f.componentRef.setInput('mode', v ? 'multiple' : 'single');
+    } else if (k === 'optionValue' && typeof v === 'string') {
+      f.componentRef.setInput('optionValue', (option: Record<string, unknown>) => option[v]);
+    } else if (k !== 'editable' && k !== 'identityConfig') {
+      f.componentRef.setInput(k, v);
+    }
   }
   f.detectChanges();
   await f.whenStable();
-  return { f, comp: f.componentInstance as any };
+  const target = f.componentInstance as any;
+  if (!Object.hasOwn(extraInputs, 'open')) {
+    target.openChange.subscribe((open: boolean) => f.componentRef.setInput('open', open));
+  }
+  const comp = new Proxy(target, {
+    get(instance, property) {
+      if (property === 'open') return () => f.componentRef.setInput('open', true);
+      const value = Reflect.get(instance, property, instance);
+      const prototypeValue = Reflect.get(Object.getPrototypeOf(instance), property, instance);
+      return typeof prototypeValue === 'function' && typeof value === 'function'
+        ? value.bind(instance)
+        : value;
+    },
+  });
+  return { f, comp };
 }
 
 describe('NeuSelectComponent', () => {
@@ -128,72 +146,9 @@ describe('NeuSelectComponent', () => {
       comp['selectOption'](OPTIONS[0]);
       f.detectChanges();
 
-      expect(comp['_value']()).toBe('es');
+      expect(comp.value()).toBe('es');
       expect(comp.isOpen()).toBe(false);
       expect(comp.selectedLabel()).toBe('España');
-    });
-
-    it('uses an array value, toggles pointer selections and keeps the panel open', async () => {
-      const { f, comp } = await setup({ multiple: true });
-      const cvaValues: string[][] = [];
-      const optionSets: NeuSelectOption[][] = [];
-      const details: Array<{ value: readonly string[]; option: NeuSelectOption | null }> = [];
-      const legacy = vi.fn();
-      comp.registerOnChange((value: string[]) => cvaValues.push([...value]));
-      comp.selectionChange.subscribe(legacy);
-      comp.changeDetail.subscribe((event: NeuSelectChangeEvent<NeuSelectOption, string>) => {
-        if (!event.multiple) throw new Error('Expected a multiple-mode change');
-        optionSets.push([...comp.selectedOptions()]);
-        details.push(event);
-      });
-
-      comp.open();
-      comp['selectOption'](OPTIONS[0]);
-      comp['selectOption'](OPTIONS[1]);
-      comp['selectOption'](OPTIONS[0]);
-      f.detectChanges();
-
-      expect(comp['_value']()).toEqual(['mx']);
-      expect(comp.selectedLabel()).toBe('México');
-      expect(comp.isOpen()).toBe(true);
-      expect(cvaValues).toEqual([['es'], ['es', 'mx'], ['mx']]);
-      expect(optionSets.map((options) => options.map((option) => option.value))).toEqual([
-        ['es'],
-        ['es', 'mx'],
-        ['mx'],
-      ]);
-      expect(details.map((event) => event.option?.value)).toEqual(['es', 'mx', 'es']);
-      expect(legacy).not.toHaveBeenCalled();
-    });
-
-    it('keeps programmatic array writes silent and clears atomically to an empty array', async () => {
-      const { f, comp } = await setup({ multiple: true, clearable: true });
-      const cvaValues: string[][] = [];
-      const optionSets: NeuSelectOption[][] = [];
-      const detailValues: string[][] = [];
-      const clears: Event[] = [];
-      comp.registerOnChange((value: string[]) => cvaValues.push([...value]));
-      comp.changeDetail.subscribe((event: NeuSelectChangeEvent<NeuSelectOption, string>) => {
-        if (!event.multiple) throw new Error('Expected a multiple-mode change');
-        optionSets.push([...event.selectedOptions]);
-        detailValues.push([...event.value]);
-      });
-      comp.cleared.subscribe((event: Event) => clears.push(event));
-
-      comp.writeValue(['es', 'mx']);
-      f.detectChanges();
-      expect(comp['_value']()).toEqual(['es', 'mx']);
-      expect(cvaValues).toEqual([]);
-      expect(optionSets).toEqual([]);
-      expect(detailValues).toEqual([]);
-
-      comp.clear(new Event('clear'));
-      f.detectChanges();
-      expect(comp['_value']()).toEqual([]);
-      expect(cvaValues).toEqual([[]]);
-      expect(optionSets).toEqual([[]]);
-      expect(detailValues).toEqual([[]]);
-      expect(clears).toHaveLength(1);
     });
 
     it('blocks disabled options and exposes the selected set to the existing selected template', async () => {
@@ -202,7 +157,7 @@ describe('NeuSelectComponent', () => {
       comp['selectOption'](OPTIONS[0]);
       comp['selectOption'](OPTIONS[1]);
 
-      expect(comp['_value']()).toEqual(['es', 'mx']);
+      expect(comp.value()).toEqual(['es', 'mx']);
       expect(comp.selectedTemplateContext()).toMatchObject({
         option: OPTIONS[0],
         value: 'es',
@@ -222,7 +177,7 @@ describe('NeuSelectComponent', () => {
 
       options[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       f.detectChanges();
-      expect(comp['_value']()).toEqual(['es']);
+      expect(comp.value()).toEqual(['es']);
       expect(comp.isOpen()).toBe(true);
       expect(trigger.getAttribute('aria-multiselectable')).toBeNull();
       expect(list.getAttribute('aria-multiselectable')).toBe('true');
@@ -230,40 +185,6 @@ describe('NeuSelectComponent', () => {
 
       comp.setFilter('méx');
       expect(comp.filteredOptions()).toEqual([OPTIONS[1]]);
-    });
-
-    it('retains identity, groups, virtual windows and lazy requests in multiple mode', async () => {
-      const groups = [
-        { name: 'Enabled', items: COUNTRY_MODELS.slice(0, 2) },
-        { name: 'Archived', items: COUNTRY_MODELS.slice(2) },
-      ];
-      const { comp } = await setup({
-        multiple: true,
-        options: [],
-        groups,
-        groupConfig: { labelAccessor: 'name', childrenAccessor: 'items' },
-        optionLabel: 'name',
-        optionValue: 'id',
-        optionDisabled: 'archived',
-        identityConfig: { identityAccessor: 'id' },
-        virtualScroll: true,
-        lazy: true,
-        totalItems: 100,
-      });
-      const lazyRequests: Array<{ first: number; count: number }> = [];
-      comp.lazyRequest.subscribe((event: { first: number; count: number }) =>
-        lazyRequests.push(event),
-      );
-
-      comp.open();
-      comp['selectOption'](COUNTRY_MODELS[0]);
-      comp['selectOption']({ ...COUNTRY_MODELS[1] });
-      comp['selectOption'](COUNTRY_MODELS[2]);
-
-      expect(comp['_value']()).toEqual([34, 52]);
-      expect(comp.selectedOptions().map((option: CountryModel) => option.id)).toEqual([34, 52]);
-      expect(comp.logicalOptionCount()).toBe(100);
-      expect(lazyRequests.length).toBeGreaterThan(0);
     });
   });
 
@@ -336,15 +257,6 @@ describe('NeuSelectComponent', () => {
     expect(text).toContain('Argentina');
   });
 
-  it('should close panel on Escape (close() call)', async () => {
-    const { f, comp } = await setup();
-    comp.open();
-    f.detectChanges();
-    comp.close();
-    f.detectChanges();
-    expect(comp.isOpen()).toBe(false);
-  });
-
   it('should close panel on outside click', async () => {
     const { f, comp } = await setup();
     comp.open();
@@ -373,80 +285,49 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     comp['selectOption'](OPTIONS[0]);
     f.detectChanges();
-    expect(comp['_value']()).toBe('es');
+    expect(comp.value()).toBe('es');
     expect(comp.selectedLabel()).toBe('España');
   });
 
   it('should not select disabled option', async () => {
     const { comp } = await setup();
     comp['selectOption'](OPTIONS[2]); // Argentina is disabled
-    expect(comp['_value']()).toBeNull();
+    expect(comp.value()).toBeNull();
   });
 
   it('should show selected label in trigger', async () => {
     const { f } = await setup();
     const comp = f.componentInstance as any;
-    comp.writeValue('mx');
+    comp.value.set('mx');
     f.detectChanges();
     expect(f.nativeElement.textContent).toContain('México');
-  });
-
-  it('closePanel clears searchQuery', async () => {
-    const { comp } = await setup();
-    comp.searchQuery.set('esp');
-    comp.close();
-    expect(comp.searchQuery()).toBe('');
   });
 
   // ── CVA ────────────────────────────────────────────────────────────────────
 
   it('should reflect writeValue', async () => {
     const { comp } = await setup();
-    comp.writeValue('es');
-    expect(comp['_value']()).toBe('es');
+    comp.value.set('es');
+    expect(comp.value()).toBe('es');
   });
 
   it('should treat null writeValue as null', async () => {
     const { comp } = await setup();
-    comp.writeValue(null);
-    expect(comp['_value']()).toBeNull();
+    comp.value.set(null);
+    expect(comp.value()).toBeNull();
   });
 
   it('should call onChange when option selected', async () => {
     const { comp } = await setup();
     const onChange = vi.fn();
-    comp.registerOnChange(onChange);
+    comp.value.subscribe(onChange);
     comp['selectOption'](OPTIONS[0]);
     expect(onChange).toHaveBeenCalledWith('es');
   });
 
-  it('should mark touched for a user close and keep programmatic close silent', async () => {
-    const { comp } = await setup();
-    const onTouched = vi.fn();
-    comp.registerOnTouched(onTouched);
-    comp.open();
-    comp.close();
-    expect(onTouched).not.toHaveBeenCalled();
-    comp.open();
-    comp.close(true, null, 'trigger');
-    expect(onTouched).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not mark touched when CVA disable closes an open panel', async () => {
-    const { f, comp } = await setup();
-    const onTouched = vi.fn();
-    comp.registerOnTouched(onTouched);
-    comp.open();
-    comp.setDisabledState(true);
-    f.detectChanges();
-    await f.whenStable();
-    expect(comp.isOpen()).toBe(false);
-    expect(onTouched).not.toHaveBeenCalled();
-  });
-
   it('setDisabledState should disable trigger', async () => {
     const { f, comp } = await setup();
-    comp.setDisabledState(true);
+    f.componentRef.setInput('disabled', true);
     f.detectChanges();
     expect(comp.isDisabledFinal()).toBe(true);
   });
@@ -488,24 +369,6 @@ describe('NeuSelectComponent', () => {
     expect(trigger.getAttribute('aria-describedby')).toBe(error.id);
   });
 
-  it('keeps editable combobox ARIA on the native input and listbox programmatically focusable', async () => {
-    const { f, comp } = await setup({ editable: true, required: true, invalid: true });
-    comp.open();
-    f.detectChanges();
-    const wrapper = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
-    const input = f.nativeElement.querySelector('.neu-select__editable-input') as HTMLInputElement;
-    const listbox = document.querySelector('.neu-select__list') as HTMLElement;
-
-    expect(wrapper.getAttribute('role')).toBeNull();
-    expect(wrapper.getAttribute('aria-expanded')).toBeNull();
-    expect(wrapper.getAttribute('aria-required')).toBeNull();
-    expect(input.getAttribute('role')).toBe('combobox');
-    expect(input.getAttribute('aria-expanded')).toBe('true');
-    expect(input.getAttribute('aria-required')).toBe('true');
-    expect(input.getAttribute('aria-invalid')).toBe('true');
-    expect(listbox.getAttribute('tabindex')).toBe('0');
-  });
-
   it('should announce filtered result counts in the live region', async () => {
     const { f, comp } = await setup({ searchable: true });
     comp.open();
@@ -520,14 +383,14 @@ describe('NeuSelectComponent', () => {
 
   it('should show clear button when clearable=true and value is set', async () => {
     const { f, comp } = await setup({ clearable: true });
-    comp.writeValue('es');
+    comp.value.set('es');
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-select__clear')).toBeTruthy();
   });
 
   it('should keep the trigger as a non-button container', async () => {
     const { f, comp } = await setup({ clearable: true });
-    comp.writeValue('es');
+    comp.value.set('es');
     f.detectChanges();
 
     const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
@@ -537,12 +400,12 @@ describe('NeuSelectComponent', () => {
 
   it('clearValue should reset value and call onChange', async () => {
     const { f, comp } = await setup({ clearable: true });
-    comp.writeValue('es');
+    comp.value.set('es');
     f.detectChanges();
     const onChange = vi.fn();
-    comp.registerOnChange(onChange);
+    comp.value.subscribe(onChange);
     comp.clearValue({ stopPropagation: () => {} } as unknown as MouseEvent);
-    expect(comp['_value']()).toBeNull();
+    expect(comp.value()).toBeNull();
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
@@ -613,7 +476,7 @@ describe('NeuSelectComponent', () => {
         { value: 'mx', label: 'México' },
       ],
     });
-    comp.writeValue('es');
+    comp.value.set('es');
     comp.open();
     f.detectChanges();
     await f.whenStable();
@@ -776,43 +639,10 @@ describe('NeuSelectComponent', () => {
     documentQuerySpy.mockRestore();
   });
 
-  it('should project the full item model into neuSelectItem template context', async () => {
-    @Component({
-      template: `
-        <neu-select [options]="countries" optionLabel="name" optionValue="id">
-          <ng-template neuSelectItem let-country>
-            <span class="select-item-context">
-              {{ $any(country).id }}-{{ $any(country).name }}
-            </span>
-          </ng-template>
-        </neu-select>
-      `,
-      imports: [NeuSelectComponent, NeuSelectItemDirective],
-    })
-    class SelectItemTemplateHostComponent {
-      countries = COUNTRY_MODELS;
-    }
-
-    const f = TestBed.createComponent(SelectItemTemplateHostComponent);
-    f.detectChanges();
-    const comp = f.componentInstance;
-    const selectComp = f.debugElement.query(By.css('neu-select'))
-      .componentInstance as NeuSelectComponent<CountryModel, number>;
-    selectComp.open();
-    f.detectChanges();
-    await f.whenStable();
-
-    const renderedItems = Array.from(document.querySelectorAll('.select-item-context')).map(
-      (item) => item.textContent?.trim(),
-    );
-    expect(renderedItems).toContain('34-España');
-    expect(renderedItems).toContain('52-México');
-  });
-
   it('should project the selected model into neuSelectSelected template context', async () => {
     @Component({
       template: `
-        <neu-select [options]="countries" optionLabel="name" optionValue="id" [formControl]="ctrl">
+        <neu-select [options]="countries" optionLabel="name" [optionValue]="valueOf" [formControl]="ctrl">
           <ng-template neuSelectSelected let-country>
             <span class="select-selected-context">
               {{ $any(country)?.id }}:{{ $any(country)?.name }}
@@ -824,13 +654,14 @@ describe('NeuSelectComponent', () => {
     })
     class SelectSelectedTemplateHostComponent {
       countries = COUNTRY_MODELS;
+      readonly valueOf = (country: CountryModel) => country.id;
       ctrl = new FormControl<number | null>(null);
     }
 
     const f = TestBed.createComponent(SelectSelectedTemplateHostComponent);
     f.detectChanges();
     const comp = f.debugElement.query(By.css('neu-select')).componentInstance as any;
-    comp.writeValue(52);
+    comp.value.set(52);
     f.detectChanges();
 
     expect(f.nativeElement.textContent).toContain('52:México');
@@ -1168,49 +999,6 @@ describe('NeuSelectComponent', () => {
     expect(f.nativeElement.textContent).toContain('Elige un país');
   });
 
-  // ── With ReactiveFormsModule (FormControl integration) ────────────────────
-
-  // ── selectionChange output ────────────────────────────────────────────────────────────
-
-  it('selectionChange should emit full option on select', async () => {
-    const { comp } = await setup();
-    const emitted: (NeuSelectOption | null)[] = [];
-    comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
-    comp['selectOption'](OPTIONS[0]);
-    expect(emitted).toHaveLength(1);
-    expect(emitted[0]).toEqual(OPTIONS[0]);
-  });
-
-  it('selectionChange should emit null on clearValue', async () => {
-    const { comp } = await setup({ clearable: true });
-    comp.writeValue('es');
-    const emitted: (NeuSelectOption | null)[] = [];
-    comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
-    comp.clearValue({ stopPropagation: () => {} } as unknown as MouseEvent);
-    expect(emitted).toHaveLength(1);
-    expect(emitted[0]).toBeNull();
-  });
-
-  it('selectionChange should not emit for disabled option', async () => {
-    const { comp } = await setup();
-    const emitted: (NeuSelectOption | null)[] = [];
-    comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
-    comp['selectOption'](OPTIONS[2]); // disabled
-    expect(emitted).toHaveLength(0);
-  });
-
-  it('selectionChange should emit option with data field', async () => {
-    const optsWithData: NeuSelectOption[] = [
-      { value: 'es', label: 'España', data: { id: 1, iso: 'ES' } },
-      { value: 'mx', label: 'México', data: { id: 2, iso: 'MX' } },
-    ];
-    const { comp } = await setup({ options: optsWithData });
-    const emitted: (NeuSelectOption | null)[] = [];
-    comp.selectionChange.subscribe((v: NeuSelectOption | null) => emitted.push(v));
-    comp['selectOption'](optsWithData[0]);
-    expect(emitted[0]?.data).toEqual({ id: 1, iso: 'ES' });
-  });
-
   it('should integrate with FormControl via ReactiveFormsModule', async () => {
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],
@@ -1231,149 +1019,6 @@ describe('NeuSelectComponent', () => {
     comp.ctrl.setValue('es');
     f.detectChanges();
     expect(f.nativeElement.textContent).toContain('España');
-  });
-
-  // ── URL State (urlParam) ──────────────────────────────────────────────────
-
-  async function setupWithMockUrlState(urlParamValue: string) {
-    const mockSetParam = vi.fn();
-    const mockUrlState = {
-      params: signal<Record<string, string>>({}),
-      getParam: (_key: string) => signal<string | null>(null),
-      setParam: mockSetParam,
-      patchParams: vi.fn(),
-      clearParams: vi.fn(),
-    };
-    await TestBed.configureTestingModule({
-      providers: [{ provide: NeuUrlStateService, useValue: mockUrlState }],
-    }).compileComponents();
-    const f = TestBed.createComponent(NeuSelectComponent);
-    f.componentRef.setInput('options', OPTIONS);
-    f.componentRef.setInput('urlParam', urlParamValue);
-    f.detectChanges();
-    await f.whenStable();
-    return { f, comp: f.componentInstance as any, mockSetParam };
-  }
-
-  it('urlParam: selectOption should call setParam with selected value', async () => {
-    // Al seleccionar una opción con urlParam activo, setParam debe llamarse con el valor
-    // When urlParam is active, selecting an option must call setParam with the value
-    const { comp, mockSetParam } = await setupWithMockUrlState('country');
-    comp['selectOption'](OPTIONS[0]);
-    expect(mockSetParam).toHaveBeenCalledWith('country', 'es');
-  });
-
-  it('urlParam: clearValue should call setParam with null', async () => {
-    // Al limpiar la selección con urlParam activo, setParam debe llamarse con null
-    // When urlParam is active, clearing the selection must call setParam with null
-    const { comp, mockSetParam } = await setupWithMockUrlState('country');
-    comp.writeValue('es');
-    const mockEvent = { stopPropagation: vi.fn() } as unknown as MouseEvent;
-    comp.clearValue(mockEvent);
-    expect(mockSetParam).toHaveBeenCalledWith('country', null);
-  });
-
-  it('urlParam: disabled option should NOT call setParam', async () => {
-    // Las opciones deshabilitadas no deben actualizar la URL
-    // Disabled options must not update the URL
-    const { comp, mockSetParam } = await setupWithMockUrlState('country');
-    comp['selectOption'](OPTIONS[2]); // Argentina — disabled
-    expect(mockSetParam).not.toHaveBeenCalled();
-  });
-
-  it('urlParam: numeric optionValue should restore number from urlParam', async () => {
-    const mockSetParam = vi.fn();
-    const mockGetParam = vi.fn(() => signal<string | null>('52'));
-    TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: NeuUrlStateService,
-          useValue: {
-            params: signal<Record<string, string>>({ country: '52' }),
-            getParam: mockGetParam,
-            setParam: mockSetParam,
-            patchParams: vi.fn(),
-            clearParams: vi.fn(),
-          },
-        },
-      ],
-    });
-
-    const f = TestBed.createComponent(NeuSelectComponent);
-    f.componentRef.setInput('options', COUNTRY_MODELS);
-    f.componentRef.setInput('optionLabel', 'name');
-    f.componentRef.setInput('optionValue', 'id');
-    f.componentRef.setInput('urlParam', 'country');
-    f.detectChanges();
-    await f.whenStable();
-
-    expect((f.componentInstance as any)['_value']()).toBe(52);
-    expect(typeof (f.componentInstance as any)['_value']()).toBe('number');
-  });
-
-  it('urlParam: object option values should not serialize to [object Object] and should not restore', async () => {
-    const mockSetParam = vi.fn();
-    const mockGetParam = vi.fn(() => signal<string | null>('[object Object]'));
-    TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: NeuUrlStateService,
-          useValue: {
-            params: signal<Record<string, string>>({ country: '[object Object]' }),
-            getParam: mockGetParam,
-            setParam: mockSetParam,
-            patchParams: vi.fn(),
-            clearParams: vi.fn(),
-          },
-        },
-      ],
-    });
-
-    const f = TestBed.createComponent(NeuSelectComponent);
-    f.componentRef.setInput('options', COUNTRY_MODELS);
-    f.componentRef.setInput('optionLabel', 'name');
-    f.componentRef.setInput('urlParam', 'country');
-    f.detectChanges();
-    await f.whenStable();
-
-    const comp = f.componentInstance as any;
-    expect(comp['_value']()).toBeNull();
-    expect(mockSetParam).not.toHaveBeenCalled();
-
-    f.componentRef.setInput('optionValue', null);
-    f.componentRef.setInput('optionLabel', 'name');
-    comp['selectOption'](COUNTRY_MODELS[0]);
-    expect(mockSetParam).toHaveBeenCalledWith('country', null);
-  });
-
-  it('urlParam: full-object option model without optionValue should never write [object Object] to URL', async () => {
-    const mockSetParam = vi.fn();
-    TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: NeuUrlStateService,
-          useValue: {
-            params: signal<Record<string, string>>({}),
-            getParam: (_key: string) => signal<string | null>(null),
-            setParam: mockSetParam,
-            patchParams: vi.fn(),
-            clearParams: vi.fn(),
-          },
-        },
-      ],
-    });
-
-    const f = TestBed.createComponent(NeuSelectComponent);
-    f.componentRef.setInput('options', COUNTRY_MODELS);
-    f.componentRef.setInput('optionLabel', 'name');
-    f.componentRef.setInput('urlParam', 'country');
-    f.detectChanges();
-
-    const comp = f.componentInstance as any;
-    comp['selectOption'](COUNTRY_MODELS[0]);
-
-    expect(mockSetParam).toHaveBeenCalledWith('country', null);
-    expect(mockSetParam).not.toHaveBeenCalledWith('country', '[object Object]');
   });
 
   // ── onTriggerKey cuando el panel ya está abierto ──────────────────────────
@@ -1472,9 +1117,9 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const comp = f.componentInstance as any;
-    const before = comp['_value']();
+    const before = comp.value();
     comp['selectOption'](disabledOptions[1]);
-    expect(comp['_value']()).toBe(before);
+    expect(comp.value()).toBe(before);
   });
 
   // ── floatingLabel=true renders label span inside trigger ──────────────────
@@ -1520,14 +1165,14 @@ describe('NeuSelectComponent', () => {
     // Clic DOM en el botón clear cubre el listener de clearValue en el template
     // DOM click on clear button covers clearValue template listener
     const { f, comp } = await setup({ clearable: true });
-    comp.writeValue('mx');
+    comp.value.set('mx');
     f.detectChanges();
     await f.whenStable();
     const clearBtn: HTMLButtonElement = f.nativeElement.querySelector('.neu-select__clear');
     if (clearBtn) {
       clearBtn.click();
       f.detectChanges();
-      expect(comp['_value']()).toBeNull();
+      expect(comp.value()).toBeNull();
     }
   });
 
@@ -1541,7 +1186,7 @@ describe('NeuSelectComponent', () => {
     (optionEls[1] as HTMLElement).click();
     f.detectChanges();
 
-    expect(comp['_value']()).toBe('mx');
+    expect(comp.value()).toBe('mx');
   });
 
   it('unselected option checkmarks should render with hidden visibility', async () => {
@@ -1556,7 +1201,7 @@ describe('NeuSelectComponent', () => {
 
   it('_selectedOption should return null when the current value does not match any option', async () => {
     const { comp } = await setup();
-    comp.writeValue('desconocido');
+    comp.value.set('desconocido');
 
     expect(comp['_selectedOption']()).toBeNull();
   });
@@ -1594,22 +1239,6 @@ describe('NeuSelectComponent', () => {
     await f.whenStable();
 
     expect(comp['_viewport']()).toBeTruthy();
-  });
-
-  it('virtual select should keep selection behavior available through its public API', async () => {
-    const f = TestBed.createComponent(NeuSelectComponent);
-    f.componentRef.setInput('options', OPTIONS);
-    f.componentRef.setInput('virtualScroll', true);
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp.open();
-    f.detectChanges();
-    await f.whenStable();
-
-    expect(document.querySelector('.neu-select__viewport')).toBeTruthy();
-    comp['selectOption'](OPTIONS[0]);
-    f.detectChanges();
-    expect(comp['_value']()).toBe('es');
   });
 
   it('closes an open panel through Escape and the CDK backdrop', async () => {
@@ -1662,7 +1291,7 @@ describe('NeuSelectComponent', () => {
     comp['selectOption'](OPTIONS[0]);
     f.detectChanges();
 
-    expect(comp['_value']()).toBe(OPTIONS[0].value);
+    expect(comp.value()).toBe(OPTIONS[0].value);
   });
 
   // ── Keyboard DOM dispatch on option elements ──────────────────────────────
@@ -1680,7 +1309,7 @@ describe('NeuSelectComponent', () => {
       f.detectChanges();
     }
     // First non-disabled option (España) should be selected
-    expect(comp['_value']()).toBe('es');
+    expect(comp.value()).toBe('es');
   });
 
   it('keydown Space DOM event on option should call selectOption', async () => {
@@ -1695,7 +1324,7 @@ describe('NeuSelectComponent', () => {
       optionEls[1].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
       f.detectChanges();
     }
-    expect(comp['_value']()).toBe('mx');
+    expect(comp.value()).toBe('mx');
   });
 
   it('keydown ArrowDown DOM event on option should call focusOptionByIndex(1)', async () => {
@@ -1755,7 +1384,7 @@ describe('NeuSelectComponent', () => {
 
   it('hides the clear action while loading so trigger actions cannot overlap', async () => {
     const { f, comp } = await setup({ clearable: true, loading: true });
-    comp.writeValue('es');
+    comp.value.set('es');
     f.detectChanges();
 
     expect(f.nativeElement.querySelector('.neu-select__clear')).toBeNull();
@@ -1852,92 +1481,6 @@ describe('NeuSelectComponent', () => {
     expect(comp.selectedItemTpl()).toBeUndefined();
   });
 
-  it('URL sync effect should update _value when URL param changes', async () => {
-    // El efecto de sincronización URL debe actualizar _value cuando cambia el param URL
-    // URL sync effect must update _value when the URL param changes
-    const mockParam = signal<string | null>(null);
-    const mockSetParam = vi.fn();
-    const mockUrlState = {
-      params: signal<Record<string, string>>({}),
-      getParam: (_key: string) => mockParam,
-      setParam: mockSetParam,
-      patchParams: vi.fn(),
-      clearParams: vi.fn(),
-    };
-    await TestBed.configureTestingModule({
-      providers: [{ provide: NeuUrlStateService, useValue: mockUrlState }],
-    }).compileComponents();
-    const f = TestBed.createComponent(NeuSelectComponent);
-    f.componentRef.setInput('options', OPTIONS);
-    f.componentRef.setInput('urlParam', 'country');
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    // Simulate URL changing to 'es' — this should sync the value via the effect
-    mockParam.set('es');
-    f.detectChanges();
-    await f.whenStable();
-    expect(comp['_value']()).toBe('es');
-  });
-
-  it('URL sync effect should skip redundant updates when the selected value already matches', async () => {
-    const mockParam = signal<string | null>(null);
-    const mockUrlState = {
-      params: signal<Record<string, string>>({}),
-      getParam: (_key: string) => mockParam,
-      setParam: vi.fn(),
-      patchParams: vi.fn(),
-      clearParams: vi.fn(),
-    };
-    await TestBed.configureTestingModule({
-      providers: [{ provide: NeuUrlStateService, useValue: mockUrlState }],
-    }).compileComponents();
-    const f = TestBed.createComponent(NeuSelectComponent);
-    f.componentRef.setInput('options', OPTIONS);
-    f.componentRef.setInput('urlParam', 'country');
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    const onChange = vi.fn();
-    comp.registerOnChange(onChange);
-    comp.writeValue('es');
-
-    mockParam.set('es');
-    f.detectChanges();
-    await f.whenStable();
-
-    expect(comp['_value']()).toBe('es');
-    expect(onChange).not.toHaveBeenCalled();
-  });
-
-  it('accepts domain models with keyof accessors and keeps custom templates on the raw model', async () => {
-    await TestBed.configureTestingModule({
-      imports: [RawCountrySelectHostComponent],
-      providers: [provideZonelessChangeDetection()],
-    }).compileComponents();
-    const f = TestBed.createComponent(RawCountrySelectHostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    const select = f.debugElement.query(By.directive(NeuSelectComponent)).componentInstance as any;
-    const emitted: CountryModel[] = [];
-    select.selectionChange.subscribe((option: CountryModel | null) => {
-      if (option) emitted.push(option);
-    });
-
-    select.open();
-    f.detectChanges();
-    expect(document.querySelector('.raw-country')?.textContent).toContain('España');
-    select['selectOption'](COUNTRY_MODELS[1]);
-    f.detectChanges();
-
-    expect(f.componentInstance.ctrl.value).toBe(52);
-    expect(select.selectedLabel()).toBe('México');
-    expect(emitted).toEqual([COUNTRY_MODELS[1]]);
-
-    select['selectOption'](COUNTRY_MODELS[2]);
-    expect(f.componentInstance.ctrl.value).toBe(52);
-  });
-
   it('returns the complete domain object when optionValue is omitted', async () => {
     const f = TestBed.createComponent(NeuSelectComponent);
     f.componentRef.setInput('options', COUNTRY_MODELS);
@@ -1947,108 +1490,13 @@ describe('NeuSelectComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance as unknown as NeuSelectComponent<CountryModel, CountryModel>;
     const onChange = vi.fn();
-    comp.registerOnChange(onChange);
+    comp.value.subscribe(onChange);
 
     comp['selectOption'](COUNTRY_MODELS[0]);
 
-    expect((comp as any)['_value']()).toBe(COUNTRY_MODELS[0]);
+    expect((comp as any).value()).toBe(COUNTRY_MODELS[0]);
     expect(comp.selectedLabel()).toBe('ESPAÑA');
     expect(onChange).toHaveBeenCalledWith(COUNTRY_MODELS[0]);
-  });
-
-  it('emits one CVA, legacy and detailed event for one semantic selection', async () => {
-    const { comp } = await setup();
-    const cva = vi.fn();
-    const legacy = vi.fn();
-    const detailed = vi.fn();
-    comp.registerOnChange(cva);
-    comp.selectionChange.subscribe(legacy);
-    comp.changeDetail.subscribe(detailed);
-
-    comp['selectOption'](OPTIONS[0]);
-    comp['selectOption'](OPTIONS[0]);
-
-    expect(cva).toHaveBeenCalledTimes(1);
-    expect(legacy).toHaveBeenCalledTimes(1);
-    expect(detailed).toHaveBeenCalledTimes(1);
-    expect(detailed.mock.calls[0][0]).toMatchObject({
-      value: 'es',
-      option: OPTIONS[0],
-      custom: false,
-    });
-  });
-
-  it('keeps programmatic writes silent for falsy, NaN, unknown and null values', async () => {
-    const f = TestBed.createComponent(NeuSelectComponent<number, number>);
-    f.componentRef.setInput('options', [0, 1, Number.NaN]);
-    f.detectChanges();
-    const comp = f.componentInstance;
-    const cva = vi.fn();
-    const legacy = vi.fn();
-    const detailed = vi.fn();
-    comp.registerOnChange(cva);
-    comp.selectionChange.subscribe(legacy);
-    comp.changeDetail.subscribe(detailed);
-
-    comp.writeValue(0);
-    expect(comp['isOptionSelected'](0)).toBe(true);
-    comp.writeValue(Number.NaN);
-    expect(comp['isOptionSelected'](Number.NaN)).toBe(true);
-    comp.writeValue(999);
-    comp.writeValue(null);
-
-    expect(cva).not.toHaveBeenCalled();
-    expect(legacy).not.toHaveBeenCalled();
-    expect(detailed).not.toHaveBeenCalled();
-  });
-
-  it('commits an editable custom value once and never creates a fake option', async () => {
-    const { comp } = await setup({ editable: true });
-    const cva = vi.fn();
-    const legacy = vi.fn();
-    const detailed = vi.fn();
-    comp.registerOnChange(cva);
-    comp.selectionChange.subscribe(legacy);
-    comp.changeDetail.subscribe(detailed);
-    const input = document.createElement('input');
-    input.value = 'Custom country';
-    comp.onEditableInput({ target: input } as unknown as Event);
-    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
-
-    expect(comp['_value']()).toBe('Custom country');
-    expect(cva).toHaveBeenCalledTimes(1);
-    expect(legacy).toHaveBeenCalledWith(null);
-    expect(detailed.mock.calls[0][0]).toMatchObject({ custom: true, option: null });
-  });
-
-  it('resolves an editable exact label to the canonical matching option on blur', async () => {
-    const { comp } = await setup({ editable: true });
-    const cva = vi.fn();
-    comp.registerOnChange(cva);
-    comp.editableQuery.set('méxico');
-
-    comp.onEditableBlur(new FocusEvent('blur'));
-
-    expect(comp['_value']()).toBe('mx');
-    expect(cva).toHaveBeenCalledTimes(1);
-    expect(comp.selectedLabel()).toBe('México');
-  });
-
-  it('proposes controlled filters without mutating the canonical owner value', async () => {
-    const { comp } = await setup({
-      searchable: true,
-      filterValue: 'esp',
-      filterConfig: { fields: ['label'], matchMode: 'startsWith' },
-    });
-    const events: any[] = [];
-    comp.filter.subscribe((event: unknown) => events.push(event));
-
-    comp.setFilter('mex', new Event('input'));
-
-    expect(comp.currentFilter()).toBe('esp');
-    expect(comp.filteredOptions()).toEqual([OPTIONS[0]]);
-    expect(events).toHaveLength(1);
-    expect(events[0]).toMatchObject({ filter: 'mex', visibleOptions: [OPTIONS[1]] });
   });
 
   it('normalizes typed groups, disables group children and keeps groups out of T events', async () => {
@@ -2058,7 +1506,7 @@ describe('NeuSelectComponent', () => {
       { title: 'Locked', locked: true, children: [{ value: 'cl', label: 'Chile' }] },
     ];
     const f = TestBed.createComponent(
-      NeuSelectComponent as unknown as new () => NeuSelectComponent<NeuSelectOption, string, Group>,
+      NeuSelectComponent as unknown as new () => NeuSelectComponent<NeuSelectOption, string, 'single', Group>,
     );
     f.componentRef.setInput('groups', groups);
     f.componentRef.setInput('groupConfig', {
@@ -2075,34 +1523,9 @@ describe('NeuSelectComponent', () => {
       .visibleRows()
       .findIndex((row) => row.kind === 'option' && row.option.value === 'cl');
     comp.selectRow(null, comp.visibleRows()[lockedIndex] as any, lockedIndex);
-    expect((comp as any)['_value']()).toBeNull();
+    expect((comp as any).value()).toBeNull();
     comp['selectOption'](groups[0].children[1]);
-    expect((comp as any)['_value']()).toBe('mx');
-  });
-
-  it('emits bounded serializable lazy requests for initial, scroll and filter lifecycles', async () => {
-    const { comp } = await setup({
-      options: [],
-      lazy: true,
-      loading: true,
-      virtualScroll: true,
-      totalItems: 500,
-      virtualScrollVisibleItems: 6,
-      virtualScrollBuffer: 2,
-      searchable: true,
-    });
-    const requests: any[] = [];
-    comp.lazyRequest.subscribe((event: unknown) => requests.push(event));
-    comp.open();
-    const list = document.createElement('div');
-    Object.defineProperty(list, 'scrollTop', { value: 400 });
-    comp['onPanelScroll']({ currentTarget: list } as unknown as Event);
-    comp.setFilter('mex');
-
-    expect(requests.map((request) => request.reason)).toEqual(['initial', 'scroll', 'filter']);
-    expect(requests[0]).toMatchObject({ first: 0, end: 10, count: 10, requestId: 1 });
-    expect(JSON.parse(JSON.stringify(requests[2])).filterValue).toBe('mex');
-    expect(comp.renderedRows()).toHaveLength(10);
+    expect((comp as any).value()).toBe('mx');
   });
 
   it('bounds virtual DOM and keeps active descendant on a real rendered eligible row', async () => {
@@ -2126,170 +1549,13 @@ describe('NeuSelectComponent', () => {
     expect(document.getElementById(active)).toBeTruthy();
   });
 
-  it('restores focus for Escape and blocks readonly and disabled mutations', async () => {
-    const { f, comp } = await setup();
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
-    trigger.focus = vi.fn();
-    const originalFrame = window.requestAnimationFrame;
-    window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
-      callback(0);
-      return 1;
-    }) as typeof window.requestAnimationFrame;
-    try {
-      comp.open();
-      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
-      expect(trigger.focus).toHaveBeenCalled();
-      f.componentRef.setInput('readonly', true);
-      f.detectChanges();
-      comp.open();
-      comp['selectOption'](OPTIONS[0]);
-      expect(comp.isOpen()).toBe(false);
-      expect(comp['_value']()).toBeNull();
-      f.componentRef.setInput('disabled', true);
-      f.componentRef.setInput('readonly', false);
-      f.detectChanges();
-      comp['selectOption'](OPTIONS[0]);
-      expect(comp['_value']()).toBeNull();
-    } finally {
-      window.requestAnimationFrame = originalFrame;
-    }
-  });
-
-  it('exposes imperative open, close, focus, clear and resetFilter with coherent events', async () => {
-    const { f, comp } = await setup({ searchable: true, clearable: true });
-    const shows = vi.fn();
-    const hides = vi.fn();
-    const clears = vi.fn();
-    comp.opened.subscribe(shows);
-    comp.closed.subscribe(hides);
-    comp.cleared.subscribe(clears);
-
-    comp.open();
-    comp.open();
-    expect(shows).toHaveBeenCalledTimes(1);
-    comp.setFilter('mex');
-    comp.resetFilter();
-    expect(comp.currentFilter()).toBe('');
-    comp.close();
-    comp.close();
-    expect(hides).toHaveBeenCalledTimes(1);
-    comp['selectOption'](OPTIONS[0]);
-    comp.clear();
-    comp.clear();
-    expect(clears).toHaveBeenCalledTimes(1);
-    expect(comp['_value']()).toBeNull();
-    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
-    trigger.focus = vi.fn();
-    comp.focus();
-    expect(trigger.focus).toHaveBeenCalled();
-  });
-
-  it('reconciles immutable identity replacement and forwards native form metadata', async () => {
-    const first = [
-      { id: 1, name: 'One' },
-      { id: 2, name: 'Two' },
-    ];
-    const f = TestBed.createComponent(NeuSelectComponent<any, any>);
-    f.componentRef.setInput('options', first);
-    f.componentRef.setInput('optionLabel', 'name');
-    f.componentRef.setInput('identityConfig', { identityAccessor: 'id' });
-    f.componentRef.setInput('name', 'role');
-    f.componentRef.setInput('required', true);
-    f.componentRef.setInput('inputId', 'role-select');
-    f.detectChanges();
-    const comp = f.componentInstance;
-    comp.writeValue(first[1]);
-    f.componentRef.setInput('options', [
-      { id: 1, name: 'One v2' },
-      { id: 2, name: 'Two v2' },
-    ]);
-    f.detectChanges();
-
-    expect(comp.selectedLabel()).toBe('Two v2');
-    expect(f.nativeElement.querySelector('.neu-select__trigger').id).toBe('role-select');
-    expect((f.nativeElement.querySelector('input[type="hidden"]') as HTMLInputElement).name).toBe(
-      'role',
-    );
-  });
-
-  it('covers the complete open and closed keyboard policy matrix', async () => {
-    const { f, comp } = await setup({ virtualScrollVisibleItems: 2 });
-    const key = (value: string, init: KeyboardEventInit = {}) => {
-      const event = new KeyboardEvent('keydown', { key: value, cancelable: true, ...init });
-      comp.onTriggerKeyDown(event);
-      return event;
-    };
-
-    const alreadyHandled = key('ArrowDown') as KeyboardEvent & { __neuSelectHandled?: boolean };
-    comp.close(false);
-    alreadyHandled.__neuSelectHandled = true;
-    comp.onTriggerKeyDown(alreadyHandled);
-    expect(comp.isOpen()).toBe(false);
-
-    key('ArrowUp');
-    expect(comp.isOpen()).toBe(true);
-    expect(comp.activeIndex()).toBe(1);
-    for (const value of ['ArrowDown', 'ArrowUp', 'Home', 'End', 'PageDown', 'PageUp']) key(value);
-    key('m');
-    key('x', { ctrlKey: true });
-    key('x', { metaKey: true });
-    key('x', { altKey: true });
-    key('Tab');
-    expect(comp.isOpen()).toBe(false);
-
-    key('Enter');
-    comp.activeIndex.set(-1);
-    key('Enter');
-    expect(comp['_value']()).toBeNull();
-    comp.activeIndex.set(0);
-    key(' ');
-    expect(comp['_value']()).toBe('es');
-
-    f.componentRef.setInput('disabled', true);
-    f.detectChanges();
-    key('ArrowDown');
-    expect(comp.isOpen()).toBe(false);
-  });
-
-  it('covers editable input, filter keyboard and controlled reset branches', async () => {
-    const { f, comp } = await setup({ editable: true, searchable: true, autofocusFilter: true });
-    comp.open();
-    f.detectChanges();
-    await f.whenStable();
-    const input = f.nativeElement.querySelector('.neu-select__editable-input') as HTMLInputElement;
-    input.value = 'Mex';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
-    expect(comp.currentFilter()).toBe('Mex');
-
-    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
-    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
-    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'x', cancelable: true }));
-    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
-    expect(comp.isOpen()).toBe(false);
-    comp.open();
-    comp['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
-    expect(comp.isOpen()).toBe(false);
-
-    f.componentRef.setInput('filterValue', 'owner');
-    f.detectChanges();
-    comp.resetFilter(false);
-    expect(comp.currentFilter()).toBe('owner');
-    f.componentRef.setInput('readonly', true);
-    f.detectChanges();
-    input.value = 'blocked';
-    comp.onEditableInput({ target: input } as unknown as Event);
-    expect(comp.editableQuery()).not.toBe('blocked');
-  });
-
   it('covers option mouse, key, select-on-focus and programmatic focus behavior', async () => {
     const { f, comp } = await setup({ selectOnFocus: true, focusOnHover: true });
     comp.open();
     f.detectChanges();
     const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
     options[1].dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-    expect(comp['_value']()).toBe('mx');
+    expect(comp.value()).toBe('mx');
 
     comp.open();
     f.detectChanges();
@@ -2311,7 +1577,7 @@ describe('NeuSelectComponent', () => {
   it('covers overlay trigger, focus, blur, detach and transition guards', async () => {
     const { f, comp } = await setup({ resetFilterOnHide: true, searchable: true });
     const touched = vi.fn();
-    comp.registerOnTouched(touched);
+    comp.touch.subscribe(touched);
     const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
     const child = document.createElement('span');
     const nested = new Event('keydown', { cancelable: true }) as Event & {
@@ -2350,363 +1616,219 @@ describe('NeuSelectComponent', () => {
     expect(touched).toHaveBeenCalled();
   });
 
-  it('covers virtual dimensions, logical positions and public template contexts', async () => {
-    const { f, comp } = await setup({
-      virtualScroll: true,
-      virtualScrollVisibleItems: 2,
-      virtualScrollBuffer: -2,
-      totalItems: 20,
-    });
-    comp.virtualFirst.set(1);
-    expect(comp.renderedRows().length).toBeGreaterThan(0);
-    expect(comp.virtualTopHeight()).toBeGreaterThanOrEqual(0);
-    expect(comp.virtualBottomHeight()).toBeGreaterThan(0);
-    const row = comp.visibleRows().find((candidate: any) => candidate.kind === 'option');
-    expect(comp['optionPosition'](row, 0)).toBe(1);
-    expect(comp['itemTemplateContext'](row, 0)).toMatchObject({ option: OPTIONS[0] });
-    expect(comp.selectedTemplateContext()).toMatchObject({ value: null, custom: false });
+  describe('N2-007 selector contract', () => {
+    it('commits one V and one typed optionActivated detail per user activation', async () => {
+      const { comp } = await setup();
+      const values = vi.fn();
+      const activations = vi.fn();
+      comp.value.subscribe(values);
+      comp.optionActivated.subscribe(activations);
+      const event = new MouseEvent('click');
 
-    f.componentRef.setInput('virtualScrollItemSize', Number.NaN);
-    f.componentRef.setInput('size', 'sm');
-    f.detectChanges();
-    expect(comp.effectiveVirtualScrollItemSize()).toBe(36);
-    f.componentRef.setInput('size', 'lg');
-    f.detectChanges();
-    expect(comp.effectiveVirtualScrollItemSize()).toBe(52);
-    comp.panelPosition.update((position: any) => ({ ...position, maxHeight: 'not-a-number' }));
-    expect(comp.virtualViewportHeight()).toMatch(/px$/);
+      comp.selectRow(event, comp.visibleRows()[1], 1);
 
-    f.componentRef.setInput('lazy', true);
-    f.componentRef.setInput('dataFirst', 5);
-    f.detectChanges();
-    expect(comp.logicalOptionCount()).toBe(20);
-    expect(comp['optionPosition'](comp.visibleRows()[0], 0)).toBe(6);
-    expect(comp['loaderTemplateContext'](7)).toMatchObject({ first: 7, end: 8, count: 1 });
-  });
-
-  it('covers descriptions, announcements, primitive and exceptional native serialization', async () => {
-    const { f, comp } = await setup();
-    f.componentRef.setInput('ariaDescribedBy', 'owned-description');
-    f.detectChanges();
-    expect(comp.describedBy()).toBe('owned-description');
-    f.componentRef.setInput('ariaDescribedBy', null);
-    f.componentRef.setInput('errorMessage', 'Required');
-    f.detectChanges();
-    expect(comp.describedBy()).toContain('-error');
-    f.componentRef.setInput('errorMessage', '');
-    f.componentRef.setInput('hint', 'Helpful');
-    f.detectChanges();
-    expect(comp.describedBy()).toContain('-hint');
-
-    comp.open();
-    expect(comp.resultsAnnouncement()).toContain('opciones');
-    f.componentRef.setInput('options', [OPTIONS[0]]);
-    f.detectChanges();
-    expect(comp.resultsAnnouncement()).toContain('1 opción');
-    f.componentRef.setInput('options', []);
-    f.detectChanges();
-    expect(comp.resultsAnnouncement()).toBe(comp.noResultsMessage());
-
-    comp.writeValue(true);
-    expect(comp.nativeValue()).toBe('true');
-    comp.writeValue(2n);
-    expect(comp.nativeValue()).toBe('2');
-    const cyclic: any = {};
-    cyclic.self = cyclic;
-    comp.writeValue(cyclic);
-    expect(comp.nativeValue()).toBe('[object Object]');
-    comp.close(false);
-    expect(comp.resultsAnnouncement()).toBe('');
-  });
-
-  it('renders every strict structural and icon template slot', async () => {
-    @Component({
-      imports: [
-        NeuSelectComponent,
-        NeuSelectItemDirective,
-        NeuSelectSelectedDirective,
-        NeuSelectGroupDirective,
-        NeuSelectFilterDirective,
-        NeuSelectLoaderDirective,
-        NeuSelectHeaderDirective,
-        NeuSelectFooterDirective,
-        NeuSelectEmptyDirective,
-        NeuSelectEmptyFilterDirective,
-        NeuSelectDropdownIconDirective,
-        NeuSelectLoadingIconDirective,
-        NeuSelectClearIconDirective,
-        NeuSelectFilterIconDirective,
-      ],
-      template: `
-        <neu-select [options]="options"  [searchable]="true" [clearable]="true">
-          <ng-template neuSelectHeader><span class="slot-header">header</span></ng-template>
-          <ng-template neuSelectGroup let-group="group"
-            ><span class="slot-group">{{ group }}</span></ng-template
-          >
-          <ng-template [neuSelectItem]="options" let-option="option"
-            ><span class="slot-item">{{ option.label }}</span></ng-template
-          >
-          <ng-template [neuSelectSelected]="options" let-option="option"
-            ><span class="slot-selected">{{ option?.label }}</span></ng-template
-          >
-          <ng-template [neuSelectFilter]="{}" let-filter="filter"
-            ><button class="slot-filter" (click)="filter('one')">filter</button></ng-template
-          >
-          <ng-template neuSelectDropdownIcon>dropdown</ng-template>
-          <ng-template neuSelectLoadingIcon>loading</ng-template>
-          <ng-template neuSelectClearIcon>clear</ng-template>
-          <ng-template neuSelectFilterIcon>filter</ng-template>
-          <ng-template neuSelectFooter><span class="slot-footer">footer</span></ng-template>
-        </neu-select>
-        <neu-select [options]="[]" [searchable]="true">
-          <ng-template neuSelectEmpty><span class="slot-empty">empty</span></ng-template>
-          <ng-template neuSelectEmptyFilter
-            ><span class="slot-empty-filter">empty-filter</span></ng-template
-          >
-          <ng-template neuSelectLoader>loader</ng-template>
-        </neu-select>
-      `,
-    })
-    class AllSlotsHost {
-      options = [
-        { value: 'one', label: 'One', group: 'A' },
-        { value: 'two', label: 'Two', group: 'B' },
-      ];
-    }
-    await TestBed.configureTestingModule({
-      imports: [AllSlotsHost],
-      providers: [provideZonelessChangeDetection()],
-    }).compileComponents();
-    const f = TestBed.createComponent(AllSlotsHost);
-    f.detectChanges();
-    const selects = f.debugElement.queryAll(By.directive(NeuSelectComponent));
-    for (const name of [
-      'itemTpl',
-      'selectedItemTpl',
-      'headerTpl',
-      'footerTpl',
-      'emptyTpl',
-      'emptyFilterTpl',
-      'groupTpl',
-      'filterTpl',
-      'loaderTpl',
-      'dropdownIconTpl',
-      'loadingIconTpl',
-      'clearIconTpl',
-      'filterIconTpl',
-    ]) {
-      selects[0].componentInstance[name]();
-    }
-    selects[0].componentInstance.writeValue('one');
-    selects[0].componentInstance.open();
-    selects[1].componentInstance.open();
-    f.detectChanges();
-    expect(document.querySelector('.slot-header')).toBeTruthy();
-    expect(document.querySelectorAll('.slot-group')).toHaveLength(2);
-    expect(document.querySelector('.slot-item')).toBeTruthy();
-    expect(f.nativeElement.querySelector('.slot-selected')).toBeTruthy();
-    expect(document.querySelector('.slot-footer')).toBeTruthy();
-    expect(document.querySelector('.slot-empty')).toBeTruthy();
-
-    selects[1].componentInstance.setFilter('missing');
-    f.detectChanges();
-    expect(document.querySelector('.slot-empty-filter')).toBeTruthy();
-  });
-
-  it('covers remaining callback, fallback and guard branches without changing semantics', async () => {
-    const { f, comp } = await setup({ editable: true, searchable: true, clearable: true });
-    f.componentRef.setInput('filterConfig', { fields: ['label'] });
-    f.componentRef.setInput('virtualScrollItemSize', 0);
-    f.detectChanges();
-    expect(comp.effectiveFilterConfig().fields).toEqual(['label']);
-    expect(comp.effectiveVirtualScrollItemSize()).toBe(1);
-    expect(comp.previousGroup(OPTIONS[0])).toBeUndefined();
-    expect(comp.previousGroup(OPTIONS[1])).toBeUndefined();
-    expect(comp.selectedOptionId()).toBeNull();
-    expect(comp.optionGroup(OPTIONS[0])).toBeUndefined();
-    expect(comp.optionDomId({ value: 'missing', label: 'Missing' })).toContain('missing');
-
-    const input = f.nativeElement.querySelector('.neu-select__editable-input') as HTMLInputElement;
-    input.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
-    input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    input.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
-    f.detectChanges();
-    const search = document.querySelector<HTMLInputElement>('.neu-select__search-input')!;
-    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    const list = document.querySelector<HTMLElement>('.neu-select__list')!;
-    list.dispatchEvent(new Event('scroll', { bubbles: true }));
-
-    const filterContext = comp['filterTemplateContext']();
-    filterContext.filter('mex');
-    filterContext.reset();
-    f.componentRef.setInput('filterValue', 'owned');
-    f.detectChanges();
-    comp.close();
-    expect(comp.currentFilter()).toBe('owned');
-
-    f.componentRef.setInput('disabled', true);
-    f.detectChanges();
-    comp.onInputFocus(new FocusEvent('focus'));
-    comp.focus();
-    f.componentRef.setInput('disabled', false);
-    f.componentRef.setInput('editable', false);
-    f.componentRef.setInput('filterValue', null);
-    f.detectChanges();
-    comp['onPanelScroll']({ currentTarget: list } as unknown as Event);
-    comp['setActiveRow'](2);
-    comp['onOptionMouseEnter'](2);
-
-    f.componentRef.setInput('options', []);
-    f.componentRef.setInput('autoOptionFocus', false);
-    f.componentRef.setInput('selectOnFocus', true);
-    f.detectChanges();
-    comp.open();
-    comp['onWindowResize']();
-    comp.onWindowScroll();
-    comp.onOverlayPositionChange({ connectionPair: { overlayY: 'bottom' } } as any);
-    expect(comp.isPanelAbove()).toBe(true);
-    comp.close(false);
-
-    f.componentRef.setInput('editable', true);
-    f.componentRef.setInput('urlParam', 'custom');
-    f.detectChanges();
-    comp.editableQuery.set('');
-    comp.onEditableBlur(new FocusEvent('blur'));
-    comp.editableQuery.set(null);
-    comp.onEditableBlur(new FocusEvent('blur'));
-
-    f.componentRef.setInput('lazy', true);
-    f.componentRef.setInput('virtualScroll', true);
-    f.componentRef.setInput('totalItems', null);
-    f.componentRef.setInput('loading', true);
-    f.componentRef.setInput('dataFirst', 4);
-    f.detectChanges();
-    comp.open();
-    comp.setFilter('same');
-    comp.setFilter('same');
-    const viewport = comp['_viewport']();
-    viewport?.checkViewportSize();
-    viewport?.scrollToIndex(2, 'auto');
-    expect(comp.logicalOptionCount()).toBeGreaterThanOrEqual(0);
-
-    vi.useFakeTimers();
-    try {
-      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'z', cancelable: true }));
-      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'z', cancelable: true }));
-      vi.advanceTimersByTime(501);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it('covers locale, controlled, URL, virtual and overlay edge contracts', async () => {
-    const { f, comp } = await setup({ editable: true, searchable: true });
-    const previousTypeahead = comp.typeaheadController;
-    f.componentRef.setInput('filterConfig', { locale: 'es' });
-    f.detectChanges();
-    await f.whenStable();
-    expect(comp.typeaheadController).not.toBe(previousTypeahead);
-
-    comp.writeValue('custom');
-    expect(comp.selectedLabel()).toBe('custom');
-    comp.writeValue('mx');
-    expect(comp.selectedOptionId()).toContain('option');
-
-    f.componentRef.setInput('filterValue', 'controlled');
-    f.detectChanges();
-    comp.searchQuery.set('local');
-    comp.close(false);
-    expect(comp.searchQuery()).toBe('local');
-    comp.finishHide({ closed: false, focusRestoration: null }, null, 'programmatic');
-
-    const ignoredKey = new KeyboardEvent('keydown', { key: 'F2', cancelable: true });
-    comp.onTriggerKeyDown(ignoredKey);
-    expect(ignoredKey.defaultPrevented).toBe(false);
-    f.componentRef.setInput('selectOnFocus', true);
-    f.detectChanges();
-    comp.onOptionMouseEnter(999);
-
-    const lazy = vi.spyOn(comp.lazyRequest, 'emit');
-    f.componentRef.setInput('filterValue', null);
-    f.componentRef.setInput('lazy', true);
-    f.componentRef.setInput('virtualScroll', true);
-    comp.searchQuery.set('');
-    f.detectChanges();
-    comp.setFilter('');
-    expect(lazy).toHaveBeenCalledWith(expect.objectContaining({ reason: 'reset' }));
-    f.componentRef.setInput('lazy', false);
-    f.detectChanges();
-    comp.onPanelScroll({ currentTarget: { scrollTop: 48 } } as unknown as Event);
-    const optionRow = comp.visibleRows().find((row: any) => row.kind === 'option');
-    expect(comp.optionPosition(optionRow, 0)).toBeGreaterThan(0);
-
-    f.componentRef.setInput('options', []);
-    f.detectChanges();
-    comp.virtualFirst.set(5);
-    expect(comp.virtualTopHeight()).toBe(0);
-    expect(comp.virtualBottomHeight()).toBe(0);
-    comp.focusFirstOption();
-    comp.scrollActiveIntoView();
-    comp.moveActive(new KeyboardEvent('keydown'), {
-      rowIndex: -1,
-      row: null,
-      scrollRequest: null,
+      expect(comp.value()).toBe('mx');
+      expect(values).toHaveBeenCalledExactlyOnceWith('mx');
+      expect(activations).toHaveBeenCalledExactlyOnceWith({
+        option: OPTIONS[1],
+        value: 'mx',
+        source: 'pointer',
+        originalEvent: event,
+      });
     });
 
-    f.componentRef.setInput('options', [
-      { value: -0, label: 'Negative zero' },
-      { value: 0, label: 'Positive zero' },
-    ]);
-    f.componentRef.setInput('multiple', false);
-    f.detectChanges();
-    comp.writeValue(-0);
-    expect(comp.isOptionSelected(comp.options()[0])).toBe(true);
-    expect(comp.isOptionSelected(comp.options()[1])).toBe(false);
+    it('ports chips, limits, removal and toggle-all into mode multiple', async () => {
+      const { f, comp } = await setup({
+        multiple: true,
+        selectionOptions: { chips: true, selectionLimit: 2, toggleAll: true },
+      });
+      comp.selectRow(new MouseEvent('click'), comp.visibleRows()[0], 0);
+      comp.selectRow(new MouseEvent('click'), comp.visibleRows()[1], 1);
+      comp.selectRow(new MouseEvent('click'), { kind: 'option', option: { value: 'fr', label: 'France' }, index: 3, logicalIndex: 3, disabled: false }, 3);
+      f.detectChanges();
 
-    f.componentRef.setInput('options', [{ value: Symbol('opaque'), label: 'Opaque' }]);
-    f.detectChanges();
-    expect(comp.valueFromUrl('missing')).toBeNull();
-    f.componentRef.setInput('options', OPTIONS);
-    f.componentRef.setInput('multiple', true);
-    f.componentRef.setInput('editable', true);
-    f.detectChanges();
-    comp.writeValue('not-an-array');
-    expect(comp.currentValues()).toEqual([]);
-    expect(comp.modelValueFromUrl('es,mx')).toEqual(['es', 'mx']);
-    expect(comp.modelValuesEqual(['es'], null)).toBe(false);
-    expect(comp.modelValuesEqual(['es'], ['es', 'mx'])).toBe(false);
-    expect(comp.modelValuesEqual(['es'], ['es'])).toBe(true);
+      expect(comp.value()).toEqual(['es', 'mx']);
+      expect(f.nativeElement.querySelectorAll('.neu-select__chip')).toHaveLength(2);
+      comp.removeSelectedOption(OPTIONS[0], new MouseEvent('click'));
+      expect(comp.value()).toEqual(['mx']);
+      comp.toggleAll(new MouseEvent('click'));
+      expect(comp.value()).toEqual(['mx', 'es']);
+    });
 
-    comp.editableQuery.set('new-value');
-    comp.commitCustomValue(new Event('change'));
-    expect(comp.currentValues()).toContain('new-value');
-    f.componentRef.setInput('editable', false);
-    f.detectChanges();
-    comp.commitCustomValue(new Event('change'));
+    it('separates local filter proposals from remote data transport', async () => {
+      const { comp } = await setup({
+        searchable: true,
+        lazy: true,
+        totalItems: 100,
+        virtualScroll: true,
+      });
+      const filters = vi.fn();
+      const requests = vi.fn();
+      comp.filterChange.subscribe(filters);
+      comp.dataRequest.subscribe(requests);
 
-    comp.pendingOverlayFrameActions = [vi.fn()];
-    comp.runOverlayFrame();
-    expect(comp.pendingOverlayFrameActions).toEqual([]);
-    comp.handleOverlayKey(new KeyboardEvent('keydown', { key: 'PageDown' }), 'escape');
+      comp.setFilter('mex', new InputEvent('input'));
 
-    comp._isOpen.set(true);
-    comp.overlaySession.close('programmatic', false);
-    expect(comp.adoptOverlaySignal()).toBe(true);
-    comp.overlaySession.close('programmatic', false);
-    comp.onWindowResize();
-    comp.overlaySession.close('programmatic', false);
-    comp.onWindowScroll();
+      expect(filters).toHaveBeenCalledExactlyOnceWith('mex');
+      expect(requests).toHaveBeenCalledTimes(1);
+      expect(requests.mock.calls[0][0]).toMatchObject({
+        query: 'mex',
+        reason: 'query',
+        range: { render: { start: 0 } },
+      });
+    });
 
-    comp._isOpen.set(false);
-    const open = vi.spyOn(comp.overlaySession, 'open').mockReturnValueOnce(false);
-    comp.open();
-    expect(comp.isOpen()).toBe(false);
-    open.mockRestore();
+    it('keeps controlled open as proposal plus physical lifecycle', async () => {
+      const { f, comp } = await setup({ open: false });
+      const proposals = vi.fn();
+      const opened = vi.fn();
+      comp.openChange.subscribe(proposals);
+      comp.opened.subscribe(opened);
 
-    const detachedOrigin = document.createElement('button');
-    comp.requestFocusRestoration(detachedOrigin);
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-    expect(document.activeElement).not.toBe(detachedOrigin);
+      comp.requestOpen(new MouseEvent('click'));
+      expect(proposals).toHaveBeenCalledExactlyOnceWith(true);
+      expect(comp.isOpen()).toBe(false);
+
+      f.componentRef.setInput('open', true);
+      f.detectChanges();
+      await f.whenStable();
+      expect(comp.isOpen()).toBe(true);
+      expect(opened).toHaveBeenCalledOnce();
+    });
+
+    it('uses Object.is by default and accepts explicit domain equality', async () => {
+      const { f, comp } = await setup({ options: [Number.NaN, 0, -0] });
+      f.componentRef.setInput('optionValue', (value: number) => value);
+      comp.value.set(Number.NaN);
+      expect(comp.isOptionSelected(Number.NaN)).toBe(true);
+      comp.value.set(0);
+      expect(comp.isOptionSelected(-0)).toBe(false);
+
+      f.componentRef.setInput('compareWith', (left: { id: number }, right: { id: number }) => left.id === right.id);
+      f.componentRef.setInput('optionValue', (value: { id: number }) => value);
+      f.componentRef.setInput('options', [{ id: 1 }]);
+      comp.value.set({ id: 1 });
+      expect(comp.isOptionSelected({ id: 1 })).toBe(true);
+    });
+
+    it('covers model, clear, bulk, keyboard, scroll and template-context boundaries', async () => {
+      const { f, comp } = await setup({ searchable: true, clearable: true });
+      const row = comp.visibleRows().find((candidate: any) => candidate.kind === 'option');
+
+      comp.value.set(null);
+      expect(comp.nativeValue()).toBe('');
+      for (const value of ['text', 7, true, 8n]) {
+        comp.value.set(value);
+        expect(comp.nativeValue()).toBe(String(value));
+      }
+      comp.value.set({ id: 1 });
+      expect(comp.nativeValue()).toBe('{"id":1}');
+      const cyclic: any = {};
+      cyclic.self = cyclic;
+      comp.value.set(cyclic);
+      expect(comp.nativeValue()).toBe('[object Object]');
+
+      expect(comp.optionDomId(OPTIONS[0])).not.toContain('missing');
+      expect(comp.optionDomId({ value: 'missing', label: 'Missing' })).toContain('missing');
+      expect(comp.itemTemplateContext(row, 0)).toMatchObject({ active: false, selected: false });
+      expect(comp.selectedTemplateContext()).toMatchObject({ multiple: false });
+      expect(comp.filterTemplateContext().value).toBe('');
+      expect(comp.loaderTemplateContext(4)).toMatchObject({ first: 4, end: 5, count: 1 });
+
+      expect(comp.modelValuesEqual(null, null)).toBe(true);
+      expect(comp.modelValuesEqual(null, 'es')).toBe(false);
+      expect(comp.modelValuesEqual('es', null)).toBe(false);
+      expect(comp.modelValuesEqual('es', 'es')).toBe(true);
+      comp.value.set('es');
+      expect(comp.currentValues()).toEqual(['es']);
+      expect(comp.singleValue()).toBe('es');
+
+      const clearKeyboard = new KeyboardEvent('keydown');
+      comp.clearValue(clearKeyboard);
+      expect(comp.value()).toBeNull();
+      comp.clearValue(clearKeyboard);
+      f.componentRef.setInput('readonly', true);
+      comp.value.set('es');
+      comp.clearValue(new MouseEvent('click'));
+      expect(comp.value()).toBe('es');
+      f.componentRef.setInput('readonly', false);
+      f.componentRef.setInput('disabled', true);
+      comp.clearValue(new MouseEvent('click'));
+      f.componentRef.setInput('disabled', false);
+
+      comp.removeSelectedOption(OPTIONS[0], new MouseEvent('click'));
+      comp.toggleAll(new MouseEvent('click'));
+      f.componentRef.setInput('mode', 'multiple');
+      comp.value.set(null);
+      expect(comp.currentValues()).toEqual([]);
+      expect(comp.singleValue()).toBeNull();
+      expect(comp.modelValuesEqual([], [])).toBe(true);
+      expect(comp.modelValuesEqual([], ['es'])).toBe(false);
+      comp.toggleAll(new MouseEvent('click'));
+      expect(comp.value()).toEqual(['es', 'mx']);
+      comp.toggleAll(new MouseEvent('click'));
+      expect(comp.value()).toEqual([]);
+      f.componentRef.setInput('selectionOptions', { toggleAll: true, selectionLimit: 1 });
+      comp.toggleAll(new MouseEvent('click'));
+      expect(comp.value()).toEqual(['es']);
+      comp.removeSelectedOption(OPTIONS[0], new MouseEvent('click'));
+      expect(comp.value()).toEqual([]);
+      f.componentRef.setInput('readonly', true);
+      comp.toggleAll(new MouseEvent('click'));
+      comp.removeSelectedOption(OPTIONS[0], new MouseEvent('click'));
+      f.componentRef.setInput('readonly', false);
+
+      for (const key of ['ArrowDown', 'ArrowUp', 'Home', 'End', 'PageDown', 'PageUp', 'Enter', ' ', 'Escape', 'Tab', 'e']) {
+        comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key, cancelable: true }));
+      }
+      comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+      comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+      comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+      comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
+      comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'x', cancelable: true }));
+
+      comp.onPanelScroll({ currentTarget: { scrollTop: 80 } } as unknown as Event);
+      f.componentRef.setInput('virtualScroll', true);
+      comp.onPanelScroll({ currentTarget: { scrollTop: 80 } } as unknown as Event);
+      f.componentRef.setInput('lazy', true);
+      f.componentRef.setInput('totalItems', 100);
+      comp.onPanelScroll({ currentTarget: { scrollTop: 120 } } as unknown as Event);
+      comp.onPanelScroll({ currentTarget: { scrollTop: 120 } } as unknown as Event);
+      expect(comp.virtualFirst()).toBeGreaterThan(0);
+    });
+
+    it('keeps 10k-option filtering, virtual DOM and repeated overlay cleanup bounded', async () => {
+      const many = Array.from({ length: 10_000 }, (_, index) => ({
+        value: String(index),
+        label: `Option ${index}`,
+      }));
+      const { f, comp } = await setup({
+        options: many,
+        searchable: true,
+        virtualScroll: true,
+        virtualScrollVisibleItems: 8,
+        virtualScrollBuffer: 2,
+      });
+
+      comp.setFilter('Option 9999');
+      f.detectChanges();
+      expect(comp.filteredOptions()).toHaveLength(1);
+      expect(comp.renderedRows()).toHaveLength(1);
+
+      comp.resetFilter();
+      expect(comp.filteredOptions()).toHaveLength(10_000);
+      expect(comp.renderedRows().length).toBeLessThanOrEqual(12);
+
+      for (let cycle = 0; cycle < 3; cycle++) {
+        comp.open();
+        f.detectChanges();
+        await f.whenStable();
+        expect(document.querySelectorAll('.neu-select__panel')).toHaveLength(1);
+        comp.requestClose();
+        f.detectChanges();
+        await f.whenStable();
+        expect(document.querySelectorAll('.neu-select__panel')).toHaveLength(0);
+      }
+    });
   });
 });

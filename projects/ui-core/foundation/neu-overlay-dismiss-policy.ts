@@ -12,7 +12,6 @@ export type NeuOverlaySource =
   | 'menu'
   | 'context-menu'
   | 'select'
-  | 'multiselect'
   | 'tree-select'
   | 'cascade-select'
   | 'color-picker';

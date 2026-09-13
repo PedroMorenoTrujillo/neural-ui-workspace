@@ -1686,9 +1686,7 @@
     .neu-date-input__float-label,
     .neu-drp__label,
     .neu-select__static-label,
-    .neu-select__label,
-    .neu-multiselect__static-label,
-    .neu-multiselect__label
+    .neu-select__label
   ) {
   position: absolute;
   width: 1px;
@@ -1709,7 +1707,7 @@
   // table-cell vertical alignment cannot make text inputs look taller than
   // number, date or selection filters.
   neu-table-inline-filter-feature
-    > :is(neu-input, neu-number-input, neu-select, neu-multiselect, neu-date-input) {
+    > :is(neu-input, neu-number-input, neu-select, neu-date-input) {
     display: block;
     width: 100%;
     min-width: 0;
@@ -1735,8 +1733,7 @@
   .neu-select,
   .neu-date-input-host,
   .neu-input-host,
-  .neu-number-input,
-  .neu-multiselect {
+  .neu-number-input {
     display: block;
     width: 100%;
     min-width: 0;
@@ -1746,9 +1743,7 @@
   .neu-number-input__label,
   .neu-date-input__label,
   .neu-drp__label,
-  .neu-select__label,
-  .neu-multiselect__static-label,
-  .neu-multiselect__label {
+  .neu-select__label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -1763,7 +1758,6 @@
   .neu-select__trigger,
   .neu-date-input__trigger,
   .neu-drp__trigger,
-  .neu-multiselect__trigger,
   .neu-input__wrapper,
   .neu-input__field,
   .neu-number-input__field,
@@ -1778,24 +1772,10 @@
     padding-inline: var(--neu-space-2);
   }
 
-  .neu-multiselect__trigger {
-    min-width: 0;
-    padding: var(--neu-space-1) var(--neu-space-2);
-  }
-
-  .neu-multiselect__chips {
+  .neu-select__chips {
     min-width: 0;
     flex-wrap: nowrap;
     overflow: hidden;
-  }
-
-  .neu-multiselect__count-badge {
-    max-width: 100%;
-    padding: 1px var(--neu-space-2);
-    overflow: hidden;
-    font-size: var(--neu-text-xs);
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .neu-date-input__trigger {

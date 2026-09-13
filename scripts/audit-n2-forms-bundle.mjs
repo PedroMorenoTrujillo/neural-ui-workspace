@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
@@ -9,16 +9,6 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const candidate = join(root, 'dist/neural-ui/core');
 const temporary = mkdtempSync(join(root, '.n2-forms-baseline-'));
 const baseline = join(temporary, 'dist/neural-ui/core');
-const pilots = [
-  'projects/ui-core/number-input/neu-number-input.component.ts',
-  'projects/ui-core/knob/neu-knob.component.ts',
-  'projects/ui-core/date-input/neu-date-input.component.ts',
-  'projects/ui-core/date-input/public_api.ts',
-  // The current table consumer is already migrated to the N2-005 inputDetail state.
-  // Restore its matching baseline as well so the historical package compiles coherently.
-  'projects/ui-core/table/neu-table-optional-features.component.ts',
-  'projects/ui-core/table/neu-table-advanced-filter.utils.ts',
-];
 const external = ['@angular/*', '@angular/cdk/*', '@ng-icons/*', 'rxjs', 'rxjs/*'];
 
 function compressed(bytes) {
@@ -79,13 +69,26 @@ try {
   for (const path of ['projects', 'angular.json', 'tsconfig.json', 'package.json', 'LICENSE']) {
     cpSync(join(root, path), join(temporary, path), { recursive: true, dereference: true });
   }
-  for (const pilot of pilots) {
-    let source = execFileSync('git', ['show', `HEAD:${pilot}`], { cwd: root, encoding: 'utf8' });
-    // N2-002 began after the approved no-OnPush cleanup already present in the working tree.
-    source = source
-      .replace('  ChangeDetectionStrategy,\n', '')
-      .replaceAll('  changeDetection: ChangeDetectionStrategy.OnPush,\n', '');
-    writeFileSync(join(temporary, pilot), source);
+  const changed = execFileSync('git', ['diff', '--name-only', 'HEAD', '--', 'projects'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim().split('\n').filter(Boolean);
+  for (const path of changed) {
+    try {
+      const source = execFileSync('git', ['show', `HEAD:${path}`], { cwd: root });
+      mkdirSync(join(temporary, dirname(path)), { recursive: true });
+      writeFileSync(join(temporary, path), source);
+    } catch {
+      rmSync(join(temporary, path), { recursive: true, force: true });
+    }
+  }
+  const untracked = execFileSync(
+    'git',
+    ['ls-files', '--others', '--exclude-standard', '--', 'projects'],
+    { cwd: root, encoding: 'utf8' },
+  ).trim().split('\n').filter(Boolean);
+  for (const path of untracked) {
+    rmSync(join(temporary, path), { recursive: true, force: true });
   }
   const ng = join(root, 'node_modules/.bin/ng');
   const built = spawnSync(ng, ['build', 'ui-core', '--configuration', 'production'], {
@@ -95,7 +98,7 @@ try {
   if (built.status !== 0) {
     console.error(built.stdout);
     console.error(built.stderr);
-    throw new Error(`Unable to build the N2-006 baseline (exit ${built.status ?? 1}).`);
+    throw new Error(`Unable to build the N2-007 HEAD baseline (exit ${built.status ?? 1}).`);
   }
 
   const scenarios = {
@@ -109,6 +112,24 @@ try {
       "import {NeuDateInputComponent} from '@neural-ui/core/date-input';const value={start:'2026-03-01',end:null};export{NeuDateInputComponent,value};",
     'multiple-consumer':
       "import {NeuDateInputComponent} from '@neural-ui/core/date-input';const value=['2026-03-01'];export{NeuDateInputComponent,value};",
+    'select-single':
+      "import {NeuSelectComponent} from '@neural-ui/core/select';const mode='single';export{NeuSelectComponent,mode};",
+    'select-multiple':
+      "import {NeuSelectComponent} from '@neural-ui/core/select';const mode='multiple';export{NeuSelectComponent,mode};",
+    autocomplete:
+      "import {NeuAutocompleteComponent} from '@neural-ui/core/autocomplete';export{NeuAutocompleteComponent};",
+    'cascade-select':
+      "import {NeuCascadeSelectComponent} from '@neural-ui/core/cascade-select';export{NeuCascadeSelectComponent};",
+    listbox:
+      "import {NeuListboxComponent} from '@neural-ui/core/listbox';export{NeuListboxComponent};",
+    'toggle-button-group':
+      "import {NeuToggleButtonGroupComponent} from '@neural-ui/core/toggle-button-group';export{NeuToggleButtonGroupComponent};",
+    'selector-family': `import {NeuSelectComponent} from '@neural-ui/core/select';
+import {NeuAutocompleteComponent} from '@neural-ui/core/autocomplete';
+import {NeuCascadeSelectComponent} from '@neural-ui/core/cascade-select';
+import {NeuListboxComponent} from '@neural-ui/core/listbox';
+import {NeuToggleButtonGroupComponent} from '@neural-ui/core/toggle-button-group';
+export {NeuSelectComponent,NeuAutocompleteComponent,NeuCascadeSelectComponent,NeuListboxComponent,NeuToggleButtonGroupComponent};`,
     'numeric-family': `import {NeuNumberInputComponent} from '@neural-ui/core/number-input';
 import {NeuKnobComponent} from '@neural-ui/core/knob';
 export {NeuNumberInputComponent,NeuKnobComponent};`,
@@ -124,7 +145,12 @@ import {NeuRadioGroupComponent,NeuRadioComponent} from '@neural-ui/core/radio';
 import {NeuNumberInputComponent} from '@neural-ui/core/number-input';
 import {NeuKnobComponent} from '@neural-ui/core/knob';
 import {NeuDateInputComponent} from '@neural-ui/core/date-input';
-export {FormControl,form,FormField,NeuTextareaComponent,NeuPasswordComponent,NeuInputMaskComponent,NeuInputOTPComponent,NeuSwitchComponent,NeuRadioGroupComponent,NeuRadioComponent,NeuNumberInputComponent,NeuKnobComponent,NeuDateInputComponent};`,
+import {NeuSelectComponent} from '@neural-ui/core/select';
+import {NeuAutocompleteComponent} from '@neural-ui/core/autocomplete';
+import {NeuCascadeSelectComponent} from '@neural-ui/core/cascade-select';
+import {NeuListboxComponent} from '@neural-ui/core/listbox';
+import {NeuToggleButtonGroupComponent} from '@neural-ui/core/toggle-button-group';
+export {FormControl,form,FormField,NeuTextareaComponent,NeuPasswordComponent,NeuInputMaskComponent,NeuInputOTPComponent,NeuSwitchComponent,NeuRadioGroupComponent,NeuRadioComponent,NeuNumberInputComponent,NeuKnobComponent,NeuDateInputComponent,NeuSelectComponent,NeuAutocompleteComponent,NeuCascadeSelectComponent,NeuListboxComponent,NeuToggleButtonGroupComponent};`,
   };
   const report = {
     method: 'minified ESM consumers; Angular/CDK/ng-icons/RxJS external; gzip 9; Brotli 11',
@@ -136,7 +162,7 @@ export {FormControl,form,FormField,NeuTextareaComponent,NeuPasswordComponent,Neu
     imports: {},
     dependencies: {},
   };
-  for (const name of ['number-input', 'knob', 'date-input']) {
+  for (const name of ['number-input', 'knob', 'date-input', 'select', 'autocomplete', 'cascade-select', 'listbox', 'toggle-button-group']) {
     const before = entry(baseline, name);
     const after = entry(candidate, name);
     report.entries[name] = { before, after, delta: delta(before, after) };

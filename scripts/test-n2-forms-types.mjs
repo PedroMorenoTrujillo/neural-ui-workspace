@@ -62,6 +62,15 @@ for (const sourceName of [
   'dateTimeInput',
   'multipleInput',
   'rangeInput',
+  'selectSingle',
+  'selectMultiple',
+  'autocompleteStrict',
+  'autocompleteFreeText',
+  'cascadeSelect',
+  'listboxSingle',
+  'listboxMultiple',
+  'toggleSingle',
+  'toggleMultiple',
 ]) {
   if (!diagnostics.includes(sourceName)) {
     console.error(`Missing invalid-value type coverage for ${sourceName}.`);
@@ -70,12 +79,12 @@ for (const sourceName of [
   }
 }
 
-if ((diagnostics.match(/TS2345/g) ?? []).length < 28) {
-  console.error('Expected at least 28 explicit invalid-value assignment diagnostics.');
+if ((diagnostics.match(/TS2345/g) ?? []).length < 38) {
+  console.error('Expected at least 38 explicit invalid-value assignment diagnostics.');
   console.error(diagnostics);
   process.exit(1);
 }
 
 console.log(
-  'N2 Forms types passed (11 official controls accepted; invalid text, boolean, radio, numeric and civil-date values rejected).',
+  'N2 Forms types passed (16 official controls accepted; selector cardinality and T/V separation are enforced).',
 );

@@ -41,6 +41,17 @@ try {
       document.querySelector('#n2-knob [role="spinbutton"]'),
       document.querySelector('#n2-date .neu-date-input__field'),
     ];
+    window.__n2SelectorControls = [
+      document.querySelector('#n2-select-single .neu-select__trigger'),
+      document.querySelector('#n2-select-multiple .neu-select__trigger'),
+      document.querySelector('#n2-autocomplete-strict .neu-autocomplete__input'),
+      document.querySelector('#n2-autocomplete-free .neu-autocomplete__input'),
+      document.querySelector('#n2-cascade .neu-cascade-select__trigger'),
+      document.querySelector('#n2-listbox-single .neu-listbox__options'),
+      document.querySelector('#n2-listbox-multiple .neu-listbox__options'),
+      document.querySelector('#n2-toggle-single .neu-toggle-group'),
+      document.querySelector('#n2-toggle-multiple .neu-toggle-group'),
+    ];
   });
   release();
   await page.waitForFunction(() => document.querySelector('#n2-ready')?.textContent === 'true');
@@ -75,6 +86,25 @@ try {
     }),
     [true, true, true, true, true, true, true, true, true],
   );
+  assert.deepEqual(
+    await page.evaluate(() => {
+      const selectors = [
+        '#n2-select-single .neu-select__trigger',
+        '#n2-select-multiple .neu-select__trigger',
+        '#n2-autocomplete-strict .neu-autocomplete__input',
+        '#n2-autocomplete-free .neu-autocomplete__input',
+        '#n2-cascade .neu-cascade-select__trigger',
+        '#n2-listbox-single .neu-listbox__options',
+        '#n2-listbox-multiple .neu-listbox__options',
+        '#n2-toggle-single .neu-toggle-group',
+        '#n2-toggle-multiple .neu-toggle-group',
+      ];
+      return window.__n2SelectorControls.map(
+        (node, index) => node === document.querySelector(selectors[index]),
+      );
+    }),
+    [true, true, true, true, true, true, true, true, true],
+  );
   assert.equal(await page.locator('#n2-input .neu-input__field').inputValue(), 'server-value');
   assert.equal(await page.locator('#n2-checkbox .neu-checkbox__input').isChecked(), true);
   assert.equal(await page.locator('#n2-textarea textarea').inputValue(), 'server-notes');
@@ -93,6 +123,15 @@ try {
     '25',
   );
   assert.equal(await page.locator('#n2-date .neu-date-input__field').inputValue(), '29/03/2026');
+  assert.match(await page.locator('#n2-select-single .neu-select__value').textContent(), /Hydrated one/);
+  assert.match(await page.locator('#n2-select-multiple .neu-select__value').textContent(), /Hydrated one/);
+  assert.equal(await page.locator('#n2-autocomplete-strict .neu-autocomplete__input').inputValue(), 'Hydrated one');
+  assert.equal(await page.locator('#n2-autocomplete-free .neu-autocomplete__input').inputValue(), 'hydrated draft');
+  assert.match(await page.locator('#n2-cascade .neu-cascade-select__value').textContent(), /Hydrated one/);
+  assert.equal(await page.locator('#n2-listbox-single .neu-listbox__option').first().getAttribute('aria-selected'), 'true');
+  assert.equal(await page.locator('#n2-listbox-multiple .neu-listbox__option').first().getAttribute('aria-selected'), 'true');
+  assert.match(await page.locator('#n2-toggle-single .neu-toggle-group__btn').first().getAttribute('aria-pressed'), /true/);
+  assert.match(await page.locator('#n2-toggle-multiple .neu-toggle-group__btn').first().getAttribute('aria-pressed'), /true/);
   assert.equal(
     await page.locator('#n2-readonly-input .neu-input__field').getAttribute('readonly'),
     '',
@@ -133,6 +172,47 @@ try {
     'knob:30',
     'date:2026-03-30',
   ]);
+
+  await page.locator('#n2-select-single .neu-select__trigger').click();
+  await page.locator('.neu-select__panel .neu-select__option').nth(1).click();
+  await page.locator('#n2-select-multiple .neu-select__trigger').click();
+  await page.locator('.neu-select__panel .neu-select__option').nth(1).click();
+  await page.keyboard.press('Escape');
+  await page.locator('#n2-autocomplete-strict .neu-autocomplete__dropdown').click();
+  await page.locator('.neu-autocomplete__option').filter({ hasText: 'Hydrated two' }).click();
+  await page.locator('#n2-autocomplete-free .neu-autocomplete__input').fill('client draft');
+  await page.keyboard.press('Escape');
+  await page.locator('#n2-cascade .neu-cascade-select__trigger').click();
+  await page.locator('.neu-cascade-select__option').nth(1).click();
+  await page.locator('#n2-listbox-single .neu-listbox__option').nth(1).click();
+  await page.locator('#n2-listbox-multiple .neu-listbox__option').nth(1).click();
+  await page.locator('#n2-toggle-single .neu-toggle-group__btn').nth(1).click();
+  await page.locator('#n2-toggle-multiple .neu-toggle-group__btn').nth(1).click();
+  await page.waitForFunction(
+    () =>
+      JSON.parse(document.querySelector('#n2-new-control-events')?.textContent ?? '[]').length ===
+      18,
+  );
+  assert.deepEqual(JSON.parse(await page.locator('#n2-new-control-events').textContent()), [
+    'textarea:client-notes',
+    'password:Client1!',
+    'mask:987-654',
+    'otp:9876',
+    'switch:false',
+    'radio:user',
+    'number:2345.5',
+    'knob:30',
+    'date:2026-03-30',
+    'select-single:2',
+    'select-multiple:[1,2]',
+    'autocomplete-strict:2',
+    'autocomplete-free:client draft',
+    'cascade:2',
+    'listbox-single:2',
+    'listbox-multiple:[1,2]',
+    'toggle-single:2',
+    'toggle-multiple:[1,2]',
+  ]);
   assert.equal(
     await page.locator('#n2-invalid-input .neu-input__field').getAttribute('aria-invalid'),
     'true',
@@ -158,7 +238,7 @@ try {
   assert.deepEqual(JSON.parse(await page.locator('#n2-checkbox-events').textContent()), [false]);
   assert.deepEqual(errors, []);
   console.log(
-    'N2 Forms real zoneless hydration passed for all 11 controls: DOM reused, explicit locale stable, zero hydration errors, first edits exactly once',
+    'N2 Forms real zoneless hydration passed for all 20 controls: DOM reused, explicit locale stable, zero hydration errors, first edits exactly once',
   );
 } finally {
   release();

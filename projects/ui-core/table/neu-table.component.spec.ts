@@ -42,7 +42,6 @@ import {
 } from '@neural-ui/core/date-input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
 import type { NeuSelectOption } from '@neural-ui/core/select';
-import { NeuMultiselectComponent } from '@neural-ui/core/multiselect';
 import { By } from '@angular/platform-browser';
 import { normalizeNeuTableDatePoint } from './neu-table-filter.engine';
 import { NeuTableFilterRegistry } from './neu-table-filter.registry';
@@ -1747,14 +1746,14 @@ describe('NeuTableComponent', () => {
     await fixture.whenStable();
     expect(table['getColumnFilterValue']('active')).toBe(false);
     expect(table.filteredData().map((row) => row.id)).toEqual([2]);
-    expect(booleanSelect.querySelector('.neu-select__value')?.textContent).toContain('No');
+    expect(fixture.nativeElement.querySelector('.neu-select__value')?.textContent).toContain('No');
 
     table.setColumnFilter('active', true);
     fixture.detectChanges();
     await fixture.whenStable();
     expect(table['getColumnFilterValue']('active')).toBe(true);
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
-    expect(booleanSelect.querySelector('.neu-select__value')?.textContent).toContain('Yes');
+    expect(fixture.nativeElement.querySelector('.neu-select__value')?.textContent).toContain('Yes');
 
     table.clearColumnFilters();
     fixture.detectChanges();
@@ -5825,8 +5824,8 @@ describe('NeuTableComponent advanced layout features', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
-    const multiselect = fixture.debugElement.query(By.directive(NeuMultiselectComponent))
-      .componentInstance as NeuMultiselectComponent<string, string>;
+    const multiselect = fixture.debugElement.query(By.directive(NeuSelectComponent))
+      .componentInstance as NeuSelectComponent<string, string>;
 
     table.setColumnFilter('status', ['active', 'pending']);
     fixture.detectChanges();
@@ -5851,7 +5850,7 @@ describe('NeuTableComponent advanced layout features', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(table['getColumnFilterValue']('status')).toBe('');
-    expect(fixture.nativeElement.textContent).toContain('All');
+    expect(fixture.nativeElement.querySelector('.neu-select__placeholder')?.textContent).toContain('All');
     expect(table.filteredData()).toHaveLength(3);
   });
 
@@ -5903,10 +5902,10 @@ describe('NeuTableComponent advanced layout features', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const table = fixture.componentInstance;
-    const multiselect = fixture.debugElement.query(By.directive(NeuMultiselectComponent))
-      .componentInstance as NeuMultiselectComponent<StatusFilterOption, string>;
+    const multiselect = fixture.debugElement.query(By.directive(NeuSelectComponent))
+      .componentInstance as NeuSelectComponent<StatusFilterOption, string>;
     const trigger = fixture.nativeElement.querySelector(
-      '.neu-multiselect__trigger',
+      '.neu-select__trigger',
     ) as HTMLElement | null;
     expect(trigger).toBeTruthy();
     expect(multiselect['isOptionDisabled'](statuses[2])).toBe(true);
@@ -5915,7 +5914,7 @@ describe('NeuTableComponent advanced layout features', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const optionByLabel = (label: string): HTMLElement | undefined =>
-      Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option')).find(
+      Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option')).find(
         (option) => option.textContent?.includes(label),
       );
     const activeOption = optionByLabel('Active');
@@ -5925,9 +5924,7 @@ describe('NeuTableComponent advanced layout features', () => {
     await fixture.whenStable();
     expect(table['getColumnFilterValue']('status')).toEqual(['active']);
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
-    expect(
-      fixture.nativeElement.querySelector('.neu-multiselect__count-badge')?.textContent,
-    ).toContain('1');
+    expect(fixture.nativeElement.querySelector('.neu-select__value')?.textContent).toContain('Active');
 
     const archivedOption = optionByLabel('Archived');
     expect(archivedOption).toBeTruthy();
@@ -5938,7 +5935,7 @@ describe('NeuTableComponent advanced layout features', () => {
     expect(table.filteredData().map((row) => row.id)).toEqual([1]);
 
     const clear = fixture.nativeElement.querySelector(
-      '.neu-multiselect__clear',
+      '.neu-select__clear',
     ) as HTMLElement | null;
     expect(clear).toBeTruthy();
     clear!.click();
@@ -6999,7 +6996,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     const root = fixture.nativeElement as HTMLElement;
     const features = root.querySelectorAll('neu-table-inline-filter-feature');
     const labels = root.querySelectorAll(
-      '.neu-table__filter-row :is(.neu-input__static-label, .neu-number-input__label, .neu-number-input__floating-label, .neu-date-input__label, .neu-select__static-label, .neu-multiselect__static-label)',
+      '.neu-table__filter-row :is(.neu-input__static-label, .neu-number-input__label, .neu-number-input__floating-label, .neu-date-input__label, .neu-select__static-label, .neu-select__static-label)',
     );
 
     expect(fixture.componentInstance.filterLabelDisplay()).toBe('visible');
@@ -7021,7 +7018,7 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     );
     const labels = Array.from(
       root.querySelectorAll<HTMLLabelElement>(
-        '.neu-table__filter-row :is(.neu-input__static-label, .neu-number-input__label, .neu-number-input__floating-label, .neu-date-input__label, .neu-select__static-label, .neu-multiselect__static-label)',
+        '.neu-table__filter-row :is(.neu-input__static-label, .neu-number-input__label, .neu-number-input__floating-label, .neu-date-input__label, .neu-select__static-label, .neu-select__static-label)',
       ),
     );
 
@@ -7161,9 +7158,9 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
   it('keeps the parent open through repeated real MultiSelect interactions', async () => {
     const fixture = await createOverlayTable();
     await openFilterOverlay(fixture, 'Tags');
-    await openChild(fixture, '.neu-multiselect__trigger');
+    await openChild(fixture, '.neu-select__trigger');
     expect(internalFilters(fixture.componentInstance)._filterOverlaySessionPanes()).toHaveLength(2);
-    const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option'));
+    const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
     options[0].click();
     options[1].click();
     await settle(fixture);
@@ -7171,21 +7168,21 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     expect(
       internalFilters(fixture.componentInstance)._filterOverlayMultiSelectControl.value,
     ).toEqual(['core', 'design']);
-    expect(document.querySelector('.neu-multiselect__panel')).toBeTruthy();
+    expect(document.querySelector('.neu-select__panel')).toBeTruthy();
     expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
   });
 
   it('gives MultiSelect the first Escape and the Table parent the second Escape', async () => {
     const fixture = await createOverlayTable();
     const parentTrigger = await openFilterOverlay(fixture, 'Tags');
-    const childTrigger = await openChild(fixture, '.neu-multiselect__trigger');
-    const option = document.querySelector<HTMLElement>('.neu-multiselect__option')!;
+    const childTrigger = await openChild(fixture, '.neu-select__trigger');
+    const option = document.querySelector<HTMLElement>('.neu-select__option')!;
     option.focus();
     escape(option);
     await settle(fixture);
     escape(document, 'keyup');
 
-    expect(document.querySelector('.neu-multiselect__panel')).toBeNull();
+    expect(document.querySelector('.neu-select__panel')).toBeNull();
     expect(document.querySelector('.neu-table__filter-overlay')).toBeTruthy();
     expect(document.activeElement).toBe(childTrigger);
 
@@ -7371,10 +7368,10 @@ describe('NeuTableComponent advanced filter overlay foundation', () => {
     fixture.componentInstance.serverStateChange.subscribe((event) => events.push(event));
 
     await openFilterOverlay(fixture, 'Tags');
-    await openChild(fixture, '.neu-multiselect__trigger');
-    document.querySelector<HTMLElement>('.neu-multiselect__option')!.click();
+    await openChild(fixture, '.neu-select__trigger');
+    document.querySelector<HTMLElement>('.neu-select__option')!.click();
     await settle(fixture);
-    escape(document.querySelector<HTMLElement>('.neu-multiselect__option')!);
+    escape(document.querySelector<HTMLElement>('.neu-select__option')!);
     await settle(fixture);
     document.querySelector<HTMLButtonElement>('.neu-table__filter-overlay-close')!.click();
     await settle(fixture);
@@ -7774,7 +7771,7 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
       .find((component) => component.label() === 'Value: Role')!;
     expect(select).toBeTruthy();
     expect(select.optionLabel()).toBe(ROLE_SELECT_FILTER.optionLabel);
-    expect(select.optionValue()).toBe(ROLE_SELECT_FILTER.optionValue);
+    expect(select.optionValue()(ROLE_FILTER_OPTIONS[1])).toBe(1);
     expect(select.optionDisabled()).toBe(ROLE_SELECT_FILTER.optionDisabled);
     expect(select.searchable()).toBe(true);
     expect(select.virtualScroll()).toBe(true);
@@ -7881,10 +7878,10 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     await openOptionFilter(fixture, 'Status');
     expect(document.querySelector('[data-neu-table-filter-add-rule]')).toBeNull();
     const multiselect = fixture.debugElement
-      .queryAll(By.directive(NeuMultiselectComponent))
+      .queryAll(By.directive(NeuSelectComponent))
       .map(
         (element) =>
-          element.componentInstance as NeuMultiselectComponent<StatusFilterOption, string>,
+          element.componentInstance as NeuSelectComponent<StatusFilterOption, string>,
       )
       .find((component) => component.label() === 'Value: Status')!;
     expect(multiselect.virtualScroll()).toBe(true);
@@ -7900,11 +7897,11 @@ describe('NeuTableComponent E5 advanced option and custom-template filters', () 
     await settle(fixture);
     expect(multiselect.virtualScroll()).toBe(false);
     document
-      .querySelector<HTMLElement>('.neu-table__filter-overlay .neu-multiselect__trigger')!
+      .querySelector<HTMLElement>('.neu-table__filter-overlay .neu-select__trigger')!
       .click();
     await settle(fixture);
     const option = (label: string) =>
-      Array.from(document.querySelectorAll<HTMLElement>('.neu-multiselect__option')).find(
+      Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option')).find(
         (candidate) => candidate.textContent?.includes(label),
       )!;
     option('Active').click();
@@ -8489,7 +8486,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     });
     expect(feature._options()).toEqual(['active']);
     expect(feature._optionLabel()).toBe(optionLabel);
-    expect(feature._optionValue()).toBe(optionValue);
+    expect(feature._optionValue()('active')).toBe('active');
     expect(feature._optionDisabled()).toBe(optionDisabled);
     expect(feature._searchable()).toBe(true);
     expect(feature._virtualScroll()).toBe(true);
@@ -8498,7 +8495,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
     setColumn({ key: 'status', header: 'Status', filterConfig: { kind: 'multiSelect' } });
     expect(feature._options()).toEqual([]);
     expect(feature._optionLabel()).toBeNull();
-    expect(feature._optionValue()).toBeNull();
+    expect(feature._optionValue()('active')).toBe('active');
     expect(feature._optionDisabled()).toBeNull();
     expect(feature._searchable()).toBe(false);
     expect(feature._virtualScroll()).toBe(false);
@@ -8517,7 +8514,7 @@ describe('NeuTableComponent functional advanced filter menu', () => {
       { label: 'pending', value: 'pending' },
     ]);
     expect(feature._optionLabel()).toBeNull();
-    expect(feature._optionValue()).toBeNull();
+    expect(feature._optionValue()({ label: 'Active', value: 'active' })).toBe('active');
     expect(feature._optionDisabled()).toBeNull();
 
     setColumn({

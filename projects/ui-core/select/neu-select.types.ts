@@ -1,10 +1,13 @@
 import {
+  NeuOptionActivatedEvent,
+  NeuOptionDataRequest,
   NeuOptionFilterConfig,
   NeuOptionFilterTemplateContext,
   NeuOptionGroupTemplateContext,
-  NeuOptionLazyRequest,
   NeuOptionLoaderTemplateContext,
   NeuOptionTemplateContext,
+  NeuSelectionMode,
+  NeuSelectionValue,
 } from '@neural-ui/core/option-api';
 
 export interface NeuSelectOption<V = string, D = unknown> {
@@ -25,48 +28,32 @@ export interface NeuSelectGroup<T = NeuSelectOption> {
 export type NeuSelectSize = 'sm' | 'md' | 'lg';
 export type NeuSelectVariant = 'outlined' | 'filled';
 
-export type NeuSelectModelValue<V, M extends boolean = false> = [M] extends [true]
-  ? readonly V[]
-  : V | null;
+export type NeuSelectMode = NeuSelectionMode;
+export type NeuSelectModelValue<V, M extends NeuSelectMode = 'single'> = NeuSelectionValue<V, M>;
+export type NeuSelectOptionActivated<T, V> = NeuOptionActivatedEvent<T, V>;
 
-interface NeuSelectChangeEventBase<T> {
-  readonly originalEvent: Event | null;
-  readonly option: T | null;
-  readonly selectedOptions: readonly T[];
-  readonly custom: boolean;
+export interface NeuSelectSelectionOptions {
+  readonly chips?: boolean;
+  readonly selectionLimit?: number;
+  readonly maxSelectedLabels?: number;
+  readonly toggleAll?: boolean;
+  readonly toggleAllScope?: 'filtered' | 'loaded';
 }
 
-export type NeuSelectChangeEvent<T, V, M extends boolean = boolean> = M extends true
-  ? NeuSelectChangeEventBase<T> & {
-      readonly value: readonly V[];
-      readonly multiple: true;
-    }
-  : NeuSelectChangeEventBase<T> & {
-      readonly value: V | null;
-      readonly multiple: false;
-    };
-
-export interface NeuSelectFilterEvent<T> {
-  readonly originalEvent: Event | null;
-  readonly filter: string;
-  readonly visibleOptions: readonly T[];
-  readonly config: Readonly<NeuOptionFilterConfig<T>>;
+export interface NeuSelectFilterOptions {
+  readonly enabled?: boolean;
+  readonly debounceMs?: number;
+  readonly locale?: string;
+  readonly resetOnClose?: boolean;
 }
 
-export interface NeuSelectOverlayEvent {
-  readonly originalEvent: Event | null;
-  readonly reason:
-    | 'programmatic'
-    | 'trigger'
-    | 'keyboard'
-    | 'selection'
-    | 'clear'
-    | 'escape'
-    | 'outside'
-    | 'tab';
+export type NeuSelectDataRequest = NeuOptionDataRequest;
+
+export interface NeuSelectClearedEvent {
+  readonly source: 'pointer' | 'keyboard' | 'programmatic-command';
+  readonly originalEvent?: Event;
 }
 
-export type NeuSelectLazyLoadEvent = NeuOptionLazyRequest;
 export interface NeuSelectItemContext<T> extends NeuOptionTemplateContext<T> {}
 
 export interface NeuSelectSelectedContext<T, V = unknown> {
@@ -76,7 +63,6 @@ export interface NeuSelectSelectedContext<T, V = unknown> {
   readonly options: readonly T[];
   readonly values: readonly V[];
   readonly multiple: boolean;
-  readonly custom: boolean;
 }
 
 export type NeuSelectGroupContext<G> = NeuOptionGroupTemplateContext<G>;

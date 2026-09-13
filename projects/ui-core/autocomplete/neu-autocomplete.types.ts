@@ -1,8 +1,8 @@
 import {
   NeuOptionGroupTemplateContext,
-  NeuOptionLazyRequest,
   NeuOptionLoaderTemplateContext,
   NeuOptionTemplateContext,
+  NeuViewportRange,
 } from '@neural-ui/core/option-api';
 
 export interface NeuAutocompleteOption<V = unknown> {
@@ -11,7 +11,9 @@ export interface NeuAutocompleteOption<V = unknown> {
   readonly disabled?: boolean;
 }
 
-export type NeuAutocompleteValue<V> = V | string;
+export type NeuAutocompleteMode = 'strict' | 'free-text';
+export type NeuAutocompleteValue<V, F extends NeuAutocompleteMode = 'strict'> =
+  F extends 'free-text' ? V | string | null : V | null;
 export type NeuAutocompleteDropdownMode = 'blank' | 'current';
 export type NeuAutocompleteSize = 'sm' | 'md' | 'lg';
 export type NeuAutocompleteVariant = 'outlined' | 'filled';
@@ -30,15 +32,24 @@ export interface NeuAutocompleteSelectEvent<T, V> {
   readonly value: V;
 }
 
+export interface NeuAutocompleteSuggestionsRequest {
+  readonly query: string;
+  readonly source: NeuAutocompleteCompletionSource;
+  readonly requestId: number;
+  readonly queryRevision: number;
+  readonly range?: NeuViewportRange;
+  readonly reason: 'initial' | 'query' | 'viewport' | 'retry';
+}
+
 export interface NeuAutocompleteDropdownClickEvent {
   readonly originalEvent: Event;
   readonly query: string;
   readonly mode: NeuAutocompleteDropdownMode;
 }
 
-export interface NeuAutocompleteClearEvent<V> {
+export interface NeuAutocompleteClearEvent<V, F extends NeuAutocompleteMode = 'strict'> {
   readonly originalEvent: Event | null;
-  readonly previousValue: NeuAutocompleteValue<V> | null;
+  readonly previousValue: NeuAutocompleteValue<V, F>;
   readonly previousText: string;
   readonly reason: 'button' | 'input' | 'force-selection' | 'programmatic';
 }
@@ -56,10 +67,6 @@ export interface NeuAutocompleteOverlayEvent {
     | 'outside'
     | 'tab'
     | 'programmatic';
-}
-
-export interface NeuAutocompleteLazyLoadEvent extends NeuOptionLazyRequest {
-  readonly query: string;
 }
 
 export interface NeuAutocompleteItemContext<T, V = unknown> extends NeuOptionTemplateContext<T> {

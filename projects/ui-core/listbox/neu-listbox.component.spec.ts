@@ -48,9 +48,10 @@ describe('NeuListboxComponent', () => {
     const component = fixture.componentInstance;
     const changes: Array<string | string[] | null> = [];
     let touched = 0;
-    component.registerOnChange((value) => changes.push(value));
-    component.registerOnTouched(() => touched++);
-    component.writeValue('a');
+    component.value.subscribe((value) => changes.push(value));
+    component.touch.subscribe(() => touched++);
+    component.value.set('a');
+    changes.length = 0;
     expect(component['isSelected']('a')).toBe(true);
 
     component['toggleOption'](options[1]);
@@ -60,33 +61,33 @@ describe('NeuListboxComponent', () => {
     component['onListBlur'](new FocusEvent('blur'));
     expect(touched).toBe(1);
 
-    component.setDisabledState(true);
+    fixture.componentRef.setInput('disabled', true);
     component['toggleOption'](options[0]);
     expect(component.values()).toEqual(['b']);
-    component.setDisabledState(false);
+    fixture.componentRef.setInput('disabled', false);
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
     expect(component.isDisabled()).toBe(true);
-    component.writeValue(null);
+    component.value.set(null);
     expect(component.values()).toEqual([]);
   });
 
   it('supports multiple selection and ignores disabled options', () => {
     const component = fixture.componentInstance;
-    const emitted = vi.spyOn(component.selectionChange, 'emit');
-    fixture.componentRef.setInput('multiple', true);
+    const emitted = vi.spyOn(component.value, 'set');
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.detectChanges();
     component['toggleOption'](options[0]);
     component['toggleOption'](options[1]);
     component['toggleOption'](options[0]);
     component['toggleOption'](options[2]);
     expect(component.values()).toEqual(['b']);
-    expect(emitted).toHaveBeenLastCalledWith([options[1]]);
+    expect(emitted).toHaveBeenLastCalledWith(['b']);
   });
 
   it('renders toggle-all as a checkbox with unchecked, mixed and checked states', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.componentRef.setInput('checkbox', true);
     fixture.componentRef.setInput('showToggleAll', true);
     fixture.detectChanges();
@@ -151,7 +152,7 @@ describe('NeuListboxComponent', () => {
 
   it('uses DOM keyboard navigation, active boundaries and multiselect semantics', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.detectChanges();
     const listbox = fixture.nativeElement.querySelector('[role="listbox"]') as HTMLElement;
     expect(listbox.getAttribute('aria-multiselectable')).toBe('true');
@@ -166,9 +167,10 @@ describe('NeuListboxComponent', () => {
 
   it('accepts array CVA values and exposes composite disabled state without option tab stops', () => {
     const component = fixture.componentInstance;
-    component.writeValue(['a', 'b']);
+    fixture.componentRef.setInput('mode', 'multiple');
+    component.value.set(['a', 'b'] as never);
     expect(component.values()).toEqual(['a', 'b']);
-    component.setDisabledState(true);
+    fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
     const rows = fixture.nativeElement.querySelectorAll(
       '.neu-listbox__option',
@@ -205,7 +207,7 @@ describe('NeuListboxComponent', () => {
     @Component({
       imports: [NeuListboxComponent, NeuListboxItemDirective],
       template: `
-        <neu-listbox [options]="options" [multiple]="true" [checkbox]="true">
+        <neu-listbox [options]="options" mode="multiple" [checkbox]="true">
           <ng-template neuListboxItem let-option>
             <span class="option-icon" aria-hidden="true">★</span>
             <span class="option-copy">
@@ -261,7 +263,7 @@ describe('NeuListboxComponent', () => {
 
   it('emits null when a malformed single-select option has no value', () => {
     const changes: unknown[] = [];
-    fixture.componentInstance.registerOnChange((value) => changes.push(value));
+    fixture.componentInstance.value.subscribe((value) => changes.push(value));
 
     fixture.componentInstance['toggleOption']({ label: 'Broken' } as NeuListboxOption);
 
@@ -313,24 +315,24 @@ describe('NeuListboxComponent', () => {
 
     fixture.componentRef.setInput('options', users);
     fixture.componentRef.setInput('optionLabel', 'name');
-    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionValue', (option: any) => option.id);
     fixture.componentRef.setInput('optionDisabled', 'disabled');
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.detectChanges();
 
     const emitted: any[] = [];
-    fixture.componentInstance.selectionChange.subscribe((value) => emitted.push(value));
+    fixture.componentInstance.optionActivated.subscribe((value) => emitted.push(value));
 
     const values: Array<string | string[] | null> = [];
-    fixture.componentInstance.registerOnChange((value) => values.push(value));
-    fixture.componentInstance['toggleOption'](users[0]);
-    fixture.componentInstance['toggleOption'](users[1]);
+    fixture.componentInstance.value.subscribe((value) => values.push(value));
+    fixture.componentInstance['toggleOption'](users[0], new MouseEvent('click'));
+    fixture.componentInstance['toggleOption'](users[1], new MouseEvent('click'));
     fixture.componentInstance['toggleOption'](users[2]);
 
     expect(values.at(-1)).toEqual(['a', 'b']);
     expect(fixture.componentInstance.values()).toEqual(['a', 'b']);
     expect(fixture.componentInstance['isSelected']('a')).toBe(true);
-    expect(emitted.at(-1)).toEqual([users[0], users[1]]);
+    expect(emitted.at(-1)?.option).toBe(users[1]);
   });
 
   it('supports function-based accessors and emits complete selected options', () => {
@@ -352,17 +354,17 @@ describe('NeuListboxComponent', () => {
       'optionDisabled',
       (option: (typeof users)[number]) => option.unavailable,
     );
-    fixture.componentRef.setInput('multiple', false);
+    fixture.componentRef.setInput('mode', 'single');
     fixture.detectChanges();
 
     const emitted: any[] = [];
-    fixture.componentInstance.selectionChange.subscribe((value) => emitted.push(value));
+    fixture.componentInstance.optionActivated.subscribe((value) => emitted.push(value));
 
     listbox['toggleOption'](users[1]);
-    listbox['toggleOption'](users[0]);
+    listbox['toggleOption'](users[0], new MouseEvent('click'));
 
     expect(fixture.componentInstance.values()).toEqual(['u-1']);
-    expect(emitted.at(-1)).toEqual([users[0]]);
+    expect(emitted.at(-1)?.option).toBe(users[0]);
   });
 
   it('supports full-domain option objects when optionValue is omitted', () => {
@@ -406,17 +408,17 @@ describe('NeuListboxComponent', () => {
 
     fixture.componentRef.setInput('options', users);
     fixture.componentRef.setInput('optionLabel', 'fullName');
-    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionValue', (option: any) => option.id);
     fixture.componentRef.setInput('optionDisabled', 'disabled');
-    fixture.componentRef.setInput('multiple', false);
+    fixture.componentRef.setInput('mode', 'single');
     fixture.detectChanges();
 
     const values: Array<number | number[] | null> = [];
     const selectionChanges: User[][] = [];
-    fixture.componentInstance.registerOnChange((value) => values.push(value));
-    fixture.componentInstance.selectionChange.subscribe((value) => selectionChanges.push(value));
+    fixture.componentInstance.value.subscribe((value) => values.push(value));
+    fixture.componentInstance.optionActivated.subscribe((event) => selectionChanges.push([event.option]));
 
-    fixture.componentInstance['toggleOption'](users[1]);
+    fixture.componentInstance['toggleOption'](users[1], new MouseEvent('click'));
 
     expect(values.at(-1)).toBe(2);
     expect(fixture.componentInstance.values()).toEqual([2]);
@@ -433,11 +435,11 @@ describe('NeuListboxComponent', () => {
     >;
 
     fixture.componentRef.setInput('options', primitiveOptions);
-    fixture.componentRef.setInput('multiple', false);
+    fixture.componentRef.setInput('mode', 'single');
     fixture.componentRef.setInput('searchable', false);
     fixture.detectChanges();
 
-    fixture.componentInstance.writeValue('admin');
+    fixture.componentInstance.value.set('admin');
     fixture.detectChanges();
 
     expect(fixture.componentInstance.values()).toEqual(['admin']);
@@ -495,7 +497,7 @@ describe('NeuListboxComponent', () => {
 
   it('supports shift range selection and Ctrl+A over visible eligible options', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.detectChanges();
     component.activeIndex.set(0);
     component['onKeyDown'](
@@ -510,7 +512,7 @@ describe('NeuListboxComponent', () => {
 
   it('implements desktop meta-key replacement and additive selection', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.componentRef.setInput('metaKeySelection', true);
     fixture.detectChanges();
     component['toggleOption'](options[0], new MouseEvent('click'));
@@ -526,7 +528,7 @@ describe('NeuListboxComponent', () => {
     fixture.componentRef.setInput('filterValue', 'alpha');
     fixture.detectChanges();
     const emitted: string[] = [];
-    component.filter.subscribe((event) => emitted.push(event.filter));
+    component.filterChange.subscribe((value) => emitted.push(value));
     component.setFilter('beta');
     expect(emitted).toEqual(['beta']);
     expect(component.currentFilter()).toBe('alpha');
@@ -543,7 +545,7 @@ describe('NeuListboxComponent', () => {
     >;
     typed.componentRef.setInput('options', users);
     typed.componentRef.setInput('optionLabel', 'name');
-    typed.componentRef.setInput('optionValue', 'id');
+    typed.componentRef.setInput('optionValue', (option: any) => option.id);
     typed.componentRef.setInput('searchable', true);
     typed.componentRef.setInput('filterConfig', { fields: ['city'], matchMode: 'startsWith' });
     typed.componentRef.setInput('noResultsMessage', 'Nothing in this city');
@@ -567,7 +569,7 @@ describe('NeuListboxComponent', () => {
       { title: 'Locked', locked: true, children: [{ label: 'Gamma', value: 'g' }] },
     ];
     const grouped = TestBed.createComponent(NeuListboxComponent) as ComponentFixture<
-      NeuListboxComponent<NeuListboxOption, string, Group>
+      NeuListboxComponent<NeuListboxOption, string, 'single', Group>
     >;
     grouped.componentRef.setInput('groups', groups);
     grouped.componentRef.setInput('groupConfig', {
@@ -592,8 +594,9 @@ describe('NeuListboxComponent', () => {
     >;
     typed.componentRef.setInput('options', first);
     typed.componentRef.setInput('optionLabel', 'name');
-    typed.componentRef.setInput('identityConfig', { identityAccessor: 'id' });
-    typed.componentInstance.writeValue(first[1]);
+    typed.componentRef.setInput('optionValue', (option: { id: number }) => option.id);
+    typed.componentRef.setInput('compareWith', (left: number, right: number) => left === right);
+    typed.componentInstance.value.set(2);
     typed.componentRef.setInput('options', [
       { id: 1, name: 'First v2' },
       { id: 2, name: 'Second v2' },
@@ -634,32 +637,24 @@ describe('NeuListboxComponent', () => {
     fixture.componentRef.setInput('totalItems', 1000);
     fixture.detectChanges();
     const requests: any[] = [];
-    component.lazyRequest.subscribe((request) => requests.push(request));
+    component.dataRequest.subscribe((request) => requests.push(request));
     component['onListFocus'](new FocusEvent('focus'));
     const list = fixture.nativeElement.querySelector('[role="listbox"]') as HTMLElement;
     Object.defineProperty(list, 'scrollTop', { value: 400, configurable: true });
     list.dispatchEvent(new Event('scroll', { bubbles: true }));
     expect(requests).toHaveLength(2);
-    expect(requests[0]).toMatchObject({ first: 0, end: 14, count: 14, reason: 'initial' });
+    expect(requests[0]).toMatchObject({ range: { render: { start: 0, end: 14 } }, reason: 'initial' });
     expect(requests[1].requestId).toBeGreaterThan(requests[0].requestId);
     expect(component.renderedRows().length).toBe(14);
   });
 
-  it('keeps selectAll controlled and emits an immutable visible-scope proposal', () => {
+  it('commits an immutable visible-scope toggle-all value', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.componentRef.setInput('checkbox', true);
-    fixture.componentRef.setInput('selectAll', false);
     fixture.detectChanges();
-    const events: any[] = [];
-    component.selectAllChangeDetail.subscribe((event) => events.push(event));
     component.toggleAll(new MouseEvent('click'));
-    expect(component.values()).toEqual([]);
-    expect(events[0]).toMatchObject({
-      checked: true,
-      scope: 'visible-eligible',
-      value: ['a', 'b'],
-    });
+    expect(component.values()).toEqual(['a', 'b']);
   });
 
   it('renders native form metadata and stable active-descendant targets', () => {
@@ -667,7 +662,7 @@ describe('NeuListboxComponent', () => {
     fixture.componentRef.setInput('id', 'roles');
     fixture.componentRef.setInput('name', 'roles');
     fixture.componentRef.setInput('required', true);
-    component.writeValue('b');
+    component.value.set('b');
     fixture.detectChanges();
     const list = fixture.nativeElement.querySelector('[role="listbox"]') as HTMLElement;
     list.dispatchEvent(new FocusEvent('focus'));
@@ -683,14 +678,12 @@ describe('NeuListboxComponent', () => {
     const component = fixture.componentInstance;
     fixture.componentRef.setInput('readonly', true);
     fixture.detectChanges();
-    const changes = vi.spyOn(component.changeDetail, 'emit');
-    const legacy = vi.spyOn(component.selectionChange, 'emit');
+    const changes = vi.spyOn(component.optionActivated, 'emit');
     component['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
     expect(component.activeIndex()).toBe(0);
     component['onKeyDown'](new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
     expect(component.values()).toEqual([]);
     expect(changes).not.toHaveBeenCalled();
-    expect(legacy).not.toHaveBeenCalled();
   });
 
   it('keeps programmatic writes and reset silent for falsy, NaN, unknown and empty values', () => {
@@ -699,18 +692,16 @@ describe('NeuListboxComponent', () => {
     >;
     typed.componentRef.setInput('options', [0, 1, Number.NaN]);
     typed.detectChanges();
-    const changes = vi.spyOn(typed.componentInstance.changeDetail, 'emit');
-    const legacy = vi.spyOn(typed.componentInstance.selectionChange, 'emit');
-    typed.componentInstance.writeValue(0);
+    const changes = vi.spyOn(typed.componentInstance.optionActivated, 'emit');
+    typed.componentInstance.value.set(0);
     expect(typed.componentInstance['isSelected'](0)).toBe(true);
-    typed.componentInstance.writeValue(Number.NaN);
+    typed.componentInstance.value.set(Number.NaN);
     expect(typed.componentInstance['isSelected'](Number.NaN)).toBe(true);
-    typed.componentInstance.writeValue(999);
+    typed.componentInstance.value.set(999);
     expect(typed.componentInstance.values()).toEqual([999]);
-    typed.componentInstance.writeValue(null);
+    typed.componentInstance.value.set(null);
     expect(typed.componentInstance.values()).toEqual([]);
     expect(changes).not.toHaveBeenCalled();
-    expect(legacy).not.toHaveBeenCalled();
   });
 
   it('emits one CVA, legacy and detailed change for one semantic selection', () => {
@@ -718,9 +709,9 @@ describe('NeuListboxComponent', () => {
     const cva: unknown[] = [];
     const legacy: unknown[] = [];
     const detailed: unknown[] = [];
-    component.registerOnChange((value) => cva.push(value));
-    component.selectionChange.subscribe((value) => legacy.push(value));
-    component.changeDetail.subscribe((value) => detailed.push(value));
+    component.value.subscribe((value) => cva.push(value));
+    component.optionActivated.subscribe((value) => legacy.push(value));
+    component.optionActivated.subscribe((value) => detailed.push(value));
     component['toggleOption'](options[0], new MouseEvent('click'));
     expect(cva).toHaveLength(1);
     expect(legacy).toHaveLength(1);
@@ -863,9 +854,7 @@ describe('NeuListboxComponent', () => {
   it('covers focus, pointer and filter keyboard policy combinations atomically', () => {
     const component = fixture.componentInstance;
     const optionEvents: unknown[] = [];
-    const doubleEvents: unknown[] = [];
-    component.optionClick.subscribe((event) => optionEvents.push(event));
-    component.optionDoubleClick.subscribe((event) => doubleEvents.push(event));
+    component.optionActivated.subscribe((event) => optionEvents.push(event));
     fixture.componentRef.setInput('selectOnFocus', true);
     fixture.detectChanges();
 
@@ -881,7 +870,6 @@ describe('NeuListboxComponent', () => {
       1,
     );
     expect(optionEvents.length).toBeGreaterThan(0);
-    expect(doubleEvents).toHaveLength(1);
 
     component['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'x' }));
     component['onFilterKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }));
@@ -918,6 +906,7 @@ describe('NeuListboxComponent', () => {
     fixture.componentRef.setInput('lazy', true);
     fixture.componentRef.setInput('dataFirst', 5);
     fixture.componentRef.setInput('totalItems', null);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.detectChanges();
     const lazyRow = component.visibleRows()[0] as any;
     expect(component['optionPosition'](lazyRow, 0)).toBe(6);
@@ -925,7 +914,7 @@ describe('NeuListboxComponent', () => {
     component['onListFocus'](new FocusEvent('focus'));
     expect(component['loaderTemplateContext'](5).first).toBe(0);
 
-    component.writeValue([null, true, 3, 4n, { id: 1 }, BigInt(5)] as any);
+    component.value.set([null, true, 3, 4n, { id: 1 }, BigInt(5)] as any);
     expect(component.selectedNativeValues().map((entry) => entry.value)).toEqual([
       '',
       'true',
@@ -936,13 +925,14 @@ describe('NeuListboxComponent', () => {
     ]);
     const circular: any = {};
     circular.self = circular;
-    component.writeValue(circular);
+    fixture.componentRef.setInput('mode', 'single');
+    component.value.set(circular);
     expect(component.selectedNativeValues()[0].value).toBe('[object Object]');
   });
 
   it('covers selection, toggle-all and reorder no-op branches without mutation', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.componentRef.setInput('metaKeySelection', true);
     fixture.componentRef.setInput('dragdrop', true);
     fixture.detectChanges();
@@ -980,7 +970,7 @@ describe('NeuListboxComponent', () => {
 
   it('covers rendered indicator, legacy-group and empty virtual boundaries', () => {
     const component = fixture.componentInstance;
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.componentRef.setInput('checkbox', true);
     fixture.componentRef.setInput('checkmark', true);
     fixture.detectChanges();
@@ -1021,10 +1011,10 @@ describe('NeuListboxComponent', () => {
 
   it('routes the complete rendered pointer, touch, filter, toggle and blur lifecycle', () => {
     const component = fixture.componentInstance as any;
-    const doubleClicks: unknown[] = [];
-    component.optionDoubleClick.subscribe((event: unknown) => doubleClicks.push(event));
+    const activations: unknown[] = [];
+    component.optionActivated.subscribe((event: unknown) => activations.push(event));
     fixture.componentRef.setInput('searchable', true);
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.componentRef.setInput('checkbox', true);
     fixture.componentRef.setInput('showToggleAll', true);
     fixture.detectChanges();
@@ -1060,8 +1050,8 @@ describe('NeuListboxComponent', () => {
     (fixture.nativeElement.querySelector('.neu-listbox__toggle-all') as HTMLButtonElement).click();
     list.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
 
-    expect(doubleClicks).toHaveLength(1);
-    expect(component.values()).toEqual(['a', 'b']);
+    expect(activations.length).toBeGreaterThan(0);
+    expect(component.values()).toEqual([]);
     expect(component.focused()).toBe(false);
   });
 
@@ -1074,26 +1064,21 @@ describe('NeuListboxComponent', () => {
       { label: 'One', value: 1 },
     ];
     numericFixture.componentRef.setInput('options', numericOptions);
-    numericFixture.componentRef.setInput('multiple', true);
+    numericFixture.componentRef.setInput('mode', 'multiple');
     numericFixture.componentRef.setInput('checkbox', true);
-    numeric.writeValue([0, -0]);
+    numeric.value.set([0, -0]);
     numericFixture.detectChanges();
 
     expect(numeric.isOptionSelected(numericOptions[0])).toBe(true);
     expect(numeric.isOptionSelected(numericOptions[1])).toBe(true);
     expect(numeric.isOptionSelected(numericOptions[2])).toBe(false);
-    numericFixture.componentRef.setInput('identityConfig', {
-      compareWith: (left: number, right: number) => Object.is(left, right),
-    });
+    numericFixture.componentRef.setInput('compareWith', (left: number, right: number) => Object.is(left, right));
     numericFixture.detectChanges();
     expect(numeric.isOptionSelected(numericOptions[0])).toBe(true);
     expect(numeric.isOptionSelected(numericOptions[2])).toBe(false);
 
-    numericFixture.componentRef.setInput('selectAll', true);
-    numericFixture.detectChanges();
-    const before = numeric.values();
     numeric.toggleAll(new Event('toggle'));
-    expect(numeric.values()).toBe(before);
+    expect(numeric.values()).toEqual([0, -0, 1]);
     expect(numeric.allSelected()).toBe(true);
 
     numericFixture.componentRef.setInput('virtualScroll', true);
@@ -1133,7 +1118,7 @@ describe('NeuListboxComponent', () => {
 
   it('covers range, meta, hover, typeahead and native scrolling edge branches', () => {
     const component = fixture.componentInstance as any;
-    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('mode', 'multiple');
     fixture.componentRef.setInput('metaKeySelection', true);
     fixture.detectChanges();
 
@@ -1143,11 +1128,9 @@ describe('NeuListboxComponent', () => {
     component.focused.set(true);
     component.onOptionMouseEnter(1);
 
-    fixture.componentRef.setInput('identityConfig', {
-      compareWith: (left: string, right: string) => left === right,
-    });
+    fixture.componentRef.setInput('compareWith', (left: string, right: string) => left === right);
     fixture.detectChanges();
-    component.writeValue(['a']);
+    component.value.set(['a']);
     expect(component.isSelected('a')).toBe(true);
     expect(component.isSelected('missing')).toBe(false);
 
@@ -1176,5 +1159,27 @@ describe('NeuListboxComponent', () => {
     Object.defineProperty(element, 'scrollIntoView', { configurable: true, value: scrollIntoView });
     component.scrollActiveIntoView();
     expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+  });
+
+  it('keeps 10k-option filtering and virtual DOM bounded across repeated queries', () => {
+    const many = Array.from({ length: 10_000 }, (_, index) => ({
+      value: String(index),
+      label: `Option ${index}`,
+    }));
+    fixture.componentRef.setInput('options', many);
+    fixture.componentRef.setInput('searchable', true);
+    fixture.componentRef.setInput('virtualScroll', true);
+    fixture.componentRef.setInput('virtualScrollViewportItems', 8);
+    fixture.componentRef.setInput('virtualScrollBuffer', 2);
+    fixture.detectChanges();
+
+    for (let cycle = 0; cycle < 3; cycle++) {
+      fixture.componentInstance.setFilter('Option 9999');
+      expect(fixture.componentInstance.filteredOptions()).toHaveLength(1);
+      expect(fixture.componentInstance.renderedRows()).toHaveLength(1);
+      fixture.componentInstance.resetFilter();
+      expect(fixture.componentInstance.filteredOptions()).toHaveLength(10_000);
+      expect(fixture.componentInstance.renderedRows().length).toBeLessThanOrEqual(12);
+    }
   });
 });
