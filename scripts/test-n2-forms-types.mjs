@@ -71,6 +71,8 @@ for (const sourceName of [
   'listboxMultiple',
   'toggleSingle',
   'toggleMultiple',
+  'stringTags',
+  'mappedTags',
 ]) {
   if (!diagnostics.includes(sourceName)) {
     console.error(`Missing invalid-value type coverage for ${sourceName}.`);
@@ -79,12 +81,12 @@ for (const sourceName of [
   }
 }
 
-if ((diagnostics.match(/TS2345/g) ?? []).length < 38) {
-  console.error('Expected at least 38 explicit invalid-value assignment diagnostics.');
+if ((diagnostics.match(/TS2345/g) ?? []).length < 42) {
+  console.error('Expected at least 42 explicit invalid-value assignment diagnostics.');
   console.error(diagnostics);
   process.exit(1);
 }
 
 console.log(
-  'N2 Forms types passed (16 official controls accepted; selector cardinality and T/V separation are enforced).',
+  'N2 Forms types passed (17 Signal Forms controls accepted; InputTags readonly arrays and T/V separation are enforced).',
 );

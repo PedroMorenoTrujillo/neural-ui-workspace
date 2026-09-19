@@ -17,6 +17,7 @@ import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
 import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
 import { NeuListboxComponent } from '@neural-ui/core/listbox';
 import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-group';
+import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
 
 @Component({
   selector: 'app-root',
@@ -40,6 +41,7 @@ import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-gro
     NeuCascadeSelectComponent,
     NeuListboxComponent,
     NeuToggleButtonGroupComponent,
+    NeuInputTagsComponent,
   ],
   template: `
     <span id="n2-ready">{{ ready() }}</span>
@@ -104,6 +106,7 @@ import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-gro
     <neu-listbox id="n2-listbox-multiple" mode="multiple" [options]="options" [optionValue]="valueOf" [formControl]="listboxMultipleControl" />
     <neu-toggle-button-group id="n2-toggle-single" [options]="options" [optionValue]="$any(valueOf)" [formControl]="toggleSingleControl" />
     <neu-toggle-button-group id="n2-toggle-multiple" mode="multiple" [options]="options" [optionValue]="$any(valueOf)" [formControl]="toggleMultipleControl" />
+    <neu-input-tags id="n2-input-tags" [options]="options" optionLabel="label" [optionValue]="valueOf" [formControl]="inputTagsControl" />
   `,
 })
 export class N2FormsHydrationComponent {
@@ -142,6 +145,7 @@ export class N2FormsHydrationComponent {
   readonly listboxMultipleControl = new FormControl<readonly number[]>([1], { nonNullable: true });
   readonly toggleSingleControl = new FormControl<number | null>(1);
   readonly toggleMultipleControl = new FormControl<readonly number[]>([1], { nonNullable: true });
+  readonly inputTagsControl = new FormControl<readonly number[]>([1], { nonNullable: true });
   readonly numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -176,6 +180,7 @@ export class N2FormsHydrationComponent {
     this.listboxMultipleControl.valueChanges.subscribe((value) => this.record('listbox-multiple', value));
     this.toggleSingleControl.valueChanges.subscribe((value) => this.record('toggle-single', value));
     this.toggleMultipleControl.valueChanges.subscribe((value) => this.record('toggle-multiple', value));
+    this.inputTagsControl.valueChanges.subscribe((value) => this.record('input-tags', value));
     afterNextRender(() => this.ready.set(true));
   }
 

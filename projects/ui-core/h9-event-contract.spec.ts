@@ -48,10 +48,10 @@ function inputText(input: HTMLInputElement, value: string): void {
       (optionActivated)="selected.push($event)"
     />
     <neu-input-tags
-      [suggestions]="options"
+      [options]="options"
       optionLabel="label"
       optionValue="value"
-      (select)="tagsSelected.push($event)"
+      (optionActivated)="tagsSelected.push($event)"
     />`,
 })
 class SelectionHost {
@@ -79,7 +79,7 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     const f = mount(SelectionHost);
     const host = f.componentInstance;
     const direct = capture(host.autocomplete().optionActivated);
-    const tagsDirect = capture(host.tags().select);
+    const tagsDirect = capture(host.tags().optionActivated);
     const inputs = Array.from(f.nativeElement.querySelectorAll('input')) as HTMLInputElement[];
     for (const input of inputs) {
       let native = 0;
@@ -100,7 +100,9 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     expect(host.selected).toEqual([
       { originalEvent: event, option: host.options[0], value: 'a', source: 'pointer' },
     ]);
-    expect(host.tagsSelected).toEqual([{ originalEvent: event, value: 'a' }]);
+    expect(host.tagsSelected).toEqual([
+      { originalEvent: event, option: host.options[0], value: 'a', source: 'pointer' },
+    ]);
     expect(direct).toEqual(host.selected);
     expect(tagsDirect).toEqual(host.tagsSelected);
     f.destroy();

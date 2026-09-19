@@ -9,101 +9,129 @@ import {
   afterNextRender,
   computed,
   contentChild,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { COMPOSITION_BUFFER_MODE, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { COMPOSITION_BUFFER_MODE } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import {
+  NeuOptionActivatedEvent,
+  NeuOptionCompareWith,
+  NeuOptionDataRequest,
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValueAccessor,
+  resolveNeuOptionDisabled,
+  resolveNeuOptionLabel,
+  resolveNeuOptionValue,
+} from '@neural-ui/core/option-api';
 
-export type NeuInputTagsOptionAccessor<T> = string | ((option: T) => unknown);
-export interface NeuInputTagsItemTemplateContext<T> {
-  $implicit: T;
-  index: number;
-  onRemove: (event: Event, index: number) => void;
+export interface NeuInputTagsGroup<T> {
+  readonly label: string;
+  readonly options: readonly T[];
+  readonly disabled?: boolean;
 }
-export interface NeuInputTagsOptionTemplateContext<T> {
-  $implicit: T;
-  index: number;
+
+export interface NeuInputTagsItemTemplateContext<T, V> {
+  readonly $implicit: V;
+  readonly value: V;
+  readonly option: T | null;
+  readonly index: number;
+  readonly onRemove: (event: Event, index: number) => void;
 }
+
+export interface NeuInputTagsOptionTemplateContext<T, V> {
+  readonly $implicit: T;
+  readonly option: T;
+  readonly value: V;
+  readonly index: number;
+}
+
 export interface NeuInputTagsGroupTemplateContext<T> {
-  $implicit: T;
+  readonly $implicit: NeuInputTagsGroup<T>;
+  readonly group: NeuInputTagsGroup<T>;
 }
-export interface NeuInputTagsAddEvent<T = unknown> {
-  originalEvent: Event;
-  value: T;
+
+export interface NeuInputTagsPasteResult<V> {
+  readonly originalEvent: ClipboardEvent;
+  readonly accepted: readonly V[];
+  readonly rejected: readonly string[];
 }
-export interface NeuInputTagsRemoveEvent<T = unknown> {
-  originalEvent: Event;
-  value: T;
-  index: number;
+
+export interface NeuInputTagsRemovedEvent<V> {
+  readonly originalEvent: Event;
+  readonly value: V;
+  readonly index: number;
 }
-export interface NeuInputTagsCompleteEvent {
-  originalEvent: Event;
-  query: string;
+
+export interface NeuInputTagsReorderedEvent<V> {
+  readonly originalEvent: Event;
+  readonly value: V;
+  readonly from: number;
+  readonly to: number;
 }
-export interface NeuInputTagsSelectEvent<T = unknown> {
-  originalEvent: Event;
-  value: T;
+
+export interface NeuInputTagsClearedEvent<V> {
+  readonly originalEvent: Event;
+  readonly previousValue: readonly V[];
 }
 
 @Directive({ selector: 'ng-template[neuInputTagsItem]' })
-export class NeuInputTagsItemDirective<T> {
-  constructor(readonly templateRef: TemplateRef<NeuInputTagsItemTemplateContext<T>>) {}
+export class NeuInputTagsItemDirective<T = string, V = T> {
+  constructor(readonly templateRef: TemplateRef<NeuInputTagsItemTemplateContext<T, V>>) {}
 }
+
 @Directive({ selector: 'ng-template[neuInputTagsRemoveIcon]' })
 export class NeuInputTagsRemoveIconDirective {
   constructor(readonly templateRef: TemplateRef<void>) {}
 }
+
 @Directive({ selector: 'ng-template[neuInputTagsOption]' })
-export class NeuInputTagsOptionDirective<T> {
-  constructor(readonly templateRef: TemplateRef<NeuInputTagsOptionTemplateContext<T>>) {}
+export class NeuInputTagsOptionDirective<T = string, V = T> {
+  constructor(readonly templateRef: TemplateRef<NeuInputTagsOptionTemplateContext<T, V>>) {}
 }
+
 @Directive({ selector: 'ng-template[neuInputTagsGroup]' })
-export class NeuInputTagsGroupDirective<T> {
+export class NeuInputTagsGroupDirective<T = string> {
   constructor(readonly templateRef: TemplateRef<NeuInputTagsGroupTemplateContext<T>>) {}
 }
+
 @Directive({ selector: 'ng-template[neuInputTagsHeader]' })
 export class NeuInputTagsHeaderDirective {
   constructor(readonly templateRef: TemplateRef<void>) {}
 }
+
 @Directive({ selector: 'ng-template[neuInputTagsFooter]' })
 export class NeuInputTagsFooterDirective {
   constructor(readonly templateRef: TemplateRef<void>) {}
 }
 
-/**
- * A multi-value form control with optional asynchronous typeahead suggestions.
- * Unlike `NeuTags`, this component mirrors the InputTags interaction model: it
- * does not add on blur or Tab unless explicitly requested.
- */
 @Component({
   selector: 'neu-input-tags',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuInputTagsComponent),
-      multi: true,
-    },
-  ],
-  host: { '[class]': 'hostClasses()' },
+  host: {
+    '[class]': 'hostClasses()',
+    '[hidden]': 'hidden()',
+    '(focusin)': 'onFocusIn($event)',
+    '(focusout)': 'onFocusOut($event)',
+  },
   template: `
+    @if (label()) {
+      <label class="neu-input-tags__label" [for]="effectiveInputId()">{{ label() }}</label>
+    }
     <div class="neu-input-tags__control" (click)="focusInput()">
-      @for (item of model(); track trackValue($index, item); let index = $index) {
+      @for (item of items(); track trackValue($index, item); let index = $index) {
         <span class="neu-input-tags__item">
           @if (itemTpl()) {
             <ng-container
               [ngTemplateOutlet]="itemTpl()!.templateRef"
-              [ngTemplateOutletContext]="{
-                $implicit: item,
-                index,
-                onRemove: removeItem.bind(this),
-              }"
+              [ngTemplateOutletContext]="itemTemplateContext(item, index)"
             />
           } @else {
             <span class="neu-input-tags__item-label">{{ itemLabel(item) }}</span>
@@ -113,6 +141,7 @@ export class NeuInputTagsFooterDirective {
               [disabled]="isDisabled() || readonly()"
               [attr.aria-label]="removeLabel() + ' ' + itemLabel(item)"
               (click)="removeItem($event, index)"
+              (keydown)="onChipKeyDown($event, index)"
             >
               @if (removeIconTpl()) {
                 <ng-container [ngTemplateOutlet]="removeIconTpl()!.templateRef" />
@@ -130,32 +159,30 @@ export class NeuInputTagsFooterDirective {
         type="text"
         role="combobox"
         [attr.autocomplete]="autocomplete() || null"
-        [placeholder]="model().length ? '' : placeholder()"
-        [value]="query()"
+        [placeholder]="items().length ? '' : placeholder()"
+        [value]="draft()"
         [disabled]="isDisabled()"
         [readOnly]="readonly()"
-        [required]="required() && model().length === 0"
+        [required]="required() && items().length === 0"
         [attr.minlength]="minlength()"
         [attr.maxlength]="maxlength()"
-        [attr.pattern]="nativePattern()"
         [attr.title]="title() || null"
         [attr.name]="name() || null"
         [attr.tabindex]="tabindex()"
         [attr.aria-label]="ariaLabel() || null"
         [attr.aria-labelledby]="ariaLabelledBy() || null"
-        [attr.aria-describedby]="ariaDescribedBy() || null"
+        [attr.aria-describedby]="effectiveDescribedBy()"
         [attr.aria-required]="ariaRequired() || required() ? 'true' : null"
         [attr.aria-invalid]="invalid() ? 'true' : null"
         [attr.aria-expanded]="panelVisible()"
         [attr.aria-controls]="panelVisible() ? panelId : null"
         [attr.aria-activedescendant]="activeOptionId()"
+        [attr.aria-busy]="pending() || loading() ? 'true' : null"
         (select)="$event.stopPropagation()"
         (compositionstart)="onCompositionStart()"
         (compositionend)="onCompositionEnd($event)"
         (input)="onInput($event)"
         (keydown)="onKeyDown($event)"
-        (focus)="onFocus($event)"
-        (blur)="onBlur($event)"
         (paste)="onPaste($event)"
       />
     </div>
@@ -169,236 +196,216 @@ export class NeuInputTagsFooterDirective {
         @if (headerTpl()) {
           <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
         }
-        @if (group()) {
-          @for (entry of groupedOptions(); track trackGroup($index, entry.group)) {
+        @if (groups().length) {
+          @for (entry of groupedOptions(); track entry.group.label) {
             <div class="neu-input-tags__group" role="presentation">
               @if (groupTpl()) {
                 <ng-container
                   [ngTemplateOutlet]="groupTpl()!.templateRef"
-                  [ngTemplateOutletContext]="{ $implicit: entry.group }"
+                  [ngTemplateOutletContext]="{ $implicit: entry.group, group: entry.group }"
                 />
               } @else {
-                {{ entry.label }}
+                {{ entry.group.label }}
               }
             </div>
-            @for (option of entry.options; track trackOption($index, option); let index = $index) {
-              <button
-                type="button"
-                class="neu-input-tags__option"
-                role="option"
-                [id]="optionId(groupedOptionIndex(entry.group, index))"
-                [class.neu-input-tags__option--active]="isActiveOption(option)"
-                [class.neu-input-tags__option--disabled]="optionIsDisabled(option)"
-                [attr.aria-selected]="isActiveOption(option)"
-                [disabled]="optionIsDisabled(option)"
-                (mouseenter)="onOptionHover(option)"
-                (mousedown)="$event.preventDefault()"
-                (click)="selectOption($event, option)"
-              >
-                @if (optionTpl()) {
-                  <ng-container
-                    [ngTemplateOutlet]="optionTpl()!.templateRef"
-                    [ngTemplateOutletContext]="{
-                      $implicit: option,
-                      index: groupedOptionIndex(entry.group, index),
-                    }"
-                  />
-                } @else {
-                  {{ optionLabelOf(option) }}
-                }
-              </button>
+            @for (option of entry.options; track trackOption($index, option)) {
+              <ng-container
+                [ngTemplateOutlet]="optionRow"
+                [ngTemplateOutletContext]="{ $implicit: option, index: optionIndex(option) }"
+              />
             }
           }
         } @else {
-          @for (
-            option of availableOptions();
-            track trackOption($index, option);
-            let index = $index
-          ) {
-            <button
-              type="button"
-              class="neu-input-tags__option"
-              role="option"
-              [id]="optionId(index)"
-              [class.neu-input-tags__option--active]="activeIndex() === index"
-              [class.neu-input-tags__option--disabled]="optionIsDisabled(option)"
-              [attr.aria-selected]="activeIndex() === index"
-              [disabled]="optionIsDisabled(option)"
-              (mouseenter)="onOptionHover(option)"
-              (mousedown)="$event.preventDefault()"
-              (click)="selectOption($event, option)"
-            >
-              @if (optionTpl()) {
-                <ng-container
-                  [ngTemplateOutlet]="optionTpl()!.templateRef"
-                  [ngTemplateOutletContext]="{ $implicit: option, index }"
-                />
-              } @else {
-                {{ optionLabelOf(option) }}
-              }
-            </button>
+          @for (option of availableOptions(); track trackOption($index, option); let index = $index) {
+            <ng-container
+              [ngTemplateOutlet]="optionRow"
+              [ngTemplateOutletContext]="{ $implicit: option, index }"
+            />
           }
+        }
+        @if (!loading() && availableOptions().length === 0) {
+          <div class="neu-input-tags__empty" role="status">{{ emptyMessage() }}</div>
         }
         @if (footerTpl()) {
           <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
         }
       </div>
     }
+    @if (hint()) {
+      <div class="neu-input-tags__hint" [id]="hintId">{{ hint() }}</div>
+    }
+    <span class="neu-input-tags__live" role="status" aria-live="polite">{{ liveMessage() }}</span>
+
+    <ng-template #optionRow let-option let-index="index">
+      <button
+        type="button"
+        class="neu-input-tags__option"
+        role="option"
+        [id]="optionId(index)"
+        [class.neu-input-tags__option--active]="activeIndex() === index"
+        [class.neu-input-tags__option--disabled]="optionIsDisabled(option)"
+        [attr.aria-selected]="isOptionSelected(option)"
+        [disabled]="optionIsDisabled(option)"
+        (mouseenter)="onOptionHover(option)"
+        (mousedown)="$event.preventDefault()"
+        (click)="selectOption($event, option)"
+      >
+        @if (optionTpl()) {
+          <ng-container
+            [ngTemplateOutlet]="optionTpl()!.templateRef"
+            [ngTemplateOutletContext]="optionTemplateContext(option, index)"
+          />
+        } @else {
+          {{ optionLabelOf(option) }}
+        }
+      </button>
+    </ng-template>
   `,
   styleUrl: './neu-input-tags.component.scss',
 })
-export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor {
-  readonly placeholder = input<string>('');
-  readonly max = input<number | null>(null);
-  readonly delimiter = input<string | RegExp | null>(null);
-  readonly allowDuplicate = input<boolean>(false);
-  readonly addOnBlur = input<boolean>(false);
-  readonly addOnTab = input<boolean>(false);
-  readonly addOnPaste = input<boolean>(false);
-  readonly typeahead = input<boolean>(false);
-  readonly suggestions = input<readonly T[]>([]);
-  readonly optionLabel = input<NeuInputTagsOptionAccessor<T> | null>(null);
-  readonly optionValue = input<NeuInputTagsOptionAccessor<T> | null>(null);
-  readonly optionDisabled = input<NeuInputTagsOptionAccessor<T> | null>(null);
-  readonly group = input<boolean>(false);
-  readonly optionGroupLabel = input<NeuInputTagsOptionAccessor<T> | null>(null);
-  readonly optionGroupChildren = input<NeuInputTagsOptionAccessor<T> | null>(null);
-  readonly delay = input<number>(300);
-  readonly minQueryLength = input<number>(1);
-  readonly completeOnFocus = input<boolean>(false);
-  readonly autoOptionFocus = input<boolean>(false);
-  readonly focusOnHover = input<boolean>(true);
-  readonly scrollHeight = input<string>('200px');
-  readonly disabled = input<boolean>(false);
-  readonly readonly = input<boolean>(false);
-  readonly required = input<boolean>(false);
-  readonly invalid = input<boolean>(false);
-  readonly autofocus = input<boolean>(false);
+export class NeuInputTagsComponent<T = string, V = T>
+  implements FormValueControl<readonly V[]>
+{
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly generatedId = inject(NeuIdGenerator).getId('neu-input-tags-');
+  private readonly compositionMode =
+    inject(COMPOSITION_BUFFER_MODE, { optional: true }) ??
+    !/android (\d+)/.test(
+      (this.document.defaultView?.navigator.userAgent ?? '').toLocaleLowerCase(),
+    );
+
+  readonly value = model<readonly V[]>([]);
+  /** Defensive view for nullable legacy adapters; the public model stays strictly `readonly V[]`. */
+  protected readonly items = computed<readonly V[]>(() => this.value() ?? []);
+  readonly options = input<readonly T[]>([]);
+  readonly groups = input<readonly NeuInputTagsGroup<T>[]>([]);
+  readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
+  readonly optionValue = input<NeuOptionValueAccessor<T, V> | null>(null);
+  readonly optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
+  readonly compareWith = input<NeuOptionCompareWith<V>>(Object.is);
+  readonly textValue = input<((text: string) => V | null | undefined) | null>(null);
+  readonly normalizeToken = input<(text: string) => string>((text) => text.trim());
+
+  readonly separators = input<readonly string[]>([',']);
+  readonly allowDuplicates = input(false);
+  readonly maxItems = input<number | null>(null);
+  readonly commitOnBlur = input(false);
+  readonly typeahead = input(false);
+  readonly delay = input(300);
+  readonly minQueryLength = input(1);
+  readonly completeOnFocus = input(false);
+  readonly autoOptionFocus = input(false);
+  readonly focusOnHover = input(true);
+  readonly loading = input(false);
+
+  readonly label = input('');
+  readonly hint = input('');
+  readonly placeholder = input('Add tag...');
+  readonly removeLabel = input('Remove');
+  readonly emptyMessage = input('No suggestions');
+  readonly scrollHeight = input('200px');
+  readonly disabled = input(false);
+  readonly readonly = input(false);
+  readonly hidden = input(false);
+  readonly invalid = input(false);
+  readonly pending = input(false);
+  readonly touched = input(false);
+  readonly dirty = input(false);
+  readonly required = input(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly autofocus = input(false);
   readonly tabindex = input<number | null>(null);
-  readonly inputId = input<string>('');
-  readonly name = input<string>('');
-  readonly autocomplete = input<string>('off');
-  readonly title = input<string>('');
+  readonly inputId = input('');
+  readonly name = input('');
+  readonly autocomplete = input('off');
+  readonly title = input('');
   readonly minlength = input<number | null>(null);
   readonly maxlength = input<number | null>(null);
-  readonly pattern = input<string | RegExp | null>(null);
-  readonly ariaLabel = input<string>('Tags');
-  readonly ariaLabelledBy = input<string>('');
-  readonly ariaDescribedBy = input<string>('');
-  readonly ariaRequired = input<boolean>(false);
-  readonly removeLabel = input<string>('Remove');
+  readonly ariaLabel = input('Tags');
+  readonly ariaLabelledBy = input('');
+  readonly ariaDescribedBy = input('');
+  readonly ariaRequired = input(false);
   readonly size = input<'sm' | 'md' | 'lg'>('md');
   readonly variant = input<'outlined' | 'filled'>('outlined');
-  readonly fluid = input<boolean>(false);
+  readonly fluid = input(false);
 
-  readonly valueChange = output<T[]>();
-  readonly add = output<NeuInputTagsAddEvent<T>>();
-  readonly remove = output<NeuInputTagsRemoveEvent<T>>();
-  readonly completeMethod = output<NeuInputTagsCompleteEvent>();
-  readonly select = output<NeuInputTagsSelectEvent<T>>();
-  readonly focus = output<FocusEvent>();
-  readonly blur = output<FocusEvent>();
-  readonly show = output<void>();
-  readonly hide = output<void>();
+  readonly suggestionsRequest = output<NeuOptionDataRequest>();
+  readonly optionActivated = output<NeuOptionActivatedEvent<T, V>>();
+  readonly pasteResult = output<NeuInputTagsPasteResult<V>>();
+  readonly itemRemoved = output<NeuInputTagsRemovedEvent<V>>();
+  readonly itemReordered = output<NeuInputTagsReorderedEvent<V>>();
+  readonly cleared = output<NeuInputTagsClearedEvent<V>>();
+  readonly opened = output<void>();
+  readonly closed = output<void>();
+  readonly focusEntered = output<FocusEvent>();
+  readonly focusLeft = output<FocusEvent>();
+  readonly touch = output<void>();
 
-  readonly model = signal<T[]>([]);
-  readonly query = signal('');
+  readonly draft = signal('');
   readonly panelOpen = signal(false);
   readonly activeIndex = signal(-1);
-  readonly cvaDisabled = signal(false);
-  readonly inputIdInternal = inject(NeuIdGenerator).getId('neu-input-tags-');
-  readonly panelId = `${this.inputIdInternal}-panel`;
-  readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
-  readonly effectiveInputId = computed(() => this.inputId() || this.inputIdInternal);
-  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
-  readonly itemTpl = contentChild(NeuInputTagsItemDirective<T>);
-  readonly removeIconTpl = contentChild(NeuInputTagsRemoveIconDirective);
-  readonly optionTpl = contentChild(NeuInputTagsOptionDirective<T>);
-  readonly groupTpl = contentChild(NeuInputTagsGroupDirective<T>);
-  readonly headerTpl = contentChild(NeuInputTagsHeaderDirective);
-  readonly footerTpl = contentChild(NeuInputTagsFooterDirective);
-  /* v8 ignore stop */
-  readonly groupedOptions = computed(() =>
-    this.group()
-      ? this.suggestions().map((group) => ({
-          group,
-          label: this.groupLabelOf(group),
-          options: this.groupChildrenOf(group).filter(
-            (option) =>
-              !this.optionIsDisabled(option) &&
-              (this.allowDuplicate() || !this.containsValue(this.optionValueOf(option))),
-          ),
-        }))
-      : [],
+  readonly liveMessage = signal('');
+  readonly effectiveInputId = computed(() => this.inputId() || this.generatedId);
+  readonly panelId = `${this.generatedId}-panel`;
+  readonly hintId = `${this.generatedId}-hint`;
+  readonly isDisabled = computed(() => this.disabled());
+  readonly effectiveDescribedBy = computed(() =>
+    [this.ariaDescribedBy(), this.hint() ? this.hintId : ''].filter(Boolean).join(' ') || null,
   );
-  readonly availableOptions = computed(() =>
-    this.group()
-      ? this.groupedOptions().flatMap((entry) => entry.options)
-      : this.suggestions().filter(
-          (option) =>
-            !this.optionIsDisabled(option) &&
-            (this.allowDuplicate() || !this.containsValue(this.optionValueOf(option))),
-        ),
-  );
-  readonly panelVisible = computed(
-    () => this.typeahead() && this.panelOpen() && this.availableOptions().length > 0,
-  );
-  readonly activeOptionId = computed(() =>
-    this.activeIndex() >= 0 && this.panelVisible() ? this.optionId(this.activeIndex()) : null,
-  );
-  readonly nativePattern = computed(() => {
-    const value = this.pattern();
-    return value instanceof RegExp ? value.source : value;
-  });
   readonly hostClasses = computed(() => ({
     'neu-input-tags': true,
     'neu-input-tags--disabled': this.isDisabled(),
     'neu-input-tags--readonly': this.readonly(),
-    'neu-input-tags--focus': this.panelOpen(),
+    'neu-input-tags--focus': this.focusWithin(),
     'neu-input-tags--invalid': this.invalid(),
     'neu-input-tags--filled': this.variant() === 'filled',
     'neu-input-tags--fluid': this.fluid(),
     'neu-input-tags--size-sm': this.size() === 'sm',
     'neu-input-tags--size-lg': this.size() === 'lg',
   }));
-  private readonly modelValueIndex = computed(() => {
-    const values = this.model();
-    return {
-      values: new Set(values.filter((value) => !(typeof value === 'number' && value === 0))),
-      positiveZero: values.some((value) => Object.is(value, 0)),
-      negativeZero: values.some((value) => Object.is(value, -0)),
-    };
-  });
-  private readonly groupedOptionOffsets = computed(() => {
-    const objectOffsets = new WeakMap<object, number>();
-    const primitiveOffsets: Array<readonly [T, number]> = [];
-    let offset = 0;
-    for (const entry of this.groupedOptions()) {
-      const group = entry.group;
-      if ((typeof group === 'object' && group !== null) || typeof group === 'function') {
-        objectOffsets.set(group as object, offset);
-      } else {
-        primitiveOffsets.push([group, offset]);
-      }
-      offset += entry.options.length;
-    }
-    return { objectOffsets, primitiveOffsets };
-  });
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly destroyRef = inject(DestroyRef);
-  /* v8 ignore start -- Angular signal-query factory; native-input behavior is covered. */
-  private readonly inputElement = viewChild<ElementRef<HTMLInputElement>>('inputElement');
-  /* v8 ignore stop */
+
+  private readonly focusWithin = signal(false);
+  private readonly focusedChipIndex = signal(-1);
+  private readonly queryRevision = signal(0);
+  private requestId = 0;
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
-  private onChange: (value: T[]) => void = () => {};
-  private onTouched: () => void = () => {};
-  private readonly compositionMode =
-    inject(COMPOSITION_BUFFER_MODE, { optional: true }) ??
-    !/android (\d+)/.test(
-      (inject(DOCUMENT).defaultView?.navigator.userAgent ?? '').toLocaleLowerCase(),
-    );
   private composing = false;
   private compositionCommit: string | null = null;
+
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
+  readonly itemTpl = contentChild(NeuInputTagsItemDirective<T, V>);
+  readonly removeIconTpl = contentChild(NeuInputTagsRemoveIconDirective);
+  readonly optionTpl = contentChild(NeuInputTagsOptionDirective<T, V>);
+  readonly groupTpl = contentChild(NeuInputTagsGroupDirective<T>);
+  readonly headerTpl = contentChild(NeuInputTagsHeaderDirective);
+  readonly footerTpl = contentChild(NeuInputTagsFooterDirective);
+  private readonly inputElement = viewChild<ElementRef<HTMLInputElement>>('inputElement');
+  /* v8 ignore stop */
+
+  readonly allOptions = computed<readonly T[]>(() =>
+    this.groups().length
+      ? this.groups().flatMap((group) => (group.disabled ? [] : group.options))
+      : this.options(),
+  );
+  readonly groupedOptions = computed(() =>
+    this.groups().map((group) => ({
+      group,
+      options: group.disabled ? [] : this.filterOptions(group.options),
+    })),
+  );
+  readonly availableOptions = computed(() =>
+    this.groups().length
+      ? this.groupedOptions().flatMap((entry) => entry.options)
+      : this.filterOptions(this.options()),
+  );
+  readonly panelVisible = computed(() => this.typeahead() && this.panelOpen());
+  readonly activeOptionId = computed(() =>
+    this.activeIndex() >= 0 && this.panelVisible() && this.availableOptions()[this.activeIndex()]
+      ? this.optionId(this.activeIndex())
+      : null,
+  );
 
   constructor() {
     this.destroyRef.onDestroy(() => {
@@ -410,32 +417,19 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
     });
   }
 
-  writeValue(value: readonly T[] | null | undefined): void {
-    this.cancelComposition();
-    this.model.set(value ? [...value] : []);
-  }
-  registerOnChange(fn: (value: T[]) => void): void {
-    this.onChange = fn;
-  }
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-  setDisabledState(disabled: boolean): void {
-    this.cvaDisabled.set(disabled);
-    if (disabled) this.cancelComposition();
-  }
-
   onInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.query.set(value);
+    if (this.isDisabled() || this.readonly()) return;
+    const next = (event.target as HTMLInputElement).value;
+    this.draft.set(next);
     this.activeIndex.set(-1);
+    this.queryRevision.update((revision) => revision + 1);
     if (this.compositionMode && this.composing) return;
-    if (this.compositionCommit === value) {
+    if (this.compositionCommit === next) {
       this.compositionCommit = null;
       return;
     }
     this.compositionCommit = null;
-    this.scheduleComplete(event);
+    this.scheduleSuggestions(event);
   }
 
   onCompositionStart(): void {
@@ -443,6 +437,7 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
     this.composing = true;
     this.compositionCommit = null;
   }
+
   onCompositionEnd(event: Event): void {
     if (!this.compositionMode || !this.composing) return;
     this.composing = false;
@@ -450,49 +445,39 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
       this.compositionCommit = null;
       return;
     }
-    const value = (event.target as HTMLInputElement).value;
-    this.query.set(value);
+    const next = (event.target as HTMLInputElement).value;
+    this.draft.set(next);
     this.activeIndex.set(-1);
-    this.compositionCommit = value;
-    this.scheduleComplete(event);
-  }
-
-  onFocus(event: FocusEvent): void {
-    this.focus.emit(event);
-    if (this.completeOnFocus() && this.typeahead()) this.requestComplete(event);
-  }
-
-  onBlur(event: FocusEvent): void {
-    const composing = this.composing;
-    this.cancelComposition();
-    if (this.addOnBlur() && !composing) this.addQuery(event);
-    this.closePanel();
-    this.onTouched();
-    this.blur.emit(event);
+    this.queryRevision.update((revision) => revision + 1);
+    this.compositionCommit = next;
+    if (this.hasSeparator(next)) this.commitDraft(event);
+    else this.scheduleSuggestions(event);
   }
 
   onPaste(event: ClipboardEvent): void {
-    if (!this.addOnPaste() || this.isDisabled() || this.readonly()) return;
-    const pasted = event.clipboardData?.getData('text') ?? '';
-    const values = this.splitValues(pasted);
-    if (!values.length) return;
+    if (this.isDisabled() || this.readonly() || this.composing) return;
+    const text = event.clipboardData?.getData('text') ?? '';
+    const tokens = this.tokenize(text);
+    if (!tokens.length) return;
     event.preventDefault();
-    for (const value of values) this.addValue(event, value as T);
-    this.query.set('');
+    const result = this.resolveTokens(tokens);
+    if (result.accepted.length) this.commit([...this.items(), ...result.accepted]);
+    this.draft.set('');
+    this.activeIndex.set(-1);
+    this.closePanel();
+    this.announceResult(result.accepted.length, result.rejected.length);
+    this.pasteResult.emit({ originalEvent: event, ...result });
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    if (this.isDisabled() || this.readonly()) return;
-    if (event.isComposing || this.composing) return;
+    if (this.isDisabled() || this.readonly() || event.isComposing || this.composing) return;
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-      if (!this.panelVisible()) this.requestComplete(event);
+      if (!this.panelVisible()) this.requestSuggestions(event, 'query');
       const count = this.availableOptions().length;
-      if (count)
-        this.activeIndex.set(
-          event.key === 'ArrowDown'
-            ? (this.activeIndex() + 1 + count) % count
-            : (this.activeIndex() - 1 + count) % count,
-        );
+      if (count) {
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+        this.activeIndex.set((this.activeIndex() + direction + count) % count);
+      }
       event.preventDefault();
       return;
     }
@@ -501,196 +486,381 @@ export class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor 
       return;
     }
     if (event.key === 'Enter') {
-      const active = this.availableOptions()[this.activeIndex()];
-      if (active !== undefined) this.selectOption(event, active);
-      else this.addQuery(event);
+      const option = this.availableOptions()[this.activeIndex()];
+      if (option !== undefined) this.selectOption(event, option);
+      else this.commitDraft(event);
       event.preventDefault();
       return;
     }
-    if (event.key === 'Tab' && this.addOnTab()) {
-      this.addQuery(event);
+    if (event.key === 'Backspace' && !this.draft() && this.items().length) {
+      event.preventDefault();
+      this.removeItem(event, this.items().length - 1);
       return;
     }
-    if (event.key === 'Backspace' && !this.query() && this.model().length) {
+    if (this.separators().includes(event.key)) {
       event.preventDefault();
-      this.removeItem(event, this.model().length - 1);
-      return;
-    }
-    if (this.delimiterMatches(event.key)) {
-      this.addQuery(event);
-      event.preventDefault();
+      this.commitDraft(event);
     }
   }
 
-  selectOption(event: Event, option: T): void {
-    if (this.optionIsDisabled(option)) return;
-    const value = this.optionValueOf(option);
-    if (this.addValue(event, value)) this.select.emit({ originalEvent: event, value });
-    this.query.set('');
-    this.closePanel();
-    this.focusInput();
-  }
-
-  removeItem(event: Event, index: number): void {
+  onChipKeyDown(event: KeyboardEvent, index: number): void {
     if (this.isDisabled() || this.readonly()) return;
-    const current = this.model();
-    const value = current[index];
-    if (value === undefined) return;
-    const next = current.filter((_, itemIndex) => itemIndex !== index);
-    this.commit(next);
-    this.remove.emit({ originalEvent: event, value, index });
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      event.preventDefault();
+      this.removeItem(event, index);
+      return;
+    }
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    const next = event.key === 'ArrowLeft' ? index - 1 : index + 1;
+    if (next < 0 || next >= this.items().length) {
+      this.focusedChipIndex.set(-1);
+      this.focusInput();
+      return;
+    }
+    this.focusedChipIndex.set(next);
+    this.removeButtons()[next]?.focus();
+  }
+
+  onFocusIn(event: FocusEvent): void {
+    if (this.isDisabled()) return;
+    const entering = !this.focusWithin();
+    if (entering) {
+      this.focusWithin.set(true);
+      this.focusEntered.emit(event);
+    }
+    if (entering && this.completeOnFocus() && this.typeahead())
+      this.requestSuggestions(event, 'initial');
+  }
+
+  onFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget;
+    if (next instanceof Node && this.host.nativeElement.contains(next)) return;
+    const wasComposing = this.composing;
+    this.cancelComposition();
+    if (this.commitOnBlur() && !wasComposing && !this.isDisabled() && !this.readonly())
+      this.commitDraft(event);
+    this.closePanel();
+    this.focusWithin.set(false);
+    this.focusedChipIndex.set(-1);
+    this.touch.emit();
+    this.focusLeft.emit(event);
+  }
+
+  selectOption(originalEvent: Event, option: T): void {
+    if (this.isDisabled() || this.readonly() || this.optionIsDisabled(option)) return;
+    const optionValue = this.optionValueOf(option);
+    const result = this.resolveValues([{ token: this.optionLabelOf(option), value: optionValue }]);
+    if (!result.accepted.length) {
+      this.announceResult(0, result.rejected.length);
+      return;
+    }
+    this.commit([...this.items(), ...result.accepted]);
+    this.optionActivated.emit({
+      option,
+      value: optionValue,
+      source: originalEvent.type.startsWith('key') ? 'keyboard' : 'pointer',
+      originalEvent,
+    });
+    this.draft.set('');
+    this.closePanel();
+    this.liveMessage.set(`${this.optionLabelOf(option)} added`);
     this.focusInput();
+  }
+
+  removeItem(originalEvent: Event, index: number): void {
+    if (this.isDisabled() || this.readonly()) return;
+    const current = this.items();
+    const removed = current[index];
+    if (removed === undefined) return;
+    this.commit(current.filter((_, itemIndex) => itemIndex !== index));
+    this.itemRemoved.emit({ originalEvent, value: removed, index });
+    this.liveMessage.set(`${this.itemLabel(removed)} removed`);
+    this.focusInput();
+  }
+
+  reorder(from: number, to: number, originalEvent: Event = new Event('reorder')): void {
+    if (this.isDisabled() || this.readonly()) return;
+    const current = this.items();
+    if (
+      from === to ||
+      from < 0 ||
+      to < 0 ||
+      from >= current.length ||
+      to >= current.length
+    )
+      return;
+    const next = [...current];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved as V);
+    this.commit(next);
+    this.itemReordered.emit({ originalEvent, value: moved as V, from, to });
+    this.liveMessage.set(`${this.itemLabel(moved as V)} moved to position ${to + 1}`);
+  }
+
+  clear(originalEvent: Event = new Event('clear')): void {
+    if (this.isDisabled() || this.readonly() || !this.items().length) return;
+    const previousValue = [...this.items()];
+    this.commit([]);
+    this.draft.set('');
+    this.closePanel();
+    this.cleared.emit({ originalEvent, previousValue });
+    this.liveMessage.set('All tags removed');
+  }
+
+  reset(): void {
+    this.clearSearchTimer();
+    this.cancelComposition();
+    this.draft.set('');
+    this.activeIndex.set(-1);
+    this.focusedChipIndex.set(-1);
+    this.liveMessage.set('');
+    this.closePanel();
+  }
+
+  retrySuggestions(originalEvent: Event = new Event('retry')): void {
+    this.requestSuggestions(originalEvent, 'retry');
+  }
+
+  commitDraft(originalEvent: Event): void {
+    if (this.isDisabled() || this.readonly() || this.composing) return;
+    const tokens = this.tokenize(this.draft());
+    if (!tokens.length) return;
+    const result = this.resolveTokens(tokens);
+    if (result.accepted.length) this.commit([...this.items(), ...result.accepted]);
+    this.draft.set('');
+    this.activeIndex.set(-1);
+    this.closePanel();
+    this.announceResult(result.accepted.length, result.rejected.length);
+  }
+
+  focus(options?: FocusOptions): void {
+    if (this.isDisabled()) return;
+    this.inputElement()?.nativeElement.focus(options);
   }
 
   focusInput(): void {
-    this.host.nativeElement.querySelector<HTMLInputElement>('.neu-input-tags__input')?.focus();
+    this.focus();
   }
-  itemLabel(item: T): string {
-    return this.optionLabelOf(item);
+
+  itemLabel(value: V): string {
+    const option = this.optionForValue(value);
+    return option === null ? String(value ?? '') : this.optionLabelOf(option);
   }
-  trackValue(index: number, item: T): unknown {
-    return this.optionValueOf(item) ?? index;
+
+  itemTemplateContext(value: V, index: number): NeuInputTagsItemTemplateContext<T, V> {
+    return {
+      $implicit: value,
+      value,
+      option: this.optionForValue(value),
+      index,
+      onRemove: (event, itemIndex) => this.removeItem(event, itemIndex),
+    };
   }
+
+  optionTemplateContext(option: T, index: number): NeuInputTagsOptionTemplateContext<T, V> {
+    return { $implicit: option, option, value: this.optionValueOf(option), index };
+  }
+
+  trackValue(index: number, value: V): unknown {
+    return value ?? index;
+  }
+
   trackOption(index: number, option: T): unknown {
     return this.optionValueOf(option) ?? index;
   }
-  trackGroup(index: number, group: T): unknown {
-    return this.resolveOption(this.optionValue(), group) ?? this.groupLabelOf(group) ?? index;
-  }
+
   optionId(index: number): string {
     return `${this.panelId}-option-${index}`;
   }
-  groupedOptionIndex(group: T, index: number): number {
-    const offsets = this.groupedOptionOffsets();
-    const objectGroup =
-      (typeof group === 'object' && group !== null) || typeof group === 'function';
-    const offset = objectGroup
-      ? offsets.objectOffsets.get(group as object)
-      : offsets.primitiveOffsets.find(([candidate]) => candidate === group)?.[1];
-    return (offset ?? 0) + index;
+
+  optionIndex(option: T): number {
+    return this.availableOptions().indexOf(option);
   }
-  isActiveOption(option: T): boolean {
-    return this.availableOptions()[this.activeIndex()] === option;
-  }
+
   onOptionHover(option: T): void {
     if (!this.focusOnHover() || this.optionIsDisabled(option)) return;
-    const index = this.availableOptions().indexOf(option);
+    const index = this.optionIndex(option);
     if (index >= 0) this.activeIndex.set(index);
   }
 
-  private addQuery(event: Event): void {
-    const entries = this.splitValues(this.query());
-    for (const entry of entries) this.addValue(event, entry as T);
-    this.query.set('');
-    this.closePanel();
+  optionLabelOf(option: T): string {
+    return resolveNeuOptionLabel(option, this.optionLabel());
   }
 
-  private addValue(event: Event, value: T): boolean {
-    if (
-      this.isDisabled() ||
-      this.readonly() ||
-      this.atMax() ||
-      (!this.allowDuplicate() && this.containsValue(value))
-    )
-      return false;
-    const next = [...this.model(), value];
-    this.commit(next);
-    this.add.emit({ originalEvent: event, value });
-    return true;
+  optionValueOf(option: T): V {
+    return resolveNeuOptionValue<T, V>(option, this.optionValue());
   }
 
-  private commit(value: T[]): void {
-    this.model.set(value);
-    this.onChange(value);
-    this.valueChange.emit(value);
+  optionIsDisabled(option: T): boolean {
+    return resolveNeuOptionDisabled(option, this.optionDisabled());
   }
-  private atMax(): boolean {
-    const max = this.max();
-    return max !== null && Number.isFinite(max) && this.model().length >= Math.max(0, max);
+
+  isOptionSelected(option: T): boolean {
+    return this.containsValue(this.optionValueOf(option));
   }
-  protected optionLabelOf(option: T): string {
-    const value = this.resolveOption(this.optionLabel(), option);
-    return String(value ?? option ?? '');
+
+  private filterOptions(options: readonly T[]): readonly T[] {
+    const query = this.normalizeToken()(this.draft()).toLocaleLowerCase();
+    return options.filter(
+      (option) =>
+        !this.optionIsDisabled(option) &&
+        (!query || this.optionLabelOf(option).toLocaleLowerCase().includes(query)) &&
+        (this.allowDuplicates() || !this.containsValue(this.optionValueOf(option))),
+    );
   }
-  private optionValueOf(option: T): T {
-    const value = this.resolveOption(this.optionValue(), option);
-    return (value === undefined ? option : value) as T;
+
+  private resolveTokens(tokens: readonly string[]): {
+    accepted: readonly V[];
+    rejected: readonly string[];
+  } {
+    return this.resolveValues(
+      tokens.map((token) => ({ token, value: this.valueFromToken(token) })).filter(
+        (entry): entry is { token: string; value: V } => entry.value !== undefined,
+      ),
+      tokens,
+    );
   }
-  private groupLabelOf(group: T): string {
-    return String(this.resolveOption(this.optionGroupLabel(), group) ?? group ?? '');
+
+  private resolveValues(
+    entries: readonly { token: string; value: V }[],
+    originalTokens: readonly string[] = entries.map((entry) => entry.token),
+  ): { accepted: readonly V[]; rejected: readonly string[] } {
+    const accepted: V[] = [];
+    const rejected: string[] = originalTokens.filter(
+      (token) => !entries.some((entry) => entry.token === token),
+    );
+    const limit = this.effectiveMaxItems();
+    for (const entry of entries) {
+      const duplicate =
+        !this.allowDuplicates() &&
+        [...this.items(), ...accepted].some((candidate) =>
+          this.compareWith()(candidate, entry.value),
+        );
+      if (duplicate || (limit !== null && this.items().length + accepted.length >= limit)) {
+        rejected.push(entry.token);
+        continue;
+      }
+      accepted.push(entry.value);
+    }
+    return { accepted, rejected };
   }
-  private groupChildrenOf(group: T): readonly T[] {
-    const value = this.resolveOption(this.optionGroupChildren(), group);
-    return Array.isArray(value) ? (value as readonly T[]) : [];
-  }
-  protected optionIsDisabled(option: T): boolean {
-    return Boolean(this.resolveOption(this.optionDisabled(), option));
-  }
-  private resolveOption(accessor: NeuInputTagsOptionAccessor<T> | null, option: T): unknown {
-    if (typeof accessor === 'function') return accessor(option);
-    if (typeof accessor === 'string' && option && typeof option === 'object')
-      return (option as Record<string, unknown>)[accessor];
+
+  private valueFromToken(token: string): V | undefined {
+    const normalized = this.normalizeToken()(token);
+    if (!normalized) return undefined;
+    const matched = this.allOptions().find(
+      (option) => this.normalizeToken()(this.optionLabelOf(option)) === normalized,
+    );
+    if (matched !== undefined && !this.optionIsDisabled(matched)) return this.optionValueOf(matched);
+    const parser = this.textValue();
+    if (parser) return parser(normalized) ?? undefined;
+    if (this.allOptions().every((option) => typeof option === 'string'))
+      return normalized as unknown as V;
     return undefined;
   }
-  private containsValue(value: T): boolean {
-    const index = this.modelValueIndex();
-    if (typeof value === 'number' && value === 0)
-      return Object.is(value, -0) ? index.negativeZero : index.positiveZero;
-    return index.values.has(value);
+
+  private optionForValue(value: V): T | null {
+    return (
+      this.allOptions().find((option) => this.compareWith()(this.optionValueOf(option), value)) ??
+      null
+    );
   }
-  private splitValues(value: string): string[] {
-    const trimmed = value.trim();
-    if (!trimmed) return [];
-    const delimiter = this.delimiter();
-    if (!delimiter) return [trimmed];
-    return typeof delimiter === 'string'
-      ? trimmed
-          .split(delimiter)
-          .map((item) => item.trim())
-          .filter(Boolean)
-      : trimmed
-          .split(delimiter)
-          .map((item) => item.trim())
-          .filter(Boolean);
+
+  private containsValue(value: V): boolean {
+    return this.items().some((candidate) => this.compareWith()(candidate, value));
   }
-  private delimiterMatches(key: string): boolean {
-    const delimiter = this.delimiter();
-    if (!delimiter || key.length !== 1) return false;
-    if (typeof delimiter === 'string') return key === delimiter;
-    delimiter.lastIndex = 0;
-    return delimiter.test(key);
+
+  private tokenize(text: string): readonly string[] {
+    const separators = this.separators().filter(Boolean);
+    if (!separators.length) {
+      const normalized = this.normalizeToken()(text);
+      return normalized ? [normalized] : [];
+    }
+    const expression = new RegExp(
+      separators.map((separator) => this.escapeRegExp(separator)).join('|'),
+      'g',
+    );
+    return text
+      .split(expression)
+      .map((token) => this.normalizeToken()(token))
+      .filter(Boolean);
   }
-  private scheduleComplete(event: Event): void {
+
+  private hasSeparator(text: string): boolean {
+    return this.separators().some((separator) => separator && text.includes(separator));
+  }
+
+  private escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private effectiveMaxItems(): number | null {
+    const max = this.maxItems();
+    return max === null || !Number.isFinite(max) ? null : Math.max(0, max);
+  }
+
+  private commit(next: readonly V[]): void {
+    this.value.set([...next]);
+  }
+
+  private scheduleSuggestions(originalEvent: Event): void {
     this.clearSearchTimer();
-    if (!this.typeahead() || this.query().length < Math.max(0, this.minQueryLength())) {
+    if (!this.typeahead() || this.draft().length < Math.max(0, this.minQueryLength())) {
       this.closePanel();
       return;
     }
-    this.searchTimer = setTimeout(() => this.requestComplete(event), Math.max(0, this.delay()));
+    const revision = this.queryRevision();
+    this.searchTimer = setTimeout(() => {
+      if (revision === this.queryRevision()) this.requestSuggestions(originalEvent, 'query');
+    }, Math.max(0, this.delay()));
   }
-  private requestComplete(event: Event): void {
+
+  private requestSuggestions(originalEvent: Event, reason: NeuOptionDataRequest['reason']): void {
     if (!this.typeahead() || this.isDisabled()) return;
-    this.panelOpen.set(true);
+    this.openPanel();
+    const requestId = ++this.requestId;
+    this.suggestionsRequest.emit({
+      requestId,
+      queryRevision: this.queryRevision(),
+      query: this.draft(),
+      reason,
+    });
     if (this.autoOptionFocus() && this.availableOptions().length) this.activeIndex.set(0);
-    this.show.emit();
-    this.completeMethod.emit({ originalEvent: event, query: this.query() });
-    if (this.autoOptionFocus())
-      queueMicrotask(() => {
-        if (this.panelOpen() && this.availableOptions().length) this.activeIndex.set(0);
-      });
+    void originalEvent;
   }
+
+  private openPanel(): void {
+    if (this.panelOpen()) return;
+    this.panelOpen.set(true);
+    this.opened.emit();
+  }
+
   private closePanel(): void {
     if (!this.panelOpen()) return;
     this.panelOpen.set(false);
     this.activeIndex.set(-1);
-    this.hide.emit();
+    this.closed.emit();
   }
+
+  private announceResult(accepted: number, rejected: number): void {
+    if (accepted && rejected) this.liveMessage.set(`${accepted} tags added, ${rejected} rejected`);
+    else if (accepted) this.liveMessage.set(`${accepted} tags added`);
+    else if (rejected) this.liveMessage.set(`${rejected} tags rejected`);
+  }
+
+  private removeButtons(): readonly HTMLButtonElement[] {
+    return Array.from(
+      this.host.nativeElement.querySelectorAll<HTMLButtonElement>('.neu-input-tags__remove'),
+    );
+  }
+
   private clearSearchTimer(): void {
-    if (this.searchTimer !== undefined) {
-      clearTimeout(this.searchTimer);
-      this.searchTimer = undefined;
-    }
+    if (this.searchTimer === undefined) return;
+    clearTimeout(this.searchTimer);
+    this.searchTimer = undefined;
   }
+
   private cancelComposition(): void {
     this.composing = false;
     this.compositionCommit = null;

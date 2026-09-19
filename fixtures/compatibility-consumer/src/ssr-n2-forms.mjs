@@ -20,6 +20,7 @@ const { NeuAutocompleteComponent } = await import('@neural-ui/core/autocomplete'
 const { NeuCascadeSelectComponent } = await import('@neural-ui/core/cascade-select');
 const { NeuListboxComponent } = await import('@neural-ui/core/listbox');
 const { NeuToggleButtonGroupComponent } = await import('@neural-ui/core/toggle-button-group');
+const { NeuInputTagsComponent } = await import('@neural-ui/core/input-tags');
 
 const changes = [];
 class N2FormsSsr {
@@ -48,6 +49,7 @@ class N2FormsSsr {
   listboxMultiple = new FormControl([1], { nonNullable: true });
   toggleSingle = new FormControl(1);
   toggleMultiple = new FormControl([1], { nonNullable: true });
+  inputTags = new FormControl([1], { nonNullable: true });
   numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -76,6 +78,7 @@ class N2FormsSsr {
     this.listboxMultiple.valueChanges.subscribe((value) => changes.push(`listbox-multiple:${value}`));
     this.toggleSingle.valueChanges.subscribe((value) => changes.push(`toggle-single:${value}`));
     this.toggleMultiple.valueChanges.subscribe((value) => changes.push(`toggle-multiple:${value}`));
+    this.inputTags.valueChanges.subscribe((value) => changes.push(`input-tags:${value}`));
   }
 }
 core.Component({
@@ -100,6 +103,7 @@ core.Component({
     NeuCascadeSelectComponent,
     NeuListboxComponent,
     NeuToggleButtonGroupComponent,
+    NeuInputTagsComponent,
   ],
   template: `
     <neu-input id="ssr-input" label="SSR input" [required]="true" [readonly]="true" [formControl]="input" />
@@ -125,6 +129,7 @@ core.Component({
     <neu-listbox id="ssr-listbox-multiple" mode="multiple" [options]="options" [optionValue]="optionValue" [formControl]="listboxMultiple" />
     <neu-toggle-button-group id="ssr-toggle-single" [options]="options" [optionValue]="optionValue" [formControl]="toggleSingle" />
     <neu-toggle-button-group id="ssr-toggle-multiple" mode="multiple" [options]="options" [optionValue]="optionValue" [formControl]="toggleMultiple" />
+    <neu-input-tags id="ssr-input-tags" [options]="options" optionLabel="label" [optionValue]="optionValue" [formControl]="inputTags" />
   `,
 })(N2FormsSsr);
 
@@ -171,6 +176,7 @@ for (const id of [
   'ssr-listbox-multiple',
   'ssr-toggle-single',
   'ssr-toggle-multiple',
+  'ssr-input-tags',
 ]) {
   assert.match(html, new RegExp(`id="${id}"`));
 }
@@ -184,5 +190,5 @@ assert.match(html, /29\/03\/2026/);
 assert.match(html, /ngh=/);
 assert.deepEqual(changes, []);
 console.log(
-  'N2 Forms SSR passed for all 20 controls: values, states, explicit locale, hydration annotations and zero write echo',
+  'N2 Forms SSR passed for all 21 controls: values, states, explicit locale, hydration annotations and zero write echo',
 );

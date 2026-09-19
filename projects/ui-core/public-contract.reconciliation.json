@@ -4,17 +4,17 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1575,
-    "bindingDelta": 408,
+    "declarationBindings": 1578,
+    "bindingDelta": 411,
     "mapped": 827,
     "aliasCorrections": 4,
     "missingOldEntries": 334,
-    "newlyDiscovered": 742,
+    "newlyDiscovered": 745,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 429,
-      "model-binding-was-not-supported": 18,
+      "declaration-or-selector-was-not-recorded": 431,
+      "model-binding-was-not-supported": 19,
       "multiline-annotated-or-compound-declaration-was-missed": 289
     }
   },
@@ -4626,19 +4626,7 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:addOnBlur",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:addOnPaste",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:addOnTab",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:allowDuplicate",
+      "id": "./input-tags#NeuInputTagsComponent.input:allowDuplicates",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4670,6 +4658,14 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./input-tags#NeuInputTagsComponent.input:commitOnBlur",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:compareWith",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./input-tags#NeuInputTagsComponent.input:completeOnFocus",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4678,11 +4674,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:delimiter",
+      "id": "./input-tags#NeuInputTagsComponent.input:dirty",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:disabled",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:emptyMessage",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:errors",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4694,7 +4698,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:group",
+      "id": "./input-tags#NeuInputTagsComponent.input:groups",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:hidden",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:hint",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4706,7 +4718,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:max",
+      "id": "./input-tags#NeuInputTagsComponent.input:label",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:loading",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:maxItems",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4726,15 +4746,11 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./input-tags#NeuInputTagsComponent.input:normalizeToken",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./input-tags#NeuInputTagsComponent.input:optionDisabled",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:optionGroupChildren",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:optionGroupLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4742,11 +4758,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./input-tags#NeuInputTagsComponent.input:options",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./input-tags#NeuInputTagsComponent.input:optionValue",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:pattern",
+      "id": "./input-tags#NeuInputTagsComponent.input:pending",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4770,11 +4790,11 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:size",
+      "id": "./input-tags#NeuInputTagsComponent.input:separators",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:suggestions",
+      "id": "./input-tags#NeuInputTagsComponent.input:size",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4782,7 +4802,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./input-tags#NeuInputTagsComponent.input:textValue",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./input-tags#NeuInputTagsComponent.input:title",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:touched",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -4794,39 +4822,51 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:add",
+      "id": "./input-tags#NeuInputTagsComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.output:cleared",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:blur",
+      "id": "./input-tags#NeuInputTagsComponent.output:closed",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:completeMethod",
+      "id": "./input-tags#NeuInputTagsComponent.output:focusEntered",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:focus",
+      "id": "./input-tags#NeuInputTagsComponent.output:focusLeft",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:hide",
+      "id": "./input-tags#NeuInputTagsComponent.output:itemRemoved",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:remove",
+      "id": "./input-tags#NeuInputTagsComponent.output:itemReordered",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:select",
+      "id": "./input-tags#NeuInputTagsComponent.output:opened",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:show",
+      "id": "./input-tags#NeuInputTagsComponent.output:optionActivated",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:valueChange",
+      "id": "./input-tags#NeuInputTagsComponent.output:pasteResult",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.output:suggestionsRequest",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.output:touch",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6091,34 +6131,6 @@
     },
     {
       "id": "./tag#NeuTagComponent.input:value",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:disabled",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:label",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:placeholder",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:removeLabel",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:separators",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:suggestions",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.output:valueChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

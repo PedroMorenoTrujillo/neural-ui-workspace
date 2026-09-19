@@ -14,6 +14,7 @@ import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
 import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
 import { NeuListboxComponent } from '@neural-ui/core/listbox';
 import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-group';
+import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
 
 declare const input: NeuInputComponent;
 declare const checkbox: NeuCheckboxComponent;
@@ -43,6 +44,8 @@ declare const listboxSingle: NeuListboxComponent<Person, number, 'single'>;
 declare const listboxMultiple: NeuListboxComponent<Person, number, 'multiple'>;
 declare const toggleSingle: NeuToggleButtonGroupComponent<Person, number, 'single'>;
 declare const toggleMultiple: NeuToggleButtonGroupComponent<Person, number, 'multiple'>;
+declare const stringTags: NeuInputTagsComponent<string, string>;
+declare const mappedTags: NeuInputTagsComponent<Person, number>;
 
 input.value.set(null);
 input.value.set(1);
@@ -87,3 +90,7 @@ listboxMultiple.value.set(null);
 toggleSingle.value.set([1]);
 toggleMultiple.value.set(1);
 toggleMultiple.value.set(null);
+stringTags.value.set('Angular');
+stringTags.value.set(null);
+mappedTags.value.set(["1"]);
+mappedTags.value.set(1);

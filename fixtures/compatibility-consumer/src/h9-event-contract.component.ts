@@ -2,7 +2,7 @@ import { Component, afterNextRender, signal, viewChild } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
 import { NeuOptionActivatedEvent } from '@neural-ui/core/option-api';
-import { NeuInputTagsComponent, NeuInputTagsSelectEvent } from '@neural-ui/core/input-tags';
+import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
 import { NeuTreeSelectComponent } from '@neural-ui/core/tree-select';
 import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
 import {
@@ -65,12 +65,12 @@ interface Option {
       </section>
       <section id="h9-tags">
         <neu-input-tags
-          [suggestions]="options"
+          [options]="options"
           [typeahead]="true"
           optionLabel="label"
-          optionValue="value"
+          [optionValue]="optionValue"
           [delay]="0"
-          (select)="onTagSelect($event)"
+          (optionActivated)="onTagSelect($event)"
         />
       </section>
       <section id="h9-tree">
@@ -223,7 +223,7 @@ export class H9EventContractComponent {
   constructor() {
     afterNextRender(() => {
       this.autocomplete()?.optionActivated.subscribe((value) => this.record('acDirect', value));
-      this.tags()?.select.subscribe((value) => this.record('tagsDirect', value));
+      this.tags()?.optionActivated.subscribe((value) => this.record('tagsDirect', value));
       this.record('ready');
     });
   }
@@ -233,7 +233,7 @@ export class H9EventContractComponent {
   onSelect(value: NeuOptionActivatedEvent<Option, string>): void {
     this.record('acSelect', value);
   }
-  onTagSelect(value: NeuInputTagsSelectEvent<Option>): void {
+  onTagSelect(value: NeuOptionActivatedEvent<Option, string>): void {
     this.record('tagsSelect', value);
   }
   onView(value: NeuDateViewChangeEvent): void {
@@ -260,7 +260,7 @@ export class H9EventContractComponent {
   }
   writeValues(): void {
     this.autocomplete()?.value.set('a');
-    this.tags()?.writeValue([]);
+    this.tags()?.value.set([]);
     this.treeSelect()?.writeValue(null);
     this.cascade()?.value.set(null);
     this.date()?.value.set(civilDate('2026-01-01'));

@@ -15,6 +15,7 @@ import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
 import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
 import { NeuListboxComponent } from '@neural-ui/core/listbox';
 import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-group';
+import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
 import {
   NeuDateInputComponent,
   civilDate,
@@ -59,6 +60,8 @@ declare const listboxSingle: NeuListboxComponent<Person, number, 'single'>;
 declare const listboxMultiple: NeuListboxComponent<Person, number, 'multiple'>;
 declare const toggleSingle: NeuToggleButtonGroupComponent<Person, number, 'single'>;
 declare const toggleMultiple: NeuToggleButtonGroupComponent<Person, number, 'multiple'>;
+declare const stringTags: NeuInputTagsComponent<string, string>;
+declare const mappedTags: NeuInputTagsComponent<Person, number>;
 
 input.value.set('valid');
 checkbox.checked.set(true);
@@ -100,6 +103,8 @@ listboxMultiple.value.set([1, 2] as const);
 toggleSingle.value.set(1);
 toggleSingle.value.set(null);
 toggleMultiple.value.set([1, 2] as const);
+stringTags.value.set(['Angular', 'Signals'] as const);
+mappedTags.value.set([1, 2] as const);
 
 declare const dynamicMode: NeuDateMode;
 declare const dynamicValue: NeuDateValue<typeof dynamicMode>;
@@ -130,6 +135,8 @@ const officialListboxSingle: FormValueControl<number | null> = listboxSingle;
 const officialListboxMultiple: FormValueControl<readonly number[]> = listboxMultiple;
 const officialToggleSingle: FormValueControl<number | null> = toggleSingle;
 const officialToggleMultiple: FormValueControl<readonly number[]> = toggleMultiple;
+const officialStringTags: FormValueControl<readonly string[]> = stringTags;
+const officialMappedTags: FormValueControl<readonly number[]> = mappedTags;
 void valueControl;
 void checkboxControl;
 void textareaControl;
@@ -154,5 +161,7 @@ void officialListboxSingle;
 void officialListboxMultiple;
 void officialToggleSingle;
 void officialToggleMultiple;
+void officialStringTags;
+void officialMappedTags;
 void dynamicInput;
 void option;

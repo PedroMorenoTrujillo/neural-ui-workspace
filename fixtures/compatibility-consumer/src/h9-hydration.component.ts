@@ -31,7 +31,7 @@ import { NeuKanbanComponent, type NeuKanbanColumn } from '@neural-ui/core/kanban
     ><output id="hydration-ime-events">{{ inputValues() | json }}</output
     ><span id="hydration-ready">{{ ready() }}</span>
     <neu-autocomplete [options]="['Alpha']" (select)="record('select')" />
-    <neu-input-tags [suggestions]="['Alpha']" [typeahead]="true" (select)="record('tagSelect')" />
+    <neu-input-tags [options]="['Alpha']" [typeahead]="true" (optionActivated)="record('tagSelect')" />
     <neu-input id="hydration-input" label="Hydrated input" [formControl]="inputControl" />
     <neu-textarea id="hydration-textarea" label="Hydrated textarea" />
     <neu-tree id="hydration-tree" [nodes]="treeNodes" [expandedKeys]="['root']" />

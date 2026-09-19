@@ -82,6 +82,10 @@ const expectedSignalControls = new Map([
     'projects/ui-core/toggle-button-group/neu-toggle-button-group.component.ts',
     /readonly\s+value\s*=\s*model<NeuSelectionValue<NeuToggleValue<T,\s*V>,\s*M>>\(/,
   ],
+  [
+    'projects/ui-core/input-tags/neu-input-tags.component.ts',
+    /readonly\s+value\s*=\s*model<readonly\s+V\[\]>\(\[\]\)/,
+  ],
 ]);
 
 const violations = [];
@@ -176,14 +180,14 @@ for (const file of componentFiles(uiCore)) {
   }
 }
 
-if (cvaComponents.length !== 7) {
+if (cvaComponents.length !== 5) {
   violations.push(
-    `expected 7 LEGACY-CVA-YET-TO-MIGRATE components, found ${cvaComponents.length}`,
+    `expected 5 LEGACY-CVA-YET-TO-MIGRATE components, found ${cvaComponents.length}`,
   );
 }
 
-if (signalComponents.length !== 16) {
-  violations.push(`expected 16 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
+if (signalComponents.length !== 17) {
+  violations.push(`expected 17 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
 }
 
 for (const expected of expectedSignalControls.keys()) {

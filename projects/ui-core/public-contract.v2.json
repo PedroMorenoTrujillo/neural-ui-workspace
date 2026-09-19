@@ -509,21 +509,21 @@
       "entrypoint": "./input-tags",
       "types": "./types/neural-ui-core-input-tags.d.ts",
       "exports": [
-        "./input-tags#NeuInputTagsAddEvent",
-        "./input-tags#NeuInputTagsCompleteEvent",
+        "./input-tags#NeuInputTagsClearedEvent",
         "./input-tags#NeuInputTagsComponent",
         "./input-tags#NeuInputTagsFooterDirective",
+        "./input-tags#NeuInputTagsGroup",
         "./input-tags#NeuInputTagsGroupDirective",
         "./input-tags#NeuInputTagsGroupTemplateContext",
         "./input-tags#NeuInputTagsHeaderDirective",
         "./input-tags#NeuInputTagsItemDirective",
         "./input-tags#NeuInputTagsItemTemplateContext",
-        "./input-tags#NeuInputTagsOptionAccessor",
         "./input-tags#NeuInputTagsOptionDirective",
         "./input-tags#NeuInputTagsOptionTemplateContext",
-        "./input-tags#NeuInputTagsRemoveEvent",
+        "./input-tags#NeuInputTagsPasteResult",
+        "./input-tags#NeuInputTagsRemovedEvent",
         "./input-tags#NeuInputTagsRemoveIconDirective",
-        "./input-tags#NeuInputTagsSelectEvent"
+        "./input-tags#NeuInputTagsReorderedEvent"
       ]
     },
     {
@@ -1238,16 +1238,6 @@
         "./tag#NeuTagComponent",
         "./tag#NeuTagIconDirective",
         "./tag#NeuTagSeverity"
-      ]
-    },
-    {
-      "entrypoint": "./tags",
-      "types": "./types/neural-ui-core-tags.d.ts",
-      "exports": [
-        "./tags#NeuTagItemDirective",
-        "./tags#NeuTagsComponent",
-        "./tags#NeuTagSuggestion",
-        "./tags#NeuTagSuggestionDirective"
       ]
     },
     {
@@ -15107,54 +15097,28 @@
       ]
     },
     {
-      "id": "./input-tags#NeuInputTagsAddEvent",
+      "id": "./input-tags#NeuInputTagsClearedEvent",
       "entrypoint": "./input-tags",
-      "name": "NeuInputTagsAddEvent",
+      "name": "NeuInputTagsClearedEvent",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuInputTagsAddEvent<T = unknown> {\n}",
+      "signature": "interface NeuInputTagsClearedEvent<V> {\n}",
       "members": [
         {
-          "id": "./input-tags#NeuInputTagsAddEvent.property:originalEvent",
+          "id": "./input-tags#NeuInputTagsClearedEvent.property:originalEvent",
           "name": "originalEvent",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "originalEvent: Event;"
+          "signature": "readonly originalEvent: Event;"
         },
         {
-          "id": "./input-tags#NeuInputTagsAddEvent.property:value",
-          "name": "value",
+          "id": "./input-tags#NeuInputTagsClearedEvent.property:previousValue",
+          "name": "previousValue",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "value: T;"
-        }
-      ]
-    },
-    {
-      "id": "./input-tags#NeuInputTagsCompleteEvent",
-      "entrypoint": "./input-tags",
-      "name": "NeuInputTagsCompleteEvent",
-      "kind": "interface",
-      "status": "SUPPORTED",
-      "signature": "interface NeuInputTagsCompleteEvent {\n}",
-      "members": [
-        {
-          "id": "./input-tags#NeuInputTagsCompleteEvent.property:originalEvent",
-          "name": "originalEvent",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "originalEvent: Event;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsCompleteEvent.property:query",
-          "name": "query",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "query: string;"
+          "signature": "readonly previousValue: readonly V[];"
         }
       ]
     },
@@ -15165,47 +15129,17 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-input-tags",
-      "signature": "declare class NeuInputTagsComponent<T = unknown> implements ControlValueAccessor {\n}",
+      "signature": "declare class NeuInputTagsComponent<T = string, V = T> implements FormValueControl<readonly V[]> {\n}",
       "members": [
         {
-          "id": "./input-tags#NeuInputTagsComponent.input:addOnBlur",
-          "name": "addOnBlur",
+          "id": "./input-tags#NeuInputTagsComponent.input:allowDuplicates",
+          "name": "allowDuplicates",
           "kind": "input",
-          "publicName": "addOnBlur",
+          "publicName": "allowDuplicates",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly addOnBlur: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.input:addOnPaste",
-          "name": "addOnPaste",
-          "kind": "input",
-          "publicName": "addOnPaste",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly addOnPaste: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.input:addOnTab",
-          "name": "addOnTab",
-          "kind": "input",
-          "publicName": "addOnTab",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly addOnTab: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.input:allowDuplicate",
-          "name": "allowDuplicate",
-          "kind": "input",
-          "publicName": "allowDuplicate",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly allowDuplicate: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly allowDuplicates: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:ariaDescribedBy",
@@ -15278,6 +15212,26 @@
           "signature": "readonly autoOptionFocus: _angular_core.InputSignal<boolean>;"
         },
         {
+          "id": "./input-tags#NeuInputTagsComponent.input:commitOnBlur",
+          "name": "commitOnBlur",
+          "kind": "input",
+          "publicName": "commitOnBlur",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly commitOnBlur: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:compareWith",
+          "name": "compareWith",
+          "kind": "input",
+          "publicName": "compareWith",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly compareWith: _angular_core.InputSignal<NeuOptionCompareWith<V>>;"
+        },
+        {
           "id": "./input-tags#NeuInputTagsComponent.input:completeOnFocus",
           "name": "completeOnFocus",
           "kind": "input",
@@ -15298,14 +15252,14 @@
           "signature": "readonly delay: _angular_core.InputSignal<number>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.input:delimiter",
-          "name": "delimiter",
+          "id": "./input-tags#NeuInputTagsComponent.input:dirty",
+          "name": "dirty",
           "kind": "input",
-          "publicName": "delimiter",
+          "publicName": "dirty",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly delimiter: _angular_core.InputSignal<string | RegExp | null>;"
+          "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:disabled",
@@ -15316,6 +15270,26 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:emptyMessage",
+          "name": "emptyMessage",
+          "kind": "input",
+          "publicName": "emptyMessage",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly emptyMessage: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:errors",
+          "name": "errors",
+          "kind": "input",
+          "publicName": "errors",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:fluid",
@@ -15338,14 +15312,34 @@
           "signature": "readonly focusOnHover: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.input:group",
-          "name": "group",
+          "id": "./input-tags#NeuInputTagsComponent.input:groups",
+          "name": "groups",
           "kind": "input",
-          "publicName": "group",
+          "publicName": "groups",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly group: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly groups: _angular_core.InputSignal<readonly NeuInputTagsGroup<T>[]>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:hidden",
+          "name": "hidden",
+          "kind": "input",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:hint",
+          "name": "hint",
+          "kind": "input",
+          "publicName": "hint",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hint: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:inputId",
@@ -15368,14 +15362,34 @@
           "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.input:max",
-          "name": "max",
+          "id": "./input-tags#NeuInputTagsComponent.input:label",
+          "name": "label",
           "kind": "input",
-          "publicName": "max",
+          "publicName": "label",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly max: _angular_core.InputSignal<number | null>;"
+          "signature": "readonly label: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:loading",
+          "name": "loading",
+          "kind": "input",
+          "publicName": "loading",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly loading: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:maxItems",
+          "name": "maxItems",
+          "kind": "input",
+          "publicName": "maxItems",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly maxItems: _angular_core.InputSignal<number | null>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:maxlength",
@@ -15418,6 +15432,16 @@
           "signature": "readonly name: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./input-tags#NeuInputTagsComponent.input:normalizeToken",
+          "name": "normalizeToken",
+          "kind": "input",
+          "publicName": "normalizeToken",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly normalizeToken: _angular_core.InputSignal<(text: string) => string>;"
+        },
+        {
           "id": "./input-tags#NeuInputTagsComponent.input:optionDisabled",
           "name": "optionDisabled",
           "kind": "input",
@@ -15425,27 +15449,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly optionDisabled: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.input:optionGroupChildren",
-          "name": "optionGroupChildren",
-          "kind": "input",
-          "publicName": "optionGroupChildren",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly optionGroupChildren: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.input:optionGroupLabel",
-          "name": "optionGroupLabel",
-          "kind": "input",
-          "publicName": "optionGroupLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly optionGroupLabel: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
+          "signature": "readonly optionDisabled: _angular_core.InputSignal<NeuOptionDisabledAccessor<T> | null>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:optionLabel",
@@ -15455,7 +15459,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly optionLabel: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
+          "signature": "readonly optionLabel: _angular_core.InputSignal<NeuOptionLabelAccessor<T> | null>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:options",
+          "name": "options",
+          "kind": "input",
+          "publicName": "options",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly options: _angular_core.InputSignal<readonly T[]>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:optionValue",
@@ -15465,17 +15479,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly optionValue: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
+          "signature": "readonly optionValue: _angular_core.InputSignal<NeuOptionValueAccessor<T, V> | null>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.input:pattern",
-          "name": "pattern",
+          "id": "./input-tags#NeuInputTagsComponent.input:pending",
+          "name": "pending",
           "kind": "input",
-          "publicName": "pattern",
+          "publicName": "pending",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly pattern: _angular_core.InputSignal<string | RegExp | null>;"
+          "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:placeholder",
@@ -15528,6 +15542,16 @@
           "signature": "readonly scrollHeight: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./input-tags#NeuInputTagsComponent.input:separators",
+          "name": "separators",
+          "kind": "input",
+          "publicName": "separators",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly separators: _angular_core.InputSignal<readonly string[]>;"
+        },
+        {
           "id": "./input-tags#NeuInputTagsComponent.input:size",
           "name": "size",
           "kind": "input",
@@ -15536,16 +15560,6 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly size: _angular_core.InputSignal<\"sm\" | \"md\" | \"lg\">;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.input:suggestions",
-          "name": "suggestions",
-          "kind": "input",
-          "publicName": "suggestions",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly suggestions: _angular_core.InputSignal<readonly T[]>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:tabindex",
@@ -15558,6 +15572,16 @@
           "signature": "readonly tabindex: _angular_core.InputSignal<number | null>;"
         },
         {
+          "id": "./input-tags#NeuInputTagsComponent.input:textValue",
+          "name": "textValue",
+          "kind": "input",
+          "publicName": "textValue",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly textValue: _angular_core.InputSignal<((text: string) => V | null | undefined) | null>;"
+        },
+        {
           "id": "./input-tags#NeuInputTagsComponent.input:title",
           "name": "title",
           "kind": "input",
@@ -15566,6 +15590,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly title: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.input:touched",
+          "name": "touched",
+          "kind": "input",
+          "publicName": "touched",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.input:typeahead",
@@ -15588,6 +15622,30 @@
           "signature": "readonly variant: _angular_core.InputSignal<\"outlined\" | \"filled\">;"
         },
         {
+          "id": "./input-tags#NeuInputTagsComponent.method:clear",
+          "name": "clear",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "clear(originalEvent?: Event): void;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:commitDraft",
+          "name": "commitDraft",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "commitDraft(originalEvent: Event): void;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
           "id": "./input-tags#NeuInputTagsComponent.method:focusInput",
           "name": "focusInput",
           "kind": "method",
@@ -15596,20 +15654,12 @@
           "signature": "focusInput(): void;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.method:groupedOptionIndex",
-          "name": "groupedOptionIndex",
+          "id": "./input-tags#NeuInputTagsComponent.method:isOptionSelected",
+          "name": "isOptionSelected",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "groupedOptionIndex(group: T, index: number): number;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.method:isActiveOption",
-          "name": "isActiveOption",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isActiveOption(option: T): boolean;"
+          "signature": "isOptionSelected(option: T): boolean;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.method:itemLabel",
@@ -15617,15 +15667,23 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "itemLabel(item: T): string;"
+          "signature": "itemLabel(value: V): string;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.method:onBlur",
-          "name": "onBlur",
+          "id": "./input-tags#NeuInputTagsComponent.method:itemTemplateContext",
+          "name": "itemTemplateContext",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onBlur(event: FocusEvent): void;"
+          "signature": "itemTemplateContext(value: V, index: number): NeuInputTagsItemTemplateContext<T, V>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:onChipKeyDown",
+          "name": "onChipKeyDown",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onChipKeyDown(event: KeyboardEvent, index: number): void;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.method:onCompositionEnd",
@@ -15644,12 +15702,20 @@
           "signature": "onCompositionStart(): void;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.method:onFocus",
-          "name": "onFocus",
+          "id": "./input-tags#NeuInputTagsComponent.method:onFocusIn",
+          "name": "onFocusIn",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onFocus(event: FocusEvent): void;"
+          "signature": "onFocusIn(event: FocusEvent): void;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:onFocusOut",
+          "name": "onFocusOut",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onFocusOut(event: FocusEvent): void;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.method:onInput",
@@ -15692,20 +15758,44 @@
           "signature": "optionId(index: number): string;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.method:registerOnChange",
-          "name": "registerOnChange",
+          "id": "./input-tags#NeuInputTagsComponent.method:optionIndex",
+          "name": "optionIndex",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnChange(fn: (value: T[]) => void): void;"
+          "signature": "optionIndex(option: T): number;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.method:registerOnTouched",
-          "name": "registerOnTouched",
+          "id": "./input-tags#NeuInputTagsComponent.method:optionIsDisabled",
+          "name": "optionIsDisabled",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnTouched(fn: () => void): void;"
+          "signature": "optionIsDisabled(option: T): boolean;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:optionLabelOf",
+          "name": "optionLabelOf",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "optionLabelOf(option: T): string;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:optionTemplateContext",
+          "name": "optionTemplateContext",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "optionTemplateContext(option: T, index: number): NeuInputTagsOptionTemplateContext<T, V>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:optionValueOf",
+          "name": "optionValueOf",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "optionValueOf(option: T): V;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.method:removeItem",
@@ -15713,7 +15803,31 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "removeItem(event: Event, index: number): void;"
+          "signature": "removeItem(originalEvent: Event, index: number): void;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:reorder",
+          "name": "reorder",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reorder(from: number, to: number, originalEvent?: Event): void;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:reset",
+          "name": "reset",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reset(): void;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.method:retrySuggestions",
+          "name": "retrySuggestions",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "retrySuggestions(originalEvent?: Event): void;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.method:selectOption",
@@ -15721,23 +15835,7 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "selectOption(event: Event, option: T): void;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.method:setDisabledState",
-          "name": "setDisabledState",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setDisabledState(disabled: boolean): void;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.method:trackGroup",
-          "name": "trackGroup",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "trackGroup(index: number, group: T): unknown;"
+          "signature": "selectOption(originalEvent: Event, option: T): void;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.method:trackOption",
@@ -15753,105 +15851,128 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "trackValue(index: number, item: T): unknown;"
+          "signature": "trackValue(index: number, value: V): unknown;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.method:writeValue",
-          "name": "writeValue",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "writeValue(value: readonly T[] | null | undefined): void;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.output:add",
-          "name": "add",
-          "kind": "output",
-          "publicName": "add",
+          "id": "./input-tags#NeuInputTagsComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly add: _angular_core.OutputEmitterRef<NeuInputTagsAddEvent<T>>;"
+          "signature": "readonly value: _angular_core.ModelSignal<readonly V[]>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.output:blur",
-          "name": "blur",
+          "id": "./input-tags#NeuInputTagsComponent.output:cleared",
+          "name": "cleared",
           "kind": "output",
-          "publicName": "blur",
+          "publicName": "cleared",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly blur: _angular_core.OutputEmitterRef<FocusEvent>;"
+          "signature": "readonly cleared: _angular_core.OutputEmitterRef<NeuInputTagsClearedEvent<V>>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.output:completeMethod",
-          "name": "completeMethod",
+          "id": "./input-tags#NeuInputTagsComponent.output:closed",
+          "name": "closed",
           "kind": "output",
-          "publicName": "completeMethod",
+          "publicName": "closed",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly completeMethod: _angular_core.OutputEmitterRef<NeuInputTagsCompleteEvent>;"
+          "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.output:focus",
-          "name": "focus",
+          "id": "./input-tags#NeuInputTagsComponent.output:focusEntered",
+          "name": "focusEntered",
           "kind": "output",
-          "publicName": "focus",
+          "publicName": "focusEntered",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly focus: _angular_core.OutputEmitterRef<FocusEvent>;"
+          "signature": "readonly focusEntered: _angular_core.OutputEmitterRef<FocusEvent>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.output:hide",
-          "name": "hide",
+          "id": "./input-tags#NeuInputTagsComponent.output:focusLeft",
+          "name": "focusLeft",
           "kind": "output",
-          "publicName": "hide",
+          "publicName": "focusLeft",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly hide: _angular_core.OutputEmitterRef<void>;"
+          "signature": "readonly focusLeft: _angular_core.OutputEmitterRef<FocusEvent>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.output:remove",
-          "name": "remove",
+          "id": "./input-tags#NeuInputTagsComponent.output:itemRemoved",
+          "name": "itemRemoved",
           "kind": "output",
-          "publicName": "remove",
+          "publicName": "itemRemoved",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly remove: _angular_core.OutputEmitterRef<NeuInputTagsRemoveEvent<T>>;"
+          "signature": "readonly itemRemoved: _angular_core.OutputEmitterRef<NeuInputTagsRemovedEvent<V>>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.output:select",
-          "name": "select",
+          "id": "./input-tags#NeuInputTagsComponent.output:itemReordered",
+          "name": "itemReordered",
           "kind": "output",
-          "publicName": "select",
+          "publicName": "itemReordered",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly select: _angular_core.OutputEmitterRef<NeuInputTagsSelectEvent<T>>;"
+          "signature": "readonly itemReordered: _angular_core.OutputEmitterRef<NeuInputTagsReorderedEvent<V>>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.output:show",
-          "name": "show",
+          "id": "./input-tags#NeuInputTagsComponent.output:opened",
+          "name": "opened",
           "kind": "output",
-          "publicName": "show",
+          "publicName": "opened",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly show: _angular_core.OutputEmitterRef<void>;"
+          "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.output:valueChange",
-          "name": "valueChange",
+          "id": "./input-tags#NeuInputTagsComponent.output:optionActivated",
+          "name": "optionActivated",
           "kind": "output",
-          "publicName": "valueChange",
+          "publicName": "optionActivated",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly valueChange: _angular_core.OutputEmitterRef<T[]>;"
+          "signature": "readonly optionActivated: _angular_core.OutputEmitterRef<NeuOptionActivatedEvent<T, V>>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.output:pasteResult",
+          "name": "pasteResult",
+          "kind": "output",
+          "publicName": "pasteResult",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pasteResult: _angular_core.OutputEmitterRef<NeuInputTagsPasteResult<V>>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.output:suggestionsRequest",
+          "name": "suggestionsRequest",
+          "kind": "output",
+          "publicName": "suggestionsRequest",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly suggestionsRequest: _angular_core.OutputEmitterRef<NeuOptionDataRequest>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.output:touch",
+          "name": "touch",
+          "kind": "output",
+          "publicName": "touch",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:activeIndex",
@@ -15870,20 +15991,36 @@
           "signature": "readonly activeOptionId: _angular_core.Signal<string | null>;"
         },
         {
+          "id": "./input-tags#NeuInputTagsComponent.property:allOptions",
+          "name": "allOptions",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly allOptions: _angular_core.Signal<readonly T[]>;"
+        },
+        {
           "id": "./input-tags#NeuInputTagsComponent.property:availableOptions",
           "name": "availableOptions",
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly availableOptions: _angular_core.Signal<T[]>;"
+          "signature": "readonly availableOptions: _angular_core.Signal<readonly T[]>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.property:cvaDisabled",
-          "name": "cvaDisabled",
+          "id": "./input-tags#NeuInputTagsComponent.property:draft",
+          "name": "draft",
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly cvaDisabled: _angular_core.WritableSignal<boolean>;"
+          "signature": "readonly draft: _angular_core.WritableSignal<string>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsComponent.property:effectiveDescribedBy",
+          "name": "effectiveDescribedBy",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly effectiveDescribedBy: _angular_core.Signal<string | null>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:effectiveInputId",
@@ -15907,7 +16044,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly groupedOptions: _angular_core.Signal<{\n    group: T;\n    label: string;\n    options: T[];\n}[]>;"
+          "signature": "readonly groupedOptions: _angular_core.Signal<{\n    group: NeuInputTagsGroup<T>;\n    options: readonly T[];\n}[]>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:groupTpl",
@@ -15926,20 +16063,20 @@
           "signature": "readonly headerTpl: _angular_core.Signal<NeuInputTagsHeaderDirective | undefined>;"
         },
         {
+          "id": "./input-tags#NeuInputTagsComponent.property:hintId",
+          "name": "hintId",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly hintId: string;"
+        },
+        {
           "id": "./input-tags#NeuInputTagsComponent.property:hostClasses",
           "name": "hostClasses",
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly hostClasses: _angular_core.Signal<{\n    'neu-input-tags': boolean;\n    'neu-input-tags--disabled': boolean;\n    'neu-input-tags--readonly': boolean;\n    'neu-input-tags--focus': boolean;\n    'neu-input-tags--invalid': boolean;\n    'neu-input-tags--filled': boolean;\n    'neu-input-tags--fluid': boolean;\n    'neu-input-tags--size-sm': boolean;\n    'neu-input-tags--size-lg': boolean;\n}>;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.property:inputIdInternal",
-          "name": "inputIdInternal",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly inputIdInternal: string;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:isDisabled",
@@ -15955,23 +16092,15 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly itemTpl: _angular_core.Signal<NeuInputTagsItemDirective<any> | undefined>;"
+          "signature": "readonly itemTpl: _angular_core.Signal<NeuInputTagsItemDirective<any, any> | undefined>;"
         },
         {
-          "id": "./input-tags#NeuInputTagsComponent.property:model",
-          "name": "model",
+          "id": "./input-tags#NeuInputTagsComponent.property:liveMessage",
+          "name": "liveMessage",
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly model: _angular_core.WritableSignal<T[]>;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.property:nativePattern",
-          "name": "nativePattern",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly nativePattern: _angular_core.Signal<string | null>;"
+          "signature": "readonly liveMessage: _angular_core.WritableSignal<string>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:optionTpl",
@@ -15979,7 +16108,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly optionTpl: _angular_core.Signal<NeuInputTagsOptionDirective<any> | undefined>;"
+          "signature": "readonly optionTpl: _angular_core.Signal<NeuInputTagsOptionDirective<any, any> | undefined>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:ɵcmp",
@@ -15987,7 +16116,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuInputTagsComponent<any>, \"neu-input-tags\", never, {\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"delimiter\": {\n        \"alias\": \"delimiter\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"allowDuplicate\": {\n        \"alias\": \"allowDuplicate\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"addOnBlur\": {\n        \"alias\": \"addOnBlur\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"addOnTab\": {\n        \"alias\": \"addOnTab\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"addOnPaste\": {\n        \"alias\": \"addOnPaste\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"typeahead\": {\n        \"alias\": \"typeahead\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"suggestions\": {\n        \"alias\": \"suggestions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"group\": {\n        \"alias\": \"group\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionGroupLabel\": {\n        \"alias\": \"optionGroupLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionGroupChildren\": {\n        \"alias\": \"optionGroupChildren\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"delay\": {\n        \"alias\": \"delay\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minQueryLength\": {\n        \"alias\": \"minQueryLength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"completeOnFocus\": {\n        \"alias\": \"completeOnFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autoOptionFocus\": {\n        \"alias\": \"autoOptionFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"focusOnHover\": {\n        \"alias\": \"focusOnHover\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"scrollHeight\": {\n        \"alias\": \"scrollHeight\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autofocus\": {\n        \"alias\": \"autofocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabindex\": {\n        \"alias\": \"tabindex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autocomplete\": {\n        \"alias\": \"autocomplete\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minlength\": {\n        \"alias\": \"minlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxlength\": {\n        \"alias\": \"maxlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pattern\": {\n        \"alias\": \"pattern\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaRequired\": {\n        \"alias\": \"ariaRequired\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"removeLabel\": {\n        \"alias\": \"removeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variant\": {\n        \"alias\": \"variant\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fluid\": {\n        \"alias\": \"fluid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n    \"add\": \"add\";\n    \"remove\": \"remove\";\n    \"completeMethod\": \"completeMethod\";\n    \"select\": \"select\";\n    \"focus\": \"focus\";\n    \"blur\": \"blur\";\n    \"show\": \"show\";\n    \"hide\": \"hide\";\n}, [\n    \"itemTpl\",\n    \"removeIconTpl\",\n    \"optionTpl\",\n    \"groupTpl\",\n    \"headerTpl\",\n    \"footerTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuInputTagsComponent<any, any>, \"neu-input-tags\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"options\": {\n        \"alias\": \"options\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"groups\": {\n        \"alias\": \"groups\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionLabel\": {\n        \"alias\": \"optionLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionValue\": {\n        \"alias\": \"optionValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"optionDisabled\": {\n        \"alias\": \"optionDisabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"compareWith\": {\n        \"alias\": \"compareWith\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"textValue\": {\n        \"alias\": \"textValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"normalizeToken\": {\n        \"alias\": \"normalizeToken\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"separators\": {\n        \"alias\": \"separators\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"allowDuplicates\": {\n        \"alias\": \"allowDuplicates\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxItems\": {\n        \"alias\": \"maxItems\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"commitOnBlur\": {\n        \"alias\": \"commitOnBlur\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"typeahead\": {\n        \"alias\": \"typeahead\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"delay\": {\n        \"alias\": \"delay\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minQueryLength\": {\n        \"alias\": \"minQueryLength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"completeOnFocus\": {\n        \"alias\": \"completeOnFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autoOptionFocus\": {\n        \"alias\": \"autoOptionFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"focusOnHover\": {\n        \"alias\": \"focusOnHover\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"removeLabel\": {\n        \"alias\": \"removeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyMessage\": {\n        \"alias\": \"emptyMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"scrollHeight\": {\n        \"alias\": \"scrollHeight\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autofocus\": {\n        \"alias\": \"autofocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabindex\": {\n        \"alias\": \"tabindex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autocomplete\": {\n        \"alias\": \"autocomplete\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minlength\": {\n        \"alias\": \"minlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxlength\": {\n        \"alias\": \"maxlength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaRequired\": {\n        \"alias\": \"ariaRequired\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variant\": {\n        \"alias\": \"variant\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fluid\": {\n        \"alias\": \"fluid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"suggestionsRequest\": \"suggestionsRequest\";\n    \"optionActivated\": \"optionActivated\";\n    \"pasteResult\": \"pasteResult\";\n    \"itemRemoved\": \"itemRemoved\";\n    \"itemReordered\": \"itemReordered\";\n    \"cleared\": \"cleared\";\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"focusEntered\": \"focusEntered\";\n    \"focusLeft\": \"focusLeft\";\n    \"touch\": \"touch\";\n}, [\n    \"itemTpl\",\n    \"removeIconTpl\",\n    \"optionTpl\",\n    \"groupTpl\",\n    \"headerTpl\",\n    \"footerTpl\"\n], never, true, never>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:ɵfac",
@@ -15995,7 +16124,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuInputTagsComponent<any>, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuInputTagsComponent<any, any>, never>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:panelId",
@@ -16020,14 +16149,6 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly panelVisible: _angular_core.Signal<boolean>;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsComponent.property:query",
-          "name": "query",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly query: _angular_core.WritableSignal<string>;"
         },
         {
           "id": "./input-tags#NeuInputTagsComponent.property:removeIconTpl",
@@ -16075,13 +16196,47 @@
       ]
     },
     {
+      "id": "./input-tags#NeuInputTagsGroup",
+      "entrypoint": "./input-tags",
+      "name": "NeuInputTagsGroup",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuInputTagsGroup<T> {\n}",
+      "members": [
+        {
+          "id": "./input-tags#NeuInputTagsGroup.property:disabled",
+          "name": "disabled",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly disabled?: boolean;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsGroup.property:label",
+          "name": "label",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: string;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsGroup.property:options",
+          "name": "options",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly options: readonly T[];"
+        }
+      ]
+    },
+    {
       "id": "./input-tags#NeuInputTagsGroupDirective",
       "entrypoint": "./input-tags",
       "name": "NeuInputTagsGroupDirective",
       "kind": "directive",
       "status": "SUPPORTED",
       "selector": "ng-template[neuInputTagsGroup]",
-      "signature": "declare class NeuInputTagsGroupDirective<T> {\n}",
+      "signature": "declare class NeuInputTagsGroupDirective<T = string> {\n}",
       "members": [
         {
           "id": "./input-tags#NeuInputTagsGroupDirective.property:ɵdir",
@@ -16123,7 +16278,15 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "$implicit: T;"
+          "signature": "readonly $implicit: NeuInputTagsGroup<T>;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsGroupTemplateContext.property:group",
+          "name": "group",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly group: NeuInputTagsGroup<T>;"
         }
       ]
     },
@@ -16169,7 +16332,7 @@
       "kind": "directive",
       "status": "SUPPORTED",
       "selector": "ng-template[neuInputTagsItem]",
-      "signature": "declare class NeuInputTagsItemDirective<T> {\n}",
+      "signature": "declare class NeuInputTagsItemDirective<T = string, V = T> {\n}",
       "members": [
         {
           "id": "./input-tags#NeuInputTagsItemDirective.property:ɵdir",
@@ -16177,7 +16340,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuInputTagsItemDirective<any>, \"ng-template[neuInputTagsItem]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuInputTagsItemDirective<any, any>, \"ng-template[neuInputTagsItem]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./input-tags#NeuInputTagsItemDirective.property:ɵfac",
@@ -16185,7 +16348,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuInputTagsItemDirective<any>, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuInputTagsItemDirective<any, any>, never>;"
         },
         {
           "id": "./input-tags#NeuInputTagsItemDirective.property:templateRef",
@@ -16193,7 +16356,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<NeuInputTagsItemTemplateContext<T>>;"
+          "signature": "readonly templateRef: TemplateRef<NeuInputTagsItemTemplateContext<T, V>>;"
         }
       ]
     },
@@ -16203,7 +16366,7 @@
       "name": "NeuInputTagsItemTemplateContext",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuInputTagsItemTemplateContext<T> {\n}",
+      "signature": "interface NeuInputTagsItemTemplateContext<T, V> {\n}",
       "members": [
         {
           "id": "./input-tags#NeuInputTagsItemTemplateContext.property:$implicit",
@@ -16211,7 +16374,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "$implicit: T;"
+          "signature": "readonly $implicit: V;"
         },
         {
           "id": "./input-tags#NeuInputTagsItemTemplateContext.property:index",
@@ -16219,7 +16382,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "index: number;"
+          "signature": "readonly index: number;"
         },
         {
           "id": "./input-tags#NeuInputTagsItemTemplateContext.property:onRemove",
@@ -16227,18 +16390,25 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "onRemove: (event: Event, index: number) => void;"
+          "signature": "readonly onRemove: (event: Event, index: number) => void;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsItemTemplateContext.property:option",
+          "name": "option",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly option: T | null;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsItemTemplateContext.property:value",
+          "name": "value",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: V;"
         }
       ]
-    },
-    {
-      "id": "./input-tags#NeuInputTagsOptionAccessor",
-      "entrypoint": "./input-tags",
-      "name": "NeuInputTagsOptionAccessor",
-      "kind": "type",
-      "status": "SUPPORTED",
-      "signature": "type NeuInputTagsOptionAccessor<T> = string | ((option: T) => unknown);",
-      "members": []
     },
     {
       "id": "./input-tags#NeuInputTagsOptionDirective",
@@ -16247,7 +16417,7 @@
       "kind": "directive",
       "status": "SUPPORTED",
       "selector": "ng-template[neuInputTagsOption]",
-      "signature": "declare class NeuInputTagsOptionDirective<T> {\n}",
+      "signature": "declare class NeuInputTagsOptionDirective<T = string, V = T> {\n}",
       "members": [
         {
           "id": "./input-tags#NeuInputTagsOptionDirective.property:ɵdir",
@@ -16255,7 +16425,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuInputTagsOptionDirective<any>, \"ng-template[neuInputTagsOption]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuInputTagsOptionDirective<any, any>, \"ng-template[neuInputTagsOption]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./input-tags#NeuInputTagsOptionDirective.property:ɵfac",
@@ -16263,7 +16433,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuInputTagsOptionDirective<any>, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuInputTagsOptionDirective<any, any>, never>;"
         },
         {
           "id": "./input-tags#NeuInputTagsOptionDirective.property:templateRef",
@@ -16271,7 +16441,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<NeuInputTagsOptionTemplateContext<T>>;"
+          "signature": "readonly templateRef: TemplateRef<NeuInputTagsOptionTemplateContext<T, V>>;"
         }
       ]
     },
@@ -16281,7 +16451,7 @@
       "name": "NeuInputTagsOptionTemplateContext",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuInputTagsOptionTemplateContext<T> {\n}",
+      "signature": "interface NeuInputTagsOptionTemplateContext<T, V> {\n}",
       "members": [
         {
           "id": "./input-tags#NeuInputTagsOptionTemplateContext.property:$implicit",
@@ -16289,7 +16459,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "$implicit: T;"
+          "signature": "readonly $implicit: T;"
         },
         {
           "id": "./input-tags#NeuInputTagsOptionTemplateContext.property:index",
@@ -16297,41 +16467,91 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "index: number;"
-        }
-      ]
-    },
-    {
-      "id": "./input-tags#NeuInputTagsRemoveEvent",
-      "entrypoint": "./input-tags",
-      "name": "NeuInputTagsRemoveEvent",
-      "kind": "interface",
-      "status": "SUPPORTED",
-      "signature": "interface NeuInputTagsRemoveEvent<T = unknown> {\n}",
-      "members": [
+          "signature": "readonly index: number;"
+        },
         {
-          "id": "./input-tags#NeuInputTagsRemoveEvent.property:index",
-          "name": "index",
+          "id": "./input-tags#NeuInputTagsOptionTemplateContext.property:option",
+          "name": "option",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "index: number;"
+          "signature": "readonly option: T;"
         },
         {
-          "id": "./input-tags#NeuInputTagsRemoveEvent.property:originalEvent",
-          "name": "originalEvent",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "originalEvent: Event;"
-        },
-        {
-          "id": "./input-tags#NeuInputTagsRemoveEvent.property:value",
+          "id": "./input-tags#NeuInputTagsOptionTemplateContext.property:value",
           "name": "value",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "value: T;"
+          "signature": "readonly value: V;"
+        }
+      ]
+    },
+    {
+      "id": "./input-tags#NeuInputTagsPasteResult",
+      "entrypoint": "./input-tags",
+      "name": "NeuInputTagsPasteResult",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuInputTagsPasteResult<V> {\n}",
+      "members": [
+        {
+          "id": "./input-tags#NeuInputTagsPasteResult.property:accepted",
+          "name": "accepted",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly accepted: readonly V[];"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsPasteResult.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: ClipboardEvent;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsPasteResult.property:rejected",
+          "name": "rejected",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rejected: readonly string[];"
+        }
+      ]
+    },
+    {
+      "id": "./input-tags#NeuInputTagsRemovedEvent",
+      "entrypoint": "./input-tags",
+      "name": "NeuInputTagsRemovedEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuInputTagsRemovedEvent<V> {\n}",
+      "members": [
+        {
+          "id": "./input-tags#NeuInputTagsRemovedEvent.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: number;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsRemovedEvent.property:originalEvent",
+          "name": "originalEvent",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly originalEvent: Event;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsRemovedEvent.property:value",
+          "name": "value",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: V;"
         }
       ]
     },
@@ -16371,28 +16591,44 @@
       ]
     },
     {
-      "id": "./input-tags#NeuInputTagsSelectEvent",
+      "id": "./input-tags#NeuInputTagsReorderedEvent",
       "entrypoint": "./input-tags",
-      "name": "NeuInputTagsSelectEvent",
+      "name": "NeuInputTagsReorderedEvent",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuInputTagsSelectEvent<T = unknown> {\n}",
+      "signature": "interface NeuInputTagsReorderedEvent<V> {\n}",
       "members": [
         {
-          "id": "./input-tags#NeuInputTagsSelectEvent.property:originalEvent",
+          "id": "./input-tags#NeuInputTagsReorderedEvent.property:from",
+          "name": "from",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly from: number;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsReorderedEvent.property:originalEvent",
           "name": "originalEvent",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "originalEvent: Event;"
+          "signature": "readonly originalEvent: Event;"
         },
         {
-          "id": "./input-tags#NeuInputTagsSelectEvent.property:value",
+          "id": "./input-tags#NeuInputTagsReorderedEvent.property:to",
+          "name": "to",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly to: number;"
+        },
+        {
+          "id": "./input-tags#NeuInputTagsReorderedEvent.property:value",
           "name": "value",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "value: T;"
+          "signature": "readonly value: V;"
         }
       ]
     },
@@ -43440,327 +43676,6 @@
       "members": []
     },
     {
-      "id": "./tags#NeuTagItemDirective",
-      "entrypoint": "./tags",
-      "name": "NeuTagItemDirective",
-      "kind": "directive",
-      "status": "SUPPORTED",
-      "selector": "ng-template[neuTagItem]",
-      "signature": "declare class NeuTagItemDirective {\n}",
-      "members": [
-        {
-          "id": "./tags#NeuTagItemDirective.property:ɵdir",
-          "name": "ɵdir",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTagItemDirective, \"ng-template[neuTagItem]\", never, {}, {}, never, never, true, never>;"
-        },
-        {
-          "id": "./tags#NeuTagItemDirective.property:ɵfac",
-          "name": "ɵfac",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTagItemDirective, never>;"
-        },
-        {
-          "id": "./tags#NeuTagItemDirective.property:templateRef",
-          "name": "templateRef",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: string;\n    remove: () => void;\n}>;"
-        }
-      ]
-    },
-    {
-      "id": "./tags#NeuTagsComponent",
-      "entrypoint": "./tags",
-      "name": "NeuTagsComponent",
-      "kind": "component",
-      "status": "SUPPORTED",
-      "selector": "neu-tags",
-      "signature": "declare class NeuTagsComponent implements ControlValueAccessor {\n}",
-      "members": [
-        {
-          "id": "./tags#NeuTagsComponent.input:disabled",
-          "name": "disabled",
-          "kind": "input",
-          "publicName": "disabled",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.input:label",
-          "name": "label",
-          "kind": "input",
-          "publicName": "label",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly label: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.input:placeholder",
-          "name": "placeholder",
-          "kind": "input",
-          "publicName": "placeholder",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly placeholder: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.input:removeLabel",
-          "name": "removeLabel",
-          "kind": "input",
-          "publicName": "removeLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly removeLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.input:separators",
-          "name": "separators",
-          "kind": "input",
-          "publicName": "separators",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly separators: _angular_core.InputSignal<string[]>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.input:suggestions",
-          "name": "suggestions",
-          "kind": "input",
-          "publicName": "suggestions",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly suggestions: _angular_core.InputSignal<(string | NeuTagSuggestion)[]>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.method:add",
-          "name": "add",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "add(tag: string): void;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.method:commitDraft",
-          "name": "commitDraft",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "commitDraft(): void;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.method:onKeyDown",
-          "name": "onKeyDown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onKeyDown(event: KeyboardEvent): void;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.method:registerOnChange",
-          "name": "registerOnChange",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnChange(fn: (value: string[]) => void): void;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.method:registerOnTouched",
-          "name": "registerOnTouched",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnTouched(fn: () => void): void;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.method:remove",
-          "name": "remove",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "remove(tag: string): void;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.method:setDisabledState",
-          "name": "setDisabledState",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setDisabledState(isDisabled: boolean): void;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.method:writeValue",
-          "name": "writeValue",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "writeValue(value: readonly string[] | null): void;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.output:valueChange",
-          "name": "valueChange",
-          "kind": "output",
-          "publicName": "valueChange",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string[]>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:cvaDisabled",
-          "name": "cvaDisabled",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly cvaDisabled: _angular_core.WritableSignal<boolean>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:draft",
-          "name": "draft",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly draft: _angular_core.WritableSignal<string>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:filteredSuggestions",
-          "name": "filteredSuggestions",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly filteredSuggestions: _angular_core.Signal<NeuTagSuggestion[]>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:inputId",
-          "name": "inputId",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly inputId: string;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:ɵcmp",
-          "name": "ɵcmp",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTagsComponent, \"neu-tags\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"suggestions\": {\n        \"alias\": \"suggestions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"separators\": {\n        \"alias\": \"separators\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"removeLabel\": {\n        \"alias\": \"removeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n}, [\n    \"tagTpl\",\n    \"suggestionTpl\"\n], never, true, never>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:ɵfac",
-          "name": "ɵfac",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTagsComponent, never>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:suggestionTpl",
-          "name": "suggestionTpl",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly suggestionTpl: _angular_core.Signal<NeuTagSuggestionDirective | undefined>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:tagTpl",
-          "name": "tagTpl",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly tagTpl: _angular_core.Signal<NeuTagItemDirective | undefined>;"
-        },
-        {
-          "id": "./tags#NeuTagsComponent.property:value",
-          "name": "value",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly value: _angular_core.WritableSignal<string[]>;"
-        }
-      ]
-    },
-    {
-      "id": "./tags#NeuTagSuggestion",
-      "entrypoint": "./tags",
-      "name": "NeuTagSuggestion",
-      "kind": "interface",
-      "status": "SUPPORTED",
-      "signature": "interface NeuTagSuggestion {\n}",
-      "members": [
-        {
-          "id": "./tags#NeuTagSuggestion.property:data",
-          "name": "data",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "data?: unknown;"
-        },
-        {
-          "id": "./tags#NeuTagSuggestion.property:label",
-          "name": "label",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "label: string;"
-        },
-        {
-          "id": "./tags#NeuTagSuggestion.property:value",
-          "name": "value",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "value: string;"
-        }
-      ]
-    },
-    {
-      "id": "./tags#NeuTagSuggestionDirective",
-      "entrypoint": "./tags",
-      "name": "NeuTagSuggestionDirective",
-      "kind": "directive",
-      "status": "SUPPORTED",
-      "selector": "ng-template[neuTagSuggestion]",
-      "signature": "declare class NeuTagSuggestionDirective {\n}",
-      "members": [
-        {
-          "id": "./tags#NeuTagSuggestionDirective.property:ɵdir",
-          "name": "ɵdir",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTagSuggestionDirective, \"ng-template[neuTagSuggestion]\", never, {}, {}, never, never, true, never>;"
-        },
-        {
-          "id": "./tags#NeuTagSuggestionDirective.property:ɵfac",
-          "name": "ɵfac",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTagSuggestionDirective, never>;"
-        },
-        {
-          "id": "./tags#NeuTagSuggestionDirective.property:templateRef",
-          "name": "templateRef",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: NeuTagSuggestion;\n}>;"
-        }
-      ]
-    },
-    {
       "id": "./terminal#NeuTerminalCommand",
       "entrypoint": "./terminal",
       "name": "NeuTerminalCommand",
@@ -58312,52 +58227,16 @@
       "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:addOnBlur",
+      "id": "./input-tags#NeuInputTagsComponent.input:allowDuplicates",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "addOnBlur",
-      "publicName": "addOnBlur",
+      "propertyName": "allowDuplicates",
+      "publicName": "allowDuplicates",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly addOnBlur: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:addOnPaste",
-      "entrypoint": "./input-tags",
-      "declaration": "NeuInputTagsComponent",
-      "selector": "neu-input-tags",
-      "propertyName": "addOnPaste",
-      "publicName": "addOnPaste",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly addOnPaste: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:addOnTab",
-      "entrypoint": "./input-tags",
-      "declaration": "NeuInputTagsComponent",
-      "selector": "neu-input-tags",
-      "propertyName": "addOnTab",
-      "publicName": "addOnTab",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly addOnTab: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:allowDuplicate",
-      "entrypoint": "./input-tags",
-      "declaration": "NeuInputTagsComponent",
-      "selector": "neu-input-tags",
-      "propertyName": "allowDuplicate",
-      "publicName": "allowDuplicate",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly allowDuplicate: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly allowDuplicates: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:ariaDescribedBy",
@@ -58444,6 +58323,30 @@
       "signature": "readonly autoOptionFocus: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./input-tags#NeuInputTagsComponent.input:commitOnBlur",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "commitOnBlur",
+      "publicName": "commitOnBlur",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly commitOnBlur: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:compareWith",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "compareWith",
+      "publicName": "compareWith",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly compareWith: _angular_core.InputSignal<NeuOptionCompareWith<V>>;"
+    },
+    {
       "id": "./input-tags#NeuInputTagsComponent.input:completeOnFocus",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
@@ -58468,16 +58371,16 @@
       "signature": "readonly delay: _angular_core.InputSignal<number>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:delimiter",
+      "id": "./input-tags#NeuInputTagsComponent.input:dirty",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "delimiter",
-      "publicName": "delimiter",
+      "propertyName": "dirty",
+      "publicName": "dirty",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly delimiter: _angular_core.InputSignal<string | RegExp | null>;"
+      "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:disabled",
@@ -58490,6 +58393,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:emptyMessage",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "emptyMessage",
+      "publicName": "emptyMessage",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly emptyMessage: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:errors",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "errors",
+      "publicName": "errors",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:fluid",
@@ -58516,16 +58443,40 @@
       "signature": "readonly focusOnHover: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:group",
+      "id": "./input-tags#NeuInputTagsComponent.input:groups",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "group",
-      "publicName": "group",
+      "propertyName": "groups",
+      "publicName": "groups",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly group: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly groups: _angular_core.InputSignal<readonly NeuInputTagsGroup<T>[]>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:hidden",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:hint",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "hint",
+      "publicName": "hint",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hint: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:inputId",
@@ -58552,16 +58503,40 @@
       "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:max",
+      "id": "./input-tags#NeuInputTagsComponent.input:label",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "max",
-      "publicName": "max",
+      "propertyName": "label",
+      "publicName": "label",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly max: _angular_core.InputSignal<number | null>;"
+      "signature": "readonly label: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:loading",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "loading",
+      "publicName": "loading",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly loading: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:maxItems",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "maxItems",
+      "publicName": "maxItems",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly maxItems: _angular_core.InputSignal<number | null>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:maxlength",
@@ -58612,6 +58587,18 @@
       "signature": "readonly name: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./input-tags#NeuInputTagsComponent.input:normalizeToken",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "normalizeToken",
+      "publicName": "normalizeToken",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly normalizeToken: _angular_core.InputSignal<(text: string) => string>;"
+    },
+    {
       "id": "./input-tags#NeuInputTagsComponent.input:optionDisabled",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
@@ -58621,31 +58608,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly optionDisabled: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:optionGroupChildren",
-      "entrypoint": "./input-tags",
-      "declaration": "NeuInputTagsComponent",
-      "selector": "neu-input-tags",
-      "propertyName": "optionGroupChildren",
-      "publicName": "optionGroupChildren",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly optionGroupChildren: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:optionGroupLabel",
-      "entrypoint": "./input-tags",
-      "declaration": "NeuInputTagsComponent",
-      "selector": "neu-input-tags",
-      "propertyName": "optionGroupLabel",
-      "publicName": "optionGroupLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly optionGroupLabel: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
+      "signature": "readonly optionDisabled: _angular_core.InputSignal<NeuOptionDisabledAccessor<T> | null>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:optionLabel",
@@ -58657,7 +58620,19 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly optionLabel: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
+      "signature": "readonly optionLabel: _angular_core.InputSignal<NeuOptionLabelAccessor<T> | null>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:options",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "options",
+      "publicName": "options",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly options: _angular_core.InputSignal<readonly T[]>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:optionValue",
@@ -58669,19 +58644,19 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly optionValue: _angular_core.InputSignal<NeuInputTagsOptionAccessor<T> | null>;"
+      "signature": "readonly optionValue: _angular_core.InputSignal<NeuOptionValueAccessor<T, V> | null>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.input:pattern",
+      "id": "./input-tags#NeuInputTagsComponent.input:pending",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "pattern",
-      "publicName": "pattern",
+      "propertyName": "pending",
+      "publicName": "pending",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly pattern: _angular_core.InputSignal<string | RegExp | null>;"
+      "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:placeholder",
@@ -58744,6 +58719,18 @@
       "signature": "readonly scrollHeight: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./input-tags#NeuInputTagsComponent.input:separators",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "separators",
+      "publicName": "separators",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly separators: _angular_core.InputSignal<readonly string[]>;"
+    },
+    {
       "id": "./input-tags#NeuInputTagsComponent.input:size",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
@@ -58754,18 +58741,6 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly size: _angular_core.InputSignal<\"sm\" | \"md\" | \"lg\">;"
-    },
-    {
-      "id": "./input-tags#NeuInputTagsComponent.input:suggestions",
-      "entrypoint": "./input-tags",
-      "declaration": "NeuInputTagsComponent",
-      "selector": "neu-input-tags",
-      "propertyName": "suggestions",
-      "publicName": "suggestions",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly suggestions: _angular_core.InputSignal<readonly T[]>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:tabindex",
@@ -58780,6 +58755,18 @@
       "signature": "readonly tabindex: _angular_core.InputSignal<number | null>;"
     },
     {
+      "id": "./input-tags#NeuInputTagsComponent.input:textValue",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "textValue",
+      "publicName": "textValue",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly textValue: _angular_core.InputSignal<((text: string) => V | null | undefined) | null>;"
+    },
+    {
       "id": "./input-tags#NeuInputTagsComponent.input:title",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
@@ -58790,6 +58777,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly title: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.input:touched",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "touched",
+      "publicName": "touched",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./input-tags#NeuInputTagsComponent.input:typeahead",
@@ -58816,112 +58815,149 @@
       "signature": "readonly variant: _angular_core.InputSignal<\"outlined\" | \"filled\">;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:add",
+      "id": "./input-tags#NeuInputTagsComponent.model:value",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "add",
-      "publicName": "add",
-      "kind": "output",
+      "propertyName": "value",
+      "publicName": "value",
+      "changePublicName": "valueChange",
+      "kind": "model",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly add: _angular_core.OutputEmitterRef<NeuInputTagsAddEvent<T>>;"
+      "signature": "readonly value: _angular_core.ModelSignal<readonly V[]>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:blur",
+      "id": "./input-tags#NeuInputTagsComponent.output:cleared",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "blur",
-      "publicName": "blur",
+      "propertyName": "cleared",
+      "publicName": "cleared",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly blur: _angular_core.OutputEmitterRef<FocusEvent>;"
+      "signature": "readonly cleared: _angular_core.OutputEmitterRef<NeuInputTagsClearedEvent<V>>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:completeMethod",
+      "id": "./input-tags#NeuInputTagsComponent.output:closed",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "completeMethod",
-      "publicName": "completeMethod",
+      "propertyName": "closed",
+      "publicName": "closed",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly completeMethod: _angular_core.OutputEmitterRef<NeuInputTagsCompleteEvent>;"
+      "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:focus",
+      "id": "./input-tags#NeuInputTagsComponent.output:focusEntered",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "focus",
-      "publicName": "focus",
+      "propertyName": "focusEntered",
+      "publicName": "focusEntered",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly focus: _angular_core.OutputEmitterRef<FocusEvent>;"
+      "signature": "readonly focusEntered: _angular_core.OutputEmitterRef<FocusEvent>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:hide",
+      "id": "./input-tags#NeuInputTagsComponent.output:focusLeft",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "hide",
-      "publicName": "hide",
+      "propertyName": "focusLeft",
+      "publicName": "focusLeft",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly hide: _angular_core.OutputEmitterRef<void>;"
+      "signature": "readonly focusLeft: _angular_core.OutputEmitterRef<FocusEvent>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:remove",
+      "id": "./input-tags#NeuInputTagsComponent.output:itemRemoved",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "remove",
-      "publicName": "remove",
+      "propertyName": "itemRemoved",
+      "publicName": "itemRemoved",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly remove: _angular_core.OutputEmitterRef<NeuInputTagsRemoveEvent<T>>;"
+      "signature": "readonly itemRemoved: _angular_core.OutputEmitterRef<NeuInputTagsRemovedEvent<V>>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:select",
+      "id": "./input-tags#NeuInputTagsComponent.output:itemReordered",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "select",
-      "publicName": "select",
+      "propertyName": "itemReordered",
+      "publicName": "itemReordered",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly select: _angular_core.OutputEmitterRef<NeuInputTagsSelectEvent<T>>;"
+      "signature": "readonly itemReordered: _angular_core.OutputEmitterRef<NeuInputTagsReorderedEvent<V>>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:show",
+      "id": "./input-tags#NeuInputTagsComponent.output:opened",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "show",
-      "publicName": "show",
+      "propertyName": "opened",
+      "publicName": "opened",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly show: _angular_core.OutputEmitterRef<void>;"
+      "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
     },
     {
-      "id": "./input-tags#NeuInputTagsComponent.output:valueChange",
+      "id": "./input-tags#NeuInputTagsComponent.output:optionActivated",
       "entrypoint": "./input-tags",
       "declaration": "NeuInputTagsComponent",
       "selector": "neu-input-tags",
-      "propertyName": "valueChange",
-      "publicName": "valueChange",
+      "propertyName": "optionActivated",
+      "publicName": "optionActivated",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly valueChange: _angular_core.OutputEmitterRef<T[]>;"
+      "signature": "readonly optionActivated: _angular_core.OutputEmitterRef<NeuOptionActivatedEvent<T, V>>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.output:pasteResult",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "pasteResult",
+      "publicName": "pasteResult",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly pasteResult: _angular_core.OutputEmitterRef<NeuInputTagsPasteResult<V>>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.output:suggestionsRequest",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "suggestionsRequest",
+      "publicName": "suggestionsRequest",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly suggestionsRequest: _angular_core.OutputEmitterRef<NeuOptionDataRequest>;"
+    },
+    {
+      "id": "./input-tags#NeuInputTagsComponent.output:touch",
+      "entrypoint": "./input-tags",
+      "declaration": "NeuInputTagsComponent",
+      "selector": "neu-input-tags",
+      "propertyName": "touch",
+      "publicName": "touch",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
     },
     {
       "id": "./input#NeuInputComponent.input:autocomplete",
@@ -67792,90 +67828,6 @@
       "signature": "value: _angular_core.InputSignal<string | number | null | undefined>;"
     },
     {
-      "id": "./tags#NeuTagsComponent.input:disabled",
-      "entrypoint": "./tags",
-      "declaration": "NeuTagsComponent",
-      "selector": "neu-tags",
-      "propertyName": "disabled",
-      "publicName": "disabled",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:label",
-      "entrypoint": "./tags",
-      "declaration": "NeuTagsComponent",
-      "selector": "neu-tags",
-      "propertyName": "label",
-      "publicName": "label",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly label: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:placeholder",
-      "entrypoint": "./tags",
-      "declaration": "NeuTagsComponent",
-      "selector": "neu-tags",
-      "propertyName": "placeholder",
-      "publicName": "placeholder",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly placeholder: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:removeLabel",
-      "entrypoint": "./tags",
-      "declaration": "NeuTagsComponent",
-      "selector": "neu-tags",
-      "propertyName": "removeLabel",
-      "publicName": "removeLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly removeLabel: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:separators",
-      "entrypoint": "./tags",
-      "declaration": "NeuTagsComponent",
-      "selector": "neu-tags",
-      "propertyName": "separators",
-      "publicName": "separators",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly separators: _angular_core.InputSignal<string[]>;"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.input:suggestions",
-      "entrypoint": "./tags",
-      "declaration": "NeuTagsComponent",
-      "selector": "neu-tags",
-      "propertyName": "suggestions",
-      "publicName": "suggestions",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly suggestions: _angular_core.InputSignal<(string | NeuTagSuggestion)[]>;"
-    },
-    {
-      "id": "./tags#NeuTagsComponent.output:valueChange",
-      "entrypoint": "./tags",
-      "declaration": "NeuTagsComponent",
-      "selector": "neu-tags",
-      "propertyName": "valueChange",
-      "publicName": "valueChange",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string[]>;"
-    },
-    {
       "id": "./terminal#NeuTerminalComponent.input:ariaLabel",
       "entrypoint": "./terminal",
       "declaration": "NeuTerminalComponent",
@@ -71150,33 +71102,33 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 103,
-    "exportedDeclarations": 829,
+    "entrypoints": 102,
+    "exportedDeclarations": 825,
     "declarationKinds": {
       "class": 14,
-      "component": 100,
-      "directive": 126,
+      "component": 99,
+      "directive": 124,
       "function": 53,
       "interface": 275,
       "reexport": 49,
       "service": 11,
       "token": 4,
-      "type": 196,
+      "type": 195,
       "variable": 1
     },
-    "publicSymbols": 5714,
+    "publicSymbols": 5705,
     "statuses": {
-      "SUPPORTED": 3722,
+      "SUPPORTED": 3729,
       "COMPATIBILITY": 2,
       "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 1988,
+      "INTERNAL/UNSUPPORTED": 1972,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1291,
-      "output": 266,
-      "model": 18,
-      "total": 1575
+      "input": 1292,
+      "output": 267,
+      "model": 19,
+      "total": 1578
     },
     "designTokens": 257
   }

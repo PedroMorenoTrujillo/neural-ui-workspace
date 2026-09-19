@@ -51,6 +51,7 @@ try {
       document.querySelector('#n2-listbox-multiple .neu-listbox__options'),
       document.querySelector('#n2-toggle-single .neu-toggle-group'),
       document.querySelector('#n2-toggle-multiple .neu-toggle-group'),
+      document.querySelector('#n2-input-tags input'),
     ];
   });
   release();
@@ -98,12 +99,13 @@ try {
         '#n2-listbox-multiple .neu-listbox__options',
         '#n2-toggle-single .neu-toggle-group',
         '#n2-toggle-multiple .neu-toggle-group',
+        '#n2-input-tags input',
       ];
       return window.__n2SelectorControls.map(
         (node, index) => node === document.querySelector(selectors[index]),
       );
     }),
-    [true, true, true, true, true, true, true, true, true],
+    [true, true, true, true, true, true, true, true, true, true],
   );
   assert.equal(await page.locator('#n2-input .neu-input__field').inputValue(), 'server-value');
   assert.equal(await page.locator('#n2-checkbox .neu-checkbox__input').isChecked(), true);
@@ -132,6 +134,7 @@ try {
   assert.equal(await page.locator('#n2-listbox-multiple .neu-listbox__option').first().getAttribute('aria-selected'), 'true');
   assert.match(await page.locator('#n2-toggle-single .neu-toggle-group__btn').first().getAttribute('aria-pressed'), /true/);
   assert.match(await page.locator('#n2-toggle-multiple .neu-toggle-group__btn').first().getAttribute('aria-pressed'), /true/);
+  assert.match(await page.locator('#n2-input-tags .neu-input-tags__item-label').textContent(), /Hydrated one/);
   assert.equal(
     await page.locator('#n2-readonly-input .neu-input__field').getAttribute('readonly'),
     '',
@@ -158,7 +161,7 @@ try {
   await page.locator('#n2-date .neu-date-input__field').fill('2026-03-30');
   await page.waitForFunction(
     () =>
-      JSON.parse(document.querySelector('#n2-new-control-events')?.textContent ?? '[]').length ===
+      JSON.parse(document.querySelector('#n2-new-control-events')?.textContent ?? '[]').length >=
       9,
   );
   assert.deepEqual(JSON.parse(await page.locator('#n2-new-control-events').textContent()), [
@@ -188,10 +191,12 @@ try {
   await page.locator('#n2-listbox-multiple .neu-listbox__option').nth(1).click();
   await page.locator('#n2-toggle-single .neu-toggle-group__btn').nth(1).click();
   await page.locator('#n2-toggle-multiple .neu-toggle-group__btn').nth(1).click();
+  await page.locator('#n2-input-tags input').fill('Hydrated two');
+  await page.keyboard.press('Enter');
   await page.waitForFunction(
     () =>
       JSON.parse(document.querySelector('#n2-new-control-events')?.textContent ?? '[]').length ===
-      18,
+      19,
   );
   assert.deepEqual(JSON.parse(await page.locator('#n2-new-control-events').textContent()), [
     'textarea:client-notes',
@@ -212,6 +217,7 @@ try {
     'listbox-multiple:[1,2]',
     'toggle-single:2',
     'toggle-multiple:[1,2]',
+    'input-tags:[1,2]',
   ]);
   assert.equal(
     await page.locator('#n2-invalid-input .neu-input__field').getAttribute('aria-invalid'),
@@ -238,7 +244,7 @@ try {
   assert.deepEqual(JSON.parse(await page.locator('#n2-checkbox-events').textContent()), [false]);
   assert.deepEqual(errors, []);
   console.log(
-    'N2 Forms real zoneless hydration passed for all 20 controls: DOM reused, explicit locale stable, zero hydration errors, first edits exactly once',
+    'N2 Forms real zoneless hydration passed for all 21 controls: DOM reused, explicit locale stable, zero hydration errors, first edits exactly once',
   );
 } finally {
   release();

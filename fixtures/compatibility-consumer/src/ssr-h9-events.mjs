@@ -33,7 +33,7 @@ core.Component({
  <neu-date-input (viewChange)="record('view')" (opened)="record('dateOpened')" />
  <neu-tree-select (filter)="record('filter')" (opened)="record('treeOpened')" />
  <neu-virtual-list [items]="['SSR row']" (rangeChange)="record('range')" />
- <neu-autocomplete (select)="record('select')" /><neu-input-tags (select)="record('tagSelect')" />
+ <neu-autocomplete (select)="record('select')" /><neu-input-tags (optionActivated)="record('tagSelect')" />
  <neu-color-picker mode="oklch" [showAlpha]="true" [showChannels]="true"
    (opened)="record('colorOpened')" (closed)="record('colorClosed')"
    (colorChange)="record('colorChange')" (colorChangeEnd)="record('colorEnd')" />
