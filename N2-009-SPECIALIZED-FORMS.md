@@ -184,3 +184,18 @@ Rama `v2`; se prepara un único commit local N2-009. No hay push, tag, release n
 ## 45. Recommendation
 
 **READY FOR N2-010**, sin iniciarlo. Recomendación no bloqueante: ampliar en una fase posterior la cobertura de gestos pointer y comandos de toolbar sin alterar los thresholds globales.
+
+### Adenda — interoperabilidad Forms final
+
+| Control | formField | formControl | formControlName | ngModel |
+| --- | --- | --- | --- | --- |
+| InlineEditor (`text` y `number`) | PASS | PASS | PASS | PASS |
+| ColorPicker | PASS | PASS | PASS | PASS |
+| RichTextEditor | PASS | PASS | PASS | PASS |
+| Uploader | PASS | PASS | PASS | PASS |
+
+Los cuatro controles productivos exponen un único contrato `model()`/`FormValueControl`: no implementan `ControlValueAccessor`, no registran `NG_VALUE_ACCESSOR` y Neural UI no contiene ningún adapter productivo para conectarlos a Reactive Forms. El único CVA productivo restante en `ui-core` es TreeSelect.
+
+La expresión anterior «adaptador reactivo/CVA externo» se refería de forma imprecisa a la interoperabilidad oficial incluida en `@angular/forms` 22.1.6, no a un CVA externo creado por Neural. Está implementada por las directivas oficiales `FormControlDirective`, `FormControlName` y `NgModel` mediante la integración de custom controls de `NgControl`; estas enlazan directamente el `model()` `value`, el output `touch` y los inputs de estado. Al no seleccionarse ni registrarse un `ControlValueAccessor`, no existe un doble contrato CVA + Signal Forms.
+
+El único fixture de interoperabilidad está en `projects/ui-core/testing/n2-specialized-forms-matrix.spec.ts`. Sus hosts importan `FormField`, `ReactiveFormsModule` o `FormsModule` y aplican las cuatro sintaxis reales; no implementan ni proporcionan adapters. Reejecución final: 1 spec, 4 tests, todos PASS; `audit:forms` confirma 21 controles Signal Forms y exclusivamente TreeSelect como CVA legacy.
