@@ -103,6 +103,11 @@ const expectedSignalControls = new Map([
     'projects/ui-core/uploader/neu-uploader.component.ts',
     /readonly\s+value\s*=\s*model<readonly\s+File\[\]>\(\[\]\)/,
   ],
+  ['projects/ui-core/slider/neu-slider.component.ts', /readonly\s+value\s*=\s*model<number>\(0\)/],
+  [
+    'projects/ui-core/rating/neu-rating.component.ts',
+    /readonly\s+value\s*=\s*model<number\s*\|\s*null>\(null\)/,
+  ],
 ]);
 
 const violations = [];
@@ -208,8 +213,8 @@ if (cvaComponents.length === 1 && cvaComponents[0] !== expectedLegacyCva) {
   );
 }
 
-if (signalComponents.length !== 21) {
-  violations.push(`expected 21 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
+if (signalComponents.length !== 23) {
+  violations.push(`expected 23 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
 }
 
 for (const expected of expectedSignalControls.keys()) {

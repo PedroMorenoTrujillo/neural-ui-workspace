@@ -12,7 +12,13 @@
   font-family: var(--neu-font-sans);
 
   &--readonly {
-    pointer-events: none;
+    .neu-rating__star {
+      cursor: default;
+    }
+  }
+
+  &--disabled {
+    opacity: 0.55;
   }
 }
 
@@ -37,7 +43,7 @@
     color: #f59e0b;
   }
 
-  &:hover:not(:disabled) {
+  .neu-rating:not(.neu-rating--readonly) &:hover:not(:disabled) {
     transform: scale(1.15);
   }
 

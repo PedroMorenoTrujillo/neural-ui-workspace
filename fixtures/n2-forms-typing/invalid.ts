@@ -19,6 +19,8 @@ import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
 import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
 import { NeuRichTextEditorComponent } from '@neural-ui/core/rich-text-editor';
 import { NeuUploaderComponent } from '@neural-ui/core/uploader';
+import { NeuSliderComponent } from '@neural-ui/core/slider';
+import { NeuRatingComponent } from '@neural-ui/core/rating';
 
 declare const input: NeuInputComponent;
 declare const checkbox: NeuCheckboxComponent;
@@ -55,6 +57,8 @@ declare const inlineNumber: NeuInlineEditorComponent<'number'>;
 declare const colorPicker: NeuColorPickerComponent;
 declare const richTextEditor: NeuRichTextEditorComponent;
 declare const uploader: NeuUploaderComponent;
+declare const slider: NeuSliderComponent;
+declare const rating: NeuRatingComponent;
 
 input.value.set(null);
 input.value.set(1);
@@ -115,3 +119,8 @@ uploader.value.set(new File([], 'one.txt'));
 uploader.value.set(null);
 uploader.value.set(undefined);
 uploader.value.set('file');
+slider.value.set(null);
+slider.value.set('50');
+slider.value.set(true);
+rating.value.set('4');
+rating.value.set(false);

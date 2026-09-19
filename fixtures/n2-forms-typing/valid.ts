@@ -23,6 +23,8 @@ import {
 import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
 import { NeuRichTextEditorComponent } from '@neural-ui/core/rich-text-editor';
 import { NeuUploaderComponent } from '@neural-ui/core/uploader';
+import { NeuSliderComponent } from '@neural-ui/core/slider';
+import { NeuRatingComponent } from '@neural-ui/core/rating';
 import {
   NeuDateInputComponent,
   civilDate,
@@ -74,6 +76,8 @@ declare const inlineNumber: NeuInlineEditorComponent<'number'>;
 declare const colorPicker: NeuColorPickerComponent;
 declare const richTextEditor: NeuRichTextEditorComponent;
 declare const uploader: NeuUploaderComponent;
+declare const slider: NeuSliderComponent;
+declare const rating: NeuRatingComponent;
 
 input.value.set('valid');
 checkbox.checked.set(true);
@@ -123,6 +127,9 @@ inlineNumber.value.set(null);
 colorPicker.value.set('#336699');
 richTextEditor.value.set('<p>Safe</p>');
 uploader.value.set([] as readonly File[]);
+slider.value.set(50);
+rating.value.set(4);
+rating.value.set(null);
 declare const discriminatedInlineNumber: NeuInlineValue<'number'>;
 inlineNumber.value.set(discriminatedInlineNumber);
 
@@ -162,6 +169,8 @@ const officialInlineNumber: FormValueControl<number | null> = inlineNumber;
 const officialColorPicker: FormValueControl<string> = colorPicker;
 const officialRichTextEditor: FormValueControl<string> = richTextEditor;
 const officialUploader: FormValueControl<readonly File[]> = uploader;
+const officialSlider: FormValueControl<number> = slider;
+const officialRating: FormValueControl<number | null> = rating;
 void valueControl;
 void checkboxControl;
 void textareaControl;
@@ -193,5 +202,7 @@ void officialInlineNumber;
 void officialColorPicker;
 void officialRichTextEditor;
 void officialUploader;
+void officialSlider;
+void officialRating;
 void dynamicInput;
 void option;

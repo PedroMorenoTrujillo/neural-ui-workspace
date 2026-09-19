@@ -1,172 +1,155 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { NeuSliderComponent } from './neu-slider.component';
 
-@Component({
-  template: `<neu-slider
-    [value]="value"
-    [min]="min"
-    [max]="max"
-    [step]="step"
-    [label]="label"
-    [showValue]="showValue"
-    [disabled]="disabled"
-    (valueChange)="lastValue = $event"
-  />`,
-  imports: [NeuSliderComponent],
-})
-class TestHostComponent {
-  value = 50;
-  min = 0;
-  max = 100;
-  step = 1;
-  label = '';
-  showValue = false;
-  disabled = false;
-  lastValue: number | undefined;
+function pointer(type: string, pointerId = 1): PointerEvent {
+  const event = new Event(type, { bubbles: true, cancelable: true });
+  Object.defineProperty(event, 'pointerId', { value: pointerId });
+  return event as PointerEvent;
 }
 
 describe('NeuSliderComponent', () => {
-  let fixture: ComponentFixture<TestHostComponent>;
-  let host: TestHostComponent;
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [TestHostComponent] }).compileComponents();
-    fixture = TestBed.createComponent(TestHostComponent);
-    host = fixture.componentInstance;
+  function mount(inputs: Record<string, unknown> = {}) {
+    const fixture = TestBed.createComponent(NeuSliderComponent);
+    for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
     fixture.detectChanges();
-  });
+    return {
+      fixture,
+      component: fixture.componentInstance,
+      input: fixture.nativeElement.querySelector('input[type="range"]') as HTMLInputElement,
+    };
+  }
 
-  it('should render range input', () => {
-    const input = fixture.nativeElement.querySelector('input[type="range"]');
-    expect(input).toBeTruthy();
-  });
-
-  it('should set min, max, step and value attributes', () => {
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="range"]');
-    expect(input.min).toBe('0');
-    expect(input.max).toBe('100');
-    expect(input.step).toBe('1');
-    expect(input.value).toBe('50');
-  });
-
-  it('should show label when provided', () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('label', 'Volumen');
-    df.detectChanges();
-    expect(df.nativeElement.textContent).toContain('Volumen');
-  });
-
-  it('should render a label without the value when showValue=false', () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('label', 'Volumen');
-    df.componentRef.setInput('showValue', false);
-    df.componentRef.setInput('value', 75);
-    df.detectChanges();
-
-    expect(df.nativeElement.textContent).toContain('Volumen');
-    expect(df.nativeElement.querySelector('.neu-slider__value')).toBeNull();
-  });
-
-  it('should show value when showValue=true', () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('showValue', true);
-    df.componentRef.setInput('value', 75);
-    df.detectChanges();
-    expect(df.nativeElement.textContent).toContain('75');
-  });
-
-  it('should emit valueChange when slider changes', () => {
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="range"]');
-    input.value = '60';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(host.lastValue).toBe(60);
-  });
-
-  it('should be disabled when disabled=true', () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('disabled', true);
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="range"]');
-    expect(input.disabled).toBe(true);
-  });
-
-  it('should apply custom min and max', () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('min', 10);
-    df.componentRef.setInput('max', 50);
-    df.detectChanges();
-    const input: HTMLInputElement = df.nativeElement.querySelector('input[type="range"]');
+  it('renders the scalar range, label, limits, step, value and ticks', () => {
+    const { fixture, input } = mount({
+      value: 50,
+      min: 10,
+      max: 90,
+      step: 5,
+      label: 'Volume',
+      showTicks: true,
+      unit: '%',
+    });
     expect(input.min).toBe('10');
-    expect(input.max).toBe('50');
+    expect(input.max).toBe('90');
+    expect(input.step).toBe('5');
+    expect(input.value).toBe('50');
+    expect(input.getAttribute('aria-labelledby')).toBe(`${input.id}-label`);
+    expect(input.getAttribute('aria-valuetext')).toBe('50%');
+    expect(fixture.nativeElement.querySelector('.neu-slider__ticks').textContent).toContain('90%');
   });
 
-  it('showTicks=true should render tick labels', async () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('showTicks', true);
-    df.componentRef.setInput('min', 0);
-    df.componentRef.setInput('max', 100);
-    df.detectChanges();
-    await df.whenStable();
-    const ticks = df.nativeElement.querySelector('.neu-slider__ticks');
-    expect(ticks).toBeTruthy();
-    expect(ticks.textContent).toContain('0');
-    expect(ticks.textContent).toContain('100');
+  it('writes pointer/input edits to the ModelSignal exactly once per changed value', () => {
+    const { component, input } = mount({ value: 10, step: 5 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    input.dispatchEvent(pointer('pointerdown'));
+    input.value = '25';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(pointer('pointermove'));
+    input.value = '30';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(pointer('pointerup'));
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(component.value()).toBe(30);
+    expect(changes.mock.calls.map(([value]) => value)).toEqual([25, 30]);
   });
 
-  it('showTicks=false should NOT render tick labels', async () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('showTicks', false);
-    df.detectChanges();
-    await df.whenStable();
-    expect(df.nativeElement.querySelector('.neu-slider__ticks')).toBeNull();
+  it('snaps to step and clamps input to min/max', () => {
+    const { component, input } = mount({ value: 20, min: 10, max: 50, step: 10 });
+    input.value = '27';
+    input.dispatchEvent(new Event('input'));
+    expect(component.value()).toBe(30);
+    component.onInput({ target: { value: '200' } } as unknown as Event);
+    expect(component.value()).toBe(50);
+    component.onInput({ target: { value: '-20' } } as unknown as Event);
+    expect(component.value()).toBe(10);
   });
 
-  it('unit input is shown in ticks', async () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('showTicks', true);
-    df.componentRef.setInput('min', 0);
-    df.componentRef.setInput('max', 10);
-    df.componentRef.setInput('unit', 'kg');
-    df.detectChanges();
-    await df.whenStable();
-    expect(df.nativeElement.textContent).toContain('0kg');
-    expect(df.nativeElement.textContent).toContain('10kg');
+  it('supports arrows, PageUp/PageDown and Home/End with one emission per change', () => {
+    const { component, input } = mount({ value: 50, min: 0, max: 100, step: 5 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    for (const key of ['ArrowRight', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End']) {
+      input.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+    }
+    expect(component.value()).toBe(100);
+    expect(changes.mock.calls.map(([value]) => value)).toEqual([55, 50, 100, 50, 0, 100]);
   });
 
-  it('fillPercent should be zero when min and max are equal', () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('min', 10);
-    df.componentRef.setInput('max', 10);
-    df.componentRef.setInput('value', 10);
-    df.detectChanges();
-
-    expect(df.componentInstance.fillPercent()).toBe(0);
+  it('blocks pointer, input and keyboard mutation while readonly but remains focusable', () => {
+    const { component, input } = mount({ value: 40, readonly: true });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    input.dispatchEvent(pointer('pointerdown'));
+    input.value = '80';
+    input.dispatchEvent(new Event('input'));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', cancelable: true }));
+    component.focus();
+    expect(component.value()).toBe(40);
+    expect(input.value).toBe('40');
+    expect(input.getAttribute('aria-readonly')).toBe('true');
+    expect(document.activeElement).toBe(input);
+    expect(changes).not.toHaveBeenCalled();
   });
 
-  it('disabled input adds disabled class to inner div', async () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('disabled', true);
-    df.detectChanges();
-    await df.whenStable();
-    expect(df.nativeElement.querySelector('.neu-slider--disabled')).toBeTruthy();
+  it('fully disables the native range and ignores direct handlers', () => {
+    const { component, input } = mount({ value: 40, disabled: true });
+    component.onInput({ target: input } as unknown as Event);
+    component.onKeyDown(new KeyboardEvent('keydown', { key: 'End' }));
+    expect(input.disabled).toBe(true);
+    expect(component.value()).toBe(40);
   });
 
-  it('disabled=false should not add disabled class', async () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.componentRef.setInput('disabled', false);
-    df.detectChanges();
-    await df.whenStable();
-    expect(df.nativeElement.querySelector('.neu-slider--disabled')).toBeNull();
+  it('emits touch only when focus leaves, never on focus or pointerdown', () => {
+    const { component, input } = mount();
+    const touched = vi.fn();
+    component.touch.subscribe(touched);
+    input.focus();
+    input.dispatchEvent(pointer('pointerdown'));
+    expect(touched).not.toHaveBeenCalled();
+    input.blur();
+    expect(touched).toHaveBeenCalledTimes(1);
   });
 
-  it('onBlur should call registerOnTouched callback', () => {
-    const df = TestBed.createComponent(NeuSliderComponent);
-    df.detectChanges();
-    // NeuSliderComponent is NOT a CVA - onBlur is not available
-    // Just verify the component exists and native blur works
-    const inputEl = df.nativeElement.querySelector('input[type="range"]');
-    expect(() => inputEl?.dispatchEvent(new Event('blur'))).not.toThrow();
+  it('accepts external writes without echo and reset only clears ephemeral state', () => {
+    const { fixture, component, input } = mount({ value: 10 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    input.dispatchEvent(pointer('pointerdown', 7));
+    fixture.componentRef.setInput('value', 75);
+    fixture.detectChanges();
+    component.reset();
+    expect(component.value()).toBe(75);
+    expect(input.value).toBe('75');
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  it('projects official validation and accessibility state without owning it', () => {
+    const { fixture, input } = mount({
+      ariaLabel: 'Brightness',
+      ariaDescribedBy: 'slider-help',
+      required: true,
+      invalid: true,
+      pending: true,
+    });
+    expect(input.getAttribute('aria-label')).toBe('Brightness');
+    expect(input.getAttribute('aria-describedby')).toBe('slider-help');
+    expect(input.getAttribute('aria-required')).toBe('true');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-busy')).toBe('true');
+    expect(fixture.nativeElement.querySelector('.neu-slider--invalid')).toBeTruthy();
+  });
+
+  it('derives a clamped visual fill without rewriting an external value', () => {
+    const { component } = mount({ value: 150, min: 0, max: 100 });
+    expect(component.value()).toBe(150);
+    expect(component.visualValue()).toBe(100);
+    expect(component.fillPercent()).toBe(100);
   });
 });

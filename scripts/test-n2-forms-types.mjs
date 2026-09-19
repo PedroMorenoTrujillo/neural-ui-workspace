@@ -78,6 +78,8 @@ for (const sourceName of [
   'colorPicker',
   'richTextEditor',
   'uploader',
+  'slider',
+  'rating',
 ]) {
   if (!diagnostics.includes(sourceName)) {
     console.error(`Missing invalid-value type coverage for ${sourceName}.`);
@@ -86,12 +88,12 @@ for (const sourceName of [
   }
 }
 
-if ((diagnostics.match(/TS2345/g) ?? []).length < 54) {
-  console.error('Expected at least 54 explicit invalid-value assignment diagnostics.');
+if ((diagnostics.match(/TS2345/g) ?? []).length < 59) {
+  console.error('Expected at least 59 explicit invalid-value assignment diagnostics.');
   console.error(diagnostics);
   process.exit(1);
 }
 
 console.log(
-  'N2 Forms types passed (21 Signal Forms controls accepted; specialized value contracts are enforced).',
+  'N2 Forms types passed (23 Signal Forms controls accepted; Slider/Rating value contracts are enforced).',
 );

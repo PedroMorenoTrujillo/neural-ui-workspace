@@ -4,18 +4,18 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1606,
-    "bindingDelta": 439,
-    "mapped": 817,
+    "declarationBindings": 1630,
+    "bindingDelta": 463,
+    "mapped": 813,
     "aliasCorrections": 4,
-    "missingOldEntries": 344,
-    "newlyDiscovered": 783,
+    "missingOldEntries": 348,
+    "newlyDiscovered": 811,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
       "declaration-or-selector-was-not-recorded": 431,
-      "model-binding-was-not-supported": 23,
-      "multiline-annotated-or-compound-declaration-was-missed": 323
+      "model-binding-was-not-supported": 25,
+      "multiline-annotated-or-compound-declaration-was-missed": 349
     }
   },
   "mappings": [
@@ -1771,14 +1771,6 @@
       "newId": "./rating#NeuRatingComponent.input:stars"
     },
     {
-      "oldToken": "rating/neu-rating.component.ts#input:value",
-      "newId": "./rating#NeuRatingComponent.input:value"
-    },
-    {
-      "oldToken": "rating/neu-rating.component.ts#output:valueChange",
-      "newId": "./rating#NeuRatingComponent.output:valueChange"
-    },
-    {
       "oldToken": "rich-text-editor/neu-rich-text-editor.component.ts#input:disabled",
       "newId": "./rich-text-editor#NeuRichTextEditorComponent.input:disabled"
     },
@@ -2205,14 +2197,6 @@
     {
       "oldToken": "slider/neu-slider.component.ts#input:unit",
       "newId": "./slider#NeuSliderComponent.input:unit"
-    },
-    {
-      "oldToken": "slider/neu-slider.component.ts#input:value",
-      "newId": "./slider#NeuSliderComponent.input:value"
-    },
-    {
-      "oldToken": "slider/neu-slider.component.ts#output:valueChange",
-      "newId": "./slider#NeuSliderComponent.output:valueChange"
     },
     {
       "oldToken": "spinner/neu-spinner.component.ts#input:animationDuration",
@@ -3465,6 +3449,8 @@
     "number-input/neu-number-input.component.ts#input:vertical",
     "number-input/neu-number-input.component.ts#output:valueChange",
     "password/neu-password.component.ts#output:valueChange",
+    "rating/neu-rating.component.ts#input:value",
+    "rating/neu-rating.component.ts#output:valueChange",
     "rich-text-editor/neu-rich-text-editor.component.ts#input:toolbarAriaLabel",
     "rich-text-editor/neu-rich-text-editor.component.ts#output:valueChange",
     "select/neu-select.component.ts#input:editable",
@@ -3494,6 +3480,8 @@
     "select/neu-select.component.ts#output:onLazyLoad",
     "select/neu-select.component.ts#output:onShow",
     "select/neu-select.component.ts#output:selectionChange",
+    "slider/neu-slider.component.ts#input:value",
+    "slider/neu-slider.component.ts#output:valueChange",
     "table-core/neu-table-core.component.ts#input:rowIdentity",
     "table/neu-table.component.ts#input:allFilterOptionLabel",
     "table/neu-table.component.ts#input:alwaysShowPaginator",
@@ -5756,6 +5744,62 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./rating#NeuRatingComponent.input:ariaDescribedBy",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:ariaLabel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:dirty",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:errors",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:inputId",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:invalid",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:label",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:name",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:pending",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:required",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:touched",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.output:touch",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.input:dirty",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5922,6 +5966,62 @@
     {
       "id": "./select#NeuSelectSelectedDirective.input:neuSelectSelected",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:ariaDescribedBy",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:ariaLabel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:dirty",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:errors",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:inputId",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:invalid",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:name",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:pending",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:readonly",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:required",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:touched",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.output:touch",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./speed-dial#NeuSpeedDialComponent.input:animation",

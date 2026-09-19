@@ -22,6 +22,8 @@ import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
 import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
 import { NeuRichTextEditorComponent } from '@neural-ui/core/rich-text-editor';
 import { NeuUploaderComponent } from '@neural-ui/core/uploader';
+import { NeuSliderComponent } from '@neural-ui/core/slider';
+import { NeuRatingComponent } from '@neural-ui/core/rating';
 
 @Component({
   selector: 'app-root',
@@ -50,6 +52,8 @@ import { NeuUploaderComponent } from '@neural-ui/core/uploader';
     NeuColorPickerComponent,
     NeuRichTextEditorComponent,
     NeuUploaderComponent,
+    NeuSliderComponent,
+    NeuRatingComponent,
   ],
   template: `
     <span id="n2-ready">{{ ready() }}</span>
@@ -120,6 +124,8 @@ import { NeuUploaderComponent } from '@neural-ui/core/uploader';
     <neu-color-picker id="n2-color-picker" [formControl]="colorControl" />
     <neu-rich-text-editor id="n2-rich-text" [formControl]="richTextControl" />
     <neu-uploader id="n2-uploader" [formControl]="uploaderControl" />
+    <neu-slider id="n2-slider" label="Hydrated slider" [step]="5" [formControl]="sliderControl" />
+    <neu-rating id="n2-rating" label="Hydrated rating" [formControl]="ratingControl" />
   `,
 })
 export class N2FormsHydrationComponent {
@@ -164,6 +170,8 @@ export class N2FormsHydrationComponent {
   readonly colorControl = new FormControl('#336699', { nonNullable: true });
   readonly richTextControl = new FormControl('<p>server-rich</p>', { nonNullable: true });
   readonly uploaderControl = new FormControl<readonly File[]>([], { nonNullable: true });
+  readonly sliderControl = new FormControl(35, { nonNullable: true });
+  readonly ratingControl = new FormControl<number | null>(3);
   readonly numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -206,6 +214,8 @@ export class N2FormsHydrationComponent {
     this.uploaderControl.valueChanges.subscribe((value) =>
       this.record('uploader', value.map((file) => file.name)),
     );
+    this.sliderControl.valueChanges.subscribe((value) => this.record('slider', value));
+    this.ratingControl.valueChanges.subscribe((value) => this.record('rating', value));
     afterNextRender(() => this.ready.set(true));
   }
 

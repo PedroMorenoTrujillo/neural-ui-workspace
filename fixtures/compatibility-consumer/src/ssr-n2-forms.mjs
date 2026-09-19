@@ -25,6 +25,8 @@ const { NeuInlineEditorComponent } = await import('@neural-ui/core/inline-editor
 const { NeuColorPickerComponent } = await import('@neural-ui/core/color-picker');
 const { NeuRichTextEditorComponent } = await import('@neural-ui/core/rich-text-editor');
 const { NeuUploaderComponent } = await import('@neural-ui/core/uploader');
+const { NeuSliderComponent } = await import('@neural-ui/core/slider');
+const { NeuRatingComponent } = await import('@neural-ui/core/rating');
 
 const changes = [];
 class N2FormsSsr {
@@ -59,6 +61,8 @@ class N2FormsSsr {
   color = new FormControl('#336699', { nonNullable: true });
   richText = new FormControl('<p>server-rich</p>', { nonNullable: true });
   files = new FormControl([], { nonNullable: true });
+  slider = new FormControl(35, { nonNullable: true });
+  rating = new FormControl(3);
   numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -93,6 +97,8 @@ class N2FormsSsr {
     this.color.valueChanges.subscribe((value) => changes.push(`color:${value}`));
     this.richText.valueChanges.subscribe((value) => changes.push(`rich-text:${value}`));
     this.files.valueChanges.subscribe((value) => changes.push(`files:${value.length}`));
+    this.slider.valueChanges.subscribe((value) => changes.push(`slider:${value}`));
+    this.rating.valueChanges.subscribe((value) => changes.push(`rating:${value}`));
   }
 }
 core.Component({
@@ -122,6 +128,8 @@ core.Component({
     NeuColorPickerComponent,
     NeuRichTextEditorComponent,
     NeuUploaderComponent,
+    NeuSliderComponent,
+    NeuRatingComponent,
   ],
   template: `
     <neu-input id="ssr-input" label="SSR input" [required]="true" [readonly]="true" [formControl]="input" />
@@ -153,6 +161,8 @@ core.Component({
     <neu-color-picker id="ssr-color-picker" [formControl]="color" />
     <neu-rich-text-editor id="ssr-rich-text" [formControl]="richText" />
     <neu-uploader id="ssr-uploader" [formControl]="files" />
+    <neu-slider id="ssr-slider" [step]="5" [formControl]="slider" />
+    <neu-rating id="ssr-rating" [formControl]="rating" />
   `,
 })(N2FormsSsr);
 
@@ -205,6 +215,8 @@ for (const id of [
   'ssr-color-picker',
   'ssr-rich-text',
   'ssr-uploader',
+  'ssr-slider',
+  'ssr-rating',
 ]) {
   assert.match(html, new RegExp(`id="${id}"`));
 }
@@ -215,8 +227,10 @@ assert.match(html, /aria-label="Role"/);
 assert.match(html, /1\.234,50/);
 assert.match(html, /aria-valuenow="1234\.5"/);
 assert.match(html, /29\/03\/2026/);
+assert.match(html, /aria-valuenow="35"/);
+assert.match(html, /data-neu-rating-value="3"[^>]*aria-checked="true"/);
 assert.match(html, /ngh=/);
 assert.deepEqual(changes, []);
 console.log(
-  'N2 Forms SSR passed for all 25 controls: values, states, explicit locale, hydration annotations and zero write echo',
+  'N2 Forms SSR passed for all 27 controls: values, states, explicit locale, hydration annotations and zero write echo',
 );

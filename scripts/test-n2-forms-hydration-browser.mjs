@@ -59,6 +59,8 @@ try {
       document.querySelector('#n2-color-picker .neu-cp__trigger'),
       document.querySelector('#n2-rich-text .neu-rich-text-editor__surface'),
       document.querySelector('#n2-uploader input[type="file"]'),
+      document.querySelector('#n2-slider input[type="range"]'),
+      document.querySelector('#n2-rating .neu-rating'),
     ];
   });
   release();
@@ -122,12 +124,14 @@ try {
         '#n2-color-picker .neu-cp__trigger',
         '#n2-rich-text .neu-rich-text-editor__surface',
         '#n2-uploader input[type="file"]',
+        '#n2-slider input[type="range"]',
+        '#n2-rating .neu-rating',
       ];
       return window.__n2SpecializedControls.map(
         (node, index) => node === document.querySelector(selectors[index]),
       );
     }),
-    [true, true, true, true, true],
+    [true, true, true, true, true, true, true],
   );
   assert.equal(await page.locator('#n2-input .neu-input__field').inputValue(), 'server-value');
   assert.equal(await page.locator('#n2-checkbox .neu-checkbox__input').isChecked(), true);
@@ -165,6 +169,11 @@ try {
     '<p>server-rich</p>',
   );
   assert.equal(await page.locator('#n2-uploader .neu-uploader__item').count(), 0);
+  assert.equal(await page.locator('#n2-slider input[type="range"]').inputValue(), '35');
+  assert.equal(
+    await page.locator('#n2-rating .neu-rating__star').nth(2).getAttribute('aria-checked'),
+    'true',
+  );
   assert.equal(
     await page.locator('#n2-readonly-input .neu-input__field').getAttribute('readonly'),
     '',
@@ -273,23 +282,28 @@ try {
     mimeType: 'text/plain',
     buffer: Buffer.from('hydrated'),
   });
+  await page.locator('#n2-slider input[type="range"]').focus();
+  await page.keyboard.press('ArrowRight');
+  await page.locator('#n2-rating .neu-rating__star').nth(3).click();
   await page.waitForFunction(
     () =>
       JSON.parse(document.querySelector('#n2-new-control-events')?.textContent ?? '[]').length ===
-      24,
+      26,
   );
   const specializedEvents = JSON.parse(
     await page.locator('#n2-new-control-events').textContent(),
-  ).slice(-5);
+  ).slice(-7);
   assert.deepEqual(
     specializedEvents.map((event) => event.split(':')[0]),
-    ['inline-text', 'inline-number', 'color-picker', 'rich-text', 'uploader'],
+    ['inline-text', 'inline-number', 'color-picker', 'rich-text', 'uploader', 'slider', 'rating'],
   );
   assert.equal(specializedEvents.filter((event) => event.startsWith('inline-text:')).length, 1);
   assert.equal(specializedEvents.filter((event) => event.startsWith('inline-number:')).length, 1);
   assert.equal(specializedEvents.filter((event) => event.startsWith('color-picker:')).length, 1);
   assert.equal(specializedEvents.filter((event) => event.startsWith('rich-text:')).length, 1);
   assert.equal(specializedEvents.filter((event) => event.startsWith('uploader:')).length, 1);
+  assert.equal(specializedEvents.filter((event) => event.startsWith('slider:')).length, 1);
+  assert.equal(specializedEvents.filter((event) => event.startsWith('rating:')).length, 1);
   assert.equal(
     await page.locator('#n2-invalid-input .neu-input__field').getAttribute('aria-invalid'),
     'true',
@@ -315,7 +329,7 @@ try {
   assert.deepEqual(JSON.parse(await page.locator('#n2-checkbox-events').textContent()), [false]);
   assert.deepEqual(errors, []);
   console.log(
-    'N2 Forms real zoneless hydration passed for all 25 controls: DOM reused, explicit locale stable, zero hydration errors, first edits exactly once',
+    'N2 Forms real zoneless hydration passed for all 27 controls: DOM reused, explicit locale stable, zero hydration errors, first edits exactly once',
   );
 } finally {
   release();

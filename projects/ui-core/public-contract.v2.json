@@ -28799,8 +28799,38 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-rating",
-      "signature": "declare class NeuRatingComponent {\n}",
+      "signature": "declare class NeuRatingComponent implements FormValueControl<number | null> {\n}",
       "members": [
+        {
+          "id": "./rating#NeuRatingComponent.input:ariaDescribedBy",
+          "name": "ariaDescribedBy",
+          "kind": "input",
+          "publicName": "ariaDescribedBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:ariaLabel",
+          "name": "ariaLabel",
+          "kind": "input",
+          "publicName": "ariaLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:dirty",
+          "name": "dirty",
+          "kind": "input",
+          "publicName": "dirty",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+        },
         {
           "id": "./rating#NeuRatingComponent.input:disabled",
           "name": "disabled",
@@ -28809,7 +28839,77 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "disabled: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:errors",
+          "name": "errors",
+          "kind": "input",
+          "publicName": "errors",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:hidden",
+          "name": "hidden",
+          "kind": "input",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:inputId",
+          "name": "inputId",
+          "kind": "input",
+          "publicName": "inputId",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly inputId: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:invalid",
+          "name": "invalid",
+          "kind": "input",
+          "publicName": "invalid",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:label",
+          "name": "label",
+          "kind": "input",
+          "publicName": "label",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:name",
+          "name": "name",
+          "kind": "input",
+          "publicName": "name",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly name: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:pending",
+          "name": "pending",
+          "kind": "input",
+          "publicName": "pending",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./rating#NeuRatingComponent.input:readonly",
@@ -28819,7 +28919,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.input:required",
+          "name": "required",
+          "kind": "input",
+          "publicName": "required",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly required: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./rating#NeuRatingComponent.input:stars",
@@ -28829,17 +28939,33 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "stars: _angular_core.InputSignal<number>;"
+          "signature": "readonly stars: _angular_core.InputSignal<number>;"
         },
         {
-          "id": "./rating#NeuRatingComponent.input:value",
-          "name": "value",
+          "id": "./rating#NeuRatingComponent.input:touched",
+          "name": "touched",
           "kind": "input",
-          "publicName": "value",
+          "publicName": "touched",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "value: _angular_core.InputSignal<number>;"
+          "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.method:activate",
+          "name": "activate",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "activate(value: number, shouldFocus?: boolean): void;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
         },
         {
           "id": "./rating#NeuRatingComponent.method:getFill",
@@ -28847,23 +28973,15 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "getFill(i: number): string;"
+          "signature": "getFill(value: number): 'currentColor' | 'transparent';"
         },
         {
-          "id": "./rating#NeuRatingComponent.method:gradientId",
-          "name": "gradientId",
+          "id": "./rating#NeuRatingComponent.method:onFocusOut",
+          "name": "onFocusOut",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "gradientId(i: number): string;"
-        },
-        {
-          "id": "./rating#NeuRatingComponent.method:isInteger",
-          "name": "isInteger",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isInteger(n: number): boolean;"
+          "signature": "onFocusOut(event: FocusEvent): void;"
         },
         {
           "id": "./rating#NeuRatingComponent.method:onHover",
@@ -28871,15 +28989,15 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onHover(i: number): void;"
+          "signature": "onHover(value: number): void;"
         },
         {
-          "id": "./rating#NeuRatingComponent.method:onKeydown",
-          "name": "onKeydown",
+          "id": "./rating#NeuRatingComponent.method:onKeyDown",
+          "name": "onKeyDown",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onKeydown(i: number, event: KeyboardEvent): void;"
+          "signature": "onKeyDown(value: number, event: KeyboardEvent): void;"
         },
         {
           "id": "./rating#NeuRatingComponent.method:onLeave",
@@ -28890,12 +29008,20 @@
           "signature": "onLeave(): void;"
         },
         {
+          "id": "./rating#NeuRatingComponent.method:reset",
+          "name": "reset",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reset(): void;"
+        },
+        {
           "id": "./rating#NeuRatingComponent.method:select",
           "name": "select",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "select(i: number, focus?: boolean): void;"
+          "signature": "select(value: number, shouldFocus?: boolean): void;"
         },
         {
           "id": "./rating#NeuRatingComponent.method:tabIndexFor",
@@ -28903,25 +29029,36 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "tabIndexFor(i: number): 0 | -1;"
+          "signature": "tabIndexFor(value: number): 0 | -1;"
         },
         {
-          "id": "./rating#NeuRatingComponent.output:valueChange",
-          "name": "valueChange",
-          "kind": "output",
-          "publicName": "valueChange",
+          "id": "./rating#NeuRatingComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "valueChange: _angular_core.OutputEmitterRef<number>;"
+          "signature": "readonly value: _angular_core.ModelSignal<number | null>;"
         },
         {
-          "id": "./rating#NeuRatingComponent.property:isInteractive",
-          "name": "isInteractive",
+          "id": "./rating#NeuRatingComponent.output:touch",
+          "name": "touch",
+          "kind": "output",
+          "publicName": "touch",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.property:hasError",
+          "name": "hasError",
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly isInteractive: _angular_core.Signal<boolean>;"
+          "signature": "readonly hasError: _angular_core.Signal<boolean>;"
         },
         {
           "id": "./rating#NeuRatingComponent.property:ɵcmp",
@@ -28929,7 +29066,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuRatingComponent, \"neu-rating\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stars\": {\n        \"alias\": \"stars\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuRatingComponent, \"neu-rating\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stars\": {\n        \"alias\": \"stars\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
         },
         {
           "id": "./rating#NeuRatingComponent.property:ɵfac",
@@ -28938,6 +29075,30 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuRatingComponent, never>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.property:ratingLabel",
+          "name": "ratingLabel",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly ratingLabel: _angular_core.Signal<string>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.property:resolvedStars",
+          "name": "resolvedStars",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly resolvedStars: _angular_core.Signal<number>;"
+        },
+        {
+          "id": "./rating#NeuRatingComponent.property:selectedValue",
+          "name": "selectedValue",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly selectedValue: _angular_core.Signal<number | null>;"
         },
         {
           "id": "./rating#NeuRatingComponent.property:starsArray",
@@ -33076,8 +33237,38 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-slider",
-      "signature": "declare class NeuSliderComponent {\n}",
+      "signature": "declare class NeuSliderComponent implements FormValueControl<number> {\n}",
       "members": [
+        {
+          "id": "./slider#NeuSliderComponent.input:ariaDescribedBy",
+          "name": "ariaDescribedBy",
+          "kind": "input",
+          "publicName": "ariaDescribedBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:ariaLabel",
+          "name": "ariaLabel",
+          "kind": "input",
+          "publicName": "ariaLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:dirty",
+          "name": "dirty",
+          "kind": "input",
+          "publicName": "dirty",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+        },
         {
           "id": "./slider#NeuSliderComponent.input:disabled",
           "name": "disabled",
@@ -33086,7 +33277,47 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "disabled: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:errors",
+          "name": "errors",
+          "kind": "input",
+          "publicName": "errors",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:hidden",
+          "name": "hidden",
+          "kind": "input",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:inputId",
+          "name": "inputId",
+          "kind": "input",
+          "publicName": "inputId",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly inputId: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:invalid",
+          "name": "invalid",
+          "kind": "input",
+          "publicName": "invalid",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./slider#NeuSliderComponent.input:label",
@@ -33096,7 +33327,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "label: _angular_core.InputSignal<string>;"
+          "signature": "readonly label: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./slider#NeuSliderComponent.input:max",
@@ -33106,7 +33337,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "max: _angular_core.InputSignal<number>;"
+          "signature": "readonly max: _angular_core.InputSignal<number | undefined>;"
         },
         {
           "id": "./slider#NeuSliderComponent.input:min",
@@ -33116,7 +33347,47 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "min: _angular_core.InputSignal<number>;"
+          "signature": "readonly min: _angular_core.InputSignal<number | undefined>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:name",
+          "name": "name",
+          "kind": "input",
+          "publicName": "name",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly name: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:pending",
+          "name": "pending",
+          "kind": "input",
+          "publicName": "pending",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:readonly",
+          "name": "readonly",
+          "kind": "input",
+          "publicName": "readonly",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:required",
+          "name": "required",
+          "kind": "input",
+          "publicName": "required",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly required: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./slider#NeuSliderComponent.input:showTicks",
@@ -33126,7 +33397,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "showTicks: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly showTicks: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./slider#NeuSliderComponent.input:showValue",
@@ -33136,7 +33407,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "showValue: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly showValue: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./slider#NeuSliderComponent.input:step",
@@ -33146,7 +33417,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "step: _angular_core.InputSignal<number>;"
+          "signature": "readonly step: _angular_core.InputSignal<number>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.input:touched",
+          "name": "touched",
+          "kind": "input",
+          "publicName": "touched",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./slider#NeuSliderComponent.input:unit",
@@ -33156,17 +33437,23 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "unit: _angular_core.InputSignal<string>;"
+          "signature": "readonly unit: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./slider#NeuSliderComponent.input:value",
-          "name": "value",
-          "kind": "input",
-          "publicName": "value",
-          "required": false,
+          "id": "./slider#NeuSliderComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
           "static": false,
-          "status": "SUPPORTED",
-          "signature": "value: _angular_core.InputSignal<number>;"
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.method:onBlur",
+          "name": "onBlur",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onBlur(): void;"
         },
         {
           "id": "./slider#NeuSliderComponent.method:onInput",
@@ -33177,14 +33464,65 @@
           "signature": "onInput(event: Event): void;"
         },
         {
-          "id": "./slider#NeuSliderComponent.output:valueChange",
-          "name": "valueChange",
-          "kind": "output",
-          "publicName": "valueChange",
+          "id": "./slider#NeuSliderComponent.method:onKeyDown",
+          "name": "onKeyDown",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onKeyDown(event: KeyboardEvent): void;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.method:onPointerDown",
+          "name": "onPointerDown",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onPointerDown(event: PointerEvent): void;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.method:onPointerEnd",
+          "name": "onPointerEnd",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onPointerEnd(event: PointerEvent): void;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.method:reset",
+          "name": "reset",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reset(): void;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "valueChange: _angular_core.OutputEmitterRef<number>;"
+          "signature": "readonly value: _angular_core.ModelSignal<number>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.output:touch",
+          "name": "touch",
+          "kind": "output",
+          "publicName": "touch",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.property:ariaValueText",
+          "name": "ariaValueText",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly ariaValueText: _angular_core.Signal<string | null>;"
         },
         {
           "id": "./slider#NeuSliderComponent.property:fillPercent",
@@ -33195,12 +33533,20 @@
           "signature": "readonly fillPercent: _angular_core.Signal<number>;"
         },
         {
+          "id": "./slider#NeuSliderComponent.property:hasError",
+          "name": "hasError",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly hasError: _angular_core.Signal<boolean>;"
+        },
+        {
           "id": "./slider#NeuSliderComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSliderComponent, \"neu-slider\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showValue\": {\n        \"alias\": \"showValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showTicks\": {\n        \"alias\": \"showTicks\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"unit\": {\n        \"alias\": \"unit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSliderComponent, \"neu-slider\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showValue\": {\n        \"alias\": \"showValue\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showTicks\": {\n        \"alias\": \"showTicks\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"unit\": {\n        \"alias\": \"unit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
         },
         {
           "id": "./slider#NeuSliderComponent.property:ɵfac",
@@ -33209,6 +33555,38 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuSliderComponent, never>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.property:resolvedMax",
+          "name": "resolvedMax",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly resolvedMax: _angular_core.Signal<number>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.property:resolvedMin",
+          "name": "resolvedMin",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly resolvedMin: _angular_core.Signal<number>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.property:resolvedStep",
+          "name": "resolvedStep",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly resolvedStep: _angular_core.Signal<number>;"
+        },
+        {
+          "id": "./slider#NeuSliderComponent.property:visualValue",
+          "name": "visualValue",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly visualValue: _angular_core.Signal<number>;"
         }
       ]
     },
@@ -63827,6 +64205,42 @@
       "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
     },
     {
+      "id": "./rating#NeuRatingComponent.input:ariaDescribedBy",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "ariaDescribedBy",
+      "publicName": "ariaDescribedBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:ariaLabel",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "ariaLabel",
+      "publicName": "ariaLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:dirty",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "dirty",
+      "publicName": "dirty",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./rating#NeuRatingComponent.input:disabled",
       "entrypoint": "./rating",
       "declaration": "NeuRatingComponent",
@@ -63836,7 +64250,91 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "disabled: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:errors",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "errors",
+      "publicName": "errors",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:hidden",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:inputId",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "inputId",
+      "publicName": "inputId",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly inputId: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:invalid",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "invalid",
+      "publicName": "invalid",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:label",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "label",
+      "publicName": "label",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly label: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:name",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "name",
+      "publicName": "name",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly name: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:pending",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "pending",
+      "publicName": "pending",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./rating#NeuRatingComponent.input:readonly",
@@ -63848,7 +64346,19 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:required",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "required",
+      "publicName": "required",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly required: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./rating#NeuRatingComponent.input:stars",
@@ -63860,31 +64370,44 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "stars: _angular_core.InputSignal<number>;"
+      "signature": "readonly stars: _angular_core.InputSignal<number>;"
     },
     {
-      "id": "./rating#NeuRatingComponent.input:value",
+      "id": "./rating#NeuRatingComponent.input:touched",
+      "entrypoint": "./rating",
+      "declaration": "NeuRatingComponent",
+      "selector": "neu-rating",
+      "propertyName": "touched",
+      "publicName": "touched",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.model:value",
       "entrypoint": "./rating",
       "declaration": "NeuRatingComponent",
       "selector": "neu-rating",
       "propertyName": "value",
       "publicName": "value",
-      "kind": "input",
+      "changePublicName": "valueChange",
+      "kind": "model",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "value: _angular_core.InputSignal<number>;"
+      "signature": "readonly value: _angular_core.ModelSignal<number | null>;"
     },
     {
-      "id": "./rating#NeuRatingComponent.output:valueChange",
+      "id": "./rating#NeuRatingComponent.output:touch",
       "entrypoint": "./rating",
       "declaration": "NeuRatingComponent",
       "selector": "neu-rating",
-      "propertyName": "valueChange",
-      "publicName": "valueChange",
+      "propertyName": "touch",
+      "publicName": "touch",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "valueChange: _angular_core.OutputEmitterRef<number>;"
+      "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
     },
     {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.input:dirty",
@@ -65581,6 +66104,42 @@
       "signature": "readonly width: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./slider#NeuSliderComponent.input:ariaDescribedBy",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "ariaDescribedBy",
+      "publicName": "ariaDescribedBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:ariaLabel",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "ariaLabel",
+      "publicName": "ariaLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:dirty",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "dirty",
+      "publicName": "dirty",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./slider#NeuSliderComponent.input:disabled",
       "entrypoint": "./slider",
       "declaration": "NeuSliderComponent",
@@ -65590,7 +66149,55 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "disabled: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:errors",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "errors",
+      "publicName": "errors",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:hidden",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:inputId",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "inputId",
+      "publicName": "inputId",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly inputId: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:invalid",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "invalid",
+      "publicName": "invalid",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./slider#NeuSliderComponent.input:label",
@@ -65602,7 +66209,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "label: _angular_core.InputSignal<string>;"
+      "signature": "readonly label: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./slider#NeuSliderComponent.input:max",
@@ -65614,7 +66221,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "max: _angular_core.InputSignal<number>;"
+      "signature": "readonly max: _angular_core.InputSignal<number | undefined>;"
     },
     {
       "id": "./slider#NeuSliderComponent.input:min",
@@ -65626,7 +66233,55 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "min: _angular_core.InputSignal<number>;"
+      "signature": "readonly min: _angular_core.InputSignal<number | undefined>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:name",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "name",
+      "publicName": "name",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly name: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:pending",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "pending",
+      "publicName": "pending",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:readonly",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "readonly",
+      "publicName": "readonly",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:required",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "required",
+      "publicName": "required",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly required: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./slider#NeuSliderComponent.input:showTicks",
@@ -65638,7 +66293,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "showTicks: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly showTicks: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./slider#NeuSliderComponent.input:showValue",
@@ -65650,7 +66305,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "showValue: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly showValue: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./slider#NeuSliderComponent.input:step",
@@ -65662,7 +66317,19 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "step: _angular_core.InputSignal<number>;"
+      "signature": "readonly step: _angular_core.InputSignal<number>;"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:touched",
+      "entrypoint": "./slider",
+      "declaration": "NeuSliderComponent",
+      "selector": "neu-slider",
+      "propertyName": "touched",
+      "publicName": "touched",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./slider#NeuSliderComponent.input:unit",
@@ -65674,31 +66341,32 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "unit: _angular_core.InputSignal<string>;"
+      "signature": "readonly unit: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./slider#NeuSliderComponent.input:value",
+      "id": "./slider#NeuSliderComponent.model:value",
       "entrypoint": "./slider",
       "declaration": "NeuSliderComponent",
       "selector": "neu-slider",
       "propertyName": "value",
       "publicName": "value",
-      "kind": "input",
+      "changePublicName": "valueChange",
+      "kind": "model",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "value: _angular_core.InputSignal<number>;"
+      "signature": "readonly value: _angular_core.ModelSignal<number>;"
     },
     {
-      "id": "./slider#NeuSliderComponent.output:valueChange",
+      "id": "./slider#NeuSliderComponent.output:touch",
       "entrypoint": "./slider",
       "declaration": "NeuSliderComponent",
       "selector": "neu-slider",
-      "propertyName": "valueChange",
-      "publicName": "valueChange",
+      "propertyName": "touch",
+      "publicName": "touch",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "valueChange: _angular_core.OutputEmitterRef<number>;"
+      "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
     },
     {
       "id": "./speed-dial#NeuSpeedDialComponent.input:animation",
@@ -71753,19 +72421,19 @@
       "type": 198,
       "variable": 1
     },
-    "publicSymbols": 5734,
+    "publicSymbols": 5775,
     "statuses": {
-      "SUPPORTED": 3761,
+      "SUPPORTED": 3785,
       "COMPATIBILITY": 2,
       "DEPRECATED": 1,
-      "INTERNAL/UNSUPPORTED": 1970,
+      "INTERNAL/UNSUPPORTED": 1987,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1314,
+      "input": 1336,
       "output": 269,
-      "model": 23,
-      "total": 1606
+      "model": 25,
+      "total": 1630
     },
     "designTokens": 257
   }

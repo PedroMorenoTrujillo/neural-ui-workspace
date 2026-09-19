@@ -26,6 +26,10 @@ $track-height: 4px;
       opacity: 0.45;
     }
   }
+
+  &--readonly .neu-slider__input {
+    cursor: default;
+  }
 }
 
 .neu-slider__header {
