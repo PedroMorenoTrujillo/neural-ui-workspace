@@ -5048,10 +5048,10 @@ describe('NeuTableComponent advanced layout features', () => {
     const editor = f.debugElement.query(By.directive(NeuInlineEditorComponent))
       ?.componentInstance as NeuInlineEditorComponent;
     expect(editor).toBeTruthy();
-    editor.valueChange.emit('Ana DOM');
-    editor.editCommit.emit({ previousValue: 'Ana García', value: 'Ana DOM' });
+    editor.value.set('Ana DOM');
+    editor.valueCommitted.emit({ previousValue: 'Ana García', value: 'Ana DOM' });
     expect(commits).toHaveBeenCalledWith(expect.objectContaining({ value: 'Ana DOM' }));
-    editor.editCancel.emit(null);
+    editor.editCancel.emit('Ana DOM');
   });
 
   it('uses rendered column reorder and selection-cell controls without bubbling to the row', async () => {

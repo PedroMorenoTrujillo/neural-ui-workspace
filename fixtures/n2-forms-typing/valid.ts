@@ -17,6 +17,13 @@ import { NeuListboxComponent } from '@neural-ui/core/listbox';
 import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-group';
 import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
 import {
+  NeuInlineEditorComponent,
+  type NeuInlineValue,
+} from '@neural-ui/core/inline-editor';
+import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
+import { NeuRichTextEditorComponent } from '@neural-ui/core/rich-text-editor';
+import { NeuUploaderComponent } from '@neural-ui/core/uploader';
+import {
   NeuDateInputComponent,
   civilDate,
   localDateTime,
@@ -62,6 +69,11 @@ declare const toggleSingle: NeuToggleButtonGroupComponent<Person, number, 'singl
 declare const toggleMultiple: NeuToggleButtonGroupComponent<Person, number, 'multiple'>;
 declare const stringTags: NeuInputTagsComponent<string, string>;
 declare const mappedTags: NeuInputTagsComponent<Person, number>;
+declare const inlineText: NeuInlineEditorComponent<'text'>;
+declare const inlineNumber: NeuInlineEditorComponent<'number'>;
+declare const colorPicker: NeuColorPickerComponent;
+declare const richTextEditor: NeuRichTextEditorComponent;
+declare const uploader: NeuUploaderComponent;
 
 input.value.set('valid');
 checkbox.checked.set(true);
@@ -105,6 +117,14 @@ toggleSingle.value.set(null);
 toggleMultiple.value.set([1, 2] as const);
 stringTags.value.set(['Angular', 'Signals'] as const);
 mappedTags.value.set([1, 2] as const);
+inlineText.value.set('edited');
+inlineNumber.value.set(12);
+inlineNumber.value.set(null);
+colorPicker.value.set('#336699');
+richTextEditor.value.set('<p>Safe</p>');
+uploader.value.set([] as readonly File[]);
+declare const discriminatedInlineNumber: NeuInlineValue<'number'>;
+inlineNumber.value.set(discriminatedInlineNumber);
 
 declare const dynamicMode: NeuDateMode;
 declare const dynamicValue: NeuDateValue<typeof dynamicMode>;
@@ -137,6 +157,11 @@ const officialToggleSingle: FormValueControl<number | null> = toggleSingle;
 const officialToggleMultiple: FormValueControl<readonly number[]> = toggleMultiple;
 const officialStringTags: FormValueControl<readonly string[]> = stringTags;
 const officialMappedTags: FormValueControl<readonly number[]> = mappedTags;
+const officialInlineText: FormValueControl<string> = inlineText;
+const officialInlineNumber: FormValueControl<number | null> = inlineNumber;
+const officialColorPicker: FormValueControl<string> = colorPicker;
+const officialRichTextEditor: FormValueControl<string> = richTextEditor;
+const officialUploader: FormValueControl<readonly File[]> = uploader;
 void valueControl;
 void checkboxControl;
 void textareaControl;
@@ -163,5 +188,10 @@ void officialToggleSingle;
 void officialToggleMultiple;
 void officialStringTags;
 void officialMappedTags;
+void officialInlineText;
+void officialInlineNumber;
+void officialColorPicker;
+void officialRichTextEditor;
+void officialUploader;
 void dynamicInput;
 void option;

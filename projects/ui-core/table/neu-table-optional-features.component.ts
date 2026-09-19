@@ -1003,7 +1003,7 @@ export class NeuTableInlineFilterFeatureComponent {
       [saveLabel]="host().saveInlineEditLabel()"
       [cancelLabel]="host().cancelInlineEditLabel()"
       (valueChange)="host().setEditingValue($event)"
-      (editCommit)="host().commitCellEdit(row(), column())"
+      (valueCommitted)="host().commitCellEdit(row(), column())"
       (editCancel)="host().cancelCellEdit(undefined, row(), column())"
     />
   `,

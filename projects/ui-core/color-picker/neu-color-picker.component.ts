@@ -6,15 +6,15 @@ import {
   ViewEncapsulation,
   computed,
   effect,
-  forwardRef,
   inject,
   input,
   linkedSignal,
+  model,
   output,
   signal,
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
 import {
@@ -56,24 +56,18 @@ interface NeuColorChannelView {
 }
 
 const DEFAULT_COLOR: NeuSrgbColor = hsvToSrgb(210, 80, 90);
+const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
 
 /**
  * NeuralUI ColorPicker.
  *
- * String-valued CVA with sRGB canonical state, optional alpha, direct CSS input,
+ * String-valued Signal Forms control with optional alpha, direct CSS input,
  * compact channel editing and HEX/RGB/HSL/OKLCH serialization.
  */
 @Component({
   selector: 'neu-color-picker',
   imports: [OverlayModule],
   encapsulation: ViewEncapsulation.None,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuColorPickerComponent),
-      multi: true,
-    },
-  ],
   host: {
     class: 'neu-cp',
     '[class.neu-cp--open]': '_isOpen()',
@@ -95,6 +89,7 @@ const DEFAULT_COLOR: NeuSrgbColor = hsvToSrgb(210, 80, 90);
       [attr.aria-invalid]="invalid() ? 'true' : null"
       [attr.aria-readonly]="readonly() ? 'true' : null"
       [disabled]="_isDisabled()"
+      (focus)="onBoundaryFocusIn()"
       (click)="_toggle()"
       (blur)="onBlur()"
     >
@@ -116,7 +111,12 @@ const DEFAULT_COLOR: NeuSrgbColor = hsvToSrgb(210, 80, 90);
       (detach)="onPanelDetached()"
       (attach)="onPanelAttached()"
     >
-      <div class="neu-cp__panel" role="dialog" aria-label="Color picker">
+      <div
+        class="neu-cp__panel"
+        role="dialog"
+        aria-label="Color picker"
+        (focusin)="onBoundaryFocusIn()"
+      >
         <div
           class="neu-cp__canvas-wrap"
           role="slider"
@@ -274,7 +274,8 @@ const DEFAULT_COLOR: NeuSrgbColor = hsvToSrgb(210, 80, 90);
   `,
   styleUrl: './neu-color-picker.component.scss',
 })
-export class NeuColorPickerComponent implements ControlValueAccessor {
+export class NeuColorPickerComponent implements FormValueControl<string> {
+  readonly value = model<string>(DEFAULT_COLOR_VALUE);
   readonly mode = input<NeuColorMode>('hex');
   readonly showAlpha = input(false);
   readonly showChannels = input(false);
@@ -286,11 +287,16 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   readonly ariaDescribedBy = input('');
   readonly required = input(false);
   readonly invalid = input(false);
+  readonly hidden = input(false);
+  readonly pending = input(false);
+  readonly touched = input(false);
+  readonly dirty = input(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly touch = output<void>();
 
   readonly opened = output<void>();
   readonly closed = output<void>();
-  readonly colorChange = output<string>();
-  readonly colorChangeEnd = output<string>();
+  readonly valueCommitted = output<string>();
 
   private readonly eventDestroyRef = inject(DestroyRef);
   private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
@@ -312,22 +318,23 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
     '#ec4899',
   ];
   protected readonly _isOpen = signal(false);
-  private readonly _cvaDisabled = signal(false);
-  private readonly _hasValue = signal(true);
-  protected readonly _color = signal<NeuSrgbColor>(DEFAULT_COLOR);
+  private readonly _hasValue = computed(() => !!parseColor((this.value() ?? '').trim()));
+  protected readonly _color = computed(
+    () => parseColor((this.value() ?? '').trim())?.color ?? DEFAULT_COLOR,
+  );
   private readonly _hueHint = signal(210);
   protected readonly _activeMode = linkedSignal<NeuColorMode>(() => this.mode());
   protected readonly _draft = signal<string | null>(null);
   protected readonly _textInvalid = signal(false);
-  protected readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
+  protected readonly _isDisabled = computed(() => this.disabled());
   readonly triggerId = computed(() => this.inputId() || this._id);
 
   private panelAttached = false;
   private _dragging = false;
   private activePointerId: number | null = null;
   private continuousStart: string | null = null;
-  private _onChange: (value: string) => void = () => {};
-  private _onTouched: () => void = () => {};
+  private continuousValue: string | null = null;
+  private touchSent = false;
 
   protected readonly _hsv = computed(() => srgbToHsv(this._color(), this._hueHint()));
   /** Internal compatibility view used by the H9 event-contract harness. */
@@ -543,12 +550,17 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   }
 
   protected beginColorChange(): void {
-    if (this.continuousStart === null) this.continuousStart = this._textValue();
+    if (this.continuousStart === null) {
+      this.continuousStart = this.value();
+      this.continuousValue = this.value();
+    }
   }
 
   protected finishColorChange(): void {
     const previous = this.continuousStart;
+    const gestureValue = this.continuousValue;
     this.continuousStart = null;
+    this.continuousValue = null;
     if (
       previous === null ||
       this.eventDestroyRef.destroyed ||
@@ -557,14 +569,16 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
     ) {
       return;
     }
-    const value = this._textValue();
-    if (previous !== value) this.colorChangeEnd.emit(value);
+    const value = this.value();
+    if (gestureValue !== value) return;
+    if (previous !== value) this.valueCommitted.emit(value);
   }
 
   protected cancelColorChange(): void {
     this._dragging = false;
     this.activePointerId = null;
     this.continuousStart = null;
+    this.continuousValue = null;
   }
 
   protected _canvasDown(event: PointerEvent): void {
@@ -591,6 +605,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   }
 
   private _updateFromCanvas(event: PointerEvent): void {
+    if (!this.gestureStillOwned()) return;
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
     const saturation = clamp((event.clientX - rect.left) / rect.width, 0, 1) * 100;
@@ -635,6 +650,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
     }
     event.preventDefault();
     this.beginColorChange();
+    if (!this.gestureStillOwned()) return;
     this.commitColor(
       hsvToSrgb(hsv.hue, clamp(saturation, 0, 100), clamp(value, 0, 100), this._color().alpha),
       hsv.hue,
@@ -657,6 +673,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   protected _onHueChange(value: number): void {
     if (!this.canMutate() || !Number.isFinite(value)) return;
     this.beginColorChange();
+    if (!this.gestureStillOwned()) return;
     const hsv = this._hsv();
     const hue = wrapHue(value);
     this.commitColor(hsvToSrgb(hue, hsv.saturation, hsv.value, this._color().alpha), hue);
@@ -665,17 +682,23 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   protected _onAlphaChange(value: number): void {
     if (!this.canMutate() || !Number.isFinite(value)) return;
     this.beginColorChange();
+    if (!this.gestureStillOwned()) return;
     this.commitColor({ ...this._color(), alpha: clamp(value, 0, 1) });
   }
 
   protected _pickSwatch(value: string): void {
     if (!this.canMutate()) return;
+    this.beginColorChange();
     const parsed = parseColor(value);
-    if (parsed) this.commitColor(parsed.color, parsed.hueHint);
+    if (parsed) {
+      this.commitColor(parsed.color, parsed.hueHint);
+      this.finishColorChange();
+    }
   }
 
   protected _onTextChange(text: string): void {
     if (!this.canMutate()) return;
+    if (!this.gestureStillOwned()) return;
     this._draft.set(text);
     const parsed = parseColor(text);
     this._textInvalid.set(!parsed);
@@ -706,6 +729,7 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
 
   protected _onChannelInput(channel: NeuColorChannel, text: string): void {
     if (!this.canMutate() || !text.trim()) return;
+    if (!this.gestureStillOwned()) return;
     const value = Number(text);
     if (!Number.isFinite(value)) return;
     const color = this._color();
@@ -739,7 +763,33 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   }
 
   onBlur(): void {
-    this._onTouched();
+    queueMicrotask(() => {
+      const active = this._el.nativeElement.ownerDocument.activeElement;
+      const panel = this._el.nativeElement.ownerDocument.querySelector('.neu-cp__panel');
+      if (this._el.nativeElement.contains(active) || panel?.contains(active)) return;
+      this.markTouched();
+    });
+  }
+
+  focus(options?: FocusOptions): void {
+    if (this._isDisabled()) return;
+    (
+      (this._el.nativeElement as HTMLElement).querySelector(
+        '.neu-cp__trigger',
+      ) as HTMLButtonElement | null
+    )?.focus(options);
+  }
+
+  reset(): void {
+    this._isOpen.set(false);
+    this.resetDraft();
+    this.cancelColorChange();
+    this.touchSent = false;
+  }
+
+  protected onBoundaryFocusIn(): void {
+    if (this._isDisabled()) return;
+    this.touchSent = false;
   }
 
   private canMutate(): boolean {
@@ -760,48 +810,23 @@ export class NeuColorPickerComponent implements ControlValueAccessor {
   private commitColor(color: NeuSrgbColor, hueHint?: number): boolean {
     const previous = this._color();
     if (hueHint !== undefined) this._hueHint.set(wrapHue(hueHint));
-    this._hasValue.set(true);
     if (colorsEqual(previous, color)) return false;
-    this._color.set(color);
-    const value = this._textValue();
-    this._onChange(value);
-    this.colorChange.emit(value);
+    const value = serializeColor(color, this._activeMode(), this.showAlpha(), this._hueHint());
+    this.value.set(value);
+    if (this.continuousStart !== null) this.continuousValue = value;
     return true;
   }
 
-  private applyValue(value: string | null | undefined): boolean {
-    const text = value?.trim() ?? '';
-    if (!text) {
-      this._hasValue.set(false);
-      this._draft.set(null);
-      this._textInvalid.set(false);
-      return true;
-    }
-    const parsed = parseColor(text);
-    if (!parsed) return false;
-    this._color.set(parsed.color);
-    if (parsed.hueHint !== undefined) this._hueHint.set(parsed.hueHint);
-    this._hasValue.set(true);
-    this._draft.set(null);
-    this._textInvalid.set(false);
-    return true;
-  }
-
-  writeValue(value: string | null | undefined): void {
+  private gestureStillOwned(): boolean {
+    if (this.continuousStart === null || this.continuousValue === this.value()) return true;
+    this.resetDraft();
     this.cancelColorChange();
-    this.applyValue(value);
+    return false;
   }
 
-  registerOnChange(fn: (value: string) => void): void {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-
-  setDisabledState(disabled: boolean): void {
-    if (disabled) this.cancelColorChange();
-    this._cvaDisabled.set(disabled);
+  private markTouched(): void {
+    if (this.touchSent) return;
+    this.touchSent = true;
+    this.touch.emit();
   }
 }

@@ -18,6 +18,10 @@ import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
 import { NeuListboxComponent } from '@neural-ui/core/listbox';
 import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-group';
 import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
+import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
+import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
+import { NeuRichTextEditorComponent } from '@neural-ui/core/rich-text-editor';
+import { NeuUploaderComponent } from '@neural-ui/core/uploader';
 
 @Component({
   selector: 'app-root',
@@ -42,6 +46,10 @@ import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
     NeuListboxComponent,
     NeuToggleButtonGroupComponent,
     NeuInputTagsComponent,
+    NeuInlineEditorComponent,
+    NeuColorPickerComponent,
+    NeuRichTextEditorComponent,
+    NeuUploaderComponent,
   ],
   template: `
     <span id="n2-ready">{{ ready() }}</span>
@@ -107,6 +115,11 @@ import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
     <neu-toggle-button-group id="n2-toggle-single" [options]="options" [optionValue]="$any(valueOf)" [formControl]="toggleSingleControl" />
     <neu-toggle-button-group id="n2-toggle-multiple" mode="multiple" [options]="options" [optionValue]="$any(valueOf)" [formControl]="toggleMultipleControl" />
     <neu-input-tags id="n2-input-tags" [options]="options" optionLabel="label" [optionValue]="valueOf" [formControl]="inputTagsControl" />
+    <neu-inline-editor id="n2-inline-text" [formControl]="inlineTextControl" />
+    <neu-inline-editor id="n2-inline-number" type="number" [formControl]="inlineNumberControl" />
+    <neu-color-picker id="n2-color-picker" [formControl]="colorControl" />
+    <neu-rich-text-editor id="n2-rich-text" [formControl]="richTextControl" />
+    <neu-uploader id="n2-uploader" [formControl]="uploaderControl" />
   `,
 })
 export class N2FormsHydrationComponent {
@@ -146,6 +159,11 @@ export class N2FormsHydrationComponent {
   readonly toggleSingleControl = new FormControl<number | null>(1);
   readonly toggleMultipleControl = new FormControl<readonly number[]>([1], { nonNullable: true });
   readonly inputTagsControl = new FormControl<readonly number[]>([1], { nonNullable: true });
+  readonly inlineTextControl = new FormControl('server-inline', { nonNullable: true });
+  readonly inlineNumberControl = new FormControl<number | null>(42);
+  readonly colorControl = new FormControl('#336699', { nonNullable: true });
+  readonly richTextControl = new FormControl('<p>server-rich</p>', { nonNullable: true });
+  readonly uploaderControl = new FormControl<readonly File[]>([], { nonNullable: true });
   readonly numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -181,6 +199,13 @@ export class N2FormsHydrationComponent {
     this.toggleSingleControl.valueChanges.subscribe((value) => this.record('toggle-single', value));
     this.toggleMultipleControl.valueChanges.subscribe((value) => this.record('toggle-multiple', value));
     this.inputTagsControl.valueChanges.subscribe((value) => this.record('input-tags', value));
+    this.inlineTextControl.valueChanges.subscribe((value) => this.record('inline-text', value));
+    this.inlineNumberControl.valueChanges.subscribe((value) => this.record('inline-number', value));
+    this.colorControl.valueChanges.subscribe((value) => this.record('color-picker', value));
+    this.richTextControl.valueChanges.subscribe((value) => this.record('rich-text', value));
+    this.uploaderControl.valueChanges.subscribe((value) =>
+      this.record('uploader', value.map((file) => file.name)),
+    );
     afterNextRender(() => this.ready.set(true));
   }
 

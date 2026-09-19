@@ -67,8 +67,8 @@ import { NeuKanbanComponent, type NeuKanbanColumn } from '@neural-ui/core/kanban
       [showChannels]="true"
       (opened)="record('colorOpened')"
       (closed)="record('colorClosed')"
-      (colorChange)="record('colorChange')"
-      (colorChangeEnd)="record('colorEnd')"
+      (valueChange)="record('colorChange')"
+      (valueCommitted)="record('colorEnd')"
     />`,
 })
 export class H9HydrationComponent {

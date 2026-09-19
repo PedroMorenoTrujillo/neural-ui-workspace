@@ -21,6 +21,10 @@ const { NeuCascadeSelectComponent } = await import('@neural-ui/core/cascade-sele
 const { NeuListboxComponent } = await import('@neural-ui/core/listbox');
 const { NeuToggleButtonGroupComponent } = await import('@neural-ui/core/toggle-button-group');
 const { NeuInputTagsComponent } = await import('@neural-ui/core/input-tags');
+const { NeuInlineEditorComponent } = await import('@neural-ui/core/inline-editor');
+const { NeuColorPickerComponent } = await import('@neural-ui/core/color-picker');
+const { NeuRichTextEditorComponent } = await import('@neural-ui/core/rich-text-editor');
+const { NeuUploaderComponent } = await import('@neural-ui/core/uploader');
 
 const changes = [];
 class N2FormsSsr {
@@ -50,6 +54,11 @@ class N2FormsSsr {
   toggleSingle = new FormControl(1);
   toggleMultiple = new FormControl([1], { nonNullable: true });
   inputTags = new FormControl([1], { nonNullable: true });
+  inlineText = new FormControl('server-inline', { nonNullable: true });
+  inlineNumber = new FormControl(42);
+  color = new FormControl('#336699', { nonNullable: true });
+  richText = new FormControl('<p>server-rich</p>', { nonNullable: true });
+  files = new FormControl([], { nonNullable: true });
   numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -79,6 +88,11 @@ class N2FormsSsr {
     this.toggleSingle.valueChanges.subscribe((value) => changes.push(`toggle-single:${value}`));
     this.toggleMultiple.valueChanges.subscribe((value) => changes.push(`toggle-multiple:${value}`));
     this.inputTags.valueChanges.subscribe((value) => changes.push(`input-tags:${value}`));
+    this.inlineText.valueChanges.subscribe((value) => changes.push(`inline-text:${value}`));
+    this.inlineNumber.valueChanges.subscribe((value) => changes.push(`inline-number:${value}`));
+    this.color.valueChanges.subscribe((value) => changes.push(`color:${value}`));
+    this.richText.valueChanges.subscribe((value) => changes.push(`rich-text:${value}`));
+    this.files.valueChanges.subscribe((value) => changes.push(`files:${value.length}`));
   }
 }
 core.Component({
@@ -104,6 +118,10 @@ core.Component({
     NeuListboxComponent,
     NeuToggleButtonGroupComponent,
     NeuInputTagsComponent,
+    NeuInlineEditorComponent,
+    NeuColorPickerComponent,
+    NeuRichTextEditorComponent,
+    NeuUploaderComponent,
   ],
   template: `
     <neu-input id="ssr-input" label="SSR input" [required]="true" [readonly]="true" [formControl]="input" />
@@ -130,6 +148,11 @@ core.Component({
     <neu-toggle-button-group id="ssr-toggle-single" [options]="options" [optionValue]="optionValue" [formControl]="toggleSingle" />
     <neu-toggle-button-group id="ssr-toggle-multiple" mode="multiple" [options]="options" [optionValue]="optionValue" [formControl]="toggleMultiple" />
     <neu-input-tags id="ssr-input-tags" [options]="options" optionLabel="label" [optionValue]="optionValue" [formControl]="inputTags" />
+    <neu-inline-editor id="ssr-inline-text" [formControl]="inlineText" />
+    <neu-inline-editor id="ssr-inline-number" type="number" [formControl]="inlineNumber" />
+    <neu-color-picker id="ssr-color-picker" [formControl]="color" />
+    <neu-rich-text-editor id="ssr-rich-text" [formControl]="richText" />
+    <neu-uploader id="ssr-uploader" [formControl]="files" />
   `,
 })(N2FormsSsr);
 
@@ -177,6 +200,11 @@ for (const id of [
   'ssr-toggle-single',
   'ssr-toggle-multiple',
   'ssr-input-tags',
+  'ssr-inline-text',
+  'ssr-inline-number',
+  'ssr-color-picker',
+  'ssr-rich-text',
+  'ssr-uploader',
 ]) {
   assert.match(html, new RegExp(`id="${id}"`));
 }
@@ -190,5 +218,5 @@ assert.match(html, /29\/03\/2026/);
 assert.match(html, /ngh=/);
 assert.deepEqual(changes, []);
 console.log(
-  'N2 Forms SSR passed for all 21 controls: values, states, explicit locale, hydration annotations and zero write echo',
+  'N2 Forms SSR passed for all 25 controls: values, states, explicit locale, hydration annotations and zero write echo',
 );

@@ -138,8 +138,8 @@ interface Option {
           [showChannels]="true"
           (opened)="record('colorOpened')"
           (closed)="record('colorClosed')"
-          (colorChange)="record('colorChange', $event)"
-          (colorChangeEnd)="record('colorEnd', $event)"
+          (valueChange)="record('colorChange', $event)"
+          (valueCommitted)="record('colorEnd', $event)"
         />
       </section>
       <neu-pick-list
@@ -264,7 +264,7 @@ export class H9EventContractComponent {
     this.treeSelect()?.writeValue(null);
     this.cascade()?.value.set(null);
     this.date()?.value.set(civilDate('2026-01-01'));
-    this.color()?.writeValue('oklch(0.7 0.12 280 / 0.65)');
+    this.color()?.value.set('oklch(0.7 0.12 280 / 0.65)');
     this.numberValue.set(null);
   }
 }

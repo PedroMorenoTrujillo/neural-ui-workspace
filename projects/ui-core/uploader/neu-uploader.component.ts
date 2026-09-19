@@ -4,16 +4,16 @@ import {
   TemplateRef,
   ViewEncapsulation,
   computed,
-  effect,
-  forwardRef,
   inject,
   input,
+  linkedSignal,
+  model,
   output,
   signal,
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuProgressBarComponent } from '@neural-ui/core/progress-bar';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
@@ -35,17 +35,13 @@ export type {
   selector: 'neu-uploader',
   imports: [NgTemplateOutlet, NeuButtonComponent, NeuProgressBarComponent],
   encapsulation: ViewEncapsulation.None,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuUploaderComponent),
-      multi: true,
-    },
-  ],
   host: {
     class: 'neu-uploader-host',
     '[class.neu-uploader-host--sm]': 'size() === "sm"',
     '[class.neu-uploader-host--lg]': 'size() === "lg"',
+    '[hidden]': 'hidden()',
+    '(focusin)': 'onBoundaryFocusIn()',
+    '(focusout)': 'onBoundaryFocusOut($event)',
   },
   template: `
     @if (label()) {
@@ -59,7 +55,7 @@ export type {
       type="file"
       [attr.accept]="accept() || null"
       [attr.multiple]="multiple() ? '' : null"
-      [disabled]="isDisabledFinal()"
+      [disabled]="isInteractionBlocked()"
       [attr.aria-label]="label() ? null : chooseLabel()"
       [attr.aria-describedby]="describedBy()"
       [attr.aria-invalid]="hasError() ? 'true' : null"
@@ -68,7 +64,7 @@ export type {
 
     <div
       class="neu-uploader"
-      [class.neu-uploader--disabled]="isDisabledFinal()"
+      [class.neu-uploader--disabled]="isInteractionBlocked()"
       [class.neu-uploader--drag-over]="isDragOver()"
       [class.neu-uploader--error]="hasError()"
       [class.neu-uploader--has-files]="fileItems().length > 0"
@@ -77,8 +73,14 @@ export type {
       @if (dropzone()) {
         <div
           class="neu-uploader__dropzone"
+          role="button"
+          [attr.tabindex]="isInteractionBlocked() ? -1 : 0"
+          [attr.aria-disabled]="isInteractionBlocked() ? 'true' : null"
+          [attr.aria-readonly]="readonly() ? 'true' : null"
           [attr.aria-describedby]="describedBy()"
           (click)="openFilePicker()"
+          (keydown.enter)="onDropzoneKey($event)"
+          (keydown.space)="onDropzoneKey($event)"
           (dragover)="onDragOver($event)"
           (dragleave)="onDragLeave($event)"
           (drop)="onDrop($event)"
@@ -109,6 +111,7 @@ export type {
               type="button"
               variant="primary"
               size="sm"
+              [disabled]="isInteractionBlocked()"
               (click)="openFilePicker(); $event.stopPropagation()"
             >
               {{ chooseLabel() }}
@@ -119,6 +122,7 @@ export type {
                 type="button"
                 variant="outline"
                 size="sm"
+                [disabled]="isInteractionBlocked()"
                 (click)="clearFiles($event)"
               >
                 {{ clearLabel() }}
@@ -134,7 +138,7 @@ export type {
           size="sm"
           icon="lucideUpload"
           class="neu-uploader__picker-trigger"
-          [disabled]="isDisabledFinal()"
+          [disabled]="isInteractionBlocked()"
           [attr.aria-label]="pickerButtonAriaLabel()"
           [attr.aria-describedby]="describedBy()"
           (click)="openFilePicker()"
@@ -194,7 +198,7 @@ export type {
                 <button
                   class="neu-uploader__retry"
                   type="button"
-                  [disabled]="isDisabledFinal()"
+                  [disabled]="isInteractionBlocked()"
                   [attr.aria-label]="retryAriaLabel() + ' ' + item.name"
                   (click)="retryFile(item.id, $event)"
                 >
@@ -204,7 +208,7 @@ export type {
               <button
                 class="neu-uploader__remove"
                 type="button"
-                [disabled]="isDisabledFinal()"
+                [disabled]="isInteractionBlocked()"
                 [attr.aria-label]="removeAriaLabel() + ' ' + item.name"
                 (click)="removeFile(item.id, $event)"
               >
@@ -237,8 +241,9 @@ export type {
   `,
   styleUrl: './neu-uploader.component.scss',
 })
-export class NeuUploaderComponent implements ControlValueAccessor {
+export class NeuUploaderComponent implements FormValueControl<readonly File[]> {
   readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
+  readonly value = model<readonly File[]>([]);
 
   label = input<string>('');
   hint = input<string>('');
@@ -265,7 +270,15 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   accept = input<string>('');
   multiple = input<boolean>(true);
   dropzone = input<boolean>(true);
-  disabled = input<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  hidden = input(false);
+  invalid = input(false);
+  pending = input(false);
+  touched = input(false);
+  dirty = input(false);
+  required = input(false);
+  errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
   size = input<NeuUploaderSize>('md');
   maxFiles = input<number | null>(null);
   maxFileSize = input<number | null>(null);
@@ -279,37 +292,39 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   retryLabel = input<string>('Retry');
   retryAriaLabel = input<string>('Retry upload for');
 
-  readonly filesSelected = output<File[]>();
+  readonly filesSelected = output<readonly File[]>();
   readonly fileRemoved = output<File>();
   readonly fileRetry = output<NeuUploaderFileItem>();
   readonly filesRejected = output<NeuUploaderError[]>();
   readonly cleared = output<void>();
+  readonly touch = output<void>();
 
   readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-uploader-'));
 
   protected readonly isDragOver = signal(false);
-  protected readonly internalErrors = signal<NeuUploaderError[]>([]);
-  protected readonly fileItems = signal<NeuUploaderFileItem[]>([]);
+  protected readonly internalErrors = linkedSignal<readonly File[], readonly NeuUploaderError[]>({
+    source: () => this.value(),
+    computation: () => [],
+  });
+  private readonly internalFileStates = linkedSignal<
+    readonly File[],
+    Record<string, { status?: NeuUploaderFileStatus; progress?: number | null; error?: string }>
+  >({
+    source: () => this.value(),
+    computation: () => ({}),
+  });
+  private readonly fileIds = new WeakMap<File, string>();
+  private nextFileId = 0;
+  private touchSent = false;
 
-  private readonly cvaDisabled = signal(false);
-  private onChange: (value: File[]) => void = () => {};
-  private onTouched: () => void = () => {};
-
-  constructor() {
-    effect(() => {
-      const states = this.fileStates();
-      if (!Object.keys(states).length) {
-        return;
-      }
-
-      this.fileItems.update((items) =>
-        items.map((item) => ({ ...item, ...(states[item.id] ?? {}) })),
-      );
-    });
-  }
-
-  readonly isDisabledFinal = computed(() => this.disabled() || this.cvaDisabled());
-  readonly hasError = computed(() => !!this.displayErrorMessage());
+  readonly isDisabledFinal = computed(() => this.disabled());
+  readonly isInteractionBlocked = computed(() => this.disabled() || this.readonly());
+  protected readonly fileItems = computed<readonly NeuUploaderFileItem[]>(() =>
+    (this.value() ?? []).map((file) => this.withExternalState(this.toItem(file))),
+  );
+  readonly hasError = computed(
+    () => this.invalid() || this.errors().length > 0 || !!this.displayErrorMessage(),
+  );
   readonly shouldShowProgress = computed(() => this.showProgress() && this.progress() !== null);
   readonly pickerButtonAriaLabel = computed(() =>
     this.showPickerText() && this.chooseLabel() ? null : this.chooseLabel(),
@@ -346,40 +361,44 @@ export class NeuUploaderComponent implements ControlValueAccessor {
     return first?.message ?? '';
   });
 
-  writeValue(value: File[] | File | null | undefined): void {
-    if (!value) {
-      this.fileItems.set([]);
-      return;
-    }
-
-    const files = Array.isArray(value) ? value : [value];
-    this.fileItems.set(files.map((file) => this.withExternalState(this.toItem(file))));
-  }
-
-  registerOnChange(fn: (value: File[]) => void): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.cvaDisabled.set(isDisabled);
-  }
-
   openFilePicker(): void {
-    if (this.isDisabledFinal()) {
+    if (this.isInteractionBlocked()) {
       return;
     }
-
-    this.onTouched();
     this.fileInput().nativeElement.click();
   }
 
-  onDropzoneKey(event: KeyboardEvent): void {
+  onDropzoneKey(event: Event): void {
+    if (this.isInteractionBlocked()) return;
     event.preventDefault();
     this.openFilePicker();
+  }
+
+  onBoundaryFocusIn(): void {
+    if (!this.disabled()) this.touchSent = false;
+  }
+
+  onBoundaryFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget as Node | null;
+    if (next && (event.currentTarget as HTMLElement).contains(next)) return;
+    this.markTouched();
+  }
+
+  focus(options?: FocusOptions): void {
+    if (this.disabled()) return;
+    const selector = this.dropzone() ? '.neu-uploader__dropzone' : '.neu-uploader__picker-trigger';
+    this.fileInput()
+      .nativeElement.closest('neu-uploader')
+      ?.querySelector<HTMLElement>(selector)
+      ?.focus(options);
+  }
+
+  reset(): void {
+    this.isDragOver.set(false);
+    this.internalErrors.set([]);
+    this.internalFileStates.set({});
+    this.fileInput().nativeElement.value = '';
+    this.touchSent = false;
   }
 
   onNativeInputChange(event: Event): void {
@@ -389,7 +408,7 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   }
 
   onDragOver(event: DragEvent): void {
-    if (!this.dropzone() || this.isDisabledFinal()) {
+    if (!this.dropzone() || this.isInteractionBlocked()) {
       return;
     }
     event.preventDefault();
@@ -405,7 +424,7 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   }
 
   onDrop(event: DragEvent): void {
-    if (!this.dropzone() || this.isDisabledFinal()) {
+    if (!this.dropzone() || this.isInteractionBlocked()) {
       return;
     }
     event.preventDefault();
@@ -415,50 +434,50 @@ export class NeuUploaderComponent implements ControlValueAccessor {
 
   removeFile(id: string, event?: Event): void {
     event?.stopPropagation();
+    if (this.isInteractionBlocked()) return;
     const current = this.fileItems();
     const match = current.find((item) => item.id === id);
     if (!match) {
       return;
     }
 
-    const next = current.filter((item) => item.id !== id);
-    this.fileItems.set(next);
+    const next = this.value().filter((file) => file !== match.file);
     this.internalErrors.set([]);
-    this.emitValue(next);
+    this.value.set(next);
+    this.removeInternalState(id);
     this.fileRemoved.emit(match.file);
-    this.onTouched();
+    this.markTouched();
   }
 
   retryFile(id: string, event?: Event): void {
     event?.stopPropagation();
+    if (this.isInteractionBlocked()) return;
     const item = this.fileItems().find((current) => current.id === id);
     if (!item) return;
-    this.fileItems.update((items) =>
-      items.map((current) =>
-        current.id === id ? { ...current, status: 'uploading', error: undefined } : current,
-      ),
-    );
+    this.setFileState(id, { status: 'uploading', error: undefined });
     this.fileRetry.emit(item);
-    this.onTouched();
+    this.markTouched();
   }
 
   setFileState(
     id: string,
     state: { status?: NeuUploaderFileStatus; progress?: number | null; error?: string },
   ): void {
-    this.fileItems.update((items) =>
-      items.map((item) => (item.id === id ? { ...item, ...state } : item)),
-    );
+    this.internalFileStates.update((states) => ({
+      ...states,
+      [id]: { ...(states[id] ?? {}), ...state },
+    }));
   }
 
   clearFiles(event?: Event): void {
     event?.stopPropagation();
-    this.fileItems.set([]);
+    if (this.isInteractionBlocked() || this.value().length === 0) return;
+    this.value.set([]);
     this.internalErrors.set([]);
+    this.internalFileStates.set({});
     this.fileInput().nativeElement.value = '';
-    this.emitValue([]);
     this.cleared.emit();
-    this.onTouched();
+    this.markTouched();
   }
 
   formatBytes(bytes: number): string {
@@ -474,6 +493,7 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   }
 
   private consumeFiles(list: FileList | null): void {
+    if (this.isInteractionBlocked()) return;
     if (!list || list.length === 0) {
       this.reportErrors([
         {
@@ -484,12 +504,11 @@ export class NeuUploaderComponent implements ControlValueAccessor {
       return;
     }
 
-    this.onTouched();
     const incoming = Array.from(list);
-    const current = this.fileItems();
-    const nextItems = this.multiple() ? [...current] : [];
+    const current = this.value();
+    const nextFiles = this.multiple() ? [...current] : [];
     const errors: NeuUploaderError[] = [];
-    const existingIds = new Set(nextItems.map((item) => item.id));
+    const accepted: File[] = [];
 
     for (const file of incoming) {
       if (!this.isAcceptedType(file)) {
@@ -510,8 +529,7 @@ export class NeuUploaderComponent implements ControlValueAccessor {
         continue;
       }
 
-      const item = this.withExternalState(this.toItem(file));
-      if (existingIds.has(item.id)) {
+      if (nextFiles.includes(file)) {
         errors.push({
           code: 'duplicate',
           file,
@@ -520,7 +538,7 @@ export class NeuUploaderComponent implements ControlValueAccessor {
         continue;
       }
 
-      if (this.maxFiles() !== null && nextItems.length >= (this.maxFiles() ?? 0)) {
+      if (this.maxFiles() !== null && nextFiles.length >= (this.maxFiles() ?? 0)) {
         errors.push({
           code: 'max-files',
           file,
@@ -531,31 +549,29 @@ export class NeuUploaderComponent implements ControlValueAccessor {
         continue;
       }
 
-      nextItems.push(item);
-      existingIds.add(item.id);
+      nextFiles.push(file);
+      accepted.push(file);
 
       if (!this.multiple()) {
         break;
       }
     }
 
-    this.fileItems.set(nextItems);
     this.internalErrors.set(errors);
-    this.emitValue(nextItems);
-    this.filesSelected.emit(nextItems.map((item) => item.file));
+    if (accepted.length > 0) {
+      this.value.set([...nextFiles]);
+      this.filesSelected.emit(accepted);
+      this.markTouched();
+    }
 
     if (errors.length > 0) {
       this.filesRejected.emit(errors);
     }
   }
 
-  private emitValue(items: NeuUploaderFileItem[]): void {
-    this.onChange(items.map((item) => item.file));
-  }
-
   private toItem(file: File): NeuUploaderFileItem {
     return {
-      id: this.fileSignature(file),
+      id: this.fileId(file),
       file,
       name: file.name,
       size: file.size,
@@ -566,16 +582,38 @@ export class NeuUploaderComponent implements ControlValueAccessor {
   }
 
   private withExternalState(item: NeuUploaderFileItem): NeuUploaderFileItem {
-    return { ...item, ...(this.fileStates()[item.id] ?? {}) };
+    return {
+      ...item,
+      ...(this.internalFileStates()[item.id] ?? {}),
+      ...(this.fileStates()[item.id] ?? {}),
+    };
   }
 
-  private fileSignature(file: File): string {
-    return `${file.name}__${file.size}__${file.lastModified}`;
+  private fileId(file: File): string {
+    const existing = this.fileIds.get(file);
+    if (existing) return existing;
+    const id = `neu-file-${++this.nextFileId}`;
+    this.fileIds.set(file, id);
+    return id;
   }
 
   private reportErrors(errors: NeuUploaderError[]): void {
     this.internalErrors.set(errors);
     this.filesRejected.emit(errors);
+    this.markTouched();
+  }
+
+  private removeInternalState(id: string): void {
+    this.internalFileStates.update((states) => {
+      const { [id]: _removed, ...remaining } = states;
+      return remaining;
+    });
+  }
+
+  private markTouched(): void {
+    if (this.touchSent) return;
+    this.touchSent = true;
+    this.touch.emit();
   }
 
   private interpolate(template: string, values: Record<string, string>): string {

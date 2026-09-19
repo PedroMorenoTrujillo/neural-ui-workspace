@@ -479,8 +479,11 @@
       "exports": [
         "./inline-editor#NeuInlineEditorCommitEvent",
         "./inline-editor#NeuInlineEditorComponent",
+        "./inline-editor#NeuInlineEditorControl",
         "./inline-editor#NeuInlineEditorSize",
-        "./inline-editor#NeuInlineEditorType"
+        "./inline-editor#NeuInlineEditorType",
+        "./inline-editor#NeuInlineMode",
+        "./inline-editor#NeuInlineValue"
       ]
     },
     {
@@ -7696,7 +7699,7 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-color-picker",
-      "signature": "declare class NeuColorPickerComponent implements ControlValueAccessor {\n}",
+      "signature": "declare class NeuColorPickerComponent implements FormValueControl<string> {\n}",
       "members": [
         {
           "id": "./color-picker#NeuColorPickerComponent.input:ariaDescribedBy",
@@ -7729,6 +7732,16 @@
           "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./color-picker#NeuColorPickerComponent.input:dirty",
+          "name": "dirty",
+          "kind": "input",
+          "publicName": "dirty",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./color-picker#NeuColorPickerComponent.input:disabled",
           "name": "disabled",
           "kind": "input",
@@ -7737,6 +7750,26 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./color-picker#NeuColorPickerComponent.input:errors",
+          "name": "errors",
+          "kind": "input",
+          "publicName": "errors",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+        },
+        {
+          "id": "./color-picker#NeuColorPickerComponent.input:hidden",
+          "name": "hidden",
+          "kind": "input",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./color-picker#NeuColorPickerComponent.input:inputId",
@@ -7767,6 +7800,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly mode: _angular_core.InputSignal<NeuColorMode>;"
+        },
+        {
+          "id": "./color-picker#NeuColorPickerComponent.input:pending",
+          "name": "pending",
+          "kind": "input",
+          "publicName": "pending",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./color-picker#NeuColorPickerComponent.input:readonly",
@@ -7809,6 +7852,24 @@
           "signature": "readonly showChannels: _angular_core.InputSignal<boolean>;"
         },
         {
+          "id": "./color-picker#NeuColorPickerComponent.input:touched",
+          "name": "touched",
+          "kind": "input",
+          "publicName": "touched",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./color-picker#NeuColorPickerComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
           "id": "./color-picker#NeuColorPickerComponent.method:onBlur",
           "name": "onBlur",
           "kind": "method",
@@ -7817,36 +7878,23 @@
           "signature": "onBlur(): void;"
         },
         {
-          "id": "./color-picker#NeuColorPickerComponent.method:registerOnChange",
-          "name": "registerOnChange",
+          "id": "./color-picker#NeuColorPickerComponent.method:reset",
+          "name": "reset",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnChange(fn: (value: string) => void): void;"
+          "signature": "reset(): void;"
         },
         {
-          "id": "./color-picker#NeuColorPickerComponent.method:registerOnTouched",
-          "name": "registerOnTouched",
-          "kind": "method",
+          "id": "./color-picker#NeuColorPickerComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
+          "required": false,
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnTouched(fn: () => void): void;"
-        },
-        {
-          "id": "./color-picker#NeuColorPickerComponent.method:setDisabledState",
-          "name": "setDisabledState",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setDisabledState(disabled: boolean): void;"
-        },
-        {
-          "id": "./color-picker#NeuColorPickerComponent.method:writeValue",
-          "name": "writeValue",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "writeValue(value: string | null | undefined): void;"
+          "status": "SUPPORTED",
+          "signature": "readonly value: _angular_core.ModelSignal<string>;"
         },
         {
           "id": "./color-picker#NeuColorPickerComponent.output:closed",
@@ -7859,26 +7907,6 @@
           "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
         },
         {
-          "id": "./color-picker#NeuColorPickerComponent.output:colorChange",
-          "name": "colorChange",
-          "kind": "output",
-          "publicName": "colorChange",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly colorChange: _angular_core.OutputEmitterRef<string>;"
-        },
-        {
-          "id": "./color-picker#NeuColorPickerComponent.output:colorChangeEnd",
-          "name": "colorChangeEnd",
-          "kind": "output",
-          "publicName": "colorChangeEnd",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly colorChangeEnd: _angular_core.OutputEmitterRef<string>;"
-        },
-        {
           "id": "./color-picker#NeuColorPickerComponent.output:opened",
           "name": "opened",
           "kind": "output",
@@ -7887,6 +7915,26 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./color-picker#NeuColorPickerComponent.output:touch",
+          "name": "touch",
+          "kind": "output",
+          "publicName": "touch",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./color-picker#NeuColorPickerComponent.output:valueCommitted",
+          "name": "valueCommitted",
+          "kind": "output",
+          "publicName": "valueCommitted",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly valueCommitted: _angular_core.OutputEmitterRef<string>;"
         },
         {
           "id": "./color-picker#NeuColorPickerComponent.property:overlayPositions",
@@ -7910,7 +7958,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuColorPickerComponent, \"neu-color-picker\", never, {\n    \"mode\": {\n        \"alias\": \"mode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showAlpha\": {\n        \"alias\": \"showAlpha\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showChannels\": {\n        \"alias\": \"showChannels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"colorChange\": \"colorChange\";\n    \"colorChangeEnd\": \"colorChangeEnd\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuColorPickerComponent, \"neu-color-picker\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"mode\": {\n        \"alias\": \"mode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showAlpha\": {\n        \"alias\": \"showAlpha\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showChannels\": {\n        \"alias\": \"showChannels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"touch\": \"touch\";\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"valueCommitted\": \"valueCommitted\";\n}, never, never, true, never>;"
         },
         {
           "id": "./color-picker#NeuColorPickerComponent.property:ɵfac",
@@ -14085,7 +14133,7 @@
       "name": "NeuInlineEditorCommitEvent",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuInlineEditorCommitEvent<T = string | number | null> {\n}",
+      "signature": "interface NeuInlineEditorCommitEvent<M extends NeuInlineMode = NeuInlineMode> {\n}",
       "members": [
         {
           "id": "./inline-editor#NeuInlineEditorCommitEvent.property:previousValue",
@@ -14093,7 +14141,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "previousValue: T;"
+          "signature": "readonly previousValue: NeuInlineValue<M>;"
         },
         {
           "id": "./inline-editor#NeuInlineEditorCommitEvent.property:value",
@@ -14101,7 +14149,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "value: T;"
+          "signature": "readonly value: NeuInlineValue<M>;"
         }
       ]
     },
@@ -14109,13 +14157,32 @@
       "id": "./inline-editor#NeuInlineEditorComponent",
       "entrypoint": "./inline-editor",
       "name": "NeuInlineEditorComponent",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuInlineEditorComponent<M extends NeuInlineMode = 'text'> = NeuInlineEditorControl<NeuInlineValue<M>>;\nconst NeuInlineEditorComponent: typeof NeuInlineEditorControl;",
+      "members": []
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl",
+      "entrypoint": "./inline-editor",
+      "name": "NeuInlineEditorControl",
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-inline-editor",
-      "signature": "declare class NeuInlineEditorComponent implements ControlValueAccessor {\n}",
+      "signature": "declare class NeuInlineEditorControl<V = string | number | null> implements FormValueControl<V> {\n}",
       "members": [
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:cancelLabel",
+          "id": "./inline-editor#NeuInlineEditorControl.input:ariaDescribedBy",
+          "name": "ariaDescribedBy",
+          "kind": "input",
+          "publicName": "ariaDescribedBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.input:cancelLabel",
           "name": "cancelLabel",
           "kind": "input",
           "publicName": "cancelLabel",
@@ -14125,7 +14192,17 @@
           "signature": "readonly cancelLabel: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:disabled",
+          "id": "./inline-editor#NeuInlineEditorControl.input:dirty",
+          "name": "dirty",
+          "kind": "input",
+          "publicName": "dirty",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.input:disabled",
           "name": "disabled",
           "kind": "input",
           "publicName": "disabled",
@@ -14135,7 +14212,7 @@
           "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:editLabel",
+          "id": "./inline-editor#NeuInlineEditorControl.input:editLabel",
           "name": "editLabel",
           "kind": "input",
           "publicName": "editLabel",
@@ -14145,7 +14222,7 @@
           "signature": "readonly editLabel: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:emptyLabel",
+          "id": "./inline-editor#NeuInlineEditorControl.input:emptyLabel",
           "name": "emptyLabel",
           "kind": "input",
           "publicName": "emptyLabel",
@@ -14155,37 +14232,57 @@
           "signature": "readonly emptyLabel: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:max",
-          "name": "max",
+          "id": "./inline-editor#NeuInlineEditorControl.input:errors",
+          "name": "errors",
           "kind": "input",
-          "publicName": "max",
+          "publicName": "errors",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly max: _angular_core.InputSignal<number>;"
+          "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:min",
-          "name": "min",
+          "id": "./inline-editor#NeuInlineEditorControl.input:hidden",
+          "name": "hidden",
           "kind": "input",
-          "publicName": "min",
+          "publicName": "hidden",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly min: _angular_core.InputSignal<number>;"
+          "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:options",
+          "id": "./inline-editor#NeuInlineEditorControl.input:invalid",
+          "name": "invalid",
+          "kind": "input",
+          "publicName": "invalid",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.input:options",
           "name": "options",
           "kind": "input",
           "publicName": "options",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly options: _angular_core.InputSignal<NeuSelectOption<string, unknown>[]>;"
+          "signature": "readonly options: _angular_core.InputSignal<readonly unknown[]>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:placeholder",
+          "id": "./inline-editor#NeuInlineEditorControl.input:pending",
+          "name": "pending",
+          "kind": "input",
+          "publicName": "pending",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.input:placeholder",
           "name": "placeholder",
           "kind": "input",
           "publicName": "placeholder",
@@ -14195,7 +14292,7 @@
           "signature": "readonly placeholder: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:readonly",
+          "id": "./inline-editor#NeuInlineEditorControl.input:readonly",
           "name": "readonly",
           "kind": "input",
           "publicName": "readonly",
@@ -14205,17 +14302,17 @@
           "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:rows",
-          "name": "rows",
+          "id": "./inline-editor#NeuInlineEditorControl.input:required",
+          "name": "required",
           "kind": "input",
-          "publicName": "rows",
+          "publicName": "required",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly rows: _angular_core.InputSignal<number>;"
+          "signature": "readonly required: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:saveLabel",
+          "id": "./inline-editor#NeuInlineEditorControl.input:saveLabel",
           "name": "saveLabel",
           "kind": "input",
           "publicName": "saveLabel",
@@ -14225,7 +14322,7 @@
           "signature": "readonly saveLabel: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:saveOnBlur",
+          "id": "./inline-editor#NeuInlineEditorControl.input:saveOnBlur",
           "name": "saveOnBlur",
           "kind": "input",
           "publicName": "saveOnBlur",
@@ -14235,7 +14332,7 @@
           "signature": "readonly saveOnBlur: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:size",
+          "id": "./inline-editor#NeuInlineEditorControl.input:size",
           "name": "size",
           "kind": "input",
           "publicName": "size",
@@ -14245,7 +14342,7 @@
           "signature": "readonly size: _angular_core.InputSignal<NeuInlineEditorSize>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:startInEdit",
+          "id": "./inline-editor#NeuInlineEditorControl.input:startInEdit",
           "name": "startInEdit",
           "kind": "input",
           "publicName": "startInEdit",
@@ -14255,17 +14352,17 @@
           "signature": "readonly startInEdit: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:step",
-          "name": "step",
+          "id": "./inline-editor#NeuInlineEditorControl.input:touched",
+          "name": "touched",
           "kind": "input",
-          "publicName": "step",
+          "publicName": "touched",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly step: _angular_core.InputSignal<number>;"
+          "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:type",
+          "id": "./inline-editor#NeuInlineEditorControl.input:type",
           "name": "type",
           "kind": "input",
           "publicName": "type",
@@ -14275,17 +14372,7 @@
           "signature": "readonly type: _angular_core.InputSignal<NeuInlineEditorType>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.input:value",
-          "name": "value",
-          "kind": "input",
-          "publicName": "value",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly value: _angular_core.InputSignal<string | number | null>;"
-        },
-        {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:beginEdit",
+          "id": "./inline-editor#NeuInlineEditorControl.method:beginEdit",
           "name": "beginEdit",
           "kind": "method",
           "static": false,
@@ -14293,7 +14380,7 @@
           "signature": "beginEdit(): void;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:cancel",
+          "id": "./inline-editor#NeuInlineEditorControl.method:cancel",
           "name": "cancel",
           "kind": "method",
           "static": false,
@@ -14301,7 +14388,7 @@
           "signature": "cancel(): void;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:commit",
+          "id": "./inline-editor#NeuInlineEditorControl.method:commit",
           "name": "commit",
           "kind": "method",
           "static": false,
@@ -14309,7 +14396,15 @@
           "signature": "commit(): void;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:hostClasses",
+          "id": "./inline-editor#NeuInlineEditorControl.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.method:hostClasses",
           "name": "hostClasses",
           "kind": "method",
           "static": false,
@@ -14317,7 +14412,15 @@
           "signature": "hostClasses(): Record<string, boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:onEditFocusout",
+          "id": "./inline-editor#NeuInlineEditorControl.method:onDraftInput",
+          "name": "onDraftInput",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onDraftInput(value: string): void;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.method:onEditFocusout",
           "name": "onEditFocusout",
           "kind": "method",
           "static": false,
@@ -14325,7 +14428,7 @@
           "signature": "onEditFocusout(event: FocusEvent): void;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:onEditKeydown",
+          "id": "./inline-editor#NeuInlineEditorControl.method:onEditKeydown",
           "name": "onEditKeydown",
           "kind": "method",
           "static": false,
@@ -14333,79 +14436,66 @@
           "signature": "onEditKeydown(event: KeyboardEvent): void;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:registerOnChange",
-          "name": "registerOnChange",
+          "id": "./inline-editor#NeuInlineEditorControl.method:reset",
+          "name": "reset",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnChange(fn: (value: string | number | null) => void): void;"
+          "signature": "reset(): void;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:registerOnTouched",
-          "name": "registerOnTouched",
-          "kind": "method",
+          "id": "./inline-editor#NeuInlineEditorControl.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
+          "required": false,
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnTouched(fn: () => void): void;"
+          "status": "SUPPORTED",
+          "signature": "readonly value: _angular_core.ModelSignal<V>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:setDisabledState",
-          "name": "setDisabledState",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setDisabledState(isDisabled: boolean): void;"
-        },
-        {
-          "id": "./inline-editor#NeuInlineEditorComponent.method:writeValue",
-          "name": "writeValue",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "writeValue(value: string | number | null): void;"
-        },
-        {
-          "id": "./inline-editor#NeuInlineEditorComponent.output:editCancel",
+          "id": "./inline-editor#NeuInlineEditorControl.output:editCancel",
           "name": "editCancel",
           "kind": "output",
           "publicName": "editCancel",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly editCancel: _angular_core.OutputEmitterRef<string | number | null>;"
+          "signature": "readonly editCancel: _angular_core.OutputEmitterRef<V>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.output:editCommit",
-          "name": "editCommit",
-          "kind": "output",
-          "publicName": "editCommit",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly editCommit: _angular_core.OutputEmitterRef<NeuInlineEditorCommitEvent<string | number | null>>;"
-        },
-        {
-          "id": "./inline-editor#NeuInlineEditorComponent.output:editStart",
+          "id": "./inline-editor#NeuInlineEditorControl.output:editStart",
           "name": "editStart",
           "kind": "output",
           "publicName": "editStart",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly editStart: _angular_core.OutputEmitterRef<string | number | null>;"
+          "signature": "readonly editStart: _angular_core.OutputEmitterRef<V>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.output:valueChange",
-          "name": "valueChange",
+          "id": "./inline-editor#NeuInlineEditorControl.output:touch",
+          "name": "touch",
           "kind": "output",
-          "publicName": "valueChange",
+          "publicName": "touch",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string | number | null>;"
+          "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.property:displayValue",
+          "id": "./inline-editor#NeuInlineEditorControl.output:valueCommitted",
+          "name": "valueCommitted",
+          "kind": "output",
+          "publicName": "valueCommitted",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly valueCommitted: _angular_core.OutputEmitterRef<NeuInlineEditorValueCommitEvent<V>>;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.property:displayValue",
           "name": "displayValue",
           "kind": "property",
           "static": false,
@@ -14413,7 +14503,23 @@
           "signature": "readonly displayValue: _angular_core.Signal<string>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.property:editing",
+          "id": "./inline-editor#NeuInlineEditorControl.property:draft",
+          "name": "draft",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly draft: _angular_core.WritableSignal<string>;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.property:draftValid",
+          "name": "draftValid",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly draftValid: _angular_core.Signal<boolean>;"
+        },
+        {
+          "id": "./inline-editor#NeuInlineEditorControl.property:editing",
           "name": "editing",
           "kind": "property",
           "static": false,
@@ -14421,15 +14527,7 @@
           "signature": "readonly editing: _angular_core.WritableSignal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.property:isDisabled",
-          "name": "isDisabled",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly isDisabled: _angular_core.Signal<boolean>;"
-        },
-        {
-          "id": "./inline-editor#NeuInlineEditorComponent.property:isEmpty",
+          "id": "./inline-editor#NeuInlineEditorControl.property:isEmpty",
           "name": "isEmpty",
           "kind": "property",
           "static": false,
@@ -14437,36 +14535,20 @@
           "signature": "readonly isEmpty: _angular_core.Signal<boolean>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.property:numberControl",
-          "name": "numberControl",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly numberControl: FormControl<number>;"
-        },
-        {
-          "id": "./inline-editor#NeuInlineEditorComponent.property:ɵcmp",
+          "id": "./inline-editor#NeuInlineEditorControl.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuInlineEditorComponent, \"neu-inline-editor\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"options\": {\n        \"alias\": \"options\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editLabel\": {\n        \"alias\": \"editLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"saveLabel\": {\n        \"alias\": \"saveLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"cancelLabel\": {\n        \"alias\": \"cancelLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"startInEdit\": {\n        \"alias\": \"startInEdit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"saveOnBlur\": {\n        \"alias\": \"saveOnBlur\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rows\": {\n        \"alias\": \"rows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n    \"editStart\": \"editStart\";\n    \"editCancel\": \"editCancel\";\n    \"editCommit\": \"editCommit\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuInlineEditorControl<any>, \"neu-inline-editor\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"type\": {\n        \"alias\": \"type\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"options\": {\n        \"alias\": \"options\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editLabel\": {\n        \"alias\": \"editLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"saveLabel\": {\n        \"alias\": \"saveLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"cancelLabel\": {\n        \"alias\": \"cancelLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"startInEdit\": {\n        \"alias\": \"startInEdit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"saveOnBlur\": {\n        \"alias\": \"saveOnBlur\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"editStart\": \"editStart\";\n    \"editCancel\": \"editCancel\";\n    \"valueCommitted\": \"valueCommitted\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
         },
         {
-          "id": "./inline-editor#NeuInlineEditorComponent.property:ɵfac",
+          "id": "./inline-editor#NeuInlineEditorControl.property:ɵfac",
           "name": "ɵfac",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuInlineEditorComponent, never>;"
-        },
-        {
-          "id": "./inline-editor#NeuInlineEditorComponent.property:stringControl",
-          "name": "stringControl",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly stringControl: FormControl<string | null>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuInlineEditorControl<any>, never>;"
         }
       ]
     },
@@ -14485,7 +14567,25 @@
       "name": "NeuInlineEditorType",
       "kind": "type",
       "status": "SUPPORTED",
-      "signature": "type NeuInlineEditorType = 'text' | 'number' | 'select' | 'textarea' | 'date';",
+      "signature": "type NeuInlineEditorType = NeuInlineMode | 'select' | 'textarea' | 'date';",
+      "members": []
+    },
+    {
+      "id": "./inline-editor#NeuInlineMode",
+      "entrypoint": "./inline-editor",
+      "name": "NeuInlineMode",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuInlineMode = 'text' | 'number';",
+      "members": []
+    },
+    {
+      "id": "./inline-editor#NeuInlineValue",
+      "entrypoint": "./inline-editor",
+      "name": "NeuInlineValue",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuInlineValue<M extends NeuInlineMode> = M extends 'number' ? number | null : string;",
       "members": []
     },
     {
@@ -28865,8 +28965,18 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-rich-text-editor",
-      "signature": "declare class NeuRichTextEditorComponent implements ControlValueAccessor, AfterViewInit {\n}",
+      "signature": "declare class NeuRichTextEditorComponent implements FormValueControl<string> {\n}",
       "members": [
+        {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.input:dirty",
+          "name": "dirty",
+          "kind": "input",
+          "publicName": "dirty",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+        },
         {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.input:disabled",
           "name": "disabled",
@@ -28898,6 +29008,26 @@
           "signature": "readonly errorMessage: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.input:errors",
+          "name": "errors",
+          "kind": "input",
+          "publicName": "errors",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+        },
+        {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.input:hidden",
+          "name": "hidden",
+          "kind": "input",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.input:hint",
           "name": "hint",
           "kind": "input",
@@ -28906,6 +29036,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly hint: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.input:invalid",
+          "name": "invalid",
+          "kind": "input",
+          "publicName": "invalid",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.input:label",
@@ -28948,6 +29088,16 @@
           "signature": "readonly minHeight: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.input:pending",
+          "name": "pending",
+          "kind": "input",
+          "publicName": "pending",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.input:placeholder",
           "name": "placeholder",
           "kind": "input",
@@ -28978,6 +29128,16 @@
           "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
         },
         {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.input:required",
+          "name": "required",
+          "kind": "input",
+          "publicName": "required",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly required: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.input:showPreview",
           "name": "showPreview",
           "kind": "input",
@@ -28998,15 +29158,14 @@
           "signature": "readonly size: _angular_core.InputSignal<NeuRichTextEditorSize>;"
         },
         {
-          "id": "./rich-text-editor#NeuRichTextEditorComponent.input:toolbarAriaLabel",
-          "name": "toolbarAriaLabel",
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.input:touched",
+          "name": "touched",
           "kind": "input",
-          "publicName": "toolbarAriaLabel",
+          "publicName": "touched",
           "required": false,
           "static": false,
-          "status": "DEPRECATED",
-          "deprecated": "Use `labels.toolbar` instead.",
-          "signature": "readonly toolbarAriaLabel: _angular_core.InputSignal<string>;"
+          "status": "SUPPORTED",
+          "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.input:variables",
@@ -29055,6 +29214,14 @@
           "signature": "addLink(): void;"
         },
         {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(): void;"
+        },
+        {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.method:format",
           "name": "format",
           "kind": "method",
@@ -29087,20 +29254,28 @@
           "signature": "insertVariable(variable: string): void;"
         },
         {
-          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:ngAfterViewInit",
-          "name": "ngAfterViewInit",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "ngAfterViewInit(): void;"
-        },
-        {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.method:onBlur",
           "name": "onBlur",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "onBlur(): void;"
+        },
+        {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:onBoundaryFocusIn",
+          "name": "onBoundaryFocusIn",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onBoundaryFocusIn(): void;"
+        },
+        {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:onBoundaryFocusOut",
+          "name": "onBoundaryFocusOut",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onBoundaryFocusOut(event: FocusEvent): void;"
         },
         {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.method:onFocus",
@@ -29111,36 +29286,23 @@
           "signature": "onFocus(): void;"
         },
         {
-          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:registerOnChange",
-          "name": "registerOnChange",
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:reset",
+          "name": "reset",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnChange(fn: (value: string) => void): void;"
+          "signature": "reset(): void;"
         },
         {
-          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:registerOnTouched",
-          "name": "registerOnTouched",
-          "kind": "method",
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
+          "required": false,
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnTouched(fn: () => void): void;"
-        },
-        {
-          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:setDisabledState",
-          "name": "setDisabledState",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setDisabledState(isDisabled: boolean): void;"
-        },
-        {
-          "id": "./rich-text-editor#NeuRichTextEditorComponent.method:writeValue",
-          "name": "writeValue",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "writeValue(value: string | null): void;"
+          "status": "SUPPORTED",
+          "signature": "readonly value: _angular_core.ModelSignal<string>;"
         },
         {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.output:imageRejected",
@@ -29153,14 +29315,24 @@
           "signature": "readonly imageRejected: _angular_core.OutputEmitterRef<NeuRichTextImageRejectedEvent>;"
         },
         {
-          "id": "./rich-text-editor#NeuRichTextEditorComponent.output:valueChange",
-          "name": "valueChange",
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.output:touch",
+          "name": "touch",
           "kind": "output",
-          "publicName": "valueChange",
+          "publicName": "touch",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string>;"
+          "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.output:valueCommitted",
+          "name": "valueCommitted",
+          "kind": "output",
+          "publicName": "valueCommitted",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly valueCommitted: _angular_core.OutputEmitterRef<string>;"
         },
         {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.property:ariaDescribedBy",
@@ -29187,6 +29359,14 @@
           "signature": "readonly isDisabledFinal: _angular_core.Signal<boolean>;"
         },
         {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.property:isInteractionBlocked",
+          "name": "isInteractionBlocked",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly isInteractionBlocked: _angular_core.Signal<boolean>;"
+        },
+        {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.property:mergedLabels",
           "name": "mergedLabels",
           "kind": "property",
@@ -29200,7 +29380,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuRichTextEditorComponent, \"neu-rich-text-editor\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minHeight\": {\n        \"alias\": \"minHeight\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"toolbarAriaLabel\": {\n        \"alias\": \"toolbarAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variables\": {\n        \"alias\": \"variables\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variablesLabel\": {\n        \"alias\": \"variablesLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variablesAriaLabel\": {\n        \"alias\": \"variablesAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxPastedImageBytes\": {\n        \"alias\": \"maxPastedImageBytes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showPreview\": {\n        \"alias\": \"showPreview\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewLabel\": {\n        \"alias\": \"previewLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editorId\": {\n        \"alias\": \"editorId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n    \"imageRejected\": \"imageRejected\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuRichTextEditorComponent, \"neu-rich-text-editor\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minHeight\": {\n        \"alias\": \"minHeight\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variables\": {\n        \"alias\": \"variables\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variablesLabel\": {\n        \"alias\": \"variablesLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"variablesAriaLabel\": {\n        \"alias\": \"variablesAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxPastedImageBytes\": {\n        \"alias\": \"maxPastedImageBytes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showPreview\": {\n        \"alias\": \"showPreview\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewLabel\": {\n        \"alias\": \"previewLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editorId\": {\n        \"alias\": \"editorId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"imageRejected\": \"imageRejected\";\n    \"valueCommitted\": \"valueCommitted\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
         },
         {
           "id": "./rich-text-editor#NeuRichTextEditorComponent.property:ɵfac",
@@ -29209,6 +29389,14 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuRichTextEditorComponent, never>;"
+        },
+        {
+          "id": "./rich-text-editor#NeuRichTextEditorComponent.property:sanitizedValue",
+          "name": "sanitizedValue",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly sanitizedValue: _angular_core.Signal<string>;"
         }
       ]
     },
@@ -50819,7 +51007,7 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-uploader",
-      "signature": "declare class NeuUploaderComponent implements ControlValueAccessor {\n}",
+      "signature": "declare class NeuUploaderComponent implements FormValueControl<readonly File[]> {\n}",
       "members": [
         {
           "id": "./uploader#NeuUploaderComponent.input:accept",
@@ -50862,6 +51050,16 @@
           "signature": "clearLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./uploader#NeuUploaderComponent.input:dirty",
+          "name": "dirty",
+          "kind": "input",
+          "publicName": "dirty",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "dirty: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./uploader#NeuUploaderComponent.input:disabled",
           "name": "disabled",
           "kind": "input",
@@ -50869,7 +51067,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "disabled: _angular_core.InputSignal<boolean>;"
+          "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.input:dropzone",
@@ -50922,6 +51120,16 @@
           "signature": "errorMessage: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./uploader#NeuUploaderComponent.input:errors",
+          "name": "errors",
+          "kind": "input",
+          "publicName": "errors",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+        },
+        {
           "id": "./uploader#NeuUploaderComponent.input:fileCountPluralLabel",
           "name": "fileCountPluralLabel",
           "kind": "input",
@@ -50952,6 +51160,16 @@
           "signature": "fileStates: _angular_core.InputSignal<Record<string, {\n    status?: NeuUploaderFileStatus;\n    progress?: number | null;\n    error?: string;\n}>>;"
         },
         {
+          "id": "./uploader#NeuUploaderComponent.input:hidden",
+          "name": "hidden",
+          "kind": "input",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "hidden: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./uploader#NeuUploaderComponent.input:hint",
           "name": "hint",
           "kind": "input",
@@ -50970,6 +51188,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly inputId: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./uploader#NeuUploaderComponent.input:invalid",
+          "name": "invalid",
+          "kind": "input",
+          "publicName": "invalid",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "invalid: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.input:invalidTypeMessage",
@@ -51062,6 +51290,16 @@
           "signature": "multiple: _angular_core.InputSignal<boolean>;"
         },
         {
+          "id": "./uploader#NeuUploaderComponent.input:pending",
+          "name": "pending",
+          "kind": "input",
+          "publicName": "pending",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "pending: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./uploader#NeuUploaderComponent.input:pickerDescription",
           "name": "pickerDescription",
           "kind": "input",
@@ -51112,6 +51350,16 @@
           "signature": "progressLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./uploader#NeuUploaderComponent.input:readonly",
+          "name": "readonly",
+          "kind": "input",
+          "publicName": "readonly",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./uploader#NeuUploaderComponent.input:removeAriaLabel",
           "name": "removeAriaLabel",
           "kind": "input",
@@ -51120,6 +51368,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "removeAriaLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./uploader#NeuUploaderComponent.input:required",
+          "name": "required",
+          "kind": "input",
+          "publicName": "required",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "required: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.input:retryAriaLabel",
@@ -51172,6 +51430,16 @@
           "signature": "size: _angular_core.InputSignal<NeuUploaderSize>;"
         },
         {
+          "id": "./uploader#NeuUploaderComponent.input:touched",
+          "name": "touched",
+          "kind": "input",
+          "publicName": "touched",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "touched: _angular_core.InputSignal<boolean>;"
+        },
+        {
           "id": "./uploader#NeuUploaderComponent.method:clearFiles",
           "name": "clearFiles",
           "kind": "method",
@@ -51180,12 +51448,36 @@
           "signature": "clearFiles(event?: Event): void;"
         },
         {
+          "id": "./uploader#NeuUploaderComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
           "id": "./uploader#NeuUploaderComponent.method:formatBytes",
           "name": "formatBytes",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "formatBytes(bytes: number): string;"
+        },
+        {
+          "id": "./uploader#NeuUploaderComponent.method:onBoundaryFocusIn",
+          "name": "onBoundaryFocusIn",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onBoundaryFocusIn(): void;"
+        },
+        {
+          "id": "./uploader#NeuUploaderComponent.method:onBoundaryFocusOut",
+          "name": "onBoundaryFocusOut",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onBoundaryFocusOut(event: FocusEvent): void;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.method:onDragLeave",
@@ -51217,7 +51509,7 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onDropzoneKey(event: KeyboardEvent): void;"
+          "signature": "onDropzoneKey(event: Event): void;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.method:onNativeInputChange",
@@ -51236,28 +51528,20 @@
           "signature": "openFilePicker(): void;"
         },
         {
-          "id": "./uploader#NeuUploaderComponent.method:registerOnChange",
-          "name": "registerOnChange",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnChange(fn: (value: File[]) => void): void;"
-        },
-        {
-          "id": "./uploader#NeuUploaderComponent.method:registerOnTouched",
-          "name": "registerOnTouched",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "registerOnTouched(fn: () => void): void;"
-        },
-        {
           "id": "./uploader#NeuUploaderComponent.method:removeFile",
           "name": "removeFile",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "removeFile(id: string, event?: Event): void;"
+        },
+        {
+          "id": "./uploader#NeuUploaderComponent.method:reset",
+          "name": "reset",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reset(): void;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.method:retryFile",
@@ -51268,14 +51552,6 @@
           "signature": "retryFile(id: string, event?: Event): void;"
         },
         {
-          "id": "./uploader#NeuUploaderComponent.method:setDisabledState",
-          "name": "setDisabledState",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setDisabledState(isDisabled: boolean): void;"
-        },
-        {
           "id": "./uploader#NeuUploaderComponent.method:setFileState",
           "name": "setFileState",
           "kind": "method",
@@ -51284,12 +51560,15 @@
           "signature": "setFileState(id: string, state: {\n    status?: NeuUploaderFileStatus;\n    progress?: number | null;\n    error?: string;\n}): void;"
         },
         {
-          "id": "./uploader#NeuUploaderComponent.method:writeValue",
-          "name": "writeValue",
-          "kind": "method",
+          "id": "./uploader#NeuUploaderComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
+          "required": false,
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "writeValue(value: File[] | File | null | undefined): void;"
+          "status": "SUPPORTED",
+          "signature": "readonly value: _angular_core.ModelSignal<readonly File[]>;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.output:cleared",
@@ -51339,7 +51618,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly filesSelected: _angular_core.OutputEmitterRef<File[]>;"
+          "signature": "readonly filesSelected: _angular_core.OutputEmitterRef<readonly File[]>;"
+        },
+        {
+          "id": "./uploader#NeuUploaderComponent.output:touch",
+          "name": "touch",
+          "kind": "output",
+          "publicName": "touch",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.property:describedBy",
@@ -51398,12 +51687,20 @@
           "signature": "readonly isDisabledFinal: _angular_core.Signal<boolean>;"
         },
         {
+          "id": "./uploader#NeuUploaderComponent.property:isInteractionBlocked",
+          "name": "isInteractionBlocked",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly isInteractionBlocked: _angular_core.Signal<boolean>;"
+        },
+        {
           "id": "./uploader#NeuUploaderComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuUploaderComponent, \"neu-uploader\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pickerDescription\": {\n        \"alias\": \"pickerDescription\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dropzoneLabel\": {\n        \"alias\": \"dropzoneLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"chooseLabel\": {\n        \"alias\": \"chooseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearLabel\": {\n        \"alias\": \"clearLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"progressLabel\": {\n        \"alias\": \"progressLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showPickerText\": {\n        \"alias\": \"showPickerText\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showProgress\": {\n        \"alias\": \"showProgress\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"listAriaLabel\": {\n        \"alias\": \"listAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"removeAriaLabel\": {\n        \"alias\": \"removeAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"acceptedTypesLabel\": {\n        \"alias\": \"acceptedTypesLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFileSizeTextLabel\": {\n        \"alias\": \"maxFileSizeTextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fileCountSingularLabel\": {\n        \"alias\": \"fileCountSingularLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fileCountPluralLabel\": {\n        \"alias\": \"fileCountPluralLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptySelectionMessage\": {\n        \"alias\": \"emptySelectionMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalidTypeMessage\": {\n        \"alias\": \"invalidTypeMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFileSizeMessage\": {\n        \"alias\": \"maxFileSizeMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"duplicateFileMessage\": {\n        \"alias\": \"duplicateFileMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFilesMessage\": {\n        \"alias\": \"maxFilesMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"accept\": {\n        \"alias\": \"accept\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiple\": {\n        \"alias\": \"multiple\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dropzone\": {\n        \"alias\": \"dropzone\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFiles\": {\n        \"alias\": \"maxFiles\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFileSize\": {\n        \"alias\": \"maxFileSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"progress\": {\n        \"alias\": \"progress\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fileStates\": {\n        \"alias\": \"fileStates\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewTemplate\": {\n        \"alias\": \"previewTemplate\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"retryLabel\": {\n        \"alias\": \"retryLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"retryAriaLabel\": {\n        \"alias\": \"retryAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"filesSelected\": \"filesSelected\";\n    \"fileRemoved\": \"fileRemoved\";\n    \"fileRetry\": \"fileRetry\";\n    \"filesRejected\": \"filesRejected\";\n    \"cleared\": \"cleared\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuUploaderComponent, \"neu-uploader\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"placeholder\": {\n        \"alias\": \"placeholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pickerDescription\": {\n        \"alias\": \"pickerDescription\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dropzoneLabel\": {\n        \"alias\": \"dropzoneLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"chooseLabel\": {\n        \"alias\": \"chooseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"clearLabel\": {\n        \"alias\": \"clearLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"progressLabel\": {\n        \"alias\": \"progressLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showPickerText\": {\n        \"alias\": \"showPickerText\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showProgress\": {\n        \"alias\": \"showProgress\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"listAriaLabel\": {\n        \"alias\": \"listAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"removeAriaLabel\": {\n        \"alias\": \"removeAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"acceptedTypesLabel\": {\n        \"alias\": \"acceptedTypesLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFileSizeTextLabel\": {\n        \"alias\": \"maxFileSizeTextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fileCountSingularLabel\": {\n        \"alias\": \"fileCountSingularLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fileCountPluralLabel\": {\n        \"alias\": \"fileCountPluralLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptySelectionMessage\": {\n        \"alias\": \"emptySelectionMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalidTypeMessage\": {\n        \"alias\": \"invalidTypeMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFileSizeMessage\": {\n        \"alias\": \"maxFileSizeMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"duplicateFileMessage\": {\n        \"alias\": \"duplicateFileMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFilesMessage\": {\n        \"alias\": \"maxFilesMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"accept\": {\n        \"alias\": \"accept\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"multiple\": {\n        \"alias\": \"multiple\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dropzone\": {\n        \"alias\": \"dropzone\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFiles\": {\n        \"alias\": \"maxFiles\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxFileSize\": {\n        \"alias\": \"maxFileSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"progress\": {\n        \"alias\": \"progress\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fileStates\": {\n        \"alias\": \"fileStates\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewTemplate\": {\n        \"alias\": \"previewTemplate\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"retryLabel\": {\n        \"alias\": \"retryLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"retryAriaLabel\": {\n        \"alias\": \"retryAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"filesSelected\": \"filesSelected\";\n    \"fileRemoved\": \"fileRemoved\";\n    \"fileRetry\": \"fileRetry\";\n    \"filesRejected\": \"filesRejected\";\n    \"cleared\": \"cleared\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
         },
         {
           "id": "./uploader#NeuUploaderComponent.property:ɵfac",
@@ -54852,6 +55149,18 @@
       "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./color-picker#NeuColorPickerComponent.input:dirty",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "dirty",
+      "publicName": "dirty",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./color-picker#NeuColorPickerComponent.input:disabled",
       "entrypoint": "./color-picker",
       "declaration": "NeuColorPickerComponent",
@@ -54862,6 +55171,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.input:errors",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "errors",
+      "publicName": "errors",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.input:hidden",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./color-picker#NeuColorPickerComponent.input:inputId",
@@ -54898,6 +55231,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly mode: _angular_core.InputSignal<NeuColorMode>;"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.input:pending",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "pending",
+      "publicName": "pending",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./color-picker#NeuColorPickerComponent.input:readonly",
@@ -54948,6 +55293,31 @@
       "signature": "readonly showChannels: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./color-picker#NeuColorPickerComponent.input:touched",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "touched",
+      "publicName": "touched",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.model:value",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "value",
+      "publicName": "value",
+      "changePublicName": "valueChange",
+      "kind": "model",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly value: _angular_core.ModelSignal<string>;"
+    },
+    {
       "id": "./color-picker#NeuColorPickerComponent.output:closed",
       "entrypoint": "./color-picker",
       "declaration": "NeuColorPickerComponent",
@@ -54960,30 +55330,6 @@
       "signature": "readonly closed: _angular_core.OutputEmitterRef<void>;"
     },
     {
-      "id": "./color-picker#NeuColorPickerComponent.output:colorChange",
-      "entrypoint": "./color-picker",
-      "declaration": "NeuColorPickerComponent",
-      "selector": "neu-color-picker",
-      "propertyName": "colorChange",
-      "publicName": "colorChange",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly colorChange: _angular_core.OutputEmitterRef<string>;"
-    },
-    {
-      "id": "./color-picker#NeuColorPickerComponent.output:colorChangeEnd",
-      "entrypoint": "./color-picker",
-      "declaration": "NeuColorPickerComponent",
-      "selector": "neu-color-picker",
-      "propertyName": "colorChangeEnd",
-      "publicName": "colorChangeEnd",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly colorChangeEnd: _angular_core.OutputEmitterRef<string>;"
-    },
-    {
       "id": "./color-picker#NeuColorPickerComponent.output:opened",
       "entrypoint": "./color-picker",
       "declaration": "NeuColorPickerComponent",
@@ -54994,6 +55340,30 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.output:touch",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "touch",
+      "publicName": "touch",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.output:valueCommitted",
+      "entrypoint": "./color-picker",
+      "declaration": "NeuColorPickerComponent",
+      "selector": "neu-color-picker",
+      "propertyName": "valueCommitted",
+      "publicName": "valueCommitted",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly valueCommitted: _angular_core.OutputEmitterRef<string>;"
     },
     {
       "id": "./compare#NeuCompareComponent.input:defaultValue",
@@ -57493,9 +57863,21 @@
       "signature": "readonly opened: _angular_core.OutputEmitterRef<void>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:cancelLabel",
+      "id": "./inline-editor#NeuInlineEditorControl.input:ariaDescribedBy",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
+      "selector": "neu-inline-editor",
+      "propertyName": "ariaDescribedBy",
+      "publicName": "ariaDescribedBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:cancelLabel",
+      "entrypoint": "./inline-editor",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "cancelLabel",
       "publicName": "cancelLabel",
@@ -57505,9 +57887,21 @@
       "signature": "readonly cancelLabel: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:disabled",
+      "id": "./inline-editor#NeuInlineEditorControl.input:dirty",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
+      "selector": "neu-inline-editor",
+      "propertyName": "dirty",
+      "publicName": "dirty",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:disabled",
+      "entrypoint": "./inline-editor",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "disabled",
       "publicName": "disabled",
@@ -57517,9 +57911,9 @@
       "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:editLabel",
+      "id": "./inline-editor#NeuInlineEditorControl.input:editLabel",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "editLabel",
       "publicName": "editLabel",
@@ -57529,9 +57923,9 @@
       "signature": "readonly editLabel: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:emptyLabel",
+      "id": "./inline-editor#NeuInlineEditorControl.input:emptyLabel",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "emptyLabel",
       "publicName": "emptyLabel",
@@ -57541,45 +57935,69 @@
       "signature": "readonly emptyLabel: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:max",
+      "id": "./inline-editor#NeuInlineEditorControl.input:errors",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
-      "propertyName": "max",
-      "publicName": "max",
+      "propertyName": "errors",
+      "publicName": "errors",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly max: _angular_core.InputSignal<number>;"
+      "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:min",
+      "id": "./inline-editor#NeuInlineEditorControl.input:hidden",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
-      "propertyName": "min",
-      "publicName": "min",
+      "propertyName": "hidden",
+      "publicName": "hidden",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly min: _angular_core.InputSignal<number>;"
+      "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:options",
+      "id": "./inline-editor#NeuInlineEditorControl.input:invalid",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
+      "selector": "neu-inline-editor",
+      "propertyName": "invalid",
+      "publicName": "invalid",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:options",
+      "entrypoint": "./inline-editor",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "options",
       "publicName": "options",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly options: _angular_core.InputSignal<NeuSelectOption<string, unknown>[]>;"
+      "signature": "readonly options: _angular_core.InputSignal<readonly unknown[]>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:placeholder",
+      "id": "./inline-editor#NeuInlineEditorControl.input:pending",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
+      "selector": "neu-inline-editor",
+      "propertyName": "pending",
+      "publicName": "pending",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:placeholder",
+      "entrypoint": "./inline-editor",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "placeholder",
       "publicName": "placeholder",
@@ -57589,9 +58007,9 @@
       "signature": "readonly placeholder: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:readonly",
+      "id": "./inline-editor#NeuInlineEditorControl.input:readonly",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "readonly",
       "publicName": "readonly",
@@ -57601,21 +58019,21 @@
       "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:rows",
+      "id": "./inline-editor#NeuInlineEditorControl.input:required",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
-      "propertyName": "rows",
-      "publicName": "rows",
+      "propertyName": "required",
+      "publicName": "required",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly rows: _angular_core.InputSignal<number>;"
+      "signature": "readonly required: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:saveLabel",
+      "id": "./inline-editor#NeuInlineEditorControl.input:saveLabel",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "saveLabel",
       "publicName": "saveLabel",
@@ -57625,9 +58043,9 @@
       "signature": "readonly saveLabel: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:saveOnBlur",
+      "id": "./inline-editor#NeuInlineEditorControl.input:saveOnBlur",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "saveOnBlur",
       "publicName": "saveOnBlur",
@@ -57637,9 +58055,9 @@
       "signature": "readonly saveOnBlur: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:size",
+      "id": "./inline-editor#NeuInlineEditorControl.input:size",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "size",
       "publicName": "size",
@@ -57649,9 +58067,9 @@
       "signature": "readonly size: _angular_core.InputSignal<NeuInlineEditorSize>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:startInEdit",
+      "id": "./inline-editor#NeuInlineEditorControl.input:startInEdit",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "startInEdit",
       "publicName": "startInEdit",
@@ -57661,21 +58079,21 @@
       "signature": "readonly startInEdit: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:step",
+      "id": "./inline-editor#NeuInlineEditorControl.input:touched",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
-      "propertyName": "step",
-      "publicName": "step",
+      "propertyName": "touched",
+      "publicName": "touched",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly step: _angular_core.InputSignal<number>;"
+      "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:type",
+      "id": "./inline-editor#NeuInlineEditorControl.input:type",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "type",
       "publicName": "type",
@@ -57685,64 +58103,65 @@
       "signature": "readonly type: _angular_core.InputSignal<NeuInlineEditorType>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.input:value",
+      "id": "./inline-editor#NeuInlineEditorControl.model:value",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "value",
       "publicName": "value",
-      "kind": "input",
+      "changePublicName": "valueChange",
+      "kind": "model",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly value: _angular_core.InputSignal<string | number | null>;"
+      "signature": "readonly value: _angular_core.ModelSignal<V>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.output:editCancel",
+      "id": "./inline-editor#NeuInlineEditorControl.output:editCancel",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "editCancel",
       "publicName": "editCancel",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly editCancel: _angular_core.OutputEmitterRef<string | number | null>;"
+      "signature": "readonly editCancel: _angular_core.OutputEmitterRef<V>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.output:editCommit",
+      "id": "./inline-editor#NeuInlineEditorControl.output:editStart",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
-      "selector": "neu-inline-editor",
-      "propertyName": "editCommit",
-      "publicName": "editCommit",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly editCommit: _angular_core.OutputEmitterRef<NeuInlineEditorCommitEvent<string | number | null>>;"
-    },
-    {
-      "id": "./inline-editor#NeuInlineEditorComponent.output:editStart",
-      "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
       "propertyName": "editStart",
       "publicName": "editStart",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly editStart: _angular_core.OutputEmitterRef<string | number | null>;"
+      "signature": "readonly editStart: _angular_core.OutputEmitterRef<V>;"
     },
     {
-      "id": "./inline-editor#NeuInlineEditorComponent.output:valueChange",
+      "id": "./inline-editor#NeuInlineEditorControl.output:touch",
       "entrypoint": "./inline-editor",
-      "declaration": "NeuInlineEditorComponent",
+      "declaration": "NeuInlineEditorControl",
       "selector": "neu-inline-editor",
-      "propertyName": "valueChange",
-      "publicName": "valueChange",
+      "propertyName": "touch",
+      "publicName": "touch",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string | number | null>;"
+      "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.output:valueCommitted",
+      "entrypoint": "./inline-editor",
+      "declaration": "NeuInlineEditorControl",
+      "selector": "neu-inline-editor",
+      "propertyName": "valueCommitted",
+      "publicName": "valueCommitted",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly valueCommitted: _angular_core.OutputEmitterRef<NeuInlineEditorValueCommitEvent<V>>;"
     },
     {
       "id": "./input-mask#NeuInputMaskComponent.input:dirty",
@@ -63468,6 +63887,18 @@
       "signature": "valueChange: _angular_core.OutputEmitterRef<number>;"
     },
     {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:dirty",
+      "entrypoint": "./rich-text-editor",
+      "declaration": "NeuRichTextEditorComponent",
+      "selector": "neu-rich-text-editor",
+      "propertyName": "dirty",
+      "publicName": "dirty",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dirty: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.input:disabled",
       "entrypoint": "./rich-text-editor",
       "declaration": "NeuRichTextEditorComponent",
@@ -63504,6 +63935,30 @@
       "signature": "readonly errorMessage: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:errors",
+      "entrypoint": "./rich-text-editor",
+      "declaration": "NeuRichTextEditorComponent",
+      "selector": "neu-rich-text-editor",
+      "propertyName": "errors",
+      "publicName": "errors",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:hidden",
+      "entrypoint": "./rich-text-editor",
+      "declaration": "NeuRichTextEditorComponent",
+      "selector": "neu-rich-text-editor",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hidden: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.input:hint",
       "entrypoint": "./rich-text-editor",
       "declaration": "NeuRichTextEditorComponent",
@@ -63514,6 +63969,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly hint: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:invalid",
+      "entrypoint": "./rich-text-editor",
+      "declaration": "NeuRichTextEditorComponent",
+      "selector": "neu-rich-text-editor",
+      "propertyName": "invalid",
+      "publicName": "invalid",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly invalid: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.input:label",
@@ -63564,6 +64031,18 @@
       "signature": "readonly minHeight: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:pending",
+      "entrypoint": "./rich-text-editor",
+      "declaration": "NeuRichTextEditorComponent",
+      "selector": "neu-rich-text-editor",
+      "propertyName": "pending",
+      "publicName": "pending",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly pending: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.input:placeholder",
       "entrypoint": "./rich-text-editor",
       "declaration": "NeuRichTextEditorComponent",
@@ -63600,6 +64079,18 @@
       "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:required",
+      "entrypoint": "./rich-text-editor",
+      "declaration": "NeuRichTextEditorComponent",
+      "selector": "neu-rich-text-editor",
+      "propertyName": "required",
+      "publicName": "required",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly required: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.input:showPreview",
       "entrypoint": "./rich-text-editor",
       "declaration": "NeuRichTextEditorComponent",
@@ -63624,16 +64115,16 @@
       "signature": "readonly size: _angular_core.InputSignal<NeuRichTextEditorSize>;"
     },
     {
-      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:toolbarAriaLabel",
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:touched",
       "entrypoint": "./rich-text-editor",
       "declaration": "NeuRichTextEditorComponent",
       "selector": "neu-rich-text-editor",
-      "propertyName": "toolbarAriaLabel",
-      "publicName": "toolbarAriaLabel",
+      "propertyName": "touched",
+      "publicName": "touched",
       "kind": "input",
       "required": false,
-      "status": "DEPRECATED",
-      "signature": "readonly toolbarAriaLabel: _angular_core.InputSignal<string>;"
+      "status": "SUPPORTED",
+      "signature": "readonly touched: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.input:variables",
@@ -63672,6 +64163,19 @@
       "signature": "readonly variablesLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.model:value",
+      "entrypoint": "./rich-text-editor",
+      "declaration": "NeuRichTextEditorComponent",
+      "selector": "neu-rich-text-editor",
+      "propertyName": "value",
+      "publicName": "value",
+      "changePublicName": "valueChange",
+      "kind": "model",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly value: _angular_core.ModelSignal<string>;"
+    },
+    {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.output:imageRejected",
       "entrypoint": "./rich-text-editor",
       "declaration": "NeuRichTextEditorComponent",
@@ -63684,16 +64188,28 @@
       "signature": "readonly imageRejected: _angular_core.OutputEmitterRef<NeuRichTextImageRejectedEvent>;"
     },
     {
-      "id": "./rich-text-editor#NeuRichTextEditorComponent.output:valueChange",
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.output:touch",
       "entrypoint": "./rich-text-editor",
       "declaration": "NeuRichTextEditorComponent",
       "selector": "neu-rich-text-editor",
-      "propertyName": "valueChange",
-      "publicName": "valueChange",
+      "propertyName": "touch",
+      "publicName": "touch",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly valueChange: _angular_core.OutputEmitterRef<string>;"
+      "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.output:valueCommitted",
+      "entrypoint": "./rich-text-editor",
+      "declaration": "NeuRichTextEditorComponent",
+      "selector": "neu-rich-text-editor",
+      "propertyName": "valueCommitted",
+      "publicName": "valueCommitted",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly valueCommitted: _angular_core.OutputEmitterRef<string>;"
     },
     {
       "id": "./ripple#NeuRippleDirective.input:neuRipple",
@@ -70326,6 +70842,18 @@
       "signature": "clearLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./uploader#NeuUploaderComponent.input:dirty",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "dirty",
+      "publicName": "dirty",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "dirty: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./uploader#NeuUploaderComponent.input:disabled",
       "entrypoint": "./uploader",
       "declaration": "NeuUploaderComponent",
@@ -70335,7 +70863,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "disabled: _angular_core.InputSignal<boolean>;"
+      "signature": "readonly disabled: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./uploader#NeuUploaderComponent.input:dropzone",
@@ -70398,6 +70926,18 @@
       "signature": "errorMessage: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./uploader#NeuUploaderComponent.input:errors",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "errors",
+      "publicName": "errors",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "errors: _angular_core.InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+    },
+    {
       "id": "./uploader#NeuUploaderComponent.input:fileCountPluralLabel",
       "entrypoint": "./uploader",
       "declaration": "NeuUploaderComponent",
@@ -70434,6 +70974,18 @@
       "signature": "fileStates: _angular_core.InputSignal<Record<string, {\n    status?: NeuUploaderFileStatus;\n    progress?: number | null;\n    error?: string;\n}>>;"
     },
     {
+      "id": "./uploader#NeuUploaderComponent.input:hidden",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "hidden: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./uploader#NeuUploaderComponent.input:hint",
       "entrypoint": "./uploader",
       "declaration": "NeuUploaderComponent",
@@ -70456,6 +71008,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly inputId: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.input:invalid",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "invalid",
+      "publicName": "invalid",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "invalid: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./uploader#NeuUploaderComponent.input:invalidTypeMessage",
@@ -70566,6 +71130,18 @@
       "signature": "multiple: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./uploader#NeuUploaderComponent.input:pending",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "pending",
+      "publicName": "pending",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "pending: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./uploader#NeuUploaderComponent.input:pickerDescription",
       "entrypoint": "./uploader",
       "declaration": "NeuUploaderComponent",
@@ -70626,6 +71202,18 @@
       "signature": "progressLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./uploader#NeuUploaderComponent.input:readonly",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "readonly",
+      "publicName": "readonly",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly readonly: _angular_core.InputSignal<boolean>;"
+    },
+    {
       "id": "./uploader#NeuUploaderComponent.input:removeAriaLabel",
       "entrypoint": "./uploader",
       "declaration": "NeuUploaderComponent",
@@ -70636,6 +71224,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "removeAriaLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.input:required",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "required",
+      "publicName": "required",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "required: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./uploader#NeuUploaderComponent.input:retryAriaLabel",
@@ -70698,6 +71298,31 @@
       "signature": "size: _angular_core.InputSignal<NeuUploaderSize>;"
     },
     {
+      "id": "./uploader#NeuUploaderComponent.input:touched",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "touched",
+      "publicName": "touched",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "touched: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.model:value",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "value",
+      "publicName": "value",
+      "changePublicName": "valueChange",
+      "kind": "model",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly value: _angular_core.ModelSignal<readonly File[]>;"
+    },
+    {
       "id": "./uploader#NeuUploaderComponent.output:cleared",
       "entrypoint": "./uploader",
       "declaration": "NeuUploaderComponent",
@@ -70755,7 +71380,19 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly filesSelected: _angular_core.OutputEmitterRef<File[]>;"
+      "signature": "readonly filesSelected: _angular_core.OutputEmitterRef<readonly File[]>;"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.output:touch",
+      "entrypoint": "./uploader",
+      "declaration": "NeuUploaderComponent",
+      "selector": "neu-uploader",
+      "propertyName": "touch",
+      "publicName": "touch",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
     },
     {
       "id": "./virtual-list#NeuVirtualListComponent.input:emptyLabel",
@@ -71103,7 +71740,7 @@
   ],
   "summary": {
     "entrypoints": 102,
-    "exportedDeclarations": 825,
+    "exportedDeclarations": 828,
     "declarationKinds": {
       "class": 14,
       "component": 99,
@@ -71113,22 +71750,22 @@
       "reexport": 49,
       "service": 11,
       "token": 4,
-      "type": 195,
+      "type": 198,
       "variable": 1
     },
-    "publicSymbols": 5705,
+    "publicSymbols": 5734,
     "statuses": {
-      "SUPPORTED": 3729,
+      "SUPPORTED": 3761,
       "COMPATIBILITY": 2,
-      "DEPRECATED": 2,
-      "INTERNAL/UNSUPPORTED": 1972,
+      "DEPRECATED": 1,
+      "INTERNAL/UNSUPPORTED": 1970,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1292,
-      "output": 267,
-      "model": 19,
-      "total": 1578
+      "input": 1314,
+      "output": 269,
+      "model": 23,
+      "total": 1606
     },
     "designTokens": 257
   }

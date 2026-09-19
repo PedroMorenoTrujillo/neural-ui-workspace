@@ -131,6 +131,19 @@ try {
     'input-tags-family': `import {NeuInputTagsComponent,NeuInputTagsItemDirective,NeuInputTagsOptionDirective} from '@neural-ui/core/input-tags';
 const simple=['Angular'];const rich=[{id:1,label:'Angular'}];
 export {NeuInputTagsComponent,NeuInputTagsItemDirective,NeuInputTagsOptionDirective,simple,rich};`,
+    'inline-editor':
+      "import {NeuInlineEditorComponent} from '@neural-ui/core/inline-editor';export{NeuInlineEditorComponent};",
+    'color-picker':
+      "import {NeuColorPickerComponent} from '@neural-ui/core/color-picker';export{NeuColorPickerComponent};",
+    'rich-text-editor':
+      "import {NeuRichTextEditorComponent} from '@neural-ui/core/rich-text-editor';export{NeuRichTextEditorComponent};",
+    uploader:
+      "import {NeuUploaderComponent} from '@neural-ui/core/uploader';export{NeuUploaderComponent};",
+    'specialized-family': `import {NeuInlineEditorComponent} from '@neural-ui/core/inline-editor';
+import {NeuColorPickerComponent} from '@neural-ui/core/color-picker';
+import {NeuRichTextEditorComponent} from '@neural-ui/core/rich-text-editor';
+import {NeuUploaderComponent} from '@neural-ui/core/uploader';
+export {NeuInlineEditorComponent,NeuColorPickerComponent,NeuRichTextEditorComponent,NeuUploaderComponent};`,
     'selector-family': `import {NeuSelectComponent} from '@neural-ui/core/select';
 import {NeuAutocompleteComponent} from '@neural-ui/core/autocomplete';
 import {NeuCascadeSelectComponent} from '@neural-ui/core/cascade-select';
@@ -158,7 +171,11 @@ import {NeuCascadeSelectComponent} from '@neural-ui/core/cascade-select';
 import {NeuListboxComponent} from '@neural-ui/core/listbox';
 import {NeuToggleButtonGroupComponent} from '@neural-ui/core/toggle-button-group';
 import {NeuInputTagsComponent} from '@neural-ui/core/input-tags';
-export {FormControl,form,FormField,NeuTextareaComponent,NeuPasswordComponent,NeuInputMaskComponent,NeuInputOTPComponent,NeuSwitchComponent,NeuRadioGroupComponent,NeuRadioComponent,NeuNumberInputComponent,NeuKnobComponent,NeuDateInputComponent,NeuSelectComponent,NeuAutocompleteComponent,NeuCascadeSelectComponent,NeuListboxComponent,NeuToggleButtonGroupComponent,NeuInputTagsComponent};`,
+import {NeuInlineEditorComponent} from '@neural-ui/core/inline-editor';
+import {NeuColorPickerComponent} from '@neural-ui/core/color-picker';
+import {NeuRichTextEditorComponent} from '@neural-ui/core/rich-text-editor';
+import {NeuUploaderComponent} from '@neural-ui/core/uploader';
+export {FormControl,form,FormField,NeuTextareaComponent,NeuPasswordComponent,NeuInputMaskComponent,NeuInputOTPComponent,NeuSwitchComponent,NeuRadioGroupComponent,NeuRadioComponent,NeuNumberInputComponent,NeuKnobComponent,NeuDateInputComponent,NeuSelectComponent,NeuAutocompleteComponent,NeuCascadeSelectComponent,NeuListboxComponent,NeuToggleButtonGroupComponent,NeuInputTagsComponent,NeuInlineEditorComponent,NeuColorPickerComponent,NeuRichTextEditorComponent,NeuUploaderComponent};`,
   };
   const report = {
     method: 'minified ESM consumers; Angular/CDK/ng-icons/RxJS external; gzip 9; Brotli 11',
@@ -170,7 +187,7 @@ export {FormControl,form,FormField,NeuTextareaComponent,NeuPasswordComponent,Neu
     imports: {},
     dependencies: {},
   };
-  for (const name of ['number-input', 'knob', 'date-input', 'select', 'autocomplete', 'cascade-select', 'listbox', 'toggle-button-group', 'input-tags']) {
+  for (const name of ['number-input', 'knob', 'date-input', 'select', 'autocomplete', 'cascade-select', 'listbox', 'toggle-button-group', 'input-tags', 'inline-editor', 'color-picker', 'rich-text-editor', 'uploader']) {
     const before = entry(baseline, name);
     const after = entry(candidate, name);
     report.entries[name] = { before, after, delta: delta(before, after) };

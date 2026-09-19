@@ -53,6 +53,18 @@
   &__control {
     flex: 1 1 auto;
     min-width: 8rem;
+    min-height: 2rem;
+    padding: var(--neu-space-2, 0.5rem) var(--neu-space-3, 0.75rem);
+    border: 1px solid var(--neu-border, #cbd5e1);
+    border-radius: var(--neu-radius-sm, 6px);
+    background: var(--neu-surface, #fff);
+    color: inherit;
+    font: inherit;
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--neu-focus-ring, 0 0 0 3px rgb(14 165 233 / 0.2));
+    }
   }
 
   &__actions {

@@ -311,7 +311,7 @@ describe('H9-A2 zoneless runtime event contracts', () => {
   it('ColorPicker emits one completion per changed continuous edit, not per input/preset/write/cancel', async () => {
     const f = mount(NeuColorPickerComponent);
     const c = f.componentInstance;
-    const ends = capture(c.colorChangeEnd),
+    const ends = capture(c.valueCommitted),
       opened = capture(c.opened),
       closed = capture(c.closed);
     c['_toggle']();
@@ -326,22 +326,23 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     hue.dispatchEvent(new Event('change'));
     expect(ends).toHaveLength(1);
     inputText(hue, '140');
-    c.writeValue('#ff0000');
+    c.value.set('#ff0000');
     hue.dispatchEvent(new Event('change'));
     expect(ends).toHaveLength(1);
     c['_pickSwatch']('#00ff00');
+    expect(ends).toHaveLength(2);
     c['_onTextChange']('#0000ff');
     c['finishColorChange']();
-    expect(ends).toHaveLength(1);
+    expect(ends).toHaveLength(2);
     inputText(hue, '200');
     c['cancelColorChange']();
     c['finishColorChange']();
-    expect(ends).toHaveLength(1);
-    c.setDisabledState(true);
+    expect(ends).toHaveLength(2);
+    f.componentRef.setInput('disabled', true);
     inputText(hue, '20');
     c['finishColorChange']();
-    expect(ends).toHaveLength(1);
-    c.setDisabledState(false);
+    expect(ends).toHaveLength(2);
+    f.componentRef.setInput('disabled', false);
     c['_toggle']();
     f.detectChanges();
     expect(closed).toHaveLength(1);
@@ -594,9 +595,9 @@ describe('H9-A2 overlay and pointer cancellation races', () => {
   it('ColorPicker canvas emits one completion on pointer release and cancels lost capture and pending edits', async () => {
     const f = mount(NeuColorPickerComponent);
     const c = f.componentInstance;
-    const ends = capture(c.colorChangeEnd);
+    const ends = capture(c.valueCommitted);
     const touched = vi.fn();
-    c.registerOnTouched(touched);
+    c.touch.subscribe(touched);
     c['_toggle']();
     f.detectChanges();
     await f.whenStable();
@@ -625,7 +626,8 @@ describe('H9-A2 overlay and pointer cancellation races', () => {
     (f.nativeElement.querySelector('.neu-cp__trigger') as HTMLElement).dispatchEvent(
       new Event('blur'),
     );
-    expect(touched).toHaveBeenCalledTimes(2);
+    await Promise.resolve();
+    expect(touched).toHaveBeenCalledTimes(1);
     canvas.dispatchEvent(new MouseEvent('pointerdown', { clientX: 70, clientY: 80 }));
     f.destroy();
     c['finishColorChange']();

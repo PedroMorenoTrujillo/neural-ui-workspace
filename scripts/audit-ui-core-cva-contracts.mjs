@@ -26,6 +26,7 @@ function componentFiles(dir) {
 }
 
 const requiredMethods = ['writeValue', 'registerOnChange', 'registerOnTouched', 'setDisabledState'];
+const expectedLegacyCva = 'projects/ui-core/tree-select/neu-tree-select.component.ts';
 const expectedSignalControls = new Map([
   ['projects/ui-core/input/neu-input.component.ts', /readonly\s+value\s*=\s*model<string>\(''\)/],
   [
@@ -85,6 +86,22 @@ const expectedSignalControls = new Map([
   [
     'projects/ui-core/input-tags/neu-input-tags.component.ts',
     /readonly\s+value\s*=\s*model<readonly\s+V\[\]>\(\[\]\)/,
+  ],
+  [
+    'projects/ui-core/inline-editor/neu-inline-editor.component.ts',
+    /readonly\s+value\s*=\s*model<V>\(/,
+  ],
+  [
+    'projects/ui-core/color-picker/neu-color-picker.component.ts',
+    /readonly\s+value\s*=\s*model<string>\(/,
+  ],
+  [
+    'projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts',
+    /readonly\s+value\s*=\s*model<string>\(''\)/,
+  ],
+  [
+    'projects/ui-core/uploader/neu-uploader.component.ts',
+    /readonly\s+value\s*=\s*model<readonly\s+File\[\]>\(\[\]\)/,
   ],
 ]);
 
@@ -180,14 +197,19 @@ for (const file of componentFiles(uiCore)) {
   }
 }
 
-if (cvaComponents.length !== 5) {
+if (cvaComponents.length !== 1) {
   violations.push(
-    `expected 5 LEGACY-CVA-YET-TO-MIGRATE components, found ${cvaComponents.length}`,
+    `expected 1 LEGACY-CVA-YET-TO-MIGRATE component, found ${cvaComponents.length}`,
+  );
+}
+if (cvaComponents.length === 1 && cvaComponents[0] !== expectedLegacyCva) {
+  violations.push(
+    `expected TreeSelect to be the only LEGACY-CVA-YET-TO-MIGRATE component, found ${cvaComponents[0]}`,
   );
 }
 
-if (signalComponents.length !== 17) {
-  violations.push(`expected 17 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
+if (signalComponents.length !== 21) {
+  violations.push(`expected 21 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
 }
 
 for (const expected of expectedSignalControls.keys()) {

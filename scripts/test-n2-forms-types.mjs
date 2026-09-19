@@ -73,6 +73,11 @@ for (const sourceName of [
   'toggleMultiple',
   'stringTags',
   'mappedTags',
+  'inlineText',
+  'inlineNumber',
+  'colorPicker',
+  'richTextEditor',
+  'uploader',
 ]) {
   if (!diagnostics.includes(sourceName)) {
     console.error(`Missing invalid-value type coverage for ${sourceName}.`);
@@ -81,12 +86,12 @@ for (const sourceName of [
   }
 }
 
-if ((diagnostics.match(/TS2345/g) ?? []).length < 42) {
-  console.error('Expected at least 42 explicit invalid-value assignment diagnostics.');
+if ((diagnostics.match(/TS2345/g) ?? []).length < 54) {
+  console.error('Expected at least 54 explicit invalid-value assignment diagnostics.');
   console.error(diagnostics);
   process.exit(1);
 }
 
 console.log(
-  'N2 Forms types passed (17 Signal Forms controls accepted; InputTags readonly arrays and T/V separation are enforced).',
+  'N2 Forms types passed (21 Signal Forms controls accepted; specialized value contracts are enforced).',
 );

@@ -15,6 +15,10 @@ import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
 import { NeuListboxComponent } from '@neural-ui/core/listbox';
 import { NeuToggleButtonGroupComponent } from '@neural-ui/core/toggle-button-group';
 import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
+import { NeuInlineEditorComponent } from '@neural-ui/core/inline-editor';
+import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
+import { NeuRichTextEditorComponent } from '@neural-ui/core/rich-text-editor';
+import { NeuUploaderComponent } from '@neural-ui/core/uploader';
 
 declare const input: NeuInputComponent;
 declare const checkbox: NeuCheckboxComponent;
@@ -46,6 +50,11 @@ declare const toggleSingle: NeuToggleButtonGroupComponent<Person, number, 'singl
 declare const toggleMultiple: NeuToggleButtonGroupComponent<Person, number, 'multiple'>;
 declare const stringTags: NeuInputTagsComponent<string, string>;
 declare const mappedTags: NeuInputTagsComponent<Person, number>;
+declare const inlineText: NeuInlineEditorComponent<'text'>;
+declare const inlineNumber: NeuInlineEditorComponent<'number'>;
+declare const colorPicker: NeuColorPickerComponent;
+declare const richTextEditor: NeuRichTextEditorComponent;
+declare const uploader: NeuUploaderComponent;
 
 input.value.set(null);
 input.value.set(1);
@@ -94,3 +103,15 @@ stringTags.value.set('Angular');
 stringTags.value.set(null);
 mappedTags.value.set(["1"]);
 mappedTags.value.set(1);
+inlineText.value.set(null);
+inlineText.value.set(1);
+inlineNumber.value.set('12');
+inlineNumber.value.set(undefined);
+colorPicker.value.set(null);
+colorPicker.value.set(1);
+richTextEditor.value.set(null);
+richTextEditor.value.set({});
+uploader.value.set(new File([], 'one.txt'));
+uploader.value.set(null);
+uploader.value.set(undefined);
+uploader.value.set('file');

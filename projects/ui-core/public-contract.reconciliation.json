@@ -4,18 +4,18 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1578,
-    "bindingDelta": 411,
-    "mapped": 827,
+    "declarationBindings": 1606,
+    "bindingDelta": 439,
+    "mapped": 817,
     "aliasCorrections": 4,
-    "missingOldEntries": 334,
-    "newlyDiscovered": 745,
+    "missingOldEntries": 344,
+    "newlyDiscovered": 783,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
       "declaration-or-selector-was-not-recorded": 431,
-      "model-binding-was-not-supported": 19,
-      "multiline-annotated-or-compound-declaration-was-missed": 289
+      "model-binding-was-not-supported": 23,
+      "multiline-annotated-or-compound-declaration-was-missed": 323
     }
   },
   "mappings": [
@@ -636,10 +636,6 @@
       "newId": "./color-picker#NeuColorPickerComponent.input:required"
     },
     {
-      "oldToken": "color-picker/neu-color-picker.component.ts#output:colorChange",
-      "newId": "./color-picker#NeuColorPickerComponent.output:colorChange"
-    },
-    {
       "oldToken": "compare/neu-compare.component.ts#input:ariaLabel",
       "newId": "./compare#NeuCompareIndicatorComponent.input:ariaLabel"
     },
@@ -1040,87 +1036,59 @@
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:cancelLabel",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:cancelLabel"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:cancelLabel"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:disabled",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:disabled"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:disabled"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:editLabel",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:editLabel"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:editLabel"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:emptyLabel",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:emptyLabel"
-    },
-    {
-      "oldToken": "inline-editor/neu-inline-editor.component.ts#input:max",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:max"
-    },
-    {
-      "oldToken": "inline-editor/neu-inline-editor.component.ts#input:min",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:min"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:emptyLabel"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:options",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:options"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:options"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:placeholder",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:placeholder"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:placeholder"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:readonly",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:readonly"
-    },
-    {
-      "oldToken": "inline-editor/neu-inline-editor.component.ts#input:rows",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:rows"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:readonly"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:saveLabel",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:saveLabel"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:saveLabel"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:saveOnBlur",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:saveOnBlur"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:saveOnBlur"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:size",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:size"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:size"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:startInEdit",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:startInEdit"
-    },
-    {
-      "oldToken": "inline-editor/neu-inline-editor.component.ts#input:step",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:step"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:startInEdit"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#input:type",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:type"
-    },
-    {
-      "oldToken": "inline-editor/neu-inline-editor.component.ts#input:value",
-      "newId": "./inline-editor#NeuInlineEditorComponent.input:value"
+      "newId": "./inline-editor#NeuInlineEditorControl.input:type"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#output:editCancel",
-      "newId": "./inline-editor#NeuInlineEditorComponent.output:editCancel"
-    },
-    {
-      "oldToken": "inline-editor/neu-inline-editor.component.ts#output:editCommit",
-      "newId": "./inline-editor#NeuInlineEditorComponent.output:editCommit"
+      "newId": "./inline-editor#NeuInlineEditorControl.output:editCancel"
     },
     {
       "oldToken": "inline-editor/neu-inline-editor.component.ts#output:editStart",
-      "newId": "./inline-editor#NeuInlineEditorComponent.output:editStart"
-    },
-    {
-      "oldToken": "inline-editor/neu-inline-editor.component.ts#output:valueChange",
-      "newId": "./inline-editor#NeuInlineEditorComponent.output:valueChange"
+      "newId": "./inline-editor#NeuInlineEditorControl.output:editStart"
     },
     {
       "oldToken": "input-mask/neu-input-mask.component.ts#input:disabled",
@@ -1863,10 +1831,6 @@
       "newId": "./rich-text-editor#NeuRichTextEditorComponent.input:size"
     },
     {
-      "oldToken": "rich-text-editor/neu-rich-text-editor.component.ts#input:toolbarAriaLabel",
-      "newId": "./rich-text-editor#NeuRichTextEditorComponent.input:toolbarAriaLabel"
-    },
-    {
       "oldToken": "rich-text-editor/neu-rich-text-editor.component.ts#input:variables",
       "newId": "./rich-text-editor#NeuRichTextEditorComponent.input:variables"
     },
@@ -1881,10 +1845,6 @@
     {
       "oldToken": "rich-text-editor/neu-rich-text-editor.component.ts#output:imageRejected",
       "newId": "./rich-text-editor#NeuRichTextEditorComponent.output:imageRejected"
-    },
-    {
-      "oldToken": "rich-text-editor/neu-rich-text-editor.component.ts#output:valueChange",
-      "newId": "./rich-text-editor#NeuRichTextEditorComponent.output:valueChange"
     },
     {
       "oldToken": "ripple/neu-ripple.directive.ts#input:neuRipple",
@@ -3374,9 +3334,17 @@
     "chart/neu-chart.component.ts#input:type",
     "checkbox/neu-checkbox.component.ts#input:checked",
     "checkbox/neu-checkbox.component.ts#output:checkedChange",
+    "color-picker/neu-color-picker.component.ts#output:colorChange",
     "date-input/neu-date-input.component.ts#input:multiple",
     "date-input/neu-date-input.component.ts#input:type",
     "date-input/neu-date-input.component.ts#output:rangeChange",
+    "inline-editor/neu-inline-editor.component.ts#input:max",
+    "inline-editor/neu-inline-editor.component.ts#input:min",
+    "inline-editor/neu-inline-editor.component.ts#input:rows",
+    "inline-editor/neu-inline-editor.component.ts#input:step",
+    "inline-editor/neu-inline-editor.component.ts#input:value",
+    "inline-editor/neu-inline-editor.component.ts#output:editCommit",
+    "inline-editor/neu-inline-editor.component.ts#output:valueChange",
     "input-mask/neu-input-mask.component.ts#output:valueChange",
     "input-otp/neu-input-otp.component.ts#output:valueChange",
     "input/neu-input.component.ts#input:maxlength",
@@ -3497,6 +3465,8 @@
     "number-input/neu-number-input.component.ts#input:vertical",
     "number-input/neu-number-input.component.ts#output:valueChange",
     "password/neu-password.component.ts#output:valueChange",
+    "rich-text-editor/neu-rich-text-editor.component.ts#input:toolbarAriaLabel",
+    "rich-text-editor/neu-rich-text-editor.component.ts#output:valueChange",
     "select/neu-select.component.ts#input:editable",
     "select/neu-select.component.ts#input:emptyFilterMessage",
     "select/neu-select.component.ts#input:filter",
@@ -4066,6 +4036,22 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./color-picker#NeuColorPickerComponent.input:dirty",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.input:errors",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.input:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.input:pending",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./color-picker#NeuColorPickerComponent.input:showAlpha",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -4074,15 +4060,27 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./color-picker#NeuColorPickerComponent.input:touched",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
       "id": "./color-picker#NeuColorPickerComponent.output:closed",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./color-picker#NeuColorPickerComponent.output:colorChangeEnd",
+      "id": "./color-picker#NeuColorPickerComponent.output:opened",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./color-picker#NeuColorPickerComponent.output:opened",
+      "id": "./color-picker#NeuColorPickerComponent.output:touch",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.output:valueCommitted",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -4496,6 +4494,50 @@
     {
       "id": "./image-viewer#NeuImageViewerDirective.output:opened",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:ariaDescribedBy",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:dirty",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:errors",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:invalid",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:pending",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:required",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.input:touched",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.output:touch",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./inline-editor#NeuInlineEditorControl.output:valueCommitted",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./input-mask#NeuInputMaskComponent.input:dirty",
@@ -5714,6 +5756,46 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:dirty",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:errors",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:invalid",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:pending",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:required",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.input:touched",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.output:touch",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rich-text-editor#NeuRichTextEditorComponent.output:valueCommitted",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./scroll-top#NeuScrollTopComponent.input:behavior",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -6634,11 +6716,51 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./uploader#NeuUploaderComponent.input:dirty",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.input:errors",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./uploader#NeuUploaderComponent.input:fileStates",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./uploader#NeuUploaderComponent.input:hidden",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.input:invalid",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.input:pending",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./uploader#NeuUploaderComponent.input:previewTemplate",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.input:readonly",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.input:required",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.input:touched",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./uploader#NeuUploaderComponent.output:touch",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
