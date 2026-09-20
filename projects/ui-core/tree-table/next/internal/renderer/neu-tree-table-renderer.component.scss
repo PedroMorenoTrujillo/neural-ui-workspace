@@ -3,6 +3,32 @@
   min-inline-size: 0;
 }
 
+.neu-tree-table2__query-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-block-end: 0.5rem;
+}
+
+.neu-tree-table2__search,
+.neu-tree-table2__filter {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  font: inherit;
+}
+
+.neu-tree-table2__sort {
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+
+.neu-tree-table2__filter-row > th {
+  font-weight: normal;
+}
+
 .neu-tree-table2__viewport {
   max-inline-size: 100%;
   overflow: auto;

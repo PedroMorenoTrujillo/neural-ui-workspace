@@ -15,11 +15,14 @@ import type {
   NeuTreeTableColumn,
   NeuTreeTableExpandedKeysChange,
   NeuTreeTableFeatureError,
+  NeuTreeTableFilterOptions,
   NeuTreeTableHierarchy,
   NeuTreeTableLayoutState,
   NeuTreeTableSelection,
   NeuTreeTableSelectionChange,
   NeuTreeTableSelectionOptions,
+  NeuTreeTableQuery,
+  NeuTreeTableSortOptions,
 } from './public/neu-tree-table.types';
 
 interface Row {
@@ -43,8 +46,15 @@ const rows: readonly Row[] = [
   { id: 'c', name: 'Gamma', value: 3 },
 ];
 const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
-  { id: 'name', header: 'Name', field: 'name', width: '12rem' },
-  { id: 'value', header: 'Value', field: 'value' },
+  {
+    id: 'name',
+    header: 'Name',
+    field: 'name',
+    width: '12rem',
+    sort: { field: 'name' },
+    filter: { field: 'name', rules: ['contains'], defaultRule: 'contains' },
+  },
+  { id: 'value', header: 'Value', field: 'value', sort: { field: 'value' } },
 ];
 const initialHierarchy: NeuTreeTableHierarchy<string> = {
   hierarchyRevision: 1,
@@ -85,10 +95,14 @@ const emptyLayout: NeuTreeTableLayoutState = {
         [expandedKeys]="expanded()"
         [selection]="selection()"
         [selectionOptions]="selectionOptions()"
+        [query]="query()"
+        [sortOptions]="sortOptions"
+        [filterOptions]="filterOptions()"
         [layout]="layout()"
         [hierarchyOptions]="{ treeColumnId: treeColumnId(), indentSize: 18 }"
         (expandedKeysChange)="recordExpansion($event)"
         (selectionChange)="recordSelection($event)"
+        (queryChange)="recordQuery($event)"
         (featureError)="recordError($event)"
       >
         <ng-template neuTreeTableHeader="name" let-column="column">
@@ -115,12 +129,34 @@ class HostComponent {
   readonly layout = signal(emptyLayout);
   readonly selection = signal<NeuTreeTableSelection<string>>({ kind: 'keys', keys: [] });
   readonly selectionOptions = signal<NeuTreeTableSelectionOptions<Row>>({ mode: 'none' });
+  readonly query = signal<NeuTreeTableQuery<Field>>({
+    page: 0,
+    pageSize: 25,
+    search: '',
+    sort: [],
+    filters: null,
+  });
+  readonly filterOptions = signal<NeuTreeTableFilterOptions<Row, Field>>({
+    surfaces: [],
+    globalFields: [],
+    predicates: {},
+    debounceMs: 0,
+    commit: 'immediate',
+  });
+  readonly sortOptions: NeuTreeTableSortOptions = {
+    mode: 'multiple',
+    removable: true,
+    defaultDirection: 'asc',
+    resetRootPageOnChange: true,
+  };
   readonly treeColumnId = signal('name');
   readonly direction = signal<'ltr' | 'rtl'>('ltr');
   readonly acceptExpansion = signal(false);
   readonly acceptSelection = signal(false);
+  readonly acceptQuery = signal(false);
   readonly expansionChanges = signal<readonly NeuTreeTableExpandedKeysChange<string>[]>([]);
   readonly selectionChanges = signal<readonly NeuTreeTableSelectionChange<Row, string>[]>([]);
+  readonly queryChanges = signal<readonly NeuTreeTableQuery<Field>[]>([]);
   readonly errors = signal<readonly NeuTreeTableFeatureError[]>([]);
   readonly rowKey = (row: Row) => row.id;
 
@@ -136,6 +172,11 @@ class HostComponent {
   recordSelection(change: NeuTreeTableSelectionChange<Row, string>): void {
     this.selectionChanges.update((changes) => [...changes, change]);
     if (this.acceptSelection()) this.selection.set(change.next);
+  }
+
+  recordQuery(query: NeuTreeTableQuery<Field>): void {
+    this.queryChanges.update((changes) => [...changes, query]);
+    if (this.acceptQuery()) this.query.set(query);
   }
 }
 
@@ -685,5 +726,192 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector<HTMLTableElement>('table')?.tabIndex,
     ).toBe(0);
+  });
+
+  it('renders applied hierarchical search with transient ancestor reveal and zero expansion echo', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.expanded.set([]);
+    host.filterOptions.set({
+      surfaces: [],
+      globalFields: ['name'],
+      predicates: {},
+      debounceMs: 0,
+      commit: 'immediate',
+    });
+    host.query.set({ ...host.query(), search: 'Beta' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    expect(
+      [...native.querySelectorAll('tbody tr[data-node-key]')].map((entry) =>
+        entry.getAttribute('data-node-key'),
+      ),
+    ).toEqual(['string:a', 'string:b']);
+    expect(row(native, 'string:a').getAttribute('aria-expanded')).toBe('true');
+    expect(host.expansionChanges()).toEqual([]);
+
+    host.query.set({ ...host.query(), search: '' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(
+      [...native.querySelectorAll('tbody tr[data-node-key]')].map((entry) =>
+        entry.getAttribute('data-node-key'),
+      ),
+    ).toEqual(['string:a', 'string:c']);
+  });
+
+  it('proposes native search, filter and sibling sort exactly once across reject and accept', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.filterOptions.set({
+      surfaces: ['row'],
+      globalFields: ['name'],
+      predicates: {},
+      debounceMs: 0,
+      commit: 'immediate',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const search = native.querySelector<HTMLInputElement>('input[type="search"]')!;
+    search.value = 'Gamma';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(1);
+    expect(host.queryChanges()[0]?.search).toBe('Gamma');
+    expect(host.query().search).toBe('');
+    expect(native.querySelectorAll('tbody tr[data-node-key]')).toHaveLength(3);
+    expect(search.value).toBe('');
+
+    host.acceptQuery.set(true);
+    const nameSort = native.querySelector<HTMLButtonElement>('th[data-column-id="name"] button')!;
+    nameSort.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(2);
+    expect(host.query().sort).toEqual([{ field: 'name', direction: 'asc' }]);
+    expect(nameSort.closest('th')?.getAttribute('aria-sort')).toBe('ascending');
+    nameSort.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(3);
+    expect(host.query().sort).toEqual([{ field: 'name', direction: 'desc' }]);
+    expect(nameSort.closest('th')?.getAttribute('aria-sort')).toBe('descending');
+    expect(
+      [...native.querySelectorAll('tbody tr[data-node-key]')].map((entry) =>
+        entry.getAttribute('data-node-key'),
+      ),
+    ).toEqual(['string:c', 'string:a', 'string:b']);
+
+    const filter = native.querySelector<HTMLInputElement>('input[aria-label="Filter Name"]')!;
+    filter.value = 'Beta';
+    filter.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(4);
+    expect(host.query().filters).toEqual({
+      kind: 'condition',
+      field: 'name',
+      rule: 'contains',
+      value: 'Beta',
+    });
+    expect(
+      [...native.querySelectorAll('tbody tr[data-node-key]')].map((entry) =>
+        entry.getAttribute('data-node-key'),
+      ),
+    ).toEqual(['string:a', 'string:b']);
+    expect(host.expansionChanges()).toEqual([]);
+  });
+
+  it('reconciles focus through filtered visibility without mutating exact-K selection', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.selection.set({ kind: 'keys', keys: ['b'] });
+    host.selectionOptions.set({
+      mode: 'single',
+      indicator: 'radio',
+      selectOnRowClick: true,
+      allowClear: true,
+    });
+    host.filterOptions.set({
+      surfaces: [],
+      globalFields: ['name'],
+      predicates: {},
+      debounceMs: 0,
+      commit: 'immediate',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    row(native, 'string:b').focus();
+    host.query.set({ ...host.query(), search: 'Gamma' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:c');
+    expect(host.selection()).toEqual({ kind: 'keys', keys: ['b'] });
+    expect(host.selectionChanges()).toEqual([]);
+    expect(host.expansionChanges()).toEqual([]);
+
+    host.query.set({ ...host.query(), search: '' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(
+      row(native, 'string:b').querySelector<HTMLInputElement>('input[data-selection-indicator]')
+        ?.checked,
+    ).toBe(true);
+  });
+
+  it('cancels pending query debounce timers on destroy without a late proposal', async () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(HostComponent);
+      const host = fixture.componentInstance;
+      host.filterOptions.set({
+        surfaces: ['row'],
+        globalFields: ['name'],
+        predicates: {},
+        debounceMs: 100,
+        commit: 'immediate',
+      });
+      fixture.detectChanges();
+      const search = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+        'input[type="search"]',
+      )!;
+      search.value = 'Beta';
+      search.dispatchEvent(new Event('input', { bubbles: true }));
+      fixture.destroy();
+      vi.advanceTimersByTime(100);
+      expect(host.queryChanges()).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('invalidates an explicit draft when the parent replaces applied query', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.filterOptions.set({
+      surfaces: [],
+      globalFields: ['name'],
+      predicates: {},
+      debounceMs: 0,
+      commit: 'explicit',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const search = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+      'input[type="search"]',
+    )!;
+    search.value = 'Beta';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    host.query.set({ ...host.query(), search: 'Gamma' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(search.value).toBe('Gamma');
+    search.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(host.queryChanges()).toEqual([]);
+    expect(host.query().search).toBe('Gamma');
   });
 });

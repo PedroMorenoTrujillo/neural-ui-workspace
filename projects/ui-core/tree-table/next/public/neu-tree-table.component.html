@@ -3,6 +3,9 @@
   [expandedKeys]="expandedKeys()"
   [selectionModel]="selectionModel()"
   [selectionOptions]="selectionOptions()"
+  [query]="query()"
+  [sortOptions]="sortOptions()"
+  [filterOptions]="filterOptions()"
   [columns]="visibleColumns()"
   [layout]="layout()"
   [hierarchyOptions]="hierarchyOptions()"
@@ -24,4 +27,5 @@
   [footerTemplates]="footerTemplates()"
   (expandedKeysProposal)="onExpandedKeysProposal($event)"
   (selectionIntent)="onSelectionIntent($event)"
+  (queryProposal)="onQueryProposal($event)"
 />

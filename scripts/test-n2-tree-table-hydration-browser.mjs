@@ -39,6 +39,11 @@ try {
   );
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '-1');
   assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
+  assert.equal(await page.locator('#n2-tree-primary input[type="search"]').count(), 1);
+  assert.equal(
+    await page.locator('#n2-tree-primary th[data-column-id="name"]').getAttribute('aria-sort'),
+    'none',
+  );
   assert.deepEqual(
     await page
       .locator('#n2-tree-primary tr[data-node-key]')
@@ -223,10 +228,58 @@ try {
       .getAttribute('aria-checked'),
     'true',
   );
+
+  const eventsBeforeQuery = JSON.parse(await page.locator('#n2-tree-events').textContent());
+  const search = page.locator('#n2-tree-primary input[type="search"]');
+  await search.fill('Gamma');
+  await page.waitForTimeout(20);
+  assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
+  assert.equal(await search.inputValue(), '');
+  assert.equal(
+    JSON.parse(await page.locator('#n2-tree-events').textContent()).length,
+    eventsBeforeQuery.length + 1,
+  );
+
+  await page.locator('#n2-tree-accept-query').click();
+  await search.fill('Beta');
+  await page.waitForTimeout(20);
+  assert.deepEqual(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-node-key'))),
+    ['string:a', 'string:b'],
+  );
+  assert.equal(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key="string:a"]')
+      .getAttribute('aria-expanded'),
+    'true',
+  );
+
+  await page.locator('#n2-tree-primary button[data-sort-column="name"]').click();
+  await page.waitForTimeout(20);
+  assert.equal(
+    await page.locator('#n2-tree-primary th[data-column-id="name"]').getAttribute('aria-sort'),
+    'ascending',
+  );
+  await search.fill('');
+  await page.waitForTimeout(20);
+  const filter = page.locator('#n2-tree-primary input[aria-label="Filter Name"]');
+  await filter.fill('Beta');
+  await page.waitForTimeout(20);
+  assert.deepEqual(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-node-key'))),
+    ['string:a', 'string:b'],
+  );
+  const finalEvents = JSON.parse(await page.locator('#n2-tree-events').textContent());
+  assert.equal(finalEvents.filter((event) => event === 'queryChange').length, 5);
+  assert.equal(finalEvents.filter((event) => event === 'dataRequest').length, 0);
   assert.equal(errors.filter((error) => /NG050\d/.test(error)).length, 0);
   assert.deepEqual(errors, []);
   console.log(
-    'N2-015D real Chromium hydration passed (DOM reused, controlled expansion/selection exactly once, deterministic focus transitions, 0 NG050x, 0 requests).',
+    'N2-015E real Chromium hydration passed (DOM reused, controlled query/expansion/selection exactly once, deterministic focus transitions, 0 NG050x, 0 requests).',
   );
 } finally {
   release?.();

@@ -4,6 +4,19 @@
   </div>
 }
 
+@if (showSearch()) {
+  <div class="neu-tree-table2__query-bar">
+    <input
+      type="search"
+      class="neu-tree-table2__search"
+      aria-label="Search"
+      [value]="searchValue()"
+      (input)="onSearchInput($event)"
+      (change)="onSearchCommit($event)"
+    />
+  </div>
+}
+
 <div
   class="neu-tree-table2__viewport"
   [attr.data-density]="appearance().density"
@@ -37,6 +50,7 @@
             [style.min-inline-size]="column.minWidth"
             [style.max-inline-size]="column.maxWidth"
             [style.text-align]="column.align"
+            [attr.aria-sort]="ariaSort(column)"
           >
             @if (showToggleAll(column)) {
               <input
@@ -53,7 +67,23 @@
                 [disabled]="selectionModel().header.disabled"
               />
             }
-            @if (headerTemplate(column.id); as template) {
+            @if (column.sort) {
+              <button
+                type="button"
+                class="neu-tree-table2__sort"
+                [attr.data-sort-priority]="sortPriority(column)"
+                [attr.data-sort-column]="column.id"
+              >
+                @if (headerTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="headerContext(column, columnIndex)"
+                  />
+                } @else {
+                  {{ column.header }}
+                }
+              </button>
+            } @else if (headerTemplate(column.id); as template) {
               <ng-container
                 [ngTemplateOutlet]="template"
                 [ngTemplateOutletContext]="headerContext(column, columnIndex)"
@@ -64,6 +94,24 @@
           </th>
         }
       </tr>
+      @if (showFilterRow()) {
+        <tr role="row" class="neu-tree-table2__filter-row">
+          @for (column of columns(); track column.id) {
+            <th role="columnheader" scope="col" [attr.data-filter-column-id]="column.id">
+              @if (column.filter) {
+                <input
+                  type="text"
+                  class="neu-tree-table2__filter"
+                  [attr.aria-label]="'Filter ' + column.header"
+                  [value]="filterValue(column)"
+                  (input)="onFilterInput(column, $event)"
+                  (change)="onFilterCommit(column, $event)"
+                />
+              }
+            </th>
+          }
+        </tr>
+      }
     </thead>
 
     <tbody (focusin)="onBodyFocus($event)" (keydown)="onBodyKeydown($event)">

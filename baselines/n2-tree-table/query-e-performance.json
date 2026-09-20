@@ -1,0 +1,62 @@
+{
+  "checkpoint": "N2-015E",
+  "capturedAt": "2026-09-20T21:29:36.330Z",
+  "metrics": {
+    "search1kNoMatch": {
+      "p50Ms": 0.4367,
+      "p95Ms": 1.3448
+    },
+    "search1kSparse": {
+      "p50Ms": 0.4174,
+      "p95Ms": 0.491
+    },
+    "search10kNoMatch": {
+      "p50Ms": 3.2276,
+      "p95Ms": 3.9735
+    },
+    "search10kMany": {
+      "p50Ms": 4.4536,
+      "p95Ms": 5.9772
+    },
+    "searchDeep1k": {
+      "p50Ms": 0.7283,
+      "p95Ms": 0.9802
+    },
+    "filter1kSimple": {
+      "p50Ms": 0.4744,
+      "p95Ms": 0.8199
+    },
+    "filter10kNested": {
+      "p50Ms": 3.4965,
+      "p95Ms": 3.7341
+    },
+    "sort10kSingle": {
+      "p50Ms": 3.601,
+      "p95Ms": 4.6893
+    },
+    "sort10kMulti": {
+      "p50Ms": 10.5522,
+      "p95Ms": 11.0209
+    },
+    "combined1k": {
+      "p50Ms": 0.4588,
+      "p95Ms": 0.6129
+    },
+    "combined10k": {
+      "p50Ms": 5.2959,
+      "p95Ms": 5.7575
+    },
+    "proposals100": {
+      "p50Ms": 0.1218,
+      "p95Ms": 0.1934
+    },
+    "transitions100": {
+      "p50Ms": 32.7774,
+      "p95Ms": 41.1225
+    },
+    "destroy50": {
+      "p50Ms": 69.357,
+      "p95Ms": 73.5409
+    }
+  }
+}

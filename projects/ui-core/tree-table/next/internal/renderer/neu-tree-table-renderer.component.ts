@@ -22,6 +22,11 @@ import { readNeuFieldValue } from '../../../../internal/neu-field-value-resolver
 import { neuExactKeyToken } from '../../../../internal/neu-exact-key';
 import type { TreeProjection, TreeProjectionNode } from '../hierarchy/neu-tree-table-hierarchy';
 import {
+  proposeNeuTreeTableSort,
+  readNeuTreeTableFilterValue,
+  replaceNeuTreeTableFilter,
+} from '../query/neu-tree-table-query';
+import {
   moveNeuTreeTableFocus,
   proposeNeuTreeTableExpansion,
   reconcileNeuTreeTableFocus,
@@ -39,6 +44,7 @@ import type {
   NeuTreeTableCellContext,
   NeuTreeTableColumn,
   NeuTreeTableExpandedKeysChange,
+  NeuTreeTableFilterOptions,
   NeuTreeTableFocusTarget,
   NeuTreeTableHeaderContext,
   NeuTreeTableHierarchyOptions,
@@ -48,6 +54,8 @@ import type {
   NeuTreeTableNodeContext,
   NeuTreeTableRowOptions,
   NeuTreeTableSelectionOptions,
+  NeuTreeTableQuery,
+  NeuTreeTableSortOptions,
   NeuTreeTableStateContext,
 } from '../../public/neu-tree-table.types';
 
@@ -72,11 +80,22 @@ export class NeuTreeTableRendererComponent<
   private readonly selectionAnchor = signal<K | null>(null);
   private focusedSnapshot: TreeFocusSnapshot<K> | null = null;
   private pendingFocus: AfterRenderRef | null = null;
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly filterTimers = new Map<F, ReturnType<typeof setTimeout>>();
+  private readonly searchDraft = signal<{ readonly value: string; readonly base: string } | null>(
+    null,
+  );
+  private readonly filterDrafts = signal<
+    ReadonlyMap<F, { readonly value: string; readonly base: unknown }>
+  >(new Map());
 
   readonly projection: InputSignal<TreeProjection<T, K>> = input.required();
   readonly expandedKeys: InputSignal<readonly K[]> = input.required();
   readonly selectionModel: InputSignal<TreeSelectionModel<T, K>> = input.required();
   readonly selectionOptions: InputSignal<NeuTreeTableSelectionOptions<T>> = input.required();
+  readonly query: InputSignal<NeuTreeTableQuery<F>> = input.required();
+  readonly sortOptions: InputSignal<NeuTreeTableSortOptions> = input.required();
+  readonly filterOptions: InputSignal<NeuTreeTableFilterOptions<T, F>> = input.required();
   readonly columns: InputSignal<readonly NeuTreeTableColumn<T, F>[]> = input.required();
   readonly layout: InputSignal<NeuTreeTableLayoutState> = input.required();
   readonly hierarchyOptions: InputSignal<NeuTreeTableHierarchyOptions> = input.required();
@@ -106,6 +125,7 @@ export class NeuTreeTableRendererComponent<
   > = input.required();
   readonly expandedKeysProposal: OutputEmitterRef<NeuTreeTableExpandedKeysChange<K>> = output();
   readonly selectionIntent: OutputEmitterRef<TreeSelectionIntent<K>> = output();
+  readonly queryProposal: OutputEmitterRef<NeuTreeTableQuery<F>> = output();
 
   protected readonly rows = computed(() => this.projection().visible);
   protected readonly rovingToken = computed(() => {
@@ -134,6 +154,12 @@ export class NeuTreeTableRendererComponent<
   protected readonly hasFooter = computed(
     () => this.footerTemplates().size > 0 || this.summaryTemplate() !== undefined,
   );
+  protected readonly showSearch = computed(() => this.filterOptions().globalFields.length > 0);
+  protected readonly showFilterRow = computed(
+    () =>
+      this.filterOptions().surfaces.includes('row') &&
+      this.columns().some((column) => column.filter !== undefined),
+  );
   protected readonly stateContext: NeuTreeTableStateContext = { retry: () => undefined };
   protected readonly emptySelectionState: TreeSelectionNodeState = {
     selected: false,
@@ -146,7 +172,184 @@ export class NeuTreeTableRendererComponent<
   };
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.cancelPendingFocus());
+    this.destroyRef.onDestroy(() => {
+      this.cancelPendingFocus();
+      if (this.searchTimer !== null) clearTimeout(this.searchTimer);
+      for (const timer of this.filterTimers.values()) clearTimeout(timer);
+      this.filterTimers.clear();
+    });
+  }
+
+  protected searchValue(): string {
+    const draft = this.searchDraft();
+    return draft?.base === this.query().search ? draft.value : this.query().search;
+  }
+
+  protected filterValue(column: NeuTreeTableColumn<T, F>): string {
+    const field = column.filter?.field;
+    if (!field) return '';
+    const applied = readNeuTreeTableFilterValue(this.query().filters, field);
+    const draft = this.filterDrafts().get(field);
+    if (draft !== undefined && Object.is(draft.base, applied)) return draft.value;
+    return typeof applied === 'string' || typeof applied === 'number' ? String(applied) : '';
+  }
+
+  protected ariaSort(column: NeuTreeTableColumn<T, F>): 'ascending' | 'descending' | 'none' | null {
+    const field = column.sort?.field;
+    if (!field) return null;
+    const entry = this.query().sort.find((candidate) => candidate.field === field);
+    return entry?.direction === 'asc'
+      ? 'ascending'
+      : entry?.direction === 'desc'
+        ? 'descending'
+        : 'none';
+  }
+
+  protected sortPriority(column: NeuTreeTableColumn<T, F>): number | null {
+    const field = column.sort?.field;
+    if (!field) return null;
+    const index = this.query().sort.findIndex((candidate) => candidate.field === field);
+    return index < 0 ? null : index + 1;
+  }
+
+  protected onSort(column: NeuTreeTableColumn<T, F>): void {
+    if (!column.sort) return;
+    this.queryProposal.emit(
+      proposeNeuTreeTableSort(this.query(), column.sort.field, this.sortOptions()),
+    );
+  }
+
+  protected onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    const base = this.query().search;
+    this.searchDraft.set({ value, base });
+    if (this.filterOptions().commit === 'immediate') this.scheduleSearch(value, target, base);
+  }
+
+  protected onSearchCommit(event: Event): void {
+    if (this.filterOptions().commit !== 'explicit') return;
+    const draft = this.searchDraft();
+    this.commitSearch(
+      this.searchValue(),
+      event.target as HTMLInputElement,
+      draft?.base ?? this.query().search,
+    );
+  }
+
+  protected onFilterInput(column: NeuTreeTableColumn<T, F>, event: Event): void {
+    const field = column.filter?.field;
+    if (!field) return;
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    const base = readNeuTreeTableFilterValue(this.query().filters, field);
+    this.filterDrafts.update((current) => {
+      const next = new Map(current);
+      next.set(field, { value, base });
+      return next;
+    });
+    if (this.filterOptions().commit === 'immediate') {
+      this.scheduleFilter(column, value, target, base);
+    }
+  }
+
+  protected onFilterCommit(column: NeuTreeTableColumn<T, F>, event: Event): void {
+    if (this.filterOptions().commit !== 'explicit' || !column.filter) return;
+    const draft = this.filterDrafts().get(column.filter.field);
+    this.commitFilter(
+      column,
+      this.filterValue(column),
+      event.target as HTMLInputElement,
+      draft?.base ?? readNeuTreeTableFilterValue(this.query().filters, column.filter.field),
+    );
+  }
+
+  private scheduleSearch(value: string, target: HTMLInputElement, base: string): void {
+    if (this.searchTimer !== null) clearTimeout(this.searchTimer);
+    const delay = Math.max(0, this.filterOptions().debounceMs);
+    if (delay === 0) {
+      this.commitSearch(value, target, base);
+      return;
+    }
+    this.searchTimer = setTimeout(() => {
+      this.searchTimer = null;
+      this.commitSearch(value, target, base);
+    }, delay);
+  }
+
+  private scheduleFilter(
+    column: NeuTreeTableColumn<T, F>,
+    value: string,
+    target: HTMLInputElement,
+    base: unknown,
+  ): void {
+    const field = column.filter?.field;
+    if (!field) return;
+    const existing = this.filterTimers.get(field);
+    if (existing !== undefined) clearTimeout(existing);
+    const delay = Math.max(0, this.filterOptions().debounceMs);
+    if (delay === 0) {
+      this.commitFilter(column, value, target, base);
+      return;
+    }
+    this.filterTimers.set(
+      field,
+      setTimeout(() => {
+        this.filterTimers.delete(field);
+        this.commitFilter(column, value, target, base);
+      }, delay),
+    );
+  }
+
+  private commitSearch(search: string, target: HTMLInputElement, base: string): void {
+    this.searchDraft.set(null);
+    if (this.query().search !== base) {
+      target.value = this.query().search;
+      return;
+    }
+    if (search === this.query().search) return;
+    this.queryProposal.emit({ ...this.query(), page: 0, search });
+    target.value = this.query().search;
+  }
+
+  private commitFilter(
+    column: NeuTreeTableColumn<T, F>,
+    value: string,
+    target: HTMLInputElement,
+    base: unknown,
+  ): void {
+    const filter = column.filter;
+    if (!filter) return;
+    this.filterDrafts.update((current) => {
+      const next = new Map(current);
+      next.delete(filter.field);
+      return next;
+    });
+    const current = readNeuTreeTableFilterValue(this.query().filters, filter.field);
+    if (!Object.is(current, base)) {
+      target.value =
+        typeof current === 'string' || typeof current === 'number' ? String(current) : '';
+      return;
+    }
+    const nextValue = value === '' ? undefined : value;
+    if (current === nextValue) return;
+    const nextConstraint =
+      nextValue === undefined
+        ? null
+        : ({
+            kind: 'condition',
+            field: filter.field,
+            rule: filter.defaultRule,
+            value: nextValue,
+          } as const);
+    this.queryProposal.emit({
+      ...this.query(),
+      page: 0,
+      filters: replaceNeuTreeTableFilter(this.query().filters, filter.field, nextConstraint),
+    });
+    const applied = readNeuTreeTableFilterValue(this.query().filters, filter.field);
+    target.value =
+      typeof applied === 'string' || typeof applied === 'number' ? String(applied) : '';
   }
 
   protected headerTemplate(columnId: string): TemplateRef<NeuTreeTableHeaderContext<T, F>> | null {
@@ -248,6 +451,14 @@ export class NeuTreeTableRendererComponent<
 
   protected onTableClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
+    const sortButton = target?.closest<HTMLButtonElement>('button[data-sort-column]');
+    if (sortButton) {
+      const column = this.columns().find(
+        (candidate) => candidate.id === sortButton.dataset['sortColumn'],
+      );
+      if (column) this.onSort(column);
+      return;
+    }
     const headerIndicator = target?.closest<HTMLInputElement>('input[data-selection-toggle-all]');
     if (headerIndicator) {
       this.selectionIntent.emit({ kind: 'toggle-all', source: 'toggle-all' });
@@ -328,7 +539,7 @@ export class NeuTreeTableRendererComponent<
   ): void {
     if (!node.expandable) return;
     this.expandedKeysProposal.emit(
-      proposeNeuTreeTableExpansion(this.expandedKeys(), node.key, node.expanded, source),
+      proposeNeuTreeTableExpansion(this.expandedKeys(), node.key, node.appliedExpanded, source),
     );
   }
 

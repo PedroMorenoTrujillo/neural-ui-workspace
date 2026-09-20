@@ -1,0 +1,115 @@
+{
+  "checkpoint": "N2-015E",
+  "legacyReference": {
+    "raw": 120496,
+    "gzip": 18411
+  },
+  "method": "Angular-compiled minified ESM; Angular external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 83670,
+        "gzip": 16477,
+        "brotli": 13837
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 83633
+        }
+      ]
+    },
+    "search": {
+      "size": {
+        "raw": 83670,
+        "gzip": 16477,
+        "brotli": 13837
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 83633
+        }
+      ]
+    },
+    "filter": {
+      "size": {
+        "raw": 83670,
+        "gzip": 16477,
+        "brotli": 13837
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 83633
+        }
+      ]
+    },
+    "sort": {
+      "size": {
+        "raw": 83670,
+        "gzip": 16477,
+        "brotli": 13837
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 83633
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 84171,
+        "gzip": 16651,
+        "brotli": 13944
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 84053
+        }
+      ]
+    },
+    "templates": {
+      "size": {
+        "raw": 84171,
+        "gzip": 16651,
+        "brotli": 13944
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 84053
+        }
+      ]
+    },
+    "nested": {
+      "size": {
+        "raw": 83670,
+        "gzip": 16477,
+        "brotli": 13837
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 83633
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": [
+    "@angular/common",
+    "@angular/core"
+  ],
+  "optionalChunks": [],
+  "forbiddenGraphTokens": []
+}

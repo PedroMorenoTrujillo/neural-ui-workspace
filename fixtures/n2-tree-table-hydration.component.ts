@@ -12,6 +12,8 @@ import {
   type NeuTreeTableExpandedKeysChange,
   type NeuTreeTableFeatureError,
   type NeuTreeTableHierarchy,
+  type NeuTreeTableFilterOptions,
+  type NeuTreeTableQuery,
   type NeuTreeTableSelection,
   type NeuTreeTableSelectionChange,
   type NeuTreeTableSelectionOptions,
@@ -48,8 +50,14 @@ const hierarchy: NeuTreeTableHierarchy<string> = {
   ],
 };
 const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
-  { id: 'name', header: 'Name', field: 'name' },
-  { id: 'value', header: 'Value', field: 'value' },
+  {
+    id: 'name',
+    header: 'Name',
+    field: 'name',
+    sort: { field: 'name' },
+    filter: { field: 'name', rules: ['contains'], defaultRule: 'contains' },
+  },
+  { id: 'value', header: 'Value', field: 'value', sort: { field: 'value' } },
 ];
 
 @Component({
@@ -73,6 +81,9 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
     <button id="n2-tree-accept-selection" type="button" (click)="acceptSelection.set(true)">
       Accept selection
     </button>
+    <button id="n2-tree-accept-query" type="button" (click)="acceptQuery.set(true)">
+      Accept query
+    </button>
     <button id="n2-tree-empty-write" type="button" (click)="emptyWrite()">Empty</button>
     <button id="n2-tree-restore-write" type="button" (click)="restoreWrite()">Restore</button>
 
@@ -85,8 +96,10 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
         [expandedKeys]="expandedKeys()"
         [selection]="selection()"
         [selectionOptions]="selectionOptions"
+        [query]="query()"
+        [filterOptions]="filterOptions"
         [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
-        (queryChange)="record('queryChange')"
+        (queryChange)="recordQuery($event)"
         (expandedKeysChange)="recordExpansion($event)"
         (selectionChange)="recordSelection($event)"
         (layoutChange)="record('layoutChange')"
@@ -178,8 +191,16 @@ export class N2TreeTableHydrationComponent {
   readonly appliedColumns = signal(columns);
   readonly expandedKeys = signal<readonly string[]>(['a']);
   readonly selection = signal<NeuTreeTableSelection<string>>({ kind: 'keys', keys: ['a'] });
+  readonly query = signal<NeuTreeTableQuery<Field>>({
+    page: 0,
+    pageSize: 25,
+    search: '',
+    sort: [],
+    filters: null,
+  });
   readonly acceptExpansion = signal(false);
   readonly acceptSelection = signal(false);
+  readonly acceptQuery = signal(false);
   readonly selectionOptions: NeuTreeTableSelectionOptions<Row> = {
     mode: 'checkbox',
     indicator: 'checkbox',
@@ -188,6 +209,13 @@ export class N2TreeTableHydrationComponent {
     range: false,
     propagation: 'loaded-subtree',
     toggleAllScope: 'loaded',
+  };
+  readonly filterOptions: NeuTreeTableFilterOptions<Row, Field> = {
+    surfaces: ['row'],
+    globalFields: ['name'],
+    predicates: {},
+    debounceMs: 0,
+    commit: 'immediate',
   };
   readonly columns = columns;
   readonly unloadedData = [rows[0]!];
@@ -243,6 +271,11 @@ export class N2TreeTableHydrationComponent {
   recordSelection(change: NeuTreeTableSelectionChange<Row, string>): void {
     this.record(`selectionChange:${change.source}:${change.addedKeys.join(',')}`);
     if (this.acceptSelection()) this.selection.set(change.next);
+  }
+
+  recordQuery(query: NeuTreeTableQuery<Field>): void {
+    this.record('queryChange');
+    if (this.acceptQuery()) this.query.set(query);
   }
 
   recordDiagnostic(error: NeuTreeTableFeatureError): void {

@@ -4,6 +4,7 @@ import type {
   NeuTreeTableHierarchy,
   NeuTreeTableKey,
 } from '../../public/neu-tree-table.types';
+import type { TreeQueryProjection } from '../query/neu-tree-table-query';
 
 export type TreeDiagnosticCode =
   | 'cycle'
@@ -33,6 +34,8 @@ export interface TreeProjectionNode<T, K extends NeuTreeTableKey> {
   readonly path: readonly K[];
   readonly relation: NeuTreeRelation<K>;
   readonly expanded: boolean;
+  readonly appliedExpanded: boolean;
+  readonly transientlyRevealed: boolean;
   readonly expandable: boolean;
   readonly logicalVisibleIndex: number;
 }
@@ -60,6 +63,8 @@ export interface NormalizedTreeHierarchy<T, K extends NeuTreeTableKey> {
   readonly blockedEdges: ReadonlySet<string>;
   readonly reachable: ReadonlySet<string>;
   readonly diagnostics: readonly TreeDiagnostic<K>[];
+  readonly rootRelation: NeuTreeRelation<K>;
+  readonly hierarchyRevision: number;
 }
 
 const edgeToken = (parent: string, child: string): string => `${parent}>${child}`;
@@ -271,21 +276,29 @@ export function normalizeNeuTreeTableHierarchy<T extends object, K extends NeuTr
     blockedEdges,
     reachable,
     diagnostics: [...diagnostics.values()],
+    rootRelation: hierarchy.roots,
+    hierarchyRevision: hierarchy.hierarchyRevision,
   };
 }
 
-export function projectNeuTreeTableHierarchy<T extends object, K extends NeuTreeTableKey>(
-  data: readonly T[],
-  rowKey: (value: T) => K,
-  hierarchy: NeuTreeTableHierarchy<K>,
+export function projectNormalizedNeuTreeTableHierarchy<T extends object, K extends NeuTreeTableKey>(
+  normalized: NormalizedTreeHierarchy<T, K>,
   expandedKeys: readonly K[],
+  queryProjection?: TreeQueryProjection,
 ): TreeProjection<T, K> {
-  const normalized = normalizeNeuTreeTableHierarchy(data, rowKey, hierarchy);
   const expanded = new Set(expandedKeys.map(neuExactKeyToken));
+  const roots = queryProjection?.roots ?? normalized.roots;
+  const childrenByToken = queryProjection?.children ?? normalized.children;
+  const transientReveal = queryProjection?.transientReveal ?? new Set<string>();
   const visible: TreeProjectionNode<T, K>[] = [];
   const projectedByToken = new Map<string, TreeProjectionNode<T, K>>();
-  const rootCount = relationSiblingCount(hierarchy.roots);
-  const frames = normalized.roots
+  const rootCount = queryProjection?.filtering
+    ? normalized.rootRelation.status === 'loaded' &&
+      normalized.rootRelation.completeness === 'complete'
+      ? roots.length
+      : null
+    : relationSiblingCount(normalized.rootRelation);
+  const frames = roots
     .map((token, index) => ({
       token,
       parentKey: null as K | null,
@@ -303,7 +316,9 @@ export function projectNeuTreeTableHierarchy<T extends object, K extends NeuTree
     if (!indexed) continue;
     const relation = normalized.relations.get(frame.token) ?? unknownRelation<K>();
     const expandable = isExpandable(relation);
-    const nodeExpanded = expandable && expanded.has(frame.token);
+    const appliedExpanded = expandable && expanded.has(frame.token);
+    const transientlyRevealed = expandable && transientReveal.has(frame.token);
+    const nodeExpanded = appliedExpanded || transientlyRevealed;
     const path = [...frame.path, indexed.key];
     const node: TreeProjectionNode<T, K> = {
       key: indexed.key,
@@ -316,14 +331,20 @@ export function projectNeuTreeTableHierarchy<T extends object, K extends NeuTree
       path,
       relation,
       expanded: nodeExpanded,
+      appliedExpanded,
+      transientlyRevealed,
       expandable,
       logicalVisibleIndex: visible.length,
     };
     visible.push(node);
     projectedByToken.set(frame.token, node);
     if (!nodeExpanded) continue;
-    const children = normalized.children.get(frame.token) ?? [];
-    const siblingCount = relationSiblingCount(relation);
+    const children = childrenByToken.get(frame.token) ?? [];
+    const siblingCount = queryProjection?.filtering
+      ? relation.status === 'loaded' && relation.completeness === 'complete'
+        ? children.length
+        : null
+      : relationSiblingCount(relation);
     for (let index = children.length - 1; index >= 0; index -= 1) {
       const child = children[index];
       if (child === undefined || normalized.blockedEdges.has(edgeToken(frame.token, child))) {
@@ -341,10 +362,20 @@ export function projectNeuTreeTableHierarchy<T extends object, K extends NeuTree
   }
 
   return {
-    projectionRevision: hierarchy.hierarchyRevision,
+    projectionRevision: normalized.hierarchyRevision,
     visible,
     nodesByToken: projectedByToken,
     normalized,
     diagnostics: normalized.diagnostics,
   };
+}
+
+export function projectNeuTreeTableHierarchy<T extends object, K extends NeuTreeTableKey>(
+  data: readonly T[],
+  rowKey: (value: T) => K,
+  hierarchy: NeuTreeTableHierarchy<K>,
+  expandedKeys: readonly K[],
+): TreeProjection<T, K> {
+  const normalized = normalizeNeuTreeTableHierarchy(data, rowKey, hierarchy);
+  return projectNormalizedNeuTreeTableHierarchy(normalized, expandedKeys);
 }

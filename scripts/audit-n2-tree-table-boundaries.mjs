@@ -109,9 +109,11 @@ for (const rowTag of rendererTemplate.match(/<tr\b[^>]*>/gs) ?? []) {
   assert.doesNotMatch(rowTag, /\((?:focusin|keydown|click)\)=/);
 }
 const runtimeSource = files.map((file) => readFileSync(file, 'utf8')).join('\n');
-assert.doesNotMatch(
-  runtimeSource,
-  /\b(?:ResizeObserver|addEventListener|setInterval|setTimeout)\b/,
+assert.doesNotMatch(runtimeSource, /\b(?:ResizeObserver|addEventListener|setInterval)\b/);
+assert.equal((runtimeSource.match(/\bsetTimeout\s*\(/g) ?? []).length, 2);
+assert.ok(
+  (runtimeSource.match(/\bclearTimeout\s*\(/g) ?? []).length >= 4,
+  'Query debounce timers must be replaced and destroyed explicitly.',
 );
 
 const result = await build({
@@ -136,5 +138,5 @@ for (const forbidden of [
 assert.match(graph, /internal\/neu-exact-key/);
 assert.match(graph, /internal\/neu-field-value-resolver/);
 console.log(
-  `N2 TreeTable boundary audit passed (${files.length} files, 2 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, 1 delegated focus/keyboard/click boundary, native selection semantics, neutral internals only).`,
+  `N2 TreeTable boundary audit passed (${files.length} files, 2 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, 1 delegated focus/keyboard/click boundary, 2 bounded debounce timers with teardown, native selection/query semantics, neutral internals only).`,
 );

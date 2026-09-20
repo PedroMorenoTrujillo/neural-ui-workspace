@@ -15,9 +15,11 @@ import {
   type TemplateRef,
 } from '@angular/core';
 import {
-  projectNeuTreeTableHierarchy,
+  normalizeNeuTreeTableHierarchy,
+  projectNormalizedNeuTreeTableHierarchy,
   type TreeDiagnostic,
 } from '../internal/hierarchy/neu-tree-table-hierarchy';
+import { buildNeuTreeTableQueryProjection } from '../internal/query/neu-tree-table-query';
 import { NeuTreeTableRendererComponent } from '../internal/renderer/neu-tree-table-renderer.component';
 import {
   buildNeuTreeTableSelectionModel,
@@ -324,14 +326,31 @@ export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, 
     const roots = this.hierarchy().roots;
     return roots.status === 'error' ? roots.error : undefined;
   });
+  protected readonly normalizedHierarchy = computed(() =>
+    normalizeNeuTreeTableHierarchy(this.data(), this.rowKey(), this.hierarchy()),
+  );
+  protected readonly queryProjection = computed(() =>
+    buildNeuTreeTableQueryProjection({
+      normalized: this.normalizedHierarchy(),
+      query: this.query(),
+      columns: this.columns(),
+      filterOptions: this.filterOptions(),
+      sortOptions: this.sortOptions(),
+      dataMode: this.dataMode(),
+    }),
+  );
   protected readonly projection = computed(() =>
-    projectNeuTreeTableHierarchy(this.data(), this.rowKey(), this.hierarchy(), this.expandedKeys()),
+    projectNormalizedNeuTreeTableHierarchy(
+      this.normalizedHierarchy(),
+      this.expandedKeys(),
+      this.queryProjection(),
+    ),
   );
   protected readonly selectionModel = computed(() =>
     buildNeuTreeTableSelectionModel(this.projection(), this.selection(), this.selectionOptions()),
   );
   private readonly hierarchyDiagnostics = computed<readonly HierarchyDiagnostic<K>[]>(() => {
-    const diagnostics: HierarchyDiagnostic<K>[] = this.projection().diagnostics.map(
+    const diagnostics: HierarchyDiagnostic<K>[] = this.normalizedHierarchy().diagnostics.map(
       (diagnostic: TreeDiagnostic<K>) => ({
         code: diagnostic.code,
         fingerprint: diagnostic.fingerprint,
@@ -382,6 +401,10 @@ export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, 
       intent,
     });
     if (change) this.selectionChange.emit(change);
+  }
+
+  protected onQueryProposal(query: NeuTreeTableQuery<F>): void {
+    this.queryChange.emit(query);
   }
 
   scrollTo(target: NeuTreeTableScrollTarget<K>): void {
