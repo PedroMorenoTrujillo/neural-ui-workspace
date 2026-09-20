@@ -69,7 +69,7 @@ test('keeps browser integration platform-guarded and free of ambient global owne
   const result = await build({
     entryPoints: ['projects/ui-core/table/next/public/public-api.ts'],
     bundle: true,
-    external: ['@angular/core', '@angular/common'],
+    external: ['@angular/core', '@angular/common', '@angular/forms', '@angular/forms/*'],
     format: 'esm',
     platform: 'node',
     write: false,

@@ -57,6 +57,14 @@ import {
   type NeuTableViewportGeometry,
 } from '../internal/virtualization/neu-table-virtualization';
 import {
+  buildNeuTableEditCommit,
+  createNeuTableEditSession,
+  neuTableEditStateToken,
+  reconcileNeuTableEditSource,
+  setNeuTableEditDraftValue,
+  type NeuTableEditSession,
+} from '../internal/editing/neu-table-editing';
+import {
   createNeuTableTemplateMap,
   firstNeuTableTemplate,
 } from '../internal/templates/neu-table-template-registry';
@@ -65,9 +73,13 @@ import {
   NeuTableCellDirective,
   NeuTableEmptyDirective,
   NeuTableErrorDirective,
+  NeuTableEditorDirective,
   NeuTableFooterDirective,
+  NeuTableGroupFooterDirective,
+  NeuTableGroupHeaderDirective,
   NeuTableHeaderDirective,
   NeuTableLoadingDirective,
+  NeuTableRowDetailDirective,
   NeuTableSummaryDirective,
   NeuTableToolbarDirective,
 } from './neu-table-template-contracts';
@@ -135,6 +147,11 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   });
   private readonly renderer = viewChild(NeuTableBasicRendererComponent);
   private readonly diagnostics = new Set<string>();
+  private editGeneration = 0;
+  private lastAppliedEditToken = 'none';
+  private closedAppliedEditToken: string | null = null;
+  private lastAppliedQuery: NeuTableQuery<F> | null = null;
+  private lastAppliedGroupingToken = 'initial';
   private lastPublishedViewport: {
     readonly visible: NeuTableRange;
     readonly render: NeuTableRange;
@@ -296,6 +313,22 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   protected readonly errorDirectives = contentChildren(NeuTableErrorDirective, {
     descendants: true,
   });
+  protected readonly rowDetailDirectives = contentChildren<NeuTableRowDetailDirective<T, K>>(
+    NeuTableRowDetailDirective,
+    { descendants: true },
+  );
+  protected readonly editorDirectives = contentChildren<NeuTableEditorDirective<T, K, F>>(
+    NeuTableEditorDirective,
+    { descendants: true },
+  );
+  protected readonly groupHeaderDirectives = contentChildren<NeuTableGroupHeaderDirective<T>>(
+    NeuTableGroupHeaderDirective,
+    { descendants: true },
+  );
+  protected readonly groupFooterDirectives = contentChildren<NeuTableGroupFooterDirective<T>>(
+    NeuTableGroupFooterDirective,
+    { descendants: true },
+  );
 
   protected readonly captionTemplate = computed(() =>
     firstNeuTableTemplate(this.captionDirectives()),
@@ -320,6 +353,18 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     firstNeuTableTemplate(this.loadingDirectives()),
   );
   protected readonly errorTemplate = computed(() => firstNeuTableTemplate(this.errorDirectives()));
+  protected readonly rowDetailTemplate = computed(() =>
+    firstNeuTableTemplate(this.rowDetailDirectives()),
+  );
+  protected readonly editorTemplates = computed(() =>
+    createNeuTableTemplateMap(this.editorDirectives()),
+  );
+  protected readonly groupHeaderTemplate = computed(() =>
+    firstNeuTableTemplate(this.groupHeaderDirectives()),
+  );
+  protected readonly groupFooterTemplate = computed(() =>
+    firstNeuTableTemplate(this.groupFooterDirectives()),
+  );
   protected readonly normalizedColumns = computed(() =>
     normalizeNeuTableColumns(this.columns(), isDevMode()),
   );
@@ -498,6 +543,15 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       renderRow.pin === null ? { ...renderRow, index: normalIndex++ } : renderRow,
     );
   });
+  protected readonly groupingDomainRows = computed(() =>
+    projectNeuTableRows(
+      this.sortedRows(),
+      this.rowKey(),
+      this.rowTrackBy(),
+      this.rowOptions().pin,
+      false,
+    ).filter((renderRow) => renderRow.pin === null),
+  );
   protected readonly virtualSpacers = computed(() => {
     const projection = this.virtualProjection();
     if (projection === null) return { before: 0, after: 0 };
@@ -507,6 +561,82 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       total: this.logicalNormalCount(),
     });
   });
+  protected readonly activeEditSession = signal<NeuTableEditSession<T, K, F> | null>(null);
+  protected readonly proposeEdit = (
+    next: NeuTableEditState<K>,
+    source: NeuTableEditChange<K>['source'],
+  ) => {
+    if (neuTableEditStateToken(next) === neuTableEditStateToken(this.editState())) return;
+    this.editStateChange.emit({ next, source });
+  };
+  protected readonly setEditValue = (columnId: string, value: unknown) => {
+    const session = this.activeEditSession();
+    if (session !== null) setNeuTableEditDraftValue(session, columnId, value);
+  };
+  protected readonly commitEdit = () => {
+    const session = this.activeEditSession();
+    if (session === null || session.requestPending) return;
+    const commit = buildNeuTableEditCommit(session);
+    const validationVersion = ++session.validationVersion;
+    const finish = (errors: readonly import('./neu-table.types').NeuTableEditError[]) => {
+      const current = this.activeEditSession();
+      if (
+        current !== session ||
+        current.generation !== session.generation ||
+        current.validationVersion !== validationVersion
+      ) {
+        return;
+      }
+      current.pending.set(false);
+      current.errors.set(errors);
+      if (errors.length > 0) return;
+      current.requestPending = true;
+      this.restoreEditFocus(current);
+      if (commit.changes.length > 0) this.editCommit.emit(commit);
+      this.editStateChange.emit({ next: { kind: 'none' }, source: 'commit' });
+    };
+    const editingOptions = this.editingOptions();
+    const validation = editingOptions.mode === 'none' ? undefined : editingOptions.validate;
+    if (validation === undefined) {
+      finish([]);
+      return;
+    }
+    try {
+      const result = validation(commit);
+      if (result instanceof Promise) {
+        session.pending.set(true);
+        void result.then(finish, () =>
+          finish([{ code: 'validation', message: 'Validation failed' }]),
+        );
+      } else {
+        finish(result);
+      }
+    } catch {
+      finish([{ code: 'validation', message: 'Validation failed' }]);
+    }
+  };
+  protected readonly cancelEdit = (reason: 'escape' | 'consumer') => {
+    this.cancelActiveEdit(reason);
+  };
+  protected readonly proposeExpansion = (args: {
+    readonly row: T;
+    readonly key: K;
+    readonly source: NeuTableExpandedKeysChange<K>['source'];
+  }) => {
+    if (this.virtualizationOptions().enabled || !this.expansionOptions().enabled) return;
+    if (this.expansionOptions().isExpandable?.(args.row) === false) return;
+    const token = neuTableIdentityToken(args.key);
+    const expanded = this.expandedKeys().some(
+      (key) => neuTableIdentityToken(key) === token,
+    );
+    const next = expanded
+      ? this.expandedKeys().filter((key) => neuTableIdentityToken(key) !== token)
+      : [...this.expandedKeys(), args.key];
+    this.expandedKeysChange.emit({ next, key: args.key, expanded: !expanded, source: args.source });
+  };
+  protected readonly proposeGrouping = (change: NeuTableGroupingChange<F> | null) => {
+    if (!this.virtualizationOptions().enabled && change !== null) this.groupingChange.emit(change);
+  };
   protected readonly selectionAnchor = signal<K | null>(null);
   protected readonly loadedSelectionRows = computed(() =>
     selectionRowsFromData(this.presentedData(), this.rowKey()),
@@ -598,6 +728,139 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     this.rangeChange.emit({ ...published, reason });
   };
 
+  protected ngDoCheck(): void {
+    const query = this.query();
+    if (
+      this.lastAppliedQuery !== null &&
+      !areNeuTableQuerySlicesEqual(
+        this.lastAppliedQuery,
+        query,
+        this.sortOptions(),
+        this.filterOptions().equals,
+      )
+    ) {
+      this.cancelActiveEdit('consumer');
+    }
+    this.lastAppliedQuery = query;
+
+    const grouping = this.grouping();
+    const groupingToken =
+      grouping === null
+        ? 'none'
+        : `${grouping.by.map(encodeURIComponent).join('|')}::${grouping.expandedGroupIds
+            .map(encodeURIComponent)
+            .join('|')}`;
+    if (this.lastAppliedGroupingToken !== 'initial' && this.lastAppliedGroupingToken !== groupingToken) {
+      this.cancelActiveEdit('consumer');
+    }
+    this.lastAppliedGroupingToken = groupingToken;
+
+    const appliedEdit = this.editState();
+    const appliedToken = neuTableEditStateToken(appliedEdit);
+    if (appliedToken !== this.lastAppliedEditToken) {
+      this.lastAppliedEditToken = appliedToken;
+      this.closedAppliedEditToken = null;
+      this.invalidateEditSession();
+    }
+
+    if (this.virtualizationOptions().enabled) {
+      if (this.expansionOptions().enabled || this.expandedKeys().length > 0) {
+        this.diagnoseOnce(
+          'virtual-expansion',
+          'NeuTable 2 fixed-height virtualization disables row expansion presentation.',
+        );
+      }
+      if (grouping !== null && grouping.by.length > 0) {
+        this.diagnoseOnce(
+          'virtual-grouping',
+          'NeuTable 2 fixed-height virtualization disables grouping presentation.',
+        );
+      }
+    }
+
+    if (appliedEdit.kind === 'none') {
+      this.invalidateEditSession();
+      return;
+    }
+    if (this.closedAppliedEditToken === appliedToken) return;
+
+    let session = this.activeEditSession();
+    const columnsById = new Map(this.normalizedColumns().map((column) => [column.id, column]));
+    const visibleIds = new Set(this.visibleColumns().map((column) => column.id));
+    if (session !== null) {
+      const editedColumnIds = [...session.draft().keys()];
+      if (
+        editedColumnIds.some(
+          (columnId) => !columnsById.has(columnId) || !visibleIds.has(columnId),
+        )
+      ) {
+        this.cancelActiveEdit('consumer');
+        return;
+      }
+    }
+
+    const keyToken = neuTableIdentityToken(appliedEdit.key);
+    const row = this.presentedData().find(
+      (candidate) => neuTableIdentityToken(this.rowKey()(candidate)) === keyToken,
+    );
+    if (session === null) {
+      if (row === undefined) return;
+      session = createNeuTableEditSession({
+        generation: ++this.editGeneration,
+        state: appliedEdit,
+        row,
+        columns: this.normalizedColumns(),
+      });
+      this.activeEditSession.set(session);
+      return;
+    }
+
+    if (row === undefined) {
+      if (this.dataMode() === 'remote' && this.virtualizationOptions().enabled) return;
+      this.cancelActiveEdit('data-change');
+      return;
+    }
+    if (
+      reconcileNeuTableEditSource(
+        session,
+        row,
+        this.normalizedColumns(),
+        this.filterOptions().equals ?? Object.is,
+      ) === 'changed'
+    ) {
+      this.cancelActiveEdit('data-change');
+    }
+  }
+
+  private invalidateEditSession(): void {
+    const session = this.activeEditSession();
+    if (session !== null) {
+      session.validationVersion += 1;
+      session.pending.set(false);
+    }
+    this.activeEditSession.set(null);
+  }
+
+  private cancelActiveEdit(reason: NeuTableEditCancel<T, K>['reason']): void {
+    const session = this.activeEditSession();
+    if (session === null) return;
+    this.restoreEditFocus(session);
+    this.closedAppliedEditToken = neuTableEditStateToken(this.editState());
+    session.validationVersion += 1;
+    session.pending.set(false);
+    this.editCancel.emit({ key: session.state.key, row: session.row, reason });
+    this.editStateChange.emit({ next: { kind: 'none' }, source: 'cancel' });
+    this.activeEditSession.set(null);
+  }
+
+  private restoreEditFocus(session: NeuTableEditSession<T, K, F>): void {
+    const columnId =
+      session.state.kind === 'cell'
+        ? session.state.columnId
+        : (session.draft().keys().next().value ?? null);
+    if (columnId !== null) this.focusCell({ key: session.state.key, columnId });
+  }
+
   constructor() {
     effect(() => {
       const previous = this.remoteCoordinator;
@@ -633,6 +896,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     }
 
     this.destroyRef.onDestroy(() => {
+      this.invalidateEditSession();
       this.remoteCoordinator = destroyNeuTableRemoteCoordinator(this.remoteCoordinator);
     });
   }

@@ -1,0 +1,78 @@
+import { Component, input, signal, type InputSignal, type OnChanges } from '@angular/core';
+import { FormField, form } from '@angular/forms/signals';
+import type { NeuTableEditError } from '../../../public/neu-table.types';
+
+@Component({
+  selector: 'neu-table-active-editor',
+  standalone: true,
+  imports: [FormField],
+  template: `
+    <label class="neu-table2__editor-label" [for]="editorId()">Edit {{ label() }}</label>
+    <input
+      [id]="editorId()"
+      [formField]="fields.value"
+      [attr.aria-invalid]="errors().length > 0 || null"
+      [attr.aria-describedby]="errors().length > 0 ? editorId() + '-errors' : null"
+      [attr.aria-busy]="pending() || null"
+      (input)="update($event)"
+      (keydown.enter)="submit($event)"
+      (keydown.escape)="dismiss($event)"
+      (blur)="blur($event)"
+    />
+    <span class="neu-table2__editor-actions" data-neu-selection-stop>
+      <button type="button" [disabled]="pending()" (click)="commit()()">Save</button>
+      <button type="button" (click)="cancel()('consumer')">Cancel</button>
+    </span>
+    @if (pending()) {
+      <span role="status">Validating</span>
+    }
+    @if (errors().length > 0) {
+      <span [id]="editorId() + '-errors'" role="alert">
+        @for (error of errors(); track error.code + ':' + error.message) {
+          {{ error.message }}
+        }
+      </span>
+    }
+  `,
+})
+export class NeuTableActiveEditorComponent implements OnChanges {
+  readonly editorId: InputSignal<string> = input.required();
+  readonly label: InputSignal<string> = input.required();
+  readonly value: InputSignal<unknown> = input.required();
+  readonly errors: InputSignal<readonly NeuTableEditError[]> = input.required();
+  readonly pending: InputSignal<boolean> = input.required();
+  readonly commitOnBlur: InputSignal<boolean> = input.required();
+  readonly setValue: InputSignal<(value: unknown) => void> = input.required();
+  readonly commit: InputSignal<() => void> = input.required();
+  readonly cancel: InputSignal<(reason: 'escape' | 'consumer') => void> = input.required();
+  private readonly model = signal({ value: '' });
+  readonly fields = form(this.model);
+
+  ngOnChanges(): void {
+    this.model.set({ value: this.value() == null ? '' : String(this.value()) });
+  }
+
+  protected update(event: Event): void {
+    this.setValue()((event.target as HTMLInputElement).value);
+  }
+
+  protected submit(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.commit()();
+  }
+
+  protected dismiss(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.cancel()('escape');
+  }
+
+  protected blur(event: FocusEvent): void {
+    if (!this.commitOnBlur()) return;
+    const input = event.currentTarget as HTMLInputElement | null;
+    queueMicrotask(() => {
+      if (input?.isConnected === true) this.commit()();
+    });
+  }
+}

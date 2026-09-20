@@ -121,6 +121,36 @@ th {
   text-align: center;
 }
 
+.neu-table2__expansion-column {
+  inline-size: 2.75rem;
+  text-align: center;
+}
+
+.neu-table2__editor {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.neu-table2__editor-actions {
+  display: inline-flex;
+  gap: 0.375rem;
+}
+
+.neu-table2__editor-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.neu-table2__group-row th,
+.neu-table2__group-footer td,
+.neu-table2__detail-row td {
+  background: var(--neu-table-group-background, color-mix(in srgb, currentColor 4%, transparent));
+}
+
 .neu-table2__resize-handle {
   inline-size: 0.5rem;
   min-block-size: 1.5rem;

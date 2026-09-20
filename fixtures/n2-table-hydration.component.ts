@@ -4,11 +4,20 @@ import {
   NeuTableComponent,
   NeuTableEmptyDirective,
   NeuTableErrorDirective,
+  NeuTableEditorDirective,
+  NeuTableGroupFooterDirective,
+  NeuTableGroupHeaderDirective,
   NeuTableHeaderDirective,
   NeuTableLoadingDirective,
+  NeuTableRowDetailDirective,
   type NeuTableColumn,
   type NeuTableDataRequest,
   type NeuTableFilterOptions,
+  type NeuTableEditChange,
+  type NeuTableEditState,
+  type NeuTableExpandedKeysChange,
+  type NeuTableGroupingChange,
+  type NeuTableGroupingState,
   type NeuTableLayoutChange,
   type NeuTableLayoutState,
   type NeuTableMetadata,
@@ -44,6 +53,7 @@ const columns: readonly NeuTableColumn<HydrationRow, HydrationField>[] = [
     maxWidth: '360px',
     sort: { field: 'name' },
     filter: { field: 'name', rules: ['contains', 'equals'], defaultRule: 'contains' },
+    edit: { field: 'name' },
   },
   { id: 'status', header: 'Status', field: 'status' },
 ];
@@ -67,6 +77,10 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     NeuTableEmptyDirective,
     NeuTableLoadingDirective,
     NeuTableErrorDirective,
+    NeuTableEditorDirective,
+    NeuTableGroupFooterDirective,
+    NeuTableGroupHeaderDirective,
+    NeuTableRowDetailDirective,
   ],
   template: `
     <button id="n2-reconstruct" type="button" (click)="applyParentQuery()">
@@ -79,6 +93,7 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     <output id="n2-remote-proposals">{{ remoteProposals() }}</output>
     <output id="n2-virtual-events">{{ virtualEvents() }}</output>
     <output id="n2-virtual-ranges">{{ virtualRanges() }}</output>
+    <output id="n2-h-events">{{ hEvents() }}</output>
     <button id="n2-remote-accept" type="button" (click)="acceptRemoteProposals()">
       Accept remote proposals
     </button>
@@ -98,6 +113,54 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     <button id="n2-virtual-retry" type="button" (click)="virtualSatisfied.retryData()">
       Retry virtual range
     </button>
+    <button id="n2-h-query" type="button" (click)="applyHQuery()">Apply H query</button>
+    <button id="n2-h-reset-edit" type="button" (click)="resetHEdit()">Reset H edit</button>
+
+    <section id="n2-table-h">
+      <neu-table
+        [data]="rows()"
+        [columns]="columns"
+        [metadata]="primaryMetadata"
+        [query]="hQuery()"
+        [rowKey]="rowKey"
+        [editState]="hEditState()"
+        [editingOptions]="hEditingOptions"
+        [expandedKeys]="hExpandedKeys()"
+        [expansionOptions]="hExpansionOptions"
+        [grouping]="hGrouping()"
+        [groupingOptions]="hGroupingOptions"
+        (editStateChange)="acceptHEditState($event)"
+        (editCommit)="recordH('editCommit')"
+        (editCancel)="recordH('editCancel')"
+        (expandedKeysChange)="acceptHExpansion($event)"
+        (groupingChange)="acceptHGrouping($event)"
+        (queryChange)="recordH('queryChange')"
+        (dataRequest)="recordH('dataRequest')"
+      >
+        <ng-template
+          neuTableEditor="name"
+          let-valueSignal="valueSignal"
+          let-setValue="setValue"
+          let-commit="commit"
+          let-cancel="cancel"
+        >
+          <input
+            id="n2-h-editor"
+            aria-label="Edit hydrated name"
+            [value]="valueSignal()"
+            (input)="setValue($any($event.target).value)"
+            (keydown.enter)="commit()"
+            (keydown.escape)="cancel()"
+          />
+          <button id="n2-h-save" type="button" (click)="commit()">Save hydrated edit</button>
+        </ng-template>
+        <ng-template neuTableRowDetail let-row="row">Hydrated detail {{ row.name }}</ng-template>
+        <ng-template neuTableGroupHeader let-value="value" let-rows="rows">
+          Hydrated group {{ value }} {{ rows.length }}
+        </ng-template>
+        <ng-template neuTableGroupFooter let-value="value">End hydrated {{ value }}</ng-template>
+      </neu-table>
+    </section>
 
     <section id="n2-table-primary">
       <neu-table
@@ -270,6 +333,7 @@ export class N2TableHydrationComponent {
   readonly remoteProposals = signal(0);
   readonly virtualEvents = signal('[]');
   readonly virtualRanges = signal('[]');
+  readonly hEvents = signal('[]');
   readonly rows = signal<readonly HydrationRow[]>([
     { id: 1, name: 'Ada', status: 'active' },
     { id: 2, name: 'Grace', status: 'disabled' },
@@ -282,6 +346,30 @@ export class N2TableHydrationComponent {
     sort: [{ field: 'name', direction: 'desc' }],
     filters: { kind: 'condition', field: 'id', rule: 'greaterThan', value: 1 },
   });
+  readonly hQuery = signal<NeuTableQuery<HydrationField>>({
+    page: 0,
+    pageSize: 25,
+    search: '',
+    sort: [],
+    filters: null,
+  });
+  readonly hEditState = signal<NeuTableEditState<number>>({
+    kind: 'cell',
+    key: 1,
+    columnId: 'name',
+  });
+  readonly hExpandedKeys = signal<readonly number[]>([1]);
+  readonly hGrouping = signal<NeuTableGroupingState<HydrationField>>({
+    by: ['status'],
+    expandedGroupIds: ['group:status=string%3Aactive', 'group:status=string%3Adisabled'],
+  });
+  readonly hEditingOptions = {
+    mode: 'cell' as const,
+    activation: 'enter' as const,
+    commitOnBlur: false,
+  };
+  readonly hExpansionOptions = { enabled: true, toggleOnRowClick: false };
+  readonly hGroupingOptions = { mode: 'subheader' as const, scope: 'loaded' as const };
   readonly remoteQuery: NeuTableQuery<HydrationField> = {
     page: 20,
     pageSize: 1,
@@ -417,6 +505,34 @@ export class N2TableHydrationComponent {
   record(name: string): void {
     const events = JSON.parse(this.outputEvents()) as string[];
     this.outputEvents.set(JSON.stringify([...events, name]));
+  }
+
+  recordH(name: string): void {
+    const events = JSON.parse(this.hEvents()) as string[];
+    this.hEvents.set(JSON.stringify([...events, name]));
+  }
+
+  acceptHEditState(change: NeuTableEditChange<number>): void {
+    this.recordH(`editState:${change.next.kind}`);
+    this.hEditState.set(change.next);
+  }
+
+  acceptHExpansion(change: NeuTableExpandedKeysChange<number>): void {
+    this.recordH(`expansion:${change.expanded}`);
+    this.hExpandedKeys.set(change.next);
+  }
+
+  acceptHGrouping(change: NeuTableGroupingChange<HydrationField>): void {
+    this.recordH('grouping');
+    this.hGrouping.set(change.next);
+  }
+
+  applyHQuery(): void {
+    this.hQuery.update((query) => ({ ...query, search: 'accepted' }));
+  }
+
+  resetHEdit(): void {
+    this.hEditState.set({ kind: 'cell', key: 1, columnId: 'name' });
   }
 
   recordRemote(scenario: string, request: NeuTableDataRequest<HydrationField>): void {

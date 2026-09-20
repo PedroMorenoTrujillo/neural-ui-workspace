@@ -17,6 +17,17 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { NeuTableAdvancedFilterBuilderComponent } from '../features/advanced-filters/neu-table-advanced-filter-builder.component';
+import { NeuTableActiveEditorComponent } from '../features/editing/neu-table-active-editor.component';
+import {
+  neuTableEditValueSignal,
+  type NeuTableEditSession,
+} from '../editing/neu-table-editing';
+import {
+  projectNeuTableGrouping,
+  proposeNeuTableGroupToggle,
+  type NeuTableGroupNode,
+  type NeuTableGroupingNode,
+} from '../grouping/neu-table-grouping';
 import { neuTableIdentityToken, type NeuTableRenderRow } from '../identity/neu-table-row-identity';
 import {
   normalizeNeuTableResize,
@@ -63,7 +74,18 @@ import type {
   NeuTableCellContext,
   NeuTableColumn,
   NeuTableDataMode,
+  NeuTableDetailContext,
+  NeuTableEditChange,
+  NeuTableEditingOptions,
+  NeuTableEditorContext,
+  NeuTableEditState,
+  NeuTableExpandedKeysChange,
+  NeuTableExpansionOptions,
   NeuTableFilterOptions,
+  NeuTableGroupContext,
+  NeuTableGroupingChange,
+  NeuTableGroupingOptions,
+  NeuTableGroupingState,
   NeuTableHeaderContext,
   NeuTableKey,
   NeuTableLabels,
@@ -84,7 +106,7 @@ import type {
 @Component({
   selector: 'neu-table-basic-renderer',
   standalone: true,
-  imports: [NgTemplateOutlet, NeuTableAdvancedFilterBuilderComponent],
+  imports: [NgTemplateOutlet, NeuTableAdvancedFilterBuilderComponent, NeuTableActiveEditorComponent],
   templateUrl: './neu-table-basic-renderer.component.html',
   styleUrl: './neu-table-basic-renderer.component.scss',
   host: {
@@ -102,6 +124,7 @@ export class NeuTableBasicRendererComponent<
   private readonly platformId = inject(PLATFORM_ID);
   private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   readonly rows: InputSignal<readonly NeuTableRenderRow<T, K>[]> = input.required();
+  readonly groupingDomainRows: InputSignal<readonly NeuTableRenderRow<T, K>[]> = input.required();
   readonly columns: InputSignal<readonly NeuTableColumn<T, F>[]> = input.required();
   readonly allColumns: InputSignal<readonly NeuTableColumn<T, F>[]> = input.required();
   readonly metadata: InputSignal<NeuTableMetadata> = input.required();
@@ -116,6 +139,12 @@ export class NeuTableBasicRendererComponent<
   readonly filterOptions: InputSignal<NeuTableFilterOptions<T, F>> = input.required();
   readonly paginationOptions: InputSignal<NeuTablePaginationOptions> = input.required();
   readonly virtualizationOptions: InputSignal<NeuTableVirtualizationOptions> = input.required();
+  readonly editingOptions: InputSignal<NeuTableEditingOptions<T, K, F>> = input.required();
+  readonly expansionOptions: InputSignal<NeuTableExpansionOptions<T>> = input.required();
+  readonly expandedKeys: InputSignal<readonly K[]> = input.required();
+  readonly grouping: InputSignal<NeuTableGroupingState<F> | null> = input.required();
+  readonly groupingOptions: InputSignal<NeuTableGroupingOptions<T, F>> = input.required();
+  readonly activeEditSession: InputSignal<NeuTableEditSession<T, K, F> | null> = input.required();
   readonly logicalRowCount: InputSignal<number | null> = input.required();
   readonly spacerBefore: InputSignal<number> = input.required();
   readonly spacerAfter: InputSignal<number> = input.required();
@@ -139,6 +168,15 @@ export class NeuTableBasicRendererComponent<
   readonly footerTemplates: InputSignal<
     ReadonlyMap<string, TemplateRef<NeuTableHeaderContext<T, F>>>
   > = input.required();
+  readonly editorTemplates: InputSignal<
+    ReadonlyMap<string, TemplateRef<NeuTableEditorContext<T, K, F>>>
+  > = input.required();
+  readonly rowDetailTemplate: InputSignal<TemplateRef<NeuTableDetailContext<T, K>> | undefined> =
+    input();
+  readonly groupHeaderTemplate: InputSignal<TemplateRef<NeuTableGroupContext<T>> | undefined> =
+    input();
+  readonly groupFooterTemplate: InputSignal<TemplateRef<NeuTableGroupContext<T>> | undefined> =
+    input();
   readonly retry: InputSignal<() => void> = input.required();
   readonly proposeSelection: InputSignal<(intent: NeuTableSelectionIntent<T, K>) => void> =
     input.required();
@@ -146,6 +184,17 @@ export class NeuTableBasicRendererComponent<
   readonly proposeLayout: InputSignal<(change: NeuTableLayoutChange | null) => void> =
     input.required();
   readonly proposeQuery: InputSignal<(query: NeuTableQuery<F> | null) => void> = input.required();
+  readonly proposeEdit: InputSignal<
+    (next: NeuTableEditState<K>, source: NeuTableEditChange<K>['source']) => void
+  > = input.required();
+  readonly setEditValue: InputSignal<(columnId: string, value: unknown) => void> = input.required();
+  readonly commitEdit: InputSignal<() => void> = input.required();
+  readonly cancelEdit: InputSignal<(reason: 'escape' | 'consumer') => void> = input.required();
+  readonly proposeExpansion: InputSignal<
+    (args: { readonly row: T; readonly key: K; readonly source: NeuTableExpandedKeysChange<K>['source'] }) => void
+  > = input.required();
+  readonly proposeGrouping: InputSignal<(change: NeuTableGroupingChange<F> | null) => void> =
+    input.required();
   readonly updateViewport: InputSignal<
     (geometry: NeuTableViewportGeometry, reason: NeuTableRangeChange['reason']) => void
   > = input.required();
@@ -174,9 +223,24 @@ export class NeuTableBasicRendererComponent<
   protected readonly builderTrigger = signal<HTMLElement | null>(null);
   private readonly filterTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly rowFilterControls = new Map<string, HTMLInputElement | HTMLSelectElement>();
+  protected readonly emptyRowspan = new Map<string, number>();
 
+  protected readonly expansionActive = computed(
+    () => !this.virtualizationOptions().enabled && this.expansionOptions().enabled,
+  );
+  protected readonly groupingActive = computed(
+    () =>
+      !this.virtualizationOptions().enabled &&
+      this.grouping() !== null &&
+      (this.grouping()?.by.length ?? 0) > 0,
+  );
   protected readonly columnCount: Signal<number> = computed(() =>
-    Math.max(1, this.columns().length + (this.hasSelectionColumn() ? 1 : 0)),
+    Math.max(
+      1,
+      this.columns().length +
+        (this.hasSelectionColumn() ? 1 : 0) +
+        (this.expansionActive() ? 1 : 0),
+    ),
   );
   protected readonly stateContext: Signal<NeuTableStateTemplateContext> = computed(() => ({
     loading: this.metadata().loading,
@@ -227,6 +291,27 @@ export class NeuTableBasicRendererComponent<
   );
   protected readonly normalRows = computed(() => this.rows().filter((row) => row.pin === null));
   protected readonly pinnedEndRows = computed(() => this.rows().filter((row) => row.pin === 'end'));
+  protected readonly expandedTokens = computed(
+    () => new Set(this.expandedKeys().map((key) => neuTableIdentityToken(key))),
+  );
+  protected readonly normalPresentation = computed<
+    readonly NeuTableGroupingNode<T, NeuTableRenderRow<T, K>>[]
+  >(() =>
+    this.groupingActive()
+      ? projectNeuTableGrouping({
+          rows: this.normalRows(),
+          domainRows: this.groupingDomainRows(),
+          grouping: this.grouping(),
+          options: this.groupingOptions(),
+          columns: this.allColumns(),
+        })
+      : this.normalRows().map((row) => ({
+          kind: 'row' as const,
+          row,
+          track: row.track,
+          rowspan: new Map<string, number>(),
+        })),
+  );
 
   constructor() {
     effect((onCleanup) => {
@@ -686,11 +771,169 @@ export class NeuTableBasicRendererComponent<
     key: renderRow.key,
     index: renderRow.index,
     selected: this.selectionProjection().isSelected(renderRow.key),
-    expanded: false,
+    expanded: this.rowExpanded(renderRow),
     disabled: this.rowDisabled(renderRow),
     columnId: column.id,
     value: readNeuTableColumnValue(renderRow.row, column),
   });
+  protected readonly rowExpanded = (renderRow: NeuTableRenderRow<T, K>) =>
+    this.expansionActive() && this.expandedTokens().has(neuTableIdentityToken(renderRow.key));
+  protected readonly rowExpandable = (renderRow: NeuTableRenderRow<T, K>) =>
+    this.expansionActive() && this.expansionOptions().isExpandable?.(renderRow.row) !== false;
+  protected readonly detailId = (renderRow: NeuTableRenderRow<T, K>) =>
+    `neu-table-detail-${neuTableIdentityToken(renderRow.key).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  protected readonly detailContext = (
+    renderRow: NeuTableRenderRow<T, K>,
+  ): NeuTableDetailContext<T, K> => ({
+    $implicit: renderRow.row,
+    row: renderRow.row,
+    key: renderRow.key,
+    index: renderRow.index,
+    selected: this.rowSelected(renderRow),
+    expanded: this.rowExpanded(renderRow),
+    disabled: this.rowDisabled(renderRow),
+  });
+  protected readonly toggleExpansion = (
+    renderRow: NeuTableRenderRow<T, K>,
+    source: NeuTableExpandedKeysChange<K>['source'],
+    event?: Event,
+  ) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (!this.rowExpandable(renderRow)) return;
+    this.proposeExpansion()({ row: renderRow.row, key: renderRow.key, source });
+  };
+  protected readonly toggleGroup = (id: string, event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    this.proposeGrouping()(proposeNeuTableGroupToggle(this.grouping(), id));
+  };
+  protected readonly groupLabel = (context: NeuTableGroupContext<T>) =>
+    `Group ${context.value == null ? '' : String(context.value)}`.trim();
+  protected readonly groupAggregateLabel = (node: NeuTableGroupNode<T>) =>
+    node.aggregates
+      .map((aggregate) =>
+        aggregate.error === null
+          ? `${aggregate.field}: ${aggregate.value == null ? '' : String(aggregate.value)}`
+          : `${aggregate.field}: unavailable`,
+      )
+      .join(', ');
+  protected readonly groupingCellVisible = (
+    node: NeuTableGroupingNode<T, NeuTableRenderRow<T, K>>,
+    column: NeuTableColumn<T, F>,
+  ) =>
+    node.kind !== 'row' ||
+    this.groupingOptions().mode !== 'rowspan' ||
+    column.field === undefined ||
+    !this.grouping()?.by.includes(column.field) ||
+    node.rowspan.has(String(column.field));
+  protected readonly groupingRowspan = (
+    node: NeuTableGroupingNode<T, NeuTableRenderRow<T, K>>,
+    column: NeuTableColumn<T, F>,
+  ) =>
+    node.kind === 'row' && column.field !== undefined
+      ? (node.rowspan.get(String(column.field)) ?? null)
+      : null;
+  protected readonly isCellEditing = (
+    renderRow: NeuTableRenderRow<T, K>,
+    column: NeuTableColumn<T, F>,
+  ) => {
+    const session = this.activeEditSession();
+    if (
+      session === null ||
+      session.keyToken !== neuTableIdentityToken(renderRow.key) ||
+      !session.draft().has(column.id)
+    ) {
+      return false;
+    }
+    return session.state.kind === 'row' || session.state.columnId === column.id;
+  };
+  protected readonly editorTemplate = (columnId: string) => this.editorTemplates().get(columnId);
+  protected readonly editorContext = (
+    renderRow: NeuTableRenderRow<T, K>,
+    column: NeuTableColumn<T, F>,
+  ): NeuTableEditorContext<T, K, F> | null => {
+    const session = this.activeEditSession();
+    if (session === null) return null;
+    return {
+      ...this.cellContext(renderRow, column),
+      valueSignal: neuTableEditValueSignal(session, column.id),
+      errors: computed(() =>
+        session.errors().filter(
+          (error) => error.columnId === undefined || error.columnId === column.id,
+        )),
+      setValue: (value) => this.setEditValue()(column.id, value),
+      commit: () => this.commitEdit()(),
+      cancel: () => this.cancelEdit()('consumer'),
+    };
+  };
+  protected readonly editorId = (
+    renderRow: NeuTableRenderRow<T, K>,
+    column: NeuTableColumn<T, F>,
+  ) => `neu-table-editor-${this.rowIdentity(renderRow).replace(/[^a-zA-Z0-9_-]/g, '_')}-${column.id}`;
+  protected readonly editCommitOnBlur = () => {
+    const options = this.editingOptions();
+    return options.mode === 'none' ? false : options.commitOnBlur;
+  };
+  protected readonly startEdit = (
+    renderRow: NeuTableRenderRow<T, K>,
+    column: NeuTableColumn<T, F>,
+    source: 'pointer' | 'keyboard',
+    event: Event,
+  ) => {
+    const options = this.editingOptions();
+    if (options.mode === 'none' || column.edit === undefined || this.rowDisabled(renderRow)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.proposeEdit()(
+      options.mode === 'cell'
+        ? { kind: 'cell', key: renderRow.key, columnId: column.id }
+        : { kind: 'row', key: renderRow.key },
+      source,
+    );
+    afterNextRender(
+      () =>
+        this.host.nativeElement
+          .querySelector<HTMLElement>(`#${this.editorId(renderRow, column)}`)
+          ?.focus(),
+      { injector: this.injector },
+    );
+  };
+  protected readonly onCellClick = (
+    renderRow: NeuTableRenderRow<T, K>,
+    column: NeuTableColumn<T, F>,
+    event: MouseEvent,
+  ) => {
+    const options = this.editingOptions();
+    if (options.mode !== 'none' && options.activation === 'click') {
+      this.startEdit(renderRow, column, 'pointer', event);
+    }
+  };
+  protected readonly onCellDoubleClick = (
+    renderRow: NeuTableRenderRow<T, K>,
+    column: NeuTableColumn<T, F>,
+    event: MouseEvent,
+  ) => {
+    const options = this.editingOptions();
+    if (options.mode !== 'none' && options.activation === 'double-click') {
+      this.startEdit(renderRow, column, 'pointer', event);
+    }
+  };
+  protected readonly onCellKeydown = (
+    renderRow: NeuTableRenderRow<T, K>,
+    column: NeuTableColumn<T, F>,
+    event: KeyboardEvent,
+  ) => {
+    if (event.target !== event.currentTarget) return;
+    const options = this.editingOptions();
+    if (
+      options.mode !== 'none' &&
+      ((options.activation === 'enter' && event.key === 'Enter') ||
+        (options.activation === 'f2' && event.key === 'F2'))
+    ) {
+      this.startEdit(renderRow, column, 'keyboard', event);
+    }
+  };
   protected readonly basicValue = (row: T, column: NeuTableColumn<T, F>) =>
     presentNeuTableBasicValue(readNeuTableColumnValue(row, column));
   protected readonly columnWidth = (column: NeuTableColumn<T, F>) => {
@@ -742,6 +985,13 @@ export class NeuTableBasicRendererComponent<
       );
     });
   protected readonly onRowClick = (renderRow: NeuTableRenderRow<T, K>, event: MouseEvent) => {
+    if (
+      this.expansionActive() &&
+      this.expansionOptions().toggleOnRowClick &&
+      !this.isInteractiveEvent(event)
+    ) {
+      this.toggleExpansion(renderRow, 'toggle');
+    }
     const options = this.selectionOptions();
     if (options.mode === 'none' || !options.selectOnRowClick || this.isInteractiveEvent(event)) {
       return;

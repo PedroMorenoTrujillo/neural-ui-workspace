@@ -40,8 +40,10 @@ test('uses computed projections with the frozen two-effect viewport/request ledg
   assert.match(product, /\bcomputed\s*\(/);
 });
 
-test('does not import legacy Table, TableCore or deferred subsystem runtimes', () => {
-  const internal = files(`${root}/internal`)
+test('keeps legacy runtimes absent and confines Signal Forms to the active editor chunk', () => {
+  const internalFiles = files(`${root}/internal`);
+  const internal = internalFiles
+    .filter((path) => !path.endsWith('neu-table-active-editor.component.ts'))
     .map((path) => readFileSync(path, 'utf8'))
     .join('\n');
   for (const forbidden of [
@@ -59,9 +61,15 @@ test('does not import legacy Table, TableCore or deferred subsystem runtimes', (
   ]) {
     assert.doesNotMatch(internal, forbidden);
   }
+  const activeEditor = readFileSync(
+    `${root}/internal/features/editing/neu-table-active-editor.component.ts`,
+    'utf8',
+  );
+  assert.match(activeEditor, /@angular\/forms\/signals/);
+  assert.doesNotMatch(activeEditor, /ControlValueAccessor|NG_VALUE_ACCESSOR|@angular\/forms['"]/);
 });
 
-test('contains no symlink in the N2-011G candidate', () => {
+test('contains no symlink in the N2-011H candidate', () => {
   const visit = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const path = join(directory, entry.name);

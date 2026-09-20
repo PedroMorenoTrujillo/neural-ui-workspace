@@ -154,7 +154,13 @@ export function validateTargetContracts() {
     violations.push('candidate NeuTableComponent contract is missing');
   } else {
     const properties = component.members.filter(ts.isPropertyDeclaration);
-    const methods = component.members.filter(ts.isMethodDeclaration);
+    const methods = component.members.filter(
+      (member) =>
+        ts.isMethodDeclaration(member) &&
+        !member.modifiers?.some((modifier) =>
+          [ts.SyntaxKind.PrivateKeyword, ts.SyntaxKind.ProtectedKeyword].includes(modifier.kind),
+        ),
+    );
     const inputMembers = properties.filter((member) =>
       member.type?.getText(componentFile).startsWith('InputSignal<'),
     );

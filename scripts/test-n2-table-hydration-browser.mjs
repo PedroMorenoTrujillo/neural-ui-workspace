@@ -35,6 +35,10 @@ try {
   assert.equal(await page.locator('#n2-remote-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-virtual-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-virtual-ranges').textContent(), '[]');
+  assert.equal(await page.locator('#n2-h-events').textContent(), '[]');
+  assert.equal(await page.locator('#n2-table-h #n2-h-editor').count(), 1);
+  assert.equal(await page.locator('#n2-table-h .neu-table2__detail-row').count(), 1);
+  assert.equal(await page.locator('#n2-table-h .neu-table2__group-row').count(), 2);
   assert.equal(await page.locator('#n2-table-client-virtual tr[data-row-key]').count(), 50);
   assert.equal(
     await page.locator('#n2-table-remote-virtual-satisfied tr[data-row-key]').count(),
@@ -149,6 +153,11 @@ try {
       document.querySelector('#n2-table-remote-virtual-satisfied table'),
       document.querySelector('#n2-table-remote-virtual-satisfied tr[data-row-key="0"]'),
     ];
+    window.__n2HNodes = [
+      document.querySelector('#n2-table-h table'),
+      document.querySelector('#n2-table-h #n2-h-editor'),
+      document.querySelector('#n2-table-h .neu-table2__detail-row'),
+    ];
   });
   release();
   await page.waitForFunction(() => document.querySelector('#n2-ready')?.textContent === 'true');
@@ -195,6 +204,19 @@ try {
     }),
     [true, true, true, true],
   );
+  assert.deepEqual(
+    await page.evaluate(() => {
+      const selectors = [
+        '#n2-table-h table',
+        '#n2-table-h #n2-h-editor',
+        '#n2-table-h .neu-table2__detail-row',
+      ];
+      return window.__n2HNodes.map(
+        (node, index) => node === document.querySelector(selectors[index]),
+      );
+    }),
+    [true, true, true],
+  );
   assert.equal(
     await page
       .locator('#n2-table-remote-satisfied input[aria-label="Select all rows"]')
@@ -222,6 +244,32 @@ try {
     await page.evaluate(() => window.__n2TableIds),
   );
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
+  await page.locator('#n2-h-query').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-h-events')?.textContent ===
+      '["editCancel","editState:none"]',
+  );
+  assert.equal((await page.locator('#n2-h-events').textContent()).includes('editCommit'), false);
+  await page.locator('#n2-h-reset-edit').click();
+  await page.locator('#n2-h-editor').fill('Hydrated Ada');
+  await page.locator('#n2-h-save').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-h-events')?.textContent ===
+      '["editCancel","editState:none","editCommit","editState:none"]',
+  );
+  await page.locator('#n2-table-h .neu-table2__expansion-column button').first().click();
+  await page.waitForFunction(
+    () => document.querySelector('#n2-h-events')?.textContent?.includes('expansion:false'),
+  );
+  assert.equal(await page.locator('#n2-table-h .neu-table2__detail-row').count(), 0);
+  await page.locator('#n2-table-h .neu-table2__group-row button').first().click();
+  await page.waitForFunction(
+    () => document.querySelector('#n2-h-events')?.textContent?.includes('grouping'),
+  );
+  assert.equal((await page.locator('#n2-h-events').textContent()).includes('dataRequest'), false);
+  assert.equal((await page.locator('#n2-h-events').textContent()).includes('queryChange'), false);
   await page.locator('#n2-table-primary button[aria-label^="Sort Name"]').click();
   await page.waitForFunction(
     () => document.querySelector('#n2-output-events')?.textContent === '["queryChange"]',
