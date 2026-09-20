@@ -3,6 +3,7 @@ import type {
   NeuTreeTableCellDirective,
   NeuTreeTableColumn,
   NeuTreeTableComponent,
+  NeuTreeTableDataRequest,
   NeuTreeTableFeatureError,
   NeuTreeTableHierarchy,
   NeuTreeTableQuery,
@@ -47,6 +48,21 @@ const hierarchyError: NeuTreeTableFeatureError = {
   code: 'cycle',
   error: new Error('cycle'),
 };
+const rootsRequest: NeuTreeTableDataRequest<number, Field> = {
+  kind: 'roots',
+  reason: 'query',
+  requestId: 1,
+  queryRevision: 1,
+  hierarchyRevision: 2,
+  relationRevision: 3,
+  query,
+};
+const childrenRequest: NeuTreeTableDataRequest<number, Field> = {
+  ...rootsRequest,
+  kind: 'children',
+  reason: 'expand',
+  parentKey: 1,
+};
 
 declare const component: NeuTreeTableComponent<Row, number, Field>;
 component.queryChange.emit(query);
@@ -64,5 +80,7 @@ export const valid = {
   columns,
   selection,
   hierarchyError,
+  rootsRequest,
+  childrenRequest,
   cellColumnId,
 };

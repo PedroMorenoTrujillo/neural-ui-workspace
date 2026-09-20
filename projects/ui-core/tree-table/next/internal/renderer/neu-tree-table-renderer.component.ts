@@ -126,6 +126,7 @@ export class NeuTreeTableRendererComponent<
   readonly expandedKeysProposal: OutputEmitterRef<NeuTreeTableExpandedKeysChange<K>> = output();
   readonly selectionIntent: OutputEmitterRef<TreeSelectionIntent<K>> = output();
   readonly queryProposal: OutputEmitterRef<NeuTreeTableQuery<F>> = output();
+  readonly retryRequested: OutputEmitterRef<void> = output();
 
   protected readonly rows = computed(() => this.projection().visible);
   protected readonly rovingToken = computed(() => {
@@ -160,7 +161,9 @@ export class NeuTreeTableRendererComponent<
       this.filterOptions().surfaces.includes('row') &&
       this.columns().some((column) => column.filter !== undefined),
   );
-  protected readonly stateContext: NeuTreeTableStateContext = { retry: () => undefined };
+  protected readonly stateContext: NeuTreeTableStateContext = {
+    retry: () => this.retryRequested.emit(),
+  };
   protected readonly emptySelectionState: TreeSelectionNodeState = {
     selected: false,
     checked: false,

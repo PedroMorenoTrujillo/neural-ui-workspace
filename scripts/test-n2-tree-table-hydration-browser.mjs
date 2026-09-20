@@ -32,6 +32,7 @@ try {
   assert.equal(await page.locator('#n2-tree-ready').textContent(), 'false');
   assert.equal(await page.locator('#n2-tree-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-tree-diagnostic-events').textContent(), '[]');
+  assert.equal(await page.locator('#n2-tree-remote-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('role'), 'treegrid');
   assert.equal(
     await page.locator('#n2-tree-primary table').getAttribute('aria-multiselectable'),
@@ -115,6 +116,11 @@ try {
     await page.locator('#n2-tree-diagnostic-events').textContent(),
     '["invalid-tree-column"]',
   );
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-tree-remote-events')?.textContent ===
+      '["unsatisfied:roots:initial:1"]',
+  );
   assert.equal(
     await page.evaluate(() =>
       document.querySelector('#n2-tree-primary')?.contains(document.activeElement),
@@ -125,6 +131,18 @@ try {
   await page.waitForTimeout(50);
   assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
   assert.equal(await page.locator('#n2-tree-events').textContent(), '[]');
+
+  await page.locator('#n2-tree-expand-remote').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-tree-remote-events')?.textContent ===
+      '["unsatisfied:roots:initial:1","child:children:expand:1:a"]',
+  );
+  await page.waitForTimeout(20);
+  assert.equal(
+    await page.locator('#n2-tree-remote-events').textContent(),
+    '["unsatisfied:roots:initial:1","child:children:expand:1:a"]',
+  );
 
   const expander = page.locator(
     '#n2-tree-primary tr[data-node-key="string:a"] button.neu-tree-table2__expander',
@@ -279,7 +297,7 @@ try {
   assert.equal(errors.filter((error) => /NG050\d/.test(error)).length, 0);
   assert.deepEqual(errors, []);
   console.log(
-    'N2-015E real Chromium hydration passed (DOM reused, controlled query/expansion/selection exactly once, deterministic focus transitions, 0 NG050x, 0 requests).',
+    'N2-015F real Chromium hydration passed (DOM reused, satisfied remote 0 requests, unsatisfied roots 1 request, accepted expansion 1 child request, controlled query/expansion/selection exactly once, deterministic focus transitions, 0 NG050x).',
   );
 } finally {
   release?.();

@@ -1,0 +1,34 @@
+{
+  "checkpoint": "N2-015F",
+  "capturedAt": "2026-09-20T22:11:48.411Z",
+  "metrics": {
+    "roots100": {
+      "p50Ms": 0.6258,
+      "p95Ms": 1.1608
+    },
+    "children100": {
+      "p50Ms": 0.6106,
+      "p95Ms": 0.9614
+    },
+    "concurrent100": {
+      "p50Ms": 0.09,
+      "p95Ms": 0.1052
+    },
+    "queryCycles100": {
+      "p50Ms": 0.6015,
+      "p95Ms": 0.8578
+    },
+    "largeTotal1m": {
+      "p50Ms": 0.0051,
+      "p95Ms": 0.0114
+    },
+    "destroy50": {
+      "p50Ms": 55.4858,
+      "p95Ms": 66.6185
+    },
+    "stateDestroy100": {
+      "p50Ms": 0.1559,
+      "p95Ms": 0.2048
+    }
+  }
+}

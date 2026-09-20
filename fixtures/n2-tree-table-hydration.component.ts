@@ -9,6 +9,7 @@ import {
   NeuTreeTableNodeDirective,
   type NeuTreeLoadedRelation,
   type NeuTreeTableColumn,
+  type NeuTreeTableDataRequest,
   type NeuTreeTableExpandedKeysChange,
   type NeuTreeTableFeatureError,
   type NeuTreeTableHierarchy,
@@ -76,6 +77,7 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
     <output id="n2-tree-ready">{{ ready() }}</output>
     <output id="n2-tree-events">{{ events() }}</output>
     <output id="n2-tree-diagnostic-events">{{ diagnosticEvents() }}</output>
+    <output id="n2-tree-remote-events">{{ remoteEvents() }}</output>
     <button id="n2-tree-parent-write" type="button" (click)="reconstruct()">Parent write</button>
     <button id="n2-tree-accept" type="button" (click)="acceptExpansion.set(true)">Accept</button>
     <button id="n2-tree-accept-selection" type="button" (click)="acceptSelection.set(true)">
@@ -86,6 +88,9 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
     </button>
     <button id="n2-tree-empty-write" type="button" (click)="emptyWrite()">Empty</button>
     <button id="n2-tree-restore-write" type="button" (click)="restoreWrite()">Restore</button>
+    <button id="n2-tree-expand-remote" type="button" (click)="remoteExpandedKeys.set(['a'])">
+      Expand remote
+    </button>
 
     <section id="n2-tree-primary">
       <neu-tree-table
@@ -180,12 +185,50 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
         <ng-template neuTreeTableError>SSR error tree</ng-template>
       </neu-tree-table>
     </section>
+
+    <section id="n2-tree-remote-satisfied">
+      <neu-tree-table
+        dataMode="remote"
+        [data]="unloadedData"
+        [hierarchy]="remoteSatisfiedHierarchy"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
+        (dataRequest)="recordRemote('satisfied', $event)"
+      />
+    </section>
+
+    <section id="n2-tree-remote-unsatisfied">
+      <neu-tree-table
+        dataMode="remote"
+        [data]="[]"
+        [hierarchy]="remoteUnsatisfiedHierarchy"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
+        (dataRequest)="recordRemote('unsatisfied', $event)"
+      />
+    </section>
+
+    <section id="n2-tree-remote-child">
+      <neu-tree-table
+        dataMode="remote"
+        [data]="unloadedData"
+        [hierarchy]="remoteSatisfiedHierarchy"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [expandedKeys]="remoteExpandedKeys()"
+        [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
+        (dataRequest)="recordRemote('child', $event)"
+      />
+    </section>
   `,
 })
 export class N2TreeTableHydrationComponent {
   readonly ready = signal(false);
   readonly events = signal('[]');
   readonly diagnosticEvents = signal('[]');
+  readonly remoteEvents = signal('[]');
   readonly data = signal(rows);
   readonly appliedHierarchy = signal(hierarchy);
   readonly appliedColumns = signal(columns);
@@ -201,6 +244,7 @@ export class N2TreeTableHydrationComponent {
   readonly acceptExpansion = signal(false);
   readonly acceptSelection = signal(false);
   readonly acceptQuery = signal(false);
+  readonly remoteExpandedKeys = signal<readonly string[]>([]);
   readonly selectionOptions: NeuTreeTableSelectionOptions<Row> = {
     mode: 'checkbox',
     indicator: 'checkbox',
@@ -253,6 +297,22 @@ export class N2TreeTableHydrationComponent {
     },
     children: [],
   };
+  readonly remoteSatisfiedHierarchy: NeuTreeTableHierarchy<string> = {
+    ...hierarchy,
+    roots: loaded(['a']),
+    children: [],
+  };
+  readonly remoteUnsatisfiedHierarchy: NeuTreeTableHierarchy<string> = {
+    ...hierarchy,
+    roots: {
+      status: 'unloaded',
+      keys: [],
+      relationRevision: 1,
+      appliedRequestId: null,
+      total: null,
+    },
+    children: [],
+  };
 
   constructor() {
     afterNextRender(() => this.ready.set(true));
@@ -282,6 +342,20 @@ export class N2TreeTableHydrationComponent {
     const code = error.feature === 'hierarchy' ? error.code : error.feature;
     const current = JSON.parse(this.diagnosticEvents()) as string[];
     this.diagnosticEvents.set(JSON.stringify([...current, code]));
+  }
+
+  recordRemote(
+    source: 'satisfied' | 'unsatisfied' | 'child',
+    request: NeuTreeTableDataRequest<string, Field>,
+  ): void {
+    const current = JSON.parse(this.remoteEvents()) as string[];
+    const target = request.kind === 'children' ? `:${request.parentKey}` : '';
+    this.remoteEvents.set(
+      JSON.stringify([
+        ...current,
+        `${source}:${request.kind}:${request.reason}:${request.requestId}${target}`,
+      ]),
+    );
   }
 
   reconstruct(): void {

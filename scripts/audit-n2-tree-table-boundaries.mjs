@@ -75,7 +75,7 @@ for (const file of files) {
     }
   }
 }
-assert.equal(effects, 2, 'NeuTreeTable candidate must have exactly two justified effects.');
+assert.equal(effects, 3, 'NeuTreeTable candidate must have exactly three justified effects.');
 assert.equal(renderEffects, 0, 'NeuTreeTable candidate must not add a render effect.');
 assert.deepEqual(signalFirstCounts, {
   inputDecorators: 0,
@@ -138,5 +138,5 @@ for (const forbidden of [
 assert.match(graph, /internal\/neu-exact-key/);
 assert.match(graph, /internal\/neu-field-value-resolver/);
 console.log(
-  `N2 TreeTable boundary audit passed (${files.length} files, 2 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, 1 delegated focus/keyboard/click boundary, 2 bounded debounce timers with teardown, native selection/query semantics, neutral internals only).`,
+  `N2 TreeTable boundary audit passed (${files.length} files, 3 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, 1 delegated focus/keyboard/click boundary, 2 bounded debounce timers with teardown, native selection/query/remote semantics, neutral internals only).`,
 );

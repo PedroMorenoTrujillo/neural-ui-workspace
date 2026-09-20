@@ -15,16 +15,20 @@ import { build } from 'esbuild';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const update = process.argv.includes('--update');
-const checkpoint = process.argv.includes('--checkpoint=N2-015E')
-  ? 'N2-015E'
+const checkpoint = process.argv.includes('--checkpoint=N2-015F')
+  ? 'N2-015F'
+  : process.argv.includes('--checkpoint=N2-015E')
+    ? 'N2-015E'
   : process.argv.includes('--checkpoint=N2-015D')
     ? 'N2-015D'
     : process.argv.includes('--checkpoint=N2-015C')
       ? 'N2-015C'
       : 'N2-015B';
 const artifactStem =
-  checkpoint === 'N2-015E'
-    ? 'query-e'
+  checkpoint === 'N2-015F'
+    ? 'remote-f'
+    : checkpoint === 'N2-015E'
+      ? 'query-e'
     : checkpoint === 'N2-015D'
       ? 'selection-d'
       : checkpoint === 'N2-015C'
@@ -176,6 +180,14 @@ try {
       '../../shared/neu-field-value-resolver',
     ),
   );
+  const remoteSource = join(entrypoint, 'internal/remote/neu-tree-table-remote.ts');
+  writeFileSync(
+    remoteSource,
+    readFileSync(remoteSource, 'utf8').replace(
+      '../../../../internal/neu-exact-key',
+      '../../shared/neu-exact-key',
+    ),
+  );
   writeFileSync(join(entrypoint, 'public_api.ts'), "export * from './public/public-api';\n");
   writeFileSync(
     join(entrypoint, 'ng-package.json'),
@@ -209,6 +221,13 @@ try {
           search: await packageConsumer(packageRoot, basic),
           filter: await packageConsumer(packageRoot, basic),
           sort: await packageConsumer(packageRoot, basic),
+          combined: await packageConsumer(packageRoot, templates),
+        }
+      : {}),
+    ...(checkpoint === 'N2-015F'
+      ? {
+          'remote-roots': await packageConsumer(packageRoot, basic),
+          'remote-children': await packageConsumer(packageRoot, basic),
           combined: await packageConsumer(packageRoot, templates),
         }
       : {}),

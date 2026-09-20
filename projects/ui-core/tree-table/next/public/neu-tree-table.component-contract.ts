@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   contentChildren,
+  DestroyRef,
   effect,
   inject,
   input,
@@ -20,6 +21,14 @@ import {
   type TreeDiagnostic,
 } from '../internal/hierarchy/neu-tree-table-hierarchy';
 import { buildNeuTreeTableQueryProjection } from '../internal/query/neu-tree-table-query';
+import {
+  createNeuTreeTableRemoteState,
+  destroyNeuTreeTableRemote,
+  reduceNeuTreeTableRemote,
+  retryNeuTreeTableRemote,
+  type TreeRemoteCoordinatorState,
+  type TreeRemoteSnapshot,
+} from '../internal/remote/neu-tree-table-remote';
 import { NeuTreeTableRendererComponent } from '../internal/renderer/neu-tree-table-renderer.component';
 import {
   buildNeuTreeTableSelectionModel,
@@ -138,7 +147,9 @@ function templateMap<C>(
 })
 export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, F extends string> {
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly destroyRef = inject(DestroyRef);
   private lastDiagnosticSnapshot = '';
+  private remoteState: TreeRemoteCoordinatorState = createNeuTreeTableRemoteState();
   private readonly renderer = viewChild(NeuTreeTableRendererComponent<T, K, F>);
 
   readonly dataMode: InputSignal<NeuTreeTableDataMode> = input<NeuTreeTableDataMode>('client');
@@ -388,6 +399,28 @@ export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, 
       }
     });
   });
+  private readonly remoteSnapshot = computed<TreeRemoteSnapshot<K, F>>(() => ({
+    browser: this.browser,
+    mode: this.dataMode(),
+    hierarchy: this.hierarchy(),
+    query: this.query(),
+    expandedKeys: this.expandedKeys(),
+    knownKeys: [...this.normalizedHierarchy().nodes.values()].map((node) => node.key),
+  }));
+  private readonly remoteRequestEffect = effect(() => {
+    const snapshot = this.remoteSnapshot();
+    untracked(() => {
+      const transition = reduceNeuTreeTableRemote(this.remoteState, snapshot);
+      this.remoteState = transition.state;
+      for (const request of transition.requests) this.dataRequest.emit(request);
+    });
+  });
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.remoteState = destroyNeuTreeTableRemote(this.remoteState);
+    });
+  }
 
   protected onExpandedKeysProposal(change: NeuTreeTableExpandedKeysChange<K>): void {
     this.expandedKeysChange.emit(change);
@@ -416,7 +449,9 @@ export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, 
   }
 
   retryData(target: NeuTreeTableRetryTarget<K>): void {
-    void target;
+    const transition = retryNeuTreeTableRemote(this.remoteState, this.remoteSnapshot(), target);
+    this.remoteState = transition.state;
+    for (const request of transition.requests) this.dataRequest.emit(request);
   }
 
   export(request: NeuTreeTableExportRequest<F>): Promise<NeuTreeTableExportOutcome> {
