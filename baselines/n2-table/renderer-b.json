@@ -1,0 +1,42 @@
+{
+  "checkpoint": "N2-011B",
+  "method": "Angular-compiled minified ESM; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 44039,
+        "gzip": 6329,
+        "brotli": 5286
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 44007
+        }
+      ]
+    },
+    "templates": {
+      "size": {
+        "raw": 44490,
+        "gzip": 6428,
+        "brotli": 5369
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 44007
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": ["@angular/common", "@angular/core"],
+  "forbiddenGraphTokens": []
+}

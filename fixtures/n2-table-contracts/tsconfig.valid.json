@@ -10,6 +10,7 @@
     "./remote.ts",
     "./selection.ts",
     "./migrations.ts",
+    "./directive-contexts.ts",
     "./valid.ts"
   ]
 }

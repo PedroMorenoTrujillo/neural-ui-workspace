@@ -1,0 +1,65 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+.neu-table2__toolbar {
+  padding-block: var(--neu-table-space-sm, 0.5rem);
+}
+
+.neu-table2__viewport {
+  max-inline-size: 100%;
+  overflow: auto;
+}
+
+.neu-table2__table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  color: var(--neu-color-text, currentColor);
+  background: var(--neu-color-surface, transparent);
+}
+
+th,
+td {
+  padding: var(--neu-table-cell-block, 0.625rem) var(--neu-table-cell-inline, 0.75rem);
+  text-align: start;
+  vertical-align: middle;
+}
+
+[data-density='compact'] th,
+[data-density='compact'] td {
+  padding-block: var(--neu-table-cell-block-compact, 0.375rem);
+}
+
+[data-density='relaxed'] th,
+[data-density='relaxed'] td {
+  padding-block: var(--neu-table-cell-block-relaxed, 0.875rem);
+}
+
+[data-borders='rows'] th,
+[data-borders='rows'] td,
+[data-borders='cells'] th,
+[data-borders='cells'] td {
+  border-block-end: 1px solid var(--neu-color-border, currentColor);
+}
+
+[data-borders='cells'] th,
+[data-borders='cells'] td {
+  border-inline-end: 1px solid var(--neu-color-border, currentColor);
+}
+
+.neu-table2__viewport--striped tbody tr:nth-child(even):not(.neu-table2__state-row) {
+  background: var(--neu-table-stripe-background, color-mix(in srgb, currentColor 4%, transparent));
+}
+
+.neu-table2__viewport--sticky-header thead {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  background: var(--neu-color-surface, Canvas);
+}
+
+.neu-table2__state {
+  padding: var(--neu-table-state-block, 1.5rem);
+  text-align: center;
+}

@@ -1,0 +1,144 @@
+@if (toolbarTemplate(); as template) {
+  <div class="neu-table2__toolbar">
+    <ng-container [ngTemplateOutlet]="template" />
+  </div>
+}
+
+<div
+  class="neu-table2__viewport"
+  [attr.data-density]="appearance().density"
+  [attr.data-borders]="appearance().borders"
+  [attr.data-responsive]="appearance().responsive"
+  [class.neu-table2__viewport--striped]="appearance().striped"
+  [class.neu-table2__viewport--sticky-header]="appearance().stickyHeader"
+>
+  <table class="neu-table2__table" [attr.aria-label]="labels().ariaLabel">
+    @if (captionTemplate(); as template) {
+      <caption>
+        <ng-container [ngTemplateOutlet]="template" />
+      </caption>
+    }
+
+    <thead>
+      <tr>
+        @for (column of columns(); track column.id) {
+          <th
+            scope="col"
+            [attr.data-column-id]="column.id"
+            [style.inline-size]="columnWidth(column)"
+            [style.min-inline-size]="column.minWidth"
+            [style.max-inline-size]="column.maxWidth"
+            [style.text-align]="column.align"
+          >
+            @if (headerTemplate(column.id); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template"
+                [ngTemplateOutletContext]="headerContext(column)"
+              />
+            } @else {
+              {{ column.header }}
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+
+    <tbody>
+      @if (metadata().loading) {
+        <tr class="neu-table2__state-row" data-state="loading">
+          <td [attr.colspan]="columnCount()">
+            <div class="neu-table2__state" role="status" aria-live="polite">
+              @if (loadingTemplate(); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="stateContext()"
+                />
+              } @else {
+                {{ labels().loading }}
+              }
+            </div>
+          </td>
+        </tr>
+      } @else if (metadata().error !== null) {
+        <tr class="neu-table2__state-row" data-state="error">
+          <td [attr.colspan]="columnCount()">
+            <div class="neu-table2__state" role="alert">
+              @if (errorTemplate(); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="stateContext()"
+                />
+              } @else {
+                {{ labels().error }}
+              }
+            </div>
+          </td>
+        </tr>
+      } @else if (rows().length === 0) {
+        <tr class="neu-table2__state-row" data-state="empty">
+          <td [attr.colspan]="columnCount()">
+            <div class="neu-table2__state" role="status">
+              @if (emptyTemplate(); as template) {
+                <ng-container [ngTemplateOutlet]="template" />
+              } @else {
+                {{ labels().empty }}
+              }
+            </div>
+          </td>
+        </tr>
+      } @else {
+        @for (renderRow of rows(); track renderRow.track) {
+          <tr
+            [attr.data-row-key]="renderRow.key"
+            [attr.data-row-pin]="renderRow.pin"
+            [attr.aria-disabled]="rowOptions().isDisabled?.(renderRow.row) || null"
+            [class]="rowClass(renderRow)"
+          >
+            @for (column of columns(); track column.id) {
+              <td
+                [attr.data-column-id]="column.id"
+                [attr.data-column-header]="column.header"
+                [style.text-align]="column.align"
+              >
+                @if (cellTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="cellContext(renderRow, column)"
+                  />
+                } @else {
+                  {{ basicValue(renderRow.row, column) }}
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+
+    @if (hasFooterTemplates()) {
+      <tfoot>
+        @if (footerTemplates().size > 0) {
+          <tr>
+            @for (column of columns(); track column.id) {
+              <td [attr.data-column-id]="column.id">
+                @if (footerTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="headerContext(column)"
+                  />
+                }
+              </td>
+            }
+          </tr>
+        }
+        @if (summaryTemplate(); as template) {
+          <tr>
+            <td [attr.colspan]="columnCount()">
+              <ng-container [ngTemplateOutlet]="template" />
+            </td>
+          </tr>
+        }
+      </tfoot>
+    }
+  </table>
+</div>

@@ -1,0 +1,21 @@
+{
+  "checkpoint": "N2-011B",
+  "capturedAt": "2026-09-20T06:59:51.921Z",
+  "metrics": {
+    "render100": {
+      "samples": 5,
+      "p50Ms": 9.851,
+      "p95Ms": 13.468,
+      "domNodes": 409
+    },
+    "render1000": {
+      "samples": 3,
+      "p50Ms": 111.442,
+      "p95Ms": 123.236,
+      "domNodes": 4009
+    },
+    "parentReplacement1000Ms": 10.068,
+    "reorder1000Ms": 68.256,
+    "destroy50Ms": 148.384
+  }
+}
