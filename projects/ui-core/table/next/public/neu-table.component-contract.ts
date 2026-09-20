@@ -1,14 +1,20 @@
 import {
+  afterNextRender,
   Component,
   computed,
   contentChildren,
+  DestroyRef,
+  effect,
+  inject,
   input,
   isDevMode,
   output,
+  PLATFORM_ID,
   signal,
   type InputSignal,
   type OutputEmitterRef,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { projectNeuTableRows } from '../internal/identity/neu-table-row-identity';
 import {
   createNeuTableFieldResolver,
@@ -32,6 +38,13 @@ import {
   selectionRowsFromData,
   type NeuTableSelectionIntent,
 } from '../internal/selection/neu-table-selection';
+import {
+  classifyNeuTableRemoteCorrelation,
+  createNeuTableRemoteCoordinatorState,
+  destroyNeuTableRemoteCoordinator,
+  transitionNeuTableRemoteCoordinator,
+} from '../internal/remote/neu-table-remote-coordinator';
+import { areNeuTableQuerySlicesEqual } from '../internal/query-ui/neu-table-query-transitions';
 import {
   createNeuTableTemplateMap,
   firstNeuTableTemplate,
@@ -98,6 +111,12 @@ import type {
   },
 })
 export class NeuTableComponent<T extends object, K extends NeuTableKey, F extends string> {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly browserActive = signal(false);
+  private readonly retryToken = signal(0);
+  private readonly remoteCoordinatorVersion = signal(0);
+  private remoteCoordinator = createNeuTableRemoteCoordinatorState<F>();
   readonly dataMode: InputSignal<NeuTableDataMode> = input<NeuTableDataMode>('client');
   readonly data: InputSignal<readonly T[]> = input<readonly T[]>([]);
   readonly metadata: InputSignal<NeuTableMetadata> = input<NeuTableMetadata>({
@@ -288,8 +307,36 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   protected readonly fieldResolver = computed(() =>
     createNeuTableFieldResolver(this.normalizedColumns()),
   );
+  protected readonly remoteCorrelation = computed(() => {
+    this.remoteCoordinatorVersion();
+    return classifyNeuTableRemoteCorrelation(this.remoteCoordinator, this.metadata());
+  });
+  protected readonly presentedData = computed(() => {
+    if (this.dataMode() === 'client') return this.data();
+    const correlation = this.remoteCorrelation();
+    return correlation === 'stale-query' || correlation === 'stale-request' ? [] : this.data();
+  });
+  protected readonly presentedMetadata = computed<NeuTableMetadata>(() => {
+    if (this.dataMode() === 'client') return this.metadata();
+    const correlation = this.remoteCorrelation();
+    if (correlation !== 'stale-query' && correlation !== 'stale-request') {
+      return this.metadata();
+    }
+    return {
+      totalItems: null,
+      loading: false,
+      error: null,
+      queryRevision: this.remoteCoordinator.queryRevision,
+      appliedRequestId: null,
+    };
+  });
   protected readonly sourcePartition = computed(() =>
-    partitionNeuTableSource(this.data(), this.rowKey(), this.rowOptions().pin, isDevMode()),
+    partitionNeuTableSource(
+      this.presentedData(),
+      this.rowKey(),
+      this.rowOptions().pin,
+      isDevMode(),
+    ),
   );
   protected readonly effectiveQuery = computed(() =>
     normalizeNeuTableQuery(this.query(), this.sortOptions()),
@@ -345,7 +392,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   );
   protected readonly selectionAnchor = signal<K | null>(null);
   protected readonly loadedSelectionRows = computed(() =>
-    selectionRowsFromData(this.data(), this.rowKey()),
+    selectionRowsFromData(this.presentedData(), this.rowKey()),
   );
   protected readonly renderedSelectionRows = computed(() =>
     this.renderRows().map(({ row, key }) => ({ row, key })),
@@ -407,6 +454,41 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   };
   protected readonly retry = () => this.retryData();
 
+  constructor() {
+    effect(() => {
+      const previous = this.remoteCoordinator;
+      const transition = transitionNeuTableRemoteCoordinator(
+        previous,
+        {
+          browserActive: this.browserActive(),
+          dataMode: this.dataMode(),
+          metadata: this.metadata(),
+          query: this.query(),
+          retryToken: this.retryToken(),
+        },
+        (left, right) =>
+          areNeuTableQuerySlicesEqual(left, right, this.sortOptions(), this.filterOptions().equals),
+      );
+      this.remoteCoordinator = transition.state;
+      if (
+        previous.queryRevision !== transition.state.queryRevision ||
+        previous.latestRequestId !== transition.state.latestRequestId ||
+        previous.dataMode !== transition.state.dataMode
+      ) {
+        this.remoteCoordinatorVersion.update((version) => version + 1);
+      }
+      if (transition.request !== null) this.dataRequest.emit(transition.request);
+    });
+
+    if (isPlatformBrowser(this.platformId)) {
+      afterNextRender(() => this.browserActive.set(true));
+    }
+
+    this.destroyRef.onDestroy(() => {
+      this.remoteCoordinator = destroyNeuTableRemoteCoordinator(this.remoteCoordinator);
+    });
+  }
+
   focusCell(target: { readonly key: K; readonly columnId: string }): boolean {
     void target;
     return false;
@@ -418,7 +500,14 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   }
 
   retryData(): void {
-    return;
+    if (
+      !isPlatformBrowser(this.platformId) ||
+      this.dataMode() !== 'remote' ||
+      this.remoteCoordinator.destroyed
+    ) {
+      return;
+    }
+    this.retryToken.update((token) => token + 1);
   }
 
   export(request: NeuTableExportRequest<F>): Promise<NeuTableExportOutcome> {

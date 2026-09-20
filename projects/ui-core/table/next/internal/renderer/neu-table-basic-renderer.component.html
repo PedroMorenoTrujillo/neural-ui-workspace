@@ -405,7 +405,10 @@
                   [ngTemplateOutletContext]="stateContext()"
                 />
               } @else {
-                {{ labels().error }}
+                <span>{{ labels().error }}</span>
+                <button type="button" [attr.aria-label]="labels().retry" (click)="retry()()">
+                  {{ labels().retry }}
+                </button>
               }
             </div>
           </td>

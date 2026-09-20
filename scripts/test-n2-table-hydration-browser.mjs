@@ -4,7 +4,12 @@ import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)(
   process.env.NEU_PLAYWRIGHT_MODULE ?? '@playwright/test',
 );
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({
+  headless: true,
+  ...(process.env.NEU_PLAYWRIGHT_EXECUTABLE
+    ? { executablePath: process.env.NEU_PLAYWRIGHT_EXECUTABLE }
+    : {}),
+});
 const page = await browser.newPage();
 const errors = [];
 page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
@@ -27,6 +32,7 @@ try {
   await page.locator('#n2-table-primary table').waitFor({ state: 'attached' });
   assert.equal(await page.locator('#n2-ready').textContent(), 'false');
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
+  assert.equal(await page.locator('#n2-remote-events').textContent(), '[]');
   assert.equal(
     await page.locator('#n2-table-primary th[data-column-id="name"]').getAttribute('aria-sort'),
     'descending',
@@ -79,7 +85,7 @@ try {
   );
   assert.deepEqual(
     await page
-      .locator('#n2-table-remote tr[data-row-key]')
+      .locator('#n2-table-remote-satisfied tr[data-row-key]')
       .evaluateAll((rows) => rows.map((row) => row.getAttribute('data-row-key'))),
     ['1', '2', '3'],
   );
@@ -94,11 +100,15 @@ try {
     true,
   );
   assert.equal(
-    await page.locator('#n2-table-remote tr[data-row-key="1"]').getAttribute('data-selected'),
+    await page
+      .locator('#n2-table-remote-satisfied tr[data-row-key="1"]')
+      .getAttribute('data-selected'),
     'true',
   );
   assert.equal(
-    await page.locator('#n2-table-remote tr[data-row-key="2"]').getAttribute('aria-disabled'),
+    await page
+      .locator('#n2-table-remote-satisfied tr[data-row-key="2"]')
+      .getAttribute('aria-disabled'),
     'true',
   );
   assert.equal(
@@ -125,9 +135,12 @@ try {
   });
   release();
   await page.waitForFunction(() => document.querySelector('#n2-ready')?.textContent === 'true');
+  await page.waitForFunction(
+    () => document.querySelector('#n2-remote-events')?.textContent === '["B:initial:1:0"]',
+  );
   assert.equal(
     await page
-      .locator('#n2-table-remote input[aria-label="Select all rows"]')
+      .locator('#n2-table-remote-satisfied input[aria-label="Select all rows"]')
       .evaluate((input) => input.indeterminate),
     true,
   );
@@ -160,8 +173,7 @@ try {
   await page.locator('#n2-table-primary button', { hasText: 'Search' }).click();
   await page.waitForFunction(
     () =>
-      document.querySelector('#n2-output-events')?.textContent ===
-      '["queryChange","queryChange"]',
+      document.querySelector('#n2-output-events')?.textContent === '["queryChange","queryChange"]',
   );
   await page.locator('#n2-table-primary button[aria-label="Filter Name"]').click();
   await page.locator('#n2-table-primary [data-filter-editor="name"] input').fill('a');
@@ -204,6 +216,24 @@ try {
     await page.locator('#n2-output-events').textContent(),
     '["queryChange","queryChange","queryChange","queryChange","selectionChange","layoutChange"]',
   );
+  await page.locator('#n2-table-remote-unsatisfied button[aria-label^="Sort Name"]').click();
+  await page.waitForFunction(
+    () => document.querySelector('#n2-remote-proposals')?.textContent === '1',
+  );
+  assert.equal(await page.locator('#n2-remote-events').textContent(), '["B:initial:1:0"]');
+  await page.locator('#n2-remote-accept').click();
+  await page.locator('#n2-table-remote-unsatisfied button[aria-label^="Sort Name"]').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-remote-events')?.textContent ===
+      '["B:initial:1:0","B:query:2:1"]',
+  );
+  await page.locator('#n2-remote-retry').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-remote-events')?.textContent ===
+      '["B:initial:1:0","B:query:2:1","B:retry:3:1"]',
+  );
   assert.equal(
     await page.locator('#n2-table-primary tr[data-row-key="3"]').getAttribute('data-selected'),
     null,
@@ -231,7 +261,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    'N2 Table real zoneless hydration passed: applied query UI rendered in SSR; DOM reused; first sort/search/filter/page and selection/layout proposals emitted exactly once; zero query echo/dataRequest and zero NG050x',
+    'N2 Table real zoneless hydration passed: SSR emitted zero requests; satisfied remote state emitted no duplicate; unsatisfied emitted one initial; rejected/accepted query and retry produced the exact 1/2/3 request sequence; DOM reused and zero NG050x',
   );
 } finally {
   release();

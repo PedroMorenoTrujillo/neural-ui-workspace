@@ -4,6 +4,7 @@ import { NeuTableComponent } from './public/neu-table.component-contract';
 import type {
   NeuTableColumn,
   NeuTableDataMode,
+  NeuTableDataRequest,
   NeuTableFilterOptions,
   NeuTableLayoutState,
   NeuTableMetadata,
@@ -35,7 +36,7 @@ const rows: readonly Row[] = [
     <neu-table
       [dataMode]="dataMode()"
       [data]="rows"
-      [metadata]="metadata"
+      [metadata]="metadata()"
       [columns]="columns"
       [query]="query()"
       [rowKey]="rowKey"
@@ -48,7 +49,7 @@ const rows: readonly Row[] = [
       (queryChange)="onQuery($event)"
       (selectionChange)="selectionEvents += 1"
       (layoutChange)="layoutEvents += 1"
-      (dataRequest)="requestEvents += 1"
+      (dataRequest)="onRequest($event)"
     />
   `,
 })
@@ -70,13 +71,13 @@ class QueryUiHostComponent {
     pinnedStart: ['name'],
     pinnedEnd: [],
   });
-  readonly metadata: NeuTableMetadata = {
+  readonly metadata = signal<NeuTableMetadata>({
     totalItems: 40,
     loading: false,
     error: null,
     queryRevision: 0,
     appliedRequestId: null,
-  };
+  });
   readonly columns: readonly NeuTableColumn<Row, Field>[] = [
     { id: 'id', header: 'ID', field: 'id', sort: { field: 'id' } },
     {
@@ -125,6 +126,15 @@ class QueryUiHostComponent {
   onQuery(next: NeuTableQuery<Field>): void {
     this.queryEvents.push(next);
     if (this.accept) this.query.set(next);
+  }
+
+  onRequest(request: NeuTableDataRequest<Field>): void {
+    this.requestEvents += 1;
+    this.metadata.update((value) => ({
+      ...value,
+      queryRevision: request.queryRevision,
+      appliedRequestId: request.requestId,
+    }));
   }
 }
 
@@ -294,7 +304,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
     expect(host.queryEvents).toHaveLength(0);
-    expect(host.requestEvents).toBe(0);
+    expect(host.requestEvents).toBe(1);
     expect(renderedKeys(native)).toEqual(['99', '1', '2', '3', '4', '5']);
     expect(native.querySelector('th[data-column-id="score"]')?.getAttribute('aria-sort')).toBe(
       'descending',
@@ -310,6 +320,6 @@ describe('NeuTable 2 controlled query UI integration', () => {
     pageSize.dispatchEvent(new Event('change', { bubbles: true }));
     await fixture.whenStable();
     expect(host.queryEvents.at(-1)).toMatchObject({ page: 2, pageSize: 4 });
-    expect(host.requestEvents).toBe(0);
+    expect(host.requestEvents).toBe(1);
   });
 });

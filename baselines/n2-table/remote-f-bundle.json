@@ -1,0 +1,270 @@
+{
+  "checkpoint": "N2-011F",
+  "method": "Angular-compiled minified ESM; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "clientBasic": {
+      "size": {
+        "raw": 120636,
+        "gzip": 20322,
+        "brotli": 17332
+      },
+      "entrySize": {
+        "raw": 104,
+        "gzip": 115,
+        "brotli": 87
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 120532,
+            "gzip": 20263,
+            "brotli": 17262
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 15
+        }
+      ]
+    },
+    "remoteBasic": {
+      "size": {
+        "raw": 120636,
+        "gzip": 20322,
+        "brotli": 17321
+      },
+      "entrySize": {
+        "raw": 104,
+        "gzip": 116,
+        "brotli": 88
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 120532,
+            "gzip": 20263,
+            "brotli": 17262
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 15
+        }
+      ]
+    },
+    "remoteRetryError": {
+      "size": {
+        "raw": 120696,
+        "gzip": 20364,
+        "brotli": 17331
+      },
+      "entrySize": {
+        "raw": 164,
+        "gzip": 152,
+        "brotli": 118
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 120532,
+            "gzip": 20263,
+            "brotli": 17262
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 77
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 120935,
+        "gzip": 20454,
+        "brotli": 17401
+      },
+      "entrySize": {
+        "raw": 403,
+        "gzip": 302,
+        "brotli": 241
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 120532,
+            "gzip": 20263,
+            "brotli": 17262
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 315
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "entrySize": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "chunks": [],
+      "lazyChunks": [],
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "queryUiEBasic": {
+      "raw": 116980,
+      "gzip": 19400,
+      "brotli": 16556
+    },
+    "remoteFClientBasic": {
+      "raw": 120636,
+      "gzip": 20322,
+      "brotli": 17332
+    },
+    "basicGzipDelta": 922,
+    "queryUiECombined": {
+      "raw": 117290,
+      "gzip": 19543,
+      "brotli": 16649
+    },
+    "remoteFCombined": {
+      "raw": 120935,
+      "gzip": 20454,
+      "brotli": 17401
+    },
+    "combinedGzipDelta": 911
+  },
+  "isolated": {
+    "remoteCoordinator": {
+      "size": {
+        "raw": 1638,
+        "gzip": 600,
+        "brotli": 550
+      },
+      "entrySize": {
+        "raw": 1638,
+        "gzip": 600,
+        "brotli": 550
+      },
+      "chunks": [],
+      "lazyChunks": [],
+      "attribution": [
+        {
+          "path": "projects/ui-core/table/next/internal/remote/neu-table-remote-coordinator.ts",
+          "bytesInOutput": 1433
+        }
+      ]
+    }
+  },
+  "packageImports": [
+    "./<private-feature-chunk>"
+  ],
+  "forbiddenGraphTokens": [],
+  "classification": {
+    "core": [
+      "remote coordinator",
+      "single effect bridge",
+      "correlation helpers",
+      "retry wiring"
+    ],
+    "optionalSplittable": [],
+    "dynamicCandidate": [
+      "advanced filter builder remains the existing private chunk"
+    ],
+    "notWorthSplitting": [
+      "small deterministic remote coordinator"
+    ]
+  }
+}

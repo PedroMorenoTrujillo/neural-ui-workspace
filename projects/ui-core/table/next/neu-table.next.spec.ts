@@ -329,6 +329,7 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
       ),
     ).toEqual(['2']);
 
+    host.metadata.set({ ...baseMetadata, queryRevision: 1, appliedRequestId: 77 });
     host.dataMode.set('remote');
     fixture.detectChanges();
     await fixture.whenStable();

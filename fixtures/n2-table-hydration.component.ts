@@ -7,6 +7,7 @@ import {
   NeuTableHeaderDirective,
   NeuTableLoadingDirective,
   type NeuTableColumn,
+  type NeuTableDataRequest,
   type NeuTableFilterOptions,
   type NeuTableLayoutChange,
   type NeuTableLayoutState,
@@ -74,6 +75,14 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     <output id="n2-ready">{{ ready() }}</output>
     <output id="n2-interactions">{{ interactions() }}</output>
     <output id="n2-output-events">{{ outputEvents() }}</output>
+    <output id="n2-remote-events">{{ remoteEvents() }}</output>
+    <output id="n2-remote-proposals">{{ remoteProposals() }}</output>
+    <button id="n2-remote-accept" type="button" (click)="acceptRemoteProposals()">
+      Accept remote proposals
+    </button>
+    <button id="n2-remote-retry" type="button" (click)="remoteUnsatisfied.retryData()">
+      Retry remote query
+    </button>
 
     <section id="n2-table-primary">
       <neu-table
@@ -110,12 +119,12 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
       </neu-table>
     </section>
 
-    <section id="n2-table-remote">
+    <section id="n2-table-remote-satisfied">
       <neu-table
         dataMode="remote"
         [data]="rows()"
         [columns]="columns"
-        [metadata]="primaryMetadata"
+        [metadata]="remoteSatisfiedMetadata"
         [query]="remoteQuery"
         [sortOptions]="sortOptions"
         [filterOptions]="filterOptions"
@@ -123,6 +132,48 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
         [rowKey]="rowKey"
         [selection]="allMatchingSelection"
         [selectionOptions]="allMatchingSelectionOptions"
+        (dataRequest)="recordRemote('A', $event)"
+      />
+    </section>
+
+    <section id="n2-table-remote-unsatisfied">
+      <neu-table
+        #remoteUnsatisfied
+        dataMode="remote"
+        [data]="rows()"
+        [columns]="columns"
+        [metadata]="remoteUnsatisfiedMetadata()"
+        [query]="remoteAppliedQuery()"
+        [sortOptions]="sortOptions"
+        [filterOptions]="filterOptions"
+        [paginationOptions]="paginationOptions"
+        [rowKey]="rowKey"
+        (queryChange)="proposeRemoteQuery($event)"
+        (dataRequest)="recordRemote('B', $event)"
+      />
+    </section>
+
+    <section id="n2-table-remote-error">
+      <neu-table
+        dataMode="remote"
+        [data]="[]"
+        [columns]="columns"
+        [metadata]="remoteErrorMetadata"
+        [query]="remoteQuery"
+        [rowKey]="rowKey"
+        (dataRequest)="recordRemote('C', $event)"
+      />
+    </section>
+
+    <section id="n2-table-remote-loading">
+      <neu-table
+        dataMode="remote"
+        [data]="[]"
+        [columns]="columns"
+        [metadata]="remoteLoadingMetadata"
+        [query]="remoteQuery"
+        [rowKey]="rowKey"
+        (dataRequest)="recordRemote('D', $event)"
       />
     </section>
 
@@ -158,6 +209,8 @@ export class N2TableHydrationComponent {
   readonly ready = signal(false);
   readonly interactions = signal(0);
   readonly outputEvents = signal('[]');
+  readonly remoteEvents = signal('[]');
+  readonly remoteProposals = signal(0);
   readonly rows = signal<readonly HydrationRow[]>([
     { id: 1, name: 'Ada', status: 'active' },
     { id: 2, name: 'Grace', status: 'disabled' },
@@ -177,6 +230,15 @@ export class N2TableHydrationComponent {
     sort: [{ field: 'name', direction: 'desc' }],
     filters: { kind: 'condition', field: 'id', rule: 'greaterThan', value: 99 },
   };
+  readonly remoteAppliedQuery = signal<NeuTableQuery<HydrationField>>({
+    page: 0,
+    pageSize: 1,
+    search: '',
+    sort: [],
+    filters: null,
+  });
+  readonly remoteUnsatisfiedMetadata = signal<NeuTableMetadata>(metadata({ totalItems: null }));
+  private acceptRemote = false;
   readonly sortOptions: NeuTableSortOptions = {
     mode: 'multiple',
     removable: true,
@@ -243,6 +305,17 @@ export class N2TableHydrationComponent {
   };
   readonly columns = columns;
   readonly primaryMetadata = metadata();
+  readonly remoteSatisfiedMetadata = metadata({ appliedRequestId: 40 });
+  readonly remoteErrorMetadata = metadata({
+    totalItems: null,
+    error: 'remote offline',
+    appliedRequestId: 41,
+  });
+  readonly remoteLoadingMetadata = metadata({
+    totalItems: null,
+    loading: true,
+    appliedRequestId: 42,
+  });
   readonly emptyMetadata = metadata({ totalItems: 0 });
   readonly loadingMetadata = metadata({ totalItems: null, loading: true });
   readonly errorMetadata = metadata({ totalItems: null, error: 'offline' });
@@ -255,6 +328,32 @@ export class N2TableHydrationComponent {
   record(name: string): void {
     const events = JSON.parse(this.outputEvents()) as string[];
     this.outputEvents.set(JSON.stringify([...events, name]));
+  }
+
+  recordRemote(scenario: string, request: NeuTableDataRequest<HydrationField>): void {
+    const events = JSON.parse(this.remoteEvents()) as string[];
+    this.remoteEvents.set(
+      JSON.stringify([
+        ...events,
+        `${scenario}:${request.reason}:${request.requestId}:${request.queryRevision}`,
+      ]),
+    );
+    if (scenario === 'B') {
+      this.remoteUnsatisfiedMetadata.update((value) => ({
+        ...value,
+        queryRevision: request.queryRevision,
+        appliedRequestId: request.requestId,
+      }));
+    }
+  }
+
+  proposeRemoteQuery(query: NeuTableQuery<HydrationField>): void {
+    this.remoteProposals.update((value) => value + 1);
+    if (this.acceptRemote) this.remoteAppliedQuery.set(query);
+  }
+
+  acceptRemoteProposals(): void {
+    this.acceptRemote = true;
   }
 
   acceptSelection(change: NeuTableSelectionChange<HydrationRow, number, HydrationField>): void {

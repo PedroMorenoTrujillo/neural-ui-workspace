@@ -1,0 +1,89 @@
+{
+  "checkpoint": "N2-011F",
+  "sourceComponent": {
+    "size": {
+      "raw": 46469,
+      "gzip": 13129,
+      "brotli": 11844
+    },
+    "entrySize": {
+      "raw": 46469,
+      "gzip": 13129,
+      "brotli": 11844
+    },
+    "chunks": [],
+    "lazyChunks": [],
+    "attribution": [
+      {
+        "path": "projects/ui-core/table/next/internal/renderer/neu-table-basic-renderer.component.ts",
+        "bytesInOutput": 13877
+      },
+      {
+        "path": "projects/ui-core/table/next/public/neu-table.component-contract.ts",
+        "bytesInOutput": 7286
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/selection/neu-table-selection.ts",
+        "bytesInOutput": 6048
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/client-pipeline/neu-table-client-pipeline.ts",
+        "bytesInOutput": 4607
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
+        "bytesInOutput": 3925
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/query-ui/neu-table-query-transitions.ts",
+        "bytesInOutput": 3702
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/layout/neu-table-layout.ts",
+        "bytesInOutput": 2351
+      },
+      {
+        "path": "projects/ui-core/table/next/public/neu-table-template-contracts.ts",
+        "bytesInOutput": 2204
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/remote/neu-table-remote-coordinator.ts",
+        "bytesInOutput": 1447
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/identity/neu-table-row-identity.ts",
+        "bytesInOutput": 396
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/semantics/neu-table-basic-projections.ts",
+        "bytesInOutput": 287
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/templates/neu-table-template-registry.ts",
+        "bytesInOutput": 103
+      }
+    ]
+  },
+  "isolated": {
+    "remoteCoordinator": {
+      "size": {
+        "raw": 1638,
+        "gzip": 600,
+        "brotli": 550
+      },
+      "entrySize": {
+        "raw": 1638,
+        "gzip": 600,
+        "brotli": 550
+      },
+      "chunks": [],
+      "lazyChunks": [],
+      "attribution": [
+        {
+          "path": "projects/ui-core/table/next/internal/remote/neu-table-remote-coordinator.ts",
+          "bytesInOutput": 1433
+        }
+      ]
+    }
+  }
+}
