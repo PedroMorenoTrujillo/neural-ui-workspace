@@ -4,7 +4,10 @@ import {
   createNeuTableEditSession,
   setNeuTableEditDraftValue,
 } from './internal/editing/neu-table-editing';
-import { projectNeuTableGrouping } from './internal/grouping/neu-table-grouping';
+import {
+  projectNeuTableGrouping,
+  proposeNeuTableGroupToggle,
+} from './internal/grouping/neu-table-grouping';
 import { neuTableIdentityToken } from './internal/identity/neu-table-row-identity';
 import type { NeuTableColumn } from './public/neu-table.types';
 
@@ -100,6 +103,15 @@ describe('NeuTable H performance evidence', () => {
       }, 100),
       grouping1k: metric(() => group(rows1k), 100),
       grouping10k: metric(() => group(rows10k), 10),
+      groupingToggle100: metric(() => {
+        let state = {
+          by: ['group'] as readonly Field[],
+          expandedGroupIds: [] as readonly string[],
+        };
+        for (let index = 0; index < 100; index += 1) {
+          state = proposeNeuTableGroupToggle(state, 'group:group=string%3Ag1')!.next;
+        }
+      }, 100),
       activeSessionsAfterCleanup: activeSessions,
       groups1k: group(rows1k).filter((node) => node.kind === 'group-header').length,
       groups10k: group(rows10k).filter((node) => node.kind === 'group-header').length,
@@ -111,8 +123,6 @@ describe('NeuTable H performance evidence', () => {
     const runtime = globalThis as typeof globalThis & {
       readonly process?: { readonly stdout?: { write(value: string): void } };
     };
-    runtime.process?.stdout?.write(
-      `N2_TABLE_H_PERFORMANCE:${JSON.stringify(metrics)}\n`,
-    );
+    runtime.process?.stdout?.write(`N2_TABLE_H_PERFORMANCE:${JSON.stringify(metrics)}\n`);
   });
 });

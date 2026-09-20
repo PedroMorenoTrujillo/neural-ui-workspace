@@ -411,8 +411,15 @@
           [attr.aria-selected]="selectionOptions().mode === 'none' ? null : rowSelected(renderRow)"
           [attr.aria-disabled]="rowDisabled(renderRow) || null"
           [attr.aria-expanded]="rowExpandable(renderRow) ? rowExpanded(renderRow) : null"
+          [attr.draggable]="rowOptions().reorderable ? 'true' : null"
           [class]="rowClass(renderRow)"
           (click)="onRowClick(renderRow, $event)"
+          (dblclick)="emitRowAction(renderRow, 'double-activate', $event)"
+          (contextmenu)="emitRowAction(renderRow, 'context-menu', $event)"
+          (dragstart)="onRowDragStart(renderRow)"
+          (dragover)="rowOptions().reorderable && $event.preventDefault()"
+          (drop)="onRowDrop(renderRow, $event)"
+          (dragend)="cancelRowDrag()"
         >
           @if (expansionActive()) {
             <td class="neu-table2__expansion-column">
@@ -447,62 +454,62 @@
           @for (column of columns(); track column.id) {
             @if (groupingCellVisible(presentationNode, column)) {
               <td
-              [attr.tabindex]="
-                virtualizationOptions().enabled
-                  ? -1
-                  : editingOptions().mode !== 'none' && column.edit !== undefined
-                    ? 0
-                    : null
-              "
-              [attr.data-column-id]="column.id"
-              [attr.data-column-header]="column.header"
-              [attr.data-column-pin]="columnPin(column)"
-              [style.inset-inline-start]="
-                columnPin(column) === 'start' ? columnPinOffset(column, 'start') : null
-              "
-              [style.inset-inline-end]="
-                columnPin(column) === 'end' ? columnPinOffset(column, 'end') : null
-              "
-              [style.text-align]="column.align"
-              [attr.rowspan]="groupingRowspan(presentationNode, column)"
-              (click)="onCellClick(renderRow, column, $event)"
-              (dblclick)="onCellDoubleClick(renderRow, column, $event)"
-              (keydown)="onCellKeydown(renderRow, column, $event)"
-            >
-              @if (isCellEditing(renderRow, column)) {
-                @if (editorContext(renderRow, column); as context) {
-                  <span class="neu-table2__editor" data-neu-selection-stop>
-                    @if (editorTemplate(column.id); as template) {
-                      <ng-container
-                        [ngTemplateOutlet]="template"
-                        [ngTemplateOutletContext]="context"
-                      />
-                    } @else {
-                      @defer (when isCellEditing(renderRow, column)) {
-                        <neu-table-active-editor
-                          [editorId]="editorId(renderRow, column)"
-                          [label]="column.header"
-                          [value]="context.valueSignal()"
-                          [errors]="context.errors()"
-                          [pending]="activeEditSession()?.pending() ?? false"
-                          [commitOnBlur]="editCommitOnBlur()"
-                          [setValue]="context.setValue"
-                          [commit]="context.commit"
-                          [cancel]="cancelEdit()"
+                [attr.tabindex]="
+                  virtualizationOptions().enabled
+                    ? -1
+                    : editingOptions().mode !== 'none' && column.edit !== undefined
+                      ? 0
+                      : null
+                "
+                [attr.data-column-id]="column.id"
+                [attr.data-column-header]="column.header"
+                [attr.data-column-pin]="columnPin(column)"
+                [style.inset-inline-start]="
+                  columnPin(column) === 'start' ? columnPinOffset(column, 'start') : null
+                "
+                [style.inset-inline-end]="
+                  columnPin(column) === 'end' ? columnPinOffset(column, 'end') : null
+                "
+                [style.text-align]="column.align"
+                [attr.rowspan]="groupingRowspan(presentationNode, column)"
+                (click)="onCellClick(renderRow, column, $event)"
+                (dblclick)="onCellDoubleClick(renderRow, column, $event)"
+                (keydown)="onCellKeydown(renderRow, column, $event)"
+              >
+                @if (isCellEditing(renderRow, column)) {
+                  @if (editorContext(renderRow, column); as context) {
+                    <span class="neu-table2__editor" data-neu-selection-stop>
+                      @if (editorTemplate(column.id); as template) {
+                        <ng-container
+                          [ngTemplateOutlet]="template"
+                          [ngTemplateOutletContext]="context"
                         />
+                      } @else {
+                        @defer (when isCellEditing(renderRow, column)) {
+                          <neu-table-active-editor
+                            [editorId]="editorId(renderRow, column)"
+                            [label]="column.header"
+                            [value]="context.valueSignal()"
+                            [errors]="context.errors()"
+                            [pending]="activeEditSession()?.pending() ?? false"
+                            [commitOnBlur]="editCommitOnBlur()"
+                            [setValue]="context.setValue"
+                            [commit]="context.commit"
+                            [cancel]="cancelEdit()"
+                          />
+                        }
                       }
-                    }
-                  </span>
+                    </span>
+                  }
+                } @else if (cellTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="cellContext(renderRow, column)"
+                  />
+                } @else {
+                  {{ basicValue(renderRow.row, column) }}
                 }
-              } @else if (cellTemplate(column.id); as template) {
-                <ng-container
-                  [ngTemplateOutlet]="template"
-                  [ngTemplateOutletContext]="cellContext(renderRow, column)"
-                />
-              } @else {
-                {{ basicValue(renderRow.row, column) }}
-              }
-            </td>
+              </td>
             }
           }
         </tr>
@@ -571,7 +578,12 @@
             [ngTemplateOutlet]="dataRow"
             [ngTemplateOutletContext]="{
               row: renderRow,
-              presentationNode: { kind: 'row', row: renderRow, track: renderRow.track, rowspan: emptyRowspan }
+              presentationNode: {
+                kind: 'row',
+                row: renderRow,
+                track: renderRow.track,
+                rowspan: emptyRowspan,
+              },
             }"
           />
         }
@@ -637,7 +649,12 @@
             [ngTemplateOutlet]="dataRow"
             [ngTemplateOutletContext]="{
               row: renderRow,
-              presentationNode: { kind: 'row', row: renderRow, track: renderRow.track, rowspan: emptyRowspan }
+              presentationNode: {
+                kind: 'row',
+                row: renderRow,
+                track: renderRow.track,
+                rowspan: emptyRowspan,
+              },
             }"
           />
         }

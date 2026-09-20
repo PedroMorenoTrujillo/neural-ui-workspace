@@ -84,6 +84,7 @@
     "capture:n2-table-export-performance": "node scripts/capture-n2-table-export-performance.mjs",
     "capture:n2-table-export-performance:update": "node scripts/capture-n2-table-export-performance.mjs --update",
     "audit:n2-table-export-bundle": "node scripts/audit-n2-table-export-bundle.mjs",
+    "audit:n2-table-final-bundle": "node scripts/audit-n2-table-export-bundle.mjs --certify",
     "audit:n2-table-export-bundle:update": "node scripts/audit-n2-table-export-bundle.mjs --update",
     "test:h5c1-facade": "node scripts/test-h5c1-public-facade.mjs",
     "test:h5c2-boundaries": "node scripts/test-h5c2-package-private-boundaries.mjs",

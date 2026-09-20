@@ -1,0 +1,96 @@
+{
+  "checkpoint": "N2-011J",
+  "method": "Angular-compiled minified split ESM; initial static closure; per-format lazy closure; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "raw": 174382,
+      "gzip": 34559,
+      "brotli": 25541
+    },
+    "csvInitial": {
+      "raw": 174382,
+      "gzip": 34559,
+      "brotli": 25541
+    },
+    "jsonInitial": {
+      "raw": 174382,
+      "gzip": 34559,
+      "brotli": 25541
+    },
+    "xlsxInitial": {
+      "raw": 174382,
+      "gzip": 34559,
+      "brotli": 25541
+    },
+    "combinedInitial": {
+      "raw": 174382,
+      "gzip": 34559,
+      "brotli": 25541
+    },
+    "csvLazy": {
+      "raw": 584,
+      "gzip": 383,
+      "brotli": 338
+    },
+    "jsonLazy": {
+      "raw": 887,
+      "gzip": 469,
+      "brotli": 410
+    },
+    "xlsxLazy": {
+      "raw": 3964,
+      "gzip": 1422,
+      "brotli": 1278
+    },
+    "rootUnused": {
+      "raw": 0,
+      "gzip": 20,
+      "brotli": 1
+    }
+  },
+  "comparison": {
+    "exportIBasic": {
+      "raw": 171897,
+      "gzip": 30044,
+      "brotli": 25271
+    },
+    "finalJBasic": {
+      "raw": 174382,
+      "gzip": 34559,
+      "brotli": 25541
+    },
+    "rawDeltaPercent": 1.4456331407761625,
+    "gzipDeltaPercent": 15.027958993476235,
+    "brotliDeltaPercent": 1.0684183451386966,
+    "attribution": "F-051 row reorder and F-053 row actions add only core renderer paths; raw and Brotli deltas remain below 5%. The larger gzip delta is DEFLATE layout sensitivity, not optional chunk retention."
+  },
+  "formatFiles": {
+    "csv": [
+      "out/neural-ui-core-table-next-neu-table-csv-export-CuNooDyP-R4E6UCKG.js"
+    ],
+    "json": [
+      "out/neural-ui-core-table-next-neu-table-json-export-DxhLBe72-UB45ES4N.js"
+    ],
+    "xlsx": [
+      "out/neural-ui-core-table-next-neu-table-xlsx-export-B4bugFc_-YFPVZXWD.js"
+    ]
+  },
+  "packageImports": [
+    "./<private-feature-chunk>"
+  ],
+  "forbiddenGraphTokens": [],
+  "classification": {
+    "core": [
+      "export command plumbing",
+      "scope projection and remote delegation"
+    ],
+    "privateChunks": [
+      "CSV serializer",
+      "JSON serializer",
+      "XLSX serializer"
+    ],
+    "notWorthSplitting": [
+      "small shared export projection"
+    ]
+  }
+}

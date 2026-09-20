@@ -18,10 +18,7 @@ import {
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { NeuTableAdvancedFilterBuilderComponent } from '../features/advanced-filters/neu-table-advanced-filter-builder.component';
 import { NeuTableActiveEditorComponent } from '../features/editing/neu-table-active-editor.component';
-import {
-  neuTableEditValueSignal,
-  type NeuTableEditSession,
-} from '../editing/neu-table-editing';
+import { neuTableEditValueSignal, type NeuTableEditSession } from '../editing/neu-table-editing';
 import {
   projectNeuTableGrouping,
   proposeNeuTableGroupToggle,
@@ -95,6 +92,8 @@ import type {
   NeuTablePaginationOptions,
   NeuTableQuery,
   NeuTableRangeChange,
+  NeuTableRowAction,
+  NeuTableRowMove,
   NeuTableRowOptions,
   NeuTableSelectionOptions,
   NeuSortEntry,
@@ -106,7 +105,11 @@ import type {
 @Component({
   selector: 'neu-table-basic-renderer',
   standalone: true,
-  imports: [NgTemplateOutlet, NeuTableAdvancedFilterBuilderComponent, NeuTableActiveEditorComponent],
+  imports: [
+    NgTemplateOutlet,
+    NeuTableAdvancedFilterBuilderComponent,
+    NeuTableActiveEditorComponent,
+  ],
   templateUrl: './neu-table-basic-renderer.component.html',
   styleUrl: './neu-table-basic-renderer.component.scss',
   host: {
@@ -191,15 +194,23 @@ export class NeuTableBasicRendererComponent<
   readonly commitEdit: InputSignal<() => void> = input.required();
   readonly cancelEdit: InputSignal<(reason: 'escape' | 'consumer') => void> = input.required();
   readonly proposeExpansion: InputSignal<
-    (args: { readonly row: T; readonly key: K; readonly source: NeuTableExpandedKeysChange<K>['source'] }) => void
+    (args: {
+      readonly row: T;
+      readonly key: K;
+      readonly source: NeuTableExpandedKeysChange<K>['source'];
+    }) => void
   > = input.required();
   readonly proposeGrouping: InputSignal<(change: NeuTableGroupingChange<F> | null) => void> =
     input.required();
+  readonly emitRowEvent: InputSignal<
+    (event: NeuTableRowAction<T, K> | NeuTableRowMove<K>) => void
+  > = input.required();
   readonly updateViewport: InputSignal<
     (geometry: NeuTableViewportGeometry, reason: NeuTableRangeChange['reason']) => void
   > = input.required();
 
   protected readonly draggedColumnId = signal<string | null>(null);
+  protected readonly draggedRow = signal<NeuTableRenderRow<T, K> | null>(null);
   protected readonly resizeGesture = signal<{
     readonly column: NeuTableColumn<T, F>;
     readonly startX: number;
@@ -859,9 +870,10 @@ export class NeuTableBasicRendererComponent<
       ...this.cellContext(renderRow, column),
       valueSignal: neuTableEditValueSignal(session, column.id),
       errors: computed(() =>
-        session.errors().filter(
-          (error) => error.columnId === undefined || error.columnId === column.id,
-        )),
+        session
+          .errors()
+          .filter((error) => error.columnId === undefined || error.columnId === column.id),
+      ),
       setValue: (value) => this.setEditValue()(column.id, value),
       commit: () => this.commitEdit()(),
       cancel: () => this.cancelEdit()('consumer'),
@@ -870,7 +882,8 @@ export class NeuTableBasicRendererComponent<
   protected readonly editorId = (
     renderRow: NeuTableRenderRow<T, K>,
     column: NeuTableColumn<T, F>,
-  ) => `neu-table-editor-${this.rowIdentity(renderRow).replace(/[^a-zA-Z0-9_-]/g, '_')}-${column.id}`;
+  ) =>
+    `neu-table-editor-${this.rowIdentity(renderRow).replace(/[^a-zA-Z0-9_-]/g, '_')}-${column.id}`;
   protected readonly editCommitOnBlur = () => {
     const options = this.editingOptions();
     return options.mode === 'none' ? false : options.commitOnBlur;
@@ -985,6 +998,7 @@ export class NeuTableBasicRendererComponent<
       );
     });
   protected readonly onRowClick = (renderRow: NeuTableRenderRow<T, K>, event: MouseEvent) => {
+    this.emitRowAction(renderRow, 'activate', event);
     if (
       this.expansionActive() &&
       this.expansionOptions().toggleOnRowClick &&
@@ -998,6 +1012,36 @@ export class NeuTableBasicRendererComponent<
     }
     this.selectRow(renderRow, 'row', event);
   };
+  protected readonly emitRowAction = (
+    renderRow: NeuTableRenderRow<T, K>,
+    action: NeuTableRowAction<T, K>['action'],
+    event: MouseEvent,
+  ) => {
+    if (this.isInteractiveEvent(event) || this.rowDisabled(renderRow)) return;
+    if (action === 'context-menu') event.preventDefault();
+    this.emitRowEvent()({
+      row: renderRow.row,
+      key: renderRow.key,
+      index: renderRow.index,
+      action,
+    });
+  };
+  protected readonly onRowDragStart = (renderRow: NeuTableRenderRow<T, K>) => {
+    if (this.rowOptions().reorderable) this.draggedRow.set(renderRow);
+  };
+  protected readonly onRowDrop = (target: NeuTableRenderRow<T, K>, event: DragEvent) => {
+    event.preventDefault();
+    const source = this.draggedRow();
+    this.draggedRow.set(null);
+    if (source === null || source.key === target.key || !this.rowOptions().reorderable) return;
+    this.emitRowEvent()({
+      key: source.key,
+      beforeKey: target.key,
+      fromIndex: source.index,
+      toIndex: target.index,
+    });
+  };
+  protected readonly cancelRowDrag = () => this.draggedRow.set(null);
   protected readonly onSelectionEnter = (renderRow: NeuTableRenderRow<T, K>, event: Event) => {
     event.preventDefault();
     event.stopPropagation();

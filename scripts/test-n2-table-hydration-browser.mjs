@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { join } from 'node:path';
 
 const { chromium } = createRequire(import.meta.url)(
   process.env.NEU_PLAYWRIGHT_MODULE ?? '@playwright/test',
@@ -11,6 +13,13 @@ const browser = await chromium.launch({
     : {}),
 });
 const page = await browser.newPage();
+const startedAt = performance.now();
+const browserEvidence = { browser: 'Chromium', timingsMs: {}, accessibilityViolations: [] };
+async function measure(name, action) {
+  const started = performance.now();
+  await action();
+  browserEvidence.timingsMs[name] = performance.now() - started;
+}
 const errors = [];
 const javascriptRequests = [];
 page.on('request', (request) => {
@@ -166,6 +175,7 @@ try {
   });
   release();
   await page.waitForFunction(() => document.querySelector('#n2-ready')?.textContent === 'true');
+  browserEvidence.timingsMs.initialHydration = performance.now() - startedAt;
   await page.waitForFunction(
     () => document.querySelector('#n2-remote-events')?.textContent === '["B:initial:1:0"]',
   );
@@ -209,6 +219,38 @@ try {
     }),
     [true, true, true, true],
   );
+  browserEvidence.accessibilityViolations = await page.evaluate(() => {
+    const violations = [];
+    const ids = [...document.querySelectorAll('[id]')].map((node) => node.id);
+    for (const id of new Set(ids)) {
+      if (ids.filter((candidate) => candidate === id).length > 1)
+        violations.push(`duplicate-id:${id}`);
+    }
+    document.querySelectorAll('table').forEach((table, index) => {
+      const labelled =
+        table.getAttribute('aria-label')?.trim() ||
+        table.getAttribute('aria-labelledby')?.trim() ||
+        table.querySelector('caption')?.textContent?.trim();
+      if (!labelled) violations.push(`table-name:${index}`);
+    });
+    document.querySelectorAll('th').forEach((header, index) => {
+      if (!header.getAttribute('scope')) violations.push(`header-scope:${index}`);
+    });
+    document.querySelectorAll('button,input,select,textarea').forEach((control, index) => {
+      const id = control.getAttribute('id');
+      const labelled =
+        control.getAttribute('aria-label')?.trim() ||
+        control.getAttribute('aria-labelledby')?.trim() ||
+        (id ? document.querySelector(`label[for="${CSS.escape(id)}"]`)?.textContent?.trim() : '') ||
+        control.textContent?.trim() ||
+        control.getAttribute('title')?.trim();
+      if (!labelled) violations.push(`control-name:${control.tagName.toLowerCase()}:${index}`);
+    });
+    return violations;
+  });
+  assert.deepEqual(browserEvidence.accessibilityViolations, []);
+  const accessibilityTree = await page.locator('#n2-table-primary table').ariaSnapshot();
+  assert.match(accessibilityTree, /table "Data table"/);
   assert.deepEqual(
     await page.evaluate(() => {
       const selectors = [
@@ -251,20 +293,27 @@ try {
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
   const initialJavascriptRequests = javascriptRequests.length;
   await page.locator('#n2-export').click();
-  await page.waitForFunction(
-    () => document.querySelector('#n2-export-state')?.textContent?.startsWith('generated:1:'),
+  await page.waitForFunction(() =>
+    document.querySelector('#n2-export-state')?.textContent?.startsWith('generated:1:'),
   );
-  assert.equal(await page.locator('#n2-export-state').textContent().then((value) => value?.startsWith('generated:1:')), true);
+  assert.equal(
+    await page
+      .locator('#n2-export-state')
+      .textContent()
+      .then((value) => value?.startsWith('generated:1:')),
+    true,
+  );
   assert.equal(javascriptRequests.length, initialJavascriptRequests + 1);
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
   await page.locator('#n2-h-query').click();
   await page.waitForFunction(
-    () =>
-      document.querySelector('#n2-h-events')?.textContent ===
-      '["editCancel","editState:none"]',
+    () => document.querySelector('#n2-h-events')?.textContent === '["editCancel","editState:none"]',
   );
   assert.equal((await page.locator('#n2-h-events').textContent()).includes('editCommit'), false);
-  await page.locator('#n2-h-reset-edit').click();
+  await measure('editActivation', async () => {
+    await page.locator('#n2-h-reset-edit').click();
+    await page.locator('#n2-h-editor').waitFor();
+  });
   await page.locator('#n2-h-editor').fill('Hydrated Ada');
   await page.locator('#n2-h-save').click();
   await page.waitForFunction(
@@ -273,20 +322,22 @@ try {
       '["editCancel","editState:none","editCommit","editState:none"]',
   );
   await page.locator('#n2-table-h .neu-table2__expansion-column button').first().click();
-  await page.waitForFunction(
-    () => document.querySelector('#n2-h-events')?.textContent?.includes('expansion:false'),
+  await page.waitForFunction(() =>
+    document.querySelector('#n2-h-events')?.textContent?.includes('expansion:false'),
   );
   assert.equal(await page.locator('#n2-table-h .neu-table2__detail-row').count(), 0);
   await page.locator('#n2-table-h .neu-table2__group-row button').first().click();
-  await page.waitForFunction(
-    () => document.querySelector('#n2-h-events')?.textContent?.includes('grouping'),
+  await page.waitForFunction(() =>
+    document.querySelector('#n2-h-events')?.textContent?.includes('grouping'),
   );
   assert.equal((await page.locator('#n2-h-events').textContent()).includes('dataRequest'), false);
   assert.equal((await page.locator('#n2-h-events').textContent()).includes('queryChange'), false);
-  await page.locator('#n2-table-primary button[aria-label^="Sort Name"]').click();
-  await page.waitForFunction(
-    () => document.querySelector('#n2-output-events')?.textContent === '["queryChange"]',
-  );
+  await measure('queryInteraction', async () => {
+    await page.locator('#n2-table-primary button[aria-label^="Sort Name"]').click();
+    await page.waitForFunction(
+      () => document.querySelector('#n2-output-events')?.textContent === '["queryChange"]',
+    );
+  });
   await page.locator('#n2-table-primary input[aria-label="Search table"]').fill('Ada');
   await page.locator('#n2-table-primary button', { hasText: 'Search' }).click();
   await page.waitForFunction(
@@ -323,7 +374,12 @@ try {
     await page.locator('#n2-table-primary input[aria-label="Search table"]').inputValue(),
     '',
   );
-  await page.locator('#n2-table-primary input[aria-label="Select row 3"]').click();
+  await measure('selection', async () => {
+    await page.locator('#n2-table-primary input[aria-label="Select row 3"]').click();
+    await page.waitForFunction(() =>
+      document.querySelector('#n2-output-events')?.textContent?.includes('selectionChange'),
+    );
+  });
   await page.locator('#n2-table-primary button[aria-label="Hide Identifier"]').click();
   await page.waitForFunction(
     () =>
@@ -352,12 +408,14 @@ try {
       document.querySelector('#n2-remote-events')?.textContent ===
       '["B:initial:1:0","B:query:2:1","B:retry:3:1"]',
   );
-  await page.locator('#n2-virtual-scroll').click();
-  await page.waitForFunction(
-    () =>
-      document.querySelector('#n2-virtual-events')?.textContent ===
-      '["unsatisfied:initial:1:0:0-50","satisfied:viewport:1:0:150-250"]',
-  );
+  await measure('virtualScroll', async () => {
+    await page.locator('#n2-virtual-scroll').click();
+    await page.waitForFunction(
+      () =>
+        document.querySelector('#n2-virtual-events')?.textContent ===
+        '["unsatisfied:initial:1:0:0-50","satisfied:viewport:1:0:150-250"]',
+    );
+  });
   await page.locator('#n2-virtual-query').click();
   await page.waitForFunction(
     () =>
@@ -396,8 +454,42 @@ try {
     false,
   );
   assert.deepEqual(errors, []);
+  const evidenceDirectory = process.env.NEU_N2_TABLE_EVIDENCE_DIR ?? '/tmp/n2-table-j-playwright';
+  mkdirSync(evidenceDirectory, { recursive: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.screenshot({ path: join(evidenceDirectory, 'n2-011j-wide.png') });
+  await page.setViewportSize({ width: 320, height: 720 });
+  assert.equal(
+    await page.evaluate(() =>
+      [...document.querySelectorAll('neu-table')].every((table) => {
+        const parentWidth = table.parentElement?.getBoundingClientRect().width ?? window.innerWidth;
+        return table.getBoundingClientRect().width <= parentWidth + 1;
+      }),
+    ),
+    true,
+  );
+  await page.screenshot({ path: join(evidenceDirectory, 'n2-011j-narrow.png') });
+  await page.evaluate(() =>
+    document.querySelector('#n2-table-primary')?.setAttribute('dir', 'rtl'),
+  );
+  assert.equal(
+    await page.evaluate(() =>
+      [...document.querySelectorAll('neu-table')].every((table) => {
+        const parentWidth = table.parentElement?.getBoundingClientRect().width ?? window.innerWidth;
+        return table.getBoundingClientRect().width <= parentWidth + 1;
+      }),
+    ),
+    true,
+  );
+  await page.locator('#n2-table-primary').screenshot({
+    path: join(evidenceDirectory, 'n2-011j-rtl.png'),
+  });
+  writeFileSync(
+    join(process.cwd(), 'baselines/n2-table/final-j-browser.json'),
+    `${JSON.stringify(browserEvidence, null, 2)}\n`,
+  );
   console.log(
-    'N2 Table real zoneless hydration passed: deterministic virtual SSR bootstrap; satisfied range zero duplicate; unsatisfied, viewport, query and retry exact ranged requests; bounded client DOM; DOM reused and zero NG050x',
+    `N2 Table real zoneless hydration passed: deterministic virtual SSR bootstrap; satisfied range zero duplicate; unsatisfied, viewport, query and retry exact ranged requests; bounded client DOM; DOM reused; zero NG050x; zero mechanical a11y violations; ${browserEvidence.timingsMs.initialHydration.toFixed(1)}ms navigation+hydration`,
   );
 } finally {
   release();

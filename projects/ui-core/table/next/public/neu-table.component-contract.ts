@@ -633,9 +633,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     if (this.virtualizationOptions().enabled || !this.expansionOptions().enabled) return;
     if (this.expansionOptions().isExpandable?.(args.row) === false) return;
     const token = neuTableIdentityToken(args.key);
-    const expanded = this.expandedKeys().some(
-      (key) => neuTableIdentityToken(key) === token,
-    );
+    const expanded = this.expandedKeys().some((key) => neuTableIdentityToken(key) === token);
     const next = expanded
       ? this.expandedKeys().filter((key) => neuTableIdentityToken(key) !== token)
       : [...this.expandedKeys(), args.key];
@@ -643,6 +641,11 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   };
   protected readonly proposeGrouping = (change: NeuTableGroupingChange<F> | null) => {
     if (!this.virtualizationOptions().enabled && change !== null) this.groupingChange.emit(change);
+  };
+  protected readonly emitRowEvent = (event: NeuTableRowAction<T, K> | NeuTableRowMove<K>) => {
+    if (this.destroyed) return;
+    if ('action' in event) this.rowAction.emit(event);
+    else this.rowReorder.emit(event);
   };
   protected readonly selectionAnchor = signal<K | null>(null);
   protected readonly loadedSelectionRows = computed(() =>
@@ -757,7 +760,10 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
         : `${grouping.by.map(encodeURIComponent).join('|')}::${grouping.expandedGroupIds
             .map(encodeURIComponent)
             .join('|')}`;
-    if (this.lastAppliedGroupingToken !== 'initial' && this.lastAppliedGroupingToken !== groupingToken) {
+    if (
+      this.lastAppliedGroupingToken !== 'initial' &&
+      this.lastAppliedGroupingToken !== groupingToken
+    ) {
       this.cancelActiveEdit('consumer');
     }
     this.lastAppliedGroupingToken = groupingToken;
@@ -797,9 +803,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     if (session !== null) {
       const editedColumnIds = [...session.draft().keys()];
       if (
-        editedColumnIds.some(
-          (columnId) => !columnsById.has(columnId) || !visibleIds.has(columnId),
-        )
+        editedColumnIds.some((columnId) => !columnsById.has(columnId) || !visibleIds.has(columnId))
       ) {
         this.cancelActiveEdit('consumer');
         return;

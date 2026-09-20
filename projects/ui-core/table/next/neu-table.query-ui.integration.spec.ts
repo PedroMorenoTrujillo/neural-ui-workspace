@@ -288,6 +288,27 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(native.ownerDocument.activeElement).toBe(trigger);
   });
 
+  it('opens and closes the filter menu 100 times without retaining state or emitting proposals', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+
+    for (let index = 0; index < 100; index += 1) {
+      native.querySelector<HTMLButtonElement>('[aria-label="Filter Name"]')!.click();
+      fixture.detectChanges();
+      expect(native.querySelector('[data-filter-editor="name"]')).not.toBeNull();
+      native
+        .querySelector<HTMLButtonElement>('[data-filter-editor="name"] button:last-of-type')!
+        .click();
+      fixture.detectChanges();
+    }
+
+    expect(native.querySelector('[data-filter-editor="name"]')).toBeNull();
+    expect(host.queryEvents).toHaveLength(0);
+  });
+
   it('reflects parent writes for every query slice with zero echo and bypasses remote processing', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     const host = fixture.componentInstance;

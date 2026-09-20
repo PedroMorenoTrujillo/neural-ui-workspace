@@ -228,6 +228,24 @@ describe('NeuTable N2-011I export integration', () => {
     expect(JSON.parse(new TextDecoder().decode(outcome.result.bytes))).toHaveLength(100);
   });
 
+  it('completes 50 independent exports without state events or retained mutable buffers', async () => {
+    const fixture = TestBed.createComponent(ExportHostComponent);
+    const host = fixture.componentInstance;
+    await render(fixture);
+
+    for (let index = 0; index < 50; index += 1) {
+      const outcome = await table(fixture).export(
+        request(index % 2 === 0 ? 'csv' : 'json', 'page'),
+      );
+      expect(outcome.kind).toBe('generated');
+      if (outcome.kind === 'generated') expect(outcome.result.bytes.byteLength).toBeGreaterThan(0);
+    }
+
+    expect(host.exportRequests).toHaveLength(0);
+    expect(host.featureErrors).toHaveLength(0);
+    expect(host.stateEvents).toBe(0);
+  });
+
   it('delegates remote/global and all-matching export without hidden request or allocation', async () => {
     const fixture = TestBed.createComponent(ExportHostComponent);
     const host = fixture.componentInstance;
@@ -267,7 +285,9 @@ describe('NeuTable N2-011I export integration', () => {
     const host = fixture.componentInstance;
     await render(fixture);
     const instance = table(fixture) as unknown as {
-      exportSerializerLoader: (format: 'csv' | 'json' | 'xlsx') => Promise<NeuTableExportSerializer>;
+      exportSerializerLoader: (
+        format: 'csv' | 'json' | 'xlsx',
+      ) => Promise<NeuTableExportSerializer>;
     };
     instance.exportSerializerLoader = async () => {
       throw new Error('chunk failed');

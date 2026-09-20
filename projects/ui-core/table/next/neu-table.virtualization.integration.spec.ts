@@ -412,7 +412,7 @@ describe('NeuTable virtual facade integration', () => {
     );
   });
 
-  it('cleans one listener, one observer and a pending frame across 55 create/destroy cycles', async () => {
+  it('cleans one listener, one observer and a pending frame across 100 create/destroy cycles', async () => {
     const browser = window as typeof window & { ResizeObserver?: typeof ResizeObserver };
     const eventPrototype = browser.EventTarget.prototype as EventTarget & {
       addEventListener: typeof EventTarget.prototype.addEventListener;
@@ -463,7 +463,7 @@ describe('NeuTable virtual facade integration', () => {
     };
 
     try {
-      for (let index = 0; index < 55; index += 1) {
+      for (let index = 0; index < 100; index += 1) {
         const fixture = TestBed.createComponent(RemoteVirtualHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -484,11 +484,11 @@ describe('NeuTable virtual facade integration', () => {
     }
 
     expect({ added, removed, observed, disconnected }).toEqual({
-      added: 55,
-      removed: 55,
-      observed: 55,
-      disconnected: 55,
+      added: 100,
+      removed: 100,
+      observed: 100,
+      disconnected: 100,
     });
-    expect(cancelled).toBeGreaterThanOrEqual(55);
+    expect(cancelled).toBeGreaterThanOrEqual(100);
   });
 });

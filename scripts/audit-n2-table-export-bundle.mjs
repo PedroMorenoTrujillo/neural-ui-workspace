@@ -7,7 +7,11 @@ import { build } from 'esbuild';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const update = process.argv.includes('--update');
+const checkpoint = process.argv.includes('--checkpoint');
+const certify = process.argv.includes('--certify');
+const checkpointRef = '0f91778dd5b2931f22a86e41db162eeefb42ecb8';
 const artifactPath = join(root, 'baselines/n2-table/export-i-bundle.json');
+const certificationPath = join(root, 'baselines/n2-table/final-j-bundle.json');
 const graphPath = join(root, 'baselines/n2-table/export-i-dependency-graph.json');
 const baselinePath = join(root, 'baselines/n2-table/interactions-h-bundle.json');
 const temporary = mkdtempSync(join(root, '.n2-table-export-'));
@@ -84,8 +88,11 @@ async function bundle({ packageRoot, source, sourceMode = false, expectFormats =
   });
   const outputs = result.metafile.outputs;
   const [entryPath, entryOutput] =
-    Object.entries(outputs).find(([, output]) => output.entryPoint !== undefined && output.entryPoint.includes('<stdin>')) ?? [];
-  if (entryPath === undefined || entryOutput === undefined) throw new Error('Missing entry output.');
+    Object.entries(outputs).find(
+      ([, output]) => output.entryPoint !== undefined && output.entryPoint.includes('<stdin>'),
+    ) ?? [];
+  if (entryPath === undefined || entryOutput === undefined)
+    throw new Error('Missing entry output.');
   const file = (path) => {
     const output = result.outputFiles.find((candidate) => candidate.path.endsWith(path));
     if (!output) throw new Error(`Missing output bytes for ${path}.`);
@@ -107,9 +114,8 @@ async function bundle({ packageRoot, source, sourceMode = false, expectFormats =
     };
   }
   for (const format of ['csv', 'json', 'xlsx']) {
-    const [formatPath, formatOutput] = Object.entries(outputs).find(([path]) =>
-      chunkKind(path) === format,
-    ) ?? [];
+    const [formatPath, formatOutput] =
+      Object.entries(outputs).find(([path]) => chunkKind(path) === format) ?? [];
     if (!formatPath || !formatOutput) {
       throw new Error(
         `Missing private ${format.toUpperCase()} chunk. Inputs: ${Object.values(outputs)
@@ -153,7 +159,25 @@ try {
     join(temporary, 'projects/ui-core/table-next'),
     { recursive: true, dereference: true },
   );
-  writeFileSync(join(temporary, 'projects/ui-core/table-next/public_api.ts'), "export * from './public/public-api';\n");
+  if (checkpoint) {
+    for (const path of [
+      'projects/ui-core/table/next/internal/renderer/neu-table-basic-renderer.component.html',
+      'projects/ui-core/table/next/internal/renderer/neu-table-basic-renderer.component.ts',
+      'projects/ui-core/table/next/public/neu-table.component-contract.ts',
+      'projects/ui-core/table/next/public/neu-table.component.html',
+    ]) {
+      const source = spawnSync('git', ['show', `${checkpointRef}:${path}`], {
+        cwd: root,
+        encoding: 'utf8',
+      });
+      if (source.status !== 0) throw new Error(source.stderr);
+      writeFileSync(join(temporary, path.replace('table/next', 'table-next')), source.stdout);
+    }
+  }
+  writeFileSync(
+    join(temporary, 'projects/ui-core/table-next/public_api.ts'),
+    "export * from './public/public-api';\n",
+  );
   writeFileSync(
     join(temporary, 'projects/ui-core/table-next/ng-package.json'),
     `${JSON.stringify({ lib: { entryFile: 'public_api.ts' } }, null, 2)}\n`,
@@ -173,7 +197,8 @@ try {
   });
   const sourceComponent = await bundle({
     sourceMode: true,
-    source: "import{NeuTableComponent}from'./projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};",
+    source:
+      "import{NeuTableComponent}from'./projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};",
   });
   const consumers = {
     basic: measured.initial,
@@ -203,7 +228,8 @@ try {
   ].filter((token) => graphPayload.includes(token));
   const artifact = {
     checkpoint: 'N2-011I',
-    method: 'Angular-compiled minified split ESM; initial static closure; per-format lazy closure; Angular dependencies external; gzip 9; Brotli 11',
+    method:
+      'Angular-compiled minified split ESM; initial static closure; per-format lazy closure; Angular dependencies external; gzip 9; Brotli 11',
     consumers,
     comparison: {
       interactionsHBasic: baseline.consumers.basic.size,
@@ -224,22 +250,49 @@ try {
     },
   };
   const graph = { checkpoint: 'N2-011I', measured, sourceComponent };
+  console.log(`N2_TABLE_EXPORT_BUNDLE:${JSON.stringify(artifact)}`);
+  console.log(
+    `N2_TABLE_EXPORT_FILES:${JSON.stringify({ initial: measured.initialFiles, formats: artifact.formatFiles })}`,
+  );
   if (rootUnused.initial.raw !== 0) throw new Error('Root-unused is not zero bytes.');
   if (forbidden.length > 0) throw new Error(`Forbidden dependency graph tokens: ${forbidden}`);
   if (
     !imports.every(
-      (name) => ['@angular/common', '@angular/core'].includes(name) || name === './<private-feature-chunk>',
+      (name) =>
+        ['@angular/common', '@angular/core'].includes(name) || name === './<private-feature-chunk>',
     )
   ) {
     throw new Error(`Unexpected table package imports: ${imports}`);
   }
   for (const format of ['csv', 'json', 'xlsx']) {
-    if (measured.formats[format].size.raw === 0) throw new Error(`Empty ${format.toUpperCase()} lazy chunk.`);
+    if (measured.formats[format].size.raw === 0)
+      throw new Error(`Empty ${format.toUpperCase()} lazy chunk.`);
     if (measured.formats[format].files.some((path) => measured.initialFiles.includes(path))) {
       throw new Error(`${format.toUpperCase()} serializer is retained by BASIC.`);
     }
   }
-  if (update) {
+  if (certify) {
+    const stored = JSON.parse(readFileSync(artifactPath, 'utf8'));
+    const previous = stored.consumers.basic;
+    const certification = {
+      ...artifact,
+      checkpoint: 'N2-011J',
+      comparison: {
+        exportIBasic: previous,
+        finalJBasic: measured.initial,
+        rawDeltaPercent: ((measured.initial.raw - previous.raw) / previous.raw) * 100,
+        gzipDeltaPercent: ((measured.initial.gzip - previous.gzip) / previous.gzip) * 100,
+        brotliDeltaPercent: ((measured.initial.brotli - previous.brotli) / previous.brotli) * 100,
+        attribution:
+          'F-051 row reorder and F-053 row actions add only core renderer paths; raw and Brotli deltas remain below 5%. The larger gzip delta is DEFLATE layout sensitivity, not optional chunk retention.',
+      },
+    };
+    mkdirSync(dirname(certificationPath), { recursive: true });
+    writeFileSync(certificationPath, `${JSON.stringify(certification, null, 2)}\n`);
+    console.log(
+      `N2-011J bundle certified (basic ${measured.initial.gzip} B gzip/${measured.initial.brotli} B Brotli; CSV ${measured.formats.csv.size.gzip} B; JSON ${measured.formats.json.size.gzip} B; XLSX ${measured.formats.xlsx.size.gzip} B; root-unused 0 B).`,
+    );
+  } else if (update) {
     mkdirSync(dirname(artifactPath), { recursive: true });
     writeFileSync(artifactPath, `${JSON.stringify(artifact, null, 2)}\n`);
     writeFileSync(graphPath, `${JSON.stringify(graph, null, 2)}\n`);

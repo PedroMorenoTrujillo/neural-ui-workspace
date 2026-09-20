@@ -90,7 +90,7 @@ const baseLayout: NeuTableLayoutState = {
       [paginationOptions]="paginationOptions()"
       [layout]="layout()"
       [rowKey]="rowKey"
-      [rowOptions]="rowOptions"
+      [rowOptions]="rowOptions()"
       [appearance]="appearance()"
     >
       <ng-template neuTableCaption>People</ng-template>
@@ -150,12 +150,12 @@ class NeuTableNextHostComponent {
     debounceMs: 0,
     commit: 'immediate',
   };
-  readonly rowOptions = {
+  readonly rowOptions = signal({
     reorderable: false,
     isDisabled: (row: Row) => row.disabled ?? false,
     className: (row: Row) => (row.disabled ? ['is-disabled', 'is-muted'] : null),
     pin: (row: Row) => row.pin ?? null,
-  };
+  });
 }
 
 describe('NeuTable 2 private semantic renderer and facade', () => {
@@ -262,6 +262,52 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     subscriptions.forEach((subscription) => subscription.unsubscribe());
   });
 
+  it('emits frozen row actions and controlled row reorder exactly once without mutating data', async () => {
+    const fixture = TestBed.createComponent(NeuTableNextHostComponent);
+    const host = fixture.componentInstance;
+    host.rowOptions.update((value) => ({ ...value, reorderable: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const native = fixture.nativeElement as HTMLElement;
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent<Row, number, Field>;
+    const actions: unknown[] = [];
+    const moves: unknown[] = [];
+    table.rowAction.subscribe((event) => actions.push(event));
+    table.rowReorder.subscribe((event) => moves.push(event));
+
+    const first = native.querySelector<HTMLTableRowElement>('tr[data-row-key="1"]')!;
+    const disabled = native.querySelector<HTMLTableRowElement>('tr[data-row-key="2"]')!;
+    const last = native.querySelector<HTMLTableRowElement>('tr[data-row-key="3"]')!;
+    first.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    first.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    const contextMenu = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    first.dispatchEvent(contextMenu);
+    disabled.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    first.dispatchEvent(new Event('dragstart', { bubbles: true }));
+    last.dispatchEvent(new Event('drop', { bubbles: true, cancelable: true }));
+
+    expect(actions).toEqual([
+      { row: baseRows[0], key: 1, index: 0, action: 'activate' },
+      { row: baseRows[0], key: 1, index: 0, action: 'double-activate' },
+      { row: baseRows[0], key: 1, index: 0, action: 'context-menu' },
+    ]);
+    expect(contextMenu.defaultPrevented).toBe(true);
+    expect(moves).toEqual([{ key: 1, beforeKey: 3, fromIndex: 0, toIndex: 2 }]);
+    expect(host.rows()).toBe(baseRows);
+    expect(
+      [...native.querySelectorAll('tr[data-row-key]')].map((row) =>
+        row.getAttribute('data-row-key'),
+      ),
+    ).toEqual(['1', '2', '3']);
+
+    host.rows.set([baseRows[1], baseRows[0], baseRows[2]]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(moves).toHaveLength(1);
+  });
+
   it('renders loading, error and empty metadata states with projected state templates', async () => {
     const fixture = TestBed.createComponent(NeuTableNextHostComponent);
     const host = fixture.componentInstance;
@@ -287,6 +333,21 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('[data-state="empty"]')?.textContent,
     ).toContain('Custom empty');
+  });
+
+  it('releases 100 basic component instances without late output', async () => {
+    let lateOutputs = 0;
+    for (let index = 0; index < 100; index += 1) {
+      const fixture = TestBed.createComponent(NeuTableNextHostComponent);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+        .componentInstance as NeuTableComponent<Row, number, Field>;
+      const subscription = table.rowAction.subscribe(() => (lateOutputs += 1));
+      fixture.destroy();
+      subscription.unsubscribe();
+    }
+    expect(lateOutputs).toBe(0);
   });
 
   it('applies combined client query, parent replacement and remote bypass without outputs', async () => {
