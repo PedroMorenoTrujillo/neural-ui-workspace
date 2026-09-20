@@ -46,7 +46,7 @@ import bootstrap from './main.server';
 const dir=new URL('../browser/',import.meta.url),csr=new URL('index.csr.html',dir);
 const document=readFileSync(existsSync(csr)?csr:new URL('index.html',dir),'utf8');
 const html=await renderApplication(bootstrap,{document,url:'http://localhost/',allowedHosts:['localhost']});
-for(const value of ['ngh=','<table','SSR Name','0:Linus','data-row-key="1"','data-row-key="2"','data-row-key="3"','SSR empty','SSR loading','SSR error']){
+for(const value of ['ngh=','<table','SSR Name','0:Linus','data-row-key="1"','data-row-key="2"','data-row-key="3"','data-column-pin="start"','data-column-pin="end"','data-selected="true"','aria-disabled="true"','type="checkbox"','type="radio"','Show Status','SSR empty','SSR loading','SSR error']){
   if(!html.includes(value)) throw new Error('Missing SSR evidence: '+value);
 }
 writeFileSync(new URL('index.html',dir),html);

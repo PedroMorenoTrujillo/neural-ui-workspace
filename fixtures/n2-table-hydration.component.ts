@@ -8,22 +8,29 @@ import {
   NeuTableLoadingDirective,
   type NeuTableColumn,
   type NeuTableFilterOptions,
+  type NeuTableLayoutChange,
+  type NeuTableLayoutState,
   type NeuTableMetadata,
   type NeuTablePaginationOptions,
   type NeuTableQuery,
+  type NeuTableSelection,
+  type NeuTableSelectionChange,
+  type NeuTableSelectionOptions,
   type NeuTableSortOptions,
 } from './neu-table-next/public/public-api';
 
 interface HydrationRow {
   readonly id: number;
   readonly name: string;
+  readonly status: string;
 }
 
-type HydrationField = 'id' | 'name';
+type HydrationField = 'id' | 'name' | 'status';
 
 const columns: readonly NeuTableColumn<HydrationRow, HydrationField>[] = [
   { id: 'id', header: 'Identifier', field: 'id' },
-  { id: 'name', header: 'Name', field: 'name' },
+  { id: 'name', header: 'Name', field: 'name', minWidth: '120px', maxWidth: '360px' },
+  { id: 'status', header: 'Status', field: 'status' },
 ];
 
 const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata => ({
@@ -64,9 +71,12 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
         [filterOptions]="filterOptions"
         [paginationOptions]="paginationOptions"
         [rowKey]="rowKey"
+        [layout]="layout()"
+        [selection]="selection()"
+        [selectionOptions]="selectionOptions"
         (queryChange)="record('queryChange')"
-        (selectionChange)="record('selectionChange')"
-        (layoutChange)="record('layoutChange')"
+        (selectionChange)="acceptSelection($event)"
+        (layoutChange)="acceptLayout($event)"
         (expandedKeysChange)="record('expandedKeysChange')"
         (editStateChange)="record('editStateChange')"
         (groupingChange)="record('groupingChange')"
@@ -97,6 +107,19 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
         [filterOptions]="filterOptions"
         [paginationOptions]="paginationOptions"
         [rowKey]="rowKey"
+        [selection]="allMatchingSelection"
+        [selectionOptions]="allMatchingSelectionOptions"
+      />
+    </section>
+
+    <section id="n2-table-single">
+      <neu-table
+        [data]="rows()"
+        [columns]="columns"
+        [metadata]="primaryMetadata"
+        [rowKey]="rowKey"
+        [selection]="singleSelection"
+        [selectionOptions]="singleSelectionOptions"
       />
     </section>
 
@@ -122,9 +145,9 @@ export class N2TableHydrationComponent {
   readonly interactions = signal(0);
   readonly outputEvents = signal('[]');
   readonly rows = signal<readonly HydrationRow[]>([
-    { id: 1, name: 'Ada' },
-    { id: 2, name: 'Grace' },
-    { id: 3, name: 'Linus' },
+    { id: 1, name: 'Ada', status: 'active' },
+    { id: 2, name: 'Grace', status: 'disabled' },
+    { id: 3, name: 'Linus', status: 'active' },
   ]);
   readonly query = signal<NeuTableQuery<HydrationField>>({
     page: 0,
@@ -160,6 +183,50 @@ export class N2TableHydrationComponent {
     report: 'none',
     showPageJump: false,
   };
+  readonly layout = signal<NeuTableLayoutState>({
+    order: ['name', 'id', 'status'],
+    hidden: ['status'],
+    widths: { name: '240px' },
+    pinnedStart: ['name'],
+    pinnedEnd: ['id'],
+  });
+  readonly selection = signal<NeuTableSelection<number, HydrationField>>({
+    kind: 'keys',
+    keys: [3],
+  });
+  readonly selectionOptions: NeuTableSelectionOptions<HydrationRow> = {
+    mode: 'multiple',
+    indicator: 'checkbox',
+    selectOnRowClick: true,
+    modifier: 'toggle',
+    range: true,
+    toggleAllScope: 'loaded',
+    isRowDisabled: (row) => row.id === 2,
+  };
+  readonly allMatchingSelection: NeuTableSelection<number, HydrationField> = {
+    kind: 'all-matching',
+    scope: { search: '', filters: null, globalFields: ['name'] },
+    excludedKeys: [2],
+  };
+  readonly allMatchingSelectionOptions: NeuTableSelectionOptions<HydrationRow> = {
+    mode: 'multiple',
+    indicator: 'checkbox',
+    selectOnRowClick: false,
+    modifier: 'toggle',
+    range: false,
+    toggleAllScope: 'all-matching',
+    isRowDisabled: (row) => row.id === 2,
+  };
+  readonly singleSelection: NeuTableSelection<number, HydrationField> = {
+    kind: 'keys',
+    keys: [1],
+  };
+  readonly singleSelectionOptions: NeuTableSelectionOptions<HydrationRow> = {
+    mode: 'single',
+    indicator: 'radio',
+    selectOnRowClick: true,
+    allowClear: true,
+  };
   readonly columns = columns;
   readonly primaryMetadata = metadata();
   readonly emptyMetadata = metadata({ totalItems: 0 });
@@ -174,6 +241,16 @@ export class N2TableHydrationComponent {
   record(name: string): void {
     const events = JSON.parse(this.outputEvents()) as string[];
     this.outputEvents.set(JSON.stringify([...events, name]));
+  }
+
+  acceptSelection(change: NeuTableSelectionChange<HydrationRow, number, HydrationField>): void {
+    this.record('selectionChange');
+    this.selection.set(change.next);
+  }
+
+  acceptLayout(change: NeuTableLayoutChange): void {
+    this.record('layoutChange');
+    this.layout.set(change.next);
   }
 
   applyParentQuery(): void {

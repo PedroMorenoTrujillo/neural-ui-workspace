@@ -1,9 +1,12 @@
 <neu-table-basic-renderer
   [rows]="renderRows()"
   [columns]="visibleColumns()"
+  [allColumns]="normalizedColumns()"
   [metadata]="metadata()"
   [layout]="layout()"
   [rowOptions]="rowOptions()"
+  [selectionOptions]="selectionOptions()"
+  [selectionProjection]="selectionProjection()"
   [sort]="effectiveQuery().sort"
   [appearance]="appearance()"
   [labels]="labels()"
@@ -17,4 +20,7 @@
   [cellTemplates]="cellTemplates()"
   [footerTemplates]="footerTemplates()"
   [retry]="retry"
+  [proposeSelection]="proposeSelection"
+  [proposeToggleAll]="proposeToggleAll"
+  [proposeLayout]="proposeLayout"
 />

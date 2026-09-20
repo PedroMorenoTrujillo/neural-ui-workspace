@@ -28,8 +28,32 @@ try {
   assert.equal(await page.locator('#n2-ready').textContent(), 'false');
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
   assert.equal(
-    await page.locator('#n2-table-primary th[data-column-id="name"]').textContent(),
+    await page
+      .locator('#n2-table-primary th[data-column-id="name"] .neu-table2__header-label')
+      .textContent(),
     'SSR Name',
+  );
+  assert.deepEqual(
+    await page
+      .locator('#n2-table-primary th[data-column-id]')
+      .evaluateAll((cells) => cells.map((cell) => cell.getAttribute('data-column-id'))),
+    ['name', 'id'],
+  );
+  assert.equal(
+    await page
+      .locator('#n2-table-primary th[data-column-id="name"]')
+      .evaluate((cell) => cell.style.inlineSize),
+    '240px',
+  );
+  assert.equal(
+    await page
+      .locator('#n2-table-primary th[data-column-id="name"]')
+      .getAttribute('data-column-pin'),
+    'start',
+  );
+  assert.equal(
+    await page.locator('#n2-table-primary th[data-column-id="id"]').getAttribute('data-column-pin'),
+    'end',
   );
   assert.equal(
     (
@@ -44,6 +68,32 @@ try {
       .locator('#n2-table-remote tr[data-row-key]')
       .evaluateAll((rows) => rows.map((row) => row.getAttribute('data-row-key'))),
     ['1', '2', '3'],
+  );
+  assert.equal(
+    await page.locator('#n2-table-primary tr[data-row-key="3"]').getAttribute('data-selected'),
+    'true',
+  );
+  assert.equal(
+    await page
+      .locator('#n2-table-primary tr[data-row-key="3"] input[aria-label="Select row 3"]')
+      .isChecked(),
+    true,
+  );
+  assert.equal(
+    await page.locator('#n2-table-remote tr[data-row-key="1"]').getAttribute('data-selected'),
+    'true',
+  );
+  assert.equal(
+    await page.locator('#n2-table-remote tr[data-row-key="2"]').getAttribute('aria-disabled'),
+    'true',
+  );
+  assert.equal(
+    await page.locator('#n2-table-single input[aria-label="Select row 1"]').getAttribute('type'),
+    'radio',
+  );
+  assert.equal(
+    await page.locator('#n2-table-single input[aria-label="Select row 1"]').isChecked(),
+    true,
   );
   assert.match(await page.locator('#n2-table-empty').textContent(), /SSR empty/);
   assert.match(await page.locator('#n2-table-loading').textContent(), /SSR loading/);
@@ -61,6 +111,12 @@ try {
   });
   release();
   await page.waitForFunction(() => document.querySelector('#n2-ready')?.textContent === 'true');
+  assert.equal(
+    await page
+      .locator('#n2-table-remote input[aria-label="Select all rows"]')
+      .evaluate((input) => input.indeterminate),
+    true,
+  );
   assert.deepEqual(
     await page.evaluate(() => {
       const selectors = [
@@ -82,6 +138,17 @@ try {
     await page.evaluate(() => window.__n2TableIds),
   );
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
+  await page.locator('#n2-table-primary input[aria-label="Select row 3"]').click();
+  await page.locator('#n2-table-primary button[aria-label="Hide Identifier"]').click();
+  assert.equal(
+    await page.locator('#n2-output-events').textContent(),
+    '["selectionChange","layoutChange"]',
+  );
+  assert.equal(
+    await page.locator('#n2-table-primary tr[data-row-key="3"]').getAttribute('data-selected'),
+    null,
+  );
+  assert.equal(await page.locator('#n2-table-primary th[data-column-id="id"]').count(), 0);
   await page.locator('#n2-reconstruct').click();
   await page.waitForFunction(() => document.querySelector('#n2-interactions')?.textContent === '1');
   assert.deepEqual(
@@ -90,14 +157,25 @@ try {
       .evaluateAll((rows) => rows.map((row) => row.getAttribute('data-row-key'))),
     ['2'],
   );
-  assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
+  assert.equal(
+    await page.locator('#n2-output-events').textContent(),
+    '["selectionChange","layoutChange"]',
+  );
+  assert.equal(
+    (await page.locator('#n2-output-events').textContent()).includes('queryChange'),
+    false,
+  );
+  assert.equal(
+    (await page.locator('#n2-output-events').textContent()).includes('dataRequest'),
+    false,
+  );
   assert.equal(
     errors.some((error) => /NG050\d/.test(error)),
     false,
   );
   assert.deepEqual(errors, []);
   console.log(
-    'N2 Table real zoneless hydration passed: applied combined query and remote bypass rendered in SSR, DOM reused, parent query replaced once, zero NG050x and zero output/request echo',
+    'N2 Table real zoneless hydration passed: controlled layout, keys, all-matching, disabled checkbox/radio state rendered in SSR; DOM reused; first selection/layout proposals emitted once; zero query/request echo and zero NG050x',
   );
 } finally {
   release();

@@ -4,6 +4,14 @@
   </div>
 }
 
+@if (hiddenColumns().length > 0) {
+  <div class="neu-table2__hidden-columns" aria-label="Hidden columns">
+    @for (column of hiddenColumns(); track column.id) {
+      <button type="button" (click)="showColumn(column.id)">Show {{ column.header }}</button>
+    }
+  </div>
+}
+
 <div
   class="neu-table2__viewport"
   [attr.data-density]="appearance().density"
@@ -21,24 +29,102 @@
 
     <thead>
       <tr>
+        @if (hasSelectionColumn()) {
+          <th scope="col" class="neu-table2__selection-column">
+            @if (selectionIndicator() === 'checkbox') {
+              <input
+                type="checkbox"
+                aria-label="Select all rows"
+                [checked]="selectionProjection().headerState === 'checked'"
+                [indeterminate]="selectionProjection().headerState === 'indeterminate'"
+                [disabled]="selectionProjection().selectableCount === 0"
+                (click)="onHeaderToggle($event)"
+                (keydown.enter)="onHeaderSelectionEnter($event)"
+              />
+            } @else {
+              <span class="neu-table2__visually-hidden">Selection</span>
+            }
+          </th>
+        }
         @for (column of columns(); track column.id) {
           <th
             scope="col"
+            draggable="true"
             [attr.aria-sort]="ariaSort(column)"
             [attr.data-column-id]="column.id"
+            [attr.data-column-pin]="columnPin(column)"
+            [style.inset-inline-start]="
+              columnPin(column) === 'start' ? columnPinOffset(column, 'start') : null
+            "
+            [style.inset-inline-end]="
+              columnPin(column) === 'end' ? columnPinOffset(column, 'end') : null
+            "
             [style.inline-size]="columnWidth(column)"
             [style.min-inline-size]="column.minWidth"
             [style.max-inline-size]="column.maxWidth"
             [style.text-align]="column.align"
+            (dragstart)="onColumnDragStart(column.id)"
+            (dragover)="$event.preventDefault()"
+            (drop)="onColumnDrop(column.id, $event)"
+            (dragend)="cancelColumnDrag()"
           >
-            @if (headerTemplate(column.id); as template) {
-              <ng-container
-                [ngTemplateOutlet]="template"
-                [ngTemplateOutletContext]="headerContext(column)"
-              />
-            } @else {
-              {{ column.header }}
-            }
+            <div class="neu-table2__header-content">
+              <span class="neu-table2__header-label">
+                @if (headerTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="headerContext(column)"
+                  />
+                } @else {
+                  {{ column.header }}
+                }
+              </span>
+              <span class="neu-table2__column-actions" data-neu-selection-stop>
+                <button
+                  type="button"
+                  [attr.data-layout-focus]="'move:' + column.id + ':-1'"
+                  [attr.aria-label]="'Move ' + column.header + ' left'"
+                  (click)="moveColumn(column.id, -1, $event)"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  [attr.data-layout-focus]="'move:' + column.id + ':1'"
+                  [attr.aria-label]="'Move ' + column.header + ' right'"
+                  (click)="moveColumn(column.id, 1, $event)"
+                >
+                  →
+                </button>
+                <button
+                  type="button"
+                  [attr.aria-label]="'Change pin for ' + column.header"
+                  (click)="cycleColumnPin(column)"
+                >
+                  Pin
+                </button>
+                <button
+                  type="button"
+                  [attr.aria-label]="'Hide ' + column.header"
+                  (click)="hideColumn(column.id)"
+                >
+                  Hide
+                </button>
+              </span>
+              <button
+                type="button"
+                class="neu-table2__resize-handle"
+                aria-orientation="vertical"
+                [attr.aria-label]="'Resize ' + column.header"
+                (pointerdown)="onResizeStart(column, $event)"
+                (pointermove)="onResizeMove($event)"
+                (pointerup)="commitResize()"
+                (pointercancel)="cancelResize()"
+                (keydown.arrowleft)="resizeWithKeyboard(column, -1, $event)"
+                (keydown.arrowright)="resizeWithKeyboard(column, 1, $event)"
+                (keydown.escape)="cancelResize()"
+              ></button>
+            </div>
           </th>
         }
       </tr>
@@ -92,13 +178,37 @@
           <tr
             [attr.data-row-key]="renderRow.key"
             [attr.data-row-pin]="renderRow.pin"
-            [attr.aria-disabled]="rowOptions().isDisabled?.(renderRow.row) || null"
+            [attr.data-selected]="rowSelected(renderRow) || null"
+            [attr.aria-selected]="
+              selectionOptions().mode === 'none' ? null : rowSelected(renderRow)
+            "
+            [attr.aria-disabled]="rowDisabled(renderRow) || null"
             [class]="rowClass(renderRow)"
+            (click)="onRowClick(renderRow, $event)"
           >
+            @if (hasSelectionColumn()) {
+              <td class="neu-table2__selection-column">
+                <input
+                  [type]="selectionIndicator()"
+                  [checked]="rowSelected(renderRow)"
+                  [disabled]="rowDisabled(renderRow)"
+                  [attr.aria-label]="'Select row ' + renderRow.key"
+                  (click)="onSelectionControlClick(renderRow, $event)"
+                  (keydown.enter)="onSelectionEnter(renderRow, $event)"
+                />
+              </td>
+            }
             @for (column of columns(); track column.id) {
               <td
                 [attr.data-column-id]="column.id"
                 [attr.data-column-header]="column.header"
+                [attr.data-column-pin]="columnPin(column)"
+                [style.inset-inline-start]="
+                  columnPin(column) === 'start' ? columnPinOffset(column, 'start') : null
+                "
+                [style.inset-inline-end]="
+                  columnPin(column) === 'end' ? columnPinOffset(column, 'end') : null
+                "
                 [style.text-align]="column.align"
               >
                 @if (cellTemplate(column.id); as template) {
@@ -120,6 +230,9 @@
       <tfoot>
         @if (footerTemplates().size > 0) {
           <tr>
+            @if (hasSelectionColumn()) {
+              <td class="neu-table2__selection-column"></td>
+            }
             @for (column of columns(); track column.id) {
               <td [attr.data-column-id]="column.id">
                 @if (footerTemplate(column.id); as template) {

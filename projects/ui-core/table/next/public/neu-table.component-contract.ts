@@ -5,6 +5,7 @@ import {
   input,
   isDevMode,
   output,
+  signal,
   type InputSignal,
   type OutputEmitterRef,
 } from '@angular/core';
@@ -19,7 +20,18 @@ import {
   sortNeuTableRows,
 } from '../internal/client-pipeline/neu-table-client-pipeline';
 import { NeuTableBasicRendererComponent } from '../internal/renderer/neu-table-basic-renderer.component';
-import { projectNeuTableVisibleColumns } from '../internal/semantics/neu-table-basic-projections';
+import {
+  normalizeNeuTableColumns,
+  projectNeuTableLayout,
+} from '../internal/layout/neu-table-layout';
+import {
+  createNeuTableSelectionScope,
+  projectNeuTableSelection,
+  proposeNeuTableRowSelection,
+  proposeNeuTableToggleAll,
+  selectionRowsFromData,
+  type NeuTableSelectionIntent,
+} from '../internal/selection/neu-table-selection';
 import {
   createNeuTableTemplateMap,
   firstNeuTableTemplate,
@@ -266,10 +278,16 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     firstNeuTableTemplate(this.loadingDirectives()),
   );
   protected readonly errorTemplate = computed(() => firstNeuTableTemplate(this.errorDirectives()));
-  protected readonly visibleColumns = computed(() =>
-    projectNeuTableVisibleColumns(this.columns(), this.layout()),
+  protected readonly normalizedColumns = computed(() =>
+    normalizeNeuTableColumns(this.columns(), isDevMode()),
   );
-  protected readonly fieldResolver = computed(() => createNeuTableFieldResolver(this.columns()));
+  protected readonly layoutProjection = computed(() =>
+    projectNeuTableLayout(this.normalizedColumns(), this.layout()),
+  );
+  protected readonly visibleColumns = computed(() => this.layoutProjection().columns);
+  protected readonly fieldResolver = computed(() =>
+    createNeuTableFieldResolver(this.normalizedColumns()),
+  );
   protected readonly sourcePartition = computed(() =>
     partitionNeuTableSource(this.data(), this.rowKey(), this.rowOptions().pin, isDevMode()),
   );
@@ -323,6 +341,65 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       false,
     ),
   );
+  protected readonly selectionAnchor = signal<K | null>(null);
+  protected readonly loadedSelectionRows = computed(() =>
+    selectionRowsFromData(this.data(), this.rowKey()),
+  );
+  protected readonly renderedSelectionRows = computed(() =>
+    this.renderRows().map(({ row, key }) => ({ row, key })),
+  );
+  protected readonly currentSelectionScope = computed(() =>
+    createNeuTableSelectionScope(this.query(), this.filterOptions()),
+  );
+  protected readonly headerSelectionRows = computed(() => {
+    const options = this.selectionOptions();
+    return options.mode === 'multiple' && options.toggleAllScope === 'loaded'
+      ? this.loadedSelectionRows()
+      : this.renderedSelectionRows();
+  });
+  protected readonly selectionProjection = computed(() =>
+    projectNeuTableSelection({
+      selection: this.selection(),
+      selectionOptions: this.selectionOptions(),
+      rowOptions: this.rowOptions(),
+      rows: this.renderedSelectionRows(),
+      headerRows: this.headerSelectionRows(),
+      columns: this.normalizedColumns(),
+      filterOptions: this.filterOptions(),
+      currentScope: this.currentSelectionScope(),
+    }),
+  );
+  protected readonly proposeSelection = (intent: NeuTableSelectionIntent<T, K>) => {
+    const result = proposeNeuTableRowSelection({
+      selection: this.selection(),
+      selectionOptions: this.selectionOptions(),
+      rowOptions: this.rowOptions(),
+      intent,
+      rangeRows: this.renderedSelectionRows(),
+      loadedRows: this.loadedSelectionRows(),
+      anchor: this.selectionAnchor(),
+      columns: this.normalizedColumns(),
+      filterOptions: this.filterOptions(),
+    });
+    this.selectionAnchor.set(result.anchor);
+    if (result.change !== null) this.selectionChange.emit(result.change);
+  };
+  protected readonly proposeToggleAll = () => {
+    const change = proposeNeuTableToggleAll({
+      selection: this.selection(),
+      selectionOptions: this.selectionOptions(),
+      rowOptions: this.rowOptions(),
+      rows: this.headerSelectionRows(),
+      loadedRows: this.loadedSelectionRows(),
+      currentScope: this.currentSelectionScope(),
+      columns: this.normalizedColumns(),
+      filterOptions: this.filterOptions(),
+    });
+    if (change !== null) this.selectionChange.emit(change);
+  };
+  protected readonly proposeLayout = (change: NeuTableLayoutChange | null) => {
+    if (change !== null) this.layoutChange.emit(change);
+  };
   protected readonly retry = () => this.retryData();
 
   focusCell(target: { readonly key: K; readonly columnId: string }): boolean {

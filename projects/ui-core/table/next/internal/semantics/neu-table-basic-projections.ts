@@ -1,19 +1,11 @@
 import type { NeuTableColumn, NeuTableLayoutState } from '../../public/neu-table.types';
+import { projectNeuTableLayout } from '../layout/neu-table-layout';
 
 export function projectNeuTableVisibleColumns<T, F extends string>(
   columns: readonly NeuTableColumn<T, F>[],
   layout: NeuTableLayoutState,
 ): readonly NeuTableColumn<T, F>[] {
-  const hidden = new Set(layout.hidden);
-  const byId = new Map(columns.map((column) => [column.id, column] as const));
-  const ordered = layout.order
-    .map((id) => byId.get(id))
-    .filter((column): column is NeuTableColumn<T, F> => column !== undefined);
-  const orderedIds = new Set(ordered.map((column) => column.id));
-
-  return [...ordered, ...columns.filter((column) => !orderedIds.has(column.id))].filter(
-    (column) => !hidden.has(column.id),
-  );
+  return projectNeuTableLayout(columns, layout).columns;
 }
 
 export function readNeuTableColumnValue<T extends object, F extends string>(

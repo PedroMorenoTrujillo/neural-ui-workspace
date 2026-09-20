@@ -181,9 +181,11 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
       'col',
       'col',
     ]);
-    expect(native.querySelector('th[data-column-id="name"]')?.textContent?.trim()).toBe(
-      'Custom Name',
-    );
+    expect(
+      native
+        .querySelector('th[data-column-id="name"] .neu-table2__header-label')
+        ?.textContent?.trim(),
+    ).toBe('Custom Name');
     expect(
       native.querySelector('tr[data-row-key="1"] td[data-column-id="name"]')?.textContent?.trim(),
     ).toBe('0:Ada');

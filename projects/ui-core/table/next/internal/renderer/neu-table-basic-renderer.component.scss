@@ -7,6 +7,46 @@
   padding-block: var(--neu-table-space-sm, 0.5rem);
 }
 
+.neu-table2__hidden-columns,
+.neu-table2__column-actions,
+.neu-table2__header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-table-space-xs, 0.25rem);
+}
+
+.neu-table2__header-label {
+  flex: 1 1 auto;
+}
+
+.neu-table2__selection-column {
+  inline-size: 2.75rem;
+  text-align: center;
+}
+
+.neu-table2__resize-handle {
+  inline-size: 0.5rem;
+  min-block-size: 1.5rem;
+  padding: 0;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.neu-table2__visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--neu-color-focus, currentColor);
+  outline-offset: 2px;
+}
+
 .neu-table2__viewport {
   max-inline-size: 100%;
   overflow: auto;
@@ -24,6 +64,24 @@ td {
   padding: var(--neu-table-cell-block, 0.625rem) var(--neu-table-cell-inline, 0.75rem);
   text-align: start;
   vertical-align: middle;
+}
+
+th[data-column-pin],
+td[data-column-pin] {
+  position: sticky;
+  z-index: 1;
+  background: var(--neu-color-surface, Canvas);
+}
+
+th[data-column-pin] {
+  z-index: 2;
+}
+
+tr[aria-selected='true'] {
+  background: var(
+    --neu-table-selected-background,
+    color-mix(in srgb, currentColor 9%, transparent)
+  );
 }
 
 [data-density='compact'] th,

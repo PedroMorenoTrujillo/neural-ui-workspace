@@ -1,0 +1,100 @@
+{
+  "checkpoint": "N2-011D",
+  "method": "Angular-compiled minified ESM; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 78665,
+        "gzip": 13819,
+        "brotli": 11818
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        }
+      ]
+    },
+    "keys": {
+      "size": {
+        "raw": 78713,
+        "gzip": 13838,
+        "brotli": 11863
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 32
+        }
+      ]
+    },
+    "allMatching": {
+      "size": {
+        "raw": 78781,
+        "gzip": 13872,
+        "brotli": 11854
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 100
+        }
+      ]
+    },
+    "layout": {
+      "size": {
+        "raw": 78769,
+        "gzip": 13858,
+        "brotli": 11855
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 91
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 78811,
+        "gzip": 13872,
+        "brotli": 11884
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 133
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": [
+    "@angular/common",
+    "@angular/core"
+  ],
+  "forbiddenGraphTokens": []
+}
