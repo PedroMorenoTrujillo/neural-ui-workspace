@@ -41,21 +41,24 @@ export interface TreeProjection<T, K extends NeuTreeTableKey> {
   readonly projectionRevision: number;
   readonly visible: readonly TreeProjectionNode<T, K>[];
   readonly nodesByToken: ReadonlyMap<string, TreeProjectionNode<T, K>>;
+  readonly normalized: NormalizedTreeHierarchy<T, K>;
   readonly diagnostics: readonly TreeDiagnostic<K>[];
 }
 
-interface IndexedNode<T, K extends NeuTreeTableKey> {
+export interface IndexedTreeNode<T, K extends NeuTreeTableKey> {
   readonly key: K;
   readonly token: string;
   readonly value: T;
 }
 
-interface NormalizedHierarchy<T, K extends NeuTreeTableKey> {
-  readonly nodes: ReadonlyMap<string, IndexedNode<T, K>>;
+export interface NormalizedTreeHierarchy<T, K extends NeuTreeTableKey> {
+  readonly nodes: ReadonlyMap<string, IndexedTreeNode<T, K>>;
   readonly roots: readonly string[];
   readonly children: ReadonlyMap<string, readonly string[]>;
+  readonly parentByToken: ReadonlyMap<string, string | null>;
   readonly relations: ReadonlyMap<string, NeuTreeRelation<K>>;
   readonly blockedEdges: ReadonlySet<string>;
+  readonly reachable: ReadonlySet<string>;
   readonly diagnostics: readonly TreeDiagnostic<K>[];
 }
 
@@ -109,8 +112,8 @@ export function normalizeNeuTreeTableHierarchy<T extends object, K extends NeuTr
   data: readonly T[],
   rowKey: (value: T) => K,
   hierarchy: NeuTreeTableHierarchy<K>,
-): NormalizedHierarchy<T, K> {
-  const nodes = new Map<string, IndexedNode<T, K>>();
+): NormalizedTreeHierarchy<T, K> {
+  const nodes = new Map<string, IndexedTreeNode<T, K>>();
   const diagnostics = new Map<string, TreeDiagnostic<K>>();
   const addDiagnostic = (diagnostic: TreeDiagnostic<K>): void => {
     if (!diagnostics.has(diagnostic.fingerprint)) {
@@ -263,8 +266,10 @@ export function normalizeNeuTreeTableHierarchy<T extends object, K extends NeuTr
     nodes,
     roots,
     children: mutableChildren,
+    parentByToken,
     relations,
     blockedEdges,
+    reachable,
     diagnostics: [...diagnostics.values()],
   };
 }
@@ -339,6 +344,7 @@ export function projectNeuTreeTableHierarchy<T extends object, K extends NeuTree
     projectionRevision: hierarchy.hierarchyRevision,
     visible,
     nodesByToken: projectedByToken,
+    normalized,
     diagnostics: normalized.diagnostics,
   };
 }

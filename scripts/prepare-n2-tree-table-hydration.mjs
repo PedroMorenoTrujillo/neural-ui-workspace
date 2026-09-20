@@ -25,6 +25,7 @@ cpSync(
 for (const file of [
   'neu-tree-table.hierarchy.spec.ts',
   'neu-tree-table.interaction.spec.ts',
+  'neu-tree-table.selection.spec.ts',
   'neu-tree-table.interaction-performance.spec.ts',
   'neu-tree-table.renderer.spec.ts',
   'neu-tree-table.performance.spec.ts',
@@ -62,7 +63,7 @@ import bootstrap from './main.server';
 const dir=new URL('../browser/',import.meta.url),csr=new URL('index.csr.html',dir);
 const document=readFileSync(existsSync(csr)?csr:new URL('index.html',dir),'utf8');
 const html=await renderApplication(bootstrap,{document,url:'http://localhost/',allowedHosts:['localhost']});
-for(const value of ['ngh=','role="treegrid"','tabindex="-1"','SSR Name','0:Alpha','1:Beta','data-node-key="string:a"','data-node-key="string:b"','aria-level="1"','aria-level="2"','aria-expanded="true"','aria-posinset="1"','aria-setsize="2"','padding-inline-start: 18px','id="n2-tree-unloaded"','id="n2-tree-invalid"','SSR empty tree','SSR loading tree','SSR error tree','<output id="n2-tree-events">[]</output>','<output id="n2-tree-diagnostic-events">[]</output>']){
+for(const value of ['ngh=','role="treegrid"','aria-multiselectable="true"','tabindex="-1"','SSR Name','0:Alpha','1:Beta','data-node-key="string:a"','data-node-key="string:b"','aria-level="1"','aria-level="2"','aria-expanded="true"','aria-selected="true"','aria-selected="false"','aria-checked="mixed"','data-selection-toggle-all','data-selection-indicator','aria-posinset="1"','aria-setsize="2"','padding-inline-start: 18px','id="n2-tree-unloaded"','id="n2-tree-invalid"','SSR empty tree','SSR loading tree','SSR error tree','<output id="n2-tree-events">[]</output>','<output id="n2-tree-diagnostic-events">[]</output>']){
   if(!html.includes(value)) throw new Error('Missing SSR evidence: '+value);
 }
 writeFileSync(new URL('index.html',dir),html);

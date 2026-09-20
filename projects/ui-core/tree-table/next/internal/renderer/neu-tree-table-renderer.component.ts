@@ -29,6 +29,11 @@ import {
   type TreeFocusSnapshot,
 } from '../interaction/neu-tree-table-interaction';
 import type {
+  TreeSelectionIntent,
+  TreeSelectionModel,
+  TreeSelectionNodeState,
+} from '../selection/neu-tree-table-selection';
+import type {
   NeuTreeRelationStatus,
   NeuTreeTableAppearance,
   NeuTreeTableCellContext,
@@ -42,6 +47,7 @@ import type {
   NeuTreeTableLayoutState,
   NeuTreeTableNodeContext,
   NeuTreeTableRowOptions,
+  NeuTreeTableSelectionOptions,
   NeuTreeTableStateContext,
 } from '../../public/neu-tree-table.types';
 
@@ -63,11 +69,14 @@ export class NeuTreeTableRendererComponent<
   private readonly destroyRef = inject(DestroyRef);
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly focusedKey = signal<K | null>(null);
+  private readonly selectionAnchor = signal<K | null>(null);
   private focusedSnapshot: TreeFocusSnapshot<K> | null = null;
   private pendingFocus: AfterRenderRef | null = null;
 
   readonly projection: InputSignal<TreeProjection<T, K>> = input.required();
   readonly expandedKeys: InputSignal<readonly K[]> = input.required();
+  readonly selectionModel: InputSignal<TreeSelectionModel<T, K>> = input.required();
+  readonly selectionOptions: InputSignal<NeuTreeTableSelectionOptions<T>> = input.required();
   readonly columns: InputSignal<readonly NeuTreeTableColumn<T, F>[]> = input.required();
   readonly layout: InputSignal<NeuTreeTableLayoutState> = input.required();
   readonly hierarchyOptions: InputSignal<NeuTreeTableHierarchyOptions> = input.required();
@@ -96,6 +105,7 @@ export class NeuTreeTableRendererComponent<
     ReadonlyMap<string, TemplateRef<NeuTreeTableHeaderContext<T, F>>>
   > = input.required();
   readonly expandedKeysProposal: OutputEmitterRef<NeuTreeTableExpandedKeysChange<K>> = output();
+  readonly selectionIntent: OutputEmitterRef<TreeSelectionIntent<K>> = output();
 
   protected readonly rows = computed(() => this.projection().visible);
   protected readonly rovingToken = computed(() => {
@@ -117,10 +127,23 @@ export class NeuTreeTableRendererComponent<
     untracked(() => this.reconcileFocus());
   });
   protected readonly columnCount = computed(() => Math.max(1, this.columns().length));
+  protected readonly ariaMultiselectable = computed(() => {
+    const mode = this.selectionOptions().mode;
+    return mode === 'multiple' || mode === 'checkbox' ? true : null;
+  });
   protected readonly hasFooter = computed(
     () => this.footerTemplates().size > 0 || this.summaryTemplate() !== undefined,
   );
   protected readonly stateContext: NeuTreeTableStateContext = { retry: () => undefined };
+  protected readonly emptySelectionState: TreeSelectionNodeState = {
+    selected: false,
+    checked: false,
+    indeterminate: false,
+    disabled: true,
+    selectableCount: 0,
+    selectedCount: 0,
+    complete: true,
+  };
 
   constructor() {
     this.destroyRef.onDestroy(() => this.cancelPendingFocus());
@@ -150,6 +173,7 @@ export class NeuTreeTableRendererComponent<
   }
 
   protected nodeContext(node: TreeProjectionNode<T, K>): NeuTreeTableNodeContext<T, K> {
+    const selection = this.selectionState(node);
     return {
       $implicit: node.value,
       value: node.value,
@@ -160,12 +184,12 @@ export class NeuTreeTableRendererComponent<
       siblingCount: node.siblingCount,
       path: node.path,
       expanded: node.expanded,
-      selected: false,
-      indeterminate: false,
-      disabled: false,
+      selected: selection.selected,
+      indeterminate: selection.indeterminate,
+      disabled: selection.disabled,
       childStatus: node.relation.status,
       toggleExpansion: () => this.proposeExpansion(node, 'toggle'),
-      toggleSelection: () => undefined,
+      toggleSelection: () => this.proposeSelection(node, 'checkbox'),
     };
   }
 
@@ -198,21 +222,59 @@ export class NeuTreeTableRendererComponent<
     return this.rowOptions().className?.(node.value) ?? null;
   }
 
+  protected selectionState(node: TreeProjectionNode<T, K>): TreeSelectionNodeState {
+    return this.selectionModel().byToken.get(node.token) ?? this.emptySelectionState;
+  }
+
+  protected selectionIndicator(node: TreeProjectionNode<T, K>): 'checkbox' | 'radio' | null {
+    const options = this.selectionOptions();
+    if (options.mode === 'none' || options.indicator === 'none') return null;
+    return options.indicator;
+  }
+
+  protected showToggleAll(column: NeuTreeTableColumn<T, F>): boolean {
+    const options = this.selectionOptions();
+    return (
+      this.isTreeColumn(column) &&
+      (options.mode === 'multiple' || options.mode === 'checkbox') &&
+      options.indicator === 'checkbox'
+    );
+  }
+
   protected onBodyFocus(event: FocusEvent): void {
     const node = this.nodeFromEvent(event);
     if (node) this.rememberFocus(node);
   }
 
-  protected onBodyClick(event: MouseEvent): void {
+  protected onTableClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    const headerIndicator = target?.closest<HTMLInputElement>('input[data-selection-toggle-all]');
+    if (headerIndicator) {
+      this.selectionIntent.emit({ kind: 'toggle-all', source: 'toggle-all' });
+      headerIndicator.checked = this.selectionModel().header.checked;
+      headerIndicator.indeterminate = this.selectionModel().header.indeterminate;
+      return;
+    }
     const node = this.nodeFromEvent(event);
     if (!node) return;
-    const target = event.target as HTMLElement | null;
     if (target?.closest('button.neu-tree-table2__expander')) {
       this.proposeExpansion(node, 'toggle');
       return;
     }
+    const indicator = target?.closest<HTMLInputElement>('input[data-selection-indicator]');
+    if (indicator) {
+      this.proposeSelection(node, indicator.type === 'radio' ? 'radio' : 'checkbox', event);
+      const state = this.selectionState(node);
+      indicator.checked = state.selected;
+      indicator.indeterminate = state.indeterminate;
+      return;
+    }
     if (this.isInteractiveTarget(target)) return;
     this.focusNode(node);
+    const options = this.selectionOptions();
+    if (options.mode !== 'none' && options.selectOnRowClick) {
+      this.proposeSelection(node, 'row', event);
+    }
   }
 
   protected onBodyKeydown(event: KeyboardEvent): void {
@@ -237,6 +299,8 @@ export class NeuTreeTableRendererComponent<
     } else if (event.key === logicalBackward) {
       if (node.expandable && node.expanded) this.proposeExpansion(node, 'keyboard');
       else target = moveNeuTreeTableFocus(this.projection(), node, 'parent');
+    } else if (event.key === ' ' && this.selectionOptions().mode !== 'none') {
+      this.proposeSelection(node, 'keyboard', event);
     } else {
       return;
     }
@@ -266,6 +330,23 @@ export class NeuTreeTableRendererComponent<
     this.expandedKeysProposal.emit(
       proposeNeuTreeTableExpansion(this.expandedKeys(), node.key, node.expanded, source),
     );
+  }
+
+  private proposeSelection(
+    node: TreeProjectionNode<T, K>,
+    source: 'row' | 'radio' | 'checkbox' | 'keyboard',
+    event?: MouseEvent | KeyboardEvent,
+  ): void {
+    const anchorKey = this.selectionAnchor();
+    this.selectionIntent.emit({
+      kind: 'node',
+      key: node.key,
+      source,
+      anchorKey,
+      shiftKey: event?.shiftKey ?? false,
+      platformModifier: (event?.ctrlKey ?? false) || (event?.metaKey ?? false),
+    });
+    if (!(event?.shiftKey ?? false)) this.selectionAnchor.set(node.key);
   }
 
   private rememberFocus(node: TreeProjectionNode<T, K>): void {

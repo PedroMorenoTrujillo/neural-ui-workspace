@@ -1,0 +1,101 @@
+{
+  "checkpoint": "N2-015D",
+  "legacyReference": {
+    "raw": 120496,
+    "gzip": 18411
+  },
+  "method": "Angular-compiled minified ESM; Angular external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 68247,
+        "gzip": 12772,
+        "brotli": 10693
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 68211
+        }
+      ]
+    },
+    "selection": {
+      "size": {
+        "raw": 68247,
+        "gzip": 12772,
+        "brotli": 10693
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 68211
+        }
+      ]
+    },
+    "checkbox-propagation": {
+      "size": {
+        "raw": 68247,
+        "gzip": 12772,
+        "brotli": 10693
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 68211
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 68748,
+        "gzip": 12950,
+        "brotli": 10831
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 68630
+        }
+      ]
+    },
+    "templates": {
+      "size": {
+        "raw": 68748,
+        "gzip": 12950,
+        "brotli": 10831
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 68630
+        }
+      ]
+    },
+    "nested": {
+      "size": {
+        "raw": 68247,
+        "gzip": 12772,
+        "brotli": 10693
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 68211
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": [
+    "@angular/common",
+    "@angular/core"
+  ],
+  "forbiddenGraphTokens": []
+}

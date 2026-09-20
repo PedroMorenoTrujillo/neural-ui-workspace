@@ -20,6 +20,11 @@ import {
 } from '../internal/hierarchy/neu-tree-table-hierarchy';
 import { NeuTreeTableRendererComponent } from '../internal/renderer/neu-tree-table-renderer.component';
 import {
+  buildNeuTreeTableSelectionModel,
+  proposeNeuTreeTableSelection,
+  type TreeSelectionIntent,
+} from '../internal/selection/neu-tree-table-selection';
+import {
   NeuTreeTableCaptionDirective,
   NeuTreeTableCellDirective,
   NeuTreeTableEditorDirective,
@@ -322,6 +327,9 @@ export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, 
   protected readonly projection = computed(() =>
     projectNeuTreeTableHierarchy(this.data(), this.rowKey(), this.hierarchy(), this.expandedKeys()),
   );
+  protected readonly selectionModel = computed(() =>
+    buildNeuTreeTableSelectionModel(this.projection(), this.selection(), this.selectionOptions()),
+  );
   private readonly hierarchyDiagnostics = computed<readonly HierarchyDiagnostic<K>[]>(() => {
     const diagnostics: HierarchyDiagnostic<K>[] = this.projection().diagnostics.map(
       (diagnostic: TreeDiagnostic<K>) => ({
@@ -364,6 +372,16 @@ export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, 
 
   protected onExpandedKeysProposal(change: NeuTreeTableExpandedKeysChange<K>): void {
     this.expandedKeysChange.emit(change);
+  }
+
+  protected onSelectionIntent(intent: TreeSelectionIntent<K>): void {
+    const change = proposeNeuTreeTableSelection({
+      model: this.selectionModel(),
+      selection: this.selection(),
+      selectionOptions: this.selectionOptions(),
+      intent,
+    });
+    if (change) this.selectionChange.emit(change);
   }
 
   scrollTo(target: NeuTreeTableScrollTarget<K>): void {

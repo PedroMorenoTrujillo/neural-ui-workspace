@@ -12,6 +12,9 @@ import {
   type NeuTreeTableExpandedKeysChange,
   type NeuTreeTableFeatureError,
   type NeuTreeTableHierarchy,
+  type NeuTreeTableSelection,
+  type NeuTreeTableSelectionChange,
+  type NeuTreeTableSelectionOptions,
 } from './ui-core/tree-table/next/public/public-api';
 
 interface Row {
@@ -67,6 +70,9 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
     <output id="n2-tree-diagnostic-events">{{ diagnosticEvents() }}</output>
     <button id="n2-tree-parent-write" type="button" (click)="reconstruct()">Parent write</button>
     <button id="n2-tree-accept" type="button" (click)="acceptExpansion.set(true)">Accept</button>
+    <button id="n2-tree-accept-selection" type="button" (click)="acceptSelection.set(true)">
+      Accept selection
+    </button>
     <button id="n2-tree-empty-write" type="button" (click)="emptyWrite()">Empty</button>
     <button id="n2-tree-restore-write" type="button" (click)="restoreWrite()">Restore</button>
 
@@ -77,10 +83,12 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
         [columns]="appliedColumns()"
         [rowKey]="rowKey"
         [expandedKeys]="expandedKeys()"
+        [selection]="selection()"
+        [selectionOptions]="selectionOptions"
         [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
         (queryChange)="record('queryChange')"
         (expandedKeysChange)="recordExpansion($event)"
-        (selectionChange)="record('selectionChange')"
+        (selectionChange)="recordSelection($event)"
         (layoutChange)="record('layoutChange')"
         (editStateChange)="record('editStateChange')"
         (dataRequest)="record('dataRequest')"
@@ -169,7 +177,18 @@ export class N2TreeTableHydrationComponent {
   readonly appliedHierarchy = signal(hierarchy);
   readonly appliedColumns = signal(columns);
   readonly expandedKeys = signal<readonly string[]>(['a']);
+  readonly selection = signal<NeuTreeTableSelection<string>>({ kind: 'keys', keys: ['a'] });
   readonly acceptExpansion = signal(false);
+  readonly acceptSelection = signal(false);
+  readonly selectionOptions: NeuTreeTableSelectionOptions<Row> = {
+    mode: 'checkbox',
+    indicator: 'checkbox',
+    selectOnRowClick: false,
+    modifier: 'toggle',
+    range: false,
+    propagation: 'loaded-subtree',
+    toggleAllScope: 'loaded',
+  };
   readonly columns = columns;
   readonly unloadedData = [rows[0]!];
   readonly rowKey = (row: Row) => row.id;
@@ -219,6 +238,11 @@ export class N2TreeTableHydrationComponent {
   recordExpansion(change: NeuTreeTableExpandedKeysChange<string>): void {
     this.record(`expandedKeysChange:${change.source}:${change.changedKey}`);
     if (this.acceptExpansion()) this.expandedKeys.set(change.next);
+  }
+
+  recordSelection(change: NeuTreeTableSelectionChange<Row, string>): void {
+    this.record(`selectionChange:${change.source}:${change.addedKeys.join(',')}`);
+    if (this.acceptSelection()) this.selection.set(change.next);
   }
 
   recordDiagnostic(error: NeuTreeTableFeatureError): void {

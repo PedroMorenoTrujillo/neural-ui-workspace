@@ -33,6 +33,10 @@ try {
   assert.equal(await page.locator('#n2-tree-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-tree-diagnostic-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('role'), 'treegrid');
+  assert.equal(
+    await page.locator('#n2-tree-primary table').getAttribute('aria-multiselectable'),
+    'true',
+  );
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '-1');
   assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
   assert.deepEqual(
@@ -48,6 +52,18 @@ try {
   assert.equal(
     await page.locator('#n2-tree-primary tr[data-node-key="string:b"]').getAttribute('aria-level'),
     '2',
+  );
+  assert.equal(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key="string:a"]')
+      .getAttribute('aria-selected'),
+    'true',
+  );
+  assert.equal(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key="string:a"] input[data-selection-indicator]')
+      .getAttribute('aria-checked'),
+    'mixed',
   );
   assert.match(await page.locator('#n2-tree-empty').textContent(), /SSR empty tree/);
   assert.match(await page.locator('#n2-tree-loading').textContent(), /SSR loading tree/);
@@ -170,10 +186,47 @@ try {
     'string:a',
   );
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '-1');
+
+  const childSelection = page.locator(
+    '#n2-tree-primary tr[data-node-key="string:b"] input[data-selection-indicator]',
+  );
+  await childSelection.click();
+  await page.waitForTimeout(20);
+  assert.equal(
+    await page.locator('#n2-tree-events').textContent(),
+    '["expandedKeysChange:toggle:a","expandedKeysChange:toggle:a","expandedKeysChange:keyboard:a","selectionChange:checkbox:b"]',
+  );
+  assert.equal(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key="string:b"]')
+      .getAttribute('aria-selected'),
+    'false',
+  );
+  assert.equal(await childSelection.isChecked(), false);
+  await page.locator('#n2-tree-accept-selection').click();
+  await childSelection.click();
+  await page.waitForTimeout(20);
+  assert.equal(
+    await page.locator('#n2-tree-events').textContent(),
+    '["expandedKeysChange:toggle:a","expandedKeysChange:toggle:a","expandedKeysChange:keyboard:a","selectionChange:checkbox:b","selectionChange:checkbox:b"]',
+  );
+  assert.equal(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key="string:b"]')
+      .getAttribute('aria-selected'),
+    'true',
+  );
+  assert.equal(await childSelection.isChecked(), true);
+  assert.equal(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key="string:a"] input[data-selection-indicator]')
+      .getAttribute('aria-checked'),
+    'true',
+  );
   assert.equal(errors.filter((error) => /NG050\d/.test(error)).length, 0);
   assert.deepEqual(errors, []);
   console.log(
-    'N2-015C real Chromium hydration passed (DOM reused, controlled expansion exactly once, deterministic focus transitions, 0 NG050x, 0 requests).',
+    'N2-015D real Chromium hydration passed (DOM reused, controlled expansion/selection exactly once, deterministic focus transitions, 0 NG050x, 0 requests).',
   );
 } finally {
   release?.();

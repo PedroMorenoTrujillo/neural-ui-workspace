@@ -17,6 +17,9 @@ import type {
   NeuTreeTableFeatureError,
   NeuTreeTableHierarchy,
   NeuTreeTableLayoutState,
+  NeuTreeTableSelection,
+  NeuTreeTableSelectionChange,
+  NeuTreeTableSelectionOptions,
 } from './public/neu-tree-table.types';
 
 interface Row {
@@ -80,9 +83,12 @@ const emptyLayout: NeuTreeTableLayoutState = {
         [columns]="columns()"
         [rowKey]="rowKey"
         [expandedKeys]="expanded()"
+        [selection]="selection()"
+        [selectionOptions]="selectionOptions()"
         [layout]="layout()"
         [hierarchyOptions]="{ treeColumnId: treeColumnId(), indentSize: 18 }"
         (expandedKeysChange)="recordExpansion($event)"
+        (selectionChange)="recordSelection($event)"
         (featureError)="recordError($event)"
       >
         <ng-template neuTreeTableHeader="name" let-column="column">
@@ -107,10 +113,14 @@ class HostComponent {
   readonly columns = signal(columns);
   readonly expanded = signal<readonly string[]>(['a']);
   readonly layout = signal(emptyLayout);
+  readonly selection = signal<NeuTreeTableSelection<string>>({ kind: 'keys', keys: [] });
+  readonly selectionOptions = signal<NeuTreeTableSelectionOptions<Row>>({ mode: 'none' });
   readonly treeColumnId = signal('name');
   readonly direction = signal<'ltr' | 'rtl'>('ltr');
   readonly acceptExpansion = signal(false);
+  readonly acceptSelection = signal(false);
   readonly expansionChanges = signal<readonly NeuTreeTableExpandedKeysChange<string>[]>([]);
+  readonly selectionChanges = signal<readonly NeuTreeTableSelectionChange<Row, string>[]>([]);
   readonly errors = signal<readonly NeuTreeTableFeatureError[]>([]);
   readonly rowKey = (row: Row) => row.id;
 
@@ -121,6 +131,11 @@ class HostComponent {
   recordExpansion(change: NeuTreeTableExpandedKeysChange<string>): void {
     this.expansionChanges.update((changes) => [...changes, change]);
     if (this.acceptExpansion()) this.expanded.set(change.next);
+  }
+
+  recordSelection(change: NeuTreeTableSelectionChange<Row, string>): void {
+    this.selectionChanges.update((changes) => [...changes, change]);
+    if (this.acceptSelection()) this.selection.set(change.next);
   }
 }
 
@@ -505,6 +520,115 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
       feature: 'hierarchy',
       code: 'duplicate-key',
     });
+  });
+
+  it('emits one loaded-subtree checkbox proposal and preserves applied DOM on rejection', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.expanded.set([]);
+    host.selectionOptions.set({
+      mode: 'checkbox',
+      indicator: 'checkbox',
+      selectOnRowClick: true,
+      modifier: 'toggle',
+      range: false,
+      propagation: 'loaded-subtree',
+      toggleAllScope: 'loaded',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const alpha = row(native, 'string:a');
+    alpha.querySelector<HTMLInputElement>('input[data-selection-indicator]')?.click();
+    await fixture.whenStable();
+
+    expect(host.selectionChanges()).toHaveLength(1);
+    expect(host.selectionChanges()[0]).toMatchObject({
+      source: 'checkbox',
+      addedKeys: ['a', 'b'],
+      propagation: 'loaded-subtree',
+    });
+    expect(host.selection()).toEqual({ kind: 'keys', keys: [] });
+    expect(alpha.getAttribute('aria-selected')).toBe('false');
+    expect(alpha.querySelector<HTMLInputElement>('input')?.checked).toBe(false);
+
+    host.acceptSelection.set(true);
+    alpha.querySelector<HTMLInputElement>('input[data-selection-indicator]')?.click();
+    await fixture.whenStable();
+    expect(host.selectionChanges()).toHaveLength(2);
+    expect(host.selection().keys).toEqual(['a', 'b']);
+    expect(row(native, 'string:a').getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('handles Space and row-click selection exactly once without duplicating native controls', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.selectionOptions.set({
+      mode: 'multiple',
+      indicator: 'none',
+      selectOnRowClick: true,
+      modifier: 'toggle',
+      range: false,
+      propagation: 'none',
+      toggleAllScope: 'visible',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const gamma = row(native, 'string:c');
+    gamma.focus();
+    press(gamma, ' ');
+    await fixture.whenStable();
+    expect(host.selectionChanges()).toHaveLength(1);
+    expect(host.selectionChanges()[0]).toMatchObject({ source: 'keyboard', addedKeys: ['c'] });
+
+    gamma.click();
+    await fixture.whenStable();
+    expect(host.selectionChanges()).toHaveLength(2);
+    expect(host.selectionChanges()[1]).toMatchObject({ source: 'row', addedKeys: ['c'] });
+    expect(document.activeElement).toBe(gamma);
+    expect(native.querySelectorAll('input[data-selection-indicator]')).toHaveLength(0);
+  });
+
+  it('renders native checkbox a11y and proposes loaded toggle-all once', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.selection.set({ kind: 'keys', keys: ['a'] });
+    host.selectionOptions.set({
+      mode: 'checkbox',
+      indicator: 'checkbox',
+      selectOnRowClick: false,
+      modifier: 'toggle',
+      range: false,
+      propagation: 'loaded-subtree',
+      toggleAllScope: 'loaded',
+      isNodeDisabled: (value) => value.id === 'c',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const table = native.querySelector('table');
+    const header = native.querySelector<HTMLInputElement>('input[data-selection-toggle-all]');
+    expect(table?.getAttribute('aria-multiselectable')).toBe('true');
+    expect(header?.getAttribute('aria-checked')).toBe('mixed');
+    expect(
+      row(native, 'string:a')
+        .querySelector<HTMLInputElement>('input[data-selection-indicator]')
+        ?.getAttribute('aria-checked'),
+    ).toBe('mixed');
+    expect(
+      row(native, 'string:c').querySelector<HTMLInputElement>('input[data-selection-indicator]')
+        ?.disabled,
+    ).toBe(true);
+
+    header?.click();
+    await fixture.whenStable();
+    expect(host.selectionChanges()).toHaveLength(1);
+    expect(host.selectionChanges()[0]).toMatchObject({
+      source: 'toggle-all',
+      addedKeys: ['b'],
+    });
+    expect(host.selectionChanges()[0]?.next.keys).toEqual(['a', 'b']);
   });
 
   it('renders empty, loading and error applied root states without requests', async () => {

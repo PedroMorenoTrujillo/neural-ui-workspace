@@ -98,6 +98,13 @@ const rendererTemplate = readFileSync(
 assert.equal((rendererTemplate.match(/\(focusin\)=/g) ?? []).length, 1);
 assert.equal((rendererTemplate.match(/\(keydown\)=/g) ?? []).length, 1);
 assert.equal((rendererTemplate.match(/\(click\)=/g) ?? []).length, 1);
+assert.match(rendererTemplate, /aria-multiselectable/);
+assert.match(rendererTemplate, /aria-selected/);
+assert.match(rendererTemplate, /aria-checked/);
+assert.match(rendererTemplate, /type="checkbox"/);
+assert.match(rendererTemplate, /\[type\]="indicator"/);
+assert.match(rendererTemplate, /data-selection-toggle-all/);
+assert.match(rendererTemplate, /data-selection-indicator/);
 for (const rowTag of rendererTemplate.match(/<tr\b[^>]*>/gs) ?? []) {
   assert.doesNotMatch(rowTag, /\((?:focusin|keydown|click)\)=/);
 }
@@ -129,5 +136,5 @@ for (const forbidden of [
 assert.match(graph, /internal\/neu-exact-key/);
 assert.match(graph, /internal\/neu-field-value-resolver/);
 console.log(
-  `N2 TreeTable boundary audit passed (${files.length} files, 2 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, 1 delegated focus/keyboard/click boundary, neutral internals only).`,
+  `N2 TreeTable boundary audit passed (${files.length} files, 2 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, 1 delegated focus/keyboard/click boundary, native selection semantics, neutral internals only).`,
 );

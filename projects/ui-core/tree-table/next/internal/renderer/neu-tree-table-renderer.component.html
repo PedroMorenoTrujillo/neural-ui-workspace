@@ -15,7 +15,9 @@
   <table
     class="neu-tree-table2__table"
     role="treegrid"
+    (click)="onTableClick($event)"
     [attr.aria-label]="labels().ariaLabel"
+    [attr.aria-multiselectable]="ariaMultiselectable()"
     [attr.tabindex]="containerTabIndex()"
   >
     @if (captionTemplate(); as template) {
@@ -36,6 +38,21 @@
             [style.max-inline-size]="column.maxWidth"
             [style.text-align]="column.align"
           >
+            @if (showToggleAll(column)) {
+              <input
+                type="checkbox"
+                class="neu-tree-table2__selection-indicator"
+                data-selection-toggle-all
+                tabindex="-1"
+                [attr.aria-label]="labels().selection"
+                [attr.aria-checked]="
+                  selectionModel().header.indeterminate ? 'mixed' : selectionModel().header.checked
+                "
+                [checked]="selectionModel().header.checked"
+                [indeterminate]="selectionModel().header.indeterminate"
+                [disabled]="selectionModel().header.disabled"
+              />
+            }
             @if (headerTemplate(column.id); as template) {
               <ng-container
                 [ngTemplateOutlet]="template"
@@ -49,11 +66,7 @@
       </tr>
     </thead>
 
-    <tbody
-      (focusin)="onBodyFocus($event)"
-      (click)="onBodyClick($event)"
-      (keydown)="onBodyKeydown($event)"
-    >
+    <tbody (focusin)="onBodyFocus($event)" (keydown)="onBodyKeydown($event)">
       @if (rows().length === 0 && rootStatus() === 'loading') {
         <tr role="row" class="neu-tree-table2__state-row" data-state="loading">
           <td role="gridcell" [attr.colspan]="columnCount()">
@@ -100,6 +113,9 @@
             [attr.tabindex]="node.token === rovingToken() ? 0 : -1"
             [attr.aria-level]="node.depth + 1"
             [attr.aria-expanded]="node.expandable ? node.expanded : null"
+            [attr.aria-selected]="
+              selectionOptions().mode === 'none' ? null : selectionState(node).selected
+            "
             [attr.aria-posinset]="node.siblingIndex + 1"
             [attr.aria-setsize]="node.siblingCount"
           >
@@ -127,6 +143,23 @@
                       >
                         <span aria-hidden="true">{{ node.expanded ? '−' : '+' }}</span>
                       </button>
+                    }
+                    @if (selectionIndicator(node); as indicator) {
+                      <input
+                        class="neu-tree-table2__selection-indicator"
+                        data-selection-indicator
+                        tabindex="-1"
+                        [type]="indicator"
+                        [attr.aria-label]="labels().selection"
+                        [attr.aria-checked]="
+                          selectionState(node).indeterminate
+                            ? 'mixed'
+                            : selectionState(node).selected
+                        "
+                        [checked]="selectionState(node).selected"
+                        [indeterminate]="selectionState(node).indeterminate"
+                        [disabled]="selectionState(node).disabled"
+                      />
                     }
                     <span class="neu-tree-table2__node-content">
                       @if (nodeTemplate(); as template) {

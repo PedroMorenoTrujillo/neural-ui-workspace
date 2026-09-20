@@ -15,8 +15,17 @@ import { build } from 'esbuild';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const update = process.argv.includes('--update');
-const checkpoint = process.argv.includes('--checkpoint=N2-015C') ? 'N2-015C' : 'N2-015B';
-const artifactStem = checkpoint === 'N2-015C' ? 'expansion-c' : 'hierarchy-b';
+const checkpoint = process.argv.includes('--checkpoint=N2-015D')
+  ? 'N2-015D'
+  : process.argv.includes('--checkpoint=N2-015C')
+    ? 'N2-015C'
+    : 'N2-015B';
+const artifactStem =
+  checkpoint === 'N2-015D'
+    ? 'selection-d'
+    : checkpoint === 'N2-015C'
+      ? 'expansion-c'
+      : 'hierarchy-b';
 const artifactPath = join(root, `baselines/n2-tree-table/${artifactStem}-bundle.json`);
 const graphPath = join(root, `baselines/n2-tree-table/${artifactStem}-dependency-graph.json`);
 const temporary = mkdtempSync(join(root, '.n2-tree-table-bundle-'));
@@ -147,6 +156,14 @@ try {
       '../../shared/neu-exact-key',
     ),
   );
+  const selectionSource = join(entrypoint, 'internal/selection/neu-tree-table-selection.ts');
+  writeFileSync(
+    selectionSource,
+    readFileSync(selectionSource, 'utf8').replace(
+      '../../../../internal/neu-exact-key',
+      '../../shared/neu-exact-key',
+    ),
+  );
   writeFileSync(join(entrypoint, 'public_api.ts'), "export * from './public/public-api';\n");
   writeFileSync(
     join(entrypoint, 'ng-package.json'),
@@ -166,6 +183,13 @@ try {
       ? {
           'expansion-interaction': await packageConsumer(packageRoot, basic),
           'keyboard-focus': await packageConsumer(packageRoot, basic),
+        }
+      : {}),
+    ...(checkpoint === 'N2-015D'
+      ? {
+          selection: await packageConsumer(packageRoot, basic),
+          'checkbox-propagation': await packageConsumer(packageRoot, basic),
+          combined: await packageConsumer(packageRoot, templates),
         }
       : {}),
     templates: await packageConsumer(packageRoot, templates),

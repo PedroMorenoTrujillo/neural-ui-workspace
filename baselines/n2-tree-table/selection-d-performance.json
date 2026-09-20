@@ -1,0 +1,54 @@
+{
+  "checkpoint": "N2-015D",
+  "capturedAt": "2026-09-20T20:42:21.889Z",
+  "metrics": {
+    "membership1k": {
+      "p50Ms": 0.3089,
+      "p95Ms": 0.3718
+    },
+    "membership10k": {
+      "p50Ms": 2.3762,
+      "p95Ms": 2.9452
+    },
+    "toggle1k": {
+      "p50Ms": 0.1353,
+      "p95Ms": 0.199
+    },
+    "toggle10k": {
+      "p50Ms": 1.5595,
+      "p95Ms": 2.1748
+    },
+    "propagate100": {
+      "p50Ms": 0.0497,
+      "p95Ms": 0.0621
+    },
+    "propagateDeep1k": {
+      "p50Ms": 0.468,
+      "p95Ms": 0.569
+    },
+    "indeterminate1k": {
+      "p50Ms": 0.188,
+      "p95Ms": 0.1991
+    },
+    "indeterminate10k": {
+      "p50Ms": 2.3499,
+      "p95Ms": 3.0535
+    },
+    "gestures100": {
+      "p50Ms": 4.9657,
+      "p95Ms": 5.189
+    },
+    "selection100": {
+      "p50Ms": 12.6748,
+      "p95Ms": 12.9665
+    },
+    "propagated100": {
+      "p50Ms": 3.6,
+      "p95Ms": 3.8407
+    },
+    "destroy50": {
+      "p50Ms": 44.3085,
+      "p95Ms": 54.8722
+    }
+  }
+}
