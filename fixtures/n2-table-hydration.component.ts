@@ -94,6 +94,10 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     <output id="n2-virtual-events">{{ virtualEvents() }}</output>
     <output id="n2-virtual-ranges">{{ virtualRanges() }}</output>
     <output id="n2-h-events">{{ hEvents() }}</output>
+    <output id="n2-export-state">{{ exportState() }}</output>
+    <button id="n2-export" type="button" (click)="exportAfterHydration()">
+      Export hydrated JSON
+    </button>
     <button id="n2-remote-accept" type="button" (click)="acceptRemoteProposals()">
       Accept remote proposals
     </button>
@@ -164,6 +168,7 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
 
     <section id="n2-table-primary">
       <neu-table
+        #primaryTable
         [data]="rows()"
         [columns]="columns"
         [metadata]="primaryMetadata"
@@ -334,6 +339,7 @@ export class N2TableHydrationComponent {
   readonly virtualEvents = signal('[]');
   readonly virtualRanges = signal('[]');
   readonly hEvents = signal('[]');
+  readonly exportState = signal('idle');
   readonly rows = signal<readonly HydrationRow[]>([
     { id: 1, name: 'Ada', status: 'active' },
     { id: 2, name: 'Grace', status: 'disabled' },
@@ -495,6 +501,8 @@ export class N2TableHydrationComponent {
   readonly loadingMetadata = metadata({ totalItems: null, loading: true });
   readonly errorMetadata = metadata({ totalItems: null, error: 'offline' });
   readonly rowKey = (row: HydrationRow) => row.id;
+  readonly primaryTable =
+    viewChild.required<NeuTableComponent<HydrationRow, number, HydrationField>>('primaryTable');
   readonly virtualSatisfied =
     viewChild.required<NeuTableComponent<HydrationRow, number, HydrationField>>('virtualSatisfied');
 
@@ -510,6 +518,22 @@ export class N2TableHydrationComponent {
   recordH(name: string): void {
     const events = JSON.parse(this.hEvents()) as string[];
     this.hEvents.set(JSON.stringify([...events, name]));
+  }
+
+  async exportAfterHydration(): Promise<void> {
+    const invocation = this.exportState() === 'idle' ? 1 : 2;
+    this.exportState.set(`pending:${invocation}`);
+    const outcome = await this.primaryTable().export({
+      format: 'json',
+      scope: 'all',
+      fileName: 'hydrated.json',
+      query: this.query(),
+    });
+    this.exportState.set(
+      outcome.kind === 'generated'
+        ? `generated:${invocation}:${outcome.result.bytes.byteLength}`
+        : `delegated:${invocation}`,
+    );
   }
 
   acceptHEditState(change: NeuTableEditChange<number>): void {

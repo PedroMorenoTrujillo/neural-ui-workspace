@@ -58,6 +58,7 @@ if(!section('n2-table-client-virtual').includes('aria-rowcount="200"')) throw ne
 if(!section('n2-table-remote-virtual-satisfied').includes('aria-rowcount="1000"')) throw new Error('Missing remote virtual aria-rowcount.');
 if(!html.includes('<output id="n2-virtual-events">[]</output>')||!html.includes('<output id="n2-virtual-ranges">[]</output>')) throw new Error('SSR virtual outputs must remain silent.');
 if(!html.includes('<output id="n2-h-events">[]</output>')) throw new Error('SSR H outputs must remain silent.');
+if(!html.includes('<output id="n2-export-state">idle</output>')) throw new Error('SSR must not execute or load export.');
 writeFileSync(new URL('index.html',dir),html);
 console.log('N2 Table SSR document prepared with deterministic virtual bootstrap, applied query UI, client pipeline, remote bypass and all metadata states');\n`,
 );

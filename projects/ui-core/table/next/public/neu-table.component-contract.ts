@@ -65,6 +65,11 @@ import {
   type NeuTableEditSession,
 } from '../internal/editing/neu-table-editing';
 import {
+  createNeuTableExportMatrix,
+  projectNeuTableExport,
+} from '../internal/export/neu-table-export-projection';
+import { loadNeuTableExportSerializer } from '../internal/export/neu-table-export-loader';
+import {
   createNeuTableTemplateMap,
   firstNeuTableTemplate,
 } from '../internal/templates/neu-table-template-registry';
@@ -147,6 +152,8 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   });
   private readonly renderer = viewChild(NeuTableBasicRendererComponent);
   private readonly diagnostics = new Set<string>();
+  private destroyed = false;
+  private exportSerializerLoader = loadNeuTableExportSerializer;
   private editGeneration = 0;
   private lastAppliedEditToken = 'none';
   private closedAppliedEditToken: string | null = null;
@@ -896,6 +903,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     }
 
     this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
       this.invalidateEditSession();
       this.remoteCoordinator = destroyNeuTableRemoteCoordinator(this.remoteCoordinator);
     });
@@ -978,8 +986,48 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     this.retryToken.update((token) => token + 1);
   }
 
-  export(request: NeuTableExportRequest<F>): Promise<NeuTableExportOutcome> {
-    void request;
-    return Promise.reject(new Error('NeuTable export is not implemented in N2-011B'));
+  async export(request: NeuTableExportRequest<F>): Promise<NeuTableExportOutcome> {
+    const projection = projectNeuTableExport({
+      request,
+      dataMode: this.dataMode(),
+      data: this.presentedData(),
+      metadata: this.metadata(),
+      queryMatchesApplied: areNeuTableQuerySlicesEqual(
+        request.query,
+        this.query(),
+        this.sortOptions(),
+        this.filterOptions().equals,
+      ),
+      columns: this.visibleColumns(),
+      selection: this.selection(),
+      rowKey: this.rowKey(),
+      rowOptions: this.rowOptions(),
+      sortOptions: this.sortOptions(),
+      filterOptions: this.filterOptions(),
+      paginationOptions: this.paginationOptions(),
+      virtualizationOptions: this.virtualizationOptions(),
+    });
+    if (projection.kind === 'delegated') {
+      if (!this.destroyed) this.exportRequest.emit(request);
+      return { kind: 'delegated' };
+    }
+
+    try {
+      const serializer = await this.exportSerializerLoader(request.format);
+      const serialized = await serializer(createNeuTableExportMatrix(projection));
+      return {
+        kind: 'generated',
+        result: {
+          fileName: request.fileName,
+          mediaType: serialized.mediaType,
+          bytes: serialized.bytes,
+        },
+      };
+    } catch (cause) {
+      if (!this.destroyed) {
+        this.featureError.emit({ feature: 'export', cause, recoverable: true });
+      }
+      throw cause;
+    }
   }
 }

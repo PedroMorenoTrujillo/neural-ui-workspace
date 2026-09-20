@@ -362,7 +362,7 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     expect(pinned.map((row) => row.key)).toEqual([3, 2, 4, 1]);
   });
 
-  it('does not mutate deeply frozen inputs while focus activates and export remains deferred', async () => {
+  it('does not mutate deeply frozen inputs while focus activates and export generates', async () => {
     const rows = Object.freeze(baseRows.map((row) => Object.freeze({ ...row })));
     const columns = Object.freeze(baseColumns.map((column) => Object.freeze({ ...column })));
     const fixture = TestBed.createComponent(NeuTableNextHostComponent);
@@ -375,19 +375,18 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
 
     expect(table.focusCell({ key: 1, columnId: 'name' })).toBe(true);
     await table.scrollTo({ key: 1 });
-    let exportError: unknown;
-    try {
-      await table.export({
-        format: 'csv',
-        scope: 'loaded',
-        fileName: 'people.csv',
-        query: { page: 1, pageSize: 25, search: '', sort: [], filters: null },
-      });
-    } catch (error) {
-      exportError = error;
+    const outcome = await table.export({
+      format: 'csv',
+      scope: 'loaded',
+      fileName: 'people.csv',
+      query: { page: 1, pageSize: 25, search: '', sort: [], filters: null },
+    });
+    expect(outcome.kind).toBe('generated');
+    if (outcome.kind === 'generated') {
+      expect(outcome.result.fileName).toBe('people.csv');
+      expect(outcome.result.mediaType).toBe('text/csv;charset=utf-8');
+      expect(outcome.result.bytes.byteLength).toBeGreaterThan(0);
     }
-    expect(exportError).toBeInstanceOf(Error);
-    expect((exportError as Error).message).toMatch(/not implemented/i);
     expect(rows[0]?.name).toBe('Ada');
     expect(columns[0]?.header).toBe('Identifier');
   });

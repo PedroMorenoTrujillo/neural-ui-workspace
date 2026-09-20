@@ -69,7 +69,27 @@ test('keeps legacy runtimes absent and confines Signal Forms to the active edito
   assert.doesNotMatch(activeEditor, /ControlValueAccessor|NG_VALUE_ACCESSOR|@angular\/forms['"]/);
 });
 
-test('contains no symlink in the N2-011H candidate', () => {
+test('keeps export serializers behind three private command-path dynamic imports', () => {
+  const loader = readFileSync(
+    `${root}/internal/export/neu-table-export-loader.ts`,
+    'utf8',
+  );
+  const component = readFileSync(`${root}/public/neu-table.component-contract.ts`, 'utf8');
+  assert.equal((loader.match(/\bimport\s*\(/g) ?? []).length, 3);
+  for (const format of ['csv', 'json', 'xlsx']) {
+    assert.match(loader, new RegExp(`features/export/neu-table-${format}-export`));
+    assert.doesNotMatch(component, new RegExp(`neu-table-${format}-export`));
+  }
+  const serializers = files(`${root}/internal/features/export`)
+    .map((path) => readFileSync(path, 'utf8'))
+    .join('\n');
+  assert.doesNotMatch(
+    serializers,
+    /@angular|\bwindow\b|\bdocument\b|\bBlob\b|createObjectURL|SheetJS|ExcelJS/,
+  );
+});
+
+test('contains no symlink in the N2-011I candidate', () => {
   const visit = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const path = join(directory, entry.name);

@@ -1,0 +1,93 @@
+{
+  "checkpoint": "N2-011I",
+  "method": "Angular-compiled minified split ESM; initial static closure; per-format lazy closure; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "raw": 171897,
+      "gzip": 30044,
+      "brotli": 25271
+    },
+    "csvInitial": {
+      "raw": 171897,
+      "gzip": 30044,
+      "brotli": 25271
+    },
+    "jsonInitial": {
+      "raw": 171897,
+      "gzip": 30044,
+      "brotli": 25271
+    },
+    "xlsxInitial": {
+      "raw": 171897,
+      "gzip": 30044,
+      "brotli": 25271
+    },
+    "combinedInitial": {
+      "raw": 171897,
+      "gzip": 30044,
+      "brotli": 25271
+    },
+    "csvLazy": {
+      "raw": 584,
+      "gzip": 383,
+      "brotli": 338
+    },
+    "jsonLazy": {
+      "raw": 887,
+      "gzip": 469,
+      "brotli": 410
+    },
+    "xlsxLazy": {
+      "raw": 3964,
+      "gzip": 1422,
+      "brotli": 1278
+    },
+    "rootUnused": {
+      "raw": 0,
+      "gzip": 20,
+      "brotli": 1
+    }
+  },
+  "comparison": {
+    "interactionsHBasic": {
+      "raw": 168789,
+      "gzip": 29127,
+      "brotli": 24472
+    },
+    "exportIBasic": {
+      "raw": 171897,
+      "gzip": 30044,
+      "brotli": 25271
+    },
+    "basicGzipDelta": 917
+  },
+  "formatFiles": {
+    "csv": [
+      "out/neural-ui-core-table-next-neu-table-csv-export-CuNooDyP-HWMZFBKM.js"
+    ],
+    "json": [
+      "out/neural-ui-core-table-next-neu-table-json-export-DxhLBe72-2M5MW5YN.js"
+    ],
+    "xlsx": [
+      "out/neural-ui-core-table-next-neu-table-xlsx-export-B4bugFc_-EIJZVML6.js"
+    ]
+  },
+  "packageImports": [
+    "./<private-feature-chunk>"
+  ],
+  "forbiddenGraphTokens": [],
+  "classification": {
+    "core": [
+      "export command plumbing",
+      "scope projection and remote delegation"
+    ],
+    "privateChunks": [
+      "CSV serializer",
+      "JSON serializer",
+      "XLSX serializer"
+    ],
+    "notWorthSplitting": [
+      "small shared export projection"
+    ]
+  }
+}

@@ -12,6 +12,10 @@ const browser = await chromium.launch({
 });
 const page = await browser.newPage();
 const errors = [];
+const javascriptRequests = [];
+page.on('request', (request) => {
+  if (new URL(request.url()).pathname.endsWith('.js')) javascriptRequests.push(request.url());
+});
 page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
 page.on('console', (message) => {
   if (['error', 'warning'].includes(message.type())) {
@@ -36,6 +40,7 @@ try {
   assert.equal(await page.locator('#n2-virtual-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-virtual-ranges').textContent(), '[]');
   assert.equal(await page.locator('#n2-h-events').textContent(), '[]');
+  assert.equal(await page.locator('#n2-export-state').textContent(), 'idle');
   assert.equal(await page.locator('#n2-table-h #n2-h-editor').count(), 1);
   assert.equal(await page.locator('#n2-table-h .neu-table2__detail-row').count(), 1);
   assert.equal(await page.locator('#n2-table-h .neu-table2__group-row').count(), 2);
@@ -243,6 +248,14 @@ try {
     ),
     await page.evaluate(() => window.__n2TableIds),
   );
+  assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
+  const initialJavascriptRequests = javascriptRequests.length;
+  await page.locator('#n2-export').click();
+  await page.waitForFunction(
+    () => document.querySelector('#n2-export-state')?.textContent?.startsWith('generated:1:'),
+  );
+  assert.equal(await page.locator('#n2-export-state').textContent().then((value) => value?.startsWith('generated:1:')), true);
+  assert.equal(javascriptRequests.length, initialJavascriptRequests + 1);
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
   await page.locator('#n2-h-query').click();
   await page.waitForFunction(
