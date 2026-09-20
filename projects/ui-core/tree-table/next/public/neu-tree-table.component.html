@@ -1,5 +1,6 @@
 <neu-tree-table-private-renderer
-  [rows]="projection().visible"
+  [projection]="projection()"
+  [expandedKeys]="expandedKeys()"
   [columns]="visibleColumns()"
   [layout]="layout()"
   [hierarchyOptions]="hierarchyOptions()"
@@ -19,4 +20,5 @@
   [headerTemplates]="headerTemplates()"
   [cellTemplates]="cellTemplates()"
   [footerTemplates]="footerTemplates()"
+  (expandedKeysProposal)="onExpandedKeysProposal($event)"
 />

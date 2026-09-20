@@ -9,6 +9,8 @@ import {
   NeuTreeTableNodeDirective,
   type NeuTreeLoadedRelation,
   type NeuTreeTableColumn,
+  type NeuTreeTableExpandedKeysChange,
+  type NeuTreeTableFeatureError,
   type NeuTreeTableHierarchy,
 } from './ui-core/tree-table/next/public/public-api';
 
@@ -62,7 +64,11 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
   template: `
     <output id="n2-tree-ready">{{ ready() }}</output>
     <output id="n2-tree-events">{{ events() }}</output>
+    <output id="n2-tree-diagnostic-events">{{ diagnosticEvents() }}</output>
     <button id="n2-tree-parent-write" type="button" (click)="reconstruct()">Parent write</button>
+    <button id="n2-tree-accept" type="button" (click)="acceptExpansion.set(true)">Accept</button>
+    <button id="n2-tree-empty-write" type="button" (click)="emptyWrite()">Empty</button>
+    <button id="n2-tree-restore-write" type="button" (click)="restoreWrite()">Restore</button>
 
     <section id="n2-tree-primary">
       <neu-tree-table
@@ -73,7 +79,7 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
         [expandedKeys]="expandedKeys()"
         [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
         (queryChange)="record('queryChange')"
-        (expandedKeysChange)="record('expandedKeysChange')"
+        (expandedKeysChange)="recordExpansion($event)"
         (selectionChange)="record('selectionChange')"
         (layoutChange)="record('layoutChange')"
         (editStateChange)="record('editStateChange')"
@@ -121,6 +127,27 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
       </neu-tree-table>
     </section>
 
+    <section id="n2-tree-unloaded">
+      <neu-tree-table
+        [data]="unloadedData"
+        [hierarchy]="unloadedHierarchy"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
+      />
+    </section>
+
+    <section id="n2-tree-invalid">
+      <neu-tree-table
+        [data]="unloadedData"
+        [hierarchy]="unloadedHierarchy"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [hierarchyOptions]="{ treeColumnId: 'missing', indentSize: 18 }"
+        (featureError)="recordDiagnostic($event)"
+      />
+    </section>
+
     <section id="n2-tree-error">
       <neu-tree-table
         [data]="[]"
@@ -137,11 +164,14 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
 export class N2TreeTableHydrationComponent {
   readonly ready = signal(false);
   readonly events = signal('[]');
+  readonly diagnosticEvents = signal('[]');
   readonly data = signal(rows);
   readonly appliedHierarchy = signal(hierarchy);
   readonly appliedColumns = signal(columns);
   readonly expandedKeys = signal<readonly string[]>(['a']);
+  readonly acceptExpansion = signal(false);
   readonly columns = columns;
+  readonly unloadedData = [rows[0]!];
   readonly rowKey = (row: Row) => row.id;
   readonly emptyHierarchy: NeuTreeTableHierarchy<string> = {
     ...hierarchy,
@@ -157,6 +187,11 @@ export class N2TreeTableHydrationComponent {
       appliedRequestId: 1,
       total: null,
     },
+    children: [],
+  };
+  readonly unloadedHierarchy: NeuTreeTableHierarchy<string> = {
+    ...hierarchy,
+    roots: loaded(['a']),
     children: [],
   };
   readonly errorHierarchy: NeuTreeTableHierarchy<string> = {
@@ -181,6 +216,17 @@ export class N2TreeTableHydrationComponent {
     this.events.set(JSON.stringify([...current, name]));
   }
 
+  recordExpansion(change: NeuTreeTableExpandedKeysChange<string>): void {
+    this.record(`expandedKeysChange:${change.source}:${change.changedKey}`);
+    if (this.acceptExpansion()) this.expandedKeys.set(change.next);
+  }
+
+  recordDiagnostic(error: NeuTreeTableFeatureError): void {
+    const code = error.feature === 'hierarchy' ? error.code : error.feature;
+    const current = JSON.parse(this.diagnosticEvents()) as string[];
+    this.diagnosticEvents.set(JSON.stringify([...current, code]));
+  }
+
   reconstruct(): void {
     this.data.set(rows.map((row) => ({ ...row })));
     this.appliedColumns.set([...columns]);
@@ -192,6 +238,23 @@ export class N2TreeTableHydrationComponent {
         ...entry,
         relation: { ...entry.relation, keys: [...entry.relation.keys] },
       })),
+    });
+    this.expandedKeys.set(['a']);
+  }
+
+  emptyWrite(): void {
+    this.data.set([]);
+    this.appliedHierarchy.set({
+      ...this.emptyHierarchy,
+      hierarchyRevision: this.appliedHierarchy().hierarchyRevision + 1,
+    });
+  }
+
+  restoreWrite(): void {
+    this.data.set(rows.map((row) => ({ ...row })));
+    this.appliedHierarchy.set({
+      ...hierarchy,
+      hierarchyRevision: this.appliedHierarchy().hierarchyRevision + 1,
     });
     this.expandedKeys.set(['a']);
   }

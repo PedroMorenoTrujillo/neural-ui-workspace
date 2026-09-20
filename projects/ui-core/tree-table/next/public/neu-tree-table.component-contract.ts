@@ -3,10 +3,13 @@ import {
   Component,
   computed,
   contentChildren,
+  effect,
   inject,
   input,
   output,
   PLATFORM_ID,
+  untracked,
+  viewChild,
   type InputSignal,
   type OutputEmitterRef,
   type TemplateRef,
@@ -129,6 +132,7 @@ function templateMap<C>(
 export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, F extends string> {
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   private lastDiagnosticSnapshot = '';
+  private readonly renderer = viewChild(NeuTreeTableRendererComponent<T, K, F>);
 
   readonly dataMode: InputSignal<NeuTreeTableDataMode> = input<NeuTreeTableDataMode>('client');
   readonly data: InputSignal<readonly T[]> = input<readonly T[]>([]);
@@ -337,24 +341,29 @@ export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, 
     }
     return diagnostics;
   });
-
-  protected ngDoCheck(): void {
+  private readonly hierarchyDiagnosticEffect = effect(() => {
     const diagnostics = this.hierarchyDiagnostics();
     const snapshot = [
       this.hierarchy().hierarchyRevision,
       this.hierarchy().queryRevision,
       ...diagnostics.map((diagnostic) => diagnostic.fingerprint),
     ].join(';');
-    if (snapshot === this.lastDiagnosticSnapshot) return;
-    this.lastDiagnosticSnapshot = snapshot;
-    if (!this.browser) return;
-    for (const diagnostic of diagnostics) {
-      this.featureError.emit({
-        feature: 'hierarchy',
-        code: diagnostic.code,
-        error: diagnostic.error,
-      });
-    }
+    untracked(() => {
+      if (snapshot === this.lastDiagnosticSnapshot) return;
+      this.lastDiagnosticSnapshot = snapshot;
+      if (!this.browser) return;
+      for (const diagnostic of diagnostics) {
+        this.featureError.emit({
+          feature: 'hierarchy',
+          code: diagnostic.code,
+          error: diagnostic.error,
+        });
+      }
+    });
+  });
+
+  protected onExpandedKeysProposal(change: NeuTreeTableExpandedKeysChange<K>): void {
+    this.expandedKeysChange.emit(change);
   }
 
   scrollTo(target: NeuTreeTableScrollTarget<K>): void {
@@ -362,7 +371,7 @@ export class NeuTreeTableComponent<T extends object, K extends NeuTreeTableKey, 
   }
 
   focus(target: NeuTreeTableFocusTarget<K>): void {
-    void target;
+    this.renderer()?.focusTarget(target);
   }
 
   retryData(target: NeuTreeTableRetryTarget<K>): void {

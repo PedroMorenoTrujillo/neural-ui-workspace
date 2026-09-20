@@ -302,7 +302,9 @@ Hierarchy Left/Right is logical and RTL-aware. Navigation handlers ignore events
 
 ## 42. Focus
 
-Una sola row tiene `tabindex=0`; las demás `-1`. Focus identity es K. Collapse con focused descendant devuelve focus al collapsing ancestor; removal usa nearest visible ancestor, luego next/previous, luego container. Virtual unmount conserva focus token y restaura afterNextRender si vuelve a window. Remote child load no mueve focus automáticamente.
+Una sola row tiene `tabindex=0`; las demás `-1`. Sin focused K previo, la primera fila visible es el roving target, pero el render inicial nunca llama `focus()`. Sin filas visibles, el treegrid/container tiene `tabindex=0`; con filas tiene `-1`. Empty → non-empty solo transfiere foco a la primera fila mediante un `afterNextRender` acotado cuando el foco DOM estaba realmente en el container; non-empty → empty devuelve foco al container únicamente si el foco estaba dentro del árbol.
+
+Focus identity es K. Collapse con focused descendant devuelve focus al collapsing ancestor. Si focused K desaparece, el fallback exacto es: nearest surviving visible ancestor; fila en el mismo old flattened index (next); previous visible row; container. Reconstructed/reordered T con la misma K conserva el target semántico. Virtual unmount conserva focus token y restaura `afterNextRender` si vuelve a window. Remote child load no mueve focus automáticamente.
 
 No per-row listener ni O(n²) DOM scan.
 

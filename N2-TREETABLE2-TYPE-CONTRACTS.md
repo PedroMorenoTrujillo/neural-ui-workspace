@@ -583,6 +583,7 @@ export declare class NeuTreeTableComponent<
 - selection desactivada; virtualización desactivada; editing desactivado.
 - `hierarchyOptions.treeColumnId` es required y `indentSize=18`.
 - navegación por fila, sin wrap, announcements desactivados y context-menu action desactivada.
+- roving focus inicial: primera visible con `tabindex=0` sin auto-focus; treegrid `tabindex=0` solo cuando no hay filas. Removal fallback: ancestor visible → same old index/next → previous → container.
 - `exportOptions.formats=[]`; export no se carga si no se invoca.
 
 ## Invariantes públicos

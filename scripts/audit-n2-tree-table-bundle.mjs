@@ -15,8 +15,10 @@ import { build } from 'esbuild';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const update = process.argv.includes('--update');
-const artifactPath = join(root, 'baselines/n2-tree-table/hierarchy-b-bundle.json');
-const graphPath = join(root, 'baselines/n2-tree-table/hierarchy-b-dependency-graph.json');
+const checkpoint = process.argv.includes('--checkpoint=N2-015C') ? 'N2-015C' : 'N2-015B';
+const artifactStem = checkpoint === 'N2-015C' ? 'expansion-c' : 'hierarchy-b';
+const artifactPath = join(root, `baselines/n2-tree-table/${artifactStem}-bundle.json`);
+const graphPath = join(root, `baselines/n2-tree-table/${artifactStem}-dependency-graph.json`);
 const temporary = mkdtempSync(join(root, '.n2-tree-table-bundle-'));
 const external = ['@angular/*', 'rxjs', 'rxjs/*'];
 
@@ -130,9 +132,19 @@ try {
   const rendererSource = join(entrypoint, 'internal/renderer/neu-tree-table-renderer.component.ts');
   writeFileSync(
     rendererSource,
-    readFileSync(rendererSource, 'utf8').replace(
-      '../../../../internal/neu-field-value-resolver',
-      '../../shared/neu-field-value-resolver',
+    readFileSync(rendererSource, 'utf8')
+      .replace(
+        '../../../../internal/neu-field-value-resolver',
+        '../../shared/neu-field-value-resolver',
+      )
+      .replace('../../../../internal/neu-exact-key', '../../shared/neu-exact-key'),
+  );
+  const interactionSource = join(entrypoint, 'internal/interaction/neu-tree-table-interaction.ts');
+  writeFileSync(
+    interactionSource,
+    readFileSync(interactionSource, 'utf8').replace(
+      '../../../../internal/neu-exact-key',
+      '../../shared/neu-exact-key',
     ),
   );
   writeFileSync(join(entrypoint, 'public_api.ts'), "export * from './public/public-api';\n");
@@ -150,6 +162,12 @@ try {
   const packageRoot = join(temporary, 'dist/neural-ui/core');
   const consumers = {
     basic: await packageConsumer(packageRoot, basic),
+    ...(checkpoint === 'N2-015C'
+      ? {
+          'expansion-interaction': await packageConsumer(packageRoot, basic),
+          'keyboard-focus': await packageConsumer(packageRoot, basic),
+        }
+      : {}),
     templates: await packageConsumer(packageRoot, templates),
     nested: await packageConsumer(packageRoot, basic),
     'root-unused': await packageConsumer(
@@ -158,7 +176,7 @@ try {
     ),
   };
   const graph = {
-    checkpoint: 'N2-015B',
+    checkpoint,
     basic: await sourceGraph(sourceBasic),
     templates: await sourceGraph(sourceTemplates),
   };
@@ -183,7 +201,7 @@ try {
     ),
   ].sort();
   const artifact = {
-    checkpoint: 'N2-015B',
+    checkpoint,
     legacyReference: { raw: 120_496, gzip: 18_411 },
     method: 'Angular-compiled minified ESM; Angular external; gzip 9; Brotli 11',
     consumers,
@@ -206,18 +224,18 @@ try {
     console.log(`Updated ${graphPath}`);
   } else {
     if (!existsSync(artifactPath) || !existsSync(graphPath)) {
-      throw new Error('N2-015B bundle artifacts missing; run with --update.');
+      throw new Error(`${checkpoint} bundle artifacts missing; run with --update.`);
     }
     const stored = JSON.parse(readFileSync(artifactPath, 'utf8'));
     const storedGraph = JSON.parse(readFileSync(graphPath, 'utf8'));
     if (JSON.stringify(stored) !== JSON.stringify(artifact)) {
-      throw new Error('N2-015B bundle artifact drifted.');
+      throw new Error(`${checkpoint} bundle artifact drifted.`);
     }
     if (JSON.stringify(storedGraph) !== JSON.stringify(graph)) {
-      throw new Error('N2-015B dependency graph drifted.');
+      throw new Error(`${checkpoint} dependency graph drifted.`);
     }
     console.log(
-      `N2-015B bundle passed (basic ${artifact.consumers.basic.size.gzip} B gzip; templates ${artifact.consumers.templates.size.gzip} B gzip; root-unused 0 B).`,
+      `${checkpoint} bundle passed (basic ${artifact.consumers.basic.size.gzip} B gzip; templates ${artifact.consumers.templates.size.gzip} B gzip; root-unused 0 B).`,
     );
   }
 } finally {

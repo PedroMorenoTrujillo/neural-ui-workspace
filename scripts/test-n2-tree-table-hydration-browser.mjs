@@ -31,8 +31,16 @@ try {
   await page.locator('#n2-tree-primary table').waitFor({ state: 'attached' });
   assert.equal(await page.locator('#n2-tree-ready').textContent(), 'false');
   assert.equal(await page.locator('#n2-tree-events').textContent(), '[]');
+  assert.equal(await page.locator('#n2-tree-diagnostic-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('role'), 'treegrid');
+  assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '-1');
   assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
+  assert.deepEqual(
+    await page
+      .locator('#n2-tree-primary tr[data-node-key]')
+      .evaluateAll((rows) => rows.map((row) => row.getAttribute('tabindex'))),
+    ['0', '-1', '-1'],
+  );
   assert.equal(
     await page.locator('#n2-tree-primary tr[data-node-key="string:a"]').getAttribute('aria-level'),
     '1',
@@ -44,6 +52,12 @@ try {
   assert.match(await page.locator('#n2-tree-empty').textContent(), /SSR empty tree/);
   assert.match(await page.locator('#n2-tree-loading').textContent(), /SSR loading tree/);
   assert.match(await page.locator('#n2-tree-error').textContent(), /SSR error tree/);
+  assert.equal(
+    await page
+      .locator('#n2-tree-unloaded button.neu-tree-table2__expander')
+      .getAttribute('aria-expanded'),
+    'false',
+  );
   await page.evaluate(() => {
     window.__n2TreeNodes = [
       document.querySelector('#n2-tree-primary table'),
@@ -55,6 +69,11 @@ try {
   release();
   await page.waitForFunction(
     () => document.querySelector('#n2-tree-ready')?.textContent === 'true',
+  );
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-tree-diagnostic-events')?.textContent ===
+      '["invalid-tree-column"]',
   );
   assert.deepEqual(
     await page.evaluate(() => {
@@ -71,13 +90,91 @@ try {
     [true, true, true, true],
   );
   assert.equal(await page.locator('#n2-tree-events').textContent(), '[]');
+  assert.equal(
+    await page.locator('#n2-tree-diagnostic-events').textContent(),
+    '["invalid-tree-column"]',
+  );
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector('#n2-tree-primary')?.contains(document.activeElement),
+    ),
+    false,
+  );
   await page.locator('#n2-tree-parent-write').click();
   await page.waitForTimeout(50);
   assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
   assert.equal(await page.locator('#n2-tree-events').textContent(), '[]');
+
+  const expander = page.locator(
+    '#n2-tree-primary tr[data-node-key="string:a"] button.neu-tree-table2__expander',
+  );
+  await expander.click();
+  await page.waitForTimeout(20);
+  assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
+  assert.equal(
+    await page.locator('#n2-tree-events').textContent(),
+    '["expandedKeysChange:toggle:a"]',
+  );
+
+  await page.locator('#n2-tree-accept').click();
+  await expander.click();
+  await page.waitForTimeout(20);
+  assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 2);
+  assert.equal(
+    await page.locator('#n2-tree-events').textContent(),
+    '["expandedKeysChange:toggle:a","expandedKeysChange:toggle:a"]',
+  );
+
+  const rootRow = page.locator('#n2-tree-primary tr[data-node-key="string:a"]');
+  await rootRow.focus();
+  await rootRow.press('ArrowRight');
+  await page.waitForTimeout(20);
+  assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
+  assert.equal(
+    await page.locator('#n2-tree-events').textContent(),
+    '["expandedKeysChange:toggle:a","expandedKeysChange:toggle:a","expandedKeysChange:keyboard:a"]',
+  );
+  await rootRow.press('ArrowRight');
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.getAttribute('data-node-key')),
+    'string:b',
+  );
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.getAttribute('data-node-key')),
+    'string:a',
+  );
+
+  await page.evaluate(() =>
+    document
+      .querySelector('#n2-tree-empty-write')
+      ?.dispatchEvent(new MouseEvent('click', { bubbles: true })),
+  );
+  await page.waitForTimeout(20);
+  assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 0);
+  assert.equal(
+    await page.evaluate(
+      () => document.activeElement === document.querySelector('#n2-tree-primary table'),
+    ),
+    true,
+  );
+  assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '0');
+  await page.evaluate(() =>
+    document
+      .querySelector('#n2-tree-restore-write')
+      ?.dispatchEvent(new MouseEvent('click', { bubbles: true })),
+  );
+  await page.waitForTimeout(20);
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.getAttribute('data-node-key')),
+    'string:a',
+  );
+  assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '-1');
   assert.equal(errors.filter((error) => /NG050\d/.test(error)).length, 0);
   assert.deepEqual(errors, []);
-  console.log('N2-015B real Chromium hydration passed (DOM reused, 0 NG050x, 0 outputs).');
+  console.log(
+    'N2-015C real Chromium hydration passed (DOM reused, controlled expansion exactly once, deterministic focus transitions, 0 NG050x, 0 requests).',
+  );
 } finally {
   release?.();
   await browser.close();

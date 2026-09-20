@@ -12,7 +12,12 @@
   [class.neu-tree-table2__viewport--striped]="appearance().striped"
   [class.neu-tree-table2__viewport--sticky-header]="appearance().stickyHeader"
 >
-  <table class="neu-tree-table2__table" role="treegrid" [attr.aria-label]="labels().ariaLabel">
+  <table
+    class="neu-tree-table2__table"
+    role="treegrid"
+    [attr.aria-label]="labels().ariaLabel"
+    [attr.tabindex]="containerTabIndex()"
+  >
     @if (captionTemplate(); as template) {
       <caption>
         <ng-container [ngTemplateOutlet]="template" />
@@ -44,7 +49,11 @@
       </tr>
     </thead>
 
-    <tbody>
+    <tbody
+      (focusin)="onBodyFocus($event)"
+      (click)="onBodyClick($event)"
+      (keydown)="onBodyKeydown($event)"
+    >
       @if (rows().length === 0 && rootStatus() === 'loading') {
         <tr role="row" class="neu-tree-table2__state-row" data-state="loading">
           <td role="gridcell" [attr.colspan]="columnCount()">
@@ -85,10 +94,10 @@
         @for (node of rows(); track node.token) {
           <tr
             role="row"
-            [id]="rowId(node)"
             [class]="rowClass(node)"
             [attr.data-node-key]="node.token"
             [attr.data-logical-index]="node.logicalVisibleIndex"
+            [attr.tabindex]="node.token === rovingToken() ? 0 : -1"
             [attr.aria-level]="node.depth + 1"
             [attr.aria-expanded]="node.expandable ? node.expanded : null"
             [attr.aria-posinset]="node.siblingIndex + 1"
@@ -109,9 +118,15 @@
                     [style.padding-inline-start.px]="node.depth * hierarchyOptions().indentSize"
                   >
                     @if (node.expandable) {
-                      <span class="neu-tree-table2__expander" aria-hidden="true">
-                        {{ node.expanded ? '−' : '+' }}
-                      </span>
+                      <button
+                        type="button"
+                        class="neu-tree-table2__expander"
+                        tabindex="-1"
+                        [attr.aria-label]="node.expanded ? labels().collapse : labels().expand"
+                        [attr.aria-expanded]="node.expanded"
+                      >
+                        <span aria-hidden="true">{{ node.expanded ? '−' : '+' }}</span>
+                      </button>
                     }
                     <span class="neu-tree-table2__node-content">
                       @if (nodeTemplate(); as template) {

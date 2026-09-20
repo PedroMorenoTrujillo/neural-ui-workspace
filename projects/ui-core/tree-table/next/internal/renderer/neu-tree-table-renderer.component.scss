@@ -26,7 +26,17 @@
 }
 
 .neu-tree-table2__expander {
+  display: inline-grid;
+  place-items: center;
   inline-size: 1rem;
+  block-size: 1rem;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
   flex: 0 0 1rem;
   text-align: center;
 }

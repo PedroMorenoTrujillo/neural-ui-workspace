@@ -13,6 +13,7 @@ import {
 import type {
   NeuTreeLoadedRelation,
   NeuTreeTableColumn,
+  NeuTreeTableExpandedKeysChange,
   NeuTreeTableFeatureError,
   NeuTreeTableHierarchy,
   NeuTreeTableLayoutState,
@@ -72,29 +73,32 @@ const emptyLayout: NeuTreeTableLayoutState = {
     NeuTreeTableErrorDirective,
   ],
   template: `
-    <neu-tree-table
-      [data]="rows()"
-      [hierarchy]="hierarchy()"
-      [columns]="columns()"
-      [rowKey]="rowKey"
-      [expandedKeys]="expanded()"
-      [layout]="layout()"
-      [hierarchyOptions]="{ treeColumnId: treeColumnId(), indentSize: 18 }"
-      (featureError)="recordError($event)"
-    >
-      <ng-template neuTreeTableHeader="name" let-column="column">
-        Tree {{ column.header }}
-      </ng-template>
-      <ng-template neuTreeTableNode let-row let-depth="depth">
-        {{ depth }}:{{ row.name }}
-      </ng-template>
-      <ng-template neuTreeTableCell="value" let-row let-index="logicalIndex">
-        {{ index }}={{ row.value }}
-      </ng-template>
-      <ng-template neuTreeTableEmpty>Custom empty</ng-template>
-      <ng-template neuTreeTableLoading>Custom loading</ng-template>
-      <ng-template neuTreeTableError>Custom error</ng-template>
-    </neu-tree-table>
+    <div [attr.dir]="direction()">
+      <neu-tree-table
+        [data]="rows()"
+        [hierarchy]="hierarchy()"
+        [columns]="columns()"
+        [rowKey]="rowKey"
+        [expandedKeys]="expanded()"
+        [layout]="layout()"
+        [hierarchyOptions]="{ treeColumnId: treeColumnId(), indentSize: 18 }"
+        (expandedKeysChange)="recordExpansion($event)"
+        (featureError)="recordError($event)"
+      >
+        <ng-template neuTreeTableHeader="name" let-column="column">
+          Tree {{ column.header }}
+        </ng-template>
+        <ng-template neuTreeTableNode let-row let-depth="depth">
+          {{ depth }}:{{ row.name }}
+        </ng-template>
+        <ng-template neuTreeTableCell="value" let-row let-index="logicalIndex">
+          {{ index }}={{ row.value }}
+        </ng-template>
+        <ng-template neuTreeTableEmpty>Custom empty</ng-template>
+        <ng-template neuTreeTableLoading>Custom loading</ng-template>
+        <ng-template neuTreeTableError>Custom error</ng-template>
+      </neu-tree-table>
+    </div>
   `,
 })
 class HostComponent {
@@ -104,12 +108,36 @@ class HostComponent {
   readonly expanded = signal<readonly string[]>(['a']);
   readonly layout = signal(emptyLayout);
   readonly treeColumnId = signal('name');
+  readonly direction = signal<'ltr' | 'rtl'>('ltr');
+  readonly acceptExpansion = signal(false);
+  readonly expansionChanges = signal<readonly NeuTreeTableExpandedKeysChange<string>[]>([]);
   readonly errors = signal<readonly NeuTreeTableFeatureError[]>([]);
   readonly rowKey = (row: Row) => row.id;
 
   recordError(error: NeuTreeTableFeatureError): void {
     this.errors.update((errors) => [...errors, error]);
   }
+
+  recordExpansion(change: NeuTreeTableExpandedKeysChange<string>): void {
+    this.expansionChanges.update((changes) => [...changes, change]);
+    if (this.acceptExpansion()) this.expanded.set(change.next);
+  }
+}
+
+function row(native: HTMLElement, token: string): HTMLTableRowElement {
+  const match = [...native.querySelectorAll<HTMLTableRowElement>('tr[data-node-key]')].find(
+    (candidate) => candidate.dataset['nodeKey'] === token,
+  );
+  if (!match) throw new Error(`Missing row ${token}`);
+  return match;
+}
+
+function press(target: HTMLElement, key: string): void {
+  target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+}
+
+function activeToken(): string | undefined {
+  return (document.activeElement as HTMLElement | null)?.dataset['nodeKey'];
 }
 
 describe('NeuTreeTable 2 private renderer and facade', () => {
@@ -156,7 +184,15 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
       'tr[data-node-key="string:b"] .neu-tree-table2__tree-cell',
     );
     expect(treeCell?.style.paddingInlineStart).toBe('18px');
-    expect(native.querySelectorAll('tbody tr[tabindex]')).toHaveLength(0);
+    expect(table?.getAttribute('tabindex')).toBe('-1');
+    expect(
+      [...native.querySelectorAll('tbody tr[tabindex]')].map((candidate) =>
+        candidate.getAttribute('tabindex'),
+      ),
+    ).toEqual(['0', '-1', '-1']);
+    const expander = root?.querySelector('button.neu-tree-table2__expander');
+    expect(expander?.getAttribute('aria-label')).toBe('Collapse node');
+    expect(expander?.getAttribute('aria-expanded')).toBe('true');
   });
 
   it('reacts to parent replacements without emitting controlled outputs', async () => {
@@ -216,6 +252,214 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     subscriptions.forEach((subscription) => subscription.unsubscribe());
   });
 
+  it('proposes pointer expansion exactly once and waits for controlled acceptance', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.expanded.set([]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const expander = row(native, 'string:a').querySelector<HTMLButtonElement>(
+      'button.neu-tree-table2__expander',
+    )!;
+
+    expander.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.expansionChanges()).toEqual([{ next: ['a'], source: 'toggle', changedKey: 'a' }]);
+    expect(native.querySelectorAll('tbody tr[data-node-key]')).toHaveLength(2);
+    expect(row(native, 'string:a').getAttribute('aria-expanded')).toBe('false');
+
+    host.acceptExpansion.set(true);
+    expander.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.expansionChanges()).toHaveLength(2);
+    expect(host.expanded()).toEqual(['a']);
+    expect(native.querySelectorAll('tbody tr[data-node-key]')).toHaveLength(3);
+    expect(row(native, 'string:a').getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('implements LTR row-focused treegrid navigation without stealing initial focus', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const native = fixture.nativeElement as HTMLElement;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(native.contains(document.activeElement)).toBe(false);
+
+    row(native, 'string:a').focus();
+    press(row(native, 'string:a'), 'ArrowDown');
+    expect(activeToken()).toBe('string:b');
+    press(row(native, 'string:b'), 'ArrowDown');
+    expect(activeToken()).toBe('string:c');
+    press(row(native, 'string:c'), 'ArrowUp');
+    expect(activeToken()).toBe('string:b');
+    press(row(native, 'string:b'), 'Home');
+    expect(activeToken()).toBe('string:a');
+    press(row(native, 'string:a'), 'End');
+    expect(activeToken()).toBe('string:c');
+    press(row(native, 'string:c'), 'ArrowRight');
+    expect(activeToken()).toBe('string:c');
+    const proposalsBeforeReservedKeys = fixture.componentInstance.expansionChanges().length;
+    press(row(native, 'string:c'), 'Enter');
+    press(row(native, 'string:c'), ' ');
+    expect(activeToken()).toBe('string:c');
+    expect(fixture.componentInstance.expansionChanges()).toHaveLength(proposalsBeforeReservedKeys);
+
+    row(native, 'string:a').focus();
+    press(row(native, 'string:a'), 'ArrowRight');
+    expect(activeToken()).toBe('string:b');
+    press(row(native, 'string:b'), 'ArrowLeft');
+    expect(activeToken()).toBe('string:a');
+
+    const before = fixture.componentInstance.expansionChanges().length;
+    press(row(native, 'string:a').querySelector('button')!, 'ArrowLeft');
+    expect(fixture.componentInstance.expansionChanges()).toHaveLength(before);
+  });
+
+  it('maps physical arrows in RTL and preserves the controlled rejection boundary', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.direction.set('rtl');
+    host.expanded.set([]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const a = row(native, 'string:a');
+    a.focus();
+    press(a, 'ArrowLeft');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.expansionChanges()).toEqual([{ next: ['a'], source: 'keyboard', changedKey: 'a' }]);
+    expect(a.getAttribute('aria-expanded')).toBe('false');
+
+    host.acceptExpansion.set(true);
+    press(a, 'ArrowLeft');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.expanded()).toEqual(['a']);
+    expect(activeToken()).toBe('string:a');
+    press(row(native, 'string:a'), 'ArrowLeft');
+    expect(activeToken()).toBe('string:b');
+    press(row(native, 'string:b'), 'ArrowRight');
+    expect(activeToken()).toBe('string:a');
+  });
+
+  it('reconciles focus deterministically across collapse, removal, empty and restore writes', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+
+    row(native, 'string:b').focus();
+    host.expanded.set([]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:a');
+
+    host.rows.set(rows);
+    host.hierarchy.set({
+      ...initialHierarchy,
+      hierarchyRevision: 2,
+      roots: loaded(['a', 'b', 'c']),
+      children: [
+        { parentKey: 'a', relation: loaded([]) },
+        { parentKey: 'b', relation: loaded([]) },
+        { parentKey: 'c', relation: loaded([]) },
+      ],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    row(native, 'string:b').focus();
+    host.rows.set(rows.map((value) => ({ ...value })));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:b');
+    host.rows.set([rows[0]!, rows[2]!]);
+    host.hierarchy.set({
+      ...host.hierarchy(),
+      hierarchyRevision: 3,
+      roots: loaded(['a', 'c']),
+      children: [
+        { parentKey: 'a', relation: loaded([]) },
+        { parentKey: 'c', relation: loaded([]) },
+      ],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:c');
+
+    host.rows.set([]);
+    host.hierarchy.set({
+      ...host.hierarchy(),
+      hierarchyRevision: 4,
+      roots: loaded([]),
+      children: [],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = native.querySelector<HTMLTableElement>('table[role="treegrid"]')!;
+    expect(document.activeElement).toBe(table);
+    expect(table.tabIndex).toBe(0);
+
+    host.rows.set(rows);
+    host.hierarchy.set({ ...initialHierarchy, hierarchyRevision: 5 });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:a');
+    expect(table.tabIndex).toBe(-1);
+  });
+
+  it('proposes unloaded expansion without creating a remote request and cleans pending focus', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.rows.set([rows[0]!]);
+    host.expanded.set([]);
+    host.hierarchy.set({
+      hierarchyRevision: 2,
+      queryRevision: 0,
+      roots: loaded(['a']),
+      children: [],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = fixture.debugElement.query(By.directive(NeuTreeTableComponent))
+      .componentInstance as NeuTreeTableComponent<Row, string, Field>;
+    let requests = 0;
+    const subscription = table.dataRequest.subscribe(() => (requests += 1));
+    const native = fixture.nativeElement as HTMLElement;
+    row(native, 'string:a').focus();
+    press(row(native, 'string:a'), 'ArrowRight');
+    fixture.detectChanges();
+    expect(host.expansionChanges()).toEqual([{ next: ['a'], source: 'keyboard', changedKey: 'a' }]);
+    expect(requests).toBe(0);
+
+    host.rows.set([]);
+    host.hierarchy.set({
+      ...host.hierarchy(),
+      hierarchyRevision: 3,
+      roots: loaded([]),
+    });
+    fixture.detectChanges();
+    expect(() => fixture.destroy()).not.toThrow();
+    subscription.unsubscribe();
+  });
+
+  it('does not steal focus for parent writes when focus is outside the treegrid', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    outside.focus();
+    fixture.componentInstance.expanded.set([]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(outside);
+    outside.remove();
+  });
+
   it('deduplicates invalid tree-column hierarchy errors and never chooses a fallback column', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     const host = fixture.componentInstance;
@@ -232,6 +476,14 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     const native = fixture.nativeElement as HTMLElement;
     expect(native.querySelectorAll('.neu-tree-table2__tree-cell')).toHaveLength(0);
     expect(native.querySelectorAll('tbody tr[data-node-key]')).toHaveLength(3);
+
+    host.treeColumnId.set('name');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    host.treeColumnId.set('missing');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.errors()).toHaveLength(2);
   });
 
   it('maps a stable malformed hierarchy diagnostic to featureError exactly once', async () => {
@@ -265,6 +517,9 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('[data-state="empty"]')?.textContent,
     ).toContain('Custom empty');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLTableElement>('table')?.tabIndex,
+    ).toBe(0);
 
     host.hierarchy.set({
       ...initialHierarchy,
@@ -282,6 +537,9 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('[data-state="loading"]')?.textContent,
     ).toContain('Custom loading');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr[tabindex]'),
+    ).toHaveLength(0);
 
     host.hierarchy.set({
       ...initialHierarchy,
@@ -300,5 +558,8 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('[data-state="error"]')?.textContent,
     ).toContain('Custom error');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLTableElement>('table')?.tabIndex,
+    ).toBe(0);
   });
 });

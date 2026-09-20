@@ -28,9 +28,43 @@ const forbiddenImports = [
 ];
 const violations = [];
 let effects = 0;
+let renderEffects = 0;
+const signalFirstCounts = {
+  inputDecorators: 0,
+  outputDecorators: 0,
+  eventEmitters: 0,
+  models: 0,
+  lifecycleInterfaces: 0,
+  onDestroyInterfaces: 0,
+  lifecycleMethods: 0,
+  ngZone: 0,
+  changeDetectorRef: 0,
+  zoneJs: 0,
+};
 for (const file of files) {
   const source = readFileSync(file, 'utf8');
   effects += (source.match(/\beffect\s*\(/g) ?? []).length;
+  renderEffects += (source.match(/\bafterRenderEffect\s*\(/g) ?? []).length;
+  signalFirstCounts.inputDecorators += (source.match(/@Input\s*\(/g) ?? []).length;
+  signalFirstCounts.outputDecorators += (source.match(/@Output\s*\(/g) ?? []).length;
+  signalFirstCounts.eventEmitters += (source.match(/\bEventEmitter\b/g) ?? []).length;
+  signalFirstCounts.models += (source.match(/\bmodel\s*\(/g) ?? []).length;
+  signalFirstCounts.lifecycleInterfaces += (
+    source.match(
+      /implements\s+(?:[^\n{]*\b)?(?:OnInit|OnChanges|DoCheck|AfterContentInit|AfterContentChecked|AfterViewInit|AfterViewChecked)\b/g,
+    ) ?? []
+  ).length;
+  signalFirstCounts.onDestroyInterfaces += (
+    source.match(/implements\s+(?:[^\n{]*\b)?OnDestroy\b/g) ?? []
+  ).length;
+  signalFirstCounts.lifecycleMethods += (
+    source.match(
+      /\bng(?:OnInit|OnChanges|DoCheck|AfterContentInit|AfterContentChecked|AfterViewInit|AfterViewChecked|OnDestroy)\s*\(/g,
+    ) ?? []
+  ).length;
+  signalFirstCounts.ngZone += (source.match(/\bNgZone\b/g) ?? []).length;
+  signalFirstCounts.changeDetectorRef += (source.match(/\bChangeDetectorRef\b/g) ?? []).length;
+  signalFirstCounts.zoneJs += (source.match(/['"]zone\.js(?:\/[^'"]*)?['"]/g) ?? []).length;
   assert.doesNotMatch(
     source,
     /__(?:treeLevel|parent|path|expanded|selected|partialSelected|loading|leaf|childrenLoaded|virtualIndex|treeMeta)\b/,
@@ -41,8 +75,37 @@ for (const file of files) {
     }
   }
 }
-assert.equal(effects, 0, 'N2-015B must have zero product effects.');
+assert.equal(effects, 2, 'NeuTreeTable candidate must have exactly two justified effects.');
+assert.equal(renderEffects, 0, 'NeuTreeTable candidate must not add a render effect.');
+assert.deepEqual(signalFirstCounts, {
+  inputDecorators: 0,
+  outputDecorators: 0,
+  eventEmitters: 0,
+  models: 0,
+  lifecycleInterfaces: 0,
+  onDestroyInterfaces: 0,
+  lifecycleMethods: 0,
+  ngZone: 0,
+  changeDetectorRef: 0,
+  zoneJs: 0,
+});
 assert.deepEqual(violations, []);
+
+const rendererTemplate = readFileSync(
+  join(root, 'internal/renderer/neu-tree-table-renderer.component.html'),
+  'utf8',
+);
+assert.equal((rendererTemplate.match(/\(focusin\)=/g) ?? []).length, 1);
+assert.equal((rendererTemplate.match(/\(keydown\)=/g) ?? []).length, 1);
+assert.equal((rendererTemplate.match(/\(click\)=/g) ?? []).length, 1);
+for (const rowTag of rendererTemplate.match(/<tr\b[^>]*>/gs) ?? []) {
+  assert.doesNotMatch(rowTag, /\((?:focusin|keydown|click)\)=/);
+}
+const runtimeSource = files.map((file) => readFileSync(file, 'utf8')).join('\n');
+assert.doesNotMatch(
+  runtimeSource,
+  /\b(?:ResizeObserver|addEventListener|setInterval|setTimeout)\b/,
+);
 
 const result = await build({
   entryPoints: [`${root}/public/public-api.ts`],
@@ -66,5 +129,5 @@ for (const forbidden of [
 assert.match(graph, /internal\/neu-exact-key/);
 assert.match(graph, /internal\/neu-field-value-resolver/);
 console.log(
-  `N2 TreeTable boundary audit passed (${files.length} files, 0 effects, neutral internals only).`,
+  `N2 TreeTable boundary audit passed (${files.length} files, 2 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, 1 delegated focus/keyboard/click boundary, neutral internals only).`,
 );
