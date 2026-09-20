@@ -362,7 +362,7 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     expect(pinned.map((row) => row.key)).toEqual([3, 2, 4, 1]);
   });
 
-  it('does not mutate deeply frozen consumer inputs and keeps deferred methods inert', async () => {
+  it('does not mutate deeply frozen inputs while focus activates and export remains deferred', async () => {
     const rows = Object.freeze(baseRows.map((row) => Object.freeze({ ...row })));
     const columns = Object.freeze(baseColumns.map((column) => Object.freeze({ ...column })));
     const fixture = TestBed.createComponent(NeuTableNextHostComponent);
@@ -373,7 +373,7 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     const table = fixture.debugElement.query(By.directive(NeuTableComponent))
       .componentInstance as NeuTableComponent<Row, number, Field>;
 
-    expect(table.focusCell({ key: 1, columnId: 'name' })).toBe(false);
+    expect(table.focusCell({ key: 1, columnId: 'name' })).toBe(true);
     await table.scrollTo({ key: 1 });
     let exportError: unknown;
     try {

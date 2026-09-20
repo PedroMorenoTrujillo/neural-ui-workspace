@@ -150,6 +150,11 @@ select:focus-visible {
   overflow: auto;
 }
 
+.neu-table2__viewport--virtual {
+  max-block-size: var(--neu-table-virtual-block-size, 24rem);
+  overscroll-behavior: contain;
+}
+
 .neu-table2__table {
   inline-size: 100%;
   border-collapse: collapse;
@@ -162,6 +167,13 @@ td {
   padding: var(--neu-table-cell-block, 0.625rem) var(--neu-table-cell-inline, 0.75rem);
   text-align: start;
   vertical-align: middle;
+}
+
+.neu-table2__virtual-spacer,
+.neu-table2__virtual-spacer td {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 th[data-column-pin],

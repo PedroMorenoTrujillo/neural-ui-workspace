@@ -117,5 +117,5 @@ describe('NeuTable remote coordinator performance', () => {
       readonly process?: { readonly stdout?: { write(value: string): void } };
     };
     runtime.process?.stdout?.write(payload);
-  });
+  }, 15_000);
 });

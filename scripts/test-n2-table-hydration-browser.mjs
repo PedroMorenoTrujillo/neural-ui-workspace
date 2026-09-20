@@ -33,6 +33,17 @@ try {
   assert.equal(await page.locator('#n2-ready').textContent(), 'false');
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-remote-events').textContent(), '[]');
+  assert.equal(await page.locator('#n2-virtual-events').textContent(), '[]');
+  assert.equal(await page.locator('#n2-virtual-ranges').textContent(), '[]');
+  assert.equal(await page.locator('#n2-table-client-virtual tr[data-row-key]').count(), 50);
+  assert.equal(
+    await page.locator('#n2-table-remote-virtual-satisfied tr[data-row-key]').count(),
+    50,
+  );
+  assert.equal(
+    await page.locator('#n2-table-remote-virtual-unsatisfied tr[data-row-key]').count(),
+    0,
+  );
   assert.equal(
     await page.locator('#n2-table-primary th[data-column-id="name"]').getAttribute('aria-sort'),
     'descending',
@@ -132,11 +143,57 @@ try {
     window.__n2TableIds = [...document.querySelectorAll('#n2-table-primary [id]')].map(
       (node) => node.id,
     );
+    window.__n2VirtualNodes = [
+      document.querySelector('#n2-table-client-virtual table'),
+      document.querySelector('#n2-table-client-virtual tr[data-row-key="0"]'),
+      document.querySelector('#n2-table-remote-virtual-satisfied table'),
+      document.querySelector('#n2-table-remote-virtual-satisfied tr[data-row-key="0"]'),
+    ];
   });
   release();
   await page.waitForFunction(() => document.querySelector('#n2-ready')?.textContent === 'true');
   await page.waitForFunction(
     () => document.querySelector('#n2-remote-events')?.textContent === '["B:initial:1:0"]',
+  );
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-virtual-events')?.textContent ===
+      '["unsatisfied:initial:1:0:0-50"]',
+  );
+  await page.waitForFunction(
+    () => document.querySelector('#n2-virtual-ranges')?.textContent !== '[]',
+  );
+  assert.equal(
+    JSON.parse(await page.locator('#n2-virtual-events').textContent()).some((event) =>
+      event.startsWith('satisfied:'),
+    ),
+    false,
+  );
+  assert.equal(
+    (await page.locator('#n2-table-client-virtual tr[data-row-key]').count()) < 50,
+    true,
+  );
+  assert.equal(
+    await page.locator('#n2-table-client-virtual table').getAttribute('aria-rowcount'),
+    '200',
+  );
+  assert.equal(
+    await page.locator('#n2-table-remote-virtual-satisfied table').getAttribute('aria-rowcount'),
+    '1000',
+  );
+  assert.deepEqual(
+    await page.evaluate(() => {
+      const selectors = [
+        '#n2-table-client-virtual table',
+        '#n2-table-client-virtual tr[data-row-key="0"]',
+        '#n2-table-remote-virtual-satisfied table',
+        '#n2-table-remote-virtual-satisfied tr[data-row-key="0"]',
+      ];
+      return window.__n2VirtualNodes.map(
+        (node, index) => node === document.querySelector(selectors[index]),
+      );
+    }),
+    [true, true, true, true],
   );
   assert.equal(
     await page
@@ -234,6 +291,24 @@ try {
       document.querySelector('#n2-remote-events')?.textContent ===
       '["B:initial:1:0","B:query:2:1","B:retry:3:1"]',
   );
+  await page.locator('#n2-virtual-scroll').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-virtual-events')?.textContent ===
+      '["unsatisfied:initial:1:0:0-50","satisfied:viewport:1:0:150-250"]',
+  );
+  await page.locator('#n2-virtual-query').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-virtual-events')?.textContent ===
+      '["unsatisfied:initial:1:0:0-50","satisfied:viewport:1:0:150-250","satisfied:query:2:1:150-250"]',
+  );
+  await page.locator('#n2-virtual-retry').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-virtual-events')?.textContent ===
+      '["unsatisfied:initial:1:0:0-50","satisfied:viewport:1:0:150-250","satisfied:query:2:1:150-250","satisfied:retry:3:1:150-250"]',
+  );
   assert.equal(
     await page.locator('#n2-table-primary tr[data-row-key="3"]').getAttribute('data-selected'),
     null,
@@ -261,7 +336,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    'N2 Table real zoneless hydration passed: SSR emitted zero requests; satisfied remote state emitted no duplicate; unsatisfied emitted one initial; rejected/accepted query and retry produced the exact 1/2/3 request sequence; DOM reused and zero NG050x',
+    'N2 Table real zoneless hydration passed: deterministic virtual SSR bootstrap; satisfied range zero duplicate; unsatisfied, viewport, query and retry exact ranged requests; bounded client DOM; DOM reused and zero NG050x',
   );
 } finally {
   release();

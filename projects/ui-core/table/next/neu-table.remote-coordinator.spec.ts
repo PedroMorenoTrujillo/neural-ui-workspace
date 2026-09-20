@@ -7,7 +7,7 @@ import {
   type NeuTableRemoteCoordinatorState,
 } from './internal/remote/neu-table-remote-coordinator';
 import { areNeuTableQuerySlicesEqual } from './internal/query-ui/neu-table-query-transitions';
-import type { NeuTableMetadata, NeuTableQuery } from './public/neu-table.types';
+import type { NeuTableMetadata, NeuTableQuery, NeuTableRange } from './public/neu-table.types';
 
 type Field = 'name' | 'score';
 
@@ -46,6 +46,11 @@ const step = (
   state: NeuTableRemoteCoordinatorState<Field>,
   next: Partial<NeuTableRemoteCoordinatorInput<Field>> = {},
 ) => transitionNeuTableRemoteCoordinator(state, input(next), equal);
+const virtualStep = (
+  state: NeuTableRemoteCoordinatorState<Field>,
+  requiredRange: NeuTableRange,
+  next: Partial<NeuTableRemoteCoordinatorInput<Field>> = {},
+) => step(state, { virtualizationEnabled: true, requiredRange, ...next });
 
 describe('NeuTable remote coordinator', () => {
   it('emits one initial request for an unsatisfied browser state', () => {
@@ -171,5 +176,222 @@ describe('NeuTable remote coordinator', () => {
     const late = step(destroyed, { query: query('late'), retryToken: 1 });
     expect(late.request).toBeNull();
     expect(late.state).toBe(destroyed);
+  });
+
+  it('coordinates exactly one ranged initial request and hydrates without a duplicate', () => {
+    const server = virtualStep(
+      createNeuTableRemoteCoordinatorState(),
+      { start: 0, end: 50 },
+      { browserActive: false },
+    );
+    expect(server.request).toBeNull();
+
+    const satisfiedHydration = virtualStep(
+      server.state,
+      { start: 0, end: 50 },
+      {
+        metadata: { ...metadata(0, 8), dataRange: { start: 0, end: 50 } },
+      },
+    );
+    expect(satisfiedHydration.request).toBeNull();
+
+    const unsatisfiedHydration = virtualStep(server.state, { start: 0, end: 50 });
+    expect(unsatisfiedHydration.request).toEqual({
+      requestId: 1,
+      queryRevision: 0,
+      query: query(),
+      reason: 'initial',
+      range: { start: 0, end: 50 },
+    });
+    const stablePending = virtualStep(unsatisfiedHydration.state, { start: 10, end: 40 });
+    expect(stablePending.request).toBeNull();
+  });
+
+  it('emits viewport requests only for uncovered ranges and never increments revision on scroll', () => {
+    const initial = virtualStep(createNeuTableRemoteCoordinatorState(), { start: 0, end: 50 });
+    const current = virtualStep(
+      initial.state,
+      { start: 0, end: 50 },
+      {
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+    const inside = virtualStep(
+      current.state,
+      { start: 10, end: 40 },
+      {
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+    const outside = virtualStep(
+      inside.state,
+      { start: 50, end: 100 },
+      {
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+    const duplicate = virtualStep(
+      outside.state,
+      { start: 60, end: 90 },
+      {
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+
+    expect(inside.request).toBeNull();
+    expect(outside.request).toMatchObject({
+      requestId: 2,
+      queryRevision: 0,
+      reason: 'viewport',
+      range: { start: 50, end: 100 },
+    });
+    expect(duplicate.request).toBeNull();
+    expect(duplicate.state.queryRevision).toBe(0);
+  });
+
+  it('combines a semantic query change and current range into one transport request', () => {
+    const initial = virtualStep(createNeuTableRemoteCoordinatorState(), { start: 0, end: 50 });
+    const current = virtualStep(
+      initial.state,
+      { start: 0, end: 50 },
+      {
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+    const changed = virtualStep(
+      current.state,
+      { start: 100, end: 150 },
+      {
+        query: query('new'),
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+    const noDuplicate = virtualStep(
+      changed.state,
+      { start: 100, end: 150 },
+      {
+        query: query('new'),
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+
+    expect(changed.request).toMatchObject({
+      requestId: 2,
+      queryRevision: 1,
+      reason: 'query',
+      range: { start: 100, end: 150 },
+    });
+    expect(noDuplicate.request).toBeNull();
+  });
+
+  it('retries the current range with a new id even when it is satisfied', () => {
+    const initial = virtualStep(createNeuTableRemoteCoordinatorState(), { start: 0, end: 50 });
+    const current = virtualStep(
+      initial.state,
+      { start: 0, end: 50 },
+      {
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+    const moved = virtualStep(
+      current.state,
+      { start: 100, end: 150 },
+      {
+        metadata: { ...metadata(0, 1), dataRange: { start: 0, end: 50 } },
+      },
+    );
+    const retried = virtualStep(
+      moved.state,
+      { start: 100, end: 150 },
+      {
+        metadata: { ...metadata(0, 2), dataRange: { start: 100, end: 150 } },
+        retryToken: 1,
+      },
+    );
+
+    expect(moved.request).toMatchObject({ requestId: 2, reason: 'viewport' });
+    expect(retried.request).toMatchObject({
+      requestId: 3,
+      queryRevision: 0,
+      reason: 'retry',
+      range: { start: 100, end: 150 },
+    });
+  });
+
+  it('suppresses failed current ranges until viewport change or explicit retry', () => {
+    const initial = virtualStep(createNeuTableRemoteCoordinatorState(), { start: 0, end: 50 });
+    const failedMetadata: NeuTableMetadata = {
+      ...metadata(0, 1),
+      error: new Error('failed'),
+    };
+    const failed = virtualStep(
+      initial.state,
+      { start: 0, end: 50 },
+      {
+        metadata: failedMetadata,
+      },
+    );
+    const stable = virtualStep(
+      failed.state,
+      { start: 0, end: 50 },
+      {
+        metadata: failedMetadata,
+      },
+    );
+    const moved = virtualStep(
+      stable.state,
+      { start: 50, end: 100 },
+      {
+        metadata: failedMetadata,
+      },
+    );
+    const retry = virtualStep(
+      failed.state,
+      { start: 0, end: 50 },
+      {
+        metadata: failedMetadata,
+        retryToken: 1,
+      },
+    );
+
+    expect(failed.request).toBeNull();
+    expect(stable.request).toBeNull();
+    expect(moved.request).toMatchObject({ requestId: 2, reason: 'viewport' });
+    expect(retry.request).toMatchObject({ requestId: 2, reason: 'retry' });
+  });
+
+  it('rejects stale request ids and ranges even when revision matches', () => {
+    const initial = virtualStep(createNeuTableRemoteCoordinatorState(), { start: 0, end: 50 });
+    const moved = virtualStep(initial.state, { start: 50, end: 100 });
+    expect(
+      classifyNeuTableRemoteCorrelation(
+        moved.state,
+        {
+          ...metadata(0, 1),
+          dataRange: { start: 50, end: 100 },
+        },
+        { start: 50, end: 100 },
+      ),
+    ).toBe('stale-request');
+    expect(
+      classifyNeuTableRemoteCorrelation(
+        moved.state,
+        {
+          ...metadata(0, 2),
+          dataRange: { start: 0, end: 50 },
+        },
+        { start: 50, end: 100 },
+      ),
+    ).toBe('stale-range');
+    expect(
+      classifyNeuTableRemoteCorrelation(
+        moved.state,
+        {
+          ...metadata(0, 2),
+          dataRange: { start: 50, end: 100 },
+        },
+        { start: 50, end: 100 },
+      ),
+    ).toBe('current');
   });
 });

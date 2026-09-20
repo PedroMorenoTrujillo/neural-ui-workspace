@@ -11,11 +11,15 @@ import {
   output,
   PLATFORM_ID,
   signal,
+  viewChild,
   type InputSignal,
   type OutputEmitterRef,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { projectNeuTableRows } from '../internal/identity/neu-table-row-identity';
+import {
+  neuTableIdentityToken,
+  projectNeuTableRows,
+} from '../internal/identity/neu-table-row-identity';
 import {
   createNeuTableFieldResolver,
   filterNeuTableRows,
@@ -45,6 +49,13 @@ import {
   transitionNeuTableRemoteCoordinator,
 } from '../internal/remote/neu-table-remote-coordinator';
 import { areNeuTableQuerySlicesEqual } from '../internal/query-ui/neu-table-query-transitions';
+import {
+  areNeuTableRangesEqual,
+  normalizeNeuTableItemSize,
+  projectNeuTableSpacerSizes,
+  projectNeuTableVirtualWindow,
+  type NeuTableViewportGeometry,
+} from '../internal/virtualization/neu-table-virtualization';
 import {
   createNeuTableTemplateMap,
   firstNeuTableTemplate,
@@ -89,6 +100,7 @@ import type {
   NeuTableMetadata,
   NeuTablePaginationOptions,
   NeuTableQuery,
+  NeuTableRange,
   NeuTableRangeChange,
   NeuTableRowAction,
   NeuTableRowMove,
@@ -116,6 +128,17 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   private readonly browserActive = signal(false);
   private readonly retryToken = signal(0);
   private readonly remoteCoordinatorVersion = signal(0);
+  private readonly viewportGeometry = signal<NeuTableViewportGeometry>({
+    measured: false,
+    scrollTop: 0,
+    viewportSize: 0,
+  });
+  private readonly renderer = viewChild(NeuTableBasicRendererComponent);
+  private readonly diagnostics = new Set<string>();
+  private lastPublishedViewport: {
+    readonly visible: NeuTableRange;
+    readonly render: NeuTableRange;
+  } | null = null;
   private remoteCoordinator = createNeuTableRemoteCoordinatorState<F>();
   readonly dataMode: InputSignal<NeuTableDataMode> = input<NeuTableDataMode>('client');
   readonly data: InputSignal<readonly T[]> = input<readonly T[]>([]);
@@ -307,20 +330,44 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   protected readonly fieldResolver = computed(() =>
     createNeuTableFieldResolver(this.normalizedColumns()),
   );
+  protected readonly remoteVirtualProjection = computed(() => {
+    const virtualization = this.virtualizationOptions();
+    if (!virtualization.enabled) return null;
+    return projectNeuTableVirtualWindow({
+      geometry: this.viewportGeometry(),
+      total: this.metadata().totalItems,
+      virtualization,
+    });
+  });
   protected readonly remoteCorrelation = computed(() => {
     this.remoteCoordinatorVersion();
-    return classifyNeuTableRemoteCorrelation(this.remoteCoordinator, this.metadata());
+    return classifyNeuTableRemoteCorrelation(
+      this.remoteCoordinator,
+      this.metadata(),
+      this.dataMode() === 'remote' ? (this.remoteVirtualProjection()?.request ?? null) : null,
+    );
   });
   protected readonly presentedData = computed(() => {
     if (this.dataMode() === 'client') return this.data();
     const correlation = this.remoteCorrelation();
-    return correlation === 'stale-query' || correlation === 'stale-request' ? [] : this.data();
+    return correlation === 'stale-query' ||
+      correlation === 'stale-request' ||
+      correlation === 'stale-range'
+      ? []
+      : this.data();
   });
   protected readonly presentedMetadata = computed<NeuTableMetadata>(() => {
     if (this.dataMode() === 'client') return this.metadata();
     const correlation = this.remoteCorrelation();
-    if (correlation !== 'stale-query' && correlation !== 'stale-request') {
+    if (
+      correlation !== 'stale-query' &&
+      correlation !== 'stale-request' &&
+      correlation !== 'stale-range'
+    ) {
       return this.metadata();
+    }
+    if (correlation === 'stale-range') {
+      return { ...this.metadata(), appliedRequestId: this.metadata().appliedRequestId };
     }
     return {
       totalItems: null,
@@ -371,25 +418,95 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       this.sortedRows(),
       this.effectiveQuery().page,
       this.effectiveQuery().pageSize,
-      this.dataMode() === 'client' && this.paginationOptions().enabled,
+      this.dataMode() === 'client' &&
+        this.paginationOptions().enabled &&
+        !this.virtualizationOptions().enabled,
     ),
   );
   protected readonly matchedNormalCount = computed(() => this.sortedRows().length);
-  protected readonly visibleNormalCount = computed(() => this.normalPage().rows.length);
+  protected readonly logicalNormalCount = computed<number | null>(() =>
+    this.dataMode() === 'client' ? this.normalPage().rows.length : this.metadata().totalItems,
+  );
+  protected readonly virtualProjection = computed(() => {
+    const virtualization = this.virtualizationOptions();
+    if (!virtualization.enabled) return null;
+    if (this.paginationOptions().enabled) {
+      this.diagnoseOnce(
+        'virtual-pagination',
+        'NeuTable 2 virtualization disables pagination runtime while preserving applied query.',
+      );
+    }
+    return this.dataMode() === 'remote'
+      ? this.remoteVirtualProjection()
+      : projectNeuTableVirtualWindow({
+          geometry: this.viewportGeometry(),
+          total: this.logicalNormalCount(),
+          virtualization,
+        });
+  });
+  protected readonly normalWindow = computed(() => {
+    const projection = this.virtualProjection();
+    const rows = this.normalPage().rows;
+    if (projection === null) return { rows, start: 0, end: rows.length };
+    if (this.dataMode() === 'client') {
+      const windowRows = rows.slice(projection.render.start, projection.render.end);
+      return {
+        rows: windowRows,
+        start: projection.render.start,
+        end: projection.render.start + windowRows.length,
+      };
+    }
+
+    const dataRange = this.metadata().dataRange;
+    if (dataRange === undefined || rows.length === 0) {
+      return {
+        rows: [] as readonly T[],
+        start: projection.render.start,
+        end: projection.render.start,
+      };
+    }
+    const declaredLength = Math.max(0, dataRange.end - dataRange.start);
+    if (this.data().length !== declaredLength) {
+      this.diagnoseOnce(
+        `data-range:${dataRange.start}:${dataRange.end}:${this.data().length}`,
+        `NeuTable 2 remote data/dataRange mismatch: ${this.data().length} rows for [${dataRange.start},${dataRange.end}).`,
+      );
+    }
+    const safeEnd = dataRange.start + Math.min(rows.length, declaredLength);
+    const start = Math.max(projection.render.start, dataRange.start);
+    const end = Math.min(projection.render.end, safeEnd);
+    if (end <= start) return { rows: [] as readonly T[], start, end: start };
+    const localStart = start - dataRange.start;
+    const windowRows = rows.slice(localStart, localStart + (end - start));
+    return { rows: windowRows, start, end: start + windowRows.length };
+  });
+  protected readonly visibleNormalCount = computed(() => this.normalWindow().rows.length);
   protected readonly pipelineRows = computed(() => [
     ...this.sourcePartition().start,
-    ...this.normalPage().rows,
+    ...this.normalWindow().rows,
     ...this.sourcePartition().end,
   ]);
-  protected readonly renderRows = computed(() =>
-    projectNeuTableRows(
+  protected readonly renderRows = computed(() => {
+    let normalIndex = this.normalWindow().start;
+    return projectNeuTableRows(
       this.pipelineRows(),
       this.rowKey(),
       this.rowTrackBy(),
       this.rowOptions().pin,
       false,
-    ),
-  );
+    ).map((renderRow) =>
+      renderRow.pin === null ? { ...renderRow, index: normalIndex++ } : renderRow,
+    );
+  });
+  protected readonly virtualSpacers = computed(() => {
+    const projection = this.virtualProjection();
+    if (projection === null) return { before: 0, after: 0 };
+    return projectNeuTableSpacerSizes({
+      itemSize: projection.itemSize,
+      mounted: { start: this.normalWindow().start, end: this.normalWindow().end },
+      total: this.logicalNormalCount(),
+    });
+  });
   protected readonly selectionAnchor = signal<K | null>(null);
   protected readonly loadedSelectionRows = computed(() =>
     selectionRowsFromData(this.presentedData(), this.rowKey()),
@@ -453,6 +570,33 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     if (query !== null) this.queryChange.emit(query);
   };
   protected readonly retry = () => this.retryData();
+  protected readonly updateViewport = (
+    geometry: NeuTableViewportGeometry,
+    reason: NeuTableRangeChange['reason'],
+  ) => {
+    if (!this.virtualizationOptions().enabled || !geometry.measured) return;
+    const current = this.viewportGeometry();
+    if (
+      current.measured === geometry.measured &&
+      current.scrollTop === geometry.scrollTop &&
+      current.viewportSize === geometry.viewportSize
+    ) {
+      return;
+    }
+    this.viewportGeometry.set(geometry);
+    const projection = this.virtualProjection();
+    if (projection === null) return;
+    const published = { visible: projection.visible, render: projection.render };
+    if (
+      this.lastPublishedViewport !== null &&
+      areNeuTableRangesEqual(this.lastPublishedViewport.visible, published.visible) &&
+      areNeuTableRangesEqual(this.lastPublishedViewport.render, published.render)
+    ) {
+      return;
+    }
+    this.lastPublishedViewport = published;
+    this.rangeChange.emit({ ...published, reason });
+  };
 
   constructor() {
     effect(() => {
@@ -464,7 +608,10 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
           dataMode: this.dataMode(),
           metadata: this.metadata(),
           query: this.query(),
+          requiredRange:
+            this.dataMode() === 'remote' ? (this.remoteVirtualProjection()?.request ?? null) : null,
           retryToken: this.retryToken(),
+          virtualizationEnabled: this.virtualizationOptions().enabled,
         },
         (left, right) =>
           areNeuTableQuerySlicesEqual(left, right, this.sortOptions(), this.filterOptions().equals),
@@ -473,6 +620,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       if (
         previous.queryRevision !== transition.state.queryRevision ||
         previous.latestRequestId !== transition.state.latestRequestId ||
+        !areNeuTableRangesEqual(previous.latestRequestRange, transition.state.latestRequestRange) ||
         previous.dataMode !== transition.state.dataMode
       ) {
         this.remoteCoordinatorVersion.update((version) => version + 1);
@@ -489,14 +637,70 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     });
   }
 
+  private readonly diagnoseOnce = (key: string, message: string): void => {
+    if (!isDevMode() || this.diagnostics.has(key)) return;
+    this.diagnostics.add(key);
+    console.warn(message);
+  };
+
+  private readonly normalIndexForKey = (key: K): number | null => {
+    const token = neuTableIdentityToken(key);
+    if (this.dataMode() === 'client') {
+      const index = this.normalPage().rows.findIndex(
+        (row) => neuTableIdentityToken(this.rowKey()(row)) === token,
+      );
+      return index < 0 ? null : index;
+    }
+    const range = this.metadata().dataRange;
+    if (range === undefined) return null;
+    const index = this.sourcePartition().normal.findIndex(
+      (row) => neuTableIdentityToken(this.rowKey()(row)) === token,
+    );
+    return index < 0 ? null : range.start + index;
+  };
+
   focusCell(target: { readonly key: K; readonly columnId: string }): boolean {
-    void target;
-    return false;
+    if (!this.visibleColumns().some((column) => column.id === target.columnId)) return false;
+    const virtualization = this.virtualizationOptions();
+    const token = neuTableIdentityToken(target.key);
+    const pinned = [...this.sourcePartition().start, ...this.sourcePartition().end].some(
+      (row) => neuTableIdentityToken(this.rowKey()(row)) === token,
+    );
+    const index = pinned ? null : this.normalIndexForKey(target.key);
+    if (!pinned && index === null) return false;
+    const renderer = this.renderer();
+    if (renderer === undefined) return false;
+    return renderer.focusVirtualCell(
+      token,
+      target.columnId,
+      index,
+      virtualization.enabled ? normalizeNeuTableItemSize(virtualization.itemSize) : null,
+    );
   }
 
   scrollTo(target: { readonly index?: number; readonly key?: K }): Promise<void> {
-    void target;
-    return Promise.resolve();
+    const virtualization = this.virtualizationOptions();
+    if (!virtualization.enabled) return Promise.resolve();
+    const index =
+      target.index ?? (target.key === undefined ? null : this.normalIndexForKey(target.key));
+    const total = this.logicalNormalCount();
+    if (
+      index === null ||
+      !Number.isInteger(index) ||
+      index < 0 ||
+      (total !== null && index >= total)
+    ) {
+      if (target.key !== undefined && this.dataMode() === 'remote') {
+        this.diagnoseOnce(
+          `remote-key:${neuTableIdentityToken(target.key)}`,
+          'NeuTable 2 cannot scroll to an unloaded remote key without a key-to-index contract.',
+        );
+      }
+      return Promise.resolve();
+    }
+    return (
+      this.renderer()?.scrollToVirtualIndex(index, virtualization.itemSize) ?? Promise.resolve()
+    );
   }
 
   retryData(): void {

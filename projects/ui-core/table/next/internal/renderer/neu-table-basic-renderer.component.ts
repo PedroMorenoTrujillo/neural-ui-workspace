@@ -3,17 +3,21 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
+  ElementRef,
   inject,
   Injector,
   input,
+  PLATFORM_ID,
   signal,
+  viewChild,
   type InputSignal,
   type Signal,
   type TemplateRef,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { NeuTableAdvancedFilterBuilderComponent } from '../features/advanced-filters/neu-table-advanced-filter-builder.component';
-import type { NeuTableRenderRow } from '../identity/neu-table-row-identity';
+import { neuTableIdentityToken, type NeuTableRenderRow } from '../identity/neu-table-row-identity';
 import {
   normalizeNeuTableResize,
   projectNeuTableLayout,
@@ -49,6 +53,11 @@ import {
   readNeuTableColumnValue,
   resolveNeuTableColumnWidth,
 } from '../semantics/neu-table-basic-projections';
+import {
+  neuTableOffsetForIndex,
+  normalizeNeuTableItemSize,
+  type NeuTableViewportGeometry,
+} from '../virtualization/neu-table-virtualization';
 import type {
   NeuTableAppearance,
   NeuTableCellContext,
@@ -63,11 +72,13 @@ import type {
   NeuTableMetadata,
   NeuTablePaginationOptions,
   NeuTableQuery,
+  NeuTableRangeChange,
   NeuTableRowOptions,
   NeuTableSelectionOptions,
   NeuSortEntry,
   NeuTableSortOptions,
   NeuTableStateTemplateContext,
+  NeuTableVirtualizationOptions,
 } from '../../public/neu-table.types';
 
 @Component({
@@ -87,6 +98,9 @@ export class NeuTableBasicRendererComponent<
 > {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   readonly rows: InputSignal<readonly NeuTableRenderRow<T, K>[]> = input.required();
   readonly columns: InputSignal<readonly NeuTableColumn<T, F>[]> = input.required();
   readonly allColumns: InputSignal<readonly NeuTableColumn<T, F>[]> = input.required();
@@ -101,6 +115,10 @@ export class NeuTableBasicRendererComponent<
   readonly sortOptions: InputSignal<NeuTableSortOptions> = input.required();
   readonly filterOptions: InputSignal<NeuTableFilterOptions<T, F>> = input.required();
   readonly paginationOptions: InputSignal<NeuTablePaginationOptions> = input.required();
+  readonly virtualizationOptions: InputSignal<NeuTableVirtualizationOptions> = input.required();
+  readonly logicalRowCount: InputSignal<number | null> = input.required();
+  readonly spacerBefore: InputSignal<number> = input.required();
+  readonly spacerAfter: InputSignal<number> = input.required();
   readonly matchedNormalCount: InputSignal<number> = input.required();
   readonly visibleNormalCount: InputSignal<number> = input.required();
   readonly appearance: InputSignal<NeuTableAppearance> = input.required();
@@ -128,6 +146,9 @@ export class NeuTableBasicRendererComponent<
   readonly proposeLayout: InputSignal<(change: NeuTableLayoutChange | null) => void> =
     input.required();
   readonly proposeQuery: InputSignal<(query: NeuTableQuery<F> | null) => void> = input.required();
+  readonly updateViewport: InputSignal<
+    (geometry: NeuTableViewportGeometry, reason: NeuTableRangeChange['reason']) => void
+  > = input.required();
 
   protected readonly draggedColumnId = signal<string | null>(null);
   protected readonly resizeGesture = signal<{
@@ -201,13 +222,120 @@ export class NeuTableBasicRendererComponent<
       this.filterOptions().surfaces.includes('builder') &&
       this.allColumns().some((column) => column.filter !== undefined),
   );
+  protected readonly pinnedStartRows = computed(() =>
+    this.rows().filter((row) => row.pin === 'start'),
+  );
+  protected readonly normalRows = computed(() => this.rows().filter((row) => row.pin === null));
+  protected readonly pinnedEndRows = computed(() => this.rows().filter((row) => row.pin === 'end'));
 
   constructor() {
+    effect((onCleanup) => {
+      const virtualization = this.virtualizationOptions();
+      const viewport = this.viewport()?.nativeElement;
+      this.logicalRowCount();
+      if (
+        !virtualization.enabled ||
+        viewport === undefined ||
+        !isPlatformBrowser(this.platformId)
+      ) {
+        return;
+      }
+
+      const browser = viewport.ownerDocument.defaultView;
+      if (browser === null) return;
+      let frame: number | null = null;
+      let reason: NeuTableRangeChange['reason'] = 'resize';
+      const publish = () => {
+        frame = null;
+        this.updateViewport()(
+          {
+            measured: true,
+            scrollTop: viewport.scrollTop,
+            viewportSize: viewport.clientHeight,
+          },
+          reason,
+        );
+      };
+      const schedule = (nextReason: NeuTableRangeChange['reason']) => {
+        reason = nextReason;
+        if (frame === null) frame = browser.requestAnimationFrame(publish);
+      };
+      const onScroll = () => schedule('scroll');
+      viewport.addEventListener('scroll', onScroll, { passive: true });
+      const ResizeObserverConstructor = browser.ResizeObserver;
+      const observer =
+        ResizeObserverConstructor === undefined
+          ? null
+          : new ResizeObserverConstructor(() => schedule('resize'));
+      observer?.observe(viewport);
+      schedule('resize');
+
+      onCleanup(() => {
+        viewport.removeEventListener('scroll', onScroll);
+        observer?.disconnect();
+        if (frame !== null) browser.cancelAnimationFrame(frame);
+      });
+    });
+
     this.destroyRef.onDestroy(() => {
       for (const timer of this.filterTimers.values()) clearTimeout(timer);
       this.filterTimers.clear();
       this.rowFilterControls.clear();
     });
+  }
+
+  protected readonly rowIdentity = (row: NeuTableRenderRow<T, K>) => neuTableIdentityToken(row.key);
+  protected readonly virtualRowSize = (row: NeuTableRenderRow<T, K>): number | null => {
+    const virtualization = this.virtualizationOptions();
+    return virtualization.enabled && row.pin === null
+      ? normalizeNeuTableItemSize(virtualization.itemSize)
+      : null;
+  };
+
+  scrollToVirtualIndex(index: number, itemSize: number): Promise<void> {
+    const viewport = this.viewport()?.nativeElement;
+    const offset = neuTableOffsetForIndex(index, itemSize);
+    if (viewport === undefined || offset === null) return Promise.resolve();
+    viewport.scrollTop = offset;
+    this.updateViewport()(
+      {
+        measured: true,
+        scrollTop: offset,
+        viewportSize: viewport.clientHeight,
+      },
+      'programmatic',
+    );
+    return new Promise((resolve) => afterNextRender(resolve, { injector: this.injector }));
+  }
+
+  focusVirtualCell(
+    keyToken: string,
+    columnId: string,
+    index: number | null,
+    itemSize: number | null,
+  ): boolean {
+    const focus = () => {
+      const row = [
+        ...this.host.nativeElement.querySelectorAll<HTMLElement>('tr[data-row-token]'),
+      ].find((candidate) => candidate.dataset['rowToken'] === keyToken);
+      const cell = [...(row?.querySelectorAll<HTMLElement>('td[data-column-id]') ?? [])].find(
+        (candidate) => candidate.dataset['columnId'] === columnId,
+      );
+      cell?.focus();
+      return cell !== undefined;
+    };
+    if (focus()) return true;
+    if (index === null || itemSize === null) return false;
+    const viewport = this.viewport()?.nativeElement;
+    const offset = neuTableOffsetForIndex(index, normalizeNeuTableItemSize(itemSize));
+    if (viewport === undefined || offset === null) return false;
+    viewport.scrollTop = offset;
+    this.updateViewport()(
+      { measured: true, scrollTop: offset, viewportSize: viewport.clientHeight },
+      'programmatic',
+    );
+    afterNextRender(focus, { injector: this.injector });
+    return true;
   }
 
   protected readonly headerTemplate = (columnId: string) => this.headerTemplates().get(columnId);

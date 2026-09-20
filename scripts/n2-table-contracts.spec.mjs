@@ -65,7 +65,7 @@ test('does not resolve the isolated candidate as a consumer package subpath', ()
   assert.equal(resolved.resolvedModule, undefined);
 });
 
-test('keeps the candidate product source free of direct browser-global dependencies', async () => {
+test('keeps browser integration platform-guarded and free of ambient global ownership', async () => {
   const result = await build({
     entryPoints: ['projects/ui-core/table/next/public/public-api.ts'],
     bundle: true,
@@ -76,7 +76,9 @@ test('keeps the candidate product source free of direct browser-global dependenc
     treeShaking: true,
   });
   const source = Buffer.concat(result.outputFiles.map((file) => file.contents)).toString('utf8');
-  assert.doesNotMatch(source, /window|document|ResizeObserver|localStorage|sessionStorage/);
+  assert.doesNotMatch(source, /\b(?:window|document|globalThis|localStorage|sessionStorage)\b/);
+  assert.match(source, /isPlatformBrowser/);
+  assert.match(source, /ownerDocument/);
   assert.match(source, /NeuTableComponent/);
   assert.match(source, /NeuTableHeaderDirective/);
 });

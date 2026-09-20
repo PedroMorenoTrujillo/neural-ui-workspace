@@ -25,14 +25,18 @@ test('keeps the runtime candidate isolated behind one public facade', () => {
   assert.deepEqual(validateTargetContracts(), []);
 });
 
-test('uses computed projections without a second writable state model or effects', () => {
+test('uses computed projections with the frozen two-effect viewport/request ledger', () => {
   const product = files(root)
     .map((path) => readFileSync(path, 'utf8'))
     .join('\n');
-  assert.doesNotMatch(product, /\beffect\s*\(/);
-  assert.doesNotMatch(product, /\bsignal\s*\(/);
+  assert.equal((product.match(/\beffect\s*\(/g) ?? []).length, 2);
   assert.doesNotMatch(product, /\bmodel\s*(?:<[^>]+>)?\s*\(/);
-  assert.doesNotMatch(product, /HostListener|addEventListener|removeEventListener/);
+  assert.doesNotMatch(product, /HostListener/);
+  assert.equal((product.match(/addEventListener\('scroll'/g) ?? []).length, 1);
+  assert.equal((product.match(/removeEventListener\('scroll'/g) ?? []).length, 1);
+  assert.equal((product.match(/new ResizeObserverConstructor/g) ?? []).length, 1);
+  assert.equal((product.match(/requestAnimationFrame\(/g) ?? []).length, 1);
+  assert.equal((product.match(/cancelAnimationFrame\(/g) ?? []).length, 1);
   assert.match(product, /\bcomputed\s*\(/);
 });
 
@@ -49,7 +53,7 @@ test('does not import legacy Table, TableCore or deferred subsystem runtimes', (
     /sort\.controller/,
     /filter\.engine/,
     /selection\.controller/,
-    /virtual/,
+    /virtual-scroll/,
     /editing\.controller/,
     /export\.controller/,
   ]) {
@@ -57,7 +61,7 @@ test('does not import legacy Table, TableCore or deferred subsystem runtimes', (
   }
 });
 
-test('contains no symlink in the N2-011B candidate', () => {
+test('contains no symlink in the N2-011G candidate', () => {
   const visit = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const path = join(directory, entry.name);

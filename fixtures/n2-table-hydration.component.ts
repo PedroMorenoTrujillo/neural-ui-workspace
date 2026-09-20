@@ -1,4 +1,4 @@
-import { Component, afterNextRender, signal } from '@angular/core';
+import { Component, afterNextRender, signal, viewChild } from '@angular/core';
 import {
   NeuTableCellDirective,
   NeuTableComponent,
@@ -77,11 +77,26 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     <output id="n2-output-events">{{ outputEvents() }}</output>
     <output id="n2-remote-events">{{ remoteEvents() }}</output>
     <output id="n2-remote-proposals">{{ remoteProposals() }}</output>
+    <output id="n2-virtual-events">{{ virtualEvents() }}</output>
+    <output id="n2-virtual-ranges">{{ virtualRanges() }}</output>
     <button id="n2-remote-accept" type="button" (click)="acceptRemoteProposals()">
       Accept remote proposals
     </button>
     <button id="n2-remote-retry" type="button" (click)="remoteUnsatisfied.retryData()">
       Retry remote query
+    </button>
+    <button
+      id="n2-virtual-scroll"
+      type="button"
+      (click)="virtualSatisfied.scrollTo({ index: 200 })"
+    >
+      Scroll virtual remote
+    </button>
+    <button id="n2-virtual-query" type="button" (click)="applyVirtualQuery()">
+      Apply virtual query
+    </button>
+    <button id="n2-virtual-retry" type="button" (click)="virtualSatisfied.retryData()">
+      Retry virtual range
     </button>
 
     <section id="n2-table-primary">
@@ -188,6 +203,48 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
       />
     </section>
 
+    <section id="n2-table-client-virtual">
+      <neu-table
+        [data]="virtualClientRows"
+        [columns]="columns"
+        [metadata]="virtualClientMetadata"
+        [query]="virtualBaseQuery"
+        [rowKey]="rowKey"
+        [virtualizationOptions]="virtualizationOptions"
+        (rangeChange)="recordVirtualRange('client', $event)"
+        (dataRequest)="record('virtualClientRequest')"
+      />
+    </section>
+
+    <section id="n2-table-remote-virtual-satisfied">
+      <neu-table
+        #virtualSatisfied
+        dataMode="remote"
+        [data]="virtualSatisfiedRows()"
+        [columns]="columns"
+        [metadata]="virtualSatisfiedMetadata()"
+        [query]="virtualAppliedQuery()"
+        [rowKey]="rowKey"
+        [virtualizationOptions]="virtualizationOptions"
+        (rangeChange)="recordVirtualRange('satisfied', $event)"
+        (dataRequest)="recordVirtualRequest('satisfied', $event)"
+      />
+    </section>
+
+    <section id="n2-table-remote-virtual-unsatisfied">
+      <neu-table
+        dataMode="remote"
+        [data]="virtualUnsatisfiedRows()"
+        [columns]="columns"
+        [metadata]="virtualUnsatisfiedMetadata()"
+        [query]="virtualBaseQuery"
+        [rowKey]="rowKey"
+        [virtualizationOptions]="virtualizationOptions"
+        (rangeChange)="recordVirtualRange('unsatisfied', $event)"
+        (dataRequest)="recordVirtualRequest('unsatisfied', $event)"
+      />
+    </section>
+
     <section id="n2-table-empty">
       <neu-table [data]="[]" [columns]="columns" [metadata]="emptyMetadata" [rowKey]="rowKey">
         <ng-template neuTableEmpty>SSR empty</ng-template>
@@ -211,6 +268,8 @@ export class N2TableHydrationComponent {
   readonly outputEvents = signal('[]');
   readonly remoteEvents = signal('[]');
   readonly remoteProposals = signal(0);
+  readonly virtualEvents = signal('[]');
+  readonly virtualRanges = signal('[]');
   readonly rows = signal<readonly HydrationRow[]>([
     { id: 1, name: 'Ada', status: 'active' },
     { id: 2, name: 'Grace', status: 'disabled' },
@@ -237,7 +296,35 @@ export class N2TableHydrationComponent {
     sort: [],
     filters: null,
   });
+  readonly virtualBaseQuery: NeuTableQuery<HydrationField> = {
+    page: 9,
+    pageSize: 1,
+    search: '',
+    sort: [],
+    filters: null,
+  };
+  readonly virtualAppliedQuery = signal<NeuTableQuery<HydrationField>>(this.virtualBaseQuery);
   readonly remoteUnsatisfiedMetadata = signal<NeuTableMetadata>(metadata({ totalItems: null }));
+  readonly virtualizationOptions = {
+    enabled: true as const,
+    itemSize: 32,
+    overscan: 2,
+    requestStep: 50,
+  };
+  readonly virtualClientRows: readonly HydrationRow[] = Array.from({ length: 200 }, (_, id) => ({
+    id,
+    name: `Client ${id}`,
+    status: 'active',
+  }));
+  readonly virtualClientMetadata = metadata({ totalItems: 200 });
+  readonly virtualSatisfiedRows = signal<readonly HydrationRow[]>(this.virtualRows(0, 50));
+  readonly virtualSatisfiedMetadata = signal<NeuTableMetadata>(
+    metadata({ totalItems: 1_000, appliedRequestId: 50, dataRange: { start: 0, end: 50 } }),
+  );
+  readonly virtualUnsatisfiedRows = signal<readonly HydrationRow[]>(this.virtualRows(100, 150));
+  readonly virtualUnsatisfiedMetadata = signal<NeuTableMetadata>(
+    metadata({ totalItems: 1_000, appliedRequestId: 60, dataRange: { start: 100, end: 150 } }),
+  );
   private acceptRemote = false;
   readonly sortOptions: NeuTableSortOptions = {
     mode: 'multiple',
@@ -320,6 +407,8 @@ export class N2TableHydrationComponent {
   readonly loadingMetadata = metadata({ totalItems: null, loading: true });
   readonly errorMetadata = metadata({ totalItems: null, error: 'offline' });
   readonly rowKey = (row: HydrationRow) => row.id;
+  readonly virtualSatisfied =
+    viewChild.required<NeuTableComponent<HydrationRow, number, HydrationField>>('virtualSatisfied');
 
   constructor() {
     afterNextRender(() => this.ready.set(true));
@@ -345,6 +434,72 @@ export class N2TableHydrationComponent {
         appliedRequestId: request.requestId,
       }));
     }
+  }
+
+  recordVirtualRequest(
+    scenario: 'satisfied' | 'unsatisfied',
+    request: NeuTableDataRequest<HydrationField>,
+  ): void {
+    const events = JSON.parse(this.virtualEvents()) as string[];
+    const range = request.range;
+    this.virtualEvents.set(
+      JSON.stringify([
+        ...events,
+        `${scenario}:${request.reason}:${request.requestId}:${request.queryRevision}:${range?.start ?? 'x'}-${range?.end ?? 'x'}`,
+      ]),
+    );
+    if (range === undefined) return;
+    const rows = this.virtualRows(range.start, range.end);
+    if (scenario === 'satisfied') {
+      this.virtualSatisfiedRows.set(rows);
+      this.virtualSatisfiedMetadata.set(
+        metadata({
+          totalItems: 1_000,
+          queryRevision: request.queryRevision,
+          appliedRequestId: request.requestId,
+          dataRange: range,
+        }),
+      );
+    } else {
+      this.virtualUnsatisfiedRows.set(rows);
+      this.virtualUnsatisfiedMetadata.set(
+        metadata({
+          totalItems: 1_000,
+          queryRevision: request.queryRevision,
+          appliedRequestId: request.requestId,
+          dataRange: range,
+        }),
+      );
+    }
+  }
+
+  recordVirtualRange(
+    scenario: string,
+    range: {
+      readonly visible: { readonly start: number; readonly end: number };
+      readonly render: { readonly start: number; readonly end: number };
+      readonly reason: string;
+    },
+  ): void {
+    const ranges = JSON.parse(this.virtualRanges()) as string[];
+    this.virtualRanges.set(
+      JSON.stringify([
+        ...ranges,
+        `${scenario}:${range.reason}:${range.visible.start}-${range.visible.end}:${range.render.start}-${range.render.end}`,
+      ]),
+    );
+  }
+
+  applyVirtualQuery(): void {
+    this.virtualAppliedQuery.update((value) => ({ ...value, search: 'accepted' }));
+  }
+
+  private virtualRows(start: number, end: number): readonly HydrationRow[] {
+    return Array.from({ length: end - start }, (_, offset) => ({
+      id: start + offset,
+      name: `Remote ${start + offset}`,
+      status: 'active',
+    }));
   }
 
   proposeRemoteQuery(query: NeuTableQuery<HydrationField>): void {

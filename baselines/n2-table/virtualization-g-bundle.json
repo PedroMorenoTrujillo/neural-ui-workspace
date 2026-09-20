@@ -1,0 +1,250 @@
+{
+  "checkpoint": "N2-011G",
+  "method": "Angular-compiled minified ESM; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 136808,
+        "gzip": 23788,
+        "brotli": 20177
+      },
+      "entrySize": {
+        "raw": 114,
+        "gzip": 124,
+        "brotli": 102
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 136694,
+            "gzip": 23723,
+            "brotli": 20109
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 26
+        }
+      ]
+    },
+    "clientVirtual": {
+      "size": {
+        "raw": 136874,
+        "gzip": 23821,
+        "brotli": 20219
+      },
+      "entrySize": {
+        "raw": 180,
+        "gzip": 170,
+        "brotli": 134
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 136694,
+            "gzip": 23723,
+            "brotli": 20109
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 92
+        }
+      ]
+    },
+    "remoteVirtual": {
+      "size": {
+        "raw": 136927,
+        "gzip": 23848,
+        "brotli": 20297
+      },
+      "entrySize": {
+        "raw": 233,
+        "gzip": 203,
+        "brotli": 178
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 136694,
+            "gzip": 23723,
+            "brotli": 20109
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 145
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 137191,
+        "gzip": 23935,
+        "brotli": 20308
+      },
+      "entrySize": {
+        "raw": 497,
+        "gzip": 354,
+        "brotli": 292
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 136694,
+            "gzip": 23723,
+            "brotli": 20109
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 409
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "entrySize": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "chunks": [],
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "remoteFClientBasic": {
+      "raw": 120636,
+      "gzip": 20322,
+      "brotli": 17332
+    },
+    "virtualizationGBasic": {
+      "raw": 136808,
+      "gzip": 23788,
+      "brotli": 20177
+    },
+    "basicGzipDelta": 3466,
+    "remoteFCombined": {
+      "raw": 120935,
+      "gzip": 20454,
+      "brotli": 17401
+    },
+    "virtualizationGCombined": {
+      "raw": 137191,
+      "gzip": 23935,
+      "brotli": 20308
+    },
+    "combinedGzipDelta": 3481
+  },
+  "isolated": {
+    "virtualizationEngine": {
+      "size": {
+        "raw": 2068,
+        "gzip": 835,
+        "brotli": 748
+      },
+      "entrySize": {
+        "raw": 2068,
+        "gzip": 835,
+        "brotli": 748
+      },
+      "chunks": [],
+      "attribution": [
+        {
+          "path": "projects/ui-core/table/next/internal/virtualization/neu-table-virtualization.ts",
+          "bytesInOutput": 1691
+        }
+      ]
+    },
+    "remoteCoordinator": {
+      "size": {
+        "raw": 3680,
+        "gzip": 1103,
+        "brotli": 1015
+      },
+      "entrySize": {
+        "raw": 3680,
+        "gzip": 1103,
+        "brotli": 1015
+      },
+      "chunks": [],
+      "attribution": [
+        {
+          "path": "projects/ui-core/table/next/internal/remote/neu-table-remote-coordinator.ts",
+          "bytesInOutput": 3124
+        },
+        {
+          "path": "projects/ui-core/table/next/internal/virtualization/neu-table-virtualization.ts",
+          "bytesInOutput": 351
+        }
+      ]
+    }
+  },
+  "packageImports": [
+    "./<private-feature-chunk>"
+  ],
+  "forbiddenGraphTokens": [],
+  "classification": {
+    "core": [
+      "small fixed-height range engine",
+      "one renderer viewport bridge",
+      "range-aware extension of the existing remote coordinator"
+    ],
+    "optionalSplittable": [],
+    "dynamicCandidate": [
+      "advanced filter builder remains the existing private chunk"
+    ],
+    "notWorthSplitting": [
+      "synchronous range math and listener wiring"
+    ]
+  }
+}

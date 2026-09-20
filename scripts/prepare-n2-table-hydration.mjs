@@ -49,8 +49,16 @@ const html=await renderApplication(bootstrap,{document,url:'http://localhost/',a
 for(const value of ['ngh=','<table','SSR Name','0:Linus','data-row-key="1"','data-row-key="2"','data-row-key="3"','data-column-pin="start"','data-column-pin="end"','data-selected="true"','aria-disabled="true"','aria-sort="descending"','aria-label="Search table"','aria-label="Filter Identifier"','type="checkbox"','type="radio"','Show Status','SSR empty','SSR loading','SSR error']){
   if(!html.includes(value)) throw new Error('Missing SSR evidence: '+value);
 }
+const section=(id:string)=>html.match(new RegExp('<section id="'+id+'">(.*?)</section>','s'))?.[1]??'';
+const rowCount=(id:string)=>(section(id).match(/data-row-key=/g)??[]).length;
+if(rowCount('n2-table-client-virtual')!==50) throw new Error('Client virtual SSR bootstrap must render exactly 50 rows.');
+if(rowCount('n2-table-remote-virtual-satisfied')!==50) throw new Error('Satisfied remote virtual SSR bootstrap must render exactly 50 rows.');
+if(rowCount('n2-table-remote-virtual-unsatisfied')!==0) throw new Error('Unsatisfied remote virtual SSR must not invent rows.');
+if(!section('n2-table-client-virtual').includes('aria-rowcount="200"')) throw new Error('Missing client virtual aria-rowcount.');
+if(!section('n2-table-remote-virtual-satisfied').includes('aria-rowcount="1000"')) throw new Error('Missing remote virtual aria-rowcount.');
+if(!html.includes('<output id="n2-virtual-events">[]</output>')||!html.includes('<output id="n2-virtual-ranges">[]</output>')) throw new Error('SSR virtual outputs must remain silent.');
 writeFileSync(new URL('index.html',dir),html);
-console.log('N2 Table SSR document prepared with applied query UI, client pipeline, remote bypass and all metadata states');\n`,
+console.log('N2 Table SSR document prepared with deterministic virtual bootstrap, applied query UI, client pipeline, remote bypass and all metadata states');\n`,
 );
 const configPath = join(fixture, 'angular.json');
 const config = JSON.parse(readFileSync(configPath, 'utf8'));

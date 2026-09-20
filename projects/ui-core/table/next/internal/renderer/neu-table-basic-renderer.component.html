@@ -129,20 +129,27 @@
 
 @if (
   paginationOptions().enabled &&
+  !virtualizationOptions().enabled &&
   (paginationOptions().position === 'top' || paginationOptions().position === 'both')
 ) {
   <ng-container [ngTemplateOutlet]="paginator" />
 }
 
 <div
+  #viewport
   class="neu-table2__viewport"
   [attr.data-density]="appearance().density"
   [attr.data-borders]="appearance().borders"
   [attr.data-responsive]="appearance().responsive"
   [class.neu-table2__viewport--striped]="appearance().striped"
   [class.neu-table2__viewport--sticky-header]="appearance().stickyHeader"
+  [class.neu-table2__viewport--virtual]="virtualizationOptions().enabled"
 >
-  <table class="neu-table2__table" [attr.aria-label]="labels().ariaLabel">
+  <table
+    class="neu-table2__table"
+    [attr.aria-label]="labels().ariaLabel"
+    [attr.aria-rowcount]="virtualizationOptions().enabled ? logicalRowCount() : null"
+  >
     @if (captionTemplate(); as template) {
       <caption>
         <ng-container [ngTemplateOutlet]="template" />
@@ -380,6 +387,63 @@
     </thead>
 
     <tbody>
+      <ng-template #dataRow let-renderRow="row">
+        <tr
+          [attr.data-row-key]="renderRow.key"
+          [attr.data-row-token]="rowIdentity(renderRow)"
+          [attr.data-row-pin]="renderRow.pin"
+          [attr.data-logical-index]="
+            virtualizationOptions().enabled && renderRow.pin === null ? renderRow.index : null
+          "
+          [attr.aria-rowindex]="
+            virtualizationOptions().enabled && renderRow.pin === null ? renderRow.index + 1 : null
+          "
+          [style.block-size.px]="virtualRowSize(renderRow)"
+          [attr.data-selected]="rowSelected(renderRow) || null"
+          [attr.aria-selected]="selectionOptions().mode === 'none' ? null : rowSelected(renderRow)"
+          [attr.aria-disabled]="rowDisabled(renderRow) || null"
+          [class]="rowClass(renderRow)"
+          (click)="onRowClick(renderRow, $event)"
+        >
+          @if (hasSelectionColumn()) {
+            <td class="neu-table2__selection-column">
+              <input
+                [type]="selectionIndicator()"
+                [checked]="rowSelected(renderRow)"
+                [disabled]="rowDisabled(renderRow)"
+                [attr.aria-label]="'Select row ' + renderRow.key"
+                (click)="onSelectionControlClick(renderRow, $event)"
+                (keydown.enter)="onSelectionEnter(renderRow, $event)"
+              />
+            </td>
+          }
+          @for (column of columns(); track column.id) {
+            <td
+              [attr.tabindex]="virtualizationOptions().enabled ? -1 : null"
+              [attr.data-column-id]="column.id"
+              [attr.data-column-header]="column.header"
+              [attr.data-column-pin]="columnPin(column)"
+              [style.inset-inline-start]="
+                columnPin(column) === 'start' ? columnPinOffset(column, 'start') : null
+              "
+              [style.inset-inline-end]="
+                columnPin(column) === 'end' ? columnPinOffset(column, 'end') : null
+              "
+              [style.text-align]="column.align"
+            >
+              @if (cellTemplate(column.id); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="cellContext(renderRow, column)"
+                />
+              } @else {
+                {{ basicValue(renderRow.row, column) }}
+              }
+            </td>
+          }
+        </tr>
+      </ng-template>
+
       @if (metadata().loading) {
         <tr class="neu-table2__state-row" data-state="loading">
           <td [attr.colspan]="columnCount()">
@@ -426,54 +490,33 @@
           </td>
         </tr>
       } @else {
-        @for (renderRow of rows(); track renderRow.track) {
-          <tr
-            [attr.data-row-key]="renderRow.key"
-            [attr.data-row-pin]="renderRow.pin"
-            [attr.data-selected]="rowSelected(renderRow) || null"
-            [attr.aria-selected]="
-              selectionOptions().mode === 'none' ? null : rowSelected(renderRow)
-            "
-            [attr.aria-disabled]="rowDisabled(renderRow) || null"
-            [class]="rowClass(renderRow)"
-            (click)="onRowClick(renderRow, $event)"
-          >
-            @if (hasSelectionColumn()) {
-              <td class="neu-table2__selection-column">
-                <input
-                  [type]="selectionIndicator()"
-                  [checked]="rowSelected(renderRow)"
-                  [disabled]="rowDisabled(renderRow)"
-                  [attr.aria-label]="'Select row ' + renderRow.key"
-                  (click)="onSelectionControlClick(renderRow, $event)"
-                  (keydown.enter)="onSelectionEnter(renderRow, $event)"
-                />
-              </td>
-            }
-            @for (column of columns(); track column.id) {
-              <td
-                [attr.data-column-id]="column.id"
-                [attr.data-column-header]="column.header"
-                [attr.data-column-pin]="columnPin(column)"
-                [style.inset-inline-start]="
-                  columnPin(column) === 'start' ? columnPinOffset(column, 'start') : null
-                "
-                [style.inset-inline-end]="
-                  columnPin(column) === 'end' ? columnPinOffset(column, 'end') : null
-                "
-                [style.text-align]="column.align"
-              >
-                @if (cellTemplate(column.id); as template) {
-                  <ng-container
-                    [ngTemplateOutlet]="template"
-                    [ngTemplateOutletContext]="cellContext(renderRow, column)"
-                  />
-                } @else {
-                  {{ basicValue(renderRow.row, column) }}
-                }
-              </td>
-            }
+        @for (renderRow of pinnedStartRows(); track renderRow.track) {
+          <ng-container
+            [ngTemplateOutlet]="dataRow"
+            [ngTemplateOutletContext]="{ row: renderRow }"
+          />
+        }
+        @if (virtualizationOptions().enabled && spacerBefore() > 0) {
+          <tr class="neu-table2__virtual-spacer" aria-hidden="true">
+            <td [attr.colspan]="columnCount()" [style.block-size.px]="spacerBefore()"></td>
           </tr>
+        }
+        @for (renderRow of normalRows(); track renderRow.track) {
+          <ng-container
+            [ngTemplateOutlet]="dataRow"
+            [ngTemplateOutletContext]="{ row: renderRow }"
+          />
+        }
+        @if (virtualizationOptions().enabled && spacerAfter() > 0) {
+          <tr class="neu-table2__virtual-spacer" aria-hidden="true">
+            <td [attr.colspan]="columnCount()" [style.block-size.px]="spacerAfter()"></td>
+          </tr>
+        }
+        @for (renderRow of pinnedEndRows(); track renderRow.track) {
+          <ng-container
+            [ngTemplateOutlet]="dataRow"
+            [ngTemplateOutletContext]="{ row: renderRow }"
+          />
         }
       }
     </tbody>
@@ -511,6 +554,7 @@
 
 @if (
   paginationOptions().enabled &&
+  !virtualizationOptions().enabled &&
   (paginationOptions().position === 'bottom' || paginationOptions().position === 'both')
 ) {
   <ng-container [ngTemplateOutlet]="paginator" />
