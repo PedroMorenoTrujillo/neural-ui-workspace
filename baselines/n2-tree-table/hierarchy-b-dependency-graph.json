@@ -1,0 +1,59 @@
+{
+  "checkpoint": "N2-015B",
+  "basic": [
+    {
+      "path": "projects/ui-core/tree-table/next/public/neu-tree-table.component-contract.ts",
+      "bytesInOutput": 4416
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/hierarchy/neu-tree-table-hierarchy.ts",
+      "bytesInOutput": 3513
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/renderer/neu-tree-table-renderer.component.ts",
+      "bytesInOutput": 2047
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/public/neu-tree-table-template-contracts.ts",
+      "bytesInOutput": 1704
+    },
+    {
+      "path": "projects/ui-core/internal/neu-field-value-resolver.ts",
+      "bytesInOutput": 108
+    },
+    {
+      "path": "projects/ui-core/internal/neu-exact-key.ts",
+      "bytesInOutput": 47
+    }
+  ],
+  "templates": [
+    {
+      "path": "projects/ui-core/tree-table/next/public/neu-tree-table.component-contract.ts",
+      "bytesInOutput": 4416
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/hierarchy/neu-tree-table-hierarchy.ts",
+      "bytesInOutput": 3513
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/renderer/neu-tree-table-renderer.component.ts",
+      "bytesInOutput": 2047
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/public/neu-tree-table-template-contracts.ts",
+      "bytesInOutput": 1704
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/public/public-api.ts",
+      "bytesInOutput": 419
+    },
+    {
+      "path": "projects/ui-core/internal/neu-field-value-resolver.ts",
+      "bytesInOutput": 108
+    },
+    {
+      "path": "projects/ui-core/internal/neu-exact-key.ts",
+      "bytesInOutput": 47
+    }
+  ]
+}

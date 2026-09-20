@@ -354,10 +354,24 @@ export type NeuTreeTableExportOutcome =
   | { readonly status: 'unsupported'; readonly reason: string }
   | { readonly status: 'failed'; readonly error: unknown };
 
-export interface NeuTreeTableFeatureError {
-  readonly feature: 'advanced-filter' | 'editor' | 'export';
-  readonly error: unknown;
-}
+export type NeuTreeTableFeatureError =
+  | {
+      readonly feature: 'hierarchy';
+      readonly code:
+        | 'cycle'
+        | 'duplicate-key'
+        | 'duplicate-parent'
+        | 'missing-root'
+        | 'missing-node'
+        | 'duplicate-child'
+        | 'orphan'
+        | 'invalid-tree-column';
+      readonly error: unknown;
+    }
+  | {
+      readonly feature: 'advanced-filter' | 'editor' | 'export';
+      readonly error: unknown;
+    };
 
 export interface NeuTreeTableRequestBase<F extends string> {
   readonly requestId: number;

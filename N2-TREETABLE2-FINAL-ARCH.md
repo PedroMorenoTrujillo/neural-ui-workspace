@@ -188,6 +188,8 @@ Search y filter AST se combinan con AND a nivel de T; search hace OR sobre `filt
 
 `hierarchyOptions.treeColumnId` es required y determina indent, expander y node template. Nunca se asume la primera visible. Si falta o está hidden, se emite diagnóstico/feature error de configuración y no se mueve silenciosamente el affordance a otra columna.
 
+Resolución normativa N2-015B: los diagnósticos estructurales públicos usan exclusivamente el output existente `featureError` con `feature: 'hierarchy'` y un código cerrado. Un `treeColumnId` inválido conserva las columnas aplicadas y las filas de dominio, pero suprime indentación y affordance jerárquico; no muta layout/columns ni elige una columna alternativa. La fachada deduplica efímeramente cada diagnóstico estable sin convertirlo en estado aplicado.
+
 ## 25. Layout
 
 P1 mantiene order, visibility, widths, pinning y proposals de resize/reorder de columnas. `layout` es applied input y `layoutChange` único proposal. Column chooser es UI privada opcional; tree row drag/reparent no forma parte de layout.

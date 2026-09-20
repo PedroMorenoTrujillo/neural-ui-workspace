@@ -1,0 +1,173 @@
+@if (toolbarTemplate(); as template) {
+  <div class="neu-tree-table2__toolbar">
+    <ng-container [ngTemplateOutlet]="template" />
+  </div>
+}
+
+<div
+  class="neu-tree-table2__viewport"
+  [attr.data-density]="appearance().density"
+  [attr.data-borders]="appearance().borders"
+  [attr.data-responsive]="appearance().responsive"
+  [class.neu-tree-table2__viewport--striped]="appearance().striped"
+  [class.neu-tree-table2__viewport--sticky-header]="appearance().stickyHeader"
+>
+  <table class="neu-tree-table2__table" role="treegrid" [attr.aria-label]="labels().ariaLabel">
+    @if (captionTemplate(); as template) {
+      <caption>
+        <ng-container [ngTemplateOutlet]="template" />
+      </caption>
+    }
+
+    <thead>
+      <tr role="row">
+        @for (column of columns(); track column.id; let columnIndex = $index) {
+          <th
+            role="columnheader"
+            scope="col"
+            [attr.data-column-id]="column.id"
+            [style.inline-size]="columnWidth(column)"
+            [style.min-inline-size]="column.minWidth"
+            [style.max-inline-size]="column.maxWidth"
+            [style.text-align]="column.align"
+          >
+            @if (headerTemplate(column.id); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template"
+                [ngTemplateOutletContext]="headerContext(column, columnIndex)"
+              />
+            } @else {
+              {{ column.header }}
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+
+    <tbody>
+      @if (rows().length === 0 && rootStatus() === 'loading') {
+        <tr role="row" class="neu-tree-table2__state-row" data-state="loading">
+          <td role="gridcell" [attr.colspan]="columnCount()">
+            @if (loadingTemplate(); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template"
+                [ngTemplateOutletContext]="stateContext"
+              />
+            } @else {
+              {{ labels().loading }}
+            }
+          </td>
+        </tr>
+      } @else if (rows().length === 0 && rootStatus() === 'error') {
+        <tr role="row" class="neu-tree-table2__state-row" data-state="error">
+          <td role="gridcell" [attr.colspan]="columnCount()">
+            @if (errorTemplate(); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template"
+                [ngTemplateOutletContext]="stateContext"
+              />
+            } @else {
+              {{ labels().error }}
+            }
+          </td>
+        </tr>
+      } @else if (rows().length === 0) {
+        <tr role="row" class="neu-tree-table2__state-row" data-state="empty">
+          <td role="gridcell" [attr.colspan]="columnCount()">
+            @if (emptyTemplate(); as template) {
+              <ng-container [ngTemplateOutlet]="template" />
+            } @else {
+              {{ labels().empty }}
+            }
+          </td>
+        </tr>
+      } @else {
+        @for (node of rows(); track node.token) {
+          <tr
+            role="row"
+            [id]="rowId(node)"
+            [class]="rowClass(node)"
+            [attr.data-node-key]="node.token"
+            [attr.data-logical-index]="node.logicalVisibleIndex"
+            [attr.aria-level]="node.depth + 1"
+            [attr.aria-expanded]="node.expandable ? node.expanded : null"
+            [attr.aria-posinset]="node.siblingIndex + 1"
+            [attr.aria-setsize]="node.siblingCount"
+          >
+            @for (column of columns(); track column.id; let columnIndex = $index) {
+              <td
+                role="gridcell"
+                [attr.data-column-id]="column.id"
+                [style.inline-size]="columnWidth(column)"
+                [style.min-inline-size]="column.minWidth"
+                [style.max-inline-size]="column.maxWidth"
+                [style.text-align]="column.align"
+              >
+                @if (isTreeColumn(column)) {
+                  <div
+                    class="neu-tree-table2__tree-cell"
+                    [style.padding-inline-start.px]="node.depth * hierarchyOptions().indentSize"
+                  >
+                    @if (node.expandable) {
+                      <span class="neu-tree-table2__expander" aria-hidden="true">
+                        {{ node.expanded ? '−' : '+' }}
+                      </span>
+                    }
+                    <span class="neu-tree-table2__node-content">
+                      @if (nodeTemplate(); as template) {
+                        <ng-container
+                          [ngTemplateOutlet]="template"
+                          [ngTemplateOutletContext]="nodeContext(node)"
+                        />
+                      } @else if (cellTemplate(column.id); as template) {
+                        <ng-container
+                          [ngTemplateOutlet]="template"
+                          [ngTemplateOutletContext]="cellContext(node, column, columnIndex)"
+                        />
+                      } @else {
+                        {{ present(node.value, column) }}
+                      }
+                    </span>
+                  </div>
+                } @else if (cellTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="cellContext(node, column, columnIndex)"
+                  />
+                } @else {
+                  {{ present(node.value, column) }}
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+
+    @if (hasFooter()) {
+      <tfoot>
+        @if (footerTemplates().size > 0) {
+          <tr role="row">
+            @for (column of columns(); track column.id; let columnIndex = $index) {
+              <td role="gridcell" [attr.data-column-id]="column.id">
+                @if (footerTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="headerContext(column, columnIndex)"
+                  />
+                }
+              </td>
+            }
+          </tr>
+        }
+        @if (summaryTemplate(); as template) {
+          <tr role="row">
+            <td role="gridcell" [attr.colspan]="columnCount()">
+              <ng-container [ngTemplateOutlet]="template" />
+            </td>
+          </tr>
+        }
+      </tfoot>
+    }
+  </table>
+</div>

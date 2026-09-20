@@ -1,0 +1,59 @@
+{
+  "checkpoint": "N2-015B",
+  "legacyReference": {
+    "raw": 120496,
+    "gzip": 18411
+  },
+  "method": "Angular-compiled minified ESM; Angular external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 49201,
+        "gzip": 8068,
+        "brotli": 6786
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 49165
+        }
+      ]
+    },
+    "templates": {
+      "size": {
+        "raw": 49702,
+        "gzip": 8225,
+        "brotli": 6934
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 49584
+        }
+      ]
+    },
+    "nested": {
+      "size": {
+        "raw": 49201,
+        "gzip": 8068,
+        "brotli": 6786
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 49165
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": ["@angular/common", "@angular/core"],
+  "forbiddenGraphTokens": []
+}
