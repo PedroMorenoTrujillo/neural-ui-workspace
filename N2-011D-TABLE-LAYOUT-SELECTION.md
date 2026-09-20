@@ -259,3 +259,106 @@ The handoff is committed locally as one N2-011D commit; no push, tag, release or
 ## 65. Recommendation
 
 PASS. Authorize design review of N2-011D. Do not begin N2-011E until that review explicitly approves this checkpoint.
+
+---
+
+## Addendum — Basic bundle retention check
+
+### Attribution
+
+The reproducible audit now compares the frozen N2-011C artifacts with N2-011D and stores the result in `layout-selection-d-bundle.json`.
+
+- N2-011C combined: 50,676 B raw / 8,460 B gzip.
+- N2-011D basic: 78,665 B raw / 13,819 B gzip.
+- Review delta: **+5,359 B gzip**.
+- Like-for-like basic delta: **+5,448 B gzip**.
+- Compiled FESM contribution delta: **+28,169 B raw**.
+
+The esbuild source graph attributes 13,766 B of minified raw growth:
+
+| Source area                               | Raw contribution delta |
+| ----------------------------------------- | ---------------------: |
+| Selection pure engine                     |               +6,045 B |
+| Private renderer class                    |               +3,909 B |
+| Layout pure engine                        |               +2,341 B |
+| Public facade implementation              |               +1,661 B |
+| Template contracts, pipeline and identity |                  +21 B |
+| Basic projection simplification           |                 -211 B |
+
+The remaining 14,403 B raw is the reproducible residual for Angular-compiled template instructions, styles, component metadata and compilation overhead. The metafile cannot divide that residual byte-perfectly between template branches.
+
+Non-additive isolated bundles locate the internal feature costs. They deliberately overlap through shared helpers:
+
+| Feature probe               | Isolated gzip | Interpretation                                                     |
+| --------------------------- | ------------: | ------------------------------------------------------------------ |
+| Complete selection engine   |       2,867 B | Keys, all-matching, range/modifier, header and proposal machinery  |
+| All-matching support        |       1,343 B | Includes 809 B selection code plus shared client-pipeline matching |
+| Range/modifier selection    |       2,168 B | Includes 3,462 B raw selection code plus shared matching/identity  |
+| Header selection/toggle-all |       2,327 B | Includes projection, header state and shared matching              |
+| Layout projection           |         442 B | Normalization, order, hidden, widths and pin projection            |
+| Resize pure interaction     |         472 B | Constraint normalization and proposal                              |
+| Reorder pure interaction    |         673 B | Reorder and keyboard move proposals                                |
+| Pinning pure interaction    |         311 B | Pin proposal                                                       |
+
+Selection controls/A11y, drag event wiring and focus restoration are methods and template instructions of the same Angular component definition. They therefore sit in the renderer/facade delta and compiled residual rather than in independently tree-shakeable metafile entries.
+
+### Basic reachability
+
+For a BASIC consumer, the entire N2-011D component definition remains reachable:
+
+- the facade template statically references the private renderer;
+- the facade computeds statically reference layout and selection projections;
+- the renderer class statically references selection, resize, reorder, visibility and pin proposal functions;
+- the compiled renderer template statically contains selection controls, A11y bindings and layout controls;
+- focus restoration is referenced by the reorder path.
+
+Runtime values such as `selectionOptions.mode === 'none'` or an empty layout cannot enable build-time tree-shaking. The bundler cannot prove those input values for every future component instance.
+
+What is tree-shaken:
+
+- type-only contracts;
+- tests, fixtures, audit code and performance code;
+- unused consumer literals for keys, all-matching, layout and combined scenarios;
+- the entire `table-next` entrypoint when imported through an unused side-effect-free root path, preserving root-unused at 0 B raw.
+
+No legacy Table 1.x or TableCore code is reachable, and package imports remain limited to `@angular/common` and `@angular/core`.
+
+### Classification
+
+| Cost                                       | Classification      | Decision                                                                                                                                                      |
+| ------------------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Column normalization/layout projection     | CORE                | Required to render the controlled column set deterministically.                                                                                               |
+| Exact-key membership and base header state | CORE                | Required for one complete accessible NeuTable contract.                                                                                                       |
+| Selection controls and A11y bindings       | CORE                | Template semantics must be present when runtime inputs enable selection.                                                                                      |
+| Renderer/template Angular instructions     | CORE                | Inherent to the single facade/private-renderer architecture.                                                                                                  |
+| All-matching matching/exclusions           | OPTIONAL-SPLITTABLE | Conceptually separable internally, but a static split would still be reachable and a dynamic split would complicate synchronous selection for a small saving. |
+| Range/modifier policies                    | OPTIONAL-SPLITTABLE | Can remain an internal boundary candidate if later selection work grows materially. No split is justified at the current size.                                |
+| Resize proposal/gesture code               | NOT WORTH SPLITTING | The pure probe is 472 B gzip and would cost more in loading/state plumbing.                                                                                   |
+| Reorder/drag code                          | NOT WORTH SPLITTING | The pure probe is 673 B gzip; it shares renderer state and focus behavior.                                                                                    |
+| Pinning                                    | NOT WORTH SPLITTING | The pure probe is 311 B gzip.                                                                                                                                 |
+| Focus restoration                          | NOT WORTH SPLITTING | Small one-shot behavior coupled to accepted reorder.                                                                                                          |
+| Angular compilation overhead               | CORE                | Consequence of statically available runtime template branches.                                                                                                |
+
+### Optimization performed
+
+No runtime optimization or architecture refactor was performed. There is no accidental legacy dependency, duplicate implementation or independently reachable optional module to remove. The only change is stronger reproducible attribution in the existing bundle audit and its baseline.
+
+The BASIC bundle remains **13,819 B gzip**. No public API, component, entrypoint, feature module, DI layer, factory or dynamic import was added.
+
+### Future budget map
+
+| Phase                          | Core                                                        | Internally separable                    | Dynamic/private feature chunk                                          |
+| ------------------------------ | ----------------------------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------- |
+| E — sort/filter/pagination UI  | Basic sort controls and compact pagination state            | Filter-row/menu adapters                | Advanced filter builder/overlay if its implementation becomes material |
+| F — remote machine             | Minimal request/output coordination and deterministic state | Retry, concurrency and transport policy | Only heavyweight optional transport tooling, if ever introduced        |
+| G — virtualization             | Stable row identity and viewport contract                   | Virtualization engine/adapter           | Private chunk if a substantial runtime/CDK dependency is required      |
+| H — editing/expansion/grouping | Minimal expansion/group keys needed by the facade           | Group/expansion projections             | Editing engine, editor orchestration and heavy editor integrations     |
+| I — optional/export            | Output contract only                                        | Small optional command adapters         | Export serializers/workers and format-specific dependencies            |
+
+Advanced filters, editing and export must not be compiled into BASIC merely because their frozen inputs/outputs exist. They are the primary candidates for private internal separation, with dynamic chunks reserved for implementations whose measured weight justifies the loading boundary.
+
+### Recommendation
+
+**BUNDLE ARCHITECTURE PASS.**
+
+The approximately 5.36 KB gzip increase is explained by the controlled selection/layout engines plus the single renderer's statically compiled controls and Angular instructions. At the present size, splitting would add more architectural and runtime complexity than it removes. Keep the new retention attribution as the budget guard for later phases and do not begin N2-011E until separately authorized.

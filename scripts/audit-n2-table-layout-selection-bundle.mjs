@@ -17,6 +17,8 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const update = process.argv.includes('--update');
 const artifactPath = join(root, 'baselines/n2-table/layout-selection-d-bundle.json');
 const graphPath = join(root, 'baselines/n2-table/layout-selection-d-dependency-graph.json');
+const clientArtifactPath = join(root, 'baselines/n2-table/client-c-bundle.json');
+const clientGraphPath = join(root, 'baselines/n2-table/client-c-dependency-graph.json');
 const temporary = mkdtempSync(join(root, '.n2-table-layout-selection-'));
 const external = ['@angular/*', '@angular/cdk/*', '@ng-icons/*', 'rxjs', 'rxjs/*'];
 
@@ -95,6 +97,35 @@ async function sourceGraph(source) {
   }));
 }
 
+async function sourceBundle(source) {
+  const result = await build({
+    bundle: true,
+    external,
+    format: 'esm',
+    loader: { '.html': 'text', '.scss': 'text' },
+    metafile: true,
+    minify: true,
+    platform: 'browser',
+    stdin: { contents: source, loader: 'ts', resolveDir: root },
+    treeShaking: true,
+    write: false,
+  });
+  const bytes = Buffer.concat(result.outputFiles.map((file) => file.contents));
+  return { size: compressed(bytes), attribution: attribution(result.metafile) };
+}
+
+function graphDelta(current, baseline) {
+  const baselineByPath = new Map(baseline.map((entry) => [entry.path, entry.bytesInOutput]));
+  const currentByPath = new Map(current.map((entry) => [entry.path, entry.bytesInOutput]));
+  return [...new Set([...baselineByPath.keys(), ...currentByPath.keys()])]
+    .map((path) => ({
+      path,
+      bytesInOutput: (currentByPath.get(path) ?? 0) - (baselineByPath.get(path) ?? 0),
+    }))
+    .filter((entry) => entry.bytesInOutput !== 0)
+    .sort((left, right) => Math.abs(right.bytesInOutput) - Math.abs(left.bytesInOutput));
+}
+
 function packageImports(packageRoot) {
   const source = readFileSync(join(packageRoot, 'fesm2022/neural-ui-core-table-next.mjs'), 'utf8');
   return [
@@ -116,6 +147,28 @@ const sourceComponent =
   "import {NeuTableComponent} from './projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};";
 const sourceAll =
   "import * as candidate from './projects/ui-core/table/next/public/public-api';export{candidate};";
+const selectionModule = './projects/ui-core/table/next/internal/selection/neu-table-selection';
+const layoutModule = './projects/ui-core/table/next/internal/layout/neu-table-layout';
+const featureSources = {
+  selectionPureEngine: `export * from '${selectionModule}';`,
+  allMatchingSupport: `export {
+    createNeuTableSelectionScope,areNeuTableSelectionScopesEqual,neuTableRowMatchesSelectionScope
+  } from '${selectionModule}';`,
+  rangeModifierSelection: `export {proposeNeuTableRowSelection} from '${selectionModule}';`,
+  headerSelection: `export {
+    projectNeuTableSelection,proposeNeuTableToggleAll
+  } from '${selectionModule}';`,
+  layoutProjection: `export {
+    normalizeNeuTableColumns,projectNeuTableLayout
+  } from '${layoutModule}';`,
+  resizeInteractionPure: `export {
+    normalizeNeuTableResize,proposeNeuTableResize
+  } from '${layoutModule}';`,
+  reorderInteractionPure: `export {
+    proposeNeuTableReorder,proposeNeuTableMove
+  } from '${layoutModule}';`,
+  pinningPure: `export {proposeNeuTablePin} from '${layoutModule}';`,
+};
 
 try {
   for (const path of ['projects', 'angular.json', 'tsconfig.json', 'package.json', 'LICENSE']) {
@@ -159,6 +212,27 @@ try {
     component: await sourceGraph(sourceComponent),
     completeEntrypoint: await sourceGraph(sourceAll),
   };
+  const isolatedFeatureBundles = Object.fromEntries(
+    await Promise.all(
+      Object.entries(featureSources).map(async ([name, source]) => [
+        name,
+        await sourceBundle(source),
+      ]),
+    ),
+  );
+  const clientArtifact = JSON.parse(readFileSync(clientArtifactPath, 'utf8'));
+  const clientGraph = JSON.parse(readFileSync(clientGraphPath, 'utf8'));
+  if (clientArtifact.checkpoint !== 'N2-011C' || clientGraph.checkpoint !== 'N2-011C') {
+    throw new Error('N2-011C comparison artifacts are not the frozen client baseline.');
+  }
+  const sourceContributionDelta = graphDelta(graph.component, clientGraph.queryClientBasic);
+  const sourceContributionRaw = sourceContributionDelta.reduce(
+    (total, entry) => total + entry.bytesInOutput,
+    0,
+  );
+  const compiledModuleRawDelta =
+    consumers.basic.attribution[0].bytesInOutput -
+    clientArtifact.consumers.queryClientBasic.attribution[0].bytesInOutput;
   const forbidden = [
     '/table/neu-table.component',
     '/table-core/',
@@ -175,6 +249,24 @@ try {
     consumers,
     packageImports: imports,
     forbiddenGraphTokens: violations,
+    retention: {
+      comparison: {
+        clientCBasic: clientArtifact.consumers.queryClientBasic.size,
+        clientCCombined: clientArtifact.consumers.queryCombined.size,
+        layoutSelectionDBasic: consumers.basic.size,
+        basicToBasicGzipDelta:
+          consumers.basic.size.gzip - clientArtifact.consumers.queryClientBasic.size.gzip,
+        combinedToBasicGzipDelta:
+          consumers.basic.size.gzip - clientArtifact.consumers.queryCombined.size.gzip,
+        compiledModuleRawDelta,
+      },
+      sourceContributionDelta,
+      sourceContributionRaw,
+      templateStylesAndAngularCompilationRemainderRaw:
+        compiledModuleRawDelta - sourceContributionRaw,
+      isolatedFeatureBundles,
+      note: 'Isolated feature bundles overlap through shared helpers and are non-additive; template-bound component methods remain reachable as one compiled Angular definition.',
+    },
   };
 
   if (consumers['root-unused'].size.raw !== 0) throw new Error('Root-unused is not zero bytes.');
@@ -207,7 +299,7 @@ try {
       throw new Error('N2-011D dependency graph drifted.');
     }
     console.log(
-      `N2-011D bundle passed (basic ${consumers.basic.size.gzip} B gzip; combined ${consumers.combined.size.gzip} B gzip; root-unused 0 B).`,
+      `N2-011D bundle passed (basic ${consumers.basic.size.gzip} B gzip; +${artifact.retention.comparison.combinedToBasicGzipDelta} B vs C combined; combined ${consumers.combined.size.gzip} B gzip; root-unused 0 B).`,
     );
   }
 } finally {
