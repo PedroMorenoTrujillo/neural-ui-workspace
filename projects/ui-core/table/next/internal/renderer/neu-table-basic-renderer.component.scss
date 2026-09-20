@@ -3,8 +3,47 @@
   min-inline-size: 0;
 }
 
-.neu-table2__toolbar {
+.neu-table2__query-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neu-table-space-sm, 0.5rem);
   padding-block: var(--neu-table-space-sm, 0.5rem);
+}
+
+.neu-table2__toolbar {
+  min-inline-size: 0;
+}
+
+.neu-table2__search,
+.neu-table2__pagination,
+.neu-table2__row-filter,
+.neu-table2__filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--neu-table-space-xs, 0.25rem);
+}
+
+.neu-table2__builder-host,
+th {
+  position: relative;
+}
+
+.neu-table2__pagination {
+  justify-content: flex-end;
+  padding-block: var(--neu-table-space-sm, 0.5rem);
+}
+
+.neu-table2__pagination label {
+  display: flex;
+  align-items: center;
+  gap: var(--neu-table-space-xs, 0.25rem);
+}
+
+.neu-table2__pagination input {
+  inline-size: 4.5rem;
 }
 
 .neu-table2__hidden-columns,
@@ -17,6 +56,64 @@
 
 .neu-table2__header-label {
   flex: 1 1 auto;
+}
+
+.neu-table2__sort-button {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--neu-table-space-xs, 0.25rem);
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.neu-table2__sort-priority {
+  display: inline-grid;
+  min-inline-size: 1.25rem;
+  min-block-size: 1.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-size: 0.75em;
+}
+
+.neu-table2__filter-menu {
+  position: absolute;
+  z-index: 7;
+  inset-block-start: calc(100% - 0.25rem);
+  inset-inline-end: 0.5rem;
+  display: grid;
+  inline-size: min(20rem, calc(100vw - 2rem));
+  gap: var(--neu-table-space-sm, 0.5rem);
+  padding: var(--neu-table-space-sm, 0.75rem);
+  border: 1px solid var(--neu-color-border, currentColor);
+  border-radius: 0.5rem;
+  background: var(--neu-color-surface, Canvas);
+  box-shadow: 0 0.75rem 2rem color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.neu-table2__filter-menu label {
+  display: grid;
+  gap: var(--neu-table-space-xs, 0.25rem);
+}
+
+.neu-table2__filter-row th {
+  padding-block: var(--neu-table-space-xs, 0.25rem);
+}
+
+.neu-table2__row-filter {
+  align-items: stretch;
+}
+
+.neu-table2__row-filter :is(select, input) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 .neu-table2__selection-column {
@@ -42,7 +139,8 @@
 }
 
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--neu-color-focus, currentColor);
   outline-offset: 2px;
 }

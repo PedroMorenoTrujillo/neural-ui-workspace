@@ -28,6 +28,20 @@ try {
   assert.equal(await page.locator('#n2-ready').textContent(), 'false');
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
   assert.equal(
+    await page.locator('#n2-table-primary th[data-column-id="name"]').getAttribute('aria-sort'),
+    'descending',
+  );
+  assert.equal(
+    await page.locator('#n2-table-primary input[aria-label="Search table"]').inputValue(),
+    '',
+  );
+  assert.equal(
+    await page
+      .locator('#n2-table-primary button[aria-label="Filter Identifier"]')
+      .getAttribute('aria-pressed'),
+    'true',
+  );
+  assert.equal(
     await page
       .locator('#n2-table-primary th[data-column-id="name"] .neu-table2__header-label')
       .textContent(),
@@ -138,11 +152,57 @@ try {
     await page.evaluate(() => window.__n2TableIds),
   );
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
-  await page.locator('#n2-table-primary input[aria-label="Select row 3"]').click();
-  await page.locator('#n2-table-primary button[aria-label="Hide Identifier"]').click();
+  await page.locator('#n2-table-primary button[aria-label^="Sort Name"]').click();
+  await page.waitForFunction(
+    () => document.querySelector('#n2-output-events')?.textContent === '["queryChange"]',
+  );
+  await page.locator('#n2-table-primary input[aria-label="Search table"]').fill('Ada');
+  await page.locator('#n2-table-primary button', { hasText: 'Search' }).click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-output-events')?.textContent ===
+      '["queryChange","queryChange"]',
+  );
+  await page.locator('#n2-table-primary button[aria-label="Filter Name"]').click();
+  await page.locator('#n2-table-primary [data-filter-editor="name"] input').fill('a');
+  await page
+    .locator('#n2-table-primary [data-filter-editor="name"] button', {
+      hasText: 'Apply Name filter',
+    })
+    .click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-output-events')?.textContent ===
+      '["queryChange","queryChange","queryChange"]',
+  );
+  await page.locator('#n2-table-primary button[aria-label="Next page"]').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-output-events')?.textContent ===
+      '["queryChange","queryChange","queryChange","queryChange"]',
+  );
   assert.equal(
     await page.locator('#n2-output-events').textContent(),
-    '["selectionChange","layoutChange"]',
+    '["queryChange","queryChange","queryChange","queryChange"]',
+  );
+  assert.equal(
+    await page.locator('#n2-table-primary th[data-column-id="name"]').getAttribute('aria-sort'),
+    'descending',
+  );
+  assert.equal(
+    await page.locator('#n2-table-primary input[aria-label="Search table"]').inputValue(),
+    '',
+  );
+  await page.locator('#n2-table-primary input[aria-label="Select row 3"]').click();
+  await page.locator('#n2-table-primary button[aria-label="Hide Identifier"]').click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#n2-output-events')?.textContent ===
+      '["queryChange","queryChange","queryChange","queryChange","selectionChange","layoutChange"]',
+  );
+  assert.equal(
+    await page.locator('#n2-output-events').textContent(),
+    '["queryChange","queryChange","queryChange","queryChange","selectionChange","layoutChange"]',
   );
   assert.equal(
     await page.locator('#n2-table-primary tr[data-row-key="3"]').getAttribute('data-selected'),
@@ -159,11 +219,7 @@ try {
   );
   assert.equal(
     await page.locator('#n2-output-events').textContent(),
-    '["selectionChange","layoutChange"]',
-  );
-  assert.equal(
-    (await page.locator('#n2-output-events').textContent()).includes('queryChange'),
-    false,
+    '["queryChange","queryChange","queryChange","queryChange","selectionChange","layoutChange"]',
   );
   assert.equal(
     (await page.locator('#n2-output-events').textContent()).includes('dataRequest'),
@@ -175,7 +231,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    'N2 Table real zoneless hydration passed: controlled layout, keys, all-matching, disabled checkbox/radio state rendered in SSR; DOM reused; first selection/layout proposals emitted once; zero query/request echo and zero NG050x',
+    'N2 Table real zoneless hydration passed: applied query UI rendered in SSR; DOM reused; first sort/search/filter/page and selection/layout proposals emitted exactly once; zero query echo/dataRequest and zero NG050x',
   );
 } finally {
   release();

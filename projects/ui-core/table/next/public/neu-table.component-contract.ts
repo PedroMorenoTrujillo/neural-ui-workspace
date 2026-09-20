@@ -327,6 +327,8 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       this.dataMode() === 'client' && this.paginationOptions().enabled,
     ),
   );
+  protected readonly matchedNormalCount = computed(() => this.sortedRows().length);
+  protected readonly visibleNormalCount = computed(() => this.normalPage().rows.length);
   protected readonly pipelineRows = computed(() => [
     ...this.sourcePartition().start,
     ...this.normalPage().rows,
@@ -399,6 +401,9 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   };
   protected readonly proposeLayout = (change: NeuTableLayoutChange | null) => {
     if (change !== null) this.layoutChange.emit(change);
+  };
+  protected readonly proposeQuery = (query: NeuTableQuery<F> | null) => {
+    if (query !== null) this.queryChange.emit(query);
   };
   protected readonly retry = () => this.retryData();
 

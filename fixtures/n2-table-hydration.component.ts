@@ -28,8 +28,22 @@ interface HydrationRow {
 type HydrationField = 'id' | 'name' | 'status';
 
 const columns: readonly NeuTableColumn<HydrationRow, HydrationField>[] = [
-  { id: 'id', header: 'Identifier', field: 'id' },
-  { id: 'name', header: 'Name', field: 'name', minWidth: '120px', maxWidth: '360px' },
+  {
+    id: 'id',
+    header: 'Identifier',
+    field: 'id',
+    sort: { field: 'id' },
+    filter: { field: 'id', rules: ['equals', 'greaterThan'], defaultRule: 'equals' },
+  },
+  {
+    id: 'name',
+    header: 'Name',
+    field: 'name',
+    minWidth: '120px',
+    maxWidth: '360px',
+    sort: { field: 'name' },
+    filter: { field: 'name', rules: ['contains', 'equals'], defaultRule: 'contains' },
+  },
   { id: 'status', header: 'Status', field: 'status' },
 ];
 
@@ -170,7 +184,7 @@ export class N2TableHydrationComponent {
     resetPageOnChange: true,
   };
   readonly filterOptions: NeuTableFilterOptions<HydrationRow, HydrationField> = {
-    surfaces: [],
+    surfaces: ['menu'],
     globalFields: ['name'],
     predicates: {},
     debounceMs: 0,
