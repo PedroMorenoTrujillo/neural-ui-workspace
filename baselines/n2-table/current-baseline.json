@@ -1,0 +1,1152 @@
+{
+  "checkpoint": "281b658",
+  "angular": "22.1.x",
+  "method": {
+    "functional": "static inventory backed by the directed current-table test run",
+    "bundle": "minified ESM consumer; Angular/CDK/ng-icons/RxJS external; gzip 9; Brotli 11",
+    "prime": "extracted only from N2-PRIME22-MATRIX.md rows F-001..F-070"
+  },
+  "functional": {
+    "simpleRender": {
+      "testCount": 63,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-advanced-filter.controller.spec.ts",
+          "title": "adapts date-only values and ranges without display-string matching"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-body-section.integration.spec.ts",
+          "title": "renders consumer-owned managed and unlimited sibling rows directly under tbody"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-expand.directive.spec.ts",
+          "title": "should render table with expand directive"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.controllers.spec.ts",
+          "title": "separates request step from render tolerance and clamps totals"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+          "title": "navigates Up/Down/Home/End within rendered selectable rows"
+        }
+      ]
+    },
+    "sort": {
+      "testCount": 66,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-body-section.integration.spec.ts",
+          "title": "keeps pagination, sorting and filtering canonical and excludes sibling rows from counts"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+          "title": "uses defaultSortOrder and can preserve the current page on sort"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+          "title": "makes only sortable headers focusable and exposes the removable aria-sort cycle"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+          "title": "uses Shift+Enter and Shift+Space for the existing additive multisort contract"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+          "title": "ignores repeated/header-descendant keys and does not create duplicate sort events"
+        }
+      ]
+    },
+    "filter": {
+      "testCount": 84,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-body-section.integration.spec.ts",
+          "title": "keeps pagination, sorting and filtering canonical and excludes sibling rows from counts"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-filter.engine.spec.ts",
+          "title": "does not expose a mode on boolean filter configuration"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-filter.engine.spec.ts",
+          "title": "handles malformed, open-ended, overridden, and registry-backed filter boundaries"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.controllers.spec.ts",
+          "title": "normalizes immediate filter delays and skips fully discarded drafts"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+          "title": "coalesces filter delay and commits enter-driven inline filters once"
+        }
+      ]
+    },
+    "pagination": {
+      "testCount": 54,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-body-section.integration.spec.ts",
+          "title": "keeps pagination, sorting and filtering canonical and excludes sibling rows from counts"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+          "title": "uses defaultSortOrder and can preserve the current page on sort"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+          "title": "limits keyboard select-all and ranges to the current loaded page"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-lazy-virtual.integration.spec.ts",
+          "title": "resets query and range as one lazy request and suppresses the paginator"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-paginator.controller.spec.ts",
+          "title": "creates immutable complete events and clamps the requested page"
+        }
+      ]
+    },
+    "selection": {
+      "testCount": 107,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-advanced-filter.controller.spec.ts",
+          "title": "owns independent Select controls per rule and defaults new combinations to OR"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-advanced-filter.controller.spec.ts",
+          "title": "keeps MultiSelect single-rule and snapshots the draft selection array"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-advanced-filter.controller.spec.ts",
+          "title": "shows unsupported existing MultiSelect and custom multi-rules read-only"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-body-section.integration.spec.ts",
+          "title": "preserves managed selection, keyboard focus, ARIA and consumer attributes/classes"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-filter.engine.spec.ts",
+          "title": "matches primitive Select values including zero without string coercion"
+        }
+      ]
+    },
+    "virtual": {
+      "testCount": 12,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-body-section.integration.spec.ts",
+          "title": "keeps virtual entries truthful and disables arbitrary sibling-row composition"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+          "title": "emits raw scroll only for real virtual DOM scrolls and never for restoration"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+          "title": "stops virtual navigation at the rendered boundary instead of claiming unloaded rows"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-lazy-virtual.integration.spec.ts",
+          "title": "keeps public virtual positioning safe for an empty total and disabled virtualization"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-lazy-virtual.integration.spec.ts",
+          "title": "preserves preloaded virtual behavior when dataFirst is absent"
+        }
+      ]
+    },
+    "remoteLazy": {
+      "testCount": 48,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-advanced-filter.controller.spec.ts",
+          "title": "keeps server-side single-rule drafts editable without enabling Add rule"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-advanced-filter.controller.spec.ts",
+          "title": "protects existing server-side multiple rules from destructive draft operations"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+          "title": "routes one keyboard sort intent through server and URL adapters atomically"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+          "title": "selects only loaded selectable rows for a partial server result"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-lazy-virtual.integration.spec.ts",
+          "title": "debounces range rendering and lazy requests when a delay is configured"
+        }
+      ]
+    },
+    "editing": {
+      "testCount": 22,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-advanced-filter.controller.spec.ts",
+          "title": "initializes and edits multiple applied rules with their operator intact"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-advanced-filter.controller.spec.ts",
+          "title": "keeps server-side single-rule drafts editable without enabling Add rule"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+          "title": "focuses the configured editor target and traverses vertically while guarding text arrows"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+          "title": "falls back safely when a custom editor focus selector is invalid"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+          "title": "guards arrow-owning editor controls without suppressing table navigation elsewhere"
+        }
+      ]
+    },
+    "expansion": {
+      "testCount": 12,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-expand.directive.spec.ts",
+          "title": "should render table with expand directive"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-expand.directive.spec.ts",
+          "title": "should have expand toggle buttons for each row"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-expand.directive.spec.ts",
+          "title": "NeuTableExpandDirective should expose templateRef"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-layout.controller.spec.ts",
+          "title": "resizes expand columns independently and obeys min/max constraints"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table.component.spec.ts",
+          "title": "toggleExpand should expand and collapse a row"
+        }
+      ]
+    },
+    "grouping": {
+      "testCount": 18,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-body-section.integration.spec.ts",
+          "title": "structurally owns loading, empty, group, expansion and frozen states"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+          "title": "groups by nested paths and computed accessors"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-grouping.controller.spec.ts",
+          "title": "applies a stable group-first order and builds contiguous metadata"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-grouping.controller.spec.ts",
+          "title": "resolves rowspan only for the first row and supports descending groups"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-grouping.controller.spec.ts",
+          "title": "orders null, numeric and equal values and resolves missing rowspan groups"
+        }
+      ]
+    },
+    "export": {
+      "testCount": 21,
+      "evidence": [
+        {
+          "file": "projects/ui-core/table/neu-table-export.controller.spec.ts",
+          "title": "quotes CSV, emits a BOM, validates separators, and escapes spreadsheet formulas"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-export.controller.spec.ts",
+          "title": "projects JSON through canonical accessors"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-export.controller.spec.ts",
+          "title": "creates a genuine ZIP-based XLSX package"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-state-persistence.adapter.spec.ts",
+          "title": "reports unsupported filters and non-JSON keys instead of corrupting them"
+        },
+        {
+          "file": "projects/ui-core/table/neu-table-state-persistence.adapter.spec.ts",
+          "title": "projects supported JSON values and omits every unsupported filter shape"
+        }
+      ]
+    }
+  },
+  "performance": {
+    "snapshot": "baselines/n2-table/performance.json",
+    "command": "npm run capture:n2-table-performance -- --update",
+    "scenarios": [
+      "1k client render (100-row page)",
+      "10k client render (100-row page)",
+      "10k sort",
+      "10k filter",
+      "10k selection",
+      "10k virtual",
+      "50 lifecycle cycles"
+    ]
+  },
+  "bundle": {
+    "consumers": {
+      "tableBasic": {
+        "raw": 795591,
+        "gzip": 137031,
+        "brotli": 94784
+      },
+      "tableFeatureRich": {
+        "raw": 795759,
+        "gzip": 137096,
+        "brotli": 94875
+      },
+      "tableCoreBasic": {
+        "raw": 30086,
+        "gzip": 4044,
+        "brotli": 3414
+      },
+      "rootUnused": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      }
+    }
+  },
+  "accessibility": {
+    "sourceSignals": {
+      "nativeTable": 1,
+      "roles": 18,
+      "headers": 10,
+      "sorting": 2,
+      "selection": 1,
+      "keyboard": 15,
+      "editing": 1,
+      "expansion": 12,
+      "virtualRows": 4
+    },
+    "directedTests": 31,
+    "evidence": [
+      {
+        "file": "projects/ui-core/table/neu-table-body-section.integration.spec.ts",
+        "title": "preserves managed selection, keyboard focus, ARIA and consumer attributes/classes"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+        "title": "focuses the configured editor target and traverses vertically while guarding text arrows"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-final-parity.integration.spec.ts",
+        "title": "falls back safely when a custom editor focus selector is invalid"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "makes only sortable headers focusable and exposes the removable aria-sort cycle"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "keeps controlled keyboard sort proposal-only and suppresses echo replay"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "routes one keyboard sort intent through server and URL adapters atomically"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "replaces single selection with Space/Enter and keeps radio/ARIA state synchronized"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "selects from the last anchor to the focused row with Shift+Space"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "limits keyboard select-all and ranges to the current loaded page"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "keeps controlled keyboard proposals authoritative until echo without replay"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "keeps controlled keyboard range proposal-only and makes consumer echo silent"
+      },
+      {
+        "file": "projects/ui-core/table/neu-table-keyboard-parity.spec.ts",
+        "title": "preserves logical focus by row key after sort/replacement and normalizes after filtering"
+      }
+    ]
+  },
+  "ssrHydration": {
+    "smokeCommand": "npm run test:ssr-smoke",
+    "entries": {
+      "table": {
+        "imports": [
+          "@angular/core",
+          "@angular/common",
+          "@angular/forms",
+          "@angular/cdk/scrolling",
+          "./neu-table-expand.directive",
+          "./neu-table-toolbar.directive",
+          "./neu-table-templates.directive",
+          "./neu-table-filter-template.directive",
+          "./neu-table-filter.engine",
+          "@neural-ui/core/url-state",
+          "@neural-ui/core/icon",
+          "@neural-ui/core/inline-editor",
+          "@neural-ui/core/context-menu",
+          "@neural-ui/core/internal",
+          "@neural-ui/core/select",
+          "@neural-ui/core/option-api",
+          "@neural-ui/core/option-api",
+          "./neu-table.types",
+          "./neu-table-advanced-filter.utils",
+          "./neu-table-state.controller",
+          "./neu-table-url-state.adapter",
+          "./neu-table-state-persistence.adapter",
+          "./neu-table-selection.controller",
+          "./neu-table-value-resolver",
+          "./neu-table-sort.controller",
+          "./neu-table-keyboard.controller",
+          "./neu-table-query.controller",
+          "./neu-table-lazy-data.controller",
+          "./neu-table-editing.controller",
+          "./neu-table-grouping.controller",
+          "./neu-table-layout.controller",
+          "./neu-table-filter.registry",
+          "./neu-table-filter-scheduler",
+          "./neu-table-paginator.controller",
+          "./neu-table-viewport.controller",
+          "./neu-table-virtual-retention.controller",
+          "./neu-table-export.controller",
+          "./neu-table-reorder.controller",
+          "./neu-table-row-reorder-handle.directive",
+          "./neu-table-managed-row.directive",
+          "./neu-table-checkbox.component",
+          "./neu-table-optional-feature-error.component",
+          "./neu-table-optional-features.component",
+          "./neu-table-optional-features.types",
+          "./neu-table.types"
+        ],
+        "browserApiReferences": {
+          "window": 10,
+          "document": 0,
+          "ResizeObserver": 0,
+          "localStorage": 1,
+          "sessionStorage": 1
+        }
+      },
+      "tableCore": {
+        "imports": [
+          "@angular/core",
+          "@angular/common",
+          "./neu-table-core-templates.directive",
+          "./neu-table-core.types"
+        ],
+        "browserApiReferences": {
+          "window": 0,
+          "document": 0,
+          "ResizeObserver": 0,
+          "localStorage": 0,
+          "sessionStorage": 0
+        }
+      }
+    },
+    "hydrationEvidence": [],
+    "currentLimit": "No Table-specific DOM-reuse/NG050x/request-deduplication hydration fixture existed at the checkpoint; this absence is part of the baseline, not a PASS claim."
+  },
+  "prime": {
+    "source": "N2-PRIME22-MATRIX.md; no PrimeNG re-audit in N2-011A",
+    "parityTarget": [
+      {
+        "id": "F-001",
+        "capability": "Datos locales",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-002",
+        "capability": "Página remota",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-003",
+        "capability": "Loading",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-004",
+        "capability": "Vacío",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-005",
+        "capability": "Error y retry",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-006",
+        "capability": "Controlado/rechazo",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-007",
+        "capability": "Query agregada",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-008",
+        "capability": "Server state legacy",
+        "classification": "REDESIGN",
+        "decision": "REMOVE"
+      },
+      {
+        "id": "F-009",
+        "capability": "Reset",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-010",
+        "capability": "Persistencia",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-011",
+        "capability": "Single",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-012",
+        "capability": "Multi",
+        "classification": "REDESIGN",
+        "decision": "MERGE"
+      },
+      {
+        "id": "F-013",
+        "capability": "Custom",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-014",
+        "capability": "Remoto",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-015",
+        "capability": "Removable",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-016",
+        "capability": "Inicial",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-017",
+        "capability": "Columna",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-018",
+        "capability": "Global",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-019",
+        "capability": "Match modes",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-020",
+        "capability": "Múltiples reglas",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-021",
+        "capability": "Custom registry",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-022",
+        "capability": "Menu/row",
+        "classification": "REDESIGN",
+        "decision": "MERGE"
+      },
+      {
+        "id": "F-023",
+        "capability": "Programático",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-024",
+        "capability": "Commit/debounce",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-025",
+        "capability": "Remoto",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-026",
+        "capability": "Client",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-027",
+        "capability": "Server",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-028",
+        "capability": "Controlled",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-029",
+        "capability": "Sizes/report/jump",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-030",
+        "capability": "Placement",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-031",
+        "capability": "Single/multiple",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-032",
+        "capability": "Checkbox/radio",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-033",
+        "capability": "Select all",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-034",
+        "capability": "Meta/range/keyboard",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-035",
+        "capability": "rowSelectable",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-036",
+        "capability": "Remoto no cargado",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-037",
+        "capability": "ARIA/foco",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-038",
+        "capability": "Cell",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-039",
+        "capability": "Row",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-040",
+        "capability": "Validation",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-041",
+        "capability": "Custom editor",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-042",
+        "capability": "Controlled/template",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-043",
+        "capability": "Subheader",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-044",
+        "capability": "Rowspan",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-045",
+        "capability": "Colapso y agregado",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-046",
+        "capability": "Dinámicas",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-047",
+        "capability": "Reorder",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-048",
+        "capability": "Resize fit/expand",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-049",
+        "capability": "Frozen/sticky",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-050",
+        "capability": "Visibility/width",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-051",
+        "capability": "Reorder",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-052",
+        "capability": "Styling/class",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-053",
+        "capability": "Context menu",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-054",
+        "capability": "Frozen",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-055",
+        "capability": "Fixed viewport",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-056",
+        "capability": "Lazy sparse",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-057",
+        "capability": "Overscan/ranges",
+        "classification": "REDESIGN",
+        "decision": "RENAME"
+      },
+      {
+        "id": "F-059",
+        "capability": "Lifecycle/memory",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-060",
+        "capability": "Header/body/footer",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-061",
+        "capability": "Caption/loading/empty",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-062",
+        "capability": "Group/filter/editor",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-063",
+        "capability": "Overflow contenido",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-064",
+        "capability": "CSV",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-066",
+        "capability": "Rows/columns/sort",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-067",
+        "capability": "Granularidad de paquete",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-068",
+        "capability": "Gran dataset/identity",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      },
+      {
+        "id": "F-069",
+        "capability": "Dominio genérico",
+        "classification": "REDESIGN",
+        "decision": "CHANGE"
+      },
+      {
+        "id": "F-070",
+        "capability": "Auxiliares",
+        "classification": "PARITY",
+        "decision": "KEEP"
+      }
+    ],
+    "superiorityTarget": [
+      {
+        "id": "F-065",
+        "capability": "JSON/XLSX propios",
+        "classification": "SUPERIOR",
+        "decision": "KEEP"
+      }
+    ],
+    "outOfScope": [
+      {
+        "id": "F-058",
+        "capability": "Altura variable real",
+        "classification": "OUT OF SCOPE",
+        "decision": "DEFER"
+      }
+    ]
+  },
+  "dependencies": {
+    "sourceFiles": 35,
+    "edges": 132,
+    "categories": {
+      "forms": [
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.controller.ts",
+          "to": "@angular/forms"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@angular/forms"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "@angular/forms"
+        }
+      ],
+      "router": [
+        {
+          "from": "projects/ui-core/table/neu-table-url-state.adapter.ts",
+          "to": "@neural-ui/core/url-state"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "@neural-ui/core/url-state"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "./neu-table-url-state.adapter"
+        }
+      ],
+      "cdk": [
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@angular/cdk/overlay"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "@angular/cdk/scrolling"
+        }
+      ],
+      "export": [
+        {
+          "from": "projects/ui-core/table/neu-table-export.controller.ts",
+          "to": "./neu-table.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "./neu-table-export.controller"
+        }
+      ],
+      "storage": [
+        {
+          "from": "projects/ui-core/table/neu-table-url-state.adapter.ts",
+          "to": "@angular/core"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-url-state.adapter.ts",
+          "to": "@neural-ui/core/url-state"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-url-state.adapter.ts",
+          "to": "./neu-table.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-url-state.adapter.ts",
+          "to": "./neu-table-state.controller"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "@neural-ui/core/url-state"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "./neu-table-url-state.adapter"
+        }
+      ],
+      "advanced": [
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.controller.ts",
+          "to": "@angular/core"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.controller.ts",
+          "to": "@angular/forms"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.controller.ts",
+          "to": "rxjs"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.controller.ts",
+          "to": "./neu-table-filter.engine"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.controller.ts",
+          "to": "./neu-table.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.controller.ts",
+          "to": "./neu-table-advanced-filter.utils"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.controller.ts",
+          "to": "./neu-table-advanced-filter.utils"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.utils.ts",
+          "to": "./neu-table-filter.engine"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.utils.ts",
+          "to": "./neu-table.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-advanced-filter.utils.ts",
+          "to": "@neural-ui/core/date-input"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-filter.engine.ts",
+          "to": "./neu-table.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-filter.engine.ts",
+          "to": "@neural-ui/core/option-api"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-filter.engine.ts",
+          "to": "./neu-table-filter.registry"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-feature-error.component.ts",
+          "to": "./neu-table-optional-features.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@angular/common"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@angular/cdk/overlay"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@angular/core"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@angular/core/rxjs-interop"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@angular/forms"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@neural-ui/core/button"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@neural-ui/core/date-input"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@neural-ui/core/inline-editor"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@neural-ui/core/input"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@neural-ui/core/number-input"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@neural-ui/core/option-api"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@neural-ui/core/option-api"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "@neural-ui/core/select"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "./neu-table-advanced-filter.controller"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "./neu-table-advanced-filter.utils"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "./neu-table-filter.engine"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "./neu-table-filter-template.directive"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "./neu-table-optional-features.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.component.ts",
+          "to": "./neu-table.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.types.ts",
+          "to": "@angular/core"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.types.ts",
+          "to": "@neural-ui/core/inline-editor"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.types.ts",
+          "to": "@neural-ui/core/select"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.types.ts",
+          "to": "./neu-table-state.controller"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.types.ts",
+          "to": "./neu-table.types"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-optional-features.types.ts",
+          "to": "./neu-table-filter-template.directive"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table-query.controller.ts",
+          "to": "./neu-table-filter.engine"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "./neu-table-filter.engine"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "./neu-table-advanced-filter.utils"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "./neu-table-optional-features.component"
+        },
+        {
+          "from": "projects/ui-core/table/neu-table.component.ts",
+          "to": "./neu-table-optional-features.types"
+        }
+      ]
+    }
+  }
+}

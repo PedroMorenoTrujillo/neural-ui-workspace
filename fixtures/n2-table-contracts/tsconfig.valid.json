@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": []
+  },
+  "files": [
+    "./model.ts",
+    "./basic.ts",
+    "./remote.ts",
+    "./selection.ts",
+    "./migrations.ts",
+    "./valid.ts"
+  ]
+}
