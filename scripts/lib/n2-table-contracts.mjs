@@ -7,6 +7,7 @@ import {
   legacyLedger,
   tableCoreTarget,
   targetDirectives,
+  targetFilterRules,
   targetInputs,
   targetMethods,
   targetOutputs,
@@ -256,6 +257,20 @@ export function validateTargetContracts() {
     }
   }
   const typesText = readFileSync(typesPath, 'utf8');
+  const filterRuleDeclaration = typesText.match(/readonly rule:\s*([\s\S]*?);/)?.[1] ?? '';
+  const actualFilterRules = [...filterRuleDeclaration.matchAll(/'([^']+)'/g)].map(
+    (match) => match[1],
+  );
+  if (JSON.stringify(actualFilterRules) !== JSON.stringify(targetFilterRules)) {
+    violations.push('filter rule union differs from the frozen manifest');
+  }
+  if (
+    !/interface NeuTableQuery[\s\S]*?\/\*\* Zero-based\. \*\/[\s\S]*?readonly page: number;/.test(
+      typesText,
+    )
+  ) {
+    violations.push('query page is not documented as zero-based');
+  }
   if (
     !/interface NeuTableRange\s*{[\s\S]*readonly start: number;[\s\S]*readonly end: number;[\s\S]*}/.test(
       typesText,

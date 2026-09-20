@@ -24,6 +24,7 @@
         @for (column of columns(); track column.id) {
           <th
             scope="col"
+            [attr.aria-sort]="ariaSort(column)"
             [attr.data-column-id]="column.id"
             [style.inline-size]="columnWidth(column)"
             [style.min-inline-size]="column.minWidth"

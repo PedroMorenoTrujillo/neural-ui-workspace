@@ -18,7 +18,7 @@ export const lazy1xToRemote2x: {
   readonly transport: 'dataRequest';
 } = {
   dataMode: 'remote',
-  query: { page: 1, pageSize: 50, search: '', sort: [], filters: null },
+  query: { page: 0, pageSize: 50, search: '', sort: [], filters: null },
   metadata: {
     totalItems: 0,
     loading: true,

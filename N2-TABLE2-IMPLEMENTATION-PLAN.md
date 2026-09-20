@@ -90,7 +90,7 @@ La secuencia N2-011A…K reemplaza el reparto grueso anterior N2-011/012/013/014
 
 ### Directed tests
 
-- Page 1-based, invalid normalization, sort de-duplication, recursive filter AST.
+- Page zero-based, invalid normalization, sort de-duplication, recursive filter AST.
 - Rejected proposal leaves rendered state/ARIA unchanged.
 - Accepted echo applies once and never reemits.
 - 1k/10k client pipeline identity and no mutation.

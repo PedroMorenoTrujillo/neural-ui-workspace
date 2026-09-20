@@ -50,7 +50,7 @@ export const columns: readonly NeuTableColumn<AccountRow, AccountField>[] = [
 ];
 
 export const query: NeuTableQuery<AccountField> = {
-  page: 1,
+  page: 0,
   pageSize: 25,
   search: '',
   sort: [{ field: 'name', direction: 'asc' }],
@@ -63,7 +63,7 @@ export const query: NeuTableQuery<AccountField> = {
         kind: 'group',
         operator: 'or',
         children: [
-          { kind: 'condition', field: 'balance', rule: 'gte', value: 100 },
+          { kind: 'condition', field: 'balance', rule: 'greaterThanOrEqual', value: 100 },
           { kind: 'condition', field: 'name', rule: 'startsWith', value: 'A' },
         ],
       },

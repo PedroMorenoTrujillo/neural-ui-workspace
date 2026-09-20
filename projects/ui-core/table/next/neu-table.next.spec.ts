@@ -17,8 +17,13 @@ import {
 import type {
   NeuTableAppearance,
   NeuTableColumn,
+  NeuTableDataMode,
+  NeuTableFilterOptions,
   NeuTableLayoutState,
   NeuTableMetadata,
+  NeuTablePaginationOptions,
+  NeuTableQuery,
+  NeuTableSortOptions,
 } from './public/neu-table.types';
 
 interface Row {
@@ -78,6 +83,11 @@ const baseLayout: NeuTableLayoutState = {
       [data]="rows()"
       [columns]="columns()"
       [metadata]="metadata()"
+      [dataMode]="dataMode()"
+      [query]="query()"
+      [sortOptions]="sortOptions"
+      [filterOptions]="filterOptions"
+      [paginationOptions]="paginationOptions()"
       [layout]="layout()"
       [rowKey]="rowKey"
       [rowOptions]="rowOptions"
@@ -103,6 +113,21 @@ class NeuTableNextHostComponent {
   readonly rows = signal(baseRows);
   readonly columns = signal(baseColumns);
   readonly metadata = signal(baseMetadata);
+  readonly dataMode = signal<NeuTableDataMode>('client');
+  readonly query = signal<NeuTableQuery<Field>>({
+    page: 0,
+    pageSize: 25,
+    search: '',
+    sort: [],
+    filters: null,
+  });
+  readonly paginationOptions = signal<NeuTablePaginationOptions>({
+    enabled: false,
+    pageSizeOptions: [1, 2, 25],
+    position: 'bottom',
+    report: 'none',
+    showPageJump: false,
+  });
   readonly layout = signal(baseLayout);
   readonly appearance = signal<NeuTableAppearance>({
     density: 'compact',
@@ -112,6 +137,19 @@ class NeuTableNextHostComponent {
     responsive: 'contained-scroll',
   });
   readonly rowKey = (row: Row) => row.id;
+  readonly sortOptions: NeuTableSortOptions = {
+    mode: 'multiple',
+    removable: true,
+    defaultDirection: 'asc',
+    resetPageOnChange: true,
+  };
+  readonly filterOptions: NeuTableFilterOptions<Row, Field> = {
+    surfaces: [],
+    globalFields: ['name'],
+    predicates: {},
+    debounceMs: 0,
+    commit: 'immediate',
+  };
   readonly rowOptions = {
     reorderable: false,
     isDisabled: (row: Row) => row.disabled ?? false,
@@ -247,6 +285,60 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('[data-state="empty"]')?.textContent,
     ).toContain('Custom empty');
+  });
+
+  it('applies combined client query, parent replacement and remote bypass without outputs', async () => {
+    const fixture = TestBed.createComponent(NeuTableNextHostComponent);
+    const host = fixture.componentInstance;
+    host.paginationOptions.set({ ...host.paginationOptions(), enabled: true });
+    host.query.set({
+      page: 0,
+      pageSize: 1,
+      search: '',
+      sort: [{ field: 'name', direction: 'desc' }],
+      filters: { kind: 'condition', field: 'id', rule: 'greaterThan', value: 1 },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const native = fixture.nativeElement as HTMLElement;
+    const table = fixture.debugElement.query(By.directive(NeuTableComponent))
+      .componentInstance as NeuTableComponent<Row, number, Field>;
+    let queryChanges = 0;
+    let dataRequests = 0;
+    const querySubscription = table.queryChange.subscribe(() => (queryChanges += 1));
+    const requestSubscription = table.dataRequest.subscribe(() => (dataRequests += 1));
+
+    expect(
+      [...native.querySelectorAll('tr[data-row-key]')].map((row) =>
+        row.getAttribute('data-row-key'),
+      ),
+    ).toEqual(['3']);
+    expect(native.querySelector('th[data-column-id="name"]')?.getAttribute('aria-sort')).toBe(
+      'descending',
+    );
+
+    host.query.set({ ...host.query(), search: 'grace', filters: null, sort: [] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(
+      [...native.querySelectorAll('tr[data-row-key]')].map((row) =>
+        row.getAttribute('data-row-key'),
+      ),
+    ).toEqual(['2']);
+
+    host.dataMode.set('remote');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(
+      [...native.querySelectorAll('tr[data-row-key]')].map((row) =>
+        row.getAttribute('data-row-key'),
+      ),
+    ).toEqual(['1', '2', '3']);
+    expect(queryChanges).toBe(0);
+    expect(dataRequests).toBe(0);
+    querySubscription.unsubscribe();
+    requestSubscription.unsubscribe();
   });
 
   it('keeps semantic keys distinct, diagnoses duplicates and partitions pinned rows stably', () => {

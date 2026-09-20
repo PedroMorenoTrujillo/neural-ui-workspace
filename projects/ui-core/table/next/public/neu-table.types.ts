@@ -21,7 +21,24 @@ export interface NeuSortEntry<F extends string> {
 export interface NeuFilterConstraint<F extends string> {
   readonly kind: 'condition';
   readonly field: F;
-  readonly rule: string;
+  readonly rule:
+    | 'equals'
+    | 'notEquals'
+    | 'contains'
+    | 'notContains'
+    | 'startsWith'
+    | 'endsWith'
+    | 'lessThan'
+    | 'lessThanOrEqual'
+    | 'greaterThan'
+    | 'greaterThanOrEqual'
+    | 'between'
+    | 'in'
+    | 'notIn'
+    | 'isNull'
+    | 'isNotNull'
+    | 'isEmpty'
+    | 'isNotEmpty';
   readonly value: unknown;
 }
 
@@ -34,7 +51,7 @@ export interface NeuFilterGroup<F extends string> {
 export type NeuFilterExpression<F extends string> = NeuFilterConstraint<F> | NeuFilterGroup<F>;
 
 export interface NeuTableQuery<F extends string> {
-  /** One-based. */
+  /** Zero-based. */
   readonly page: number;
   readonly pageSize: number;
   readonly search: string;
@@ -90,8 +107,8 @@ export interface NeuTableSortColumn<T, F extends string> {
 export interface NeuTableFilterColumn<T, F extends string> {
   readonly field: F;
   readonly value?: NeuTableValueAccessor<T>;
-  readonly rules: readonly string[];
-  readonly defaultRule: string;
+  readonly rules: readonly NeuFilterConstraint<F>['rule'][];
+  readonly defaultRule: NeuFilterConstraint<F>['rule'];
 }
 
 export interface NeuTableEditColumn<T, F extends string> {

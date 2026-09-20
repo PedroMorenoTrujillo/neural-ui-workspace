@@ -9,6 +9,15 @@ import {
   type OutputEmitterRef,
 } from '@angular/core';
 import { projectNeuTableRows } from '../internal/identity/neu-table-row-identity';
+import {
+  createNeuTableFieldResolver,
+  filterNeuTableRows,
+  normalizeNeuTableQuery,
+  paginateNeuTableRows,
+  partitionNeuTableSource,
+  searchNeuTableRows,
+  sortNeuTableRows,
+} from '../internal/client-pipeline/neu-table-client-pipeline';
 import { NeuTableBasicRendererComponent } from '../internal/renderer/neu-table-basic-renderer.component';
 import { projectNeuTableVisibleColumns } from '../internal/semantics/neu-table-basic-projections';
 import {
@@ -90,7 +99,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     readonly NeuTableColumn<T, F>[]
   >([]);
   readonly query: InputSignal<NeuTableQuery<F>> = input<NeuTableQuery<F>>({
-    page: 1,
+    page: 0,
     pageSize: 25,
     search: '',
     sort: [],
@@ -260,13 +269,58 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   protected readonly visibleColumns = computed(() =>
     projectNeuTableVisibleColumns(this.columns(), this.layout()),
   );
+  protected readonly fieldResolver = computed(() => createNeuTableFieldResolver(this.columns()));
+  protected readonly sourcePartition = computed(() =>
+    partitionNeuTableSource(this.data(), this.rowKey(), this.rowOptions().pin, isDevMode()),
+  );
+  protected readonly effectiveQuery = computed(() =>
+    normalizeNeuTableQuery(this.query(), this.sortOptions()),
+  );
+  protected readonly searchedRows = computed(() => {
+    const rows = this.sourcePartition().normal;
+    if (this.dataMode() === 'remote') return rows;
+    return searchNeuTableRows(
+      rows,
+      this.effectiveQuery().search,
+      this.filterOptions().globalFields,
+      this.fieldResolver(),
+    );
+  });
+  protected readonly filteredRows = computed(() =>
+    this.dataMode() === 'remote'
+      ? this.searchedRows()
+      : filterNeuTableRows(
+          this.searchedRows(),
+          this.effectiveQuery().filters,
+          this.fieldResolver(),
+          this.filterOptions(),
+        ),
+  );
+  protected readonly sortedRows = computed(() =>
+    this.dataMode() === 'remote'
+      ? this.filteredRows()
+      : sortNeuTableRows(this.filteredRows(), this.effectiveQuery().sort, this.fieldResolver()),
+  );
+  protected readonly normalPage = computed(() =>
+    paginateNeuTableRows(
+      this.sortedRows(),
+      this.effectiveQuery().page,
+      this.effectiveQuery().pageSize,
+      this.dataMode() === 'client' && this.paginationOptions().enabled,
+    ),
+  );
+  protected readonly pipelineRows = computed(() => [
+    ...this.sourcePartition().start,
+    ...this.normalPage().rows,
+    ...this.sourcePartition().end,
+  ]);
   protected readonly renderRows = computed(() =>
     projectNeuTableRows(
-      this.data(),
+      this.pipelineRows(),
       this.rowKey(),
       this.rowTrackBy(),
       this.rowOptions().pin,
-      isDevMode(),
+      false,
     ),
   );
   protected readonly retry = () => this.retryData();

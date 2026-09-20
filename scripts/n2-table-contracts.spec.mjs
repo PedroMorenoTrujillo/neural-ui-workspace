@@ -7,6 +7,7 @@ import {
   controlledSlices,
   tableCoreTarget,
   targetDirectives,
+  targetFilterRules,
   targetInputs,
   targetMethods,
   targetOutputs,
@@ -16,6 +17,7 @@ import { validateLegacyLedger, validateTargetContracts } from './lib/n2-table-co
 
 test('freezes the exact 82-symbol target and 24/14/4 member surface', () => {
   assert.equal(targetTypes.length, 66);
+  assert.equal(targetFilterRules.length, 17);
   assert.equal(targetDirectives.length, 15);
   assert.equal(targetInputs.length, 24);
   assert.equal(targetOutputs.length, 14);

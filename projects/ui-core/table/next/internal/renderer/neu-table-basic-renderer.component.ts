@@ -23,6 +23,7 @@ import type {
   NeuTableLayoutState,
   NeuTableMetadata,
   NeuTableRowOptions,
+  NeuSortEntry,
   NeuTableStateTemplateContext,
 } from '../../public/neu-table.types';
 
@@ -46,6 +47,7 @@ export class NeuTableBasicRendererComponent<
   readonly metadata: InputSignal<NeuTableMetadata> = input.required();
   readonly layout: InputSignal<NeuTableLayoutState> = input.required();
   readonly rowOptions: InputSignal<NeuTableRowOptions<T, K>> = input.required();
+  readonly sort: InputSignal<readonly NeuSortEntry<F>[]> = input.required();
   readonly appearance: InputSignal<NeuTableAppearance> = input.required();
   readonly labels: InputSignal<NeuTableLabels> = input.required();
   readonly captionTemplate: InputSignal<TemplateRef<never> | undefined> = input();
@@ -83,7 +85,16 @@ export class NeuTableBasicRendererComponent<
   protected readonly footerTemplate = (columnId: string) => this.footerTemplates().get(columnId);
   protected readonly headerContext = (
     column: NeuTableColumn<T, F>,
-  ): NeuTableHeaderContext<T, F> => ({ column, sort: [] });
+  ): NeuTableHeaderContext<T, F> => ({ column, sort: this.sort() });
+  protected readonly ariaSort = (column: NeuTableColumn<T, F>) => {
+    const field = column.sort?.field ?? column.field;
+    const entry = this.sort().find((candidate) => candidate.field === field);
+    return entry?.direction === 'asc'
+      ? 'ascending'
+      : entry?.direction === 'desc'
+        ? 'descending'
+        : null;
+  };
   protected readonly cellContext = (
     renderRow: NeuTableRenderRow<T, K>,
     column: NeuTableColumn<T, F>,

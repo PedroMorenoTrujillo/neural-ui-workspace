@@ -1,0 +1,45 @@
+{
+  "checkpoint": "N2-011C",
+  "capturedAt": "2026-09-20T07:46:01.328Z",
+  "metrics": {
+    "search1k": {
+      "samples": 15,
+      "p50Ms": 0.326,
+      "p95Ms": 2.761
+    },
+    "search10k": {
+      "samples": 15,
+      "p50Ms": 3.828,
+      "p95Ms": 4.545
+    },
+    "filter10k": {
+      "samples": 15,
+      "p50Ms": 1.355,
+      "p95Ms": 2.688
+    },
+    "singleSort10k": {
+      "samples": 15,
+      "p50Ms": 1.54,
+      "p95Ms": 2.503
+    },
+    "multiSort10k": {
+      "samples": 15,
+      "p50Ms": 2.356,
+      "p95Ms": 3.469
+    },
+    "combined10k": {
+      "samples": 15,
+      "p50Ms": 3.779,
+      "p95Ms": 4.324
+    },
+    "pageExtraction10k": {
+      "samples": 15,
+      "p50Ms": 0.933,
+      "p95Ms": 1.602
+    },
+    "repeatedIdenticalReadMs": 0.001,
+    "dataReplacementMs": 7.549,
+    "queryReplacementMs": 3.407,
+    "computedEvaluations": 3
+  }
+}

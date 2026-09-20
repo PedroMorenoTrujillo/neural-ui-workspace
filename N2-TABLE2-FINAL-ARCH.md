@@ -94,7 +94,7 @@ La única query canónica es:
 
 ```ts
 interface NeuTableQuery<F extends string> {
-  page: number;                 // 1-based
+  page: number;                 // zero-based
   pageSize: number;
   search: string;
   sort: readonly NeuSortEntry<F>[];
@@ -470,7 +470,7 @@ selection = signal<NeuTableSelection<CustomerId, CustomerField>>({
 
 ```ts
 query = signal<NeuTableQuery<CustomerField>>({
-  page: 1,
+  page: 0,
   pageSize: 25,
   search: legacySearch,
   sort: legacySort ? [{ field: legacySort.key, direction: legacySort.dir }] : [],

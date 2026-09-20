@@ -44,7 +44,7 @@ export type NeuFilterExpression<F extends string> =
   | NeuFilterGroup<F>;
 
 export interface NeuTableQuery<F extends string> {
-  /** One-based. */
+  /** Zero-based. */
   readonly page: number;
   readonly pageSize: number;
   readonly search: string;

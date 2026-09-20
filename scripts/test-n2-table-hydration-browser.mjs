@@ -34,10 +34,16 @@ try {
   assert.equal(
     (
       await page
-        .locator('#n2-table-primary tr[data-row-key="1"] td[data-column-id="name"]')
+        .locator('#n2-table-primary tr[data-row-key="3"] td[data-column-id="name"]')
         .textContent()
     )?.trim(),
-    '0:Ada',
+    '0:Linus',
+  );
+  assert.deepEqual(
+    await page
+      .locator('#n2-table-remote tr[data-row-key]')
+      .evaluateAll((rows) => rows.map((row) => row.getAttribute('data-row-key'))),
+    ['1', '2', '3'],
   );
   assert.match(await page.locator('#n2-table-empty').textContent(), /SSR empty/);
   assert.match(await page.locator('#n2-table-loading').textContent(), /SSR loading/);
@@ -46,7 +52,7 @@ try {
     window.__n2TableNodes = [
       document.querySelector('#n2-table-primary table'),
       document.querySelector('#n2-table-primary thead'),
-      document.querySelector('#n2-table-primary tr[data-row-key="1"]'),
+      document.querySelector('#n2-table-primary tr[data-row-key="3"]'),
       document.querySelector('#n2-table-primary td[data-column-id="name"]'),
     ];
     window.__n2TableIds = [...document.querySelectorAll('#n2-table-primary [id]')].map(
@@ -60,7 +66,7 @@ try {
       const selectors = [
         '#n2-table-primary table',
         '#n2-table-primary thead',
-        '#n2-table-primary tr[data-row-key="1"]',
+        '#n2-table-primary tr[data-row-key="3"]',
         '#n2-table-primary td[data-column-id="name"]',
       ];
       return window.__n2TableNodes.map(
@@ -82,7 +88,7 @@ try {
     await page
       .locator('#n2-table-primary tr[data-row-key]')
       .evaluateAll((rows) => rows.map((row) => row.getAttribute('data-row-key'))),
-    ['2', '1'],
+    ['2'],
   );
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
   assert.equal(
@@ -91,7 +97,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    'N2 Table real zoneless hydration passed: SSR states present, DOM reused, IDs stable, zero NG050x, zero output echo, first parent interaction exactly once',
+    'N2 Table real zoneless hydration passed: applied combined query and remote bypass rendered in SSR, DOM reused, parent query replaced once, zero NG050x and zero output/request echo',
   );
 } finally {
   release();

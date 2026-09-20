@@ -7,7 +7,11 @@ import {
   NeuTableHeaderDirective,
   NeuTableLoadingDirective,
   type NeuTableColumn,
+  type NeuTableFilterOptions,
   type NeuTableMetadata,
+  type NeuTablePaginationOptions,
+  type NeuTableQuery,
+  type NeuTableSortOptions,
 } from './neu-table-next/public/public-api';
 
 interface HydrationRow {
@@ -23,7 +27,7 @@ const columns: readonly NeuTableColumn<HydrationRow, HydrationField>[] = [
 ];
 
 const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata => ({
-  totalItems: 2,
+  totalItems: 3,
   loading: false,
   error: null,
   queryRevision: 0,
@@ -43,7 +47,9 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     NeuTableErrorDirective,
   ],
   template: `
-    <button id="n2-reconstruct" type="button" (click)="reconstruct()">Reconstruct rows</button>
+    <button id="n2-reconstruct" type="button" (click)="applyParentQuery()">
+      Apply parent query
+    </button>
     <output id="n2-ready">{{ ready() }}</output>
     <output id="n2-interactions">{{ interactions() }}</output>
     <output id="n2-output-events">{{ outputEvents() }}</output>
@@ -53,6 +59,10 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
         [data]="rows()"
         [columns]="columns"
         [metadata]="primaryMetadata"
+        [query]="query()"
+        [sortOptions]="sortOptions"
+        [filterOptions]="filterOptions"
+        [paginationOptions]="paginationOptions"
         [rowKey]="rowKey"
         (queryChange)="record('queryChange')"
         (selectionChange)="record('selectionChange')"
@@ -74,6 +84,20 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
           >{{ index }}:{{ row.name }}</ng-template
         >
       </neu-table>
+    </section>
+
+    <section id="n2-table-remote">
+      <neu-table
+        dataMode="remote"
+        [data]="rows()"
+        [columns]="columns"
+        [metadata]="primaryMetadata"
+        [query]="remoteQuery"
+        [sortOptions]="sortOptions"
+        [filterOptions]="filterOptions"
+        [paginationOptions]="paginationOptions"
+        [rowKey]="rowKey"
+      />
     </section>
 
     <section id="n2-table-empty">
@@ -100,7 +124,42 @@ export class N2TableHydrationComponent {
   readonly rows = signal<readonly HydrationRow[]>([
     { id: 1, name: 'Ada' },
     { id: 2, name: 'Grace' },
+    { id: 3, name: 'Linus' },
   ]);
+  readonly query = signal<NeuTableQuery<HydrationField>>({
+    page: 0,
+    pageSize: 1,
+    search: '',
+    sort: [{ field: 'name', direction: 'desc' }],
+    filters: { kind: 'condition', field: 'id', rule: 'greaterThan', value: 1 },
+  });
+  readonly remoteQuery: NeuTableQuery<HydrationField> = {
+    page: 20,
+    pageSize: 1,
+    search: 'missing',
+    sort: [{ field: 'name', direction: 'desc' }],
+    filters: { kind: 'condition', field: 'id', rule: 'greaterThan', value: 99 },
+  };
+  readonly sortOptions: NeuTableSortOptions = {
+    mode: 'multiple',
+    removable: true,
+    defaultDirection: 'asc',
+    resetPageOnChange: true,
+  };
+  readonly filterOptions: NeuTableFilterOptions<HydrationRow, HydrationField> = {
+    surfaces: [],
+    globalFields: ['name'],
+    predicates: {},
+    debounceMs: 0,
+    commit: 'immediate',
+  };
+  readonly paginationOptions: NeuTablePaginationOptions = {
+    enabled: true,
+    pageSizeOptions: [1],
+    position: 'bottom',
+    report: 'none',
+    showPageJump: false,
+  };
   readonly columns = columns;
   readonly primaryMetadata = metadata();
   readonly emptyMetadata = metadata({ totalItems: 0 });
@@ -117,12 +176,8 @@ export class N2TableHydrationComponent {
     this.outputEvents.set(JSON.stringify([...events, name]));
   }
 
-  reconstruct(): void {
+  applyParentQuery(): void {
     this.interactions.update((value) => value + 1);
-    this.rows.set(
-      this.rows()
-        .map((row) => ({ ...row }))
-        .reverse(),
-    );
+    this.query.set({ page: 0, pageSize: 1, search: 'grace', sort: [], filters: null });
   }
 }

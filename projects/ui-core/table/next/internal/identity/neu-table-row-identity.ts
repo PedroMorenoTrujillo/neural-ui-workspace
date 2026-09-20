@@ -8,7 +8,7 @@ export interface NeuTableRenderRow<T, K extends NeuTableKey> {
   readonly pin: 'start' | 'end' | null;
 }
 
-function identityToken(key: NeuTableKey): string {
+export function neuTableIdentityToken(key: NeuTableKey): string {
   return `${typeof key}:${String(key)}`;
 }
 
@@ -26,7 +26,7 @@ export function projectNeuTableRows<T, K extends NeuTableKey>(
 
   for (const [sourceIndex, row] of data.entries()) {
     const key = rowKey(row);
-    const token = identityToken(key);
+    const token = neuTableIdentityToken(key);
     if (diagnoseDuplicateKeys && seen.has(token)) {
       throw new Error(`NeuTable 2 duplicate row key: ${token}`);
     }

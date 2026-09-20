@@ -1,5 +1,25 @@
 export const table2Checkpoint = '281b658';
 
+export const targetFilterRules = [
+  'equals',
+  'notEquals',
+  'contains',
+  'notContains',
+  'startsWith',
+  'endsWith',
+  'lessThan',
+  'lessThanOrEqual',
+  'greaterThan',
+  'greaterThanOrEqual',
+  'between',
+  'in',
+  'notIn',
+  'isNull',
+  'isNotNull',
+  'isEmpty',
+  'isNotEmpty',
+];
+
 export const targetTypes = [
   'NeuTableKey',
   'NeuTableDataMode',
