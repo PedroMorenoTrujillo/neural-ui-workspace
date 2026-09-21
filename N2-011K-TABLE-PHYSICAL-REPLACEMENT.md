@@ -1,261 +1,299 @@
-# N2-011K — NeuTable 2 physical replacement
+# N2-011K — Table 2 + TreeTable 2 physical replacement
 
-## 1. Status
+## 1. Final status
 
-**TABLE 2 PHYSICAL REPLACEMENT BLOCKED.** La condición de parada de TreeTable de las secciones 12 y 59 de la autorización se activa antes de modificar runtime.
+**TABLE 2 + TREETABLE 2 PHYSICAL REPLACEMENT PASS.**
 
-## 2. Starting checkpoint
+The product now exposes exactly two independent data-grid facades:
 
-- Rama: `v2`.
-- HEAD: `c1e07dddd42ac27e8e46960ec0b34a4176b59162`.
-- Mensaje: `test(table): certify NeuTable 2 for N2-011K`.
-- Working tree inicial: limpio.
-- Symlinks versionados iniciales: 0.
+- `@neural-ui/core/table` → `NeuTableComponent<T, K, F>` / `<neu-table>`;
+- `@neural-ui/core/tree-table` → `NeuTreeTableComponent<T, K, F>` / `<neu-tree-table>`.
 
-## 3. Scope
+Table 1.x, TableCore, TreeTable 1.x and the temporary candidate paths are physically absent. No compatibility runtime, alias, wrapper or redirect was introduced.
 
-Se releyeron la arquitectura, contratos, plan, informes A–J y addenda normativos. La inspección se limitó a la sustitución física, entrypoints, consumidores y especialmente el desacoplamiento requerido de TreeTable. No se reabrieron decisiones certificadas ni se inició otra macrofase.
+## 2. Original blocker
 
-## 4. Candidate promotion
+The first N2-011K execution started from `c1e07dddd42ac27e8e46960ec0b34a4176b59162` and stopped correctly before changing runtime. TreeTable 1.x still delegated 42 inputs, 21 outputs and 8 methods to Table 1.x/TableCore, so deleting the flat legacy graph would have required either a compatibility layer or a deep TreeTable rewrite.
 
-No ejecutada. Promover `projects/ui-core/table/next/**` y borrar Table 1.x dejaría TreeTable sin un runtime compatible. Hacer el move antes de resolver ese bloqueo produciría deliberadamente un paquete roto.
+That attempt remains recorded as **BLOCKED** history; this resumed execution did not restart the audit or reopen the certified Table design.
 
-## 5. Final source layout
+## 3. TreeTable 2 unblock evidence
 
-No aplicado. Se conserva temporalmente el layout certificado en J mientras se resuelve la decisión de TreeTable; no se creó ningún segundo layout ni copia.
+NeuTreeTable 2 was rewritten independently, certified in N2-015I and committed before resuming K:
 
-## 6. Public Table entrypoint
+- N2-015H checkpoint: `037e46bb2294414a32a8127c52eb50d86b10d59b`;
+- N2-015I checkpoint: `f4b6c54b7c3cde9a0f4059ee9b4c1b9bf4062743`;
+- result: `CERTIFIED FOR N2-011K`;
+- no runtime dependency on NeuTable, TableCore or either legacy facade.
 
-Sin cambios. `@neural-ui/core/table` sigue apuntando a Table 1.x en este checkpoint; NeuTable 2 permanece privada en `table/next`.
+## 4. Starting checkpoints
 
-## 7. TableCore removal
+- Branch: `v2`.
+- NeuTable certification: `c1e07dddd42ac27e8e46960ec0b34a4176b59162`.
+- NeuTreeTable final certification: `f4b6c54b7c3cde9a0f4059ee9b4c1b9bf4062743`.
+- N2-011K began with a clean working tree after committing N2-015I.
+- No behavior was redesigned in K; changes are promotion, removal, package/tooling migration, consumer migration and generated-contract updates.
 
-No ejecutada. Eliminar TableCore sin completar la sustitución atómica incumpliría el gate de paquete y no se ha intentado un redirect, alias o barrel vacío.
+## 5. NeuTable promotion
 
-## 8. Table 1.x removal
+`projects/ui-core/table/next/**` was promoted into `projects/ui-core/table/**`. The final root barrel exports `./public/public-api`; certified private folders remain private. The selector remains uniquely `neu-table`.
 
-No ejecutada. No se conserva una eliminación parcial ni se deja un facade roto.
+## 6. NeuTreeTable promotion
 
-## 9. next removal
+`projects/ui-core/tree-table/next/**` was promoted into `projects/ui-core/tree-table/**`. Its two certified neutral helpers were moved inside `tree-table/internal/shared` solely to satisfy the final secondary-entrypoint packaging boundary. NeuTable was not touched and no bilateral extraction was performed. The selector remains uniquely `neu-tree-table`.
 
-No ejecutada por el mismo bloqueo atómico. No se creó nomenclatura candidata adicional.
+## 7. Table 1.x removal
 
-## 10. TreeTable decoupling
+The old facade, controllers, query/state engines, legacy remote/lazy channels, selection/edit/group/export implementations, virtual engine, URL/storage adapters, legacy styles and API-only specs were deleted. There is no old Table runtime beneath the final facade.
 
-La inspección reproducible de `projects/ui-core/tree-table/neu-tree-table.component.ts` contra el contrato final de NeuTable 2 demuestra que no es un simple cambio de imports:
+## 8. TableCore removal
 
-- el `<neu-table>` delegado tiene 48 bindings de input; 42 no existen con ese nombre/semántica en los 24 inputs finales;
-- tiene 24 bindings de output; 21 no existen en los 14 outputs finales;
-- invoca 8 miembros imperativos eliminados (`exactMatch`, `resetVirtualScroll`, `scrollToIndex`, `scrollToOffset`, `resetState`, `startRowEdit`, `saveRowEdit`, `cancelRowEdit`); ninguno pertenece a los cuatro métodos finales;
-- consume contratos eliminados como `NeuTableQueryState`, `NeuTableSortState`, `NeuTableLazyRequest`, selección por filas, eventos de edición legacy y `NeuTableUrlStateOptions`;
-- proyecta directivas legacy de body/body-section, cell view/editor, expand, header/footer groups, loading body y paginator slots que no tienen equivalencia directa en la superficie final;
-- delega context menu y eventos detallados de row/edit que NeuTable 2 consolidó o eliminó.
+The complete `projects/ui-core/table-core` secondary entrypoint was deleted: sources, public barrel, ng-package metadata, selector, styles and tests. The final package has no `./table-core` export, declaration, FESM, redirect or empty barrel.
 
-Desacoplarla conservando comportamiento obliga a rediseñar su query/filter projection, selección, edición, virtual scroll, template projection, context menu, eventos, métodos y tests. Eso es una reescritura funcional profunda de TreeTable y está expresamente fuera de K.
+## 9. TreeTable legacy removal
 
-## 11. Internal consumers
+The legacy facade, hierarchy controller, templates, flat-state orchestration, legacy lazy/tree paths and its three API-era spec files were deleted. NeuTreeTable 2 does not wrap or instantiate the old component.
 
-TreeTable es el consumidor activo bloqueante. NeuTable 2 no tiene edges a Table 1.x o TableCore, según J. No se encontró una primitive neutral que permita retirar el componente legacy sin reimplementar su comportamiento dentro de TreeTable.
+## 10. Final source layout
 
-## 12. Showcase minimal migration
+Both final entrypoints use the same product shape:
 
-No requerida ni iniciada antes del STOP. Los 17 debts históricos de Showcase permanecen intactos.
+```text
+projects/ui-core/table/
+  public/
+  internal/
+  *.spec.ts
+  public_api.ts
+  ng-package.json
 
-## 13. URL/storage removal
+projects/ui-core/tree-table/
+  public/
+  internal/
+  *.spec.ts
+  public_api.ts
+  ng-package.json
+```
 
-No ejecutada. La API final mantiene el modelo controlled, pero la eliminación física no puede hacerse parcialmente mientras TreeTable consume `NeuTableUrlStateOptions` y bindings legacy.
+There is no `next`, `candidate`, `v2`, `table-core` or second facade directory.
 
-## 14. Export legacy removal
+## 11. Final package exports
 
-No ejecutada. No se duplicaron ni tocaron los serializers privados CSV/JSON/XLSX certificados.
+- Present: `@neural-ui/core/table`.
+- Present: `@neural-ui/core/tree-table`.
+- Absent intentionally: `@neural-ui/core/table-core`.
+- Entry points: 102 before K, 101 after K.
+- Package verification: PASS, 447 published files.
+- SSR import smoke: PASS, all 101 entrypoints.
 
-## 15. Filter legacy removal
+## 12. Final Table API
 
-No ejecutada. TreeTable usa `NeuTableQueryState` y `NeuTableQueryFilterConstraint` en su hierarchy controller; migrarlo al AST final cambia su motor funcional y forma parte del bloqueo.
+Contract gates confirm exactly:
 
-## 16. Virtual legacy removal
+- 66 public types;
+- 15 directives;
+- 1 component;
+- 82 exported symbols;
+- 24 inputs;
+- 14 outputs;
+- 4 methods.
 
-No ejecutada. TreeTable invoca cuatro rutas imperativas legacy de scroll/reset que no tienen sustitución uno-a-uno.
+## 13. Final TreeTable API
 
-## 17. Remote legacy removal
+Contract gates confirm exactly:
 
-No ejecutada. TreeTable traduce `lazyRequest` y server/query behavior legacy; cambiarlo al único `dataRequest` exige rediseñar su protocolo público.
+- 66 public types;
+- 11 directives;
+- 1 component;
+- 22 inputs;
+- 12 outputs;
+- 4 methods.
 
-## 18. Forms/edit legacy removal
+## 14. Contract regeneration
 
-No ejecutada. TreeTable depende de lifecycle outputs e imperative row-edit removidos. No se añadió CVA ni infraestructura Forms alternativa.
+`tokens:generate` regenerated 282 public tokens. `snapshot:contracts` regenerated `public-contract.v2.json` and the historical reconciliation through the official generator. Final audit: 101 entrypoints, 789 exported declarations, 1,496 bindings and 5,243 classified symbols.
 
-## 19. CSS/styles
+The policy now lists only the four certified methods on each final facade and removes the old Table registry/compatibility classifications.
 
-Sin cambios. No se copiaron estilos legacy ni se hizo rediseño visual.
+## 15. Legacy API scans
 
-## 20. Tokens
+The new executable `audit:n2-table-physical-replacement` gate verifies:
 
-Sin cambios. No se añadieron aliases de compatibilidad.
+- TableCore directory/export/symbol/selector absent;
+- legacy Table and TreeTable facade files absent;
+- `next` paths absent;
+- removed ledger members absent from the final classes;
+- one `neu-table` and one `neu-tree-table` selector;
+- no Router, HTTP, storage or PrimeNG edge;
+- exact 2/4 effect budgets;
+- zero runtime symlinks.
 
-## 21. Package exports
+Result: PASS across 55 active runtime files.
 
-Sin cambios por el STOP. El estado objetivo (`table` presente y `table-core` ausente) no se declara falsamente como alcanzado.
+## 16. Table migration fixtures
 
-## 22. EntryPoints before/after
+The eleven certified recipes compile against `@neural-ui/core/table`: basic, remote, query, selection, virtual, editing, expansion/grouping, export, URL, storage and TableCore→NeuTable. No internal or candidate import is used.
 
-- Before K: 102 directorios con `ng-package.json`.
-- Entrypoints relacionados: `table`, `table-core`, `tree-table`.
-- After K: no aplicable; no hubo sustitución física. El delta esperado de `-1` no se materializó.
+## 17. TreeTable migration fixtures
 
-## 23. Public contracts
+The certified hierarchy, expansion, remote children, selection, query, virtual, editing, export and legacy-migration examples compile against `@neural-ui/core/tree-table`. They use clean domain rows plus the parent-owned hierarchy relation.
 
-No regenerados, porque el package surface no cambió. Regenerarlos ahora solo produciría el mismo contrato de J y no ocultaría el bloqueo.
+## 18. Legacy test classification
 
-## 24. Legacy API scan
+- A — behavior already covered: duplicate legacy renderer/controller tests removed after the certified final suites were retained.
+- B — relevant uncovered P1 behavior: none found; no test migration was required to preserve a missing P1 path.
+- C — legacy API-only: facade, controller, TableCore and 42/21/8 compatibility tests removed as the intended major break.
+- D — P2/P3: not reintroduced; variable-height/grouping+virtual/expansion+virtual/remote-key lookup and tree reorder remain outside K.
 
-Resultado: FAIL esperado para K. Siguen existiendo `table/next`, Table 1.x, TableCore y referencias TreeTable a API legacy. No se añadió un gate engañoso sobre un producto todavía no sustituido.
+## 19. Test count accounting
 
-## 25. Final 82-symbol surface
+| Measure | Before K | After K | Delta |
+|---|---:|---:|---:|
+| Full-suite files | 203 | 170 | -33 |
+| Full-suite tests | 3,166 | 2,417 | -749 |
 
-NeuTable 2 mantiene internamente la superficie certificada de 82 símbolos: 66 tipos, 15 directivas y un componente, con 24 inputs, 14 outputs y cuatro métodos. No se promovió al entrypoint final.
+Deleted spec files: 29 Table 1.x, 1 TableCore and 3 TreeTable 1.x. The final promoted suites remain: 22 NeuTable files / 124 tests and 17 NeuTreeTable files / 88 tests. No functional P1 loss was identified.
 
-## 26. Migration fixtures
+## 20. NeuTable tests
 
-No migrados al entrypoint final porque ese entrypoint no se cambió. Las once recetas certificadas en J permanecen intactas.
+PASS: 22/22 files, 124/124 tests covering renderer, query, selection, layout, remote, virtual, editing, expansion, grouping, export and lifecycle behavior.
 
-## 27. TableCore migration fixture
+## 21. NeuTreeTable tests
 
-Permanece como receta documental/compile-only; no se creó wrapper, alias o runtime de compatibilidad.
+PASS: 17/17 files, 88/88 tests covering hierarchy, renderer, expansion, keyboard/focus, selection, query, remote roots/children, virtualization, editing, export, lifecycle and accessibility behavior.
 
-## 28. Candidate tests promoted
+## 22. Full suite
 
-No ejecutado. Los 22 files/124 tests certificados continúan en el árbol candidato.
+PASS without global coverage: 170/170 files and 2,417/2,417 tests. Duration of the recorded final run: 67.85 s.
 
-## 29. Legacy tests removed/migrated
+## 23. Build
 
-Ninguno eliminado ni migrado. La clasificación A/B/C/D no puede consumarse de forma segura antes de resolver TreeTable.
+Production Angular package build: PASS. The two known Menu NG8102 warnings remain unchanged and were not modified.
 
-## 30. Test count accounting
+## 24. Package verification
 
-- Before K certificado por J: 186 files, 3.078 tests.
-- NeuTable 2 dirigida: 22 files, 124 tests.
-- Table 1.x/TableCore dirigida: 52 files, 797 tests.
-- After K: no aplicable; no se cambió runtime ni tests.
+`audit:package`: PASS. `verify:package`: PASS. The published projection contains both final entrypoints and no TableCore entry.
 
-## 31. Final NeuTable tests
+## 25. Import smoke
 
-No repetidos: el STOP ocurrió durante el análisis previo a runtime. Se conserva la evidencia green de J.
+The Angular 22.1.6 consumer imports only the two final subpaths. Build and representative Table/TreeTable rendering pass. No internal-path import is required.
 
-## 32. Full suite
+## 26. SSR import smoke
 
-No repetida porque no hubo sustitución física. Última certificación: 186/186 files y 3.078/3.078 tests en J.
+PASS for all 101 final entrypoints. Table and TreeTable evaluate without browser globals. TableCore is absent from the package export map.
 
-## 33. Build
+## 27. Angular 22 consumer
 
-No repetido; no hubo cambios de runtime/package que validar.
+PASS on Angular 22.1.6: production build, zoneless providers, basic final Table, controlled hierarchy TreeTable, generated CRUD page, server rendering and entrypoint imports. The CRUD schematic was minimally updated to supply the required semantic `rowKey`.
 
-## 34. Package verification
+## 28. Table SSR/hydration
 
-No repetida; la eliminación objetivo no fue aplicada.
+Real Chromium PASS: deterministic virtual SSR bootstrap, satisfied range with zero duplicate request, accepted request paths exactly once, bounded DOM, DOM reuse, zero NG050x and zero mechanical accessibility violations.
 
-## 35. Import smoke
+## 29. TreeTable SSR/hydration
 
-No repetido. El smoke final sin `table-core` no puede ejecutarse hasta resolver el bloqueo.
+Real Chromium PASS: DOM reuse, native table/treegrid structure, empty/loading/error, RTL logical indentation, narrow containment, optional chunks lazy, editor/JSON exactly once, controlled interactions exactly once, zero viewport request and zero NG050x.
 
-## 36. SSR import smoke
+## 30. Zoneless
 
-No repetido. Se mantiene el PASS de J para el estado previo.
+Both final consumers run with `provideZonelessChangeDetection()`. No Zone.js dependency or compatibility change-detection bridge was introduced.
 
-## 37. Angular 22 consumer
+## 31. Effects audits
 
-No repetido. No se expuso el entrypoint final nuevo.
+- NeuTable: exactly 2 product effects (request coordination and viewport lifecycle).
+- NeuTreeTable: exactly 4 certified product effects.
+- No compatibility or promotion effect was added.
 
-## 38. SSR/hydration real
+## 32. Accessibility smoke
 
-No repetido; paths y barrels permanecen intactos. Último estado certificado en J: PASS.
+NeuTable retains native table semantics. NeuTreeTable retains native table plus treegrid semantics. Chromium hydration checks found zero mechanical violations and no ARIA regression caused by the path promotion.
 
-## 39. Zoneless
+## 33. Table dependency graph
 
-Sin cambios. NeuTable 2 continúa certificada con `provideZonelessChangeDetection()` y sin Zone.js.
+The final graph contains Angular core/common, private Table runtime and private dynamic chunks. It has no edge to Table 1.x, TableCore, TreeTable, Router, HTTP, storage, PrimeNG or a third-party grid/XLSX runtime.
 
-## 40. Effects audit
+## 34. TreeTable dependency graph
 
-Sin cambios: NeuTable 2 conserva los dos effects certificados. No se añadió effect de compatibilidad.
+The final graph contains Angular core/common, private TreeTable runtime and its internal neutral helpers. It has no edge to TreeTable 1.x, NeuTable, Table 1.x, TableCore, Router, HTTP, storage or PrimeNG.
 
-## 41. Dependency graph
+## 35. Table bundle
 
-El grafo objetivo no se publicó. El grafo candidato sigue sin edges a Table 1.x, TableCore, Router, HTTP, storage, PrimeNG o third-party grids. TreeTable sí conserva el edge bloqueante al entrypoint legacy.
+Final promoted `@neural-ui/core/table`:
 
-## 42. Bundle BASIC
+| Scenario | Raw | Gzip | Brotli |
+|---|---:|---:|---:|
+| BASIC / enterprise initial / remote / virtual / combined initial | 174,362 B | 34,516 B | 25,552 B |
+| root-unused | 0 B | 20 B container | 1 B container |
 
-No recalculado. Baseline J: 174.382 B raw, 34.559 B gzip, 25.541 B Brotli.
+The measured initial closure is byte-identical to the checked-in N2-011J bundle baseline. Runtime configuration does not create separate compile-time closures; the enterprise/remote/virtual scenarios therefore share BASIC until a private feature is invoked.
 
-## 43. Bundle enterprise
+## 36. TreeTable bundle
 
-No recalculado. Baseline J initial: 34.559 B gzip.
+Final promoted `@neural-ui/core/tree-table`:
 
-## 44. Bundle remote
+| Scenario | Raw | Gzip | Brotli |
+|---|---:|---:|---:|
+| BASIC | 112,510 B | 22,483 B | 19,039 B |
+| combined/templates | 113,211 B | 22,763 B | 19,278 B |
+| root-unused | 0 B | 20 B container | 1 B container |
 
-No recalculado. Baseline J initial: 34.559 B gzip.
+Against N2-015I BASIC (112,525/22,485/19,049), promotion changes -15 raw, -2 gzip and -10 Brotli: well inside the 5% gate.
 
-## 45. Bundle virtual
+## 37. Optional chunks
 
-No recalculado. Baseline J initial: 34.559 B gzip.
+NeuTable keeps advanced filter, active Signal Forms editor, CSV, JSON and XLSX behind dynamic imports. Export chunk gzip sizes remain CSV 383 B, JSON 469 B and XLSX 1,422 B.
 
-## 46. Bundle combined
+NeuTreeTable keeps its active editor and private export boundary lazy. Final gzip sizes: editor 1,185 B, shared export projection 1,097 B, CSV 386 B, JSON 471 B and XLSX 1,425 B.
 
-No recalculado. Baseline J initial: 34.559 B gzip.
+## 38. Root-unused
 
-## 47. Optional chunks
+PASS for both final entrypoints: 0 B raw. Neither facade is retained by an unused root import.
 
-Sin cambios: advanced filter 1.939 B gzip, Signal Forms editor 1.414 B, CSV 383 B, JSON 469 B y XLSX 1.422 B.
+## 39. Table legacy absence
 
-## 48. Root-unused
+Proof: zero old facade file, duplicate selector, legacy state/query controller, old remote channel, old virtual implementation or old export implementation in the shipped source/package.
 
-No recalculado. Baseline J: 0 B raw.
+## 40. TableCore absence
 
-## 49. TableCore absence proof
+Proof: zero source folder, entrypoint, export-map key, FESM, declaration, selector, runtime import or current consumer recommendation.
 
-FAIL esperado: TableCore sigue físicamente presente porque la sustitución atómica fue detenida. No se oculta ni se redirige.
+## 41. TreeTable legacy absence
 
-## 50. Old Table absence proof
+Proof: zero old facade, old hierarchy/orchestration engine, legacy 42/21/8 runtime API, old lazy/tree engine, Table dependency or compatibility wrapper.
 
-FAIL esperado: Table 1.x permanece intacta para no romper TreeTable mientras el diseño está bloqueado.
+## 42. Candidate path absence
 
-## 51. next absence proof
+The product tree contains no Table/TreeTable `next`, candidate or v2 implementation directory. Hydration and bundle fixtures were renamed to final paths. Historical N2 reports retain historical terminology.
 
-FAIL esperado: `table/next` permanece intacto y certificado; no se realizó un move parcial.
+## 43. Breaking migration delta
 
-## 52. rowAction/rowReorder
+- REMOVED: Table 1.x, TableCore, TreeTable 1.x, legacy URL/storage owners and parallel remote/virtual/export/edit paths.
+- CHANGED: flat legacy state becomes the certified controlled Table query/state and controlled TreeTable hierarchy.
+- MERGED: scalar legacy flags move into the frozen cohesive option contracts.
+- RENAMED: legacy lazy/server events become the single certified `dataRequest` channels.
+- INTERNALIZED: renderers, hierarchy projections, drafts, focus state and serializers.
+- No DEPRECATE target or runtime adapter remains.
 
-Sin cambios. Los fixes exactamente-once de J permanecen en el candidato.
+## 44. Known debts intentionally untouched
 
-## 53. Prime checklist preservation
+- Global coverage was not rerun; N2-015I remains the recorded checkpoint (lines 96.17%, statements 94.66%, functions 94.42%, branches 91.43%, threshold 95.01%).
+- The entrypoint audit now has zero Table/TreeTable findings and still reports exactly the 17 previously known missing Showcase demos.
+- The historical aggregate H9-B4 bundle policy was migrated away from TableCore but its shared budgets were not recalibrated in K. Its dedicated Table/TreeTable K bundle gates pass; the aggregate audit remains red for stale Table/Tree/ColorPicker budgets and requires separate global-policy authorization.
+- Menu NG8102, Firefox/WebKit installation, axe installation and unrelated component debts remain untouched.
 
-No re-auditado. F-001…F-070 permanece con el resultado funcional certificado en J.
+## 45. Git diff review
 
-## 54. Breaking delta
+The diff is limited to expected categories: candidate promotion/moves, legacy deletion, package/contract tooling, migration fixtures and consumer/schematic adaptation, generated contracts/baselines, static absence gates, and minimal historical-doc labeling. No unrelated runtime feature or broad refactor was found.
 
-No materializado. El ledger REMOVED/CHANGED/MERGED/RENAMED/INTERNALIZED sigue siendo el plan aprobado, no una afirmación sobre el package actual.
+## 46. Symlink/file hygiene
 
-## 55. Documentation changes
+`git diff --check`: PASS. Tracked mode 120000: 0. Changed mode 120000: 0. Runtime symlinks: 0. Temporary N2 hydration/bundle directories: 0. No dist/coverage artifact was newly tracked.
 
-Solo se añade este informe de bloqueo. No se alteran documentos históricos ni docs activas para fingir una promoción inexistente.
+## 47. Remaining risks
 
-## 56. Known global debts untouched
+The physical replacement itself has no open blocker. Remaining work is operational: review the destructive diff, authorize the local K commit, and separately decide whether to recalibrate the shared H9-B4 policy. Future Table P2 and TreeTable P2/P3 remain explicitly out of scope.
 
-No se tocaron los 17 demos Showcase ausentes, warnings NG8102 de Menu, tokens de OrganizationChart, deuda de SVG inline ni otros debts globales.
+## 48. Final recommendation
 
-## 57. Git diff review
+**TABLE 2 + TREETABLE 2 PHYSICAL REPLACEMENT PASS**
 
-El diff de K queda limitado a este informe. No hay promotion, deletions, package changes, TreeTable rewrite ni refactor no relacionado.
-
-## 58. Symlink/file hygiene
-
-0 symlinks versionados al inicio y ninguno añadido. No se crearon carpetas temporales de hydration ni build artifacts versionados.
-
-## 59. Remaining risks
-
-La decisión necesaria excede K: o se autoriza una fase específica de migración/reescritura de TreeTable a los contratos finales, o se retira TreeTable como producto. Las alternativas de conservar un adapter Table1→Table2, esconder Table 1.x dentro de TreeTable, duplicar engines o crear aliases están explícitamente prohibidas y no se implementaron.
-
-## 60. Final recommendation
-
-**TABLE 2 PHYSICAL REPLACEMENT BLOCKED**
-
-Solicitar una resolución de diseño para TreeTable antes de reintentar la sustitución física. No avanzar a otra fase del roadmap.
+N2-011K is complete in the working tree and ready for review. No commit, push, tag, release or npm publish was performed.

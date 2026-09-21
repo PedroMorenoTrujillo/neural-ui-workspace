@@ -7,22 +7,25 @@ import {
   ViewEncapsulation,
   computed,
   contentChild,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormValueControl } from '@angular/forms/signals';
 import {
   NeuOptionAccessor,
   NeuOptionDisabledAccessor,
   NeuOptionLabelAccessor,
   NeuOptionValue,
   NeuOptionValueAccessor,
+  NeuSelectionMode,
+  NeuSelectionValue,
+  NeuViewportRange,
   neuOptionValuesEqual,
   readNeuOptionAccessor,
   resolveNeuOptionDisabled,
@@ -36,6 +39,11 @@ import {
   walkNeuTreeDepthFirst,
 } from '@neural-ui/core/internal';
 import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
+import {
+  NeuTreeSelectChildrenRequest,
+  NeuTreeSelectSelectionStrategy,
+  NeuTreeSelectVirtualizationOptions,
+} from './neu-tree-select.types';
 
 export interface NeuTreeSelectNode {
   value: string;
@@ -47,6 +55,11 @@ export interface NeuTreeSelectNode {
 }
 
 type UnknownRecord = Record<PropertyKey, unknown>;
+const NEGATIVE_ZERO_TOKEN = Symbol('neu-tree-select-negative-zero');
+
+function selectionToken(value: unknown): unknown {
+  return typeof value === 'number' && Object.is(value, -0) ? NEGATIVE_ZERO_TOKEN : value;
+}
 
 interface FlatNode<T, V> {
   node: T;
@@ -91,15 +104,9 @@ export class NeuTreeSelectEmptyDirective {
   selector: 'neu-tree-select',
   imports: [OverlayModule, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuTreeSelectComponent),
-      multi: true,
-    },
-  ],
   host: {
     class: 'neu-tree-select',
+    '(focusout)': 'onCompositeFocusOut($event)',
     '(window:resize)': 'onViewportResize()',
   },
   template: `
@@ -145,7 +152,7 @@ export class NeuTreeSelectEmptyDirective {
           </svg>
         </span>
       </button>
-      @if (clearable() && values().length) {
+      @if (clearable() && currentValues().length) {
         <button
           class="neu-tree-select__clear"
           type="button"
@@ -174,7 +181,8 @@ export class NeuTreeSelectEmptyDirective {
         [id]="panelId"
         role="tree"
         [attr.aria-label]="label() || placeholder()"
-        [attr.aria-multiselectable]="multiple() ? 'true' : null"
+        [attr.aria-multiselectable]="isMultiple() ? 'true' : null"
+        (focusout)="onCompositeFocusOut($event)"
       >
         @if (headerTpl()) {
           <div class="neu-tree-select__header">
@@ -191,19 +199,24 @@ export class NeuTreeSelectEmptyDirective {
             (keydown)="onSearchKeydown($event)"
           />
         }
-        @for (item of visibleNodes(); track item.trackBy; let index = $index) {
+        <ng-template #treeNode let-item let-index="index" let-virtual="virtual">
           <button
             type="button"
             role="treeitem"
             class="neu-tree-select__node"
-            [class.neu-tree-select__node--selected]="isSelected(item.value)"
+            [class.neu-tree-select__node--selected]="selectionState(item) === 'checked'"
+            [class.neu-tree-select__node--mixed]="selectionState(item) === 'mixed'"
+            [class.neu-tree-select__node--virtual]="virtual"
             [disabled]="item.disabled"
             [tabIndex]="treeTabIndex(index)"
             [style.padding-inline-start.rem]="0.75 + item.level * 1"
+            [style.height.px]="virtual ? effectiveVirtualization().itemSize : null"
+            [style.transform]="virtual ? 'translateY(' + index * effectiveVirtualization().itemSize + 'px)' : null"
             [attr.data-neu-tree-select-index]="index"
             [attr.aria-level]="item.level + 1"
-            [attr.aria-expanded]="item.hasChildren || item.lazy ? expanded().has(item.value) : null"
+            [attr.aria-expanded]="item.hasChildren || item.lazy ? isExpanded(item.value) : null"
             [attr.aria-selected]="isSelected(item.value)"
+            [attr.aria-checked]="isMultiple() ? selectionState(item) : null"
             [attr.aria-disabled]="item.disabled ? 'true' : null"
             (focus)="setActiveIndex(index)"
             (keydown)="onNodeKeydown(item, index, $event)"
@@ -215,7 +228,7 @@ export class NeuTreeSelectEmptyDirective {
                 aria-hidden="true"
                 (click)="toggleExpanded(item.node, $event)"
               >
-                {{ expanded().has(item.value) ? '−' : '+' }}
+                {{ isExpanded(item.value) ? '−' : '+' }}
               </span>
             }
             @if (nodeTpl()) {
@@ -232,6 +245,37 @@ export class NeuTreeSelectEmptyDirective {
               {{ item.label }}
             }
           </button>
+        </ng-template>
+        @if (effectiveVirtualization().enabled && visibleNodes().length) {
+          <div
+            class="neu-tree-select__viewport"
+            role="group"
+            [style.height.px]="effectiveVirtualization().viewportHeight"
+            (scroll)="onVirtualScroll($event)"
+          >
+            <div
+              class="neu-tree-select__virtual-spacer"
+              [style.height.px]="visibleNodes().length * effectiveVirtualization().itemSize"
+            >
+              @for (item of renderedNodes(); track item.trackBy; let localIndex = $index) {
+                <ng-container
+                  [ngTemplateOutlet]="treeNode"
+                  [ngTemplateOutletContext]="{
+                    $implicit: item,
+                    index: virtualRenderStart() + localIndex,
+                    virtual: true,
+                  }"
+                />
+              }
+            </div>
+          </div>
+        } @else {
+          @for (item of visibleNodes(); track item.trackBy; let index = $index) {
+            <ng-container
+              [ngTemplateOutlet]="treeNode"
+              [ngTemplateOutletContext]="{ $implicit: item, index, virtual: false }"
+            />
+          }
         }
         @if (!visibleNodes().length) {
           <div class="neu-tree-select__empty" role="status">
@@ -255,7 +299,8 @@ export class NeuTreeSelectEmptyDirective {
 export class NeuTreeSelectComponent<
   T = NeuTreeSelectNode,
   V = NeuOptionValue<T>,
-> implements ControlValueAccessor {
+  M extends NeuSelectionMode = 'single',
+> implements FormValueControl<NeuSelectionValue<V, M>> {
   private isRecord(value: unknown): value is UnknownRecord {
     return typeof value === 'object' && value !== null;
   }
@@ -283,10 +328,14 @@ export class NeuTreeSelectComponent<
   readonly emptyLabel = input('No options found');
   readonly searchPlaceholder = input('Search...');
   readonly searchable = input(true);
-  readonly multiple = input(false);
+  readonly mode = input<M>('single' as M);
+  readonly selectionStrategy = input<NeuTreeSelectSelectionStrategy>('independent');
+  readonly expandedKeys = input<readonly V[]>([]);
+  readonly virtualizationOptions = input<Readonly<NeuTreeSelectVirtualizationOptions>>({});
   readonly clearable = input(false);
   readonly disabled = input(false);
   readonly readonly = input(false);
+  readonly touched = input(false);
   readonly clearLabel = input('Clear selection');
 
   /** Browser panel attached, regardless of opening source. */
@@ -311,19 +360,24 @@ export class NeuTreeSelectComponent<
     if (wasAttached) this.closed.emit();
   }
 
-  readonly selectionChange = output<T[]>();
-  readonly nodeExpand = output<T>();
+  readonly expandedKeysChange = output<readonly V[]>();
+  readonly nodeExpanded = output<T>();
+  readonly nodeCollapsed = output<T>();
+  readonly childrenRequest = output<NeuTreeSelectChildrenRequest<V>>();
+  readonly rangeChange = output<NeuViewportRange>();
   /** Changed raw query from user input; programmatic query writes are silent. */
   readonly filter = output<{ query: string }>();
   /** Explicit clear command, not empty selection/model synchronization. */
   readonly cleared = output<void>();
-  readonly nodeExpansionChange = output<{ node: T; expanded: boolean }>();
+  readonly touch = output<void>();
 
   protected onFilterInput(event: Event): void {
     if (this.eventDestroyRef.destroyed || this.isDisabled()) return;
     const query = (event.target as HTMLInputElement).value;
     if (query === this.query()) return;
     this.query.set(query);
+    this.queryRevision.update((revision) => revision + 1);
+    this.virtualStart.set(0);
     this.filter.emit({ query });
   }
 
@@ -331,10 +385,11 @@ export class NeuTreeSelectComponent<
   readonly panelId = inject(NeuIdGenerator).getId('neu-tree-select-panel-');
   readonly open = signal(false);
   readonly query = signal('');
-  readonly values = signal<V[]>([]);
-  readonly expanded = signal(new Set<V>());
+  readonly value = model<NeuSelectionValue<V, M>>(null as NeuSelectionValue<V, M>);
+  readonly virtualStart = signal(0);
   protected readonly panelWidth = signal<number | string>('');
-  readonly cvaDisabled = signal(false);
+  private readonly queryRevision = signal(0);
+  private nextChildrenRequestId = 1;
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   /* v8 ignore start -- Angular signal-query factories; trigger/overlay behavior is covered. */
   private readonly trigger = viewChild('trigger', { read: ElementRef<HTMLButtonElement> });
@@ -343,50 +398,108 @@ export class NeuTreeSelectComponent<
   private readonly navigation = new NeuTreeNavigationController();
   private focusLastOnAttach = false;
 
-  readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
-  readonly selectedNodes = computed(() => this.selectedNodesFromValues(this.values()));
+  readonly isDisabled = computed(() => this.disabled());
+  readonly isMultiple = computed(() => this.mode() === 'multiple');
+  readonly currentValues = computed<readonly V[]>(() => {
+    const value = this.value();
+    if (value == null) return [];
+    return this.isMultiple() ? ([...(value as readonly V[])] as readonly V[]) : [value as V];
+  });
+  private readonly currentValueTokens = computed(
+    () => new Set(this.currentValues().map((value) => selectionToken(value))),
+  );
+  readonly effectiveVirtualization = computed(() => {
+    const options = this.virtualizationOptions();
+    return {
+      enabled: options.enabled === true,
+      itemSize: Math.max(24, options.itemSize ?? 40),
+      viewportHeight: Math.max(40, options.viewportHeight ?? 240),
+      buffer: Math.max(0, options.buffer ?? 3),
+    };
+  });
+  readonly allNodes = computed(() => this.flatten(this.nodes()));
+  readonly selectedNodes = computed(() =>
+    this.allNodes()
+      .filter((item) => this.isSelected(item.value))
+      .map((item) => item.node),
+  );
   readonly selectedLabel = computed(() => {
     const selected = this.selectedNodes();
     if (!selected.length) {
       return '';
     }
-    return this.multiple() ? `${selected.length} selected` : this.optionLabelOf(selected[0]);
+    return this.isMultiple() ? `${selected.length} selected` : this.optionLabelOf(selected[0]);
   });
   readonly selectedNode = computed(() => this.selectedNodes()[0] ?? null);
   readonly visibleNodes = computed(() => {
     const q = this.query().trim().toLowerCase();
-    const nodes = q ? this.flatten(this.nodes()) : this.flattenVisible(this.nodes());
+    const nodes = q ? this.allNodes() : this.flattenVisible(this.nodes());
     return q ? nodes.filter((item) => item.label.toLowerCase().includes(q)) : nodes;
   });
-
-  private onChange: (value: V | V[] | null) => void = () => {};
-  private onTouched: () => void = () => {};
-
-  writeValue(value: V | V[] | null): void {
-    if (value === null || value === undefined) {
-      this.values.set([]);
-      return;
+  readonly selectionStates = computed(() => {
+    const nodes = this.allNodes();
+    const states = new Map<string, 'checked' | 'mixed' | 'unchecked'>();
+    if (!this.isMultiple() || this.selectionStrategy() === 'independent') {
+      for (const item of nodes)
+        states.set(item.trackBy, this.isSelected(item.value) ? 'checked' : 'unchecked');
+      return states;
     }
-
-    this.values.set(Array.isArray(value) ? [...value] : [value]);
-  }
-
-  registerOnChange(fn: (value: V | V[] | null) => void): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.cvaDisabled.set(isDisabled);
-  }
+    const childrenByParent = new Map<string, FlatNode<T, V>[]>();
+    for (const item of nodes) {
+      if (!item.parentTrackBy || item.disabled) continue;
+      const children = childrenByParent.get(item.parentTrackBy) ?? [];
+      children.push(item);
+      childrenByParent.set(item.parentTrackBy, children);
+    }
+    for (let index = nodes.length - 1; index >= 0; index -= 1) {
+      const item = nodes[index];
+      const selected = this.isSelected(item.value);
+      const children = childrenByParent.get(item.trackBy) ?? [];
+      if (!children.length) {
+        states.set(item.trackBy, selected ? 'checked' : 'unchecked');
+        continue;
+      }
+      const childStates = children.map((child) => states.get(child.trackBy) ?? 'unchecked');
+      states.set(
+        item.trackBy,
+        selected && childStates.every((state) => state === 'checked')
+          ? 'checked'
+          : selected || childStates.some((state) => state !== 'unchecked')
+            ? 'mixed'
+            : 'unchecked',
+      );
+    }
+    return states;
+  });
+  readonly renderedNodes = computed(() => {
+    if (!this.effectiveVirtualization().enabled) return this.visibleNodes();
+    const { itemSize, viewportHeight, buffer } = this.effectiveVirtualization();
+    const visibleCount = Math.ceil(viewportHeight / itemSize);
+    return this.visibleNodes().slice(
+      this.virtualRenderStart(),
+      this.virtualRenderStart() + visibleCount + buffer * 2,
+    );
+  });
+  readonly virtualRenderStart = computed(() =>
+    Math.max(0, this.virtualStart() - this.effectiveVirtualization().buffer),
+  );
 
   toggle(): void {
     if (!this.isDisabled()) {
       this.open() ? this.close() : this.openPanel(false);
     }
+  }
+
+  focus(): void {
+    if (!this.isDisabled()) this.trigger()?.nativeElement.focus({ preventScroll: true });
+  }
+
+  reset(): void {
+    if (this.query()) this.queryRevision.update((revision) => revision + 1);
+    this.query.set('');
+    this.virtualStart.set(0);
+    this.navigation.setItems([]);
+    this.close();
   }
 
   close(): void {
@@ -396,6 +509,13 @@ export class NeuTreeSelectComponent<
       if (!this.eventDestroyRef.destroyed)
         this.trigger()?.nativeElement.focus({ preventScroll: true });
     });
+  }
+
+  onCompositeFocusOut(event: FocusEvent): void {
+    const related = event.relatedTarget as Node | null;
+    const panel = this.host.ownerDocument.getElementById(this.panelId);
+    if (related && (this.host.contains(related) || panel?.contains(related))) return;
+    this.touch.emit();
   }
 
   requestClose(reason: 'escape' | 'outside-pointer', event: Event): void {
@@ -419,7 +539,15 @@ export class NeuTreeSelectComponent<
   }
 
   isSelected(value: V): boolean {
-    return this.values().some((selected) => neuOptionValuesEqual(selected, value));
+    return this.currentValueTokens().has(selectionToken(value));
+  }
+
+  isExpanded(value: V): boolean {
+    return this.expandedKeys().some((key) => neuOptionValuesEqual(key, value));
+  }
+
+  selectionState(item: FlatNode<T, V>): 'checked' | 'mixed' | 'unchecked' {
+    return this.selectionStates().get(item.trackBy) ?? 'unchecked';
   }
 
   selectNode(node: T): void {
@@ -428,14 +556,16 @@ export class NeuTreeSelectComponent<
     }
 
     const value = this.optionValueOf(node);
-    const next = this.multiple()
-      ? this.isSelected(value)
-        ? this.values().filter((item) => !neuOptionValuesEqual(item, value))
-        : [...this.values(), value]
+    const next = this.isMultiple()
+      ? this.selectionStrategy() === 'propagated'
+        ? this.propagatedSelection(node, !this.isSelected(value))
+        : this.isSelected(value)
+          ? this.currentValues().filter((item) => !neuOptionValuesEqual(item, value))
+          : [...this.currentValues(), value]
       : [value];
 
     this.commit(next);
-    if (!this.multiple()) {
+    if (!this.isMultiple()) {
       this.close();
     }
   }
@@ -446,20 +576,26 @@ export class NeuTreeSelectComponent<
     const value = this.optionValueOf(node);
     const children = this.childrenOf(node);
     if (!children.length && !this.isLazyNode(node)) return;
-    const next = new Set(this.expanded());
+    const next = [...this.expandedKeys()];
+    const currentIndex = next.findIndex((key) => neuOptionValuesEqual(key, value));
 
-    if (next.has(value)) {
-      next.delete(value);
+    if (currentIndex >= 0) {
+      next.splice(currentIndex, 1);
+      this.nodeCollapsed.emit(node);
     } else {
-      next.add(value);
+      next.push(value);
+      this.nodeExpanded.emit(node);
       if (this.isLazyNode(node) && !children.length) {
-        this.nodeExpand.emit(node);
+        this.childrenRequest.emit({
+          requestId: this.nextChildrenRequestId++,
+          queryRevision: this.queryRevision(),
+          parentKey: value,
+        });
+        if (this.eventDestroyRef.destroyed) return;
       }
     }
 
-    this.expanded.set(next);
-    if (!this.eventDestroyRef.destroyed)
-      this.nodeExpansionChange.emit({ node, expanded: next.has(value) });
+    this.expandedKeysChange.emit(next);
   }
 
   toggleExpandedFromTemplate(node: T): void {
@@ -487,7 +623,22 @@ export class NeuTreeSelectComponent<
       if (this.focusLastOnAttach) this.navigation.setActiveIndex(this.lastEligibleIndex());
       this.focusActiveNode();
       this.focusLastOnAttach = false;
+      this.emitVirtualRange();
     });
+  }
+
+  onVirtualScroll(event: Event): void {
+    const target = event.currentTarget as HTMLElement;
+    const first = Math.max(
+      0,
+      Math.min(
+        Math.floor(target.scrollTop / this.effectiveVirtualization().itemSize),
+        Math.max(0, this.visibleNodes().length - 1),
+      ),
+    );
+    if (first === this.virtualStart()) return;
+    this.virtualStart.set(first);
+    this.emitVirtualRange();
   }
 
   onOverlayKeydown(event: KeyboardEvent): void {
@@ -563,17 +714,83 @@ export class NeuTreeSelectComponent<
 
   private commit(values: V[]): void {
     const ownedValues = [...values];
-    this.values.set(ownedValues);
-    this.onTouched();
-    this.onChange(this.multiple() ? [...ownedValues] : (ownedValues[0] ?? null));
-    this.selectionChange.emit(this.selectedNodesFromValues(ownedValues));
+    this.value.set(
+      (this.isMultiple() ? ownedValues : (ownedValues[0] ?? null)) as NeuSelectionValue<V, M>,
+    );
   }
 
-  private selectedNodesFromValues(values: readonly V[]): T[] {
-    const allNodes = this.flatten(this.nodes());
-    return allNodes
-      .filter((item) => values.some((value) => neuOptionValuesEqual(item.value, value)))
-      .map((item) => item.node);
+  private propagatedSelection(node: T, select: boolean): V[] {
+    const all = this.allNodes();
+    const root = all.find((item) => item.node === node);
+    if (!root) return [...this.currentValues()];
+    const next = new Map<unknown, V>(
+      this.currentValues().map((value) => [selectionToken(value), value]),
+    );
+    const setSelected = (value: V, selected: boolean) => {
+      const token = selectionToken(value);
+      if (selected) next.set(token, value);
+      else next.delete(token);
+    };
+    const byTrack = new Map(all.map((item) => [item.trackBy, item]));
+    const childrenByParent = new Map<string, FlatNode<T, V>[]>();
+    for (const item of all) {
+      if (!item.parentTrackBy) continue;
+      const children = childrenByParent.get(item.parentTrackBy) ?? [];
+      children.push(item);
+      childrenByParent.set(item.parentTrackBy, children);
+    }
+    for (const item of this.propagationNodes(root, childrenByParent))
+      setSelected(item.value, select);
+
+    let parentTrack = root.parentTrackBy;
+    while (parentTrack) {
+      const parent = byTrack.get(parentTrack);
+      if (!parent || parent.disabled) break;
+      const children = (childrenByParent.get(parentTrack) ?? []).filter(
+        (candidate) => !candidate.disabled,
+      );
+      setSelected(
+        parent.value,
+        children.length > 0 &&
+          children.every((candidate) => next.has(selectionToken(candidate.value))),
+      );
+      parentTrack = parent.parentTrackBy;
+    }
+    return [...next.values()];
+  }
+
+  private propagationNodes(
+    root: FlatNode<T, V>,
+    childrenByParent: ReadonlyMap<string, readonly FlatNode<T, V>[]>,
+  ): FlatNode<T, V>[] {
+    const result: FlatNode<T, V>[] = [];
+    const pending = [root];
+    while (pending.length) {
+      const current = pending.pop()!;
+      if (current.disabled) continue;
+      result.push(current);
+      const children = childrenByParent.get(current.trackBy) ?? [];
+      for (let index = children.length - 1; index >= 0; index -= 1) pending.push(children[index]);
+    }
+    return result;
+  }
+
+  private emitVirtualRange(): void {
+    if (!this.effectiveVirtualization().enabled || this.eventDestroyRef.destroyed) return;
+    const visibleCount = Math.ceil(
+      this.effectiveVirtualization().viewportHeight / this.effectiveVirtualization().itemSize,
+    );
+    const renderStart = this.virtualRenderStart();
+    this.rangeChange.emit({
+      visible: {
+        start: this.virtualStart(),
+        end: Math.min(this.visibleNodes().length, this.virtualStart() + visibleCount),
+      },
+      render: {
+        start: renderStart,
+        end: Math.min(this.visibleNodes().length, renderStart + this.renderedNodes().length),
+      },
+    });
   }
 
   private flatten(nodes: readonly T[]): FlatNode<T, V>[] {
@@ -602,7 +819,7 @@ export class NeuTreeSelectComponent<
   private flattenVisible(nodes: readonly T[]): FlatNode<T, V>[] {
     const entries = walkNeuTreeDepthFirst(nodes, (node) => this.childrenOf(node), {
       includePath: true,
-      shouldDescend: (entry) => this.expanded().has(this.optionValueOf(entry.node)),
+      shouldDescend: (entry) => this.isExpanded(this.optionValueOf(entry.node)),
     });
     return entries.map((entry) => {
       const node = entry.node;
@@ -654,7 +871,7 @@ export class NeuTreeSelectComponent<
         parentKey: item.parentTrackBy,
         disabled: item.disabled,
         hasChildren: item.hasChildren || item.lazy,
-        expanded: this.expanded().has(item.value),
+        expanded: this.isExpanded(item.value),
       })),
     );
   }
@@ -671,10 +888,27 @@ export class NeuTreeSelectComponent<
   }
 
   private focusActiveNode(): void {
-    this.connectedOverlay()
-      ?.overlayRef.overlayElement.querySelector<HTMLElement>(
-        `[data-neu-tree-select-index="${this.navigation.index}"]`,
-      )
+    const overlay = this.connectedOverlay()?.overlayRef.overlayElement;
+    if (!overlay) return;
+    if (this.effectiveVirtualization().enabled) {
+      const index = this.navigation.index;
+      const count = Math.ceil(
+        this.effectiveVirtualization().viewportHeight / this.effectiveVirtualization().itemSize,
+      );
+      if (index < this.virtualStart() || index >= this.virtualStart() + count) {
+        this.virtualStart.set(Math.max(0, index));
+        const viewport = overlay.querySelector<HTMLElement>('.neu-tree-select__viewport');
+        if (viewport) viewport.scrollTop = this.virtualStart() * this.effectiveVirtualization().itemSize;
+      }
+      queueMicrotask(() =>
+        overlay
+          .querySelector<HTMLElement>(`[data-neu-tree-select-index="${this.navigation.index}"]`)
+          ?.focus({ preventScroll: true }),
+      );
+      return;
+    }
+    overlay
+      .querySelector<HTMLElement>(`[data-neu-tree-select-index="${this.navigation.index}"]`)
       ?.focus({ preventScroll: true });
   }
 }

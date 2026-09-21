@@ -7,7 +7,7 @@ import type {
   NeuTableQuery,
   NeuTableSelection,
   NeuTableVirtualizationOptions,
-} from '../../projects/ui-core/table/next/public/public-api';
+} from '@neural-ui/core/table';
 
 interface Row {
   readonly id: number;

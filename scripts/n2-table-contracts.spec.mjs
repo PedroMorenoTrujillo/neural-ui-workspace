@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { test } from 'node:test';
 import { build } from 'esbuild';
 import ts from 'typescript';
@@ -40,24 +40,21 @@ test('classifies every output once and keeps the six controlled owners unique', 
   assert.equal(targetOutputs.filter((output) => output.name === 'dataRequest').length, 1);
 });
 
-test('covers every current facade member in the executable removal ledger', () => {
+test('keeps the removed legacy facade fully classified in the executable ledger', () => {
   assert.deepEqual(validateLegacyLedger(), []);
 });
 
-test('keeps TableCore physical code while marking it absent from the public target', () => {
+test('physically removes TableCore at the frozen N2-011K boundary', () => {
   assert.equal(tableCoreTarget.publicTarget, 'REMOVE');
   assert.equal(tableCoreTarget.physicalRemovalPhase, 'N2-011K');
-  assert.match(
-    readFileSync('projects/ui-core/table-core/public_api.ts', 'utf8'),
-    /NeuTableCore|neu-table-core/,
-  );
+  assert.equal(existsSync('projects/ui-core/table-core'), false);
 });
 
-test('does not resolve the isolated candidate as a consumer package subpath', () => {
+test('does not resolve internal source folders as consumer package subpaths', () => {
   const config = ts.readConfigFile('tsconfig.json', ts.sys.readFile);
   const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, '.');
   const resolved = ts.resolveModuleName(
-    '@neural-ui/core/table/next/public',
+    '@neural-ui/core/table/public',
     'fixtures/n2-table-contracts/invalid-package-path.ts',
     parsed.options,
     ts.sys,
@@ -67,7 +64,7 @@ test('does not resolve the isolated candidate as a consumer package subpath', ()
 
 test('keeps browser integration platform-guarded and free of ambient global ownership', async () => {
   const result = await build({
-    entryPoints: ['projects/ui-core/table/next/public/public-api.ts'],
+    entryPoints: ['projects/ui-core/table/public/public-api.ts'],
     bundle: true,
     external: ['@angular/core', '@angular/common', '@angular/forms', '@angular/forms/*'],
     format: 'esm',

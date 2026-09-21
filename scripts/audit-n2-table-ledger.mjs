@@ -1,4 +1,5 @@
-import { collectCurrentTableMembers, validateLegacyLedger } from './lib/n2-table-contracts.mjs';
+import { legacyLedger } from './n2-table-contract-manifest.mjs';
+import { validateLegacyLedger } from './lib/n2-table-contracts.mjs';
 
 const violations = validateLegacyLedger();
 if (violations.length > 0) {
@@ -7,7 +8,12 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-const current = collectCurrentTableMembers();
+const counts = Object.fromEntries(
+  ['input', 'output', 'method'].map((kind) => [
+    kind,
+    legacyLedger.filter((entry) => entry.kind === kind).length,
+  ]),
+);
 console.log(
-  `N2 Table legacy ledger passed (${current.input.length} inputs, ${current.output.length} outputs, ${current.method.length} methods; every member has disposition, target, reason and migration).`,
+  `N2 Table removed-legacy ledger passed (${counts.input} inputs, ${counts.output} outputs, ${counts.method} methods; every frozen member has disposition, target, reason and migration).`,
 );

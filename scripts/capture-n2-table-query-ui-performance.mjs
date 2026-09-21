@@ -16,7 +16,7 @@ const result = spawnSync(
   vitest,
   [
     'run',
-    'projects/ui-core/table/next/neu-table.query-ui-performance.spec.ts',
+    'projects/ui-core/table/neu-table.query-ui-performance.spec.ts',
     '--config',
     'vitest.stress.config.mts',
     '--silent=false',

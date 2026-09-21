@@ -2,7 +2,7 @@ import type {
   NeuTableDataRequest,
   NeuTableMetadata,
   NeuTableQuery,
-} from '../../projects/ui-core/table/next/public/public-api';
+} from '@neural-ui/core/table';
 import { query, type AccountField } from './model';
 
 export interface RemoteConsumerState {

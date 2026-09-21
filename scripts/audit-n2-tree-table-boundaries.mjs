@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { build } from 'esbuild';
 
-const root = 'projects/ui-core/tree-table/next';
+const root = 'projects/ui-core/tree-table';
 const files = [];
 function walk(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
@@ -19,7 +19,6 @@ const forbiddenImports = [
   '@neural-ui/core/table',
   '@neural-ui/core/table-core',
   '@angular/router',
-  '@angular/forms',
   '@angular/common/http',
   'primeng',
   '/table/neu-table',
@@ -29,6 +28,7 @@ const forbiddenImports = [
 const violations = [];
 let effects = 0;
 let renderEffects = 0;
+let signalFormsImports = 0;
 const signalFirstCounts = {
   inputDecorators: 0,
   outputDecorators: 0,
@@ -70,12 +70,18 @@ for (const file of files) {
     /__(?:treeLevel|parent|path|expanded|selected|partialSelected|loading|leaf|childrenLoaded|virtualIndex|treeMeta)\b/,
   );
   for (const match of source.matchAll(/(?:from\s+|import\s*)['"]([^'"]+)['"]/g)) {
+    if (match[1] === '@angular/forms/signals') {
+      signalFormsImports += 1;
+      if (!file.endsWith('internal/features/editing/neu-tree-table-active-editor.component.ts')) {
+        violations.push(`${file}: ${match[1]}`);
+      }
+    }
     for (const forbidden of forbiddenImports) {
       if (match[1].includes(forbidden)) violations.push(`${file}: ${match[1]}`);
     }
   }
 }
-assert.equal(effects, 3, 'NeuTreeTable candidate must have exactly three justified effects.');
+assert.equal(effects, 4, 'NeuTreeTable candidate must have exactly four justified effects.');
 assert.equal(renderEffects, 0, 'NeuTreeTable candidate must not add a render effect.');
 assert.deepEqual(signalFirstCounts, {
   inputDecorators: 0,
@@ -90,6 +96,7 @@ assert.deepEqual(signalFirstCounts, {
   zoneJs: 0,
 });
 assert.deepEqual(violations, []);
+assert.equal(signalFormsImports, 1, 'Signal Forms must remain isolated to the private editor chunk.');
 
 const rendererTemplate = readFileSync(
   join(root, 'internal/renderer/neu-tree-table-renderer.component.html'),
@@ -98,6 +105,8 @@ const rendererTemplate = readFileSync(
 assert.equal((rendererTemplate.match(/\(focusin\)=/g) ?? []).length, 1);
 assert.equal((rendererTemplate.match(/\(keydown\)=/g) ?? []).length, 1);
 assert.equal((rendererTemplate.match(/\(click\)=/g) ?? []).length, 1);
+assert.equal((rendererTemplate.match(/\(dblclick\)=/g) ?? []).length, 1);
+assert.equal((rendererTemplate.match(/\(contextmenu\)=/g) ?? []).length, 1);
 assert.match(rendererTemplate, /aria-multiselectable/);
 assert.match(rendererTemplate, /aria-selected/);
 assert.match(rendererTemplate, /aria-checked/);
@@ -109,8 +118,12 @@ for (const rowTag of rendererTemplate.match(/<tr\b[^>]*>/gs) ?? []) {
   assert.doesNotMatch(rowTag, /\((?:focusin|keydown|click)\)=/);
 }
 const runtimeSource = files.map((file) => readFileSync(file, 'utf8')).join('\n');
-assert.doesNotMatch(runtimeSource, /\b(?:ResizeObserver|addEventListener|setInterval)\b/);
-assert.equal((runtimeSource.match(/\bsetTimeout\s*\(/g) ?? []).length, 2);
+assert.equal((runtimeSource.match(/\baddEventListener\s*\(/g) ?? []).length, 1);
+assert.equal((runtimeSource.match(/\bResizeObserver\b/g) ?? []).length, 1);
+assert.equal((runtimeSource.match(/\brequestAnimationFrame\s*\(/g) ?? []).length, 1);
+assert.equal((runtimeSource.match(/\bcancelAnimationFrame\s*\(/g) ?? []).length, 1);
+assert.doesNotMatch(runtimeSource, /\bsetInterval\b/);
+assert.equal((runtimeSource.match(/\bsetTimeout\s*\(/g) ?? []).length, 3);
 assert.ok(
   (runtimeSource.match(/\bclearTimeout\s*\(/g) ?? []).length >= 4,
   'Query debounce timers must be replaced and destroyed explicitly.',
@@ -119,7 +132,7 @@ assert.ok(
 const result = await build({
   entryPoints: [`${root}/public/public-api.ts`],
   bundle: true,
-  external: ['@angular/core', '@angular/common'],
+  external: ['@angular/core', '@angular/common', '@angular/forms/signals'],
   format: 'esm',
   loader: { '.html': 'text', '.scss': 'text' },
   metafile: true,
@@ -135,8 +148,8 @@ for (const forbidden of [
 ]) {
   assert.equal(graph.includes(forbidden), false, `Forbidden graph edge: ${forbidden}`);
 }
-assert.match(graph, /internal\/neu-exact-key/);
-assert.match(graph, /internal\/neu-field-value-resolver/);
+assert.match(graph, /tree-table\/internal\/shared\/neu-exact-key/);
+assert.match(graph, /tree-table\/internal\/shared\/neu-field-value-resolver/);
 console.log(
-  `N2 TreeTable boundary audit passed (${files.length} files, 3 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, 1 delegated focus/keyboard/click boundary, 2 bounded debounce timers with teardown, native selection/query/remote semantics, neutral internals only).`,
+  `N2 TreeTable boundary audit passed (${files.length} files, 4 justified effects, 0 render effects, 0 lifecycle methods/interfaces, 0 decorators/EventEmitter/model, 0 NgZone/ChangeDetectorRef/Zone.js, Signal Forms isolated to 1 private editor chunk, 1 delegated focus/keyboard/click/double-click/context-menu boundary, 1 viewport scroll listener, 1 ResizeObserver, 1 pending rAF maximum, 2 bounded debounce timers plus 1 bounded click disambiguation timer with teardown, native selection/query/remote/virtual/edit/action/export semantics, neutral internals only).`,
 );

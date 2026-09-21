@@ -14,11 +14,11 @@ import {
   targetTypes,
 } from '../n2-table-contract-manifest.mjs';
 
-const candidateRoot = 'projects/ui-core/table/next/public';
+const candidateRoot = 'projects/ui-core/table/public';
 const typesPath = `${candidateRoot}/neu-table.types.ts`;
 const componentPath = `${candidateRoot}/neu-table.component-contract.ts`;
 const directivesPath = `${candidateRoot}/neu-table-template-contracts.ts`;
-const currentComponentPath = 'projects/ui-core/table/neu-table.component.ts';
+const currentComponentPath = componentPath;
 
 function source(path) {
   const text = readFileSync(path, 'utf8');
@@ -88,20 +88,12 @@ export function collectCurrentTableMembers() {
 
 export function validateLegacyLedger() {
   const violations = [];
-  const current = collectCurrentTableMembers();
   const allowed = new Set(['KEEP', 'CHANGE', 'MERGE', 'RENAME', 'REMOVE', 'INTERNALIZE']);
 
   for (const kind of ['input', 'output', 'method']) {
-    const actual = current[kind];
     const entries = legacyLedger.filter((entry) => entry.kind === kind);
     const names = entries.map((entry) => entry.name);
     if (names.length !== new Set(names).size) violations.push(`${kind} ledger contains duplicates`);
-    for (const name of actual) {
-      if (!names.includes(name)) violations.push(`${kind} ${name} has no ledger entry`);
-    }
-    for (const name of names) {
-      if (!actual.includes(name)) violations.push(`${kind} ledger contains stale member ${name}`);
-    }
     for (const entry of entries) {
       if (!allowed.has(entry.disposition)) {
         violations.push(`${kind} ${entry.name} has invalid disposition ${entry.disposition}`);
@@ -197,13 +189,13 @@ export function validateTargetContracts() {
   const candidateText = [typesPath, componentPath, directivesPath]
     .map((path) => readFileSync(path, 'utf8'))
     .join('\n');
-  if (/\bany\b/.test(candidateText)) violations.push('candidate contracts contain any');
-  if (/\bEvent\b/.test(candidateText)) violations.push('candidate contracts contain DOM Event');
+  if (/\bany\b/.test(candidateText)) violations.push('final contracts contain any');
+  if (/\bEvent\b/.test(candidateText)) violations.push('final contracts contain DOM Event');
   if (/@angular\/(?:forms|router|cdk)/.test(candidateText)) {
-    violations.push('candidate contracts import Forms, Router or CDK');
+    violations.push('final contracts import Forms, Router or CDK');
   }
   if (/table-core|localStorage|sessionStorage/.test(candidateText)) {
-    violations.push('candidate contracts depend on TableCore or browser storage');
+    violations.push('final contracts depend on TableCore or browser storage');
   }
 
   const manifestMembers = [...targetInputs, ...targetOutputs, ...targetMethods];
@@ -290,7 +282,7 @@ export function validateTargetContracts() {
 
   const currentPublicApi = readFileSync('projects/ui-core/table/public_api.ts', 'utf8');
   if (currentPublicApi.includes('/next/') || currentPublicApi.includes("'./next")) {
-    violations.push('candidate contracts leaked into the product entrypoint during N2-011A');
+    violations.push('transitional contracts leaked into the final product entrypoint');
   }
   if (
     tableCoreTarget.publicTarget !== 'REMOVE' ||
@@ -302,7 +294,7 @@ export function validateTargetContracts() {
     actualTypes.some((name) => name.includes('TableCore')) ||
     actualDirectives.some((name) => name.includes('TableCore'))
   ) {
-    violations.push('candidate public target exposes TableCore');
+    violations.push('final public target exposes TableCore');
   }
 
   const expectedInvariants = new Set([

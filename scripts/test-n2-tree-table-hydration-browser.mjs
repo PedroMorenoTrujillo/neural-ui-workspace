@@ -12,7 +12,11 @@ const browser = await chromium.launch({
 });
 const page = await browser.newPage();
 const errors = [];
+const scriptRequests = [];
 page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
+page.on('request', (request) => {
+  if (request.url().endsWith('.js')) scriptRequests.push(request.url());
+});
 page.on('console', (message) => {
   if (['error', 'warning'].includes(message.type()))
     errors.push(`${message.type()}: ${message.text()}`);
@@ -33,6 +37,7 @@ try {
   assert.equal(await page.locator('#n2-tree-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-tree-diagnostic-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-tree-remote-events').textContent(), '[]');
+  assert.equal(await page.locator('#n2-tree-virtual-events').textContent(), '[]');
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('role'), 'treegrid');
   assert.equal(
     await page.locator('#n2-tree-primary table').getAttribute('aria-multiselectable'),
@@ -40,6 +45,8 @@ try {
   );
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '-1');
   assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
+  assert.equal(await page.locator('#n2-tree-virtual tr[data-node-key]').count(), 200);
+  assert.equal(await page.locator('#n2-tree-virtual table').getAttribute('aria-rowcount'), '200');
   assert.equal(await page.locator('#n2-tree-primary input[type="search"]').count(), 1);
   assert.equal(
     await page.locator('#n2-tree-primary th[data-column-id="name"]').getAttribute('aria-sort'),
@@ -86,6 +93,8 @@ try {
       document.querySelector('#n2-tree-primary thead'),
       document.querySelector('#n2-tree-primary tr[data-node-key="string:a"]'),
       document.querySelector('#n2-tree-primary tr[data-node-key="string:b"]'),
+      document.querySelector('#n2-tree-virtual table'),
+      document.querySelector('#n2-tree-virtual tr[data-node-key="string:virtual-0"]'),
     ];
   });
   release();
@@ -104,13 +113,56 @@ try {
         '#n2-tree-primary thead',
         '#n2-tree-primary tr[data-node-key="string:a"]',
         '#n2-tree-primary tr[data-node-key="string:b"]',
+        '#n2-tree-virtual table',
+        '#n2-tree-virtual tr[data-node-key="string:virtual-0"]',
       ];
       return window.__n2TreeNodes.map(
         (node, index) => node === document.querySelector(selectors[index]),
       );
     }),
-    [true, true, true, true],
+    [true, true, true, true, true, true],
   );
+  assert.deepEqual(
+    await page.locator('#n2-tree-primary table').evaluate((table) => ({
+      table: table.tagName,
+      head: table.querySelector('thead')?.tagName,
+      body: table.querySelector('tbody')?.tagName,
+      row: table.querySelector('tbody tr')?.tagName,
+      header: table.querySelector('th')?.tagName,
+      cell: table.querySelector('td')?.tagName,
+    })),
+    { table: 'TABLE', head: 'THEAD', body: 'TBODY', row: 'TR', header: 'TH', cell: 'TD' },
+  );
+  assert.equal(await page.locator('#n2-tree-empty').getByText('SSR empty tree').count(), 1);
+  assert.equal(await page.locator('#n2-tree-loading').getByText('SSR loading tree').count(), 1);
+  assert.equal(await page.locator('#n2-tree-error').getByText('SSR error tree').count(), 1);
+  const structuralReview = await page.locator('#n2-tree-primary').evaluate((section) => {
+    section.setAttribute('dir', 'rtl');
+    section.style.inlineSize = '320px';
+    section.style.maxInlineSize = '320px';
+    const viewport = section.querySelector('.neu-tree-table2__viewport');
+    const childTreeCell = section.querySelector(
+      'tr[data-node-key="string:b"] .neu-tree-table2__tree-cell',
+    );
+    const viewportStyle = viewport ? getComputedStyle(viewport) : null;
+    const treeCellStyle = childTreeCell ? getComputedStyle(childTreeCell) : null;
+    const result = {
+      direction: getComputedStyle(section).direction,
+      contained: Boolean(viewport && viewport.getBoundingClientRect().width <= 320),
+      overflow: viewportStyle?.overflowX,
+      logicalIndent: Number.parseFloat(treeCellStyle?.paddingRight ?? '0') > 0,
+    };
+    section.removeAttribute('dir');
+    section.style.removeProperty('inline-size');
+    section.style.removeProperty('max-inline-size');
+    return result;
+  });
+  assert.deepEqual(structuralReview, {
+    direction: 'rtl',
+    contained: true,
+    overflow: 'auto',
+    logicalIndent: true,
+  });
   assert.equal(await page.locator('#n2-tree-events').textContent(), '[]');
   assert.equal(
     await page.locator('#n2-tree-diagnostic-events').textContent(),
@@ -120,6 +172,33 @@ try {
     () =>
       document.querySelector('#n2-tree-remote-events')?.textContent ===
       '["unsatisfied:roots:initial:1"]',
+  );
+  await page.waitForFunction(() => {
+    const events = JSON.parse(
+      document.querySelector('#n2-tree-virtual-events')?.textContent ?? '[]',
+    );
+    return events.some((event) => event.startsWith('resize:'));
+  });
+  assert.ok((await page.locator('#n2-tree-virtual tr[data-node-key]').count()) <= 20);
+  const virtualViewport = page.locator('#n2-tree-virtual .neu-tree-table2__viewport');
+  await virtualViewport.evaluate((viewport) => {
+    viewport.scrollTop = 3_200;
+    viewport.dispatchEvent(new Event('scroll'));
+  });
+  await page.waitForFunction(() => {
+    const events = JSON.parse(
+      document.querySelector('#n2-tree-virtual-events')?.textContent ?? '[]',
+    );
+    return events.some((event) => event.startsWith('scroll:'));
+  });
+  assert.ok((await page.locator('#n2-tree-virtual tr[data-node-key]').count()) <= 30);
+  assert.equal(
+    await page.locator('#n2-tree-virtual tr[data-node-key]').first().getAttribute('aria-rowindex'),
+    '99',
+  );
+  assert.equal(
+    JSON.parse(await page.locator('#n2-tree-virtual-events').textContent()).includes('dataRequest'),
+    false,
   );
   assert.equal(
     await page.evaluate(() =>
@@ -291,13 +370,57 @@ try {
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-node-key'))),
     ['string:a', 'string:b'],
   );
+  const scriptCountBeforeEditor = scriptRequests.length;
+  const rowActionsBeforeEdit = JSON.parse(
+    await page.locator('#n2-tree-events').textContent(),
+  ).filter((event) => event === 'rowAction').length;
+
+  const rootNameCell = page.locator(
+    '#n2-tree-primary tr[data-node-key="string:a"] td[data-column-id="name"]',
+  );
+  await rootNameCell.dblclick();
+  const editor = page.locator('#n2-tree-primary [data-tree-editor]');
+  await editor.waitFor({ state: 'visible' });
+  assert.equal(
+    await editor.evaluate(
+      (input) => input.getBoundingClientRect().width <= input.closest('td').getBoundingClientRect().width,
+    ),
+    true,
+  );
+  await editor.fill('Renamed');
+  await editor.press('Enter');
+  await page.waitForTimeout(20);
+  assert.equal(await editor.count(), 0);
+  assert.ok(scriptRequests.length > scriptCountBeforeEditor);
+
+  const scriptCountBeforeExport = scriptRequests.length;
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#n2-tree-export-json').click();
+  const download = await downloadPromise;
+  assert.equal(download.suggestedFilename(), 'tree-table.json');
+  await page.waitForFunction(
+    () => document.querySelector('#n2-tree-export-outcome')?.textContent?.includes('downloaded'),
+  );
+  assert.deepEqual(JSON.parse(await page.locator('#n2-tree-export-outcome').textContent()), {
+    status: 'downloaded',
+    filename: 'tree-table.json',
+    rowCount: 2,
+  });
+  assert.ok(scriptRequests.length > scriptCountBeforeExport);
   const finalEvents = JSON.parse(await page.locator('#n2-tree-events').textContent());
   assert.equal(finalEvents.filter((event) => event === 'queryChange').length, 5);
   assert.equal(finalEvents.filter((event) => event === 'dataRequest').length, 0);
+  assert.equal(finalEvents.filter((event) => event === 'rowAction').length, rowActionsBeforeEdit + 1);
+  assert.equal(finalEvents.filter((event) => event === 'editCommit').length, 1);
+  assert.equal(finalEvents.filter((event) => event === 'editCancel').length, 0);
+  assert.deepEqual(
+    finalEvents.filter((event) => event.startsWith('editStateChange:')),
+    ['editStateChange:gesture', 'editStateChange:commit'],
+  );
   assert.equal(errors.filter((error) => /NG050\d/.test(error)).length, 0);
   assert.deepEqual(errors, []);
   console.log(
-    'N2-015F real Chromium hydration passed (DOM reused, satisfied remote 0 requests, unsatisfied roots 1 request, accepted expansion 1 child request, controlled query/expansion/selection exactly once, deterministic focus transitions, 0 NG050x).',
+    'N2-015I real Chromium certification passed (DOM reused; native table/treegrid; empty/loading/error; RTL logical indentation; narrow containment; optional chunks lazy; editor and JSON export exactly once; deterministic virtual bootstrap; 0 viewport requests; controlled query/expansion/selection/edit/action exactly once; 0 NG050x).',
   );
 } finally {
   release?.();

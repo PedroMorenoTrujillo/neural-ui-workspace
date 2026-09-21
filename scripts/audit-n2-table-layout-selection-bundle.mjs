@@ -144,11 +144,11 @@ const scenarios = {
   combined: `${component}const config={selection:{kind:'keys',keys:[1]},layout:{order:['name','id'],hidden:[],widths:{name:240},pinnedStart:['name'],pinnedEnd:[]}};export{NeuTableComponent,config};`,
 };
 const sourceComponent =
-  "import {NeuTableComponent} from './projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};";
+  "import {NeuTableComponent} from './projects/ui-core/table/public/neu-table.component-contract';export{NeuTableComponent};";
 const sourceAll =
-  "import * as candidate from './projects/ui-core/table/next/public/public-api';export{candidate};";
-const selectionModule = './projects/ui-core/table/next/internal/selection/neu-table-selection';
-const layoutModule = './projects/ui-core/table/next/internal/layout/neu-table-layout';
+  "import * as candidate from './projects/ui-core/table/public/public-api';export{candidate};";
+const selectionModule = './projects/ui-core/table/internal/selection/neu-table-selection';
+const layoutModule = './projects/ui-core/table/internal/layout/neu-table-layout';
 const featureSources = {
   selectionPureEngine: `export * from '${selectionModule}';`,
   allMatchingSupport: `export {
@@ -175,7 +175,7 @@ try {
     cpSync(join(root, path), join(temporary, path), { recursive: true, dereference: true });
   }
   cpSync(
-    join(temporary, 'projects/ui-core/table/next'),
+    join(temporary, 'projects/ui-core/table'),
     join(temporary, 'projects/ui-core/table-next'),
     { recursive: true, dereference: true },
   );

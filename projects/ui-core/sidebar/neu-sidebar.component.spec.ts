@@ -540,7 +540,7 @@ describe('NeuSidebarComponent', () => {
     expect(focus).toHaveBeenCalledTimes(1);
   });
 
-  it('collapsedChange should emit when collapsed input changes', () => {
+  it('collapsedChange emits and applies an uncontrolled collapse gesture', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.detectChanges();
     let emittedValue: boolean | null = null;
@@ -549,6 +549,45 @@ describe('NeuSidebarComponent', () => {
     });
     f.componentInstance.toggleCollapsed();
     expect(emittedValue).toBe(true);
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+  });
+
+  it('keeps controlled collapse applied until the parent accepts', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    const changes: boolean[] = [];
+    f.componentInstance.collapsedChange.subscribe((value) => changes.push(value));
+    f.componentInstance.toggleCollapsed();
+    f.detectChanges();
+    expect(changes).toEqual([true]);
+    expect(f.componentInstance.effectiveCollapsed()).toBe(false);
+    expect(f.nativeElement.querySelector('aside').classList).not.toContain(
+      'neu-sidebar--collapsed',
+    );
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+    expect(changes).toEqual([true]);
+  });
+
+  it('reads initialCollapsed once and diagnoses lifetime mode switching once', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('initialCollapsed', true);
+    f.detectChanges();
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+    f.componentRef.setInput('initialCollapsed', false);
+    f.detectChanges();
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+    expect(warning).toHaveBeenCalledOnce();
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    expect(warning).toHaveBeenCalledOnce();
+    warning.mockRestore();
   });
 
   it('uses the configured URL parameter and exposes inert semantics while closed', () => {

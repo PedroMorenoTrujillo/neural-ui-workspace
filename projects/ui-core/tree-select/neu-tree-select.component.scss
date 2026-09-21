@@ -157,6 +157,28 @@
   background: color-mix(in srgb, var(--neu-primary, #2563eb) 14%, transparent);
 }
 
+.neu-tree-select__node--mixed {
+  background: color-mix(in srgb, var(--neu-primary, #2563eb) 8%, transparent);
+}
+
+.neu-tree-select__viewport {
+  position: relative;
+  min-height: 2.5rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.neu-tree-select__virtual-spacer {
+  position: relative;
+  min-width: 100%;
+}
+
+.neu-tree-select__node--virtual {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+}
+
 .neu-tree-select__trigger:focus-visible,
 .neu-tree-select__search:focus-visible,
 .neu-tree-select__node:focus-visible {
@@ -183,6 +205,11 @@
 @media (forced-colors: active) {
   .neu-tree-select__node--selected {
     outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .neu-tree-select__node--mixed {
+    outline: 1px dashed Highlight;
     outline-offset: -2px;
   }
 

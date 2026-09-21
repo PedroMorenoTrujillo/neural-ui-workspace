@@ -9,12 +9,12 @@ if (!existsSync(join(dependencies, '@angular/ssr/package.json'))) {
 }
 const fixture = mkdtempSync(join(dirname(dependencies), '.n2-table-hydration-'));
 cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
-cpSync(join(root, 'projects/ui-core/table/next'), join(fixture, 'src/neu-table-next'), {
+cpSync(join(root, 'projects/ui-core/table'), join(fixture, 'src/neu-table'), {
   recursive: true,
   dereference: true,
 });
-rmSync(join(fixture, 'src/neu-table-next/neu-table.next.spec.ts'));
-rmSync(join(fixture, 'src/neu-table-next/neu-table.next-performance.spec.ts'));
+rmSync(join(fixture, 'src/neu-table/neu-table.spec.ts'));
+rmSync(join(fixture, 'src/neu-table/neu-table.performance.spec.ts'));
 cpSync(
   join(root, 'fixtures/n2-table-hydration.component.ts'),
   join(fixture, 'src/n2-table-hydration.component.ts'),
@@ -79,8 +79,8 @@ ts.include = [
   'src/main.server.ts',
   'src/server.ts',
   'src/n2-table-hydration.component.ts',
-  'src/neu-table-next/**/*.ts',
+  'src/neu-table/**/*.ts',
 ];
-ts.exclude = ['src/neu-table-next/**/*.spec.ts'];
+ts.exclude = ['src/neu-table/**/*.spec.ts'];
 writeFileSync(tsPath, `${JSON.stringify(ts, null, 2)}\n`);
 console.log(fixture);

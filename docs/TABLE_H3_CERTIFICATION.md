@@ -1,5 +1,7 @@
 # Table H3-B certification
 
+> Historical pre-N2 certification record. It does not describe the active package graph: `@neural-ui/core/table-core` was physically removed in N2-011K and must not be used by current consumers.
+
 Date: 2026-08-27
 Status: certified with explicitly recorded baseline/global gate debt
 

@@ -1,0 +1,35 @@
+{
+  "checkpoint": "N2-021",
+  "capturedAt": "2026-09-21T15:04:49.861Z",
+  "metrics": {
+    "projection1k": {
+      "p50Ms": 0.0022910000000138098,
+      "p95Ms": 0.06375000000002728
+    },
+    "membership1k": {
+      "p50Ms": 0.020792000000028565,
+      "p95Ms": 0.13324999999997544
+    },
+    "parentWrites1k": {
+      "p50Ms": 0.0015000000000782165,
+      "p95Ms": 0.007040999999958331
+    },
+    "panelToggle": {
+      "p50Ms": 0.9057910000001357,
+      "p95Ms": 2.681542000000036
+    },
+    "sidebarToggle": {
+      "p50Ms": 0.8346669999998539,
+      "p95Ms": 1.7732920000000831
+    },
+    "lifecycle50": {
+      "p50Ms": 0.7541250000001583,
+      "p95Ms": 1.7586659999999483
+    },
+    "tabsProductEffects": 0,
+    "panelProductEffects": 0,
+    "sidebarLifecycleEffects": 2,
+    "tabsObservers": 0,
+    "tabsPersistentTimers": 0
+  }
+}

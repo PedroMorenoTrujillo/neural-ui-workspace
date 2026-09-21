@@ -37,7 +37,7 @@ const scenarios = {
   provider: { imports: [['provideNeuralUI', '']] },
   button: { imports: [['NeuButtonComponent', 'button']] },
   select: { imports: [['NeuSelectComponent', 'select']] },
-  'table-basic': { imports: [['NeuTableCoreComponent', 'table-core']] },
+  'table-basic': { imports: [['NeuTableComponent', 'table']] },
   'table-advanced-lazy': { imports: [['NeuTableComponent', 'table']] },
   'tree-basic': { imports: [['NeuTreeComponent', 'tree']] },
   'tree-checkbox': { imports: [['NeuTreeComponent', 'tree']] },
@@ -233,14 +233,15 @@ function architecturalChecks(root, measured, packageMetrics) {
   if (dialogImports.some((specifier) => specifier.startsWith('@angular/cdk/drag-drop'))) {
     errors.push('Dialog retained an accidental @angular/cdk/drag-drop dependency');
   }
-  const tableCoreImports = importSpecifiers(
-    resolve(root, 'fesm2022/neural-ui-core-table-core.mjs'),
+  const tableImports = importSpecifiers(resolve(root, 'fesm2022/neural-ui-core-table.mjs'));
+  const tableUnexpected = tableImports.filter(
+    (specifier) =>
+      specifier !== '@angular/core' &&
+      specifier !== '@angular/common' &&
+      !specifier.startsWith('./'),
   );
-  const tableCoreUnexpected = tableCoreImports.filter(
-    (specifier) => specifier !== '@angular/core' && specifier !== '@angular/common',
-  );
-  if (tableCoreUnexpected.length) {
-    errors.push(`Table basic boundary leaked: ${[...new Set(tableCoreUnexpected)].join(', ')}`);
+  if (tableUnexpected.length) {
+    errors.push(`Table final boundary leaked: ${[...new Set(tableUnexpected)].join(', ')}`);
   }
   if (!files.some((file) => file.startsWith('neural-ui-core-table-neural-ui-core-table-'))) {
     errors.push('Table advanced lazy chunk is missing');

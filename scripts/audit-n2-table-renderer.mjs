@@ -116,15 +116,15 @@ export {NeuTableComponent,NeuTableCaptionDirective,NeuTableToolbarDirective,NeuT
   NeuTableCellDirective,NeuTableFooterDirective,NeuTableSummaryDirective,NeuTableEmptyDirective,
   NeuTableLoadingDirective,NeuTableErrorDirective,NeuTableRowDetailDirective,NeuTableEditorDirective,
   NeuTableGroupHeaderDirective,NeuTableGroupFooterDirective,NeuTableFilterDirective,NeuTablePaginatorDirective};`;
-const sourceBasic = `import {NeuTableComponent} from './projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};`;
-const sourceTemplates = `import * as candidate from './projects/ui-core/table/next/public/public-api';export{candidate};`;
+const sourceBasic = `import {NeuTableComponent} from './projects/ui-core/table/public/neu-table.component-contract';export{NeuTableComponent};`;
+const sourceTemplates = `import * as candidate from './projects/ui-core/table/public/public-api';export{candidate};`;
 
 try {
   for (const path of ['projects', 'angular.json', 'tsconfig.json', 'package.json', 'LICENSE']) {
     cpSync(join(root, path), join(temporary, path), { recursive: true, dereference: true });
   }
   cpSync(
-    join(temporary, 'projects/ui-core/table/next'),
+    join(temporary, 'projects/ui-core/table'),
     join(temporary, 'projects/ui-core/table-next'),
     { recursive: true, dereference: true },
   );

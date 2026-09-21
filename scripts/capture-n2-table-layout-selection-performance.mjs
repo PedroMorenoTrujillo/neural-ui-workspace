@@ -14,7 +14,7 @@ const result = spawnSync(
     'ui-core',
     '--watch=false',
     '--no-coverage',
-    '--include=table/next/neu-table.layout-selection-performance.spec.ts',
+    '--include=table/neu-table.layout-selection-performance.spec.ts',
   ],
   { cwd: root, encoding: 'utf8', env: { ...process.env, NO_COLOR: '1' } },
 );

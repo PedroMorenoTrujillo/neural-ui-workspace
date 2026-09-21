@@ -9,9 +9,15 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const update = process.argv.includes('--update');
 const checkpoint = process.argv.includes('--checkpoint');
 const certify = process.argv.includes('--certify');
+const physicalReplacement = process.argv.includes('--physical-replacement');
 const checkpointRef = '0f91778dd5b2931f22a86e41db162eeefb42ecb8';
 const artifactPath = join(root, 'baselines/n2-table/export-i-bundle.json');
 const certificationPath = join(root, 'baselines/n2-table/final-j-bundle.json');
+const physicalReplacementPath = join(root, 'baselines/n2-table/physical-replacement-k-bundle.json');
+const physicalReplacementGraphPath = join(
+  root,
+  'baselines/n2-table/physical-replacement-k-dependency-graph.json',
+);
 const graphPath = join(root, 'baselines/n2-table/export-i-dependency-graph.json');
 const baselinePath = join(root, 'baselines/n2-table/interactions-h-bundle.json');
 const temporary = mkdtempSync(join(root, '.n2-table-export-'));
@@ -33,6 +39,18 @@ function stableBytes(bytes) {
       .toString('utf8')
       .replace(/[A-Za-z0-9_-]+-[A-Z0-9_-]{8}\.js/gi, 'private-feature.js')
       .replace(/chunk-[A-Za-z0-9_-]+\.js/g, 'chunk-shared.js'),
+  );
+}
+
+function stableArtifactNames(value) {
+  return JSON.parse(
+    JSON.stringify(value)
+      .replace(/\.n2-table-export-[^/]+/g, '.n2-table-export-<temp>')
+      .replace(/chunk-[A-Za-z0-9_-]+\.js/g, 'chunk-shared.js')
+      .replace(
+        /(neu-table-(?:csv|json|xlsx)-export)-[A-Za-z0-9_-]+\.js/g,
+        '$1-private.js',
+      ),
   );
 }
 
@@ -139,7 +157,7 @@ async function bundle({ packageRoot, source, sourceMode = false, expectFormats =
 }
 
 function packageImports(packageRoot) {
-  const source = readFileSync(join(packageRoot, 'fesm2022/neural-ui-core-table-next.mjs'), 'utf8');
+  const source = readFileSync(join(packageRoot, 'fesm2022/neural-ui-core-table.mjs'), 'utf8');
   return [
     ...new Set(
       [...source.matchAll(/(?:from\s+|import\s*)['"]([^'"]+)['"]/g)].map((match) => match[1]),
@@ -147,18 +165,13 @@ function packageImports(packageRoot) {
   ].sort();
 }
 
-const component = "import{NeuTableComponent}from'@neural-ui/core/table-next';";
+const component = "import{NeuTableComponent}from'@neural-ui/core/table';";
 const source = `${component}export{NeuTableComponent};`;
 
 try {
   for (const path of ['projects', 'angular.json', 'tsconfig.json', 'package.json', 'LICENSE']) {
     cpSync(join(root, path), join(temporary, path), { recursive: true, dereference: true });
   }
-  cpSync(
-    join(temporary, 'projects/ui-core/table/next'),
-    join(temporary, 'projects/ui-core/table-next'),
-    { recursive: true, dereference: true },
-  );
   if (checkpoint) {
     for (const path of [
       'projects/ui-core/table/next/internal/renderer/neu-table-basic-renderer.component.html',
@@ -171,17 +184,9 @@ try {
         encoding: 'utf8',
       });
       if (source.status !== 0) throw new Error(source.stderr);
-      writeFileSync(join(temporary, path.replace('table/next', 'table-next')), source.stdout);
+      writeFileSync(join(temporary, path.replace('table/next', 'table')), source.stdout);
     }
   }
-  writeFileSync(
-    join(temporary, 'projects/ui-core/table-next/public_api.ts'),
-    "export * from './public/public-api';\n",
-  );
-  writeFileSync(
-    join(temporary, 'projects/ui-core/table-next/ng-package.json'),
-    `${JSON.stringify({ lib: { entryFile: 'public_api.ts' } }, null, 2)}\n`,
-  );
   const built = spawnSync(
     join(root, 'node_modules/.bin/ng'),
     ['build', 'ui-core', '--configuration', 'production'],
@@ -198,7 +203,7 @@ try {
   const sourceComponent = await bundle({
     sourceMode: true,
     source:
-      "import{NeuTableComponent}from'./projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};",
+      "import{NeuTableComponent}from'./projects/ui-core/table/public/neu-table.component-contract';export{NeuTableComponent};",
   });
   const consumers = {
     basic: measured.initial,
@@ -213,7 +218,7 @@ try {
   };
   const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
   const imports = packageImports(packageRoot).map((name) =>
-    name.startsWith('./neural-ui-core-table-next-') ? './<private-feature-chunk>' : name,
+    name.startsWith('./neural-ui-core-table-') ? './<private-feature-chunk>' : name,
   );
   const graphPayload = JSON.stringify(sourceComponent);
   const forbidden = [
@@ -271,7 +276,47 @@ try {
       throw new Error(`${format.toUpperCase()} serializer is retained by BASIC.`);
     }
   }
-  if (certify) {
+  if (physicalReplacement) {
+    const certified = JSON.parse(readFileSync(certificationPath, 'utf8'));
+    const previous = certified.consumers.basic;
+    const final = stableArtifactNames({
+      ...artifact,
+      checkpoint: 'N2-011K',
+      comparison: {
+        finalJBasic: previous,
+        physicalReplacementBasic: measured.initial,
+        rawDeltaPercent: ((measured.initial.raw - previous.raw) / previous.raw) * 100,
+        gzipDeltaPercent: ((measured.initial.gzip - previous.gzip) / previous.gzip) * 100,
+        brotliDeltaPercent: ((measured.initial.brotli - previous.brotli) / previous.brotli) * 100,
+      },
+    });
+    if (
+      Math.abs(final.comparison.rawDeltaPercent) > 5 ||
+      Math.abs(final.comparison.gzipDeltaPercent) > 5
+    ) {
+      throw new Error('N2-011K Table bundle changed more than 5% from N2-011J.');
+    }
+    const finalGraph = stableArtifactNames({ ...graph, checkpoint: 'N2-011K' });
+    if (update) {
+      mkdirSync(dirname(physicalReplacementPath), { recursive: true });
+      writeFileSync(physicalReplacementPath, `${JSON.stringify(final, null, 2)}\n`);
+      writeFileSync(physicalReplacementGraphPath, `${JSON.stringify(finalGraph, null, 2)}\n`);
+      console.log(`Updated ${physicalReplacementPath}`);
+      console.log(`Updated ${physicalReplacementGraphPath}`);
+    } else {
+      const stored = JSON.parse(readFileSync(physicalReplacementPath, 'utf8'));
+      const storedGraph = JSON.parse(readFileSync(physicalReplacementGraphPath, 'utf8'));
+      if (JSON.stringify(stored) !== JSON.stringify(final)) {
+        throw new Error('N2-011K Table bundle artifact drifted.');
+      }
+      if (JSON.stringify(storedGraph) !== JSON.stringify(finalGraph)) {
+        throw new Error('N2-011K Table dependency graph drifted.');
+      }
+      console.log(
+        `N2-011K Table bundle passed (basic ${measured.initial.gzip} B gzip; CSV ${measured.formats.csv.size.gzip} B; JSON ${measured.formats.json.size.gzip} B; XLSX ${measured.formats.xlsx.size.gzip} B; root-unused 0 B).`,
+      );
+    }
+  } else if (certify) {
     const stored = JSON.parse(readFileSync(artifactPath, 'utf8'));
     const previous = stored.consumers.basic;
     const certification = {

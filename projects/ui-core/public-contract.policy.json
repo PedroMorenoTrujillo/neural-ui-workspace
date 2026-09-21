@@ -2,11 +2,7 @@
   "schemaVersion": 2,
   "description": "Classification metadata for the declaration-derived Neural UI consumer contract. Supported members are intentional consumer API; declaration-visible Angular and package mechanics are internal/unsupported.",
   "overrides": {},
-  "compatibility": {
-    "./table#NeuTableComponent.serverStateChange": "queryChange",
-    "./table#NeuTableComponent.virtualScrollEvent": "virtualRangeChange (pending H5 semantic verification)",
-    "./table#NeuTableServerState": "NeuTableQueryState"
-  },
+  "compatibility": {},
   "frameworkMembers": [
     "registerOnChange",
     "registerOnTouched",
@@ -97,7 +93,6 @@
       "selectOption"
     ],
     "NeuSwitchHarness": ["getLabel", "hostSelector", "isChecked", "isDisabled", "toggle"],
-    "NeuTableFilterRegistry": ["has", "names", "register", "resolve", "revision", "unregister"],
     "NeuTableHarness": ["getCellText", "getHeaderTexts", "getRowCount", "hostSelector"],
     "NeuToastService": [
       "clear",
@@ -137,52 +132,9 @@
     ],
     "NeuSpeedDialComponent": ["close", "open", "toggle"],
     "NeuStepperComponent": ["goTo", "next", "prev"],
-    "NeuTableComponent": [
-      "applyLayout",
-      "cancelCellEdit",
-      "cancelRowEdit",
-      "clearColumnFilters",
-      "clearSearch",
-      "clearSelection",
-      "clearState",
-      "collapseRow",
-      "commitCellEdit",
-      "currentLayout",
-      "currentState",
-      "expandRow",
-      "exportCsv",
-      "exportJson",
-      "exportXlsx",
-      "goToPage",
-      "resetState",
-      "resetVirtualScroll",
-      "restoreState",
-      "saveRowEdit",
-      "saveState",
-      "scrollToIndex",
-      "scrollToOffset",
-      "selectRow",
-      "setColumnFilter",
-      "setExactMatch",
-      "sortBy",
-      "startCellEdit",
-      "startRowEdit",
-      "toggleAll",
-      "toggleExpand",
-      "unselectRow"
-    ],
+    "NeuTableComponent": ["export", "focusCell", "retryData", "scrollTo"],
     "NeuTooltipDirective": ["hide", "show"],
     "NeuTreeComponent": ["activateNode", "toggleNode"],
-    "NeuTreeTableComponent": [
-      "cancelRowEdit",
-      "reset",
-      "resetScrollTop",
-      "saveRowEdit",
-      "scrollTo",
-      "scrollToNode",
-      "scrollToVirtualIndex",
-      "startRowEdit",
-      "toggleNode"
-    ]
+    "NeuTreeTableComponent": ["export", "focus", "retryData", "scrollTo"]
   }
 }

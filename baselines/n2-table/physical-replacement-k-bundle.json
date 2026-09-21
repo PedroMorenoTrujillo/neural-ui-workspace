@@ -1,0 +1,95 @@
+{
+  "checkpoint": "N2-011K",
+  "method": "Angular-compiled minified split ESM; initial static closure; per-format lazy closure; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "raw": 174362,
+      "gzip": 34516,
+      "brotli": 25552
+    },
+    "csvInitial": {
+      "raw": 174362,
+      "gzip": 34516,
+      "brotli": 25552
+    },
+    "jsonInitial": {
+      "raw": 174362,
+      "gzip": 34516,
+      "brotli": 25552
+    },
+    "xlsxInitial": {
+      "raw": 174362,
+      "gzip": 34516,
+      "brotli": 25552
+    },
+    "combinedInitial": {
+      "raw": 174362,
+      "gzip": 34516,
+      "brotli": 25552
+    },
+    "csvLazy": {
+      "raw": 584,
+      "gzip": 383,
+      "brotli": 338
+    },
+    "jsonLazy": {
+      "raw": 887,
+      "gzip": 469,
+      "brotli": 410
+    },
+    "xlsxLazy": {
+      "raw": 3964,
+      "gzip": 1422,
+      "brotli": 1278
+    },
+    "rootUnused": {
+      "raw": 0,
+      "gzip": 20,
+      "brotli": 1
+    }
+  },
+  "comparison": {
+    "finalJBasic": {
+      "raw": 174362,
+      "gzip": 34516,
+      "brotli": 25552
+    },
+    "physicalReplacementBasic": {
+      "raw": 174362,
+      "gzip": 34516,
+      "brotli": 25552
+    },
+    "rawDeltaPercent": 0,
+    "gzipDeltaPercent": 0,
+    "brotliDeltaPercent": 0
+  },
+  "formatFiles": {
+    "csv": [
+      "out/neural-ui-core-table-neu-table-csv-export-private.js"
+    ],
+    "json": [
+      "out/neural-ui-core-table-neu-table-json-export-private.js"
+    ],
+    "xlsx": [
+      "out/neural-ui-core-table-neu-table-xlsx-export-private.js"
+    ]
+  },
+  "packageImports": [
+    "./<private-feature-chunk>"
+  ],
+  "forbiddenGraphTokens": [],
+  "classification": {
+    "core": [
+      "export command plumbing",
+      "scope projection and remote delegation"
+    ],
+    "privateChunks": [
+      "CSV serializer",
+      "JSON serializer",
+      "XLSX serializer"
+    ],
+    "notWorthSplitting": [
+      "small shared export projection"
+    ]
+  }
+}

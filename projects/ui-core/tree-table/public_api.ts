@@ -1,2 +1,1 @@
-export * from './neu-tree-table.component';
-export * from './neu-tree-table-templates.directive';
+export * from './public/public-api';

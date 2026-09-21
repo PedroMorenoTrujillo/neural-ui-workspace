@@ -71,6 +71,8 @@ for (const sourceName of [
   'listboxMultiple',
   'toggleSingle',
   'toggleMultiple',
+  'treeSingle',
+  'treeMultiple',
   'stringTags',
   'mappedTags',
   'inlineText',
@@ -88,12 +90,12 @@ for (const sourceName of [
   }
 }
 
-if ((diagnostics.match(/TS2345/g) ?? []).length < 59) {
-  console.error('Expected at least 59 explicit invalid-value assignment diagnostics.');
+if ((diagnostics.match(/TS2345/g) ?? []).length < 62) {
+  console.error('Expected at least 62 explicit invalid-value assignment diagnostics.');
   console.error(diagnostics);
   process.exit(1);
 }
 
 console.log(
-  'N2 Forms types passed (23 Signal Forms controls accepted; Slider/Rating value contracts are enforced).',
+  'N2 Forms types passed (24 Signal Forms controls accepted; TreeSelect/Slider/Rating value contracts are enforced).',
 );

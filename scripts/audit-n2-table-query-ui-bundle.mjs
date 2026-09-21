@@ -140,7 +140,7 @@ try {
     cpSync(join(root, path), join(temporary, path), { recursive: true, dereference: true });
   }
   cpSync(
-    join(temporary, 'projects/ui-core/table/next'),
+    join(temporary, 'projects/ui-core/table'),
     join(temporary, 'projects/ui-core/table-next'),
     { recursive: true, dereference: true },
   );
@@ -175,18 +175,18 @@ try {
   const sourceComponent = await bundle({
     sourceMode: true,
     source:
-      "import{NeuTableComponent}from'./projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};",
+      "import{NeuTableComponent}from'./projects/ui-core/table/public/neu-table.component-contract';export{NeuTableComponent};",
   });
   const isolated = {
     queryTransitions: await bundle({
       sourceMode: true,
       source:
-        "export * from './projects/ui-core/table/next/internal/query-ui/neu-table-query-transitions';",
+        "export * from './projects/ui-core/table/internal/query-ui/neu-table-query-transitions';",
     }),
     advancedBuilder: await bundle({
       sourceMode: true,
       source:
-        "export{NeuTableAdvancedFilterBuilderComponent}from'./projects/ui-core/table/next/internal/features/advanced-filters/neu-table-advanced-filter-builder.component';",
+        "export{NeuTableAdvancedFilterBuilderComponent}from'./projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component';",
     }),
   };
   const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));

@@ -8,6 +8,7 @@ import {
   computed,
   inject,
   input,
+  isDevMode,
   numberAttribute,
   output,
   signal,
@@ -38,13 +39,13 @@ export type NeuScrollAreaVariant = 'auto' | 'hover' | 'scroll' | 'always' | 'hid
         <header class="neu-panel__header">
           <h3>{{ header() }}</h3>
           @if (collapsible()) {
-            <button type="button" (click)="toggle()" [attr.aria-expanded]="!collapsed()" [attr.aria-controls]="_bodyId">
-              {{ collapsed() ? expandLabel() : collapseLabel() }}
+            <button type="button" (click)="toggle()" [attr.aria-expanded]="!effectiveCollapsed()" [attr.aria-controls]="_bodyId">
+              {{ effectiveCollapsed() ? expandLabel() : collapseLabel() }}
             </button>
           }
         </header>
       }
-      @if (!collapsed()) {
+      @if (!effectiveCollapsed()) {
         <div class="neu-panel__body" [id]="_bodyId"><ng-content /></div>
       }
     </section>
@@ -56,13 +57,44 @@ export class NeuPanelComponent {
   readonly collapsible = input(false);
   readonly expandLabel = input('Expand');
   readonly collapseLabel = input('Collapse');
+  /** Applied controlled state. Undefined selects uncontrolled mode for this instance. */
+  readonly collapsed = input<boolean | undefined>(undefined);
+  /** One-time seed used only when `collapsed` is not bound. */
+  readonly initialCollapsed = input(false);
   readonly collapsedChange = output<boolean>();
-  readonly collapsed = signal(false);
+  private controlMode: 'controlled' | 'uncontrolled' | null = null;
+  private modeWarningEmitted = false;
+  private uncontrolledCollapsed = false;
+  private readonly uncontrolledRevision = signal(0);
+  readonly effectiveCollapsed = computed(() => {
+    this.uncontrolledRevision();
+    return this.ensureControlMode() === 'controlled'
+      ? (this.collapsed() ?? false)
+      : this.uncontrolledCollapsed;
+  });
   protected readonly _bodyId = inject(NeuIdGenerator).getId('neu-panel-body-');
 
   toggle(): void {
-    this.collapsed.set(!this.collapsed());
-    this.collapsedChange.emit(this.collapsed());
+    if (!this.collapsible()) return;
+    const proposal = !this.effectiveCollapsed();
+    if (this.ensureControlMode() === 'uncontrolled') {
+      this.uncontrolledCollapsed = proposal;
+      this.uncontrolledRevision.update((revision) => revision + 1);
+    }
+    this.collapsedChange.emit(proposal);
+  }
+
+  private ensureControlMode(): 'controlled' | 'uncontrolled' {
+    const requested = this.collapsed() === undefined ? 'uncontrolled' : 'controlled';
+    if (this.controlMode === null) {
+      this.controlMode = requested;
+      if (requested === 'uncontrolled') this.uncontrolledCollapsed = this.initialCollapsed();
+    } else if (this.controlMode !== requested && !this.modeWarningEmitted) {
+      this.modeWarningEmitted = true;
+      if (isDevMode())
+        console.warn('NeuPanel cannot switch between controlled and uncontrolled collapse.');
+    }
+    return this.controlMode;
   }
 }
 

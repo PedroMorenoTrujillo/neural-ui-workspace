@@ -15,7 +15,7 @@ import type {
   NeuTableSelectionOptions,
   NeuTableSortOptions,
   NeuTableVirtualizationOptions,
-} from '../../projects/ui-core/table/next/public/public-api';
+} from '@neural-ui/core/table';
 import { basicClientTable } from './basic';
 import { lazy1xToRemote2x, selectedRows1xToKeys2x } from './migrations';
 import { columns, query, type AccountField, type AccountRow } from './model';

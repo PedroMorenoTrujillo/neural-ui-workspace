@@ -27,7 +27,7 @@ import {
   type NeuTableSelectionChange,
   type NeuTableSelectionOptions,
   type NeuTableSortOptions,
-} from './neu-table-next/public/public-api';
+} from './neu-table/public/public-api';
 
 interface HydrationRow {
   readonly id: number;

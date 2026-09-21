@@ -17,7 +17,6 @@ const demoEntryPointOverrides = new Map([
   ['animate-on-scroll', 'utilities-demo'],
   ['key-filter', 'utilities-demo'],
   ['ripple', 'utilities-demo'],
-  ['table-core', 'table-demo'],
 ]);
 
 function dirs(path) {
@@ -31,6 +30,17 @@ function dirs(path) {
 
 function files(path, suffix) {
   return readdirSync(path).filter((entry) => entry.endsWith(suffix));
+}
+
+function filesRecursive(path, suffix) {
+  return readdirSync(path).flatMap((entry) => {
+    const full = join(path, entry);
+    return statSync(full).isDirectory()
+      ? filesRecursive(full, suffix)
+      : entry.endsWith(suffix)
+        ? [full]
+        : [];
+  });
 }
 
 function read(path) {
@@ -70,8 +80,8 @@ for (const entry of entryPoints) {
   }
 
   if (!nonVisualEntryPoints.has(entry)) {
-    const componentFiles = files(dir, '.component.ts');
-    const directiveFiles = files(dir, '.directive.ts');
+    const componentFiles = filesRecursive(dir, '.component.ts');
+    const directiveFiles = filesRecursive(dir, '.directive.ts');
     if (componentFiles.length === 0 && directiveFiles.length === 0) {
       violations.push(`${rel}: missing standalone component or directive file`);
     }

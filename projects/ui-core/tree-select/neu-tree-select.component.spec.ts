@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
 import {
   NeuTreeSelectComponent,
@@ -13,6 +12,38 @@ import {
   NeuTreeSelectSelectedDirective,
 } from './neu-tree-select.component';
 
+const NODES: readonly NeuTreeSelectNode[] = [
+  {
+    value: 'engineering',
+    label: 'Engineering',
+    children: [
+      { value: 'platform', label: 'Platform' },
+      {
+        value: 'disabled',
+        label: 'Disabled branch',
+        disabled: true,
+        children: [{ value: 'secret', label: 'Secret' }],
+      },
+    ],
+  },
+  { value: 'lazy', label: 'Lazy', lazy: true },
+];
+
+function createTreeSelect<M extends 'single' | 'multiple' = 'single'>(
+  inputs: Record<string, unknown> = {},
+): {
+  fixture: ComponentFixture<NeuTreeSelectComponent<NeuTreeSelectNode, string, M>>;
+  component: NeuTreeSelectComponent<NeuTreeSelectNode, string, M>;
+} {
+  const fixture = TestBed.createComponent(
+    NeuTreeSelectComponent<NeuTreeSelectNode, string, M>,
+  );
+  fixture.componentRef.setInput('nodes', NODES);
+  for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
+  fixture.detectChanges();
+  return { fixture, component: fixture.componentInstance };
+}
+
 @Component({
   imports: [
     NeuTreeSelectComponent,
@@ -23,668 +54,265 @@ import {
     NeuTreeSelectEmptyDirective,
   ],
   template: `
-    <neu-tree-select [nodes]="nodes" [searchable]="true">
-      <ng-template neuTreeSelectHeader><span class="tree-header">Header</span></ng-template>
+    <neu-tree-select [nodes]="nodes" [(value)]="value" [expandedKeys]="expandedKeys">
+      <ng-template neuTreeSelectHeader>Header</ng-template>
       <ng-template neuTreeSelectNode let-node let-level="level" let-toggle="toggle">
-        <button class="tree-template-toggle" type="button" (click)="toggle()">
-          {{ node.label }}-{{ level }}
-        </button>
+        <span class="custom-node" (click)="toggle()">{{ level }}:{{ node.label }}</span>
       </ng-template>
-      <ng-template neuTreeSelectSelected let-node>
-        <span class="tree-selected">{{ node?.label }}</span>
-      </ng-template>
-      <ng-template neuTreeSelectEmpty><span class="tree-empty">Empty slot</span></ng-template>
-      <ng-template neuTreeSelectFooter><span class="tree-footer">Footer</span></ng-template>
+      <ng-template neuTreeSelectSelected let-node><b>{{ node?.label }}</b></ng-template>
+      <ng-template neuTreeSelectEmpty>Empty</ng-template>
+      <ng-template neuTreeSelectFooter>Footer</ng-template>
     </neu-tree-select>
   `,
 })
-class TreeSelectTemplatesHost {
-  nodes: NeuTreeSelectNode[] = [
-    { value: 'root', label: 'Root', children: [{ value: 'leaf', label: 'Leaf' }] },
-  ];
+class TemplateHost {
+  readonly nodes = NODES;
+  value: string | null = 'engineering';
+  expandedKeys: readonly string[] = ['engineering'];
 }
 
-describe('NeuTreeSelectComponent', () => {
-  let fixture: ComponentFixture<NeuTreeSelectComponent<NeuTreeSelectNode, string>>;
-  const nodes: NeuTreeSelectNode[] = [
-    {
-      value: 'admin',
-      label: 'Admin',
-      children: [{ value: 'editor', label: 'Editor' }],
-    },
-    { value: 'lazy', label: 'Lazy', lazy: true },
-    { value: 'disabled', label: 'Disabled', disabled: true },
-  ];
+describe('NeuTreeSelectComponent N2-019', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [NeuTreeSelectComponent] }).compileComponents();
-    fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
-      NeuTreeSelectComponent<NeuTreeSelectNode, string>
-    >;
-    fixture.componentRef.setInput('nodes', nodes);
-    fixture.detectChanges();
+  it('renders a labelled Signal Forms control without CVA methods', () => {
+    const { fixture, component } = createTreeSelect({ label: 'Department' });
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-tree-select__trigger',
+    ) as HTMLButtonElement;
+    expect(fixture.nativeElement.querySelector('label')?.textContent).toContain('Department');
+    expect(trigger.textContent).toContain('Select...');
+    expect('writeValue' in component).toBe(false);
+    expect('registerOnChange' in component).toBe(false);
+    expect('setDisabledState' in component).toBe(false);
   });
 
-  it('renders its placeholder and an optional label', () => {
-    expect(fixture.nativeElement.textContent).toContain('Select');
-    expect(fixture.nativeElement.querySelector('.neu-tree-select__chevron')).toBeTruthy();
-    fixture.componentRef.setInput('label', 'Role');
+  it('accepts parent model writes silently and emits one single-value proposal', () => {
+    const { fixture, component } = createTreeSelect();
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    fixture.componentRef.setInput('value', 'engineering');
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('label')?.textContent).toContain('Role');
+    expect(changes).not.toHaveBeenCalled();
+    component.selectNode(NODES[1]);
+    expect(component.value()).toBe('lazy');
+    expect(changes).toHaveBeenCalledExactlyOnceWith('lazy');
   });
 
-  it('implements CVA write, change, touched and disabled contracts', () => {
-    const component = fixture.componentInstance;
-    const changes: Array<string | string[] | null> = [];
-    let touched = 0;
-    component.registerOnChange((value) => changes.push(value));
-    component.registerOnTouched(() => touched++);
+  it('supports independent multiple values and preserves unloaded values', () => {
+    const { fixture, component } = createTreeSelect<'multiple'>({
+      mode: 'multiple',
+      value: ['unloaded'],
+    });
+    component.selectNode(NODES[1]);
+    expect(component.value()).toEqual(['unloaded', 'lazy']);
+    component.selectNode(NODES[1]);
+    expect(component.value()).toEqual(['unloaded']);
+    fixture.destroy();
+  });
 
-    component.writeValue('admin');
-    expect(component.values()).toEqual(['admin']);
-    expect(component.selectedLabel()).toBe('Admin');
+  it('propagates through loaded enabled descendants and stops at disabled boundaries', () => {
+    const { component } = createTreeSelect<'multiple'>({
+      mode: 'multiple',
+      selectionStrategy: 'propagated',
+      expandedKeys: ['engineering'],
+    });
+    component.selectNode(NODES[0]);
+    expect(component.value()).toEqual(['engineering', 'platform']);
+    expect(component.value()).not.toContain('disabled');
+    expect(component.value()).not.toContain('secret');
+    expect(component.selectionState(component.visibleNodes()[0])).toBe('checked');
+    component.selectNode(NODES[0].children![0]);
+    expect(component.value()).toEqual([]);
+  });
 
-    component.selectNode(nodes[1]);
-    expect(changes).toEqual(['lazy']);
-    expect(touched).toBe(1);
-    expect(component.values()).toEqual(['lazy']);
-    expect(component.open()).toBe(false);
+  it('derives mixed state without rewriting a parent-owned value', () => {
+    const { component } = createTreeSelect<'multiple'>({
+      mode: 'multiple',
+      selectionStrategy: 'propagated',
+      value: ['platform'],
+      expandedKeys: ['engineering'],
+    });
+    expect(component.selectionState(component.visibleNodes()[0])).toBe('mixed');
+    expect(component.value()).toEqual(['platform']);
+  });
 
-    component.setDisabledState(true);
+  it('proposes controlled expansion and separates lazy children requests', () => {
+    const { fixture, component } = createTreeSelect();
+    const expansion = vi.fn();
+    const expanded = vi.fn();
+    const collapsed = vi.fn();
+    const requests = vi.fn();
+    component.expandedKeysChange.subscribe(expansion);
+    component.nodeExpanded.subscribe(expanded);
+    component.nodeCollapsed.subscribe(collapsed);
+    component.childrenRequest.subscribe(requests);
+
+    component.toggleExpanded(NODES[0], new Event('click'));
+    expect(expansion).toHaveBeenLastCalledWith(['engineering']);
+    expect(expanded).toHaveBeenCalledExactlyOnceWith(NODES[0]);
+    expect(component.isExpanded('engineering')).toBe(false);
+
+    fixture.componentRef.setInput('expandedKeys', ['engineering']);
+    fixture.detectChanges();
+    component.toggleExpanded(NODES[0], new Event('click'));
+    expect(expansion).toHaveBeenLastCalledWith([]);
+    expect(collapsed).toHaveBeenCalledExactlyOnceWith(NODES[0]);
+
+    component.toggleExpanded(NODES[1], new Event('click'));
+    expect(requests).toHaveBeenCalledExactlyOnceWith({
+      requestId: 1,
+      queryRevision: 0,
+      parentKey: 'lazy',
+    });
+  });
+
+  it('does not expand leaves or mutate applied expansion arrays', () => {
+    const applied = Object.freeze(['engineering']);
+    const { component } = createTreeSelect({ expandedKeys: applied });
+    const proposals = vi.fn();
+    component.expandedKeysChange.subscribe(proposals);
+    component.toggleExpanded(NODES[0].children![0], new Event('click'));
+    expect(proposals).not.toHaveBeenCalled();
+    expect(applied).toEqual(['engineering']);
+  });
+
+  it('filters collapsed descendants and advances request correlation revision', () => {
+    const { component } = createTreeSelect();
+    const filters = vi.fn();
+    const requests = vi.fn();
+    component.filter.subscribe(filters);
+    component.childrenRequest.subscribe(requests);
+    component['onFilterInput']({ target: { value: 'platform' } } as unknown as Event);
+    expect(component.visibleNodes().map((item) => item.value)).toEqual(['platform']);
+    expect(filters).toHaveBeenCalledExactlyOnceWith({ query: 'platform' });
+    component.toggleExpanded(NODES[1], new Event('click'));
+    expect(requests.mock.calls[0][0].queryRevision).toBe(1);
+  });
+
+  it('virtualizes 10k visible nodes and emits half-open ranges', async () => {
+    const nodes = Array.from({ length: 10_000 }, (_, index) => ({
+      value: `node-${index}`,
+      label: `Node ${index}`,
+    }));
+    const { fixture, component } = createTreeSelect({
+      nodes,
+      searchable: false,
+      virtualizationOptions: { enabled: true, itemSize: 32, viewportHeight: 160, buffer: 2 },
+    });
+    const ranges = vi.fn();
+    component.rangeChange.subscribe(ranges);
     component.toggle();
-    expect(component.isDisabled()).toBe(true);
-    expect(component.open()).toBe(false);
-    component.setDisabledState(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const viewport = document.querySelector<HTMLElement>('.neu-tree-select__viewport')!;
+    expect(document.querySelectorAll('.neu-tree-select__node').length).toBeLessThanOrEqual(9);
+    viewport.scrollTop = 3_200;
+    viewport.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+    expect(component.virtualStart()).toBe(100);
+    expect(ranges.mock.calls.at(-1)?.[0]).toEqual({
+      visible: { start: 100, end: 105 },
+      render: { start: 98, end: 107 },
+    });
+  });
+
+  it('keeps keyboard navigation and overlay lifecycle exactly once', async () => {
+    const { fixture, component } = createTreeSelect({ searchable: false });
+    const opened = vi.fn();
+    const closed = vi.fn();
+    component.opened.subscribe(opened);
+    component.closed.subscribe(closed);
+    component.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(opened).toHaveBeenCalledTimes(1);
+    expect(document.activeElement?.getAttribute('data-neu-tree-select-index')).toBe('0');
+    component.onOverlayKeydown(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(closed).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits touch only after focus leaves the composite control', () => {
+    const { fixture, component } = createTreeSelect();
+    const touched = vi.fn();
+    component.touch.subscribe(touched);
+    const trigger = fixture.nativeElement.querySelector(
+      '.neu-tree-select__trigger',
+    ) as HTMLButtonElement;
+    component.onCompositeFocusOut(new FocusEvent('focusout', { relatedTarget: trigger }));
+    expect(touched).not.toHaveBeenCalled();
+    component.onCompositeFocusOut(new FocusEvent('focusout'));
+    expect(touched).toHaveBeenCalledTimes(1);
+  });
+
+  it('blocks gestures for readonly and disabled controls', () => {
+    const { fixture, component } = createTreeSelect({ readonly: true });
+    component.selectNode(NODES[0]);
+    expect(component.value()).toBeNull();
+    fixture.componentRef.setInput('readonly', false);
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
-    expect(component.isDisabled()).toBe(true);
-  });
-
-  it('selects and unselects several nodes in multiple mode', () => {
-    const component = fixture.componentInstance;
-    const changes: Array<string | string[] | null> = [];
-    component.registerOnChange((value) => changes.push(value));
-    fixture.componentRef.setInput('multiple', true);
-    fixture.detectChanges();
-
-    component.selectNode(nodes[0]);
-    component.selectNode(nodes[1]);
-    expect(component.values()).toEqual(['admin', 'lazy']);
-    expect(component.selectedLabel()).toBe('2 selected');
-    expect(changes).toEqual([['admin'], ['admin', 'lazy']]);
-
-    component.selectNode(nodes[0]);
-    expect(component.values()).toEqual(['lazy']);
-    expect(component['isSelected']('admin')).toBe(false);
-  });
-
-  it('owns multiple programmatic selections and emits a fresh selection proposal', () => {
-    const component = fixture.componentInstance;
-    const incoming = ['admin'];
-    const cvaValues: string[][] = [];
-    fixture.componentRef.setInput('multiple', true);
-    fixture.detectChanges();
-    component.registerOnChange((value) => cvaValues.push(value as string[]));
-
-    component.writeValue(incoming);
-    expect(component.values()).toEqual(incoming);
-    expect(component.values()).not.toBe(incoming);
-
-    incoming.push('lazy');
-    expect(component.values()).toEqual(['admin']);
-
-    component.selectNode(nodes[1]);
-    expect(incoming).toEqual(['admin', 'lazy']);
-    expect(cvaValues[0]).toEqual(['admin', 'lazy']);
-    expect(cvaValues[0]).not.toBe(component.values());
-  });
-
-  it('does not commit disabled nodes and emits selected node objects', () => {
-    const component = fixture.componentInstance;
-    const selected: NeuTreeSelectNode[][] = [];
-    component.selectionChange.subscribe((value) => selected.push(value));
-
-    component.selectNode(nodes[2]);
-    expect(component.values()).toEqual([]);
-
-    component.selectNode(nodes[0]);
-    expect(selected).toEqual([[nodes[0]]]);
-  });
-
-  it('expands nested nodes, emits lazy expansion and filters all tree nodes', () => {
-    const component = fixture.componentInstance;
-    const expanded: NeuTreeSelectNode[] = [];
-    component.nodeExpand.subscribe((node) => expanded.push(node));
-    const event = new Event('click');
-    const stop = vi.spyOn(event, 'stopPropagation');
-    expect(component.expanded().has('admin')).toBe(false);
-
-    expect(component.visibleNodes().map((item) => item.node.value)).toEqual([
-      'admin',
-      'lazy',
-      'disabled',
-    ]);
-    component.toggleExpanded(nodes[0], event);
-    expect(stop).toHaveBeenCalled();
-    expect(component.visibleNodes().map((item) => item.node.value)).toEqual([
-      'admin',
-      'editor',
-      'lazy',
-      'disabled',
-    ]);
-    expect(component.expanded().has('admin')).toBe(true);
-
-    component.toggleExpanded(nodes[0], new Event('click'));
-    expect(component.expanded().has('admin')).toBe(false);
-    expect(component.visibleNodes().map((item) => item.node.value)).toEqual([
-      'admin',
-      'lazy',
-      'disabled',
-    ]);
-
-    component.toggleExpanded(nodes[1], new Event('click'));
-    expect(expanded).toEqual([nodes[1]]);
-    component.toggleExpanded(nodes[1], new Event('click'));
-    expect(expanded).toEqual([nodes[1]]);
-
-    component.query.set('edit');
-    expect(component.visibleNodes().map((item) => item.node.value)).toEqual(['editor']);
-    component.query.set('unknown');
-    expect(component.visibleNodes()).toEqual([]);
-  });
-
-  it('opens from the trigger, closes from backdrop and clears with the clear affordance', () => {
-    const component = fixture.componentInstance;
-    fixture.componentRef.setInput('clearable', true);
-    component.writeValue('admin');
-    fixture.detectChanges();
-
-    const trigger = fixture.nativeElement.querySelector(
-      '.neu-tree-select__trigger',
-    ) as HTMLButtonElement;
-    trigger.click();
-    fixture.detectChanges();
-    expect(component.open()).toBe(true);
-    expect(trigger.getAttribute('aria-expanded')).toBe('true');
-
-    const clear = fixture.nativeElement.querySelector('.neu-tree-select__clear') as HTMLElement;
-    clear.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(component.values()).toEqual([]);
-
-    component.close();
+    component.selectNode(NODES[0]);
+    component.toggle();
+    expect(component.value()).toBeNull();
     expect(component.open()).toBe(false);
   });
 
-  it('handles the overlay search, tree node and twisty listeners', () => {
-    const component = fixture.componentInstance;
-    const expanded: NeuTreeSelectNode[] = [];
-    component.nodeExpand.subscribe((node) => expanded.push(node));
-    component.toggle();
-    fixture.detectChanges();
-
-    const search = document.querySelector('.neu-tree-select__search') as HTMLInputElement;
-    search.value = 'admin';
-    search.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(component.query()).toBe('admin');
-
-    component.query.set('');
-    fixture.detectChanges();
-    const twisties = Array.from(
-      document.querySelectorAll('.neu-tree-select__twisty'),
-    ) as HTMLElement[];
-    twisties[1].click();
-    fixture.detectChanges();
-    expect(expanded).toEqual([nodes[1]]);
-
-    const nodeButtons = Array.from(
-      document.querySelectorAll('.neu-tree-select__node'),
-    ) as HTMLButtonElement[];
-    nodeButtons[0].click();
-    fixture.detectChanges();
-    expect(component.values()).toEqual(['admin']);
-
-    component.toggle();
-    fixture.detectChanges();
-    (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
-    expect(component.open()).toBe(false);
-  });
-
-  it('renders the empty overlay state and integrates through Reactive Forms', async () => {
-    fixture.componentInstance.toggle();
-    fixture.detectChanges();
-    const search = document.querySelector('.neu-tree-select__search') as HTMLInputElement;
-    search.value = 'missing';
-    search.dispatchEvent(new Event('input', { bubbles: true }));
-    fixture.detectChanges();
-    expect(document.querySelector('.neu-tree-select__empty')).toBeTruthy();
-
-    @Component({
-      imports: [NeuTreeSelectComponent, ReactiveFormsModule],
-      template: '<neu-tree-select [nodes]="nodes" [formControl]="control" />',
-    })
-    class FormHostComponent {
-      readonly nodes = nodes;
-      readonly control = new FormControl<string | null>('admin');
-    }
-
-    await TestBed.resetTestingModule()
-      .configureTestingModule({ imports: [FormHostComponent] })
-      .compileComponents();
-    const formFixture = TestBed.createComponent(FormHostComponent);
-    formFixture.detectChanges();
-    expect(formFixture.nativeElement.textContent).toContain('Admin');
-  });
-
-  it('renders without search, supports single selected labels and handles undefined writes', () => {
-    const component = fixture.componentInstance;
-    fixture.componentRef.setInput('searchable', false);
-    component.writeValue(undefined as unknown as null);
-    fixture.detectChanges();
-
-    component.selectNode(nodes[0]);
-    fixture.detectChanges();
-
-    expect(component.selectedLabel()).toBe('Admin');
-    component.toggle();
-    fixture.detectChanges();
-    expect(document.querySelector('.neu-tree-select__search')).toBeNull();
-  });
-
-  it('clear and select before CVA registration use default callbacks safely', () => {
-    const fresh = TestBed.createComponent(NeuTreeSelectComponent);
-    fresh.componentRef.setInput('nodes', nodes);
-    fresh.componentRef.setInput('clearable', true);
-    fresh.detectChanges();
-
-    expect(() => fresh.componentInstance.selectNode(nodes[0])).not.toThrow();
-    expect(() => fresh.componentInstance.clear(new MouseEvent('click'))).not.toThrow();
-    expect(fresh.componentInstance.values()).toEqual([]);
-  });
-
-  it('searches across full tree even with collapsed nodes', () => {
-    interface Department {
+  it('supports key/function accessors, numeric zero and domain values', () => {
+    interface DomainNode {
       id: number;
       name: string;
-      children?: Department[];
+      blocked?: boolean;
+      descendants?: readonly DomainNode[];
     }
-
-    const departments: Department[] = [
-      { id: 1, name: 'Root', children: [{ id: 2, name: 'Child' }] },
-    ];
-    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
-      NeuTreeSelectComponent<Department, number>
-    >;
-    const component = fixture.componentInstance;
-
-    fixture.componentRef.setInput('nodes', departments);
+    const child: DomainNode = { id: 0, name: 'Zero' };
+    const root: DomainNode = { id: 1, name: 'Root', descendants: [child] };
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent<DomainNode, number>);
+    fixture.componentRef.setInput('nodes', [root]);
     fixture.componentRef.setInput('optionLabel', 'name');
-    fixture.componentRef.setInput('optionValue', 'id');
-    fixture.detectChanges();
-
-    component.query.set('child');
-    expect(component.visibleNodes().map((item) => item.label)).toEqual(['Child']);
-  });
-
-  it('supports key-based optionLabel, optionValue and optionDisabled accessors', () => {
-    interface Department {
-      id: number;
-      name: string;
-      disabled?: boolean;
-      children?: Department[];
-    }
-
-    const departments: Department[] = [
-      { id: 1, name: 'Platform', children: [{ id: 11, name: 'Users' }] },
-      { id: 2, name: 'Operations', disabled: true },
-    ];
-    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
-      NeuTreeSelectComponent<Department, number>
-    >;
-    fixture.componentRef.setInput('nodes', departments);
-    fixture.componentRef.setInput('optionLabel', 'name');
-    fixture.componentRef.setInput('optionValue', 'id');
-    fixture.componentRef.setInput('optionDisabled', 'disabled');
-    fixture.componentRef.setInput('multiple', true);
-    fixture.detectChanges();
-
-    const events: Department[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((selection) => events.push(selection));
-    const values: Array<number | number[] | null> = [];
-    fixture.componentInstance.registerOnChange((value) => values.push(value));
-
-    fixture.componentInstance.selectNode(departments[0]);
-    fixture.componentInstance.selectNode(departments[1]);
-
-    expect(fixture.componentInstance.values()).toEqual([1]);
-    expect(values.at(-1)).toEqual([1]);
-    expect(events.at(-1)).toEqual([departments[0]]);
-  });
-
-  it('supports numeric optionValue and numeric zero through writeValue', () => {
-    interface MetricNode {
-      id: number;
-      name: string;
-    }
-
-    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
-      NeuTreeSelectComponent<MetricNode, number>
-    >;
-    const component = fixture.componentInstance;
-
-    fixture.componentRef.setInput('nodes', [
-      { id: 0, name: 'Zero' },
-      { id: 1, name: 'One' },
-    ]);
-    fixture.componentRef.setInput('optionLabel', 'name');
-    fixture.componentRef.setInput('optionValue', 'id');
-    fixture.detectChanges();
-
-    component.writeValue(0);
-    expect(component.values()).toEqual([0]);
-
-    component.selectNode({ id: 0, name: 'Zero' });
-    expect(component.values()).toEqual([0]);
-  });
-
-  it('supports function-based accessors and full-domain values when optionValue is omitted', () => {
-    interface Department {
-      id: number;
-      name: string;
-      disabled?: boolean;
-      descendants?: Department[];
-    }
-
-    const departments: Department[] = [
-      { id: 1, name: 'Root', descendants: [{ id: 2, name: 'Child' }] },
-    ];
-    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
-      NeuTreeSelectComponent<Department, Department>
-    >;
-    const component = fixture.componentInstance as NeuTreeSelectComponent<Department, Department>;
-
-    fixture.componentRef.setInput('nodes', departments);
-    fixture.componentRef.setInput('optionLabel', (node: Department) => node.name);
-    fixture.componentRef.setInput('optionChildren', (node: Department) => node.descendants ?? []);
-    fixture.detectChanges();
-
-    const cvaValues: Array<Department | Department[] | null> = [];
-    const emitted: Department[][] = [];
-    component.registerOnChange((value) => {
-      cvaValues.push(value as Department | Department[] | null);
-    });
-    component.selectionChange.subscribe((selection) => emitted.push(selection));
-
-    const child = departments[0]?.descendants?.[0];
-    expect(component['optionValueOf'](child!)).toEqual(child);
-    component.selectNode(child!);
-
-    expect(component.values()).toEqual([child]);
-    expect(cvaValues.at(-1)).toBe(child);
-    expect(emitted.at(-1)).toEqual([child]);
-  });
-
-  it('supports legacy optionValue behavior and primitive default option values', () => {
-    const primitive = ['admin', 'editor', 'viewer'];
-    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
-      NeuTreeSelectComponent<string, string>
-    >;
-
-    fixture.componentRef.setInput('nodes', primitive);
-    fixture.componentRef.setInput('searchable', false);
-    fixture.detectChanges();
-
-    fixture.componentInstance.writeValue('editor');
-    fixture.detectChanges();
-    expect(fixture.componentInstance.values()).toEqual(['editor']);
-    fixture.componentInstance.selectNode('admin');
-    expect(fixture.componentInstance['isSelected']('admin')).toBe(true);
-  });
-
-  it('supports optionValue function accessors for expanded/collapsed state', () => {
-    interface Department {
-      id: number;
-      name: string;
-      children?: Department[];
-    }
-
-    const departments: Department[] = [
-      {
-        id: 1,
-        name: 'Platform',
-        children: [{ id: 11, name: 'Users' }],
-      },
-    ];
-
-    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
-      NeuTreeSelectComponent<Department, string>
-    >;
-    const component = fixture.componentInstance;
-    fixture.componentRef.setInput('nodes', departments);
-    fixture.componentRef.setInput('optionLabel', 'name');
-    fixture.componentRef.setInput('optionValue', (node: Department) => `id:${node.id}`);
-    fixture.detectChanges();
-
-    component.toggleExpanded(departments[0], new Event('click'));
-    expect(component.expanded().has('id:1')).toBe(true);
-    expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Platform', 'Users']);
-
-    component.toggleExpanded(departments[0], new Event('click'));
-    expect(component.expanded().has('id:1')).toBe(false);
-    expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Platform']);
-  });
-
-  it('supports full-domain V expansion, collapse and selection without optionValue', () => {
-    interface Department {
-      id: number;
-      name: string;
-      descendants?: Department[];
-    }
-
-    const departments: Department[] = [
-      { id: 1, name: 'Root', descendants: [{ id: 2, name: 'Child' }] },
-    ];
-    const fixture = TestBed.createComponent(NeuTreeSelectComponent) as ComponentFixture<
-      NeuTreeSelectComponent<Department, Department>
-    >;
-    const component = fixture.componentInstance as NeuTreeSelectComponent<Department, Department>;
-
-    fixture.componentRef.setInput('nodes', departments);
-    fixture.componentRef.setInput('optionLabel', (node: Department) => node.name);
+    fixture.componentRef.setInput('optionValue', (node: DomainNode) => node.id);
+    fixture.componentRef.setInput('optionDisabled', 'blocked');
     fixture.componentRef.setInput('optionChildren', 'descendants');
+    fixture.componentRef.setInput('expandedKeys', [1]);
     fixture.detectChanges();
-
-    const root = departments[0];
-    const child = departments[0]?.descendants?.[0];
-    expect(component.expanded().size).toBe(0);
-
-    component.toggleExpanded(root, new Event('click'));
-    expect(component.expanded().has(root)).toBe(true);
-    expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Root', 'Child']);
-
-    component.selectNode(child!);
-    expect(component.values()).toEqual([child]);
-
-    component.toggleExpanded(root, new Event('click'));
-    expect(component.expanded().has(root)).toBe(false);
-    expect(component.visibleNodes().map((item) => item.node.name)).toEqual(['Root']);
+    fixture.componentInstance.selectNode(child);
+    expect(fixture.componentInstance.value()).toBe(0);
+    expect(fixture.componentInstance.selectedLabel()).toBe('Zero');
   });
 
-  it('uses a native clear button outside the trigger and respects readonly state', () => {
-    const component = fixture.componentInstance;
-    fixture.componentRef.setInput('clearable', true);
-    fixture.componentRef.setInput('readonly', true);
-    component.writeValue('admin');
-    fixture.detectChanges();
-    const trigger = fixture.nativeElement.querySelector(
-      '.neu-tree-select__trigger',
-    ) as HTMLButtonElement;
-    const clear = fixture.nativeElement.querySelector(
-      '.neu-tree-select__clear',
-    ) as HTMLButtonElement;
-    expect(trigger.contains(clear)).toBe(false);
-    expect(clear.getAttribute('aria-label')).toBe('Clear selection');
-    expect(clear.disabled).toBe(true);
-    component.selectNode(nodes[1]);
-    expect(component.values()).toEqual(['admin']);
-  });
-
-  it('provides deterministic trigger/panel relationships and tree roving navigation', async () => {
-    const component = fixture.componentInstance;
-    fixture.componentRef.setInput('searchable', false);
-    fixture.detectChanges();
-    const trigger = fixture.nativeElement.querySelector(
-      '.neu-tree-select__trigger',
-    ) as HTMLButtonElement;
-    trigger.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
-    );
-    fixture.detectChanges();
-    await fixture.whenStable();
-    const panel = document.querySelector('.neu-tree-select__panel') as HTMLElement;
-    const items = () =>
-      Array.from(panel.querySelectorAll('[role="treeitem"]')) as HTMLButtonElement[];
-    expect(trigger.getAttribute('aria-controls')).toBe(panel.id);
-    expect(items().filter((item) => item.tabIndex === 0)).toHaveLength(1);
-    expect(document.activeElement).toBe(items()[0]);
-    expect(items()[0].getAttribute('aria-level')).toBe('1');
-
-    items()[0].dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
-    fixture.detectChanges();
-    expect(items().map((item) => item.textContent?.trim())).toContain('Editor');
-    items()[0].dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement?.textContent).toContain('Editor');
-    (document.activeElement as HTMLElement).dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
-    );
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(component.open()).toBe(false);
-    expect(document.activeElement).toBe(trigger);
-  });
-
-  it('matches the overlay panel width to the visible trigger', async () => {
-    const trigger = fixture.nativeElement.querySelector(
-      '.neu-tree-select__trigger',
-    ) as HTMLButtonElement;
-    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
-      width: 360,
-      height: 48,
-      top: 0,
-      right: 360,
-      bottom: 48,
-      left: 0,
-      x: 0,
-      y: 0,
-      toJSON: () => ({}),
-    });
-
-    fixture.componentInstance.toggle();
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const overlayPane = document.querySelector('.cdk-overlay-pane') as HTMLElement;
-    expect(overlayPane.style.width).toBe('360px');
-  });
-
-  it('hands ArrowDown and ArrowUp from search to the first and last eligible treeitems', async () => {
-    const component = fixture.componentInstance;
-    component.toggle();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    const panel = document.querySelector('.neu-tree-select__panel') as HTMLElement;
-    const search = panel.querySelector('.neu-tree-select__search') as HTMLInputElement;
-    const items = Array.from(panel.querySelectorAll<HTMLButtonElement>('[role="treeitem"]'));
-
-    search.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(items[0]);
-    search.focus();
-    search.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(items[1]);
-  });
-
-  it('terminates cycles, retains shared references per branch, and flattens depth 5,000', () => {
-    const self: NeuTreeSelectNode = { value: 'self', label: 'Self', children: [] };
-    const parent: NeuTreeSelectNode = { value: 'parent', label: 'Parent', children: [] };
-    const child: NeuTreeSelectNode = { value: 'child', label: 'Child', children: [] };
-    const grandchild: NeuTreeSelectNode = {
-      value: 'grandchild',
-      label: 'Grandchild',
-      children: [],
-    };
-    const shared: NeuTreeSelectNode = { value: 'shared', label: 'Shared' };
-    self.children = [self, { value: 'safe', label: 'Safe sibling' }];
-    parent.children = [child, shared];
-    child.children = [grandchild];
-    grandchild.children = [parent];
-    fixture.componentRef.setInput('nodes', [
-      self,
-      parent,
-      { value: 'right', label: 'Right', children: [shared] },
-    ]);
-    fixture.componentInstance.query.set('shared');
-    fixture.detectChanges();
-    expect(fixture.componentInstance.visibleNodes().map((item) => item.label)).toEqual([
-      'Shared',
-      'Shared',
-    ]);
-
-    let deep: NeuTreeSelectNode = { value: 'deep-5000', label: 'Deep' };
-    for (let level = 4999; level >= 0; level -= 1) {
-      deep = { value: `deep-${level}`, label: `Deep ${level}`, children: [deep] };
+  it('bounds cycles and flattens a depth-5000 hierarchy iteratively', () => {
+    const root: NeuTreeSelectNode = { value: '0', label: '0', children: [] };
+    let current = root;
+    for (let index = 1; index < 5_000; index += 1) {
+      const child: NeuTreeSelectNode = { value: String(index), label: String(index), children: [] };
+      current.children = [child];
+      current = child;
     }
-    expect((fixture.componentInstance as any).flatten([deep])).toHaveLength(5001);
+    current.children = [root];
+    const fixture = TestBed.createComponent(NeuTreeSelectComponent);
+    fixture.componentRef.setInput('nodes', [root]);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.allNodes()).toHaveLength(5_000);
   });
 
-  it('renders every typed template slot and executes the node toggle callback', () => {
-    const host = TestBed.createComponent(TreeSelectTemplatesHost);
-    host.detectChanges();
-    const component = host.debugElement.query(By.directive(NeuTreeSelectComponent))
-      .componentInstance as any;
-    component.writeValue('leaf');
+  it('renders every typed template slot without exposing private projection state', async () => {
+    const fixture = TestBed.createComponent(TemplateHost);
+    fixture.detectChanges();
+    const component = fixture.debugElement.query(By.directive(NeuTreeSelectComponent))
+      .componentInstance as NeuTreeSelectComponent<NeuTreeSelectNode, string>;
     component.toggle();
-    host.detectChanges();
-
-    expect(document.querySelector('.tree-header')?.textContent).toContain('Header');
-    expect(document.querySelector('.tree-footer')?.textContent).toContain('Footer');
-    expect(
-      document.querySelector('.tree-header')?.closest('.neu-tree-select__header'),
-    ).toBeTruthy();
-    expect(
-      document.querySelector('.tree-footer')?.closest('.neu-tree-select__footer'),
-    ).toBeTruthy();
-    expect(document.querySelector('.tree-template-toggle')?.textContent).toContain('Root-0');
-    (document.querySelector('.tree-template-toggle') as HTMLButtonElement).click();
-    host.detectChanges();
-    expect(component.expanded().has('root')).toBe(true);
-    component.toggle();
-    host.detectChanges();
-    expect(document.querySelectorAll('.tree-template-toggle')).toHaveLength(2);
-    component.close();
-    host.detectChanges();
-    expect(host.nativeElement.querySelector('.tree-selected')?.textContent).toContain('Root');
-
-    const emptyHost = TestBed.createComponent(TreeSelectTemplatesHost);
-    emptyHost.componentInstance.nodes = [];
-    emptyHost.detectChanges();
-    const emptyComponent = emptyHost.debugElement.query(By.directive(NeuTreeSelectComponent))
-      .componentInstance as any;
-    emptyComponent.toggle();
-    emptyHost.detectChanges();
-    expect(document.querySelector('.tree-empty')?.textContent).toContain('Empty slot');
-    expect(
-      document
-        .querySelector('.tree-empty')
-        ?.closest('.neu-tree-select__empty')
-        ?.getAttribute('role'),
-    ).toBe('status');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(document.querySelector('.neu-tree-select__header')?.textContent).toContain('Header');
+    expect(document.querySelector('.custom-node')?.textContent).toContain('0:Engineering');
+    expect(document.querySelector('.neu-tree-select__footer')?.textContent).toContain('Footer');
+    expect(fixture.nativeElement.querySelector('.neu-tree-select__value b')?.textContent).toContain(
+      'Engineering',
+    );
   });
 });

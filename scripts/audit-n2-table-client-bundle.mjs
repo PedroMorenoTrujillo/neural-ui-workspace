@@ -117,11 +117,11 @@ export {NeuTableComponent,NeuTableCaptionDirective,NeuTableToolbarDirective,NeuT
   NeuTableCellDirective,NeuTableFooterDirective,NeuTableSummaryDirective,NeuTableEmptyDirective,
   NeuTableLoadingDirective,NeuTableErrorDirective,NeuTableRowDetailDirective,NeuTableEditorDirective,
   NeuTableGroupHeaderDirective,NeuTableGroupFooterDirective,NeuTableFilterDirective,NeuTablePaginatorDirective};`;
-const sourceBasic = `import {NeuTableComponent} from './projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};`;
+const sourceBasic = `import {NeuTableComponent} from './projects/ui-core/table/public/neu-table.component-contract';export{NeuTableComponent};`;
 const combined = `import {NeuTableComponent} from '@neural-ui/core/table-next';
 const combinedQuery={page:2,pageSize:25,search:'row',sort:[{field:'amount',direction:'desc'}],filters:{kind:'condition',field:'amount',rule:'greaterThanOrEqual',value:7000}};
 export{NeuTableComponent,combinedQuery};`;
-const sourceTemplates = `import * as candidate from './projects/ui-core/table/next/public/public-api';export{candidate};`;
+const sourceTemplates = `import * as candidate from './projects/ui-core/table/public/public-api';export{candidate};`;
 const rendererBaseline = JSON.parse(readFileSync(rendererBaselinePath, 'utf8'));
 
 try {
@@ -129,7 +129,7 @@ try {
     cpSync(join(root, path), join(temporary, path), { recursive: true, dereference: true });
   }
   cpSync(
-    join(temporary, 'projects/ui-core/table/next'),
+    join(temporary, 'projects/ui-core/table'),
     join(temporary, 'projects/ui-core/table-next'),
     { recursive: true, dereference: true },
   );

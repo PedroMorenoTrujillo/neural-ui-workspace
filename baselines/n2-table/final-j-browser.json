@@ -1,11 +1,11 @@
 {
   "browser": "Chromium",
   "timingsMs": {
-    "initialHydration": 192.56825000000026,
-    "editActivation": 57.068334000000505,
-    "queryInteraction": 45.409583999999995,
-    "selection": 44.147666000000754,
-    "virtualScroll": 50.58708299999944
+    "initialHydration": 230.44595799999934,
+    "editActivation": 56.84204199999931,
+    "queryInteraction": 47.38574999999946,
+    "selection": 46.65562500000033,
+    "virtualScroll": 52.98462500000096
   },
   "accessibilityViolations": []
 }

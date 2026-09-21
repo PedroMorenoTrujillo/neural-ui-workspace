@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { validateTargetContracts } from './lib/n2-table-contracts.mjs';
 
-const root = 'projects/ui-core/table/next';
+const root = 'projects/ui-core/table';
 
 function files(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

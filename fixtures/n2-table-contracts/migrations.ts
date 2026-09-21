@@ -10,7 +10,7 @@ import type {
   NeuTableQuery,
   NeuTableSelection,
   NeuTableVirtualizationOptions,
-} from '../../projects/ui-core/table/next/public/public-api';
+} from '@neural-ui/core/table';
 import type { AccountField, AccountRow } from './model';
 
 export const simple1xTo2x = {

@@ -26,7 +26,6 @@ function componentFiles(dir) {
 }
 
 const requiredMethods = ['writeValue', 'registerOnChange', 'registerOnTouched', 'setDisabledState'];
-const expectedLegacyCva = 'projects/ui-core/tree-select/neu-tree-select.component.ts';
 const expectedSignalControls = new Map([
   ['projects/ui-core/input/neu-input.component.ts', /readonly\s+value\s*=\s*model<string>\(''\)/],
   [
@@ -107,6 +106,10 @@ const expectedSignalControls = new Map([
   [
     'projects/ui-core/rating/neu-rating.component.ts',
     /readonly\s+value\s*=\s*model<number\s*\|\s*null>\(null\)/,
+  ],
+  [
+    'projects/ui-core/tree-select/neu-tree-select.component.ts',
+    /readonly\s+value\s*=\s*model<NeuSelectionValue<V,\s*M>>\(/,
   ],
 ]);
 
@@ -202,19 +205,14 @@ for (const file of componentFiles(uiCore)) {
   }
 }
 
-if (cvaComponents.length !== 1) {
+if (cvaComponents.length !== 0) {
   violations.push(
-    `expected 1 LEGACY-CVA-YET-TO-MIGRATE component, found ${cvaComponents.length}`,
-  );
-}
-if (cvaComponents.length === 1 && cvaComponents[0] !== expectedLegacyCva) {
-  violations.push(
-    `expected TreeSelect to be the only LEGACY-CVA-YET-TO-MIGRATE component, found ${cvaComponents[0]}`,
+    `expected 0 LEGACY-CVA-YET-TO-MIGRATE components, found ${cvaComponents.length}`,
   );
 }
 
-if (signalComponents.length !== 23) {
-  violations.push(`expected 23 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
+if (signalComponents.length !== 24) {
+  violations.push(`expected 24 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
 }
 
 for (const expected of expectedSignalControls.keys()) {

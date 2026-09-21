@@ -2,7 +2,7 @@ import type {
   NeuTableColumn,
   NeuTableMetadata,
   NeuTableQuery,
-} from '../../projects/ui-core/table/next/public/public-api';
+} from '@neural-ui/core/table';
 
 export interface AccountRow {
   readonly id: number;

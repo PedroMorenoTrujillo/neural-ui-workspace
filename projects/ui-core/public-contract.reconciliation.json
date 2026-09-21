@@ -4,18 +4,18 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1630,
-    "bindingDelta": 463,
-    "mapped": 813,
-    "aliasCorrections": 4,
-    "missingOldEntries": 348,
-    "newlyDiscovered": 811,
+    "declarationBindings": 1511,
+    "bindingDelta": 344,
+    "mapped": 663,
+    "aliasCorrections": 3,
+    "missingOldEntries": 498,
+    "newlyDiscovered": 842,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 431,
-      "model-binding-was-not-supported": 25,
-      "multiline-annotated-or-compound-declaration-was-missed": 349
+      "declaration-or-selector-was-not-recorded": 445,
+      "model-binding-was-not-supported": 26,
+      "multiline-annotated-or-compound-declaration-was-missed": 365
     }
   },
   "mappings": [
@@ -2295,497 +2295,44 @@
       "newId": "./switch#NeuSwitchComponent.input:name"
     },
     {
-      "oldToken": "table-core/neu-table-core.component.ts#input:bordered",
-      "newId": "./table-core#NeuTableCoreComponent.input:bordered"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:columns",
-      "newId": "./table-core#NeuTableCoreComponent.input:columns"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:data",
-      "newId": "./table-core#NeuTableCoreComponent.input:data"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:density",
-      "newId": "./table-core#NeuTableCoreComponent.input:density"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:emptyMessage",
-      "newId": "./table-core#NeuTableCoreComponent.input:emptyMessage"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:footerRow",
-      "newId": "./table-core#NeuTableCoreComponent.input:footerRow"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:loading",
-      "newId": "./table-core#NeuTableCoreComponent.input:loading"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:roundedBorders",
-      "newId": "./table-core#NeuTableCoreComponent.input:roundedBorders"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:rowClass",
-      "newId": "./table-core#NeuTableCoreComponent.input:rowClass"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:rowKey",
-      "newId": "./table-core#NeuTableCoreComponent.input:rowKey"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:rowTrackBy",
-      "newId": "./table-core#NeuTableCoreComponent.input:rowTrackBy"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:showRowNumbers",
-      "newId": "./table-core#NeuTableCoreComponent.input:showRowNumbers"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:skeletonRows",
-      "newId": "./table-core#NeuTableCoreComponent.input:skeletonRows"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:stripedRows",
-      "newId": "./table-core#NeuTableCoreComponent.input:stripedRows"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:tableAriaLabel",
-      "newId": "./table-core#NeuTableCoreComponent.input:tableAriaLabel"
-    },
-    {
-      "oldToken": "table-core/neu-table-core.component.ts#input:title",
-      "newId": "./table-core#NeuTableCoreComponent.input:title"
-    },
-    {
-      "oldToken": "table/neu-table-row-reorder-handle.directive.ts#input:disabled",
-      "newId": "./table#NeuTableRowReorderHandleDirective.input:disabled",
-      "note": "historical-name-was-property-name-not-public-alias"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:advancedFilterMode",
-      "newId": "./table#NeuTableComponent.input:advancedFilterMode"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:advancedFilterTexts",
-      "newId": "./table#NeuTableComponent.input:advancedFilterTexts"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:bordered",
-      "newId": "./table#NeuTableComponent.input:bordered"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:columnChooser",
-      "newId": "./table#NeuTableComponent.input:columnChooser"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:columnResizeMode",
-      "newId": "./table#NeuTableComponent.input:columnResizeMode"
-    },
-    {
       "oldToken": "table/neu-table.component.ts#input:columns",
       "newId": "./table#NeuTableComponent.input:columns"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:compareSelectionBy",
-      "newId": "./table#NeuTableComponent.input:compareSelectionBy"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:contextMenu",
-      "newId": "./table#NeuTableComponent.input:contextMenu"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:contextMenuRowDisabled",
-      "newId": "./table#NeuTableComponent.input:contextMenuRowDisabled"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:contextMenuSelection",
-      "newId": "./table#NeuTableComponent.input:contextMenuSelection"
     },
     {
       "oldToken": "table/neu-table.component.ts#input:data",
       "newId": "./table#NeuTableComponent.input:data"
     },
     {
-      "oldToken": "table/neu-table.component.ts#input:dataFirst",
-      "newId": "./table#NeuTableComponent.input:dataFirst"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:defaultSortOrder",
-      "newId": "./table#NeuTableComponent.input:defaultSortOrder"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:density",
-      "newId": "./table#NeuTableComponent.input:density"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:editingCell",
-      "newId": "./table#NeuTableComponent.input:editingCell"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:editingRowKeys",
-      "newId": "./table#NeuTableComponent.input:editingRowKeys"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:editMode",
-      "newId": "./table#NeuTableComponent.input:editMode"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:emptyMessage",
-      "newId": "./table#NeuTableComponent.input:emptyMessage"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:exactMatchable",
-      "newId": "./table#NeuTableComponent.input:exactMatchable"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:expandableRowGroups",
-      "newId": "./table#NeuTableComponent.input:expandableRowGroups"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:expandedGroupKeys",
-      "newId": "./table#NeuTableComponent.input:expandedGroupKeys"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:expandedRowKeys",
-      "newId": "./table#NeuTableComponent.input:expandedRowKeys"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:footerRow",
-      "newId": "./table#NeuTableComponent.input:footerRow"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:frozenData",
-      "newId": "./table#NeuTableComponent.input:frozenData"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:globalFilterFields",
-      "newId": "./table#NeuTableComponent.input:globalFilterFields"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:groupBy",
-      "newId": "./table#NeuTableComponent.input:groupBy"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:groupRowsByOrder",
-      "newId": "./table#NeuTableComponent.input:groupRowsByOrder"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:initialLayout",
-      "newId": "./table#NeuTableComponent.input:initialLayout"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:lazyLoadOnInit",
-      "newId": "./table#NeuTableComponent.input:lazyLoadOnInit"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:loading",
-      "newId": "./table#NeuTableComponent.input:loading"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:metaKeySelection",
-      "newId": "./table#NeuTableComponent.input:metaKeySelection"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:multiSort",
-      "newId": "./table#NeuTableComponent.input:multiSort"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:pageSize",
-      "newId": "./table#NeuTableComponent.input:pageSize"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:pageSizeOptions",
-      "newId": "./table#NeuTableComponent.input:pageSizeOptions"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:pagination",
-      "newId": "./table#NeuTableComponent.input:pagination"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:paginatorPosition",
-      "newId": "./table#NeuTableComponent.input:paginatorPosition"
-    },
-    {
       "oldToken": "table/neu-table.component.ts#input:query",
       "newId": "./table#NeuTableComponent.input:query"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:removableSort",
-      "newId": "./table#NeuTableComponent.input:removableSort"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:reorderableColumns",
-      "newId": "./table#NeuTableComponent.input:reorderableColumns"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:reorderableRows",
-      "newId": "./table#NeuTableComponent.input:reorderableRows"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:resetPageOnSort",
-      "newId": "./table#NeuTableComponent.input:resetPageOnSort"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:resizableColumns",
-      "newId": "./table#NeuTableComponent.input:resizableColumns"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:roundedBorders",
-      "newId": "./table#NeuTableComponent.input:roundedBorders"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:rowClass",
-      "newId": "./table#NeuTableComponent.input:rowClass"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:rowGroupMode",
-      "newId": "./table#NeuTableComponent.input:rowGroupMode"
     },
     {
       "oldToken": "table/neu-table.component.ts#input:rowKey",
       "newId": "./table#NeuTableComponent.input:rowKey"
     },
     {
-      "oldToken": "table/neu-table.component.ts#input:rowReorderable",
-      "newId": "./table#NeuTableComponent.input:rowReorderable"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:rowSelectable",
-      "newId": "./table#NeuTableComponent.input:rowSelectable"
-    },
-    {
       "oldToken": "table/neu-table.component.ts#input:rowTrackBy",
       "newId": "./table#NeuTableComponent.input:rowTrackBy"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:scrollHeight",
-      "newId": "./table#NeuTableComponent.input:scrollHeight"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:searchable",
-      "newId": "./table#NeuTableComponent.input:searchable"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:selectable",
-      "newId": "./table#NeuTableComponent.input:selectable"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:selectAllScope",
-      "newId": "./table#NeuTableComponent.input:selectAllScope"
     },
     {
       "oldToken": "table/neu-table.component.ts#input:selection",
       "newId": "./table#NeuTableComponent.input:selection"
     },
     {
-      "oldToken": "table/neu-table.component.ts#input:selectionActions",
-      "newId": "./table#NeuTableComponent.input:selectionActions"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:selectOnRowClick",
-      "newId": "./table#NeuTableComponent.input:selectOnRowClick"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:serverSide",
-      "newId": "./table#NeuTableComponent.input:serverSide"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:showRowNumbers",
-      "newId": "./table#NeuTableComponent.input:showRowNumbers"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:sort",
-      "newId": "./table#NeuTableComponent.input:sort"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:sortable",
-      "newId": "./table#NeuTableComponent.input:sortable"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:stateKey",
-      "newId": "./table#NeuTableComponent.input:stateKey"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:stateStorage",
-      "newId": "./table#NeuTableComponent.input:stateStorage"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:stickyHeader",
-      "newId": "./table#NeuTableComponent.input:stickyHeader"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:stripedRows",
-      "newId": "./table#NeuTableComponent.input:stripedRows"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:tableAriaLabel",
-      "newId": "./table#NeuTableComponent.input:tableAriaLabel"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:title",
-      "newId": "./table#NeuTableComponent.input:title"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:totalItems",
-      "newId": "./table#NeuTableComponent.input:totalItems"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#input:virtualScroll",
-      "newId": "./table#NeuTableComponent.input:virtualScroll"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:actionClick",
-      "newId": "./table#NeuTableComponent.output:actionClick"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:cellEditCancel",
-      "newId": "./table#NeuTableComponent.output:cellEditCancel"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:cellEditCommit",
-      "newId": "./table#NeuTableComponent.output:cellEditCommit"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:cellEditInit",
-      "newId": "./table#NeuTableComponent.output:cellEditInit"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:columnReorder",
-      "newId": "./table#NeuTableComponent.output:columnReorder"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:columnResize",
-      "newId": "./table#NeuTableComponent.output:columnResize"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:contextMenuSelect",
-      "newId": "./table#NeuTableComponent.output:contextMenuSelect"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:contextMenuSelectionChange",
-      "newId": "./table#NeuTableComponent.output:contextMenuSelectionChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:editingCellChange",
-      "newId": "./table#NeuTableComponent.output:editingCellChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:editingRowKeysChange",
-      "newId": "./table#NeuTableComponent.output:editingRowKeysChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:editValidationError",
-      "newId": "./table#NeuTableComponent.output:editValidationError"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:expandedGroupKeysChange",
-      "newId": "./table#NeuTableComponent.output:expandedGroupKeysChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:expandedRowKeysChange",
-      "newId": "./table#NeuTableComponent.output:expandedRowKeysChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:groupCollapse",
-      "newId": "./table#NeuTableComponent.output:groupCollapse"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:groupExpand",
-      "newId": "./table#NeuTableComponent.output:groupExpand"
-    },
-    {
       "oldToken": "table/neu-table.component.ts#output:layoutChange",
       "newId": "./table#NeuTableComponent.output:layoutChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:lazyRequest",
-      "newId": "./table#NeuTableComponent.output:lazyRequest"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:pageChange",
-      "newId": "./table#NeuTableComponent.output:pageChange"
     },
     {
       "oldToken": "table/neu-table.component.ts#output:queryChange",
       "newId": "./table#NeuTableComponent.output:queryChange"
     },
     {
-      "oldToken": "table/neu-table.component.ts#output:rowClick",
-      "newId": "./table#NeuTableComponent.output:rowClick"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:rowCollapse",
-      "newId": "./table#NeuTableComponent.output:rowCollapse"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:rowDblClick",
-      "newId": "./table#NeuTableComponent.output:rowDblClick"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:rowEditCancel",
-      "newId": "./table#NeuTableComponent.output:rowEditCancel"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:rowEditInit",
-      "newId": "./table#NeuTableComponent.output:rowEditInit"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:rowEditSave",
-      "newId": "./table#NeuTableComponent.output:rowEditSave"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:rowExpand",
-      "newId": "./table#NeuTableComponent.output:rowExpand"
-    },
-    {
       "oldToken": "table/neu-table.component.ts#output:rowReorder",
       "newId": "./table#NeuTableComponent.output:rowReorder"
     },
     {
-      "oldToken": "table/neu-table.component.ts#output:rowSelect",
-      "newId": "./table#NeuTableComponent.output:rowSelect"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:rowUnselect",
-      "newId": "./table#NeuTableComponent.output:rowUnselect"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:searchChange",
-      "newId": "./table#NeuTableComponent.output:searchChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:selectAllChange",
-      "newId": "./table#NeuTableComponent.output:selectAllChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:selectionActionClick",
-      "newId": "./table#NeuTableComponent.output:selectionActionClick"
-    },
-    {
       "oldToken": "table/neu-table.component.ts#output:selectionChange",
       "newId": "./table#NeuTableComponent.output:selectionChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:serverStateChange",
-      "newId": "./table#NeuTableComponent.output:serverStateChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:sortChange",
-      "newId": "./table#NeuTableComponent.output:sortChange"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:stateRestore",
-      "newId": "./table#NeuTableComponent.output:stateRestore"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:stateSave",
-      "newId": "./table#NeuTableComponent.output:stateSave"
-    },
-    {
-      "oldToken": "table/neu-table.component.ts#output:virtualScrollEvent",
-      "newId": "./table#NeuTableComponent.output:virtualScrollEvent"
     },
     {
       "oldToken": "terminal/neu-terminal.component.ts#input:ariaLabel",
@@ -2940,164 +2487,16 @@
       "newId": "./tooltip#NeuTooltipDirective.input:neuTooltipPosition"
     },
     {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:bordered",
-      "newId": "./tree-table#NeuTreeTableComponent.input:bordered"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:columnChooser",
-      "newId": "./tree-table#NeuTreeTableComponent.input:columnChooser"
-    },
-    {
       "oldToken": "tree-table/neu-tree-table.component.ts#input:columns",
       "newId": "./tree-table#NeuTreeTableComponent.input:columns"
     },
     {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:density",
-      "newId": "./tree-table#NeuTreeTableComponent.input:density"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:exactMatchable",
-      "newId": "./tree-table#NeuTreeTableComponent.input:exactMatchable"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:expandMode",
-      "newId": "./tree-table#NeuTreeTableComponent.input:expandMode"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:footerRow",
-      "newId": "./tree-table#NeuTreeTableComponent.input:footerRow"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:groupBy",
-      "newId": "./tree-table#NeuTreeTableComponent.input:groupBy"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:indentSize",
-      "newId": "./tree-table#NeuTreeTableComponent.input:indentSize"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:initialLayout",
-      "newId": "./tree-table#NeuTreeTableComponent.input:initialLayout"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:loading",
-      "newId": "./tree-table#NeuTreeTableComponent.input:loading"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:multiSort",
-      "newId": "./tree-table#NeuTreeTableComponent.input:multiSort"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:nodes",
-      "newId": "./tree-table#NeuTreeTableComponent.input:nodes"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:pageSize",
-      "newId": "./tree-table#NeuTreeTableComponent.input:pageSize"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:pageSizeOptions",
-      "newId": "./tree-table#NeuTreeTableComponent.input:pageSizeOptions"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:pagination",
-      "newId": "./tree-table#NeuTreeTableComponent.input:pagination"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:reorderableColumns",
-      "newId": "./tree-table#NeuTreeTableComponent.input:reorderableColumns"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:resizableColumns",
-      "newId": "./tree-table#NeuTreeTableComponent.input:resizableColumns"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:roundedBorders",
-      "newId": "./tree-table#NeuTreeTableComponent.input:roundedBorders"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:rowClass",
-      "newId": "./tree-table#NeuTreeTableComponent.input:rowClass"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:searchable",
-      "newId": "./tree-table#NeuTreeTableComponent.input:searchable"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:selectionActions",
-      "newId": "./tree-table#NeuTreeTableComponent.input:selectionActions"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:serverSide",
-      "newId": "./tree-table#NeuTreeTableComponent.input:serverSide"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:showRowNumbers",
-      "newId": "./tree-table#NeuTreeTableComponent.input:showRowNumbers"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:sortable",
-      "newId": "./tree-table#NeuTreeTableComponent.input:sortable"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:stickyHeader",
-      "newId": "./tree-table#NeuTreeTableComponent.input:stickyHeader"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:stripedRows",
-      "newId": "./tree-table#NeuTreeTableComponent.input:stripedRows"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:tableAriaLabel",
-      "newId": "./tree-table#NeuTreeTableComponent.input:tableAriaLabel"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:title",
-      "newId": "./tree-table#NeuTreeTableComponent.input:title"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:totalItems",
-      "newId": "./tree-table#NeuTreeTableComponent.input:totalItems"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:treeColumnKey",
-      "newId": "./tree-table#NeuTreeTableComponent.input:treeColumnKey"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#input:virtualScroll",
-      "newId": "./tree-table#NeuTreeTableComponent.input:virtualScroll"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#output:actionClick",
-      "newId": "./tree-table#NeuTreeTableComponent.output:actionClick"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#output:cellEditCommit",
-      "newId": "./tree-table#NeuTreeTableComponent.output:cellEditCommit"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#output:columnReorder",
-      "newId": "./tree-table#NeuTreeTableComponent.output:columnReorder"
+      "oldToken": "tree-table/neu-tree-table.component.ts#input:rowKey",
+      "newId": "./tree-table#NeuTreeTableComponent.input:rowKey"
     },
     {
       "oldToken": "tree-table/neu-tree-table.component.ts#output:layoutChange",
       "newId": "./tree-table#NeuTreeTableComponent.output:layoutChange"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#output:nodeClick",
-      "newId": "./tree-table#NeuTreeTableComponent.output:nodeClick"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#output:nodeDblClick",
-      "newId": "./tree-table#NeuTreeTableComponent.output:nodeDblClick"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#output:searchChange",
-      "newId": "./tree-table#NeuTreeTableComponent.output:searchChange"
-    },
-    {
-      "oldToken": "tree-table/neu-tree-table.component.ts#output:selectionActionClick",
-      "newId": "./tree-table#NeuTreeTableComponent.output:selectionActionClick"
     },
     {
       "oldToken": "tree-table/neu-tree-table.component.ts#output:selectionChange",
@@ -3482,22 +2881,59 @@
     "select/neu-select.component.ts#output:selectionChange",
     "slider/neu-slider.component.ts#input:value",
     "slider/neu-slider.component.ts#output:valueChange",
+    "table-core/neu-table-core.component.ts#input:bordered",
+    "table-core/neu-table-core.component.ts#input:columns",
+    "table-core/neu-table-core.component.ts#input:data",
+    "table-core/neu-table-core.component.ts#input:density",
+    "table-core/neu-table-core.component.ts#input:emptyMessage",
+    "table-core/neu-table-core.component.ts#input:footerRow",
+    "table-core/neu-table-core.component.ts#input:loading",
+    "table-core/neu-table-core.component.ts#input:roundedBorders",
+    "table-core/neu-table-core.component.ts#input:rowClass",
     "table-core/neu-table-core.component.ts#input:rowIdentity",
+    "table-core/neu-table-core.component.ts#input:rowKey",
+    "table-core/neu-table-core.component.ts#input:rowTrackBy",
+    "table-core/neu-table-core.component.ts#input:showRowNumbers",
+    "table-core/neu-table-core.component.ts#input:skeletonRows",
+    "table-core/neu-table-core.component.ts#input:stripedRows",
+    "table-core/neu-table-core.component.ts#input:tableAriaLabel",
+    "table-core/neu-table-core.component.ts#input:title",
+    "table/neu-table-row-reorder-handle.directive.ts#input:disabled",
+    "table/neu-table.component.ts#input:advancedFilterMode",
+    "table/neu-table.component.ts#input:advancedFilterTexts",
     "table/neu-table.component.ts#input:allFilterOptionLabel",
     "table/neu-table.component.ts#input:alwaysShowPaginator",
+    "table/neu-table.component.ts#input:bordered",
     "table/neu-table.component.ts#input:cancelInlineEditLabel",
     "table/neu-table.component.ts#input:clearFilterLabel",
     "table/neu-table.component.ts#input:clearSearchAriaLabel",
     "table/neu-table.component.ts#input:clearSelectionLabel",
     "table/neu-table.component.ts#input:collapseGroupAriaLabel",
     "table/neu-table.component.ts#input:collapseRowAriaLabel",
+    "table/neu-table.component.ts#input:columnChooser",
     "table/neu-table.component.ts#input:columnChooserLabel",
+    "table/neu-table.component.ts#input:columnResizeMode",
+    "table/neu-table.component.ts#input:compareSelectionBy",
+    "table/neu-table.component.ts#input:contextMenu",
+    "table/neu-table.component.ts#input:contextMenuRowDisabled",
+    "table/neu-table.component.ts#input:contextMenuSelection",
     "table/neu-table.component.ts#input:csvFormulaPolicy",
     "table/neu-table.component.ts#input:csvSeparator",
     "table/neu-table.component.ts#input:currentPageReportTemplate",
+    "table/neu-table.component.ts#input:dataFirst",
+    "table/neu-table.component.ts#input:defaultSortOrder",
+    "table/neu-table.component.ts#input:density",
+    "table/neu-table.component.ts#input:editingCell",
+    "table/neu-table.component.ts#input:editingRowKeys",
+    "table/neu-table.component.ts#input:editMode",
+    "table/neu-table.component.ts#input:emptyMessage",
     "table/neu-table.component.ts#input:emptyStateTemplate",
+    "table/neu-table.component.ts#input:exactMatchable",
     "table/neu-table.component.ts#input:exactMatchLabel",
     "table/neu-table.component.ts#input:expandable",
+    "table/neu-table.component.ts#input:expandableRowGroups",
+    "table/neu-table.component.ts#input:expandedGroupKeys",
+    "table/neu-table.component.ts#input:expandedRowKeys",
     "table/neu-table.component.ts#input:expandGroupAriaLabel",
     "table/neu-table.component.ts#input:expandRowAriaLabel",
     "table/neu-table.component.ts#input:exportable",
@@ -3519,45 +2955,87 @@
     "table/neu-table.component.ts#input:filterToLabel",
     "table/neu-table.component.ts#input:filterTrueLabel",
     "table/neu-table.component.ts#input:firstPageAriaLabel",
+    "table/neu-table.component.ts#input:footerRow",
+    "table/neu-table.component.ts#input:frozenData",
+    "table/neu-table.component.ts#input:globalFilterFields",
+    "table/neu-table.component.ts#input:groupBy",
     "table/neu-table.component.ts#input:groupHeaderLabel",
+    "table/neu-table.component.ts#input:groupRowsByOrder",
+    "table/neu-table.component.ts#input:initialLayout",
     "table/neu-table.component.ts#input:inlineEdit",
     "table/neu-table.component.ts#input:inlineEditLabel",
     "table/neu-table.component.ts#input:jumpToPageAriaLabel",
     "table/neu-table.component.ts#input:lastPageAriaLabel",
+    "table/neu-table.component.ts#input:lazyLoadOnInit",
+    "table/neu-table.component.ts#input:loading",
+    "table/neu-table.component.ts#input:metaKeySelection",
     "table/neu-table.component.ts#input:moveRowDownAriaLabel",
     "table/neu-table.component.ts#input:moveRowUpAriaLabel",
+    "table/neu-table.component.ts#input:multiSort",
     "table/neu-table.component.ts#input:multiSortParam",
     "table/neu-table.component.ts#input:nextPageAriaLabel",
     "table/neu-table.component.ts#input:ofLabel",
     "table/neu-table.component.ts#input:pageAriaLabel",
     "table/neu-table.component.ts#input:pageLinkSize",
     "table/neu-table.component.ts#input:pageParam",
+    "table/neu-table.component.ts#input:pageSize",
     "table/neu-table.component.ts#input:pageSizeAriaLabel",
     "table/neu-table.component.ts#input:pageSizeLabel",
+    "table/neu-table.component.ts#input:pageSizeOptions",
+    "table/neu-table.component.ts#input:pagination",
     "table/neu-table.component.ts#input:paginationAriaLabel",
+    "table/neu-table.component.ts#input:paginatorPosition",
     "table/neu-table.component.ts#input:previousPageAriaLabel",
+    "table/neu-table.component.ts#input:removableSort",
+    "table/neu-table.component.ts#input:reorderableColumns",
+    "table/neu-table.component.ts#input:reorderableRows",
+    "table/neu-table.component.ts#input:resetPageOnSort",
+    "table/neu-table.component.ts#input:resizableColumns",
     "table/neu-table.component.ts#input:resultLabelPlural",
     "table/neu-table.component.ts#input:resultLabelSingular",
+    "table/neu-table.component.ts#input:roundedBorders",
+    "table/neu-table.component.ts#input:rowClass",
+    "table/neu-table.component.ts#input:rowGroupMode",
     "table/neu-table.component.ts#input:rowIdentity",
+    "table/neu-table.component.ts#input:rowReorderable",
+    "table/neu-table.component.ts#input:rowSelectable",
     "table/neu-table.component.ts#input:saveInlineEditLabel",
+    "table/neu-table.component.ts#input:scrollHeight",
+    "table/neu-table.component.ts#input:searchable",
     "table/neu-table.component.ts#input:searchAriaLabel",
     "table/neu-table.component.ts#input:searchParam",
     "table/neu-table.component.ts#input:searchPlaceholder",
+    "table/neu-table.component.ts#input:selectable",
     "table/neu-table.component.ts#input:selectAllAriaLabel",
+    "table/neu-table.component.ts#input:selectAllScope",
+    "table/neu-table.component.ts#input:selectionActions",
     "table/neu-table.component.ts#input:selectionMode",
     "table/neu-table.component.ts#input:selectionSummaryLabel",
+    "table/neu-table.component.ts#input:selectOnRowClick",
     "table/neu-table.component.ts#input:selectRowAriaLabel",
+    "table/neu-table.component.ts#input:serverSide",
     "table/neu-table.component.ts#input:showCurrentPageReport",
     "table/neu-table.component.ts#input:showFirstLastPageButtons",
     "table/neu-table.component.ts#input:showJumpToPageDropdown",
     "table/neu-table.component.ts#input:showJumpToPageInput",
     "table/neu-table.component.ts#input:showPageLinks",
+    "table/neu-table.component.ts#input:showRowNumbers",
     "table/neu-table.component.ts#input:skeletonRows",
+    "table/neu-table.component.ts#input:sort",
+    "table/neu-table.component.ts#input:sortable",
     "table/neu-table.component.ts#input:sortDirParam",
     "table/neu-table.component.ts#input:sortParam",
+    "table/neu-table.component.ts#input:stateKey",
+    "table/neu-table.component.ts#input:stateStorage",
+    "table/neu-table.component.ts#input:stickyHeader",
+    "table/neu-table.component.ts#input:stripedRows",
+    "table/neu-table.component.ts#input:tableAriaLabel",
+    "table/neu-table.component.ts#input:title",
     "table/neu-table.component.ts#input:toolbarExtraRef",
+    "table/neu-table.component.ts#input:totalItems",
     "table/neu-table.component.ts#input:unselectRowAriaLabel",
     "table/neu-table.component.ts#input:useUrlState",
+    "table/neu-table.component.ts#input:virtualScroll",
     "table/neu-table.component.ts#input:virtualScrollAppendOnly",
     "table/neu-table.component.ts#input:virtualScrollAutoSize",
     "table/neu-table.component.ts#input:virtualScrollDelay",
@@ -3566,21 +3044,60 @@
     "table/neu-table.component.ts#input:virtualScrollResizeDelay",
     "table/neu-table.component.ts#input:virtualScrollStep",
     "table/neu-table.component.ts#input:virtualScrollVisibleItems",
+    "table/neu-table.component.ts#output:actionClick",
+    "table/neu-table.component.ts#output:cellEditCancel",
+    "table/neu-table.component.ts#output:cellEditCommit",
+    "table/neu-table.component.ts#output:cellEditInit",
+    "table/neu-table.component.ts#output:columnReorder",
+    "table/neu-table.component.ts#output:columnResize",
+    "table/neu-table.component.ts#output:contextMenuSelect",
+    "table/neu-table.component.ts#output:contextMenuSelectionChange",
+    "table/neu-table.component.ts#output:editingCellChange",
+    "table/neu-table.component.ts#output:editingRowKeysChange",
+    "table/neu-table.component.ts#output:editValidationError",
+    "table/neu-table.component.ts#output:expandedGroupKeysChange",
+    "table/neu-table.component.ts#output:expandedRowKeysChange",
+    "table/neu-table.component.ts#output:groupCollapse",
+    "table/neu-table.component.ts#output:groupExpand",
+    "table/neu-table.component.ts#output:lazyRequest",
+    "table/neu-table.component.ts#output:pageChange",
+    "table/neu-table.component.ts#output:rowClick",
+    "table/neu-table.component.ts#output:rowCollapse",
+    "table/neu-table.component.ts#output:rowDblClick",
+    "table/neu-table.component.ts#output:rowEditCancel",
+    "table/neu-table.component.ts#output:rowEditInit",
+    "table/neu-table.component.ts#output:rowEditSave",
+    "table/neu-table.component.ts#output:rowExpand",
+    "table/neu-table.component.ts#output:rowSelect",
+    "table/neu-table.component.ts#output:rowUnselect",
+    "table/neu-table.component.ts#output:searchChange",
+    "table/neu-table.component.ts#output:selectAllChange",
+    "table/neu-table.component.ts#output:selectionActionClick",
+    "table/neu-table.component.ts#output:serverStateChange",
+    "table/neu-table.component.ts#output:sortChange",
+    "table/neu-table.component.ts#output:stateRestore",
+    "table/neu-table.component.ts#output:stateSave",
+    "table/neu-table.component.ts#output:virtualScrollEvent",
     "textarea/neu-textarea.component.ts#input:maxlength",
     "tooltip/neu-tooltip.component.ts#input:text",
     "tooltip/neu-tooltip.component.ts#input:tooltipId",
     "tree-table/neu-tree-table.component.ts#input:allFilterOptionLabel",
+    "tree-table/neu-tree-table.component.ts#input:bordered",
     "tree-table/neu-tree-table.component.ts#input:cancelInlineEditLabel",
     "tree-table/neu-tree-table.component.ts#input:clearFilterLabel",
     "tree-table/neu-tree-table.component.ts#input:clearSearchAriaLabel",
     "tree-table/neu-tree-table.component.ts#input:clearSelectionLabel",
     "tree-table/neu-tree-table.component.ts#input:collapseLabel",
+    "tree-table/neu-tree-table.component.ts#input:columnChooser",
     "tree-table/neu-tree-table.component.ts#input:columnChooserLabel",
+    "tree-table/neu-tree-table.component.ts#input:density",
     "tree-table/neu-tree-table.component.ts#input:emptyMessage",
     "tree-table/neu-tree-table.component.ts#input:emptyStateTemplate",
+    "tree-table/neu-tree-table.component.ts#input:exactMatchable",
     "tree-table/neu-tree-table.component.ts#input:exactMatchLabel",
     "tree-table/neu-tree-table.component.ts#input:expandable",
     "tree-table/neu-tree-table.component.ts#input:expandLabel",
+    "tree-table/neu-tree-table.component.ts#input:expandMode",
     "tree-table/neu-tree-table.component.ts#input:expandRowAriaLabel",
     "tree-table/neu-tree-table.component.ts#input:exportable",
     "tree-table/neu-tree-table.component.ts#input:exportColumns",
@@ -3592,35 +3109,67 @@
     "tree-table/neu-tree-table.component.ts#input:exportXlsxTitle",
     "tree-table/neu-tree-table.component.ts#input:filterAriaPrefix",
     "tree-table/neu-tree-table.component.ts#input:filterPlaceholder",
+    "tree-table/neu-tree-table.component.ts#input:footerRow",
+    "tree-table/neu-tree-table.component.ts#input:groupBy",
     "tree-table/neu-tree-table.component.ts#input:groupHeaderLabel",
+    "tree-table/neu-tree-table.component.ts#input:indentSize",
+    "tree-table/neu-tree-table.component.ts#input:initialLayout",
     "tree-table/neu-tree-table.component.ts#input:inlineEdit",
     "tree-table/neu-tree-table.component.ts#input:inlineEditLabel",
+    "tree-table/neu-tree-table.component.ts#input:loading",
+    "tree-table/neu-tree-table.component.ts#input:multiSort",
     "tree-table/neu-tree-table.component.ts#input:multiSortParam",
     "tree-table/neu-tree-table.component.ts#input:nextPageAriaLabel",
+    "tree-table/neu-tree-table.component.ts#input:nodes",
     "tree-table/neu-tree-table.component.ts#input:ofLabel",
     "tree-table/neu-tree-table.component.ts#input:pageParam",
+    "tree-table/neu-tree-table.component.ts#input:pageSize",
     "tree-table/neu-tree-table.component.ts#input:pageSizeAriaLabel",
     "tree-table/neu-tree-table.component.ts#input:pageSizeLabel",
+    "tree-table/neu-tree-table.component.ts#input:pageSizeOptions",
+    "tree-table/neu-tree-table.component.ts#input:pagination",
     "tree-table/neu-tree-table.component.ts#input:paginationAriaLabel",
     "tree-table/neu-tree-table.component.ts#input:previousPageAriaLabel",
+    "tree-table/neu-tree-table.component.ts#input:reorderableColumns",
+    "tree-table/neu-tree-table.component.ts#input:resizableColumns",
     "tree-table/neu-tree-table.component.ts#input:resultLabelPlural",
     "tree-table/neu-tree-table.component.ts#input:resultLabelSingular",
-    "tree-table/neu-tree-table.component.ts#input:rowKey",
+    "tree-table/neu-tree-table.component.ts#input:roundedBorders",
+    "tree-table/neu-tree-table.component.ts#input:rowClass",
     "tree-table/neu-tree-table.component.ts#input:saveInlineEditLabel",
+    "tree-table/neu-tree-table.component.ts#input:searchable",
     "tree-table/neu-tree-table.component.ts#input:searchAriaLabel",
     "tree-table/neu-tree-table.component.ts#input:searchParam",
     "tree-table/neu-tree-table.component.ts#input:searchPlaceholder",
     "tree-table/neu-tree-table.component.ts#input:selectable",
     "tree-table/neu-tree-table.component.ts#input:selectAllAriaLabel",
+    "tree-table/neu-tree-table.component.ts#input:selectionActions",
     "tree-table/neu-tree-table.component.ts#input:selectionSummaryLabel",
     "tree-table/neu-tree-table.component.ts#input:selectRowAriaLabel",
+    "tree-table/neu-tree-table.component.ts#input:serverSide",
+    "tree-table/neu-tree-table.component.ts#input:showRowNumbers",
     "tree-table/neu-tree-table.component.ts#input:skeletonRows",
+    "tree-table/neu-tree-table.component.ts#input:sortable",
     "tree-table/neu-tree-table.component.ts#input:sortDirParam",
     "tree-table/neu-tree-table.component.ts#input:sortParam",
+    "tree-table/neu-tree-table.component.ts#input:stickyHeader",
+    "tree-table/neu-tree-table.component.ts#input:stripedRows",
+    "tree-table/neu-tree-table.component.ts#input:tableAriaLabel",
+    "tree-table/neu-tree-table.component.ts#input:title",
     "tree-table/neu-tree-table.component.ts#input:toolbarExtraRef",
+    "tree-table/neu-tree-table.component.ts#input:totalItems",
+    "tree-table/neu-tree-table.component.ts#input:treeColumnKey",
     "tree-table/neu-tree-table.component.ts#input:useUrlState",
+    "tree-table/neu-tree-table.component.ts#input:virtualScroll",
     "tree-table/neu-tree-table.component.ts#input:virtualScrollVisibleItems",
+    "tree-table/neu-tree-table.component.ts#output:actionClick",
+    "tree-table/neu-tree-table.component.ts#output:cellEditCommit",
+    "tree-table/neu-tree-table.component.ts#output:columnReorder",
     "tree-table/neu-tree-table.component.ts#output:expansionChange",
+    "tree-table/neu-tree-table.component.ts#output:nodeClick",
+    "tree-table/neu-tree-table.component.ts#output:nodeDblClick",
+    "tree-table/neu-tree-table.component.ts#output:searchChange",
+    "tree-table/neu-tree-table.component.ts#output:selectionActionClick",
     "tree-table/neu-tree-table.component.ts#output:serverStateChange",
     "virtual-list/neu-virtual-list.component.ts#input:index",
     "virtual-list/neu-virtual-list.component.ts#input:item",
@@ -3632,11 +3181,23 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./accordion#NeuAccordionComponent.input:expandedKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./accordion#NeuAccordionComponent.input:initialExpandedKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./accordion#NeuAccordionComponent.input:items",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./accordion#NeuAccordionComponent.input:multiple",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./accordion#NeuAccordionComponent.output:expandedKeysChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5448,6 +5009,14 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./panel#NeuPanelComponent.input:collapsed",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./panel#NeuPanelComponent.input:initialCollapsed",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./password#NeuPasswordComponent.input:dirty",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5968,6 +5537,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./sidebar#NeuSidebarComponent.input:initialCollapsed",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./slider#NeuSliderComponent.input:ariaDescribedBy",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -6204,35 +5777,31 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableBodySectionDirective.input:typeSource",
+      "id": "./table#NeuTableCellDirective.input:columnId",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./table#NeuTableCellEditorDirective.input:columnKey",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./table#NeuTableCellViewDirective.input:columnKey",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./table#NeuTableComponent.input:cellEditValidator",
+      "id": "./table#NeuTableComponent.input:appearance",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableComponent.input:expandMode",
+      "id": "./table#NeuTableComponent.input:dataMode",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableComponent.input:exportOptions",
+      "id": "./table#NeuTableComponent.input:editingOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableComponent.input:filterDisplay",
+      "id": "./table#NeuTableComponent.input:editState",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableComponent.input:filterLabelDisplay",
+      "id": "./table#NeuTableComponent.input:expandedKeys",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.input:expansionOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6240,23 +5809,43 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./table#NeuTableComponent.input:grouping",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.input:groupingOptions",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.input:interactionOptions",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./table#NeuTableComponent.input:labels",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableComponent.input:paginatorOptions",
+      "id": "./table#NeuTableComponent.input:layout",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableComponent.input:rowEditValidator",
+      "id": "./table#NeuTableComponent.input:metadata",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableComponent.input:urlState",
+      "id": "./table#NeuTableComponent.input:paginationOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableComponent.input:urlStateOptions",
+      "id": "./table#NeuTableComponent.input:rowOptions",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.input:selectionOptions",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.input:sortOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6264,15 +5853,67 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./table#NeuTableFilterTemplateDirective.input:columnKey",
+      "id": "./table#NeuTableComponent.output:dataRequest",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:editCancel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:editCommit",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:editStateChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:expandedKeysChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:exportRequest",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:featureError",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:groupingChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:rangeChange",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableComponent.output:rowAction",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./table#NeuTableEditorDirective.input:columnId",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./table#NeuTableManagedRowDirective.input:entry",
+      "id": "./table#NeuTableFilterDirective.input:columnId",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./table#NeuTableFooterDirective.input:columnId",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./table#NeuTableHeaderDirective.input:columnId",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./tabs#NeuTabPanelComponent.input:tabId",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tabs#NeuTabsComponent.input:activeId",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6284,7 +5925,7 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tabs#NeuTabsComponent.input:tabParam",
+      "id": "./tabs#NeuTabsComponent.input:initialActiveId",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6292,7 +5933,7 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tabs#NeuTabsComponent.output:tabChange",
+      "id": "./tabs#NeuTabsComponent.output:activeIdChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6480,11 +6121,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree-select#NeuTreeSelectComponent.input:expandedKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree-select#NeuTreeSelectComponent.input:label",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree-select#NeuTreeSelectComponent.input:multiple",
+      "id": "./tree-select#NeuTreeSelectComponent.input:mode",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6524,6 +6169,26 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree-select#NeuTreeSelectComponent.input:selectionStrategy",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.input:touched",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.input:virtualizationOptions",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./tree-select#NeuTreeSelectComponent.output:childrenRequest",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree-select#NeuTreeSelectComponent.output:cleared",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -6532,15 +6197,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree-select#NeuTreeSelectComponent.output:expandedKeysChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree-select#NeuTreeSelectComponent.output:filter",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpand",
+      "id": "./tree-select#NeuTreeSelectComponent.output:nodeCollapsed",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpansionChange",
+      "id": "./tree-select#NeuTreeSelectComponent.output:nodeExpanded",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6548,27 +6217,35 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree-select#NeuTreeSelectComponent.output:selectionChange",
+      "id": "./tree-select#NeuTreeSelectComponent.output:rangeChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:contextMenu",
+      "id": "./tree-select#NeuTreeSelectComponent.output:touch",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableCellDirective.input:columnId",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:appearance",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:contextMenuNodeDisabled",
+      "id": "./tree-table#NeuTreeTableComponent.input:data",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:contextMenuSelection",
+      "id": "./tree-table#NeuTreeTableComponent.input:dataMode",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:editingRowKeys",
+      "id": "./tree-table#NeuTreeTableComponent.input:editingOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:editMode",
+      "id": "./tree-table#NeuTreeTableComponent.input:editState",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6580,7 +6257,19 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:filterMode",
+      "id": "./tree-table#NeuTreeTableComponent.input:filterOptions",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:hierarchy",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:hierarchyOptions",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:interactionOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6588,7 +6277,11 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:metaKeySelection",
+      "id": "./tree-table#NeuTreeTableComponent.input:layout",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.input:paginationOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6596,7 +6289,7 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:rowEditValidator",
+      "id": "./tree-table#NeuTreeTableComponent.input:rowOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6604,15 +6297,11 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:selectionMode",
+      "id": "./tree-table#NeuTreeTableComponent.input:selectionOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.input:sort",
-      "reason": "multiline-annotated-or-compound-declaration-was-missed"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.input:urlStateOptions",
+      "id": "./tree-table#NeuTreeTableComponent.input:sortOptions",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6620,31 +6309,19 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:cellEditCancel",
+      "id": "./tree-table#NeuTreeTableComponent.output:dataRequest",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:cellEditInit",
+      "id": "./tree-table#NeuTreeTableComponent.output:editCancel",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:columnResize",
+      "id": "./tree-table#NeuTreeTableComponent.output:editCommit",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:contextMenuSelect",
-      "reason": "multiline-annotated-or-compound-declaration-was-missed"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.output:contextMenuSelectionChange",
-      "reason": "multiline-annotated-or-compound-declaration-was-missed"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.output:editingRowKeysChange",
-      "reason": "multiline-annotated-or-compound-declaration-was-missed"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.output:editValidationError",
+      "id": "./tree-table#NeuTreeTableComponent.output:editStateChange",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6652,15 +6329,11 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:lazyRequest",
+      "id": "./tree-table#NeuTreeTableComponent.output:exportRequest",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:nodeSelect",
-      "reason": "multiline-annotated-or-compound-declaration-was-missed"
-    },
-    {
-      "id": "./tree-table#NeuTreeTableComponent.output:nodeUnselect",
+      "id": "./tree-table#NeuTreeTableComponent.output:featureError",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -6668,23 +6341,23 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:rowEditCancel",
+      "id": "./tree-table#NeuTreeTableComponent.output:rangeChange",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:rowEditInit",
+      "id": "./tree-table#NeuTreeTableComponent.output:rowAction",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:rowEditSave",
-      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+      "id": "./tree-table#NeuTreeTableEditorDirective.input:columnId",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree-table#NeuTreeTableComponent.output:sortChange",
-      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+      "id": "./tree-table#NeuTreeTableFooterDirective.input:columnId",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree-table#NeuTreeTableManagedRowDirective.input:context",
+      "id": "./tree-table#NeuTreeTableHeaderDirective.input:columnId",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

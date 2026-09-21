@@ -111,18 +111,18 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     expect(host.tagsSelected).toHaveLength(1);
   });
 
-  it('TreeSelect separates query edits, explicit clear, expansion and lazy requests from CVA writes', async () => {
+  it('TreeSelect separates query edits, explicit clear, expansion and lazy requests from model writes', async () => {
     const root = { value: 'root', label: 'Root', children: [{ value: 'leaf', label: 'Leaf' }] };
     const lazy = { value: 'lazy', label: 'Lazy', lazy: true };
     const f = mount(NeuTreeSelectComponent, { nodes: [root, lazy], clearable: true });
     const c = f.componentInstance;
     const filters = capture(c.filter),
       clears = capture(c.cleared),
-      expansions = capture(c.nodeExpansionChange),
-      requests = capture(c.nodeExpand);
+      expansions = capture(c.expandedKeysChange),
+      requests = capture(c.childrenRequest);
     const opened = capture(c.opened),
       closed = capture(c.closed);
-    c.writeValue(root);
+    c.value.set(root);
     c.query.set('programmatic');
     f.detectChanges();
     expect(filters).toEqual([]);
@@ -137,18 +137,21 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     inputText(search, '');
     expect(filters).toEqual([{ query: 'root' }, { query: '' }]);
     c.toggleExpanded(root, new MouseEvent('click'));
+    f.componentRef.setInput('expandedKeys', ['root']);
+    f.detectChanges();
     c.toggleExpanded(root, new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     c.toggleExpanded(lazy, new MouseEvent('click'));
     expect(expansions).toEqual([
-      { node: root, expanded: true },
-      { node: root, expanded: false },
-      { node: lazy, expanded: true },
+      ['root'],
+      [],
+      ['root', 'lazy'],
     ]);
-    expect(requests).toEqual([lazy]);
+    expect(requests).toEqual([{ requestId: 1, queryRevision: 2, parentKey: 'lazy' }]);
     c.clear(new MouseEvent('click'));
     expect(clears).toHaveLength(1);
-    c.writeValue(null);
-    c.setDisabledState(true);
+    c.value.set(null);
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
     c.clear(new Event('click'));
     c.toggleExpanded(root, new Event('click'));
     inputText(search, 'disabled');
@@ -160,7 +163,8 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     f.detectChanges();
     await f.whenStable();
     expect(closed).toHaveLength(1);
-    c.setDisabledState(false);
+    f.componentRef.setInput('disabled', false);
+    f.detectChanges();
     c.toggle();
     f.detectChanges();
     await f.whenStable();
@@ -556,7 +560,7 @@ describe('H9-A2 overlay and pointer cancellation races', () => {
       root = { value: 'root', label: 'Root', children: [leaf] };
     const f = mount(NeuTreeSelectComponent, { nodes: [root, leaf], searchable: false });
     const c = f.componentInstance;
-    const changes = capture(c.nodeExpansionChange);
+    const changes = capture(c.expandedKeysChange);
     c.toggleExpanded(leaf, new Event('click'));
     expect(changes).toEqual([]);
     c.onTriggerKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
@@ -571,7 +575,7 @@ describe('H9-A2 overlay and pointer cancellation races', () => {
     await f.whenStable();
     const first = document.querySelector<HTMLElement>('[data-neu-tree-select-index="0"]')!;
     first.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
-    expect(changes).toEqual([{ node: root, expanded: true }]);
+    expect(changes).toEqual([['root']]);
     c.close();
     f.destroy();
     await Promise.resolve();
@@ -581,13 +585,15 @@ describe('H9-A2 overlay and pointer cancellation races', () => {
     const lazy = { value: 'lazy', label: 'Lazy', lazy: true };
     const f = mount(NeuTreeSelectComponent, { nodes: [lazy] });
     const c = f.componentInstance;
-    const changes = capture(c.nodeExpansionChange);
-    c.nodeExpand.subscribe(() => f.destroy());
+    const changes = capture(c.expandedKeysChange);
+    c.childrenRequest.subscribe(() => f.destroy());
     c.toggleExpanded(lazy, new Event('click'));
     expect(changes).toEqual([]);
     const second = mount(NeuTreeSelectComponent);
+    second.componentRef.setInput('value', 'lazy');
+    second.detectChanges();
     const cleared = capture(second.componentInstance.cleared);
-    second.componentInstance.selectionChange.subscribe(() => second.destroy());
+    second.componentInstance.value.subscribe(() => second.destroy());
     second.componentInstance.clear(new Event('click'));
     expect(cleared).toEqual([]);
   });

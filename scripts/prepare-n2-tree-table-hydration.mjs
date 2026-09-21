@@ -10,17 +10,9 @@ if (!existsSync(join(dependencies, '@angular/ssr/package.json'))) {
 const fixture = mkdtempSync(join(dirname(dependencies), '.n2-tree-table-hydration-'));
 cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
 cpSync(
-  join(root, 'projects/ui-core/tree-table/next'),
-  join(fixture, 'src/ui-core/tree-table/next'),
+  join(root, 'projects/ui-core/tree-table'),
+  join(fixture, 'src/ui-core/tree-table'),
   { recursive: true, dereference: true },
-);
-cpSync(
-  join(root, 'projects/ui-core/internal/neu-exact-key.ts'),
-  join(fixture, 'src/ui-core/internal/neu-exact-key.ts'),
-);
-cpSync(
-  join(root, 'projects/ui-core/internal/neu-field-value-resolver.ts'),
-  join(fixture, 'src/ui-core/internal/neu-field-value-resolver.ts'),
 );
 for (const file of [
   'neu-tree-table.hierarchy.spec.ts',
@@ -31,7 +23,7 @@ for (const file of [
   'neu-tree-table.renderer.spec.ts',
   'neu-tree-table.performance.spec.ts',
 ]) {
-  rmSync(join(fixture, 'src/ui-core/tree-table/next', file));
+  rmSync(join(fixture, 'src/ui-core/tree-table', file));
 }
 cpSync(
   join(root, 'fixtures/n2-tree-table-hydration.component.ts'),

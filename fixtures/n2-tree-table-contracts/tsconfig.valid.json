@@ -4,5 +4,5 @@
     "noEmit": true,
     "types": []
   },
-  "files": ["./valid.ts"]
+  "files": ["./valid.ts", "./migration-examples.ts"]
 }

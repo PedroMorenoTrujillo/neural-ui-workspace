@@ -1,5 +1,5 @@
 import type { InputSignal } from '@angular/core';
-import type { NeuTableComponent } from '../../projects/ui-core/table/next/public/public-api';
+import type { NeuTableComponent } from '@neural-ui/core/table';
 import { columns, metadata, query, rows, type AccountField, type AccountRow } from './model';
 
 type InputValue<V> = V extends InputSignal<infer T> ? T : never;

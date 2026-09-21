@@ -5,7 +5,7 @@ import type {
   NeuTableFooterDirective,
   NeuTableHeaderDirective,
   NeuTableLoadingDirective,
-} from '../../projects/ui-core/table/next/public/public-api';
+} from '@neural-ui/core/table';
 import type { AccountField, AccountRow } from './model';
 
 type TemplateContext<T> = T extends { readonly template: TemplateRef<infer C> } ? C : never;

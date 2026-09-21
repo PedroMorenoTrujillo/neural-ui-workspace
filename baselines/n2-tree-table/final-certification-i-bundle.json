@@ -1,0 +1,737 @@
+{
+  "checkpoint": "N2-015I",
+  "legacyReference": {
+    "raw": 120496,
+    "gzip": 18411
+  },
+  "method": "Angular-compiled minified ESM; Angular external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "typical": {
+      "size": {
+        "raw": 113229,
+        "gzip": 22764,
+        "brotli": 19247
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4400,
+            "gzip": 1200,
+            "brotli": 1017
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 616,
+            "gzip": 406,
+            "brotli": 359
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2604,
+            "gzip": 1104,
+            "brotli": 969
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 919,
+            "gzip": 490,
+            "brotli": 431
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 4000,
+            "gzip": 1444,
+            "brotli": 1300
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 416
+        }
+      ]
+    },
+    "remote": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "virtual": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "editing": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "row-actions": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "export-csv": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "export-json": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "export-xlsx": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 113229,
+        "gzip": 22764,
+        "brotli": 19247
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4400,
+            "gzip": 1200,
+            "brotli": 1017
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 616,
+            "gzip": 406,
+            "brotli": 359
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2604,
+            "gzip": 1104,
+            "brotli": 969
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 919,
+            "gzip": 490,
+            "brotli": 431
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 4000,
+            "gzip": 1444,
+            "brotli": 1300
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 416
+        }
+      ]
+    },
+    "templates": {
+      "size": {
+        "raw": 113229,
+        "gzip": 22764,
+        "brotli": 19247
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4400,
+            "gzip": 1200,
+            "brotli": 1017
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 616,
+            "gzip": 406,
+            "brotli": 359
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2604,
+            "gzip": 1104,
+            "brotli": 969
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 919,
+            "gzip": 490,
+            "brotli": 431
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 4000,
+            "gzip": 1444,
+            "brotli": 1300
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 416
+        }
+      ]
+    },
+    "nested": {
+      "size": {
+        "raw": 112525,
+        "gzip": 22485,
+        "brotli": 19049
+      },
+      "chunks": [
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+          "size": {
+            "raw": 4372,
+            "gzip": 1185,
+            "brotli": 1003
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+          "size": {
+            "raw": 588,
+            "gzip": 386,
+            "brotli": 341
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+          "size": {
+            "raw": 2576,
+            "gzip": 1097,
+            "brotli": 960
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+          "size": {
+            "raw": 891,
+            "gzip": 471,
+            "brotli": 413
+          }
+        },
+        {
+          "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+          "size": {
+            "raw": 3972,
+            "gzip": 1425,
+            "brotli": 1280
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next-neural-ui-core-tree-table-next-CuIHA7Nf.mjs",
+          "bytesInOutput": 112417
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "chunks": [],
+      "attribution": []
+    }
+  },
+  "packageImports": [
+    "./neural-ui-core-tree-table-next-private-chunk.mjs"
+  ],
+  "optionalChunks": [
+    {
+      "name": "out/neural-ui-core-tree-table-next-neu-tree-table-active-editor.component.js",
+      "size": {
+        "raw": 4372,
+        "gzip": 1185,
+        "brotli": 1003
+      }
+    },
+    {
+      "name": "out/neural-ui-core-tree-table-next-neu-tree-table-csv-export.js",
+      "size": {
+        "raw": 588,
+        "gzip": 386,
+        "brotli": 341
+      }
+    },
+    {
+      "name": "out/neural-ui-core-tree-table-next-neu-tree-table-export.js",
+      "size": {
+        "raw": 2576,
+        "gzip": 1097,
+        "brotli": 960
+      }
+    },
+    {
+      "name": "out/neural-ui-core-tree-table-next-neu-tree-table-json-export.js",
+      "size": {
+        "raw": 891,
+        "gzip": 471,
+        "brotli": 413
+      }
+    },
+    {
+      "name": "out/neural-ui-core-tree-table-next-neu-tree-table-xlsx-export.js",
+      "size": {
+        "raw": 3972,
+        "gzip": 1425,
+        "brotli": 1280
+      }
+    }
+  ],
+  "forbiddenGraphTokens": []
+}

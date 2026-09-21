@@ -14,7 +14,7 @@ const result = spawnSync(
     'ui-core',
     '--watch=false',
     '--no-coverage',
-    '--include=tree-table/next/neu-tree-table.interaction-performance.spec.ts',
+    '--include=tree-table/neu-tree-table.interaction-performance.spec.ts',
     '--runner-config=vitest.n2-tree-table.config.mts',
   ],
   { cwd: root, encoding: 'utf8', env: { ...process.env, NO_COLOR: '1' } },

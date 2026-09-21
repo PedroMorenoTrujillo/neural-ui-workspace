@@ -1,5 +1,7 @@
 # Table architecture
 
+> Historical H5/Table 1.x architecture record. It is not an active Neural UI 2 API recommendation. The final product entrypoints are `@neural-ui/core/table` and `@neural-ui/core/tree-table`; `@neural-ui/core/table-core` was physically removed in N2-011K. See `N2-TABLE2-FINAL-ARCH.md` and `N2-TREETABLE2-FINAL-ARCH.md` for the authoritative designs.
+
 ## Status and scope
 
 This document is the H5-B1 source of truth for the public `NeuTableComponent` facade. H5-B1 redesigns the consumer API without removing Table behavior: related scalar configuration is grouped, presentation templates become declarative, and implementation methods are no longer represented as supported consumer API.

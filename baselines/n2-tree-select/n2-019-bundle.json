@@ -1,0 +1,96 @@
+{
+  "checkpoint": "N2-019",
+  "capturedAt": "2026-09-21T11:32:59.851Z",
+  "method": "Angular-compiled minified consumer ESM; Angular/RxJS external; gzip 9; Brotli 11",
+  "legacyBasic": {
+    "size": {
+      "raw": 45602,
+      "gzip": 9399,
+      "brotli": 8312
+    },
+    "attribution": [
+      {
+        "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-select.mjs",
+        "bytesInOutput": 36648
+      },
+      {
+        "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+        "bytesInOutput": 7917
+      },
+      {
+        "path": "dist/neural-ui/core/fesm2022/neural-ui-core-option-api.mjs",
+        "bytesInOutput": 611
+      },
+      {
+        "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+        "bytesInOutput": 389
+      }
+    ]
+  },
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 55865,
+        "gzip": 11190,
+        "brotli": 9905
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-select.mjs",
+          "bytesInOutput": 46908
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 7920
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-option-api.mjs",
+          "bytesInOutput": 611
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 389
+        }
+      ]
+    },
+    "facade": {
+      "size": {
+        "raw": 56169,
+        "gzip": 11295,
+        "brotli": 10016
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-select.mjs",
+          "bytesInOutput": 47130
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 7920
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-option-api.mjs",
+          "bytesInOutput": 611
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 389
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "rawDeltaPercent": 22.50559186000614,
+    "gzipDeltaPercent": 19.05521864028088,
+    "brotliDeltaPercent": 19.165062560153995
+  },
+  "forbiddenGraphTokens": []
+}

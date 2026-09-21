@@ -35,13 +35,58 @@ describe('NeuPanelComponent', () => {
     expect(button.getAttribute('aria-expanded')).toBe('true');
     button.click();
     fixture.detectChanges();
-    expect(component.collapsed()).toBe(true);
+    expect(component.effectiveCollapsed()).toBe(true);
     expect(emitted).toHaveBeenCalledWith(true);
     expect(button.textContent).toContain('Open');
     expect(button.getAttribute('aria-expanded')).toBe('false');
     expect(fixture.nativeElement.querySelector('.neu-panel__body')).toBeNull();
     component.toggle();
-    expect(component.collapsed()).toBe(false);
+    expect(component.effectiveCollapsed()).toBe(false);
+  });
+
+  it('keeps controlled collapse applied until the parent accepts the proposal', () => {
+    const component = fixture.componentInstance;
+    const changes: boolean[] = [];
+    fixture.componentRef.setInput('header', 'Settings');
+    fixture.componentRef.setInput('collapsible', true);
+    fixture.componentRef.setInput('collapsed', false);
+    component.collapsedChange.subscribe((value) => changes.push(value));
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(changes).toEqual([true]);
+    expect(component.effectiveCollapsed()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.neu-panel__body')).toBeTruthy();
+    fixture.componentRef.setInput('collapsed', true);
+    fixture.detectChanges();
+    expect(component.effectiveCollapsed()).toBe(true);
+    expect(changes).toEqual([true]);
+  });
+
+  it('reads initialCollapsed once in uncontrolled mode', () => {
+    fixture.componentRef.setInput('header', 'Settings');
+    fixture.componentRef.setInput('collapsible', true);
+    fixture.componentRef.setInput('initialCollapsed', true);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.effectiveCollapsed()).toBe(true);
+    fixture.componentRef.setInput('initialCollapsed', false);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.effectiveCollapsed()).toBe(true);
+  });
+
+  it('warns once and keeps the initial lifetime mode', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    fixture.componentRef.setInput('header', 'Settings');
+    fixture.componentRef.setInput('collapsible', true);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('collapsed', true);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.effectiveCollapsed()).toBe(false);
+    expect(warning).toHaveBeenCalledOnce();
+    fixture.componentRef.setInput('collapsed', false);
+    fixture.detectChanges();
+    expect(warning).toHaveBeenCalledOnce();
+    warning.mockRestore();
   });
 });
 

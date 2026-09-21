@@ -1,4 +1,4 @@
-import type { NeuTableSelection } from '../../projects/ui-core/table/next/public/public-api';
+import type { NeuTableSelection } from '@neural-ui/core/table';
 import type { AccountField } from './model';
 
 export const selectedKeys: NeuTableSelection<number, AccountField> = {

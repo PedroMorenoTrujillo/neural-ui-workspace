@@ -4,7 +4,7 @@ import type {
   NeuTreeTableHierarchy,
   NeuTreeTableKey,
   NeuTreeTableQuery,
-} from '../../projects/ui-core/tree-table/next/public/public-api';
+} from '@neural-ui/core/tree-table';
 
 interface Row {
   readonly id: number;

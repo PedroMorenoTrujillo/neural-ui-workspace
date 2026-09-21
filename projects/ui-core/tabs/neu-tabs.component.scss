@@ -62,6 +62,17 @@
   &--active {
     color: var(--neu-primary-dark, var(--neu-primary));
     font-weight: 600;
+
+    &::after {
+      position: absolute;
+      inset-inline: 0;
+      bottom: -1.5px;
+      height: 2.5px;
+      border-radius: var(--neu-radius-full) var(--neu-radius-full) 0 0;
+      background: var(--neu-primary);
+      content: '';
+      pointer-events: none;
+    }
   }
 
   &--disabled {
@@ -91,19 +102,6 @@
   .neu-tabs__tab-badge {
     color: var(--neu-primary-light, var(--neu-primary));
   }
-}
-
-// ---- Indicador deslizante / Sliding indicator (animated underline) ----
-.neu-tabs__indicator {
-  position: absolute;
-  bottom: -1.5px;
-  height: 2.5px;
-  background: var(--neu-primary);
-  border-radius: var(--neu-radius-full) var(--neu-radius-full) 0 0;
-  transition:
-    left var(--neu-transition-slow),
-    width var(--neu-transition-slow);
-  pointer-events: none;
 }
 
 // ---- Paneles / Panels ----

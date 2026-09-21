@@ -1,5 +1,5 @@
 import { H9EventContractComponent } from './h9-event-contract.component';
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
@@ -7,10 +7,13 @@ import { NeuDialogComponent } from '@neural-ui/core/modal';
 import {
   NeuTableComponent,
   NeuTableColumn,
-  NeuTableQueryState,
-  NeuTableServerState,
 } from '@neural-ui/core/table';
-import { NeuTreeTableComponent, NeuTreeTableNode } from '@neural-ui/core/tree-table';
+import {
+  NeuTreeLoadedRelation,
+  NeuTreeTableColumn,
+  NeuTreeTableComponent,
+  NeuTreeTableHierarchy,
+} from '@neural-ui/core/tree-table';
 import { NeuNavComponent, NeuNavItem } from '@neural-ui/core/nav';
 
 @Component({
@@ -34,16 +37,17 @@ import { NeuNavComponent, NeuNavItem } from '@neural-ui/core/nav';
     <neu-checkbox [formControl]="accepted" label="Accepted"></neu-checkbox>
     <neu-dialog [open]="false" title="Compatibility dialog"></neu-dialog>
     <neu-table
-      [columns]="columns"
+      [columns]="tableColumns"
       [data]="rows"
-      [pagination]="false"
-      [serverSide]="true"
-      [lazyLoadOnInit]="true"
-      [query]="query()"
-      (queryChange)="query.set($event)"
-      (serverStateChange)="onLegacyServerState($event)"
+      [rowKey]="rowKey"
     ></neu-table>
-    <neu-tree-table [nodes]="treeNodes" [columns]="columns" [pagination]="false"></neu-tree-table>
+    <neu-tree-table
+      [data]="rows"
+      [hierarchy]="hierarchy"
+      [columns]="treeColumns"
+      [rowKey]="rowKey"
+      [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
+    ></neu-tree-table>
   `,
 })
 export class AppComponent {
@@ -52,13 +56,37 @@ export class AppComponent {
   readonly navItems: NeuNavItem[] = [
     { id: 'home', label: 'Home', icon: 'lucideHouse', route: '/' },
   ];
-  readonly columns: NeuTableColumn[] = [{ key: 'name', header: 'Name' }];
-  readonly rows = [{ id: 1, name: 'Neural UI' }];
-  readonly treeNodes: NeuTreeTableNode[] = [
-    { id: 'root', label: 'Neural UI', children: [{ id: 'child', label: 'TreeTable' }] },
+  readonly rows: readonly CompatibilityRow[] = [
+    { id: 1, name: 'Neural UI' },
+    { id: 2, name: 'TreeTable' },
   ];
-  readonly query = signal<NeuTableQueryState | undefined>(undefined);
-  onLegacyServerState(state: NeuTableServerState): void {
-    void state.page;
-  }
+  readonly tableColumns: readonly NeuTableColumn<CompatibilityRow, CompatibilityField>[] = [
+    { id: 'name', header: 'Name', field: 'name' },
+  ];
+  readonly treeColumns: readonly NeuTreeTableColumn<CompatibilityRow, CompatibilityField>[] = [
+    { id: 'name', header: 'Name', field: 'name' },
+  ];
+  readonly rowKey = (row: CompatibilityRow): number => row.id;
+  readonly hierarchy: NeuTreeTableHierarchy<number> = {
+    hierarchyRevision: 1,
+    queryRevision: 0,
+    roots: loaded([1]),
+    children: [{ parentKey: 1, relation: loaded([2]) }],
+  };
 }
+
+interface CompatibilityRow {
+  readonly id: number;
+  readonly name: string;
+}
+
+type CompatibilityField = 'name';
+
+const loaded = (keys: readonly number[]): NeuTreeLoadedRelation<number> => ({
+  status: 'loaded',
+  keys,
+  relationRevision: 1,
+  appliedRequestId: null,
+  total: keys.length,
+  completeness: 'complete',
+});

@@ -11,7 +11,7 @@ import {
   targetTypes,
 } from './n2-tree-table-contract-manifest.mjs';
 
-const root = 'projects/ui-core/tree-table/next';
+const root = 'projects/ui-core/tree-table';
 const typesPath = `${root}/public/neu-tree-table.types.ts`;
 const directivesPath = `${root}/public/neu-tree-table-template-contracts.ts`;
 const componentPath = `${root}/public/neu-tree-table.component-contract.ts`;

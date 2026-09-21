@@ -6,8 +6,10 @@ import {
   effect,
   inject,
   input,
+  isDevMode,
   output,
   HostListener,
+  signal,
   viewChild,
 } from '@angular/core';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
@@ -85,7 +87,7 @@ function unlockDocumentScroll(document: Document): void {
       [neuFocusTrap]="isOpen() && !persistent()"
       [class.neu-sidebar--open]="isOpen()"
       [class.neu-sidebar--persistent]="persistent()"
-      [class.neu-sidebar--collapsed]="collapsed()"
+      [class.neu-sidebar--collapsed]="effectiveCollapsed()"
       [class.neu-sidebar--right]="side() === 'right'"
       [attr.role]="persistent() ? 'navigation' : 'dialog'"
       [attr.aria-modal]="persistent() ? null : 'true'"
@@ -166,13 +168,26 @@ export class NeuSidebarComponent {
    * Modo colapsado: el sidebar muestra solo iconos (icon-only en desktop).
    * Útil para sidebars persistentes en modo compact / Collapsed mode: sidebar shows only icons.
    */
-  collapsed = input<boolean>(false);
+  /** Applied controlled collapse state. Undefined selects uncontrolled mode. */
+  readonly collapsed = input<boolean | undefined>(undefined);
+  /** One-time collapse seed for uncontrolled instances. */
+  readonly initialCollapsed = input(false);
 
   /** Emite cuando el usuario cierra el sidebar (overlay click o botón) / Emits when the user closes the sidebar (overlay click or button) */
   closeRequested = output<void>();
 
   /** Emite cuando el estado collapsed cambia / Emits when collapsed state changes */
-  collapsedChange = output<boolean>();
+  readonly collapsedChange = output<boolean>();
+  private collapseControlMode: 'controlled' | 'uncontrolled' | null = null;
+  private collapseModeWarningEmitted = false;
+  private uncontrolledCollapsed = false;
+  private readonly uncontrolledCollapsedRevision = signal(0);
+  readonly effectiveCollapsed = computed(() => {
+    this.uncontrolledCollapsedRevision();
+    return this.ensureCollapseControlMode() === 'controlled'
+      ? (this.collapsed() ?? false)
+      : this.uncontrolledCollapsed;
+  });
 
   /** Signal reactivo: true si el sidebar debe mostrarse / Reactive signal: true if the sidebar should be shown */
   readonly isOpen = computed(() => {
@@ -245,8 +260,25 @@ export class NeuSidebarComponent {
 
   /** Alterna el estado collapsed / Toggles collapsed state */
   toggleCollapsed(): void {
-    const newState = !this.collapsed();
-    this.collapsedChange.emit(newState);
+    const proposal = !this.effectiveCollapsed();
+    if (this.ensureCollapseControlMode() === 'uncontrolled') {
+      this.uncontrolledCollapsed = proposal;
+      this.uncontrolledCollapsedRevision.update((revision) => revision + 1);
+    }
+    this.collapsedChange.emit(proposal);
+  }
+
+  private ensureCollapseControlMode(): 'controlled' | 'uncontrolled' {
+    const requested = this.collapsed() === undefined ? 'uncontrolled' : 'controlled';
+    if (this.collapseControlMode === null) {
+      this.collapseControlMode = requested;
+      if (requested === 'uncontrolled') this.uncontrolledCollapsed = this.initialCollapsed();
+    } else if (this.collapseControlMode !== requested && !this.collapseModeWarningEmitted) {
+      this.collapseModeWarningEmitted = true;
+      if (isDevMode())
+        console.warn('NeuSidebar cannot switch between controlled and uncontrolled collapse.');
+    }
+    return this.collapseControlMode;
   }
 
   /** Mueve el foco al primer elemento focusable / Moves focus to first focusable element */

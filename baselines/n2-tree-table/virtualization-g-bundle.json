@@ -1,0 +1,102 @@
+{
+  "checkpoint": "N2-015G",
+  "legacyReference": {
+    "raw": 120496,
+    "gzip": 18411
+  },
+  "method": "Angular-compiled minified ESM; Angular external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 99991,
+        "gzip": 20053,
+        "brotli": 16950
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 99954
+        }
+      ]
+    },
+    "virtual-client": {
+      "size": {
+        "raw": 99991,
+        "gzip": 20053,
+        "brotli": 16950
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 99954
+        }
+      ]
+    },
+    "virtual-remote-loaded": {
+      "size": {
+        "raw": 99991,
+        "gzip": 20053,
+        "brotli": 16950
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 99954
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 100492,
+        "gzip": 20228,
+        "brotli": 17087
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 100374
+        }
+      ]
+    },
+    "templates": {
+      "size": {
+        "raw": 100492,
+        "gzip": 20228,
+        "brotli": 17087
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 100374
+        }
+      ]
+    },
+    "nested": {
+      "size": {
+        "raw": 99991,
+        "gzip": 20053,
+        "brotli": 16950
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 99954
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": [
+    "@angular/common",
+    "@angular/core"
+  ],
+  "optionalChunks": [],
+  "forbiddenGraphTokens": []
+}

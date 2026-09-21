@@ -1,4 +1,4 @@
-import { Component, afterNextRender, signal } from '@angular/core';
+import { Component, afterNextRender, signal, viewChild } from '@angular/core';
 import {
   NeuTreeTableCellDirective,
   NeuTreeTableComponent,
@@ -11,6 +11,9 @@ import {
   type NeuTreeTableColumn,
   type NeuTreeTableDataRequest,
   type NeuTreeTableExpandedKeysChange,
+  type NeuTreeTableEditChange,
+  type NeuTreeTableEditState,
+  type NeuTreeTableExportOutcome,
   type NeuTreeTableFeatureError,
   type NeuTreeTableHierarchy,
   type NeuTreeTableFilterOptions,
@@ -18,7 +21,7 @@ import {
   type NeuTreeTableSelection,
   type NeuTreeTableSelectionChange,
   type NeuTreeTableSelectionOptions,
-} from './ui-core/tree-table/next/public/public-api';
+} from './ui-core/tree-table/public/public-api';
 
 interface Row {
   readonly id: string;
@@ -57,6 +60,11 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
     field: 'name',
     sort: { field: 'name' },
     filter: { field: 'name', rules: ['contains'], defaultRule: 'contains' },
+    edit: {
+      field: 'name',
+      read: (row) => row.name,
+      write: (row, value) => ({ ...row, name: String(value) }),
+    },
   },
   { id: 'value', header: 'Value', field: 'value', sort: { field: 'value' } },
 ];
@@ -78,6 +86,8 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
     <output id="n2-tree-events">{{ events() }}</output>
     <output id="n2-tree-diagnostic-events">{{ diagnosticEvents() }}</output>
     <output id="n2-tree-remote-events">{{ remoteEvents() }}</output>
+    <output id="n2-tree-virtual-events">{{ virtualEvents() }}</output>
+    <output id="n2-tree-export-outcome">{{ exportOutcome() }}</output>
     <button id="n2-tree-parent-write" type="button" (click)="reconstruct()">Parent write</button>
     <button id="n2-tree-accept" type="button" (click)="acceptExpansion.set(true)">Accept</button>
     <button id="n2-tree-accept-selection" type="button" (click)="acceptSelection.set(true)">
@@ -91,9 +101,11 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
     <button id="n2-tree-expand-remote" type="button" (click)="remoteExpandedKeys.set(['a'])">
       Expand remote
     </button>
+    <button id="n2-tree-export-json" type="button" (click)="runExport()">Export JSON</button>
 
     <section id="n2-tree-primary">
       <neu-tree-table
+        #primaryTable
         [data]="data()"
         [hierarchy]="appliedHierarchy()"
         [columns]="appliedColumns()"
@@ -103,12 +115,21 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
         [selectionOptions]="selectionOptions"
         [query]="query()"
         [filterOptions]="filterOptions"
+        [editState]="editState()"
+        [editingOptions]="{ mode: 'cell', validate: validateEdit }"
+        [interactionOptions]="{
+          navigation: 'row',
+          wrapFocus: false,
+          announceChanges: false,
+          contextMenuAction: true
+        }"
+        [exportOptions]="{ formats: ['csv', 'json', 'xlsx'], defaultFilename: 'tree-table.json' }"
         [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
         (queryChange)="recordQuery($event)"
         (expandedKeysChange)="recordExpansion($event)"
         (selectionChange)="recordSelection($event)"
         (layoutChange)="record('layoutChange')"
-        (editStateChange)="record('editStateChange')"
+        (editStateChange)="recordEdit($event)"
         (dataRequest)="record('dataRequest')"
         (rangeChange)="record('rangeChange')"
         (rowAction)="record('rowAction')"
@@ -222,6 +243,19 @@ const columns: readonly NeuTreeTableColumn<Row, Field>[] = [
         (dataRequest)="recordRemote('child', $event)"
       />
     </section>
+
+    <section id="n2-tree-virtual">
+      <neu-tree-table
+        [data]="virtualData"
+        [hierarchy]="virtualHierarchy"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
+        [virtualizationOptions]="{ enabled: true, itemSize: 32, overscan: 2 }"
+        (rangeChange)="recordVirtualRange($event)"
+        (dataRequest)="recordVirtualRequest()"
+      />
+    </section>
   `,
 })
 export class N2TreeTableHydrationComponent {
@@ -229,6 +263,8 @@ export class N2TreeTableHydrationComponent {
   readonly events = signal('[]');
   readonly diagnosticEvents = signal('[]');
   readonly remoteEvents = signal('[]');
+  readonly virtualEvents = signal('[]');
+  readonly exportOutcome = signal('');
   readonly data = signal(rows);
   readonly appliedHierarchy = signal(hierarchy);
   readonly appliedColumns = signal(columns);
@@ -241,6 +277,8 @@ export class N2TreeTableHydrationComponent {
     sort: [],
     filters: null,
   });
+  readonly editState = signal<NeuTreeTableEditState<string>>({ kind: 'none' });
+  readonly primaryTable = viewChild<NeuTreeTableComponent<Row, string, Field>>('primaryTable');
   readonly acceptExpansion = signal(false);
   readonly acceptSelection = signal(false);
   readonly acceptQuery = signal(false);
@@ -264,6 +302,8 @@ export class N2TreeTableHydrationComponent {
   readonly columns = columns;
   readonly unloadedData = [rows[0]!];
   readonly rowKey = (row: Row) => row.id;
+  readonly validateEdit = ({ draft }: { readonly draft: Readonly<Partial<Row>> }) =>
+    draft.name === '' ? 'Name is required' : true;
   readonly emptyHierarchy: NeuTreeTableHierarchy<string> = {
     ...hierarchy,
     roots: loaded([]),
@@ -313,6 +353,17 @@ export class N2TreeTableHydrationComponent {
     },
     children: [],
   };
+  readonly virtualData: readonly Row[] = Array.from({ length: 200 }, (_, index) => ({
+    id: `virtual-${index}`,
+    name: `Virtual ${index}`,
+    value: index,
+  }));
+  readonly virtualHierarchy: NeuTreeTableHierarchy<string> = {
+    hierarchyRevision: 1,
+    queryRevision: 0,
+    roots: loaded(this.virtualData.map((row) => row.id)),
+    children: [],
+  };
 
   constructor() {
     afterNextRender(() => this.ready.set(true));
@@ -338,6 +389,21 @@ export class N2TreeTableHydrationComponent {
     if (this.acceptQuery()) this.query.set(query);
   }
 
+  recordEdit(change: NeuTreeTableEditChange<string>): void {
+    this.record(`editStateChange:${change.source}`);
+    this.editState.set(change.next);
+  }
+
+  async runExport(): Promise<void> {
+    const outcome: NeuTreeTableExportOutcome | undefined = await this.primaryTable()?.export({
+      format: 'json',
+      scope: 'visible',
+      filename: 'tree-table.json',
+      query: this.query(),
+    });
+    this.exportOutcome.set(JSON.stringify(outcome));
+  }
+
   recordDiagnostic(error: NeuTreeTableFeatureError): void {
     const code = error.feature === 'hierarchy' ? error.code : error.feature;
     const current = JSON.parse(this.diagnosticEvents()) as string[];
@@ -356,6 +422,24 @@ export class N2TreeTableHydrationComponent {
         `${source}:${request.kind}:${request.reason}:${request.requestId}${target}`,
       ]),
     );
+  }
+
+  recordVirtualRange(change: {
+    readonly reason: string;
+    readonly visible: { readonly start: number; readonly end: number };
+  }): void {
+    const current = JSON.parse(this.virtualEvents()) as string[];
+    this.virtualEvents.set(
+      JSON.stringify([
+        ...current,
+        `${change.reason}:${change.visible.start}-${change.visible.end}`,
+      ]),
+    );
+  }
+
+  recordVirtualRequest(): void {
+    const current = JSON.parse(this.virtualEvents()) as string[];
+    this.virtualEvents.set(JSON.stringify([...current, 'dataRequest']));
   }
 
   reconstruct(): void {

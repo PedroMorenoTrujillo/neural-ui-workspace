@@ -8,7 +8,7 @@ import type {
   NeuTreeTableHierarchy,
   NeuTreeTableQuery,
   NeuTreeTableSelection,
-} from '../../projects/ui-core/tree-table/next/public/public-api';
+} from '@neural-ui/core/tree-table';
 
 interface Row {
   readonly id: number;

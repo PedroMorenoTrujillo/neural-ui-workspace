@@ -130,7 +130,7 @@ try {
     cpSync(join(root, path), join(temporary, path), { recursive: true, dereference: true });
   }
   cpSync(
-    join(temporary, 'projects/ui-core/table/next'),
+    join(temporary, 'projects/ui-core/table'),
     join(temporary, 'projects/ui-core/table-next'),
     {
       recursive: true,
@@ -171,18 +171,18 @@ try {
   const sourceComponent = await bundle({
     sourceMode: true,
     source:
-      "import{NeuTableComponent}from'./projects/ui-core/table/next/public/neu-table.component-contract';export{NeuTableComponent};",
+      "import{NeuTableComponent}from'./projects/ui-core/table/public/neu-table.component-contract';export{NeuTableComponent};",
   });
   const isolated = {
     virtualizationEngine: await bundle({
       sourceMode: true,
       source:
-        "export * from './projects/ui-core/table/next/internal/virtualization/neu-table-virtualization';",
+        "export * from './projects/ui-core/table/internal/virtualization/neu-table-virtualization';",
     }),
     remoteCoordinator: await bundle({
       sourceMode: true,
       source:
-        "export * from './projects/ui-core/table/next/internal/remote/neu-table-remote-coordinator';",
+        "export * from './projects/ui-core/table/internal/remote/neu-table-remote-coordinator';",
     }),
   };
   const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));

@@ -1,0 +1,34 @@
+{
+  "checkpoint": "N2-019",
+  "capturedAt": "2026-09-21T11:20:45.221Z",
+  "metrics": {
+    "projection1k": {
+      "p50Ms": 0.6484590000000026,
+      "p95Ms": 5.424499999999966
+    },
+    "projection10k": {
+      "p50Ms": 6.458292000000029,
+      "p95Ms": 7.941332999999986
+    },
+    "filter10k": {
+      "p50Ms": 0.2685000000000173,
+      "p95Ms": 0.5737500000000182
+    },
+    "propagated10k": {
+      "p50Ms": 4.591417000000092,
+      "p95Ms": 7.307624999999916
+    },
+    "virtualWindow10k": {
+      "p50Ms": 0.0019170000000485743,
+      "p95Ms": 0.0025829999999587017
+    },
+    "lifecycle50": {
+      "p50Ms": 1.4514169999999922,
+      "p95Ms": 3.61854100000005
+    },
+    "maxMountedNodes": 12,
+    "productEffects": 0,
+    "persistentTimers": 0,
+    "perNodeListeners": 0
+  }
+}

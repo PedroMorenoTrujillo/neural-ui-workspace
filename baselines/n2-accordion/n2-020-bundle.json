@@ -1,0 +1,84 @@
+{
+  "checkpoint": "N2-020",
+  "capturedAt": "2026-09-21T12:37:26.031Z",
+  "method": "Angular-compiled minified consumer ESM; Angular/RxJS external; gzip 9; Brotli 11",
+  "legacyBasic": {
+    "size": {
+      "raw": 15430,
+      "gzip": 3653,
+      "brotli": 3148
+    },
+    "attribution": [
+      {
+        "path": "dist/neural-ui/core/fesm2022/neural-ui-core-accordion.mjs",
+        "bytesInOutput": 10900
+      },
+      {
+        "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+        "bytesInOutput": 4177
+      },
+      {
+        "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+        "bytesInOutput": 317
+      }
+    ]
+  },
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 19771,
+        "gzip": 4549,
+        "brotli": 3941
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-accordion.mjs",
+          "bytesInOutput": 15240
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4177
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 318
+        }
+      ]
+    },
+    "facade": {
+      "size": {
+        "raw": 19965,
+        "gzip": 4633,
+        "brotli": 4020
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-accordion.mjs",
+          "bytesInOutput": 15356
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4177
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 318
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "rawDeltaPercent": 28.133506156837328,
+    "gzipDeltaPercent": 24.52778538187791,
+    "brotliDeltaPercent": 25.190597204574335
+  },
+  "forbiddenGraphTokens": []
+}
