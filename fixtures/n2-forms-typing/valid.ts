@@ -33,9 +33,12 @@ import {
   localTime,
   type CivilDate,
   type CivilDateRange,
+  type CivilMonth,
+  type CivilYear,
   type LocalDateTime,
   type LocalTime,
   type NeuDateMode,
+  type NeuDatePresentation,
   type NeuDateValue,
 } from '@neural-ui/core/date-input';
 
@@ -56,6 +59,8 @@ declare const timeInput: NeuDateInputComponent<'time'>;
 declare const dateTimeInput: NeuDateInputComponent<'datetime'>;
 declare const multipleInput: NeuDateInputComponent<'multiple'>;
 declare const rangeInput: NeuDateInputComponent<'range'>;
+declare const monthInput: NeuDateInputComponent<'month'>;
+declare const yearInput: NeuDateInputComponent<'year'>;
 interface Person {
   readonly id: number;
   readonly name: string;
@@ -104,6 +109,12 @@ dateTimeInput.value.set(localDateTime('2026-03-29T02:30'));
 dateTimeInput.value.set(null);
 multipleInput.value.set([civilDate('2026-03-29')]);
 rangeInput.value.set({ start: civilDate('2026-03-29'), end: null });
+monthInput.value.set({ year: 2026, month: 9 });
+monthInput.value.set(null);
+yearInput.value.set({ year: 2026 });
+yearInput.value.set(null);
+const overlayPresentation: NeuDatePresentation = 'overlay';
+const inlinePresentation: NeuDatePresentation = 'inline';
 selectSingle.value.set(1);
 selectSingle.value.set(null);
 selectMultiple.value.set([1, 2] as const);
@@ -159,6 +170,8 @@ const officialTime: FormValueControl<LocalTime | null> = timeInput;
 const officialDateTime: FormValueControl<LocalDateTime | null> = dateTimeInput;
 const officialMultiple: FormValueControl<readonly CivilDate[]> = multipleInput;
 const officialRange: FormValueControl<CivilDateRange> = rangeInput;
+const officialMonth: FormValueControl<CivilMonth | null> = monthInput;
+const officialYear: FormValueControl<CivilYear | null> = yearInput;
 const officialSelectSingle: FormValueControl<number | null> = selectSingle;
 const officialSelectMultiple: FormValueControl<readonly number[]> = selectMultiple;
 const officialAutocompleteStrict: FormValueControl<number | null> = autocompleteStrict;

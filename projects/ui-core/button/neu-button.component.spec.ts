@@ -17,22 +17,25 @@ describe('NeuButtonComponent', () => {
     expect(fixture.nativeElement.classList).toContain('neu-button');
   });
 
-  it('should have primary variant class by default', () => {
+  it('should have brand tone and solid variant classes by default', () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
     fixture.detectChanges();
-    expect(fixture.nativeElement.classList).toContain('neu-button--primary');
+    expect(fixture.nativeElement.classList).toContain('neu-button--brand');
+    expect(fixture.nativeElement.classList).toContain('neu-button--solid');
   });
 
-  it('should apply secondary variant class', () => {
+  it('should apply neutral solid treatment', () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
-    fixture.componentRef.setInput('variant', 'secondary');
+    fixture.componentRef.setInput('tone', 'neutral');
+    fixture.componentRef.setInput('variant', 'solid');
     fixture.detectChanges();
-    expect(fixture.nativeElement.classList).toContain('neu-button--secondary');
+    expect(fixture.nativeElement.classList).toContain('neu-button--neutral');
+    expect(fixture.nativeElement.classList).toContain('neu-button--solid');
   });
 
-  it('should apply danger variant class', () => {
+  it('should apply danger tone class', () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
-    fixture.componentRef.setInput('variant', 'danger');
+    fixture.componentRef.setInput('tone', 'danger');
     fixture.detectChanges();
     expect(fixture.nativeElement.classList).toContain('neu-button--danger');
   });

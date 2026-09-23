@@ -2,6 +2,7 @@ import {
   Component,
   DestroyRef,
   ViewEncapsulation,
+  afterRenderEffect,
   computed,
   effect,
   inject,
@@ -14,56 +15,25 @@ import {
 } from '@angular/core';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { DOCUMENT } from '@angular/common';
-import { NeuUrlStateService } from '@neural-ui/core/url-state';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-
-let overlayScrollLockCount = 0;
-let previousHtmlOverflow = '';
-let previousBodyOverflow = '';
-
-function lockDocumentScroll(document: Document): void {
-  if (overlayScrollLockCount === 0) {
-    previousHtmlOverflow = document.documentElement.style.overflow;
-    previousBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-  }
-
-  overlayScrollLockCount += 1;
-}
-
-function unlockDocumentScroll(document: Document): void {
-  if (overlayScrollLockCount === 0) {
-    return;
-  }
-
-  overlayScrollLockCount -= 1;
-
-  if (overlayScrollLockCount === 0) {
-    document.documentElement.style.overflow = previousHtmlOverflow;
-    document.body.style.overflow = previousBodyOverflow;
-  }
-}
+import { NeuCloseRequest } from '@neural-ui/core/foundation';
+import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
 
 /**
  * NeuralUI Sidebar Component
  *
- * El estado abierto/cerrado se gestiona automáticamente desde la URL / The open/closed state is automatically managed from the URL
- * via NeuUrlStateService (?menu=open por defecto). / via NeuUrlStateService (?menu=open by default).
+ * El estado overlay es aplicado y controlado por el consumer. / Overlay state is consumer-controlled.
  *
  * Modos:
  *   - overlay (default): panel flotante sobre el contenido con backdrop / floating panel above content with backdrop
  *   - persistent: sidebar fijo integrado en el layout (desktop) / fixed sidebar integrated in the layout (desktop)
  *
  * Uso:
- *   <neu-sidebar urlParam="menu" [persistent]="isDesktop()">
+ *   <neu-sidebar [open]="menuOpen()" [persistent]="isDesktop()" (closeRequested)="closeMenu($event)">
  *     <span neu-sidebar-header>Mi App</span>
  *     <nav>...</nav>
  *     <div neu-sidebar-footer>...</div>
  *   </neu-sidebar>
- *
- * Abrir desde cualquier parte: / Open from anywhere:
- *   inject(NeuUrlStateService).setParam('menu', 'open', false);
  */
 @Component({
   selector: 'neu-sidebar',
@@ -75,7 +45,7 @@ function unlockDocumentScroll(document: Document): void {
       <div
         class="neu-sidebar__overlay"
         [class.neu-sidebar__overlay--visible]="isOpen()"
-        (click)="close()"
+        (click)="requestClose('outside', $event)"
         aria-hidden="true"
       ></div>
     }
@@ -104,7 +74,7 @@ function unlockDocumentScroll(document: Document): void {
           @if (!persistent()) {
             <button
               class="neu-sidebar__close"
-              (click)="close()"
+              (click)="requestClose('action', $event)"
               [attr.aria-label]="closeLabel()"
               type="button"
             >
@@ -131,16 +101,17 @@ export class NeuSidebarComponent {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
-  private readonly urlState = inject(NeuUrlStateService);
-  private readonly openParam = computed(() => this.urlState.getParam(this.urlParam()));
+  private readonly overlayStack = inject(InternalNeuOverlayStack);
   private previousActiveElement: HTMLElement | null = null;
   private pendingFocusTimer: ReturnType<typeof setTimeout> | null = null;
+  private lifecycleInitialized = false;
+  private eventOverlayActive = false;
 
   /** Posición del sidebar: izquierda o derecha de la pantalla / Sidebar position: left or right of the screen */
   side = input<'left' | 'right'>('left');
 
-  /** QueryParam que controla el estado. Default: 'menu' (?menu=open) / QueryParam that controls the state. Default: 'menu' (?menu=open) */
-  urlParam = input<string>('menu');
+  /** Applied overlay state. Ignored for persistent presentation without being rewritten. */
+  readonly open = input(false);
 
   /**
    * Modo persistente: el sidebar está siempre visible como parte del layout.
@@ -173,8 +144,11 @@ export class NeuSidebarComponent {
   /** One-time collapse seed for uncontrolled instances. */
   readonly initialCollapsed = input(false);
 
-  /** Emite cuando el usuario cierra el sidebar (overlay click o botón) / Emits when the user closes the sidebar (overlay click or button) */
-  closeRequested = output<void>();
+  /** Consumer-owned close intent. Applied `open` remains unchanged. */
+  readonly closeRequested = output<NeuCloseRequest>();
+  /** Completed post-init overlay lifecycle. */
+  readonly opened = output<void>();
+  readonly closed = output<void>();
 
   /** Emite cuando el estado collapsed cambia / Emits when collapsed state changes */
   readonly collapsedChange = output<boolean>();
@@ -189,30 +163,19 @@ export class NeuSidebarComponent {
       : this.uncontrolledCollapsed;
   });
 
-  /** Signal reactivo: true si el sidebar debe mostrarse / Reactive signal: true if the sidebar should be shown */
-  readonly isOpen = computed(() => {
-    if (this.persistent()) return true;
-    return this.openParam()() === 'open';
-  });
+  readonly overlayActive = computed(() => !this.persistent() && this.open());
+  /** Persistent mode is always presented; overlay mode follows the applied input. */
+  readonly isOpen = computed(() => this.persistent() || this.open());
 
   constructor() {
     effect((onCleanup) => {
-      const shouldLockScroll = !this.persistent() && this.isOpen();
-
-      if (!shouldLockScroll) {
-        return;
-      }
-
-      lockDocumentScroll(this.document);
-
-      onCleanup(() => {
-        unlockDocumentScroll(this.document);
-      });
+      if (!this.overlayActive()) return;
+      onCleanup(this.overlayStack.activate(this, 0));
     });
 
     // Focus management: save previous element and move focus to sidebar when opening in drawer mode
     effect(() => {
-      const isOpenNow = this.isOpen();
+      const isOpenNow = this.overlayActive();
       const isPersistent = this.persistent();
       const shouldRestoreFocus = this.restoreFocus();
 
@@ -241,21 +204,23 @@ export class NeuSidebarComponent {
       }
     });
 
+    afterRenderEffect(() => {
+      const active = this.overlayActive();
+      if (!this.lifecycleInitialized) {
+        this.lifecycleInitialized = true;
+        this.eventOverlayActive = active;
+        return;
+      }
+      if (active === this.eventOverlayActive) return;
+      this.eventOverlayActive = active;
+      if (active) this.opened.emit();
+      else this.closed.emit();
+    });
+
     this.destroyRef.onDestroy(() => {
       this.cancelPendingFocus();
       this.previousActiveElement = null;
     });
-  }
-
-  /** Abre el sidebar — añade ?{urlParam}=open a la URL / Opens the sidebar — adds ?{urlParam}=open to the URL */
-  open(replaceUrl = false): void {
-    this.urlState.setParam(this.urlParam(), 'open', replaceUrl);
-  }
-
-  /** Cierra el sidebar — elimina el parámetro de la URL / Closes the sidebar — removes the URL parameter */
-  close(): void {
-    this.urlState.setParam(this.urlParam(), null, true);
-    this.closeRequested.emit();
   }
 
   /** Alterna el estado collapsed / Toggles collapsed state */
@@ -310,6 +275,12 @@ export class NeuSidebarComponent {
     );
   }
 
+  protected requestClose(reason: 'escape' | 'outside' | 'action', originalEvent: Event): void {
+    if (this.destroyRef.destroyed || !this.overlayActive() || !this.overlayStack.isTop(this))
+      return;
+    this.closeRequested.emit({ reason, originalEvent });
+  }
+
   /** Focus trap: cicla entre elementos focusables con Tab/Shift+Tab / Focus trap cycling */
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
@@ -317,9 +288,10 @@ export class NeuSidebarComponent {
       return;
     }
 
-    if (event.key === 'Escape' && this.closeOnEscape()) {
+    if (event.key === 'Escape' && this.closeOnEscape() && this.overlayStack.isTop(this)) {
       event.preventDefault();
-      this.close();
+      event.stopPropagation();
+      this.requestClose('escape', event);
       return;
     }
   }

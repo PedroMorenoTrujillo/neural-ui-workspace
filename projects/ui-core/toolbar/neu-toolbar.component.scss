@@ -21,7 +21,7 @@
     min-height: 64px;
   }
 
-  &--primary {
+  &--solid.neu-toolbar--brand {
     background: var(--neu-toolbar-primary-bg, var(--neu-primary-dark, var(--neu-primary)));
     color: var(--neu-toolbar-primary-color, #fff);
 
@@ -35,7 +35,17 @@
     }
   }
 
-  &--none {
+  &--solid.neu-toolbar--neutral {
+    background: var(--neu-text);
+    color: var(--neu-surface);
+  }
+
+  &--soft.neu-toolbar--brand {
+    background: var(--neu-primary-soft);
+    color: var(--neu-primary-dark, var(--neu-primary));
+  }
+
+  &--ghost {
     background: transparent;
   }
 
@@ -63,6 +73,25 @@
     &.neu-toolbar--lg {
       padding: 8px 12px;
       min-height: 50px;
+    }
+  }
+
+  &--density-relaxed {
+    gap: 12px;
+
+    &.neu-toolbar--sm {
+      padding: 8px 16px;
+      min-height: 46px;
+    }
+
+    &.neu-toolbar--md {
+      padding: 12px 20px;
+      min-height: 60px;
+    }
+
+    &.neu-toolbar--lg {
+      padding: 16px 24px;
+      min-height: 72px;
     }
   }
 

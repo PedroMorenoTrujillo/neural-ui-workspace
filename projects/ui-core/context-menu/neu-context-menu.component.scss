@@ -34,7 +34,7 @@
   width: 100%;
   box-sizing: border-box;
   padding: 7px 10px;
-  border-radius: var(--neu-radius-md, 8px);
+  border-radius: var(--neu-radius, 8px);
   font-size: 0.875rem;
   color: var(--neu-context-menu-color, var(--neu-text, var(--neu-text-primary, #111827)));
   cursor: pointer;
@@ -51,7 +51,7 @@
   }
 
   &.neu-context-menu__item--danger {
-    color: var(--neu-color-danger, #ef4444);
+    color: var(--neu-error, #ef4444);
   }
 
   &.neu-context-menu__item--disabled {

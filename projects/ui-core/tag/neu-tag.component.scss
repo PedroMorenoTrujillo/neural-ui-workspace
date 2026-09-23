@@ -19,10 +19,14 @@
   &--rounded { border-radius: var(--neu-radius-full); }
   &--success { background: var(--neu-success-bg); color: var(--neu-success-text); }
   &--info { background: var(--neu-info-bg); color: var(--neu-info-text); }
-  &--warn { background: var(--neu-warning-bg); color: var(--neu-warning-text); }
+  &--warning { background: var(--neu-warning-bg); color: var(--neu-warning-text); }
   &--danger { background: var(--neu-error-bg); color: var(--neu-error-text); }
-  &--secondary { color: var(--neu-text-muted); border-color: var(--neu-border); }
-  &--contrast { background: var(--neu-text); color: var(--neu-surface); }
+  &--neutral { color: var(--neu-text-muted); border-color: var(--neu-border); }
+  &--solid { background: var(--neu-text); color: var(--neu-surface); }
+  &--solid.neu-tag--success { background: var(--neu-success); color: var(--neu-surface); }
+  &--solid.neu-tag--info { background: var(--neu-info); color: var(--neu-surface); }
+  &--solid.neu-tag--warning { background: var(--neu-warning); color: var(--neu-text); }
+  &--solid.neu-tag--danger { background: var(--neu-error); color: var(--neu-surface); }
 }
 
 .neu-tag__icon { flex: 0 0 auto; }

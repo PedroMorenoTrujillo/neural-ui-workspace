@@ -118,7 +118,7 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
     '[class.neu-autocomplete--has-value]': '!!_query()',
     '[class.neu-autocomplete--sm]': 'size() === "sm"',
     '[class.neu-autocomplete--lg]': 'size() === "lg"',
-    '[class.neu-autocomplete--filled]': 'variant() === "filled"',
+    '[class.neu-autocomplete--solid]': 'variant() === "solid"',
     '[class.neu-autocomplete--fluid]': 'fluid()',
     '[style.--neu-autocomplete-option-height]': 'effectiveVirtualScrollItemSize() + "px"',
   },
@@ -457,7 +457,7 @@ export class NeuAutocompleteComponent<
   readonly clearable = input(true);
   readonly floatingLabel = input(false);
   readonly size = input<NeuAutocompleteSize>('md');
-  readonly variant = input<NeuAutocompleteVariant>('outlined');
+  readonly variant = input<NeuAutocompleteVariant>('outline');
   readonly fluid = input(false);
   readonly scrollHeight = input('240px');
 

@@ -18,7 +18,7 @@ import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuInitialTemporalState } from '@neural-ui/core/internal';
 
 export type NeuCalendarView = 'month' | 'week';
-export type NeuCalendarEventVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuCalendarEventTone = 'brand' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface NeuCalendarEvent {
   /** Stable event identifier. / Identificador estable del evento. */
@@ -36,7 +36,7 @@ export interface NeuCalendarEvent {
   /** Uses the localized all-day label instead of a time. / Usa la etiqueta localizada de día completo en lugar de una hora. */
   allDay?: boolean;
   /** Semantic colour applied to the event. / Color semántico aplicado al evento. */
-  variant?: NeuCalendarEventVariant;
+  tone?: NeuCalendarEventTone;
 }
 export type NeuCalendarEventView = 'month' | 'week' | 'agenda';
 
@@ -215,7 +215,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                       class="neu-calendar__event neu-calendar__event--compact"
                       [class]="
                         'neu-calendar__event neu-calendar__event--compact neu-calendar__event--' +
-                        (event.variant || 'default')
+                        (event.tone || 'brand')
                       "
                       [attr.title]="eventTooltip(event)"
                       [attr.aria-label]="eventTooltip(event)"
@@ -283,7 +283,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                       type="button"
                       class="neu-calendar__event"
                       [class]="
-                        'neu-calendar__event neu-calendar__event--' + (event.variant || 'default')
+                        'neu-calendar__event neu-calendar__event--' + (event.tone || 'brand')
                       "
                       [attr.title]="eventTooltip(event)"
                       [attr.aria-label]="eventTooltip(event)"
@@ -333,7 +333,7 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
               <button
                 type="button"
                 class="neu-calendar__agenda-event neu-calendar__event neu-calendar__event--{{
-                  event.variant || 'default'
+                  event.tone || 'brand'
                 }}"
                 [attr.title]="eventTooltip(event)"
                 [attr.aria-label]="eventTooltip(event)"
@@ -390,8 +390,6 @@ export class NeuCalendarComponent {
 
   /** Emits the active date after navigation or direct day selection. */
   readonly selectedDateChange = output<Date>();
-  /** Emits the active date after navigation or direct day selection. */
-  readonly dateSelect = output<Date>();
   /** Emits the opened event after synchronizing the built-in agenda with its start date. */
   readonly eventClick = output<NeuCalendarEvent>();
 
@@ -530,10 +528,7 @@ export class NeuCalendarComponent {
   selectDate(date: Date): void {
     const nextDate = startOfDay(date);
     this._selectedDate.set(nextDate);
-    // `selectedDateChange` is the canonical proposal. `dateSelect` is retained
-    // as the established compatibility event for this same user transition.
     this.selectedDateChange.emit(nextDate);
-    this.dateSelect.emit(nextDate);
   }
 
   protected openDay(date: Date): void {

@@ -65,7 +65,9 @@ Este ledger enumera toda unidad pública afectada por los contratos N2 auditados
 | APPROVED TARGET | `rangeChange` | `valueChange` del model range | MERGE | un canal del dato | Sí | `(rangeChange)`→`(valueChange)` | N2-006 |
 | APPROVED TARGET | `viewChange` | `viewChange` navegación | KEEP | no es valor | No | conservar listener | N2-006 |
 | APPROVED TARGET | `opened`, `closed`, `cleared` | lifecycle/lifecycle/domain | KEEP | semánticas vigentes | No | conservar timing documentado | N2-006/N2-022 |
-| NEEDS REVIEW | navegación month/year sin valor period | modos period tipados | ADD | P2 independiente | No ahora | no implementar hasta N2-025 | N2-025 |
+| APPROVED TARGET | navegación month/year sin valor period | `mode='month'` → `CivilMonth\|null`; `mode='year'` → `CivilYear\|null` | ADD | selección civil de período, distinta de navegación | Sí de tipo | usar valores estructurados y límites por unidad | N2-025 |
+| APPROVED TARGET | picker solo en overlay | `presentation: 'overlay'\|'inline'` | ADD | presentación independiente de `NeuDateValue<M>` | No | inline conserva el mismo FormValueControl; `opened/closed` solo overlay | N2-025 |
+| APPROVED TARGET | sin numeración de semanas | `showWeekNumbers: boolean` (default `false`) | ADD | ISO-8601 visual solo en day-grid | No | ningún valor/selección de semana; touchUI fuera de scope | N2-025 |
 
 ## Select, Multiselect, Autocomplete, Listbox, Toggle y Tags
 
@@ -171,6 +173,7 @@ Este ledger enumera toda unidad pública afectada por los contratos N2 auditados
 | APPROVED TARGET | Panel collapsed interno | `collapsed` + `collapsedChange` | CHANGE | estado controlable | Sí | aplicar proposal | N2-021 |
 | APPROVED TARGET | Fieldset collapsed controlado | misma convención collapsed/proposal | KEEP | ya encaja | No | conservar | N2-021 |
 | APPROVED TARGET | Sidebar collapsed/persistencia implícita | `collapsed` + `collapsedChange`, adapter externo | CHANGE | owner explícito | Sí | mover URL/storage fuera | N2-021 |
+| APPROVED TARGET | Sidebar `urlParam` + `open()`/`close()` ownership | `[open]` aplicado + `closeRequested`; `opened`/`closed` lifecycle | CHANGE | overlay controlled-only; URL/storage externos | Sí | parent adapta URL y acepta/rechaza intención | N2-022 |
 | APPROVED TARGET | Dialog/BottomSheet `closed` como request | `closeRequested` | RENAME | intención puede rechazarse | Sí | renombrar listener | N2-022 |
 | APPROVED TARGET | Dialog/BottomSheet `hidden` como detach final | `closed` lifecycle | RENAME | convención temporal | Sí | `(hidden)`→`(closed)` | N2-022 |
 | APPROVED TARGET | lifecycle `opened` en overlays | `opened` tras attach | KEEP | semántica correcta | No | conservar | N2-022 |

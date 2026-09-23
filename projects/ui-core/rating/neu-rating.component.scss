@@ -54,6 +54,30 @@
   &:disabled {
     cursor: default;
   }
+
+  &--half {
+    position: relative;
+    width: 16px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 0;
+
+    .neu-rating__icon {
+      position: absolute;
+      flex: none;
+      width: 28px;
+      height: 28px;
+      max-width: none;
+    }
+  }
+
+  &--first-half .neu-rating__icon {
+    left: 2px;
+  }
+
+  &--second-half .neu-rating__icon {
+    right: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -39,7 +39,7 @@ export interface NeuNavItem {
   /** Ítems hijo (nivel 2). Cada hijo puede tener sus propios `children` (nivel 3). / Child items (level 2). Each child can have its own `children` (level 3). */
   children?: NeuNavItem[];
   badge?: string;
-  badgeVariant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
+  badgeTone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info';
   disabled?: boolean;
 }
 
@@ -100,7 +100,7 @@ export interface NeuNavItem {
                   @if (item.badge) {
                     <span
                       class="neu-nav__item-badge neu-nav__item-badge--{{
-                        item.badgeVariant ?? 'default'
+                        item.badgeTone ?? 'neutral'
                       }}"
                       >{{ item.badge }}</span
                     >
@@ -144,7 +144,7 @@ export interface NeuNavItem {
                             @if (child.badge) {
                               <span
                                 class="neu-nav__item-badge neu-nav__item-badge--{{
-                                  child.badgeVariant ?? 'default'
+                                  child.badgeTone ?? 'neutral'
                                 }}"
                                 >{{ child.badge }}</span
                               >
@@ -209,7 +209,7 @@ export interface NeuNavItem {
                                     @if (grand.badge) {
                                       <span
                                         class="neu-nav__item-badge neu-nav__item-badge--{{
-                                          grand.badgeVariant ?? 'default'
+                                          grand.badgeTone ?? 'neutral'
                                         }}"
                                         >{{ grand.badge }}</span
                                       >
@@ -241,7 +241,7 @@ export interface NeuNavItem {
                           @if (child.badge) {
                             <span
                               class="neu-nav__item-badge neu-nav__item-badge--{{
-                                child.badgeVariant ?? 'default'
+                                child.badgeTone ?? 'neutral'
                               }}"
                               >{{ child.badge }}</span
                             >
@@ -274,7 +274,7 @@ export interface NeuNavItem {
                           @if (child.badge) {
                             <span
                               class="neu-nav__item-badge neu-nav__item-badge--{{
-                                child.badgeVariant ?? 'default'
+                                child.badgeTone ?? 'neutral'
                               }}"
                               >{{ child.badge }}</span
                             >
@@ -308,7 +308,7 @@ export interface NeuNavItem {
                 @if (item.badge) {
                   <span
                     class="neu-nav__item-badge neu-nav__item-badge--{{
-                      item.badgeVariant ?? 'default'
+                      item.badgeTone ?? 'neutral'
                     }}"
                     >{{ item.badge }}</span
                   >
@@ -343,7 +343,7 @@ export interface NeuNavItem {
                 @if (item.badge) {
                   <span
                     class="neu-nav__item-badge neu-nav__item-badge--{{
-                      item.badgeVariant ?? 'default'
+                      item.badgeTone ?? 'neutral'
                     }}"
                     >{{ item.badge }}</span
                   >

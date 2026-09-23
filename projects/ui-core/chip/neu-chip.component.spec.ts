@@ -4,7 +4,7 @@ import { NeuChipComponent } from './neu-chip.component';
 
 @Component({
   template: `<neu-chip
-    [variant]="variant"
+    [tone]="tone"
     [size]="size"
     [selected]="selected"
     [removable]="removable"
@@ -16,7 +16,7 @@ import { NeuChipComponent } from './neu-chip.component';
   imports: [NeuChipComponent],
 })
 class TestHostComponent {
-  variant: any = 'default';
+  tone: any = 'neutral';
   size: any = 'md';
   selected = false;
   removable = false;
@@ -45,12 +45,12 @@ describe('NeuChipComponent', () => {
     expect(comp).toBeInstanceOf(NeuChipComponent);
   });
 
-  it('should apply variant class', async () => {
+  it('should apply tone class', async () => {
     const df = TestBed.createComponent(NeuChipComponent);
-    df.componentRef.setInput('variant', 'primary');
+    df.componentRef.setInput('tone', 'brand');
     df.detectChanges();
     await df.whenStable();
-    expect(df.nativeElement.className).toContain('neu-chip--primary');
+    expect(df.nativeElement.className).toContain('neu-chip--brand');
   });
 
   it('should apply selected class when selected', async () => {

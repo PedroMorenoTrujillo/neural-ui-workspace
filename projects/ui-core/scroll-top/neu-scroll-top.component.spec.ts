@@ -102,6 +102,26 @@ describe('NeuScrollTopComponent', () => {
     expect(local.nativeElement.querySelector('button')?.getAttribute('aria-label')).toBe('Scroll to top');
   });
 
+  it('registers at most one parent scroll listener and removes it on destroy', async () => {
+    @Component({
+      imports: [NeuScrollTopComponent],
+      template: '<div><neu-scroll-top target="parent" /></div>',
+    })
+    class ParentHost {}
+
+    const local = TestBed.createComponent(ParentHost);
+    const parent = local.nativeElement.querySelector('div') as HTMLElement;
+    const add = vi.spyOn(parent, 'addEventListener');
+    const remove = vi.spyOn(parent, 'removeEventListener');
+    local.detectChanges();
+    await local.whenStable();
+    expect(add.mock.calls.filter(([event]) => event === 'scroll')).toHaveLength(1);
+    local.destroy();
+    expect(remove.mock.calls.filter(([event]) => event === 'scroll')).toHaveLength(1);
+    add.mockRestore();
+    remove.mockRestore();
+  });
+
   it('keeps programmatic scrolling and rebinding inert on the server', async () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({

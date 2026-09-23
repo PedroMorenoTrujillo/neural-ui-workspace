@@ -2,14 +2,9 @@ import {
   Component,
   ViewEncapsulation,
   computed,
-  effect,
-  inject,
   input,
   output,
-  signal,
-  untracked,
 } from '@angular/core';
-import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export interface NeuFilterChip {
   /** Identificador único del filtro / Unique filter identifier */
@@ -61,8 +56,8 @@ export interface NeuFilterChip {
   styleUrl: './neu-filter-bar.component.scss',
 })
 export class NeuFilterBarComponent {
-  /** Lista inicial de filtros / Initial filter chips list */
-  readonly filters = input<NeuFilterChip[]>([]);
+  /** Applied filter chips owned by the consumer. */
+  readonly filters = input<readonly NeuFilterChip[]>([]);
 
   /** Muestra el botón "Limpiar todo" cuando hay activos / Shows "Clear all" when any active */
   readonly clearable = input<boolean>(true);
@@ -79,8 +74,7 @@ export class NeuFilterBarComponent {
   /** Emitido con los chips activos al cambiar / Emitted with active chips on change */
   readonly filterChange = output<NeuFilterChip[]>();
 
-  private readonly _id = inject(NeuIdGenerator).getId('neu-filter-bar-');
-  protected readonly _chips = signal<NeuFilterChip[]>([]);
+  protected readonly _chips = computed(() => this.filters());
 
   protected readonly _hasActive = computed(() => this._chips().some((c) => c.active));
 
@@ -89,31 +83,24 @@ export class NeuFilterBarComponent {
     'neu-filter-bar--multi': this.multi(),
   }));
 
-  constructor() {
-    effect(() => {
-      const src = this.filters();
-      untracked(() => this._chips.set(src.map((f) => ({ ...f }))));
-    });
-  }
-
   toggle(chip: NeuFilterChip): void {
-    this._chips.update((chips) => {
-      if (this.multi()) {
-        return chips.map((c) => (c.key === chip.key ? { ...c, active: !c.active } : c));
-      }
-      return chips.map((c) => ({ ...c, active: c.key === chip.key ? !c.active : false }));
-    });
-    this.filterChange.emit(this._chips().filter((c) => c.active));
+    if (!this.filters().some((current) => current.key === chip.key)) return;
+    const next = this.filters().map((current) => this.multi()
+      ? (current.key === chip.key ? { ...current, active: !current.active } : current)
+      : { ...current, active: current.key === chip.key ? !current.active : false });
+    this.filterChange.emit(next.filter((current) => current.active));
   }
 
   clearAll(): void {
-    this._chips.update((chips) => chips.map((c) => ({ ...c, active: false })));
+    if (!this._hasActive()) return;
     this.filterChange.emit([]);
   }
 
-  /** Activa chips por sus keys programáticamente / Activate chips by keys programmatically */
-  setActive(keys: string[]): void {
-    this._chips.update((chips) => chips.map((c) => ({ ...c, active: keys.includes(c.key) })));
-    this.filterChange.emit(this._chips().filter((c) => c.active));
+  /** Propose activating chips by key; the consumer applies the result via `filters`. */
+  setActive(keys: readonly string[]): void {
+    const wanted = new Set(keys);
+    const next = this.filters().filter((current) => wanted.has(current.key))
+      .map((current) => ({ ...current, active: true }));
+    this.filterChange.emit(next);
   }
 }

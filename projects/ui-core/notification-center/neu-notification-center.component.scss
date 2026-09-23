@@ -106,11 +106,11 @@
   border-radius: var(--neu-radius-sm, 4px);
 
   &:hover {
-    background: var(--neu-color-primary-alpha, rgb(14 165 233 / 0.1));
+    background: var(--neu-primary-alpha, rgb(14 165 233 / 0.1));
   }
 
   &:focus-visible {
-    outline: 2px solid var(--neu-focus-ring-color, var(--neu-color-primary, #0ea5e9));
+    outline: 2px solid var(--neu-focus-ring-color, var(--neu-primary, #0ea5e9));
     outline-offset: 2px;
   }
 }
@@ -156,7 +156,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--neu-color-primary, #0ea5e9);
+    background: var(--neu-primary, #0ea5e9);
   }
 }
 
@@ -211,7 +211,7 @@
 
   &:focus-visible {
     opacity: 1;
-    outline: 2px solid var(--neu-focus-ring-color, var(--neu-color-primary, #0ea5e9));
+    outline: 2px solid var(--neu-focus-ring-color, var(--neu-primary, #0ea5e9));
     outline-offset: 1px;
   }
 }

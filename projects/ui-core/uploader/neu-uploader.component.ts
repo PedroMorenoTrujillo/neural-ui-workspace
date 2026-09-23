@@ -109,7 +109,7 @@ export type {
             <button
               neu-button
               type="button"
-              variant="primary"
+              tone="brand" variant="solid"
               size="sm"
               [disabled]="isInteractionBlocked()"
               (click)="openFilePicker(); $event.stopPropagation()"
@@ -120,7 +120,7 @@ export type {
               <button
                 neu-button
                 type="button"
-                variant="outline"
+                tone="brand" variant="outline"
                 size="sm"
                 [disabled]="isInteractionBlocked()"
                 (click)="clearFiles($event)"
@@ -134,7 +134,7 @@ export type {
         <button
           neu-button
           type="button"
-          variant="primary"
+          tone="brand" variant="solid"
           size="sm"
           icon="lucideUpload"
           class="neu-uploader__picker-trigger"

@@ -26,8 +26,10 @@ writeFileSync(
   `import {provideZonelessChangeDetection} from '@angular/core';
 import {bootstrapApplication,provideClientHydration} from '@angular/platform-browser';
 import {provideRouter} from '@angular/router';
+import {provideIcons} from '@ng-icons/core';
+import {lucideX} from '@ng-icons/lucide';
 import {N2NavigationHydrationComponent} from './n2-navigation-hydration.component';
-bootstrapApplication(N2NavigationHydrationComponent,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideRouter([])]});\n`,
+bootstrapApplication(N2NavigationHydrationComponent,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideRouter([]),provideIcons({lucideX})]});\n`,
 );
 writeFileSync(
   join(fixture, 'src/main.server.ts'),
@@ -35,8 +37,10 @@ writeFileSync(
 import {bootstrapApplication,provideClientHydration,BootstrapContext} from '@angular/platform-browser';
 import {provideServerRendering} from '@angular/platform-server';
 import {provideRouter} from '@angular/router';
+import {provideIcons} from '@ng-icons/core';
+import {lucideX} from '@ng-icons/lucide';
 import {N2NavigationHydrationComponent} from './n2-navigation-hydration.component';
-export default (context:BootstrapContext) => bootstrapApplication(N2NavigationHydrationComponent,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideServerRendering(),provideRouter([])]},context);\n`,
+export default (context:BootstrapContext) => bootstrapApplication(N2NavigationHydrationComponent,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideServerRendering(),provideRouter([]),provideIcons({lucideX})]},context);\n`,
 );
 writeFileSync(
   join(fixture, 'src/server.ts'),
@@ -46,7 +50,7 @@ import bootstrap from './main.server';
 const dir=new URL('../browser/',import.meta.url),csr=new URL('index.csr.html',dir);
 const document=readFileSync(existsSync(csr)?csr:new URL('index.html',dir),'utf8');
 const html=await renderApplication(bootstrap,{document,url:'http://localhost/',allowedHosts:['localhost']});
-for(const value of ['ngh=','id="n2-tabs-one"','id="n2-tabs-two"','Overview body','id="n2-panel"','Panel body','id="n2-sidebar"','id="n2-tabs-events">0','id="n2-panel-events">0','id="n2-sidebar-events">0']) if(!html.includes(value)) throw new Error('Missing SSR evidence: '+value);
+for(const value of ['ngh=','id="n2-tabs-one"','id="n2-tabs-two"','Overview body','id="n2-panel"','Panel body','id="n2-sidebar"','id="n2-sidebar-overlay"','Overlay navigation','id="n2-tabs-events">0','id="n2-panel-events">0','id="n2-sidebar-events">0','id="n2-sidebar-overlay-requests">0','id="n2-sidebar-opened">0','id="n2-sidebar-closed">0']) if(!html.includes(value)) throw new Error('Missing SSR evidence: '+value);
 const ids=[...html.matchAll(/\\sid="([^"]+)"/g)].map((match)=>match[1]);
 if(new Set(ids).size!==ids.length) throw new Error('SSR emitted duplicate DOM IDs.');
 writeFileSync(new URL('index.html',dir),html);

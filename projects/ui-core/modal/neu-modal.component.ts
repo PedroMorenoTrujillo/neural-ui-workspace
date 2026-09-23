@@ -13,11 +13,14 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { Overlay } from '@angular/cdk/overlay';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { NeuIconComponent } from '@neural-ui/core/icon';
-import { NeuIdGenerator } from '@neural-ui/core/internal';
-import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
+import { InternalNeuOverlayStack, NeuIdGenerator } from '@neural-ui/core/internal';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  NeuCloseRequest,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export type NeuDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type NeuDialogLayout = 'auto' | 'viewport';
@@ -29,7 +32,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
  * Para uso programático, utiliza NeuDialogService.open().
  *
  * Uso declarativo:
- *   <neu-dialog [open]="isOpen()" title="Editar usuario" (closed)="isOpen.set(false)">
+ *   <neu-dialog [open]="isOpen()" title="Editar usuario" (closeRequested)="onClose($event)">
  *     <p>Contenido del diálogo</p>
  *     <div neu-dialog-footer>
  *       <neu-button (click)="save()">Guardar</neu-button>
@@ -109,7 +112,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
                   class="neu-dialog__action neu-dialog__close"
                   type="button"
                   aria-label="Close dialog"
-                  (click)="close()"
+                  (click)="requestClose('action', $event)"
                 >
                   <neu-icon name="lucideX" size="1.125rem" />
                 </button>
@@ -165,8 +168,8 @@ export class NeuDialogComponent {
   restoreLabel = input('Restore dialog');
   resizeLabel = input('Resize dialog');
 
-  /** Emite cuando el usuario cierra el diálogo. / Emits when the user closes the dialog. */
-  closed = output<unknown>();
+  /** Consumer-owned close intent. Applied `open` remains unchanged. */
+  readonly closeRequested = output<NeuCloseRequest>();
 
   /* v8 ignore start -- Angular signal-query factories; modal focus behavior is covered. */
   private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
@@ -175,7 +178,7 @@ export class NeuDialogComponent {
   private readonly document = inject(DOCUMENT);
   private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
-  private readonly scrollStrategy = inject(Overlay).scrollStrategies.block();
+  private readonly overlayStack = inject(InternalNeuOverlayStack);
   private previousActiveElement: HTMLElement | null = null;
   private focusEpoch = 0;
   private offsetX = 0;
@@ -187,10 +190,11 @@ export class NeuDialogComponent {
   protected readonly _uid = inject(NeuIdGenerator).getId('dialog-');
 
   private eventPanelVisible = false;
+  private lifecycleInitialized = false;
   /** Panel mounted in the browser, independently of the trigger source. */
   readonly opened = output<void>();
-  /** Panel unmounted after render; closed remains a request. Silent on destroy. */
-  readonly hidden = output<void>();
+  /** Panel unmounted after an applied post-init transition. Silent on destroy. */
+  readonly closed = output<void>();
   readonly maximizedChange = output<boolean>();
   private readonly internalMaximized = signal(false);
   readonly effectiveMaximized = computed(
@@ -200,15 +204,19 @@ export class NeuDialogComponent {
   constructor() {
     afterRenderEffect(() => {
       const visible = !!this.panelRef();
+      if (!this.lifecycleInitialized) {
+        this.lifecycleInitialized = true;
+        this.eventPanelVisible = visible;
+        return;
+      }
       if (visible === this.eventPanelVisible) return;
       this.eventPanelVisible = visible;
       if (visible) this.opened.emit();
-      else this.hidden.emit();
+      else this.closed.emit();
     });
     effect((onCleanup) => {
       if (!this.open()) return;
-      this.scrollStrategy.enable();
-      onCleanup(() => this.scrollStrategy.disable());
+      onCleanup(this.overlayStack.activate(this));
     });
 
     effect(() => {
@@ -243,15 +251,18 @@ export class NeuDialogComponent {
     });
   }
 
-  close(result?: unknown): void {
+  close(): void {
+    if (this.destroyRef.destroyed) return;
     this.closeRequestEpoch += 1;
-    this.closed.emit(result);
+    this.closeRequested.emit({ reason: 'programmatic-command' });
   }
 
-  requestClose(reason: 'escape' | 'backdrop', event: Event): void {
+  requestClose(reason: 'escape' | 'backdrop' | 'action', event: Event): void {
     if (this.disableClose() || this.destroyRef.destroyed) return;
+    if (!this.overlayStack.isTop(this)) return;
     const closeRequestEpoch = this.closeRequestEpoch;
     if (
+      reason !== 'action' &&
       !allowsNeuOverlayDismissal(this.dismissGuard, {
         source: 'dialog',
         reason,
@@ -261,14 +272,18 @@ export class NeuDialogComponent {
       return;
     if (this.destroyRef.destroyed || !this.open() || closeRequestEpoch !== this.closeRequestEpoch)
       return;
-    this.close();
+    this.closeRequestEpoch += 1;
+    this.closeRequested.emit({
+      reason: reason === 'backdrop' ? 'outside' : reason,
+      originalEvent: event,
+    });
   }
 
   onPanelKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      this.requestClose('escape', event);
-      return;
-    }
+    if (event.key !== 'Escape' || !this.overlayStack.isTop(this)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.requestClose('escape', event);
   }
 
   toggleMaximize(): void {

@@ -121,7 +121,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideBold"
               [iconOnly]="true"
@@ -133,7 +133,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideItalic"
               [iconOnly]="true"
@@ -145,7 +145,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideUnderline"
               [iconOnly]="true"
@@ -164,7 +164,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideList"
               [iconOnly]="true"
@@ -176,7 +176,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideListOrdered"
               [iconOnly]="true"
@@ -195,7 +195,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideLink"
               [iconOnly]="true"
@@ -207,7 +207,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideImage"
               [iconOnly]="true"
@@ -226,7 +226,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideEraser"
               [iconOnly]="true"

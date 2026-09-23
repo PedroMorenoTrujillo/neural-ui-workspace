@@ -1,12 +1,12 @@
 import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { NeuToastService } from './neu-toast.service';
-import { NeuToastType } from './neu-toast.types';
+import { NeuToastTone } from './neu-toast.types';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 
 /** Mapa de iconos Lucide por tipo de toast / Map of Lucide icons by toast type */
-const TOAST_ICONS: Record<NeuToastType, string> = {
+const TOAST_ICONS: Record<NeuToastTone, string> = {
   success: 'lucideCheckCircle',
-  error: 'lucideXCircle',
+  danger: 'lucideXCircle',
   warning: 'lucideAlertTriangle',
   info: 'lucideInfo',
 };
@@ -40,14 +40,14 @@ const TOAST_ICONS: Record<NeuToastType, string> = {
     @for (toast of toastService.toasts(); track toast.id) {
       <div
         class="neu-toast"
-        [class]="'neu-toast neu-toast--' + toast.type"
-        [attr.role]="toast.type === 'error' || toast.type === 'warning' ? 'alert' : 'status'"
+        [class]="'neu-toast neu-toast--' + toast.tone"
+        [attr.role]="toast.tone === 'danger' || toast.tone === 'warning' ? 'alert' : 'status'"
         [attr.aria-live]="
-          toast.type === 'error' || toast.type === 'warning' ? 'assertive' : 'polite'
+          toast.tone === 'danger' || toast.tone === 'warning' ? 'assertive' : 'polite'
         "
       >
         <span class="neu-toast__icon-wrap" aria-hidden="true">
-          <neu-icon [name]="getIcon(toast.type)" size="1rem" />
+          <neu-icon [name]="getIcon(toast.tone)" size="1rem" />
         </span>
         <div class="neu-toast__body">
           @if (toast.title) {
@@ -71,7 +71,7 @@ const TOAST_ICONS: Record<NeuToastType, string> = {
 export class NeuToastContainerComponent {
   readonly toastService = inject(NeuToastService);
 
-  getIcon(type: NeuToastType): string {
-    return TOAST_ICONS[type];
+  getIcon(tone: NeuToastTone): string {
+    return TOAST_ICONS[tone];
   }
 }

@@ -3,7 +3,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-radius: var(--neu-radius-md, 8px);
+  border-radius: var(--neu-radius, 8px);
   border: 1px solid transparent;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -31,7 +31,7 @@
     color: var(--neu-alert-warning-text, #b45309);
   }
 
-  &--error {
+  &--danger {
     background: var(--neu-alert-error-bg, #fef2f2);
     border-color: var(--neu-alert-error-border, #fecaca);
     color: var(--neu-alert-error-text, #b91c1c);

@@ -1,23 +1,22 @@
 import {
   Component,
   ViewEncapsulation,
-  computed,
   input,
 } from '@angular/core';
 
-export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuSpinnerTone = 'brand' | 'success' | 'warning' | 'danger' | 'info';
 
 /**
  * NeuralUI Spinner Component
  *
  * Indicador de carga circular animado para estados de espera.
- * Permite personalizar color via severity o color CSS directo.
+ * Permite personalizar color mediante tone o color CSS directo.
  *
  * Uso básico:
  *   <neu-spinner />
  *
- * Con severity:
- *   <neu-spinner severity="success" size="48px" />
+ * Con tone:
+ *   <neu-spinner tone="success" size="48px" />
  *
  * Con color personalizado:
  *   <neu-spinner color="#ff6b35" strokeWidth="6" />
@@ -30,7 +29,7 @@ export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 
   template: `
     <svg
       class="neu-spinner"
-      [class]="'neu-spinner--' + severity()"
+      [class]="'neu-spinner--' + tone()"
       [style.width]="size()"
       [style.height]="size()"
       [style.animation-duration]="animationDuration()"
@@ -64,10 +63,10 @@ export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 
   styleUrl: './neu-spinner.component.scss',
 })
 export class NeuSpinnerComponent {
-  /** Variante de color semántica / Semantic color variant */
-  severity = input<NeuSpinnerSeverity>('primary');
+  /** Intención semántica / Semantic intent */
+  tone = input<NeuSpinnerTone>('brand');
 
-  /** Color CSS directo — sobreescribe severity / Direct CSS color — overrides severity */
+  /** Color CSS directo — sobreescribe tone / Direct CSS color — overrides tone */
   color = input<string>('');
 
   /** Grosor del trazo SVG (unidades SVG) / SVG stroke width (SVG units) */
@@ -85,14 +84,4 @@ export class NeuSpinnerComponent {
   /** Texto accesible cuando no se muestra label / Accessible text when label is not displayed */
   ariaLabel = input<string>('Loading...');
 
-  private readonly _severityColor = computed(() => {
-    const map: Record<NeuSpinnerSeverity, string> = {
-      primary: 'var(--neu-primary)',
-      success: 'var(--neu-success)',
-      warning: 'var(--neu-warning)',
-      danger: 'var(--neu-danger)',
-      info: 'var(--neu-info)',
-    };
-    return map[this.severity()];
-  });
 }

@@ -7,18 +7,19 @@ import {
 } from '@angular/core';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 
-export type NeuButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
+export type NeuButtonTone = 'neutral' | 'brand' | 'danger';
+export type NeuButtonVariant = 'solid' | 'outline' | 'ghost';
 export type NeuButtonSize = 'sm' | 'md' | 'lg';
 export type NeuButtonIconPosition = 'left' | 'right';
 
 /**
  * NeuralUI Button Component
  *
- * Uso: <button neu-button variant="primary" size="md">Texto</button>
+ * Uso: <button neu-button tone="brand" variant="solid" size="md">Texto</button>
  * Con icono: <button neu-button icon="lucideSave">Guardar</button>
  * Solo icono: <button neu-button icon="lucideTrash2" [iconOnly]="true" />
  *
- * Signals: variant, size, disabled, loading, fullWidth, icon, iconPosition, iconOnly
+ * Signals: tone, variant, size, disabled, loading, fullWidth, icon, iconPosition, iconOnly
  * son inputs reactivos. El estado se computa automáticamente con computed().
  */
 @Component({
@@ -61,8 +62,11 @@ export type NeuButtonIconPosition = 'left' | 'right';
   styleUrl: './neu-button.component.scss',
 })
 export class NeuButtonComponent {
-  /** Variante visual del botón / Visual button variant */
-  variant = input<NeuButtonVariant>('primary');
+  /** Intención semántica / Semantic intent */
+  tone = input<NeuButtonTone>('brand');
+
+  /** Tratamiento visual del botón / Visual button treatment */
+  variant = input<NeuButtonVariant>('solid');
 
   /** Tamaño del botón / Button size */
   size = input<NeuButtonSize>('md');
@@ -108,6 +112,7 @@ export class NeuButtonComponent {
 
   readonly hostClasses = computed(() => ({
     'neu-button': true,
+    [`neu-button--${this.tone()}`]: true,
     [`neu-button--${this.variant()}`]: true,
     [`neu-button--${this.size()}`]: true,
     'neu-button--loading': this.loading(),

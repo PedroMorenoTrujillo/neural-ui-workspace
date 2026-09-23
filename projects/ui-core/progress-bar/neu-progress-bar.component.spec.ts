@@ -5,7 +5,7 @@ import { NeuProgressBarComponent } from './neu-progress-bar.component';
 @Component({
   template: `<neu-progress-bar
     [value]="value"
-    [variant]="variant"
+    [tone]="tone"
     [label]="label"
     [showValue]="showValue"
     [indeterminate]="indeterminate"
@@ -15,7 +15,7 @@ import { NeuProgressBarComponent } from './neu-progress-bar.component';
 })
 class TestHostComponent {
   value = 50;
-  variant: any = 'primary';
+  tone: any = 'brand';
   label = '';
   showValue = false;
   indeterminate = false;
@@ -60,9 +60,9 @@ describe('NeuProgressBarComponent', () => {
     expect(el).toBeTruthy();
   });
 
-  it('should apply variant class', () => {
+  it('should apply tone class', () => {
     const df = TestBed.createComponent(NeuProgressBarComponent);
-    df.componentRef.setInput('variant', 'success');
+    df.componentRef.setInput('tone', 'success');
     df.detectChanges();
     const el = df.nativeElement.querySelector('[class*="success"]');
     expect(el).toBeTruthy();
@@ -85,22 +85,22 @@ describe('NeuProgressBarComponent', () => {
     expect(bar.getAttribute('aria-valuenow')).toBe('40');
   });
 
-  it('variant=success should add the success CSS class', async () => {
+  it('tone=success should add the success CSS class', async () => {
     const df = TestBed.createComponent(NeuProgressBarComponent);
-    df.componentRef.setInput('variant', 'success');
+    df.componentRef.setInput('tone', 'success');
     df.componentRef.setInput('value', 50);
     df.detectChanges();
     await df.whenStable();
     expect(df.nativeElement.querySelector('.neu-progress--success')).toBeTruthy();
   });
 
-  it('variant=error should add the error CSS class', async () => {
+  it('tone=danger should add the danger CSS class', async () => {
     const df = TestBed.createComponent(NeuProgressBarComponent);
-    df.componentRef.setInput('variant', 'error');
+    df.componentRef.setInput('tone', 'danger');
     df.componentRef.setInput('value', 50);
     df.detectChanges();
     await df.whenStable();
-    expect(df.nativeElement.querySelector('.neu-progress--error')).toBeTruthy();
+    expect(df.nativeElement.querySelector('.neu-progress--danger')).toBeTruthy();
   });
 
   it('size=sm should add the sm CSS class', async () => {

@@ -35,7 +35,7 @@
   }
 
   // ---- Variantes / Variants ----
-  &--default {
+  &--neutral {
     background: var(--neu-surface-2);
     color: color-mix(in srgb, var(--neu-text) 72%, var(--neu-surface) 28%);
     border: 1px solid var(--neu-border);

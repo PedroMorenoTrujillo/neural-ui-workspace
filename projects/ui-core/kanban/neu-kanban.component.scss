@@ -71,8 +71,8 @@
 }
 
 .neu-kanban__wip--alert {
-  background: color-mix(in srgb, var(--neu-danger) 12%, var(--neu-surface-2) 88%);
-  color: var(--neu-danger);
+  background: color-mix(in srgb, var(--neu-error) 12%, var(--neu-surface-2) 88%);
+  color: var(--neu-error);
 }
 
 .neu-kanban__list {

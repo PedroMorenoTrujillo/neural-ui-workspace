@@ -10,7 +10,8 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 
-export type NeuTagSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast';
+export type NeuTagTone = 'neutral' | 'success' | 'info' | 'warning' | 'danger';
+export type NeuTagVariant = 'soft' | 'solid';
 
 /** Custom icon content for a tag. */
 @Directive({ selector: 'ng-template[neuTagIcon]' })
@@ -48,8 +49,10 @@ export class NeuTagIconDirective {
 export class NeuTagComponent {
   @ContentChild(NeuTagIconDirective) iconTemplate?: NeuTagIconDirective;
 
-  /** Semantic color treatment aligned with the public design contract. */
-  severity = input<NeuTagSeverity | null>(null);
+  /** Semantic intent aligned with the public design contract. */
+  tone = input<NeuTagTone>('neutral');
+  /** Visual treatment independent from semantic intent. */
+  variant = input<NeuTagVariant>('soft');
   /** Visible label. `0` and `''` render faithfully. */
   value = input<string | number | null | undefined>(null);
   /** Registered Neural icon name displayed before `value`. */
@@ -66,7 +69,8 @@ export class NeuTagComponent {
 
   readonly hostClasses = computed(() => ({
     'neu-tag': true,
-    [`neu-tag--${this.severity() ?? 'default'}`]: true,
+    [`neu-tag--${this.tone()}`]: true,
+    [`neu-tag--${this.variant()}`]: true,
     'neu-tag--rounded': this.rounded(),
   }));
 }

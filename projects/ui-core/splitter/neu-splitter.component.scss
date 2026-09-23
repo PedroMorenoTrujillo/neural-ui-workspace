@@ -49,7 +49,7 @@
 
     &:hover,
     &:focus-visible {
-      background: var(--neu-color-primary, #0ea5e9);
+      background: var(--neu-primary, #0ea5e9);
       width: 4px;
     }
   }
@@ -61,7 +61,7 @@
 
     &:hover,
     &:focus-visible {
-      background: var(--neu-color-primary, #0ea5e9);
+      background: var(--neu-primary, #0ea5e9);
       height: 4px;
     }
   }

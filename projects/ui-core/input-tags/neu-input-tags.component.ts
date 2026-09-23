@@ -328,7 +328,7 @@ export class NeuInputTagsComponent<T = string, V = T>
   readonly ariaDescribedBy = input('');
   readonly ariaRequired = input(false);
   readonly size = input<'sm' | 'md' | 'lg'>('md');
-  readonly variant = input<'outlined' | 'filled'>('outlined');
+  readonly variant = input<'outline' | 'solid'>('outline');
   readonly fluid = input(false);
 
   readonly suggestionsRequest = output<NeuOptionDataRequest>();
@@ -360,7 +360,7 @@ export class NeuInputTagsComponent<T = string, V = T>
     'neu-input-tags--readonly': this.readonly(),
     'neu-input-tags--focus': this.focusWithin(),
     'neu-input-tags--invalid': this.invalid(),
-    'neu-input-tags--filled': this.variant() === 'filled',
+    'neu-input-tags--solid': this.variant() === 'solid',
     'neu-input-tags--fluid': this.fluid(),
     'neu-input-tags--size-sm': this.size() === 'sm',
     'neu-input-tags--size-lg': this.size() === 'lg',

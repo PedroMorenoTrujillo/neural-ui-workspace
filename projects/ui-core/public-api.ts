@@ -14,3 +14,4 @@
 export * from './provide-neural-ui';
 export { defineNeuPreset } from './foundation/neu-preset';
 export type { NeuPresetDefinition, NeuPresetTokens } from './foundation/neu-preset';
+export type { NeuDensity, NeuTone, NeuVariant } from './foundation/neu-visual';

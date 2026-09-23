@@ -16,6 +16,8 @@ import {
   localDateTime,
   localTime,
   type CivilDateRange,
+  type CivilMonth,
+  type CivilYear,
   type NeuDateMode,
 } from './neu-date-value';
 
@@ -91,6 +93,221 @@ describe('civil date value model', () => {
     expect(emptyDateValue('datetime')).toBeNull();
     expect(emptyDateValue('multiple')).toEqual([]);
     expect(emptyDateValue('range')).toEqual({ start: null, end: null });
+    expect(emptyDateValue('month')).toBeNull();
+    expect(emptyDateValue('year')).toBeNull();
+  });
+});
+
+describe('NeuDateInput N2-025 periods and presentation', () => {
+  beforeEach(() => TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }));
+  afterEach(() => TestBed.inject(OverlayContainer).getContainerElement().replaceChildren());
+
+  it('renders one inline month surface with no overlay trigger or lifecycle echo', () => {
+    const fixture = create('month');
+    const opened = vi.fn();
+    const closed = vi.fn();
+    fixture.componentInstance.opened.subscribe(opened);
+    fixture.componentInstance.closed.subscribe(closed);
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', { year: 2026, month: 9 } satisfies CivilMonth);
+    fixture.detectChanges();
+    const panel = fixture.nativeElement.querySelector('.neu-date-input__panel') as HTMLElement;
+    expect(panel).toBeTruthy();
+    expect(panel.getAttribute('role')).toBe('group');
+    expect(panel.getAttribute('aria-modal')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.neu-date-input__open')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('[data-civil-month]')).toHaveLength(12);
+    expect((fixture.nativeElement.querySelector('[data-civil-month="9"]') as HTMLElement).getAttribute('aria-selected')).toBe('true');
+    expect(opened).not.toHaveBeenCalled();
+    expect(closed).not.toHaveBeenCalled();
+  });
+
+  it('selects a CivilMonth exactly once, respects unit bounds and ignores disabledDates', () => {
+    const fixture = create('month');
+    const changes = vi.spyOn(fixture.componentInstance.value, 'set');
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', { year: 2026, month: 9 } satisfies CivilMonth);
+    fixture.componentRef.setInput('min', { year: 2026, month: 3 } satisfies CivilMonth);
+    fixture.componentRef.setInput('max', { year: 2026, month: 10 } satisfies CivilMonth);
+    fixture.componentRef.setInput('disabledDates', () => true);
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('[data-civil-month="2"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((fixture.nativeElement.querySelector('[data-civil-month="2"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
+    (fixture.nativeElement.querySelector('[data-civil-month="2"]') as HTMLButtonElement).click();
+    expect(changes).not.toHaveBeenCalled();
+    expect((fixture.nativeElement.querySelector('[data-civil-month="10"]') as HTMLButtonElement).disabled).toBe(false);
+    (fixture.nativeElement.querySelector('[data-civil-month="10"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toEqual({ year: 2026, month: 10 });
+    expect(changes).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.querySelector('.neu-date-input__panel')).toBeTruthy();
+    fixture.componentRef.setInput('value', { year: 2026, month: 4 } satisfies CivilMonth);
+    fixture.detectChanges();
+    expect(changes).toHaveBeenCalledTimes(1);
+  });
+
+  it('selects a CivilYear exactly once and navigates pages without changing value', () => {
+    const fixture = create('year');
+    const changes = vi.spyOn(fixture.componentInstance.value, 'set');
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', { year: 2026 } satisfies CivilYear);
+    fixture.componentRef.setInput('min', { year: 2024 } satisfies CivilYear);
+    fixture.componentRef.setInput('max', { year: 2030 } satisfies CivilYear);
+    fixture.detectChanges();
+    fixture.componentInstance.navigateMonth(12);
+    fixture.detectChanges();
+    expect(changes).not.toHaveBeenCalled();
+    fixture.componentInstance.navigateMonth(-12);
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('[data-civil-year="2023"]') as HTMLButtonElement)?.disabled).toBe(false);
+    expect((fixture.nativeElement.querySelector('[data-civil-year="2023"]') as HTMLButtonElement)?.getAttribute('aria-disabled')).toBe('true');
+    (fixture.nativeElement.querySelector('[data-civil-year="2023"]') as HTMLButtonElement).click();
+    expect(changes).not.toHaveBeenCalled();
+    (fixture.nativeElement.querySelector('[data-civil-year="2027"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toEqual({ year: 2027 });
+    expect(changes).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders ISO week numbers for day grid only, without selectable week controls', () => {
+    const fixture = create('date');
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', civilDate('2021-01-01'));
+    fixture.componentRef.setInput('showWeekNumbers', true);
+    fixture.detectChanges();
+    const numbers = [...fixture.nativeElement.querySelectorAll('.neu-date-input__week-number')] as HTMLElement[];
+    expect(numbers).toHaveLength(6);
+    expect(numbers[0].textContent?.trim()).toBe('53');
+    expect(numbers[0].getAttribute('aria-hidden')).toBe('true');
+    expect(numbers.every((node) => node.tabIndex < 0)).toBe(true);
+    fixture.componentRef.setInput('mode', 'month');
+    fixture.componentRef.setInput('value', null);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.neu-date-input__week-number')).toHaveLength(0);
+  });
+
+  it('keeps overlay lifecycle real when presentation changes and never opens from inline', async () => {
+    const fixture = create('month');
+    const opened = vi.fn();
+    const closed = vi.fn();
+    fixture.componentInstance.opened.subscribe(opened);
+    fixture.componentInstance.closed.subscribe(closed);
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(opened).toHaveBeenCalledTimes(1);
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(closed).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    fixture.componentRef.setInput('presentation', 'overlay');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(opened).toHaveBeenCalledTimes(1);
+  });
+
+  it('navigates month/year grids by keyboard without selecting on focus', async () => {
+    const monthFixture = create('month');
+    monthFixture.componentRef.setInput('presentation', 'inline');
+    monthFixture.componentRef.setInput('value', { year: 2026, month: 9 } satisfies CivilMonth);
+    monthFixture.detectChanges();
+    const september = monthFixture.nativeElement.querySelector('[data-civil-month="9"]') as HTMLButtonElement;
+    september.focus();
+    september.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    monthFixture.detectChanges();
+    await Promise.resolve();
+    expect(monthFixture.componentInstance.value()).toEqual({ year: 2026, month: 9 });
+    expect(monthFixture.componentInstance.focusedMonth()).toBe(10);
+    const october = monthFixture.nativeElement.querySelector('[data-civil-month="10"]') as HTMLButtonElement;
+    expect(document.activeElement).toBe(october);
+    october.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    expect(monthFixture.componentInstance.value()).toEqual({ year: 2026, month: 10 });
+
+    const yearFixture = create('year');
+    yearFixture.componentRef.setInput('presentation', 'inline');
+    yearFixture.componentRef.setInput('value', { year: 2026 } satisfies CivilYear);
+    yearFixture.detectChanges();
+    const current = yearFixture.nativeElement.querySelector('[data-civil-year="2026"]') as HTMLButtonElement;
+    current.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    yearFixture.detectChanges();
+    expect(yearFixture.componentInstance.value()).toEqual({ year: 2026 });
+    expect(yearFixture.componentInstance.focusedYear()).toBe(2030);
+    yearFixture.componentInstance.onYearKeydown(new KeyboardEvent('keydown', { key: 'PageUp', cancelable: true }), 2030);
+    expect(yearFixture.componentInstance.value()).toEqual({ year: 2026 });
+  });
+
+  it('keeps readonly periods focusable but rejects selection and marks inline touch only on focus exit', async () => {
+    const fixture = create('month');
+    const touches = vi.fn();
+    fixture.componentInstance.touch.subscribe(touches);
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('readonly', true);
+    fixture.detectChanges();
+    const cell = fixture.nativeElement.querySelector('[data-civil-month="9"]') as HTMLButtonElement;
+    expect(cell.disabled).toBe(false);
+    expect(cell.getAttribute('aria-disabled')).toBe('true');
+    cell.click();
+    expect(fixture.componentInstance.value()).toBeNull();
+    expect(touches).not.toHaveBeenCalled();
+    cell.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    outside.focus();
+    fixture.componentInstance.onCompositeFocusOut();
+    await Promise.resolve();
+    expect(touches).toHaveBeenCalledTimes(1);
+    outside.remove();
+  });
+
+  it('creates and destroys inline periods without late outputs', () => {
+    const late = vi.fn();
+    for (let index = 0; index < 100; index += 1) {
+      const fixture = create(index % 2 ? 'month' : 'year');
+      fixture.componentRef.setInput('presentation', 'inline');
+      fixture.detectChanges();
+      fixture.componentInstance.opened.subscribe(late);
+      fixture.componentInstance.closed.subscribe(late);
+      fixture.destroy();
+    }
+    expect(late).not.toHaveBeenCalled();
+  });
+
+  it('does not autocorrect invalid applied periods or expand day restrictions into a year', () => {
+    const fixture = create('year');
+    const invalid = Object.freeze({ year: 10000 });
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', invalid);
+    fixture.componentRef.setInput('min', Object.freeze({ year: 2020 }));
+    fixture.componentRef.setInput('max', Object.freeze({ year: 2030 }));
+    fixture.componentRef.setInput('disabledDates', () => { throw new Error('day predicate must not run'); });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBe(invalid);
+    expect(fixture.componentInstance.isYearDisabled(2019)).toBe(true);
+    expect(fixture.componentInstance.isYearDisabled(2029)).toBe(false);
+    fixture.componentInstance.selectYear(2029);
+    expect(fixture.componentInstance.value()).toEqual({ year: 2029 });
+    expect(invalid.year).toBe(10000);
+  });
+
+  it('keeps instances independent and ISO weeks stable with Sunday grid start', () => {
+    const first = create('date');
+    const second = create('date');
+    for (const fixture of [first, second]) {
+      fixture.componentRef.setInput('presentation', 'inline');
+      fixture.componentRef.setInput('showWeekNumbers', true);
+      fixture.componentRef.setInput('firstDayOfWeek', 0);
+      fixture.componentRef.setInput('value', civilDate('2021-01-01'));
+      fixture.detectChanges();
+    }
+    const firstPanel = first.nativeElement.querySelector('.neu-date-input__panel') as HTMLElement;
+    const secondPanel = second.nativeElement.querySelector('.neu-date-input__panel') as HTMLElement;
+    expect(firstPanel.id).not.toBe(secondPanel.id);
+    expect(first.nativeElement.querySelectorAll('.neu-date-input__week-number')).toHaveLength(6);
+    expect(first.nativeElement.querySelector('.neu-date-input__week-number')?.textContent?.trim()).toBe('53');
+    first.componentInstance.selectCivilDate(civilDate('2021-01-02'));
+    expect(first.componentInstance.value()).toBe('2021-01-02');
+    expect(second.componentInstance.value()).toBe('2021-01-01');
   });
 });
 

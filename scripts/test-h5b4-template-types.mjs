@@ -38,10 +38,4 @@ if (!diagnostics.includes("Property 'missing' does not exist")) {
   process.exit(1);
 }
 
-if (!diagnostics.includes("Argument of type 'number' is not assignable to parameter of type 'Event'")) {
-  console.error('Invalid OrganizationChart action diagnostic was not produced.');
-  console.error(diagnostics);
-  process.exit(1);
-}
-
 console.log('H5-B4 strict Angular template typing passed (valid accepted, invalid rejected).');

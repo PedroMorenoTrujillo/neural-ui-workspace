@@ -40,7 +40,7 @@ export class NeuToastService {
       id,
       message: options.message,
       title: options.title ?? '',
-      type: options.type ?? 'info',
+      tone: options.tone ?? 'info',
       duration,
     };
 
@@ -55,19 +55,19 @@ export class NeuToastService {
   }
 
   success(message: string, opts?: Partial<NeuToastOptions>): string {
-    return this.show({ ...opts, message, type: 'success' });
+    return this.show({ ...opts, message, tone: 'success' });
   }
 
   error(message: string, opts?: Partial<NeuToastOptions>): string {
-    return this.show({ ...opts, message, type: 'error' });
+    return this.show({ ...opts, message, tone: 'danger' });
   }
 
   info(message: string, opts?: Partial<NeuToastOptions>): string {
-    return this.show({ ...opts, message, type: 'info' });
+    return this.show({ ...opts, message, tone: 'info' });
   }
 
   warning(message: string, opts?: Partial<NeuToastOptions>): string {
-    return this.show({ ...opts, message, type: 'warning' });
+    return this.show({ ...opts, message, tone: 'warning' });
   }
 
   dismiss(id: string): void {

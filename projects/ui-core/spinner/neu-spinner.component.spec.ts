@@ -4,7 +4,7 @@ import { NeuSpinnerComponent } from './neu-spinner.component';
 
 @Component({
   template: `<neu-spinner
-    [severity]="severity"
+    [tone]="tone"
     [size]="size"
     [strokeWidth]="strokeWidth"
     [color]="color"
@@ -14,7 +14,7 @@ import { NeuSpinnerComponent } from './neu-spinner.component';
   imports: [NeuSpinnerComponent],
 })
 class TestHostComponent {
-  severity: any = 'primary';
+  tone: any = 'brand';
   size = '40px';
   strokeWidth = '4';
   color = '';
@@ -37,14 +37,14 @@ describe('NeuSpinnerComponent', () => {
     expect(fixture.nativeElement.querySelector('svg.neu-spinner')).toBeTruthy();
   });
 
-  it('should apply severity class', () => {
+  it('should apply tone class', () => {
     const svg = fixture.nativeElement.querySelector('svg.neu-spinner');
-    expect(svg.classList).toContain('neu-spinner--primary');
+    expect(svg.classList).toContain('neu-spinner--brand');
   });
 
-  it('should change severity class', () => {
+  it('should change tone class', () => {
     const df = TestBed.createComponent(NeuSpinnerComponent);
-    df.componentRef.setInput('severity', 'success');
+    df.componentRef.setInput('tone', 'success');
     df.detectChanges();
     const svg = df.nativeElement.querySelector('svg.neu-spinner');
     expect(svg.classList).toContain('neu-spinner--success');
@@ -92,29 +92,28 @@ describe('NeuSpinnerComponent', () => {
     expect(arc.style.stroke).toBe('rgb(255, 0, 0)');
   });
 
-  it('severity=success should compute the green color class', async () => {
+  it('tone=success should apply the success class', async () => {
     const df = TestBed.createComponent(NeuSpinnerComponent);
-    df.componentRef.setInput('severity', 'success');
+    df.componentRef.setInput('tone', 'success');
     df.detectChanges();
     await df.whenStable();
-    // _severityColor should return a non-empty CSS custom property string
-    expect((df.componentInstance as any)['_severityColor']()).toBeTruthy();
+    expect(df.nativeElement.querySelector('svg').classList).toContain('neu-spinner--success');
   });
 
-  it('severity=danger should compute the danger color class', async () => {
+  it('tone=danger should apply the danger class', async () => {
     const df = TestBed.createComponent(NeuSpinnerComponent);
-    df.componentRef.setInput('severity', 'danger');
+    df.componentRef.setInput('tone', 'danger');
     df.detectChanges();
     await df.whenStable();
-    expect((df.componentInstance as any)['_severityColor']()).toBeTruthy();
+    expect(df.nativeElement.querySelector('svg').classList).toContain('neu-spinner--danger');
   });
 
-  it('severity=warning should compute the warning color class', async () => {
+  it('tone=warning should apply the warning class', async () => {
     const df = TestBed.createComponent(NeuSpinnerComponent);
-    df.componentRef.setInput('severity', 'warning');
+    df.componentRef.setInput('tone', 'warning');
     df.detectChanges();
     await df.whenStable();
-    expect((df.componentInstance as any)['_severityColor']()).toBeTruthy();
+    expect(df.nativeElement.querySelector('svg').classList).toContain('neu-spinner--warning');
   });
 
   it('strokeWidth input is applied to svg elements', async () => {

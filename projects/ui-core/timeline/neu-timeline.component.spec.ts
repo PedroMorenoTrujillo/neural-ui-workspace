@@ -9,9 +9,9 @@ import {
 } from './neu-timeline.component';
 
 const ITEMS: NeuTimelineItem[] = [
-  { title: 'Evento A', time: 'Hace 2h', description: 'Descripción A', variant: 'success' },
-  { title: 'Evento B', time: '12 Mar', description: 'Descripción B', variant: 'warning' },
-  { title: 'Evento C', variant: 'danger' },
+  { title: 'Evento A', time: 'Hace 2h', description: 'Descripción A', tone: 'success' },
+  { title: 'Evento B', time: '12 Mar', description: 'Descripción B', tone: 'warning' },
+  { title: 'Evento C', tone: 'danger' },
 ];
 
 @Component({
@@ -19,7 +19,7 @@ const ITEMS: NeuTimelineItem[] = [
   template: `
     <neu-timeline [items]="items">
       <ng-template neuTimelineMarker let-item>
-        <span class="custom-marker">{{ item.variant }}</span>
+            <span class="custom-marker">{{ item.tone }}</span>
       </ng-template>
       <ng-template neuTimelineItem let-item let-index="index">
         <span class="custom-item">{{ index }}:{{ item.title }}</span>
@@ -113,7 +113,7 @@ describe('NeuTimelineComponent', () => {
         title: 'Evento con icono',
         description: 'desc',
         icon: 'M12 2 L2 22 L22 22 Z',
-        variant: 'success',
+      tone: 'success',
       },
     ]);
     fixture.detectChanges();
@@ -177,13 +177,13 @@ describe('NeuTimelineComponent', () => {
     const fixture = TestBed.createComponent(NeuTimelineComponent);
     fixture.componentRef.setInput('items', ITEMS);
     fixture.componentRef.setInput('align', 'alternate');
-    fixture.componentRef.setInput('compact', true);
+    fixture.componentRef.setInput('density', 'compact');
     fixture.componentRef.setInput('ariaLabel', 'Release history');
     fixture.detectChanges();
 
     const list = fixture.nativeElement.querySelector('.neu-timeline');
     expect(list.classList).toContain('neu-timeline--alternate');
-    expect(list.classList).toContain('neu-timeline--compact');
+    expect(list.classList).toContain('neu-timeline--density-compact');
     expect(list.getAttribute('aria-label')).toBe('Release history');
   });
 
@@ -205,14 +205,14 @@ describe('NeuTimelineComponent', () => {
     const fixture = TestBed.createComponent(NeuTimelineComponent);
     fixture.componentRef.setInput('items', ITEMS);
     fixture.componentRef.setInput('align', 'alternate');
-    fixture.componentRef.setInput('compact', true);
+    fixture.componentRef.setInput('density', 'compact');
     fixture.componentRef.setInput('reverse', true);
     fixture.componentRef.setInput('ariaLabel', 'Order history');
     fixture.detectChanges();
 
     const timeline = fixture.nativeElement.querySelector('.neu-timeline');
     expect(timeline.classList).toContain('neu-timeline--alternate');
-    expect(timeline.classList).toContain('neu-timeline--compact');
+    expect(timeline.classList).toContain('neu-timeline--density-compact');
     expect(timeline.getAttribute('aria-label')).toBe('Order history');
     expect(timeline.querySelector('.neu-timeline__title')?.textContent).toContain('Evento C');
   });

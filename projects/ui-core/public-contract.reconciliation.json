@@ -4,18 +4,18 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1511,
-    "bindingDelta": 344,
-    "mapped": 663,
+    "declarationBindings": 1487,
+    "bindingDelta": 320,
+    "mapped": 637,
     "aliasCorrections": 3,
-    "missingOldEntries": 498,
-    "newlyDiscovered": 842,
+    "missingOldEntries": 524,
+    "newlyDiscovered": 844,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 445,
-      "model-binding-was-not-supported": 26,
-      "multiline-annotated-or-compound-declaration-was-missed": 365
+      "declaration-or-selector-was-not-recorded": 429,
+      "model-binding-was-not-supported": 24,
+      "multiline-annotated-or-compound-declaration-was-missed": 385
     }
   },
   "mappings": [
@@ -32,20 +32,12 @@
       "newId": "./alert#NeuAlertComponent.input:icon"
     },
     {
-      "oldToken": "alert/neu-alert.component.ts#input:outline",
-      "newId": "./alert#NeuAlertComponent.input:outline"
-    },
-    {
       "oldToken": "alert/neu-alert.component.ts#input:showIcon",
       "newId": "./alert#NeuAlertComponent.input:showIcon"
     },
     {
       "oldToken": "alert/neu-alert.component.ts#input:title",
       "newId": "./alert#NeuAlertComponent.input:title"
-    },
-    {
-      "oldToken": "alert/neu-alert.component.ts#input:type",
-      "newId": "./alert#NeuAlertComponent.input:type"
     },
     {
       "oldToken": "alert/neu-alert.component.ts#output:closed",
@@ -356,10 +348,6 @@
       "newId": "./badge#NeuBadgeComponent.input:dot"
     },
     {
-      "oldToken": "badge/neu-badge.component.ts#input:outline",
-      "newId": "./badge#NeuBadgeComponent.input:outline"
-    },
-    {
       "oldToken": "badge/neu-badge.component.ts#input:pill",
       "newId": "./badge#NeuBadgeComponent.input:pill"
     },
@@ -558,10 +546,6 @@
     {
       "oldToken": "chip/neu-chip.component.ts#input:size",
       "newId": "./chip#NeuChipComponent.input:size"
-    },
-    {
-      "oldToken": "chip/neu-chip.component.ts#input:variant",
-      "newId": "./chip#NeuChipComponent.input:variant"
     },
     {
       "oldToken": "chip/neu-chip.component.ts#output:removed",
@@ -861,10 +845,6 @@
     {
       "oldToken": "empty-state/neu-empty-state.component.ts#input:actionLabel",
       "newId": "./empty-state#NeuEmptyStateComponent.input:actionLabel"
-    },
-    {
-      "oldToken": "empty-state/neu-empty-state.component.ts#input:compact",
-      "newId": "./empty-state#NeuEmptyStateComponent.input:compact"
     },
     {
       "oldToken": "empty-state/neu-empty-state.component.ts#input:description",
@@ -1735,10 +1715,6 @@
       "newId": "./progress-bar#NeuProgressBarComponent.input:value"
     },
     {
-      "oldToken": "progress-bar/neu-progress-bar.component.ts#input:variant",
-      "newId": "./progress-bar#NeuProgressBarComponent.input:variant"
-    },
-    {
       "oldToken": "radio/neu-radio-group.component.ts#input:ariaLabel",
       "newId": "./radio#NeuRadioGroupComponent.input:ariaLabel"
     },
@@ -1849,62 +1825,6 @@
     {
       "oldToken": "ripple/neu-ripple.directive.ts#input:neuRippleDuration",
       "newId": "./ripple#NeuRippleDirective.input:neuRippleDuration"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:compact",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:compact"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:endDate",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:endDate"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:locale",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:locale"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:minColumnWidth",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:minColumnWidth"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:rows",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:rows"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:scale",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:scale"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:selectedSlot",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:selectedSlot"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:selectedTaskId",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:selectedTaskId"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:showSummary",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:showSummary"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:startDate",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:startDate"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:stickyLabels",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:stickyLabels"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#input:title",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.input:title"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#output:slotClick",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.output:slotClick"
-    },
-    {
-      "oldToken": "scheduler-gantt/neu-scheduler-gantt.component.ts#output:taskClick",
-      "newId": "./scheduler-gantt#NeuSchedulerGanttComponent.output:taskClick"
     },
     {
       "oldToken": "select/neu-select.component.ts#input:ariaDescribedBy",
@@ -2139,10 +2059,6 @@
       "newId": "./sidebar#NeuSidebarComponent.input:side"
     },
     {
-      "oldToken": "sidebar/neu-sidebar.component.ts#input:urlParam",
-      "newId": "./sidebar#NeuSidebarComponent.input:urlParam"
-    },
-    {
       "oldToken": "sidebar/neu-sidebar.component.ts#output:closeRequested",
       "newId": "./sidebar#NeuSidebarComponent.output:closeRequested"
     },
@@ -2175,14 +2091,6 @@
       "newId": "./slider#NeuSliderComponent.input:label"
     },
     {
-      "oldToken": "slider/neu-slider.component.ts#input:max",
-      "newId": "./slider#NeuSliderComponent.input:max"
-    },
-    {
-      "oldToken": "slider/neu-slider.component.ts#input:min",
-      "newId": "./slider#NeuSliderComponent.input:min"
-    },
-    {
       "oldToken": "slider/neu-slider.component.ts#input:showTicks",
       "newId": "./slider#NeuSliderComponent.input:showTicks"
     },
@@ -2213,10 +2121,6 @@
     {
       "oldToken": "spinner/neu-spinner.component.ts#input:label",
       "newId": "./spinner#NeuSpinnerComponent.input:label"
-    },
-    {
-      "oldToken": "spinner/neu-spinner.component.ts#input:severity",
-      "newId": "./spinner#NeuSpinnerComponent.input:severity"
     },
     {
       "oldToken": "spinner/neu-spinner.component.ts#input:size",
@@ -2419,10 +2323,6 @@
       "newId": "./timeline-grid#NeuTimelineGridComponent.input:columns"
     },
     {
-      "oldToken": "timeline-grid/neu-timeline-grid.component.ts#input:compact",
-      "newId": "./timeline-grid#NeuTimelineGridComponent.input:compact"
-    },
-    {
       "oldToken": "timeline-grid/neu-timeline-grid.component.ts#input:minColumnWidth",
       "newId": "./timeline-grid#NeuTimelineGridComponent.input:minColumnWidth"
     },
@@ -2465,10 +2365,6 @@
     {
       "oldToken": "toolbar/neu-toolbar.component.ts#input:size",
       "newId": "./toolbar#NeuToolbarComponent.input:size"
-    },
-    {
-      "oldToken": "toolbar/neu-toolbar.component.ts#input:surface",
-      "newId": "./toolbar#NeuToolbarComponent.input:surface"
     },
     {
       "oldToken": "toolbar/neu-toolbar.component.ts#input:wrap",
@@ -2676,6 +2572,8 @@
     }
   ],
   "missingOldEntries": [
+    "alert/neu-alert.component.ts#input:outline",
+    "alert/neu-alert.component.ts#input:type",
     "autocomplete/neu-autocomplete.component.ts#input:clientFilter",
     "autocomplete/neu-autocomplete.component.ts#input:dataKey",
     "autocomplete/neu-autocomplete.component.ts#input:emptyMessage",
@@ -2704,6 +2602,7 @@
     "autocomplete/neu-autocomplete.component.ts#output:onSelect",
     "autocomplete/neu-autocomplete.component.ts#output:onShow",
     "autocomplete/neu-autocomplete.component.ts#output:optionSelected",
+    "badge/neu-badge.component.ts#input:outline",
     "cascade-select/neu-cascade-select.component.ts#input:nodes",
     "cascade-select/neu-cascade-select.component.ts#output:selectionChange",
     "chart/neu-chart.component.ts#input:categories",
@@ -2717,10 +2616,12 @@
     "chart/neu-chart.component.ts#input:type",
     "checkbox/neu-checkbox.component.ts#input:checked",
     "checkbox/neu-checkbox.component.ts#output:checkedChange",
+    "chip/neu-chip.component.ts#input:variant",
     "color-picker/neu-color-picker.component.ts#output:colorChange",
     "date-input/neu-date-input.component.ts#input:multiple",
     "date-input/neu-date-input.component.ts#input:type",
     "date-input/neu-date-input.component.ts#output:rangeChange",
+    "empty-state/neu-empty-state.component.ts#input:compact",
     "inline-editor/neu-inline-editor.component.ts#input:max",
     "inline-editor/neu-inline-editor.component.ts#input:min",
     "inline-editor/neu-inline-editor.component.ts#input:rows",
@@ -2848,10 +2749,25 @@
     "number-input/neu-number-input.component.ts#input:vertical",
     "number-input/neu-number-input.component.ts#output:valueChange",
     "password/neu-password.component.ts#output:valueChange",
+    "progress-bar/neu-progress-bar.component.ts#input:variant",
     "rating/neu-rating.component.ts#input:value",
     "rating/neu-rating.component.ts#output:valueChange",
     "rich-text-editor/neu-rich-text-editor.component.ts#input:toolbarAriaLabel",
     "rich-text-editor/neu-rich-text-editor.component.ts#output:valueChange",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:compact",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:endDate",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:locale",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:minColumnWidth",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:rows",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:scale",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:selectedSlot",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:selectedTaskId",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:showSummary",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:startDate",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:stickyLabels",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#input:title",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#output:slotClick",
+    "scheduler-gantt/neu-scheduler-gantt.component.ts#output:taskClick",
     "select/neu-select.component.ts#input:editable",
     "select/neu-select.component.ts#input:emptyFilterMessage",
     "select/neu-select.component.ts#input:filter",
@@ -2879,8 +2795,12 @@
     "select/neu-select.component.ts#output:onLazyLoad",
     "select/neu-select.component.ts#output:onShow",
     "select/neu-select.component.ts#output:selectionChange",
+    "sidebar/neu-sidebar.component.ts#input:urlParam",
+    "slider/neu-slider.component.ts#input:max",
+    "slider/neu-slider.component.ts#input:min",
     "slider/neu-slider.component.ts#input:value",
     "slider/neu-slider.component.ts#output:valueChange",
+    "spinner/neu-spinner.component.ts#input:severity",
     "table-core/neu-table-core.component.ts#input:bordered",
     "table-core/neu-table-core.component.ts#input:columns",
     "table-core/neu-table-core.component.ts#input:data",
@@ -3079,6 +2999,8 @@
     "table/neu-table.component.ts#output:stateSave",
     "table/neu-table.component.ts#output:virtualScrollEvent",
     "textarea/neu-textarea.component.ts#input:maxlength",
+    "timeline-grid/neu-timeline-grid.component.ts#input:compact",
+    "toolbar/neu-toolbar.component.ts#input:surface",
     "tooltip/neu-tooltip.component.ts#input:text",
     "tooltip/neu-tooltip.component.ts#input:tooltipId",
     "tree-table/neu-tree-table.component.ts#input:allFilterOptionLabel",
@@ -3205,6 +3127,14 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./alert#NeuAlertComponent.input:tone",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./alert#NeuAlertComponent.input:variant",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./autocomplete#NeuAutocompleteComponent.input:clearable",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -3309,7 +3239,11 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./bottom-sheet#NeuBottomSheetComponent.output:hidden",
+      "id": "./badge#NeuBadgeComponent.input:tone",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./bottom-sheet#NeuBottomSheetComponent.output:closeRequested",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -3346,6 +3280,10 @@
     },
     {
       "id": "./button#NeuButtonComponent.input:size",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./button#NeuButtonComponent.input:tone",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -3386,10 +3324,6 @@
     },
     {
       "id": "./calendar#NeuCalendarComponent.input:view",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./calendar#NeuCalendarComponent.output:dateSelect",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -3577,7 +3511,11 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./code-block#NeuCodeBlockComponent.input:compact",
+      "id": "./chip#NeuChipComponent.input:tone",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./code-block#NeuCodeBlockComponent.input:density",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -3793,6 +3731,14 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./date-input#NeuDateInputControl.input:presentation",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./date-input#NeuDateInputControl.input:showWeekNumbers",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./date-input#NeuDateInputControl.input:touched",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -3907,6 +3853,10 @@
     {
       "id": "./drag-drop#NeuDropZoneDirective.input:tabIndex",
       "reason": "compound-declaration-collision-hidden-by-file-oriented-snapshot"
+    },
+    {
+      "id": "./empty-state#NeuEmptyStateComponent.input:density",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./form-field#NeuInputGroupComponent.input:size",
@@ -4817,7 +4767,7 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./modal#NeuDialogComponent.output:hidden",
+      "id": "./modal#NeuDialogComponent.output:closeRequested",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -4901,90 +4851,6 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaDescribedBy",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaLabel",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:ariaLabelledBy",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:collapseLabel",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:collapsible",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:emptyLabel",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:expandLabel",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:gap",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:nodes",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:selectable",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.input:selectionMode",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.model:collapsedKeys",
-      "reason": "model-binding-was-not-supported"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.model:selectionKeys",
-      "reason": "model-binding-was-not-supported"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeCollapse",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeExpand",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeSelect",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartComponent.output:nodeUnselect",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartNodeDirective.input:neuOrganizationChartNode",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartSelectionIndicatorDirective.input:neuOrganizationChartSelectionIndicator",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartToggleDirective.input:neuOrganizationChartToggle",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./organization-chart#NeuOrganizationChartToggleIconDirective.input:neuOrganizationChartToggleIcon",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
       "id": "./pagination#NeuPaginationComponent.input:pageSizeAriaLabel",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5002,6 +4868,10 @@
     },
     {
       "id": "./panel#NeuFieldsetComponent.input:collapsible",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./panel#NeuFieldsetComponent.input:disabled",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5257,6 +5127,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./progress-bar#NeuProgressBarComponent.input:tone",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./radio#NeuRadioComponent.input:inputId",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5354,6 +5228,10 @@
     },
     {
       "id": "./rating#NeuRatingComponent.input:required",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./rating#NeuRatingComponent.input:step",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -5541,6 +5419,18 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./sidebar#NeuSidebarComponent.input:open",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./sidebar#NeuSidebarComponent.output:closed",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./sidebar#NeuSidebarComponent.output:opened",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./slider#NeuSliderComponent.input:ariaDescribedBy",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5569,7 +5459,23 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./slider#NeuSliderComponent.input:maxValue",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:minStepsBetweenThumbs",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:minValue",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./slider#NeuSliderComponent.input:name",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./slider#NeuSliderComponent.input:orientation",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
@@ -5677,6 +5583,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./spinner#NeuSpinnerComponent.input:tone",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./split-button#NeuSplitButtonComponent.input:actions",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -5702,6 +5612,10 @@
     },
     {
       "id": "./split-button#NeuSplitButtonComponent.input:size",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./split-button#NeuSplitButtonComponent.input:tone",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -5949,11 +5863,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tag#NeuTagComponent.input:severity",
+      "id": "./tag#NeuTagComponent.input:tone",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./tag#NeuTagComponent.input:value",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tag#NeuTagComponent.input:variant",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6005,6 +5923,10 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./timeline-grid#NeuTimelineGridComponent.input:density",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./timeline#NeuTimelineComponent.input:align",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -6013,7 +5935,7 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./timeline#NeuTimelineComponent.input:compact",
+      "id": "./timeline#NeuTimelineComponent.input:density",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6103,6 +6025,14 @@
     {
       "id": "./toggle-button-group#NeuToggleButtonGroupComponent.output:touch",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./toolbar#NeuToolbarComponent.input:tone",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./toolbar#NeuToolbarComponent.input:variant",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./tree-select#NeuTreeSelectComponent.input:clearable",

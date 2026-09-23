@@ -50,7 +50,7 @@
   align-self: stretch;
   flex-shrink: 0;
 
-  .neu-button--secondary &,
+  .neu-button--neutral &,
   .neu-button--ghost &,
   .neu-button--outline & {
     background: var(--neu-border);
@@ -118,8 +118,8 @@
 }
 
 html[data-theme='dark'] {
-  .neu-split-button__main.neu-button--primary,
-  .neu-split-button__chevron.neu-button--primary {
+  .neu-split-button__main.neu-button--brand.neu-button--solid,
+  .neu-split-button__chevron.neu-button--brand.neu-button--solid {
     background: #0b66d4;
     border-color: #0b66d4;
     color: #ffffff;

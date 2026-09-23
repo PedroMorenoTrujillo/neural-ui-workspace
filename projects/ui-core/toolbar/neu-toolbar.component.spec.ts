@@ -55,12 +55,14 @@ describe('NeuToolbarComponent', () => {
     expect(f.nativeElement.classList).toContain('neu-toolbar--bordered');
   });
 
-  it('should apply primary surface class', async () => {
+  it('should apply brand solid classes', async () => {
     const f = TestBed.createComponent(NeuToolbarComponent);
-    f.componentRef.setInput('surface', 'primary');
+    f.componentRef.setInput('tone', 'brand');
+    f.componentRef.setInput('variant', 'solid');
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-toolbar--primary');
+    expect(f.nativeElement.classList).toContain('neu-toolbar--brand');
+    expect(f.nativeElement.classList).toContain('neu-toolbar--solid');
   });
 
   it('should render the three section slots', async () => {

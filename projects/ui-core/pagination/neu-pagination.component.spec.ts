@@ -186,6 +186,28 @@ describe('NeuPaginationComponent', () => {
     expect(pages).toEqual([]);
   });
 
+  it('keeps page and page-size applied state when the parent rejects proposals', () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('total', 100);
+    df.componentRef.setInput('page', 2);
+    df.componentRef.setInput('pageSize', 10);
+    df.detectChanges();
+    const pages: number[] = [];
+    const sizes: number[] = [];
+    df.componentInstance.pageChange.subscribe((value) => pages.push(value));
+    df.componentInstance.pageSizeChange.subscribe((value) => sizes.push(value));
+
+    df.componentInstance.go(3);
+    df.componentInstance.changePageSize(20);
+    df.detectChanges();
+
+    expect(pages).toEqual([3, 1]);
+    expect(sizes).toEqual([20]);
+    expect(df.componentInstance.page()).toBe(2);
+    expect(df.componentInstance.pageSize()).toBe(10);
+    expect(df.nativeElement.querySelector('[aria-current="page"]')?.textContent.trim()).toBe('2');
+  });
+
   it('renders an optional Neural page-size selector and emits deterministic state proposals once', () => {
     const df = TestBed.createComponent(NeuPaginationComponent);
     df.componentRef.setInput('total', 95);
@@ -208,6 +230,9 @@ describe('NeuPaginationComponent', () => {
     select.selectOption(select.options()[1]);
     expect(sizes).toEqual([20]);
     expect(pages).toEqual([3]);
+    df.detectChanges();
+    expect(df.componentInstance['pageSizeControl'].value).toBe(10);
+    expect(select.value()).toBe(10);
     df.componentInstance.changePageSize(10);
     expect(sizes).toEqual([20]);
   });

@@ -46,7 +46,23 @@ describe('NeuAvatarComponent', () => {
     const img = df.nativeElement.querySelector('img');
     expect(img).toBeTruthy();
     expect(img.src).toContain('avatar.jpg');
-    expect(img.alt).toBe('Test user');
+    expect(img.alt).toBe('');
+    expect(df.nativeElement.querySelector('.neu-avatar').getAttribute('aria-label')).toBe('Test user');
+  });
+
+  it('exposes one accessible name for initials and hides an unnamed decorative avatar', () => {
+    const named = TestBed.createComponent(NeuAvatarComponent);
+    named.componentRef.setInput('name', 'Jane Doe');
+    named.detectChanges();
+    const namedAvatar = named.nativeElement.querySelector('.neu-avatar');
+    expect(namedAvatar.getAttribute('role')).toBe('img');
+    expect(namedAvatar.getAttribute('aria-label')).toBe('Jane Doe');
+    expect(namedAvatar.querySelector('.neu-avatar__initials').getAttribute('aria-hidden')).toBe('true');
+
+    const decorative = fixture.nativeElement.querySelector('.neu-avatar');
+    expect(decorative.getAttribute('role')).toBeNull();
+    expect(decorative.getAttribute('aria-label')).toBeNull();
+    expect(decorative.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('should show initials when name is provided without src', async () => {

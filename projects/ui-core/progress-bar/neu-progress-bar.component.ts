@@ -5,7 +5,7 @@ import {
   input,
 } from '@angular/core';
 
-export type NeuProgressVariant = 'primary' | 'success' | 'warning' | 'danger';
+export type NeuProgressTone = 'brand' | 'success' | 'warning' | 'danger';
 
 /**
  * NeuralUI ProgressBar Component
@@ -15,7 +15,7 @@ export type NeuProgressVariant = 'primary' | 'success' | 'warning' | 'danger';
  *
  * Uso:
  *   <neu-progress-bar [value]="75" />
- *   <neu-progress-bar [value]="75" label="Cargando..." variant="success" [showValue]="true" />
+ *   <neu-progress-bar [value]="75" label="Cargando..." tone="success" [showValue]="true" />
  *   <neu-progress-bar [indeterminate]="true" />
  */
 @Component({
@@ -60,8 +60,8 @@ export class NeuProgressBarComponent {
   /** Valor de 0 a 100 / Value from 0 to 100 */
   value = input<number>(0);
 
-  /** Variante de color / Color variant */
-  variant = input<NeuProgressVariant>('primary');
+  /** Intención semántica / Semantic intent */
+  tone = input<NeuProgressTone>('brand');
 
   /** Etiqueta descriptiva sobre la barra / Descriptive label above the bar */
   label = input<string>('');
@@ -78,6 +78,6 @@ export class NeuProgressBarComponent {
   readonly clampedValue = computed(() => Math.min(100, Math.max(0, this.value())));
 
   readonly hostClasses = computed(() =>
-    [`neu-progress--${this.variant()}`, `neu-progress--${this.size()}`].join(' '),
+    [`neu-progress--${this.tone()}`, `neu-progress--${this.size()}`].join(' '),
   );
 }

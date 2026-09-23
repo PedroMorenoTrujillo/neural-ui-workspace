@@ -11,7 +11,7 @@ import { NeuSwitchComponent } from '@neural-ui/core/switch';
 import { NeuRadioComponent, NeuRadioGroupComponent } from '@neural-ui/core/radio';
 import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
 import { NeuKnobComponent } from '@neural-ui/core/knob';
-import { NeuDateInputComponent, civilDate, type CivilDate } from '@neural-ui/core/date-input';
+import { NeuDateInputComponent, civilDate, type CivilDate, type CivilMonth, type CivilYear } from '@neural-ui/core/date-input';
 import { NeuSelectComponent } from '@neural-ui/core/select';
 import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
 import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
@@ -60,6 +60,9 @@ import { NeuRatingComponent } from '@neural-ui/core/rating';
     <output id="n2-input-events">{{ inputEvents() | json }}</output>
     <output id="n2-checkbox-events">{{ checkboxEvents() | json }}</output>
     <output id="n2-new-control-events">{{ newControlEvents() | json }}</output>
+    <output id="n2-period-events">{{ periodEvents() | json }}</output>
+    <output id="n2-period-lifecycle">{{ periodLifecycle() | json }}</output>
+    <output id="n2-b7-events">{{ b7Events() | json }}</output>
     <neu-input
       id="n2-input"
       label="Hydrated input"
@@ -109,6 +112,12 @@ import { NeuRatingComponent } from '@neural-ui/core/rating';
       locale="es-ES"
       [formControl]="dateControl"
     />
+    <neu-date-input id="n2-date-inline" presentation="inline" [formControl]="dateInlineControl" (opened)="recordPeriodLifecycle('date-inline:opened')" (closed)="recordPeriodLifecycle('date-inline:closed')" />
+    <neu-date-input id="n2-month-overlay" mode="month" [formControl]="monthOverlayControl" (opened)="recordPeriodLifecycle('month:opened')" (closed)="recordPeriodLifecycle('month:closed')" />
+    <neu-date-input id="n2-month-inline" mode="month" presentation="inline" [formControl]="monthInlineControl" (opened)="recordPeriodLifecycle('month-inline:opened')" (closed)="recordPeriodLifecycle('month-inline:closed')" />
+    <neu-date-input id="n2-year-overlay" mode="year" [formControl]="yearOverlayControl" (opened)="recordPeriodLifecycle('year:opened')" (closed)="recordPeriodLifecycle('year:closed')" />
+    <neu-date-input id="n2-year-inline" mode="year" presentation="inline" [formControl]="yearInlineControl" (opened)="recordPeriodLifecycle('year-inline:opened')" (closed)="recordPeriodLifecycle('year-inline:closed')" />
+    <neu-date-input id="n2-week-grid" presentation="inline" [showWeekNumbers]="true" [formControl]="weekControl" (opened)="recordPeriodLifecycle('week:opened')" (closed)="recordPeriodLifecycle('week:closed')" />
     <neu-select id="n2-select-single" [options]="options" [optionValue]="valueOf" [formControl]="selectSingleControl" />
     <neu-select id="n2-select-multiple" mode="multiple" [selectionOptions]="multipleOptions" [options]="options" [optionValue]="valueOf" [formControl]="selectMultipleControl" />
     <neu-autocomplete id="n2-autocomplete-strict" mode="strict" [dropdown]="true" [options]="options" [optionValue]="valueOf" [formControl]="autocompleteStrictControl" />
@@ -126,6 +135,9 @@ import { NeuRatingComponent } from '@neural-ui/core/rating';
     <neu-uploader id="n2-uploader" [formControl]="uploaderControl" />
     <neu-slider id="n2-slider" label="Hydrated slider" [step]="5" [formControl]="sliderControl" />
     <neu-rating id="n2-rating" label="Hydrated rating" [formControl]="ratingControl" />
+    <neu-slider id="n2-b7-range" label="Hydrated range" [minValue]="0" [maxValue]="100" [step]="5" [minStepsBetweenThumbs]="2" [formControl]="rangeSliderControl" />
+    <neu-slider id="n2-b7-vertical" label="Hydrated vertical range" orientation="vertical" [minValue]="0" [maxValue]="100" [formControl]="verticalSliderControl" />
+    <neu-rating id="n2-b7-half" label="Hydrated half rating" [step]="0.5" [formControl]="halfRatingControl" />
   `,
 })
 export class N2FormsHydrationComponent {
@@ -155,6 +167,14 @@ export class N2FormsHydrationComponent {
   readonly numberControl = new FormControl<number | null>(1234.5);
   readonly knobControl = new FormControl(25, { nonNullable: true });
   readonly dateControl = new FormControl<CivilDate | null>(civilDate('2026-03-29'));
+  readonly dateInlineControl = new FormControl<CivilDate | null>(civilDate('2026-09-03'));
+  readonly monthOverlayControl = new FormControl<CivilMonth | null>({ year: 2026, month: 9 });
+  readonly monthInlineControl = new FormControl<CivilMonth | null>({ year: 2026, month: 9 });
+  readonly yearOverlayControl = new FormControl<CivilYear | null>({ year: 2026 });
+  readonly yearInlineControl = new FormControl<CivilYear | null>({ year: 2026 });
+  readonly weekControl = new FormControl<CivilDate | null>(civilDate('2021-01-01'));
+  readonly periodEvents = signal<string[]>([]);
+  readonly periodLifecycle = signal<string[]>([]);
   readonly selectSingleControl = new FormControl<number | null>(1);
   readonly selectMultipleControl = new FormControl<readonly number[]>([1], { nonNullable: true });
   readonly autocompleteStrictControl = new FormControl<number | null>(1);
@@ -172,6 +192,10 @@ export class N2FormsHydrationComponent {
   readonly uploaderControl = new FormControl<readonly File[]>([], { nonNullable: true });
   readonly sliderControl = new FormControl(35, { nonNullable: true });
   readonly ratingControl = new FormControl<number | null>(3);
+  readonly rangeSliderControl = new FormControl<readonly [number, number]>([20, 80], { nonNullable: true });
+  readonly verticalSliderControl = new FormControl<readonly [number, number]>([10, 60], { nonNullable: true });
+  readonly halfRatingControl = new FormControl<number | null>(2.5);
+  readonly b7Events = signal<string[]>([]);
   readonly numberFormat = {
     locale: 'de-DE',
     style: 'currency',
@@ -197,6 +221,10 @@ export class N2FormsHydrationComponent {
     this.numberControl.valueChanges.subscribe((value) => this.record('number', value));
     this.knobControl.valueChanges.subscribe((value) => this.record('knob', value));
     this.dateControl.valueChanges.subscribe((value) => this.record('date', value));
+    this.monthOverlayControl.valueChanges.subscribe((value) => this.periodEvents.update((events) => [...events, `month-overlay:${JSON.stringify(value)}`]));
+    this.monthInlineControl.valueChanges.subscribe((value) => this.periodEvents.update((events) => [...events, `month-inline:${JSON.stringify(value)}`]));
+    this.yearOverlayControl.valueChanges.subscribe((value) => this.periodEvents.update((events) => [...events, `year-overlay:${JSON.stringify(value)}`]));
+    this.yearInlineControl.valueChanges.subscribe((value) => this.periodEvents.update((events) => [...events, `year-inline:${JSON.stringify(value)}`]));
     this.selectSingleControl.valueChanges.subscribe((value) => this.record('select-single', value));
     this.selectMultipleControl.valueChanges.subscribe((value) => this.record('select-multiple', value));
     this.autocompleteStrictControl.valueChanges.subscribe((value) => this.record('autocomplete-strict', value));
@@ -216,10 +244,20 @@ export class N2FormsHydrationComponent {
     );
     this.sliderControl.valueChanges.subscribe((value) => this.record('slider', value));
     this.ratingControl.valueChanges.subscribe((value) => this.record('rating', value));
+    this.rangeSliderControl.valueChanges.subscribe((value) =>
+      this.b7Events.update((events) => [...events, `range:${JSON.stringify(value)}`]),
+    );
+    this.halfRatingControl.valueChanges.subscribe((value) =>
+      this.b7Events.update((events) => [...events, `half:${value}`]),
+    );
     afterNextRender(() => this.ready.set(true));
   }
 
   private record(name: string, value: unknown): void {
     this.newControlEvents.update((events) => [...events, `${name}:${Array.isArray(value) ? JSON.stringify(value) : String(value)}`]);
+  }
+
+  recordPeriodLifecycle(event: string): void {
+    this.periodLifecycle.update((events) => [...events, event]);
   }
 }

@@ -36,7 +36,7 @@ describe('NeuNotificationService', () => {
   it('push should default type to info', () => {
     const svc = mkSvc();
     svc.push({ message: 'Test' });
-    expect(svc.notifications()[0].type).toBe('info');
+    expect(svc.notifications()[0].tone).toBe('info');
   });
 
   it('push should default duration to 5000ms', () => {
@@ -47,13 +47,13 @@ describe('NeuNotificationService', () => {
 
   it('push with named type should set icon', () => {
     const svc = mkSvc();
-    svc.push({ type: 'success', message: 'OK' });
+    svc.push({ tone: 'success', message: 'OK' });
     expect(svc.notifications()[0].icon).toBe('✅');
   });
 
   it('push should preserve a custom icon', () => {
     const svc = mkSvc();
-    svc.push({ type: 'info', message: 'Custom', icon: '⭐', duration: 0 });
+    svc.push({ tone: 'info', message: 'Custom', icon: '⭐', duration: 0 });
     expect(svc.notifications()[0].icon).toBe('⭐');
   });
 
@@ -335,7 +335,7 @@ describe('NeuNotificationCenterComponent', () => {
   it('should render notification items when panel is open with notifications', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'success', title: 'Título', message: 'Cuerpo', duration: 0 });
+    svc.push({ tone: 'success', title: 'Título', message: 'Cuerpo', duration: 0 });
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
@@ -346,7 +346,7 @@ describe('NeuNotificationCenterComponent', () => {
   it('should render item title when present', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'info', title: 'Mi título', message: 'msg', duration: 0 });
+    svc.push({ tone: 'info', title: 'Mi título', message: 'msg', duration: 0 });
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
@@ -356,7 +356,7 @@ describe('NeuNotificationCenterComponent', () => {
   it('should not render title element when notification has no title', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'info', message: 'Solo mensaje', duration: 0 });
+    svc.push({ tone: 'info', message: 'Solo mensaje', duration: 0 });
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
@@ -366,7 +366,7 @@ describe('NeuNotificationCenterComponent', () => {
   it('should mark notification as unread with class', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'warning', message: 'Alerta', duration: 0 });
+    svc.push({ tone: 'warning', message: 'Alerta', duration: 0 });
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
@@ -376,7 +376,7 @@ describe('NeuNotificationCenterComponent', () => {
   it('close button should remove the notification', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'error', message: 'Error!', duration: 0 });
+    svc.push({ tone: 'danger', message: 'Error!', duration: 0 });
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
@@ -390,7 +390,7 @@ describe('NeuNotificationCenterComponent', () => {
   it('close button should expose an accessible aria-label', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'error', message: 'Error!', duration: 0 });
+    svc.push({ tone: 'danger', message: 'Error!', duration: 0 });
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
@@ -401,7 +401,7 @@ describe('NeuNotificationCenterComponent', () => {
   it('markAllRead button should appear and work when there are unread', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'info', message: 'A', duration: 0 });
+    svc.push({ tone: 'info', message: 'A', duration: 0 });
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
@@ -418,7 +418,7 @@ describe('NeuNotificationCenterComponent', () => {
   it('clearAll button should appear and remove all notifications', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'info', message: 'A', duration: 0 });
+    svc.push({ tone: 'info', message: 'A', duration: 0 });
     f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();

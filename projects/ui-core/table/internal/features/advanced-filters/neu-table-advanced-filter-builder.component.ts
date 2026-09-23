@@ -79,9 +79,9 @@ import {
       display: grid;
       gap: 0.75rem;
       padding: 1rem;
-      border: 1px solid var(--neu-color-border, currentColor);
+      border: 1px solid var(--neu-border, currentColor);
       border-radius: 0.5rem;
-      background: var(--neu-color-surface, Canvas);
+          background: var(--neu-surface, Canvas);
       box-shadow: 0 0.75rem 2rem color-mix(in srgb, currentColor 18%, transparent);
     }
 
@@ -103,7 +103,7 @@ import {
     }
 
     :is(select, input, button):focus-visible {
-      outline: 2px solid var(--neu-color-focus, currentColor);
+          outline: 2px solid var(--neu-focus-color, currentColor);
       outline-offset: 2px;
     }
   `,

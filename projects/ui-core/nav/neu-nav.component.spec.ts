@@ -29,7 +29,7 @@ const BADGE_ITEMS: NeuNavItem[] = [
     icon: 'lucideChevronRight',
     route: '/notifs',
     badge: '9',
-    badgeVariant: 'danger',
+        badgeTone: 'danger',
   },
 ];
 
@@ -170,7 +170,7 @@ describe('NeuNavComponent', () => {
         label: 'Grupo con badge',
         icon: 'lucideChevronRight',
         badge: 'Beta',
-        badgeVariant: 'info',
+        badgeTone: 'info',
         children: [{ id: 'child', label: 'Child', icon: 'lucideChevronRight', route: '/child' }],
       },
     ]);
@@ -181,7 +181,7 @@ describe('NeuNavComponent', () => {
     expect(f.nativeElement.querySelector('.neu-nav__item-badge')).toBeTruthy();
   });
 
-  it('should use default badge variant when badgeVariant is omitted on group and child items', async () => {
+  it('should use the neutral badge tone when badgeTone is omitted on group and child items', async () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', [
       {
@@ -212,7 +212,7 @@ describe('NeuNavComponent', () => {
     f.componentInstance['toggleGroup']('group-default-badge');
     f.detectChanges();
 
-    const badges = Array.from(f.nativeElement.querySelectorAll('.neu-nav__item-badge--default'));
+    const badges = Array.from(f.nativeElement.querySelectorAll('.neu-nav__item-badge--neutral'));
     expect(badges.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -225,7 +225,7 @@ describe('NeuNavComponent', () => {
         icon: 'lucideExternalLink',
         href: 'https://github.com',
         badge: 'New',
-        badgeVariant: 'info',
+        badgeTone: 'info',
       },
     ]);
     f.detectChanges();
@@ -284,7 +284,7 @@ describe('NeuNavComponent', () => {
         icon: 'lucideChevronRight',
         route: '/',
         badge: '4',
-        badgeVariant: 'warning',
+        badgeTone: 'warning',
       },
     ]);
     f.detectChanges();
@@ -478,7 +478,7 @@ describe('NeuNavComponent', () => {
             icon: 'lucideExternalLink',
             href: 'https://example.com',
             badge: 'Hot',
-            badgeVariant: 'warning',
+        badgeTone: 'warning',
           },
         ],
       },

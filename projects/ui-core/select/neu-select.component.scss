@@ -21,7 +21,7 @@ $select-height: 48px;
     width: 100%;
   }
 
-  &--filled .neu-select__trigger {
+  &--solid .neu-select__trigger {
     background: var(--neu-surface-2);
   }
 
@@ -205,7 +205,7 @@ $select-height: 48px;
   margin: 8px;
   padding: 8px 10px;
   border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-md);
+  border-radius: var(--neu-radius);
   background: var(--neu-surface-2);
   color: var(--neu-text);
   text-align: start;

@@ -1,5 +1,6 @@
 import {
   Component,
+  DestroyRef,
   HostListener,
   ViewEncapsulation,
   effect,
@@ -8,9 +9,10 @@ import {
   input,
   output,
 } from '@angular/core';
-import { Overlay } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
+import { NeuCloseReason, NeuCloseRequest } from '@neural-ui/core/foundation';
+import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
 
 export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
 
@@ -25,7 +27,11 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
   template: `
     @if (open()) {
       @if (backdrop()) {
-        <div class="neu-bottom-sheet__backdrop" aria-hidden="true" (click)="requestClose()"></div>
+        <div
+          class="neu-bottom-sheet__backdrop"
+          aria-hidden="true"
+          (click)="requestClose('outside', $event)"
+        ></div>
       }
       <section
         class="neu-bottom-sheet"
@@ -33,7 +39,7 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
         neuModalFocus
         [class.neu-bottom-sheet--full]="size() === 'full'"
         [neuModalFocusInitial]="initialFocus()"
-        (neuModalFocusEscape)="requestClose()"
+        (neuModalFocusEscape)="requestClose('escape', $event)"
         role="dialog"
         aria-modal="true"
         [attr.aria-label]="ariaLabel() || title() || 'Bottom sheet'"
@@ -46,13 +52,13 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
               neu-button
               class="neu-bottom-sheet__close"
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
               icon="lucideX"
               [iconOnly]="true"
               [ariaLabel]="closeLabel()"
               [disabled]="disableClose()"
-              (click)="requestClose()"
+              (click)="requestClose('action', $event)"
             ></button>
           </header>
         }
@@ -71,38 +77,52 @@ export class NeuBottomSheetComponent {
   readonly disableClose = input(false);
   readonly size = input<NeuBottomSheetSize>('md');
   readonly initialFocus = input('first');
-  readonly closed = output<void>();
-  private readonly scrollStrategy = inject(Overlay).scrollStrategies.block();
+  readonly closeRequested = output<NeuCloseRequest>();
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly overlayStack = inject(InternalNeuOverlayStack);
 
   private eventPanelVisible = false;
+  private lifecycleInitialized = false;
   /** Panel mounted in the browser, independently of the trigger source. */
   readonly opened = output<void>();
-  /** Panel unmounted after render; closed remains a request. Silent on destroy. */
-  readonly hidden = output<void>();
+  /** Panel unmounted after an applied post-init transition. Silent on destroy. */
+  readonly closed = output<void>();
 
   constructor() {
     afterRenderEffect(() => {
       const visible = this.open();
+      if (!this.lifecycleInitialized) {
+        this.lifecycleInitialized = true;
+        this.eventPanelVisible = visible;
+        return;
+      }
       if (visible === this.eventPanelVisible) return;
       this.eventPanelVisible = visible;
       if (visible) this.opened.emit();
-      else this.hidden.emit();
+      else this.closed.emit();
     });
     effect((onCleanup) => {
       if (!this.open()) return;
-      this.scrollStrategy.enable();
-      onCleanup(() => this.scrollStrategy.disable());
+      onCleanup(this.overlayStack.activate(this));
     });
   }
 
-  requestClose(): void {
-    if (!this.disableClose()) {
-      this.closed.emit();
-    }
+  requestClose(reason: NeuCloseReason = 'programmatic-command', originalEvent?: Event): void {
+    if (
+      this.disableClose() ||
+      this.destroyRef.destroyed ||
+      !this.open() ||
+      !this.overlayStack.isTop(this)
+    )
+      return;
+    this.closeRequested.emit({ reason, ...(originalEvent ? { originalEvent } : {}) });
   }
 
-  @HostListener('document:keydown.escape')
-  onDocumentEscape(): void {
-    if (this.open()) this.requestClose();
+  @HostListener('document:keydown.escape', ['$event'])
+  onDocumentEscape(event: Event): void {
+    if (event.defaultPrevented || !this.open() || !this.overlayStack.isTop(this)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.requestClose('escape', event);
   }
 }

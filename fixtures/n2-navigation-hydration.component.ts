@@ -1,11 +1,8 @@
 import { Component, afterNextRender, signal } from '@angular/core';
+import { NeuCloseRequest } from './ui-core/foundation/neu-overlay-dismiss-policy';
 import { NeuPanelComponent } from './ui-core/panel/neu-panel.component';
 import { NeuSidebarComponent } from './ui-core/sidebar/neu-sidebar.component';
-import {
-  NeuTab,
-  NeuTabPanelComponent,
-  NeuTabsComponent,
-} from './ui-core/tabs/neu-tabs.component';
+import { NeuTab, NeuTabPanelComponent, NeuTabsComponent } from './ui-core/tabs/neu-tabs.component';
 
 @Component({
   selector: 'n2-navigation-hydration',
@@ -15,6 +12,9 @@ import {
     <output id="n2-tabs-events">{{ tabsEvents() }}</output>
     <output id="n2-panel-events">{{ panelEvents() }}</output>
     <output id="n2-sidebar-events">{{ sidebarEvents() }}</output>
+    <output id="n2-sidebar-overlay-requests">{{ sidebarOverlayRequests() }}</output>
+    <output id="n2-sidebar-opened">{{ sidebarOpened() }}</output>
+    <output id="n2-sidebar-closed">{{ sidebarClosed() }}</output>
 
     <neu-tabs
       id="n2-tabs-one"
@@ -53,6 +53,27 @@ import {
         Toggle navigation
       </button>
     </neu-sidebar>
+
+    <button id="n2-sidebar-overlay-open" type="button" (click)="sidebarOverlayOpen.set(true)">
+      Open overlay navigation
+    </button>
+    <neu-sidebar
+      id="n2-sidebar-overlay"
+      [open]="sidebarOverlayOpen()"
+      (closeRequested)="acceptSidebarOverlayClose($event)"
+      (opened)="sidebarOpened.update(increment)"
+      (closed)="sidebarClosed.update(increment)"
+    >
+      <span neu-sidebar-header>Overlay navigation</span>
+      <a href="#content">Content</a>
+      <button
+        id="n2-sidebar-overlay-parent-close"
+        type="button"
+        (click)="sidebarOverlayOpen.set(false)"
+      >
+        Parent closes overlay navigation
+      </button>
+    </neu-sidebar>
   `,
 })
 export class N2NavigationHydrationComponent {
@@ -67,6 +88,11 @@ export class N2NavigationHydrationComponent {
   readonly tabsEvents = signal(0);
   readonly panelEvents = signal(0);
   readonly sidebarEvents = signal(0);
+  readonly sidebarOverlayOpen = signal(true);
+  readonly sidebarOverlayRequests = signal(0);
+  readonly sidebarOpened = signal(0);
+  readonly sidebarClosed = signal(0);
+  readonly increment = (count: number): number => count + 1;
 
   constructor() {
     afterNextRender(() => this.ready.set(true));
@@ -85,5 +111,10 @@ export class N2NavigationHydrationComponent {
   acceptSidebar(collapsed: boolean): void {
     this.sidebarCollapsed.set(collapsed);
     this.sidebarEvents.update((count) => count + 1);
+  }
+
+  acceptSidebarOverlayClose(_request: NeuCloseRequest): void {
+    this.sidebarOverlayRequests.update(this.increment);
+    this.sidebarOverlayOpen.set(false);
   }
 }

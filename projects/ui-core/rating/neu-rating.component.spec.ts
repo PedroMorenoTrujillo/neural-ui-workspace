@@ -162,4 +162,38 @@ describe('NeuRatingComponent', () => {
     expect(fixture.nativeElement.querySelector('.neu-rating__star--half')).toBeNull();
     expect(fixture.nativeElement.querySelector('linearGradient')).toBeNull();
   });
+
+  it('offers discrete half-step radios and preserves a fractional applied value', () => {
+    const { component, root, buttons } = mount({ value: 2.5, step: 0.5 });
+    expect(buttons()).toHaveLength(10);
+    expect(component.value()).toBe(2.5);
+    expect(component.selectedValue()).toBe(2.5);
+    expect(root.querySelectorAll('[aria-checked="true"]')).toHaveLength(1);
+    expect(buttons()[4].getAttribute('aria-label')).toBe('2.5 stars');
+    expect(buttons()[4].classList.contains('neu-rating__star--half')).toBe(true);
+  });
+
+  it('selects and clears a half rating exactly once per user activation', () => {
+    const { component, buttons } = mount({ step: 0.5 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    buttons()[2].click();
+    buttons()[2].click();
+    expect(changes.mock.calls.map(([value]) => value)).toEqual([1.5, null]);
+  });
+
+  it('moves by half steps with RTL-aware arrows and bounds', () => {
+    const { component, root, buttons } = mount({ value: 2.5, step: 0.5 });
+    root.style.direction = 'rtl';
+    buttons()[4].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    expect(component.value()).toBe(3);
+    buttons()[5].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }));
+    expect(component.value()).toBe(0.5);
+  });
+
+  it('bounds invalid runtime step configuration to the certified integer mode', () => {
+    const { component, buttons } = mount({ step: 0 });
+    expect(component.resolvedStep()).toBe(1);
+    expect(buttons()).toHaveLength(5);
+  });
 });

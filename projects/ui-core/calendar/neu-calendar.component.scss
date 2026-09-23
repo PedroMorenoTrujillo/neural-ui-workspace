@@ -390,7 +390,7 @@ html[data-theme='dark'] {
   font-size: 10px;
 }
 
-.neu-calendar__event--default {
+.neu-calendar__event--brand {
   border-inline-start-color: var(--neu-primary);
 }
 
@@ -403,7 +403,7 @@ html[data-theme='dark'] {
 }
 
 .neu-calendar__event--danger {
-  border-inline-start-color: var(--neu-danger);
+  border-inline-start-color: var(--neu-error);
 }
 
 .neu-calendar__event--info {

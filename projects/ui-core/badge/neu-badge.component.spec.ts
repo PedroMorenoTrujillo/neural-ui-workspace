@@ -4,20 +4,20 @@ import { NeuBadgeComponent } from './neu-badge.component';
 
 @Component({
   template: `<neu-badge
+    [tone]="tone"
     [variant]="variant"
     [size]="size"
     [dot]="dot"
-    [outline]="outline"
     [pill]="pill"
     >Label</neu-badge
   >`,
   imports: [NeuBadgeComponent],
 })
 class TestHostComponent {
-  variant: any = 'default';
+  tone: any = 'neutral';
+  variant: any = 'soft';
   size: any = 'md';
   dot = false;
-  outline = false;
   pill = true;
 }
 
@@ -41,14 +41,14 @@ describe('NeuBadgeComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Label');
   });
 
-  it('should apply default variant class', () => {
+  it('should apply default tone class', () => {
     const el = fixture.nativeElement.querySelector('neu-badge');
-    expect(el.classList).toContain('neu-badge--default');
+    expect(el.classList).toContain('neu-badge--neutral');
   });
 
-  it('should apply variant class when changed', async () => {
+  it('should apply tone class when changed', async () => {
     const df = TestBed.createComponent(NeuBadgeComponent);
-    df.componentRef.setInput('variant', 'success');
+    df.componentRef.setInput('tone', 'success');
     df.detectChanges();
     await df.whenStable();
     expect(df.nativeElement.classList.toString()).toContain('neu-badge--success');
@@ -76,7 +76,7 @@ describe('NeuBadgeComponent', () => {
 
   it('should apply outline class', async () => {
     const df = TestBed.createComponent(NeuBadgeComponent);
-    df.componentRef.setInput('outline', true);
+    df.componentRef.setInput('variant', 'outline');
     df.detectChanges();
     await df.whenStable();
     expect(df.nativeElement.classList.toString()).toContain('neu-badge--outline');

@@ -730,10 +730,26 @@ El Router adapter pertenece a la aplicación y sincroniza query params con `acti
 />
 
 <neu-sidebar
+  [open]="navOpen"
+  (closeRequested)="acceptSidebarClose($event)"
   [collapsed]="navCollapsed"
   (collapsedChange)="navCollapsed = $event"
 />
 ```
+
+```ts
+onUrlChanged(url: URL): void {
+  this.navOpen = url.searchParams.get('menu') === 'open';
+}
+
+acceptSidebarClose(request: NeuCloseRequest): void {
+  if (request.reason === 'escape' || request.reason === 'outside' || request.reason === 'action') {
+    this.router.navigate([], { queryParams: { menu: null } });
+  }
+}
+```
+
+Sidebar no conserva `urlParam`, `open()` ni `close()`. URL/back-forward escribe el input aplicado `open` desde el consumer y no produce eco; `closeRequested` solo expresa la intención del gesto.
 
 ## 18. Eventos de opción y lifecycle
 

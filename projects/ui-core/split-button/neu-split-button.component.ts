@@ -20,7 +20,7 @@ import {
   Overlay,
   OverlayModule,
 } from '@angular/cdk/overlay';
-import { NeuButtonVariant, NeuButtonSize } from '@neural-ui/core/button';
+import { NeuButtonSize, NeuButtonTone, NeuButtonVariant } from '@neural-ui/core/button';
 import { NeuRovingMenuController } from '@neural-ui/core/internal';
 
 export interface NeuSplitButtonAction {
@@ -220,8 +220,11 @@ export class NeuSplitButtonComponent {
   /** Texto del botón principal / Primary button text */
   label = input<string>('');
 
-  /** Variante visual / Visual variant */
-  variant = input<NeuButtonVariant>('primary');
+  /** Intención semántica / Semantic intent */
+  tone = input<NeuButtonTone>('brand');
+
+  /** Tratamiento visual / Visual treatment */
+  variant = input<NeuButtonVariant>('solid');
 
   /** Tamaño / Size */
   size = input<NeuButtonSize>('md');
@@ -274,11 +277,12 @@ export class NeuSplitButtonComponent {
 
   readonly mainClasses = computed(
     () =>
-      `neu-button neu-button--${this.variant()} neu-button--${this.size()}${this.loading() ? ' neu-button--loading' : ''}`,
+      `neu-button neu-button--${this.tone()} neu-button--${this.variant()} neu-button--${this.size()}${this.loading() ? ' neu-button--loading' : ''}`,
   );
 
   readonly chevronClasses = computed(
-    () => `neu-button neu-button--${this.variant()} neu-button--${this.size()}`,
+    () =>
+      `neu-button neu-button--${this.tone()} neu-button--${this.variant()} neu-button--${this.size()}`,
   );
 
   toggleDropdown(event: MouseEvent): void {

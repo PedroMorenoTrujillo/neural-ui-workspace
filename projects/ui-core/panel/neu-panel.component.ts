@@ -104,13 +104,14 @@ export class NeuPanelComponent {
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-fieldset-host' },
   template: `
-    <fieldset class="neu-fieldset">
+    <fieldset class="neu-fieldset" [disabled]="disabled()">
       @if (legend()) {
         <legend [id]="_legendId">
           @if (collapsible()) {
             <button
               class="neu-fieldset__toggle"
               type="button"
+              [disabled]="disabled()"
               [attr.aria-expanded]="!effectiveCollapsed()"
               [attr.aria-controls]="_contentId"
               (click)="toggle()"
@@ -139,6 +140,8 @@ export class NeuPanelComponent {
 })
 export class NeuFieldsetComponent {
   readonly legend = input('');
+  /** Native disabled state for projected form controls. */
+  readonly disabled = input(false, { transform: booleanAttribute });
   readonly collapsible = input(false, { transform: booleanAttribute });
   /** Presence makes collapse state consumer-authoritative. */
   readonly collapsed = input<boolean | undefined>(undefined);
@@ -151,7 +154,7 @@ export class NeuFieldsetComponent {
   protected readonly _contentId = inject(NeuIdGenerator).getId('neu-fieldset-content-');
 
   toggle(): void {
-    if (!this.collapsible()) return;
+    if (!this.collapsible() || this.disabled()) return;
     const next = !this.effectiveCollapsed();
     if (this.collapsed() === undefined) this.internalCollapsed.set(next);
     this.collapsedChange.emit(next);

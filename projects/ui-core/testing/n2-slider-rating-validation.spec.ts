@@ -7,7 +7,7 @@ import { NeuSliderComponent } from '../slider/neu-slider.component';
 @Component({
   imports: [FormField, NeuSliderComponent, NeuRatingComponent],
   template: `
-    <neu-slider data-control="slider" [formField]="fields.slider" />
+    <neu-slider data-control="slider" [minValue]="10" [maxValue]="90" [formField]="fields.slider" />
     <neu-rating data-control="rating" [formField]="fields.rating" />
   `,
 })
@@ -38,7 +38,7 @@ describe('N2-010 Slider/Rating Signal Forms validation', () => {
     TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
   );
 
-  it('binds required, min, max and custom validation to Slider', () => {
+  it('keeps numeric Slider bounds separate from form validation metadata', () => {
     const fixture = TestBed.createComponent(ValidationHost);
     fixture.detectChanges();
     const field = fixture.componentInstance.fields.slider();

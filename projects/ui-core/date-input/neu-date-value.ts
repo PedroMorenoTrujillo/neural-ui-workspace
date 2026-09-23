@@ -16,7 +16,17 @@ export interface CivilDateRange {
   readonly end: CivilDate | null;
 }
 
-export type NeuDateMode = 'date' | 'time' | 'datetime' | 'multiple' | 'range';
+export interface CivilMonth {
+  readonly year: number;
+  readonly month: number;
+}
+
+export interface CivilYear {
+  readonly year: number;
+}
+
+export type NeuDateMode = 'date' | 'time' | 'datetime' | 'multiple' | 'range' | 'month' | 'year';
+export type NeuDatePresentation = 'overlay' | 'inline';
 
 export interface NeuDateValueMap {
   readonly date: CivilDate | null;
@@ -24,6 +34,8 @@ export interface NeuDateValueMap {
   readonly datetime: LocalDateTime | null;
   readonly multiple: readonly CivilDate[];
   readonly range: CivilDateRange;
+  readonly month: CivilMonth | null;
+  readonly year: CivilYear | null;
 }
 
 export type NeuDateValue<M extends NeuDateMode> = NeuDateValueMap[M];
@@ -32,7 +44,11 @@ export type NeuDateBoundary<M extends NeuDateMode> = M extends 'time'
   ? LocalTime
   : M extends 'datetime'
     ? LocalDateTime
-    : CivilDate;
+    : M extends 'month'
+      ? CivilMonth
+      : M extends 'year'
+        ? CivilYear
+        : CivilDate;
 
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME_PATTERN = /^(\d{2}):(\d{2})(?::(\d{2}))?$/;
@@ -113,10 +129,12 @@ export function emptyDateValue(mode: 'time'): LocalTime | null;
 export function emptyDateValue(mode: 'datetime'): LocalDateTime | null;
 export function emptyDateValue(mode: 'multiple'): readonly CivilDate[];
 export function emptyDateValue(mode: 'range'): CivilDateRange;
+export function emptyDateValue(mode: 'month'): CivilMonth | null;
+export function emptyDateValue(mode: 'year'): CivilYear | null;
 export function emptyDateValue<M extends NeuDateMode>(mode: M): NeuDateValue<M>;
 export function emptyDateValue(
   mode: NeuDateMode,
-): CivilDate | LocalTime | LocalDateTime | readonly CivilDate[] | CivilDateRange | null {
+): CivilDate | LocalTime | LocalDateTime | readonly CivilDate[] | CivilDateRange | CivilMonth | CivilYear | null {
   if (mode === 'multiple') return [];
   if (mode === 'range') return { start: null, end: null };
   return null;

@@ -62,6 +62,8 @@ for (const sourceName of [
   'dateTimeInput',
   'multipleInput',
   'rangeInput',
+  'monthInput',
+  'yearInput',
   'selectSingle',
   'selectMultiple',
   'autocompleteStrict',

@@ -28,19 +28,19 @@
   flex-shrink: 0;
 
   &[data-index='0']:not([style*='background']) {
-    background: var(--neu-color-primary, #0ea5e9);
+    background: var(--neu-primary, #0ea5e9);
   }
   &[data-index='1']:not([style*='background']) {
-    background: var(--neu-color-success, #22c55e);
+    background: var(--neu-success, #22c55e);
   }
   &[data-index='2']:not([style*='background']) {
-    background: var(--neu-color-warning, #f59e0b);
+    background: var(--neu-warning, #f59e0b);
   }
   &[data-index='3']:not([style*='background']) {
-    background: var(--neu-color-danger, #ef4444);
+    background: var(--neu-error, #ef4444);
   }
   &[data-index='4']:not([style*='background']) {
-    background: var(--neu-color-secondary, #8b5cf6);
+    background: var(--neu-secondary, #8b5cf6);
   }
 }
 
@@ -70,19 +70,19 @@
   flex-shrink: 0;
 
   &[data-index='0']:not([style*='background']) {
-    background: var(--neu-color-primary, #0ea5e9);
+    background: var(--neu-primary, #0ea5e9);
   }
   &[data-index='1']:not([style*='background']) {
-    background: var(--neu-color-success, #22c55e);
+    background: var(--neu-success, #22c55e);
   }
   &[data-index='2']:not([style*='background']) {
-    background: var(--neu-color-warning, #f59e0b);
+    background: var(--neu-warning, #f59e0b);
   }
   &[data-index='3']:not([style*='background']) {
-    background: var(--neu-color-danger, #ef4444);
+    background: var(--neu-error, #ef4444);
   }
   &[data-index='4']:not([style*='background']) {
-    background: var(--neu-color-secondary, #8b5cf6);
+    background: var(--neu-secondary, #8b5cf6);
   }
 }
 

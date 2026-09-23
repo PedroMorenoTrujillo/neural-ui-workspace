@@ -11,14 +11,15 @@ import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
-export type NeuAlertType = 'info' | 'success' | 'warning' | 'error';
+export type NeuAlertTone = 'info' | 'success' | 'warning' | 'danger';
+export type NeuAlertVariant = 'soft' | 'outline';
 
 /** Icono por defecto para cada tipo */
-const DEFAULT_ICON_NAMES: Record<NeuAlertType, string> = {
+const DEFAULT_ICON_NAMES: Record<NeuAlertTone, string> = {
   info: 'lucideInfo',
   success: 'lucideCheckCircle',
   warning: 'lucideAlertTriangle',
-  error: 'lucideXCircle',
+  danger: 'lucideXCircle',
 };
 
 /**
@@ -26,8 +27,8 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertType, string> = {
  *
  * Mensaje de alerta contextual con soporte de icono personalizado, slot de acciones y cierre.
  *
- * Uso: <neu-alert type="success">Operación completada</neu-alert>
- *      <neu-alert type="error" [closable]="true" (closed)="onClosed()">Error de red</neu-alert>
+ * Uso: <neu-alert tone="success">Operación completada</neu-alert>
+ *      <neu-alert tone="danger" [closable]="true" (closed)="onClosed()">Error de red</neu-alert>
  */
 @Component({
   selector: 'neu-alert',
@@ -63,7 +64,7 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertType, string> = {
           neu-button
           class="neu-alert__close"
           type="button"
-          variant="ghost"
+          tone="neutral" variant="ghost"
           size="sm"
           icon="lucideX"
           [iconOnly]="true"
@@ -77,8 +78,8 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertType, string> = {
   styleUrl: './neu-alert.component.scss',
 })
 export class NeuAlertComponent {
-  /** Tipo semántico / Semantic type */
-  readonly type = input<NeuAlertType>('info');
+  /** Intención semántica / Semantic intent */
+  readonly tone = input<NeuAlertTone>('info');
 
   /** Título opcional sobre el mensaje / Optional title above message */
   readonly title = input<string>('');
@@ -92,8 +93,8 @@ export class NeuAlertComponent {
   /** Permite cerrarse / Can be dismissed */
   readonly closable = input<boolean>(false);
 
-  /** Variante outline (sin fondo sólido) / Outline variant (no solid background) */
-  readonly outline = input<boolean>(false);
+  /** Tratamiento visual / Visual treatment */
+  readonly variant = input<NeuAlertVariant>('soft');
 
   /** Aria-label para el botón de cierre / Aria-label for the close button */
   readonly closeLabel = input<string>('Close alert');
@@ -104,16 +105,16 @@ export class NeuAlertComponent {
   private readonly _id = inject(NeuIdGenerator).getId('neu-alert-');
   protected readonly _dismissed = signal(false);
 
-  protected readonly _defaultIconName = computed(() => DEFAULT_ICON_NAMES[this.type()]);
+  protected readonly _defaultIconName = computed(() => DEFAULT_ICON_NAMES[this.tone()]);
 
-  readonly liveRegion = computed(() => (this.type() === 'error' ? 'assertive' : 'polite'));
+  readonly liveRegion = computed(() => (this.tone() === 'danger' ? 'assertive' : 'polite'));
 
-  readonly alertRole = computed(() => (this.type() === 'error' ? 'alert' : 'status'));
+  readonly alertRole = computed(() => (this.tone() === 'danger' ? 'alert' : 'status'));
 
   readonly hostClasses = computed(() => ({
     'neu-alert': true,
-    [`neu-alert--${this.type()}`]: true,
-    'neu-alert--outline': this.outline(),
+    [`neu-alert--${this.tone()}`]: true,
+    [`neu-alert--${this.variant()}`]: true,
     'neu-alert--closable': this.closable(),
     'neu-alert--with-icon': this.showIcon(),
     'neu-alert--with-title': Boolean(this.title()),

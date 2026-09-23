@@ -41,8 +41,9 @@ describe('NeuDividerComponent', () => {
   });
 
   it('should apply horizontal orientation by default', () => {
-    const el = fixture.nativeElement.querySelector('neu-divider, .neu-divider');
-    expect(el).toBeTruthy();
+    const el = fixture.nativeElement.querySelector('.neu-divider');
+    expect(el.getAttribute('role')).toBe('separator');
+    expect(el.getAttribute('aria-orientation')).toBe('horizontal');
   });
 
   it('should apply vertical orientation class', async () => {
@@ -52,5 +53,6 @@ describe('NeuDividerComponent', () => {
     await df.whenStable();
     const el = df.nativeElement.querySelector('[class*="vertical"]');
     expect(el).toBeTruthy();
+    expect(el.getAttribute('aria-orientation')).toBe('vertical');
   });
 });

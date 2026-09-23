@@ -141,11 +141,7 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     f.detectChanges();
     c.toggleExpanded(root, new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     c.toggleExpanded(lazy, new MouseEvent('click'));
-    expect(expansions).toEqual([
-      ['root'],
-      [],
-      ['root', 'lazy'],
-    ]);
+    expect(expansions).toEqual([['root'], [], ['root', 'lazy']]);
     expect(requests).toEqual([{ requestId: 1, queryRevision: 2, parentKey: 'lazy' }]);
     c.clear(new MouseEvent('click'));
     expect(clears).toHaveLength(1);
@@ -279,35 +275,35 @@ describe('H9-A2 zoneless runtime event contracts', () => {
   }
 
   for (const component of [NeuDialogComponent, NeuBottomSheetComponent]) {
-    it(`${component.name}: closed is a request; hidden follows actual removal, not destroy`, async () => {
+    it(`${component.name}: closeRequested is intent; closed follows actual removal, not destroy`, async () => {
       const f = mount(component as Type<NeuDialogComponent | NeuBottomSheetComponent>);
       const c = f.componentInstance;
       const opened = capture(c.opened),
-        hidden = capture(c.hidden),
-        requested = capture(c.closed);
+        closed = capture(c.closed),
+        requested = capture(c.closeRequested);
       f.componentRef.setInput('open', true);
       f.detectChanges();
       await f.whenStable();
       expect(opened).toHaveLength(1);
-      if (c instanceof NeuDialogComponent) c.close('result');
+      if (c instanceof NeuDialogComponent) c.close();
       else c.requestClose();
       f.detectChanges();
       await f.whenStable();
       expect(requested).toHaveLength(1);
-      expect(hidden).toHaveLength(0);
+      expect(closed).toHaveLength(0);
       f.componentRef.setInput('open', false);
       f.detectChanges();
       await f.whenStable();
-      expect(hidden).toHaveLength(1);
+      expect(closed).toHaveLength(1);
       expect(requested).toHaveLength(1);
       f.detectChanges();
-      expect(hidden).toHaveLength(1);
+      expect(closed).toHaveLength(1);
       f.componentRef.setInput('open', true);
       f.detectChanges();
       await f.whenStable();
       f.destroy();
       await Promise.resolve();
-      expect(hidden).toHaveLength(1);
+      expect(closed).toHaveLength(1);
       expect(opened).toHaveLength(2);
     });
   }
@@ -628,12 +624,16 @@ describe('H9-A2 overlay and pointer cancellation races', () => {
     inputText(hue, String(c['_hue']()));
     hue.dispatchEvent(new Event('change'));
     expect(ends).toHaveLength(1);
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    outside.focus();
     (document.querySelector('.neu-cp__text-input') as HTMLElement).dispatchEvent(new Event('blur'));
     (f.nativeElement.querySelector('.neu-cp__trigger') as HTMLElement).dispatchEvent(
       new Event('blur'),
     );
     await Promise.resolve();
     expect(touched).toHaveBeenCalledTimes(1);
+    outside.remove();
     canvas.dispatchEvent(new MouseEvent('pointerdown', { clientX: 70, clientY: 80 }));
     f.destroy();
     c['finishColorChange']();

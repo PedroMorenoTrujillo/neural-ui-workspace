@@ -19,12 +19,12 @@ const ROWS: NeuTimelineGridRow[] = [
   {
     id: 'design',
     label: 'Design',
-    items: [{ id: 'kickoff', title: 'Kickoff', start: 'mon', span: 2, variant: 'info' }],
+      items: [{ id: 'kickoff', title: 'Kickoff', start: 'mon', span: 2, tone: 'info' }],
   },
   {
     id: 'engineering',
     label: 'Engineering',
-    items: [{ id: 'build', title: 'Build', start: 'wed', variant: 'success' }],
+      items: [{ id: 'build', title: 'Build', start: 'wed', tone: 'success' }],
   },
 ];
 
@@ -155,7 +155,7 @@ describe('NeuTimelineGridComponent', () => {
     ).toBe('1 / span 1');
     expect(component.slotGridColumn('unknown')).toBe('1 / span 1');
     expect(component.itemClass({ id: 'plain', title: 'Plain', start: 'mon' })).toBe(
-      'neu-timeline-grid__item neu-timeline-grid__item--default',
+      'neu-timeline-grid__item neu-timeline-grid__item--neutral',
     );
     expect(component.itemAriaLabel(ROWS[0], ROWS[0].items[0])).toBe('Design: Kickoff');
     expect(component.slotAriaLabel(ROWS[0], COLUMNS[0])).toBe('Design: Mon');

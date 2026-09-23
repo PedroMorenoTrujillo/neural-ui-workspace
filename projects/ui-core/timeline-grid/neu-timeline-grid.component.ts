@@ -5,8 +5,9 @@ import {
   output,
   ViewEncapsulation,
 } from '@angular/core';
+import type { NeuDensity } from '@neural-ui/core';
 
-export type NeuTimelineGridItemVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuTimelineGridItemTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface NeuTimelineGridColumn {
   id: string;
@@ -21,7 +22,7 @@ export interface NeuTimelineGridItem {
   span?: number;
   subtitle?: string;
   meta?: string;
-  variant?: NeuTimelineGridItemVariant;
+  tone?: NeuTimelineGridItemTone;
 }
 
 export interface NeuTimelineGridRow {
@@ -41,7 +42,8 @@ export interface NeuTimelineGridSlotSelection {
   imports: [],
   encapsulation: ViewEncapsulation.None,
   host: {
-    '[class.neu-timeline-grid--compact]': 'compact()',
+    '[class.neu-timeline-grid--density-compact]': 'density() === "compact"',
+    '[class.neu-timeline-grid--density-relaxed]': 'density() === "relaxed"',
     '[class.neu-timeline-grid--sticky-labels]': 'stickyLabels()',
     '[style.--neu-timeline-grid-min-column-width]': 'minColumnWidth()',
   },
@@ -122,7 +124,7 @@ export interface NeuTimelineGridSlotSelection {
 export class NeuTimelineGridComponent {
   readonly columns = input<NeuTimelineGridColumn[]>([]);
   readonly rows = input<NeuTimelineGridRow[]>([]);
-  readonly compact = input<boolean>(false);
+  readonly density = input<NeuDensity>('normal');
   readonly stickyLabels = input<boolean>(true);
   readonly minColumnWidth = input<string>('112px');
   readonly selectedItemId = input<string | null>(null);
@@ -160,7 +162,7 @@ export class NeuTimelineGridComponent {
 
   itemClass(item: NeuTimelineGridItem): string {
     const selectedClass = this.isItemSelected(item.id) ? ' neu-timeline-grid__item--selected' : '';
-    return `neu-timeline-grid__item neu-timeline-grid__item--${item.variant ?? 'default'}${selectedClass}`;
+    return `neu-timeline-grid__item neu-timeline-grid__item--${item.tone ?? 'neutral'}${selectedClass}`;
   }
 
   itemAriaLabel(row: NeuTimelineGridRow, item: NeuTimelineGridItem): string {

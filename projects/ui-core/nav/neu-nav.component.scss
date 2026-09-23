@@ -168,7 +168,7 @@ $item-radius: 8px;
     &:hover {
       background: var(--neu-nav-toggle-bg-hover);
       border-color: color-mix(in srgb, var(--neu-nav-toggle-border) 55%, var(--neu-text));
-      color: var(--neu-nav-toggle-color-hover);
+      color: var(--neu-text);
       transform: translateX(-1px);
     }
 
@@ -340,7 +340,7 @@ $item-radius: 8px;
     letter-spacing: 0.04em;
     transition: opacity 0.2s ease;
 
-    &--default {
+    &--neutral {
       background: var(--neu-surface-3);
       color: var(--neu-text-muted);
     }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import {
@@ -93,11 +93,11 @@ describe('NeuPanelComponent', () => {
 @Component({
   imports: [NeuFieldsetComponent, NeuScrollAreaComponent],
   template: `
-    <neu-fieldset legend="Details"><input value="Ada" /></neu-fieldset>
+    <neu-fieldset legend="Details" [disabled]="disabled()" [collapsible]="collapsible()"><input value="Ada" /></neu-fieldset>
     <neu-scroll-area maxHeight="12rem"><p>Scrollable</p></neu-scroll-area>
   `,
 })
-class PanelProjectionHostComponent {}
+class PanelProjectionHostComponent { readonly disabled = signal(false); readonly collapsible = signal(false); }
 
 @Component({
   imports: [NeuScrollAreaComponent],
@@ -128,6 +128,26 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     const fixture = TestBed.createComponent(NeuFieldsetComponent);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('legend')).toBeNull();
+  });
+
+  it('applies native disabled fieldset semantics to projected controls and the legend toggle', async () => {
+    await TestBed.configureTestingModule({ imports: [PanelProjectionHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(PanelProjectionHostComponent);
+    fixture.componentInstance.collapsible.set(true);
+    fixture.detectChanges();
+    const fieldset = fixture.nativeElement.querySelector('fieldset') as HTMLFieldSetElement;
+    const input = fieldset.querySelector('input') as HTMLInputElement;
+    expect(fieldset.disabled).toBe(false);
+    const component = fixture.debugElement.children[0].componentInstance as NeuFieldsetComponent;
+    fixture.componentInstance.disabled.set(true);
+    fixture.detectChanges();
+    expect(fieldset.disabled).toBe(true);
+    expect(input.matches(':disabled')).toBe(true);
+    expect((fieldset.querySelector('legend button') as HTMLButtonElement).disabled).toBe(true);
+    const proposed: boolean[] = [];
+    component.collapsedChange.subscribe((value) => proposed.push(value));
+    component.toggle();
+    expect(proposed).toEqual([]);
   });
 
   it('preserves fieldset and legend semantics while toggling controlled and uncontrolled content', async () => {

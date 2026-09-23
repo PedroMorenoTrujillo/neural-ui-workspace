@@ -58,8 +58,8 @@
     width: 100%;
   }
 
-  // ---- Variantes / Variants ----
-  &--primary {
+  // ---- Tonos + tratamientos / Tones + treatments ----
+  &--solid.neu-button--brand {
     background: var(--neu-button-background, var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))));
     color: var(--neu-button-foreground, var(--neu-primary-solid-fg, var(--neu-primary-fg)));
     border-color: var(--neu-button-border, var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))));
@@ -76,25 +76,40 @@
     }
   }
 
-  &--secondary {
-    background: #475569;
-    color: #ffffff;
-    border-color: #475569;
+  &--solid.neu-button--neutral {
+    background: var(--neu-text);
+    color: var(--neu-surface);
+    border-color: var(--neu-text);
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: #334155;
-      border-color: #334155;
+      background: color-mix(in srgb, var(--neu-text) 84%, black 16%);
+      border-color: color-mix(in srgb, var(--neu-text) 84%, black 16%);
     }
   }
 
   &--outline {
     background: transparent;
+    color: var(--neu-text);
+    border-color: currentColor;
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--neu-surface-2);
+    }
+  }
+
+  &--outline.neu-button--brand {
     color: var(--neu-primary-dark, var(--neu-primary));
-    border-color: var(--neu-primary);
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
       background: var(--neu-primary-50);
-      border-color: var(--neu-primary-dark, var(--neu-primary));
+    }
+  }
+
+  &--outline.neu-button--danger {
+    color: var(--neu-error);
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--neu-error-bg);
     }
   }
 
@@ -109,7 +124,23 @@
     }
   }
 
-  &--danger {
+  &--ghost.neu-button--brand {
+    color: var(--neu-primary-dark, var(--neu-primary));
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--neu-primary-50);
+    }
+  }
+
+  &--ghost.neu-button--danger {
+    color: var(--neu-error);
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--neu-error-bg);
+    }
+  }
+
+  &--solid.neu-button--danger {
     background: var(--neu-error);
     color: var(--neu-primary-fg);
     border-color: var(--neu-error);
@@ -188,12 +219,12 @@
 }
 
 html[data-theme='dark'] {
-  .neu-button--outline {
+  .neu-button--outline.neu-button--brand {
     color: #d8ebff;
     border-color: #65b7ff;
   }
 
-  .neu-button--outline:hover:not(:disabled):not(.neu-button--disabled) {
+  .neu-button--outline.neu-button--brand:hover:not(:disabled):not(.neu-button--disabled) {
     background: rgba(101, 183, 255, 0.18);
     color: #ffffff;
     border-color: #9ecbff;

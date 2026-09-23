@@ -2,10 +2,9 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  HostListener,
   ViewEncapsulation,
+  afterNextRender,
   computed,
-  effect,
   inject,
   input,
   linkedSignal,
@@ -55,6 +54,16 @@ interface NeuColorChannelView {
   readonly step: number;
 }
 
+interface NeuEyeDropperResult {
+  readonly sRGBHex: string;
+}
+
+interface NeuEyeDropper {
+  open(options?: { readonly signal?: AbortSignal }): Promise<NeuEyeDropperResult>;
+}
+
+type NeuEyeDropperWindow = Window & { readonly EyeDropper?: new () => NeuEyeDropper };
+
 const DEFAULT_COLOR: NeuSrgbColor = hsvToSrgb(210, 80, 90);
 const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
 
@@ -81,6 +90,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
       class="neu-cp__trigger"
       [id]="triggerId()"
       [attr.aria-expanded]="_isOpen()"
+      [attr.aria-controls]="_isOpen() ? panelId : null"
       aria-haspopup="dialog"
       [attr.aria-label]="ariaLabel() || 'Color: ' + (_textValue() || 'not set')"
       [attr.aria-labelledby]="ariaLabelledBy() || null"
@@ -108,11 +118,13 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
       (backdropClick)="requestOutsideDismiss($event)"
+      (overlayKeydown)="requestEscapeDismiss($event)"
       (detach)="onPanelDetached()"
       (attach)="onPanelAttached()"
     >
       <div
         class="neu-cp__panel"
+        [id]="panelId"
         role="dialog"
         aria-label="Color picker"
         (focusin)="onBoundaryFocusIn()"
@@ -264,6 +276,22 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
           />
           <span class="neu-cp__swatch-sm" [style.--neu-cp-color]="_cssColor()"></span>
         </div>
+        @if (_eyeDropperAvailable()) {
+          <button
+            type="button"
+            class="neu-cp__sample-button"
+            [disabled]="_isDisabled() || readonly() || _sampling()"
+            [attr.aria-busy]="_sampling() ? 'true' : null"
+            (click)="_sampleScreenColor()"
+          >
+            {{ _sampling() ? 'Sampling screen color…' : 'Sample screen color' }}
+          </button>
+        }
+        @if (_sampleError()) {
+          <span class="neu-cp__error" role="status">
+            Screen sampling is unavailable. Use the color controls instead.
+          </span>
+        }
         @if (_textInvalid()) {
           <span class="neu-cp__error" role="status">
             Enter a valid HEX, RGB, HSL, or OKLCH color.
@@ -303,6 +331,7 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _overlay = inject(Overlay);
   private readonly _id = inject(NeuIdGenerator).getId('neu-cp-');
+  protected readonly panelId = `${this._id}-panel`;
 
   protected readonly _modes: readonly NeuColorMode[] = ['hex', 'rgb', 'hsl', 'oklch'];
   protected readonly _swatches: readonly string[] = [
@@ -318,22 +347,40 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
     '#ec4899',
   ];
   protected readonly _isOpen = signal(false);
+  protected readonly _eyeDropperAvailable = signal(false);
+  protected readonly _sampling = signal(false);
+  protected readonly _sampleError = signal(false);
   private readonly _hasValue = computed(() => !!parseColor((this.value() ?? '').trim()));
   protected readonly _color = computed(
     () => parseColor((this.value() ?? '').trim())?.color ?? DEFAULT_COLOR,
   );
   private readonly _hueHint = signal(210);
   protected readonly _activeMode = linkedSignal<NeuColorMode>(() => this.mode());
-  protected readonly _draft = signal<string | null>(null);
-  protected readonly _textInvalid = signal(false);
+  protected readonly _draft = linkedSignal<string | null>(() => {
+    this.mode();
+    this.showAlpha();
+    this.showChannels();
+    return null;
+  });
+  protected readonly _textInvalid = computed(() => {
+    const draft = this._draft();
+    return draft !== null && !parseColor(draft);
+  });
   protected readonly _isDisabled = computed(() => this.disabled());
   readonly triggerId = computed(() => this.inputId() || this._id);
 
   private panelAttached = false;
   private _dragging = false;
   private activePointerId: number | null = null;
+  private activePointerTarget: HTMLElement | null = null;
+  private activeSample: AbortController | null = null;
   private continuousStart: string | null = null;
   private continuousValue: string | null = null;
+  private continuousConfig: {
+    mode: NeuColorMode;
+    showAlpha: boolean;
+    showChannels: boolean;
+  } | null = null;
   private touchSent = false;
 
   protected readonly _hsv = computed(() => srgbToHsv(this._color(), this._hueHint()));
@@ -348,14 +395,17 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
     };
   });
   protected readonly _alphaPercent = computed(() => Math.round(this._color().alpha * 100));
+  private readonly _serializeAlpha = computed(() => this.showAlpha() || this._color().alpha < 1);
   protected readonly _textValue = computed(() =>
     this._hasValue()
-      ? serializeColor(this._color(), this._activeMode(), this.showAlpha(), this._hueHint())
+      ? serializeColor(this._color(), this._activeMode(), this._serializeAlpha(), this._hueHint())
       : '',
   );
   /** Stable compact trigger label retained for existing consumers and test harnesses. */
   protected readonly _hexValue = computed(() =>
-    this._hasValue() ? serializeColor(this._color(), 'hex', this.showAlpha(), this._hueHint()) : '',
+    this._hasValue()
+      ? serializeColor(this._color(), 'hex', this._serializeAlpha(), this._hueHint())
+      : '',
   );
   protected readonly _displayText = computed(() => this._draft() ?? this._textValue());
   protected readonly _cssColor = computed(() =>
@@ -486,16 +536,14 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
   readonly overlayScrollStrategy = this._overlay.scrollStrategies.reposition();
 
   constructor() {
-    effect(() => {
-      this.mode();
-      this.showAlpha();
-      this.showChannels();
-      this.resetDraft();
-      this.cancelColorChange();
+    afterNextRender(() => {
+      const view = this._el.nativeElement.ownerDocument.defaultView as NeuEyeDropperWindow | null;
+      this._eyeDropperAvailable.set(typeof view?.EyeDropper === 'function');
     });
     this.eventDestroyRef.onDestroy(() => {
       this.panelAttached = false;
       this.cancelColorChange();
+      this.cancelSampling();
     });
   }
 
@@ -503,6 +551,14 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
     if (this.eventDestroyRef.destroyed || this.panelAttached) return;
     this.panelAttached = true;
     this.opened.emit();
+    queueMicrotask(() => {
+      if (!this.eventDestroyRef.destroyed && this._isOpen()) {
+        const area = this._el.nativeElement.ownerDocument
+          .getElementById(this.panelId)
+          ?.querySelector('.neu-cp__canvas-wrap') as HTMLElement | null;
+        area?.focus();
+      }
+    });
   }
 
   protected onPanelDetached(): void {
@@ -512,26 +568,17 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
     this._isOpen.set(false);
     this.resetDraft();
     this.cancelColorChange();
+    this.cancelSampling();
+    this._sampleError.set(false);
     if (wasAttached) this.closed.emit();
-  }
-
-  @HostListener('document:mousedown', ['$event'])
-  protected _outsideClick(event: MouseEvent): void {
-    const target = event.target as Element | null;
-    if (target?.closest('.cdk-overlay-backdrop')) return;
-    const isInsidePanel = !!target?.closest('.neu-cp__panel');
-    if (!this._el.nativeElement.contains(event.target as Node) && !isInsidePanel) {
-      this.requestOutsideDismiss(event);
-    }
   }
 
   protected requestOutsideDismiss(event: Event): void {
     this.requestDismissal('outside-pointer', event);
   }
 
-  @HostListener('document:keydown.escape', ['$event'])
   protected requestEscapeDismiss(event: Event): void {
-    if (!this._isOpen()) return;
+    if (!this._isOpen() || (event as KeyboardEvent).key !== 'Escape') return;
     this.requestDismissal('escape', event);
   }
 
@@ -553,16 +600,27 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
     if (this.continuousStart === null) {
       this.continuousStart = this.value();
       this.continuousValue = this.value();
+      this.continuousConfig = {
+        mode: this.mode(),
+        showAlpha: this.showAlpha(),
+        showChannels: this.showChannels(),
+      };
     }
   }
 
   protected finishColorChange(): void {
     const previous = this.continuousStart;
     const gestureValue = this.continuousValue;
+    const gestureConfig = this.continuousConfig;
     this.continuousStart = null;
     this.continuousValue = null;
+    this.continuousConfig = null;
     if (
       previous === null ||
+      !gestureConfig ||
+      gestureConfig.mode !== this.mode() ||
+      gestureConfig.showAlpha !== this.showAlpha() ||
+      gestureConfig.showChannels !== this.showChannels() ||
       this.eventDestroyRef.destroyed ||
       this._isDisabled() ||
       this.readonly()
@@ -575,18 +633,19 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
   }
 
   protected cancelColorChange(): void {
-    this._dragging = false;
-    this.activePointerId = null;
+    this.releasePointerCapture();
     this.continuousStart = null;
     this.continuousValue = null;
+    this.continuousConfig = null;
   }
 
   protected _canvasDown(event: PointerEvent): void {
-    if (!this.canMutate()) return;
+    if (!this.canMutate() || this._dragging) return;
     this.beginColorChange();
     this._dragging = true;
     this.activePointerId = event.pointerId;
-    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    this.activePointerTarget = event.currentTarget as HTMLElement;
+    this.activePointerTarget.setPointerCapture(event.pointerId);
     this._updateFromCanvas(event);
   }
 
@@ -597,11 +656,8 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
 
   protected _canvasUp(event: PointerEvent): void {
     if (!this._dragging || event.pointerId !== this.activePointerId) return;
-    this._dragging = false;
-    this.activePointerId = null;
     this.finishColorChange();
-    const target = event.currentTarget as HTMLElement;
-    if (target.hasPointerCapture?.(event.pointerId)) target.releasePointerCapture(event.pointerId);
+    this.releasePointerCapture();
   }
 
   private _updateFromCanvas(event: PointerEvent): void {
@@ -665,8 +721,8 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
   }
 
   protected _selectMode(mode: NeuColorMode): void {
+    this.cancelColorChange();
     this._draft.set(null);
-    this._textInvalid.set(false);
     this._activeMode.set(mode);
   }
 
@@ -701,7 +757,6 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
     if (!this.gestureStillOwned()) return;
     this._draft.set(text);
     const parsed = parseColor(text);
-    this._textInvalid.set(!parsed);
     if (parsed) this.commitColor(parsed.color, parsed.hueHint);
   }
 
@@ -710,7 +765,7 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
       event.preventDefault();
       event.stopPropagation();
       this.resetDraft();
-      this.continuousStart = null;
+      this.cancelColorChange();
       return;
     }
     if (event.key === 'Enter' && !this._textInvalid()) {
@@ -722,7 +777,6 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
 
   protected _onTextBlur(): void {
     this._draft.set(null);
-    this._textInvalid.set(false);
     this.finishColorChange();
     this.onBlur();
   }
@@ -764,8 +818,9 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
 
   onBlur(): void {
     queueMicrotask(() => {
+      if (this.eventDestroyRef.destroyed) return;
       const active = this._el.nativeElement.ownerDocument.activeElement;
-      const panel = this._el.nativeElement.ownerDocument.querySelector('.neu-cp__panel');
+      const panel = this._el.nativeElement.ownerDocument.getElementById(this.panelId);
       if (this._el.nativeElement.contains(active) || panel?.contains(active)) return;
       this.markTouched();
     });
@@ -784,6 +839,8 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
     this._isOpen.set(false);
     this.resetDraft();
     this.cancelColorChange();
+    this.cancelSampling();
+    this._sampleError.set(false);
     this.touchSent = false;
   }
 
@@ -797,28 +854,45 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
   }
 
   private closePanel(): void {
+    const panel = this._el.nativeElement.ownerDocument.getElementById(this.panelId);
+    const restoreFocus = !!panel?.contains(this._el.nativeElement.ownerDocument.activeElement);
     this._isOpen.set(false);
     this.resetDraft();
     this.cancelColorChange();
+    this.cancelSampling();
+    this._sampleError.set(false);
+    if (restoreFocus) {
+      queueMicrotask(() => {
+        if (!this.eventDestroyRef.destroyed && !this._isDisabled()) this.focus();
+      });
+    }
   }
 
   private resetDraft(): void {
     this._draft.set(null);
-    this._textInvalid.set(false);
   }
 
   private commitColor(color: NeuSrgbColor, hueHint?: number): boolean {
     const previous = this._color();
     if (hueHint !== undefined) this._hueHint.set(wrapHue(hueHint));
     if (colorsEqual(previous, color)) return false;
-    const value = serializeColor(color, this._activeMode(), this.showAlpha(), this._hueHint());
+    const value = serializeColor(color, this._activeMode(), this.showAlpha() || color.alpha < 1, this._hueHint());
     this.value.set(value);
     if (this.continuousStart !== null) this.continuousValue = value;
     return true;
   }
 
   private gestureStillOwned(): boolean {
-    if (this.continuousStart === null || this.continuousValue === this.value()) return true;
+    if (this.continuousStart === null) return true;
+    const config = this.continuousConfig;
+    if (
+      this.continuousValue === this.value() &&
+      config?.mode === this.mode() &&
+      config.showAlpha === this.showAlpha() &&
+      config.showChannels === this.showChannels()
+    ) {
+      return true;
+    }
     this.resetDraft();
     this.cancelColorChange();
     return false;
@@ -828,5 +902,65 @@ export class NeuColorPickerComponent implements FormValueControl<string> {
     if (this.touchSent) return;
     this.touchSent = true;
     this.touch.emit();
+  }
+
+  private releasePointerCapture(): void {
+    const pointerId = this.activePointerId;
+    const pointerTarget = this.activePointerTarget;
+    this._dragging = false;
+    this.activePointerId = null;
+    this.activePointerTarget = null;
+    if (pointerId !== null && pointerTarget?.hasPointerCapture?.(pointerId)) {
+      pointerTarget.releasePointerCapture(pointerId);
+    }
+  }
+
+  private cancelSampling(): void {
+    this.activeSample?.abort();
+    this.activeSample = null;
+    this._sampling.set(false);
+  }
+
+  protected async _sampleScreenColor(): Promise<void> {
+    if (!this.canMutate() || !this._isOpen() || this.activeSample) return;
+    const view = this._el.nativeElement.ownerDocument.defaultView as NeuEyeDropperWindow | null;
+    const EyeDropper = view?.EyeDropper;
+    if (typeof EyeDropper !== 'function') return;
+    const controller = new AbortController();
+    const startingValue = this.value();
+    this.activeSample = controller;
+    this._sampling.set(true);
+    this._sampleError.set(false);
+    try {
+      // open() must be called synchronously from the activation gesture.
+      const sample = await new EyeDropper().open({ signal: controller.signal });
+      if (
+        this.eventDestroyRef.destroyed ||
+        this.activeSample !== controller ||
+        !this._isOpen() ||
+        !this.canMutate() ||
+        this.value() !== startingValue
+      ) return;
+      const parsed = parseColor(sample.sRGBHex);
+      if (!parsed) {
+        this._sampleError.set(true);
+        return;
+      }
+      this.beginColorChange();
+      this.commitColor({ ...parsed.color, alpha: this._color().alpha }, parsed.hueHint);
+      this.finishColorChange();
+    } catch (error: unknown) {
+      if (
+        this.activeSample === controller &&
+        !controller.signal.aborted &&
+        !this.eventDestroyRef.destroyed &&
+        !(error instanceof DOMException && error.name === 'AbortError')
+      ) this._sampleError.set(true);
+    } finally {
+      if (this.activeSample === controller) {
+        this.activeSample = null;
+        this._sampling.set(false);
+      }
+    }
   }
 }

@@ -25,7 +25,7 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
   border: 1px solid $cb-border;
   font-family: var(--neu-font-mono);
 
-  &--compact {
+  &--density-compact {
     border-radius: var(--neu-radius-sm);
 
     .neu-code-block__header {
@@ -53,6 +53,25 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
     .neu-code-block__code {
       font-size: 0.75rem;
       line-height: 1.5;
+    }
+  }
+
+  &--density-relaxed {
+    .neu-code-block__header {
+      padding: 0.875rem 1.25rem;
+    }
+
+    .neu-code-block__dots {
+      gap: 8px;
+    }
+
+    .neu-code-block__copy {
+      min-height: 2.75rem;
+      padding: 0.5rem 0.875rem;
+    }
+
+    .neu-code-block__pre {
+      padding: 1.25rem 1.5rem;
     }
   }
 }

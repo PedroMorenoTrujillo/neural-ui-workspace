@@ -37,7 +37,7 @@
   border: 2.5px solid;
   background: var(--neu-surface);
 
-  &--default {
+  &--neutral {
     border-color: var(--neu-border);
     color: var(--neu-text-disabled);
     background: var(--neu-surface-2);
@@ -137,7 +137,7 @@
   }
 }
 
-.neu-timeline--compact {
+.neu-timeline--density-compact {
   .neu-timeline__item {
     min-height: 44px;
     gap: var(--neu-space-3);
@@ -181,7 +181,7 @@
   }
 }
 
-.neu-timeline--compact {
+.neu-timeline--density-compact {
   .neu-timeline__item {
     min-height: 42px;
     gap: var(--neu-space-3);
@@ -189,5 +189,16 @@
 
   .neu-timeline__content {
     padding-bottom: var(--neu-space-3);
+  }
+}
+
+.neu-timeline--density-relaxed {
+  .neu-timeline__item {
+    min-height: 72px;
+    gap: var(--neu-space-6);
+  }
+
+  .neu-timeline__content {
+    padding-bottom: var(--neu-space-6);
   }
 }

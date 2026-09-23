@@ -100,7 +100,7 @@ export class NeuDataViewFooterDirective {
                 neu-button
                 type="button"
                 class="neu-data-view__mode"
-                variant="ghost"
+                tone="neutral" variant="ghost"
                 size="sm"
                 [class.neu-data-view__mode--active]="mode() === item"
                 [attr.aria-pressed]="mode() === item"
@@ -140,7 +140,7 @@ export class NeuDataViewFooterDirective {
         <button
           neu-button
           type="button"
-          variant="secondary"
+          tone="neutral" variant="solid"
           size="sm"
           [disabled]="effectivePage() <= 1"
           (click)="previousPage()"
@@ -151,7 +151,7 @@ export class NeuDataViewFooterDirective {
         <button
           neu-button
           type="button"
-          variant="secondary"
+          tone="neutral" variant="solid"
           size="sm"
           [disabled]="effectivePage() >= pageCount()"
           (click)="nextPage()"

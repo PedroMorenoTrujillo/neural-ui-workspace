@@ -12,11 +12,11 @@ import {
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
 
-export type NeuNotificationType = 'info' | 'success' | 'warning' | 'error';
+export type NeuNotificationTone = 'info' | 'success' | 'warning' | 'danger';
 
 export interface NeuNotification {
   id: string;
-  type: NeuNotificationType;
+  tone: NeuNotificationTone;
   title?: string;
   message: string;
   /** Auto-dismiss duration in ms (0 = persistent) */
@@ -32,11 +32,11 @@ export interface NeuNotificationOptions extends Omit<
   'id' | 'timestamp' | 'read'
 > {}
 
-const DEFAULT_ICONS: Record<NeuNotificationType, string> = {
+const DEFAULT_ICONS: Record<NeuNotificationTone, string> = {
   info: 'ℹ️',
   success: '✅',
   warning: '⚠️',
-  error: '❌',
+  danger: '❌',
 };
 
 /**
@@ -45,7 +45,7 @@ const DEFAULT_ICONS: Record<NeuNotificationType, string> = {
  * Servicio inyectable que gestiona la cola de notificaciones.
  *
  * Uso:
- *   inject(NeuNotificationService).push({ type: 'success', message: '¡Guardado!' });
+ *   inject(NeuNotificationService).push({ tone: 'success', message: '¡Guardado!' });
  */
 @Injectable({ providedIn: 'root' })
 export class NeuNotificationService {
@@ -69,10 +69,10 @@ export class NeuNotificationService {
     const id = this.ids.getId('neu-notif-');
     const n: NeuNotification = {
       id,
-      type: opts.type ?? 'info',
+      tone: opts.tone ?? 'info',
       title: opts.title,
       message: opts.message,
-      icon: opts.icon ?? DEFAULT_ICONS[opts.type ?? 'info'],
+      icon: opts.icon ?? DEFAULT_ICONS[opts.tone ?? 'info'],
       duration: opts.duration ?? 5000,
       timestamp: this.temporal.currentNow(),
       read: false,
@@ -202,7 +202,7 @@ export class NeuNotificationService {
               class="neu-nc__item"
               role="listitem"
               [class.neu-nc__item--unread]="!n.read"
-              [class]="'neu-nc__item--' + n.type"
+          [class]="'neu-nc__item--' + n.tone"
             >
               <span class="neu-nc__item-icon" aria-hidden="true">{{ n.icon }}</span>
               <div class="neu-nc__item-body">

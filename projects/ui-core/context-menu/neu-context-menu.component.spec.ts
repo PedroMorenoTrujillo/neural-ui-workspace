@@ -13,7 +13,7 @@ import {
 const ITEMS: NeuContextMenuItem[] = [
   { key: 'copy', label: 'Copiar', icon: '📋' },
   { key: 'paste', label: 'Pegar', icon: '📋' },
-  { key: 'delete', label: 'Eliminar', icon: '🗑️', variant: 'danger' },
+  { key: 'delete', label: 'Eliminar', icon: '🗑️', tone: 'danger' },
 ];
 
 @Component({
@@ -334,7 +334,7 @@ describe('NeuContextMenuOverlayComponent', () => {
     expect(selected.length).toBe(0);
   });
 
-  it('should render danger class for danger variant items', async () => {
+  it('should render danger class for danger tone items', async () => {
     const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
     f.componentInstance._items.set([ITEMS[2]]);
     f.detectChanges();

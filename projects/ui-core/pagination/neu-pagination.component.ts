@@ -8,6 +8,7 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -156,6 +157,7 @@ export class NeuPaginationComponent {
   });
 
   protected readonly pageSizeControl = new FormControl(10, { nonNullable: true });
+  private readonly pageSizeSelect = viewChild(NeuSelectComponent);
 
   constructor() {
     const pageSizeSubscription = this.pageSizeControl.valueChanges.subscribe((value) =>
@@ -226,6 +228,9 @@ export class NeuPaginationComponent {
     const nextPage = Math.min(nextTotalPages, Math.floor(first / nextSize) + 1);
     this.pageSizeChange.emit(nextSize);
     if (nextPage !== this.page()) this.pageChange.emit(nextPage);
+    // The selector is a UI adapter; only the parent can apply the proposed size.
+    this.pageSizeControl.setValue(this.pageSize(), { emitEvent: false });
+    this.pageSizeSelect()?.value.set(this.pageSize());
   }
 }
 

@@ -10,7 +10,7 @@ import {
 } from '@ng-icons/lucide';
 import { NeuToastContainerComponent } from './neu-toast.component';
 import { NeuToastService } from './neu-toast.service';
-import { NeuToastType } from './neu-toast.types';
+import { NeuToastTone } from './neu-toast.types';
 
 describe('NeuToastContainerComponent', () => {
   beforeEach(async () => {
@@ -49,22 +49,22 @@ describe('NeuToastContainerComponent', () => {
 
   it('should render a toast when service.show() is called', () => {
     const { f, service } = setup();
-    service.show({ message: 'Hola', type: 'info', duration: 0 });
+    service.show({ message: 'Hola', tone: 'info', duration: 0 });
     f.detectChanges();
     expect(f.nativeElement.querySelectorAll('.neu-toast').length).toBe(1);
   });
 
   it('should apply the type class to the toast element', () => {
     const { f, service } = setup();
-    service.show({ message: 'Error', type: 'error', duration: 0 });
+    service.show({ message: 'Error', tone: 'danger', duration: 0 });
     f.detectChanges();
     const toast = f.nativeElement.querySelector('.neu-toast');
-    expect(toast.classList).toContain('neu-toast--error');
+    expect(toast.classList).toContain('neu-toast--danger');
   });
 
   it('should render the toast message', () => {
     const { f, service } = setup();
-    service.show({ message: 'Mensaje de prueba', type: 'success', duration: 0 });
+    service.show({ message: 'Mensaje de prueba', tone: 'success', duration: 0 });
     f.detectChanges();
     const messageEl = f.nativeElement.querySelector('.neu-toast__message');
     expect(messageEl.textContent).toContain('Mensaje de prueba');
@@ -72,7 +72,7 @@ describe('NeuToastContainerComponent', () => {
 
   it('should render toast title when provided', () => {
     const { f, service } = setup();
-    service.show({ message: 'Msg', title: 'Título del toast', type: 'info', duration: 0 });
+    service.show({ message: 'Msg', title: 'Título del toast', tone: 'info', duration: 0 });
     f.detectChanges();
     const titleEl = f.nativeElement.querySelector('.neu-toast__title');
     expect(titleEl).not.toBeNull();
@@ -81,14 +81,14 @@ describe('NeuToastContainerComponent', () => {
 
   it('should NOT render title element when title is not provided', () => {
     const { f, service } = setup();
-    service.show({ message: 'Sin título', type: 'info', duration: 0 });
+    service.show({ message: 'Sin título', tone: 'info', duration: 0 });
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-toast__title')).toBeNull();
   });
 
   it('should call service.dismiss() when close button is clicked', () => {
     const { f, service } = setup();
-    const id = service.show({ message: 'Para descartar', type: 'warning', duration: 0 });
+    const id = service.show({ message: 'Para descartar', tone: 'warning', duration: 0 });
     f.detectChanges();
     const closeBtn: HTMLButtonElement = f.nativeElement.querySelector('.neu-toast__close');
     closeBtn.click();
@@ -119,15 +119,15 @@ describe('NeuToastContainerComponent', () => {
 
   it('should render multiple toasts', () => {
     const { f, service } = setup();
-    service.show({ message: 'Toast 1', type: 'success', duration: 0 });
-    service.show({ message: 'Toast 2', type: 'error', duration: 0 });
+    service.show({ message: 'Toast 1', tone: 'success', duration: 0 });
+    service.show({ message: 'Toast 2', tone: 'danger', duration: 0 });
     f.detectChanges();
     expect(f.nativeElement.querySelectorAll('.neu-toast').length).toBe(2);
   });
 
   it('error toast should have role="alert"', () => {
     const { f, service } = setup();
-    service.show({ message: 'Error!', type: 'error', duration: 0 });
+    service.show({ message: 'Error!', tone: 'danger', duration: 0 });
     f.detectChanges();
     const toast = f.nativeElement.querySelector('.neu-toast');
     expect(toast.getAttribute('role')).toBe('alert');
@@ -135,7 +135,7 @@ describe('NeuToastContainerComponent', () => {
 
   it('warning toast should have role="alert"', () => {
     const { f, service } = setup();
-    service.show({ message: 'Aviso!', type: 'warning', duration: 0 });
+    service.show({ message: 'Aviso!', tone: 'warning', duration: 0 });
     f.detectChanges();
     const toast = f.nativeElement.querySelector('.neu-toast');
     expect(toast.getAttribute('role')).toBe('alert');
@@ -143,7 +143,7 @@ describe('NeuToastContainerComponent', () => {
 
   it('info toast should have role="status"', () => {
     const { f, service } = setup();
-    service.show({ message: 'Info', type: 'info', duration: 0 });
+    service.show({ message: 'Info', tone: 'info', duration: 0 });
     f.detectChanges();
     const toast = f.nativeElement.querySelector('.neu-toast');
     expect(toast.getAttribute('role')).toBe('status');
@@ -151,7 +151,7 @@ describe('NeuToastContainerComponent', () => {
 
   it('success toast should have role="status"', () => {
     const { f, service } = setup();
-    service.show({ message: 'Hecho', type: 'success', duration: 0 });
+    service.show({ message: 'Hecho', tone: 'success', duration: 0 });
     f.detectChanges();
     const toast = f.nativeElement.querySelector('.neu-toast');
     expect(toast.getAttribute('role')).toBe('status');
@@ -160,9 +160,9 @@ describe('NeuToastContainerComponent', () => {
   it('getIcon() should return correct icons for all types', () => {
     const { f } = setup();
     const comp = f.componentInstance;
-    const cases: [NeuToastType, string][] = [
+    const cases: [NeuToastTone, string][] = [
       ['success', 'lucideCheckCircle'],
-      ['error', 'lucideXCircle'],
+      ['danger', 'lucideXCircle'],
       ['warning', 'lucideAlertTriangle'],
       ['info', 'lucideInfo'],
     ];
@@ -173,7 +173,7 @@ describe('NeuToastContainerComponent', () => {
 
   it('should remove toast from list when service.dismiss() is called directly', () => {
     const { f, service } = setup();
-    const id = service.show({ message: 'Directo', type: 'success', duration: 0 });
+    const id = service.show({ message: 'Directo', tone: 'success', duration: 0 });
     f.detectChanges();
     expect(f.nativeElement.querySelectorAll('.neu-toast').length).toBe(1);
     service.dismiss(id);

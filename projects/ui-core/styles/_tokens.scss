@@ -17,10 +17,7 @@
   --neu-primary-solid-hover: #005fcc;
   --neu-primary-solid-fg: #ffffff;
 
-  // Canonical semantic aliases. The older --neu-color-* names remain supported
-  // so consumer themes written against either vocabulary resolve identically.
-  --neu-color-primary: var(--neu-primary);
-  --neu-color-primary-alpha: rgb(0 122 255 / 0.1);
+  --neu-primary-alpha: rgb(0 122 255 / 0.1);
   --neu-primary-200: #bfdbfe;
   --neu-primary-contrast: var(--neu-primary-fg);
   --neu-primary-soft: var(--neu-primary-50);
@@ -28,7 +25,6 @@
   --neu-secondary: #10b981;
   --neu-secondary-dark: #059669;
   --neu-secondary-fg: #ffffff;
-  --neu-color-secondary: var(--neu-secondary);
 
   --neu-accent: #5ac8fa;
 
@@ -54,7 +50,6 @@
   --neu-border-focus: var(--neu-primary);
   --neu-border-color: var(--neu-border);
   --neu-border-subtle: var(--neu-border);
-  --neu-color-border: var(--neu-border);
 
   // ------------------------------------------------
   // Tipografía (Slate scale)
@@ -86,18 +81,14 @@
   --neu-success: #15803d;
   --neu-success-bg: #d1fae5;
   --neu-success-text: #065f46;
-  --neu-color-success: var(--neu-success);
 
   --neu-warning: #f59e0b;
   --neu-warning-bg: #fef3c7;
   --neu-warning-text: #92400e;
-  --neu-color-warning: var(--neu-warning);
 
   --neu-error: #dc2626;
   --neu-error-bg: #fee2e2;
   --neu-error-text: #991b1b;
-  --neu-danger: var(--neu-error); // compatibility alias
-  --neu-color-danger: var(--neu-error);
 
   --neu-info: #007aff;
   --neu-info-bg: #eff6ff;
@@ -109,7 +100,6 @@
   --neu-radius-xs: 2px;
   --neu-radius-sm: 6px;
   --neu-radius: 8px;
-  --neu-radius-md: var(--neu-radius); // compatibility alias
   --neu-radius-lg: 12px;
   --neu-radius-xl: 16px;
   --neu-radius-2xl: 24px;
@@ -277,12 +267,6 @@
   --neu-knob-track: var(--neu-surface-3);
 
   // ------------------------------------------------
-  // Color Picker (v1.3.0)
-  // ------------------------------------------------
-  --neu-color-picker-bg: var(--neu-surface);
-  --neu-color-picker-shadow: var(--neu-shadow-lg);
-
-  // ------------------------------------------------
   // Command Palette (v1.3.0)
   // ------------------------------------------------
   --neu-cmd-bg: var(--neu-surface);
@@ -337,8 +321,18 @@
   --neu-table-header-height: 44px;
   --neu-table-max-height: 480px;
   --neu-table-sticky-offset: 0px;
-  --neu-color-surface-subtle: var(--neu-bg);
-  --neu-color-text-secondary: var(--neu-text-muted);
+  --neu-table-space-xs: var(--neu-space-1);
+  --neu-table-space-sm: var(--neu-space-2);
+  --neu-table-cell-block: 0.625rem;
+  --neu-table-cell-block-compact: 0.375rem;
+  --neu-table-cell-block-relaxed: 0.875rem;
+  --neu-table-cell-inline: var(--neu-space-3);
+  --neu-table-group-background: color-mix(in srgb, currentColor 4%, transparent);
+  --neu-table-selected-background: color-mix(in srgb, currentColor 9%, transparent);
+  --neu-table-stripe-background: color-mix(in srgb, currentColor 4%, transparent);
+  --neu-table-state-block: var(--neu-space-6);
+  --neu-table-virtual-block-size: 24rem;
+  --neu-tree-table-virtual-block-size: 24rem;
   --neu-meter-track: var(--neu-meter-track-bg);
 
   --neu-context-menu-border: var(--neu-border-color);
@@ -366,15 +360,12 @@
   --neu-stepper-indicator-size: 32px;
   --neu-stepper-indicator-radius: calc(var(--neu-stepper-indicator-size) / 2);
   --neu-stepper-connector-gap: var(--neu-space-2);
-  --neu-organization-chart-gap-x: 2.5rem;
-  --neu-organization-chart-gap-y: 2.5rem;
   --neu-nav-toggle-size: 28px;
   --neu-nav-toggle-offset-top: 18px;
   --neu-nav-toggle-bg: var(--neu-surface);
   --neu-nav-toggle-bg-hover: var(--neu-surface-2);
   --neu-nav-toggle-border: var(--neu-border);
   --neu-nav-toggle-color: var(--neu-text-muted);
-  --neu-nav-toggle-color-hover: var(--neu-text);
   --neu-nav-toggle-shadow:
     0 6px 14px color-mix(in srgb, var(--neu-text) 10%, transparent),
     inset 0 1px 0 color-mix(in srgb, var(--neu-surface) 82%, white);

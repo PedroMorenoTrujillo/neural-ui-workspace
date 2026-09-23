@@ -27,6 +27,7 @@ try {
   assert.equal(await page.locator('#n2-ready').textContent(), 'false');
   assert.deepEqual(JSON.parse(await page.locator('#n2-input-events').textContent()), []);
   assert.deepEqual(JSON.parse(await page.locator('#n2-checkbox-events').textContent()), []);
+  assert.deepEqual(JSON.parse(await page.locator('#n2-b7-events').textContent()), []);
   await page.evaluate(() => {
     window.__n2Input = document.querySelector('#n2-input .neu-input__field');
     window.__n2Checkbox = document.querySelector('#n2-checkbox .neu-checkbox__input');
@@ -61,6 +62,11 @@ try {
       document.querySelector('#n2-uploader input[type="file"]'),
       document.querySelector('#n2-slider input[type="range"]'),
       document.querySelector('#n2-rating .neu-rating'),
+    ];
+    window.__n2B7Controls = [
+      document.querySelector('#n2-b7-range [role="slider"]'),
+      document.querySelector('#n2-b7-vertical [role="slider"]'),
+      document.querySelector('#n2-b7-half .neu-rating__star'),
     ];
   });
   release();
@@ -133,6 +139,11 @@ try {
     }),
     [true, true, true, true, true, true, true],
   );
+  assert.deepEqual(await page.evaluate(() => [
+    window.__n2B7Controls[0] === document.querySelector('#n2-b7-range [role="slider"]'),
+    window.__n2B7Controls[1] === document.querySelector('#n2-b7-vertical [role="slider"]'),
+    window.__n2B7Controls[2] === document.querySelector('#n2-b7-half .neu-rating__star'),
+  ]), [true, true, true]);
   assert.equal(await page.locator('#n2-input .neu-input__field').inputValue(), 'server-value');
   assert.equal(await page.locator('#n2-checkbox .neu-checkbox__input').isChecked(), true);
   assert.equal(await page.locator('#n2-textarea textarea').inputValue(), 'server-notes');
@@ -170,6 +181,12 @@ try {
   );
   assert.equal(await page.locator('#n2-uploader .neu-uploader__item').count(), 0);
   assert.equal(await page.locator('#n2-slider input[type="range"]').inputValue(), '35');
+  assert.deepEqual(
+    await page.locator('#n2-b7-range [role="slider"]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('aria-valuenow'))),
+    ['20', '80'],
+  );
+  assert.equal(await page.locator('#n2-b7-half [data-neu-rating-value="2.5"]').getAttribute('aria-checked'), 'true');
+  assert.equal(await page.locator('#n2-b7-vertical [role="slider"]').first().getAttribute('aria-orientation'), 'vertical');
   assert.equal(
     await page.locator('#n2-rating .neu-rating__star').nth(2).getAttribute('aria-checked'),
     'true',
@@ -285,6 +302,13 @@ try {
   await page.locator('#n2-slider input[type="range"]').focus();
   await page.keyboard.press('ArrowRight');
   await page.locator('#n2-rating .neu-rating__star').nth(3).click();
+  await page.locator('#n2-b7-range [role="slider"]').first().focus();
+  await page.keyboard.press('ArrowRight');
+  await page.locator('#n2-b7-half [data-neu-rating-value="3"]').click();
+  await page.waitForFunction(() => JSON.parse(document.querySelector('#n2-b7-events')?.textContent ?? '[]').length === 2);
+  assert.deepEqual(JSON.parse(await page.locator('#n2-b7-events').textContent()), [
+    'range:[25,80]', 'half:3',
+  ]);
   await page.waitForFunction(
     () =>
       JSON.parse(document.querySelector('#n2-new-control-events')?.textContent ?? '[]').length ===

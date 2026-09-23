@@ -16,28 +16,28 @@ describe('NeuAlertComponent', () => {
     expect(f.nativeElement).toBeTruthy();
   });
 
-  it('should apply type class', async () => {
+  it('should apply tone class', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'success');
+    f.componentRef.setInput('tone', 'success');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.classList).toContain('neu-alert--success');
   });
 
-  it('should apply error and info type classes', async () => {
+  it('should apply danger and info tone classes', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'error');
+    f.componentRef.setInput('tone', 'danger');
     f.detectChanges();
-    expect(f.nativeElement.classList).toContain('neu-alert--error');
+    expect(f.nativeElement.classList).toContain('neu-alert--danger');
 
-    f.componentRef.setInput('type', 'info');
+    f.componentRef.setInput('tone', 'info');
     f.detectChanges();
     expect(f.nativeElement.classList).toContain('neu-alert--info');
   });
 
   it('should show default icon', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'warning');
+    f.componentRef.setInput('tone', 'warning');
     f.componentRef.setInput('showIcon', true);
     f.detectChanges();
     await f.whenStable();
@@ -48,7 +48,7 @@ describe('NeuAlertComponent', () => {
 
   it('should use custom icon when provided', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'info');
+    f.componentRef.setInput('tone', 'info');
     f.componentRef.setInput('icon', '🔔');
     f.detectChanges();
     await f.whenStable();
@@ -115,7 +115,7 @@ describe('NeuAlertComponent', () => {
 
   it('should apply outline class', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('outline', true);
+    f.componentRef.setInput('variant', 'outline');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.classList).toContain('neu-alert--outline');
@@ -139,27 +139,27 @@ describe('NeuAlertComponent', () => {
     expect(f.nativeElement.classList).not.toContain('neu-alert--with-title');
   });
 
-  it('liveRegion returns assertive for error type', async () => {
+  it('liveRegion returns assertive for danger tone', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'error');
+    f.componentRef.setInput('tone', 'danger');
     f.detectChanges();
     expect((f.componentInstance as any).liveRegion()).toBe('assertive');
   });
 
-  it('liveRegion returns polite for non-error types', async () => {
+  it('liveRegion returns polite for non-danger tones', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'info');
+    f.componentRef.setInput('tone', 'info');
     f.detectChanges();
     expect((f.componentInstance as any).liveRegion()).toBe('polite');
   });
 
   it('uses an assertive alert role only for errors', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'info');
+    f.componentRef.setInput('tone', 'info');
     f.detectChanges();
     expect(f.nativeElement.getAttribute('role')).toBe('status');
 
-    f.componentRef.setInput('type', 'error');
+    f.componentRef.setInput('tone', 'danger');
     f.detectChanges();
     expect(f.nativeElement.getAttribute('role')).toBe('alert');
     expect(f.nativeElement.getAttribute('aria-live')).toBe('assertive');

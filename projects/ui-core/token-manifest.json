@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "projects/ui-core/styles/_tokens.scss",
-  "tokenCount": 302,
-  "publicTokenCount": 282,
+  "tokenCount": 282,
+  "publicTokenCount": 262,
   "tokens": [
     {
       "token": "--neu-accent",
@@ -468,13 +468,11 @@
         "projects/ui-core/modal/neu-modal.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/panel/neu-panel.component.scss",
         "projects/ui-core/password/neu-password.component.scss",
         "projects/ui-core/pick-list/neu-pick-list.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
-        "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
         "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
@@ -484,6 +482,8 @@
         "projects/ui-core/stepper/neu-stepper.component.scss",
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/textarea/neu-textarea.component.scss",
@@ -1003,292 +1003,6 @@
       "status": "canonical"
     },
     {
-      "token": "--neu-color-border",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color border.",
-      "default": "var(--neu-border)",
-      "fallback": [
-        "--neu-border"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss",
-        "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
-        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-danger",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color danger.",
-      "default": "var(--neu-error)",
-      "fallback": [
-        "--neu-error"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/color-picker/neu-color-picker.component.scss",
-        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
-        "projects/ui-core/context-menu/neu-context-menu.component.scss",
-        "projects/ui-core/meter-group/neu-meter-group.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-focus",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color focus.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
-      "consumedIn": [
-        "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
-        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
-      ],
-      "public": true,
-      "documented": false,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-picker-bg",
-      "category": "component",
-      "owner": "color-picker",
-      "description": "Component token for color picker bg.",
-      "default": "var(--neu-surface)",
-      "fallback": [
-        "--neu-surface"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-picker-shadow",
-      "category": "component",
-      "owner": "color-picker",
-      "description": "Component token for color picker shadow.",
-      "default": "var(--neu-shadow-lg)",
-      "fallback": [
-        "--neu-shadow-lg"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-primary",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color primary.",
-      "default": "var(--neu-primary)",
-      "fallback": [
-        "--neu-primary"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/block-ui/neu-block-ui.component.scss",
-        "projects/ui-core/color-picker/neu-color-picker.component.scss",
-        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
-        "projects/ui-core/input-otp/neu-input-otp.component.scss",
-        "projects/ui-core/knob/neu-knob.component.scss",
-        "projects/ui-core/meter-group/neu-meter-group.component.scss",
-        "projects/ui-core/notification-center/neu-notification-center.component.scss",
-        "projects/ui-core/splitter/neu-splitter.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-primary-alpha",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color primary alpha.",
-      "default": "rgb(0 122 255 / 0.1)",
-      "fallback": [],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/notification-center/neu-notification-center.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-secondary",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color secondary.",
-      "default": "var(--neu-secondary)",
-      "fallback": [
-        "--neu-secondary"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/meter-group/neu-meter-group.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-success",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color success.",
-      "default": "var(--neu-success)",
-      "fallback": [
-        "--neu-success"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/meter-group/neu-meter-group.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-surface",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color surface.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
-      "consumedIn": [
-        "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
-        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
-      ],
-      "public": true,
-      "documented": false,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-surface-subtle",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color surface subtle.",
-      "default": "var(--neu-bg)",
-      "fallback": [
-        "--neu-bg"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-text",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color text.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
-      "consumedIn": [
-        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
-      ],
-      "public": true,
-      "documented": false,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-text-secondary",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color text secondary.",
-      "default": "var(--neu-text-muted)",
-      "fallback": [
-        "--neu-text-muted"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
-      "token": "--neu-color-warning",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for color warning.",
-      "default": "var(--neu-warning)",
-      "fallback": [
-        "--neu-warning"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/meter-group/neu-meter-group.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
       "token": "--neu-context-menu-bg",
       "category": "component",
       "owner": "context-menu",
@@ -1570,36 +1284,6 @@
       "public": false,
       "documented": false,
       "status": "internal-runtime"
-    },
-    {
-      "token": "--neu-danger",
-      "category": "semantic",
-      "owner": "semantic",
-      "description": "Semantic token for danger.",
-      "default": "var(--neu-error)",
-      "fallback": [
-        "--neu-error"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/autocomplete/neu-autocomplete.component.scss",
-        "projects/ui-core/calendar/neu-calendar.component.scss",
-        "projects/ui-core/empty-state/neu-empty-state.component.scss",
-        "projects/ui-core/gallery/neu-gallery.component.scss",
-        "projects/ui-core/input-tags/neu-input-tags.component.scss",
-        "projects/ui-core/kanban/neu-kanban.component.scss",
-        "projects/ui-core/listbox/neu-listbox.component.scss",
-        "projects/ui-core/spinner/neu-spinner.component.scss",
-        "projects/ui-core/spinner/neu-spinner.component.ts",
-        "projects/ui-core/styles/_tokens.scss",
-        "projects/ui-core/uploader/neu-uploader.component.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
     },
     {
       "token": "--neu-density-scale",
@@ -1951,18 +1635,31 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/autocomplete/neu-autocomplete.component.scss",
         "projects/ui-core/avatar/neu-avatar.component.scss",
         "projects/ui-core/badge/neu-badge.component.scss",
         "projects/ui-core/button/neu-button.component.scss",
+        "projects/ui-core/calendar/neu-calendar.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
+        "projects/ui-core/color-picker/neu-color-picker.component.scss",
+        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
+        "projects/ui-core/context-menu/neu-context-menu.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
+        "projects/ui-core/empty-state/neu-empty-state.component.scss",
         "projects/ui-core/form-field/neu-form-field.component.scss",
+        "projects/ui-core/gallery/neu-gallery.component.scss",
+        "projects/ui-core/input-tags/neu-input-tags.component.scss",
         "projects/ui-core/input/neu-input.component.scss",
+        "projects/ui-core/kanban/neu-kanban.component.scss",
+        "projects/ui-core/listbox/neu-listbox.component.scss",
+        "projects/ui-core/meter-group/neu-meter-group.component.scss",
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/progress-bar/neu-progress-bar.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
+        "projects/ui-core/spinner/neu-spinner.component.scss",
         "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/textarea/neu-textarea.component.scss",
         "projects/ui-core/timeline-grid/neu-timeline-grid.component.scss",
         "projects/ui-core/timeline/neu-timeline.component.scss",
@@ -1986,6 +1683,7 @@
       "defaultSource": "root",
       "consumedIn": [
         "projects/ui-core/badge/neu-badge.component.scss",
+        "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/kanban/neu-kanban.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
@@ -2040,7 +1738,9 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss"
+        "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
       "documented": true,
@@ -2490,8 +2190,8 @@
         "projects/ui-core/badge/neu-badge.component.scss",
         "projects/ui-core/empty-state/neu-empty-state.component.scss",
         "projects/ui-core/spinner/neu-spinner.component.scss",
-        "projects/ui-core/spinner/neu-spinner.component.ts",
         "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/toast/neu-toast.component.scss"
       ],
       "public": true,
@@ -2857,27 +2557,6 @@
       "status": "canonical"
     },
     {
-      "token": "--neu-nav-toggle-color-hover",
-      "category": "component",
-      "owner": "nav",
-      "description": "Component token for nav toggle color hover.",
-      "default": "var(--neu-text)",
-      "fallback": [
-        "--neu-text"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/nav/neu-nav.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
-    },
-    {
       "token": "--neu-nav-toggle-offset-top",
       "category": "component",
       "owner": "nav",
@@ -3045,83 +2724,6 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "canonical"
-    },
-    {
-      "token": "--neu-organization-chart-connector",
-      "category": "component",
-      "owner": "organization-chart",
-      "description": "Component token for organization chart connector.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss"
-      ],
-      "defaultSource": null,
-      "consumedIn": [
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss"
-      ],
-      "public": true,
-      "documented": false,
-      "status": "canonical"
-    },
-    {
-      "token": "--neu-organization-chart-connector-width",
-      "category": "component",
-      "owner": "organization-chart",
-      "description": "Component token for organization chart connector width.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss"
-      ],
-      "defaultSource": null,
-      "consumedIn": [
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss"
-      ],
-      "public": true,
-      "documented": false,
-      "status": "canonical"
-    },
-    {
-      "token": "--neu-organization-chart-gap-x",
-      "category": "component",
-      "owner": "organization-chart",
-      "description": "Component token for organization chart gap x.",
-      "default": "2.5rem",
-      "fallback": [],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.ts",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "canonical"
-    },
-    {
-      "token": "--neu-organization-chart-gap-y",
-      "category": "component",
-      "owner": "organization-chart",
-      "description": "Component token for organization chart gap y.",
-      "default": "2.5rem",
-      "fallback": [],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.ts",
         "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,
@@ -3471,6 +3073,7 @@
       "defaultSource": "root",
       "consumedIn": [
         "projects/ui-core/autocomplete/neu-autocomplete.component.scss",
+        "projects/ui-core/block-ui/neu-block-ui.component.scss",
         "projects/ui-core/breadcrumb/neu-breadcrumb.component.scss",
         "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/calendar/neu-calendar.component.scss",
@@ -3479,7 +3082,9 @@
         "projects/ui-core/cascade-select/neu-cascade-select.component.scss",
         "projects/ui-core/checkbox/neu-checkbox.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
+        "projects/ui-core/color-picker/neu-color-picker.component.scss",
         "projects/ui-core/compare/neu-compare.component.scss",
+        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
         "projects/ui-core/dashboard-grid/neu-dashboard-grid.component.scss",
         "projects/ui-core/data-view/neu-data-view.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
@@ -3488,16 +3093,19 @@
         "projects/ui-core/gallery/neu-gallery.component.scss",
         "projects/ui-core/image-gallery/neu-image-gallery.component.scss",
         "projects/ui-core/input-mask/neu-input-mask.component.scss",
+        "projects/ui-core/input-otp/neu-input-otp.component.scss",
         "projects/ui-core/input-tags/neu-input-tags.component.scss",
         "projects/ui-core/input/neu-input.component.scss",
         "projects/ui-core/kanban/neu-kanban.component.scss",
         "projects/ui-core/kanban/neu-kanban.component.ts",
+        "projects/ui-core/knob/neu-knob.component.scss",
         "projects/ui-core/listbox/neu-listbox.component.scss",
         "projects/ui-core/mega-menu/neu-mega-menu.component.scss",
+        "projects/ui-core/meter-group/neu-meter-group.component.scss",
         "projects/ui-core/modal/neu-modal.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
+        "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/panel/neu-panel.component.scss",
         "projects/ui-core/password/neu-password.component.scss",
@@ -3505,13 +3113,12 @@
         "projects/ui-core/progress-bar/neu-progress-bar.component.scss",
         "projects/ui-core/radio/neu-radio.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
-        "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.scss",
         "projects/ui-core/scroll-top/neu-scroll-top.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/slider/neu-slider.component.scss",
         "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
         "projects/ui-core/spinner/neu-spinner.component.scss",
-        "projects/ui-core/spinner/neu-spinner.component.ts",
+        "projects/ui-core/splitter/neu-splitter.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
         "projects/ui-core/stepper/neu-stepper.component.scss",
         "projects/ui-core/styles/_presets.scss",
@@ -3595,6 +3202,25 @@
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "public": true,
+      "documented": true,
+      "status": "canonical"
+    },
+    {
+      "token": "--neu-primary-alpha",
+      "category": "semantic",
+      "owner": "semantic",
+      "description": "Semantic token for primary alpha.",
+      "default": "rgb(0 122 255 / 0.1)",
+      "fallback": [],
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
+      "consumedIn": [
+        "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,
@@ -3728,7 +3354,8 @@
         "projects/ui-core/dock/neu-dock.component.scss",
         "projects/ui-core/mega-menu/neu-mega-menu.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
-        "projects/ui-core/styles/_tokens.scss"
+        "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/toolbar/neu-toolbar.component.scss"
       ],
       "public": true,
       "documented": true,
@@ -3826,20 +3453,27 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/alert/neu-alert.component.scss",
         "projects/ui-core/autocomplete/neu-autocomplete.component.scss",
         "projects/ui-core/avatar/neu-avatar.component.scss",
         "projects/ui-core/badge/neu-badge.component.scss",
         "projects/ui-core/button-group/neu-button-group.component.scss",
         "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/cascade-select/neu-cascade-select.component.scss",
+        "projects/ui-core/color-picker/neu-color-picker.component.scss",
+        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
+        "projects/ui-core/context-menu/neu-context-menu.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
+        "projects/ui-core/empty-state/neu-empty-state.component.scss",
         "projects/ui-core/gallery/neu-gallery.component.scss",
         "projects/ui-core/image-gallery/neu-image-gallery.component.scss",
         "projects/ui-core/input-mask/neu-input-mask.component.scss",
+        "projects/ui-core/input-otp/neu-input-otp.component.scss",
         "projects/ui-core/input-tags/neu-input-tags.component.scss",
         "projects/ui-core/input/neu-input.component.scss",
         "projects/ui-core/kanban/neu-kanban.component.scss",
         "projects/ui-core/modal/neu-modal.component.scss",
+        "projects/ui-core/number-input/neu-number-input.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/password/neu-password.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
@@ -3850,6 +3484,7 @@
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/textarea/neu-textarea.component.scss",
+        "projects/ui-core/timeline-grid/neu-timeline-grid.component.scss",
         "projects/ui-core/toggle-button-group/neu-toggle-button-group.component.scss",
         "projects/ui-core/tree-select/neu-tree-select.component.scss",
         "projects/ui-core/uploader/neu-uploader.component.scss"
@@ -3940,7 +3575,6 @@
         "projects/ui-core/kanban/neu-kanban.component.scss",
         "projects/ui-core/modal/neu-modal.component.scss",
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/popover/neu-popover.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
@@ -3953,37 +3587,6 @@
       "public": true,
       "documented": true,
       "status": "canonical"
-    },
-    {
-      "token": "--neu-radius-md",
-      "category": "foundation",
-      "owner": "global",
-      "description": "Foundation token for radius md.",
-      "default": "var(--neu-radius)",
-      "fallback": [
-        "--neu-radius"
-      ],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/alert/neu-alert.component.scss",
-        "projects/ui-core/autocomplete/neu-autocomplete.component.scss",
-        "projects/ui-core/color-picker/neu-color-picker.component.scss",
-        "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.scss",
-        "projects/ui-core/context-menu/neu-context-menu.component.scss",
-        "projects/ui-core/empty-state/neu-empty-state.component.scss",
-        "projects/ui-core/input-otp/neu-input-otp.component.scss",
-        "projects/ui-core/number-input/neu-number-input.component.scss",
-        "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.scss",
-        "projects/ui-core/select/neu-select.component.scss",
-        "projects/ui-core/styles/_tokens.scss",
-        "projects/ui-core/timeline-grid/neu-timeline-grid.component.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "compatibility-alias"
     },
     {
       "token": "--neu-radius-sm",
@@ -4006,7 +3609,6 @@
         "projects/ui-core/inline-editor/neu-inline-editor.component.scss",
         "projects/ui-core/kanban/neu-kanban.component.scss",
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/rating/neu-rating.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
@@ -4096,6 +3698,7 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/meter-group/neu-meter-group.component.scss",
         "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,
@@ -4614,6 +4217,7 @@
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/stepper/neu-stepper.component.scss",
         "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/timeline/neu-timeline.component.scss",
         "projects/ui-core/toast/neu-toast.component.scss",
         "projects/ui-core/uploader/neu-uploader.component.scss"
       ],
@@ -4888,11 +4492,12 @@
         "projects/ui-core/calendar/neu-calendar.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/empty-state/neu-empty-state.component.scss",
+        "projects/ui-core/meter-group/neu-meter-group.component.scss",
         "projects/ui-core/progress-bar/neu-progress-bar.component.scss",
         "projects/ui-core/spinner/neu-spinner.component.scss",
-        "projects/ui-core/spinner/neu-spinner.component.ts",
         "projects/ui-core/stepper/neu-stepper.component.scss",
         "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/timeline-grid/neu-timeline-grid.component.scss",
         "projects/ui-core/timeline/neu-timeline.component.scss",
         "projects/ui-core/toast/neu-toast.component.scss",
@@ -4967,6 +4572,7 @@
         "projects/ui-core/avatar/neu-avatar.component.scss",
         "projects/ui-core/badge/neu-badge.component.scss",
         "projects/ui-core/bottom-sheet/neu-bottom-sheet.component.scss",
+        "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/calendar/neu-calendar.component.scss",
         "projects/ui-core/card/neu-card.component.scss",
         "projects/ui-core/carousel/neu-carousel.component.scss",
@@ -4991,7 +4597,6 @@
         "projects/ui-core/nav/neu-nav.component.scss",
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/panel/neu-panel.component.scss",
         "projects/ui-core/password/neu-password.component.scss",
@@ -5006,6 +4611,8 @@
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/textarea/neu-textarea.component.scss",
@@ -5013,6 +4620,7 @@
         "projects/ui-core/timeline/neu-timeline.component.scss",
         "projects/ui-core/toast/neu-toast.component.scss",
         "projects/ui-core/toggle-button-group/neu-toggle-button-group.component.scss",
+        "projects/ui-core/toolbar/neu-toolbar.component.scss",
         "projects/ui-core/tree-select/neu-tree-select.component.scss",
         "projects/ui-core/tree/neu-tree.component.scss",
         "projects/ui-core/uploader/neu-uploader.component.scss"
@@ -5088,7 +4696,6 @@
         "projects/ui-core/nav/neu-nav.component.scss",
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/panel/neu-panel.component.scss",
         "projects/ui-core/password/neu-password.component.scss",
@@ -5362,15 +4969,18 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table cell block.",
-      "default": null,
+      "default": "0.625rem",
       "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5378,15 +4988,18 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table cell block compact.",
-      "default": null,
+      "default": "0.375rem",
       "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5394,15 +5007,18 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table cell block relaxed.",
-      "default": null,
+      "default": "0.875rem",
       "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5410,15 +5026,20 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table cell inline.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "default": "var(--neu-space-3)",
+      "fallback": [
+        "--neu-space-3"
+      ],
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5462,15 +5083,18 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table group background.",
-      "default": null,
+      "default": "color-mix(in srgb, currentColor 4%, transparent)",
       "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5514,15 +5138,18 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table selected background.",
-      "default": null,
+      "default": "color-mix(in srgb, currentColor 9%, transparent)",
       "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5530,15 +5157,20 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table space sm.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "default": "var(--neu-space-2)",
+      "fallback": [
+        "--neu-space-2"
+      ],
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5546,15 +5178,20 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table space xs.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "default": "var(--neu-space-1)",
+      "fallback": [
+        "--neu-space-1"
+      ],
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5562,15 +5199,20 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table state block.",
-      "default": null,
-      "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "default": "var(--neu-space-6)",
+      "fallback": [
+        "--neu-space-6"
+      ],
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5596,15 +5238,18 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table stripe background.",
-      "default": null,
+      "default": "color-mix(in srgb, currentColor 4%, transparent)",
       "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5612,15 +5257,18 @@
       "category": "component",
       "owner": "table",
       "description": "Component token for table virtual block size.",
-      "default": null,
+      "default": "24rem",
       "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -5804,7 +5452,6 @@
         "projects/ui-core/nav/neu-nav.component.scss",
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/panel/neu-panel.component.scss",
         "projects/ui-core/password/neu-password.component.scss",
@@ -5812,7 +5459,6 @@
         "projects/ui-core/popover/neu-popover.component.scss",
         "projects/ui-core/radio/neu-radio.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
-        "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
         "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
@@ -5823,6 +5469,7 @@
         "projects/ui-core/styles/_presets.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/switch/neu-switch.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/textarea/neu-textarea.component.scss",
@@ -6042,12 +5689,10 @@
         "projects/ui-core/modal/neu-modal.component.scss",
         "projects/ui-core/nav/neu-nav.component.scss",
         "projects/ui-core/number-input/neu-number-input.component.scss",
-        "projects/ui-core/organization-chart/neu-organization-chart.component.scss",
         "projects/ui-core/pagination/neu-pagination.component.scss",
         "projects/ui-core/password/neu-password.component.scss",
         "projects/ui-core/progress-bar/neu-progress-bar.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
-        "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
         "projects/ui-core/slider/neu-slider.component.scss",
@@ -6558,8 +6203,7 @@
       "consumedIn": [
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
         "projects/ui-core/styles/_presets.scss",
-        "projects/ui-core/styles/_tokens.scss",
-        "projects/ui-core/tabs/neu-tabs.component.scss"
+        "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,
       "documented": true,
@@ -6570,15 +6214,18 @@
       "category": "semantic",
       "owner": "semantic",
       "description": "Semantic token for tree table virtual block size.",
-      "default": null,
+      "default": "24rem",
       "fallback": [],
-      "declaredIn": [],
-      "defaultSource": null,
+      "declaredIn": [
+        "projects/ui-core/styles/_tokens.scss"
+      ],
+      "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.scss"
       ],
       "public": true,
-      "documented": false,
+      "documented": true,
       "status": "canonical"
     },
     {
@@ -6598,10 +6245,11 @@
         "projects/ui-core/calendar/neu-calendar.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/empty-state/neu-empty-state.component.scss",
+        "projects/ui-core/meter-group/neu-meter-group.component.scss",
         "projects/ui-core/progress-bar/neu-progress-bar.component.scss",
         "projects/ui-core/spinner/neu-spinner.component.scss",
-        "projects/ui-core/spinner/neu-spinner.component.ts",
         "projects/ui-core/styles/_tokens.scss",
+        "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/timeline-grid/neu-timeline-grid.component.scss",
         "projects/ui-core/timeline/neu-timeline.component.scss",
         "projects/ui-core/toast/neu-toast.component.scss"

@@ -1,0 +1,225 @@
+{
+  "checkpoint": "N2-023",
+  "capturedAt": "2026-09-23T07:00:04.617Z",
+  "method": "Angular-compiled minified consumer ESM; Angular/RxJS external; gzip 9; Brotli 11",
+  "previousConsumers": {
+    "basic": {
+      "size": {
+        "raw": 30750,
+        "gzip": 5865,
+        "brotli": 5075
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs",
+          "bytesInOutput": 14583
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12917
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        }
+      ]
+    },
+    "full": {
+      "size": {
+        "raw": 151029,
+        "gzip": 21721,
+        "brotli": 17872
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-timeline-grid.mjs",
+          "bytesInOutput": 19102
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-code-block.mjs",
+          "bytesInOutput": 15329
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-timeline.mjs",
+          "bytesInOutput": 14630
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs",
+          "bytesInOutput": 14583
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12985
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-chip.mjs",
+          "bytesInOutput": 11631
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-empty-state.mjs",
+          "bytesInOutput": 9683
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-alert.mjs",
+          "bytesInOutput": 8850
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-progress-bar.mjs",
+          "bytesInOutput": 7817
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-spinner.mjs",
+          "bytesInOutput": 7252
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-toolbar.mjs",
+          "bytesInOutput": 7216
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-badge.mjs",
+          "bytesInOutput": 6368
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tag.mjs",
+          "bytesInOutput": 6169
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5550
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 324
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 32894,
+        "gzip": 5981,
+        "brotli": 5161
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs",
+          "bytesInOutput": 16727
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12917
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        }
+      ]
+    },
+    "full": {
+      "size": {
+        "raw": 157723,
+        "gzip": 22043,
+        "brotli": 18051
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-timeline-grid.mjs",
+          "bytesInOutput": 19797
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs",
+          "bytesInOutput": 16727
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-code-block.mjs",
+          "bytesInOutput": 16269
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-timeline.mjs",
+          "bytesInOutput": 15282
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12985
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-chip.mjs",
+          "bytesInOutput": 11591
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-empty-state.mjs",
+          "bytesInOutput": 10030
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-alert.mjs",
+          "bytesInOutput": 8890
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-toolbar.mjs",
+          "bytesInOutput": 8557
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-progress-bar.mjs",
+          "bytesInOutput": 7787
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tag.mjs",
+          "bytesInOutput": 7081
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-spinner.mjs",
+          "bytesInOutput": 6965
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-badge.mjs",
+          "bytesInOutput": 6348
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5550
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 324
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "basic": {
+      "rawDelta": 2144,
+      "gzipDelta": 116,
+      "brotliDelta": 86
+    },
+    "full": {
+      "rawDelta": 6694,
+      "gzipDelta": 322,
+      "brotliDelta": 179
+    }
+  }
+}

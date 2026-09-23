@@ -8,8 +8,9 @@ import {
   input,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import type { NeuDensity } from '@neural-ui/core';
 
-export type NeuTimelineItemVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuTimelineItemTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 export type NeuTimelineAlign = 'left' | 'right' | 'alternate';
 
 export interface NeuTimelineItemContext {
@@ -31,8 +32,8 @@ export interface NeuTimelineItem {
   title: string;
   /** Descripción opcional / Optional description */
   description?: string;
-  /** Variante de color del punto / Dot color variant */
-  variant?: NeuTimelineItemVariant;
+  /** Intención semántica del punto / Dot semantic intent */
+  tone?: NeuTimelineItemTone;
   /** Icono SVG path opcional / Optional SVG path icon */
   icon?: string;
 }
@@ -80,7 +81,8 @@ export class NeuTimelineMarkerDirective {
       class="neu-timeline"
       [class.neu-timeline--right]="align() === 'right'"
       [class.neu-timeline--alternate]="align() === 'alternate'"
-      [class.neu-timeline--compact]="compact()"
+      [class.neu-timeline--density-compact]="density() === 'compact'"
+      [class.neu-timeline--density-relaxed]="density() === 'relaxed'"
       [attr.aria-label]="ariaLabel() || null"
     >
       @for (item of renderedItems(); track item.title; let last = $last) {
@@ -89,7 +91,7 @@ export class NeuTimelineMarkerDirective {
           <div class="neu-timeline__axis">
             <div
               class="neu-timeline__dot"
-              [class]="'neu-timeline__dot--' + (item.variant ?? 'default')"
+              [class]="'neu-timeline__dot--' + (item.tone ?? 'neutral')"
             >
               @if (markerTpl()) {
                 <ng-container
@@ -149,8 +151,8 @@ export class NeuTimelineComponent {
   readonly items = input<NeuTimelineItem[]>([]);
   /** Places the axis on the left, right or alternating sides. / Sitúa el eje a la izquierda, derecha o en lados alternos. */
   readonly align = input<NeuTimelineAlign>('left');
-  /** Reduces item height and vertical spacing. / Reduce la altura y el espaciado vertical de los elementos. */
-  readonly compact = input(false);
+  /** Spatial compactness. / Compactación espacial. */
+  readonly density = input<NeuDensity>('normal');
   /** Renders the supplied collection from last to first without mutating it. / Renderiza la colección de último a primero sin modificarla. */
   readonly reverse = input(false);
   /** Optional accessible name for the chronological list. / Nombre accesible opcional para la lista cronológica. */

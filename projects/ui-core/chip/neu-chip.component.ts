@@ -6,7 +6,7 @@ import {
   output,
 } from '@angular/core';
 
-export type NeuChipVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger';
+export type NeuChipTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger';
 export type NeuChipSize = 'sm' | 'md';
 
 /**
@@ -61,8 +61,8 @@ export type NeuChipSize = 'sm' | 'md';
   styleUrl: './neu-chip.component.scss',
 })
 export class NeuChipComponent {
-  /** Variante de color / Color variant */
-  variant = input<NeuChipVariant>('default');
+  /** Intención semántica / Semantic intent */
+  tone = input<NeuChipTone>('neutral');
 
   /** Tamaño / Size */
   size = input<NeuChipSize>('md');
@@ -87,7 +87,7 @@ export class NeuChipComponent {
 
   readonly hostClasses = computed(() => ({
     'neu-chip': true,
-    [`neu-chip--${this.variant()}`]: true,
+    [`neu-chip--${this.tone()}`]: true,
     [`neu-chip--${this.size()}`]: true,
     'neu-chip--selected': this.selected(),
     'neu-chip--removable': this.removable(),

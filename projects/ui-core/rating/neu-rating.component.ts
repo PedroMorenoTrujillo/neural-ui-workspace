@@ -12,7 +12,7 @@ import {
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
-/** Accessible integer rating backed by a nullable number ModelSignal. */
+/** Accessible discrete rating backed by a nullable number ModelSignal. */
 @Component({
   selector: 'neu-rating',
   imports: [],
@@ -35,15 +35,18 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
       [attr.aria-describedby]="ariaDescribedBy() || null"
       (focusout)="onFocusOut($event)"
     >
-      @for (i of starsArray(); track i) {
+      @for (i of ratingOptions(); track i) {
         <button
           class="neu-rating__star"
+          [class.neu-rating__star--half]="resolvedStep() === 0.5"
+          [class.neu-rating__star--first-half]="resolvedStep() === 0.5 && isHalf(i)"
+          [class.neu-rating__star--second-half]="resolvedStep() === 0.5 && !isHalf(i)"
           [class.neu-rating__star--filled]="i <= (hovered() ?? selectedValue() ?? 0)"
           type="button"
           [disabled]="disabled()"
           [tabIndex]="tabIndexFor(i)"
           [attr.data-neu-rating-value]="i"
-          [attr.aria-label]="i + ' star' + (i > 1 ? 's' : '')"
+          [attr.aria-label]="i + ' star' + (i === 1 ? '' : 's')"
           [attr.aria-checked]="i === selectedValue()"
           role="radio"
           (mouseenter)="onHover(i)"
@@ -73,6 +76,7 @@ export class NeuRatingComponent implements FormValueControl<number | null> {
   readonly value = model<number | null>(null);
 
   readonly stars = input<number>(5);
+  readonly step = input<1 | 0.5>(1);
   readonly label = input<string>('');
   readonly ariaLabel = input<string>('');
   readonly ariaDescribedBy = input<string>('');
@@ -97,13 +101,20 @@ export class NeuRatingComponent implements FormValueControl<number | null> {
   readonly resolvedStars = computed(() =>
     Number.isFinite(this.stars()) ? Math.max(1, Math.trunc(this.stars())) : 5,
   );
+  readonly resolvedStep = computed<1 | 0.5>(() => this.step() === 0.5 ? 0.5 : 1);
   readonly selectedValue = computed(() => {
     const value = this.value();
     if (value === null || !Number.isFinite(value)) return null;
-    return this.clamp(Math.round(value));
+    return this.clamp(value);
   });
   readonly starsArray = computed(() =>
     Array.from({ length: this.resolvedStars() }, (_, index) => index + 1),
+  );
+  readonly ratingOptions = computed(() =>
+    Array.from(
+      { length: this.resolvedStars() / this.resolvedStep() },
+      (_, index) => (index + 1) * this.resolvedStep(),
+    ),
   );
   readonly hasError = computed(() => this.invalid() || this.errors().length > 0);
   readonly ratingLabel = computed(() =>
@@ -120,7 +131,7 @@ export class NeuRatingComponent implements FormValueControl<number | null> {
     this.hovered.set(null);
   }
 
-  /** Selects an integer rating without applying the same-value clear gesture. */
+  /** Selects a discrete rating without applying the same-value clear gesture. */
   select(value: number, shouldFocus = false): void {
     if (this.disabled() || this.readonly()) return;
     const next = this.clamp(value);
@@ -140,12 +151,13 @@ export class NeuRatingComponent implements FormValueControl<number | null> {
 
   tabIndexFor(value: number): 0 | -1 {
     if (this.disabled()) return -1;
-    const owner = this.focusedValue() ?? this.selectedValue() ?? 1;
+    const owner = this.focusedValue() ?? this.selectedValue() ?? this.resolvedStep();
     return value === owner ? 0 : -1;
   }
 
   onKeyDown(value: number, event: KeyboardEvent): void {
-    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction;
+    const group = this.host.querySelector<HTMLElement>('.neu-rating');
+    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(group ?? this.host).direction;
     const nextKey = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
     const previousKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
     const handled = [nextKey, previousKey, 'ArrowDown', 'ArrowUp', 'Home', 'End', ' ', 'Enter'];
@@ -155,9 +167,9 @@ export class NeuRatingComponent implements FormValueControl<number | null> {
 
     let next = value;
     let clearOnSame = false;
-    if (event.key === nextKey || event.key === 'ArrowDown') next = this.clamp(value + 1);
-    else if (event.key === previousKey || event.key === 'ArrowUp') next = this.clamp(value - 1);
-    else if (event.key === 'Home') next = 1;
+    if (event.key === nextKey || event.key === 'ArrowDown') next = this.clamp(value + this.resolvedStep());
+    else if (event.key === previousKey || event.key === 'ArrowUp') next = this.clamp(value - this.resolvedStep());
+    else if (event.key === 'Home') next = this.resolvedStep();
     else if (event.key === 'End') next = this.resolvedStars();
     else clearOnSame = true;
 
@@ -174,7 +186,7 @@ export class NeuRatingComponent implements FormValueControl<number | null> {
 
   focus(options?: FocusOptions): void {
     if (this.disabled()) return;
-    const owner = this.selectedValue() ?? 1;
+    const owner = this.selectedValue() ?? this.resolvedStep();
     this.focusedValue.set(owner);
     this.star(owner)?.focus(options);
   }
@@ -190,12 +202,17 @@ export class NeuRatingComponent implements FormValueControl<number | null> {
       : 'transparent';
   }
 
+  isHalf(value: number): boolean {
+    return !Number.isInteger(value);
+  }
+
   private commit(value: number | null): void {
     if (!Object.is(value, this.value())) this.value.set(value);
   }
 
   private clamp(value: number): number {
-    return Math.min(this.resolvedStars(), Math.max(1, Math.round(value)));
+    const step = this.resolvedStep();
+    return Math.min(this.resolvedStars(), Math.max(step, Math.round(value / step) * step));
   }
 
   private focusStar(value: number): void {

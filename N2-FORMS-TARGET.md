@@ -502,6 +502,8 @@ En modos de colección/rango, límites de calendario usan dateConstraints separa
 | Slider | value input/output, sin CVA | FormValueControl<number>, value/valueChange | Prueba de cuatro bindings Forms, min/max/step/reset/readonly; rango tipado separado P2. [neu-slider.component.ts](/Users/pedromorenotrujillo/Documents/neural/neural-ui-workspace-v2/projects/ui-core/slider/neu-slider.component.ts:1) |
 | Rating | value input/output, sin CVA | FormValueControl<number\|null>, vacío null | Clear nullable, required, teclado/ARIA y reset; medio valor P2. [neu-rating.component.ts](/Users/pedromorenotrujillo/Documents/neural/neural-ui-workspace-v2/projects/ui-core/rating/neu-rating.component.ts:1) |
 
+Resolución B7 posterior a esta matriz P1: el Slider P2 usa `FormValueControl<V>` con `V = number | readonly [number,number]`. Sus límites numéricos públicos son `minValue`/`maxValue` para ambos valores; los antiguos inputs `min`/`max` se eliminan sin alias porque Angular 22 Signal Forms los reserva para metadatos de validación del tipo del field. Rating añade `step: 1 | 0.5` y sigue siendo horizontal.
+
 No incluir Tree/Table como campos de formulario completos: selección es slice de producto. Los controles hijos de radio y auxiliares internos de Table no añaden fields al inventario.
 
 ## Gate por familia

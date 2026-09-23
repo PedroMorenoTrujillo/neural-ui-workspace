@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { NeuIconComponent } from '@neural-ui/core/icon';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import type { NeuDensity } from '@neural-ui/core';
 
 export type NeuEmptyStateSize = 'sm' | 'md' | 'lg';
 export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'success';
@@ -42,7 +43,7 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
       }
 
       @if (actionLabel()) {
-        <button neu-button variant="primary" size="md" (click)="action.emit()">
+        <button neu-button tone="brand" variant="solid" size="md" (click)="action.emit()">
           {{ actionLabel() }}
         </button>
       }
@@ -65,8 +66,8 @@ export class NeuEmptyStateComponent {
   size = input<NeuEmptyStateSize>('md');
   /** Tono semántico del icono y fondo / Semantic tone for icon and background */
   tone = input<NeuEmptyStateTone>('neutral');
-  /** Reduce espaciado para tablas, listas y overlays compactos / Reduces spacing for tables, lists and compact overlays */
-  compact = input<boolean>(false);
+  /** Compactación espacial para tablas, listas y overlays / Spatial compactness */
+  density = input<NeuDensity>('normal');
 
   /** Emite cuando el usuario hace clic en el botón de acción. / Emits when the user clicks the action button. */
   action = output<void>();
@@ -76,7 +77,7 @@ export class NeuEmptyStateComponent {
       'neu-empty-state': true,
       [`neu-empty-state--${this.size()}`]: true,
       [`neu-empty-state--${this.tone()}`]: true,
-      'neu-empty-state--compact': this.compact(),
+      [`neu-empty-state--density-${this.density()}`]: true,
     };
   }
 }

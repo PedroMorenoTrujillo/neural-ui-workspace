@@ -28,8 +28,8 @@ core.Component({
   standalone: true,
   imports,
   template: `
- <neu-dialog [open]="true" title="SSR event dialog" (opened)="record('dialogOpened')" (hidden)="record('dialogHidden')" />
- <neu-bottom-sheet [open]="true" title="SSR event sheet" (opened)="record('sheetOpened')" (hidden)="record('sheetHidden')" />
+ <neu-dialog [open]="true" title="SSR event dialog" (opened)="record('dialogOpened')" (closed)="record('dialogClosed')" />
+ <neu-bottom-sheet [open]="true" title="SSR event sheet" (opened)="record('sheetOpened')" (closed)="record('sheetClosed')" />
  <neu-date-input (viewChange)="record('view')" (opened)="record('dateOpened')" />
  <neu-tree-select (filter)="record('filter')" (opened)="record('treeOpened')" />
  <neu-virtual-list [items]="['SSR row']" (rangeChange)="record('range')" />

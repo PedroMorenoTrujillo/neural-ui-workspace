@@ -34,8 +34,8 @@ export interface NeuContextMenuItem {
   separator?: boolean;
   /** Desactiva el item / Disables the item */
   disabled?: boolean;
-  /** Variante de color / Color variant */
-  variant?: 'default' | 'danger';
+  /** Intención semántica / Semantic intent */
+  tone?: 'neutral' | 'danger';
 }
 
 /**
@@ -82,7 +82,7 @@ export class NeuContextMenuItemDirective {
         type="button"
         role="menuitem"
         class="neu-context-menu__item"
-        [class.neu-context-menu__item--danger]="item.variant === 'danger'"
+        [class.neu-context-menu__item--danger]="item.tone === 'danger'"
         [class.neu-context-menu__item--disabled]="item.disabled"
         [disabled]="item.disabled ?? false"
         [attr.aria-disabled]="item.disabled ?? false"

@@ -258,15 +258,17 @@ describe('NeuSplitButtonComponent', () => {
     expect(fixture.componentInstance.isDisabled()).toBe(false);
   });
 
-  it('variant input produces the correct CSS class', async () => {
+  it('tone and variant inputs produce the correct CSS classes', async () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
-    fixture.componentRef.setInput('variant', 'danger');
+    fixture.componentRef.setInput('tone', 'danger');
+    fixture.componentRef.setInput('variant', 'solid');
     fixture.detectChanges();
     await fixture.whenStable();
-    // The variant class is applied to the main button inside, not to the host
+    // The visual-axis classes are applied to the main button inside, not to the host.
     expect(fixture.nativeElement.querySelector('.neu-button--danger')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.neu-button--solid')).toBeTruthy();
   });
 
   it('action with divider=true renders a separator in the dropdown', async () => {
@@ -287,16 +289,16 @@ describe('NeuSplitButtonComponent', () => {
     expect(sep).toBeTruthy();
   });
 
-  it('chevronClasses should include the variant CSS class', () => {
-    // chevronClasses debe incluir la clase CSS de la variante
-    // chevronClasses must include the variant CSS class
+  it('chevronClasses should include the tone and variant CSS classes', () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
-    fixture.componentRef.setInput('variant', 'secondary');
+    fixture.componentRef.setInput('tone', 'neutral');
+    fixture.componentRef.setInput('variant', 'solid');
     fixture.detectChanges();
     const comp = fixture.componentInstance as any;
-    expect(comp.chevronClasses()).toContain('neu-button--secondary');
+    expect(comp.chevronClasses()).toContain('neu-button--neutral');
+    expect(comp.chevronClasses()).toContain('neu-button--solid');
   });
 
   it('chevronClasses should include size modifier', () => {

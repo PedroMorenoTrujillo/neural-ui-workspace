@@ -92,9 +92,9 @@ th {
   inline-size: min(20rem, calc(100vw - 2rem));
   gap: var(--neu-table-space-sm, 0.5rem);
   padding: var(--neu-table-space-sm, 0.75rem);
-  border: 1px solid var(--neu-color-border, currentColor);
+  border: 1px solid var(--neu-border, currentColor);
   border-radius: 0.5rem;
-  background: var(--neu-color-surface, Canvas);
+  background: var(--neu-surface, Canvas);
   box-shadow: 0 0.75rem 2rem color-mix(in srgb, currentColor 18%, transparent);
 }
 
@@ -171,7 +171,7 @@ th {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--neu-color-focus, currentColor);
+  outline: 2px solid var(--neu-focus-color, currentColor);
   outline-offset: 2px;
 }
 
@@ -188,8 +188,8 @@ select:focus-visible {
 .neu-table2__table {
   inline-size: 100%;
   border-collapse: collapse;
-  color: var(--neu-color-text, currentColor);
-  background: var(--neu-color-surface, transparent);
+  color: var(--neu-text, currentColor);
+  background: var(--neu-surface, transparent);
 }
 
 th,
@@ -210,7 +210,7 @@ th[data-column-pin],
 td[data-column-pin] {
   position: sticky;
   z-index: 1;
-  background: var(--neu-color-surface, Canvas);
+  background: var(--neu-surface, Canvas);
 }
 
 th[data-column-pin] {
@@ -238,12 +238,12 @@ tr[aria-selected='true'] {
 [data-borders='rows'] td,
 [data-borders='cells'] th,
 [data-borders='cells'] td {
-  border-block-end: 1px solid var(--neu-color-border, currentColor);
+  border-block-end: 1px solid var(--neu-border, currentColor);
 }
 
 [data-borders='cells'] th,
 [data-borders='cells'] td {
-  border-inline-end: 1px solid var(--neu-color-border, currentColor);
+  border-inline-end: 1px solid var(--neu-border, currentColor);
 }
 
 .neu-table2__viewport--striped tbody tr:nth-child(even):not(.neu-table2__state-row) {
@@ -254,7 +254,7 @@ tr[aria-selected='true'] {
   position: sticky;
   inset-block-start: 0;
   z-index: 1;
-  background: var(--neu-color-surface, Canvas);
+  background: var(--neu-surface, Canvas);
 }
 
 .neu-table2__state {

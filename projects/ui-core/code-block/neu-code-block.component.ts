@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import type { NeuDensity } from '@neural-ui/core';
 
 /**
  * NeuralUI Code Block
@@ -29,7 +30,8 @@ import { DOCUMENT } from '@angular/common';
   template: `
     <div
       class="neu-code-block"
-      [class.neu-code-block--compact]="compact()"
+      [class.neu-code-block--density-compact]="density() === 'compact'"
+      [class.neu-code-block--density-relaxed]="density() === 'relaxed'"
       [class.neu-code-block--wrap]="wrap()"
     >
       <!-- Encabezado del editor -->
@@ -91,8 +93,8 @@ export class NeuCodeBlockComponent {
   /** Código fuente a mostrar / Source code to display */
   code = input<string>('');
 
-  /** Reduce espaciados y controles para ejemplos cortos / Reduces spacing and controls for short examples */
-  compact = input<boolean>(false);
+  /** Compactación espacial / Spatial compactness */
+  density = input<NeuDensity>('normal');
 
   /** Ajusta las líneas largas al ancho disponible y evita el scroll horizontal / Wraps long lines to the available width and avoids horizontal scrolling */
   wrap = input<boolean>(false);

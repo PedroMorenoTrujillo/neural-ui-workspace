@@ -4,11 +4,12 @@ import { NeuTagComponent, NeuTagIconDirective } from './neu-tag.component';
 
 @Component({
   imports: [NeuTagComponent],
-  template: '<neu-tag [value]="value" [severity]="severity" [rounded]="rounded">Projected</neu-tag>',
+  template: '<neu-tag [value]="value" [tone]="tone" [variant]="variant" [rounded]="rounded">Projected</neu-tag>',
 })
 class HostComponent {
   value: string | number | null | undefined = null;
-  severity: 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | null = null;
+  tone: 'neutral' | 'success' | 'info' | 'warning' | 'danger' = 'neutral';
+  variant: 'soft' | 'solid' = 'soft';
   rounded = false;
 }
 
@@ -39,12 +40,14 @@ describe('NeuTagComponent', () => {
     expect(direct.nativeElement.textContent).not.toContain('Projected');
   });
 
-  it('updates severity and rounded classes dynamically', async () => {
+  it('updates tone, variant and rounded classes dynamically', async () => {
     const direct = TestBed.createComponent(NeuTagComponent);
-    direct.componentRef.setInput('severity', 'warn');
+    direct.componentRef.setInput('tone', 'warning');
+    direct.componentRef.setInput('variant', 'solid');
     direct.componentRef.setInput('rounded', true);
     direct.detectChanges();
-    expect(direct.nativeElement.classList).toContain('neu-tag--warn');
+    expect(direct.nativeElement.classList).toContain('neu-tag--warning');
+    expect(direct.nativeElement.classList).toContain('neu-tag--solid');
     expect(direct.nativeElement.classList).toContain('neu-tag--rounded');
   });
 

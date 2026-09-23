@@ -204,8 +204,8 @@ TreeSelect comparte nodos tipados, índice/proyección, filtros e igualdad con T
 **Estado: APPROVED TARGET para el vocabulario y los 14 destinos; NEEDS REVIEW para el mapa exhaustivo por componente de N2-023.**
 
 - `density: 'compact'|'normal'|'relaxed'`; default `normal`. Solo se expone donde los tres modos tienen tratamiento real.
-- `tone` comunica intención semántica (`neutral|info|success|warning|danger`) y solo admite tonos soportados por el componente.
-- `variant` comunica tratamiento visual (`solid|outline|ghost|soft`, subconjunto por componente).
+- `tone` comunica intención semántica (`neutral|brand|info|success|warning|danger`) y solo admite tonos soportados por el componente.
+- `variant` comunica tratamiento visual (`solid|soft|outline|ghost|text`, subconjunto por componente).
 - `type` conserva semántica HTML/dominio (Input, DateInput); `color` literal sigue siendo color y no se renombra a tone.
 - Temas/presets resuelven tokens canónicos para light, dark, RTL, forced-colors y high contrast. El orden lógico usa propiedades inline/block.
 
@@ -311,8 +311,8 @@ No queda ninguna ambigüedad P1 que bloquee implementación. Estas decisiones so
 | --- | --- | --- | --- |
 | mapa `tone/variant` por cada componente | NEEDS REVIEW P2 | conservar visual actual; no renombrar un input hasta tener mapa/test | N2-023 |
 | InputMask raw vs masked avanzado | NEEDS REVIEW P2 | masked | N2-027 |
-| DateInput period/inline | NEEDS REVIEW P2 | no añadir modos | N2-025 |
-| Slider range/vertical y Rating half/vertical | NEEDS REVIEW P2 | scalar/horizontal/step entero | N2-026 |
+| DateInput period/inline | APPROVED TARGET P2 (resolución N2-025) | `month: CivilMonth\|null`, `year: CivilYear\|null`; `presentation: 'overlay'\|'inline'` independiente del valor; `showWeekNumbers` solo en day-grid; sin touchUI ni expansión de `disabledDays` a períodos | N2-025 |
+| Slider range/vertical y Rating half; Rating vertical | APPROVED TARGET P2 (resolución B7); Rating vertical REJECTED | Slider `number | readonly [number, number]` discriminado por valor, sin cruce, gap `minStepsBetweenThumbs * step`, eje físico horizontal izquierda→derecha y vertical abajo→arriba; límites numéricos públicos `minValue`/`maxValue` (defaults 0/100), sin inputs `min`/`max`; Rating `number|null`, `step: 1|0.5`, radiogroup horizontal, `null`/same-value clear | N2-026 / B7 |
 | Splitter collapse | NEEDS REVIEW P2 | resize actual; persistence externa | N2-028 |
 | Gallery/ImageGallery merge | NEEDS REVIEW P2 | no retirar ImageGallery hasta equivalencia | N2-029 |
 | EyeDropper | NEEDS REVIEW P2 | color editor funciona sin API browser | N2-024 |

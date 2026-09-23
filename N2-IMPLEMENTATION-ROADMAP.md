@@ -453,13 +453,15 @@ Performance continua: mismo consumer/funcionalidad/datos/toolchain contra PrimeN
 | PRIORITY | P2 |
 | COMPONENTS | Slider, Rating |
 | CURRENT PROBLEM | Faltan rango/vertical en Slider y medio valor/vertical en Rating. Evidencia: [neu-slider.component.ts](/Users/pedromorenotrujillo/Documents/neural/neural-ui-workspace-v2/projects/ui-core/slider/neu-slider.component.ts:14) |
-| TARGET DESIGN | Slider rango con readonly [number,number] y política de cruce; Rating incrementos explícitos. |
-| BREAKING CHANGE | Modo tipado añade uniones; no cambia tipo sin discriminante. |
+| TARGET DESIGN | Slider `number` o `readonly [number,number]` discriminado por la forma del valor, sin modo redundante; thumbs de identidad estable sin cruce, gap `minStepsBetweenThumbs * step`, orientación horizontal o vertical. Rating `number|null`, `step: 1|0.5`, radiogroup horizontal; orientación vertical rechazada. |
+| BREAKING CHANGE | Slider elimina los inputs públicos `min`/`max` y usa `minValue`/`maxValue` para escalar y rango, conservando defaults 0/100; amplía el valor con tupla readonly y correlación tipada escalar/rango, sin `range=true` ni `mode`. Rating conserva el valor y añade solo el paso discreto. |
 | DEPENDENCIES | N2-010 |
-| IMPLEMENTATION NOTES | Priorizar rango para filtros empresariales; vertical/medio valor según caso. |
+| IMPLEMENTATION NOTES | Slider horizontal min izquierda/max derecha y vertical min abajo/max arriba, sin inversión RTL; flechas derecha/arriba aumentan, izquierda/abajo disminuyen. El valor externo inválido se normaliza solo para vista/ARIA y no produce eco; la siguiente edición de usuario emite valor canónico. Rating conserva `null` y clear al reactivar el valor seleccionado; medio paso crea opciones radio discretas sin duplicar estrellas visuales. |
 | TESTS REQUIRED | Dos thumbs teclado, minSteps, clamping, nombres distintos, valueText y readonly. |
 | ACCEPTANCE GATE | Ningún thumb pierde foco ni orden lógico. |
 | RISK | Medio. |
+
+**Gate de implementación B7 (Angular 22.1.6): RESUELTO.** `FormValueControl<V>` y `[formField]` reservan `min`/`max` como valores de `V`; con tuplas colisionaban con límites numéricos. La resolución sustituye los inputs públicos por `minValue`/`maxValue`, sin alias legacy ni reinterpretar metadatos de validación. La prueba antes/después y el breaking delta están en `N2-B7-NUMERIC-P2.md`.
 
 ### N2-027 — InputMask
 

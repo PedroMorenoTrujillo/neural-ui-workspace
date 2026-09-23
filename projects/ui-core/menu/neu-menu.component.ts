@@ -66,7 +66,7 @@ export class NeuMenuItemDirective {
             type="button"
             role="menuitem"
             class="neu-menu__item"
-            variant="ghost"
+            tone="neutral" variant="ghost"
             size="sm"
             [disabled]="!!item.disabled"
             [tabIndex]="tabIndexFor(index)"
@@ -267,7 +267,7 @@ export class NeuMenuComponent {
       #trigger
       type="button"
       class="neu-menu-button__trigger"
-      variant="ghost"
+      tone="neutral" variant="ghost"
       size="sm"
       [attr.aria-expanded]="open()"
       aria-haspopup="menu"
@@ -429,7 +429,7 @@ export class NeuMenuButtonComponent {
             neu-button
             type="button"
             class="neu-menubar__item"
-            variant="ghost"
+            tone="neutral" variant="ghost"
             size="sm"
             role="menuitem"
             [attr.data-neu-menubar-index]="index"

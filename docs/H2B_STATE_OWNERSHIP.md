@@ -7,7 +7,7 @@ intentionally internal: no public API is removed by this work.
 
 | Slice                                         | Before                                           | Contract after H2-B                                                                                                                                                                                                                                                             |
 | --------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `selectedDate` / visible period               | input copied to local signal and changed locally | **Proposal/echo**. `selectedDate` initializes and reconciles the local date projection; user selection updates that projection and emits `selectedDateChange` once. `dateSelect` mirrors the same user transition for compatibility. Input reconciliation and reset are silent. |
+| `selectedDate` / visible period               | input copied to local signal and changed locally | **Proposal/echo**. `selectedDate` initializes and reconciles the local date projection; user selection updates that projection and emits `selectedDateChange` once. Input reconciliation and reset are silent. |
 | calendar grid, labels, agenda, event grouping | mixed input/signal reads                         | **Derived** from the canonical projected date, locale, timezone, events, and view.                                                                                                                                                                                              |
 | event collection                              | input                                            | **Consumer-owned**, normalized in a computed value only.                                                                                                                                                                                                                        |
 | focus / button interaction                    | DOM                                              | **Ephemeral**.                                                                                                                                                                                                                                                                  |
@@ -80,8 +80,8 @@ or a modified concurrent board replaces the projection atomically.
 
 ## Public compatibility ledger
 
-- Calendar `selectedDateChange`: canonical proposal event; `dateSelect` is a
-  compatibility alias and a deprecation candidate for a future major release.
+- Calendar `selectedDateChange`: canonical proposal event; the duplicate
+  `dateSelect` compatibility mirror was removed in N2-022.
 - Carousel `pageChange`, Gallery `activeIndexChange`, and Nav `collapsedChange`:
   canonical proposal events; their input values retain proposal/echo behavior.
 - Kanban `columnsChange` / `cardDrop` and DashboardGrid `orderChange`: canonical

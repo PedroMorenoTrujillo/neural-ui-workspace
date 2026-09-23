@@ -131,7 +131,7 @@ export type { NeuSelectOption } from './neu-select.types';
       [class.neu-select--error]="hasError() || invalid()"
       [class.neu-select--invalid]="invalid()"
       [class.neu-select--fluid]="fluid()"
-      [class.neu-select--filled]="variant() === 'filled'"
+      [class.neu-select--solid]="variant() === 'solid'"
       [class.neu-select--has-value]="hasValue()"
       [class.neu-select--has-placeholder]="!!placeholder() && !hasValue()"
       [class.neu-select--no-float]="!floatingLabel()"
@@ -573,7 +573,7 @@ export class NeuSelectComponent<
   ariaDescribedBy = input<string | null>(null);
   ariaFilterLabel = input('Filter options');
   fluid = input(false);
-  variant = input<NeuSelectVariant>('outlined');
+  variant = input<NeuSelectVariant>('outline');
 
   /** Muestra el label como flotante (true) o como label estático encima (false, por defecto) / Shows the label as floating (true) or static above (false, default) */
   floatingLabel = input<boolean>(false);

@@ -73,10 +73,10 @@ export class NeuConfirmPopupService {
         }
         <p [id]="messageId">{{ currentMessage() }}</p>
         <div class="neu-confirm-popup__actions">
-          <button neu-button type="button" class="neu-confirm-popup__reject" variant="secondary" size="sm" (click)="reject()">
+          <button neu-button type="button" class="neu-confirm-popup__reject" tone="neutral" variant="solid" size="sm" (click)="reject()">
             {{ currentRejectLabel() }}
           </button>
-          <button neu-button type="button" class="neu-confirm-popup__accept" variant="primary" size="sm" (click)="accept()">
+          <button neu-button type="button" class="neu-confirm-popup__accept" tone="brand" variant="solid" size="sm" (click)="accept()">
             {{ currentAcceptLabel() }}
           </button>
         </div>

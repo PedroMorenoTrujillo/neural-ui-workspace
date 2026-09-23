@@ -29,14 +29,15 @@ export type NeuAvatarStatus = 'online' | 'offline' | 'busy' | 'away' | '';
     <span
       class="neu-avatar"
       [ngClass]="hostClasses()"
-      [attr.aria-label]="alt() || name() || 'Avatar'"
-      role="img"
+      [attr.aria-label]="alt() || name() || null"
+      [attr.role]="alt() || name() ? 'img' : null"
+      [attr.aria-hidden]="alt() || name() ? null : 'true'"
     >
       @if (src() && failedSrc() !== src()) {
         <img
           class="neu-avatar__img"
           [src]="src()"
-          [alt]="alt() || name()"
+          alt=""
           (error)="failedSrc.set(src())"
         />
       } @else {

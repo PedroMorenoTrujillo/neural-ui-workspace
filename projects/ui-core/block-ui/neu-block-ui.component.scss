@@ -55,7 +55,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid var(--neu-spinner-track, #e5e7eb);
-  border-top-color: var(--neu-color-primary, #0ea5e9);
+  border-top-color: var(--neu-primary, #0ea5e9);
   border-radius: 50%;
   animation: neu-block-ui-spin 0.75s linear infinite;
 }

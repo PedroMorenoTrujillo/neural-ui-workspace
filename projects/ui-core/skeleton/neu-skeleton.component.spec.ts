@@ -30,7 +30,9 @@ describe('NeuSkeletonComponent', () => {
   });
 
   it('should render', () => {
-    expect(fixture.nativeElement.querySelector('neu-skeleton')).toBeTruthy();
+    const skeleton = fixture.nativeElement.querySelector('neu-skeleton');
+    expect(skeleton).toBeTruthy();
+    expect(skeleton.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('should apply rect variant class by default', () => {

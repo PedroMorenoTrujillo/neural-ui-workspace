@@ -23,36 +23,36 @@ describe('NeuToastService', () => {
   });
 
   it('should add a toast with show()', () => {
-    service.show({ message: 'Hola', type: 'info', duration: 0 });
+    service.show({ message: 'Hola', tone: 'info', duration: 0 });
     expect(service.toasts().length).toBe(1);
     expect(service.toasts()[0].message).toBe('Hola');
-    expect(service.toasts()[0].type).toBe('info');
+    expect(service.toasts()[0].tone).toBe('info');
   });
 
   it('should add a success toast', () => {
     service.success('Guardado', { duration: 0 });
-    expect(service.toasts()[0].type).toBe('success');
+    expect(service.toasts()[0].tone).toBe('success');
     expect(service.toasts()[0].message).toBe('Guardado');
   });
 
   it('should add an error toast', () => {
     service.error('Error crítico', { duration: 0 });
-    expect(service.toasts()[0].type).toBe('error');
+    expect(service.toasts()[0].tone).toBe('danger');
   });
 
   it('should add a warning toast', () => {
     service.warning('Atención', { duration: 0 });
-    expect(service.toasts()[0].type).toBe('warning');
+    expect(service.toasts()[0].tone).toBe('warning');
   });
 
   it('should add an info toast', () => {
     service.info('Información', { duration: 0 });
-    expect(service.toasts()[0].type).toBe('info');
+    expect(service.toasts()[0].tone).toBe('info');
   });
 
   it('should dismiss a specific toast by id', () => {
-    const id = service.show({ message: 'A', type: 'info', duration: 0 });
-    service.show({ message: 'B', type: 'success', duration: 0 });
+    const id = service.show({ message: 'A', tone: 'info', duration: 0 });
+    service.show({ message: 'B', tone: 'success', duration: 0 });
     service.dismiss(id);
     expect(service.toasts().length).toBe(1);
     expect(service.toasts()[0].message).toBe('B');
@@ -66,7 +66,7 @@ describe('NeuToastService', () => {
   });
 
   it('should return an id from show()', () => {
-    const id = service.show({ message: 'Test', type: 'info', duration: 0 });
+    const id = service.show({ message: 'Test', tone: 'info', duration: 0 });
     expect(typeof id).toBe('string');
     expect(id.length).toBeGreaterThan(0);
   });
@@ -78,27 +78,27 @@ describe('NeuToastService', () => {
 
   it('success() should add a toast with type=success', () => {
     service.success('Exito', { duration: 0 });
-    expect(service.toasts()[0].type).toBe('success');
+    expect(service.toasts()[0].tone).toBe('success');
   });
 
-  it('error() should add a toast with type=error', () => {
+  it('error() should add a toast with tone=danger', () => {
     service.error('Error', { duration: 0 });
-    expect(service.toasts()[0].type).toBe('error');
+    expect(service.toasts()[0].tone).toBe('danger');
   });
 
   it('warning() should add a toast with type=warning', () => {
     service.warning('Aviso', { duration: 0 });
-    expect(service.toasts()[0].type).toBe('warning');
+    expect(service.toasts()[0].tone).toBe('warning');
   });
 
   it('info() should add a toast with type=info', () => {
     service.info('Info', { duration: 0 });
-    expect(service.toasts()[0].type).toBe('info');
+    expect(service.toasts()[0].tone).toBe('info');
   });
 
   it('dismiss after duration>0 auto-removes toast', async () => {
     vi.useFakeTimers();
-    service.show({ message: 'Temp', type: 'info', duration: 100 });
+    service.show({ message: 'Temp', tone: 'info', duration: 100 });
     expect(service.toasts().length).toBe(1);
     vi.advanceTimersByTime(200);
     expect(service.toasts().length).toBe(0);
@@ -107,7 +107,7 @@ describe('NeuToastService', () => {
 
   it('clear should cancel pending auto-dismiss timers', () => {
     vi.useFakeTimers();
-    service.show({ message: 'Temp', type: 'info', duration: 100 });
+    service.show({ message: 'Temp', tone: 'info', duration: 100 });
 
     service.clear();
     vi.advanceTimersByTime(200);
@@ -117,7 +117,7 @@ describe('NeuToastService', () => {
   });
 
   it('show with title sets title on the toast', () => {
-    service.show({ message: 'Msg', title: 'Title', type: 'info', duration: 0 });
+    service.show({ message: 'Msg', title: 'Title', tone: 'info', duration: 0 });
     expect(service.toasts()[0].title).toBe('Title');
   });
 
@@ -126,11 +126,11 @@ describe('NeuToastService', () => {
 
     expect(service.toasts()[0].duration).toBe(4000);
     expect(service.toasts()[0].title).toBe('');
-    expect(service.toasts()[0].type).toBe('info');
+    expect(service.toasts()[0].tone).toBe('info');
   });
 
   it('dismiss should keep the list unchanged when the id does not exist', () => {
-    service.show({ message: 'A', type: 'info', duration: 0 });
+    service.show({ message: 'A', tone: 'info', duration: 0 });
 
     service.dismiss('missing-id');
 

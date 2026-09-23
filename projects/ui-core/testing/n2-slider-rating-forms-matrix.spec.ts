@@ -73,6 +73,77 @@ class TemplateHost {
   readonly rating = signal<number | null>(INITIAL.rating);
 }
 
+type Range = readonly [number, number];
+
+@Component({
+  imports: [FormField, ...imports],
+  template: `
+    <neu-slider [minValue]="0" [maxValue]="100" [formField]="fields.range" />
+    <neu-rating [step]="0.5" [formField]="fields.rating" />
+  `,
+})
+class B7SignalHost {
+  readonly data = signal({ range: [20, 80] as Range, rating: 2 as number | null });
+  readonly fields = form(this.data);
+}
+
+@Component({
+  imports: [ReactiveFormsModule, ...imports],
+  template: `
+    <neu-slider [minValue]="0" [maxValue]="100" [formControl]="range" />
+    <neu-rating [step]="0.5" [formControl]="rating" />
+  `,
+})
+class B7ReactiveDirectHost {
+  readonly range = new FormControl<Range>([20, 80], { nonNullable: true });
+  readonly rating = new FormControl<number | null>(2);
+}
+
+@Component({
+  imports: [ReactiveFormsModule, ...imports],
+  template: `<form [formGroup]="group">
+    <neu-slider formControlName="range" [minValue]="0" [maxValue]="100" />
+    <neu-rating formControlName="rating" [step]="0.5" />
+  </form>`,
+})
+class B7ReactiveGroupHost {
+  readonly group = new FormGroup({
+    range: new FormControl<Range>([20, 80], { nonNullable: true }),
+    rating: new FormControl<number | null>(2),
+  });
+}
+
+@Component({
+  imports: [FormsModule, ...imports],
+  template: `
+    <neu-slider [minValue]="0" [maxValue]="100" [(ngModel)]="range" [ngModelOptions]="{ standalone: true }" />
+    <neu-rating [step]="0.5" [(ngModel)]="rating" [ngModelOptions]="{ standalone: true }" />
+  `,
+})
+class B7TemplateHost {
+  range: Range = [20, 80];
+  readonly rating = signal<number | null>(2);
+}
+
+function b7Controls(fixture: ComponentFixture<unknown>) {
+  return {
+    slider: fixture.debugElement.query(By.directive(NeuSliderComponent))
+      .componentInstance as NeuSliderComponent<Range>,
+    rating: fixture.debugElement.query(By.directive(NeuRatingComponent))
+      .componentInstance as NeuRatingComponent,
+  };
+}
+
+function editB7(fixture: ComponentFixture<unknown>): void {
+  const { slider, rating } = b7Controls(fixture);
+  const thumb = fixture.nativeElement.querySelector('[role="slider"]') as HTMLElement;
+  thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+  const half = fixture.nativeElement.querySelector('[data-neu-rating-value="2.5"]') as HTMLButtonElement;
+  half.click();
+  expect(slider.value()).toEqual([21, 80]);
+  expect(rating.value()).toBe(2.5);
+}
+
 describe('N2-010 Slider/Rating Forms matrix', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
@@ -141,5 +212,75 @@ describe('N2-010 Slider/Rating Forms matrix', () => {
     await fixture.whenStable();
     expect(slider.value()).toBe(55);
     expect(echo).not.toHaveBeenCalled();
+  });
+});
+
+describe('B7 range Slider and half Rating Forms matrix', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
+
+  it('propagates through formField once and keeps minValue independent of field metadata', () => {
+    const fixture = TestBed.createComponent(B7SignalHost);
+    fixture.detectChanges();
+    const { slider, rating } = b7Controls(fixture);
+    const sliderEcho = vi.fn();
+    const ratingEcho = vi.fn();
+    slider.value.subscribe(sliderEcho);
+    rating.value.subscribe(ratingEcho);
+    editB7(fixture);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.data()).toEqual({ range: [21, 80], rating: 2.5 });
+    expect(sliderEcho).toHaveBeenCalledTimes(1);
+    expect(ratingEcho).toHaveBeenCalledTimes(1);
+    fixture.componentInstance.data.set({ range: [30, 70], rating: 3.5 });
+    fixture.detectChanges();
+    expect(slider.value()).toEqual([30, 70]);
+    expect(rating.value()).toBe(3.5);
+    expect(sliderEcho).toHaveBeenCalledTimes(1);
+    expect(ratingEcho).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates through direct formControl and accepts silent external writes', () => {
+    const fixture = TestBed.createComponent(B7ReactiveDirectHost);
+    fixture.detectChanges();
+    editB7(fixture);
+    expect(fixture.componentInstance.range.value).toEqual([21, 80]);
+    expect(fixture.componentInstance.rating.value).toBe(2.5);
+    fixture.componentInstance.range.setValue([30, 70]);
+    fixture.componentInstance.rating.setValue(3.5);
+    fixture.detectChanges();
+    expect(b7Controls(fixture).slider.value()).toEqual([30, 70]);
+  });
+
+  it('propagates through formControlName and resets under parent ownership', () => {
+    const fixture = TestBed.createComponent(B7ReactiveGroupHost);
+    fixture.detectChanges();
+    editB7(fixture);
+    expect(fixture.componentInstance.group.getRawValue()).toEqual({ range: [21, 80], rating: 2.5 });
+    fixture.componentInstance.group.reset({ range: [10, 90], rating: null });
+    fixture.detectChanges();
+    expect(b7Controls(fixture).slider.value()).toEqual([10, 90]);
+    expect(b7Controls(fixture).rating.value()).toBeNull();
+  });
+
+  it('propagates through ngModel without echoing parent changes', async () => {
+    const fixture = TestBed.createComponent(B7TemplateHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(b7Controls(fixture).slider.value()).toEqual([20, 80]);
+    editB7(fixture);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.range).toEqual([21, 80]);
+    expect(fixture.componentInstance.rating()).toBe(2.5);
+    fixture.componentInstance.range = [30, 70];
+    fixture.componentInstance.rating.set(3.5);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(b7Controls(fixture).slider.value()).toEqual([30, 70]);
   });
 });

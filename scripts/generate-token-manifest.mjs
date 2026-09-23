@@ -78,7 +78,6 @@ const COMPONENT_PREFIXES = [
   'toolbar',
   'toast',
   'tooltip',
-  'organization-chart',
 ];
 
 function filesIn(directory) {

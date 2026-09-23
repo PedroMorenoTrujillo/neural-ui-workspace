@@ -30,8 +30,12 @@ import { NeuKanbanComponent, type NeuKanbanColumn } from '@neural-ui/core/kanban
   template: `<output id="hydration-events">{{ events() | json }}</output
     ><output id="hydration-ime-events">{{ inputValues() | json }}</output
     ><span id="hydration-ready">{{ ready() }}</span>
-    <neu-autocomplete [options]="['Alpha']" (select)="record('select')" />
-    <neu-input-tags [options]="['Alpha']" [typeahead]="true" (optionActivated)="record('tagSelect')" />
+    <neu-autocomplete [options]="['Alpha']" (optionActivated)="record('select')" />
+    <neu-input-tags
+      [options]="['Alpha']"
+      [typeahead]="true"
+      (optionActivated)="record('tagSelect')"
+    />
     <neu-input id="hydration-input" label="Hydrated input" [formControl]="inputControl" />
     <neu-textarea id="hydration-textarea" label="Hydrated textarea" />
     <neu-tree id="hydration-tree" [nodes]="treeNodes" [expandedKeys]="['root']" />
@@ -51,14 +55,20 @@ import { NeuKanbanComponent, type NeuKanbanColumn } from '@neural-ui/core/kanban
       [open]="open()"
       title="Hydrated dialog"
       (opened)="record('opened')"
-      (hidden)="record('hidden')"
+      (closed)="record('closed')"
     >
       <button id="hydration-close" (click)="open.set(false)">Close owner</button>
+      <button id="hydration-sheet-open" type="button" (click)="sheetOpen.set(true)">
+        Open sheet
+      </button>
     </neu-dialog>
+    <button id="hydration-open" type="button" (click)="open.set(true)">Open dialog</button>
     <neu-bottom-sheet
-      [open]="false"
+      [open]="sheetOpen()"
       (opened)="record('sheetOpened')"
-      (hidden)="record('sheetHidden')"
+      (closed)="record('sheetClosed')"
+      (closeRequested)="acceptSheetClose()"
+      title="Hydrated sheet"
     />
     <neu-color-picker
       id="hydration-color"
@@ -75,6 +85,7 @@ export class H9HydrationComponent {
   readonly events = signal<string[]>([]);
   readonly ready = signal(false);
   readonly open = signal(true);
+  readonly sheetOpen = signal(false);
   readonly inputControl = new FormControl('', { nonNullable: true });
   readonly inputValues = signal<string[]>([]);
   readonly treeNodes: NeuTreeNode[] = [
@@ -96,5 +107,9 @@ export class H9HydrationComponent {
   acceptKanban(columns: NeuKanbanColumn[]): void {
     this.kanbanColumns.set(columns);
     this.record('kanbanMove');
+  }
+  acceptSheetClose(): void {
+    this.record('sheetRequest');
+    this.sheetOpen.set(false);
   }
 }

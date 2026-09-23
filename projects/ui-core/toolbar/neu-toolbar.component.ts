@@ -4,9 +4,11 @@ import {
   computed,
   input,
 } from '@angular/core';
+import type { NeuDensity } from '@neural-ui/core';
 
 export type NeuToolbarSize = 'sm' | 'md' | 'lg';
-export type NeuToolbarDensity = 'comfortable' | 'compact';
+export type NeuToolbarTone = 'neutral' | 'brand';
+export type NeuToolbarVariant = 'solid' | 'soft' | 'ghost';
 export type NeuToolbarWrap = 'nowrap' | 'wrap';
 
 /**
@@ -53,19 +55,23 @@ export class NeuToolbarComponent {
   /** Añade separador inferior / Adds bottom separator */
   readonly bordered = input<boolean>(false);
 
-  /** Densidad visual: comfortable mantiene el espaciado actual, compact reduce huecos / Visual density */
-  readonly density = input<NeuToolbarDensity>('comfortable');
+  /** Compactación espacial / Spatial compactness */
+  readonly density = input<NeuDensity>('normal');
 
   /** Permite que los grupos pasen a varias líneas en responsive / Allows groups to wrap on narrow surfaces */
   readonly wrap = input<NeuToolbarWrap>('nowrap');
 
-  /** Color de fondo personalizado vía CSS (pasa a la variable local) / Custom background color via CSS */
-  readonly surface = input<'primary' | 'surface' | 'none'>('surface');
+  /** Intención semántica / Semantic intent */
+  readonly tone = input<NeuToolbarTone>('neutral');
+
+  /** Tratamiento visual / Visual treatment */
+  readonly variant = input<NeuToolbarVariant>('soft');
 
   readonly hostClasses = computed(() => ({
     'neu-toolbar': true,
     [`neu-toolbar--${this.size()}`]: true,
-    [`neu-toolbar--${this.surface()}`]: true,
+    [`neu-toolbar--${this.tone()}`]: true,
+    [`neu-toolbar--${this.variant()}`]: true,
     [`neu-toolbar--density-${this.density()}`]: true,
     [`neu-toolbar--${this.wrap()}`]: true,
     'neu-toolbar--shadow': this.shadow(),

@@ -53,13 +53,13 @@ describe('menu action resolver', () => {
 
   it('adapts legacy menu-family contracts without mutating them', () => {
     const menu = [{ key: 'copy', label: 'Copy' }];
-    const context = [{ key: 'delete', label: 'Delete', variant: 'danger' as const }];
+    const context = [{ key: 'delete', label: 'Delete', tone: 'danger' as const }];
     const split = [{ id: 'save', label: 'Save', divider: true }];
     expect(adaptNeuMenuItems(menu)[0]).toMatchObject({ key: 'copy' });
     expect(adaptNeuContextMenuItems(context)[0]).toMatchObject({ key: 'delete' });
     expect(adaptNeuSplitButtonActions(split)[0]).toMatchObject({ key: 'save', separator: true });
     expect(menu).toEqual([{ key: 'copy', label: 'Copy' }]);
-    expect(context[0]).toHaveProperty('variant', 'danger');
+    expect(context[0]).toHaveProperty('tone', 'danger');
     expect(split[0]).toHaveProperty('divider', true);
   });
 

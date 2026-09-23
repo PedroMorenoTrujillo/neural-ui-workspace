@@ -1,10 +1,13 @@
 import { InjectionToken, type Provider } from '@angular/core';
 
-export type NeuOverlayDismissReason =
-  | 'escape'
-  | 'outside-pointer'
-  | 'backdrop'
-  | 'focus-loss';
+export type NeuOverlayDismissReason = 'escape' | 'outside-pointer' | 'backdrop' | 'focus-loss';
+
+export type NeuCloseReason = 'escape' | 'outside' | 'action' | 'programmatic-command';
+
+export interface NeuCloseRequest {
+  readonly reason: NeuCloseReason;
+  readonly originalEvent?: Event;
+}
 
 export type NeuOverlaySource =
   | 'dialog'

@@ -5,14 +5,14 @@ import { vi } from 'vitest';
 import { NeuCalendarComponent, NeuCalendarEventDirective } from './neu-calendar.component';
 
 const EVENTS = [
-  { id: 'a', title: 'Kickoff', start: '2026-05-14T09:00:00', variant: 'info' as const },
+  { id: 'a', title: 'Kickoff', start: '2026-05-14T09:00:00', tone: 'info' as const },
   { id: 'b', title: 'Review', start: '2026-05-14T13:30:00', meta: 'Remote' },
   {
     id: 'c',
     title: 'Launch',
     start: '2026-05-16T00:00:00',
     allDay: true,
-    variant: 'success' as const,
+    tone: 'success' as const,
   },
 ];
 
@@ -25,9 +25,20 @@ function localDayKey(date: Date): string {
 
 describe('NeuCalendarComponent', () => {
   it('projects the event template in the calendar views', async () => {
-    @Component({ imports: [NeuCalendarComponent, NeuCalendarEventDirective], template: `<neu-calendar [events]="events" selectedDate="2026-05-14"><ng-template neuCalendarEvent let-event let-view="view">CUSTOM:{{ view }}:{{ event.title }}</ng-template></neu-calendar>` })
-    class Host { events = EVENTS; }
-    await TestBed.resetTestingModule().configureTestingModule({ providers: [provideZonelessChangeDetection()], imports: [Host] }).compileComponents();
+    @Component({
+      imports: [NeuCalendarComponent, NeuCalendarEventDirective],
+      template: `<neu-calendar [events]="events" selectedDate="2026-05-14"
+        ><ng-template neuCalendarEvent let-event let-view="view"
+          >CUSTOM:{{ view }}:{{ event.title }}</ng-template
+        ></neu-calendar
+      >`,
+    })
+    class Host {
+      events = EVENTS;
+    }
+    await TestBed.resetTestingModule()
+      .configureTestingModule({ providers: [provideZonelessChangeDetection()], imports: [Host] })
+      .compileComponents();
     const host = TestBed.createComponent(Host);
     host.detectChanges();
     expect(host.nativeElement.textContent).toContain('CUSTOM:month:Kickoff');
@@ -168,23 +179,19 @@ describe('NeuCalendarComponent', () => {
     expect(fixture.componentInstance.currentLabel().toLowerCase()).toContain('may');
   });
 
-  it('selectDate should emit selectedDateChange and dateSelect', async () => {
+  it('selectDate should emit only the canonical selectedDateChange', async () => {
     const fixture = setup();
     await fixture.whenStable();
 
     const selectedChanges: string[] = [];
-    const dateSelections: string[] = [];
     fixture.componentInstance.selectedDateChange.subscribe((date) =>
       selectedChanges.push(localDayKey(date)),
-    );
-    fixture.componentInstance.dateSelect.subscribe((date) =>
-      dateSelections.push(localDayKey(date)),
     );
 
     fixture.componentInstance.selectDate(new Date('2026-05-20T10:00:00'));
 
     expect(selectedChanges).toEqual(['2026-05-20']);
-    expect(dateSelections).toEqual(['2026-05-20']);
+    expect('dateSelect' in fixture.componentInstance).toBe(false);
   });
 
   it('should emit eventClick with normalized dates', async () => {
@@ -249,13 +256,10 @@ describe('NeuCalendarComponent', () => {
     const fixture = setup();
     await fixture.whenStable();
 
-    const launchEvent = fixture.componentInstance.normalizedEvents().find(
-      (event) => event.id === 'c',
-    );
-    fixture.componentInstance.onEventClick(
-      new MouseEvent('click'),
-      launchEvent!,
-    );
+    const launchEvent = fixture.componentInstance
+      .normalizedEvents()
+      .find((event) => event.id === 'c');
+    fixture.componentInstance.onEventClick(new MouseEvent('click'), launchEvent!);
 
     expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-16');
     expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual(['c']);
@@ -331,9 +335,11 @@ describe('NeuCalendarComponent', () => {
 
   it('falls back to English labels when navigator language is unavailable', async () => {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+    const navigatorWithoutLanguage = Object.create(globalThis.navigator) as Navigator;
+    Object.defineProperty(navigatorWithoutLanguage, 'language', { value: '' });
     Object.defineProperty(globalThis, 'navigator', {
       configurable: true,
-      value: { language: '' },
+      value: navigatorWithoutLanguage,
     });
     try {
       const fixture = TestBed.createComponent(NeuCalendarComponent);
@@ -365,7 +371,9 @@ describe('NeuCalendarComponent', () => {
 
   it('indexes a replacement event collection without retaining stale dates', () => {
     const fixture = setup();
-    const may14 = fixture.componentInstance.monthDays().find((cell) => localDayKey(cell.date) === '2026-05-14');
+    const may14 = fixture.componentInstance
+      .monthDays()
+      .find((cell) => localDayKey(cell.date) === '2026-05-14');
     expect(may14?.events.map((event) => event.id)).toEqual(['a', 'b']);
 
     fixture.componentRef.setInput('events', [
@@ -375,7 +383,9 @@ describe('NeuCalendarComponent', () => {
 
     const days = fixture.componentInstance.monthDays();
     expect(days.find((cell) => localDayKey(cell.date) === '2026-05-14')?.events).toEqual([]);
-    expect(days.find((cell) => localDayKey(cell.date) === '2026-05-20')?.events[0]?.id).toBe('replacement');
+    expect(days.find((cell) => localDayKey(cell.date) === '2026-05-20')?.events[0]?.id).toBe(
+      'replacement',
+    );
   });
 
   it('constructs a bounded formatter set for an event-heavy month', async () => {
@@ -390,11 +400,14 @@ describe('NeuCalendarComponent', () => {
     });
     try {
       const fixture = TestBed.createComponent(NeuCalendarComponent);
-      fixture.componentRef.setInput('events', Array.from({ length: 1_000 }, (_, index) => ({
-        id: String(index),
-        title: String(index),
-        start: new Date(2026, 4, (index % 31) + 1),
-      })));
+      fixture.componentRef.setInput(
+        'events',
+        Array.from({ length: 1_000 }, (_, index) => ({
+          id: String(index),
+          title: String(index),
+          start: new Date(2026, 4, (index % 31) + 1),
+        })),
+      );
       fixture.componentRef.setInput('selectedDate', '2026-05-14');
       fixture.detectChanges();
       await fixture.whenStable();
@@ -406,12 +419,14 @@ describe('NeuCalendarComponent', () => {
   });
 
   it('keeps midnight, year-boundary and DST event keys in the configured timezone', async () => {
-    await TestBed.resetTestingModule().configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: NEURAL_TIME_ZONE, useValue: 'America/New_York' },
-      ],
-    }).compileComponents();
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(),
+          { provide: NEURAL_TIME_ZONE, useValue: 'America/New_York' },
+        ],
+      })
+      .compileComponents();
     const fixture = TestBed.createComponent(NeuCalendarComponent);
     fixture.componentRef.setInput('events', [
       { id: 'year-boundary', title: 'Year boundary', start: '2026-01-01T03:30:00.000Z' },
@@ -420,12 +435,17 @@ describe('NeuCalendarComponent', () => {
     ]);
     fixture.componentRef.setInput('selectedDate', '2025-12-31');
     fixture.detectChanges();
-    expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual(['year-boundary']);
+    expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual([
+      'year-boundary',
+    ]);
 
     fixture.componentRef.setInput('selectedDate', '2026-03-08');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual(['dst-before', 'dst-after']);
+    expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual([
+      'dst-before',
+      'dst-after',
+    ]);
   });
 
   it('should render the more label when a day exceeds maxVisibleEvents', async () => {
@@ -565,7 +585,9 @@ describe('NeuCalendarComponent', () => {
     const fixture = setup();
     await fixture.whenStable();
     const selected: string[] = [];
-    fixture.componentInstance.dateSelect.subscribe((date) => selected.push(localDayKey(date)));
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      selected.push(localDayKey(date)),
+    );
 
     const target = new Date('2026-05-20T12:00:00');
 
@@ -586,7 +608,9 @@ describe('NeuCalendarComponent', () => {
     const fixture = setup();
     await fixture.whenStable();
     const emitted: string[] = [];
-    fixture.componentInstance.selectedDateChange.subscribe((date) => emitted.push(localDayKey(date)));
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      emitted.push(localDayKey(date)),
+    );
 
     fixture.componentInstance.prev();
     fixture.componentInstance.next();
@@ -595,7 +619,9 @@ describe('NeuCalendarComponent', () => {
     fixture.componentInstance.prev();
     fixture.componentInstance.next();
 
-    const todayButton = fixture.nativeElement.querySelector('.neu-calendar__today') as HTMLButtonElement;
+    const todayButton = fixture.nativeElement.querySelector(
+      '.neu-calendar__today',
+    ) as HTMLButtonElement;
     todayButton.click();
     fixture.detectChanges();
 
@@ -609,10 +635,20 @@ describe('NeuCalendarComponent', () => {
     expect(labels.eventCount(1)).toBe('1 event');
     expect(labels.eventCount(2)).toBe('2 events');
     expect(
-      fixture.componentInstance.eventTooltip({ id: 'x', title: 'Plain', start: new Date(), allDay: false }),
+      fixture.componentInstance.eventTooltip({
+        id: 'x',
+        title: 'Plain',
+        start: new Date(),
+        allDay: false,
+      }),
     ).toContain('Plain');
     expect(
-      fixture.componentInstance.eventTooltip({ id: 'plain', title: 'Plain only', start: new Date(), meta: '' }),
+      fixture.componentInstance.eventTooltip({
+        id: 'plain',
+        title: 'Plain only',
+        start: new Date(),
+        meta: '',
+      }),
     ).toContain('Plain only');
     fixture.componentInstance.onDayKeydown(
       new KeyboardEvent('keydown', { key: 'Spacebar', cancelable: true }),

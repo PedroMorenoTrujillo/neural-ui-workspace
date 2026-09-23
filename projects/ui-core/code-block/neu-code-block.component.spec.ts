@@ -3,13 +3,20 @@ import { DOCUMENT } from '@angular/common';
 import { NeuCodeBlockComponent } from './neu-code-block.component';
 
 describe('NeuCodeBlockComponent', () => {
+  let navigatorDescriptor: PropertyDescriptor | undefined;
+
   beforeEach(async () => {
+    navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
     await TestBed.configureTestingModule({
       imports: [NeuCodeBlockComponent],
     }).compileComponents();
 
     const doc = TestBed.inject(DOCUMENT);
     doc.documentElement.lang = 'en';
+  });
+
+  afterEach(() => {
+    if (navigatorDescriptor) Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
   });
 
   // ── Rendering ─────────────────────────────────────────────────────────────
@@ -20,15 +27,15 @@ describe('NeuCodeBlockComponent', () => {
     expect(f.nativeElement.querySelector('.neu-code-block')).toBeTruthy();
   });
 
-  it('should apply the compact variant only when requested', () => {
+  it('should apply compact density only when requested', () => {
     const f = TestBed.createComponent(NeuCodeBlockComponent);
     f.detectChanges();
     const block = f.nativeElement.querySelector('.neu-code-block');
-    expect(block.classList).not.toContain('neu-code-block--compact');
+    expect(block.classList).not.toContain('neu-code-block--density-compact');
 
-    f.componentRef.setInput('compact', true);
+    f.componentRef.setInput('density', 'compact');
     f.detectChanges();
-    expect(block.classList).toContain('neu-code-block--compact');
+    expect(block.classList).toContain('neu-code-block--density-compact');
   });
 
   it('should apply the wrapping variant only when requested', () => {

@@ -64,7 +64,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
           <button
             neu-button
             type="button"
-            variant="primary"
+            tone="brand" variant="solid"
             [size]="size()"
             icon="lucideCheck"
             [iconOnly]="true"
@@ -75,7 +75,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
           <button
             neu-button
             type="button"
-            variant="ghost"
+            tone="neutral" variant="ghost"
             [size]="size()"
             icon="lucideX"
             [iconOnly]="true"
@@ -90,7 +90,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
         neu-button
         class="neu-inline-editor__display"
         type="button"
-        variant="ghost"
+        tone="neutral" variant="ghost"
         [size]="size()"
         [disabled]="disabled()"
         [attr.aria-readonly]="readonly() ? 'true' : null"

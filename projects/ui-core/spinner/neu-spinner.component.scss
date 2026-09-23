@@ -30,7 +30,7 @@
   }
 
   // Severities — stroke del arco
-  &--primary &__arc {
+  &--brand &__arc {
     stroke: var(--neu-primary);
   }
 
@@ -43,7 +43,7 @@
   }
 
   &--danger &__arc {
-    stroke: var(--neu-danger);
+    stroke: var(--neu-error);
   }
 
   &--info &__arc {

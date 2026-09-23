@@ -102,14 +102,14 @@ describe('NeuDialogComponent', () => {
 
   // ── Cierre con botón ───────────────────────────────────────────────────────
 
-  it('should emit closed when close button is clicked', async () => {
+  it('should emit an action close request when close button is clicked', async () => {
     const { f, comp } = await mkDialog({ title: 'Test' });
-    let closed = false;
-    comp.closed.subscribe(() => {
-      closed = true;
+    let requestReason = '';
+    comp.closeRequested.subscribe((request) => {
+      requestReason = request.reason;
     });
     f.nativeElement.querySelector('.neu-dialog__close')?.click();
-    expect(closed).toBe(true);
+    expect(requestReason).toBe('action');
   });
 
   it('should show close button when disableClose=false', async () => {
@@ -126,48 +126,48 @@ describe('NeuDialogComponent', () => {
 
   // ── Cierre con backdrop ────────────────────────────────────────────────────
 
-  it('should emit closed when backdrop is clicked (disableClose=false)', async () => {
+  it('should emit an outside request when backdrop is clicked (disableClose=false)', async () => {
     const { f, comp } = await mkDialog({ title: 'Test' });
-    let closed = false;
-    comp.closed.subscribe(() => {
-      closed = true;
+    let requestReason = '';
+    comp.closeRequested.subscribe((request) => {
+      requestReason = request.reason;
     });
     f.nativeElement.querySelector('.neu-dialog__backdrop')?.click();
-    expect(closed).toBe(true);
+    expect(requestReason).toBe('outside');
   });
 
-  it('should NOT emit closed when backdrop clicked and disableClose=true', async () => {
+  it('should NOT emit closeRequested when backdrop clicked and disableClose=true', async () => {
     const { f, comp } = await mkDialog({ title: 'Test', disableClose: true });
-    let closed = false;
-    comp.closed.subscribe(() => {
-      closed = true;
+    let requested = false;
+    comp.closeRequested.subscribe(() => {
+      requested = true;
     });
     f.nativeElement.querySelector('.neu-dialog__backdrop')?.click();
-    expect(closed).toBe(false);
+    expect(requested).toBe(false);
   });
 
   // ── Cierre con ESC ─────────────────────────────────────────────────────────
 
-  it('should emit closed on Escape keydown (disableClose=false)', async () => {
+  it('should emit an escape request on Escape keydown (disableClose=false)', async () => {
     const { f, comp } = await mkDialog({ title: 'Test' });
-    let closed = false;
-    comp.closed.subscribe(() => {
-      closed = true;
+    let requestReason = '';
+    comp.closeRequested.subscribe((request) => {
+      requestReason = request.reason;
     });
     const panel = f.nativeElement.querySelector('.neu-dialog__panel');
     panel?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    expect(closed).toBe(true);
+    expect(requestReason).toBe('escape');
   });
 
   it('should NOT emit closed on Escape when disableClose=true', async () => {
     const { f, comp } = await mkDialog({ title: 'Test', disableClose: true });
-    let closed = false;
-    comp.closed.subscribe(() => {
-      closed = true;
+    let requested = false;
+    comp.closeRequested.subscribe(() => {
+      requested = true;
     });
     const panel = f.nativeElement.querySelector('.neu-dialog__panel');
     panel?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    expect(closed).toBe(false);
+    expect(requested).toBe(false);
   });
 
   // ── Tamaños ────────────────────────────────────────────────────────────────
@@ -345,7 +345,7 @@ describe('NeuDialogComponent', () => {
   it('should ignore non-Tab keys after handling Escape', async () => {
     const { comp } = await mkDialog({ title: 'Test' });
     const event = new KeyboardEvent('keydown', { key: 'Enter' });
-    const emitSpy = vi.spyOn(comp.closed, 'emit');
+    const emitSpy = vi.spyOn(comp.closeRequested, 'emit');
 
     comp.onPanelKeydown(event);
 
@@ -500,17 +500,15 @@ describe('NeuDialogComponent', () => {
       providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
     }).compileComponents();
     const f = TestBed.createComponent(NeuDialogComponent);
-    const enable = vi.spyOn((f.componentInstance as any).scrollStrategy, 'enable');
-    const disable = vi.spyOn((f.componentInstance as any).scrollStrategy, 'disable');
     f.componentRef.setInput('open', true);
     f.detectChanges();
     await f.whenStable();
-    expect(enable).toHaveBeenCalledTimes(1);
+    expect(document.body.style.overflow).toBe('hidden');
 
     f.componentRef.setInput('open', false);
     f.detectChanges();
     await f.whenStable();
-    expect(disable).toHaveBeenCalledTimes(1);
+    expect(document.body.style.overflow).toBe('');
   });
 
   it('preserves the original focus target across a close-open race', async () => {
@@ -788,14 +786,14 @@ describe('NeuDialogComponent', () => {
     f = TestBed.createComponent(NeuDialogComponent);
     f.componentRef.setInput('open', true);
     f.detectChanges();
-    const closed = vi.spyOn(f.componentInstance.closed, 'emit');
+    const requested = vi.spyOn(f.componentInstance.closeRequested, 'emit');
 
     f.nativeElement
       .querySelector('.neu-dialog__panel')
       .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
     expect(guard).toHaveBeenCalledOnce();
-    expect(closed).not.toHaveBeenCalled();
+    expect(requested).not.toHaveBeenCalled();
   });
 
   it('fails closed when a dismissal guard prevents or throws during Escape', async () => {
@@ -813,25 +811,25 @@ describe('NeuDialogComponent', () => {
     const f = TestBed.createComponent(NeuDialogComponent);
     f.componentRef.setInput('open', true);
     f.detectChanges();
-    const closed = vi.spyOn(f.componentInstance.closed, 'emit');
+    const requested = vi.spyOn(f.componentInstance.closeRequested, 'emit');
     const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
     f.nativeElement.querySelector('.neu-dialog__panel').dispatchEvent(event);
     expect(guard).toHaveBeenCalledOnce();
-    expect(closed).not.toHaveBeenCalled();
+    expect(requested).not.toHaveBeenCalled();
 
     guard.mockImplementation(() => {
       throw new Error('consumer failure');
     });
     f.nativeElement.querySelector('.neu-dialog__panel').dispatchEvent(event);
-    expect(closed).not.toHaveBeenCalled();
+    expect(requested).not.toHaveBeenCalled();
 
     guard.mockImplementation(() => {
-      f.componentInstance.close('guard-owned request');
+      f.componentInstance.close();
       return true;
     });
     f.nativeElement.querySelector('.neu-dialog__panel').dispatchEvent(event);
-    expect(closed).toHaveBeenCalledOnce();
-    expect(closed).toHaveBeenCalledWith('guard-owned request');
+    expect(requested).toHaveBeenCalledOnce();
+    expect(requested).toHaveBeenCalledWith({ reason: 'programmatic-command' });
   });
 });
 

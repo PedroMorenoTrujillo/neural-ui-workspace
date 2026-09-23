@@ -38,8 +38,8 @@
     border-radius: var(--neu-radius-full);
   }
 
-  // ---- Variantes / Variants ----
-  &--default {
+  // ---- Tonos / Tones ----
+  &--neutral {
     background: var(--neu-surface-2);
     color: var(--neu-text);
     border-color: var(--neu-border);
@@ -56,7 +56,7 @@
     }
   }
 
-  &--primary {
+  &--brand {
     background: var(--neu-primary-50);
     color: var(--neu-primary-dark, var(--neu-primary));
     border-color: color-mix(in srgb, var(--neu-primary-dark, var(--neu-primary)) 28%, transparent);
@@ -117,13 +117,13 @@
 }
 
 html[data-theme='dark'] {
-  .neu-chip--default {
+  .neu-chip--neutral {
     color: #f2f7fb;
     background: #21262d;
     border-color: #6e7681;
   }
 
-  .neu-chip--primary {
+  .neu-chip--brand {
     color: #e8f4ff;
     background: #0b3b74;
     border-color: #65b7ff;

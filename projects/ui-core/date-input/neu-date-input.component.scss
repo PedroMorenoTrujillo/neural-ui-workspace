@@ -234,6 +234,15 @@ $drum-item-h: 36px;
   &--time-only {
     flex-direction: row;
   }
+
+  &--inline {
+    position: static;
+    z-index: auto;
+    box-shadow: none;
+    animation: none;
+    width: fit-content;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 600px) {
@@ -242,6 +251,11 @@ $drum-item-h: 36px;
     inset-inline-end: 0;
     width: min(280px, calc(100vw - 2rem));
     max-width: calc(100vw - 2rem);
+  }
+
+  .neu-date-input__panel--inline {
+    inset-inline-start: auto;
+    inset-inline-end: auto;
   }
 }
 
@@ -310,6 +324,10 @@ $drum-item-h: 36px;
   text-align: center;
   margin-bottom: 4px;
 
+  &--numbered {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
   span {
     font-size: 11px;
     font-weight: 600;
@@ -321,8 +339,63 @@ $drum-item-h: 36px;
 
 .neu-date-input__cal-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: 1fr;
   gap: 2px;
+}
+
+.neu-date-input__cal-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.neu-date-input__cal-grid--numbered .neu-date-input__cal-week {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.neu-date-input__week-number {
+  display: grid;
+  place-items: center;
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+  user-select: none;
+}
+
+.neu-date-input__period-grid {
+  display: grid;
+  gap: var(--neu-space-1);
+}
+
+.neu-date-input__period-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--neu-space-1);
+}
+
+.neu-date-input__period-cell {
+  min-height: 40px;
+  padding: var(--neu-space-1);
+  border: 0;
+  border-radius: var(--neu-radius-sm);
+  background: transparent;
+  color: var(--neu-text);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    background: var(--neu-surface-2);
+  }
+
+  &[aria-selected='true'] {
+    background: var(--neu-primary-solid, var(--neu-primary));
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 
 .neu-date-input__cal-day {

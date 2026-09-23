@@ -81,7 +81,7 @@
     }
   }
 
-  &--error {
+  &--danger {
     border-color: var(--neu-error);
     .neu-toast__icon-wrap {
       color: var(--neu-error);

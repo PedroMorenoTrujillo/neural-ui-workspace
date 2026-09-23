@@ -115,8 +115,8 @@ interface Option {
         [open]="dialogOpen()"
         title="Event dialog"
         (opened)="record('dialogOpened')"
-        (hidden)="record('dialogHidden')"
-        (closed)="record('dialogRequest')"
+        (closed)="record('dialogClosed')"
+        (closeRequested)="record('dialogRequest', $event)"
       >
         <button id="h9-dialog-close-owner" (click)="dialogOpen.set(false)">
           Owner closes dialog
@@ -126,8 +126,8 @@ interface Option {
         [open]="sheetOpen()"
         title="Event sheet"
         (opened)="record('sheetOpened')"
-        (hidden)="record('sheetHidden')"
-        (closed)="record('sheetRequest')"
+        (closed)="record('sheetClosed')"
+        (closeRequested)="record('sheetRequest', $event)"
       >
         <button id="h9-sheet-close-owner" (click)="sheetOpen.set(false)">Owner closes sheet</button>
       </neu-bottom-sheet>
@@ -261,7 +261,7 @@ export class H9EventContractComponent {
   writeValues(): void {
     this.autocomplete()?.value.set('a');
     this.tags()?.value.set([]);
-    this.treeSelect()?.writeValue(null);
+    this.treeSelect()?.value.set(null);
     this.cascade()?.value.set(null);
     this.date()?.value.set(civilDate('2026-01-01'));
     this.color()?.value.set('oklch(0.7 0.12 280 / 0.65)');

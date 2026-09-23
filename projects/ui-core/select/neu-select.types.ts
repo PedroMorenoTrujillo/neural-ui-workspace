@@ -26,7 +26,7 @@ export interface NeuSelectGroup<T = NeuSelectOption> {
 }
 
 export type NeuSelectSize = 'sm' | 'md' | 'lg';
-export type NeuSelectVariant = 'outlined' | 'filled';
+export type NeuSelectVariant = 'outline' | 'solid';
 
 export type NeuSelectMode = NeuSelectionMode;
 export type NeuSelectModelValue<V, M extends NeuSelectMode = 'single'> = NeuSelectionValue<V, M>;

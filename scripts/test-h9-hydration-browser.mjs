@@ -6,7 +6,13 @@ const { chromium, firefox, webkit } = createRequire(import.meta.url)(
 );
 const angularVersion = createRequire(import.meta.url)('@angular/core/package.json').version;
 const results = [];
-for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
+const requestedBrowser = process.env.NEU_H9_BROWSER;
+const engines = { chromium, firefox, webkit };
+const selectedEngines = requestedBrowser
+  ? Object.entries(engines).filter(([name]) => name === requestedBrowser)
+  : Object.entries(engines);
+if (selectedEngines.length === 0) throw new Error(`Unknown browser: ${requestedBrowser}`);
+for (const [name, engine] of selectedEngines) {
   const browser = await engine.launch({ headless: true });
   const page = await browser.newPage();
   const errors = [];
@@ -50,13 +56,11 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       window.__h9OriginalKanbanCard = document.querySelector(
         '#hydration-kanban [data-neu-kanban-card-id="hydrated-card"]',
       );
+      window.__h9OriginalDialog = document.querySelector('.neu-dialog__panel');
     });
     release();
     await page.waitForFunction(
       () => document.querySelector('#hydration-ready')?.textContent === 'true',
-    );
-    await page.waitForFunction(() =>
-      document.querySelector('#hydration-events')?.textContent?.includes('opened'),
     );
     assert.equal(
       await page.evaluate(
@@ -79,6 +83,7 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       ['__h9OriginalTextarea', '#hydration-textarea .neu-textarea__field'],
       ['__h9OriginalTree', '#hydration-tree .neu-tree'],
       ['__h9OriginalKanbanCard', '#hydration-kanban [data-neu-kanban-card-id="hydrated-card"]'],
+      ['__h9OriginalDialog', '.neu-dialog__panel'],
     ]) {
       assert.equal(
         await page.evaluate(
@@ -95,7 +100,7 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       );
       return JSON.parse(await page.locator('#hydration-events').textContent());
     };
-    assert.deepEqual(await log(), ['opened']);
+    assert.deepEqual(await log(), []);
     const imeDomTrace = await page.locator('#hydration-input').evaluate((host) => {
       const result = [];
       const input = host.querySelector('.neu-input__field');
@@ -113,17 +118,60 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
     assert.deepEqual(JSON.parse(await page.locator('#hydration-ime-events').textContent()), [
       '日本',
     ]);
-    assert.deepEqual(await log(), ['opened']);
+    assert.deepEqual(await log(), []);
     await page.locator('#hydration-close').click();
-    assert.deepEqual(await log(), ['opened', 'hidden']);
+    assert.deepEqual(await log(), ['closed']);
+    await page.locator('#hydration-open').click();
+    assert.deepEqual(await log(), ['closed', 'opened']);
+    await page.locator('#hydration-sheet-open').click();
+    assert.deepEqual(await log(), ['closed', 'opened', 'sheetOpened']);
+    await page.locator('.neu-bottom-sheet__close').click();
+    assert.deepEqual(await log(), [
+      'closed',
+      'opened',
+      'sheetOpened',
+      'sheetRequest',
+      'sheetClosed',
+    ]);
+    await page.locator('#hydration-close').click();
+    assert.deepEqual(await log(), [
+      'closed',
+      'opened',
+      'sheetOpened',
+      'sheetRequest',
+      'sheetClosed',
+      'closed',
+    ]);
     await page.locator('#hydration-color .neu-cp__trigger').click();
-    assert.deepEqual(await log(), ['opened', 'hidden', 'colorOpened']);
+    assert.deepEqual(await log(), [
+      'closed',
+      'opened',
+      'sheetOpened',
+      'sheetRequest',
+      'sheetClosed',
+      'closed',
+      'colorOpened',
+    ]);
     await page.locator('.neu-cp__alpha-slider').fill('0.4');
-    assert.deepEqual(await log(), ['opened', 'hidden', 'colorOpened', 'colorChange', 'colorEnd']);
+    assert.deepEqual(await log(), [
+      'closed',
+      'opened',
+      'sheetOpened',
+      'sheetRequest',
+      'sheetClosed',
+      'closed',
+      'colorOpened',
+      'colorChange',
+      'colorEnd',
+    ]);
     await page.keyboard.press('Escape');
     assert.deepEqual(await log(), [
+      'closed',
       'opened',
-      'hidden',
+      'sheetOpened',
+      'sheetRequest',
+      'sheetClosed',
+      'closed',
       'colorOpened',
       'colorChange',
       'colorEnd',
@@ -134,8 +182,12 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       input.setSelectionRange(0, 3);
     });
     assert.deepEqual(await log(), [
+      'closed',
       'opened',
-      'hidden',
+      'sheetOpened',
+      'sheetRequest',
+      'sheetClosed',
+      'closed',
       'colorOpened',
       'colorChange',
       'colorEnd',
@@ -147,8 +199,12 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
     await page.locator('.neu-autocomplete__option').first().waitFor();
     await input.press('Enter');
     assert.deepEqual(await log(), [
+      'closed',
       'opened',
-      'hidden',
+      'sheetOpened',
+      'sheetRequest',
+      'sheetClosed',
+      'closed',
       'colorOpened',
       'colorChange',
       'colorEnd',
@@ -159,8 +215,12 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
     await kanbanCard.focus();
     for (const key of ['Space', 'ArrowRight', 'End', 'Enter']) await page.keyboard.press(key);
     assert.deepEqual(await log(), [
+      'closed',
       'opened',
-      'hidden',
+      'sheetOpened',
+      'sheetRequest',
+      'sheetClosed',
+      'closed',
       'colorOpened',
       'colorChange',
       'colorEnd',
@@ -187,7 +247,10 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       colorOpened: 1,
       colorClosed: 1,
       opened: 1,
-      hidden: 1,
+      closed: 2,
+      sheetOpened: 1,
+      sheetClosed: 1,
+      sheetRequests: 1,
       domainSelect: 1,
       inputImeCommits: 1,
       kanbanMoves: 1,

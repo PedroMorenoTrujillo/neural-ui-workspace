@@ -40,7 +40,7 @@
     box-sizing: border-box;
     min-height: 44px;
     padding: 8px 18px;
-    border-radius: var(--neu-radius-md, 8px);
+    border-radius: var(--neu-radius, 8px);
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
@@ -59,7 +59,7 @@
       }
 
       &.neu-confirm-dialog__btn--danger {
-        background: var(--neu-color-danger, #ef4444);
+        background: var(--neu-error, #ef4444);
         color: var(--neu-primary-fg);
 
         &:hover {
@@ -71,7 +71,7 @@
     &--primary {
       background: var(
         --neu-primary-solid,
-        var(--neu-primary-dark, var(--neu-color-primary, #006ee6))
+        var(--neu-primary-dark, var(--neu-primary, #006ee6))
       );
       color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
 
@@ -81,7 +81,7 @@
     }
 
     &--danger {
-      background: var(--neu-color-danger, #ef4444);
+      background: var(--neu-error, #ef4444);
       color: var(--neu-primary-fg);
 
       &:hover {

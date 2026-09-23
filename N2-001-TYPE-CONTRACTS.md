@@ -22,7 +22,7 @@ export type NeuSelectionValue<
 
 export type NeuDataMode = 'client' | 'remote';
 export type NeuDensity = 'compact' | 'normal' | 'relaxed';
-export type NeuTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+export type NeuTone = 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'danger';
 
 export interface NeuComparator<V> {
   (left: V, right: V): boolean;
@@ -149,18 +149,33 @@ export interface CivilDateRange {
   readonly end: CivilDate | null;
 }
 
+export interface CivilMonth {
+  readonly year: number; // 1..9999
+  readonly month: number; // 1..12
+}
+
+export interface CivilYear {
+  readonly year: number; // 1..9999
+}
+
 export type NeuDateMode =
   | 'date'
   | 'time'
   | 'datetime'
   | 'multiple'
-  | 'range';
+  | 'range'
+  | 'month'
+  | 'year';
+
+export type NeuDatePresentation = 'overlay' | 'inline';
 
 export type NeuDateValue<M extends NeuDateMode> =
   M extends 'date' ? CivilDate | null :
   M extends 'time' ? LocalTime | null :
   M extends 'datetime' ? LocalDateTime | null :
   M extends 'multiple' ? readonly CivilDate[] :
+  M extends 'month' ? CivilMonth | null :
+  M extends 'year' ? CivilYear | null :
   CivilDateRange;
 
 export function civilDate(value: string): CivilDate;
@@ -169,6 +184,8 @@ export function localDateTime(value: string): LocalDateTime;
 ```
 
 Los constructores validan formato y calendario. No convierten zona horaria. Un `Date` o instante se convierte en el consumidor con una zona/política explícita.
+
+Resolución N2-025: `min`/`max` son `CivilMonth` para `month` y `CivilYear` para `year`; `disabledDays` solo limita selección de días y nunca se expande para un período. `presentation` es un input (default `overlay`), no un modo de valor ni un segundo control Forms. `showWeekNumbers` es un input booleano (default `false`) de presentación ISO-8601 para day-grid. No hay `touchUI`, valor semanal, rangos ni múltiples de período.
 
 ## Select
 
@@ -731,8 +748,10 @@ También deben existir casos positivos/negativos para modo literal y dinámico, 
 | --- | --- | --- |
 | `tone/variant` por componente | NEEDS REVIEW N2-023 | no exportar combinaciones hasta mapear soporte real |
 | InputMask raw | NEEDS REVIEW N2-027 | `string` masked |
-| Date period | NEEDS REVIEW N2-025 | unión `NeuDateMode` P1 sin period |
-| Slider range / Rating half | NEEDS REVIEW N2-026 | `number` / `number\|null` |
+| Date period | APPROVED TARGET N2-025 | `month`/`year` civiles estructurados, presentación `overlay\|inline` y semanas visuales; sin `touchUI` |
+| Slider range/vertical, Rating half | APPROVED TARGET N2-026/B7 | Slider scalar `number` or range `readonly [number,number]` by value shape, non-crossing stable thumbs, `minStepsBetweenThumbs` steps, numeric `minValue`/`maxValue` for both shapes, vertical physical bottom→top; Rating `number\|null`, `step: 1\|0.5`, horizontal radiogroup, same-value clear to `null` |
 | VirtualList 2D | REJECTED para P1 | rango vertical fijo |
+
+Resolución normativa B7: se eliminan los inputs públicos de Slider `min`/`max` y se sustituyen por `minValue`/`maxValue` en scalar y range. Es un breaking change intencional de Neural 2. Angular 22 Signal Forms reserva `min`/`max` para metadatos de validación del tipo del campo; los límites numéricos de interacción del componente son independientes y no reinterpretan esos metadatos. El gate genérico `[formField]` para tuplas se compila con los nuevos nombres; véase `N2-B7-NUMERIC-P2.md`.
 
 Ninguna de estas decisiones altera `FormValueControl`/`FormCheckboxControl`, de modo que N2-002 puede comenzar.

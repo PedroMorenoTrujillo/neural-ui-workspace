@@ -16,7 +16,7 @@ export type NeuAutocompleteValue<V, F extends NeuAutocompleteMode = 'strict'> =
   F extends 'free-text' ? V | string | null : V | null;
 export type NeuAutocompleteDropdownMode = 'blank' | 'current';
 export type NeuAutocompleteSize = 'sm' | 'md' | 'lg';
-export type NeuAutocompleteVariant = 'outlined' | 'filled';
+export type NeuAutocompleteVariant = 'outline' | 'solid';
 export type NeuAutocompleteCompletionSource = 'input' | 'focus' | 'dropdown' | 'programmatic';
 
 export interface NeuAutocompleteCompleteEvent {
