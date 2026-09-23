@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { auditFormModels } from './forms-model-type-audit.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
 const uiCore = join(root, 'projects/ui-core');
@@ -102,7 +103,10 @@ const expectedSignalControls = new Map([
     'projects/ui-core/uploader/neu-uploader.component.ts',
     /readonly\s+value\s*=\s*model<readonly\s+File\[\]>\(\[\]\)/,
   ],
-  ['projects/ui-core/slider/neu-slider.component.ts', /readonly\s+value\s*=\s*model<number>\(0\)/],
+  [
+    'projects/ui-core/slider/neu-slider.component.ts',
+    { pattern: /readonly\s+value\s*=\s*model<V>\(0\s+as\s+V\)/, boundedGeneric: true },
+  ],
   [
     'projects/ui-core/rating/neu-rating.component.ts',
     /readonly\s+value\s*=\s*model<number\s*\|\s*null>\(null\)/,
@@ -169,8 +173,14 @@ for (const file of componentFiles(uiCore)) {
       violations.push(
         `${rel}: unexpected Signal Form control outside the authorized migration set`,
       );
-    else if (!expectedModel.test(source))
+    else if (!(expectedModel.pattern ?? expectedModel).test(source))
       violations.push(`${rel}: canonical public model does not match its approved typed contract`);
+    else if (expectedModel.boundedGeneric) {
+      const models = auditFormModels(file).filter((model) => model.formValueControl);
+      if (models.length !== 1 || !models[0].ok) {
+        violations.push(`${rel}: canonical generic model must have a closed, non-any TypeScript constraint`);
+      }
+    }
     if (/readonly\s+(?:valueChange|checkedChange)\s*=\s*output/.test(source)) {
       violations.push(`${rel}: model output must not be duplicated manually`);
     }
