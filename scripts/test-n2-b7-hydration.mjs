@@ -54,8 +54,10 @@ try {
   });
   try {
     process.env.NEU_N2_HYDRATION_URL = `http://127.0.0.1:${server.address().port}`;
-    await import('./test-n2-forms-hydration-browser.mjs');
-    console.log('B7 range Slider / half Rating real Chromium SSR/hydration PASS');
+    await import(process.env.NEU_N2_HYDRATION_RUNNER ?? './test-n2-forms-hydration-browser.mjs');
+    if (!process.env.NEU_N2_HYDRATION_RUNNER) {
+      console.log('B7 range Slider / half Rating real Chromium SSR/hydration PASS');
+    }
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }

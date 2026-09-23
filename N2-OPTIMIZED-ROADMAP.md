@@ -2,7 +2,7 @@
 
 ## Decision and counts
 
-**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **96** = 44 completed + 52 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 19, MEDIUM 25, HEAVY 7, VERY HEAVY 1. Pending effort: XS 13, S 6, M 25, L 7, XL 1. One-by-one active work would require **51 component/removal tasks**; the proposal is **18 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
+**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **96** = 45 completed + 51 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 19, MEDIUM 24, HEAVY 7, VERY HEAVY 1. Pending effort: XS 13, S 6, M 24, L 7, XL 1. One-by-one active work would require **50 component/removal tasks**; the proposal is **17 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
 
 ## Top 10 next best targets
 
@@ -11,15 +11,14 @@
 | 1 | A1 foundation/actions (5) | LIGHT | XS/S | Icon/Button unblock feedback, menu and data consumers | GPT-6 SOL MEDIUM |
 | 2 | A2 feedback/status (5) | LIGHT | XS/S | Five low-risk feedback surfaces share tone/a11y checks | GPT-6 SOL MEDIUM |
 | 3 | A4 metrics/form shell (5) | LIGHT | XS/S | Closes P1 StatsCard chart scope while auditing form shells | GPT-6 SOL MEDIUM |
-| 4 | B8 mask parser P2 (1) | MEDIUM | M | Closes demonstrably lossy mask parser | GPT-6 SOL HIGH |
-| 5 | B9 resizable layout (2) | MEDIUM | M | Resizable layout and ScrollArea lifecycle share gates | GPT-6 SOL HIGH |
-| 6 | B2 menu family (4) | MEDIUM | M | Menu family has shared nested keyboard and overlay debt | GPT-6 SOL HIGH |
-| 7 | B1 navigation state (4) | MEDIUM | M | Navigation state needs an explicit controlled/focus contract | GPT-6 SOL HIGH |
-| 8 | B3 action navigation (3) | MEDIUM | M | Action navigation should follow shared interaction contracts | GPT-6 SOL HIGH |
+| 4 | B9 resizable layout (2) | MEDIUM | M | Resizable layout and ScrollArea lifecycle share gates | GPT-6 SOL HIGH |
+| 5 | B2 menu family (4) | MEDIUM | M | Menu family has shared nested keyboard and overlay debt | GPT-6 SOL HIGH |
+| 6 | B1 navigation state (4) | MEDIUM | M | Navigation state needs an explicit controlled/focus contract | GPT-6 SOL HIGH |
+| 7 | B3 action navigation (3) | MEDIUM | M | Action navigation should follow shared interaction contracts | GPT-6 SOL HIGH |
 
 ## Dependency-aware execution
 
-No-icons lane: **A3/A5/D1 completed**; independent B7/B8/B9 require GPT-6 SOL HIGH.; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1. D1 is labelled Wave D by work type but should run before TimelineGrid and Tree to avoid preserving removed consumers. A1 gives Icon/Button first; A2 can then safely audit consumers. N2-031 native improvements are directed within affected batches, not a mass rewrite. N2-032 package/bundle measurements run per batch and are consolidated in E.
+No-icons lane: **A3/A5/D1 and B7/B8 completed**; A1 remains blocked by the separate icons lane. B9 requires GPT-6 SOL HIGH. D1 is labelled Wave D by work type but should run before TimelineGrid and Tree to avoid preserving removed consumers. A1 gives Icon/Button first; A2 can then safely audit consumers. N2-031 native improvements are directed within affected batches, not a mass rewrite. N2-032 package/bundle measurements run per batch and are consolidated in E.
 
 ## WAVE A — quick wins (15 components; 3 batches remaining)
 
@@ -27,7 +26,7 @@ No-icons lane: **A3/A5/D1 completed**; independent B7/B8/B9 require GPT-6 SOL HI
 - **A2 — feedback/status (5):** NeuAlertComponent, NeuBadgeComponent, NeuChipComponent, NeuEmptyStateComponent, NeuToastContainerComponent. GPT-6 SOL MEDIUM; directed contracts/a11y, proportional SSR and bundle gates.
 - **A4 — metrics/form shell (5):** NeuFormFieldComponent, NeuInputGroupComponent, NeuMeterGroupComponent, NeuProgressBarComponent, NeuStatsCardComponent. GPT-6 SOL MEDIUM; directed contracts/a11y, proportional SSR and bundle gates.
 
-## WAVE B — medium (28 components; 10 batches)
+## WAVE B — medium (27 components; 10 batches)
 
 - **B1 — navigation state (4):** NeuBreadcrumbComponent, NeuDockComponent, NeuNavComponent, NeuStepperComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B2 — menu family (4):** NeuMenubarComponent, NeuMenuButtonComponent, NeuMenuComponent, NeuTieredMenuComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
@@ -35,7 +34,6 @@ No-icons lane: **A3/A5/D1 completed**; independent B7/B8/B9 require GPT-6 SOL HI
 - **B4 — overlay feedback (4):** NeuBlockUIComponent, NeuConfirmDialogComponent, NeuConfirmPopupComponent, NeuNotificationCenterComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B5 — comparison interaction (4):** NeuCompareComponent, NeuCompareHandleComponent, NeuCompareIndicatorComponent, NeuCompareItemComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B6 — data layout (2):** NeuDashboardGridComponent, NeuDataViewComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
-- **B8 — mask parser P2 (1):** NeuInputMaskComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B9 — resizable layout (2):** NeuScrollAreaComponent, NeuSplitterComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B10 — content and temporal display (4):** NeuCodeBlockComponent, NeuTerminalComponent, NeuTimelineComponent, NeuTimelineGridComponent. GPT-6 SOL MEDIUM; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 
@@ -99,4 +97,4 @@ LIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM a
 | InputMask (B8) | No other pending component | N2-003 Forms base already certified |
 | Splitter/ScrollArea (B9) | No other pending component | N2-001 controlled-state contract |
 
-A3, A5 and D1 are complete. A1 remains blocked by the separate neural-icons lane. The plan saves **33** active component/removal task slots versus one-by-one execution (51 → 18); this is a phase count, not a calendar or token-cost guarantee.
+A3, A5 and D1 are complete. A1 remains blocked by the separate neural-icons lane. The plan saves **33** active component/removal task slots versus one-by-one execution (50 → 17); this is a phase count, not a calendar or token-cost guarantee.

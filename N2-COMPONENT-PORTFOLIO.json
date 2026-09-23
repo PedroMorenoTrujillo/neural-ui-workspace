@@ -12,26 +12,26 @@
     "currentPublicComponents": 96,
     "componentEntrypoints": 84,
     "secondaryEntrypoints": 98,
-    "completed": 44,
-    "pending": 52,
+    "completed": 45,
+    "pending": 51,
     "remove": 0,
     "physicallyRemovedHistorical": 2,
     "mergedReplacedHistorical": 4,
     "pendingByDifficulty": {
       "LIGHT": 19,
-      "MEDIUM": 25,
+      "MEDIUM": 24,
       "HEAVY": 7,
       "VERY HEAVY": 1
     },
     "pendingByEffort": {
       "XS": 13,
       "S": 6,
-      "M": 25,
+      "M": 24,
       "L": 7,
       "XL": 1
     },
-    "activePending": 51,
-    "implementationBatches": 18
+    "activePending": 50,
+    "implementationBatches": 17
   },
   "historicalIdentityDelta": {
     "from": "fbe9e5c^",
@@ -113,13 +113,6 @@
       "wave": "B",
       "family": "data layout",
       "components": 2,
-      "model": "GPT-6 SOL HIGH"
-    },
-    {
-      "id": "B8",
-      "wave": "B",
-      "family": "mask parser P2",
-      "components": 1,
       "model": "GPT-6 SOL HIGH"
     },
     {
@@ -1324,30 +1317,27 @@
     {
       "component": "NeuInputMaskComponent",
       "entrypoint": "@neural-ui/core/input-mask",
-      "status": "PENDING",
-      "evidenceStatus": "STILL PENDING",
-      "action": "DEEP REFACTOR",
-      "difficulty": "MEDIUM",
-      "effort": "M",
-      "risk": "MEDIUM",
+      "status": "COMPLETED",
+      "evidenceStatus": "FULLY COMPLETED",
+      "action": "KEEP AS-IS",
+      "difficulty": "CLOSED",
+      "effort": "—",
+      "risk": "CLOSED",
       "dependencies": [],
-      "roadmapPhase": "N2-027",
-      "recommendedModel": "GPT-6 SOL HIGH",
-      "batch": "B8",
-      "batchFamily": "mask parser P2",
-      "reason": "mask parser P2; 247 source lines; no overlay in component source. P1 Signal Forms complete; explicit P2 target remains.",
-      "expectedChanges": [
-        "Replace lossy parser with slot-based matching",
-        "Freeze masked/raw value policy and composition/caret tests"
-      ],
-      "apiImpact": "PUBLIC",
-      "ssrHydrationWork": "SSR import/render smoke; hydration if changed DOM",
-      "a11yKeyboardWork": "directed keyboard/focus + semantics",
-      "lifecycleComplexity": "LOW",
-      "bundleRisk": "LOW",
-      "rewriteProbability": "MEDIUM",
-      "designReviewProbability": "HIGH",
-      "priorityScore": 59,
+      "roadmapPhase": "B8",
+      "recommendedModel": "—",
+      "batch": "—",
+      "batchFamily": "—",
+      "reason": "Certified in B8; do not reopen for a transverse smoke test.",
+      "expectedChanges": [],
+      "apiImpact": "NONE",
+      "ssrHydrationWork": "certified",
+      "a11yKeyboardWork": "certified",
+      "lifecycleComplexity": "certified",
+      "bundleRisk": "certified",
+      "rewriteProbability": "N/A",
+      "designReviewProbability": "NONE",
+      "priorityScore": null,
       "sourceFile": "projects/ui-core/input-mask/neu-input-mask.component.ts"
     },
     {

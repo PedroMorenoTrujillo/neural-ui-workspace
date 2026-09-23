@@ -196,9 +196,16 @@ describe('N2-003 + N2-004 Forms matrix: 6 controls x 4 paths', () => {
     for (const name of Object.keys(EDITED) as (keyof Values)[])
       expect(fixture.componentInstance.fields[name]().dirty()).toBe(true);
     expect(fixture.componentInstance.fields.textarea().touched()).toBe(false);
+    expect(fixture.componentInstance.fields.mask().touched()).toBe(false);
+    root(fixture, 'mask').querySelector('input')?.dispatchEvent(new FocusEvent('blur'));
     root(fixture, 'textarea').querySelector('textarea')?.dispatchEvent(new FocusEvent('blur'));
     fixture.detectChanges();
     expect(fixture.componentInstance.fields.textarea().touched()).toBe(true);
+    expect(fixture.componentInstance.fields.mask().touched()).toBe(true);
+    fixture.componentInstance.fields.mask().reset('');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.data().mask).toBe('');
+    expect(fixture.componentInstance.fields.mask().dirty()).toBe(false);
     fixture.componentInstance.fields.textarea().reset('parent');
     fixture.detectChanges();
     expect(fixture.componentInstance.data().textarea).toBe('parent');
@@ -211,6 +218,9 @@ describe('N2-003 + N2-004 Forms matrix: 6 controls x 4 paths', () => {
     editAll(fixture);
     fixture.detectChanges();
     expect(fixture.componentInstance.values()).toEqual(EDITED);
+    expect(fixture.componentInstance.mask.dirty).toBe(true);
+    root(fixture, 'mask').querySelector('input')?.dispatchEvent(new FocusEvent('blur'));
+    expect(fixture.componentInstance.mask.touched).toBe(true);
     fixture.componentInstance.textarea.reset();
     fixture.componentInstance.password.reset();
     fixture.componentInstance.mask.reset();
@@ -219,6 +229,7 @@ describe('N2-003 + N2-004 Forms matrix: 6 controls x 4 paths', () => {
     fixture.componentInstance.role.reset();
     fixture.detectChanges();
     expect(fixture.componentInstance.values()).toEqual(INITIAL);
+    expect(fixture.componentInstance.mask.dirty).toBe(false);
   });
 
   it('Reactive formControlName: all six controls edit and nonNullable values reset', () => {
@@ -227,9 +238,11 @@ describe('N2-003 + N2-004 Forms matrix: 6 controls x 4 paths', () => {
     editAll(fixture);
     fixture.detectChanges();
     expect(fixture.componentInstance.group.getRawValue()).toEqual(EDITED);
+    expect(fixture.componentInstance.group.controls.mask.dirty).toBe(true);
     fixture.componentInstance.group.reset();
     fixture.detectChanges();
     expect(fixture.componentInstance.group.getRawValue()).toEqual(INITIAL);
+    expect(fixture.componentInstance.group.controls.mask.dirty).toBe(false);
   });
 
   it('Template [(ngModel)]: all six controls edit and accept parent writes without echo', async () => {
@@ -242,6 +255,7 @@ describe('N2-003 + N2-004 Forms matrix: 6 controls x 4 paths', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(fixture.componentInstance.values()).toEqual(EDITED);
+    expect((root(fixture, 'mask').querySelector('input') as HTMLInputElement).value).toBe('123-456');
     fixture.componentInstance.textarea.set('parent');
     fixture.componentInstance.password.set('external');
     fixture.componentInstance.mask.set('987-654');
@@ -255,5 +269,6 @@ describe('N2-003 + N2-004 Forms matrix: 6 controls x 4 paths', () => {
       'parent',
     );
     expect((root(fixture, 'role').querySelector('input') as HTMLInputElement).checked).toBe(true);
+    expect((root(fixture, 'mask').querySelector('input') as HTMLInputElement).value).toBe('987-654');
   });
 });

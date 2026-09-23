@@ -63,6 +63,7 @@ import { NeuRatingComponent } from '@neural-ui/core/rating';
     <output id="n2-period-events">{{ periodEvents() | json }}</output>
     <output id="n2-period-lifecycle">{{ periodLifecycle() | json }}</output>
     <output id="n2-b7-events">{{ b7Events() | json }}</output>
+    <output id="n2-b8-events">{{ b8Events() | json }}</output>
     <neu-input
       id="n2-input"
       label="Hydrated input"
@@ -93,6 +94,11 @@ import { NeuRatingComponent } from '@neural-ui/core/rating';
     <neu-textarea id="n2-textarea" label="Hydrated textarea" [formControl]="textareaControl" />
     <neu-password id="n2-password" label="Hydrated password" [formControl]="passwordControl" />
     <neu-input-mask id="n2-mask" mask="999-999" [formControl]="maskControl" />
+    <neu-input-mask id="n2-b8-empty" mask="99/99" [formControl]="b8EmptyControl" />
+    <neu-input-mask id="n2-b8-partial" mask="99/99" [formControl]="b8PartialControl" />
+    <neu-input-mask id="n2-b8-readonly" mask="99/99" value="12/34" [readonly]="true" />
+    <neu-input-mask id="n2-b8-disabled" mask="99/99" value="12/34" [disabled]="true" />
+    <button id="n2-b8-external" type="button" (click)="b8EmptyControl.setValue('34/56')">External mask write</button>
     <neu-input-otp id="n2-otp" [length]="4" [formControl]="otpControl" />
     <neu-switch id="n2-switch" label="Hydrated switch" [formControl]="switchControl" />
     <neu-radio-group id="n2-radio" ariaLabel="Hydrated role" [formControl]="radioControl">
@@ -161,6 +167,9 @@ export class N2FormsHydrationComponent {
   readonly textareaControl = new FormControl('server-notes', { nonNullable: true });
   readonly passwordControl = new FormControl('Server1!', { nonNullable: true });
   readonly maskControl = new FormControl('123-456', { nonNullable: true });
+  readonly b8EmptyControl = new FormControl('', { nonNullable: true });
+  readonly b8PartialControl = new FormControl('12/3', { nonNullable: true });
+  readonly b8Events = signal<string[]>([]);
   readonly otpControl = new FormControl('1234', { nonNullable: true });
   readonly switchControl = new FormControl(true, { nonNullable: true });
   readonly radioControl = new FormControl<'admin' | 'user' | null>('admin');
@@ -215,6 +224,12 @@ export class N2FormsHydrationComponent {
     this.textareaControl.valueChanges.subscribe((value) => this.record('textarea', value));
     this.passwordControl.valueChanges.subscribe((value) => this.record('password', value));
     this.maskControl.valueChanges.subscribe((value) => this.record('mask', value));
+    this.b8EmptyControl.valueChanges.subscribe((value) =>
+      this.b8Events.update((events) => [...events, `empty:${value}`]),
+    );
+    this.b8PartialControl.valueChanges.subscribe((value) =>
+      this.b8Events.update((events) => [...events, `partial:${value}`]),
+    );
     this.otpControl.valueChanges.subscribe((value) => this.record('otp', value));
     this.switchControl.valueChanges.subscribe((value) => this.record('switch', value));
     this.radioControl.valueChanges.subscribe((value) => this.record('radio', value));

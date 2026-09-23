@@ -6,22 +6,22 @@
 | --- | --- |
 | HISTORICAL CATALOG | 98 component source files; 102 public component declarations at Phase-1 checkpoint |
 | CURRENT PUBLIC COMPONENTS | 96 |
-| COMPLETED | 44 |
-| PENDING | 52 |
+| COMPLETED | 45 |
+| PENDING | 51 |
 | REMOVE | 0 |
 | PHYSICALLY REMOVED IN D1 (historical) | 2 |
 | MERGED/REPLACED (historical identities) | 4 |
 | 🟢 LIGHT | 19 |
-| 🟡 MEDIUM | 25 |
+| 🟡 MEDIUM | 24 |
 | 🟠 HEAVY | 7 |
 | 🔴 VERY HEAVY | 1 |
 | XS | 13 |
 | S | 6 |
-| M | 25 |
+| M | 24 |
 | L | 7 |
 | XL | 1 |
 
-The partition is **44 + 52 + 0 = 96**. The merged/replaced number describes retired historical identities, not another current-status bucket. 51 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
+The partition is **45 + 51 + 0 = 96**. The merged/replaced number describes retired historical identities, not another current-status bucket. 50 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
 
 ## Method and taxonomy
 
@@ -33,7 +33,7 @@ N2-PHASE-2 used **98 canonical component source files** before removing Chart; t
 
 ## Product decisions and evidence standard
 
-Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, Timeline remains pending visual/semantic certification. OrganizationChart and the sole SchedulerGantt component were physically removed in D1, not modernized or retained as current components. There is **no separate public Gantt or Scheduler component/entrypoint**; both concepts reside in the one SchedulerGantt runtime, so removal counts once. Generic Charts already left Core and future neural-charts is not an active Core component. N2-023's visual-axis edits alone never certify a component: rows marked “transverse only” remain pending. The 24 Signal Forms controls are migration evidence, but InputMask, Slider and Rating still have explicit P2 work (N2-027/N2-026) and remain pending. Completed rows require the named component report/contract gate, not a passing incidental test.
+Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, Timeline remains pending visual/semantic certification. OrganizationChart and the sole SchedulerGantt component were physically removed in D1, not modernized or retained as current components. There is **no separate public Gantt or Scheduler component/entrypoint**; both concepts reside in the one SchedulerGantt runtime, so removal counts once. Generic Charts already left Core and future neural-charts is not an active Core component. N2-023's visual-axis edits alone never certify a component: rows marked “transverse only” remain pending. The 24 Signal Forms controls are migration evidence; B7 certified Slider/Rating P2 and B8 certified InputMask P2. Completed rows require the named component report/contract gate, not a passing incidental test.
 
 ## Complete public-component matrix
 
@@ -79,7 +79,7 @@ Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, T
 | NeuImageGalleryComponent | @neural-ui/core/image-gallery | PENDING | N2-029 | MERGE | • Migrate unique inputs and tests into Gallery<br>• Remove duplicate runtime/entrypoint only after parity proof | HEAVY | L | HIGH | NeuGalleryComponent | PUBLIC | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | N/A | HIGH | GPT-6 SOL HIGH | yes | media consolidation | 18 | media consolidation; 162 source lines; no overlay in component source. |
 | NeuInlineEditorControl | @neural-ui/core/inline-editor | COMPLETED | N2-009 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-009; do not reopen for a transverse smoke test. |
 | NeuInputComponent | @neural-ui/core/input | COMPLETED | N2-003/004 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-003/004; do not reopen for a transverse smoke test. |
-| NeuInputMaskComponent | @neural-ui/core/input-mask | PENDING | N2-027 | DEEP REFACTOR | • Replace lossy parser with slot-based matching<br>• Freeze masked/raw value policy and composition/caret tests | MEDIUM | M | MEDIUM | independent | PUBLIC | SSR import/render smoke; hydration if changed DOM | directed keyboard/focus + semantics | LOW | LOW | MEDIUM | HIGH | GPT-6 SOL HIGH | yes | mask parser P2 | 59 | mask parser P2; 247 source lines; no overlay in component source. P1 Signal Forms complete; explicit P2 target remains. |
+| NeuInputMaskComponent | @neural-ui/core/input-mask | COMPLETED | B8 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B8; do not reopen for a transverse smoke test. |
 | NeuInputOTPComponent | @neural-ui/core/input-otp | COMPLETED | N2-003/004 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-003/004; do not reopen for a transverse smoke test. |
 | NeuInputTagsComponent | @neural-ui/core/input-tags | COMPLETED | N2-008 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-008; do not reopen for a transverse smoke test. |
 | NeuKanbanComponent | @neural-ui/core/kanban | PENDING | C5 | DEEP REFACTOR | • Audit board/column/card identity and controlled DnD<br>• Design cross-column move proposals and SSR/lifecycle gates | HEAVY | L | HIGH | independent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | HIGH | GPT-6 SOL HIGH | yes | board DnD | 20 | board DnD; 659 source lines; no overlay in component source. |

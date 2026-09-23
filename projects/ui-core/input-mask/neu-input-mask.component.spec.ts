@@ -27,19 +27,25 @@ function paste(input: HTMLInputElement, value: string): ClipboardEvent {
   return event;
 }
 
+function beforeInput(input: HTMLInputElement, inputType: string, data: string | null = null): InputEvent {
+  const event = new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType, data });
+  input.dispatchEvent(event);
+  return event;
+}
+
 describe('NeuInputMaskComponent Signal Forms contract', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
   );
 
-  it('applies numeric, alphabetic and alphanumeric slots without dropping deferred valid chars', () => {
+  it('applies numeric, alphabetic and alphanumeric slots in source order', () => {
     const numeric = create({ mask: '999-999' });
     type(numeric.input, '12a3b456');
     expect(numeric.component.value()).toBe('123-456');
 
     const mixed = create({ mask: '99-AA-**' });
     type(mixed.input, '1a2bc3Z');
-    expect(mixed.component.value()).toBe('12-ab-c3');
+    expect(mixed.component.value()).toBe('12-bc-3Z');
   });
 
   it('keeps raw text when no mask is configured', () => {
@@ -71,6 +77,63 @@ describe('NeuInputMaskComponent Signal Forms contract', () => {
     expect(event.defaultPrevented).toBe(true);
     expect(component.value()).toBe('123-789');
     expect(changed).toHaveBeenCalledExactlyOnceWith('123-789');
+  });
+
+  it('owns insertText once and advances the caret across a literal', () => {
+    const { component, input } = create({ mask: '99/99', value: '12' });
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    input.setSelectionRange(2, 2);
+    const event = beforeInput(input, 'insertText', '3');
+    expect(event.defaultPrevented).toBe(true);
+    expect(input.value).toBe('12/3');
+    expect(input.selectionStart).toBe(4);
+    expect(changed).toHaveBeenCalledExactlyOnceWith('12/3');
+  });
+
+  it('overwrites a middle slot and deletes before/after literals deterministically', () => {
+    const { component, input } = create({ mask: '99/99', value: '12/34' });
+    input.setSelectionRange(3, 3);
+    beforeInput(input, 'insertText', '9');
+    expect(component.value()).toBe('12/94');
+    expect(input.selectionStart).toBe(4);
+    input.setSelectionRange(3, 3);
+    beforeInput(input, 'deleteContentBackward');
+    expect(component.value()).toBe('1/94');
+    expect(input.selectionStart).toBe(1);
+    input.setSelectionRange(1, 1);
+    beforeInput(input, 'insertText', '8');
+    expect(component.value()).toBe('18/94');
+    input.setSelectionRange(2, 2);
+    beforeInput(input, 'deleteContentForward');
+    expect(component.value()).toBe('18/4');
+  });
+
+  it('pastes mixed text over a selection without a second input propagation', () => {
+    const { component, input } = create({ mask: '99/99', value: '12/34' });
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    input.setSelectionRange(3, 5);
+    const event = paste(input, '7x8');
+    expect(event.defaultPrevented).toBe(true);
+    expect(component.value()).toBe('12/78');
+    expect(input.selectionStart).toBe(5);
+    expect(changed).toHaveBeenCalledExactlyOnceWith('12/78');
+  });
+
+  it('preserves an invalid external value verbatim until a user edit and never echoes it', () => {
+    const { fixture, component, input } = create({ mask: '99/99' });
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    fixture.componentRef.setInput('value', 'not a mask');
+    fixture.detectChanges();
+    expect(input.value).toBe('not a mask');
+    expect(component.value()).toBe('not a mask');
+    expect(changed).not.toHaveBeenCalled();
+    input.setSelectionRange(0, 0);
+    beforeInput(input, 'insertText', '4');
+    expect(component.value()).toBe('4');
+    expect(changed).toHaveBeenCalledExactlyOnceWith('4');
   });
 
   it('ignores a paste event without clipboard data', () => {
@@ -145,7 +208,7 @@ describe('NeuInputMaskComponent Signal Forms contract', () => {
     Object.defineProperty(input, 'selectionStart', { configurable: true, value: null });
     Object.defineProperty(input, 'selectionEnd', { configurable: true, value: null });
     paste(input, 'a1b2z9');
-    expect(component.value()).toBe('12-ab-z9');
+    expect(component.value()).toBe('12-z');
   });
 
   it.each(['disabled', 'readonly'] as const)(
@@ -204,5 +267,19 @@ describe('NeuInputMaskComponent Signal Forms contract', () => {
     input.dispatchEvent(new FocusEvent('blur'));
     expect(touched).toHaveBeenCalledTimes(1);
     expect(() => component.reset()).not.toThrow();
+  });
+
+  it('releases transient composition state over 50 create/destroy cycles', () => {
+    for (let cycle = 0; cycle < 50; cycle++) {
+      const { fixture, component, input } = create({ mask: 'AA-99' });
+      const changed = vi.fn();
+      component.value.subscribe(changed);
+      input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+      input.value = 'ab12';
+      input.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+      fixture.destroy();
+      component.onCompositionEnd({ target: input } as unknown as Event);
+      expect(changed).not.toHaveBeenCalled();
+    }
   });
 });
