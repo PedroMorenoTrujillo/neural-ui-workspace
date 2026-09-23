@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconCheck } from '@neural-icons/core/icons/check';
 import { NeuTagComponent, NeuTagIconDirective } from './neu-tag.component';
 
 @Component({
@@ -17,7 +19,7 @@ describe('NeuTagComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [HostComponent], providers: [provideNeuralIcons(iconCheck)] }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
   });
@@ -59,8 +61,19 @@ describe('NeuTagComponent', () => {
     direct.detectChanges();
 
     expect(direct.nativeElement.querySelector('neural-icon')).toBeTruthy();
+    expect(direct.nativeElement.querySelector('neural-icon svg')).toBeTruthy();
+    expect(direct.nativeElement.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
     expect(direct.nativeElement.getAttribute('aria-label')).toBe('Deployment status');
     expect(direct.componentInstance.iconTemplate).toBeUndefined();
+  });
+
+  it('remains presentational without a remove control or local dismissal', () => {
+    const direct = TestBed.createComponent(NeuTagComponent);
+    direct.componentRef.setInput('value', 'Stable');
+    direct.detectChanges();
+    expect(direct.nativeElement.textContent).toContain('Stable');
+    expect(direct.nativeElement.querySelector('button')).toBeNull();
+    expect(direct.nativeElement.getAttribute('tabindex')).toBeNull();
   });
 
   it('renders a supplied icon template ahead of its value', async () => {

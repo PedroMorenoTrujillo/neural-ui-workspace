@@ -28,6 +28,7 @@ export type NeuButtonIconPosition = 'start' | 'end';
   imports: [NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
+    type: 'button',
     '[class]': 'hostClasses()',
     '[attr.disabled]': 'isDisabled() ? "" : null',
     '[attr.aria-disabled]': 'isDisabled()',

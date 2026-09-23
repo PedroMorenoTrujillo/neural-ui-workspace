@@ -1,8 +1,26 @@
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NeuButtonComponent } from './neu-button.component';
 import { provideNeuralIcons } from '@neural-icons/angular';
 import { iconSave } from '@neural-icons/core/icons/save';
 import { iconPlus } from '@neural-icons/core/icons/plus';
+
+@Component({
+  imports: [NeuButtonComponent],
+  template: '<button neu-button id="default">Default</button><button neu-button id="submit" type="submit">Submit</button>',
+})
+class ButtonTypeHost {}
+
+@Component({
+  imports: [NeuButtonComponent],
+  template: '<button neu-button [disabled]="disabled()" [loading]="loading()" (neuClick)="onAction()">Action</button>',
+})
+class ButtonActionHost {
+  readonly disabled = signal(false);
+  readonly loading = signal(false);
+  events = 0;
+  onAction(): void { this.events += 1; }
+}
 
 describe('NeuButtonComponent', () => {
   beforeEach(async () => {
@@ -10,6 +28,13 @@ describe('NeuButtonComponent', () => {
       imports: [NeuButtonComponent],
       providers: [provideNeuralIcons(iconSave, iconPlus)],
     }).compileComponents();
+  });
+
+  it('defaults to native type=button while preserving an explicit submit type', () => {
+    const fixture = TestBed.createComponent(ButtonTypeHost);
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('#default') as HTMLButtonElement).type).toBe('button');
+    expect((fixture.nativeElement.querySelector('#submit') as HTMLButtonElement).type).toBe('submit');
   });
 
   it('should have default neu-button class', () => {
@@ -138,6 +163,37 @@ describe('NeuButtonComponent', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();
     expect(fixture.componentInstance.isDisabled()).toBe(true);
+  });
+
+  it('emits one action per native click and blocks disabled or loading activation', () => {
+    const fixture = TestBed.createComponent(ButtonActionHost);
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+
+    button.click();
+    expect(fixture.componentInstance.events).toBe(1);
+    fixture.componentInstance.loading.set(true);
+    fixture.detectChanges();
+    expect(button.disabled).toBe(true);
+    expect(button.getAttribute('aria-busy')).toBe('true');
+    button.click();
+    expect(fixture.componentInstance.events).toBe(1);
+
+    fixture.componentInstance.loading.set(false);
+    fixture.componentInstance.disabled.set(true);
+    fixture.detectChanges();
+    expect(button.disabled).toBe(true);
+    button.click();
+    expect(fixture.componentInstance.events).toBe(1);
+  });
+
+  it('keeps a named text button icon decorative', async () => {
+    const fixture = TestBed.createComponent(NeuButtonComponent);
+    fixture.componentRef.setInput('icon', 'save');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(fixture.nativeElement.getAttribute('aria-label')).toBeNull();
   });
 
   it('icon with iconPosition=end should render icon after content', async () => {

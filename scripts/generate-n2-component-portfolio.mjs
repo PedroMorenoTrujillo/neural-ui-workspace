@@ -33,6 +33,7 @@ const completed = new Map([
   ['B8', 'InputMask'],
   ['B9', 'Splitter ScrollArea'],
   ['B5', 'Compare CompareHandle CompareIndicator CompareItem'],
+  ['A1', 'Button ButtonGroup Tag Toolbar'],
 ].flatMap(([phase, names]) => names.split(' ').map((name) => [name, phase])));
 
 const groups = [
@@ -65,7 +66,7 @@ const groups = [
 const changes = {
   Button: ['Verify native button type/disabled/loading and exactly-once action', 'Close icon/visual-axis contract and keyboard smoke'],
   ButtonGroup: ['Audit group semantics and child disabled state', 'Check roving/selected behavior without duplicating Button state'],
-  Tag: ['Verify dismiss proposal and semantic tone classes', 'Audit accessible removal label and immutable inputs'],
+  Tag: ['Verify presentational semantics and semantic tone classes', 'Audit accessible content, canonical icon and immutable inputs; removal belongs to Chip'],
   Toolbar: ['Audit projected action order and responsive semantics', 'Check keyboard traversal and visual tokens'],
   Alert: ['Audit status/live-region policy and dismiss ownership', 'Verify button/icon dependencies and visual tones'],
   Badge: ['Audit count/overflow announcement and tone mapping', 'Measure cost for navigation consumers'],
@@ -318,18 +319,19 @@ const audit = `# N2 — Component portfolio audit (planning only)\n\n## Executiv
 
 const currentAudit = audit
   .replace('The 24 Signal Forms controls are migration evidence, but InputMask, Slider and Rating still have explicit P2 work (N2-027/N2-026) and remain pending.', 'The 24 Signal Forms controls are migration evidence; B7 certified Slider/Rating P2 and B8 certified InputMask P2.')
-  .replace('Completed rows require the named component report/contract gate, not a passing incidental test.', 'B9 certifies Splitter controlled resizing and ScrollArea logical scrolling; collapse/restore is deferred P3. B5 certifies the controlled Compare family and presentation-only children. Completed rows require the named component report/contract gate, not a passing incidental test.')
+  .replace('Completed rows require the named component report/contract gate, not a passing incidental test.', 'B9 certifies Splitter controlled resizing and ScrollArea logical scrolling; collapse/restore is deferred P3. B5 certifies the controlled Compare family and presentation-only children. A1 certifies Button, ButtonGroup, presentational Tag, and Toolbar; removal belongs to Chip. Completed rows require the named component report/contract gate, not a passing incidental test.')
   .replace('(98/98)', `(${actual.length}/${found.size})`)
   .replace('**101 public entrypoints** including root, **100** secondary source entrypoints, **86** component-bearing secondary entrypoints and **14** non-component secondary entrypoints', `**${snapshot.entrypoints.length} public entrypoints** including root, **${bars.length}** secondary source entrypoints, **${summary.componentEntrypoints}** component-bearing secondary entrypoints and **${bars.length - summary.componentEntrypoints}** non-component secondary entrypoints`)
   .replace('Thus **102 − 6 + 2 = 98**', `Thus **${old.length} − ${removedIds.length} + ${addedIds.length} = ${actual.length}**`)
   .replace('The current 98 matching the old 98 file count is coincidence, not proof of no net migration.', `The current ${actual.length} is source-derived after ${summary.physicallyRemovedHistorical} D1 physical removals, not an adjusted historical file count.`)
   .replace('OrganizationChart and the sole SchedulerGantt component are REMOVE, not modernize.', 'OrganizationChart and the sole SchedulerGantt component were physically removed in D1, not modernized or retained as current components.')
   .replace('SchedulerGantt→TimelineGrid, OrganizationChart→Tree.', 'the retired SchedulerGantt→TimelineGrid and OrganizationChart→Tree dependencies no longer exist in active runtime.')
+  .replace('Button→Icon, Alert/EmptyState→Button+Icon, DataView→Button/Input/Select, Dock/MegaMenu/SpeedDial→Badge/Icon, Gallery→Icon', 'Button/Alert/EmptyState/Dock/MegaMenu/SpeedDial/Gallery→published neural-icons, DataView→Button/Input/Select')
   .replace('physical removals precede TimelineGrid and Tree changes.', 'D1 physical removals are complete before TimelineGrid and Tree changes.')
   .replace('No runtime, SCSS, token or product contract was changed by this audit.', 'Runtime, token, contract and package changes belong to the separate D1 execution report.');
 
 const whyNow = {
-  A1: 'Button, ButtonGroup, Tag and Toolbar follow the completed neural-icons integration',
+  A1: 'Button, ButtonGroup, Tag and Toolbar certified after the neural-icons integration',
   A2: 'Five low-risk feedback surfaces share tone/a11y checks',
   A3: 'Six nearly-finished display components need audit, not rewrite',
   A4: 'Closes P1 StatsCard chart scope while auditing form shells',
@@ -365,7 +367,7 @@ const roadmap = `# N2 — Optimized component execution roadmap (proposal only)\
 ])}\n## Gate and model policy\n\nLIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM and HEAVY implementation: GPT-6 SOL HIGH. GPT-6 ASTRA only for high-impact design review before C1/C3/C4/C5/C6 or any unexpected public contract ambiguity. Each batch gets pure/integration/type/contract tests proportional to change, SSR/hydration for DOM or lifecycle, a11y for interaction, bundle/root-unused and regression of actual consumers. Full suite/global coverage belong to E, not every batch. No component runtime work occurs in this planning task.\n`;
 
 const dependencySection = `\n## Blocking graph and phase economy\n\n${table(['Provider / decision', 'BLOCKS', 'BLOCKED BY / order'], [
-  ['Neural-icons + Button (A1)', 'Alert, EmptyState, Menu, SplitButton, DataView', 'A0.2 complete; A1 ready'],
+  ['Neural-icons + Button (A1)', 'Alert, EmptyState, Menu, SplitButton, DataView', 'A0.2 and A1 complete'],
   ['Badge (A2)', 'Dock, MegaMenu, SpeedDial', 'A1 icon semantics'],
   ['Gallery (C1)', 'ImageGallery merge', 'Media capability parity and ImageViewer directive audit'],
   ['D1 physical removals', 'Safe Tree and TimelineGrid modernization', 'Classify active consumers; no runtime compatibility'],
@@ -384,12 +386,13 @@ for (const group of groups.filter((candidate) => phaseCount(candidate) === 0)) {
   currentRoadmap = currentRoadmap.replace(new RegExp(`^- \\*\\*${group.id} —[^\\n]*\\n`, 'm'), '');
 }
 currentRoadmap = currentRoadmap
-  .replace('No-icons lane: **A3 completed → A5 → D1**; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1.', 'A3/A5/D1 and B7/B8/B9/B5 are complete. A0.2 externalized Icon to neural-icons; A1 is ready with Button, ButtonGroup, Tag and Toolbar.')
+  .replace('No-icons lane: **A3 completed → A5 → D1**; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1.', 'A3/A5/D1, B7/B8/B9/B5 and A1 are complete. A0.2 externalized Icon to neural-icons; A2/A4 are the next light batches.')
+  .replace('A1 gives Icon/Button first; A2 can then safely audit consumers.', 'A0.2 externalized Icon, and A1 certified Button, ButtonGroup, presentational Tag, and Toolbar; A2 can now audit consumers.')
   .replace('planned removals', `current removals; ${summary.physicallyRemovedHistorical} products physically retired in D1`)
   .replace(`## WAVE D — removals (${summary.remove} actual components; 1 phase, execute before dependent B/C work)`, `## WAVE D — D1 completed (${summary.physicallyRemovedHistorical} historical products removed)`)
   .replace('D1 physically removes OrganizationChart and SchedulerGantt', 'D1 physically removed OrganizationChart and SchedulerGantt');
 const currentDependencySection = dependencySection
-  .replace('Independent quick wins A3/A4/A5 may run after A1 without waiting for the heavy lane.', 'A3, A5 and D1 are complete. A1 is ready after the npm neural-icons integration.')
+  .replace('Independent quick wins A3/A4/A5 may run after A1 without waiting for the heavy lane.', 'A3, A5, D1 and A1 are complete; A2/A4 remain independent next batches.')
   .replace('(65 → 22)', `(${summary.activePending + summary.remove} → ${summary.implementationBatches})`);
 
 if (process.argv.includes('--write')) {
