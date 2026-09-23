@@ -486,12 +486,12 @@ Performance continua: mismo consumer/funcionalidad/datos/toolchain contra PrimeN
 | ID | N2-028 |
 | PRIORITY | P2 |
 | COMPONENTS | Splitter |
-| CURRENT PROBLEM | No hay colapso/restauración y persistencia incorporados equivalentes. Evidencia: [neu-splitter.component.ts](/Users/pedromorenotrujillo/Documents/neural/neural-ui-workspace-v2/projects/ui-core/splitter/neu-splitter.component.ts:68) |
-| TARGET DESIGN | Estado de tamaños controlado, colapso por panel y restauración; persistencia mediante adapter del consumidor. |
-| BREAKING CHANGE | direction→orientation, sizeChange→sizesChange si se adopta ledger. |
+| CURRENT PROBLEM | El resize mantiene un mirror mutable de tamaños aplicados y no respeta el rechazo del parent. |
+| TARGET DESIGN | `panes` es el único owner aplicado: `size` porcentual y `min/max` en píxeles. `sizesChange` propone porcentajes; orden lógico de paneles, movimiento físico de pointer/teclas, persistencia del consumer. Colapso/restauración DEFERRED P3. |
+| BREAKING CHANGE | `direction`→`orientation`, `sizeChange`→`sizesChange`, sin aliases. |
 | DEPENDENCIES | N2-001 |
 | IMPLEMENTATION NOTES | Conservar alternativa keyboard y mínimos de panel; no importar Router/storage por defecto. |
-| TESTS REQUIRED | Resize keyboard/pointer/RTL, colapso, min/max, reset, nested layouts. |
+| TESTS REQUIRED | Resize keyboard/pointer/RTL, parent accept/reject, min/max, nested layouts. Colapso fuera de B9. |
 | ACCEPTANCE GATE | Layout restaurable sin estados paralelos. |
 | RISK | Medio. |
 

@@ -382,30 +382,37 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     expect(target).toHaveLength(2);
   });
 
-  it('Splitter publishes changed live sizes only during drag, preserves keyboard commits and releases on destroy', async () => {
+  it('Splitter publishes live proposals during pointer drag and keyboard proposals without a local commit', async () => {
     const f = mount(NeuSplitterComponent, { panes: [{ size: 50 }, { size: 50 }] });
     await f.whenStable();
     const c = f.componentInstance;
     Object.defineProperty(f.nativeElement, 'offsetWidth', { value: 1000 });
     const starts = capture(c.resizeStart),
       live = capture(c.resize),
-      commits = capture(c.sizeChange);
+      commits = capture(c.sizesChange);
     const handle = f.nativeElement.querySelector('.neu-splitter__handle') as HTMLElement;
-    handle.dispatchEvent(new MouseEvent('mousedown', { clientX: 100, bubbles: true }));
+    const pointer = (type: string, clientX: number) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperties(event, {
+        pointerId: { value: 1 }, button: { value: 0 }, clientX: { value: clientX }, clientY: { value: 0 },
+      });
+      handle.dispatchEvent(event);
+    };
+    pointer('pointerdown', 100);
     expect(starts).toEqual([[50, 50]]);
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 200 }));
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 200 }));
+    pointer('pointermove', 200);
+    pointer('pointermove', 200);
     expect(live).toEqual([[60, 40]]);
-    window.dispatchEvent(new MouseEvent('mouseup'));
+    pointer('pointerup', 200);
     expect(commits).toEqual([[60, 40]]);
     handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(commits).toHaveLength(2);
     expect(starts).toHaveLength(1);
     expect(live).toHaveLength(1);
-    handle.dispatchEvent(new MouseEvent('mousedown', { clientX: 100 }));
+    pointer('pointerdown', 100);
     f.destroy();
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 300 }));
-    window.dispatchEvent(new MouseEvent('mouseup'));
+    pointer('pointermove', 300);
+    pointer('pointerup', 300);
     expect(live).toHaveLength(1);
     expect(commits).toHaveLength(2);
   });
@@ -642,18 +649,19 @@ describe('H9-A2 overlay and pointer cancellation races', () => {
     expect(ends).toHaveLength(1);
   });
 
-  it('Splitter rejects secondary pointer buttons and empty touch starts without emitting drag lifecycle', async () => {
+  it('Splitter rejects secondary pointer buttons without emitting drag lifecycle', async () => {
     const f = mount(NeuSplitterComponent, { panes: [{ size: 50 }, { size: 50 }] });
     await f.whenStable();
     const c = f.componentInstance,
       starts = capture(c.resizeStart),
       live = capture(c.resize);
-    c['_startDrag'](new MouseEvent('mousedown', { button: 2 }), 0);
-    c['_startTouchDrag']({ touches: [] } as unknown as TouchEvent, 0);
+    const handle = f.nativeElement.querySelector('.neu-splitter__handle') as HTMLElement;
+    const secondary = new Event('pointerdown', { bubbles: true });
+    Object.defineProperties(secondary, { button: { value: 2 }, pointerId: { value: 1 } });
+    handle.dispatchEvent(secondary);
     expect(starts).toEqual([]);
     expect(live).toEqual([]);
     f.destroy();
-    c['_startDrag'](new MouseEvent('mousedown'), 0);
     expect(starts).toEqual([]);
   });
 });

@@ -25915,7 +25915,7 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-scroll-area",
-      "signature": "declare class NeuScrollAreaComponent implements OnDestroy {\n}",
+      "signature": "declare class NeuScrollAreaComponent {\n}",
       "members": [
         {
           "id": "./panel#NeuScrollAreaComponent.input:ariaLabel",
@@ -26012,22 +26012,6 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "moveBy(axis: 'x' | 'y', event: MouseEvent): void;"
-        },
-        {
-          "id": "./panel#NeuScrollAreaComponent.method:ngAfterViewInit",
-          "name": "ngAfterViewInit",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "ngAfterViewInit(): void;"
-        },
-        {
-          "id": "./panel#NeuScrollAreaComponent.method:ngOnDestroy",
-          "name": "ngOnDestroy",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "ngOnDestroy(): void;"
         },
         {
           "id": "./panel#NeuScrollAreaComponent.method:onBarKey",
@@ -26136,12 +26120,12 @@
           "signature": "readonly position: _angular_core.WritableSignal<NeuScrollPosition>;"
         },
         {
-          "id": "./panel#NeuScrollAreaComponent.property:thumbTransformX",
-          "name": "thumbTransformX",
+          "id": "./panel#NeuScrollAreaComponent.property:thumbOffsetX",
+          "name": "thumbOffsetX",
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly thumbTransformX: () => string;"
+          "signature": "readonly thumbOffsetX: () => number;"
         },
         {
           "id": "./panel#NeuScrollAreaComponent.property:thumbTransformY",
@@ -34168,14 +34152,14 @@
       "signature": "declare class NeuSplitterComponent {\n}",
       "members": [
         {
-          "id": "./splitter#NeuSplitterComponent.input:direction",
-          "name": "direction",
+          "id": "./splitter#NeuSplitterComponent.input:orientation",
+          "name": "orientation",
           "kind": "input",
-          "publicName": "direction",
+          "publicName": "orientation",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly direction: _angular_core.InputSignal<NeuSplitterDirection>;"
+          "signature": "readonly orientation: _angular_core.InputSignal<NeuSplitterDirection>;"
         },
         {
           "id": "./splitter#NeuSplitterComponent.input:panes",
@@ -34185,7 +34169,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly panes: _angular_core.InputSignal<NeuSplitterPane[]>;"
+          "signature": "readonly panes: _angular_core.InputSignal<readonly NeuSplitterPane[]>;"
         },
         {
           "id": "./splitter#NeuSplitterComponent.output:resize",
@@ -34195,7 +34179,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly resize: _angular_core.OutputEmitterRef<number[]>;"
+          "signature": "readonly resize: _angular_core.OutputEmitterRef<readonly number[]>;"
         },
         {
           "id": "./splitter#NeuSplitterComponent.output:resizeStart",
@@ -34205,17 +34189,17 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly resizeStart: _angular_core.OutputEmitterRef<number[]>;"
+          "signature": "readonly resizeStart: _angular_core.OutputEmitterRef<readonly number[]>;"
         },
         {
-          "id": "./splitter#NeuSplitterComponent.output:sizeChange",
-          "name": "sizeChange",
+          "id": "./splitter#NeuSplitterComponent.output:sizesChange",
+          "name": "sizesChange",
           "kind": "output",
-          "publicName": "sizeChange",
+          "publicName": "sizesChange",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly sizeChange: _angular_core.OutputEmitterRef<number[]>;"
+          "signature": "readonly sizesChange: _angular_core.OutputEmitterRef<readonly number[]>;"
         },
         {
           "id": "./splitter#NeuSplitterComponent.property:ɵcmp",
@@ -34223,7 +34207,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSplitterComponent, \"neu-splitter\", never, {\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"panes\": {\n        \"alias\": \"panes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"sizeChange\": \"sizeChange\";\n    \"resizeStart\": \"resizeStart\";\n    \"resize\": \"resize\";\n}, never, [\n    \"neu-splitter-pane\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuSplitterComponent, \"neu-splitter\", never, {\n    \"orientation\": {\n        \"alias\": \"orientation\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"panes\": {\n        \"alias\": \"panes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"sizesChange\": \"sizesChange\";\n    \"resizeStart\": \"resizeStart\";\n    \"resize\": \"resize\";\n}, never, [\n    \"neu-splitter-pane\"\n], true, never>;"
         },
         {
           "id": "./splitter#NeuSplitterComponent.property:ɵfac",
@@ -61848,16 +61832,16 @@
       "signature": "primaryClick: _angular_core.OutputEmitterRef<MouseEvent>;"
     },
     {
-      "id": "./splitter#NeuSplitterComponent.input:direction",
+      "id": "./splitter#NeuSplitterComponent.input:orientation",
       "entrypoint": "./splitter",
       "declaration": "NeuSplitterComponent",
       "selector": "neu-splitter",
-      "propertyName": "direction",
-      "publicName": "direction",
+      "propertyName": "orientation",
+      "publicName": "orientation",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly direction: _angular_core.InputSignal<NeuSplitterDirection>;"
+      "signature": "readonly orientation: _angular_core.InputSignal<NeuSplitterDirection>;"
     },
     {
       "id": "./splitter#NeuSplitterComponent.input:panes",
@@ -61869,7 +61853,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly panes: _angular_core.InputSignal<NeuSplitterPane[]>;"
+      "signature": "readonly panes: _angular_core.InputSignal<readonly NeuSplitterPane[]>;"
     },
     {
       "id": "./splitter#NeuSplitterComponent.output:resize",
@@ -61881,7 +61865,7 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly resize: _angular_core.OutputEmitterRef<number[]>;"
+      "signature": "readonly resize: _angular_core.OutputEmitterRef<readonly number[]>;"
     },
     {
       "id": "./splitter#NeuSplitterComponent.output:resizeStart",
@@ -61893,19 +61877,19 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly resizeStart: _angular_core.OutputEmitterRef<number[]>;"
+      "signature": "readonly resizeStart: _angular_core.OutputEmitterRef<readonly number[]>;"
     },
     {
-      "id": "./splitter#NeuSplitterComponent.output:sizeChange",
+      "id": "./splitter#NeuSplitterComponent.output:sizesChange",
       "entrypoint": "./splitter",
       "declaration": "NeuSplitterComponent",
       "selector": "neu-splitter",
-      "propertyName": "sizeChange",
-      "publicName": "sizeChange",
+      "propertyName": "sizesChange",
+      "publicName": "sizesChange",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly sizeChange: _angular_core.OutputEmitterRef<number[]>;"
+      "signature": "readonly sizesChange: _angular_core.OutputEmitterRef<readonly number[]>;"
     },
     {
       "id": "./stats-card#NeuStatsCardComponent.input:change",
@@ -65952,12 +65936,12 @@
       "type": 187,
       "variable": 1
     },
-    "publicSymbols": 5233,
+    "publicSymbols": 5231,
     "statuses": {
       "SUPPORTED": 3304,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1929,
+      "INTERNAL/UNSUPPORTED": 1927,
       "REVIEW": 0
     },
     "bindings": {

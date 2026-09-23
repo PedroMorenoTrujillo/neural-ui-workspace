@@ -6,16 +6,16 @@
     "oldBindings": 1167,
     "declarationBindings": 1487,
     "bindingDelta": 320,
-    "mapped": 637,
+    "mapped": 635,
     "aliasCorrections": 3,
-    "missingOldEntries": 524,
-    "newlyDiscovered": 844,
+    "missingOldEntries": 526,
+    "newlyDiscovered": 846,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
       "declaration-or-selector-was-not-recorded": 429,
       "model-binding-was-not-supported": 24,
-      "multiline-annotated-or-compound-declaration-was-missed": 385
+      "multiline-annotated-or-compound-declaration-was-missed": 387
     }
   },
   "mappings": [
@@ -2131,16 +2131,8 @@
       "newId": "./spinner#NeuSpinnerComponent.input:strokeWidth"
     },
     {
-      "oldToken": "splitter/neu-splitter.component.ts#input:direction",
-      "newId": "./splitter#NeuSplitterComponent.input:direction"
-    },
-    {
       "oldToken": "splitter/neu-splitter.component.ts#input:panes",
       "newId": "./splitter#NeuSplitterComponent.input:panes"
-    },
-    {
-      "oldToken": "splitter/neu-splitter.component.ts#output:sizeChange",
-      "newId": "./splitter#NeuSplitterComponent.output:sizeChange"
     },
     {
       "oldToken": "stats-card/neu-stats-card.component.ts#input:change",
@@ -2801,6 +2793,8 @@
     "slider/neu-slider.component.ts#input:value",
     "slider/neu-slider.component.ts#output:valueChange",
     "spinner/neu-spinner.component.ts#input:severity",
+    "splitter/neu-splitter.component.ts#input:direction",
+    "splitter/neu-splitter.component.ts#output:sizeChange",
     "table-core/neu-table-core.component.ts#input:bordered",
     "table-core/neu-table-core.component.ts#input:columns",
     "table-core/neu-table-core.component.ts#input:data",
@@ -5639,11 +5633,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./splitter#NeuSplitterComponent.input:orientation",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./splitter#NeuSplitterComponent.output:resize",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./splitter#NeuSplitterComponent.output:resizeStart",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.output:sizesChange",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
